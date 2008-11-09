@@ -174,7 +174,7 @@ Index: gtk/gtkdnd-quartz.c
    if (site && site->flags & GTK_DEST_DEFAULT_DROP)
      {
        gtk_drag_finish (context, 
-@@ -233,19 +243,23 @@
+@@ -233,19 +243,24 @@
      }      
  }
  
@@ -194,18 +194,19 @@ Index: gtk/gtkdnd-quartz.c
 +	GtkDragSourceInfo *info;
 +	GdkDragContext* source_context = gdk_quartz_drag_source_context ();
 +
-+	g_assert (source_context);
-+
-+	info = gtk_drag_get_source_info (source_context, FALSE);
-+	if (info) 
++	if (source_context) 
 +	  {
-+   	     info->success = success;
-+	     info->delete = del;
++	     info = gtk_drag_get_source_info (source_context, FALSE);
++	     if (info) 
++	       {
++   	          info->success = success;
++	          info->delete = del;
++	       }
 +	  }
  }
  
  static void
-@@ -307,6 +321,22 @@
+@@ -307,6 +322,22 @@
    g_object_set_qdata (G_OBJECT (context), dest_info_quark, NULL);
  }
  
@@ -228,7 +229,7 @@ Index: gtk/gtkdnd-quartz.c
  /*************************************************************
   * gtk_drag_highlight_expose:
   *     Callback for expose_event for highlighted widgets.
-@@ -857,6 +887,8 @@
+@@ -857,6 +888,8 @@
  	gtk_drag_get_data (widget, context, target, time);
      }
    
@@ -237,7 +238,7 @@ Index: gtk/gtkdnd-quartz.c
    g_signal_emit_by_name (widget, "drag-drop",
  			 context, x, y, time, &retval);
  
-@@ -1052,6 +1084,7 @@
+@@ -1052,6 +1085,7 @@
  
    info = gtk_drag_get_source_info (context, TRUE);
    
@@ -245,7 +246,7 @@ Index: gtk/gtkdnd-quartz.c
    info->widget = g_object_ref (widget);
    info->target_list = target_list;
    gtk_target_list_ref (target_list);
-@@ -1086,13 +1119,13 @@
+@@ -1086,13 +1120,13 @@
  		GdkPixbuf *pixbuf;
  
  		pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, 1, 1);
@@ -264,7 +265,7 @@ Index: gtk/gtkdnd-quartz.c
  	      }
  	    break;
  	  case GTK_IMAGE_PIXBUF:
-@@ -1668,7 +1701,20 @@
+@@ -1668,7 +1702,20 @@
  			  gint               hot_x,
  			  gint               hot_y)
  {
@@ -286,7 +287,7 @@ Index: gtk/gtkdnd-quartz.c
  }
  
  /**
-@@ -1760,6 +1806,9 @@
+@@ -1760,6 +1807,9 @@
    g_signal_emit_by_name (info->widget, "drag-end", 
  			 info->context);
  
@@ -296,7 +297,7 @@ Index: gtk/gtkdnd-quartz.c
    if (info->widget)
      g_object_unref (info->widget);
  
-@@ -1781,6 +1830,10 @@
+@@ -1781,6 +1831,10 @@
  static void
  gtk_drag_drop_finished (GtkDragSourceInfo *info)
  {
