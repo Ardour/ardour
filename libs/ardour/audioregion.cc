@@ -241,6 +241,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 		}
 	}
 
+	_scale_amplitude = other->_scale_amplitude;
+
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
 
