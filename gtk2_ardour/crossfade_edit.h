@@ -72,6 +72,10 @@ class CrossfadeEditor : public ArdourDialog
 	
 	static Presets* fade_in_presets;
 	static Presets* fade_out_presets;
+
+  protected:
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 	
   private:
 	boost::shared_ptr<ARDOUR::Crossfade> xfade;

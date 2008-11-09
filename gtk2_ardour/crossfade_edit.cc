@@ -1338,3 +1338,48 @@ CrossfadeEditor::audition_left_dry_toggled ()
 		}
 	}
 }
+
+bool
+CrossfadeEditor::on_key_press_event (GdkEventKey *ev)
+{
+	return true;
+}
+
+bool
+CrossfadeEditor::on_key_release_event (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+	case GDK_Right:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			audition_right_dry_button.set_active (!audition_right_dry_button.get_active());
+		} else {
+			audition_right_button.set_active (!audition_right_button.get_active());
+		}
+		break;
+
+	case GDK_Left:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			audition_left_dry_button.set_active (!audition_left_dry_button.get_active());
+		} else {
+			audition_left_button.set_active (!audition_left_button.get_active());
+		}
+		break;
+
+	case GDK_space:
+		if (audition_left_dry_button.get_active() ||
+		    audition_left_button.get_active () ||
+		    audition_right_dry_button.get_active () ||
+		    audition_right_button.get_active () ||
+		    audition_both_button.get_active ()) {
+			cancel_audition ();
+		} else {
+			audition_both_button.set_active (!audition_both_button.get_active());
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return true;
+}

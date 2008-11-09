@@ -1359,8 +1359,9 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			prev_pymax = pymax;
 			prev_pymin = pymin;
 		}
-	}
-	else if(waveview->filled && rectify) {
+
+	} else if (waveview->filled && rectify) {
+
 		int prev_pymax = -1;
 		int last_pymax = -1;
 		int next_pymax;
