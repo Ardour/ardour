@@ -515,7 +515,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
 	
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
-	ARDOUR_UI::instance()->flush_pending ();
+	gdk_flush ();
 
 	/* start import thread for this spec. this will ultimately call Session::import_audiofile()
 	   and if successful will add the file(s) as a region to the session region list.
