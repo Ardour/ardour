@@ -2851,7 +2851,9 @@ Editor::setup_toolbar ()
 
 	vector<string> edit_mode_strings;
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
-	edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	if (!Profile->get_sae()) {
+		edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	}
 	edit_mode_strings.push_back (edit_mode_to_string (Lock));
 
 	edit_mode_selector.set_name ("EditModeSelector");
@@ -3380,7 +3382,11 @@ Editor::cycle_edit_mode ()
 {
 	switch (Config->get_edit_mode()) {
 	case Slide:
-		Config->set_edit_mode (Splice);
+		if (Profile->get_sae()) {
+			Config->set_edit_mode (Lock);
+		} else {
+			Config->set_edit_mode (Splice);
+		}
 		break;
 	case Splice:
 		Config->set_edit_mode (Lock);
