@@ -4418,22 +4418,20 @@ Editor::idle_visual_changer ()
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
-
+	double last_time_origin = horizontal_adjustment.get_value();
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
 	}
 
 	if (p & VisualChange::TimeOrigin) {
-		double current_time_origin = horizontal_adjustment.get_value();
 		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
-
-		if (current_time_origin == pending_visual_change.time_origin) {
-			/* changed signal not emitted */
-			update_fixed_rulers ();
-			redisplay_tempo (true);
-		}
 	}
 
+	if (last_time_origin == horizontal_adjustment.get_value() ) {
+		/* changed signal not emitted */
+		update_fixed_rulers ();
+		redisplay_tempo (true);
+	}
 	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;
 	return 0; /* this is always a one-shot call */

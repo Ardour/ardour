@@ -1966,20 +1966,20 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				      << endmsg;
 				goto failure;
 			}
-			if (! getenv("ARDOUR_SAE")) {
-				for (uint32_t x = 0; n_physical_audio_inputs && x < bus->n_inputs(); ++x) {
+			/*
+			for (uint32_t x = 0; n_physical_audio_inputs && x < bus->n_inputs(); ++x) {
 					
-					port = "";
-					
-					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-						port = physinputs[((n+x)%n_physical_audio_inputs)];
-					} 
-					
-					if (port.length() && bus->connect_input (bus->input (x), port, this)) {
-						break;
-					}
+				port = "";
+				
+				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+					port = physinputs[((n+x)%n_physical_audio_inputs)];
+				} 
+				
+				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
+					break;
 				}
 			}
+			*/
 			for (uint32_t x = 0; n_physical_audio_outputs && x < bus->n_outputs(); ++x) {
 				
 				port = "";
