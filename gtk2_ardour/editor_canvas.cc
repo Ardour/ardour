@@ -474,6 +474,10 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		goto out;
 	}
 
+	for (vector<ustring>::iterator xx = paths.begin(); xx != paths.end(); ++xx) {
+		cerr << "Drop path = " << *xx << endl;
+	}
+
 	/* D-n-D coordinates are window-relative, so convert to "world" coordinates
 	 */
 

@@ -310,6 +310,8 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 		build_interthread_progress_window ();
 	}
 
+	cerr << "Here we go .. disp = " << chns << " mode = " << mode << " @ " << pos << endl;
+
 	if (chns == Editing::ImportMergeFiles) {
 		/* create 1 region from all paths, add to 1 track,
 		   ignore "track"
@@ -324,6 +326,7 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 		}
 
 		if (!cancel) {
+			cerr << "Here we REALLY go ..\n";
 			if (import_sndfiles (paths, mode, quality, pos, 1, 1, track, false)) {
 				ok = false;
 			}
@@ -362,6 +365,7 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 						track = get_nth_selected_audio_track (nth++);
 					}
 
+					cerr << "Here we REALLY go 2 ..\n";
 					if (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace)) {
 						ok = false;
 					}
@@ -373,6 +377,7 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 					to_import.clear ();
 					to_import.push_back (*a);
 
+					cerr << "Here we REALLY go 3 ..\n";
 					if (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace)) {
 						ok = false;
 					}
@@ -388,6 +393,7 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 					   reuse "track" across paths
 					   */
 
+					cerr << "Here we REALLY go 4 ..\n";
 					if (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace)) {
 						ok = false;
 					}
@@ -501,7 +507,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_bar.set_fraction (0.0f);
 	interthread_cancel_label.set_text (_("Cancel Import"));
-	current_interthread_info = &import_status;
+ 	current_interthread_info = &import_status;
 
 	import_status.paths = paths;
 	import_status.done = false;
@@ -521,12 +527,19 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	   and if successful will add the file(s) as a region to the session region list.
 	*/
 	
+	cerr << "Creating import thread\n";
+
 	pthread_create_and_store ("import", &import_status.thread, 0, _import_thread, this);
 	pthread_detach (import_status.thread);
 	
+	cerr << "into rec loop while thread runs\n";
+
 	while (!(import_status.done || import_status.cancel)) {
 		gtk_main_iteration ();
 	}
+
+	cerr << "back from rec loop while thread run, status.cancel = " << import_status.cancel
+	     << " done = " << import_status.done << " progress = " << import_status.progress << endl;
 
 	interthread_progress_window->hide ();
 	
@@ -538,6 +551,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	boost::shared_ptr<AudioRegion> r;
 	
 	if (import_status.cancel || import_status.sources.empty()) {
+		cerr << "Cancelled ? " << import_status.cancel << " or no files\n";
 		goto out;
 	}
 

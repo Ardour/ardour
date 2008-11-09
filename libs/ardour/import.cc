@@ -87,10 +87,12 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 		try { 
 			boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
 			
+			cerr << "Got a new sndfile source from " << path << " as " << source->length() << endl;
+
 			if (source->samplerate() == samplerate) {
 				return source;
 			}
-
+			
 			/* rewrap as a resampled source */
 			
 			return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
@@ -244,6 +246,8 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 	boost::scoped_array<float> data(new float[nframes * channels]);
 	vector<boost::shared_array<Sample> > channel_data;
 
+	cerr << "writing " << channels << " to new file, length = " << source->length() << endl;
+
 	for (uint n = 0; n < channels; ++n) {
 		channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
 	}
@@ -280,6 +284,8 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 
 		read_count += nread;
 		status.progress = read_count / (source->ratio () * source->length() * channels);
+
+		cerr << "status.progress = " << status.progress << endl;
 	}
 }
 
@@ -300,6 +306,9 @@ Session::import_audiofiles (import_status& status)
 	typedef vector<boost::shared_ptr<AudioFileSource> > AudioSources;
 	AudioSources all_new_sources;
 
+
+	cerr << "start import of AF\n";
+
 	status.sources.clear ();
 	
 	for (vector<Glib::ustring>::iterator p = status.paths.begin();
@@ -311,11 +320,13 @@ Session::import_audiofiles (import_status& status)
 		try
 		{
 			source = open_importable_source (*p, frame_rate(), status.quality);
+			cerr << "New source from " << *p << " length = " << source->length() << endl;
 		}
 		
 		catch (const failed_constructor& err)
 		{
 			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
+			cerr << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endl;
 			status.done = status.cancel = true;
 			return;
 		}
@@ -346,6 +357,8 @@ Session::import_audiofiles (import_status& status)
 		status.doing_what = compose_status_message (*p, source->samplerate(),
 				frame_rate(), cnt, status.paths.size());
 
+		cerr << "about to write audio data\n";
+		
 		write_audio_data_to_new_files (source.get(), status, newfiles);
 	}
 
@@ -374,13 +387,13 @@ Session::import_audiofiles (import_status& status)
 
 		save_state (_name);
 
-		std::copy (all_new_sources.begin(), all_new_sources.end(),
-				std::back_inserter(status.sources));
+		std::copy (all_new_sources.begin(), all_new_sources.end(), std::back_inserter(status.sources));
 	} else {
 		// this can throw...but it seems very unlikely
 		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
 	}
 
+	cerr << "end of import, setting done = true\n";
 	status.done = true;
 }
 

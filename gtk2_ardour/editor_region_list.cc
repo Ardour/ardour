@@ -386,8 +386,6 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	int cellx;
 	int celly;
 
-	// cerr << "Button press release, button = " << ev->button << endl;
-
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
 			region = (*iter)[region_list_columns.region];
@@ -396,12 +394,10 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_region_list_display_context_menu (ev->button, ev->time);
-		cerr << "\tcontext menu event, event handled\n";
 		return true;
 	}
 
 	if (region == 0) {
-		cerr << "\tno region, event not handled\n";
 		return false;
 	}
 
@@ -414,7 +410,6 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			consider_auditioning (region);
 		}
-		cerr << "\taudition, event handled\n";
 		return true;
 		break;
 
@@ -422,7 +417,6 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		break; 
 	}
 
-	cerr << "\tnot handled\n";
 	return false;
 }	
 

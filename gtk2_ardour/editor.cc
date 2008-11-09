@@ -3048,11 +3048,18 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 		}
   
 		/* Parse the "uri-list" format that Nautilus provides, 
-		   where each pathname is delimited by \r\n
+		   where each pathname is delimited by \r\n.
+
+		   THERE MAY BE NO NULL TERMINATING CHAR!!!
 		*/
-	
-		const char* p = data.get_text().c_str();
+
+		ustring txt = data.get_text();
+		const char* p;
 		const char* q;
+
+		p = (const char *) malloc (txt.length() + 1);
+		txt.copy ((char *) p, txt.length(), 0);
+		((char*)p)[txt.length()] = '\0';
 
 		while (p)
 		{
@@ -3062,8 +3069,9 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 					p++;
 				
 				q = p;
-				while (*q && (*q != '\n') && (*q != '\r'))
+				while (*q && (*q != '\n') && (*q != '\r')) {
 					q++;
+				}
 				
 				if (q > p)
 				{
@@ -3082,6 +3090,8 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 				p++;
 		}
 
+		free ((void*)p);
+		
 		if (uris.empty()) {
 			return -1;
 		}
