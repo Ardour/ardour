@@ -545,27 +545,43 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				}
 				return true;
 
+			case MarkerBarItem:
 			case TempoBarItem:
-				return true;
-
 			case MeterBarItem:
+				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
+				}
 				return true;
+				break;
+
 				
 			case RangeMarkerBarItem:
-				start_range_markerbar_op (item, event, CreateRangeMarker); 
+				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {		
+					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
+				} else {
+					start_range_markerbar_op (item, event, CreateRangeMarker); 
+				}	
 				return true;
 				break;
 
 			case CdMarkerBarItem:
-				start_range_markerbar_op (item, event, CreateCDMarker); 
+				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
+				} else {
+					start_range_markerbar_op (item, event, CreateCDMarker); 
+				}
 				return true;
 				break;
 
 			case TransportMarkerBarItem:
-				start_range_markerbar_op (item, event, CreateTransportMarker); 
+				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
+				} else {
+					start_range_markerbar_op (item, event, CreateTransportMarker);
+				}
 				return true;
 				break;
-
+				
 			default:
 				break;
 			}
@@ -1057,36 +1073,44 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 
 		case MarkerBarItem:
-			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-				snap_to (where, 0, true);
+			if (!_dragging_playhead) {
+				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+					snap_to (where, 0, true);
+				}
+				mouse_add_new_marker (where);
 			}
-			mouse_add_new_marker (where);
 			return true;
 
 		case CdMarkerBarItem:
-			// if we get here then a dragged range wasn't done
-			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-				snap_to (where, 0, true);
+			if (!_dragging_playhead) {
+				// if we get here then a dragged range wasn't done
+				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+					snap_to (where, 0, true);
+				}
+				mouse_add_new_marker (where, true);
 			}
-			mouse_add_new_marker (where, true);
 			return true;
 
 		case TempoBarItem:
-			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-				snap_to (where);
+			if (!_dragging_playhead) {
+				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+					snap_to (where);
+				}
+				mouse_add_new_tempo_event (where);
 			}
-			mouse_add_new_tempo_event (where);
 			return true;
 			
 		case MeterBarItem:
-			mouse_add_new_meter_event (pixel_to_frame (event->button.x));
+			if (!_dragging_playhead) {
+				mouse_add_new_meter_event (pixel_to_frame (event->button.x));
+			} 
 			return true;
 			break;
 
 		default:
 			break;
 		}
-
+		
 		switch (mouse_mode) {
 		case MouseObject:
 			switch (item_type) {
@@ -1715,6 +1739,9 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	switch (item_type) {
 	case PlayheadCursorItem:
 	case MarkerItem:
+	case MarkerBarItem:
+	case TempoBarItem:
+	case MeterBarItem:
 	case RangeMarkerBarItem:
 	case TransportMarkerBarItem:
 	case CdMarkerBarItem:
@@ -2213,6 +2240,39 @@ Editor::start_cursor_grab (ArdourCanvas::Item* item, GdkEvent* event)
 }
 
 void
+Editor::start_cursor_grab_no_stop (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	drag_info.item = item;
+	drag_info.motion_callback = &Editor::cursor_drag_motion_callback;
+	drag_info.finished_callback = &Editor::cursor_drag_finished_ensure_locate_callback;
+
+	start_grab (event);
+
+	if ((drag_info.data = (item->get_data ("cursor"))) == 0) {
+		fatal << _("programming error: cursor canvas item has no cursor data pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Cursor* cursor = (Cursor *) drag_info.data;
+	nframes64_t where = event_frame (event, 0, 0);
+
+	snap_to(where);
+	playhead_cursor->set_position (where);
+
+	if (cursor == playhead_cursor) {
+		_dragging_playhead = true;
+
+		if (session && session->is_auditioning()) {
+			session->cancel_audition ();
+		}
+	}
+
+	drag_info.pointer_frame_offset = drag_info.grab_frame - cursor->current_frame;	
+	
+	show_verbose_time_cursor (cursor->current_frame, 10);
+}
+
+void
 Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	Cursor* cursor = (Cursor *) drag_info.data;
@@ -2249,11 +2309,27 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::cursor_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	if (drag_info.first_move) return;
+	_dragging_playhead = false;
+
+	if (drag_info.first_move) {
+		return;
+	}
 	
 	cursor_drag_motion_callback (item, event);
+	
+	if (item == &playhead_cursor->canvas_item) {
+		if (session) {
+			session->request_locate (playhead_cursor->current_frame, drag_info.was_rolling);
+		}
+	} 
+}
 
+void
+Editor::cursor_drag_finished_ensure_locate_callback (ArdourCanvas::Item* item, GdkEvent* event)
+{
 	_dragging_playhead = false;
+	
+	cursor_drag_motion_callback (item, event);
 	
 	if (item == &playhead_cursor->canvas_item) {
 		if (session) {

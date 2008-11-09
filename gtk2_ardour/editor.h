@@ -1341,6 +1341,7 @@ class Editor : public PublicEditor
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+	void cursor_drag_finished_ensure_locate_callback (ArdourCanvas::Item*, GdkEvent*);
 	void marker_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void marker_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void control_point_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -1360,6 +1361,7 @@ class Editor : public PublicEditor
 	void start_region_brush_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_cursor_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_cursor_grab_no_stop (ArdourCanvas::Item*, GdkEvent*);
 	void start_marker_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_control_point_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_line_grab_from_regionview (ArdourCanvas::Item*, GdkEvent*);
