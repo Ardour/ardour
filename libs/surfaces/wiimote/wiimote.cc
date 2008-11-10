@@ -138,11 +138,10 @@ WiimoteControlProtocol::update_led_state()
 {
 	ENSURE_WIIMOTE_THREAD(sigc::mem_fun(*this, &WiimoteControlProtocol::update_led_state));
 
-	// ensure thread needs to be done here...
 	uint8_t state = 0;
 
 	if (session->transport_rolling()) {
-		state |= CWIID_LED3_ON;
+		state |= CWIID_LED1_ON;
 	}
 
 	if (session->actively_recording()) {
