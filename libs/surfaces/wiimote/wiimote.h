@@ -6,12 +6,24 @@
 
 #include <glibmm/thread.h>
 
+#include <pbd/abstract_ui.h>
+
 #include <cwiid.h>
 
 
 namespace ARDOUR {
         class Session;
 }
+
+#define ENSURE_WIIMOTE_THREAD(slot) \
+	if (Glib::Thread::self() != main_thread) {\
+		slot_mutex.lock();\
+		slot_list.push_back(slot);\
+		slot_cond.signal();\
+		slot_mutex.unlock();\
+		return;\
+	} 
+
 
 class WiimoteControlProtocol : public ARDOUR::ControlProtocol {
 	public:
@@ -29,15 +41,26 @@ class WiimoteControlProtocol : public ARDOUR::ControlProtocol {
 
 	private:
 		
-		void initializer_thread();
-		bool init_thread_quit;
+		void wiimote_main();
+		volatile bool main_thread_quit;
+
+		Glib::Thread *main_thread;
+
+		void update_led_state();
 
 		bool thread_registered_for_ardour;
 
-		Glib::Thread *init_thread;
 		static uint16_t button_state;
 
 		cwiid_wiimote_t *wiimote_handle;
+
+		Glib::Cond slot_cond;
+		Glib::Mutex slot_mutex;
+
+		std::list< sigc::slot<void> > slot_list;
+
+		sigc::connection transport_state_conn;
+		sigc::connection record_state_conn;
 };
 
 

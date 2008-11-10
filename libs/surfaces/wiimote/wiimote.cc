@@ -18,18 +18,18 @@ uint16_t WiimoteControlProtocol::button_state = 0;
 
 WiimoteControlProtocol::WiimoteControlProtocol ( Session & session) 
 	: ControlProtocol ( session, "Wiimote"),
-	  init_thread_quit (false),
+	  main_thread_quit (false),
 	  thread_registered_for_ardour (false),
 	  wiimote_handle (0)
 {
-	std::cerr << "WiimoteControlProtocol()" << std::endl;
-	init_thread = Glib::Thread::create( sigc::mem_fun(*this, &WiimoteControlProtocol::initializer_thread), true);
+	main_thread = Glib::Thread::create( sigc::mem_fun(*this, &WiimoteControlProtocol::wiimote_main), true);
 }
 
 WiimoteControlProtocol::~WiimoteControlProtocol()
 {
-	init_thread_quit = true;
-	init_thread->join();
+	main_thread_quit = true;
+	slot_cond.signal();
+	main_thread->join();
 
 	if (wiimote_handle) {
 		cwiid_close(wiimote_handle);
@@ -59,20 +59,46 @@ WiimoteControlProtocol::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_coun
 	{
 		if (mesg[i].type != CWIID_MESG_BTN) continue;
 
+		// what buttons are pressed down which weren't pressed down last time
 		b = (mesg[i].btn_mesg.buttons ^ button_state) & mesg[i].btn_mesg.buttons;
 
 		button_state = mesg[i].btn_mesg.buttons;
 
+		// if B is pressed down
+		if (button_state & CWIID_BTN_B) {
+			if (b & CWIID_BTN_A) { // B is down and A is pressed
+				access_action("Transport/ToggleRollForgetCapture");
+			}
 
-		if (b & CWIID_BTN_A && !(button_state & CWIID_BTN_B)) { // Just "A"
-			access_action("Transport/ToggleRoll");
+			if (b & CWIID_BTN_LEFT) {
+				access_action("Editor/playhead-to-previous-region-boundary");
+			}
+			if (b & CWIID_BTN_RIGHT) {
+				access_action("Editor/playhead-to-next-region-boundary");
+			}
+
+			if (b & CWIID_BTN_HOME) {
+				access_action("Editor/add-location-from-playhead");
+			}
+
+			if (b & CWIID_BTN_MINUS) {	
+				access_action("Transport/GotoStart");
+			}
+			
+			if (b & CWIID_BTN_PLUS) {
+				access_action("Transport/GotoEnd");
+			}
+
+			continue;
 		}
-		if (b & CWIID_BTN_A && button_state & CWIID_BTN_B) { // B is down and A is pressed
-			access_action("Transport/ToggleRollForgetCapture");
+
+
+		if (b & CWIID_BTN_A) {
+			access_action("Transport/ToggleRoll");
 		}
 
 		if (b & CWIID_BTN_1) { // 1
-			access_action("Editor/track-record-enable-toggle");			
+			access_action("Editor/track-record-enable-toggle");
 		}
 		if (b & CWIID_BTN_2) { // 2
 			rec_enable_toggle();
@@ -108,25 +134,44 @@ WiimoteControlProtocol::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_coun
 }
 
 void
-WiimoteControlProtocol::initializer_thread()
+WiimoteControlProtocol::update_led_state()
+{
+	ENSURE_WIIMOTE_THREAD(sigc::mem_fun(*this, &WiimoteControlProtocol::update_led_state));
+
+	// ensure thread needs to be done here...
+	uint8_t state = 0;
+
+	if (session->transport_rolling()) {
+		state |= CWIID_LED3_ON;
+	}
+
+	if (session->actively_recording()) {
+		state |= CWIID_LED4_ON;
+	}
+
+	cwiid_set_led(wiimote_handle, state);
+}
+
+void
+WiimoteControlProtocol::wiimote_main()
 {
 	bdaddr_t bdaddr;
 	unsigned char rpt_mode = 0;
 
-	std::cerr << "wiimote: discovering, press 1+2" << std::endl;
+	std::cerr << "Wiimote: discovering, press 1+2" << std::endl;
 
- 	while (!wiimote_handle && !init_thread_quit) {
+ 	while (!wiimote_handle && !main_thread_quit) {
 		bdaddr = *BDADDR_ANY;
 		wiimote_handle = cwiid_open(&bdaddr, 0);
 
-		if (!wiimote_handle && !init_thread_quit) {
+		if (!wiimote_handle && !main_thread_quit) {
 			sleep(1); 
 			// We don't know whether the issue was a timeout or a configuration 
 			// issue
 		}
 	}
 
-	if (init_thread_quit) {
+	if (main_thread_quit) {
 		// The corner case where the wiimote is bound at the same time as
 		// the control protocol is destroyed
 		if (wiimote_handle) {
@@ -159,7 +204,30 @@ WiimoteControlProtocol::initializer_thread()
 	cwiid_enable(wiimote_handle, CWIID_FLAG_MESG_IFC);
 	cwiid_set_rpt_mode(wiimote_handle, rpt_mode);
 
-	std::cerr << "Wiimote: initialization thread stopping" << std::endl;
+	transport_state_conn = session->TransportStateChange.connect(sigc::mem_fun(*this, &WiimoteControlProtocol::update_led_state));
+	record_state_conn = session->RecordStateChanged.connect(sigc::mem_fun(*this, &WiimoteControlProtocol::update_led_state));
+
+	std::cerr << "Wiimote: initialization done, waiting for callbacks / quit" << std::endl;
+
+	while (!main_thread_quit) {
+		slot_mutex.lock();
+		while (slot_list.empty() && !main_thread_quit)
+			slot_cond.wait(slot_mutex);
+
+		if (main_thread_quit) {
+			slot_mutex.unlock();
+			break;
+		}
+
+		sigc::slot<void> call_me = *slot_list.begin();
+		slot_list.pop_front();
+		slot_mutex.unlock();
+
+		call_me();
+	}
+
+
+	std::cerr << "Wiimote: main thread stopped" << std::endl;
 }
 
 

@@ -583,7 +583,7 @@ if env['WIIMOTE']:
 	wiimote_surface = [ 'libs/surfaces/wiimote' ]
 else:
 	wiimote_surface = [ ]
-	print 'WIIMOTE support not enabled. Build with \'scons WIIMOTE=1\' to enale.'
+	print 'WIIMOTE not enabled. Build with \'scons WIIMOTE=1\' to enable support.'
 
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
