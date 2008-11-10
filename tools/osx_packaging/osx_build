@@ -119,6 +119,9 @@ echo "Copying ardour executable ...."
 cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
 if test x$SAE != x ; then
     cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
+    cp  Ardour2-SAE.icns $Resources/appIcon.icns
+else
+    cp  Ardour2.icns $Resources/appIcon.icns
 fi
 if test x$STRIP != x ; then
     strip $APPROOT/MacOS/Ardour2
