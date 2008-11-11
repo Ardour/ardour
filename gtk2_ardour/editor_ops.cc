@@ -142,8 +142,6 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 		snap_to (where);
 	}
 
-	cerr << "Split " << regions.size() << " at " << where << endl;
-
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
 		RegionSelection::iterator tmp;
@@ -4444,7 +4442,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 		boost::shared_ptr<Playlist> playlist = arv->region()->playlist();
 
 		RegionSelection::iterator tmp;
-		
+
 		tmp = r;
 		++tmp;
 

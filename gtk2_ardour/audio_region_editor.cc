@@ -47,16 +47,20 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	  _region_view (rv),
 	  name_label (_("NAME:")),
 	  audition_button (_("play")),
-	  time_table (3, 2),
-	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), true),
+	  time_table (5, 2),
+	  position_clock (X_("regionposition"), true, X_("AudioRegionEditorClock"), true),
 	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true),
 	  length_clock (X_("regionlength"), true, X_("AudioRegionEditorClock"), true, true),
-	  sync_offset_clock (X_("regionsyncoffset"), true, X_("AudioRegionEditorClock"), true, true)
+	  /* XXX cannot edit sync point or start yet */
+	  sync_offset_clock (X_("regionsyncoffset"), true, X_("AudioRegionEditorClock"), false),
+	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), false)
 
 {
-	start_clock.set_session (&_session);
+	position_clock.set_session (&_session);
 	end_clock.set_session (&_session);
 	length_clock.set_session (&_session);
+	sync_offset_clock.set_session (&_session);
+	start_clock.set_session (&_session);
 
 	name_entry.set_name ("AudioRegionEditorEntry");
 	name_label.set_name ("AudioRegionEditorLabel");
@@ -79,33 +83,47 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	top_row_hbox.pack_start (name_hbox, true, true);
 	top_row_hbox.pack_end (top_row_button_hbox, true, true);
 
-	start_label.set_name ("AudioRegionEditorLabel");
-	start_label.set_text (_("START:"));
+	position_label.set_name ("AudioRegionEditorLabel");
+	position_label.set_text (_("POSITION:"));
 	end_label.set_name ("AudioRegionEditorLabel");
 	end_label.set_text (_("END:"));
 	length_label.set_name ("AudioRegionEditorLabel");
 	length_label.set_text (_("LENGTH:"));
+	sync_label.set_name ("AudioRegionEditorLabel");
+	sync_label.set_text (_("SYNC POINT:"));
+	start_label.set_name ("AudioRegionEditorLabel");
+	start_label.set_text (_("FILE START:"));
 	
 	time_table.set_col_spacings (2);
 	time_table.set_row_spacings (5);
 	time_table.set_border_width (5);
 
-	start_alignment.set (1.0, 0.5);
+	position_alignment.set (1.0, 0.5);
 	end_alignment.set (1.0, 0.5);
 	length_alignment.set (1.0, 0.5);
+	sync_alignment.set (1.0, 0.5);
+	start_alignment.set (1.0, 0.5);
 
-	start_alignment.add (start_label);
+	position_alignment.add (position_label);
 	end_alignment.add (end_label);
 	length_alignment.add (length_label);
+	sync_alignment.add (sync_label);
+	start_alignment.add (start_label);
 
-	time_table.attach (start_alignment, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
-	time_table.attach (start_clock, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+	time_table.attach (position_alignment, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+	time_table.attach (position_clock, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
 
 	time_table.attach (end_alignment, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
 	time_table.attach (end_clock, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
 
 	time_table.attach (length_alignment, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
 	time_table.attach (length_clock, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
+
+	time_table.attach (sync_alignment, 0, 1, 3, 4, Gtk::FILL, Gtk::FILL);
+	time_table.attach (sync_offset_clock, 1, 2, 3, 4, Gtk::FILL, Gtk::FILL);
+
+	time_table.attach (start_alignment, 0, 1, 4, 5, Gtk::FILL, Gtk::FILL);
+	time_table.attach (start_clock, 1, 2, 4, 5, Gtk::FILL, Gtk::FILL);
 
 	lower_hbox.pack_start (time_table, true, true);
 	lower_hbox.pack_start (sep1, false, false);
@@ -128,7 +146,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	show_all();
 
 	name_changed ();
-	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged));
+	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|StartChanged|Region::SyncOffsetChanged));
 
 	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
 	
@@ -147,7 +165,8 @@ AudioRegionEditor::region_changed (Change what_changed)
 	if (what_changed & NameChanged) {
 		name_changed ();
 	}
-	if (what_changed & BoundsChanged) {
+
+	if (what_changed & Change (BoundsChanged|StartChanged|Region::SyncOffsetChanged)) {
 		bounds_changed (what_changed);
 	}
 }
@@ -190,7 +209,7 @@ AudioRegionEditor::connect_editor_events ()
 {
 	name_entry.signal_changed().connect (mem_fun(*this, &AudioRegionEditor::name_entry_changed));
 
-	start_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::start_clock_changed));
+	position_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::position_clock_changed));
 	end_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::end_clock_changed));
 	length_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::length_clock_changed));
 
@@ -199,7 +218,7 @@ AudioRegionEditor::connect_editor_events ()
 }
 
 void
-AudioRegionEditor::start_clock_changed ()
+AudioRegionEditor::position_clock_changed ()
 {
 	_session.begin_reversible_command (_("change region start position"));
 
@@ -207,7 +226,7 @@ AudioRegionEditor::start_clock_changed ()
 
 	if (pl) {
 		XMLNode &before = pl->get_state();
-		_region->set_position (start_clock.current_time(), this);
+		_region->set_position (position_clock.current_time(), this);
 		XMLNode &after = pl->get_state();
 		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 	}
@@ -276,10 +295,24 @@ AudioRegionEditor::name_changed ()
 void
 AudioRegionEditor::bounds_changed (Change what_changed)
 {
-	if (what_changed & Change ((PositionChanged|LengthChanged))) {
-		start_clock.set (_region->position(), true);
+	if ((what_changed & Change (PositionChanged|LengthChanged)) == Change (PositionChanged|LengthChanged)) {
+		position_clock.set (_region->position(), true);
 		end_clock.set (_region->position() + _region->length(), true);
 		length_clock.set (_region->length(), true);
+	} else if (what_changed & Change (PositionChanged)) {
+		position_clock.set (_region->position(), true);
+		end_clock.set (_region->position() + _region->length(), true);
+	} else if (what_changed & Change (LengthChanged)) {
+		end_clock.set (_region->position() + _region->length(), true);
+		length_clock.set (_region->length(), true);
+	}
+
+	if (what_changed & Region::SyncOffsetChanged) {
+		sync_offset_clock.set (_region->sync_position(), true);
+	}
+
+	if (what_changed & StartChanged) {
+		start_clock.set (_region->start(), true);
 	}
 }
 
