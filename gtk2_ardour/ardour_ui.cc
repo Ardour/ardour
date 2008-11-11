@@ -338,11 +338,12 @@ ARDOUR_UI::post_engine ()
 	/* set default clock modes */
 
 	if (Profile->get_sae()) {
-		primary_clock.set_mode (AudioClock::MinSec);
+		primary_clock.set_mode (AudioClock::BBT);
+		secondary_clock.set_mode (AudioClock::MinSec);
 	}  else {
 		primary_clock.set_mode (AudioClock::SMPTE);
+		secondary_clock.set_mode (AudioClock::BBT);
 	}
-	secondary_clock.set_mode (AudioClock::BBT);
 
 	/* start the time-of-day-clock */
 	
@@ -2542,6 +2543,9 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 	connect_to_session (new_session);
 
 	session_loaded = true;
+
+	new_session->save_state(new_session->name());
+
 	return 0;
 }
 
