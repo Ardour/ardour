@@ -34,6 +34,8 @@ class TearOff : public Gtk::HBox
 	virtual ~TearOff ();
 
 	void set_visible (bool yn);
+	void set_can_be_torn_off (bool);
+	bool can_be_torn_off () const { return _can_be_torn_off; }
 
 	sigc::signal<void> Detach;
 	sigc::signal<void> Attach;
@@ -55,6 +57,7 @@ class TearOff : public Gtk::HBox
 	double         drag_y;
 	bool           dragging;
 	bool          _visible;
+	bool          _can_be_torn_off;
 
 	gint tearoff_click (GdkEventButton*);
 	gint close_click (GdkEventButton*);
