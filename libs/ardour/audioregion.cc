@@ -250,6 +250,38 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	listen_to_my_sources ();
 }
 
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const SourceList& srcs,
+			  nframes_t length, const string& name, layer_t layer, Flag flags)
+	: Region (other, length, name, layer, flags),
+	  _fade_in (other->_fade_in),
+	  _fade_out (other->_fade_out),
+	  _envelope (other->_envelope)
+	  
+{
+	/* make-a-sort-of-copy-with-different-sources constructor (used by audio filter) */
+
+	set<boost::shared_ptr<AudioSource> > unique_srcs;
+
+	for (SourceList::const_iterator i=srcs.begin(); i != srcs.end(); ++i) {
+		sources.push_back (*i);
+		master_sources.push_back (*i);
+		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
+		
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> ((*i));
+		if (afs) {
+			afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+		}
+	}
+
+	_scale_amplitude = other->_scale_amplitude;
+
+	_fade_in_disabled = 0;
+	_fade_out_disabled = 0;
+
+	listen_to_my_curves ();
+	listen_to_my_sources ();
+}
+
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (node),
 	  _fade_in (0.0, 2.0, 1.0, false),
@@ -347,22 +379,6 @@ AudioRegion::listen_to_my_curves ()
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 	_fade_in.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_in_changed));
 	_fade_out.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_out_changed));
-}
-
-void
-AudioRegion::copy_settings (boost::shared_ptr<const AudioRegion> other)
-{
-	_fade_in = other->_fade_in;
-	_fade_out = other->_fade_out;
-	_envelope = other->_envelope; 
-	_flags = other->_flags;
-	_scale_amplitude = other->_scale_amplitude;
-	_fade_in_disabled = other->_fade_in_disabled;
-	_fade_out_disabled = other->_fade_out_disabled;
-
-	if (_length != other->length()) {
-		_envelope.extend_to (_length);
-	}
 }
 
 bool
@@ -475,25 +491,25 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 }
 
 nframes64_t
-AudioRegion::read (Sample* buf, nframes64_t position, nframes64_t cnt, int channel) const
+AudioRegion::read (Sample* buf, nframes64_t timeline_position, nframes64_t cnt, int channel) const
 {
 	/* raw read, no fades, no gain, nada */
-	return _read_at (sources, _length, buf, 0, 0, _position + position, cnt, channel, 0, 0, ReadOps (0));
+	return _read_at (sources, _length, buf, 0, 0, _position + timeline_position, cnt, channel, 0, 0, ReadOps (0));
 }
 
 nframes64_t
-AudioRegion::read_with_ops (Sample* buf, nframes64_t position, nframes64_t cnt, int channel, ReadOps rops) const
+AudioRegion::read_with_ops (Sample* buf, nframes64_t file_position, nframes64_t cnt, int channel, ReadOps rops) const
 {
-	return _read_at (sources, _length, buf, 0, 0, _position + position, cnt, channel, 0, 0, rops);
+	return _read_at (sources, _length, buf, 0, 0, file_position, cnt, channel, 0, 0, rops);
 }
 
 nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t file_position, 
 		      nframes_t cnt, 
 		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
 	/* regular diskstream/butler read complete with fades etc */
-	return _read_at (sources, _length, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames, ReadOps (~0));
+	return _read_at (sources, _length, buf, mixdown_buffer, gain_buffer, file_position, cnt, chan_n, read_frames, skip_frames, ReadOps (~0));
 }
 
 nframes_t

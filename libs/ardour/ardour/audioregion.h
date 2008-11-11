@@ -169,6 +169,7 @@ class AudioRegion : public Region
 	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (const SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, const SourceList&, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
 	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
 	AudioRegion (SourceList &, const XMLNode&);

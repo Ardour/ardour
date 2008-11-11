@@ -349,7 +349,12 @@ SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 		
 		if (_info.channels == 1) {
 			nframes_t ret = sf_read_float (sf, dst, file_cnt);
-			_read_data_count = cnt * sizeof(float);
+			_read_data_count = ret * sizeof(float);
+			if (ret != file_cnt) {
+				char errbuf[256];
+				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
+				cerr << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"), start, file_cnt, _name.substr (1), errbuf, _length) << endl;
+			}
 			return ret;
 		}
 	}
@@ -413,7 +418,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 	}
 
 	_write_data_count = cnt;
-	
+
 	return cnt;
 }
 

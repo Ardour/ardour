@@ -66,6 +66,7 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 	}
 
 	fpos = max (fstart, (fstart + region->length() - blocksize));
+
 	buf = new Sample[blocksize];
 	to_read = blocksize;
 
@@ -77,9 +78,9 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 
 		for (n = 0, si = nsrcs.begin(); n < region->n_channels(); ++n, ++si) {
 
-			/* read it in, with any amplitude scaling */
+			/* read it in directly from the source */
 			
-			if (region->read (buf, fpos, to_read, n) != to_read) {
+			if (region->source (n)->read (buf, fpos, to_read, n) != to_read) {
 				goto out;
 			}
 
@@ -88,7 +89,7 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 			for (nframes_t i = 0; i < to_read/2; ++i) {
 				swap (buf[i],buf[to_read-1-i]);
 			}
-			
+
 			/* write it out */
 
 			if ((*si)->write (buf, to_read) != to_read) {

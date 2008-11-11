@@ -36,6 +36,7 @@
 #include <ardour/session.h>
 #include <ardour/tempo.h>
 #include <ardour/region_factory.h>
+#include <ardour/profile.h>
 
 #include "i18n.h"
 
@@ -82,19 +83,100 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 {
 	/* create a new Region from part of an existing one */
 
+	_start = other->_start + offset; 
+
+	copy_stuff (other, offset, length, name, layer, flags);
+
+	/* if the other region had a distinct sync point
+	   set, then continue to use it as best we can.
+	   otherwise, reset sync point back to start.
+	*/
+
+	if (other->flags() & SyncMarked) {
+		if (other->_sync_position < _start) {
+			_flags = Flag (_flags & ~SyncMarked);
+			_sync_position = _start;
+		} else {
+			_sync_position = other->_sync_position;
+		}
+	} else {
+		_flags = Flag (_flags & ~SyncMarked);
+		_sync_position = _start;
+	}
+
+	if (Profile->get_sae()) {
+		/* reset sync point to start if its ended up
+		   outside region bounds.
+		*/
+
+		if (_sync_position < _start || _sync_position >= _start + _length) {
+			_flags = Flag (_flags & ~SyncMarked);
+			_sync_position = _start;
+		}
+	}
+
+}
+
+Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const string& name, layer_t layer, Flag flags)
+{
+	/* create a new Region exactly like another but starting at 0 in its sources */
+
+	_start = 0;
+	copy_stuff (other, 0, length, name, layer, flags);
+
+	/* sync pos is relative to start of file. our start-in-file is now zero,
+	   so set our sync position to whatever the the difference between
+	   _start and _sync_pos was in the other region. 
+
+	   result is that our new sync pos points to the same point in our source(s) 
+	   as the sync in the other region did in its source(s).
+
+	   since we start at zero in our source(s), it is not possible to use a sync point that
+	   is before the start. reset it to _start if that was true in the other region.
+	*/
+	
+	if (other->flags() & SyncMarked) {
+		if (other->_start < other->_sync_position) {
+			/* sync pos was after the start point of the other region */
+			_sync_position = other->_sync_position - other->_start;
+		} else {
+			/* sync pos was before the start point of the other region. not possible here. */
+			_flags = Flag (_flags & ~SyncMarked);
+			_sync_position = _start;
+		}
+	} else {
+		_flags = Flag (_flags & ~SyncMarked);
+		_sync_position = _start;
+	}
+		
+	if (Profile->get_sae()) {
+		/* reset sync point to start if its ended up
+		   outside region bounds.
+		*/
+
+		if (_sync_position < _start || _sync_position >= _start + _length) {
+			_flags = Flag (_flags & ~SyncMarked);
+			_sync_position = _start;
+		}
+	}
+
+	/* reset a couple of things that copy_stuff() gets wrong in this particular case */
+
+	_positional_lock_style = other->_positional_lock_style;
+	_first_edit = other->_first_edit;
+}
+
+void
+Region::copy_stuff (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
+{
 	_frozen = 0;
 	pending_changed = Change (0);
 	_read_data_count = 0;
 	valid_transients = false;
 
-	_start = other->_start + offset; 
-	if (other->_sync_position < offset) {
-		_sync_position = other->_sync_position;
-	} else {
-		_sync_position = _start;
-	}
 	_length = length; 
 	_last_length = length; 
+	_sync_position = other->_sync_position;
 	_ancestral_start = other->_ancestral_start;
 	_ancestral_length = other->_ancestral_length; 
 	_stretch = other->_stretch;
@@ -765,7 +847,7 @@ Region::sync_offset (int& dir) const
 }
 
 nframes_t 
-Region::adjust_to_sync (nframes_t pos)
+Region::adjust_to_sync (nframes_t pos) const
 {
 	int sync_dir;
 	nframes_t offset = sync_offset (sync_dir);

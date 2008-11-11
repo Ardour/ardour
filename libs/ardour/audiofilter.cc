@@ -113,6 +113,24 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs, s
 		}
 	}
 
+
+	/* make a new whole-file region that copies almost everything from the old one, but
+	   uses the new sources (and new length and name)
+	*/
+
+	boost::shared_ptr<AudioRegion> ar;
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(nsrcs.front());
+
+	string whole_file_region_name = region_name_from_path (afs->path(), true);
+
+	ar = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create 
+						       (nsrcs, 0, nsrcs.front()->length(), whole_file_region_name, 0, 
+							Region::Flag (Region::WholeFile|Region::DefaultFlags)));
+	
+	/* now make a copy of the region that copies almost everything from the old one, but
+	   uses the new sources (and new length and name)
+	*/
+
 	/* create a new region */
 
 	if (region_name.empty()) {
@@ -121,13 +139,14 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs, s
 
 	results.clear ();
 
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (
-		RegionFactory::create (nsrcs, 0, nsrcs.front()->length(), region_name, 0, 
-				       Region::Flag (Region::WholeFile|Region::DefaultFlags)));
+	ar = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create 
+						       (region, nsrcs, region_name, 0, region->flags()));
 
-	/* reset relevant stuff */
+	/* if we changed the length, fix up the envelope */
 
-	ar->copy_settings (region);
+	if (region->length() != ar->length()) {
+		ar->envelope().extend_to (ar->length());
+	}
 
 	results.push_back (ar);
 	

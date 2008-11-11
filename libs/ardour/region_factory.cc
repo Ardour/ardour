@@ -35,7 +35,7 @@ sigc::signal<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start, 
-		       nframes_t length, std::string name, 
+		       nframes_t length, const std::string& name, 
 		       layer_t layer, Region::Flag flags, bool announce)
 {
 	boost::shared_ptr<const AudioRegion> other;
@@ -75,10 +75,37 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<AudioRegion> region, nframes_t start, 
-		       nframes_t length, std::string name, 
+		       nframes_t length, const std::string& name, 
 		       layer_t layer, Region::Flag flags, bool announce)
 {
 	return create (boost::static_pointer_cast<Region> (region), start, length, name, layer, flags, announce);
+}
+
+boost::shared_ptr<Region>
+RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
+		       const std::string& name, layer_t layer, Region::Flag flags, bool announce)
+
+{
+	boost::shared_ptr<const AudioRegion> other;
+
+	/* used by AudioFilter when constructing a new region that is intended to have nearly
+	   identical settings to an original, but using different sources.
+	*/
+
+	if ((other = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
+		AudioRegion* ar = new AudioRegion (other, srcs, srcs.front()->length(), name, layer, flags);
+		boost::shared_ptr<AudioRegion> arp (ar);
+		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
+		if (announce) {
+			CheckNewRegion (ret);
+		}
+		return ret;
+	} else {
+		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
+		      << endmsg;
+		/*NOTREACHED*/
+		return boost::shared_ptr<Region>();
+	}
 }
 
 boost::shared_ptr<Region>
