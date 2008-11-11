@@ -4644,7 +4644,7 @@ Editor::toggle_region_opaque ()
 void
 Editor::toggle_record_enable ()
 {
-	bool new_state;
+	bool new_state = false;
 	bool first = true;
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);

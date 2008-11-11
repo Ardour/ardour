@@ -1151,7 +1151,7 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNodeList          clist;
 	XMLNodeConstIterator citer;
 	XMLNode* child;
-	XMLProperty* prop;
+	XMLProperty* prop = NULL;
 	bool using_dummy = false;
 	
 	int val;

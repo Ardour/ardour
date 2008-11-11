@@ -1615,7 +1615,7 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	double origin;
 	double clip_length;
 	double xoff;
-	double yoff;
+	double yoff = 0.0;
 	double ulx;
 	double uly;
 	double lrx;
