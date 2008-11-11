@@ -56,7 +56,7 @@
     <AudioSetup>
       <periods val="2"/>
       <priority val="60"/>
-      <ports val="128"/>
+      <ports val="256"/>
       <realtime val="1"/>
       <samplerate val="44100Hz"/>
       <periodsize val="256"/>

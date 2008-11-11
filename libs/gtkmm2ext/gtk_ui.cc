@@ -99,6 +99,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 
 	errors->dismiss_button().set_name ("ErrorLogCloseButton");
 	errors->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), (Window *) errors));
+	errors->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 
 	register_thread (pthread_self(), X_("GUI"));
 
