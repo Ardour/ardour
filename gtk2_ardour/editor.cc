@@ -2867,6 +2867,10 @@ Editor::setup_toolbar ()
 	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
 
+	if (Profile->get_sae()) {
+		mouse_mode_tearoff->set_can_be_torn_off (false);
+	}
+
 	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
 						  &mouse_mode_tearoff->tearoff_window()));
 	mouse_mode_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
@@ -2990,6 +2994,10 @@ Editor::setup_toolbar ()
 
 	tools_tearoff = new TearOff (*hbox);
 	tools_tearoff->set_name ("MouseModeBase");
+
+	if (Profile->get_sae()) {
+		tools_tearoff->set_can_be_torn_off (false);
+	}
 
 	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
 					     &tools_tearoff->tearoff_window()));

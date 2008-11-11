@@ -191,6 +191,10 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
 
+	if (Profile->get_sae()) {
+		transport_tearoff->set_can_be_torn_off (false);
+	}
+
 	transport_hbox.pack_start (*transport_tearoff, true, false);
 
 	transport_base.set_name ("TransportBase");
