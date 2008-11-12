@@ -207,8 +207,7 @@ Session::butler_transport_work ()
 	}
 
 	if (post_transport_work & PostTransportReverse) {
-
-
+		
 		clear_clicks();
 		cumulative_rf_motion = 0;
 		reset_rf_scale (0);
@@ -865,6 +864,7 @@ Session::set_transport_speed (float speed, bool abort)
 
 		if ((_transport_speed && speed * _transport_speed < 0.0f) || (_last_transport_speed * speed < 0.0f) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportReverse);
+			last_stop_frame = _transport_frame;
 		}
 		
 		_last_transport_speed = _transport_speed;
