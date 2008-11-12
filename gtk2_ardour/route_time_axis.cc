@@ -130,6 +130,13 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	visual_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
+	edit_group_button.unset_flags (Gtk::CAN_FOCUS);
+	playlist_button.unset_flags (Gtk::CAN_FOCUS);
+	automation_button.unset_flags (Gtk::CAN_FOCUS);
+	size_button.unset_flags (Gtk::CAN_FOCUS);
+	visual_button.unset_flags (Gtk::CAN_FOCUS);
+	hide_button.unset_flags (Gtk::CAN_FOCUS);
+
 	hide_button.add (*(manage (new Image (::get_icon("hide")))));
 	hide_button.show_all ();
 
