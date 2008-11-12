@@ -1378,7 +1378,7 @@ Session::audible_frame () const
 	nframes_t offset;
 	nframes_t tf;
 
-	if (_transport_speed == 0.0f) {
+	if (_transport_speed == 0.0f && non_realtime_work_pending()) {
 		return last_stop_frame;
 	}
 
