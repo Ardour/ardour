@@ -201,6 +201,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	ignore_dual_punch = false;
 	_mixer_on_top = false;
 
+	roll_button.unset_flags (Gtk::CAN_FOCUS);
+	stop_button.unset_flags (Gtk::CAN_FOCUS);
+	goto_start_button.unset_flags (Gtk::CAN_FOCUS);
+	goto_end_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_loop_button.unset_flags (Gtk::CAN_FOCUS);
+	play_selection_button.unset_flags (Gtk::CAN_FOCUS);
+	rec_button.unset_flags (Gtk::CAN_FOCUS);
+
 	last_configure_time= 0;
 
 	shuttle_grabbed = false;

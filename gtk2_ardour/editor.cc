@@ -1223,6 +1223,7 @@ Editor::connect_to_session (Session *t)
 
 	edit_groups_changed ();
 
+	edit_point_clock.set_mode(AudioClock::BBT);
 	edit_point_clock.set_session (session);
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);

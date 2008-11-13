@@ -92,6 +92,11 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	clear_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
+	height_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_button.unset_flags (Gtk::CAN_FOCUS);
+	clear_button.unset_flags (Gtk::CAN_FOCUS);
+	hide_button.unset_flags (Gtk::CAN_FOCUS);
+
 	controls_table.set_no_show_all();
 
 	ARDOUR_UI::instance()->tooltips().set_tip(height_button, _("track height"));

@@ -73,7 +73,7 @@ style "verbose_canvas_cursor"
 
 style "marker_text" 
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 }
 
 style "time_axis_view_item_name"
