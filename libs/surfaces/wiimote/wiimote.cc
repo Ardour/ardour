@@ -156,6 +156,7 @@ WiimoteControlProtocol::wiimote_main()
 {
 	bdaddr_t bdaddr;
 	unsigned char rpt_mode = 0;
+	register_thread("Wiimote Discovery and Callback Thread");
 
 	std::cerr << "Wiimote: discovering, press 1+2" << std::endl;
 
