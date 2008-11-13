@@ -2,68 +2,34 @@ Index: gtk/gtktreeview.c
 ===================================================================
 --- gtk/gtktreeview.c	(revision 21770)
 +++ gtk/gtktreeview.c	(working copy)
-@@ -99,6 +99,9 @@
+@@ -2534,6 +2534,7 @@
+       gboolean row_double_click = FALSE;
+       gboolean rtl;
+       gboolean node_selected;
++      gboolean edits_allowed;
  
-   guint source_set : 1;
-   guint dest_set : 1;
+       /* Empty tree? */
+       if (tree_view->priv->tree == NULL)
+@@ -2643,9 +2644,17 @@
+ 
+       tree_view->priv->focus_column = column;
+ 
++      /* ARDOUR HACK */
 +
-+  GtkTreePath* path;
-+  GtkTreeModel* model;
- };
- 
- 
-@@ -6967,6 +6970,17 @@
-   return path;
- }
- 
-+#ifdef GDK_WINDOWING_QUARTZ
-+static void
-+gtk_tree_view_catch_drag_begin (GtkWidget* widget,
-+				GdkDragContext* context,
-+				gpointer user_data)
-+{
-+	TreeViewDragInfo* drag_info = (TreeViewDragInfo*) user_data;
-+	set_source_row (context, drag_info->model, drag_info->path);
-+}
-+#endif
++      if (g_object_get_data (G_OBJECT(tree_view), "mouse-edits-require-mod1")) {
++	      edits_allowed = (event->state & GDK_MOD1_MASK);
++      } else {
++	      /* regular GTK design: do edits if none of the default modifiers are active */
++	      edits_allowed = !(event->state & gtk_accelerator_get_default_mod_mask ());
++      }
 +
- static gboolean
- gtk_tree_view_maybe_begin_dragging_row (GtkTreeView      *tree_view,
-                                         GdkEventMotion   *event)
-@@ -6979,6 +6993,7 @@
-   gint cell_x, cell_y;
-   GtkTreeModel *model;
-   gboolean retval = FALSE;
-+  gint drag_begin_id;
- 
-   di = get_info (tree_view);
- 
-@@ -7025,13 +7040,25 @@
- 
-   retval = TRUE;
- 
-+#ifdef GDK_WINDOWING_QUARTZ
-+  /* catch drag-being signal */
-+  di->model = model;
-+  di->path = path;
-+  drag_begin_id = g_signal_connect (tree_view, "drag-begin", G_CALLBACK (gtk_tree_view_catch_drag_begin), (gpointer) di);
-+#endif
-+
-   context = gtk_drag_begin (widget,
-                             gtk_drag_source_get_target_list (widget),
-                             di->source_actions,
-                             button,
-                             (GdkEvent*)event);
- 
-+#ifndef GDK_WINDOWING_QUARTZ
-   set_source_row (context, model, path);
-+#else 
-+  /* disconnect drag-begin and catch drag-end */
-+  g_signal_handler_disconnect (tree_view, drag_begin_id);
-+#endif
- 
-  out:
-   if (path)
+       /* decide if we edit */
+-      if (event->type == GDK_BUTTON_PRESS && event->button == 1 &&
+-	  !(event->state & gtk_accelerator_get_default_mod_mask ()))
++      if (event->type == GDK_BUTTON_PRESS && event->button == 1 && edits_allowed)
+ 	{
+ 	  GtkTreePath *anchor;
+ 	  GtkTreeIter iter;
 Index: gtk/gtkquartz.c
 ===================================================================
 --- gtk/gtkquartz.c	(revision 21770)
@@ -147,7 +113,7 @@ Index: gtk/gtkdnd-quartz.c
  struct _GtkDragSourceSite 
  {
    GdkModifierType    start_button_mask;
-@@ -89,6 +94,7 @@
+@@ -89,13 +94,16 @@
  
  struct _GtkDragSourceInfo 
  {
@@ -155,8 +121,9 @@ Index: gtk/gtkdnd-quartz.c
    GtkWidget         *widget;
    GtkTargetList     *target_list; /* Targets for drag data */
    GdkDragAction      possible_actions; /* Actions allowed by source */
-@@ -96,6 +102,8 @@
- 
+   GdkDragContext    *context;	  /* drag context */
+-
++  NSEvent           *nsevent;     /* what started it */
    gint hot_x, hot_y;		  /* Hot spot for drag */
    GdkPixbuf         *icon_pixbuf;
 +  gboolean           success;
@@ -238,7 +205,63 @@ Index: gtk/gtkdnd-quartz.c
    g_signal_emit_by_name (widget, "drag-drop",
  			 context, x, y, time, &retval);
  
-@@ -1052,6 +1085,7 @@
+@@ -1031,6 +1064,45 @@
+   return GDK_NONE;
+ }
+ 
++static gboolean
++gtk_drag_begin_idle (gpointer arg)
++{
++  GdkDragContext* context = (GdkDragContext*) arg;
++  GtkDragSourceInfo* info = gtk_drag_get_source_info (context, FALSE);
++  NSWindow *nswindow;
++  NSPasteboard *pasteboard;
++  GtkDragSourceOwner *owner;
++  NSPoint point;
++
++  g_assert (info != NULL);
++
++  pasteboard = [NSPasteboard pasteboardWithName:NSDragPboard];
++  owner = [[GtkDragSourceOwner alloc] initWithInfo:info];
++
++  [pasteboard declareTypes:_gtk_quartz_target_list_to_pasteboard_types (info->target_list) owner:owner];
++
++  if ((nswindow = get_toplevel_nswindow (info->source_widget)) == NULL)
++     return FALSE;
++  
++  /* Ref the context. It's unreffed when the drag has been aborted */
++  g_object_ref (info->context);
++
++  /* FIXME: If the event isn't a mouse event, use the global cursor position instead */
++  point = [info->nsevent locationInWindow];
++
++  [nswindow dragImage:_gtk_quartz_create_image_from_pixbuf (info->icon_pixbuf)
++                   at:point
++               offset:NSMakeSize(0, 0)
++                event:info->nsevent
++           pasteboard:pasteboard
++               source:nswindow
++            slideBack:YES];
++
++  [info->nsevent release];
++
++  return FALSE;
++}
++
+ static GdkDragContext *
+ gtk_drag_begin_internal (GtkWidget         *widget,
+ 			 GtkDragSourceSite *site,
+@@ -1042,16 +1114,13 @@
+   GtkDragSourceInfo *info;
+   GdkDragContext *context;
+   NSWindow *nswindow;
+-  NSPasteboard *pasteboard;
+-  GtkDragSourceOwner *owner;
+-  NSEvent *nsevent;
+-  NSPoint point;
+ 
+   context = gdk_drag_begin (NULL, NULL);
+   context->is_source = TRUE;
  
    info = gtk_drag_get_source_info (context, TRUE);
    
@@ -246,7 +269,7 @@ Index: gtk/gtkdnd-quartz.c
    info->widget = g_object_ref (widget);
    info->target_list = target_list;
    gtk_target_list_ref (target_list);
-@@ -1086,13 +1120,13 @@
+@@ -1086,13 +1155,13 @@
  		GdkPixbuf *pixbuf;
  
  		pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, 1, 1);
@@ -265,7 +288,46 @@ Index: gtk/gtkdnd-quartz.c
  	      }
  	    break;
  	  case GTK_IMAGE_PIXBUF:
-@@ -1668,7 +1702,20 @@
+@@ -1117,31 +1186,17 @@
+ 	  }
+     }
+ 
+-  gdk_pointer_ungrab (0);
+-  
+-  pasteboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+-  owner = [[GtkDragSourceOwner alloc] initWithInfo:info];
++  nswindow = get_toplevel_nswindow (widget);
++  info->nsevent = [nswindow currentEvent];
++  [info->nsevent retain];
+ 
+-  [pasteboard declareTypes:_gtk_quartz_target_list_to_pasteboard_types (target_list) owner:owner];
++  /* drag will begin in an idle handler to avoid nested run loops */
+ 
+-  /* Ref the context. It's unreffed when the drag has been aborted */
+-  g_object_ref (info->context);
++  g_idle_add_full (G_PRIORITY_HIGH_IDLE, gtk_drag_begin_idle, context, NULL);
+ 
+-  nswindow = get_toplevel_nswindow (widget);
++  gdk_pointer_ungrab (0);
+ 
+-  /* FIXME: If the event isn't a mouse event, use the global cursor position instead */
+-  nsevent = [nswindow currentEvent];
+-  point = [nsevent locationInWindow];
+-
+-  [nswindow dragImage:_gtk_quartz_create_image_from_pixbuf (info->icon_pixbuf)
+-                   at:point
+-               offset:NSMakeSize(0, 0)
+-                event:nsevent
+-           pasteboard:pasteboard
+-               source:nswindow
+-            slideBack:YES];
+-
+-  return info->context;
++  return context;
+ }
+ 
+ GdkDragContext *
+@@ -1668,7 +1723,20 @@
  			  gint               hot_x,
  			  gint               hot_y)
  {
@@ -287,7 +349,7 @@ Index: gtk/gtkdnd-quartz.c
  }
  
  /**
-@@ -1760,6 +1807,9 @@
+@@ -1760,6 +1828,9 @@
    g_signal_emit_by_name (info->widget, "drag-end", 
  			 info->context);
  
@@ -297,7 +359,7 @@ Index: gtk/gtkdnd-quartz.c
    if (info->widget)
      g_object_unref (info->widget);
  
-@@ -1781,6 +1831,10 @@
+@@ -1781,6 +1852,10 @@
  static void
  gtk_drag_drop_finished (GtkDragSourceInfo *info)
  {
