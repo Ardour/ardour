@@ -21,6 +21,7 @@
 #include <ardour/insert.h>
 #include <ardour/lv2_plugin.h>
 
+#include "ardour_ui.h"
 #include "lv2_plugin_ui.h"
 
 using namespace Gtk;
@@ -51,6 +52,38 @@ LV2PluginUI::parameter_changed (uint32_t port_index, float val)
 	}
 }
 
+bool
+LV2PluginUI::start_updating(GdkEventAny* event)
+{
+	if (!_output_ports.empty()) {
+		_screen_update_connection.disconnect();
+		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
+			(mem_fun(*this, &LV2PluginUI::output_update));
+	}
+	return false;
+}
+
+bool
+LV2PluginUI::stop_updating(GdkEventAny* event)
+{
+	if (!_output_ports.empty()) {
+		_screen_update_connection.disconnect();
+	}
+	return false;
+}
+
+void
+LV2PluginUI::output_update()
+{
+	/* FIXME only works with control output ports (which is all we support now anyway) */
+	uint32_t nports = _output_ports.size();
+	for (uint32_t i = 0; i < nports; ++i) {
+		uint32_t index = _output_ports[i];
+		parameter_changed(index, _lv2->get_parameter(index));
+	}
+	
+}
+
 LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<LV2Plugin> lv2p)
 	: PlugUIBase (pi)
 	, _lv2(lv2p)
@@ -59,12 +92,18 @@ LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 			_lv2->slv2_plugin(), _lv2->slv2_ui(), LV2PluginUI::lv2_ui_write, this,
 			_lv2->features());
 			
+	uint32_t num_ports = slv2_plugin_get_num_ports(lv2p->slv2_plugin());
+	for (uint32_t i = 0; i < num_ports; ++i) {
+		if (lv2p->parameter_is_output(i) && lv2p->parameter_is_control(i) && is_update_wanted(i)) {
+			_output_ports.push_back(i);
+		}
+	}
+	
 	GtkWidget* c_widget = (GtkWidget*)slv2_ui_instance_get_widget(_inst);
 	_gui_widget = Glib::wrap(c_widget);
 	_gui_widget->show_all();
 	pack_start(*_gui_widget, true, true);
 	
-	uint32_t num_ports = slv2_plugin_get_num_ports(lv2p->slv2_plugin());
 	_values = new float[num_ports];
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		bool ok;
@@ -101,6 +140,8 @@ LV2PluginUI::package (Gtk::Window& win)
 {
 	/* forward configure events to plugin window */
 	win.signal_configure_event().connect (mem_fun (*this, &LV2PluginUI::configure_handler));
+	win.signal_map_event().connect (mem_fun (*this, &LV2PluginUI::start_updating));
+	win.signal_unmap_event().connect (mem_fun (*this, &LV2PluginUI::stop_updating));
 	return 0;
 }
 
@@ -111,3 +152,9 @@ LV2PluginUI::configure_handler (GdkEventConfigure* ev)
 	return false;
 }
 
+bool
+LV2PluginUI::is_update_wanted(uint32_t index)
+{
+	/* FIXME this should check the port notification properties, which nobody sets now anyway :) */
+	return true;
+}
