@@ -135,7 +135,7 @@ void MackieControlProtocol::read_ports()
 		// this will cause handle_midi_any in the MackiePort to be triggered
 		// for alsa/raw ports
 		// alsa/sequencer ports trigger the midi parser off poll
-		if ( pfd[p].revents & POLLIN > 0 )
+		if ( (pfd[p].revents & POLLIN) > 0 )
 		{
 			// avoid deadlocking?
 			// doesn't seem to make a difference
