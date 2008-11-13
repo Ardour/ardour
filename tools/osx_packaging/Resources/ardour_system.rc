@@ -14,7 +14,7 @@
     <Option name="mtc-port" value="ardour"/>
     <Option name="mmc-port" value="ardour"/>
     <Option name="midi-port" value="ardour"/>
-    <Option name="jack-time-master" value="yes"/>
+    <Option name="jack-time-master" value="no"/>
     <Option name="trace-midi-input" value="no"/>
     <Option name="trace-midi-output" value="no"/>
     <Option name="plugins-stop-with-transport" value="no"/>
