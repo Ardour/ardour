@@ -627,6 +627,13 @@ PluginInsert::state (bool full)
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
 		child->add_property("number", string(buf));
 
+#ifdef HAVE_SLV2
+		LV2Plugin* lv2p = dynamic_cast<LV2Plugin*>(_plugins[0].get());
+		if (lv2p) {
+			child->add_property("symbol", string(lv2p->port_symbol(*x)));
+		}
+#endif
+
 		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 	}

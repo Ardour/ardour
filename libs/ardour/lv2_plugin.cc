@@ -189,6 +189,19 @@ LV2Plugin::default_value (uint32_t port)
 	return _defaults[port];
 }	
 
+const char*
+LV2Plugin::port_symbol (uint32_t index)
+{
+	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, index);
+	if (!port) {
+		error << name() << ": Invalid port index " << index << endmsg;
+	}
+
+	SLV2Value sym = slv2_port_get_symbol(_plugin, port);
+	return slv2_value_as_string(sym);
+}
+
+
 void
 LV2Plugin::set_parameter (uint32_t which, float val)
 {
@@ -251,6 +264,7 @@ LV2Plugin::get_state()
 			child = new XMLNode("port");
 			snprintf(buf, sizeof(buf), "%u", i);
 			child->add_property("number", string(buf));
+			child->add_property("symbol", port_symbol(i));
 			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
 			child->add_property("value", string(buf));
 			root->add_child_nocopy (*child);
