@@ -3,4 +3,5 @@ dir=`dirname "$0"`
 . $dir/ardev_common.sh
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 export ARDOUR_INSIDE_GDB=1
+export DYLD_PRINT_BINDINGS=1
 exec gdb $EXECUTABLE "$@"

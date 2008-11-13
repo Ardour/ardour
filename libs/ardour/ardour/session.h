@@ -585,6 +585,7 @@ class Session : public PBD::StatefulDestructible
 	    string doing_what;
 	    
 	    /* control info */
+	    uint32_t total;
 	    SrcQuality quality;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;
@@ -592,7 +593,6 @@ class Session : public PBD::StatefulDestructible
 	    
 	    /* result */
 	    SourceList sources;
-	    
 	};
 
 	void import_audiofiles (import_status&);

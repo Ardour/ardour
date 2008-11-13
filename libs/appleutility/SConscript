@@ -4,7 +4,7 @@ import os
 import os.path
 import glob
 
-appleutility_files = glob.glob('*.cpp') 
+appleutility_files = [ glob.glob('*.cpp') + glob.glob('*.c') + glob.glob('*.C') ]
 
 Import('env install_prefix')
 appleutility = env.Clone()

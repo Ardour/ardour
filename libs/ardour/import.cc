@@ -50,7 +50,9 @@
 #include <ardour/analyser.h>
 
 #ifdef HAVE_COREAUDIO
+#ifdef USE_COREAUDIO_FOR_FILE_IO
 #include <ardour/caimportable.h>
+#endif
 #endif
 
 #include "i18n.h"
@@ -63,11 +65,13 @@ static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
 #ifdef HAVE_COREAUDIO
+#ifdef USE_COREAUDIO_FOR_FILE_IO
 
 	/* see if we can use CoreAudio to handle the IO */
 	
 	try { 
-		boost::shared_ptr<CAImportableSource> source(new CAImportableSource(path));
+		CAImportableSource* src = new CAImportableSource(path);
+		boost::shared_ptr<CAImportableSource> source (src);
 		
 		if (source->samplerate() == samplerate) {
 			return source;
@@ -81,14 +85,12 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 	catch (...) {
 
 		/* fall back to SndFile */
-
 #endif	
+#endif
 
 		try { 
 			boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
 			
-			cerr << "Got a new sndfile source from " << path << " as " << source->length() << endl;
-
 			if (source->samplerate() == samplerate) {
 				return source;
 			}
@@ -103,7 +105,9 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 		}
 		
 #ifdef HAVE_COREAUDIO		
+#ifdef USE_COREAUDIO_FOR_FILE_IO
 	}
+#endif
 #endif
 }
 
@@ -246,8 +250,6 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 	boost::scoped_array<float> data(new float[nframes * channels]);
 	vector<boost::shared_array<Sample> > channel_data;
 
-	cerr << "writing " << channels << " to new file, length = " << source->length() << endl;
-
 	for (uint n = 0; n < channels; ++n) {
 		channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
 	}
@@ -284,8 +286,6 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 
 		read_count += nread;
 		status.progress = read_count / (source->ratio () * source->length() * channels);
-
-		cerr << "status.progress = " << status.progress << endl;
 	}
 }
 
@@ -306,9 +306,6 @@ Session::import_audiofiles (import_status& status)
 	typedef vector<boost::shared_ptr<AudioFileSource> > AudioSources;
 	AudioSources all_new_sources;
 
-
-	cerr << "start import of AF\n";
-
 	status.sources.clear ();
 	
 	for (vector<Glib::ustring>::iterator p = status.paths.begin();
@@ -320,13 +317,11 @@ Session::import_audiofiles (import_status& status)
 		try
 		{
 			source = open_importable_source (*p, frame_rate(), status.quality);
-			cerr << "New source from " << *p << " length = " << source->length() << endl;
 		}
 		
 		catch (const failed_constructor& err)
 		{
 			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
-			cerr << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endl;
 			status.done = status.cancel = true;
 			return;
 		}
@@ -355,10 +350,8 @@ Session::import_audiofiles (import_status& status)
 		}
 
 		status.doing_what = compose_status_message (*p, source->samplerate(),
-				frame_rate(), cnt, status.paths.size());
+				frame_rate(), cnt, status.total);
 
-		cerr << "about to write audio data\n";
-		
 		write_audio_data_to_new_files (source.get(), status, newfiles);
 	}
 
@@ -393,7 +386,6 @@ Session::import_audiofiles (import_status& status)
 		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
 	}
 
-	cerr << "end of import, setting done = true\n";
 	status.done = true;
 }
 

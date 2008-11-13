@@ -29,6 +29,7 @@
 #include <ardour/audiofilesource.h>
 #include <ardour/silentfilesource.h>
 #include <ardour/session_region.h>
+#include <ardour/profile.h>
 
 #include <gtkmm2ext/stop_signal.h>
 
@@ -637,14 +638,17 @@ Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& 
 	vector<ustring> paths;
 
 	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
-		cerr << "Delete drag data drop to treeview\n";
 		region_list_display.on_drag_data_received (context, x, y, data, info, time);
 		return;
 	}
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
 		nframes64_t pos = 0;
-		do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
+		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, SrcBest, pos); 
+		} else {
+			do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
+		}
 		context->drag_finish (true, false, time);
 	}
 }

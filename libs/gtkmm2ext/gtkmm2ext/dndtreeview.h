@@ -74,13 +74,11 @@ class DnDTreeView : public DnDTreeViewBase
 	sigc::signal<void,std::string,uint32_t,const DataType*> signal_object_drop;
 
 	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time) {
-		std::cerr << "DRAG DATA Get, context = " << context->gobj() << " src = " << context->gobj()->is_source << std::endl;
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
-			
+
 			TreeView::on_drag_data_get (context, selection_data, info, time);
 			
 		} else if (data_column >= 0) {
-			
 			Gtk::TreeSelection::ListHandle_Path selection = get_selection()->get_selected_rows ();
 			SerializedObjectPointers<DataType>* sr = serialize_pointers (get_model(), &selection, selection_data.get_target());
 			selection_data.set (8, (guchar*)sr, sr->size);
@@ -88,7 +86,6 @@ class DnDTreeView : public DnDTreeViewBase
 	}
 	
 	void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {
-		std::cerr << "DRAG DATA Receive, context = " << context->gobj() << " src = " << context->gobj()->is_source << std::endl;
 		if (suggested_action) {
 			/* this is a drag motion callback. just update the status to
 			   say that we are still dragging, and that's it.

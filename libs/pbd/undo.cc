@@ -18,7 +18,6 @@
     $Id$
 */
 
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <time.h>

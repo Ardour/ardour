@@ -300,6 +300,7 @@ Editor::Editor ()
 	show_gain_after_trim = false;
 	route_redisplay_does_not_sync_order_keys = false;
 	route_redisplay_does_not_reset_order_keys = false;
+	ignore_gui_changes = false;
 	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
 	route_removal = false;
@@ -4939,6 +4940,9 @@ Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
 {
 	if (resize_idle_id < 0) {
 		resize_idle_id = g_idle_add (_idle_resizer, this);
+		cerr << "QUEUE and reset idle resize target to " << h << endl;
+	} else {
+		cerr << "JUST reset idle resize target to " << h << endl;
 	}
 
 	resize_idle_target = h;
@@ -4948,15 +4952,22 @@ Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
 	if (selection->selected (view) && !selection->tracks.empty()) {
 		pending_resizes.insert (pending_resizes.end(), selection->tracks.begin(), selection->tracks.end());
 	}
+
+	cerr << "\tpending now  " << pending_resizes.size() << endl;
 }
 
 bool
 Editor::idle_resize ()
 {
+	cerr << "idle resize to " << resize_idle_target << endl;
+	ignore_gui_changes = true;
 	for (vector<TimeAxisView*>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
 		(*i)->idle_resize (resize_idle_target);
 	}
 	pending_resizes.clear();
+	ignore_gui_changes = false;
+	handle_gui_changes ("track_height", this);
+	flush_canvas ();
 	resize_idle_id = -1;
 	return false;
 }

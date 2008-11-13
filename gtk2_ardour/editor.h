@@ -1162,32 +1162,16 @@ class Editor : public PublicEditor
 	
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
 
-	bool  idle_drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
-				gint                x,
-				gint                y,
-				const Gtk::SelectionData& data,
-				guint               info,
-				guint               time);
-
-	void  _drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
-				gint                x,
-				gint                y,
-				const Gtk::SelectionData& data,
-				guint               info,
-				guint               time);
-
-	void _do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+	bool  idle_drop_paths  (std::vector<Glib::ustring> paths, nframes64_t frame, double ypos);
+	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
+	
 	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-	bool idle_do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-
-	void _do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 	void do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
-	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
 	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
-			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool);
+			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>, bool, uint32_t total);
 	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
-			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
+			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>);
 
 	int add_sources (vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool add_channel_suffix);
@@ -1215,10 +1199,20 @@ class Editor : public PublicEditor
 
 	/* import specific info */
 
-	ARDOUR::Session::import_status import_status;
+	struct EditorImportStatus : public ARDOUR::Session::import_status {
+	    Editing::ImportMode mode;
+	    nframes64_t pos;
+	    int target_tracks;
+	    int target_regions;
+	    boost::shared_ptr<ARDOUR::AudioTrack> track;
+	    bool replace;
+	};
+
+	EditorImportStatus import_status;
 	gint import_progress_timeout (void *);
 	static void *_import_thread (void *);
 	void* import_thread ();
+	void finish_import ();
 
 	/* to support this ... */
 
@@ -1309,6 +1303,7 @@ class Editor : public PublicEditor
 	double snap_threshold;
 
 	void handle_gui_changes (const string &, void *);
+	bool ignore_gui_changes;
 
 	void    hide_all_tracks (bool with_select);
 

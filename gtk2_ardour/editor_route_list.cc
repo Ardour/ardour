@@ -100,7 +100,11 @@ void
 Editor::handle_gui_changes (const string & what, void *src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
-	
+
+	if (ignore_gui_changes) {
+		return;
+	}
+
 	if (what == "track_height") {
 		/* Optional :make tracks change height while it happens, instead 
 		   of on first-idle
@@ -591,14 +595,10 @@ Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& c
 						const SelectionData& data,
 						guint info, guint time)
 {
-	cerr << "RouteLD::dddr target = " << data.get_target() << endl;
-	
 	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
-		cerr << "Delete drag data drop to treeview\n";
 		route_list_display.on_drag_data_received (context, x, y, data, info, time);
 		return;
 	}
-	cerr << "some other kind of drag\n";
 	context->drag_finish (true, false, time);
 }
 

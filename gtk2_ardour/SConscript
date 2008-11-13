@@ -98,6 +98,7 @@ au_pluginui.mm
 
 gtkosx_files=Split("""
 cocoacarbon.mm
+newoverload.cc
 """)
 
 x11_files=Split("""

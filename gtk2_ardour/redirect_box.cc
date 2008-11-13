@@ -171,6 +171,8 @@ RedirectBox::route_going_away ()
 void
 RedirectBox::object_drop (string type, uint32_t cnt, const boost::shared_ptr<Redirect>* ptr)
 {
+	cerr << "Object drop, type = " << type << " cnt = " << cnt << endl;
+
 	if (type != "redirects" || cnt == 0 || !ptr) {
 		return;
 	}

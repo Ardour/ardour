@@ -447,8 +447,6 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 					 const SelectionData& data,
 					 guint info, guint time)
 {
-	cerr << "drop on canvas, target = " << data.get_target() << endl;
-
 	if (data.get_target() == "regions") {
 		drop_regions (context, x, y, data, info, time);
 	} else {
@@ -457,69 +455,19 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 }
 
 bool
-Editor::idle_drop_paths (const RefPtr<Gdk::DragContext>& context,
-		    int x, int y, 
-		    const SelectionData& data,
-		    guint info, guint time)
+Editor::idle_drop_paths (vector<ustring> paths, nframes64_t frame, double ypos)
 {
-	_drop_paths (context, x, y, data, info, time);
+	drop_paths_part_two (paths, frame, ypos);
 	return false;
 }
 
 void
-Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
-		    int x, int y, 
-		    const SelectionData& data,
-		    guint info, guint time)
-{
-#ifdef GTKOSX
-	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_drop_paths), context, x, y, data, info, time));
-#else
-	_drop_paths (context, x, y, data, info, time);
-#endif
-}
-
-void
-Editor::_drop_paths (const RefPtr<Gdk::DragContext>& context,
-		    int x, int y, 
-		    const SelectionData& data,
-		    guint info, guint time)
+Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, double ypos)
 {
 	TimeAxisView* tvp;
 	AudioTimeAxisView* tv;
-	double cy;
-	vector<ustring> paths;
-	string spath;
-	GdkEvent ev;
-	nframes64_t frame;
 
-	if (convert_drop_to_paths (paths, context, x, y, data, info, time)) {
-		goto out;
-	}
-
-	for (vector<ustring>::iterator xx = paths.begin(); xx != paths.end(); ++xx) {
-		cerr << "Drop path = " << *xx << endl;
-	}
-
-	/* D-n-D coordinates are window-relative, so convert to "world" coordinates
-	 */
-
-	double wx;
-	double wy;
-
-	track_canvas->window_to_world (x, y, wx, wy);
-	//wx += horizontal_adjustment.get_value();
-	//wy += vertical_adjustment.get_value();
-	
-	ev.type = GDK_BUTTON_RELEASE;
-	ev.button.x = wx;
-	ev.button.y = wy;
-
-	frame = event_frame (&ev, 0, &cy);
-
-	snap_to (frame);
-
-	if ((tvp = trackview_by_y_position (cy)) == 0) {
+	if ((tvp = trackview_by_y_position (ypos)) == 0) {
 
 		/* drop onto canvas background: create new tracks */
 
@@ -536,18 +484,57 @@ Editor::_drop_paths (const RefPtr<Gdk::DragContext>& context,
 		/* check that its an audio track, not a bus */
 		
 		if (tv->get_diskstream()) {
-			/* select the track, then embed */
+			/* select the track, then embed/import */
 			selection->set (tv);
 
 			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
-				do_import (paths, Editing::ImportDistinctFiles, Editing::ImportToTrack, SrcBest, frame); 
+				do_import (paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame); 
 			} else {
-				do_embed (paths, Editing::ImportDistinctFiles, ImportToTrack, frame);
+				do_embed (paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
 			}
 		}
 	}
+}
 
-  out:
+void
+Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
+		    int x, int y, 
+		    const SelectionData& data,
+		    guint info, guint time)
+{
+	vector<ustring> paths;
+	GdkEvent ev;
+	nframes64_t frame;
+	double wx;
+	double wy;
+	double cy;
+
+	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
+		
+		/* D-n-D coordinates are window-relative, so convert to "world" coordinates
+		 */
+
+		track_canvas->window_to_world (x, y, wx, wy);
+		
+		ev.type = GDK_BUTTON_RELEASE;
+		ev.button.x = wx;
+		ev.button.y = wy;
+		
+		frame = event_frame (&ev, 0, &cy);
+		
+		snap_to (frame);
+		
+#ifdef GTKOSX
+		/* We are not allowed to call recursive main event loops from within
+		   the main event loop with GTK/Quartz. Since import/embed wants
+		   to push up a progress dialog, defer all this till we go idle.
+		*/
+		Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy));
+#else
+		drop_paths_part_two (paths, frame, cy);
+#endif
+	}
+
 	context->drag_finish (true, false, time);
 }
 
