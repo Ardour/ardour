@@ -9,7 +9,7 @@ WITH_JACK=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
-WITH_NLS=0
+WITH_NLS=
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -19,9 +19,9 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae) WITH_NLS=0 ; SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
-	--public) WITH_NLS=0 ; SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
-	--allinone) SAE= ; WITH_NLS=0 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--sae) WITH_NLS= ; SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--public) WITH_NLS= ; SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
+	--allinone) SAE= ; WITH_NLS= ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
 	--test) SAE= ; WITH_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
@@ -36,9 +36,11 @@ while [ $# -gt 0 ] ; do
     esac
 done
 
-version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
-echo "Version is $version"
-info_string="$version built on `hostname` by `whoami` on `date`"
+
+release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 6 | sed 's/[";]//g'`
+echo "Version is $release_version / $svn_version"
+info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -110,7 +112,7 @@ env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$version?g" \
+    -e "s?@VERSION@?$svn_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
 
 # copy static files
@@ -119,7 +121,7 @@ cp Info.plist $APPROOT
 cp -R Resources $APPROOT
 
 echo "Copying ardour executable ...."
-cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
+cp ../../gtk2_ardour/ardour-$release_version $APPROOT/MacOS/Ardour2
 if test x$SAE != x ; then
     cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour2-SAE.icns $Resources/appIcon.icns
@@ -158,8 +160,13 @@ cp -R $GTKQUARTZ_ROOT/lib/charset.alias $Resources
 pwd=`pwd`
 
 if test x$WITH_LADSPA != x ; then
-    echo "Copying `ls ladspa | wc -l` plugins ..."
-    cp -r ladspa/* $Plugins
+    if test x$SAE != x ; then
+	plugdir=sae_ladspa
+    else
+	plugdir=ladspa
+    fi
+    echo "Copying `ls $plugdir | wc -l` plugins ..."
+    cp -r $plugdir/* $Plugins
 fi
 
 # generate new Pango module file
