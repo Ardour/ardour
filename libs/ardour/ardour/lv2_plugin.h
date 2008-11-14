@@ -65,6 +65,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	SLV2Plugin slv2_plugin()         { return _plugin; }
 	SLV2UI     slv2_ui()             { return _ui; }
 	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
+
+	const char* port_symbol(uint32_t port);
 	
 	const LV2_Feature* const* features() { return _features; }
 

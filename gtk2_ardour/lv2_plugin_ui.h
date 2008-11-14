@@ -47,13 +47,15 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 	gint get_preferred_height ();
 	gint get_preferred_width ();
-	bool start_updating(GdkEventAny*) {return false;}
-	bool stop_updating(GdkEventAny*) {return false;}
+	bool start_updating(GdkEventAny*);
+	bool stop_updating(GdkEventAny*);
 
 	int package (Gtk::Window&);
 
   private:
 	boost::shared_ptr<ARDOUR::LV2Plugin> _lv2;
+	std::vector<int> _output_ports;
+	sigc::connection _screen_update_connection;
 	
 	Gtk::Widget*   _gui_widget;
 	SLV2UIInstance _inst;
@@ -69,6 +71,8 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	void parameter_changed(uint32_t, float);
 	bool configure_handler (GdkEventConfigure*);
 	void save_plugin_setting ();
+	void output_update();
+	bool is_update_wanted(uint32_t index);
 };
 #endif // HAVE_LV2
 

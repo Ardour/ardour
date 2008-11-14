@@ -816,7 +816,7 @@ PluginInsert::set_state(const XMLNode& node)
 			if ((cprop = child->property("number")) != 0) {
 				port = cprop->value().c_str();
 			} else {
-				warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
+				warning << _("PluginInsert: Auto: no plugin port number") << endmsg;
 				continue;
 			}
 			
