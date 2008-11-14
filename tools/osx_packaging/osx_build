@@ -9,6 +9,7 @@ WITH_JACK=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
+WITH_NLS=1
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -18,9 +19,9 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae) SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
-	--public) SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
-	--allinone) SAE= ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--sae) WITH_NLS=1 ; SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--public) WITH_NLS=1 ; SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
+	--allinone) SAE= ; WITH_NLS=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
 	--test) SAE= ; WITH_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
@@ -31,6 +32,7 @@ while [ $# -gt 0 ] ; do
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
+	--nonls) WITH_NLS=0 ; shift ;;
     esac
 done
 
@@ -48,6 +50,7 @@ Plugins=$APPROOT/Plugins
 Surfaces=$APPROOT/Surfaces
 Shared=$Resources/share
 Etc=$Resources/etc
+Locale=$Resources/locale
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -129,6 +132,21 @@ fi
 if test x$WITH_JACK != x ; then
     cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
     cp /usr/local/bin/jackd $APPROOT/MacOS
+fi
+
+# copy locale files
+if test x$WITH_NLS != x ; then
+    echo "NLS support ..."
+    echo ../../gtk2_ardour/*.mo
+    for file in ../../gtk2_ardour/*.mo
+    do
+	lang=`basename $file | sed 's/\.mo//'`
+	echo "Copying $file to " $Locale/$lang/LC_MESSAGES
+	mkdir -p $Locale/$lang/LC_MESSAGES
+	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
+    done
+else
+    echo "Skipping NLS support"
 fi
 
 cp -R $GTKQUARTZ_ROOT/etc/* $Etc
