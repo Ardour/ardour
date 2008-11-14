@@ -87,6 +87,7 @@ mkdir -p $Etc
 # maybe set variables
 env=""
 if test x$SAE != x ; then
+    appname="Ardour2/SAE"
     env="$env<key>ARDOUR_SAE</key><string>true</string>"
     #
     # current default for SAE version is German keyboard layout without a keypad
@@ -94,6 +95,8 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui_sae.conf</string>"
     env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark_sae.rc</string>"
+else
+    appname="Ardour2"
 fi
 
 #
@@ -112,8 +115,13 @@ env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$svn_version?g" \
+    -e "s?@VERSION@?$release_version/$svn_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
+# and plist strings
+sed -e "s?@APPNAME@?$appname?" \
+    -e "s?@ENV@?$env?g" \
+    -e "s?@VERSION@?$release_version/$svn_version?g" \
+    -e "s?@INFOSTRING@?$info_string?g" < InfoPlist.strings.in > Resources/InfoPlist.strings
 
 # copy static files
 
