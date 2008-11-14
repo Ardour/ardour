@@ -2250,6 +2250,9 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		case Gtk::RESPONSE_CANCEL:
 		case Gtk::RESPONSE_DELETE_EVENT:
 			if (!session) {
+				if (engine && engine->running()) {
+					engine->stop (true);
+				}
 				quit();
 			}
 			new_session_dialog->hide ();
@@ -2440,10 +2443,10 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		MessageDialog msg (err.what(),
 				   true,
 				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_OK_CANCEL);
+				   Gtk::BUTTONS_CLOSE);
 		
-		msg.set_title (_("Loading Error"));
-		msg.set_secondary_text (_("Click the OK button to try again."));
+		msg.set_title (_("Port Registration Error"));
+		msg.set_secondary_text (_("Click the Close button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash ();
 		msg.present ();
@@ -2466,10 +2469,10 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
 				   true,
 				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_OK_CANCEL);
+				   Gtk::BUTTONS_CLOSE);
 		
 		msg.set_title (_("Loading Error"));
-		msg.set_secondary_text (_("Click the OK button to try again."));
+		msg.set_secondary_text (_("Click the Close button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash ();
 		msg.present ();

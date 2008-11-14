@@ -478,7 +478,9 @@ NewSessionDialog::run ()
 		/* nothing to display */
 		return Gtk::RESPONSE_OK;
 	}
-
+	if (!(page_set & NewPage) && !(page_set & OpenPage)) {
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
+	}
 	return ArdourDialog::run ();
 }
 

@@ -922,6 +922,9 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 					bool visible = (*iter)[track_columns.visible];
 					(*iter)[track_columns.visible] = !visible;
 				}
+#ifdef GTKOSX
+				track_display.queue_draw();
+#endif
 			}
 		}
 		return true;
@@ -1017,6 +1020,9 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 			if ((iter = group_model->get_iter (path))) {
 				if ((group = (*iter)[group_columns.group]) != 0) {
 					// edit_mix_group (group);
+#ifdef GTKOSX
+					group_display.queue_draw();
+#endif
 					return true;
 				}
 			}
@@ -1028,6 +1034,9 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		if ((iter = group_model->get_iter (path))) {
 			bool active = (*iter)[group_columns.active];
 			(*iter)[group_columns.active] = !active;
+#ifdef GTKOSX
+			group_display.queue_draw();
+#endif
 			return true;
 		}
 		break;
@@ -1036,6 +1045,9 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		if ((iter = group_model->get_iter (path))) {
 			bool visible = (*iter)[group_columns.visible];
 			(*iter)[group_columns.visible] = !visible;
+#ifdef GTKOSX
+			group_display.queue_draw();
+#endif
 			return true;
 		}
 		break;

@@ -140,6 +140,9 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 			if ((iter = group_model->get_iter (path))) {
 				if ((group = (*iter)[group_columns.routegroup]) != 0) {
 					// edit_route_group (group);
+#ifdef GTKOSX
+					edit_group_display.queue_draw();
+#endif
 					return true;
 				}
 			}
@@ -151,6 +154,9 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 		if ((iter = group_model->get_iter (path))) {
 			bool active = (*iter)[group_columns.is_active];
 			(*iter)[group_columns.is_active] = !active;
+#ifdef GTKOSX
+			edit_group_display.queue_draw();
+#endif
 			return true;
 		}
 		break;
@@ -159,6 +165,9 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 		if ((iter = group_model->get_iter (path))) {
 			bool visible = (*iter)[group_columns.is_visible];
 			(*iter)[group_columns.is_visible] = !visible;
+#ifdef GTKOSX
+			edit_group_display.queue_draw();
+#endif
 			return true;
 		}
 		break;
