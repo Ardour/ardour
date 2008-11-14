@@ -87,9 +87,9 @@ env=""
 if test x$SAE != x ; then
     env="$env<key>ARDOUR_SAE</key><string>true</string>"
     #
-    # current default for SAE version is German keyboard layout
+    # current default for SAE version is German keyboard layout without a keypad
     #
-    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de</string>"
+    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui_sae.conf</string>"
     env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark_sae.rc</string>"
 fi
@@ -222,7 +222,10 @@ echo "Copying other stuff to Ardour2.app  ..."
 
 cp ../../gtk2_ardour/ergonomic-us.bindings  $Resources
 cp ../../gtk2_ardour/mnemonic-us.bindings  $Resources
-cp ../../gtk2_ardour/SAE-de.bindings  $Resources
+cp ../../gtk2_ardour/SAE-de-keypad.bindings  $Resources
+cp ../../gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
+cp ../../gtk2_ardour/SAE-us-keypad.bindings  $Resources
+cp ../../gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
 cp ../../gtk2_ardour/ardour.menus $Resources
 cp ../../gtk2_ardour/ardour-sae.menus $Resources
 if test x$SAE != x ; then
