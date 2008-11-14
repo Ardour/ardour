@@ -137,11 +137,9 @@ fi
 # copy locale files
 if test x$WITH_NLS != x ; then
     echo "NLS support ..."
-    echo ../../gtk2_ardour/*.mo
     for file in ../../gtk2_ardour/*.mo
     do
 	lang=`basename $file | sed 's/\.mo//'`
-	echo "Copying $file to " $Locale/$lang/LC_MESSAGES
 	mkdir -p $Locale/$lang/LC_MESSAGES
 	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
     done
