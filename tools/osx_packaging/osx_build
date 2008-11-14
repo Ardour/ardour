@@ -9,7 +9,7 @@ WITH_JACK=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
-WITH_NLS=1
+WITH_NLS=0
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -19,9 +19,9 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae) WITH_NLS=1 ; SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
-	--public) WITH_NLS=1 ; SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
-	--allinone) SAE= ; WITH_NLS=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--sae) WITH_NLS=0 ; SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--public) WITH_NLS=0 ; SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
+	--allinone) SAE= ; WITH_NLS=0 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
 	--test) SAE= ; WITH_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
@@ -32,7 +32,7 @@ while [ $# -gt 0 ] ; do
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
-	--nonls) WITH_NLS=0 ; shift ;;
+	--nls) WITH_NLS=1 ; shift ;;
     esac
 done
 
