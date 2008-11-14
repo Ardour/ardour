@@ -839,6 +839,17 @@ Editor::scroll_canvas_horizontally ()
 		canvas_scroll_to (time_origin);
 	}
 
+	/* horizontal scrolling only */
+	double x1, x2, y1, y2, x_delta;
+
+	_master_group->get_bounds(x1, y1, x2, y2);
+	x_delta = x1 + horizontal_adjustment.get_value();
+
+	_master_group->move (-x_delta, 0);
+	timebar_group->move (-x_delta, 0);
+	time_line_group->move (-x_delta, 0);
+	cursor_group->move (-x_delta, 0);
+
 	update_fixed_rulers ();
 	redisplay_tempo (true);
 
@@ -850,16 +861,7 @@ Editor::scroll_canvas_horizontally ()
 		}
 	}
 #endif
-	/* horizontal scrolling only */
-	double x1, x2, y1, y2, x_delta;
 
-	_master_group->get_bounds(x1, y1, x2, y2);
-	x_delta = x1 + horizontal_adjustment.get_value();
-
-	_master_group->move (-x_delta, 0);
-	timebar_group->move (-x_delta, 0);
-	time_line_group->move (-x_delta, 0);
-	cursor_group->move (-x_delta, 0);
 }
 
 void
