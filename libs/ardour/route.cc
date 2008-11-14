@@ -921,7 +921,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 			_max_peak_power.push_back(-INFINITY);
 		}
 
-		redirect->activate ();
+		redirect->set_active (true, this);
 		redirect->active_changed.connect (mem_fun (*this, &Route::redirect_active_proxy));
 	}
 	
@@ -985,7 +985,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 				return -1;
 			}
 			
-			(*i)->activate ();
+			(*i)->set_active (true, this);
 			(*i)->active_changed.connect (mem_fun (*this, &Route::redirect_active_proxy));
 		}
 	}
