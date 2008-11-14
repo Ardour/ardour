@@ -101,10 +101,6 @@ Editor::handle_gui_changes (const string & what, void *src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
 
-	if (ignore_gui_changes) {
-		return;
-	}
-
 	if (what == "track_height") {
 		/* Optional :make tracks change height while it happens, instead 
 		   of on first-idle

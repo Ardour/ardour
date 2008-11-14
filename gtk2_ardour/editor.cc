@@ -300,7 +300,6 @@ Editor::Editor ()
 	show_gain_after_trim = false;
 	route_redisplay_does_not_sync_order_keys = false;
 	route_redisplay_does_not_reset_order_keys = false;
-	ignore_gui_changes = false;
 	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
 	route_removal = false;
@@ -4959,14 +4958,10 @@ Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
 bool
 Editor::idle_resize ()
 {
-	cerr << "idle resize to " << resize_idle_target << endl;
-	ignore_gui_changes = true;
 	for (vector<TimeAxisView*>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
 		(*i)->idle_resize (resize_idle_target);
 	}
 	pending_resizes.clear();
-	ignore_gui_changes = false;
-	handle_gui_changes ("track_height", this);
 	flush_canvas ();
 	resize_idle_id = -1;
 	return false;
