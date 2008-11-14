@@ -568,7 +568,7 @@ else:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 	
-	if conf.CheckPKGVersion('slv2', '0.6.0'):
+	if conf.CheckPKGVersion('slv2', '0.6.1'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
                 env.Append (CCFLAGS="-DHAVE_LV2")
