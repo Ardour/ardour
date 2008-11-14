@@ -49,6 +49,7 @@
 (gtk_accel_path "<Actions>/Editor/show-editor-mixer" "<%TERTIARY%>e")
 ; (gtk_accel_path "<Actions>/Common/goto-editor" "<%SECONDARY%>e")
 (gtk_accel_path "<Actions>/Editor/redo" "<%PRIMARY%><%TERTIARY%>z")
+(gtk_accel_path "<Actions>/Transport/Record" "<%TERTIARY%>r")
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "r")
 (gtk_accel_path "<Actions>/Transport/Record" "<%TERTIARY%>r")
 (gtk_accel_path "<Actions>/Editor/reverse-region" "<%LEVEL4%>r")
@@ -103,6 +104,7 @@
 (gtk_accel_path "<Actions>/Editor/editor-copy" "<%PRIMARY%>c")
 (gtk_accel_path "<Actions>/Common/ToggleColorManager" "<%SECONDARY%>c")
 (gtk_accel_path "<Actions>/Editor/editor-paste" "<%PRIMARY%>v")
+(gtk_accel_path "<Actions>/Editor/add-location-from-playhead" "b")
 (gtk_accel_path "<Actions>/Common/ToggleBigClock" "<%SECONDARY%>b")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
 (gtk_accel_path "<Actions>/Main/New" "<%PRIMARY%>n")
@@ -199,15 +201,15 @@
 (gtk_accel_path "<Actions>/Transport/ToggleAutoInput" "6")
 (gtk_accel_path "<Actions>/Transport/ToggleClick" "7")
 
-(gtk_accel_path "<Actions>/Editor/set-loop-from-edit-range" "<%LEVEL4%>8")
-(gtk_accel_path "<Actions>/Editor/set-loop-from-region" "8")
+(gtk_accel_path "<Actions>/Editor/set-loop-from-edit-range" "8")
+(gtk_accel_path "<Actions>/Editor/set-loop-from-region" "<%LEVEL4%>8")
 ; (gtk_accel_path "<Actions>/Editor/loop-region" "<%PRIMARY%>8")
 
-(gtk_accel_path "<Actions>/Editor/set-punch-from-edit-range" "<%LEVEL4%>9")
-(gtk_accel_path "<Actions>/Editor/set-punch-from-region" "9")
+(gtk_accel_path "<Actions>/Editor/set-punch-from-edit-range" "9")
+(gtk_accel_path "<Actions>/Editor/set-punch-from-region" "<%LEVEL4>9")
 
-(gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "0")
-(gtk_accel_path "<Actions>/Editor/set-tempo-from-edit-range" "<%LEVEL4%>0")
+(gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "<%LEVEL4%>0")
+(gtk_accel_path "<Actions>/Editor/set-tempo-from-edit-range" "0")
 
 ;;
 ;; unbound actions
