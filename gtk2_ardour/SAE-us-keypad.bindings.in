@@ -55,8 +55,8 @@
 (gtk_accel_path "<Actions>/Editor/reverse-region" "<%LEVEL4%>r")
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "t")
 (gtk_accel_path "<Actions>/Common/ToggleThemeManager" "<%WINDOW%>t")
-(gtk_accel_path "<Actions>/Editor/transpose-region" "<%LEVEL4%>t")
-(gtk_accel_path "<Actions>/Editor/split-region" "z")
+(gtk_accel_path "<Actions>/Editor/pitch-shift-region" "<%LEVEL4%>t")
+(gtk_accel_path "<Actions>/Editor/split-region" "y")
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "u")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/addExistingAudioFiles" "<%PRIMARY%>i")
@@ -94,10 +94,10 @@
 
 ;; UNTERE ZEILE
 
-(gtk_accel_path "<Actions>/Editor/zoom-to-region" "y")
+(gtk_accel_path "<Actions>/Editor/zoom-to-region" "z")
 (gtk_accel_path "<Actions>/Editor/undo" "<%PRIMARY%>z")
-(gtk_accel_path "<Actions>/Editor/zoom-to-session" "<%SECONDARY%>y")
-(gtk_accel_path "<Actions>/Editor/toggle-zoom" "<%TERTIARY%>y")
+(gtk_accel_path "<Actions>/Editor/zoom-to-session" "<%SECONDARY%>z")
+(gtk_accel_path "<Actions>/Editor/toggle-zoom" "<%TERTIARY%>z")
 (gtk_accel_path "<Actions>/Editor/editor-separate" "x")
 (gtk_accel_path "<Actions>/Editor/editor-cut" "<%PRIMARY%>x")
 (gtk_accel_path "<Actions>/Editor/crop" "c")

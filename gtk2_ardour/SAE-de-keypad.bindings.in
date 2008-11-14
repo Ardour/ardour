@@ -55,7 +55,7 @@
 (gtk_accel_path "<Actions>/Editor/reverse-region" "<%LEVEL4%>r")
 (gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "t")
 (gtk_accel_path "<Actions>/Common/ToggleThemeManager" "<%WINDOW%>t")
-(gtk_accel_path "<Actions>/Editor/transpose-region" "<%LEVEL4%>t")
+(gtk_accel_path "<Actions>/Editor/pitch-shift-region" "<%LEVEL4%>t")
 (gtk_accel_path "<Actions>/Editor/split-region" "y")
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "u")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
