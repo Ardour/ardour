@@ -1,21 +1,22 @@
 # German translations for gtk-ardour
 # Copyright (C) 2003 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
-# Karsten Petersen <kapet@kapet.de>, 2003.
 #
+# Karsten Petersen <kapet@kapet.de>, 2003.
+# Edgar Aichinger <edgar.aichinger@aon.at>, 2008.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-10-20 19:01+0100\n"
-"PO-Revision-Date: 2008-10-23 19:33+0100\n"
-"Last-Translator: Robert Schwede <schwede@ironshark.de>\n"
-"Language-Team: Deutsch <de@li.org>\n"
+"PO-Revision-Date: 2008-11-02 11:27+0100\n"
+"Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
+"Language-Team: German <kde-i18n-de@lists.kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: KBabel 0.9.6\n"
+"X-Generator: Lokalize 0.2\n"
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Poedit-SearchPath-0: gtk2_ardour\n"
@@ -100,7 +101,7 @@ msgstr "zeichnen"
 
 #: gtk2_ardour/canvas-simplerect.c:181
 msgid "draw rectangle"
-msgstr "Rechteck zeichne"
+msgstr "Rechteck zeichnen"
 
 #: gtk2_ardour/canvas-simplerect.c:189
 msgid "outline color rgba"
@@ -469,11 +470,11 @@ msgstr "Automatisches Input Monitoring aktivieren"
 
 #: gtk2_ardour/ardour_ui2.cc:292
 msgid "Start recording at auto-punch start"
-msgstr "Beginnt die Aufnahme bei Auto-Punch Start"
+msgstr "Aufnahme am Anfang des Punch-Bereichs beginnen"
 
 #: gtk2_ardour/ardour_ui2.cc:293
 msgid "Stop recording at auto-punch end"
-msgstr "Beginnt die Aufnahme bei Auto-Punch Ende"
+msgstr "Aufnahme am Ende des Punch-Bereichs beenden"
 
 #: gtk2_ardour/ardour_ui2.cc:294
 msgid "Enable/Disable audio click"
@@ -485,7 +486,7 @@ msgstr "Positionsbezogene Sync-quelle"
 
 #: gtk2_ardour/ardour_ui2.cc:296
 msgid "Does Ardour control the time?"
-msgstr "Bestimmt ardour die Time?"
+msgstr "Bestimmt Ardour die Time?"
 
 #: gtk2_ardour/ardour_ui2.cc:297
 msgid "Shuttle speed control"
@@ -901,7 +902,7 @@ msgstr "Beenden"
 
 #: gtk2_ardour/ardour_ui_ed.cc:202
 msgid "Maximise Editor Space"
-msgstr "Editor Maximieren"
+msgstr "Editor maximieren"
 
 #: gtk2_ardour/ardour_ui_ed.cc:204
 msgid "Show Editor"
@@ -933,7 +934,7 @@ msgstr "Große Zeitanzeige"
 
 #: gtk2_ardour/ardour_ui_ed.cc:215
 msgid "About"
-msgstr "Über ardour..."
+msgstr "Über Ardour..."
 
 #: gtk2_ardour/ardour_ui_ed.cc:216
 msgid "Theme Manager"
@@ -1037,11 +1038,11 @@ msgstr "Zum Anfang springen"
 
 #: gtk2_ardour/ardour_ui_ed.cc:303
 msgid "Goto End"
-msgstr "Zum Ende Springen"
+msgstr "Zum Ende springen"
 
 #: gtk2_ardour/ardour_ui_ed.cc:306
 msgid "Goto Wall Clock"
-msgstr ""
+msgstr "Zur lokalen Uhrzeit springen"
 
 #: gtk2_ardour/ardour_ui_ed.cc:310
 msgid "Focus On Clock"
@@ -1263,7 +1264,7 @@ msgstr "Aktiviere OSC"
 
 #: gtk2_ardour/ardour_ui_ed.cc:443
 msgid "Tape Machine mode"
-msgstr "Tape-Modus"
+msgstr "Bandmaschinen-Modus"
 
 #: gtk2_ardour/ardour_ui_ed.cc:446
 msgid "Sync Editor and Mixer track order"
@@ -1283,7 +1284,7 @@ msgstr "Erstelle regelmäßig Sicherungskopien"
 
 #: gtk2_ardour/ardour_ui_ed.cc:450
 msgid "Stop recording on xrun"
-msgstr "Aufnahme bei XRUN stoppen"
+msgstr "Aufnahme bei xrun stoppen"
 
 #: gtk2_ardour/ardour_ui_ed.cc:451
 msgid "Create marker at xrun location"
@@ -1327,7 +1328,7 @@ msgstr "Time-Stretch schnappt auf Raster ein"
 
 #: gtk2_ardour/ardour_ui_ed.cc:461
 msgid "Auto-analyse new audio"
-msgstr "Neue Audiodaten automatisch untersuchen"
+msgstr "Neue Audiodaten automatisch analysieren"
 
 #: gtk2_ardour/ardour_ui_ed.cc:463
 msgid "Use narrow mixer strips"
@@ -1339,7 +1340,7 @@ msgstr "Neue Marker benennen"
 
 #: gtk2_ardour/ardour_ui_ed.cc:468
 msgid "Use DC bias"
-msgstr "DC bias aktivieren"
+msgstr "Benutze DC bias"
 
 #: gtk2_ardour/ardour_ui_ed.cc:470
 msgid "No processor handling"
@@ -2337,7 +2338,7 @@ msgstr ""
 "\n"
 "Das ist nicht möglich - außer, wenn dieses Plugin\n"
 "Side-Chain-Eingänge unterstützt. Dies wird in einer\n"
-"der nächsten Versionen von ardour möglich sein."
+"der nächsten Versionen von Ardour möglich sein."
 
 #: gtk2_ardour/redirect_box.cc:454
 msgid ""
@@ -2468,7 +2469,7 @@ msgstr "Einfügen"
 
 #: gtk2_ardour/redirect_box.cc:1215
 msgid "Select All"
-msgstr "Alles Auswählen"
+msgstr "Alles auswählen"
 
 #: gtk2_ardour/redirect_box.cc:1216
 msgid "Deselect All"
@@ -2827,7 +2828,7 @@ msgstr "Normalisieren"
 
 #: gtk2_ardour/editor.cc:1939
 msgid "Reverse"
-msgstr "Rückwärts"
+msgstr "Umkehren"
 
 #: gtk2_ardour/editor.cc:1944
 #: gtk2_ardour/editor.cc:2035
@@ -2935,7 +2936,7 @@ msgstr "Punch-Bereich aus Auswahl erstellen"
 
 #: gtk2_ardour/editor.cc:2037
 msgid "Crop region to range"
-msgstr "Regionen-Editor öffnen"
+msgstr "Region auf Bereich kürzen"
 
 #: gtk2_ardour/editor.cc:2038
 msgid "Fill range with region"
@@ -2943,7 +2944,7 @@ msgstr "Bereich mit Region ausfüllen"
 
 #: gtk2_ardour/editor.cc:2039
 msgid "Duplicate range"
-msgstr "Bereich Duplizieren"
+msgstr "Bereich duplizieren"
 
 #: gtk2_ardour/editor.cc:2040
 msgid "Create chunk from range"
@@ -3109,7 +3110,7 @@ msgstr "Zoombereich auswählen"
 
 #: gtk2_ardour/editor.cc:2870
 msgid "Stretch/Shrink Regions"
-msgstr "Regionen vergrößern/verkleinern (Time-Stretch)"
+msgstr "Regionen strecken/stauchen (Time-Stretch)"
 
 #: gtk2_ardour/editor.cc:2871
 msgid "Listen to Specific Regions"
@@ -3459,11 +3460,11 @@ msgstr "Neue Kopie"
 
 #: gtk2_ardour/route_time_axis.cc:1390
 msgid "New Take"
-msgstr "Neu"
+msgstr "Neuer Take"
 
 #: gtk2_ardour/route_time_axis.cc:1391
 msgid "Copy Take"
-msgstr "Neue Kopie"
+msgstr "Take kopieren"
 
 #: gtk2_ardour/route_time_axis.cc:1396
 msgid "Clear Current"
@@ -3675,7 +3676,7 @@ msgstr "Merkwürdig... LADSPA-Plugins sollten kein GUI haben!"
 #: gtk2_ardour/plugin_ui.cc:96
 #: gtk2_ardour/plugin_ui.cc:203
 msgid "unknown type of editor-supplying plugin (note: no VST support in this version of ardour)"
-msgstr "Unbekannter Plugintyp (Hinweis: diese ardour-Version unterstützt keine VST-Plugins)"
+msgstr "Unbekannter Plugintyp (Hinweis: diese Ardour-Version unterstützt keine VST-Plugins)"
 
 #: gtk2_ardour/plugin_ui.cc:99
 msgid "unknown type of editor-supplying plugin"
@@ -3764,22 +3765,22 @@ msgstr "Bereich hinzufügen"
 #: gtk2_ardour/sfdb_ui.cc:97
 #: gtk2_ardour/sfdb_ui.cc:106
 msgid "as new tracks"
-msgstr "Spuren"
+msgstr "als neue Spuren"
 
 #: gtk2_ardour/sfdb_ui.cc:79
 #: gtk2_ardour/sfdb_ui.cc:99
 msgid "to selected tracks"
-msgstr "Spuren (Auswahl)"
+msgstr "zu ausgewählten Spuren"
 
 #: gtk2_ardour/sfdb_ui.cc:81
 #: gtk2_ardour/sfdb_ui.cc:101
 msgid "to region list"
-msgstr "Regionen"
+msgstr "zur Liste der Regionen"
 
 #: gtk2_ardour/sfdb_ui.cc:83
 #: gtk2_ardour/sfdb_ui.cc:103
 msgid "as new tape tracks"
-msgstr "Tape-Spuren"
+msgstr "als neue Tape-Spuren"
 
 #: gtk2_ardour/sfdb_ui.cc:87
 msgid "programming error: unknown import mode string %1"
@@ -3958,7 +3959,7 @@ msgstr "Projektanfang"
 
 #: gtk2_ardour/sfdb_ui.cc:1191
 msgid "Add files:"
-msgstr "Dateien als"
+msgstr "Hinzufügen:"
 
 #: gtk2_ardour/sfdb_ui.cc:1213
 msgid "Insert:"
@@ -3970,7 +3971,7 @@ msgstr "Zuordnung:"
 
 #: gtk2_ardour/sfdb_ui.cc:1244
 msgid "Conversion Quality:"
-msgstr "Konvertierungsqualität:"
+msgstr "SR-Konvertierung:"
 
 #: gtk2_ardour/sfdb_ui.cc:1256
 #: gtk2_ardour/sfdb_ui.cc:1334
@@ -4184,7 +4185,7 @@ msgstr "Fade-Out (de-)aktivieren"
 
 #: gtk2_ardour/editor_actions.cc:126
 msgid "Toggle Region Fades"
-msgstr "Überblenden von Region (de-)Aktivieren"
+msgstr "Überblenden von Region (de-)aktivieren"
 
 #: gtk2_ardour/editor_actions.cc:129
 msgid "Playhead to Next Region Boundary"
@@ -4272,15 +4273,15 @@ msgstr "Auswahl umkehren"
 
 #: gtk2_ardour/editor_actions.cc:188
 msgid "Select All Overlapping Edit Range"
-msgstr "Alles Regionen des Bearbeitungsbereichs auswählen "
+msgstr "Alle Regionen des Bearbeitungsbereichs auswählen "
 
 #: gtk2_ardour/editor_actions.cc:190
 msgid "Select All Inside Edit Range"
-msgstr "Alles im Bearbeitungsbereichs auswählen"
+msgstr "Alles inerhalb des Bearbeitungsbereichs auswählen"
 
 #: gtk2_ardour/editor_actions.cc:193
 msgid "Select Edit Range"
-msgstr "Bereich auswählen"
+msgstr "Bearbeitungsbereich auswählen"
 
 #: gtk2_ardour/editor_actions.cc:196
 msgid "Select All in Punch Range"
@@ -4480,7 +4481,7 @@ msgstr "Auf Region zoomen"
 
 #: gtk2_ardour/editor_actions.cc:310
 msgid "Zoom to Region (W&H)"
-msgstr "Auf Region zoomen"
+msgstr "Auf Region zoomen (B&H)"
 
 #: gtk2_ardour/editor_actions.cc:312
 msgid "Toggle Zoom State"
@@ -4544,7 +4545,7 @@ msgstr "Positionszeiger zur aktiven Markierung"
 
 #: gtk2_ardour/editor_actions.cc:347
 msgid "Active Mark To Playhead"
-msgstr "Marker zum Positionszeiger verschieben"
+msgstr "Aktiven Marker zum Positionszeiger verschieben"
 
 #: gtk2_ardour/editor_actions.cc:350
 msgid "Trim Start At Edit Point"
@@ -4656,11 +4657,11 @@ msgstr "Akitven Marker zur Mausposition"
 
 #: gtk2_ardour/editor_actions.cc:434
 msgid "Duplicate Region"
-msgstr "Duplizieren"
+msgstr "Region duplizieren"
 
 #: gtk2_ardour/editor_actions.cc:437
 msgid "Multi-Duplicate Region"
-msgstr "Region mehrfach Duplizieren"
+msgstr "Region mehrfach duplizieren"
 
 #: gtk2_ardour/editor_actions.cc:440
 msgid "Duplicate Range"
@@ -4724,7 +4725,7 @@ msgstr "Ursprungsposition"
 
 #: gtk2_ardour/editor_actions.cc:497
 msgid "Mute/Unmute Region"
-msgstr "Region Mute/Unmute"
+msgstr "Region stummschalten"
 
 #: gtk2_ardour/editor_actions.cc:506
 msgid "Export Session"
@@ -5050,7 +5051,7 @@ msgstr "Wellenformen beim Aufnehmen zeigen"
 
 #: gtk2_ardour/editor_actions.cc:768
 msgid "Show Measures"
-msgstr "Takte zeigen"
+msgstr "Takt-Raster einblenden"
 
 #: gtk2_ardour/editor_actions.cc:779
 msgid "Show Logo"
@@ -5058,7 +5059,7 @@ msgstr "Zeige Logo"
 
 #: gtk2_ardour/editor_actions.cc:785
 msgid "Later is Higher"
-msgstr "Neuste nach oben"
+msgstr "Spätere nach oben"
 
 #: gtk2_ardour/editor_actions.cc:786
 msgid "Most Recently Moved/Added is Higher"
@@ -5338,7 +5339,7 @@ msgstr "Samplerate"
 
 #: gtk2_ardour/export_dialog.cc:109
 msgid "Conversion Quality"
-msgstr "Qualität"
+msgstr "SR-Konvertierung"
 
 #: gtk2_ardour/export_dialog.cc:110
 msgid "Dither Type"
@@ -5371,7 +5372,7 @@ msgstr "44,1 kHz"
 #: gtk2_ardour/export_dialog.cc:1091
 #: gtk2_ardour/export_dialog.cc:1261
 msgid "48kHz"
-msgstr "4"
+msgstr "48 kHz"
 
 #: gtk2_ardour/export_dialog.cc:432
 #: gtk2_ardour/export_dialog.cc:1093
@@ -5606,7 +5607,7 @@ msgstr "Dithering"
 
 #: gtk2_ardour/engine_dialog.cc:282
 msgid "No JACK server found anywhere on this system. Please install JACK and restart"
-msgstr "Es wurde kein JACK Server auf diesem System gefunden. Bitte installieren Sie JACK und starten Sie ardour neu."
+msgstr "Es wurde kein JACK Server auf diesem System gefunden. Bitte installieren Sie JACK und starten Sie Ardour neu."
 
 #: gtk2_ardour/engine_dialog.cc:290
 msgid "Server:"
@@ -6202,11 +6203,11 @@ msgstr "Bereich in Schleife wiedergeben"
 
 #: gtk2_ardour/editor_markers.cc:634
 msgid "Set Range Mark from Playhead"
-msgstr "Bereichsmarker zum Positionszeiger verschieben"
+msgstr "Bereichsmarker beim Positionszeiger erzeugen"
 
 #: gtk2_ardour/editor_markers.cc:636
 msgid "Set Range from Range Selection"
-msgstr "Bereichsmarker zum Auswahlbereich verschieben"
+msgstr "Bereichsmarker für Auswahl erzeugen"
 
 #: gtk2_ardour/editor_markers.cc:646
 msgid "Hide Range"
@@ -6299,7 +6300,7 @@ msgstr "Fehlermeldungen"
 
 #: gtk2_ardour/ardour_ui.cc:246
 msgid "could not initialize Ardour."
-msgstr "Konnte ardour nicht initialisieren."
+msgstr "Konnte Ardour nicht initialisieren."
 
 #: gtk2_ardour/ardour_ui.cc:272
 msgid "Starting audio engine"
@@ -6311,7 +6312,7 @@ msgstr "Ardour konnte JACK nicht starten"
 
 #: gtk2_ardour/ardour_ui.cc:580
 msgid "Ardour could not connect to JACK."
-msgstr "ardour konnte nicht zu JACK verbinden."
+msgstr "Ardour konnte nicht zu JACK verbinden."
 
 #: gtk2_ardour/ardour_ui.cc:589
 msgid ""
@@ -6345,7 +6346,7 @@ msgstr ""
 "2) JACK wurde unter einem anderen Benutzer gestartet, möglicherweise als root.\n"
 "3) Es gibt bereits einen anderen Client mit der Bezeichnung \"ardour\".\n"
 "\n"
-"Betrachten Sie bitte diese Möglichkeiten und starten Sie JACK neu, wenn dies notwendig sein sollte."
+"Betrachten Sie bitte diese Möglichkeiten und starten Sie ggf. JACK neu."
 
 #: gtk2_ardour/ardour_ui.cc:644
 msgid "Ardour is ready for use"
@@ -6377,8 +6378,7 @@ msgid ""
 "\n"
 "\"Just quit\" option."
 msgstr ""
-"ardour konnte das Projekt nicht speichern.\n"
-"\n"
+"Ardour konnte das Projekt nicht speichern.\n \n"
 "Wenn Sie trotzdem beenden wollen, wählen Sie bitte\n"
 "\n"
 "\"Trotzdem beenden\"."
@@ -6475,7 +6475,7 @@ msgstr "Projekt öffnen"
 
 #: gtk2_ardour/ardour_ui.cc:1171
 msgid "Ardour sessions"
-msgstr "ardour-Projekte"
+msgstr "Ardour-Projekte"
 
 #: gtk2_ardour/ardour_ui.cc:1204
 msgid "Patience is a virtue.\n"
@@ -6507,9 +6507,9 @@ msgid ""
 msgstr ""
 "Es sind nicht genügend JACK Ports verfügbar\n"
 "um neue Spuren oder Busse zu erstellen.\n"
-"Speichern Sie Ihr Projekt und starten Sie\n"
-"ardour sowie JACK mit einer größeren\n"
-"Anzahl Ports erneut."
+"Speichern Sie Ihr Projekt, beenden Sie\n"
+"Ardour und starten Sie JACK mit einer größeren\n"
+"Anzahl Ports neu."
 
 #: gtk2_ardour/ardour_ui.cc:1409
 msgid ""
@@ -6529,7 +6529,7 @@ msgid ""
 "session and/or try to reconnect to JACK ."
 msgstr ""
 "JACK wurde entweder beendet oder\n"
-"hat ardour getrennt weil Ardour nicht\n"
+"hat Ardour getrennt weil Ardour nicht\n"
 "schnell genug war. Sie sollten versuchen,\n"
 "das Projekt zu speichern und erneut mit JACK zu verbinden."
 
@@ -6719,7 +6719,7 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 "Ihre Festplatte war nicht schnell genug,\n"
-"um ardour zu folgen.\n"
+"um Ardour zu folgen.\n"
 "\n"
 "Die Daten konnten nicht schnell genug geschrieben\n"
 "werden, um die Aufnahme fortzuführen.\n"
@@ -6733,7 +6733,7 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 "Ihre Festplatte war nicht schnell genug,\n"
-"um ardour zu folgen.\n"
+"um Ardour zu folgen.\n"
 "\n"
 "Die Daten konnten nicht schnell genug gelesen\n"
 "werden, um die Wiedergabe aufrechtzuerhalten.\n"
@@ -7238,7 +7238,7 @@ msgstr "Mindestauslöseabstand (msec)"
 
 #: gtk2_ardour/rhythm_ferret.cc:394
 msgid "split regions (rhythm ferret)"
-msgstr "regionen teilen (rhythm ferret)"
+msgstr "Regionen teilen (rhythm ferret)"
 
 #: gtk2_ardour/ardour_ui_dependents.cc:74
 msgid "Setup Editor"
@@ -7389,7 +7389,7 @@ msgstr "die UI Definitionsdatei %1 ist falsch formatiert"
 
 #: gtk2_ardour/actions.cc:83
 msgid "Ardour menu definition file not found"
-msgstr "Konnte die ardour Menü-Definition nicht finden"
+msgstr "Konnte die Ardour Menü-Definition nicht finden"
 
 #: gtk2_ardour/actions.cc:87
 msgid "ardour will not work without a valid ardour.menus file"
