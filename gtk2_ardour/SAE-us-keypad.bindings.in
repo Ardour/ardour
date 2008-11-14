@@ -206,7 +206,7 @@
 ; (gtk_accel_path "<Actions>/Editor/loop-region" "<%PRIMARY%>8")
 
 (gtk_accel_path "<Actions>/Editor/set-punch-from-edit-range" "9")
-(gtk_accel_path "<Actions>/Editor/set-punch-from-region" "<%LEVEL4>9")
+(gtk_accel_path "<Actions>/Editor/set-punch-from-region" "<%LEVEL4%>9")
 
 (gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "<%LEVEL4%>0")
 (gtk_accel_path "<Actions>/Editor/set-tempo-from-edit-range" "0")
