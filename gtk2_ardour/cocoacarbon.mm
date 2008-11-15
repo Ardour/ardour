@@ -61,6 +61,8 @@ handle_open_documents (const AppleEvent *inAppleEvent,
 {
 	AEDescList docs;
 
+	cerr << "\n\n\n\n HANDLE DOCUMENT\n\n\n";
+
         if (AEGetParamDesc(inAppleEvent, keyDirectObject, typeAEList, &docs) == noErr) {
 		long n = 0;
 		AECountItems(&docs, &n);

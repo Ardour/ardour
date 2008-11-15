@@ -637,6 +637,8 @@ void
 ARDOUR_UI::startup ()
 {
 	string name, path;
+	
+	cerr << "\n\n\nNEW SESSION DIALOG\n\n\n";
 
 	new_session_dialog = new NewSessionDialog();
 
@@ -2177,11 +2179,16 @@ ARDOUR_UI::idle_load (const Glib::ustring& path)
 			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
 		}
 	} else {
+
 		ARDOUR_COMMAND_LINE::session_name = path;
+
 		if (new_session_dialog) {
+
+
 			/* make it break out of Dialog::run() and
 			   start again.
 			 */
+
 			new_session_dialog->response (1);
 		}
 	}
@@ -2199,9 +2206,17 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
   begin:
 	response = Gtk::RESPONSE_NONE;
 
+	cerr << "\n\n\n CONSIDER CLSN = " << ARDOUR_COMMAND_LINE::session_name << "\n\n\n";
+
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 
 		parse_cmdline_path (ARDOUR_COMMAND_LINE::session_name, session_name, session_path, existing_session);
+
+		cerr << "from command line got name = "
+		     << session_name
+		     << " path = " << session_path
+		     << " existing ? " << existing_session 
+		     << endl;
 
 		/* don't ever reuse this */
 
@@ -2305,7 +2320,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			if (session_name[0] == '/' || 
 			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
-				
+
 				session_path = Glib::path_get_dirname (session_name);
 				session_name = Glib::path_get_basename (session_name);
 				
@@ -2363,6 +2378,8 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			
 		  loadit:
 			new_session_dialog->hide ();
+
+			cerr << "trying to load " << session_path << " as " << session_name << endl;
 			
 			if (load_session (session_path, session_name, template_name)) {
 				/* force a retry */
