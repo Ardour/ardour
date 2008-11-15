@@ -6,7 +6,7 @@
 ;; punctuation
 (gtk_accel_path "<Actions>/Editor/center-playhead" "Escape")
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
-(gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>space")
+(gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>period")
 (gtk_accel_path "<Actions>/Transport/record-roll" "<%PRIMARY%>space")
 
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<%PRIMARY%><%SECONDARY%>less")
