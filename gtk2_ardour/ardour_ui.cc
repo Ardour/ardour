@@ -638,8 +638,6 @@ ARDOUR_UI::startup ()
 {
 	string name, path;
 	
-	cerr << "\n\n\nNEW SESSION DIALOG\n\n\n";
-
 	new_session_dialog = new NewSessionDialog();
 
 	bool backend_audio_is_running = EngineControl::engine_running();
@@ -2206,17 +2204,9 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
   begin:
 	response = Gtk::RESPONSE_NONE;
 
-	cerr << "\n\n\n CONSIDER CLSN = " << ARDOUR_COMMAND_LINE::session_name << "\n\n\n";
-
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 
 		parse_cmdline_path (ARDOUR_COMMAND_LINE::session_name, session_name, session_path, existing_session);
-
-		cerr << "from command line got name = "
-		     << session_name
-		     << " path = " << session_path
-		     << " existing ? " << existing_session 
-		     << endl;
 
 		/* don't ever reuse this */
 
@@ -2379,8 +2369,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		  loadit:
 			new_session_dialog->hide ();
 
-			cerr << "trying to load " << session_path << " as " << session_name << endl;
-			
 			if (load_session (session_path, session_name, template_name)) {
 				/* force a retry */
 				response = Gtk::RESPONSE_NONE;
@@ -2879,8 +2867,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	}
 
 	/* XXX do something with name template */
-
-	cerr << "Adding with " << input_chan << " in and " << output_chan << "out\n";
 
 	if (track) {
 		session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), count);
