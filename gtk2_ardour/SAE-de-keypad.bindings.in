@@ -81,7 +81,7 @@
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "<%PRIMARY%>d")
 (gtk_accel_path "<Actions>/Editor/multi-duplicate-region" "<%PRIMARY%><%TERTIARY%>d")
 (gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "f")
-(gtk_accel_path "<Actions>/Common/toggle-rhythmn-ferret" "<%WINDOW%>f")
+(gtk_accel_path "<Actions>/Common/toggle-rhythm-ferret" "<%WINDOW%>f")
 ; (gtk_accel_path "<Actions>/Editor/set-edit-point" "g")
 ; (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
 (gtk_accel_path "<Actions>/Editor/nudge-backward" "g")
