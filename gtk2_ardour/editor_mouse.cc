@@ -336,8 +336,15 @@ Editor::step_mouse_mode (bool next)
 {
 	switch (current_mouse_mode()) {
 	case MouseObject:
-		if (next) set_mouse_mode (MouseRange);
-		else set_mouse_mode (MouseTimeFX);
+		if (next) {
+			if (Profile->get_sae()) {
+				set_mouse_mode (MouseZoom);
+			} else {
+				set_mouse_mode (MouseRange);
+			}
+		} else {
+			set_mouse_mode (MouseTimeFX);
+		}
 		break;
 
 	case MouseRange:
@@ -346,8 +353,19 @@ Editor::step_mouse_mode (bool next)
 		break;
 
 	case MouseZoom:
-		if (next) set_mouse_mode (MouseGain);
-		else set_mouse_mode (MouseRange);
+		if (next) {
+			if (Profile->get_sae()) {
+				set_mouse_mode (MouseTimeFX);
+			} else {
+				set_mouse_mode (MouseGain);
+			}
+		} else {
+			if (Profile->get_sae()) {
+				set_mouse_mode (MouseObject);
+			} else {
+				set_mouse_mode (MouseRange);
+			}
+		}
 		break;
 	
 	case MouseGain:
@@ -356,8 +374,15 @@ Editor::step_mouse_mode (bool next)
 		break;
 	
 	case MouseTimeFX:
-		if (next) set_mouse_mode (MouseAudition);
-		else set_mouse_mode (MouseGain);
+		if (next) {
+			set_mouse_mode (MouseAudition);
+		} else {
+			if (Profile->get_sae()) {
+				set_mouse_mode (MouseZoom);
+			} else {
+				set_mouse_mode (MouseGain);
+			}
+		}
 		break;
 
 	case MouseAudition:
