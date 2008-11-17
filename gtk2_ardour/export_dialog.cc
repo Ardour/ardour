@@ -43,6 +43,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "keyboard.h"
+#include "nag.h"
 
 #include "i18n.h"
 
@@ -1008,6 +1009,13 @@ ExportDialog::do_export ()
 	
   	progress_connection.disconnect ();
 	end_dialog ();
+
+	NagScreen* ns = NagScreen::maybe_nag (_("export"));
+
+	if (ns) {
+		ns->nag ();
+		delete ns;
+	}
 }
 	
 void
