@@ -76,6 +76,7 @@ ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
 void
 ArdourDialog::on_unmap ()
 {
+	Keyboard::the_keyboard().leave_window (0, this);
 	Dialog::on_unmap ();
 }
 

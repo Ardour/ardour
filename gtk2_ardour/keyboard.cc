@@ -301,25 +301,29 @@ Keyboard::enter_window (GdkEventCrossing *ev, Gtk::Window* win)
 bool
 Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* win)
 {
-	switch (ev->detail) {
-	case GDK_NOTIFY_INFERIOR:
-		if (debug_keyboard) {
-			cerr << "INFERIOR crossing ... out\n";
+	if (ev) {
+		switch (ev->detail) {
+		case GDK_NOTIFY_INFERIOR:
+			if (debug_keyboard) {
+				cerr << "INFERIOR crossing ... out\n";
+			}
+			break;
+			
+		case GDK_NOTIFY_VIRTUAL:
+			if (debug_keyboard) {
+				cerr << "VIRTUAL crossing ... out\n";
+			}
+			/* fallthru */
+			
+		default:
+			if (debug_keyboard) {
+				cerr << "REAL CROSSING ... out\n";
+				cerr << "clearing current target\n";
+			}
+			state.clear ();
+			current_window = 0;
 		}
-		break;
-
-	case GDK_NOTIFY_VIRTUAL:
-		if (debug_keyboard) {
-			cerr << "VIRTUAL crossing ... out\n";
-		}
-		/* fallthru */
-
-	default:
-		if (debug_keyboard) {
-			cerr << "REAL CROSSING ... out\n";
-			cerr << "clearing current target\n";
-		}
-		state.clear ();
+	} else {
 		current_window = 0;
 	}
 
