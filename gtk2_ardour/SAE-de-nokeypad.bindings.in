@@ -185,6 +185,7 @@
 ; (gtk_accel_path "<Actions>/Editor/finish-range" "F2")
 ; (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "<%TERTIARY%>F2")
 ; (gtk_accel_path "<Actions>/Editor/brush-at-mouse" "F3")
+(gtk_accel_path "<Actions>/Editor/step-mouse-mode" "F1")
 (gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F2")
 
 

@@ -315,6 +315,7 @@
 		   <menuitem action='GotoStart'/>
 		   <menuitem action='GotoEnd'/>
 		   <separator/>
+		   <menuitem action='step-mouse-mode'/>
 		   <menuitem action='set-mouse-mode-object'/>
 		   <menuitem action='set-mouse-mode-zoom'/>
 		   <menuitem action='set-mouse-mode-timefx'/>
