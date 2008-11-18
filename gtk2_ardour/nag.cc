@@ -198,7 +198,7 @@ NagScreen::open_uri (const char* uri)
 
 	return true;
 #else
-	extern bool cocoa_open_uri (const char*);
+	extern bool cocoa_open_url (const char*);
 	return cocoa_open_url (uri);
 #endif
 #endif
