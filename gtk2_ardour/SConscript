@@ -489,7 +489,10 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ergonomic-us.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'mnemonic-us.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de-keypad.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-us-keypad.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de-nokeypad.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-us-nokeypad.bindings'))
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
