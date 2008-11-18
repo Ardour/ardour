@@ -1010,11 +1010,18 @@ ExportDialog::do_export ()
   	progress_connection.disconnect ();
 	end_dialog ();
 
-	NagScreen* ns = NagScreen::maybe_nag (_("export"));
+	/* if not stopped early and not SAE, ask for money, maybe */
 
-	if (ns) {
-		ns->nag ();
-		delete ns;
+	cerr << "At end, spec.stop == " << spec.stop << endl;
+
+	if (!spec.stop && !Profile->get_sae()) {
+
+		NagScreen* ns = NagScreen::maybe_nag (_("export"));
+		
+		if (ns) {
+			ns->nag ();
+			delete ns;
+		}
 	}
 }
 	

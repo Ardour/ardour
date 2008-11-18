@@ -453,10 +453,21 @@ Session::stop_audio_export (AudioExportSpecification& spec)
 {
 	/* don't stop freewheeling but do stop paying attention to it for now */
 
+
+	/* save the value of stop so that the UI
+	   can see if it requested a stop.
+	*/
+
+	bool old_stop = spec.stop;
+
 	spec.freewheel_connection.disconnect ();
 	spec.clear (); /* resets running/stop etc */
 
-	Exported (spec.path, name());
+	spec.stop = old_stop;
+
+	if (!spec.stop) {
+		Exported (spec.path, name());
+	}
 
 	return 0;
 }
