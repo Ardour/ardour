@@ -4939,10 +4939,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
 {
 	if (resize_idle_id < 0) {
 		resize_idle_id = g_idle_add (_idle_resizer, this);
-		cerr << "QUEUE and reset idle resize target to " << h << endl;
-	} else {
-		cerr << "JUST reset idle resize target to " << h << endl;
-	}
+	} 
 
 	resize_idle_target = h;
 
@@ -4951,8 +4948,6 @@ Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
 	if (selection->selected (view) && !selection->tracks.empty()) {
 		pending_resizes.insert (pending_resizes.end(), selection->tracks.begin(), selection->tracks.end());
 	}
-
-	cerr << "\tpending now  " << pending_resizes.size() << endl;
 }
 
 bool
