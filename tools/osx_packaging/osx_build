@@ -128,8 +128,23 @@ sed -e "s?@APPNAME@?$appname?" \
 cp Info.plist $APPROOT
 cp -R Resources $APPROOT
 
+#
+# if we build a bundle without jack, then
+# make the Ardour2 executable a helper
+# script that checks to see if JACK is
+# installed.
+#
+
+if test x$WITH_JACK != x ; then
+    MAIN_EXECUTABLE=Ardour2
+else
+    cp startup_script $APPROOT/MacOS/Ardour2
+    chmod 775 $APPROOT/MacOS/Ardour2
+    MAIN_EXECUTABLE=Ardour2.bin
+fi
+
 echo "Copying ardour executable ...."
-cp ../../gtk2_ardour/ardour-$release_version $APPROOT/MacOS/Ardour2
+cp ../../gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
 if test x$SAE != x ; then
     cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour2-SAE.icns $Resources/appIcon.icns
@@ -276,7 +291,7 @@ done
 
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
-executables="Ardour2"
+executables=$MAIN_EXECUTABLE
 if test x$WITH_JACK != x ; then
     executables="$executables jackd"
 fi
