@@ -7,9 +7,7 @@
 
 if test ! -x /usr/local/bin/jackd -a ! -x /usr/bin/jackd ; then
    osascript -e 'tell application "Terminal"
-display dialog "You do not have JACK installed.\
-Ardour will not run without it.\ 
-See http://jackaudio.org/ for info" buttons["OK"]
+display dialog "You do not have JACK installed. Ardour will not run without it. See http://jackaudio.org/ for info" buttons["OK"]
 end tell'
    exit 1
 fi
