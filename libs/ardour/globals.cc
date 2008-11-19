@@ -119,6 +119,7 @@ setup_osc ()
 		return 0;
 	}
 }
+
 #endif
 
 int

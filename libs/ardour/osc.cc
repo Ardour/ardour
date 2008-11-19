@@ -36,6 +36,7 @@
 #include <ardour/session.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
+#include <ardour/dB.h>
 
 #include "i18n.h"
 
@@ -146,9 +147,9 @@ OSC::stop ()
 		unlink(_osc_unix_socket_path.c_str());
 	}
 	
-   if (!  _osc_url_file.empty() ) {
-      unlink(_osc_url_file.c_str() );
-   }
+	if (!  _osc_url_file.empty() ) {
+		unlink(_osc_url_file.c_str() );
+	}
 	return 0;
 }
 
@@ -195,6 +196,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_out", "", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/rec_enable_toggle", "", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
+
+		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
+		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);
+		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);
+		REGISTER_CALLBACK (serv, "/ardour/routes/gainabs", "if", route_set_gain_abs);
+		REGISTER_CALLBACK (serv, "/ardour/routes/gaindB", "if", route_set_gain_dB);
 
 #if 0
 		REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -369,7 +376,7 @@ OSC::osc_receiver()
 			if (pfd[i].revents & POLLIN)
 			{
 				// this invokes callbacks
-				//cerr << "invoking recv on " << pfd[i].fd << endl;
+				// cerr << "invoking recv on " << pfd[i].fd << endl;
 				lo_server_recv(srvs[i]);
 			}
 		}
@@ -381,7 +388,7 @@ OSC::osc_receiver()
 	if (_osc_server) {
 		int fd = lo_server_get_socket_fd(_osc_server);
 		if (fd >=0) {
-				// hack around
+			// hack around
 			close(fd);
 		}
 		lo_server_free (_osc_server);
@@ -489,5 +496,72 @@ OSC::current_value (const char *path, const char *types, lo_arg **argv, int argc
 		/* error */
 	}
 #endif
+	return 0;
+}
+
+int
+OSC::route_mute (int rid, int yn)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_mute (yn, this);
+	}
+	return 0;
+}
+
+int
+OSC::route_solo (int rid, int yn)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_solo (yn, this);
+	}
+	return 0;
+}
+
+int
+OSC::route_recenable (int rid, int yn)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_record_enable (yn, this);
+	}
+	return 0;
+}
+
+int
+OSC::route_set_gain_abs (int rid, float level)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_gain (level, this);
+	}
+
+	return 0;
+}
+
+int
+OSC::route_set_gain_dB (int rid, float dB)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_gain (dB_to_coefficient (dB), this);
+	}
+
 	return 0;
 }

@@ -120,6 +120,29 @@ class OSC : public BasicUI, public sigc::trackable
 
 	PATH_CALLBACK1(set_transport_speed,f,);
 	PATH_CALLBACK1(access_action,s,&);
+
+#define PATH_CALLBACK2(name,arg1type,arg2type)			\
+        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+        } \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+                if (argc > 1) {						\
+			name (argv[0]->arg1type, argv[1]->arg2type); \
+                }							\
+		return 0;						\
+	}
+
+	PATH_CALLBACK2(route_mute,i,i);
+	PATH_CALLBACK2(route_solo,i,i);
+	PATH_CALLBACK2(route_recenable,i,i);
+	PATH_CALLBACK2(route_set_gain_abs,i,f);
+	PATH_CALLBACK2(route_set_gain_dB,i,f);
+
+	int route_mute (int rid, int yn);
+	int route_solo (int rid, int yn);
+	int route_recenable (int rid, int yn);
+	int route_set_gain_abs (int rid, float level);
+	int route_set_gain_dB (int rid, float dB);
 };
 
 }
