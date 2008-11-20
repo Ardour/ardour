@@ -1,0 +1,71 @@
+.TH ARDOUR 1 2002-12-29
+.SH NOM
+ardour \- une station de travail audio-numérique
+.SH SYNOPSIS
+ardour
+.B \-b
+.RB [ \-U
+.IR fichier ]
+.RI [ session ]
+.br
+ardour
+.B \-\-help
+.SH DESCRIPTION
+Ardour est un enregistreur sur disque dur multi-canaux (HDR) et une station de
+travail audio-numérique (DAW).
+Il est capable d'enregistrer simultanément 24 ou plus canaux audio 32 bits à
+48 kHz.
+Ardour a pour vocation de fonctionner comme un enregistreur sur disque dur
+"professionnel", en remplacement de solutions matérielles dédiées comme le
+Mackie HDR, le Tascam 2424 et les plus traditionnels système à bande tels que
+la série Alesis ADAT.
+Il est aussi conçu pour procurer les mêmes ou de meilleures fonctionnalités
+que des systèmes logiciels comme ProTools, Samplitude, Logic Audio, Nuendo et
+Cubase VST (nous reconnaissons ces marques comme marques déposées appartenant
+à leurs propriétaires respectifs).
+Il supporte MIDI Machine Control, et peut ainsi être contrôlé depuis
+n'importe quel contrôleur MMC, comme le Mackie Digital 8 Bus mixer et de nombreux autres mélangeurs audio-numériques modernes.
+.SH OPTIONS
+.TP
+.B \-b
+Affiche tous les noms des codes clavier possibles.
+.TP
+.B \-U
+Indiquer le chemin vers le fichier GTK RC à utiliser.
+Le fichier fourni s'appelle
+.B ardour_ui.rc
+et se trouve dans la racine du répertoire du code source d'Ardour.
+Ce fichier gère l'utilisation de toutes les couleurs et polices de caractère
+dans Ardour.
+Ardour fonctionnera sans, mais son aspect sera, disons, affreux.
+.TP
+.B \-\-help
+Affiche le message d'aide.
+.SH FICHIERS
+.TP
+.B ardour.rc
+Paramètre par défaut et de démarrage d'Ardour.
+.TP
+.B ardour_ui.rc
+Définitions pour l'interface d'Ardour.
+.SH ENVIRONNEMENT
+.TP
+.B ARDOUR_RC
+Chemin vers ardour.rc.
+.TP
+.B ARDOUR_SYSTEM_RC
+Chemin vers ardour_system.rc
+.TP
+.B LADSPA_PATH
+Chemin vers les greffons LADSPA.
+.SH BOGUES
+Oui.
+.SH AUTEUR
+Paul Davis.
+Ne
+.I pas
+le contacter directement.
+Contactez-le plutôt à <ardour-dev@lists.ardour.org>.
+Vous pouvez vous inscrire ici :
+.br
+http://lists.ardour.org/listinfo.cgi/ardour-dev-ardour.org

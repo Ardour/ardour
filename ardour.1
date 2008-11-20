@@ -1,0 +1,72 @@
+.TH ARDOUR 1 2002-12-29
+.SH NAME
+ardour \- a digital audio workstation
+.SH SYNOPSIS
+ardour
+.B \-b
+.RB [ \-U
+.IR file ]
+.RI [ session ]
+.br
+ardour
+.B \-\-help
+.SH DESCRIPTION
+Ardour is a multichannel hard disk recorder (HDR) and digital audio 
+workstation (DAW).
+It is capable of simultaneous recording 24 or more channels of 32 bit audio at
+48kHz.
+Ardour is intended to function as a "professional" HDR system, replacing
+dedicated hardware solutions such as the Mackie HDR, the Tascam 2424 and more
+traditional tape systems like the Alesis ADAT series.
+It is also intended to provide the same or better functionality as software 
+systems such as ProTools, Samplitude, Logic Audio, Nuendo and Cubase VST (we 
+acknowledge these and all other names as trademarks of their respective 
+owners).
+It supports MIDI Machine Control, and so can be controlled from any MMC
+controller, such as the Mackie Digital 8 Bus mixer and many other modern
+digital mixers. 
+.SH OPTIONS
+.TP
+.B \-b
+Print all possible keyboard binding names.
+.TP
+.B \-U
+Specify the path to the GTK RC file to use.
+The provided one is called
+.B ardour_ui.rc
+and lives in the top level Ardour source directory.
+This file controls all color and font use within Ardour.
+Ardour will run without it, but its appearance is, uhm, ugly.
+.TP
+.B \-\-help
+Displays the help message.
+.SH FILES
+.TP
+.B ardour.rc
+Defaults and startup settings for Ardour.
+.TP
+.B ardour_ui.rc
+Definitions for the Ardour interface.
+.SH ENVIRONMENT
+.TP
+.B ARDOUR_RC
+Path to ardour.rc.
+.TP
+.B ARDOUR_SYSTEM_RC
+Path to the ardour_system.rc
+.TP
+.B LADSPA_PATH
+Path to LADSPA plugins.
+.SH BUGS
+Yes.
+http://ardour.org/mantis is the preferred bugtracker.
+.SH AUTHOR
+Paul Davis.
+Do
+.I not
+contact him directly.
+Instead,
+contact him at <ardour-dev@lists.ardour.org>.
+You can subscribe here:
+.br
+http://lists.ardour.org/listinfo.cgi/ardour-dev-ardour.org
