@@ -843,15 +843,15 @@ if env['LIBLO']:
 def prep_libcheck(topenv, libinfo):
     if topenv['IS_OSX']:
 	#
-	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
-	#            All libraries needed should be built against this location
-	# However.. now jhbuild installs to ~/gtk/inst by default.. changed to accomodate this
+	# rationale: GTK-Quartz uses jhbuild and installs to ~/gtk/inst by default.
+	# All libraries needed should be built against this location
 	if topenv['GTKOSX']:
-		GTKROOT = os.path.expanduser ('~/gtk/inst')
-		libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
-		libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
-	#libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
-	#libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+            GTKROOT = os.path.expanduser ('~/gtk/inst')
+            libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
+            libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
+
+
+                
 
 prep_libcheck(env, env)
 
@@ -1041,6 +1041,11 @@ else:
 
 env = conf.Finish()
 
+if env['GTKOSX']:
+    clearlooks_version = 'libs/clearlooks-newer'
+else:
+    clearlooks_version = 'libs/clearlooks-older'
+
 if env['SYSLIBS']:
 
     syslibdeps = \
@@ -1126,7 +1131,7 @@ if env['SYSLIBS']:
 #        'libs/flowcanvas',
         'libs/gtkmm2ext',
         'gtk2_ardour',
-        'libs/clearlooks'
+        clearlooks_version
         ]
 
 else:
@@ -1201,7 +1206,7 @@ else:
         'libs/libgnomecanvasmm',
         'libs/gtkmm2ext',
         'gtk2_ardour',
-        'libs/clearlooks'
+        clearlooks_version
         ]
 
 #
@@ -1394,12 +1399,10 @@ env.Distribute (env['DISTTREE'],
                   'icons/icon/ardour_icon_tango_48px_blue.png',
                   'icons/icon/ardour_icon_tango_48px_red.png'
                   ] +
-                glob.glob ('DOCUMENTATION/AUTHORS*') +
-                glob.glob ('DOCUMENTATION/CONTRIBUTORS*') +
-                glob.glob ('DOCUMENTATION/TRANSLATORS*') +
-                glob.glob ('DOCUMENTATION/BUILD*') +
-                glob.glob ('DOCUMENTATION/FAQ*') +
-                glob.glob ('DOCUMENTATION/README*')
+                glob.glob ('ardour.1*') +
+                glob.glob ('libs/clearlooks-newer/*.c') +
+                glob.glob ('libs/clearlooks-newer/*.h') +
+                glob.glob ('libs/clearlooks-newer/SConscript')
                 )
 
 srcdist = env.Tarball(env['TARBALL'], [ env['DISTTREE'], the_revision ])

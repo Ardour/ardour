@@ -204,7 +204,7 @@ rm pangorc
 sed "s?$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < $GTKQUARTZ_ROOT/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders
 
 # this one is special - we will set GTK_PATH to $Frameworks/clearlooks
-cp ../../libs/clearlooks/libclearlooks.dylib $Frameworks
+cp ../../libs/clearlooks-newer/libclearlooks.dylib $Frameworks
 mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
 

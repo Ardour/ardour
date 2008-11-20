@@ -6,7 +6,7 @@ import glob
 libclearlooks_files = [
 	'animation.c',
 	'cairo-support.c',
-    'clearlooks_draw.c',
+        'clearlooks_draw.c',
 	'clearlooks_draw_glossy.c',
 	'clearlooks_draw_gummy.c',
 	'clearlooks_draw_inverted.c',
@@ -28,13 +28,13 @@ if env['GTKOSX']:
     clearlooks.Append (CCFLAGS = '-DGTKOSX')
 
 libclearlooks = clearlooks.SharedLibrary('clearlooks', libclearlooks_files) 
-
 usable_libclearlooks = clearlooks.Install ('engines', libclearlooks)
+
 Default (usable_libclearlooks)
 
-env.Alias('install',
-          env.Install(os.path.join(install_prefix,env['LIBDIR'], 'ardour2', 'engines'),
-                      libclearlooks))
+env.Alias('install', env.Install (
+        os.path.join(install_prefix,env['LIBDIR'], 'ardour2', 'engines'),
+        libclearlooks))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'bits.c'] +
