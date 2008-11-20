@@ -19,7 +19,8 @@ uint16_t WiimoteControlProtocol::button_state = 0;
 WiimoteControlProtocol::WiimoteControlProtocol ( Session & session) 
 	: ControlProtocol ( session, "Wiimote"),
 	  main_thread_quit (false),
-	  thread_registered_for_ardour (false),
+	  restart_discovery (false),
+	  callback_thread_registered_for_ardour (false),
 	  wiimote_handle (0)
 {
 	main_thread = Glib::Thread::create( sigc::mem_fun(*this, &WiimoteControlProtocol::wiimote_main), true);
@@ -50,20 +51,27 @@ WiimoteControlProtocol::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_coun
 	int i;
 	uint16_t b;
 
-	if (!thread_registered_for_ardour) {
+	if (!callback_thread_registered_for_ardour) {
 		register_thread("Wiimote Control Protocol");
-		thread_registered_for_ardour = true;
+		callback_thread_registered_for_ardour = true;
 	}
 
         for (i=0; i < mesg_count; i++)
 	{
+		if (mesg[i].type == CWIID_MESG_ERROR) {	
+			std::cerr << "Wiimote: disconnect" << std::endl;
+			restart_discovery = true;
+			slot_cond.signal();
+			return;
+		}
+
 		if (mesg[i].type != CWIID_MESG_BTN) continue;
 
 		// what buttons are pressed down which weren't pressed down last time
 		b = (mesg[i].btn_mesg.buttons ^ button_state) & mesg[i].btn_mesg.buttons;
 
 		button_state = mesg[i].btn_mesg.buttons;
-
+	
 		// if B is pressed down
 		if (button_state & CWIID_BTN_B) {
 			if (b & CWIID_BTN_A) { // B is down and A is pressed
@@ -75,6 +83,12 @@ WiimoteControlProtocol::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_coun
 			}
 			if (b & CWIID_BTN_RIGHT) {
 				access_action("Editor/playhead-to-next-region-boundary");
+			}
+			if (b & CWIID_BTN_UP) {
+				next_marker();
+			}
+			if (b & CWIID_BTN_DOWN) {
+				prev_marker();
 			}
 
 			if (b & CWIID_BTN_HOME) {
@@ -158,10 +172,13 @@ WiimoteControlProtocol::wiimote_main()
 	unsigned char rpt_mode = 0;
 	register_thread("Wiimote Discovery and Callback Thread");
 
+wiimote_discovery:
+
 	std::cerr << "Wiimote: discovering, press 1+2" << std::endl;
 
  	while (!wiimote_handle && !main_thread_quit) {
 		bdaddr = *BDADDR_ANY;
+		callback_thread_registered_for_ardour = false;
 		wiimote_handle = cwiid_open(&bdaddr, 0);
 
 		if (!wiimote_handle && !main_thread_quit) {
@@ -177,6 +194,8 @@ WiimoteControlProtocol::wiimote_main()
 		if (wiimote_handle) {
 			cwiid_close(wiimote_handle);
 		}
+		wiimote_handle = 0;
+
 		std::cerr << "Wiimote Control Protocol stopped before connected to a wiimote" << std::endl;
 		return;
 	}
@@ -187,16 +206,19 @@ WiimoteControlProtocol::wiimote_main()
 	if (cwiid_enable(wiimote_handle, CWIID_FLAG_REPEAT_BTN)) {
 		std::cerr << "cwiid_enable(), error" << std::endl;
 		cwiid_close(wiimote_handle);
+		wiimote_handle = 0;
 		return;
 	}
 	if (cwiid_set_mesg_callback(wiimote_handle, wiimote_control_protocol_cwiid_callback)) {
 		std::cerr << "cwiid_set_mesg_callback(), couldn't connect callback" << std::endl;
 		cwiid_close(wiimote_handle);
+		wiimote_handle = 0;
 		return;
 	} 
 	if (cwiid_command(wiimote_handle, CWIID_CMD_RPT_MODE, CWIID_RPT_BTN)) {
 		std::cerr << "cwiid_command(), RPT_MODE error" << std::endl;
 		cwiid_close(wiimote_handle);
+		wiimote_handle = 0;
 		return;
 	}
 
@@ -211,12 +233,23 @@ WiimoteControlProtocol::wiimote_main()
 
 	while (!main_thread_quit) {
 		slot_mutex.lock();
-		while (slot_list.empty() && !main_thread_quit)
+		while (slot_list.empty() && !main_thread_quit && !restart_discovery)
 			slot_cond.wait(slot_mutex);
 
 		if (main_thread_quit) {
 			slot_mutex.unlock();
 			break;
+		}
+
+		if (restart_discovery) {
+			std::cerr << "Wiimote: closing wiimote and restarting discovery" << std::endl;
+			if (wiimote_handle) {
+				cwiid_close(wiimote_handle);
+				wiimote_handle = 0;
+			}
+			slot_mutex.unlock();
+			restart_discovery = false;
+			goto wiimote_discovery;
 		}
 
 		sigc::slot<void> call_me = *slot_list.begin();

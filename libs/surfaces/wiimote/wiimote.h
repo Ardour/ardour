@@ -43,12 +43,13 @@ class WiimoteControlProtocol : public ARDOUR::ControlProtocol {
 		
 		void wiimote_main();
 		volatile bool main_thread_quit;
+		volatile bool restart_discovery;
 
 		Glib::Thread *main_thread;
 
 		void update_led_state();
 
-		bool thread_registered_for_ardour;
+		bool callback_thread_registered_for_ardour;
 
 		static uint16_t button_state;
 
