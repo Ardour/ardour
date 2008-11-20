@@ -193,11 +193,23 @@ load_rc_file (const string& filename, bool themechange)
 	Gtkmm2ext::UI::instance()->load_rcfile (rcfile, themechange);
 }
 
+/* hmm, this is a problem. the profile doesn't
+   exist when the theme manager is constructed
+   and toggles buttons during "normal" GTK setup.
+   
+   a better solution will be to make all Profile
+   methods static or something.
+
+   XXX FIX ME
+*/
+
+#define HACK_PROFILE_IS_SAE() (getenv("ARDOUR_SAE")!=0)
+
 void
 ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
-	if (Profile->get_sae()) {
+	if (HACK_PROFILE_IS_SAE()){
 		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_dark_sae.rc");
 	} else {
 		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_dark.rc");
@@ -209,7 +221,7 @@ void
 ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
-	if (Profile->get_sae()) {
+	if (HACK_PROFILE_IS_SAE()){
 		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light_sae.rc");
 	} else {
 		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light.rc");
