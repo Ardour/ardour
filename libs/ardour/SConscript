@@ -39,6 +39,7 @@ audio_playlist.cc
 audio_playlist_importer.cc
 audio_port.cc
 audio_track.cc
+audio_track_importer.cc
 audioanalyser.cc
 audioengine.cc
 audiofile_tagger.cc

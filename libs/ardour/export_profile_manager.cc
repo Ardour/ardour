@@ -722,6 +722,8 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 	/* Check format and maximum channel count */
 	if (!format || !format->type()) {
 		warnings->errors.push_back (_("No format selected!"));
+	} else if (!channel_config->get_n_chans()) {
+		warnings->errors.push_back (_("All channels are empty!"));
 	} else if (!ExportFileFactory::check (format, channel_config->get_n_chans())) {
 		warnings->errors.push_back (_("One or more of the selected formats is not compatible with this system!"));
 	} else if (format->channel_limit() < channel_config->get_n_chans()) {

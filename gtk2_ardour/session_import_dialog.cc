@@ -24,6 +24,7 @@
 
 #include <ardour/audio_region_importer.h>
 #include <ardour/audio_playlist_importer.h>
+#include <ardour/audio_track_importer.h>
 #include <ardour/location_importer.h>
 #include <ardour/tempo_map_importer.h>
 
@@ -110,6 +111,7 @@ SessionImportDialog::load_session (const string& filename)
 	handlers.push_back (HandlerPtr(region_handler));
 	handlers.push_back (HandlerPtr(new AudioPlaylistImportHandler (tree, target, *region_handler)));
 	handlers.push_back (HandlerPtr(new UnusedAudioPlaylistImportHandler (tree, target, *region_handler)));
+	handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, target)));
 	handlers.push_back (HandlerPtr(new LocationImportHandler (tree, target)));
 	handlers.push_back (HandlerPtr(new TempoMapImportHandler (tree, target)));
 	

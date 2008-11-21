@@ -92,8 +92,8 @@ Session::pre_export ()
 	
 	_exporting = true;
 	export_status->running = true;
-	export_abort_connection = export_status->Aborting.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::stop_audio_export)));
-	export_abort_connection = export_status->Finished.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::finalize_audio_export)));
+	export_status->Aborting.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::stop_audio_export)));
+	export_status->Finished.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::finalize_audio_export)));
 
 	return 0;
 }
@@ -239,7 +239,6 @@ Session::finalize_audio_export ()
 	ProcessExport.clear();
 	ExportReadFinished.clear();
 	export_freewheel_connection.disconnect();
-	export_abort_connection.disconnect();
 	export_handler.reset();
 	export_status.reset();
 

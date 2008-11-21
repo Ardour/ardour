@@ -1081,7 +1081,6 @@ class Session : public PBD::StatefulDestructible
 	void finalize_audio_export ();
 	
 	sigc::connection export_freewheel_connection;
-	sigc::connection export_abort_connection;
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);

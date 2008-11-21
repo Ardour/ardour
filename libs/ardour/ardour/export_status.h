@@ -36,7 +36,7 @@ enum ExportStage {
 	export_Write
 };
 
-struct ExportStatus {
+struct ExportStatus : public sigc::trackable {
 
 	ExportStatus ();
 	void init ();

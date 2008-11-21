@@ -103,7 +103,7 @@ AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & 
 			// All ok
 		} else if (!prop.compare("name")) {
 			name = (*it)->value();
-		} else if (!prop.compare("orig_diskstream_id")) {
+		} else if (!prop.compare("orig-diskstream-id")) {
 			ds_ok = true;
 		} else {
 			std::cerr << string_compose (X_("AudioPlaylistImporter did not recognise XML-property \"%1\""), prop) << endmsg;
