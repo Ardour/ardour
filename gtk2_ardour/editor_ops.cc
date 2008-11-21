@@ -6167,9 +6167,7 @@ Editor::goto_visual_state (uint32_t n)
 void
 Editor::start_visual_state_op (uint32_t n)
 {
-	cerr << "Start\n";
 	if (visual_state_op_connection.empty()) {
-		cerr << "\tqueue\n";
 		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
 	}
 }
@@ -6177,9 +6175,7 @@ Editor::start_visual_state_op (uint32_t n)
 void
 Editor::cancel_visual_state_op (uint32_t n)
 {
-	cerr << "Cancel\n";
-	if (!visual_state_op_connection.empty()) {
-		cerr << "\tgoto\n";
+	if (visual_state_op_connection.empty()) {
 		visual_state_op_connection.disconnect();
 		goto_visual_state (n);
 	} 
