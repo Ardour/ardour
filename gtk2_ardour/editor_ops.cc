@@ -6176,7 +6176,7 @@ void
 Editor::cancel_visual_state_op (uint32_t n)
 {
 	if (visual_state_op_connection.empty()) {
-		visual_state_op_connection.disconnect();
+		// visual_state_op_connection.disconnect();
 		goto_visual_state (n);
 	} 
 }
