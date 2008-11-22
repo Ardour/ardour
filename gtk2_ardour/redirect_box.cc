@@ -407,6 +407,10 @@ RedirectBox::use_plugins (const SelectedPlugins& plugins)
 		boost::shared_ptr<Redirect> redirect (new PluginInsert (_session, *p, _placement));
 
 		uint32_t err_streams;
+
+		if (Config->get_new_plugins_active()) {
+			redirect->set_active (true, this);
+		}
 		
 		if (_route->add_redirect (redirect, this, &err_streams)) {
 			weird_plugin_dialog (**p, err_streams, _route);

@@ -470,6 +470,12 @@ ARDOUR_UI::toggle_editing_space()
 }
 
 void
+ARDOUR_UI::toggle_new_plugins_active ()
+{
+	ActionManager::toggle_config_state ("options", "NewPluginsActive", &Configuration::set_new_plugins_active, &Configuration::get_new_plugins_active);
+}
+
+void
 ARDOUR_UI::toggle_StopPluginsWithTransport()
 {
 	ActionManager::toggle_config_state ("options", "StopPluginsWithTransport", &Configuration::set_plugins_stop_with_transport, &Configuration::get_plugins_stop_with_transport);
@@ -1125,6 +1131,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", &Configuration::get_jack_time_master);
 	} else if (PARAM_IS ("plugins-stop-with-transport")) {
 		ActionManager::map_some_state ("options",  "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport);
+	} else if (PARAM_IS ("new-plugins-active")) {
+		ActionManager::map_some_state ("options",  "NewPluginsActive", &Configuration::get_new_plugins_active);
 	} else if (PARAM_IS ("latched-record-enable")) {
 		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("verify-remove-last-capture")) {

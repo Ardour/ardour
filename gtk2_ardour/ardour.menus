@@ -534,6 +534,7 @@
 	       <menu action='MiscOptions'>
                	     <menuitem action='UseOSC'/>
                	     <menuitem action='StopPluginsWithTransport'/>
+               	     <menuitem action='NewPluginsActive'/>
                	     <menuitem action='DoNotRunPluginsWhileRecording'/>
                	     <menuitem action='LatchedRecordEnable'/>
                	     <menuitem action='RegionEquivalentsOverlap'/>
