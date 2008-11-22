@@ -71,7 +71,8 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	  quick_button (_("Quick but Ugly")),
 	  antialias_button (_("Skip Anti-aliasing")),
 	  stretch_opts_label (_("Contents:")),
-	  precise_button (_("Strict Linear"))
+	  precise_button (_("Strict Linear")),
+	  preserve_formants_button(_("Preserve Formants"))
 {
 	set_modal (true);
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -110,6 +111,9 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 		upper_button_box.pack_start (pitch_cent_spinner, false, false);
 
 		pitch_cent_spinner.set_digits (1);
+
+		upper_button_box.pack_start (preserve_formants_button, false, false);
+
 
 		add_button (_("Shift"), Gtk::RESPONSE_ACCEPT);
 
@@ -253,6 +257,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	bool peaklock = true;
 	bool longwin = false;
 	bool shortwin = false;
+	bool preserve_formants = false;
 	string txt;
 
 	enum {
@@ -262,6 +267,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	} transients = Transients;
 	
 	precise = current_timefx->precise_button.get_active();
+	preserve_formants = current_timefx->preserve_formants_button.get_active();
 	
 	txt = current_timefx->stretch_opts_selector.get_active_text ();
 
@@ -284,9 +290,13 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 
 	if (realtime)    options |= RubberBandStretcher::OptionProcessRealTime;
 	if (precise)     options |= RubberBandStretcher::OptionStretchPrecise;
+	if (preserve_formants)	options |= RubberBandStretcher::OptionFormantPreserved;
+
 	if (!peaklock)   options |= RubberBandStretcher::OptionPhaseIndependent;
 	if (longwin)     options |= RubberBandStretcher::OptionWindowLong;
 	if (shortwin)    options |= RubberBandStretcher::OptionWindowShort;
+		
+		
 		
 	switch (transients) {
 	case NoTransients:

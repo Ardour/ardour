@@ -2003,6 +2003,7 @@ public:
 	    Gtk::ComboBoxText     stretch_opts_selector;
 	    Gtk::Label            stretch_opts_label;
 	    Gtk::ToggleButton     precise_button;
+	    Gtk::ToggleButton     preserve_formants_button;
 	    Gtk::HBox             opts_box;
 
 	    Gtk::Button*          cancel_button;
