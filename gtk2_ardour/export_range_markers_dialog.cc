@@ -131,7 +131,6 @@ ExportRangeMarkersDialog::get_target_filepath(string path, string filename, stri
 	return target_filepath;
 }
 
-
 bool
 ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 {
@@ -148,10 +147,10 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
  	
 	if ( (stat (filepath.c_str(), &statbuf) != 0) || 
 		(!S_ISDIR (statbuf.st_mode)) ) {
-	 		string txt = _("Please select an existing target directory. Files are not allowed!");
-			MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
-			msg.run();
- 			return false;
+		string txt = _("Please select an existing target directory. Files are not allowed!");
+		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		msg.run();
+		return false;
 	}
  	
  	// directory needs to exist and be writable
@@ -165,7 +164,6 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 	
 	return true;
 }
-
 
 void
 ExportRangeMarkersDialog::init_progress_computing(Locations::LocationList& locations)

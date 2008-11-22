@@ -949,34 +949,37 @@ ExportDialog::do_export ()
 		return;
 	}
 
-	/* maybe add suffix */
+	if (!wants_dir()) {
 
-	int file_format = sndfile_header_format_from_string (header_format_combo.get_active_text ());
+		/* maybe add suffix */
+		
+		int file_format = sndfile_header_format_from_string (header_format_combo.get_active_text ());
+		
+		if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
+			if (filepath.find (".wav") != filepath.length() - 4) {
+				filepath += ".wav";
+			}
+		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_AIFF) {
+			if (filepath.find (".aiff") != filepath.length() - 5) {
+				filepath += ".aiff";
+			}
+		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_W64) {
+			if (filepath.find (".w64") != filepath.length() - 5) {
+				filepath += ".w64";
+			}
+		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_FLAC) {
+			if (filepath.find (".flac") != filepath.length() - 5) {
+				filepath += ".flac";
+			}
+		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_CAF) {
+			if (filepath.find (".caf") != filepath.length() - 4) {
+				filepath += ".caf";
+			}
+		}
 
-	if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
-		if (filepath.find (".wav") != filepath.length() - 4) {
-			filepath += ".wav";
-		}
-	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_AIFF) {
-		if (filepath.find (".aiff") != filepath.length() - 5) {
-			filepath += ".aiff";
-		}
-	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_W64) {
-		if (filepath.find (".w64") != filepath.length() - 5) {
-			filepath += ".w64";
-		}
-	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_FLAC) {
-		if (filepath.find (".flac") != filepath.length() - 5) {
-			filepath += ".flac";
-		}
-	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_CAF) {
-		if (filepath.find (".caf") != filepath.length() - 4) {
-			filepath += ".caf";
-		}
+		/* others ? */
 	}
 
-	/* others ? */
-		
 	if(!is_filepath_valid(filepath)){
 		return;
 	}
@@ -1011,8 +1014,6 @@ ExportDialog::do_export ()
 	end_dialog ();
 
 	/* if not stopped early and not SAE, ask for money, maybe */
-
-	cerr << "At end, spec.stop == " << spec.stop << endl;
 
 	if (!spec.stop && !Profile->get_sae()) {
 

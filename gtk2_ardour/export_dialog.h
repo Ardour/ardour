@@ -96,7 +96,7 @@ class ExportDialog : public ArdourDialog
   private:
 	PublicEditor&    editor;
 	ARDOUR::Session* session;
-    bool	track_and_master_selection_allowed;
+	bool	track_and_master_selection_allowed;
   	bool	channel_count_selection_allowed;
   	bool	export_cd_markers_allowed;
     
@@ -163,7 +163,7 @@ class ExportDialog : public ArdourDialog
 	void fill_lists();
 	void write_track_and_master_selection_to_spec();
 
-    void do_export_cd_markers (const string& path, const string& cuefile_type);
+	void do_export_cd_markers (const string& path, const string& cuefile_type);
 	void export_cue_file (ARDOUR::Locations::LocationList& locations, const string& path);
 	void export_toc_file (ARDOUR::Locations::LocationList& locations, const string& path);
 	void do_export ();

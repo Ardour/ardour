@@ -107,7 +107,7 @@
 (gtk_accel_path "<Actions>/Common/ToggleBigClock" "<%WINDOW%>b")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
 (gtk_accel_path "<Actions>/Editor/mute-unmute-region" "m")
-(gtk_accel_path "<Actions>/Common/goto-mixer" "<%WINDOW%>m")
+(gtk_accel_path "<Actions>/Common/toggle-editor-mixer-on-top" "<%WINDOW%>m")
 
 ;; arrow keys, navigation etc.
 
@@ -215,8 +215,9 @@
 (gtk_accel_path "<Actions>/Editor/toggle-edit-mode" "1")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-mode" "2")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-choice" "3")
-(gtk_accel_path "<Actions>/Transport/ToggleAutoReturn" "4")
-(gtk_accel_path "<Actions>/Transport/ToggleClick" "5")
+(gtk_accel_path "<Actions>/Editor/step-mouse-mode" "4")
+(gtk_accel_path "<Actions>/Transport/ToggleAutoReturn" "5")
+(gtk_accel_path "<Actions>/Transport/ToggleClick" "6")
 (gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "9")
 (gtk_accel_path "<Actions>/Editor/set-tempo-from-edit-range" "0")
 

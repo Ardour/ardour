@@ -403,6 +403,7 @@
 	       <separator/>
                <menuitem action='goto-editor'/>
                <menuitem action='goto-mixer'/>
+               <menuitem action='toggle-editor-mixer-on-top'/>
                <menuitem action='ToggleOptionsEditor'/>
                <menuitem action='ToggleInspector'/>
                <menuitem action='ToggleLocations'/>
