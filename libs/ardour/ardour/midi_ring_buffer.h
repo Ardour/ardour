@@ -85,7 +85,7 @@ private:
 
 
 /** Read the time and size of an event.  This call MUST be immediately proceeded
- * by a call to read_contents (or the read pointer will be garabage).
+ * by a call to read_contents (or the read pointer will be garbage).
  */
 inline bool
 MidiRingBuffer::read_prefix(Evoral::EventTime* time, Evoral::EventType* type, uint32_t* size)
@@ -100,8 +100,8 @@ MidiRingBuffer::read_prefix(Evoral::EventTime* time, Evoral::EventType* type, ui
 }
 
 
-/** Read the contenst of an event.  This call MUST be immediately preceeded
- * by a call to read_prefix (or the returned even will be garabage).
+/** Read the content of an event.  This call MUST be immediately preceded
+ * by a call to read_prefix (or the returned even will be garbage).
  */
 inline bool
 MidiRingBuffer::read_contents(uint32_t size, uint8_t* buf)
@@ -112,7 +112,7 @@ MidiRingBuffer::read_contents(uint32_t size, uint8_t* buf)
 
 /** Read a block of MIDI events from buffer.
  *
- * Timestamps of events returned are relative to start (ie event with stamp 0
+ * Timestamps of events returned are relative to start (i.e. event with stamp 0
  * occurred at start), with offset added.
  */
 inline size_t
