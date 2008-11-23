@@ -7,6 +7,8 @@
 # for each missing source file. The length of each file is determined
 # by how far regions using that source file go into the sample data.
 
+use FindBin '$Bin';
+use lib "$Bin";
 use XML::Parser::PerlSAX;
 use XML::Handler::XMLWriter;
 use IO::Handle;
