@@ -88,6 +88,50 @@ private:
 	PatchBanks           _patch_banks;
 };
 
+class CustomDeviceMode : public PBD::Stateful
+{
+public:
+	CustomDeviceMode() {};
+	virtual ~CustomDeviceMode() {};
+
+	const string& name() const               { return _name; }
+	void set_name(const string a_name)       { _name = a_name; }
+
+	
+	XMLNode& get_state (void);
+	int      set_state (const XMLNode& a_node);
+	
+private:
+	/// array index = channel number
+	/// string contents = name of channel name set 
+	string _name;
+	string _channel_name_set_assignments[16];
+};
+
+class MasterDeviceNames : public PBD::Stateful
+{
+public:
+	typedef std::list<ChannelNameSet> ChannelNameSets;
+	typedef std::list<std::string> Models;
+	
+	MasterDeviceNames() {};
+	virtual ~MasterDeviceNames() {};
+	
+	const string& manufacturer() const { return _manufacturer; }
+	void set_manufacturer(const string a_manufacturer) { _manufacturer = a_manufacturer; }
+	
+	const Models& models() const { return _models; }
+	void set_models(const Models some_models) { _models = some_models; }
+	
+	XMLNode& get_state (void);
+	int      set_state (const XMLNode& a_node);
+	
+private:
+	string _manufacturer;
+	Models _models;
+	ChannelNameSets _channel_name_sets;
+};
+
 class MIDINameDocument : public PBD::Stateful
 {
 public:

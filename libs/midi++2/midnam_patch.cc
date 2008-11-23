@@ -132,6 +132,53 @@ ChannelNameSet::set_state (const XMLNode& node)
 }
 
 int
+CustomDeviceMode::set_state(const XMLNode& a_node)
+{
+	assert(a_node.name() == "CustomDeviceNode");
+	boost::shared_ptr<XMLSharedNodeList> channel_name_set_assignments =
+		a_node.find("//ChannelNameSetAssign");
+	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
+	    i != channel_name_set_assignments->end();
+	    ++i) {
+		int channel = atoi((*i)->property("Channel")->value().c_str());
+		string name_set = (*i)->property("NameSet")->value();
+		assert( 1 <= channel && channel <= 16 );
+		_channel_name_set_assignments[channel -1] = name_set;
+	}
+	return 0;
+}
+
+XMLNode&
+CustomDeviceMode::get_state(void)
+{
+	XMLNode* custom_device_mode = new XMLNode("CustomDeviceMode");
+	custom_device_mode->add_property("Name",   _name);
+	XMLNode* channel_name_set_assignments = 
+		custom_device_mode->add_child("ChannelNameSetAssignments");
+	for (int i = 0; i < 15 && !_channel_name_set_assignments[i].empty(); i++) {
+		XMLNode* channel_name_set_assign = 
+			channel_name_set_assignments->add_child("ChannelNameSetAssign");
+		channel_name_set_assign->add_property("Channel", i + 1);
+		channel_name_set_assign->add_property("NameSet", _channel_name_set_assignments[i]);
+	}
+	
+	return *custom_device_mode;
+}
+
+int
+MasterDeviceNames::set_state(const XMLNode& a_node)
+{
+	return 0;
+}
+
+XMLNode&
+MasterDeviceNames::get_state(void)
+{
+	static XMLNode nothing("<nothing>");
+	return nothing;
+}
+
+int
 MIDINameDocument::set_state(const XMLNode& a_node)
 {
 	return 0;
