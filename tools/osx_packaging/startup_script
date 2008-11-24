@@ -1,12 +1,15 @@
 #!/bin/sh
 
 #
+# NOTE: Leopard appears not to set PATH for this script, so be absolutely certain
+# never to use any other program without fully specifying the path.
+#
 # this is used to detect a missing JACK install which
 # is the most common thing causing startup crashes.
 # 
 
 if test ! -x /usr/local/bin/jackd -a ! -x /usr/bin/jackd ; then
-   osascript -e 'tell application "Terminal"
+   /usr/bin/osascript -e 'tell application "Finder"
 display dialog "You do not have JACK installed. Ardour will not run without it. See http://jackaudio.org/ for info" buttons["OK"]
 end tell'
    exit 1
@@ -19,5 +22,3 @@ fi
 
 CWD="`/usr/bin/dirname \"$0\"`"
 exec "$CWD/Ardour2.bin" "$*"
-
-
