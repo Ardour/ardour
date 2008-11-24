@@ -93,17 +93,24 @@ class UndoHistory : public sigc::trackable
 	void clear_undo ();
 	void clear_redo ();
 
+	/* returns all or part of the history.
+	   If depth==0 it returns just the top
+	   node. If depth<0, it returns everything.
+	   If depth>0, it returns state for that
+	   many elements of the history, or 
+	   the full history, whichever is smaller.
+	*/
+
         XMLNode &get_state(int32_t depth = 0);
         void save_state();
 
-	void set_depth (int32_t);
-	int32_t get_depth() const { return _depth; }
+	void set_depth (uint32_t);
 
 	sigc::signal<void> Changed;
 	
   private:
 	bool _clearing;
-	int32_t _depth;
+	uint32_t _depth;
 	std::list<UndoTransaction*> UndoList;
 	std::list<UndoTransaction*> RedoList;
 
