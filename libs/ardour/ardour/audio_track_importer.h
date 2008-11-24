@@ -50,10 +50,12 @@ class AudioTrackImporter : public ElementImporter
 
   private:
 
-	bool parse_io (XMLNode const & node);
-	bool parse_processor (XMLNode const & node);
+	bool parse_route_xml ();
+	bool parse_io ();
 	
-	bool parse_controllable (XMLNode const & node, XMLNode & dest_parent);
+	bool parse_processor (XMLNode & node);
+	bool parse_controllable (XMLNode & node);
+	bool parse_automation (XMLNode & node);
 	
 	XMLNode xml_track;
 	

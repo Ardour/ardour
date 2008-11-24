@@ -180,7 +180,7 @@ AudioRegionImporter::move ()
 bool
 AudioRegionImporter::parse_xml_region ()
 {
-	XMLPropertyList const & props = xml_region.properties();;
+	XMLPropertyList const & props = xml_region.properties();
 	bool id_ok = false;
 	bool name_ok = false;
 	
