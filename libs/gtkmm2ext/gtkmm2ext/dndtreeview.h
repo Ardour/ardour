@@ -82,6 +82,15 @@ class DnDTreeView : public DnDTreeViewBase
 			Gtk::TreeSelection::ListHandle_Path selection = get_selection()->get_selected_rows ();
 			SerializedObjectPointers<DataType>* sr = serialize_pointers (get_model(), &selection, selection_data.get_target());
 			selection_data.set (8, (guchar*)sr, sr->size);
+			/* we don't need the allocated block anymore,
+			   it will have been copied. this is wierd - 
+			   the objects we put into the block have
+			   effectively been moved into the copy
+			   made by Gtk::SelectionData::set(),
+			   leaving our memory block a mere ghost.
+			   we're just fixing a memory leak here.
+			*/
+			delete [] (reinterpret_cast<char*>(sr));
 		}
 	}
 	
@@ -108,6 +117,19 @@ class DnDTreeView : public DnDTreeViewBase
 			
 			if (sr) {
 				signal_object_drop (sr->type, sr->cnt, sr->data);
+
+				/* now clean up the pointers in the blob.
+				   Note that we make an explicit call
+				   to the destructor rather than using
+				   delete - the object does not own
+				   the memory in which it lives - it 
+				   was allocated as a single contiguous
+				   block (see below).
+				 */
+
+				for (uint32_t x = 0; x < sr->cnt; ++x) {
+					sr->data[x].~DataType();
+				}
 			}
 			
 		} else {
