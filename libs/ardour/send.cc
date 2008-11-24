@@ -59,6 +59,21 @@ Send::Send (const Send& other)
 	_metering = false;
 	expected_inputs = 0;
 
+	/* set up the same outputs, and connect them to the same places */
+	for (uint32_t i = 0; i < other.n_outputs (); ++i) {
+		add_output_port ("", 0);
+		Port* p = other.output (i);
+		if (p) {
+			/* this is what the other send's output is connected to */
+			const char **connections = p->get_connections ();
+			if (connections) {
+				for (uint32_t c = 0; connections[c]; ++c) {
+					connect_output (output (i), connections [c], 0);
+				}
+			}
+		}
+	}
+
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
