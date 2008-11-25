@@ -9,6 +9,8 @@
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>period")
 (gtk_accel_path "<Actions>/Transport/record-roll" "<%PRIMARY%>space")
 
+(gtk_accel_path "<Actions>/Common/ToggleOptionsEditor" "<%PRIMARY%>,")
+
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<%PRIMARY%><%SECONDARY%>less")
 (gtk_accel_path "<Actions>/Editor/align-regions-end-relative" "<%PRIMARY%>less")
 (gtk_accel_path "<Actions>/Editor/align-regions-start" "<%LEVEL4%><%SECONDARY%>less")
@@ -61,7 +63,6 @@
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/addExistingAudioFiles" "<%PRIMARY%>i")
 (gtk_accel_path "<Actions>/Editor/invert-selection" "<%TERTIARY%>i")
-(gtk_accel_path "<Actions>/Common/ToggleOptionsEditor" "<%SECONDARY%>o")
 (gtk_accel_path "<Actions>/Main/Open" "<%PRIMARY%>o")
 (gtk_accel_path "<Actions>/Main/Recent" "<%PRIMARY%><%TERTIARY%>o")
 (gtk_accel_path "<Actions>/Editor/naturalize-region" "<%LEVEL4%>o")
