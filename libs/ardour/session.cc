@@ -2406,6 +2406,10 @@ Session::catch_up_on_solo ()
 void
 Session::catch_up_on_solo_mute_override ()
 {
+	if (Config->get_solo_model() != InverseMute) {
+		return;
+	}
+
 	/* this is called whenever the param solo-mute-override is
 	   changed.
 	*/

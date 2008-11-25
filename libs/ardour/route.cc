@@ -824,16 +824,23 @@ Route::set_solo (bool yn, void *src)
 void
 Route::catch_up_on_solo_mute_override ()
 {
-	Glib::Mutex::Lock lm (declick_lock);
+	if (Config->get_solo_model() != InverseMute) {
+		return;
+	}
+	
+	{
 
-	if (_muted) {
-		if (Config->get_solo_mute_override()) {
-			desired_mute_gain = (_soloed?1.0:0.0);
+		Glib::Mutex::Lock lm (declick_lock);
+		
+		if (_muted) {
+			if (Config->get_solo_mute_override()) {
+				desired_mute_gain = (_soloed?1.0:0.0);
+			} else {
+				desired_mute_gain = 0.0;
+			}
 		} else {
-			desired_mute_gain = 0.0;
+			desired_mute_gain = 1.0;
 		}
-	} else {
-		desired_mute_gain = 1.0;
 	}
 }
 
