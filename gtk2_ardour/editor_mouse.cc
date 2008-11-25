@@ -395,10 +395,11 @@ Editor::step_mouse_mode (bool next)
 void
 Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	/* in object/audition/timefx mode, any button press sets
-	   the selection if the object can be selected. this is a
-	   bit of hack, because we want to avoid this if the
-	   mouse operation is a region alignment.
+ 	/* in object/audition/timefx/gain-automation mode,
+	   any button press sets the selection if the object
+	   can be selected. this is a bit of hack, because
+	   we want to avoid this if the mouse operation is a
+	   region alignment.
 
 	   note: not dbl-click or triple-click
 	*/
@@ -406,6 +407,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	if (((mouse_mode != MouseObject) &&
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
+	     (mouse_mode != MouseGain) &&
 	     (mouse_mode != MouseRange)) ||
 
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
@@ -424,7 +426,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			}
 		}
 	}
-	    
+
 	Selection::Operation op = Keyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
