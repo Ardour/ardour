@@ -74,6 +74,10 @@ Send::Send (const Send& other)
 		}
 	}
 
+	if (other.active()) {
+		set_active (true, this);
+	}
+
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
 

@@ -810,8 +810,9 @@ RedirectBox::copy_redirects ()
 	}
 
 	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
-		// Do not copy inserts or sends
-		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
+		// Do not copy inserts 
+		if ((boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) ||
+		    (boost::dynamic_pointer_cast<Send>((*i)) != 0)) {
 			copies.push_back (Redirect::clone (*i));
 		}
   	}
