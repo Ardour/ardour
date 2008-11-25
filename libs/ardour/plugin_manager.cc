@@ -152,15 +152,42 @@ void
 PluginManager::ladspa_refresh ()
 {
 	_ladspa_plugin_info.clear ();
-	static const char *standard_path = "/usr/local/lib64/ladspa:/usr/local/lib/ladspa:/usr/lib64/ladspa:/usr/lib/ladspa:/Library/Audio/Plug-Ins/LADSPA";
+	
+	static const char *standard_paths[] = {
+		"/usr/local/lib64/ladspa",
+		"/usr/local/lib/ladspa",
+		"/usr/lib64/ladspa",
+		"/usr/lib/ladspa",
+		"/Library/Audio/Plug-Ins/LADSPA",
+		""
+	};
 	
 	/* allow LADSPA_PATH to augment, not override standard locations */
 
-	if (ladspa_path.empty()) {
-		ladspa_path = standard_path;
-	} else {
-		ladspa_path += ":";
-		ladspa_path += standard_path;
+	/* Only add standard locations to ladspa_path if it doesn't
+	 * already contain them. Check for trailing '/'s too.
+	 */
+	 
+	int i;
+	for (i = 0; standard_paths[i][0]; i++) {
+		size_t found = ladspa_path.find(standard_paths[i]);
+		if (found != ladspa_path.npos) {
+			switch (ladspa_path[found + strlen(standard_paths[i])]) {
+				case ':' :
+				case '\0':
+					continue;
+				case '/' :
+					if (ladspa_path[found + strlen(standard_paths[i]) + 1] == ':' ||
+					    ladspa_path[found + strlen(standard_paths[i]) + 1] == '\0') {
+						continue;
+					}
+			}
+		}
+		if (!ladspa_path.empty())
+			ladspa_path += ":";
+		
+		ladspa_path += standard_paths[i]; 
+		
 	}
 
 	ladspa_discover_from_path (ladspa_path);
