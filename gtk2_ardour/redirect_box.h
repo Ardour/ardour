@@ -125,7 +125,7 @@ class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Redirect> > redirect_display;
 	Gtk::ScrolledWindow    redirect_scroller;
 
-	void object_drop (std::string type, uint32_t cnt, const boost::shared_ptr<ARDOUR::Redirect>*);
+	void object_drop (const std::list<boost::shared_ptr<ARDOUR::Redirect> >&);
 
 	Width _width;
 	
@@ -184,7 +184,7 @@ class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 	void get_selected_redirects (vector<boost::shared_ptr<ARDOUR::Redirect> >&);
 
 	static Glib::RefPtr<Gtk::Action> paste_action;
-	void paste_redirect_list (std::list<boost::shared_ptr<ARDOUR::Redirect> >& redirects);
+	void paste_redirect_list (const std::list<boost::shared_ptr<ARDOUR::Redirect> >& redirects);
 	
 	void activate_redirect (boost::shared_ptr<ARDOUR::Redirect>);
 	void deactivate_redirect (boost::shared_ptr<ARDOUR::Redirect>);

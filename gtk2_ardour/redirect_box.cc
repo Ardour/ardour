@@ -121,7 +121,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, PluginSelector &plugse
 	redirect_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	redirect_display.get_column(0)->set_fixed_width(48);
 	redirect_display.add_object_drag (columns.redirect.index(), "redirects");
-	redirect_display.signal_object_drop.connect (mem_fun (*this, &RedirectBox::object_drop));
+	redirect_display.signal_drop.connect (mem_fun (*this, &RedirectBox::object_drop));
 
 	TreeViewColumn* name_col = redirect_display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(redirect_display.get_column_cell_renderer (0));
@@ -169,22 +169,8 @@ RedirectBox::route_going_away ()
 }
 
 void
-RedirectBox::object_drop (string type, uint32_t cnt, const boost::shared_ptr<Redirect>* ptr)
+RedirectBox::object_drop (const list<boost::shared_ptr<Redirect> >& redirects)
 {
-	cerr << "Object drop, type = " << type << " cnt = " << cnt << endl;
-
-	if (type != "redirects" || cnt == 0 || !ptr) {
-		return;
-	}
-
-	/* do something with the dropped redirects */
-
-	list<boost::shared_ptr<Redirect> > redirects;
-	
-	for (uint32_t n = 0; n < cnt; ++n) {
-		redirects.push_back (ptr[n]);
-	}
-	
 	paste_redirect_list (redirects);
 }
 
@@ -193,7 +179,6 @@ RedirectBox::update()
 {
 	redisplay_redirects (0);
 }
-
 
 void
 RedirectBox::set_width (Width w)
@@ -953,11 +938,11 @@ RedirectBox::paste_redirects ()
 }
 
 void
-RedirectBox::paste_redirect_list (list<boost::shared_ptr<Redirect> >& redirects)
+RedirectBox::paste_redirect_list (const list<boost::shared_ptr<Redirect> >& redirects)
 {
 	list<boost::shared_ptr<Redirect> > copies;
 
-	for (list<boost::shared_ptr<Redirect> >::iterator i = redirects.begin(); i != redirects.end(); ++i) {
+	for (list<boost::shared_ptr<Redirect> >::const_iterator i = redirects.begin(); i != redirects.end(); ++i) {
 
 		boost::shared_ptr<Redirect> copy = Redirect::clone (*i);
 
