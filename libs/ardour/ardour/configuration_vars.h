@@ -91,6 +91,7 @@ CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
 CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", false)
+CONFIG_VARIABLE (bool, solo_mute_override, "solo-mute-override", false)
 CONFIG_VARIABLE (bool, tape_machine_mode, "tape-machine-mode", false)
 
 /* click */

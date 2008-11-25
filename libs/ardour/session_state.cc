@@ -3363,6 +3363,8 @@ Session::config_changed (const char* parameter_name)
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 			deliver_midi (_mmc_port, buf, 2);
 		}
+	} else if (PARAM_IS ("solo-mute-override")) {
+		catch_up_on_solo_mute_override ();
 	}
 
 	set_dirty ();

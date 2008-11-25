@@ -516,6 +516,7 @@
                    <menuitem action='SoloInPlace'/>
                    <menuitem action='SoloViaBus'/>
                    <menuitem action='ShowSoloMutes'/>
+                   <menuitem action='SoloMuteOverride'/>
                </menu>
 	       <menu action='Crossfades'>
 		   <menuitem action='toggle-xfades-active'/>

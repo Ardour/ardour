@@ -466,6 +466,7 @@ Default(ardour_dark_theme)
 Default(ardour_light_theme)
 Default(ardour_dark_sae_theme)
 Default(ardour_light_sae_theme)
+Default(ardour_menus)
 
 if env['VST']:
 	Default(ardourlib)

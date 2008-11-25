@@ -2302,8 +2302,6 @@ Session::update_route_solo_state ()
 	bool is_track = false;
 	bool signal = false;
 
-	/* caller must hold RouteLock */
-
 	/* this is where we actually implement solo by changing
 	   the solo mute setting of each track.
 	*/
@@ -2404,7 +2402,20 @@ Session::catch_up_on_solo ()
 	*/
 	update_route_solo_state();
 }	
-		
+
+void
+Session::catch_up_on_solo_mute_override ()
+{
+	/* this is called whenever the param solo-mute-override is
+	   changed.
+	*/
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->catch_up_on_solo_mute_override ();
+	}
+}	
+
 shared_ptr<Route>
 Session::route_by_name (string name)
 {

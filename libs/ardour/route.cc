@@ -816,6 +816,24 @@ Route::set_solo (bool yn, void *src)
 		_soloed = yn;
 		solo_changed (src); /* EMIT SIGNAL */
 		_solo_control.Changed (); /* EMIT SIGNAL */
+	}	
+	
+	catch_up_on_solo_mute_override ();
+}
+
+void
+Route::catch_up_on_solo_mute_override ()
+{
+	Glib::Mutex::Lock lm (declick_lock);
+
+	if (_muted) {
+		if (Config->get_solo_mute_override()) {
+			desired_mute_gain = (_soloed?1.0:0.0);
+		} else {
+			desired_mute_gain = 0.0;
+		}
+	} else {
+		desired_mute_gain = 1.0;
 	}
 }
 
@@ -855,7 +873,12 @@ Route::set_mute (bool yn, void *src)
 		_mute_control.Changed (); /* EMIT SIGNAL */
 		
 		Glib::Mutex::Lock lm (declick_lock);
-		desired_mute_gain = (yn?0.0f:1.0f);
+		
+		if (_soloed && Config->get_solo_mute_override()){
+			desired_mute_gain = 1.0f;
+		} else {
+			desired_mute_gain = (yn?0.0f:1.0f);
+		}
 	}
 }
 

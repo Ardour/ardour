@@ -1479,6 +1479,7 @@ class Session : public PBD::StatefulDestructible
 	void route_mute_changed (void *src);
 	void route_solo_changed (void *src, boost::weak_ptr<Route>);
 	void catch_up_on_solo ();
+	void catch_up_on_solo_mute_override ();
 	void update_route_solo_state ();
 	void modify_solo_mute (bool, bool);
 	void strip_portname_for_solo (string& portname);

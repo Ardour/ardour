@@ -554,6 +554,12 @@ ARDOUR_UI::toggle_ShowSoloMutes()
 }
 
 void
+ARDOUR_UI::toggle_SoloMuteOverride()
+{
+	ActionManager::toggle_config_state ("options", "SoloMuteOverride", &Configuration::set_solo_mute_override, &Configuration::get_solo_mute_override);
+}
+
+void
 ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor()
 {
 	ActionManager::toggle_config_state ("options", "PrimaryClockDeltaEditCursor", &Configuration::set_primary_clock_delta_edit_cursor, &Configuration::get_primary_clock_delta_edit_cursor);
@@ -1105,6 +1111,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
 	} else if (PARAM_IS ("show-solo-mutes")) {
 		ActionManager::map_some_state ("options", "ShowSoloMutes", &Configuration::get_show_solo_mutes);
+	} else if (PARAM_IS ("solo-mute-override")) {
+		ActionManager::map_some_state ("options", "SoloMuteOverride", &Configuration::get_solo_mute_override);
 	} else if (PARAM_IS ("solo-model")) {
 		map_solo_model ();
 	} else if (PARAM_IS ("auto-play")) {
