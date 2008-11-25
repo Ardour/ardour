@@ -26,6 +26,10 @@
                <menuitem action='FlushWastebasket'/>
            </menu>
            <separator/>
+#ifdef GTKOSX
+           <menuitem action='ToggleOptionsEditor'/>
+           <menuitem action='About'/>
+#endif
            <menuitem action='Quit'/>
         </menu>
 
@@ -207,6 +211,10 @@
 		   <separator/>
 		   <menuitem action='break-drag'/>
              </menu>
+#ifndef GTKOSX
+	     <separator/>
+             <menuitem action='ToggleOptionsEditor'/>
+#endif
         </menu>         
 
 	<menu action='RegionMenu'>
@@ -404,7 +412,6 @@
                <menuitem action='goto-editor'/>
                <menuitem action='goto-mixer'/>
                <menuitem action='toggle-editor-mixer-on-top'/>
-               <menuitem action='ToggleOptionsEditor'/>
                <menuitem action='ToggleInspector'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleKeyEditor'/>

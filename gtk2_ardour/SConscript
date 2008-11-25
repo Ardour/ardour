@@ -400,6 +400,15 @@ for style in ['', 'BOLD', 'ITALIC']:
 		key = '%' + key + '%'
 		my_font_dict[key] = fontstyle
 
+#
+# create menus based on build platform
+# 
+
+if env['GTKOSX']:
+	ardour_menus = env.Command ('ardour.menus', 'ardour.menus.in', "cpp -E -P -DGTKOSX -DTOP_MENUBAR ardour.menus.in ardour_osx.menus", chdir=1)
+else:
+	ardour_menus = env.Command ('ardour.menus', 'ardour.menus.in', "cpp -E -P ardour.menus.in ardour.menus", chdir=1)
+
 ardour_dark_theme = env.SubstInFile ('ardour2_ui_dark.rc', 'ardour2_ui_dark.rc.in', SUBST_DICT = my_font_dict)
 ardour_light_theme = env.SubstInFile ('ardour2_ui_light.rc', 'ardour2_ui_light.rc.in', SUBST_DICT = my_font_dict)
 ardour_dark_sae_theme = env.SubstInFile ('ardour2_ui_dark_sae.rc', 'ardour2_ui_dark_sae.rc.in', SUBST_DICT = my_font_dict)
@@ -545,8 +554,13 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
-                                        'ardour2_ui_dark.rc.in', 'ardour2_ui_light.rc.in', 'ardour2_ui_dark_sae.rc.in', 'ardour2_ui_light_sae.rc.in', 'splash.png', 
-                                        'ardour.menus', 'ardour-sae.menus', 
+                                        'ardour2_ui_dark.rc.in', 
+					'ardour2_ui_light.rc.in', 
+					'ardour2_ui_dark_sae.rc.in', 
+					'ardour2_ui_light_sae.rc.in', 
+					'splash.png', 
+					'ardour.menus.in',
+                                        'ardour-sae.menus', 
 					'mnemonic-us.bindings.in', 
 					'ergonomic-us.bindings.in', 
 					'SAE-us-keypad.bindings.in', 
