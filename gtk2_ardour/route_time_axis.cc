@@ -758,6 +758,18 @@ RouteTimeAxisView::set_height (uint32_t h)
 	} else {
 
 		hide_meter ();
+
+		/* don't allow name_entry to be hidden while
+		   it has focus, otherwise the GUI becomes unusable.
+		*/
+
+		if (name_entry.has_focus()) {
+			if (name_entry.get_text() != _route->name()) {
+				name_entry_changed ();
+			}
+			controls_ebox.grab_focus ();
+		}
+
 		hide_name_entry ();
 		show_name_label ();
 		
