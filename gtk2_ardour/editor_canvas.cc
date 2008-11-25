@@ -544,15 +544,14 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 		      const SelectionData& data,
 		      guint info, guint time)
 {
-	const SerializedObjectPointers<boost::shared_ptr<Region> >* sr = 
-		reinterpret_cast<const SerializedObjectPointers<boost::shared_ptr<Region> > *> (data.get_data());
+	std::list<boost::shared_ptr<Region> > regions;
+	region_list_display.get_object_drag_data (regions);
 
-	for (uint32_t i = 0; i < sr->cnt; ++i) {
+	for (list<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r) {
 
-		boost::shared_ptr<Region> r = sr->data[i];
 		boost::shared_ptr<AudioRegion> ar;
 
-		if ((ar = boost::dynamic_pointer_cast<AudioRegion>(r)) != 0) {
+		if ((ar = boost::dynamic_pointer_cast<AudioRegion>(*r)) != 0) {
 			insert_region_list_drag (ar, x, y);
 		}
 	}
