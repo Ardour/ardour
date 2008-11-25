@@ -1819,10 +1819,11 @@ void
 Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region> region, Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
+	Gtk::MenuItem* foo_item;
 	Menu     *region_menu = manage (new Menu);
 	MenuList& items       = region_menu->items();
 	region_menu->set_name ("ArdourContextMenu");
-	
+
 	boost::shared_ptr<AudioRegion> ar;
 
 	if (region) {
@@ -1983,7 +1984,15 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	trim_menu->set_name ("ArdourContextMenu");
 	
 	trim_items.push_back (MenuElem (_("Start to edit point"), mem_fun(*this, &Editor::trim_region_from_edit_point)));
+	foo_item = &trim_items.back();
+	if (_edit_point == EditAtMouse) {
+		foo_item->set_sensitive (false);
+	}
 	trim_items.push_back (MenuElem (_("Edit point to end"), mem_fun(*this, &Editor::trim_region_to_edit_point)));
+	foo_item = &trim_items.back();
+	if (_edit_point == EditAtMouse) {
+		foo_item->set_sensitive (false);
+	}
 	trim_items.push_back (MenuElem (_("Trim To Loop"), mem_fun(*this, &Editor::trim_region_to_loop)));
 	trim_items.push_back (MenuElem (_("Trim To Punch"), mem_fun(*this, &Editor::trim_region_to_punch)));
 			     
@@ -1992,6 +2001,10 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	items.push_back (MenuElem (_("Split"), (mem_fun(*this, &Editor::split_region))));
 	region_edit_menu_split_item = &items.back();
+	
+	if (_edit_point == EditAtMouse) {
+		region_edit_menu_split_item->set_sensitive (false);
+	}
 
 	items.push_back (MenuElem (_("Make mono regions"), (mem_fun(*this, &Editor::split_multichannel_region))));
 	region_edit_menu_split_multichannel_item = &items.back();
