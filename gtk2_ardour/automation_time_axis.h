@@ -106,7 +106,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool    first_call_to_set_height;
 
 	Gtk::Button        hide_button;
-	Gtk::Button        height_button;
 	Gtk::Button        clear_button;
 	Gtk::Button        auto_button; 
 	Gtk::Menu*         automation_menu;
@@ -119,7 +118,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	Gtk::CheckMenuItem*     auto_write_item;
 
 	void clear_clicked ();
-	void height_clicked ();
 	void hide_clicked ();
 	void auto_clicked ();
 

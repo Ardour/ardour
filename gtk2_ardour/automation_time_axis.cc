@@ -52,7 +52,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	  route (r),
 	  _name (nom),
 	  _state_name (state_name),
-	  height_button (_("h")),
 	  clear_button (_("clear")),
 	  auto_button (X_("")) /* force addition of a label */
 {
@@ -87,19 +86,16 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
-	height_button.set_name ("TrackSizeButton");
 	auto_button.set_name ("TrackVisualButton");
 	clear_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
-	height_button.unset_flags (Gtk::CAN_FOCUS);
 	auto_button.unset_flags (Gtk::CAN_FOCUS);
 	clear_button.unset_flags (Gtk::CAN_FOCUS);
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
 
 	controls_table.set_no_show_all();
 
-	ARDOUR_UI::instance()->tooltips().set_tip(height_button, _("track height"));
 	ARDOUR_UI::instance()->tooltips().set_tip(auto_button, _("automation state"));
 	ARDOUR_UI::instance()->tooltips().set_tip(clear_button, _("clear track"));
 	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("hide track"));
@@ -160,14 +156,12 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	
 	/* add the buttons */
 	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (height_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	controls_table.attach (auto_button, 5, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (clear_button, 5, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	controls_table.show_all ();
 
-	height_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::height_clicked));
 	clear_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::clear_clicked));
 	hide_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::hide_clicked));
 	auto_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::auto_clicked));
@@ -288,12 +282,6 @@ AutomationTimeAxisView::automation_state_changed ()
 }
 
 void
-AutomationTimeAxisView::height_clicked ()
-{
-	popup_size_menu (0);
-}
-
-void
 AutomationTimeAxisView::clear_clicked ()
 {
 	_session.begin_reversible_command (_("clear automation"));
@@ -307,7 +295,7 @@ void
 AutomationTimeAxisView::set_height (uint32_t h)
 {
 	bool changed = (height != (uint32_t) h);
-	bool changed_between_small_and_normal = ( (h == hSmall || h == hSmaller) ^ (height == hSmall || height == hSmaller) );
+	bool changed_between_small_and_normal = ( (height < hNormal && h >= hNormal) || (height >= hNormal || h < hNormal) );
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	XMLNode* xml_node = (state_parent ? state_parent->get_child_xml_node (_state_name) : NULL);
@@ -351,7 +339,6 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			name_hbox.show_all ();
 			
 			auto_button.show();
-			height_button.show();
 			clear_button.show();
 			hide_button.show_all();
 
@@ -370,15 +357,11 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			name_hbox.show_all ();
 			
 			auto_button.hide();
-			height_button.hide();
 			clear_button.hide();
 			hide_button.hide();
 		}
 	} else if (h >= hNormal){
-		auto_button.show();
-		height_button.show();
-		clear_button.show();
-		hide_button.show_all();
+		cerr << "track grown, but neither changed_between_small_and_normal nor first_call_to_set_height set!" << endl;
 	}
 
 	if (changed) {
