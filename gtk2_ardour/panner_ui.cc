@@ -210,14 +210,12 @@ PannerUI::get_controllable()
 bool
 PannerUI::panning_link_button_press (GdkEventButton* ev)
 {
-	cerr << "link press\n";
 	return true;
 }
 
 bool
 PannerUI::panning_link_button_release (GdkEventButton* ev)
 {
-	cerr << "link release\n";
 	if (!ignore_toggle) {
 		_io->panner().set_linked (!_io->panner().linked());
 	}
@@ -244,7 +242,7 @@ PannerUI::update_pan_linkage ()
 	
 	bool x = _io->panner().linked();
 	bool bx = panning_link_button.get_active();
-	
+
 	if (x != bx) {
 		
 		ignore_toggle = true;
@@ -313,6 +311,7 @@ PannerUI::panner_changed ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &PannerUI::panner_changed));
 	setup_pan ();
+	pan_changed (0);
 }
 
 void

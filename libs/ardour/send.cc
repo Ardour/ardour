@@ -24,6 +24,7 @@
 #include <ardour/send.h>
 #include <ardour/session.h>
 #include <ardour/port.h>
+#include <ardour/panner.h>
 
 #include "i18n.h"
 
@@ -60,6 +61,7 @@ Send::Send (const Send& other)
 	expected_inputs = 0;
 
 	/* set up the same outputs, and connect them to the same places */
+	no_panner_reset = true;
 	for (uint32_t i = 0; i < other.n_outputs (); ++i) {
 		add_output_port ("", 0);
 		Port* p = other.output (i);
@@ -73,10 +75,17 @@ Send::Send (const Send& other)
 			}
 		}
 	}
+	
+	/* setup panner */
 
-	if (other.active()) {
-		set_active (true, this);
-	}
+	no_panner_reset = false;
+
+	/* copy state */
+
+	XMLNode& other_state (const_cast<Send*>(&other)->_panner->get_state());
+	_panner->set_state (other_state);
+	
+	delete &other_state;
 
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
