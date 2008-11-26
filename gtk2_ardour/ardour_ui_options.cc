@@ -62,6 +62,12 @@ ARDOUR_UI::toggle_send_mmc ()
 }
 
 void
+ARDOUR_UI::toggle_send_midi_clock ()
+{
+	ActionManager::toggle_config_state ("options", "SendMidiClock", &Configuration::set_send_midi_clock, &Configuration::get_send_midi_clock);
+}
+
+void
 ARDOUR_UI::toggle_use_mmc ()
 {
 	ActionManager::toggle_config_state ("options", "UseMMC", &Configuration::set_mmc_control, &Configuration::get_mmc_control);

@@ -17,6 +17,7 @@
 
     $Id$
 */
+
 #include <sigc++/sigc++.h>
 
 #include "ardour/types.h"
@@ -42,31 +43,36 @@ public:
 		const SMPTE::Time& transport_smpte) = 0;
 	
 	virtual void set_session(Session& s);
-	virtual void going_away() { _session = 0; }
+	virtual void going_away() { _session = 0;  delete this; }
 
-private:
+protected:
 	Session* _session;
 };
 
 class MidiClockTicker : public Ticker
 {
-	MidiClockTicker() : _jack_port(0) {};
+public:
+	MidiClockTicker() : _jack_port(0), _ppqn(24) {};
 	virtual ~MidiClockTicker() {};
-	
 	
 	void tick(
 		const nframes_t& transport_frames, 
 		const BBT_Time& transport_bbt, 
 		const SMPTE::Time& transport_smpte);
 	
-	
+	void set_session(Session& s);
 	void going_away() { Ticker::going_away(); _jack_port = 0;}
 	
-	void set_midi_port(MIDI::JACK_MidiPort &port);
+	/// slot for the signal session::MIDIClock_PortChanged
+	void update_midi_clock_port();
+	
+	/// pulses per quarter note (default 24)
+	void set_ppqn(int ppqn) { _ppqn = ppqn; }
 
 private:	
 	MIDI::JACK_MidiPort* _jack_port;
-	
+	nframes_t            _last_tick;
+	int                  _ppqn;
 };
 
 }

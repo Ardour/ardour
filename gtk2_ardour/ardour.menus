@@ -430,6 +430,7 @@
                </menu>
 	       <menu action='SyncMenu'>
                	     <menuitem action='SendMTC'/>
+               	     <menuitem action='SendMidiClock'/>
                	     <menuitem action='SendMMC'/>
                	     <menuitem action='UseMMC'/>
 	       </menu>

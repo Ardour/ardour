@@ -101,6 +101,7 @@
 #include <ardour/filename_extensions.h>
 #include <ardour/directory_names.h>
 #include <ardour/template_utils.h>
+#include <ardour/ticker.h>
 
 #include <control_protocol/control_protocol.h>
 
@@ -357,6 +358,9 @@ Session::second_stage_init (bool new_session)
 	_engine.transport_locate (0);
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
+	
+	MidiClockTicker* midi_clock_ticker = new MidiClockTicker();
+	midi_clock_ticker->set_session(*this);
 
 	BootMessage (_("Reset Control Protocols"));
 
