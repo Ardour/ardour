@@ -405,7 +405,7 @@ for style in ['', 'BOLD', 'ITALIC']:
 # 
 
 if env['GTKOSX']:
-	ardour_menus = env.Command ('ardour.menus', 'ardour.menus.in', "cpp -E -P -DGTKOSX -DTOP_MENUBAR ardour.menus.in ardour_osx.menus", chdir=1)
+	ardour_menus = env.Command ('ardour.menus', 'ardour.menus.in', "cpp -E -P -DGTKOSX -DTOP_MENUBAR ardour.menus.in ardour.menus", chdir=1)
 else:
 	ardour_menus = env.Command ('ardour.menus', 'ardour.menus.in', "cpp -E -P ardour.menus.in ardour.menus", chdir=1)
 
