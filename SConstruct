@@ -579,10 +579,7 @@ if env['LV2']:
 else:
 	print 'LV2 support is not enabled.  Build with \'scons LV2=1\' to enable.'
 
-if env['WIIMOTE']:
-	wiimote_surface = [ 'libs/surfaces/wiimote' ]
-else:
-	wiimote_surface = [ ]
+if not env['WIIMOTE']:
 	print 'WIIMOTE not enabled. Build with \'scons WIIMOTE=1\' to enable support.'
 
 libraries['jack'] = LibraryInfo()
@@ -1212,17 +1209,17 @@ else:
 #
 # * always build the LGPL control protocol lib, since we link against it from libardour
 # * ditto for generic MIDI
-# * tranzport checks whether it should build internally, but we need here so that
-#   its included in the tarball
+# * tranzport & wiimote check whether they should build internally, but we need them here
+#   so that they are included in the tarball
 #
 
 surface_subdirs = [ 'libs/surfaces/control_protocol',
                     'libs/surfaces/generic_midi',
                     'libs/surfaces/tranzport',
                     'libs/surfaces/mackie',
-                    'libs/surfaces/powermate'
+                    'libs/surfaces/powermate',
+		    'libs/surfaces/wiimote'
                     ]
-surface_subdirs += wiimote_surface
 
 if env['SURFACES']:
     if have_libusb:

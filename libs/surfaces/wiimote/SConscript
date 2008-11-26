@@ -47,12 +47,12 @@ wiimote.Merge ([
 
 libardour_wiimote = wiimote.SharedLibrary('ardour_wiimote', wiimote_files)
 
-Default(libardour_wiimote)
+if wiimote['WIIMOTE']:
+	Default(libardour_wiimote)
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_wiimote))
 
 if env['NLS']:
 	i18n (wiimote, wiimote_files, env)
-	      
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_wiimote))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript' ] +
