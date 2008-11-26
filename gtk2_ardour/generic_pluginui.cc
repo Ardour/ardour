@@ -191,7 +191,7 @@ GenericPluginUI::build ()
 			/* if we are scrollable, just use one long column */
 
 			if (!is_scrollable) {
-				if (x++ > 7){
+				if (x++ > 20){
 					frame = manage (new Frame);
 					frame->set_name ("BaseFrame");
 					box = manage (new VBox);
