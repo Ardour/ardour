@@ -83,26 +83,20 @@ TempoMapImporter::get_info () const
 }
 
 bool
-TempoMapImporter::prepare_move ()
+TempoMapImporter::_prepare_move ()
 {
 	// Prompt user for verification
 	bool replace = Prompt (_("This will replace the current tempo map!\nAre you shure you want to do this?"));
-	
-	if (replace) {
-		queued = true;
-	}
-	
 	return replace;
 }
 
 void
-TempoMapImporter::cancel_move ()
+TempoMapImporter::_cancel_move ()
 {
-	queued = false;
 }
 
 void
-TempoMapImporter::move ()
+TempoMapImporter::_move ()
 {
 	session.tempo_map().set_state (xml_tempo_map);
 }

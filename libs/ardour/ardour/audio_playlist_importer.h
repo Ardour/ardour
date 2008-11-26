@@ -38,16 +38,22 @@ namespace ARDOUR {
 
 class AudioRegionImportHandler;
 class AudioRegionImporter;
+class AudioPlaylistImporter;
 
 class AudioPlaylistImportHandler : public ElementImportHandler
 {
   public:
+	typedef boost::shared_ptr<AudioPlaylistImporter> PlaylistPtr;
+	typedef std::list<PlaylistPtr> PlaylistList;
+
 	AudioPlaylistImportHandler (XMLTree const & source, Session & session, AudioRegionImportHandler & region_handler, const char * nodename = "Playlists");
 	virtual ~AudioPlaylistImportHandler () {}
 	virtual string get_info () const;
 	
-	void get_regions (XMLNode const & node, ElementList & list);
+	void get_regions (XMLNode const & node, ElementList & list) const;
 	void update_region_id (XMLProperty* id_prop);
+
+	void playlists_by_diskstream (PBD::ID const & id, PlaylistList & list) const;
 	
   protected:
 	AudioRegionImportHandler & region_handler;
@@ -65,19 +71,27 @@ class AudioPlaylistImporter : public ElementImporter
 {
   public:
 	AudioPlaylistImporter (XMLTree const & source, Session & session, AudioPlaylistImportHandler & handler, XMLNode const & node);
+	AudioPlaylistImporter (AudioPlaylistImporter const & other);
 
 	string get_info () const;
-	bool prepare_move ();
-	void cancel_move ();
-	void move ();
 	
 	void set_diskstream (PBD::ID const & id);
+	PBD::ID const & orig_diskstream () const { return orig_diskstream_id; }
+
+  protected:
+	bool _prepare_move ();
+	void _cancel_move ();
+	void _move ();
 
   private:
 	typedef std::list<boost::shared_ptr<AudioRegionImporter> > RegionList;
 
+	void populate_region_list ();
+
 	AudioPlaylistImportHandler & handler;
+	XMLNode const & orig_node;
 	XMLNode xml_playlist;
+	PBD::ID orig_diskstream_id;
 	PBD::ID diskstream_id;
 	RegionList regions;
 };

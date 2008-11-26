@@ -37,7 +37,7 @@ sigc::signal <bool, string> ElementImporter::Prompt;
 ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & session) : 
   source (source),
   session(session),
-  queued (false),
+  _queued (false),
   _broken (false)
 {
 	// Get samplerate
@@ -47,6 +47,35 @@ ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & sess
 		std::istringstream iss (prop->value());
 		iss >> sample_rate;
 	}
+}
+
+ElementImporter::~ElementImporter ()
+{
+	cancel_move ();
+}
+
+void
+ElementImporter::move ()
+{
+	if (!_queued) { return; }
+	_move ();
+}
+
+bool
+ElementImporter::prepare_move ()
+{
+	if (_queued) {
+		return true;
+	}
+	_queued = _prepare_move ();
+	return _queued;
+}
+
+void
+ElementImporter::cancel_move ()
+{
+	if (!_queued) { return; }
+	_cancel_move ();
 }
 
 string

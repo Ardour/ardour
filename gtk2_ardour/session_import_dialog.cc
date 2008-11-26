@@ -105,13 +105,13 @@ void
 SessionImportDialog::load_session (const string& filename)
 {
 	tree.read (filename);
-	AudioRegionImportHandler *region_handler;
+	boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, target));
+	boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, target, *region_handler));
 	
-	region_handler = new AudioRegionImportHandler (tree, target);
-	handlers.push_back (HandlerPtr(region_handler));
-	handlers.push_back (HandlerPtr(new AudioPlaylistImportHandler (tree, target, *region_handler)));
+	handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (region_handler));
+	handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (pl_handler));
 	handlers.push_back (HandlerPtr(new UnusedAudioPlaylistImportHandler (tree, target, *region_handler)));
-	handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, target)));
+	handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, target, *pl_handler)));
 	handlers.push_back (HandlerPtr(new LocationImportHandler (tree, target)));
 	handlers.push_back (HandlerPtr(new TempoMapImportHandler (tree, target)));
 	

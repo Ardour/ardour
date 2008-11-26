@@ -95,7 +95,7 @@ LocationImporter::LocationImporter (XMLTree const & source, Session & session, L
 
 LocationImporter::~LocationImporter ()
 {
-	if (!queued && location) {
+	if (!queued() && location) {
 		delete location;
 	}
 }
@@ -129,7 +129,7 @@ LocationImporter::get_info () const
 }
 
 bool
-LocationImporter::prepare_move ()
+LocationImporter::_prepare_move ()
 {
 	try {
 		Location const original (xml_location);
@@ -171,14 +171,13 @@ LocationImporter::prepare_move ()
 	}
 	
 	location->set_name (name);
-	queued = true;
+
 	return true;
 }
 
 void
-LocationImporter::cancel_move ()
-{
-	queued = false;
+LocationImporter::_cancel_move ()
+{	
 	if (location) {
 		delete location;
 		location = 0;
@@ -186,10 +185,7 @@ LocationImporter::cancel_move ()
 }
 
 void
-LocationImporter::move ()
+LocationImporter::_move ()
 {
-	if (!queued) {
-		return;
-	}
 	session.locations()->add (location);
 }

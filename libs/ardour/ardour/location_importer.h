@@ -46,9 +46,11 @@ class LocationImporter : public ElementImporter
 	~LocationImporter ();
 
 	string get_info () const;
-	bool prepare_move ();
-	void cancel_move ();
-	void move ();
+
+  protected:
+	bool _prepare_move ();
+	void _cancel_move ();
+	void _move ();
 
   private:
 	LocationImportHandler & handler;

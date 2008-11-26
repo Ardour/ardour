@@ -66,7 +66,7 @@ AudioPlaylistImportHandler::get_info () const
 }
 
 void
-AudioPlaylistImportHandler::get_regions (XMLNode const & node, ElementList & list)
+AudioPlaylistImportHandler::get_regions (XMLNode const & node, ElementList & list) const
 {
 	region_handler.create_regions_from_children (node, list);
 }
@@ -79,21 +79,28 @@ AudioPlaylistImportHandler::update_region_id (XMLProperty* id_prop)
 	id_prop->set_value (new_id.to_s());
 }
 
+void
+AudioPlaylistImportHandler::playlists_by_diskstream (PBD::ID const & id, PlaylistList & list) const
+{
+	for (ElementList::const_iterator it = elements.begin(); it != elements.end(); ++it) {
+		boost::shared_ptr<AudioPlaylistImporter> pl = boost::dynamic_pointer_cast<AudioPlaylistImporter> (*it);
+		if (pl && pl->orig_diskstream() == id) {
+			list.push_back (PlaylistPtr (new AudioPlaylistImporter (*pl)));
+		}
+	}
+}
+
 /*** AudioPlaylistImporter ***/
 AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & session, AudioPlaylistImportHandler & handler, XMLNode const & node) : 
   ElementImporter (source, session),
   handler (handler),
+  orig_node (node),
   xml_playlist (node),
   diskstream_id ("0")
 {
 	bool ds_ok = false;
 	
-	// Populate region list
-	ElementImportHandler::ElementList elements;
-	handler.get_regions (node, elements);
-	for (ElementImportHandler::ElementList::iterator it = elements.begin(); it != elements.end(); ++it) {
-		regions.push_back (boost::dynamic_pointer_cast<AudioRegionImporter> (*it));
-	}
+	populate_region_list ();
 	
 	// Parse XML
 	XMLPropertyList const & props = xml_playlist.properties();
@@ -104,6 +111,7 @@ AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & 
 		} else if (!prop.compare("name")) {
 			name = (*it)->value();
 		} else if (!prop.compare("orig-diskstream-id")) {
+			orig_diskstream_id = (*it)->value();
 			ds_ok = true;
 		} else {
 			std::cerr << string_compose (X_("AudioPlaylistImporter did not recognise XML-property \"%1\""), prop) << endmsg;
@@ -114,6 +122,16 @@ AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & 
 		error << string_compose (X_("AudioPlaylistImporter (%1): did not find XML-property \"orig_diskstream_id\" which is mandatory"), name) << endmsg;
 		throw failed_constructor();
 	}
+}
+
+AudioPlaylistImporter::AudioPlaylistImporter (AudioPlaylistImporter const & other) :
+  ElementImporter (other.source, other.session),
+  handler (other.handler),
+  orig_node (other.orig_node),
+  xml_playlist (other.xml_playlist),
+  orig_diskstream_id (other.orig_diskstream_id)
+{
+	populate_region_list ();
 }
 
 string
@@ -141,7 +159,7 @@ AudioPlaylistImporter::get_info () const
 }
 
 bool
-AudioPlaylistImporter::prepare_move ()
+AudioPlaylistImporter::_prepare_move ()
 {
 	// Rename
 	while (session.playlist_by_name (name) || !handler.check_name (name)) {
@@ -154,19 +172,17 @@ AudioPlaylistImporter::prepare_move ()
 	xml_playlist.property ("name")->set_value (name);
 	handler.add_name (name);
 	
-	queued = true;
 	return true;
 }
 
 void
-AudioPlaylistImporter::cancel_move ()
+AudioPlaylistImporter::_cancel_move ()
 {
 	handler.remove_name (name);
-	queued = false;
 }
 
 void
-AudioPlaylistImporter::move ()
+AudioPlaylistImporter::_move ()
 {
 	boost::shared_ptr<Playlist> playlist;
 	
@@ -217,5 +233,15 @@ void
 AudioPlaylistImporter::set_diskstream (PBD::ID const & id)
 {
 	diskstream_id = id;
+}
+
+void
+AudioPlaylistImporter::populate_region_list ()
+{
+	ElementImportHandler::ElementList elements;
+	handler.get_regions (orig_node, elements);
+	for (ElementImportHandler::ElementList::iterator it = elements.begin(); it != elements.end(); ++it) {
+		regions.push_back (boost::dynamic_pointer_cast<AudioRegionImporter> (*it));
+	}
 }
 

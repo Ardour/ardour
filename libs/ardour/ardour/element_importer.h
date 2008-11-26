@@ -41,7 +41,7 @@ class ElementImporter
   public:
 
 	ElementImporter (XMLTree const & source, ARDOUR::Session & session);
-	virtual ~ElementImporter () {};
+	virtual ~ElementImporter ();
 	
 	/** Returns the element name
 	 * @return the name of the element
@@ -54,27 +54,18 @@ class ElementImporter
 	virtual string get_info () const = 0;
 	
 	/** Prepares to move element
-	 * Should take care of all tasks that need to be done 
-	 * before moving the element. This includes prompting
-	 * the user for more information if necessary.
-	 *
-	 * If the element can be moved, queued should be set to true.
 	 *
 	 * @return whther or not the element could be prepared for moving
 	 */
-	virtual bool prepare_move () = 0;
+	bool prepare_move ();
 	
 	/** Cancels moving of element
 	 * If the element has been set to be moved, this cancels the move.
-	 * queued should be set to false.
 	 */
-	virtual void cancel_move () = 0;
+	void cancel_move ();
 	
-	/** Moves the element to the taget session
-	 * In addition to actually adding the element to the session
-	 * changing ids, renaming files etc. should be taken care of.
-	 */
-	virtual void move () = 0;
+	/// Moves the element to the taget session
+	void move ();
 	
 	/// Check if element is broken. Cannot be moved if broken.
 	bool broken () { return _broken; }
@@ -86,6 +77,24 @@ class ElementImporter
 	static sigc::signal <bool, string> Prompt;
 	
   protected:
+
+	/** Moves the element to the taget session
+	 * In addition to actually adding the element to the session
+	 * changing ids, renaming files etc. should be taken care of.
+	 */
+	virtual void _move () = 0;
+
+	/** Should take care of all tasks that need to be done 
+	 * before moving the element. This includes prompting
+	 * the user for more information if necessary.
+	 *
+	 * @return whether or not the element can be moved
+	 */
+	virtual bool _prepare_move () = 0;
+	
+	/// Cancel move 
+	virtual void _cancel_move () = 0;
+
 	/// Source XML-tree
 	XMLTree const & source;
 	
@@ -93,7 +102,7 @@ class ElementImporter
 	ARDOUR::Session & session;
 	
 	/// Ture if the element has been prepared and queued for importing
-	bool    queued;
+	bool queued () { return _queued; }
 	
 	/// Name of element
 	string  name;
@@ -114,6 +123,7 @@ class ElementImporter
 	void set_broken () { _broken = true; }
 	
   private:
+	bool _queued;
 	bool _broken;
 };
 

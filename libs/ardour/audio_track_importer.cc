@@ -20,11 +20,13 @@
 
 #include <ardour/audio_track_importer.h>
 
+#include <ardour/audio_playlist_importer.h>
 #include <ardour/session.h>
 
-#include <pbd/id.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/convert.h>
+
+#include <sstream>
 
 #include "i18n.h"
 
@@ -33,8 +35,9 @@ using namespace ARDOUR;
 
 /*** AudioTrackImportHandler ***/
 
-AudioTrackImportHandler::AudioTrackImportHandler (XMLTree const & source, Session & session) :
-  ElementImportHandler (source, session)
+AudioTrackImportHandler::AudioTrackImportHandler (XMLTree const & source, Session & session, AudioPlaylistImportHandler & pl_handler) :
+  ElementImportHandler (source, session),
+  pl_handler (pl_handler)
 {
 	XMLNode const * root = source.root();
 	XMLNode const * routes;
@@ -46,9 +49,9 @@ AudioTrackImportHandler::AudioTrackImportHandler (XMLTree const & source, Sessio
 	XMLNodeList const & route_list = routes->children();
 	for (XMLNodeList::const_iterator it = route_list.begin(); it != route_list.end(); ++it) {
 		const XMLProperty* type = (*it)->property("default-type");
-		if ( !type || type->value() == "audio" ) {
+		if ( (!type || type->value() == "audio") &&  ((*it)->property ("diskstream") != 0 || (*it)->property ("diskstream-id") != 0)) {
 			try {
-				elements.push_back (ElementPtr ( new AudioTrackImporter (source, session, *this, **it)));
+				elements.push_back (ElementPtr ( new AudioTrackImporter (source, session, *this, **it, pl_handler)));
 			} catch (failed_constructor err) {
 				set_dirty();
 			}
@@ -65,9 +68,15 @@ AudioTrackImportHandler::get_info () const
 
 /*** AudioTrackImporter ***/
 
-AudioTrackImporter::AudioTrackImporter (XMLTree const & source, Session & session, AudioTrackImportHandler & handler, XMLNode const & node) :
+AudioTrackImporter::AudioTrackImporter (XMLTree const & source,
+                                        Session & session,
+                                        AudioTrackImportHandler & handler,
+                                        XMLNode const & node,
+                                        AudioPlaylistImportHandler & pl_handler) :
   ElementImporter (source, session),
-  xml_track (node)
+  track_handler (track_handler),
+  xml_track (node),
+  pl_handler (pl_handler)
 {
 	XMLProperty * prop;
 
@@ -96,8 +105,12 @@ AudioTrackImporter::AudioTrackImporter (XMLTree const & source, Session & sessio
 bool
 AudioTrackImporter::parse_route_xml ()
 {
-	XMLPropertyList const & props = xml_track.properties();
+	bool ds_ok = false;
 
+	// Remove order keys, new ones will be generated
+	xml_track.remove_property ("order-keys");
+
+	XMLPropertyList const & props = xml_track.properties();
 	for (XMLPropertyList::const_iterator it = props.begin(); it != props.end(); ++it) {
 		string prop = (*it)->name();
 		if (!prop.compare ("default-type") || !prop.compare ("flags") ||
@@ -107,13 +120,18 @@ AudioTrackImporter::parse_route_xml ()
 		  !prop.compare ("mute-affects-post-fader") || !prop.compare("mute-affects-control-outs") ||
 		  !prop.compare ("mute-affects-main-outs") || !prop.compare("mode")) {
 			// All ok
-		} else if (!prop.compare("order-keys")) {
-			// TODO
 		} else if (!prop.compare("diskstream-id")) {
-			// TODO
+			old_ds_id = (*it)->value();
+			(*it)->set_value (new_ds_id.to_s());
+			ds_ok = true;
 		} else {
 			std::cerr << string_compose (X_("AudioTrackImporter: did not recognise XML-property \"%1\""), prop) << endmsg;
 		}
+	}
+	
+	if (!ds_ok) {
+		error << X_("AudioTrackImporter: did not find necessary XML-property \"diskstream-id\"") << endmsg;
+		return false;
 	}
 	
 	return true;
@@ -137,17 +155,16 @@ AudioTrackImporter::parse_io ()
 		if (!prop.compare ("gain") || !prop.compare ("iolimits")) {
 			// All ok
 		} else if (!prop.compare("name")) {
-			name = prop;
+			name = (*it)->value();
 			name_ok = true;
 		} else if (!prop.compare("id")) {
 			PBD::ID id;
 			(*it)->set_value (id.to_s());
 			id_ok = true;
-			// TODO
 		} else if (!prop.compare("inputs")) {
-			// TODO
+			// TODO Let the IO class do it's thing for now...
 		} else if (!prop.compare("outputs")) {
-			// TODO
+			// TODO Let the IO class do it's thing for now...
 		} else {
 			std::cerr << string_compose (X_("AudioTrackImporter: did not recognise XML-property \"%1\""), prop) << endmsg;
 		}
@@ -189,20 +206,46 @@ AudioTrackImporter::get_info () const
 }
 
 bool
-AudioTrackImporter::prepare_move ()
+AudioTrackImporter::_prepare_move ()
 {
+	/* Copy dependent playlists */
+
+	pl_handler.playlists_by_diskstream (old_ds_id, playlists);
+	
+	for (PlaylistList::iterator it = playlists.begin(); it != playlists.end(); ++it) {
+		if (!(*it)->prepare_move ()) {
+			playlists.clear ();
+			return false;
+		}
+		(*it)->set_diskstream (new_ds_id);
+	}
+	
+	/* Rename */
+	
+	while (session.route_by_name (name) || !track_handler.check_name (name)) {
+		std::pair<bool, string> rename_pair = Rename (_("A playlist with this name already exists, please rename it."), name);
+		if (!rename_pair.first) {
+			return false;
+		}
+		name = rename_pair.second;
+	}
+	xml_track.child ("IO")->property ("name")->set_value (name);
+	track_handler.add_name (name);
+	
 	// TODO
-	return false;
+	return true;
 }
 
 void
-AudioTrackImporter::cancel_move ()
+AudioTrackImporter::_cancel_move ()
 {
+	track_handler.remove_name (name);
+	playlists.clear ();
 	// TODO
 }
 
 void
-AudioTrackImporter::move ()
+AudioTrackImporter::_move ()
 {
 	// TODO
 }
@@ -246,8 +289,54 @@ AudioTrackImporter::parse_automation (XMLNode & node)
 			prop->set_value (id.to_s());
 		}
 		
-		// TODO rate convert events
+		if (!(*it)->name().compare ("events")) {
+			rate_convert_events (**it);
+		}
 	}
+
+	return true;
+}
+
+bool
+AudioTrackImporter::rate_convert_events (XMLNode & node)
+{
+	if (node.children().empty()) {
+		return false;
+	}
+
+	XMLNode* content_node = node.children().front();
+
+	if (content_node->content().empty()) {
+		return false;
+	}
+	
+	std::stringstream str (content_node->content());
+	std::ostringstream new_content;
+	
+	nframes_t x;
+	double y;
+	bool ok = true;
+	
+	while (str) {
+		str >> x;
+		if (!str) {
+			break;
+		}
+		str >> y;
+		if (!str) {
+			ok = false;
+			break;
+		}
+		
+		new_content << rate_convert_samples (x) << ' ' << y;
+	}
+	
+	if (!ok) {
+		error << X_("AudioTrackImporter: error in rate converting automation events") << endmsg;
+		return false;
+	}
+
+	content_node->set_content (new_content.str());
 
 	return true;
 }

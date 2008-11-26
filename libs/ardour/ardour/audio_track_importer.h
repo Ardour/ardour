@@ -21,34 +21,51 @@
 #ifndef __ardour_audio_track_importer_h__
 #define __ardour_audio_track_importer_h__
 
+#include <list>
+
 #include <pbd/xml++.h>
+#include <pbd/id.h>
 
 #include <ardour/element_importer.h>
 #include <ardour/element_import_handler.h>
 
 namespace ARDOUR {
 
+class AudioPlaylistImportHandler;
+class AudioPlaylistImporter;
 
 class AudioTrackImportHandler : public ElementImportHandler
 {
   public:
-	AudioTrackImportHandler (XMLTree const & source, Session & session);
+	AudioTrackImportHandler (XMLTree const & source, Session & session, AudioPlaylistImportHandler & pl_handler);
 	virtual ~AudioTrackImportHandler () {}
 	virtual string get_info () const;
+
+  private:
+	AudioPlaylistImportHandler & pl_handler;
 };
 
 
 class AudioTrackImporter : public ElementImporter
 {
   public:
-	AudioTrackImporter (XMLTree const & source, Session & session, AudioTrackImportHandler & handler, XMLNode const & node);
+	AudioTrackImporter (XMLTree const & source,
+	                    Session & session,
+	                    AudioTrackImportHandler & track_handler,
+	                    XMLNode const & node,
+	                    AudioPlaylistImportHandler & pl_handler);
 
 	string get_info () const;
-	bool prepare_move ();
-	void cancel_move ();
-	void move ();
+
+  protected:
+	bool _prepare_move ();
+	void _cancel_move ();
+	void _move ();
 
   private:
+
+	typedef boost::shared_ptr<AudioPlaylistImporter> PlaylistPtr;
+	typedef std::list<PlaylistPtr> PlaylistList;
 
 	bool parse_route_xml ();
 	bool parse_io ();
@@ -56,9 +73,16 @@ class AudioTrackImporter : public ElementImporter
 	bool parse_processor (XMLNode & node);
 	bool parse_controllable (XMLNode & node);
 	bool parse_automation (XMLNode & node);
+	bool rate_convert_events (XMLNode & node);
 	
+	AudioTrackImportHandler & track_handler;
 	XMLNode xml_track;
 	
+	PBD::ID old_ds_id;
+	PBD::ID new_ds_id;
+	
+	PlaylistList playlists;
+	AudioPlaylistImportHandler & pl_handler;
 };
 
 } // namespace ARDOUR

@@ -75,13 +75,15 @@ class AudioRegionImporter : public ElementImporter
 
 	// Interface implementation
 	string get_info () const;
-	bool prepare_move ();
-	void cancel_move ();
-	void move ();
 	
 	// other stuff
 	void add_sources_to_session ();
 	XMLNode const & get_xml ();
+
+  protected:
+	bool _prepare_move ();
+	void _cancel_move ();
+	void _move ();
 
   private:
 

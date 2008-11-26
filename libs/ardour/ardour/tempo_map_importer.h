@@ -47,9 +47,11 @@ class TempoMapImporter : public ElementImporter
 	TempoMapImporter (XMLTree const & source, Session & session, XMLNode const & node);
 
 	virtual string get_info () const;
-	virtual bool prepare_move ();
-	virtual void cancel_move ();
-	virtual void move ();
+
+  protected:
+	bool _prepare_move ();
+	void _cancel_move ();
+	void _move ();
 
   private:
 	XMLNode xml_tempo_map;

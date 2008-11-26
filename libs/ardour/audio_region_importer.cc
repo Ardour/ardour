@@ -148,20 +148,18 @@ AudioRegionImporter::get_info () const
 }
 
 bool
-AudioRegionImporter::prepare_move ()
+AudioRegionImporter::_prepare_move ()
 {
-	queued = true;
 	return true;
 }
 
 void
-AudioRegionImporter::cancel_move ()
+AudioRegionImporter::_cancel_move ()
 {
-	queued = false;
 }
 
 void
-AudioRegionImporter::move ()
+AudioRegionImporter::_move ()
 {
 	if (!region_prepared) {
 		prepare_region();
@@ -190,6 +188,7 @@ AudioRegionImporter::parse_xml_region ()
 		  !prop.compare ("shift") || !prop.compare ("first_edit") ||
 		  !prop.compare ("layer") || !prop.compare ("flags") ||
 		  !prop.compare ("scale-gain") || !prop.compare("channels") ||
+		  !prop.compare ("first-edit") ||
 		  prop.find ("master-source-") == 0 || prop.find ("source-") == 0) {
 			// All ok
 		} else if (!prop.compare ("start") || !prop.compare ("length") ||
@@ -209,7 +208,7 @@ AudioRegionImporter::parse_xml_region ()
 			(*it)->set_value (name);
 			name_ok = true;
 		} else {
-			std::cerr << string_compose (X_("AudioRegionImporter (%1): did not recognise XML-property \"%1\""), name, prop) << endmsg;
+			std::cerr << string_compose (X_("AudioRegionImporter (%1): did not recognise XML-property \"%2\""), name, prop) << endmsg;
 		}
 	}
 	
@@ -256,7 +255,7 @@ AudioRegionImporter::parse_source_xml ()
 		snprintf (buf, sizeof(buf), X_("source-%d"), i);
 		prop = xml_region.property (buf);
 		if (!prop) {
-			error << string_compose (X_("AudioRegionImporter (%1): did not find necessary XML-property \"%3\""), name, buf) << endmsg;
+			error << string_compose (X_("AudioRegionImporter (%1): did not find necessary XML-property \"%2\""), name, buf) << endmsg;
 			return false;
 		}
 		string source_id = prop->value();
