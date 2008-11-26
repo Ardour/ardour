@@ -30,7 +30,14 @@ if env['GTKOSX']:
 libclearlooks = clearlooks.SharedLibrary('clearlooks', libclearlooks_files) 
 usable_libclearlooks = clearlooks.Install ('engines', libclearlooks)
 
-Default (usable_libclearlooks)
+if env['GTKOSX']:
+    # GTK looks only for foo.so, not foo.dylib
+    print ("GTKOSX part");
+    really_usable_module = clearlooks.Command ('engines/libclearlooks.so', usable_libclearlooks, "cd libs/clearlooks-newer/engines && ln -s libclearlooks.dylib libclearlooks.so", chdir=1)
+    Default (really_usable_module)
+else:
+    print ("non-GTKOSX part");
+    Default (usable_libclearlooks)
 
 env.Alias('install', env.Install (
         os.path.join(install_prefix,env['LIBDIR'], 'ardour2', 'engines'),

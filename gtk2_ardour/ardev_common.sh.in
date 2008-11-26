@@ -9,7 +9,7 @@ if test -d $HOME/gtk/inst ; then
     export GTK_PATH=~/.ardour2:libs/clearlooks-newer
 else
     echo USING OLD CLEARLOOKS
-    export GTK_PATH=~/.ardour2:libs/clearlooks-older:
+    export GTK_PATH=~/.ardour2:libs/clearlooks-older
 fi
 export VAMP_PATH=libs/vamp-plugins:$VAMP_PATH
 
