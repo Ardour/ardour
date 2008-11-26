@@ -576,6 +576,9 @@ class Session : public PBD::StatefulDestructible
 
 	TempoMap& tempo_map() { return *_tempo_map; }
 
+	/// signals the current transport position in frames, bbt and smpte time (in that order)
+	sigc::signal<void, const nframes_t&, const BBT_Time&, const SMPTE::Time&> tick;
+	
 	/* region info  */
 
 	void add_regions (std::vector<boost::shared_ptr<Region> >&);

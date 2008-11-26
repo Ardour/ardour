@@ -165,6 +165,7 @@ svn_revision.cc
 tape_file_matcher.cc
 template_utils.cc
 tempo.cc
+ticker.cc
 tempo_map_importer.cc
 track.cc
 transient_detector.cc

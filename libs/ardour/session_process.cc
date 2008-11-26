@@ -66,9 +66,17 @@ Session::process (nframes_t nframes)
 	
 	(this->*process_function) (nframes);
 	
-	MIDI::Manager::instance()->cycle_end();
-
+	// the ticker is for sending time information like MidiClock
+	nframes_t transport_frames = transport_frame();
+	BBT_Time  transport_bbt;
+	bbt_time(transport_frames, transport_bbt);
+	SMPTE::Time transport_smpte;
+	smpte_time(transport_frames, transport_smpte);
+	tick (transport_frames, transport_bbt, transport_smpte); /* EMIT SIGNAL */
+	
 	SendFeedback (); /* EMIT SIGNAL */
+	
+	MIDI::Manager::instance()->cycle_end();
 }
 
 void

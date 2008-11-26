@@ -199,7 +199,7 @@ namespace ARDOUR {
 	    BBT_Time       bbt;
 
 	    union {
-		nframes_t frames;
+		nframes_t      frames;
 		double         seconds;
 	    };
 
