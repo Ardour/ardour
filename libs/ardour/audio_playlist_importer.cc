@@ -134,6 +134,11 @@ AudioPlaylistImporter::AudioPlaylistImporter (AudioPlaylistImporter const & othe
 	populate_region_list ();
 }
 
+AudioPlaylistImporter::~AudioPlaylistImporter ()
+{
+	
+}
+
 string
 AudioPlaylistImporter::get_info () const
 {

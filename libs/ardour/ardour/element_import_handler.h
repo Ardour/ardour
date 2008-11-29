@@ -23,6 +23,7 @@
 
 #include <string>
 #include <list>
+#include <set>
 
 #include <boost/shared_ptr.hpp>
 
@@ -101,8 +102,8 @@ class ElementImportHandler
 	static bool _errors;
 	
   private:
-	/// List of names for duplicate checking
-	std::list<string> names;
+	/// Set of names for duplicate checking
+	std::set<string> names;
 };
 
 } // namespace ARDOUR

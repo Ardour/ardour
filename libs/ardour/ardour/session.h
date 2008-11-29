@@ -307,6 +307,7 @@ class Session : public PBD::StatefulDestructible
 	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
 	typedef std::list<boost::shared_ptr<Route> >      RouteList;
 
+	int load_routes (const XMLNode&);
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
 	}
@@ -1446,7 +1447,6 @@ class Session : public PBD::StatefulDestructible
 	void   add_routes (RouteList&, bool save);
 	uint32_t destructive_index;
 
-	int load_routes (const XMLNode&);
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&);
 
 	/* mixer stuff */

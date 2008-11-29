@@ -51,7 +51,6 @@ ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & sess
 
 ElementImporter::~ElementImporter ()
 {
-	cancel_move ();
 }
 
 void

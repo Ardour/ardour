@@ -72,6 +72,7 @@ class AudioRegionImporter : public ElementImporter
 {
   public:
 	AudioRegionImporter (XMLTree const & source, Session & session, AudioRegionImportHandler & handler, XMLNode const & node);
+	~AudioRegionImporter ();
 
 	// Interface implementation
 	string get_info () const;

@@ -118,6 +118,10 @@ AudioRegionImporter::AudioRegionImporter (XMLTree const & source, Session & sess
 	handler.register_id (old_id, id);
 }
 
+AudioRegionImporter::~AudioRegionImporter ()
+{
+}
+
 string
 AudioRegionImporter::get_info () const
 {

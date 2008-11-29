@@ -21,6 +21,7 @@
 #include <ardour/audio_track_importer.h>
 
 #include <ardour/audio_playlist_importer.h>
+#include <ardour/audio_diskstream.h>
 #include <ardour/session.h>
 
 #include <pbd/failed_constructor.h>
@@ -70,7 +71,7 @@ AudioTrackImportHandler::get_info () const
 
 AudioTrackImporter::AudioTrackImporter (XMLTree const & source,
                                         Session & session,
-                                        AudioTrackImportHandler & handler,
+                                        AudioTrackImportHandler & track_handler,
                                         XMLNode const & node,
                                         AudioPlaylistImportHandler & pl_handler) :
   ElementImporter (source, session),
@@ -100,6 +101,11 @@ AudioTrackImporter::AudioTrackImporter (XMLTree const & source,
 	}
 	
 	xml_track.remove_nodes_and_delete ("extra");
+}
+
+AudioTrackImporter::~AudioTrackImporter ()
+{
+	playlists.clear ();
 }
 
 bool
@@ -147,6 +153,10 @@ AudioTrackImporter::parse_io ()
 	if (!(io = xml_track.child ("IO"))) {
 		return false;
 	}
+	
+	// TODO
+	io->remove_property ("inputs");
+	io->remove_property ("outputs");
 	
 	XMLPropertyList const & props = io->properties();
 
@@ -232,7 +242,6 @@ AudioTrackImporter::_prepare_move ()
 	xml_track.child ("IO")->property ("name")->set_value (name);
 	track_handler.add_name (name);
 	
-	// TODO
 	return true;
 }
 
@@ -241,13 +250,40 @@ AudioTrackImporter::_cancel_move ()
 {
 	track_handler.remove_name (name);
 	playlists.clear ();
-	// TODO
 }
 
 void
 AudioTrackImporter::_move ()
-{
-	// TODO
+{	
+	/* Add diskstream */
+	
+	boost::shared_ptr<XMLSharedNodeList> ds_node_list;
+	string xpath = "/Session/DiskStreams/AudioDiskstream[@id='" + old_ds_id.to_s() + "']";
+	ds_node_list = source.root()->find (xpath);
+	
+	if (ds_node_list->size() != 1) {
+		error << string_compose (_("Error Importing Audio track %1"), name) << endmsg;
+		return;
+	}
+	
+	boost::shared_ptr<XMLNode> ds_node = ds_node_list->front();
+	ds_node->property ("id")->set_value (new_ds_id.to_s());
+	
+	boost::shared_ptr<Diskstream> new_ds (new AudioDiskstream (session, *ds_node));
+	new_ds->set_name (name);
+	session.add_diskstream (new_ds);
+
+	/* Import playlists */
+
+	for (PlaylistList::const_iterator it = playlists.begin(); it != playlists.end(); ++it) {
+		(*it)->move ();
+	}
+
+	/* Import track */
+
+	XMLNode routes ("Routes");
+	routes.add_child_copy (xml_track);
+	session.load_routes (routes);
 }
 
 bool

@@ -54,6 +54,7 @@ class AudioTrackImporter : public ElementImporter
 	                    AudioTrackImportHandler & track_handler,
 	                    XMLNode const & node,
 	                    AudioPlaylistImportHandler & pl_handler);
+	~AudioTrackImporter ();
 
 	string get_info () const;
 

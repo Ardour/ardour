@@ -36,20 +36,17 @@ ElementImportHandler::~ElementImportHandler ()
 bool
 ElementImportHandler::check_name (const string & name) const
 {
-	return std::find (names.begin(), names.end(), name) == names.end();
+	return !names.count (name);
 }
 
 void
 ElementImportHandler::add_name (string name)
 {
-	names.push_back (name);
+	names.insert (name);
 }
 
 void
 ElementImportHandler::remove_name (const string & name)
 {
-	std::list<string>::iterator it = std::find (names.begin(), names.end(), name);
-	if (it != names.end()) {
-		names.erase(it);
-	}
+	names.erase (name);
 }

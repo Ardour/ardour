@@ -72,6 +72,7 @@ class AudioPlaylistImporter : public ElementImporter
   public:
 	AudioPlaylistImporter (XMLTree const & source, Session & session, AudioPlaylistImportHandler & handler, XMLNode const & node);
 	AudioPlaylistImporter (AudioPlaylistImporter const & other);
+	~AudioPlaylistImporter ();
 
 	string get_info () const;
 	
