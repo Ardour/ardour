@@ -61,7 +61,7 @@ public:
 		const SMPTE::Time& transport_smpte);
 	
 	void set_session(Session& s);
-	void going_away() { Ticker::going_away(); _jack_port = 0;}
+	void going_away() { _jack_port = 0; Ticker::going_away(); }
 	
 	/// slot for the signal session::MIDIClock_PortChanged
 	void update_midi_clock_port();
