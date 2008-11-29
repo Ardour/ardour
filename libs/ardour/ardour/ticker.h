@@ -52,7 +52,7 @@ protected:
 class MidiClockTicker : public Ticker
 {
 public:
-	MidiClockTicker() : _jack_port(0), _ppqn(24) {};
+	MidiClockTicker() : _jack_port(0), _ppqn(24), _last_tick(0.0) {};
 	virtual ~MidiClockTicker() {};
 	
 	void tick(
@@ -66,13 +66,27 @@ public:
 	/// slot for the signal session::MIDIClock_PortChanged
 	void update_midi_clock_port();
 	
+	/// slot for the signal session::TransportStateChange
+	void transport_state_changed();
+	
+	/// slot for the signal session::PositionChanged
+	void position_changed(nframes_t position);
+
+	/// slot for the signal session::TransportLooped
+	void transport_looped();
+	
 	/// pulses per quarter note (default 24)
 	void set_ppqn(int ppqn) { _ppqn = ppqn; }
 
 private:	
 	MIDI::JACK_MidiPort* _jack_port;
-	nframes_t            _last_tick;
 	int                  _ppqn;
+	double               _last_tick;
+	
+	void send_midi_clock_event(nframes_t offset);
+	void send_start_event(nframes_t offset);
+	void send_continue_event(nframes_t offset);
+	void send_stop_event(nframes_t offset);
 };
 
 }

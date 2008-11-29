@@ -63,6 +63,8 @@ public:
 	static pthread_t get_process_thread () { return _process_thread; }
 	static bool is_process_thread();
 	
+	nframes_t nframes_this_cycle() const {	return _nframes_this_cycle; }
+	
   protected:
 	std::string get_typestring () const {
 		return typestring;
