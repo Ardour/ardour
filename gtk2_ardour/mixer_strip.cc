@@ -1056,11 +1056,10 @@ MixerStrip::build_route_ops_menu ()
 	denormal_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());
 
-	build_remote_control_menu ();
-	
-	items.push_back (SeparatorElem());
 	if (!Profile->get_sae()) {
-              items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		build_remote_control_menu ();
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
         }
 
 	items.push_back (SeparatorElem());

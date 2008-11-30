@@ -114,11 +114,6 @@ RouteUI::reset ()
 		mute_menu = 0;
 	}
 	
-	if (remote_control_menu) {
-		delete remote_control_menu;
-		remote_control_menu = 0;
-	}
-
 	if (xml_node) {
 		/* do not delete the node - its owned by the route */
 		xml_node = 0;
@@ -193,6 +188,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 RouteUI::~RouteUI()
 {
 	GoingAway (); /* EMIT SIGNAL */
+
 	if (solo_menu) {
 		delete solo_menu;
 	}
@@ -200,10 +196,13 @@ RouteUI::~RouteUI()
 	if (mute_menu) {
 		delete mute_menu;
 	}
-
-	if (remote_control_menu) {
-		delete remote_control_menu;
-	}
+	
+	/* Note: the remote control menu is constructed
+	   by derived classes (e.g. MixerStrip or RouteTimeAxis) and
+	   is always attached to a context menu. It then becomes
+	   owned by that menu, and will deleted along with it. We
+	   do not need to take care of it here.
+	*/
 }
 
 bool
@@ -941,7 +940,7 @@ gint
 RouteUI::idle_remove_this_route (RouteUI *rui)
 {
 	rui->_session.remove_route (rui->_route);
-	return FALSE;
+	return false;
 }
 
 void

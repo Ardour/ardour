@@ -450,11 +450,10 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 
-	build_remote_control_menu ();
-	build_automation_action_menu ();
-
 	if (!Profile->get_sae()) {
+		build_remote_control_menu ();
 		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		build_automation_action_menu ();
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
 		items.push_back (SeparatorElem());
 	}
