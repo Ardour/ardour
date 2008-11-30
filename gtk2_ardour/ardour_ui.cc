@@ -2946,13 +2946,17 @@ ARDOUR_UI::halt_on_xrun_message ()
 void
 ARDOUR_UI::xrun_handler(nframes_t where)
 {
+	if (!session) {
+		return;
+	}
+
 	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::xrun_handler), where));
 
-	if (Config->get_create_xrun_marker() && session->actively_recording()) {
+	if (session && Config->get_create_xrun_marker() && session->actively_recording()) {
 		create_xrun_marker(where);
 	}
 
-	if (Config->get_stop_recording_on_xrun() && session->actively_recording()) {
+	if (session && Config->get_stop_recording_on_xrun() && session->actively_recording()) {
 		halt_on_xrun_message ();
 	}
 }
