@@ -24,7 +24,6 @@
 
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
-#include <pbd/shiva.h>
 
 #include <sigc++/bind.h>
 
@@ -78,8 +77,10 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 void
 UndoTransaction::add_command (Command *const action)
 {
-	/* catch death */
-	new PBD::ProxyShiva<Command,UndoTransaction> (*action, *this, &command_death);
+	/* catch death of command (e.g. caused by death of object to
+	   which it refers.
+	 */
+	shivas.push_back (new PBD::ProxyShiva<Command,UndoTransaction> (*action, *this, &command_death));
 	actions.push_back (action);
 }
 
@@ -87,6 +88,21 @@ void
 UndoTransaction::remove_command (Command* const action)
 {
 	actions.remove (action);
+}
+
+void
+UndoTransaction::about_to_explicitly_delete ()
+{
+	/* someone is going to call our destructor and its not Shiva,
+	   the god of destruction and chaos. This happens when an UndoHistory
+	   is pruning itself. we must remove Shivas to avoid the god
+	   striking us down a second time, unnecessarily and illegally.
+	*/
+
+	for (list<PBD::ProxyShiva<Command,UndoTransaction>*>::iterator i = shivas.begin(); i != shivas.end(); ++i) {
+		delete *i;
+	}
+	shivas.clear ();
 }
 
 bool
@@ -172,6 +188,7 @@ UndoHistory::set_depth (uint32_t d)
 		while (cnt--) {
 			ut = UndoList.front();
 			UndoList.pop_front ();
+			ut->about_to_explicitly_delete ();
 			delete ut;
 		}
 	}
@@ -197,6 +214,7 @@ UndoHistory::add (UndoTransaction* const ut)
 			UndoTransaction* ut;
 			ut = UndoList.front ();
 			UndoList.pop_front ();
+			ut->about_to_explicitly_delete ();
 			delete ut;
 		}
 	}

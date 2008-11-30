@@ -27,7 +27,8 @@ namespace PBD {
 /* named after the Hindu god Shiva, The Destroyer */
 
 template<typename ObjectWithGoingAway, typename ObjectToBeDestroyed>
-class Shiva {
+class Shiva : public sigc::trackable 
+{
   public:
 	Shiva (ObjectWithGoingAway& emitter, ObjectToBeDestroyed& receiver) {
 
@@ -58,15 +59,15 @@ class Shiva {
 };
 
 template<typename ObjectWithGoingAway, typename ObjectToBeDestroyed>
-class ProxyShiva {
+class ProxyShiva : public sigc::trackable 
+{
   public:
 	ProxyShiva (ObjectWithGoingAway& emitter, ObjectToBeDestroyed& receiver, void (*callback)(ObjectToBeDestroyed*, ObjectWithGoingAway*)) {
-
+		
 		/* if the emitter goes away, destroy the receiver */
 
 		_callback = callback;
-		_callback_argument1 = &receiver;
-		_callback_argument2 = &emitter;
+		_callback_argument = &emitter;
 
 		_connection = emitter.GoingAway.connect 
 			(sigc::bind (sigc::mem_fun 
@@ -74,19 +75,18 @@ class ProxyShiva {
 				     &receiver));
 	}
 
-	~ProxyShiva() { 
+	~ProxyShiva () {
 		forget ();
 	}
 
   private:
 	sigc::connection _connection;
 	void (*_callback) (ObjectToBeDestroyed*, ObjectWithGoingAway*);
-	ObjectToBeDestroyed* _callback_argument1;
-	ObjectWithGoingAway* _callback_argument2;
+	ObjectWithGoingAway* _callback_argument;
 
 	void destroy (ObjectToBeDestroyed* obj) {
 		/* callback must destroy obj if appropriate, not done here */
-		_callback (obj, _callback_argument2);
+		_callback (obj, _callback_argument);
 		forget ();
 	}
 
@@ -96,7 +96,8 @@ class ProxyShiva {
 };
 
 template<typename ObjectWithGoingAway, typename ObjectToBeDestroyed>
-class PairedShiva {
+class PairedShiva : public sigc::trackable 
+{
   public:
 	PairedShiva (ObjectWithGoingAway& emitter, ObjectToBeDestroyed& receiver) {
 

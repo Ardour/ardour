@@ -47,7 +47,7 @@ class MementoCommand : public Command
                        ) 
             : obj(object), before(before), after(after) {
 		/* catch destruction of the object */
-		new PBD::Shiva<obj_T,MementoCommand<obj_T> > (object, *this);
+		new PBD::PairedShiva<obj_T,MementoCommand<obj_T> > (object, *this);
 	}
 
 	~MementoCommand () {

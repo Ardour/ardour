@@ -27,6 +27,7 @@
 #include <sigc++/bind.h>
 #include <sys/time.h>
 #include <pbd/command.h>
+#include <pbd/shiva.h>
 
 typedef sigc::slot<void> UndoAction;
 
@@ -36,7 +37,6 @@ class UndoTransaction : public Command
 	UndoTransaction ();
 	UndoTransaction (const UndoTransaction&);
 	UndoTransaction& operator= (const UndoTransaction&);
-	~UndoTransaction ();
 
 	void clear ();
 	bool empty() const;
@@ -66,11 +66,18 @@ class UndoTransaction : public Command
 
   private:
 	std::list<Command*>    actions;
+	std::list<PBD::ProxyShiva<Command,UndoTransaction>*> shivas;
 	struct timeval        _timestamp;
 	std::string           _name;
 	bool                  _clearing;
 
 	friend void command_death (UndoTransaction*, Command *);
+	
+	friend class UndoHistory;
+
+	~UndoTransaction ();
+	void about_to_explicitly_delete ();
+	
 };
 
 class UndoHistory : public sigc::trackable
