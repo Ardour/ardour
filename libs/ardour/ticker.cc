@@ -108,11 +108,14 @@ void MidiClockTicker::transport_looped()
 	
 	Location* loop_location = _session->locations()->auto_loop_location();
 	assert(loop_location);
+
+#if DEBUG_TICKER	
 	cerr << "Transport looped, position:" <<  position 
 	     << " loop start " << loop_location->start( )
 	     << " loop end " << loop_location->end( )
 	     << " play loop " << _session->get_play_loop()
 	     <<  endl;
+#endif
 	
 	// adjust _last_tick, so that the next MIDI clock message is sent 
 	// in due time (and the tick interval is still constant)
