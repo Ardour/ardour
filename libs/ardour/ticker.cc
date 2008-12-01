@@ -104,13 +104,11 @@ void MidiClockTicker::position_changed(nframes_t position)
 
 void MidiClockTicker::transport_looped()
 {
-	nframes_t position  = _session->transport_frame();
-	
 	Location* loop_location = _session->locations()->auto_loop_location();
 	assert(loop_location);
 
 #if DEBUG_TICKER	
-	cerr << "Transport looped, position:" <<  position 
+	cerr << "Transport looped, position:" <<  p_session->transport_frame()
 	     << " loop start " << loop_location->start( )
 	     << " loop end " << loop_location->end( )
 	     << " play loop " << _session->get_play_loop()
