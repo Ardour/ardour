@@ -82,6 +82,8 @@ private:
 	MIDI::JACK_MidiPort* _jack_port;
 	int                  _ppqn;
 	double               _last_tick;
+
+	double one_ppqn_in_frames(nframes_t transport_position);
 	
 	void send_midi_clock_event(nframes_t offset);
 	void send_start_event(nframes_t offset);
