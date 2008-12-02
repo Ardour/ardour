@@ -367,7 +367,8 @@ Editor::Editor ()
 
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
-	
+
+	_edit_point = EditAtMouse;
 	set_mouse_mode (MouseObject, true);
 
 	frames_per_unit = 2048; /* too early to use reset_zoom () */

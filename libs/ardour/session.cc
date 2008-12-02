@@ -276,16 +276,23 @@ Session::Session (AudioEngine &eng,
 		  string mix_template)
 
 	: _engine (eng),
+	  mmc (0),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
+	  state_tree (0),
+	  butler_mixdown_buffer (0),
+	  butler_gain_buffer (0),
+	  midi_thread (pthread_t (0)),
 	  midi_requests (128), // the size of this should match the midi request pool size
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _total_free_4k_blocks (0),
 	  _click_io ((IO*) 0),
+	  click_data (0),
+	  click_emphasis_data (0),
 	  main_outs (0)
 {
 	bool new_session;
@@ -340,14 +347,23 @@ Session::Session (AudioEngine &eng,
 		  nframes_t initial_length)
 
 	: _engine (eng),
+	  mmc (0),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
+	  state_tree (0),
+	  butler_mixdown_buffer (0),
+	  butler_gain_buffer (0),
+	  midi_thread (pthread_t (0)),
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
+	  auditioner ((Auditioner *) 0),
 	  _total_free_4k_blocks (0),
+	  _click_io ((IO *) 0),
+	  click_data (0),
+	  click_emphasis_data (0),
 	  main_outs (0)
 
 {
@@ -455,19 +471,16 @@ Session::destroy ()
 	_history.clear ();
 
 	/* clear state tree so that no references to objects are held any more */
-	
-	if (state_tree) {
-		delete state_tree;
-	}
+	delete state_tree;
 
 	terminate_butler_thread ();
 	terminate_midi_thread ();
 	
-	if (click_data && click_data != default_click) {
+	if (click_data != default_click) {
 		delete [] click_data;
 	}
 
-	if (click_emphasis_data && click_emphasis_data != default_click_emphasis) {
+	if (click_emphasis_data != default_click_emphasis) {
 		delete [] click_emphasis_data;
 	}
 
@@ -635,19 +648,12 @@ Session::destroy ()
 		i = tmp;
 	}
 
-	if (butler_mixdown_buffer) {
-		delete [] butler_mixdown_buffer;
-	}
-
-	if (butler_gain_buffer) {
-		delete [] butler_gain_buffer;
-	}
+	delete [] butler_mixdown_buffer;
+	delete [] butler_gain_buffer;
 
 	Crossfade::set_buffer_size (0);
 
-	if (mmc) {
-		delete mmc;
-	}
+	delete mmc;
 }
 
 void

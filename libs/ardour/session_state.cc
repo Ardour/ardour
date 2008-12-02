@@ -155,7 +155,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_locate_roll = false;
 	pending_locate_flush = false;
 	dstream_buffer_size = 0;
-	state_tree = 0;
 	state_was_pending = false;
 	set_next_event ();
 	outbound_mtc_smpte_frame = 0;
@@ -171,9 +170,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	_slave = 0;
 	_silent = false;
-	butler_mixdown_buffer = 0;
-	butler_gain_buffer = 0;
-	mmc = 0;
 	session_send_mmc = false;
 	session_send_mtc = false;
 	post_transport_work = PostTransportWork (0);
@@ -194,7 +190,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
 	butler_thread = (pthread_t) 0;
-	midi_thread = (pthread_t) 0;
 
 	AudioDiskstream::allocate_working_buffers();
 	
@@ -211,8 +206,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	   waveforms for clicks.
 	*/
 	
-	click_data = 0;
-	click_emphasis_data = 0;
 	click_length = 0;
 	click_emphasis_length = 0;
 	_clicking = false;
