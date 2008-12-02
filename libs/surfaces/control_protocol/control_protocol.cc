@@ -70,14 +70,14 @@ ControlProtocol::next_track (uint32_t initial_id)
 		id++;
 	}
 
-	while (id < limit) {
+	while (id <= limit) {
 		if ((cr = session->route_by_remote_id (id)) != 0) {
 			break;
 		}
 		id++;
 	}
 
-	if (id == limit) {
+	if (id >= limit) {
 		id = 0;
 		while (id != initial_id) {
 			if ((cr = session->route_by_remote_id (id)) != 0) {
@@ -93,9 +93,9 @@ ControlProtocol::next_track (uint32_t initial_id)
 void
 ControlProtocol::prev_track (uint32_t initial_id)
 {
-	uint32_t limit = session->nroutes() - 1;
+	uint32_t limit = session->nroutes();
 	boost::shared_ptr<Route> cr = route_table[0];
-	uint32_t id;
+	int32_t id;
 
 	if (cr) {
 		id = cr->remote_control_id ();
@@ -104,7 +104,7 @@ ControlProtocol::prev_track (uint32_t initial_id)
 	}
 
 	if (id == 0) {
-		id = session->nroutes() - 1;
+		id = limit;
 	} else {
 		id--;
 	}

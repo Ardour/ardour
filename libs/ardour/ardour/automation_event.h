@@ -108,6 +108,7 @@ class AutomationList : public PBD::StatefulDestructible
 	void erase (iterator, iterator);
 	void move_range (iterator start, iterator end, double, double);
 	void modify (iterator, double, double);
+	void shift (nframes64_t, nframes64_t);
 
 	AutomationList* cut (double, double);
 	AutomationList* copy (double, double);

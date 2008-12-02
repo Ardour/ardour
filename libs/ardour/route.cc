@@ -25,6 +25,7 @@
 #include <pbd/xml++.h>
 #include <pbd/enumwriter.h>
 #include <pbd/stacktrace.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/timestamps.h>
 #include <ardour/buffer.h>
@@ -2613,4 +2614,48 @@ Route::set_pending_declick (int declick)
 		_pending_declick = 0;
 	}
 
+}
+
+/** Shift automation forwards from a particular place, thereby inserting time.
+ *  Adds undo commands for any shifts that are performed.
+ *
+ * @param pos Position to start shifting from.
+ * @param frames Amount to shift forwards by.
+ */
+
+void
+Route::shift (nframes64_t pos, nframes64_t frames)
+{
+	/* gain automation */
+	XMLNode &before = _gain_automation_curve.get_state ();
+	_gain_automation_curve.shift (pos, frames);
+	XMLNode &after = _gain_automation_curve.get_state ();
+	_session.add_command (new MementoCommand<AutomationList> (_gain_automation_curve, &before, &after));
+
+	/* pan automation */
+	for (std::vector<StreamPanner*>::iterator i = _panner->begin (); i != _panner->end (); ++i) {
+		Curve & c = (*i)->automation ();
+		XMLNode &before = c.get_state ();
+		c.shift (pos, frames);
+		XMLNode &after = c.get_state ();
+		_session.add_command (new MementoCommand<AutomationList> (c, &before, &after));
+	}
+
+	/* redirect automation */
+	{
+		Glib::RWLock::ReaderLock lm (redirect_lock);
+		for (RedirectList::iterator i = _redirects.begin (); i != _redirects.end (); ++i) {
+			
+			set<uint32_t> a;
+			(*i)->what_has_automation (a);
+			
+			for (set<uint32_t>::const_iterator j = a.begin (); j != a.end (); ++j) {
+				AutomationList & al = (*i)->automation_list (*j);
+				XMLNode &before = al.get_state ();
+				al.shift (pos, frames);
+				XMLNode &after = al.get_state ();
+				_session.add_command (new MementoCommand<AutomationList> (al, &before, &after));
+			}
+		}
+	}
 }

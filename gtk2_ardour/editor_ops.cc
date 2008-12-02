@@ -36,7 +36,6 @@
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/popup.h>
 
-
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audioplaylist.h>
@@ -6014,26 +6013,34 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 	begin_reversible_command (_("insert time"));
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+		/* regions */
 		boost::shared_ptr<Playlist> pl = (*x)->playlist();
 		
-		if (!pl) {
-			continue;
+		if (pl) {
+
+			XMLNode &before = pl->get_state();
+			
+			if (opt == SplitIntersected) {
+				pl->split (pos);
+			}
+			
+			pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
+			
+			XMLNode &after = pl->get_state();
+			
+			session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
+			commit = true;
 		}
-
-		XMLNode &before = pl->get_state();
-
-		if (opt == SplitIntersected) {
-			pl->split (pos);
+			
+		/* automation */
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
+		if (rtav) {
+			rtav->route ()->shift (pos, frames);
+			commit = true;
 		}
-		
-		pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
-
-		XMLNode &after = pl->get_state();
-
-		session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
-		commit = true;
 	}
 
+	/* markers */
 	if (markers_too) {
 		bool moved = false;
 		XMLNode& before (session->locations()->get_state());

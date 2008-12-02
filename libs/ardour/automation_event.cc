@@ -1426,3 +1426,20 @@ AutomationList::set_state (const XMLNode& node)
 	return 0;
 }
 
+void
+AutomationList::shift (nframes64_t pos, nframes64_t frames)
+{
+	{
+		Glib::Mutex::Lock lm (lock);
+
+		for (iterator i = begin (); i != end (); ++i) {
+			if ((*i)->when >= pos) {
+				(*i)->when += frames;
+			}
+		}
+
+		mark_dirty ();
+	}
+
+	maybe_signal_changed ();
+}

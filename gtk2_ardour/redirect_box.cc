@@ -303,6 +303,12 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 
 		// this is purely informational but necessary
 		RedirectSelected (redirect); // emit
+
+	} else if (!redirect && ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
+
+		choose_plugin ();
+		_plugin_selector.show_manager ();
+
 	}
 	
 	return ret;

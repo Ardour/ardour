@@ -46,6 +46,7 @@ class PluginSelector : public ArdourDialog
 	void on_show ();
 
 	Gtk::Menu& plugin_menu ();
+	void show_manager ();
 
   private:
 	PluginInterestedObject* interested_object;
@@ -125,7 +126,6 @@ class PluginSelector : public ArdourDialog
 
 	void plugin_chosen_from_menu (const ARDOUR::PluginInfoPtr&);
 	Gtk::Menu* _menu;
-	void show_manager ();
 };
 
 #endif // __ardour_plugin_selector_h__

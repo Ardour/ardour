@@ -106,6 +106,8 @@ class Route : public IO
 
 	/* end of vfunc-based API */
 
+	void shift (nframes64_t, nframes64_t);
+
 	/* override IO::set_gain() to provide group control */
 
 	void set_gain (gain_t val, void *src);
