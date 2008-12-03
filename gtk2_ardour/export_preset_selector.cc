@@ -114,15 +114,11 @@ ExportPresetSelector::update_selection ()
 		entry.get_entry()->set_text (text);
 		select_connection.block (false);
 	
-	} else { // Text has been edited 
+	} else { // Text has been edited, this should not make any changes in the profile manager
 		if (previous && !text.compare (previous->name())) {
-			
 			current = previous;
-			
 		} else {
 			current.reset ();
-			profile_manager->load_preset (current);
-			CriticalSelectionChanged();
 		}
 	}
 	
