@@ -446,7 +446,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
 	if (!_slave->locked()) {
-		cerr << "Slave not locked, not rolling\n";
+		// cerr << "Slave not locked, not rolling\n";
 		goto noroll;
 	}
 
@@ -643,12 +643,14 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			float adjusted_speed = slave_speed +
 				(delta / (adjust_seconds * _current_frame_rate));
 			
-			// cerr << "adjust using " << delta
-			// << " towards " << adjusted_speed
-			// << " ratio = " << adjusted_speed / slave_speed
-			// << " current = " << _transport_speed
-			// << " slave @ " << slave_speed
-			// << endl;
+#if 0
+			cerr << "adjust using " << delta
+			     << " towards " << adjusted_speed
+			     << " ratio = " << adjusted_speed / slave_speed
+			     << " current = " << _transport_speed
+			     << " slave @ " << slave_speed
+			     << endl;
+#endif
 			
 			request_transport_speed (adjusted_speed);
 			

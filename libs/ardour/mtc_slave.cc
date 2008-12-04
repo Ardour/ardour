@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
+#include <iostream>
 #include <errno.h>
 #include <poll.h>
 #include <sys/types.h>
@@ -42,6 +42,8 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	: session (s)
 {
 	can_notify_on_unknown_rate = true;
+
+	last_mtc_fps_byte = session.get_mtc_smpte_bits ();
 
 	rebind (p);
 	reset ();
@@ -96,6 +98,8 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 	smpte.seconds = msg[1];
 	smpte.frames = msg[0];
 
+	last_mtc_fps_byte = msg[4];
+	
 	switch (msg[4]) {
 	case MTC_24_FPS:
 		smpte.rate = 24;
@@ -120,7 +124,9 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 	default:
 		/* throttle error messages about unknown MTC rates */
 		if (can_notify_on_unknown_rate) {
-			error << _("Unknown rate/drop value in incoming MTC stream, session values used instead") << endmsg;
+			error << string_compose (_("Unknown rate/drop value %1 in incoming MTC stream, session values used instead"),
+						 (int) msg[4]) 
+			      << endmsg;
 			can_notify_on_unknown_rate = false;
 		}
 		smpte.rate = session.smpte_frames_per_second();
@@ -170,8 +176,9 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 void
 MTC_Slave::handle_locate (const MIDI::byte* mmc_tc)
 {
-	MIDI::byte mtc[4];
+	MIDI::byte mtc[5];
 	
+	mtc[4] = last_mtc_fps_byte;
 	mtc[3] = mmc_tc[0] & 0xf; /* hrs only */
 	mtc[2] = mmc_tc[1];
 	mtc[1] = mmc_tc[2];

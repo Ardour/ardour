@@ -50,7 +50,6 @@ Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 	fake_mtc_time[3] = (sysex_buf[5] & 0x1f); // hours
 	
 	_mtc_fps = MTC_FPS ((sysex_buf[5] & 0x60) >> 5); // fps
-
 	fake_mtc_time[4] = (byte) _mtc_fps;
 
 	/* wait for first quarter frame, which could indicate forwards
@@ -292,6 +291,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 				if (!_mtc_locked) {
 					_mtc_locked = true;
 				}
+
 				mtc_time (_mtc_time, false);
 			}
 			expected_mtc_quarter_frame_code = 0;

@@ -398,6 +398,10 @@ class Session : public PBD::StatefulDestructible
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
 
+	MIDI::byte get_mtc_smpte_bits() const { 
+		return mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
+	}
+
 	float smpte_frames_per_second() const;
 	bool smpte_drop_frames() const;
 
