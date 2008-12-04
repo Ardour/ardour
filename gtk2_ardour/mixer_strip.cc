@@ -388,6 +388,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		meter_point_label.set_text (_("post"));
 		break;
 	}
+
+	delete route_ops_menu;
+	route_ops_menu = 0;
 	
 	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route->comment().empty() ?
 						   _("Click to Add/Edit Comments"):
@@ -1038,7 +1041,7 @@ void
 MixerStrip::build_route_ops_menu ()
 {
 	using namespace Menu_Helpers;
-	route_ops_menu = manage (new Menu);
+	route_ops_menu = new Menu;
 	route_ops_menu->set_name ("ArdourContextMenu");
 
 	MenuList& items = route_ops_menu->items();
@@ -1069,7 +1072,7 @@ MixerStrip::build_route_ops_menu ()
 gint
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1) {
+	if (ev->button == 1 || ev->button == 3) {
 		list_route_operations ();
 
 		Menu_Helpers::MenuList& items = route_ops_menu->items();
