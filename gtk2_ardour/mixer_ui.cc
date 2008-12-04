@@ -1296,19 +1296,41 @@ Mixer_UI::set_state (const XMLNode& node)
 	const XMLProperty* prop;
 	XMLNode* geometry;
 	
-	if ((geometry = find_named_node (node, "geometry")) == 0) {
+	m_width = default_width;
+	m_height = default_height;
+	m_root_x = 1;
+	m_root_y = 1;
+	
+	if ((geometry = find_named_node (node, "geometry")) != 0) {
 
-		m_width = default_width;
-		m_height = default_height;
-		m_root_x = 1;
-		m_root_y = 1;
+		XMLProperty* prop;
 
-	} else {
+		if ((prop = geometry->property("x_size")) == 0) {
+			prop = geometry->property ("x-size");
+		}
+		if (prop) {
+			m_width = atoi(prop->value());
+		}
+		if ((prop = geometry->property("y_size")) == 0) {
+			prop = geometry->property ("y-size");
+		}
+		if (prop) {
+			m_height = atoi(prop->value());
+		}
 
-		m_width = atoi(geometry->property("x_size")->value().c_str());
-		m_height = atoi(geometry->property("y_size")->value().c_str());
-		m_root_x = atoi(geometry->property("x_pos")->value().c_str());
-		m_root_y = atoi(geometry->property("y_pos")->value().c_str());
+		if ((prop = geometry->property ("x_pos")) == 0) {
+			prop = geometry->property ("x-pos");
+		}
+		if (prop) {
+			m_root_x = atoi (prop->value());
+			
+		}
+		if ((prop = geometry->property ("y_pos")) == 0) {
+			prop = geometry->property ("y-pos");
+		}
+		if (prop) {
+			m_root_y = atoi (prop->value());
+		}
 	}
 
 	set_window_pos_and_size ();
@@ -1384,12 +1406,24 @@ Mixer_UI::pane_allocation_handler (Allocation& alloc, Gtk::Paned* which)
 	int width, height;
 	static int32_t done[3] = { 0, 0, 0 };
 
-	if ((geometry = find_named_node (*node, "geometry")) == 0) {
-		width = default_width;
-		height = default_height;
-	} else {
-		width = atoi(geometry->property("x_size")->value());
-		height = atoi(geometry->property("y_size")->value());
+	width = default_width;
+	height = default_height;
+
+	if ((geometry = find_named_node (*node, "geometry")) != 0) {
+
+
+		if ((prop = geometry->property ("x_size")) == 0) {
+			prop = geometry->property ("x-size");
+		}
+		if (prop) {
+			width = atoi (prop->value());
+		}
+		if ((prop = geometry->property ("y_size")) == 0) {
+			prop = geometry->property ("y-size");
+		}
+		if (prop) {
+			height = atoi (prop->value());
+		}
 	}
 
 	if (which == static_cast<Gtk::Paned*> (&rhs_pane1)) {

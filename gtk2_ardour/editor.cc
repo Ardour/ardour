@@ -2354,23 +2354,57 @@ Editor::set_state (const XMLNode& node)
 		_id = prop->value ();
 	}
 
-	if ((geometry = find_named_node (node, "geometry")) == 0) {
+	g.base_width = default_width;
+	g.base_height = default_height;
+	x = 1;
+	y = 1;
+	xoff = 0;
+	yoff = 21;
 
-		g.base_width = default_width;
-		g.base_height = default_height;
-		x = 1;
-		y = 1;
-		xoff = 0;
-		yoff = 21;
+	if ((geometry = find_named_node (node, "geometry")) != 0) {
 
-	} else {
+		XMLProperty* prop;
 
-		g.base_width = atoi(geometry->property("x_size")->value());
-		g.base_height = atoi(geometry->property("y_size")->value());
-		x = atoi(geometry->property("x_pos")->value());
-		y = atoi(geometry->property("y_pos")->value());
-		xoff = atoi(geometry->property("x_off")->value());
-		yoff = atoi(geometry->property("y_off")->value());
+		if ((prop = geometry->property("x_size")) == 0) {
+			prop = geometry->property ("x-size");
+		}
+		if (prop) {
+			g.base_width = atoi(prop->value());
+		}
+		if ((prop = geometry->property("y_size")) == 0) {
+			prop = geometry->property ("y-size");
+		}
+		if (prop) {
+			g.base_height = atoi(prop->value());
+		}
+
+		if ((prop = geometry->property ("x_pos")) == 0) {
+			prop = geometry->property ("x-pos");
+		}
+		if (prop) {
+			x = atoi (prop->value());
+
+		}
+		if ((prop = geometry->property ("y_pos")) == 0) {
+			prop = geometry->property ("y-pos");
+		}
+		if (prop) {
+			y = atoi (prop->value());
+		}
+
+		if ((prop = geometry->property ("x_off")) == 0) {
+			prop = geometry->property ("x-off");
+		}
+		if (prop) {
+			xoff = atoi (prop->value());
+		}
+		if ((prop = geometry->property ("y_off")) == 0) {
+			prop = geometry->property ("y-off");
+		}
+		if (prop) {
+			yoff = atoi (prop->value());
+		}
+
 	}
 
 	set_default_size (g.base_width, g.base_height);
@@ -3688,12 +3722,23 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	static int32_t done;
 	XMLNode* geometry;
 
-	if ((geometry = find_named_node (*node, "geometry")) == 0) {
-		width = default_width;
-		height = default_height;
-	} else {
-		width = atoi(geometry->property("x_size")->value());
-		height = atoi(geometry->property("y_size")->value());
+	width = default_width;
+	height = default_height;
+
+	if ((geometry = find_named_node (*node, "geometry")) != 0) {
+
+		if ((prop = geometry->property ("x_size")) == 0) {
+			prop = geometry->property ("x-size");
+		}
+		if (prop) {
+			width = atoi (prop->value());
+		}
+		if ((prop = geometry->property ("y_size")) == 0) {
+			prop = geometry->property ("y-size");
+		}
+		if (prop) {
+			height = atoi (prop->value());
+		}
 	}
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
