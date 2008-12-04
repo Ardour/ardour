@@ -624,7 +624,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			*/
 
 			float scaling = limit/blimit;
-
+			
 			for (i = 0, n = 1; i < blimit; ++i, ++n) {
 
 				/* first time through just copy a channel into 
@@ -649,7 +649,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 				   data in the output buffers 
 				*/
 				
-				_session.mix_buffers_with_gain (bufs[i%blimit], b, nframes, scaling);
+				Session::mix_buffers_with_gain (bufs[i%blimit], b, nframes, scaling);
 
 				if (n < diskstream->n_channels()) {
 					tmpb = diskstream->playback_buffer(n);
@@ -660,8 +660,9 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 				
 			}
 
+			limit = blimit;
+
 		} else {
-		
 			for (i = 0, n = 1; i < limit; ++i, ++n) {
 				memcpy (bufs[i], b, sizeof (Sample) * nframes); 
 				if (n < diskstream->n_channels()) {
@@ -683,7 +684,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			}
 		}
 
-		process_output_buffers (bufs, blimit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
