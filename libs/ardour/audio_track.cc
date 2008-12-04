@@ -606,18 +606,69 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		/* copy the diskstream data to all output buffers */
 		
 		vector<Sample*>& bufs = _session.get_passthru_buffers ();
+		vector<Sample*>::size_type blimit = bufs.size();
 		uint32_t limit = n_process_buffers ();
 		
 		uint32_t n;
 		uint32_t i;
 
+		if (limit > blimit) {
 
-		for (i = 0, n = 1; i < limit; ++i, ++n) {
-			memcpy (bufs[i], b, sizeof (Sample) * nframes); 
-			if (n < diskstream->n_channels()) {
-				tmpb = diskstream->playback_buffer(n);
-				if (tmpb!=0) {
-					b = tmpb;
+			/* example case: auditioner configured for stereo output,
+			   but loaded with an 8 channel file. there are only
+			   2 passthrough buffers, but n_process_buffers() will
+			   return 8.
+			   
+			   arbitrary decision: map all channels in the diskstream
+			   to the outputs available.
+			*/
+
+			float scaling = limit/blimit;
+
+			for (i = 0, n = 1; i < blimit; ++i, ++n) {
+
+				/* first time through just copy a channel into 
+				   the output buffer.
+				*/
+				
+				for (nframes_t xx = 0; xx < nframes; ++xx) {
+					bufs[i][xx] = b[xx] * scaling;
+				}
+
+				if (n < diskstream->n_channels()) {
+					tmpb = diskstream->playback_buffer(n);
+					if (tmpb!=0) {
+						b = tmpb;
+					}
+				}
+			}
+
+			for (;i < limit; ++i, ++n) {
+				
+				/* for all remaining channels, sum with existing
+				   data in the output buffers 
+				*/
+				
+				_session.mix_buffers_with_gain (bufs[i%blimit], b, nframes, scaling);
+
+				if (n < diskstream->n_channels()) {
+					tmpb = diskstream->playback_buffer(n);
+					if (tmpb!=0) {
+						b = tmpb;
+					}
+				}
+				
+			}
+
+		} else {
+		
+			for (i = 0, n = 1; i < limit; ++i, ++n) {
+				memcpy (bufs[i], b, sizeof (Sample) * nframes); 
+				if (n < diskstream->n_channels()) {
+					tmpb = diskstream->playback_buffer(n);
+					if (tmpb!=0) {
+						b = tmpb;
+					}
 				}
 			}
 		}
@@ -632,7 +683,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			}
 		}
 
-		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, blimit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
