@@ -51,9 +51,19 @@ protected:
 
 class MidiClockTicker : public Ticker
 {
-public:
+	/// Singleton
+private:
 	MidiClockTicker() : _jack_port(0), _ppqn(24), _last_tick(0.0) {};
+	MidiClockTicker( const MidiClockTicker& );
+	MidiClockTicker& operator= (const MidiClockTicker&);
+	
+public:
 	virtual ~MidiClockTicker() {};
+	
+	static MidiClockTicker& instance() {
+		static MidiClockTicker _instance;
+		return _instance;
+	}
 	
 	void tick(
 		const nframes_t& transport_frames, 

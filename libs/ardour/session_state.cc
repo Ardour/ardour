@@ -359,8 +359,7 @@ Session::second_stage_init (bool new_session)
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
 	
-	MidiClockTicker* midi_clock_ticker = new MidiClockTicker();
-	midi_clock_ticker->set_session(*this);
+	MidiClockTicker::instance().set_session(*this);
 
 	BootMessage (_("Reset Control Protocols"));
 
