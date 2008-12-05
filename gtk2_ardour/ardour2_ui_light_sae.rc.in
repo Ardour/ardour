@@ -797,6 +797,7 @@ style "track_name_display"
 	font_name = "%FONT_NORMAL%"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	text[INSENSITIVE] = { 0.70, 0.70, 0.70 }
 
 	base[NORMAL] = { 0.80, 0.80, 0.80 }
 	base[ACTIVE] = { 0.80, 0.80, 0.80 }
