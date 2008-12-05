@@ -17,9 +17,6 @@
 
 */
 
-#include "i18n.h"
-#include "new_session_dialog.h"
-
 #include <pbd/error.h>
 
 #include <ardour/recent_sessions.h>
@@ -43,6 +40,8 @@ using namespace PBD;
 
 #include "opts.h"
 #include "utils.h"
+#include "i18n.h"
+#include "new_session_dialog.h"
 
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
