@@ -1261,6 +1261,7 @@ class Editor : public PublicEditor
 
 	void add_location_mark (nframes64_t where);
 	void add_location_from_audio_region ();
+	void add_locations_from_audio_region ();
 	void add_location_from_selection ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();

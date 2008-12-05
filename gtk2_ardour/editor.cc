@@ -1962,7 +1962,12 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	/* range related stuff */
 
-	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_audio_region)));
+	items.push_back (MenuElem (_("Add Single Range"), mem_fun (*this, &Editor::add_location_from_audio_region)));
+	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_locations_from_audio_region)));
+	if (selection->regions.size() < 2) {
+		items.back().set_sensitive (false);
+	}
+
 	items.push_back (MenuElem (_("Set Range Selection"), mem_fun (*this, &Editor::set_selection_from_audio_region)));
 	items.push_back (SeparatorElem());
 			 

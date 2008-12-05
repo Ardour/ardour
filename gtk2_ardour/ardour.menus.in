@@ -242,6 +242,11 @@
 	      <menuitem action='duplicate-region'/>
 	      <menuitem action='multi-duplicate-region'/>
 	      <menuitem action='region-fill-track'/>
+	      <separator/>
+	      <menuitem action='loop-region'/>
+	      <menuitem action='set-punch-from-region'/>
+	      <menuitem action='add-range-marker-from-region'/>
+	      <menuitem action='add-range-markers-from-region'/>
 	</menu>
 
         <menu action='TrackMenu'>

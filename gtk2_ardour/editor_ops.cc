@@ -1991,6 +1991,36 @@ Editor::add_location_from_playhead_cursor ()
 }
 
 void
+Editor::add_locations_from_audio_region ()
+{
+	RegionSelection rs; 
+
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
+	}
+
+	session->begin_reversible_command (rs.size () > 1 ? _("add markers") : _("add marker"));
+	XMLNode &before = session->locations()->get_state();
+	
+	cerr << "Add locations\n";
+
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
+		
+		boost::shared_ptr<Region> region = (*i)->region ();
+	
+		Location *location = new Location (region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
+		
+		session->locations()->add (location, true);
+	}
+
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	session->commit_reversible_command ();
+}
+
+void
 Editor::add_location_from_audio_region ()
 {
 	RegionSelection rs; 
@@ -2001,15 +2031,31 @@ Editor::add_location_from_audio_region ()
 		return;
 	}
 
-	RegionView* rv = *(rs.begin());
-	boost::shared_ptr<Region> region = rv->region();
-	
-	Location *location = new Location (region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
 	session->begin_reversible_command (_("add marker"));
-        XMLNode &before = session->locations()->get_state();
+	XMLNode &before = session->locations()->get_state();
+
+	string markername;
+
+	if (rs.size() > 1) {		// more than one region selected
+		session->locations()->next_available_name(markername, "regions");
+	} else {
+		RegionView* rv = *(rs.begin());
+		boost::shared_ptr<Region> region = rv->region();
+		markername = region->name();
+	}
+		
+	if (!choose_new_marker_name(markername)) {
+		return;
+	}
+
+	cerr << "Add location\n";
+
+	// single range spanning all selected 
+	Location *location = new Location (rs.start(), rs.end_frame(), markername, Location::IsRangeMarker);
 	session->locations()->add (location, true);
-        XMLNode &after = session->locations()->get_state();
-	session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
+
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	session->commit_reversible_command ();
 }
 
