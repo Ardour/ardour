@@ -19,6 +19,8 @@
 */
 
 #include <algorithm>
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 
 #include <pbd/error.h>
 #include <ardour/coreaudiosource.h>
@@ -256,6 +258,8 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 		goto out;
 	}
 
+	_info.format_name = "";
+
 	if (absd.mFormatID == kAudioFormatLinearPCM) {
 		if (absd.mFormatFlags & kAudioFormatFlagIsBigEndian) {
 			_info.format_name += "big-endian";
@@ -264,17 +268,17 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 		}
 		
 		char buf[32];
-		snprintf (buf, sizeof (buf), "%u bit", absd.mBitsPerChannel);
+		snprintf (buf, sizeof (buf), " %" PRIu32 " bit", absd.mBitsPerChannel);
 		_info.format_name += buf;
 		_info.format_name += '\n';
 		
 		if (absd.mFormatFlags & kAudioFormatFlagIsFloat) {
-			_info.format_name += " float";
+			_info.format_name += "float";
 		} else {
 			if (absd.mFormatFlags & kAudioFormatFlagIsSignedInteger) {
-				_info.format_name += " signed";
+				_info.format_name += "signed";
 			} else {
-				_info.format_name += " unsigned";
+				_info.format_name += "unsigned";
 			}
 			/* integer is typical, do not show it */
 		}
@@ -302,8 +306,16 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 		_info.format_name += "60958 AC3";
 		break;
 
-	case kAudioFormatMPEG:
-		_info.format_name += "MPEG";
+	case kAudioFormatMPEGLayer1:
+		_info.format_name += "MPEG-1";
+		break;
+
+	case kAudioFormatMPEGLayer2:
+		_info.format_name += "MPEG-2";
+		break;
+
+	case kAudioFormatMPEGLayer3:
+		_info.format_name += "MPEG-3";
 		break;
 
 	case kAudioFormatAppleIMA4:
