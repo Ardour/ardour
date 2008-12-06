@@ -6,7 +6,7 @@
 #include "pbd/xml++.h"
 
 #include <string>
-#include <list>
+#include <vector>
 #include <set>
 
 namespace MIDI
@@ -18,7 +18,7 @@ namespace Name
 class Patch : public PBD::Stateful
 {
 public:
-	typedef std::list<Evoral::Event> PatchMidiCommands;
+	typedef std::vector<Evoral::Event> PatchMidiCommands;
 
 	Patch() {};
 	Patch(string a_number, string a_name) : _number(a_number), _name(a_name) {};
@@ -44,7 +44,7 @@ private:
 class PatchBank : public PBD::Stateful
 {
 public:
-	typedef std::list<Patch> PatchNameList;
+	typedef std::vector<Patch> PatchNameList;
 
 	PatchBank() {};
 	virtual ~PatchBank() {};
@@ -67,7 +67,7 @@ class ChannelNameSet : public PBD::Stateful
 {
 public:
 	typedef std::set<uint8_t>    AvailableForChannels;
-	typedef std::list<PatchBank> PatchBanks;
+	typedef std::vector<PatchBank> PatchBanks;
 
 	ChannelNameSet() {};
 	virtual ~ChannelNameSet() {};
@@ -109,6 +109,27 @@ private:
 	string _name;
 };
 
+class NoteNameList : public PBD::Stateful
+{
+public:
+	typedef std::vector<Note> Notes;
+	NoteNameList() {};
+	NoteNameList(string a_name) : _name(a_name) {};
+	~NoteNameList() {};
+
+	const string& name() const               { return _name; }
+	void set_name(const string a_name)       { _name = a_name; }
+
+	const Notes& notes() const { return _notes; }
+
+	XMLNode& get_state (void);
+	int      set_state (const XMLNode& a_node);
+
+private:
+	string _name;
+	Notes  _notes;
+};
+
 class CustomDeviceMode : public PBD::Stateful
 {
 public:
@@ -132,8 +153,11 @@ private:
 class MasterDeviceNames : public PBD::Stateful
 {
 public:
-	typedef std::list<ChannelNameSet> ChannelNameSets;
-	typedef std::list<std::string> Models;
+	typedef std::vector<std::string>       Models;
+	typedef std::vector<CustomDeviceMode>  CustomDeviceModes;
+	typedef std::vector<ChannelNameSet>    ChannelNameSets;
+	typedef std::vector<NoteNameList>      NoteNameLists;
+	
 	
 	MasterDeviceNames() {};
 	virtual ~MasterDeviceNames() {};
@@ -148,9 +172,11 @@ public:
 	int      set_state (const XMLNode& a_node);
 	
 private:
-	string _manufacturer;
-	Models _models;
-	ChannelNameSets _channel_name_sets;
+	string            _manufacturer;
+	Models            _models;
+	CustomDeviceModes _custom_device_modes;
+	ChannelNameSets   _channel_name_sets;
+	NoteNameLists     _note_name_lists;
 };
 
 class MIDINameDocument : public PBD::Stateful

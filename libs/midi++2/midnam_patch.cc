@@ -42,7 +42,7 @@ Patch::set_state (const XMLNode& node)
 XMLNode&
 Note::get_state (void)
 {
-	XMLNode* node = new XMLNode("Patch");
+	XMLNode* node = new XMLNode("Note");
 	node->add_property("Number", _number);
 	node->add_property("Name",   _name);
 
@@ -52,12 +52,39 @@ Note::get_state (void)
 int
 Note::set_state (const XMLNode& node)
 {
-	assert(node.name() == "Patch");
+	assert(node.name() == "Note");
 	_number = node.property("Number")->value();
 	_name   = node.property("Name")->value();
 
 	return 0;
 }
+
+XMLNode&
+NoteNameList::get_state (void)
+{
+	XMLNode* node = new XMLNode("NoteNameList");
+	node->add_property("Name",   _name);
+
+	return *node;
+}
+
+int
+NoteNameList::set_state (const XMLNode& node)
+{
+	assert(node.name() == "NoteNameList");
+	_name   = node.property("Name")->value();
+
+	boost::shared_ptr<XMLSharedNodeList> notes =
+					node.find("//Note");
+	for (XMLSharedNodeList::const_iterator i = notes->begin(); i != notes->end(); ++i) {
+		Note note;
+		note.set_state(*(*i));
+		_notes.push_back(note);
+	}
+	
+	return 0;
+}
+
 
 XMLNode&
 PatchBank::get_state (void)
@@ -188,6 +215,50 @@ CustomDeviceMode::get_state(void)
 int
 MasterDeviceNames::set_state(const XMLNode& a_node)
 {
+	// Manufacturer
+	boost::shared_ptr<XMLSharedNodeList> manufacturer = a_node.find("//Manufacturer");
+	assert(manufacturer->size() == 1);
+	_manufacturer = manufacturer->front()->content();
+
+	// Models
+	boost::shared_ptr<XMLSharedNodeList> models = a_node.find("//Model");
+	assert(models->size() >= 1);
+	for (XMLSharedNodeList::iterator i = models->begin();
+	     i != models->end();
+	     ++i) {
+		_models.push_back((*i)->content());
+	}
+
+	// CustomDeviceModes
+	boost::shared_ptr<XMLSharedNodeList> custom_device_modes = a_node.find("//CustomDeviceMode");
+	for (XMLSharedNodeList::iterator i = custom_device_modes->begin();
+	     i != custom_device_modes->end();
+	     ++i) {
+		CustomDeviceMode custom_device_mode;
+		custom_device_mode.set_state(*(*i));
+		_custom_device_modes.push_back(custom_device_mode);
+	}
+
+	// ChannelNameSets
+	boost::shared_ptr<XMLSharedNodeList> channel_name_sets = a_node.find("//ChannelNameSet");
+	for (XMLSharedNodeList::iterator i = channel_name_sets->begin();
+	     i != channel_name_sets->end();
+	     ++i) {
+		ChannelNameSet channel_name_set;
+		channel_name_set.set_state(*(*i));
+		_channel_name_sets.push_back(channel_name_set);
+	}
+
+	// NoteNameLists
+	boost::shared_ptr<XMLSharedNodeList> note_name_lists = a_node.find("//NoteNameList");
+	for (XMLSharedNodeList::iterator i = note_name_lists->begin();
+	     i != note_name_lists->end();
+	     ++i) {
+		NoteNameList note_name_list;
+		note_name_list.set_state(*(*i));
+		_note_name_lists.push_back(note_name_list);
+	}
+
 	return 0;
 }
 
