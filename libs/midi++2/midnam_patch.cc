@@ -272,6 +272,21 @@ MasterDeviceNames::get_state(void)
 int
 MIDINameDocument::set_state(const XMLNode& a_node)
 {
+	// Author
+	boost::shared_ptr<XMLSharedNodeList> author = a_node.find("//Author");
+	assert(author->size() == 1);
+	_author = author->front()->content();
+	
+	// MasterDeviceNames
+	boost::shared_ptr<XMLSharedNodeList> master_device_names_list = a_node.find("//MasterDeviceNames");
+	for (XMLSharedNodeList::iterator i = master_device_names_list->begin();
+	     i != master_device_names_list->end();
+	     ++i) {
+		MasterDeviceNames master_device_names;
+		master_device_names.set_state(*(*i));
+		_master_device_names_list.push_back(master_device_names);
+	}
+	
 	return 0;
 }
 

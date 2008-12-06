@@ -185,14 +185,19 @@ public:
 	typedef std::list<MasterDeviceNames> MasterDeviceNamesList;
 	
 	MIDINameDocument() {};
+	MIDINameDocument(const string &filename) : _document(XMLTree(filename)) { set_state(*_document.root()); };
 	virtual ~MIDINameDocument() {};
 
+	const string& author() const { return _author; }
+	void set_author(const string an_author) { _author = an_author; }
+	
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
 
 private:
-	string _author;
+	string                _author;
 	MasterDeviceNamesList _master_device_names_list;
+	XMLTree               _document;
 };
 
 }
