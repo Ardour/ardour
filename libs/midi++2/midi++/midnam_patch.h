@@ -88,6 +88,27 @@ private:
 	PatchBanks           _patch_banks;
 };
 
+class Note : public PBD::Stateful
+{
+public:
+	Note() {};
+	Note(string a_number, string a_name) : _number(a_number), _name(a_name) {};
+	~Note() {};
+
+	const string& name() const               { return _name; }
+	void set_name(const string a_name)       { _name = a_name; }
+
+	const string& number() const             { return _number; }
+	void set_number(const string a_number)   { _number = a_number; }
+
+	XMLNode& get_state (void);
+	int      set_state (const XMLNode& a_node);
+
+private:
+	string _number;
+	string _name;
+};
+
 class CustomDeviceMode : public PBD::Stateful
 {
 public:

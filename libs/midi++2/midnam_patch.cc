@@ -40,6 +40,26 @@ Patch::set_state (const XMLNode& node)
 }
 
 XMLNode&
+Note::get_state (void)
+{
+	XMLNode* node = new XMLNode("Patch");
+	node->add_property("Number", _number);
+	node->add_property("Name",   _name);
+
+	return *node;
+}
+
+int
+Note::set_state (const XMLNode& node)
+{
+	assert(node.name() == "Patch");
+	_number = node.property("Number")->value();
+	_name   = node.property("Name")->value();
+
+	return 0;
+}
+
+XMLNode&
 PatchBank::get_state (void)
 {
 	XMLNode* node = new XMLNode("PatchBank");
