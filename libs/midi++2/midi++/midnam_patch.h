@@ -6,7 +6,7 @@
 #include "pbd/xml++.h"
 
 #include <string>
-#include <vector>
+#include <list>
 #include <set>
 
 namespace MIDI
@@ -18,7 +18,7 @@ namespace Name
 class Patch : public PBD::Stateful
 {
 public:
-	typedef std::vector<Evoral::Event> PatchMidiCommands;
+	typedef std::list<Evoral::Event> PatchMidiCommands;
 
 	Patch() {};
 	Patch(string a_number, string a_name) : _number(a_number), _name(a_name) {};
@@ -44,7 +44,7 @@ private:
 class PatchBank : public PBD::Stateful
 {
 public:
-	typedef std::vector<Patch> PatchNameList;
+	typedef std::list<Patch> PatchNameList;
 
 	PatchBank() {};
 	virtual ~PatchBank() {};
@@ -67,7 +67,7 @@ class ChannelNameSet : public PBD::Stateful
 {
 public:
 	typedef std::set<uint8_t>    AvailableForChannels;
-	typedef std::vector<PatchBank> PatchBanks;
+	typedef std::list<PatchBank> PatchBanks;
 
 	ChannelNameSet() {};
 	virtual ~ChannelNameSet() {};
@@ -112,7 +112,7 @@ private:
 class NoteNameList : public PBD::Stateful
 {
 public:
-	typedef std::vector<Note> Notes;
+	typedef std::list<Note> Notes;
 	NoteNameList() {};
 	NoteNameList(string a_name) : _name(a_name) {};
 	~NoteNameList() {};
@@ -153,10 +153,10 @@ private:
 class MasterDeviceNames : public PBD::Stateful
 {
 public:
-	typedef std::vector<std::string>       Models;
-	typedef std::vector<CustomDeviceMode>  CustomDeviceModes;
-	typedef std::vector<ChannelNameSet>    ChannelNameSets;
-	typedef std::vector<NoteNameList>      NoteNameLists;
+	typedef std::list<std::string>       Models;
+	typedef std::list<CustomDeviceMode>  CustomDeviceModes;
+	typedef std::list<ChannelNameSet>    ChannelNameSets;
+	typedef std::list<NoteNameList>      NoteNameLists;
 	
 	
 	MasterDeviceNames() {};
@@ -182,6 +182,8 @@ private:
 class MIDINameDocument : public PBD::Stateful
 {
 public:
+	typedef std::list<MasterDeviceNames> MasterDeviceNamesList;
+	
 	MIDINameDocument() {};
 	virtual ~MIDINameDocument() {};
 
@@ -190,7 +192,7 @@ public:
 
 private:
 	string _author;
-
+	MasterDeviceNamesList _master_device_names_list;
 };
 
 }
