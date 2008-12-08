@@ -370,6 +370,8 @@ class Editor : public PublicEditor
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
 
+	void move_selected_tracks (bool up);
+
 	bool new_regionviews_display_gain () { return _new_regionviews_show_envelope; }
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
@@ -548,7 +550,7 @@ class Editor : public PublicEditor
 
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
-
+	
 	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region> region);
 	
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
@@ -1844,8 +1846,9 @@ public:
 
 	void update_route_visibility ();
 
-	void sync_order_keys ();
-	bool ignore_route_order_sync;
+	void sync_order_keys (const char*);
+	bool route_redisplay_does_not_sync_order_keys;
+	bool route_redisplay_does_not_reset_order_keys;
 
 	bool route_list_display_button_press (GdkEventButton*);
 	void route_list_display_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,

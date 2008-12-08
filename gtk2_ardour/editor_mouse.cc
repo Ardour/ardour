@@ -4002,7 +4002,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		}
 		
 		if (changed_position && !drag_info.x_constrained) {
--			where = rv->region()->position() - drag_delta;
+			where = rv->region()->position() - drag_delta;
 		} else {
 			where = rv->region()->position();
 		}

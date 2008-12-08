@@ -298,7 +298,8 @@ Editor::Editor ()
 	_show_waveforms_recording = true;
 	first_action_message = 0;
 	show_gain_after_trim = false;
-	ignore_route_list_reorder = false;
+	route_redisplay_does_not_sync_order_keys = false;
+	route_redisplay_does_not_reset_order_keys = false;
 	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
 	route_removal = false;
@@ -358,7 +359,6 @@ Editor::Editor ()
 	scrubbing_direction = 0;
 
 	sfbrowser = 0;
-	ignore_route_order_sync = false;
 
 	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
 	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();

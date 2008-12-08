@@ -17,6 +17,8 @@
 
 */
 
+#include <list>
+#include <vector>
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
@@ -43,6 +45,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 
+const char* _order_key = N_("editor");
 
 void
 Editor::handle_new_route (Session::RouteList& routes)
@@ -54,8 +57,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
-	ignore_route_list_reorder = true;
-	ignore_route_order_sync = true;
+	route_redisplay_does_not_sync_order_keys = true;
 	no_route_list_redisplay = true;
 
 	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
@@ -116,22 +118,19 @@ Editor::handle_new_route (Session::RouteList& routes)
 		
 		if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
 			/* added a new fresh one at the end */
-			if (rtv->route()->order_key(N_("editor")) == -1) {
-				rtv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
+			if (rtv->route()->order_key(_order_key) == -1) {
+				rtv->route()->set_order_key (_order_key, route_display_model->children().size()-1);
 			}
 			rtv->effective_gain_display ();
 		}
 		
 		ignore_route_list_reorder = false;
 
-		tv->set_old_order_key (route_display_model->children().size() - 1);
 		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
 		
 		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
 
-	ignore_route_list_reorder = false;
-	ignore_route_order_sync = false;
 	no_route_list_redisplay = false;
 
 	redisplay_route_list ();
@@ -139,7 +138,9 @@ Editor::handle_new_route (Session::RouteList& routes)
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);
 	}
+
 	editor_list_button.set_sensitive(true);
+	route_redisplay_does_not_sync_order_keys = false;
 }
 
 void
@@ -173,13 +174,11 @@ Editor::remove_route (TimeAxisView *tv)
 		entered_track = 0;
 	}
 
-	/* Decrement old order keys for tracks `above' the one that is being removed */
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		TimeAxisView* v = (*ri)[route_display_columns.tv];
-		if (v->old_order_key() > tv->old_order_key()) {
-			v->set_old_order_key (v->old_order_key() - 1);
-		}
-	}
+	/* the core model has changed, there is no need to sync 
+	   view orders.
+	*/
+
+	route_redisplay_does_not_sync_order_keys = true;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[route_display_columns.tv] == tv) {
@@ -187,6 +186,8 @@ Editor::remove_route (TimeAxisView *tv)
 			break;
 		}
 	}
+
+	route_redisplay_does_not_sync_order_keys = false;
 
 	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
 		track_views.erase (i);
@@ -276,13 +277,13 @@ Editor::route_list_reordered (const TreeModel::Path& path,const TreeModel::itera
 
 
 void
-Editor::sync_order_keys ()
+Editor::sync_order_keys (const char *src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (ignore_route_order_sync || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if ((strcmp (src, _order_key) == 0) || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -290,15 +291,27 @@ Editor::sync_order_keys ()
 		neworder.push_back (0);
 	}
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		TimeAxisView* tv = (*ri)[route_display_columns.tv];
+	bool changed = false;
+	int order;
+
+	for (order = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
-		neworder[route->order_key (X_("editor"))] = tv->old_order_key ();
+
+		int old_key = order;
+		int new_key = route->order_key (_order_key);
+
+		neworder[new_key] = old_key;
+
+		if (new_key != old_key) {
+			changed = true;
+		}
 	}
 
-	ignore_route_list_reorder = true;
-	route_display_model->reorder (neworder);
-	ignore_route_list_reorder = false;
+	if (changed) {
+		route_redisplay_does_not_reset_order_keys = true;
+		route_display_model->reorder (neworder);
+		route_redisplay_does_not_reset_order_keys = false;
+	}
 }
 
 void
@@ -316,23 +329,20 @@ Editor::redisplay_route_list ()
 
 	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
-		RouteTimeAxisView* rt; 
+		boost::shared_ptr<Route> route = (*i)[route_display_columns.route];
 
 		if (tv == 0) {
 			// just a "title" row
 			continue;
 		}
 
-		if (!ignore_route_list_reorder) {
+		if (!route_redisplay_does_not_reset_order_keys) {
 			
 			/* this reorder is caused by user action, so reassign sort order keys
 			   to tracks.
 			*/
 			
-			if ((rt = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
-				rt->route()->set_order_key (N_("editor"), order);
-				++order;
-			}
+			route->set_order_key (_order_key, order);
 		}
 
 		bool visible = (*i)[route_display_columns.visible];
@@ -360,12 +370,9 @@ Editor::redisplay_route_list ()
 		vertical_adjustment.set_value (full_canvas_height - canvas_height);
 	} 
 
-	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {
-		ignore_route_order_sync = true;
-		Route::SyncOrderKeys (); // EMIT SIGNAL
-		ignore_route_order_sync = false;
+	if (!route_redisplay_does_not_reset_order_keys && !route_redisplay_does_not_sync_order_keys) {
+		session->sync_order_keys (_order_key);
 	}
-
 }
 
 void
@@ -577,7 +584,7 @@ Editor::route_list_selection_filter (const Glib::RefPtr<TreeModel>& model, const
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key ("editor") < b->order_key ("editor");
+	    return a->order_key (_order_key) < b->order_key (_order_key);
     }
 };
 
@@ -604,20 +611,26 @@ Editor::initial_route_list_display ()
 void
 Editor::track_list_reorder (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter, int* new_order)
 {
+	route_redisplay_does_not_sync_order_keys = true;
 	session->set_remote_control_ids();
 	redisplay_route_list ();
+	route_redisplay_does_not_sync_order_keys = false;
 }
 
 void
 Editor::route_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
+	/* never reset order keys because of a property change */
+	route_redisplay_does_not_reset_order_keys = true;
 	session->set_remote_control_ids();
 	redisplay_route_list ();
+	route_redisplay_does_not_reset_order_keys = false;
 }
 
 void
 Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
+	/* this could require an order reset & sync */
 	session->set_remote_control_ids();
 	ignore_route_list_reorder = true;
 	redisplay_route_list ();
@@ -664,3 +677,223 @@ Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
 		theslot (**i);
 	}
 }
+
+void
+Editor::move_selected_tracks (bool up)
+{
+	if (selection->tracks.empty()) {
+		return;
+	}
+
+	typedef std::pair<TimeAxisView*,boost::shared_ptr<Route> > ViewRoute;
+	std::list<ViewRoute> view_routes;
+	std::vector<int> neworder;
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator ri;
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		TimeAxisView* tv = (*ri)[route_display_columns.tv];
+		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
+
+		view_routes.push_back (ViewRoute (tv, route));
+	}
+
+	list<ViewRoute>::iterator trailing;
+	list<ViewRoute>::iterator leading;
+	
+	if (up) {
+		
+		trailing = view_routes.begin();
+		leading = view_routes.begin();
+		
+		++leading;
+		
+		while (leading != view_routes.end()) {
+			if (selection->selected (leading->first)) {
+				view_routes.insert (trailing, ViewRoute (leading->first, leading->second));
+				leading = view_routes.erase (leading);
+			} else {
+				++leading;
+				++trailing;
+			}
+		}
+
+	} else {
+
+		/* if we could use reverse_iterator in list::insert, this code
+		   would be a beautiful reflection of the code above. but we can't
+		   and so it looks like a bit of a mess.
+		*/
+
+		trailing = view_routes.end();
+		leading = view_routes.end();
+
+		--leading; if (leading == view_routes.begin()) { return; }
+		--leading;
+		--trailing;
+
+		while (1) {
+
+			if (selection->selected (leading->first)) {
+				list<ViewRoute>::iterator tmp;
+
+				/* need to insert *after* trailing, not *before* it,
+				   which is what insert (iter, val) normally does.
+				*/
+
+				tmp = trailing;
+				tmp++;
+
+				view_routes.insert (tmp, ViewRoute (leading->first, leading->second));
+					
+				/* can't use iter = cont.erase (iter); form here, because
+				   we need iter to move backwards.
+				*/
+
+				tmp = leading;
+				--tmp;
+
+				bool done = false;
+
+				if (leading == view_routes.begin()) {
+					/* the one we've just inserted somewhere else
+					   was the first in the list. erase this copy,
+					   and then break, because we're done.
+					*/
+					done = true;
+				}
+
+				view_routes.erase (leading);
+				
+				if (done) {
+					break;
+				}
+
+				leading = tmp;
+
+			} else {
+				if (leading == view_routes.begin()) {
+					break;
+				}
+				--leading;
+				--trailing;
+			}
+		};
+	}
+
+	for (leading = view_routes.begin(); leading != view_routes.end(); ++leading) {
+		neworder.push_back (leading->second->order_key (_order_key));
+	}
+
+	route_display_model->reorder (neworder);
+}
+
+#if 0
+	vector<boost::shared_ptr<Route> > selected_block;
+	boost::shared_ptr<Route> target_unselected_route;
+	bool last_track_was_selected = false;
+	vector<int> neworder;
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator ri;
+	uint32_t old_key;
+	uint32_t new_key;
+	int n;
+
+	/* preload "neworder" with the current order */
+	
+	for (n = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++n) {
+		neworder.push_back (n);
+	}
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+
+		TimeAxisView* tv = (*ri)[route_display_columns.tv];
+		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
+
+		if (selection->selected (tv)) {
+
+			selected_block.push_back (route);
+			cerr << "--SAVE as SELECTED " << route->name() << endl;
+			last_track_was_selected = true;
+			continue;
+
+		} else {
+
+			if (!last_track_was_selected) {
+				/* keep moving through unselected tracks, but save this
+				   one in case we need it later as the one that will
+				   move *down* as the selected block moves up.
+				*/
+				target_unselected_route = route;
+				cerr << "--pre-SAVE as UNSELECTED " << route->name() << endl;
+				continue;
+			}
+
+			last_track_was_selected = false;
+
+			if (!up) {
+				/* this is the track immediately after a selected block,
+				   and this is the one that will move *up* as 
+				   the selected block moves down.
+				*/
+
+				target_unselected_route = route;
+				cerr << "--post-SAVE as UNSELECTED " << route->name() << endl;
+			} else {
+				cerr << "--(up) plan to use existing unselected target\n";
+			}
+		}
+
+		cerr << "TRANSITION: sel = " << selected_block.size() << " unsel = " << target_unselected_route << endl;
+
+		/* transitioned between selected/not-selected */
+		
+		uint32_t distance;
+		
+		for (vector<boost::shared_ptr<Route> >::iterator x = selected_block.begin(); x != selected_block.end(); ++x) {
+			old_key = (*x)->order_key (_order_key);
+			new_key = compute_new_key (old_key, up, 1, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--SELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+
+		/* now move the unselected tracks in the opposite direction */
+		
+		if (!selected_block.empty() && target_unselected_route) {
+			distance = selected_block.size();
+			old_key = target_unselected_route->order_key (_order_key);
+			new_key = compute_new_key (old_key, !up, distance, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--UNSELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+
+		selected_block.clear ();
+		target_unselected_route.reset ();
+	}
+
+	cerr << "when done ... sel = " << selected_block.size() << " unsel = " << target_unselected_route << endl;
+	
+	if (!selected_block.empty() || target_unselected_route) {
+		
+		/* left over blocks */
+		
+		uint32_t distance;
+		
+		for (vector<boost::shared_ptr<Route> >::iterator x = selected_block.begin(); x != selected_block.end(); ++x) {
+			old_key = (*x)->order_key (_order_key);
+			new_key = compute_new_key (old_key, up, 1, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--SELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+
+		if (!selected_block.empty() && target_unselected_route) {
+			distance = selected_block.size();
+			old_key = target_unselected_route->order_key (_order_key);
+			new_key = compute_new_key (old_key, !up, distance, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--UNSELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+	}
+
+	route_display_model->reorder (neworder);
+#endif

@@ -319,6 +319,8 @@ class Session : public PBD::StatefulDestructible
 	struct RoutePublicOrderSorter {
 	    bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
+	
+	void sync_order_keys (const char* base);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
@@ -1394,8 +1396,6 @@ class Session : public PBD::StatefulDestructible
 	void          midi_thread_work ();
 	void          change_midi_ports ();
 	int           use_config_midi_ports ();
-
-	mutable  gint   butler_active;
 
 	void set_play_loop (bool yn);
 	void overwrite_some_buffers (Diskstream*);

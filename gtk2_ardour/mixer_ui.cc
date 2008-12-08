@@ -68,7 +68,8 @@ Mixer_UI::Mixer_UI ()
 	no_track_list_redisplay = false;
 	in_group_row_change = false;
 	_visible = false;
-	ignore_route_reorder = false;
+	strip_redisplay_does_not_reset_order_keys = false;
+	strip_redisplay_does_not_sync_order_keys = false;
 	ignore_sync = false;
 
 	Route::SyncOrderKeys.connect (mem_fun (*this, &Mixer_UI::sync_order_keys));
@@ -302,6 +303,9 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 	
 	MixerStrip* strip;
 
+	no_track_list_redisplay = true;
+	strip_redisplay_does_not_sync_order_keys = true;
+
 	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
@@ -322,25 +326,28 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 
 		show_strip (strip);
 		
-		no_track_list_redisplay = true;
-		
 		TreeModel::Row row = *(track_model->append());
 		row[track_columns.text] = route->name();
-		
 		row[track_columns.visible] = strip->marked_for_display();
 		row[track_columns.route] = route;
 		row[track_columns.strip] = strip;
-		
-		strip->set_old_order_key (track_model->children().size() - 1);
 
-		no_track_list_redisplay = false;
-		redisplay_track_list ();
+		if (route->order_key (N_("signal")) == -1) {
+			route->set_order_key (N_("signal"), track_model->children().size()-1);
+		}
 		
 		route->NameChanged.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
+
 		strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
 		
 		strip->signal_button_release_event().connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 	}
+
+	no_track_list_redisplay = false;
+
+	redisplay_track_list ();
+	
+	strip_redisplay_does_not_sync_order_keys = false;
 }
 
 void
@@ -356,13 +363,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 		strips.erase (i);
 	}
 
-	/* Decrement old order keys for strips `above' the one that is being removed */
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		MixerStrip* s = (*ri)[track_columns.strip];
-		if (s->old_order_key() > strip->old_order_key()) {
-			s->set_old_order_key (s->old_order_key() - 1);
-		}
-	}
+	strip_redisplay_does_not_sync_order_keys = true;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[track_columns.strip] == strip) {
@@ -370,26 +371,31 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 			break;
 		}
 	}
+
+	strip_redisplay_does_not_sync_order_keys = false;
 }
 
 const char*
 Mixer_UI::get_order_key() 
 {
+	return X_("signal");
+#if 0
 	if (Config->get_sync_all_route_ordering()) {
 		return X_("editor");
 	} else {
 		return X_("signal");
 	}
+#endif
 }
 
 void
-Mixer_UI::sync_order_keys ()
+Mixer_UI::sync_order_keys (const char *src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (ignore_sync || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if ((strcmp (src, get_order_key()) == 0) || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -397,15 +403,26 @@ Mixer_UI::sync_order_keys ()
 		neworder.push_back (0);
 	}
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+	bool changed = false;
+	int order;
+
+	for (order = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		MixerStrip* strip = (*ri)[track_columns.strip];
-		neworder[route->order_key (get_order_key())] = strip->old_order_key ();
+		int old_key = order;
+		int new_key = route->order_key (get_order_key());
+
+		neworder[new_key] = old_key;
+
+		if (new_key != old_key) {
+			changed = true;
+		}
 	}
 
-	ignore_route_reorder = true;
-	track_model->reorder (neworder);
-	ignore_route_reorder = false;
+	if (changed) {
+		strip_redisplay_does_not_reset_order_keys = true;
+		track_model->reorder (neworder);
+		strip_redisplay_does_not_reset_order_keys = false;
+	}
 }
 
 void
@@ -655,24 +672,28 @@ Mixer_UI::hide_all_audiotracks ()
 void
 Mixer_UI::track_list_reorder (const TreeModel::Path& path, const TreeModel::iterator& iter, int* new_order)
 {
+	strip_redisplay_does_not_sync_order_keys = true;
 	session->set_remote_control_ids();
 	redisplay_track_list ();
+	strip_redisplay_does_not_sync_order_keys = false;
 }
 
 void
 Mixer_UI::track_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
+	// never reset order keys because of a property change
+	strip_redisplay_does_not_reset_order_keys = true; 
 	session->set_remote_control_ids();
 	redisplay_track_list ();
+	strip_redisplay_does_not_reset_order_keys = false;
 }
 
 void
 Mixer_UI::track_list_delete (const Gtk::TreeModel::Path& path)
 {
+	/* this could require an order sync */
 	session->set_remote_control_ids();
-	ignore_route_reorder = true;
 	redisplay_track_list ();
-	ignore_route_reorder = false;
 }
 
 void
@@ -700,7 +721,7 @@ Mixer_UI::redisplay_track_list ()
 			strip->set_marked_for_display (true);
 			strip->route()->set_order_key (N_("signal"), order);
 
-			if (!ignore_route_reorder) {
+			if (!strip_redisplay_does_not_reset_order_keys) {
 				strip->route()->set_order_key (get_order_key(), order);
 			} 
 
@@ -736,17 +757,14 @@ Mixer_UI::redisplay_track_list ()
 		}
 	}
 	
-	if (Config->get_sync_all_route_ordering() && !ignore_route_reorder) {
-		ignore_sync = true;
-		Route::SyncOrderKeys (); // EMIT SIGNAL
-		ignore_sync = false;
+	if (!strip_redisplay_does_not_reset_order_keys && !strip_redisplay_does_not_sync_order_keys) {
+		session->sync_order_keys (get_order_key());
 	}
 
 	// Rebind all of the midi controls automatically
 	
 	if (auto_rebinding)
 		auto_rebind_midi_controls ();
-
 }
 
 void

@@ -67,7 +67,6 @@ JACK_Slave::speed_and_position (float& sp, nframes_t& position)
 {
 	jack_position_t pos;
 	jack_transport_state_t state;
-
 	state = jack_transport_query (jack, &pos);
 
 	switch (state) {

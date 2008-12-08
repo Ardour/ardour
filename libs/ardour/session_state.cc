@@ -193,7 +193,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	session_send_mtc = false;
 	post_transport_work = PostTransportWork (0);
 	g_atomic_int_set (&butler_should_do_transport_work, 0);
-	g_atomic_int_set (&butler_active, 0);
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
 	g_atomic_int_set (&_playback_load_min, 100);
@@ -255,7 +254,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* slave stuff */
 
-	average_slave_delta = 1800;
+	average_slave_delta = 1800; // !!! why 1800 ????
 	have_first_delta_accumulator = false;
 	delta_accumulator_cnt = 0;
 	slave_state = Stopped;
@@ -3260,7 +3259,7 @@ Session::config_changed (const char* parameter_name)
 	} else if (PARAM_IS ("history-depth")) {
 		set_history_depth (Config->get_history_depth());
 	} else if (PARAM_IS ("sync-all-route-ordering")) {
-		sync_order_keys ();
+		sync_order_keys ("session");
 	} else if (PARAM_IS ("initial-program-change")) {
 
 		if (_mmc_port && Config->get_initial_program_change() >= 0) {

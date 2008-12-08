@@ -2114,6 +2114,8 @@ Session::remove_route (shared_ptr<Route> route)
 
 	route->drop_references ();
 
+	sync_order_keys (N_("session"));
+
 	/* save the new state of the world */
 
 	if (save_state (_current_snapshot_name)) {
@@ -4274,7 +4276,7 @@ Session::compute_initial_length ()
 }
 
 void
-Session::sync_order_keys ()
+Session::sync_order_keys (const char* base)
 {
 	if (!Config->get_sync_all_route_ordering()) {
 		/* leave order keys as they are */
@@ -4284,10 +4286,10 @@ Session::sync_order_keys ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->sync_order_keys ();
+		(*i)->sync_order_keys (base);
 	}
 
-	Route::SyncOrderKeys (); // EMIT SIGNAL
+	Route::SyncOrderKeys (base); // EMIT SIGNAL
 }
 
 void

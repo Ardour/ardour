@@ -241,6 +241,8 @@
         <menu action='TrackMenu'>
 	        <menuitem action='AddTrackBus'/>	
 		<menuitem action='insert-time'/>
+	        <menuitem action="move-selected-tracks-up"/>
+	        <menuitem action="move-selected-tracks-down"/>
 	        <menu action='TrackHeightMenu'>
 		     <menuitem action='fit-tracks'/>
 		     <menuitem action='track-height-largest'/>

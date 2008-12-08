@@ -115,10 +115,12 @@
 (gtk_accel_path "<Actions>/Editor/step-tracks-up" "uparrow")
 (gtk_accel_path "<Actions>/Transport/TransitionToRoll" "<%PRIMARY%>uparrow")
 (gtk_accel_path "<Actions>/Editor/select-prev-route" "<%SECONDARY%>uparrow")
+(gtk_accel_path "<Actions>/Editor/move-selected-tracks-up" "<%TERTIARY%>uparrow")
 
 (gtk_accel_path "<Actions>/Editor/step-tracks-down" "downarrow")
 (gtk_accel_path "<Actions>/Transport/TransitionToReverse" "<%PRIMARY%>downarrow")
 (gtk_accel_path "<Actions>/Editor/select-next-route" "<%SECONDARY%>downarrow")
+(gtk_accel_path "<Actions>/Editor/move-selected-tracks-down" "<%TERTIARY%>downarrow")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary" "leftarrow")
 (gtk_accel_path "<Actions>/Editor/tab-to-transient-backwards" "<%PRIMARY%>leftarrow")

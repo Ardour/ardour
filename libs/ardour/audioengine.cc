@@ -1103,7 +1103,6 @@ AudioEngine::transport_stop ()
 void
 AudioEngine::transport_start ()
 {
-	// cerr << "tell JACK to start\n";
 	if (_jack) {
 		jack_transport_start (_jack);
 	}

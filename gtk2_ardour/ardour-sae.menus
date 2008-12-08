@@ -177,6 +177,8 @@
 
         <menu action='TrackMenu'>
 	        <menuitem action='AddTrackBus'/>	
+	        <menuitem action="move-selected-tracks-up"/>
+	        <menuitem action="move-selected-tracks-down"/>
 	        <menu action='TrackHeightMenu'>
 		     <menuitem action='track-height-largest'/>
 		     <menuitem action='track-height-large'/>
