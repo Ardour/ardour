@@ -37,7 +37,7 @@ env.Alias('install',
                       libclearlooks))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-                                     [ 'SConscript', 'bits.c'] +
+                                     [ 'SConscript' ] +
                                     libclearlooks_files +
                                     glob.glob('*.h')
                                     ))

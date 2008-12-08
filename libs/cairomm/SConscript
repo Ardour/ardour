@@ -24,8 +24,8 @@ env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                        'cairomm/cairomm.h',
                                        'configure',
                                        'Makefile.in',
-                                       'cairomm/cairomm-1.0.pc.in',
-                                       'cairomm/Makefile.in'
+                                       'cairomm-1.0.pc.in',
+                                       'Makefile.in'
                                        ] +
 				     cairomm_files + 
 				     glob.glob('cairomm/*.h')

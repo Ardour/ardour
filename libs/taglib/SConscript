@@ -132,15 +132,18 @@ Default([config_h,header_dir,libtaglib])
 env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libtaglib))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-                                     [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',
+                                     [ 'AUTHORS',
                                        'configure',
+                                       'config.h.in',
+                                       'acinclude.m4',
+                                       'Makefile.am',
                                        'SConscript',
-                                       'taglib.pc.in'
-                                       'config.sub',
-                                       'config.guess',
-                                       'install-sh'
+                                       'taglib.pc.in',
+                                       'admin/config.sub',
+                                       'admin/config.guess',
+                                       'admin/conf.change.pl',
+                                       'admin/install-sh'
                                      ] +
                                      taglib_files +
                                      headers
                                      ))
-                                     

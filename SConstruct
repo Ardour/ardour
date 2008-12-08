@@ -281,9 +281,12 @@ def create_stored_revision (target = None, source = None, env = None):
         rev = fetch_svn_revision ('.');
     elif os.path.exists('.git'):
         rev = fetch_git_revision ('.');
+    elif os.path.exists('libs/ardour/svn_revision.cc'):
+        print "Using packaged svn revision"
+        return
     else:
-        print "You cannot use \"scons revision\" on without using a checked out"
-        print "copy of the Ardour source code repository"
+        print "Your source does not include revision information."
+        print "Please check out the code from a repository or use a properly packaged version!"
         sys.exit (-1)
 
     try:
@@ -1366,7 +1369,7 @@ Default (sysrcbuild)
 Precious (env['DISTTREE'])
 
 env.Distribute (env['DISTTREE'],
-               [ 'SConstruct', 'svn_revision.h',
+               [ 'SConstruct',
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'tools/config.guess',
