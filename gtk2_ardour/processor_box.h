@@ -68,10 +68,10 @@ namespace ARDOUR {
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 {
   public:
-	ProcessorBox (ARDOUR::Placement, ARDOUR::Session&, 
-		     boost::shared_ptr<ARDOUR::Route>, PluginSelector &, RouteRedirectSelection &, bool owner_is_mixer = false);
+	ProcessorBox (ARDOUR::Placement, ARDOUR::Session&, PluginSelector &, RouteRedirectSelection &, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
+	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_width (Width);
 
 	void update();
@@ -87,14 +87,12 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	
 	static void register_actions();
 
-  protected:
-	void set_stuff_from_route ();
-
   private:
 	boost::shared_ptr<ARDOUR::Route>  _route;
 	ARDOUR::Session &   _session;
 	bool                _owner_is_mixer;
 	bool                 ab_direction;
+	std::vector<sigc::connection> connections;
 
 	ARDOUR::Placement   _placement;
 

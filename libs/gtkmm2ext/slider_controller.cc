@@ -30,11 +30,9 @@ using namespace PBD;
 
 SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				    Gtk::Adjustment *adj,  int orientation,
-				    boost::shared_ptr<Controllable> c,
 				    bool with_numeric)
 
 	: PixFader (image, *adj, orientation),
-	  binding_proxy (c),
 	  spin (*adj, 0, 2)
 {			  
 	spin.set_name ("SliderControllerValue");
@@ -55,15 +53,15 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
+
 	return PixFader::on_button_press_event (ev);
 }
 
 VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
-				      boost::shared_ptr<Controllable> control,
 				      bool with_numeric)
 
-	: SliderController (image, adj, VERT, control, with_numeric)
+	: SliderController (image, adj, VERT, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -76,10 +74,9 @@ VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 
 HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
-				      boost::shared_ptr<Controllable> control,
 				      bool with_numeric)
 	
-	: SliderController (image, adj, HORIZ, control, with_numeric)
+	: SliderController (image, adj, HORIZ, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);

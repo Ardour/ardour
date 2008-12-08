@@ -596,7 +596,8 @@ SoundFileBrowser::add_gain_meter ()
 		delete gm;
 	}
 
-	gm = new GainMeter (session->the_auditioner(), *session);
+	gm = new GainMeter (*session);
+	gm->set_io (session->the_auditioner());
 
 	meter_packer.set_border_width (12);
 	meter_packer.pack_start (*gm, false, true);

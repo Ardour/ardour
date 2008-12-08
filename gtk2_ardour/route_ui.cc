@@ -54,13 +54,33 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, const char* m_name,
-		  const char* s_name, const char* r_name)
-	: AxisView(sess),
-	  _route(rt),
-	  mute_button(0),
-	  solo_button(0),
-	  rec_enable_button(0)
+RouteUI::RouteUI (ARDOUR::Session& sess, const char* mute_name, const char* solo_name, const char* rec_name)
+	: AxisView(sess)
+{
+	init ();
+	set_button_names (mute_name, solo_name, rec_name);
+}
+
+RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, 
+		  ARDOUR::Session& sess, const char* mute_name, const char* solo_name, const char* rec_name)
+	: AxisView(sess)
+{
+	init ();
+	set_button_names (mute_name, solo_name, rec_name);
+	set_route (rt);
+}
+
+RouteUI::~RouteUI()
+{
+	GoingAway (); /* EMIT SIGNAL */
+
+	delete solo_menu;
+	delete mute_menu;
+	delete remote_control_menu;
+}
+
+void
+RouteUI::init ()
 {
 	xml_node = 0;
 	mute_menu = 0;
@@ -73,27 +93,87 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	polarity_menu_item = 0;
 	denormal_menu_item = 0;
 
+	mute_button = manage (new BindableToggleButton (""));
+	mute_button->set_self_managed (true);
+	mute_button->set_name ("MuteButton");
+
+	solo_button = manage (new BindableToggleButton (""));
+	solo_button->set_self_managed (true);
+	solo_button->set_name ("SoloButton");
+
+	rec_enable_button = manage (new BindableToggleButton (""));
+	rec_enable_button->set_name ("RecordEnableButton");
+	rec_enable_button->set_self_managed (true);
+	
+	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
+}
+
+void
+RouteUI::reset ()
+{
+	connections.clear ();
+
+	if (solo_menu) {
+		delete solo_menu;
+		solo_menu = 0;
+	}
+
+	if (mute_menu) {
+		delete mute_menu;
+		mute_menu = 0;
+	}
+	
+	if (remote_control_menu) {
+		delete remote_control_menu;
+		remote_control_menu = 0;
+	}
+
+	if (xml_node) {
+		/* do not delete the node - its owned by the route */
+		xml_node = 0;
+	}
+
+	route_active_menu_item = 0;
+	polarity_menu_item = 0;
+	denormal_menu_item = 0;
+}
+
+void
+RouteUI::set_button_names (const char* mute, const char* solo, const char* rec)
+{
+	m_name = mute;
+	s_name = solo;
+	r_name = rec;
+}
+
+void
+RouteUI::set_route (boost::shared_ptr<Route> rp)
+{
+	reset ();
+
+	_route = rp;
+
 	if (set_color_from_route()) {
 		set_color (unique_random_color());
 	}
 
-	new PairedShiva<Route,RouteUI> (*_route, *this);
+	/* no, there is no memory leak here. This object cleans itself (and other stuff)
+	   up when the route is destroyed.
+	*/
 
-	_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
-
-	mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
-	mute_button->set_self_managed (true);
-
-	solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
-	solo_button->set_self_managed (true);
-
-	mute_button->set_name ("MuteButton");
-	solo_button->set_name ("SoloButton");
-
-	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-
+  	new PairedShiva<Route,RouteUI> (*_route, *this);
+  
+	mute_button->set_controllable (_route->mute_control());
+	mute_button->set_label (m_name);
+	
+	solo_button->set_controllable (_route->solo_control());
+	solo_button->set_label (s_name);
+  
+	connections.push_back (_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed)));
+	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
+	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
+	connections.push_back (_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
+  
 	/* when solo changes, update mute state too, in case the user wants us to display it */
 
 	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
@@ -101,15 +181,13 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed));
+		connections.push_back (t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed)));
+		connections.push_back (_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed)));
 
-		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
-
-		rec_enable_button = manage (new BindableToggleButton (t->rec_enable_control(), r_name ));
-		rec_enable_button->set_name ("RecordEnableButton");
-		rec_enable_button->set_self_managed (true);
-		
 		rec_enable_button->show();
+ 		rec_enable_button->set_controllable (t->rec_enable_control());
+ 		rec_enable_button->set_label (r_name);
+
 		update_rec_display ();
 	} 
 
@@ -119,17 +197,11 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	mute_button->show();
 	solo_button->show();
 
-	_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu));
+	connections.push_back (_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu)));
 
 	/* map the current state */
 
 	map_frozen ();
-}
-
-RouteUI::~RouteUI()
-{
-	GoingAway (); /* EMIT SIGNAL */
-	delete mute_menu;
 }
 
 bool

@@ -40,11 +40,26 @@ BindingProxy::BindingProxy (boost::shared_ptr<Controllable> c)
 {			  
 }
 
+BindingProxy::BindingProxy ()
+	: prompter (0),
+	  bind_button (2),
+	  bind_statemask (Gdk::CONTROL_MASK)
+
+{			  
+}
+
 BindingProxy::~BindingProxy ()
 {
 	if (prompter) {
 		delete prompter;
 	}
+}
+
+void
+BindingProxy::set_controllable (boost::shared_ptr<Controllable> c)
+{
+	learning_finished ();
+	controllable = c;
 }
 
 void
@@ -64,7 +79,7 @@ BindingProxy::get_bind_button_state (guint &button, guint &statemask)
 bool
 BindingProxy::button_press_handler (GdkEventButton *ev)
 {
-	if ((ev->state & bind_statemask) && ev->button == bind_button) { 
+	if (controllable && (ev->state & bind_statemask) && ev->button == bind_button) { 
 		if (Controllable::StartLearning (controllable.get())) {
 			string prompt = _("operate controller now");
 			if (prompter == 0) {
@@ -95,7 +110,9 @@ bool
 BindingProxy::prompter_hiding (GdkEventAny *ev)
 {
 	learning_connection.disconnect ();
-	Controllable::StopLearning (controllable.get());
+	if (controllable) {
+		Controllable::StopLearning (controllable.get());
+	}
 	return false;
 }
 

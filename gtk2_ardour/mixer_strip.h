@@ -83,6 +83,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 {
   public:
 	MixerStrip (Mixer_UI&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
+	MixerStrip (Mixer_UI&, ARDOUR::Session&, bool in_mixer = true);
 	~MixerStrip ();
 
 	void set_width (Width, void* owner);
@@ -93,6 +94,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_embedded (bool);
 	
 	ARDOUR::RouteGroup* mix_group() const;
+	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
   protected:
 	friend class Mixer_UI;
@@ -104,6 +106,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
   private:
 	Mixer_UI& _mixer;
+
+	void init ();
 
 	bool  _embedded;
 	bool  _packed;

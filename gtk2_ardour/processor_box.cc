@@ -82,10 +82,9 @@ bool ProcessorBox::get_colors = true;
 Gdk::Color* ProcessorBox::active_processor_color;
 Gdk::Color* ProcessorBox::inactive_processor_color;
 
-ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, boost::shared_ptr<Route> rt, PluginSelector &plugsel, 
-			  RouteRedirectSelection & rsel, bool owner_is_mixer)
-	: _route(rt), 
-	  _session(sess), 
+ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, PluginSelector &plugsel, 
+			    RouteRedirectSelection & rsel, bool owner_is_mixer)
+	: _session(sess), 
 	  _owner_is_mixer (owner_is_mixer), 
 	  _placement(pcmnt), 
 	  _plugin_selector(plugsel),
@@ -138,25 +137,27 @@ ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, boost::shared_ptr<Ro
 
 	pack_start (processor_eventbox, true, true);
 
-	_route->processors_changed.connect (mem_fun(*this, &ProcessorBox::redisplay_processors));
-	_route->GoingAway.connect (mem_fun (*this, &ProcessorBox::route_going_away));
-
 	processor_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (ProcessorBox::enter_box), this));
 
 	processor_display.signal_button_press_event().connect (mem_fun(*this, &ProcessorBox::processor_button_press_event), false);
 	processor_display.signal_button_release_event().connect (mem_fun(*this, &ProcessorBox::processor_button_release_event));
-
-	/* start off as a passthru strip. we'll correct this, if necessary,
-	   in update_diskstream_display().
-	*/
-
-	/* now force an update of all the various elements */
-
-	redisplay_processors ();
 }
 
 ProcessorBox::~ProcessorBox ()
 {
+}
+
+void
+ProcessorBox::set_route (boost::shared_ptr<Route> r)
+{
+	connections.clear ();
+
+	_route = r;
+
+	connections.push_back (_route->processors_changed.connect (mem_fun(*this, &ProcessorBox::redisplay_processors)));
+	connections.push_back (_route->GoingAway.connect (mem_fun (*this, &ProcessorBox::route_going_away)));
+
+	redisplay_processors ();
 }
 
 void

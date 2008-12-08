@@ -1736,8 +1736,8 @@ ARDOUR_UI::engine_halted ()
 			   _("\
 JACK has either been shutdown or it\n\
 disconnected Ardour because Ardour\n\
-was not fast enough. You can save the\n\
-session and/or try to reconnect to JACK ."));
+was not fast enough. Try to restart\n\
+JACK, reconnect and save the session."));
 	pop_back_splash ();
 	msg.run ();
 }

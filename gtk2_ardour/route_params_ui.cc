@@ -229,8 +229,11 @@ RouteParams_UI::setup_processor_boxes()
 		cleanup_processor_boxes();
 		
 		// construct new redirect boxes
-		pre_insert_box = new ProcessorBox(PreFader, *session, _route, *_plugin_selector, _rr_selection);
-		post_insert_box = new ProcessorBox(PostFader, *session, _route, *_plugin_selector, _rr_selection);
+ 		pre_insert_box = new ProcessorBox(PreFader, *session, *_plugin_selector, _rr_selection);
+ 		post_insert_box = new ProcessorBox(PostFader, *session, *_plugin_selector, _rr_selection);
+  
+ 		pre_insert_box->set_route (_route);
+ 		post_insert_box->set_route (_route);
 
 	        pre_redir_hpane.pack1 (*pre_insert_box);
 		post_redir_hpane.pack1 (*post_insert_box);

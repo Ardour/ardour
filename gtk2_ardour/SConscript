@@ -194,6 +194,7 @@ lineset.cc
 location_ui.cc
 main.cc
 marker.cc
+matrix.cc
 midi_channel_selector.cc
 midi_port_dialog.cc
 midi_region_view.cc

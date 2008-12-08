@@ -196,6 +196,10 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	setup_fade_handle_positions ();
 
+ 	if (!Config->get_show_region_fades()) {
+ 		set_fade_visibility (false);
+ 	}
+
 	string line_name = _region->name();
 	line_name += ':';
 	line_name += "gain";
@@ -410,8 +414,10 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 				fade_in_handle->hide();
 				fade_out_handle->hide();
 			} else {
-				fade_in_handle->show();
-				fade_out_handle->show();
+				if (Config->get_show_region_fades()) {
+					fade_in_handle->show();
+					fade_out_handle->show();
+				}
 			}
 		}
 	}

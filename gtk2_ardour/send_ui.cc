@@ -30,11 +30,14 @@ using namespace ARDOUR;
 using namespace PBD;
 
 SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
-	: _send (s),
-	  _session (se),
-	  gpm (s->io(), se),
-	  panners (s->io(), se)
+	: _send (s)
+	, _session (se)
+	, gpm (se)
+	, panners (se)
 {
+ 	panners.set_io (s->io());
+ 	gpm.set_io (s->io());
+
 	hbox.pack_start (gpm, true, true);
 	set_name ("SendUIFrame");
 	

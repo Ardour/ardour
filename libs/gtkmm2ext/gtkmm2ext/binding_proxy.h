@@ -34,6 +34,7 @@ class BindingProxy : public sigc::trackable
 {
    public:
 	BindingProxy (boost::shared_ptr<PBD::Controllable>);
+	BindingProxy ();
 	virtual ~BindingProxy();
 	
 	void set_bind_button_state (guint button, guint statemask);
@@ -42,6 +43,7 @@ class BindingProxy : public sigc::trackable
 	bool button_press_handler (GdkEventButton *);
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return controllable; }
+ 	void set_controllable (boost::shared_ptr<PBD::Controllable>);
 
   protected:
 	Gtkmm2ext::PopUp*  prompter;

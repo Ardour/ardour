@@ -47,9 +47,8 @@ using namespace sigc;
 
 const int PannerUI::pan_bar_height = 30;
 
-PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
-	: _io (io),
-	  _session (s),
+PannerUI::PannerUI (Session& s)
+	: _session (s),
 	  hAdjustment(0.0, 0.0, 0.0),
 	  vAdjustment(0.0, 0.0, 0.0),
 	  panning_viewport(hAdjustment, vAdjustment),
@@ -61,6 +60,8 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 {
 	ignore_toggle = false;
 	pan_menu = 0;
+	pan_astate_menu = 0;
+	pan_astyle_menu = 0;
 	in_pan_update = false;
 
 	pan_automation_style_button.set_name ("MixerAutomationModeButton");
@@ -83,22 +84,6 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 
 	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
-
-	using namespace Menu_Helpers;
-	pan_astate_menu.items().push_back (MenuElem (_("Manual"), 
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Off)));
-	pan_astate_menu.items().push_back (MenuElem (_("Play"),
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Play)));
-	pan_astate_menu.items().push_back (MenuElem (_("Write"),
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Write)));
-	pan_astate_menu.items().push_back (MenuElem (_("Touch"),
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Touch)));
-
-	pan_astyle_menu.items().push_back (MenuElem (_("Trim")));
-	pan_astyle_menu.items().push_back (MenuElem (_("Abs")));
-
-	pan_astate_menu.set_name ("ArdourContextMenu");
-	pan_astyle_menu.set_name ("ArdourContextMenu");
 
 	pan_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &PannerUI::pan_automation_style_button_event), false);
 	pan_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &PannerUI::pan_automation_state_button_event), false);
@@ -141,16 +126,41 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	panner = 0;
 
 	set_width(Narrow);
-
-	_io->panner().Changed.connect (mem_fun(*this, &PannerUI::panner_changed));
-	_io->panner().LinkStateChanged.connect (mem_fun(*this, &PannerUI::update_pan_linkage));
-	_io->panner().StateChanged.connect (mem_fun(*this, &PannerUI::update_pan_state));
+}
+  
+void
+PannerUI::set_io (boost::shared_ptr<IO> io)
+{
+ 	connections.clear ();
+	
+ 	if (pan_astyle_menu) {
+ 		delete pan_astyle_menu;
+ 		pan_astyle_menu = 0;
+ 	}
+ 
+ 	if (pan_astate_menu) {
+ 		delete pan_astate_menu;
+ 		pan_astate_menu = 0;
+ 	}
+ 			
+ 	_io = io;
+ 
+ 	connections.push_back (_io->panner().Changed.connect (mem_fun(*this, &PannerUI::panner_changed)));
+ 	connections.push_back (_io->panner().LinkStateChanged.connect (mem_fun(*this, &PannerUI::update_pan_linkage)));
+ 	connections.push_back (_io->panner().StateChanged.connect (mem_fun(*this, &PannerUI::update_pan_state)));
+ 
+ 	if (panner) {
+ 		delete panner;
+ 		panner = 0;
+ 	}
+ 
 
 	pan_changed (0);
 	update_pan_sensitive ();
 	update_pan_linkage ();
 	pan_automation_state_changed ();
 
+#if WHERE_DOES_THIS_LIVE	
 	pan_bar_packer.show();
 	panning_viewport.show();
 	panning_up.show();
@@ -164,6 +174,46 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	pan_automation_style_button.show();
 	pan_automation_state_button.show();
 	show();
+#endif
+}
+
+void
+PannerUI::build_astate_menu ()
+{
+	using namespace Menu_Helpers;
+
+	if (pan_astate_menu == 0) {
+		pan_astate_menu = new Menu;
+		pan_astate_menu->set_name ("ArdourContextMenu");
+	} else {
+		pan_astate_menu->items().clear ();
+	}
+
+	pan_astate_menu->items().push_back (MenuElem (_("Manual"), 
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Off)));
+	pan_astate_menu->items().push_back (MenuElem (_("Play"),
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Play)));
+	pan_astate_menu->items().push_back (MenuElem (_("Write"),
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Write)));
+	pan_astate_menu->items().push_back (MenuElem (_("Touch"),
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Touch)));
+
+}
+
+void
+PannerUI::build_astyle_menu ()
+{
+	using namespace Menu_Helpers;
+
+	if (pan_astyle_menu == 0) {
+		pan_astyle_menu = new Menu;
+		pan_astyle_menu->set_name ("ArdourContextMenu");
+	} else {
+		pan_astyle_menu->items().clear();
+	}
+
+	pan_astyle_menu->items().push_back (MenuElem (_("Trim")));
+	pan_astyle_menu->items().push_back (MenuElem (_("Abs")));
 }
 
 boost::shared_ptr<PBD::Controllable>
@@ -262,7 +312,14 @@ PannerUI::~PannerUI ()
 	if (pan_menu) {
 		delete pan_menu;
 	}
-
+	
+	if (pan_astyle_menu) {
+		delete pan_astyle_menu;
+	}
+	
+	if (pan_astate_menu) {
+		delete pan_astate_menu;
+	}
 }
 
 
@@ -662,7 +719,10 @@ PannerUI::pan_automation_state_button_event (GdkEventButton *ev)
 
 	switch (ev->button) {
 	case 1:
-		pan_astate_menu.popup (1, ev->time);
+		if (pan_astate_menu == 0) {
+			build_astate_menu ();
+		}
+		pan_astate_menu->popup (1, ev->time);
 		break;
 	default:
 		break;
@@ -680,7 +740,10 @@ PannerUI::pan_automation_style_button_event (GdkEventButton *ev)
 
 	switch (ev->button) {
 	case 1:
-		pan_astyle_menu.popup (1, ev->time);
+		if (pan_astyle_menu == 0) {
+			build_astyle_menu ();
+		}
+		pan_astyle_menu->popup (1, ev->time);
 		break;
 	default:
 		break;

@@ -117,7 +117,10 @@ fixup_bundle_environment ()
 	Glib::ustring path;
 	const char *cstr = getenv ("PATH");
 
-	/* ensure that we find any bundled executables (e.g. JACK) */
+	/* ensure that we find any bundled executables (e.g. JACK),
+	   and find them before any instances of the same name
+	   elsewhere in PATH
+	*/
 
 	path = dir_path;
 	if (cstr) {
@@ -152,8 +155,10 @@ fixup_bundle_environment ()
 	if (cstr) {
 		path = cstr;
 		path += ':';
+	} else {
+		path = "";
 	}
-	path = dir_path;
+	path += dir_path;
 	path += "/../Plugins";
 	
 	setenv ("LADSPA_PATH", path.c_str(), 1);
@@ -162,8 +167,10 @@ fixup_bundle_environment ()
 	if (cstr) {
 		path = cstr;
 		path += ':';
+	} else {
+		path = "";
 	}
-	path = dir_path;
+	path += dir_path;
 	path += "/../Frameworks";
 	
 	setenv ("VAMP_PATH", path.c_str(), 1);
@@ -172,8 +179,10 @@ fixup_bundle_environment ()
 	if (cstr) {
 		path = cstr;
 		path += ':';
+	} else {
+		path = "";
 	}
-	path = dir_path;
+	path += dir_path;
 	path += "/../Surfaces";
 	
 	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
@@ -182,8 +191,10 @@ fixup_bundle_environment ()
 	if (cstr) {
 		path = cstr;
 		path += ':';
+	} else {
+		path = "";
 	}
-	path = dir_path;
+	path += dir_path;
 	path += "/../Plugins";
 	
 	setenv ("LV2_PATH", path.c_str(), 1);

@@ -41,7 +41,6 @@ class SliderController : public Gtkmm2ext::PixFader
   public:
 	SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			  Gtk::Adjustment* adj, int orientation,
-			  boost::shared_ptr<PBD::Controllable>,
 			  bool with_numeric = true);
 	
         virtual ~SliderController () {}
@@ -52,6 +51,8 @@ class SliderController : public Gtkmm2ext::PixFader
 	
 	bool on_button_press_event (GdkEventButton *ev);
 
+	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
+
   protected:
 	BindingProxy binding_proxy;
 	Glib::RefPtr<Gdk::Pixbuf> slider;
@@ -59,6 +60,8 @@ class SliderController : public Gtkmm2ext::PixFader
 	Gtk::SpinButton     spin;
 	Gtk::Frame          spin_frame;
 	Gtk::HBox           spin_hbox;
+
+	void init ();
 };
 
 class VSliderController : public SliderController
@@ -66,7 +69,6 @@ class VSliderController : public SliderController
   public:
 	VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			   Gtk::Adjustment *adj,
-			   boost::shared_ptr<PBD::Controllable>,
 			   bool with_numeric = true);
 };
 
@@ -75,7 +77,6 @@ class HSliderController : public SliderController
   public:
 	HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			   Gtk::Adjustment *adj,
-			   boost::shared_ptr<PBD::Controllable>,
 			   bool with_numeric = true);
 };
 

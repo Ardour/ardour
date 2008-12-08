@@ -56,8 +56,10 @@ namespace Gtk {
 class LevelMeter : public Gtk::HBox
 {
   public:
-	LevelMeter (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&);
+	LevelMeter (ARDOUR::Session&);
 	~LevelMeter ();
+
+	virtual void set_io (boost::shared_ptr<ARDOUR::IO> io);
 
 	void update_gain_sensitive ();
 

@@ -32,10 +32,8 @@ namespace PBD {
 class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
 {
    public:
-	BindableToggleButton (boost::shared_ptr<PBD::Controllable> c) : binding_proxy (c) {}
-
-	explicit BindableToggleButton (boost::shared_ptr<PBD::Controllable> c, const std::string &label)
-		: Gtkmm2ext::StatefulToggleButton (label), binding_proxy (c) {}
+	BindableToggleButton (const std::string &label)
+		: Gtkmm2ext::StatefulToggleButton (label) {}
 
 	virtual ~BindableToggleButton() {}
 	
@@ -49,7 +47,8 @@ class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
 	}
 	
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
-
+ 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
+ 
   private:
 	BindingProxy binding_proxy;
 };
@@ -58,10 +57,6 @@ class BindableButton : public Gtkmm2ext::StatefulButton
 {
    public:
 	BindableButton (boost::shared_ptr<PBD::Controllable> c) : binding_proxy (c) {}
-
-	explicit BindableButton (boost::shared_ptr<PBD::Controllable> c, const std::string &label)
-		: Gtkmm2ext::StatefulButton (label), binding_proxy (c) {}
-
 	~BindableButton() {}
 	
 	bool on_button_press_event (GdkEventButton *ev) {
@@ -74,6 +69,7 @@ class BindableButton : public Gtkmm2ext::StatefulButton
 	}
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
+ 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
 
   private:
 	BindingProxy binding_proxy;
