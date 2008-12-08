@@ -478,7 +478,7 @@ PluginManager::vst_discover (string path)
 	
 	PluginInfoPtr info(new VSTPluginInfo);
 
-	/* what a goddam joke freeware VST is */
+	/* what a joke freeware VST is */
 
 	if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
 		info->name = PBD::basename_nosuffix (path);

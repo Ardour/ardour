@@ -141,9 +141,9 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	}
 		
 	// add channel selector expander
-	HBox *channel_selector_box = manage(new HBox());
-	channel_selector_box->pack_start(_channel_selector, false, false);
-	_midi_expander.add(*channel_selector_box);
+	HBox *midi_expander_box = manage(new HBox());
+	midi_expander_box->pack_start(_channel_selector, false, false);
+	_midi_expander.add(*midi_expander_box);
 	_midi_expander.property_expanded().signal_changed().connect(
 			mem_fun(this, &MidiTimeAxisView::channel_selector_toggled));
 	controls_vbox.pack_start(_midi_expander, false, false);

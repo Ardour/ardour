@@ -107,6 +107,12 @@ SessionDirectory::midi_path () const
 }
 
 const path
+SessionDirectory::midi_patch_path () const
+{
+	return sources_root() / midi_patch_path();
+}
+
+const path
 SessionDirectory::peak_path () const
 {
 	return m_root_path / peak_dir_name;
