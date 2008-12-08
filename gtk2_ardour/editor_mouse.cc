@@ -4001,8 +4001,11 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			continue;
 		}
 		
+		changed_position = (drag_info.last_frame_position != (nframes_t) (rv->region()->position()));
+		changed_tracks = (dest_tv != &rv->get_time_axis_view());
+
 		if (changed_position && !drag_info.x_constrained) {
-			where = rv->region()->position() - drag_delta;
+			where = (nframes_t) unit_to_frame (ix1);
 		} else {
 			where = rv->region()->position();
 		}

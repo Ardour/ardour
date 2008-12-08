@@ -728,6 +728,7 @@ Editor::update_ruler_visibility ()
 		range_marker_bar_group->show();
 		range_marker_group->show();
 		range_mark_label.show();
+
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;

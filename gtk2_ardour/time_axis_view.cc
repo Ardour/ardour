@@ -560,7 +560,6 @@ TimeAxisView::conditionally_add_to_selection ()
 	}
 }
 
-
 void
 TimeAxisView::popup_display_menu (guint32 when)
 {
