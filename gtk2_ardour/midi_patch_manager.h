@@ -44,7 +44,7 @@ private:
 	static MidiPatchManager* _manager; 
 	
 public:
-	typedef std::list<boost::shared_ptr<MIDINameDocument> > MidiNameDocuments;
+	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> > MidiNameDocuments;
 	
 	virtual ~MidiPatchManager() { _manager = 0; }
 	
@@ -57,12 +57,22 @@ public:
 	
 	void set_session (ARDOUR::Session&);
 	
+	boost::shared_ptr<MIDINameDocument> document_by_model(std::string model_name) 
+		{ return _documents[model_name]; }
+	
+	boost::shared_ptr<MasterDeviceNames> master_device_by_model(std::string model_name) 
+		{ return _master_devices_by_model[model_name]; }
+	
+	const MasterDeviceNames::Models& all_models() const { return _all_models; }
+	
 private:
 	void drop_session();
 	void refresh();
 	
-	ARDOUR::Session*  _session;
-	MidiNameDocuments _documents;
+	ARDOUR::Session*                        _session;
+	MidiNameDocuments                       _documents;
+	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;
+	MasterDeviceNames::Models               _all_models;
 };
 
 } // namespace Name

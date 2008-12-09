@@ -68,6 +68,7 @@
 #include "midi_streamview.h"
 #include "utils.h"
 #include "midi_scroomer.h"
+#include "midi_patch_manager.h"
 #include "piano_roll_header.h"
 #include "ghostregion.h"
 
@@ -141,9 +142,27 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	}
 		
 	// add channel selector expander
-	HBox *midi_expander_box = manage(new HBox());
-	midi_expander_box->pack_start(_channel_selector, false, false);
-	_midi_expander.add(*midi_expander_box);
+	HBox* midi_expander_hbox = manage(new HBox());
+	VBox* midi_expander_vbox = manage(new VBox());
+	
+	// Instrument patch selector
+	ComboBoxText*       model_selector = manage(new ComboBoxText());
+	
+	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
+	patch_manager.set_session(session());
+
+	for (MIDI::Name::MasterDeviceNames::Models::const_iterator model = patch_manager.all_models().begin();
+	     model != patch_manager.all_models().end();
+	     ++model) {
+		model_selector->append_text(model->c_str());
+	}
+	
+	model_selector->set_active(0);
+	
+	midi_expander_hbox->pack_start(_channel_selector, true, false);
+	midi_expander_vbox->pack_start(*model_selector, true, false);
+	midi_expander_vbox->pack_start(*midi_expander_hbox, true, true);
+	_midi_expander.add(*midi_expander_vbox);
 	_midi_expander.property_expanded().signal_changed().connect(
 			mem_fun(this, &MidiTimeAxisView::channel_selector_toggled));
 	controls_vbox.pack_start(_midi_expander, false, false);

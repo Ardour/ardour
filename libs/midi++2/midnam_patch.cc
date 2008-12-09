@@ -21,6 +21,10 @@
 #include "midi++/midnam_patch.h"
 #include <algorithm>
 
+#include <iostream>
+
+using namespace std;
+
 namespace MIDI
 {
 
@@ -97,9 +101,9 @@ NoteNameList::set_state (const XMLNode& node)
 	boost::shared_ptr<XMLSharedNodeList> notes =
 					node.find("//Note");
 	for (XMLSharedNodeList::const_iterator i = notes->begin(); i != notes->end(); ++i) {
-		Note note;
-		note.set_state(*(*i));
-		_notes.push_back(note);
+		Note* note = new Note();
+		note->set_state(*(*i));
+		_notes.push_back(*note);
 	}
 	
 	return 0;
@@ -130,9 +134,9 @@ PatchBank::set_state (const XMLNode& node)
 	assert(patch_name_list);
 	const XMLNodeList patches = patch_name_list->children();
 	for (XMLNodeList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
-		Patch patch;
-		patch.set_state(*(*i));
-		_patch_name_list.push_back(patch);
+		Patch* patch = new Patch();
+		patch->set_state(*(*i));
+		_patch_name_list.push_back(*patch);
 	}
 
 	return 0;
@@ -174,26 +178,37 @@ ChannelNameSet::set_state (const XMLNode& node)
 {
 	assert(node.name() == "ChannelNameSet");
 	_name   = node.property("Name")->value();
+	// cerr << "ChannelNameSet _name: " << _name << endl;
 	const XMLNodeList children = node.children();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		XMLNode* node = *i;
 		assert(node);
 		if (node->name() == "AvailableForChannels") {
+			// cerr << "AvailableForChannels" << endl;
 			boost::shared_ptr<XMLSharedNodeList> channels =
 				node->find("//AvailableChannel[@Available = 'true']/@Channel");
+			// cerr << "AvailableForChannels after find" << endl;
 			for(XMLSharedNodeList::const_iterator i = channels->begin();
 			    i != channels->end();
 			    ++i) {
+				// cerr << "AvailableForChannels before insert" << endl;
 				_available_for_channels.insert(atoi((*i)->attribute_value().c_str()));
+				// cerr << "AvailableForChannels after insert" << endl;
 			}
 		}
+		
+		// cerr << "before PatchBank" << endl;
 
 		if (node->name() == "PatchBank") {
-			PatchBank bank;
-			bank.set_state(*node);
-			_patch_banks.push_back(bank);
+			// cerr << "got PatchBank" << endl;
+			PatchBank* bank = new PatchBank();
+			bank->set_state(*node);
+			_patch_banks.push_back(*bank);
+			// cerr << "after PatchBank pushback" << endl;
 		}
 	}
+	
+	// cerr << "ChannelnameSet done" << endl;
 
 	return 0;
 }
@@ -201,7 +216,7 @@ ChannelNameSet::set_state (const XMLNode& node)
 int
 CustomDeviceMode::set_state(const XMLNode& a_node)
 {
-	assert(a_node.name() == "CustomDeviceNode");
+	assert(a_node.name() == "CustomDeviceMode");
 	boost::shared_ptr<XMLSharedNodeList> channel_name_set_assignments =
 		a_node.find("//ChannelNameSetAssign");
 	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
@@ -235,48 +250,58 @@ CustomDeviceMode::get_state(void)
 int
 MasterDeviceNames::set_state(const XMLNode& a_node)
 {
+	// cerr << "MasterDeviceNames::set_state Manufacturer" << endl;
 	// Manufacturer
 	boost::shared_ptr<XMLSharedNodeList> manufacturer = a_node.find("//Manufacturer");
 	assert(manufacturer->size() == 1);
 	_manufacturer = manufacturer->front()->content();
 
+	// cerr << "MasterDeviceNames::set_state models" << endl;
 	// Models
 	boost::shared_ptr<XMLSharedNodeList> models = a_node.find("//Model");
 	assert(models->size() >= 1);
 	for (XMLSharedNodeList::iterator i = models->begin();
 	     i != models->end();
 	     ++i) {
-		_models.push_back((*i)->content());
+		const XMLNodeList& contents = (*i)->children();
+		assert(contents.size() == 1);
+		XMLNode * content = *(contents.begin());
+		assert(content->is_content());
+		_models.push_back(content->content());
 	}
 
+	// cerr << "MasterDeviceNames::set_state CustomDeviceModes" << endl;
 	// CustomDeviceModes
 	boost::shared_ptr<XMLSharedNodeList> custom_device_modes = a_node.find("//CustomDeviceMode");
 	for (XMLSharedNodeList::iterator i = custom_device_modes->begin();
 	     i != custom_device_modes->end();
 	     ++i) {
-		CustomDeviceMode custom_device_mode;
-		custom_device_mode.set_state(*(*i));
-		_custom_device_modes.push_back(custom_device_mode);
+		CustomDeviceMode* custom_device_mode = new CustomDeviceMode();
+		custom_device_mode->set_state(*(*i));
+		_custom_device_modes.push_back(*custom_device_mode);
 	}
 
+	// cerr << "MasterDeviceNames::set_state ChannelNameSets" << endl;
 	// ChannelNameSets
 	boost::shared_ptr<XMLSharedNodeList> channel_name_sets = a_node.find("//ChannelNameSet");
 	for (XMLSharedNodeList::iterator i = channel_name_sets->begin();
 	     i != channel_name_sets->end();
 	     ++i) {
-		ChannelNameSet channel_name_set;
-		channel_name_set.set_state(*(*i));
-		_channel_name_sets.push_back(channel_name_set);
+		ChannelNameSet* channel_name_set = new ChannelNameSet();
+		// cerr << "MasterDeviceNames::set_state ChannelNameSet before set_state" << endl;
+		channel_name_set->set_state(*(*i));
+		_channel_name_sets.push_back(*channel_name_set);
 	}
 
+	// cerr << "MasterDeviceNames::set_state NoteNameLists" << endl;
 	// NoteNameLists
 	boost::shared_ptr<XMLSharedNodeList> note_name_lists = a_node.find("//NoteNameList");
 	for (XMLSharedNodeList::iterator i = note_name_lists->begin();
 	     i != note_name_lists->end();
 	     ++i) {
-		NoteNameList note_name_list;
-		note_name_list.set_state(*(*i));
-		_note_name_lists.push_back(note_name_list);
+		NoteNameList* note_name_list = new NoteNameList();
+		note_name_list->set_state(*(*i));
+		_note_name_lists.push_back(*note_name_list);
 	}
 
 	return 0;
@@ -297,18 +322,39 @@ MIDINameDocument::set_state(const XMLNode& a_node)
 	assert(author->size() == 1);
 	_author = author->front()->content();
 	
+	// cerr << "MIDINameDocument::set_state befor masterdevicenames" << endl;
 	// MasterDeviceNames
 	boost::shared_ptr<XMLSharedNodeList> master_device_names_list = a_node.find("//MasterDeviceNames");
 	for (XMLSharedNodeList::iterator i = master_device_names_list->begin();
 	     i != master_device_names_list->end();
 	     ++i) {
-		MasterDeviceNames master_device_names;
-		master_device_names.set_state(*(*i));
-		_master_device_names_list.push_back(master_device_names);
+		boost::shared_ptr<MasterDeviceNames> master_device_names(new MasterDeviceNames());
+		// cerr << "MIDINameDocument::set_state before masterdevicenames->set_state" << endl;
+		master_device_names->set_state(*(*i));
+		// cerr << "MIDINameDocument::set_state after masterdevicenames->set_state" << endl;
+		
+		for (MasterDeviceNames::Models::const_iterator model = master_device_names->models().begin();
+		     model != master_device_names->models().end();
+		     ++model) {
+			// cerr << "MIDINameDocument::set_state inserting model " << *model << endl;
+				_master_device_names_list.insert(
+						std::pair<std::string, boost::shared_ptr<MasterDeviceNames> >
+						         (*model,      master_device_names));
+				
+				_all_models.push_back(*model);
+		}
 	}
 	
 	return 0;
 }
+
+/*
+const MasterDeviceNames::Models&
+MIDINameDocument::models(void)
+{
+	;
+}
+*/
 
 XMLNode&
 MIDINameDocument::get_state(void)

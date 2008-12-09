@@ -52,9 +52,12 @@ MidiPatchManager::refresh()
 	
 	path path_to_patches = _session->session_directory().midi_patch_path();
 	
+	cerr << "Path to patches: " << path_to_patches.to_string() << endl;
+	
 	if(!exists(path_to_patches)) {
 		return;
 	}
+	cerr << "Path to patches: " << path_to_patches.to_string() << " exists" << endl;
 	
 	assert(is_directory(path_to_patches));
 	
@@ -62,10 +65,29 @@ MidiPatchManager::refresh()
 	vector<path> result;
 	
 	find_matching_files_in_directory(path_to_patches, pattern, result);
+
+	cerr << "patchfiles result contains " << result.size() << " elements" << endl;
 	
 	for(vector<path>::iterator i = result.begin(); i != result.end(); ++i) {
+		cerr << "processing patchfile " << i->to_string() << endl;	
+		
 		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(i->to_string()));
-		_documents.push_back(document);
+		for(MIDINameDocument::MasterDeviceNamesList::const_iterator device = 
+			  document->master_device_names_by_model().begin();
+		    device != document->master_device_names_by_model().end();
+		    ++device) {
+			cerr << "got model " << device->first << endl;
+			// have access to the documents by model name
+			_documents[device->first] = document;
+			// build a list of all master devices from all documents
+			_master_devices_by_model[device->first] = device->second;
+			_all_models.push_back(device->first);
+			
+			// make sure there are no double model names
+			// TODO: handle this gracefully.
+			assert(_documents.count(device->first) == 1);
+			assert(_master_devices_by_model.count(device->first) == 1);
+		}
 	}
 }
 

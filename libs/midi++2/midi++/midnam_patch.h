@@ -24,6 +24,7 @@
 #include <string>
 #include <list>
 #include <set>
+#include <map>
 
 #include "pbd/stateful.h"
 #include "midi++/event.h"
@@ -202,7 +203,8 @@ private:
 class MIDINameDocument : public PBD::Stateful
 {
 public:
-	typedef std::list<MasterDeviceNames> MasterDeviceNamesList;
+	// Maps Model names to MasterDeviceNames
+	typedef std::map<std::string, boost::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
 	
 	MIDINameDocument() {};
 	MIDINameDocument(const string &filename) : _document(XMLTree(filename)) { set_state(*_document.root()); };
@@ -211,13 +213,18 @@ public:
 	const string& author() const { return _author; }
 	void set_author(const string an_author) { _author = an_author; }
 	
+	const MasterDeviceNamesList& master_device_names_by_model() const { return _master_device_names_list; }
+	
+	const MasterDeviceNames::Models& all_models() const { return _all_models; }
+	
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
 
 private:
-	string                _author;
-	MasterDeviceNamesList _master_device_names_list;
-	XMLTree               _document;
+	string                        _author;
+	MasterDeviceNamesList         _master_device_names_list;
+	XMLTree                       _document;
+	MasterDeviceNames::Models     _all_models;
 };
 
 }

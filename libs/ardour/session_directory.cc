@@ -109,7 +109,7 @@ SessionDirectory::midi_path () const
 const path
 SessionDirectory::midi_patch_path () const
 {
-	return sources_root() / midi_patch_path();
+	return sources_root() / midi_patch_dir_name;
 }
 
 const path
