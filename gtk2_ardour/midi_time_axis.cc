@@ -37,6 +37,7 @@
 
 #include <ardour/midi_playlist.h>
 #include <ardour/midi_diskstream.h>
+#include <ardour/midi_patch_manager.h>
 #include <ardour/processor.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/location.h>
@@ -68,7 +69,6 @@
 #include "midi_streamview.h"
 #include "utils.h"
 #include "midi_scroomer.h"
-#include "midi_patch_manager.h"
 #include "piano_roll_header.h"
 #include "ghostregion.h"
 
@@ -83,7 +83,7 @@ using namespace sigc;
 using namespace Editing;
 	
 // Minimum height at which a control is displayed
-static const uint32_t CHANNEL_MIN_HEIGHT = 80;
+static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 162;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 140;
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
@@ -95,7 +95,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	, _note_mode(Sustained)
 	, _note_mode_item(NULL)
 	, _percussion_mode_item(NULL)
-	, _midi_expander("Channel")
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -142,14 +141,12 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	}
 		
 	// add channel selector expander
-	HBox* midi_expander_hbox = manage(new HBox());
-	VBox* midi_expander_vbox = manage(new VBox());
+	HBox* midi_controls_hbox = manage(new HBox());
 	
 	// Instrument patch selector
 	ComboBoxText*       model_selector = manage(new ComboBoxText());
 	
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
-	patch_manager.set_session(session());
 
 	for (MIDI::Name::MasterDeviceNames::Models::const_iterator model = patch_manager.all_models().begin();
 	     model != patch_manager.all_models().end();
@@ -159,13 +156,12 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	
 	model_selector->set_active(0);
 	
-	midi_expander_hbox->pack_start(_channel_selector, true, false);
-	midi_expander_vbox->pack_start(*model_selector, true, false);
-	midi_expander_vbox->pack_start(*midi_expander_hbox, true, true);
-	_midi_expander.add(*midi_expander_vbox);
-	_midi_expander.property_expanded().signal_changed().connect(
-			mem_fun(this, &MidiTimeAxisView::channel_selector_toggled));
-	controls_vbox.pack_start(_midi_expander, false, false);
+	midi_controls_hbox->pack_start(_channel_selector, true, false);
+	_midi_controls_box.pack_start(*model_selector, true, false);
+	_midi_controls_box.pack_start(*midi_controls_hbox, true, true);
+	
+	controls_vbox.pack_start(_midi_controls_box, false, false);
+	
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_track()->midi_diskstream();
 
 	// restore channel selector settings
@@ -214,10 +210,10 @@ MidiTimeAxisView::set_height (uint32_t h)
 {
 	RouteTimeAxisView::set_height (h);
 
-	if (height >= CHANNEL_MIN_HEIGHT) {
-		_midi_expander.show();
+	if (height >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
+		_midi_controls_box.show();
 	} else {
-		_midi_expander.hide();
+		_midi_controls_box.hide();
 	}
 	
 	if (height >= KEYBOARD_MIN_HEIGHT) {
@@ -462,20 +458,6 @@ MidiTimeAxisView::route_active_changed ()
 	}
 }
 
-void 
-MidiTimeAxisView::channel_selector_toggled()
-{
-	static uint32_t previous_height;
-	
-	if (_midi_expander.property_expanded()) {
-		previous_height = current_height();
-		if (previous_height < TimeAxisView::hLargest) {
-			set_height (TimeAxisView::hLarge);
-		}
-	} else {
-		set_height (previous_height);
-	}
-}
 
 
 

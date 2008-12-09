@@ -86,6 +86,7 @@
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
 #include <ardour/midi_track.h>
+#include <ardour/midi_patch_manager.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
 #include <ardour/named_selection.h>
@@ -359,6 +360,7 @@ Session::second_stage_init (bool new_session)
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
 	
 	MidiClockTicker::instance().set_session(*this);
+	MIDI::Name::MidiPatchManager::instance().set_session(*this);
 
 	BootMessage (_("Reset Control Protocols"));
 

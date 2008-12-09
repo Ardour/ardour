@@ -21,10 +21,11 @@
 #include <sigc++/sigc++.h>
 #include <boost/shared_ptr.hpp>
 
-#include "midi_patch_manager.h"
-#include "pbd/file_utils.h"
+#include <pbd/file_utils.h>
+
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
+#include "ardour/midi_patch_manager.h"
 
 using namespace std;
 using namespace sigc;

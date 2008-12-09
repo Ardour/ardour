@@ -115,6 +115,7 @@ midi_source.cc
 midi_state_tracker.cc
 midi_stretch.cc
 midi_track.cc
+midi_patch_manager.cc
 mix.cc
 mtc_slave.cc
 named_selection.cc
