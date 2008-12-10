@@ -140,11 +140,11 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		_view->attach ();
 	}
 		
-	// add channel selector expander
 	HBox* midi_controls_hbox = manage(new HBox());
 	
 	// Instrument patch selector
-	ComboBoxText*       model_selector = manage(new ComboBoxText());
+	ComboBoxText*       model_selector              = manage(new ComboBoxText());
+	ComboBoxText*       custom_device_mode_selector = manage(new ComboBoxText());
 	
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
 
@@ -154,10 +154,25 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		model_selector->append_text(model->c_str());
 	}
 	
+	// TODO: persist the choice
 	model_selector->set_active(0);
 	
+	std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model(model_selector->get_active_text());
+	
+	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
+		cerr << "found custom device mode " << *i << endl;
+		custom_device_mode_selector->append_text(*i);
+	}
+
+	// TODO: persist the choice
+	custom_device_mode_selector->set_active(0);
+	
 	midi_controls_hbox->pack_start(_channel_selector, true, false);
-	_midi_controls_box.pack_start(*model_selector, true, false);
+	if (!patch_manager.all_models().empty()) {
+		_midi_controls_box.pack_start(*model_selector, true, false);
+		_midi_controls_box.pack_start(*custom_device_mode_selector, true, false);
+	}
+	
 	_midi_controls_box.pack_start(*midi_controls_hbox, true, true);
 	
 	controls_vbox.pack_start(_midi_controls_box, false, false);

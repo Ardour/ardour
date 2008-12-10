@@ -18,10 +18,11 @@
     $Id$
 */
 
-#include "midi++/midnam_patch.h"
 #include <algorithm>
-
 #include <iostream>
+
+#include "midi++/midnam_patch.h"
+#include "pbd/convert.h"
 
 using namespace std;
 
@@ -58,8 +59,27 @@ Patch::set_state (const XMLNode& node)
 	const XMLNodeList events = commands->children();
 	for (XMLNodeList::const_iterator i = events.begin(); i != events.end(); ++i) {
 		_patch_midi_commands.push_back(*(new Evoral::MIDIEvent(*(*i))));
+		XMLNode* node = *i;
+		if (node->name() == "ControlChange") {
+			string control = node->property("Control")->value();
+			assert(control != "");
+			string value = node->property("Value")->value();
+			assert(value != "");
+			
+			if (control == "0") {
+				_id.msb = PBD::atoi(value);
+			} else if (control == "32") {
+				_id.lsb = PBD::atoi(value);
+			}
+		} else if (node->name() == "ProgramChange") {
+			string number = node->property("Number")->value();
+			assert(number != "");
+			_id.program_number = PBD::atoi(number);
+		}
 	}
 
+	assert(_id.is_sane());
+	
 	return 0;
 }
 
@@ -204,6 +224,12 @@ ChannelNameSet::set_state (const XMLNode& node)
 			PatchBank* bank = new PatchBank();
 			bank->set_state(*node);
 			_patch_banks.push_back(*bank);
+			const PatchBank::PatchNameList& patches = bank->patch_name_list();
+			for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
+			     patch != patches.end();
+			     ++patch) {
+				_patch_map[patch->patch_primary_key()] = *patch;
+			}
 			// cerr << "after PatchBank pushback" << endl;
 		}
 	}
@@ -217,6 +243,9 @@ int
 CustomDeviceMode::set_state(const XMLNode& a_node)
 {
 	assert(a_node.name() == "CustomDeviceMode");
+	
+	_name = a_node.property("Name")->value();
+	
 	boost::shared_ptr<XMLSharedNodeList> channel_name_set_assignments =
 		a_node.find("//ChannelNameSetAssign");
 	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
@@ -278,7 +307,9 @@ MasterDeviceNames::set_state(const XMLNode& a_node)
 	     ++i) {
 		CustomDeviceMode* custom_device_mode = new CustomDeviceMode();
 		custom_device_mode->set_state(*(*i));
-		_custom_device_modes.push_back(*custom_device_mode);
+		
+		_custom_device_modes[custom_device_mode->name()] = *custom_device_mode;
+		_custom_device_mode_names.push_back(custom_device_mode->name());
 	}
 
 	// cerr << "MasterDeviceNames::set_state ChannelNameSets" << endl;
@@ -290,7 +321,7 @@ MasterDeviceNames::set_state(const XMLNode& a_node)
 		ChannelNameSet* channel_name_set = new ChannelNameSet();
 		// cerr << "MasterDeviceNames::set_state ChannelNameSet before set_state" << endl;
 		channel_name_set->set_state(*(*i));
-		_channel_name_sets.push_back(*channel_name_set);
+		_channel_name_sets[channel_name_set->name()] = *channel_name_set;
 	}
 
 	// cerr << "MasterDeviceNames::set_state NoteNameLists" << endl;
@@ -347,14 +378,6 @@ MIDINameDocument::set_state(const XMLNode& a_node)
 	
 	return 0;
 }
-
-/*
-const MasterDeviceNames::Models&
-MIDINameDocument::models(void)
-{
-	;
-}
-*/
 
 XMLNode&
 MIDINameDocument::get_state(void)

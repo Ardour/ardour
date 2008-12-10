@@ -36,6 +36,46 @@ namespace MIDI
 namespace Name
 {
 
+struct PatchPrimaryKey
+{
+public:
+	int msb;
+	int lsb;
+	int program_number;
+	
+	PatchPrimaryKey(int a_msb = -1, int a_lsb = -1, int a_program_number = -1) {
+		msb = a_msb;
+		lsb = a_lsb;
+		program_number = a_program_number;
+	}
+	
+	bool is_sane() { 	
+		return 
+		0 <= msb <= 127 &&
+		0 <= lsb <= 127 &&
+		0 <= program_number <= 127;
+	}
+	
+	inline bool operator==(const PatchPrimaryKey& id) const {
+		return (msb == id.msb && lsb == id.lsb && program_number == id.program_number);
+	}
+	
+	/**
+	 * obey strict weak ordering or crash in STL containers
+	 */
+	inline bool operator<(const PatchPrimaryKey& id) const {
+		if (msb < id.msb) {
+			return true;
+		} else if (msb == id.msb && lsb < id.lsb) {
+			return true;
+		} else if (lsb == id.lsb && program_number < id.program_number) {
+			return true;
+		}
+		
+		return false;
+	}
+};
+
 class Patch : public PBD::Stateful
 {
 public:
@@ -52,13 +92,16 @@ public:
 	void set_number(const string a_number)   { _number = a_number; }
 
 	const PatchMidiCommands& patch_midi_commands() const { return _patch_midi_commands; }
+	
+	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
 
 private:
-	string _number;
-	string _name;
+	string            _number;
+	string            _name;
+	PatchPrimaryKey   _id;
 	PatchMidiCommands _patch_midi_commands;
 };
 
@@ -89,6 +132,7 @@ class ChannelNameSet : public PBD::Stateful
 public:
 	typedef std::set<uint8_t>    AvailableForChannels;
 	typedef std::list<PatchBank> PatchBanks;
+	typedef std::map<PatchPrimaryKey, Patch> PatchMap;
 
 	ChannelNameSet() {};
 	virtual ~ChannelNameSet() {};
@@ -97,8 +141,14 @@ public:
 	const string& name() const               { return _name; }
 	void set_name(const string a_name)       { _name = a_name; }
 
-	const AvailableForChannels& available_for_channels() const { return _available_for_channels; }
-	const PatchBanks&           patch_banks()            const { return _patch_banks; }
+	bool available_for_channel(uint8_t channel) const { 
+		return _available_for_channels.find(channel) != _available_for_channels.end(); 
+	}
+	
+	Patch& find_patch(uint8_t msb, uint8_t lsb, uint8_t program_number) {
+		PatchPrimaryKey key(msb, lsb, program_number);
+		return _patch_map[key];
+	}
 
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
@@ -107,6 +157,7 @@ private:
 	string _name;
 	AvailableForChannels _available_for_channels;
 	PatchBanks           _patch_banks;
+	PatchMap             _patch_map;
 };
 
 class Note : public PBD::Stateful
@@ -164,6 +215,11 @@ public:
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
 	
+	string channel_name_set_name_by_channel(uint8_t channel) {
+		assert(channel <= 15);
+		return _channel_name_set_assignments[channel]; 
+	}
+	
 private:
 	/// array index = channel number
 	/// string contents = name of channel name set 
@@ -174,10 +230,13 @@ private:
 class MasterDeviceNames : public PBD::Stateful
 {
 public:
-	typedef std::list<std::string>       Models;
-	typedef std::list<CustomDeviceMode>  CustomDeviceModes;
-	typedef std::list<ChannelNameSet>    ChannelNameSets;
-	typedef std::list<NoteNameList>      NoteNameLists;
+	typedef std::list<std::string>                                       Models;
+	/// maps name to CustomDeviceMode
+	typedef std::map<std::string, CustomDeviceMode>                      CustomDeviceModes;
+	typedef std::list<std::string>                                       CustomDeviceModeNames;
+	/// maps name to ChannelNameSet
+	typedef std::map<std::string, ChannelNameSet>                        ChannelNameSets;
+	typedef std::list<NoteNameList>                                      NoteNameLists;
 	
 	
 	MasterDeviceNames() {};
@@ -189,15 +248,31 @@ public:
 	const Models& models() const { return _models; }
 	void set_models(const Models some_models) { _models = some_models; }
 	
+	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
+	
+	CustomDeviceMode& custom_device_mode_by_name(string& mode_name) {
+		assert(mode_name != "");
+		return _custom_device_modes[mode_name];
+	}
+	
+	ChannelNameSet& channel_name_set_by_device_mode_and_channel(string mode, uint8_t channel) {
+		return _channel_name_sets[custom_device_mode_by_name(mode).channel_name_set_name_by_channel(channel)];
+	}
+	
+	Patch& find_patch(string mode, uint8_t channel, uint8_t msb, uint8_t lsb, uint8_t program_number) {
+		return channel_name_set_by_device_mode_and_channel(mode, channel).find_patch(msb, lsb, program_number);
+	}
+	
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
 	
 private:
-	string            _manufacturer;
-	Models            _models;
-	CustomDeviceModes _custom_device_modes;
-	ChannelNameSets   _channel_name_sets;
-	NoteNameLists     _note_name_lists;
+	string                _manufacturer;
+	Models                _models;
+	CustomDeviceModes     _custom_device_modes;
+	CustomDeviceModeNames _custom_device_mode_names;
+	ChannelNameSets       _channel_name_sets;
+	NoteNameLists         _note_name_lists;
 };
 
 class MIDINameDocument : public PBD::Stateful
@@ -216,7 +291,7 @@ public:
 	const MasterDeviceNamesList& master_device_names_by_model() const { return _master_device_names_list; }
 	
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
-	
+		
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
 
