@@ -579,7 +579,7 @@ MidiRegionView::redisplay_model()
 			add_note(_model->note_at(i));
 		}
 		
-		find_and_insert_program_chage_flags();
+		find_and_insert_program_change_flags();
 
 		// Is this necessary?
 		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
