@@ -147,6 +147,7 @@ public:
 	
 	Patch& find_patch(uint8_t msb, uint8_t lsb, uint8_t program_number) {
 		PatchPrimaryKey key(msb, lsb, program_number);
+		assert(key.is_sane());
 		return _patch_map[key];
 	}
 

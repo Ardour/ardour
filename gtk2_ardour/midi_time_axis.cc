@@ -141,36 +141,28 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	}
 		
 	HBox* midi_controls_hbox = manage(new HBox());
-	
-	// Instrument patch selector
-	ComboBoxText*       model_selector              = manage(new ComboBoxText());
-	ComboBoxText*       custom_device_mode_selector = manage(new ComboBoxText());
-	
+		
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
 
 	for (MIDI::Name::MasterDeviceNames::Models::const_iterator model = patch_manager.all_models().begin();
 	     model != patch_manager.all_models().end();
 	     ++model) {
-		model_selector->append_text(model->c_str());
+		_model_selector.append_text(model->c_str());
 	}
+	
+	_model_selector.signal_changed().connect(mem_fun(*this, &MidiTimeAxisView::model_changed));
+	
+	_custom_device_mode_selector.signal_changed().connect(
+			mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
 	
 	// TODO: persist the choice
-	model_selector->set_active(0);
-	
-	std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model(model_selector->get_active_text());
-	
-	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
-		cerr << "found custom device mode " << *i << endl;
-		custom_device_mode_selector->append_text(*i);
-	}
+	// this initializes the comboboxes and sends out the signal
+	_model_selector.set_active(0);
 
-	// TODO: persist the choice
-	custom_device_mode_selector->set_active(0);
-	
 	midi_controls_hbox->pack_start(_channel_selector, true, false);
 	if (!patch_manager.all_models().empty()) {
-		_midi_controls_box.pack_start(*model_selector, true, false);
-		_midi_controls_box.pack_start(*custom_device_mode_selector, true, false);
+		_midi_controls_box.pack_start(_model_selector, true, false);
+		_midi_controls_box.pack_start(_custom_device_mode_selector, true, false);
 	}
 	
 	_midi_controls_box.pack_start(*midi_controls_hbox, true, true);
@@ -193,6 +185,26 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 
 	delete _range_scroomer;
 	_range_scroomer = 0;
+}
+
+void MidiTimeAxisView::model_changed()
+{
+	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
+		.custom_device_mode_names_by_model(_model_selector.get_active_text());
+	
+	_custom_device_mode_selector.clear_items();
+	
+	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
+		cerr << "found custom device mode " << *i << endl;
+		_custom_device_mode_selector.append_text(*i);
+	}
+
+	_custom_device_mode_selector.set_active(0);
+}
+
+void MidiTimeAxisView::custom_device_mode_changed()
+{
+	_midi_patch_settings_changed.emit(_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());	
 }
 
 MidiStreamView*

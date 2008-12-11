@@ -1,25 +1,20 @@
 #ifndef CANVASPROGRAMCHANGE_H_
 #define CANVASPROGRAMCHANGE_H_
 
-#include <libgnomecanvasmm/group.h>
-#include "simplerect.h"
-#include "simpleline.h"
-#include <libgnomecanvasmm/text.h>
-#include <libgnomecanvasmm/widget.h>
-#include <ardour/midi_model.h>
+#include "canvas-flag.h"
 
 class MidiRegionView;
 
 namespace Gnome {
 namespace Canvas {
 
-class CanvasProgramChange : public Group
+class CanvasProgramChange : public CanvasFlag
 {
 public:
 	CanvasProgramChange(
 		MidiRegionView&                       region,
 		Group&                                parent,
-		boost::shared_ptr<Evoral::Event>      event,
+		string                                text,
 		double                                height,
 		double                                x = 0.0,
 		double                                y = 0.0
@@ -28,11 +23,6 @@ public:
 	virtual ~CanvasProgramChange();
 	
 private:
-	MidiRegionView&                   _region;
-	boost::shared_ptr<Evoral::Event>  _event;
-	Text*                             _text;
-	SimpleLine*                       _line;
-	SimpleRect*                       _rect;
 };
 
 } // namespace Canvas

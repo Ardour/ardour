@@ -33,6 +33,10 @@
 #include <ardour/midi_source.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/midi_model.h>
+#include <ardour/midi_patch_manager.h>
+
+#include <evoral/Parameter.hpp>
+#include <evoral/Control.hpp>
 
 #include "streamview.h"
 #include "midi_region_view.h"
@@ -67,6 +71,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _default_note_length(0.0)
 	, _current_range_min(0)
 	, _current_range_max(0)
+	, _model_name(string())
+	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(NULL)
@@ -81,6 +87,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
+	, _model_name(string())
+	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(NULL)
@@ -97,6 +105,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
+	, _model_name(string())
+	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
 	, _delta_command(NULL)
@@ -117,6 +127,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
+	, _model_name(string())
+	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
 	, _delta_command(NULL)
@@ -175,6 +187,9 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	midi_view()->signal_channel_mode_changed().connect(
 			mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
+	
+	midi_view()->signal_midi_patch_settings_changed().connect(
+			mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
 }
 
 bool
@@ -546,7 +561,9 @@ MidiRegionView::redisplay_model()
 		clear_events();
 		_model->read_lock();
 		
-		/*MidiModel::Notes notes = _model->notes();
+		
+		MidiModel::Notes notes = _model->notes();
+		/*
 		cerr << endl << _model->midi_source()->name() << " : redisplaying " << notes.size() << " notes:" << endl;
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 			cerr << "NOTE  time: " << (*i)->time()
@@ -555,27 +572,14 @@ MidiRegionView::redisplay_model()
 			     << "  end-time: " << (*i)->end_time() 
 			     << "  velocity: " << int((*i)->velocity()) 
 			     << endl;
-		}*/
-		
-		for (size_t i = 0; i < _model->n_notes(); ++i)
-			add_note(_model->note_at(i));
-
-		// Draw program change 'flags'
-		for (Automatable::Controls::iterator control = _model->controls().begin();
-				control != _model->controls().end(); ++control) {
-			if (control->first.type() == MidiPgmChangeAutomation) {
-				Glib::Mutex::Lock list_lock (control->second->list()->lock());
-				
-				for (AutomationList::const_iterator event = control->second->list()->begin();
-						event != control->second->list()->end(); ++event) {
-					Evoral::ControlIterator iter(control->second->list(), (*event)->when, (*event)->value);
-					boost::shared_ptr<Evoral::Event> event(new Evoral::Event());
-					_model->control_to_midi_event(event, iter);
-					add_pgm_change(event);
-				}
-				break;
-			}
 		}
+		*/
+		
+		for (size_t i = 0; i < _model->n_notes(); ++i) {
+			add_note(_model->note_at(i));
+		}
+		
+		find_and_insert_program_chage_flags();
 
 		// Is this necessary?
 		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
@@ -606,12 +610,79 @@ MidiRegionView::redisplay_model()
 
 			_automation_children.insert(std::make_pair(i->second->parameter(), arv));
 		}*/
-
 		_model->read_unlock();
 
 	} else {
 		cerr << "MidiRegionView::redisplay_model called without a model" << endmsg;
 	}
+}
+
+void
+MidiRegionView::find_and_insert_program_change_flags()
+{
+	// Draw program change 'flags'
+	for (Automatable::Controls::iterator control = _model->controls().begin();
+			control != _model->controls().end(); ++control) {
+		if (control->first.type() == MidiPgmChangeAutomation) {
+			Glib::Mutex::Lock list_lock (control->second->list()->lock());
+
+			uint8_t channel       = control->first.channel();
+			
+			for (AutomationList::const_iterator event = control->second->list()->begin();
+					event != control->second->list()->end(); ++event) {
+				double event_time     = (*event)->when;
+				double program_number = (*event)->value;
+
+				//cerr << " got program change on channel " << int(channel) << " time: " << event_time << " number: " << program_number << endl;
+				
+				// find bank select msb and lsb for the program change
+				Evoral::Parameter bank_select_msb(MidiCCAutomation, channel, MIDI_CTL_MSB_BANK);
+				Evoral::Parameter bank_select_lsb(MidiCCAutomation, channel, MIDI_CTL_LSB_BANK);
+				
+				boost::shared_ptr<Evoral::Control>  lsb_control = _model->control(bank_select_lsb);
+				boost::shared_ptr<Evoral::Control>  msb_control = _model->control(bank_select_msb);
+									
+				boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device 
+					= MIDI::Name::MidiPatchManager::instance().master_device_by_model(_model_name);
+				
+				MIDI::Name::Patch patch;
+				
+				if (master_device != 0 && _custom_device_mode != "") {			 
+					uint8_t msb = 0;
+					if (msb_control != 0) {
+						msb = uint8_t(msb_control->get_float(true, event_time));
+					}
+					
+					uint8_t lsb = 0;
+					if (lsb_control != 0) {
+						lsb = uint8_t(lsb_control->get_float(true, event_time));
+					}
+					
+					//cerr << " got msb " << int(msb) << " and lsb " << int(lsb) << endl;
+					
+					patch = master_device->find_patch(
+							_custom_device_mode, 
+							channel, 
+							msb,
+							lsb,
+							uint8_t(program_number)
+					);
+
+					//cerr << " got patch with name " << patch.name() << " number " << patch.number() << endl;
+				}
+				if (patch.name() != "") {
+					add_pgm_change(event_time, patch.name());
+				} else {
+					char buf[4];
+					snprintf(buf, 4, "%d", int(program_number));
+					add_pgm_change(event_time, buf);
+				}
+			}
+			break;
+		} else if (control->first.type() == MidiCCAutomation) {
+			//cerr << " found CC Automation of channel " << int(control->first.channel()) << " and id " << control->first.id() << endl;
+		}
+	}	
 }
 
 
@@ -925,21 +996,21 @@ MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
 }
 
 void
-MidiRegionView::add_pgm_change(boost::shared_ptr<Evoral::Event> event)
+MidiRegionView::add_pgm_change(nframes_t time, string displaytext)
 {
-	assert(event->time() >= 0);
+	assert(time >= 0);
 	
 	// dont display notes beyond the region bounds
-	if (event->time() - _region->start() >= _region->length() || event->time() <  _region->start()) 
+	if (time - _region->start() >= _region->length() || time <  _region->start()) 
 		return;
 	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
-	const double x = trackview.editor.frame_to_pixel((nframes64_t)event->time() - _region->start());
+	const double x = trackview.editor.frame_to_pixel((nframes64_t)time - _region->start());
 	
 	double height = midi_stream_view()->contents_height();
 	_pgm_changes.push_back(
 		boost::shared_ptr<CanvasProgramChange>(
-			new CanvasProgramChange(*this, *group, event, height, x, 1.0)));
+			new CanvasProgramChange(*this, *group, displaytext, height, x, 1.0)));
 }
 
 void
@@ -1436,5 +1507,13 @@ MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
 	}
 
 	_last_channel_selection = mask;
+}
+
+void 
+MidiRegionView::midi_patch_settings_changed(std::string model, std::string custom_device_mode)
+{
+	_model_name         = model;
+	_custom_device_mode = custom_device_mode;
+	redisplay_model();
 }
 

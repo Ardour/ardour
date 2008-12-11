@@ -278,13 +278,6 @@ XMLNode& MidiModel::DeltaCommand::get_state()
 	return *delta_command;
 }
 
-struct EventTimeComparator {
-	typedef const Evoral::Event* value_type;
-	inline bool operator()(const Evoral::Event& a, const Evoral::Event& b) const {
-		return a.time() >= b.time();
-	}
-};
-
 /** Write the model to a MidiSource (i.e. save the model).
  * This is different from manually using read to write to a source in that
  * note off events are written regardless of the track mode.  This is so the

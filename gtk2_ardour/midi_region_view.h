@@ -86,7 +86,8 @@ class MidiRegionView : public RegionView
 	void add_note(const boost::shared_ptr<Evoral::Note> note);
 	void resolve_note(uint8_t note_num, double end_time);
 	
-	void add_pgm_change(boost::shared_ptr<Evoral::Event> event);
+	void add_pgm_change(nframes_t time, string displaytext);
+	void find_and_insert_program_change_flags();
 
 	void begin_write();
 	void end_write();
@@ -219,6 +220,7 @@ class MidiRegionView : public RegionView
 	bool note_canvas_event(GdkEvent* ev);
 	
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
+	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
 
 	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
@@ -229,6 +231,9 @@ class MidiRegionView : public RegionView
 	double   _default_note_length;
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
+	
+	string   _model_name;
+	string   _custom_device_mode;   
 
 	typedef std::vector<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;

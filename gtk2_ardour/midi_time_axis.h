@@ -77,10 +77,19 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void update_range();
 	
-	sigc::signal<void, ARDOUR::ChannelMode, uint16_t>& signal_channel_mode_changed() 
-		{ return _channel_selector.mode_changed; }
+	sigc::signal<void, ARDOUR::ChannelMode, uint16_t>& signal_channel_mode_changed() { 
+		return _channel_selector.mode_changed; 
+	}
+	
+	sigc::signal<void, string, string>& signal_midi_patch_settings_changed() {
+		return _midi_patch_settings_changed;
+	}
 	
   private:
+	sigc::signal<void, string, string>  _midi_patch_settings_changed;
+	  		
+	void model_changed();
+	void custom_device_mode_changed();
 	
 	void append_extra_display_menu_items ();
 	void build_automation_action_menu ();
@@ -102,6 +111,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::RadioMenuItem*          _percussion_mode_item;
 	Gtk::VBox                    _midi_controls_box;
 	MidiMultipleChannelSelector  _channel_selector;
+	Gtk::ComboBoxText            _model_selector;
+	Gtk::ComboBoxText            _custom_device_mode_selector;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

@@ -131,6 +131,7 @@ axis_view.cc
 bundle_manager.cc
 canvas-note-event.cc
 canvas-note.cc
+canvas-flag.cc
 canvas-program-change.cc
 canvas-simpleline.c
 canvas-simplerect.c
