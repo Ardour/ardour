@@ -18,6 +18,8 @@
 #ifndef mackie_controls_h
 #define mackie_controls_h
 
+#include <sigc++/sigc++.h>
+
 #include <map>
 #include <vector>
 #include <string>
@@ -83,6 +85,9 @@ class Fader;
 class Strip : public Group
 {
 public:
+	/**
+		\param is the index of the strip. 0-based.
+	*/
 	Strip( const std::string & name, int index );
 	
 	virtual bool is_strip() const
@@ -92,10 +97,11 @@ public:
 	
 	virtual void add( Control & control );
 	
-	/// This is the index of the strip
+	/// This is the index of the strip. zero-based.
 	int index() const { return _index; }
 	
 	/// This is for Surface only
+	/// index is zero-based
 	void index( int rhs ) { _index = rhs; }
 	
 	Button & solo();
@@ -107,14 +113,14 @@ public:
 	Pot & vpot();
 	Fader & gain();
 	
-	bool has_solo() { return _solo != 0; }
-	bool has_recenable() { return _recenable != 0; }
-	bool has_mute() { return _mute != 0; }
-	bool has_select() { return _select != 0; }
-	bool has_vselect() { return _vselect != 0; }
-	bool has_fader_touch() { return _fader_touch != 0; }
-	bool has_vpot() { return _vpot != 0; }
-	bool has_gain() { return _gain != 0; }
+	bool has_solo() const { return _solo != 0; }
+	bool has_recenable() const { return _recenable != 0; }
+	bool has_mute() const { return _mute != 0; }
+	bool has_select() const { return _select != 0; }
+	bool has_vselect() const { return _vselect != 0; }
+	bool has_fader_touch() const { return _fader_touch != 0; }
+	bool has_vpot() const { return _vpot != 0; }
+	bool has_gain() const { return _gain != 0; }
 	
 private:
 	Button * _solo;
@@ -127,6 +133,8 @@ private:
 	Fader * _gain;
 	int _index;
 };
+
+std::ostream & operator << ( std::ostream &, const Strip & );
 
 class MasterStrip : public Strip
 {
@@ -151,13 +159,9 @@ class Led;
 class Control
 {
 public:
-	enum type_t { type_fader, type_button, type_pot, type_led, type_led_ring };
+	enum type_t { type_led, type_led_ring, type_fader = 0xe0, type_button = 0x90, type_pot = 0xb0 };
 	
-	Control( int id, int ordinal, std::string name, Group & group )
-	: _id( id ), _ordinal( ordinal ), _name( name ), _group( group )
-	{
-	}
-	
+	Control( int id, int ordinal, std::string name, Group & group );
 	virtual ~Control() {}
 	
 	virtual const Led & led() const
@@ -165,17 +169,20 @@ public:
 		throw MackieControlException( "no led available" );
 	}
 
-	/// The midi id of the control
+	/// type() << 8 + midi id of the control. This
+	/// provides a unique id for any control on the surface.
 	int id() const
 	{
-		return _id;
+		return ( type() << 8 ) + _id;
 	}
 	
+	/// the value of the second bytes of the message. It's
+	/// the id of the control, but only guaranteed to be
+	/// unique within the control type.
+	int raw_id() const { return _id; }
+	
 	/// The 1-based number of the control
-	int ordinal() const
-	{
-		return _ordinal;
-	}
+	int ordinal() const { return _ordinal; }
 	
 	const std::string & name() const
 	{
@@ -204,11 +211,32 @@ public:
 	
 	virtual type_t type() const = 0;
 	
+	/// Return true if this control is the one and only Jog Wheel
+	virtual bool is_jog() const { return false; }
+
+	/**
+		Return true if the controlis in use, or false otherwise. For buttons
+		this returns true if the button is currently being held down. For
+		faders, the touch button has not been released. For pots, this returns
+		true from the first move event until a timeout after the last move event.
+	*/
+	virtual bool in_use() const;
+	virtual Control & in_use( bool );
+	
+	/// The timeout value for this control. Normally defaulted to 250ms, but
+	/// certain controls (ie jog wheel) may want to override it.
+	virtual unsigned int in_use_timeout() { return _in_use_timeout; }
+
+	/// Keep track of the timeout so it can be updated with more incoming events
+	sigc::connection in_use_connection;
+	
 private:
 	int _id;
 	int _ordinal;
 	std::string _name;
 	Group & _group;
+	bool _in_use;
+	unsigned int _in_use_timeout;
 };
 
 std::ostream & operator << ( std::ostream & os, const Control & control );
@@ -218,18 +246,10 @@ class Fader : public Control
 public:
 	Fader( int id, int ordinal, std::string name, Group & group )
 	: Control( id, ordinal, name, group )
-	, _touch( false )
 	{
 	}
 	
-	bool touch() const { return _touch; }
-	
-	void touch( bool yn ) { _touch = yn; }
-
 	virtual type_t type() const { return type_fader; }
-
-private:
-	bool _touch;
 };
 
 class Led : public Control
@@ -260,7 +280,7 @@ public:
 	}
 	
 	virtual type_t type() const { return type_button; };
-
+	
 private:
 	Led _led;
 };
@@ -294,6 +314,17 @@ public:
 
 private:
 	LedRing _led_ring;
+};
+
+class Jog : public Pot
+{
+public:
+	Jog( int id, int ordinal, std::string name, Group & group )
+	: Pot( id, ordinal, name, group )
+	{
+	}
+
+	virtual bool is_jog() const { return true; }
 };
 
 }

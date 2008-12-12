@@ -18,6 +18,11 @@
 require 'controls.rb'
 require 'mackie.rb'
 
+if ARGV.size != 2
+  puts "#$0 /dev/snd/midiXXXX control-file.csv"
+  exit 1
+end
+
 while !File.exist? ARGV[0]
   sleep 0.010
 end
@@ -30,46 +35,14 @@ puts ""
 file = File.open ARGV[0], 'r+'
 mck = Mackie.new( file )
 
-# send device query
-response = mck.sysex( "\x00" )
-puts "response: #{response.to_hex}"
-
-# decode host connection query
-status = response[0]
-if status != 1
-  puts "expected 01, got " + response.to_hex.inspect
-  exit(1)
-end
-serial = response[1..7]
-challenge = response[8..11]
-puts <<EOF
-serial: #{serial.to_hex.inspect}
-challenge: #{challenge.to_hex.inspect}
-EOF
-
-# send host connection reply
-response = mck.sysex( "\x02" + serial.pack('C*') + challenge.pack('C*') )
-
-# decode host connection confirmation
-status = response[0]
-if status != 3
-  puts "expected 03, got " + response.to_hex.inspect
-  exit(1)
-end
-
-serial = response[1..7]
-puts <<EOF
-serial: #{serial.to_hex.inspect}
-EOF
-
 # faders to minimum. bcf2000 doesn't respond
-#file.write( hdr + "\x61\xf7" )
+mck.write_sysex "\x61"
 
 # all leds off. bcf2000 doesn't respond
-#file.write( hdr + "\x62\xf7" )
+mck.write_sysex "\x62"
 
 # get version. comes back as ASCII bytes
-version = mck.sysex( "\x13\x00" )
+version = mck.sysex "\x13\x00"
 puts "version: #{version.map{|x| x.chr}}"
 
 # write a welcome message. bcf2000 responds with exact
@@ -126,7 +99,7 @@ while bytes = mck.file.read( 3 )
   control = sf.midis[midi_type][control_id]
   
   print " Control Type: %-7s, " % sf.types[midi_type]
-  print "id: %4i" % control_id
+  print "id: %4x" % control_id
   print ", control: %15s" % ( control ? control.name : "nil control" )
   print ", %15s" % ( control ? control.group.name : "nil group" )
   print "\n"

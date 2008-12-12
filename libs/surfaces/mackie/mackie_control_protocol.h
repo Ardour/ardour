@@ -32,9 +32,12 @@
 #include <control_protocol/control_protocol.h>
 #include "midi_byte_array.h"
 #include "controls.h"
+#include "dummy_port.h"
 #include "route_signal.h"
 #include "mackie_button_handler.h"
 #include "mackie_port.h"
+#include "mackie_jog_wheel.h"
+#include "timer.h"
 
 namespace MIDI {
 	class Port;
@@ -93,14 +96,16 @@ class MackieControlProtocol
 	/// Signal handler for Route::record_enable_changed
 	void notify_record_enable_changed( Mackie::RouteSignal * );
 	/// Signal handler for Route::gain_changed ( from IO )
-	void notify_gain_changed( Mackie::RouteSignal * );
+	void notify_gain_changed( Mackie::RouteSignal *, bool force_update = true );
 	/// Signal handler for Route::name_change
 	void notify_name_changed( Mackie::RouteSignal * );
 	/// Signal handler from Panner::Change
-	void notify_panner_changed( Mackie::RouteSignal * );
+	void notify_panner_changed( Mackie::RouteSignal *, bool force_update = true );
 	/// Signal handler for new routes added
 	void notify_route_added( ARDOUR::Session::RouteList & );
-
+	/// Signal handler for Route::active_changed
+	void notify_active_changed( Mackie::RouteSignal * );
+ 
 	void notify_remote_id_changed();
 
 	/// rebuild the current bank. Called on route added/removed and
@@ -116,12 +121,15 @@ class MackieControlProtocol
 	void notify_parameter_changed( const char * );
    void notify_solo_active_changed( bool );
 
-	// this is called to generate the midi to send in response to
-   // a button press.
+	/// Turn smpte on and beats off, or vice versa, depending
+	/// on state of _timecode_type
+	void update_smpte_beats_led();
+  
+	/// this is called to generate the midi to send in response to a button press.
 	void update_led( Mackie::Button & button, Mackie::LedState );
   
-	// calls update_led, but looks up the button by name
 	void update_global_button( const std::string & name, Mackie::LedState );
+	void update_global_led( const std::string & name, Mackie::LedState );
   
    // transport button handler methods from MackieButtonHandler
 	virtual Mackie::LedState frm_left_press( Mackie::Button & );
@@ -183,6 +191,28 @@ class MackieControlProtocol
 	virtual Mackie::LedState marker_press( Mackie::Button & );
 	virtual Mackie::LedState marker_release( Mackie::Button & );
 
+	virtual Mackie::LedState drop_press( Mackie::Button & );
+	virtual Mackie::LedState drop_release( Mackie::Button & );
+
+	virtual Mackie::LedState save_press( Mackie::Button & );
+	virtual Mackie::LedState save_release( Mackie::Button & );
+
+	virtual Mackie::LedState smpte_beats_press( Mackie::Button & );
+	virtual Mackie::LedState smpte_beats_release( Mackie::Button & );
+
+	// jog wheel states
+	virtual Mackie::LedState zoom_press( Mackie::Button & );
+	virtual Mackie::LedState zoom_release( Mackie::Button & );
+
+	virtual Mackie::LedState scrub_press( Mackie::Button & );
+	virtual Mackie::LedState scrub_release( Mackie::Button & );
+	
+   /// This is the main MCU port, ie not an extender port
+	/// Only for use by JogWheel
+	const Mackie::SurfacePort & mcu_port() const;
+	Mackie::SurfacePort & mcu_port();
+	ARDOUR::Session & get_session() { return *session; }
+ 
   protected:
 	// create instances of MackiePort, depending on what's found in ardour.rc
 	void create_ports();
@@ -221,10 +251,6 @@ class MackieControlProtocol
    // delete all RouteSignal objects connecting Routes to Strips
    void clear_route_signals();
 	
-   /// This is the main MCU port, ie not an extender port
-	const Mackie::MackiePort & mcu_port() const;
-	Mackie::MackiePort & mcu_port();
- 
 	typedef std::vector<Mackie::RouteSignal*> RouteSignals;
 	RouteSignals route_signals;
 	
@@ -260,14 +286,17 @@ class MackieControlProtocol
 		automation from the currently active routes and
 		timecode displays.
 	*/
-	void poll_automation ();
+	void poll_session_data();
 	
 	// called from poll_automation to figure out which automations need to be sent
 	void update_automation( Mackie::RouteSignal & );
-
+	
 	// also called from poll_automation to update timecode display
 	void update_timecode_display();
 
+	std::string format_bbt_timecode( nframes_t now_frame );
+	std::string format_smpte_timecode( nframes_t now_frame );
+	
 	/**
 		notification that the port is about to start it's init sequence.
 		We must make sure that before this exits, the port is being polled
@@ -292,6 +321,9 @@ class MackieControlProtocol
 	/// The Midi port(s) connected to the units
 	typedef vector<Mackie::MackiePort*> MackiePorts;
 	MackiePorts _ports;
+  
+	/// Sometimes the real port goes away, and we want to contain the breakage
+	Mackie::DummyPort _dummy_port;
   
    // the thread that polls the ports for incoming midi data
 	pthread_t thread;
@@ -321,6 +353,20 @@ class MackieControlProtocol
 	int nfds;
 	
 	bool _transport_previously_rolling;
+	
+	// timer for two quick marker left presses
+	Mackie::Timer _frm_left_last;
+	
+	Mackie::JogWheel _jog_wheel;
+	
+	// Timer for controlling midi bandwidth used by automation polls
+	Mackie::Timer _automation_last;
+	
+	// last written timecode string
+	std::string _timecode_last;
+	
+	// Which timecode are we displaying? BBT or SMPTE
+	ARDOUR::AnyTime::Type _timecode_type;
 };
 
 #endif // ardour_mackie_control_protocol_h

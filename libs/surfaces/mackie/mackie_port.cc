@@ -23,6 +23,8 @@
 #include "controls.h"
 #include "surface.h"
 
+#include <glibmm/main.h>
+
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <sigc++/sigc++.h>
@@ -49,14 +51,20 @@ MackiePort::MackiePort( MackieControlProtocol & mcp, MIDI::Port & port, int numb
 , _emulation( none )
 , _initialising( true )
 {
-	//cout << "MackiePort::MackiePort" <<endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::MackiePort" <<endl;
+#endif
 }
 
 MackiePort::~MackiePort()
 {
-	//cout << "~MackiePort" << endl;
+#ifdef PORT_DEBUG
+	cout << "~MackiePort" << endl;
+#endif
 	close();
-	//cout << "~MackiePort finished" << endl;
+#ifdef PORT_DEBUG
+	cout << "~MackiePort finished" << endl;
+#endif
 }
 
 int MackiePort::strips() const
@@ -83,7 +91,9 @@ int MackiePort::strips() const
 // should really be in MackiePort
 void MackiePort::open()
 {
-	//cout << "MackiePort::open " << *this << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::open " << *this << endl;
+#endif
 	_sysex = port().input()->sysex.connect( ( mem_fun (*this, &MackiePort::handle_midi_sysex) ) );
 	
 	// make sure the device is connected
@@ -92,14 +102,18 @@ void MackiePort::open()
 
 void MackiePort::close()
 {
-	//cout << "MackiePort::close" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::close" << endl;
+#endif
 	
 	// disconnect signals
 	_any.disconnect();
 	_sysex.disconnect();
 	
 	// TODO emit a "closing" signal?
-	//cout << "MackiePort::close finished" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::close finished" << endl;
+#endif
 }
 
 const MidiByteArray & MackiePort::sysex_hdr() const
@@ -111,57 +125,6 @@ const MidiByteArray & MackiePort::sysex_hdr() const
 	}
 	cout << "MackiePort::sysex_hdr _port_type not known" << endl;
 	return mackie_sysex_hdr;
-}
-
-Control & MackiePort::lookup_control( const MidiByteArray & bytes )
-{
-	Control * control = 0;
-	int midi_id = -1;
-	MIDI::byte midi_type = bytes[0] & 0xf0; //0b11110000
-	switch( midi_type )
-	{
-		// fader
-		case MackieMidiBuilder::midi_fader_id:
-			midi_id = bytes[0] & 0x0f;
-			control = _mcp.surface().faders[midi_id];
-			if ( control == 0 )
-			{
-				ostringstream os;
-				os << "control for fader" << midi_id << " is null";
-				throw MackieControlException( os.str() );
-			}
-			break;
-			
-		// button
-		case MackieMidiBuilder::midi_button_id:
-			midi_id = bytes[1];
-			control = _mcp.surface().buttons[midi_id];
-			if ( control == 0 )
-			{
-				ostringstream os;
-				os << "control for button" << midi_id << " is null";
-				throw MackieControlException( os.str() );
-			}
-			break;
-			
-		// pot (jog wheel, external control)
-		case MackieMidiBuilder::midi_pot_id:
-			midi_id = bytes[1] & 0x1f;
-			control = _mcp.surface().pots[midi_id];
-			if ( control == 0 )
-			{
-				ostringstream os;
-				os << "control for button" << midi_id << " is null";
-				throw MackieControlException( os.str() );
-			}
-			break;
-		
-		default:
-			ostringstream os;
-			os << "Cannot find control for " << bytes;
-			throw MackieControlException( os.str() );
-	}
-	return *control;
 }
 
 MidiByteArray calculate_challenge_response( MidiByteArray::iterator begin, MidiByteArray::iterator end )
@@ -186,7 +149,9 @@ MidiByteArray calculate_challenge_response( MidiByteArray::iterator begin, MidiB
 MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 {
 	// handle host connection query
-	//cout << "host connection query: " << bytes << endl;
+#ifdef PORT_DEBUG
+	cout << "host connection query: " << bytes << endl;
+#endif
 	
 	if ( bytes.size() != 18 )
 	{
@@ -207,7 +172,9 @@ MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 // not used right now
 MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & bytes )
 {
-	//cout << "host_connection_confirmation: " << bytes << endl;
+#ifdef PORT_DEBUG
+	cout << "host_connection_confirmation: " << bytes << endl;
+#endif
 	
 	// decode host connection confirmation
 	if ( bytes.size() != 14 )
@@ -224,17 +191,20 @@ MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & by
 
 void MackiePort::probe_emulation( const MidiByteArray & bytes )
 {
-	//cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
-	string version_string;
-	for ( int i = 6; i < 11; ++i ) version_string.append( 1, (char)bytes[i] );
-	//cout << "version_string: " << version_string << endl;
+#if 0
+	cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
+
+	MidiByteArray version_string;
+	for ( int i = 6; i < 11; ++i ) version_string << bytes[i];
+	cout << "version_string: " << version_string << endl;
+#endif
 	
 	// TODO investigate using serial number. Also, possibly size of bytes might
 	// give an indication. Also, apparently MCU sends non-documented messages
 	// sometimes.
 	if (!_initialising)
 	{
-		cout << "MackiePort::probe_emulation out of sequence." << endl;
+		//cout << "MackiePort::probe_emulation out of sequence." << endl;
 		return;
 	}
 
@@ -243,11 +213,15 @@ void MackiePort::probe_emulation( const MidiByteArray & bytes )
 
 void MackiePort::init()
 {
-	//cout << "MackiePort::init" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::init" << endl;
+#endif
 	init_mutex.lock();
 	_initialising = true;
 	
-	//cout << "MackiePort::lock acquired" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::init lock acquired" << endl;
+#endif
 	// emit pre-init signal
 	init_event();
 	
@@ -263,13 +237,19 @@ void MackiePort::init()
 
 void MackiePort::finalise_init( bool yn )
 {
-	//cout << "MackiePort::finalise_init" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::finalise_init" << endl;
+#endif
 	bool emulation_ok = false;
 	
 	// probing doesn't work very well, so just use a config variable
 	// to set the emulation mode
+	// TODO This might have to be specified on a per-port basis
+	// in the config file
+	// if an mcu and a bcf are needed to work as one surface
 	if ( _emulation == none )
 	{
+		// TODO same as code in mackie_control_protocol.cc
 		if ( ARDOUR::Config->get_mackie_emulation() == "bcf" )
 		{
 			_emulation = bcf2000;
@@ -296,11 +276,39 @@ void MackiePort::finalise_init( bool yn )
 		active_event();
 		
 		// start handling messages from controls
-		_any = port().input()->any.connect( ( mem_fun (*this, &MackiePort::handle_midi_any) ) );
+		connect_any();
 	}
 	_initialising = false;
 	init_cond.signal();
 	init_mutex.unlock();
+#ifdef PORT_DEBUG
+	cout << "MackiePort::finalise_init lock released" << endl;
+#endif
+}
+
+void MackiePort::connect_any()
+{
+/*
+	Doesn't work because there isn't an == operator for slots
+	MIDI::Signal::slot_list_type slots = port().input()->any.slots();
+	
+	if ( find( slots.begin(), slots.end(), mem_fun( *this, &MackiePort::handle_midi_any ) ) == slots.end() )
+*/
+	// TODO but this will break if midi tracing is turned on
+	if ( port().input()->any.empty() )
+	{
+#ifdef DEBUG
+		cout << "connect input parser " << port().input() << " to handle_midi_any" << endl;
+#endif
+		_any = port().input()->any.connect( mem_fun( *this, &MackiePort::handle_midi_any ) );
+#ifdef DEBUG
+		cout << "input parser any connections: " << port().input()->any.size() << endl;
+#endif
+	}
+	else
+	{
+		cout << "MackiePort::connect_any already connected" << endl;
+	}
 }
 
 bool MackiePort::wait_for_init()
@@ -308,18 +316,26 @@ bool MackiePort::wait_for_init()
 	Glib::Mutex::Lock lock( init_mutex );
 	while ( _initialising )
 	{
-		//cout << "MackiePort::wait_for_active waiting" << endl;
+#ifdef PORT_DEBUG
+		cout << "MackiePort::wait_for_active waiting" << endl;
+#endif
 		init_cond.wait( init_mutex );
-		//cout << "MackiePort::wait_for_active released" << endl;
+#ifdef PORT_DEBUG
+		cout << "MackiePort::wait_for_active released" << endl;
+#endif
 	}
-	//cout << "MackiePort::wait_for_active returning" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::wait_for_active returning" << endl;
+#endif
 	return SurfacePort::active();
 }
 
 void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
 {
 	MidiByteArray bytes( count, raw_bytes );
-	//cout << "handle_midi_sysex: " << bytes << endl;
+#ifdef PORT_DEBUG
+	cout << "handle_midi_sysex: " << bytes << endl;
+#endif
 	switch( bytes[5] )
 	{
 		case 0x01:
@@ -342,16 +358,99 @@ void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_byte
 	}
 }
 
+Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
+{
+	// Don't instantiate a MidiByteArray here unless it's needed for exceptions.
+	// Reason being that this method is called for every single incoming
+	// midi event, and it needs to be as efficient as possible.
+	Control * control = 0;
+	MIDI::byte midi_type = bytes[0] & 0xf0; //0b11110000
+	switch( midi_type )
+	{
+		// fader
+		case MackieMidiBuilder::midi_fader_id:
+		{
+			int midi_id = bytes[0] & 0x0f;
+			control = _mcp.surface().faders[midi_id];
+			if ( control == 0 )
+			{
+				MidiByteArray mba( count, bytes );
+				ostringstream os;
+				os << "control for fader" << bytes << " id " << midi_id << " is null";
+				throw MackieControlException( os.str() );
+			}
+			break;
+		}
+			
+		// button
+		case MackieMidiBuilder::midi_button_id:
+			control = _mcp.surface().buttons[bytes[1]];
+			if ( control == 0 )
+			{
+				MidiByteArray mba( count, bytes );
+				ostringstream os;
+				os << "control for button " << bytes << " is null";
+				throw MackieControlException( os.str() );
+			}
+			break;
+			
+		// pot (jog wheel, external control)
+		case MackieMidiBuilder::midi_pot_id:
+			control = _mcp.surface().pots[bytes[1]];
+			if ( control == 0 )
+			{
+				MidiByteArray mba( count, bytes );
+				ostringstream os;
+				os << "control for rotary " << mba << " is null";
+				throw MackieControlException( os.str() );
+			}
+			break;
+		
+		default:
+			MidiByteArray mba( count, bytes );
+			ostringstream os;
+			os << "Cannot find control for " << bytes;
+			throw MackieControlException( os.str() );
+	}
+	return *control;
+}
+
+bool MackiePort::handle_control_timeout_event ( Control * control )
+{
+	// empty control_state
+	ControlState control_state;
+	control->in_use( false );
+	control_event( *this, *control, control_state );
+	
+	// only call this method once from the timer
+	return false;
+}
+
 // converts midi messages into control_event signals
+// it might be worth combining this with lookup_control
+// because they have similar logic flows.
 void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
 {
+#ifdef DEBUG
 	MidiByteArray bytes( count, raw_bytes );
+	cout << "MackiePort::handle_midi_any " << bytes << endl;
+#endif
 	try
 	{
 		// ignore sysex messages
-		if ( bytes[0] == MIDI::sysex ) return;
+		if ( raw_bytes[0] == MIDI::sysex ) return;
 
-		Control & control = lookup_control( bytes );
+		// sanity checking
+		if ( count != 3 )
+		{
+			ostringstream os;
+			MidiByteArray mba( count, raw_bytes );
+			os << "MackiePort::handle_midi_any needs 3 bytes, but received " << mba;
+			throw MackieControlException( os.str() );
+		}
+		
+		Control & control = lookup_control( raw_bytes, count );
+		control.in_use( true );
 		
 		// This handles incoming bytes. Outgoing bytes
 		// are sent by the signal handlers.
@@ -359,41 +458,74 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 		{
 			// fader
 			case Control::type_fader:
-				{
-					// for a BCF2000, max is 7f for high-order byte and 0x70 for low-order byte
-					// According to the Logic docs, these should both be 0x7f.
-					// Although it does mention something about only the top-order
-					// 10 bits out of 14 being used
-					int midi_pos = ( bytes[2] << 7 ) + bytes[1];
-					control_event( *this, control, float(midi_pos) / float(0x3fff) );
-				}
-				break;
+			{
+				// only the top-order 10 bits out of 14 are used
+				int midi_pos = ( ( raw_bytes[2] << 7 ) + raw_bytes[1] ) >> 4;
+				
+				// in_use is set by the MackieControlProtocol::handle_strip_button
+				
+				// relies on implicit ControlState constructor
+				control_event( *this, control, float(midi_pos) / float(0x3ff) );
+			}
+			break;
 				
 			// button
 			case Control::type_button:
-				control_event( *this, control, bytes[2] == 0x7f ? press : release );
+			{
+				ControlState control_state( raw_bytes[2] == 0x7f ? press : release );
+				control.in_use( control_state.button_state == press );
+				control_event( *this, control, control_state );
+				
 				break;
+			}
 				
 			// pot (jog wheel, external control)
 			case Control::type_pot:
-				{
-					ControlState state;
-					
-					// bytes[2] & 0b01000000 (0x40) give sign
-					int sign = ( bytes[2] & 0x40 ) == 0 ? 1 : -1; 
-					// bytes[2] & 0b00111111 (0x3f) gives delta
-					state.ticks = ( bytes[2] & 0x3f) * sign;
-					state.delta = float( state.ticks ) / float( 0x3f );
-					
-					control_event( *this, control, state );
-				}
+			{
+				ControlState state;
+				
+				// bytes[2] & 0b01000000 (0x40) give sign
+				state.sign = ( raw_bytes[2] & 0x40 ) == 0 ? 1 : -1; 
+				// bytes[2] & 0b00111111 (0x3f) gives delta
+				state.ticks = ( raw_bytes[2] & 0x3f);
+				state.delta = float( state.ticks ) / float( 0x3f );
+				
+				/*
+					Pots only emit events when they move, not when they
+					stop moving. So to get a stop event, we need to use a timeout.
+				*/
+				// this is set to false ...
+				control.in_use( true );
+				
+				// ... by this timeout
+				
+				// first disconnect any previous timeouts
+				control.in_use_connection.disconnect();
+				
+				// now connect a new timeout to call handle_control_timeout_event
+				sigc::slot<bool> timeout_slot = sigc::bind(
+					mem_fun( *this, &MackiePort::handle_control_timeout_event )
+					, &control
+				);
+				control.in_use_connection = Glib::signal_timeout().connect(
+					timeout_slot
+					, control.in_use_timeout()
+				);
+				
+				// emit the control event
+				control_event( *this, control, state );
 				break;
+			}
 			default:
 				cerr << "Do not understand control type " << control;
 		}
 	}
 	catch( MackieControlException & e )
 	{
-		//cout << bytes << ' ' << e.what() << endl;
+		MidiByteArray bytes( count, raw_bytes );
+		cout << bytes << ' ' << e.what() << endl;
 	}
+#ifdef DEBUG
+	cout << "finished MackiePort::handle_midi_any " << bytes << endl;
+#endif
 }

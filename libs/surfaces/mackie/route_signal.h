@@ -20,6 +20,10 @@
 
 #include <sigc++/sigc++.h>
 
+#include <vector>
+
+#include "midi_byte_array.h"
+
 class MackieControlProtocol;
 
 namespace ARDOUR {
@@ -30,7 +34,7 @@ namespace Mackie
 {
 
 class Strip;
-class MackiePort;
+class SurfacePort;
 
 /**
   This class is intended to easily create and destroy the set of
@@ -41,8 +45,8 @@ class MackiePort;
 class RouteSignal
 {
 public:
-	RouteSignal( ARDOUR::Route & route, MackieControlProtocol & mcp, Strip & strip, MackiePort & port )
-	: _route( route ), _mcp( mcp ), _strip( strip ), _port( port )
+	RouteSignal( ARDOUR::Route & route, MackieControlProtocol & mcp, Strip & strip, SurfacePort & port )
+	: _route( route ), _mcp( mcp ), _strip( strip ), _port( port ), _last_gain_written(0.0)
 	{
 		connect();
 	}
@@ -60,20 +64,27 @@ public:
 	
 	const ARDOUR::Route & route() const { return _route; }
 	Strip & strip() { return _strip; }
-	MackiePort & port() { return _port; }
+	SurfacePort & port() { return _port; }
+	
+	float last_gain_written() const { return _last_gain_written; }
+	void last_gain_written( float other ) { _last_gain_written = other; }
+	
+	const MidiByteArray & last_pan_written() const { return _last_pan_written; }
+	void last_pan_written( const MidiByteArray & other ) { _last_pan_written = other; }
 	
 private:
 	ARDOUR::Route & _route;
 	MackieControlProtocol & _mcp;
 	Strip & _strip;
-	MackiePort & _port;	
+	SurfacePort & _port;
 
-	sigc::connection _solo_changed_connection;
-	sigc::connection _mute_changed_connection;
-	sigc::connection _record_enable_changed_connection;
-	sigc::connection _gain_changed_connection;
-	sigc::connection _name_changed_connection;
-	sigc::connection _panner_changed_connection;
+	typedef std::vector<sigc::connection> Connections;
+	Connections _connections;
+
+	// Last written values for the gain and pan, to avoid overloading
+	// the midi connection to the surface
+	float _last_gain_written;
+	MidiByteArray _last_pan_written;
 };
 
 }

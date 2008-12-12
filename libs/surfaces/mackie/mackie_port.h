@@ -55,12 +55,12 @@ public:
 	virtual const MidiByteArray & sysex_hdr() const;
 
 	/// Handle device initialisation
-	void handle_midi_sysex( MIDI::Parser &, MIDI::byte *, size_t );
+	void handle_midi_sysex( MIDI::Parser &, MIDI::byte *, size_t count );
 
 	/// Handle all control messags
-	void handle_midi_any( MIDI::Parser &, MIDI::byte *, size_t );
+	void handle_midi_any( MIDI::Parser &, MIDI::byte *, size_t count );
 	
-	Control & lookup_control( const MidiByteArray & bytes );
+	Control & lookup_control( MIDI::byte *, size_t count );
 	
 	/// return the number of strips associated with this port
 	virtual int strips() const;
@@ -70,6 +70,10 @@ public:
 	bool wait_for_init();
 	
 	emulation_t emulation() const { return _emulation; }
+	
+	/// Connect the any signal from the parser to handle_midi_any
+	/// unless it's already connected
+	void connect_any();
 	
 protected:
 	/**
@@ -104,6 +108,10 @@ protected:
 		environment variables. Or existence of a file.
 	*/
 	void probe_emulation( const MidiByteArray & bytes );
+
+	/// Handle timeout events set for controls that don't emit
+	/// an off event
+	bool handle_control_timeout_event ( Control * );
 
 private:
 	MackieControlProtocol & _mcp;

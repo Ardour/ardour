@@ -46,6 +46,76 @@ Strip::Strip( const std::string & name, int index )
 }
 
 /**
+	TODO could optimise this to use enum, but it's only
+	called during the protocol class instantiation.
+
+	generated using
+
+	irb -r controls.rb
+	sf=Surface.new
+	sf.parse
+	controls = sf.groups.find{|x| x[0] =~ /strip/}.each{|x| puts x[1]}
+	controls[1].each {|x| puts "\telse if ( control.name() == \"#{x.name}\" )\n\t{\n\t\t_#{x.name} = reinterpret_cast<#{x.class.name}*>(&control);\n\t}\n"}
+*/
+void Strip::add( Control & control )
+{
+	Group::add( control );
+	if ( control.name() == "gain" )
+	{
+		_gain = reinterpret_cast<Fader*>(&control);
+	}
+	else if ( control.name() == "vpot" )
+	{
+		_vpot = reinterpret_cast<Pot*>(&control);
+	}
+	else if ( control.name() == "recenable" )
+	{
+		_recenable = reinterpret_cast<Button*>(&control);
+	}
+	else if ( control.name() == "solo" )
+	{
+		_solo = reinterpret_cast<Button*>(&control);
+	}
+	else if ( control.name() == "mute" )
+	{
+		_mute = reinterpret_cast<Button*>(&control);
+	}
+	else if ( control.name() == "select" )
+	{
+		_select = reinterpret_cast<Button*>(&control);
+	}
+	else if ( control.name() == "vselect" )
+	{
+		_vselect = reinterpret_cast<Button*>(&control);
+	}
+	else if ( control.name() == "fader_touch" )
+	{
+		_fader_touch = reinterpret_cast<Button*>(&control);
+	}
+	else if ( control.type() == Control::type_led || control.type() == Control::type_led_ring )
+	{
+		// do nothing
+		cout << "Strip::add not adding " << control << endl;
+	}
+	else
+	{
+		ostringstream os;
+		os << "Strip::add: unknown control type " << control;
+		throw MackieControlException( os.str() );
+	}
+}
+
+Control::Control( int id, int ordinal, std::string name, Group & group )
+: _id( id )
+, _ordinal( ordinal )
+, _name( name )
+, _group( group )
+, _in_use( false )
+, _in_use_timeout( 250 )
+{
+}
+
+/**
  generated with
 
 controls[1].each do |x|
@@ -106,4 +176,59 @@ Button & Strip::fader_touch()
 	if ( _fader_touch == 0 )
 		throw MackieControlException( "fader_touch is null" );
 	return *_fader_touch;
+}
+
+bool Control::in_use() const
+{
+	return _in_use;
+}
+
+Control & Control::in_use( bool rhs )
+{
+	_in_use = rhs;
+	return *this;
+}
+
+ostream & Mackie::operator << ( ostream & os, const Mackie::Control & control )
+{
+	os << typeid( control ).name();
+	os << " { ";
+	os << "name: " << control.name();
+	os << ", ";
+	os << "id: " << "0x" << setw(4) << setfill('0') << hex << control.id() << setfill(' ');
+	os << ", ";
+	os << "type: " << "0x" << setw(2) << setfill('0') << hex << control.type() << setfill(' ');
+	os << ", ";
+	os << "raw_id: " << "0x" << setw(2) << setfill('0') << hex << control.raw_id() << setfill(' ');
+	os << ", ";
+	os << "ordinal: " << dec << control.ordinal();
+	os << ", ";
+	os << "group: " << control.group().name();
+	os << " }";
+	
+	return os;
+}
+
+std::ostream & Mackie::operator << ( std::ostream & os, const Strip & strip )
+{
+	os << typeid( strip ).name();
+	os << " { ";
+	os << "has_solo: " << boolalpha << strip.has_solo();
+	os << ", ";
+	os << "has_recenable: " << boolalpha << strip.has_recenable();
+	os << ", ";
+	os << "has_mute: " << boolalpha << strip.has_mute();
+	os << ", ";
+	os << "has_select: " << boolalpha << strip.has_select();
+	os << ", ";
+	os << "has_vselect: " << boolalpha << strip.has_vselect();
+	os << ", ";
+	os << "has_fader_touch: " << boolalpha << strip.has_fader_touch();
+	os << ", ";
+	os << "has_vpot: " << boolalpha << strip.has_vpot();
+	os << ", ";
+	os << "has_gain: " << boolalpha << strip.has_gain();
+	os << " }";
+	
+	return os;
 }

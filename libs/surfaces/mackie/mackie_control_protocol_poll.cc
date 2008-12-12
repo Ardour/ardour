@@ -28,7 +28,15 @@ const char * MackieControlProtocol::default_port_name = "mcu";
 
 bool MackieControlProtocol::probe()
 {
-	return MIDI::Manager::instance()->port( default_port_name ) != 0;
+	if ( MIDI::Manager::instance()->port( default_port_name ) == 0 )
+	{
+		error << "No port called mcu. Add it to ardour.rc." << endmsg;
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 void * MackieControlProtocol::monitor_work()
@@ -52,8 +60,8 @@ void * MackieControlProtocol::monitor_work()
 					update_ports();
 				}
 			}
-			// poll for automation data from the routes
-			poll_automation();
+			// poll for session data that needs to go to the unit
+			poll_session_data();
 		}
 		catch ( exception & e )
 		{
@@ -71,30 +79,51 @@ void * MackieControlProtocol::monitor_work()
 
 void MackieControlProtocol::update_ports()
 {
+#ifdef DEBUG
+	cout << "MackieControlProtocol::update_ports" << endl;
+#endif
 	if ( _ports_changed )
 	{
 		Glib::Mutex::Lock ul( update_mutex );
 		// yes, this is a double-test locking paradigm, or whatever it's called
 		// because we don't *always* need to acquire the lock for the first test
+#ifdef DEBUG
+		cout << "MackieControlProtocol::update_ports lock acquired" << endl;
+#endif
 		if ( _ports_changed )
 		{
 			// create new pollfd structures
-			if ( pfd != 0 ) delete[] pfd;
-			// TODO This might be a memory leak. How does thread cancellation cleanup work?
+			if ( pfd != 0 )
+			{
+				delete[] pfd;
+				pfd = 0;
+			}
 			pfd = new pollfd[_ports.size()];
+#ifdef DEBUG
+			cout << "pfd: " << pfd << endl;
+#endif
 			nfds = 0;
-
 			for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 			{
-				//cout << "adding port " << (*it)->port().name() << " to pollfd" << endl;
+				// add the port any handler
+				(*it)->connect_any();
+#ifdef DEBUG
+				cout << "adding pollfd for port " << (*it)->port().name() << " to pollfd " << nfds << endl;
+#endif
 				pfd[nfds].fd = (*it)->port().selectable();
 				pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 				++nfds;
 			}
 			_ports_changed = false;
 		}
+#ifdef DEBUG
+		cout << "MackieControlProtocol::update_ports signal" << endl;
+#endif
 		update_cond.signal();
 	}
+#ifdef DEBUG
+	cout << "MackieControlProtocol::update_ports finish" << endl;
+#endif
 }
 
 void MackieControlProtocol::read_ports()
@@ -127,12 +156,14 @@ bool MackieControlProtocol::poll_ports()
 	if ( nfds < 1 )
 	{
 		lock.release();
-		//cout << "poll_ports no ports" << endl;
+#ifdef DEBUG
+		cout << "poll_ports no ports" << endl;
+#endif
 		usleep( no_ports_sleep * 1000 );
 		return false;
 	}
 
-	int retval = poll( pfd, nfds, timeout );
+	int retval = ::poll( pfd, nfds, timeout );
 	if ( retval < 0 )
 	{
 		// gdb at work, perhaps
@@ -179,14 +210,21 @@ void MackieControlProtocol::handle_port_active( SurfacePort * port )
 	// finally update session state to the surface
 	// TODO but this is also done in set_active, and
 	// in fact update_surface won't execute unless
+#ifdef DEBUG
+	cout << "update_surface in handle_port_active" << endl;
+#endif
 	// _active == true
-	//cout << "update_surface in handle_port_active" << endl;
 	update_surface();
 }
 
 void MackieControlProtocol::handle_port_init( Mackie::SurfacePort * sport )
 {
-	//cout << "MackieControlProtocol::handle_port_init" << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::handle_port_init" << endl;
+#endif
 	_ports_changed = true;
 	update_ports();
+#ifdef DEBUG
+	cout << "MackieControlProtocol::handle_port_init finish" << endl;
+#endif
 }

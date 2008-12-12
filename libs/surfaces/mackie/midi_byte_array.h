@@ -67,6 +67,9 @@ public:
 /// append the given byte to the end of the array
 MidiByteArray & operator << ( MidiByteArray & mba, const MIDI::byte & b );
 
+/// append the given string to the end of the array
+MidiByteArray & operator << ( MidiByteArray & mba, const std::string & );
+
 /// append the given array to the end of this array
 MidiByteArray & operator << ( MidiByteArray & mba, const MidiByteArray & barr );
 

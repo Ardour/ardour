@@ -689,3 +689,23 @@ LedState MackieButtonHandler::global_solo_release( Button & button )
 {
 	return default_button_press( button );
 }
+
+LedState MackieButtonHandler::drop_press( Button & button )
+{
+	return default_button_press( button );
+}
+
+LedState MackieButtonHandler::drop_release( Button & button )
+{
+	return default_button_press( button );
+}
+
+LedState MackieButtonHandler::save_press( Button & button )
+{
+	return default_button_press( button );
+}
+
+LedState MackieButtonHandler::save_release( Button & button )
+{
+	return default_button_press( button );
+}

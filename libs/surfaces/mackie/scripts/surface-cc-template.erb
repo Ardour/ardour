@@ -52,17 +52,29 @@ void Mackie::<%= sf.name %>Surface::init_controls()
 % end
 
 	// initialise controls
-	Control * control = 0;
+	Fader * fader = 0;
+	Pot * pot = 0;
+	Button * button = 0;
+	Led * led = 0;
 
 % sf.controls.each do |control|
+	<%-
+		variable_name = control.class.name.downcase
+		class_name =
+		if control.name == 'jog'
+			'Jog'
+		else
+			control.class.name
+		end
+	-%>
 	group = groups["<%=control.group.name%>"];
-	control = new <%= control.class.name %> ( <%= control.id %>, <%= control.ordinal %>, "<%=control.name%>", *group );
-	<%=control.class.name.downcase%>s[0x<%=control.id.to_hex %>] = control;
-	controls.push_back( control );
+	<%= variable_name %> = new <%= class_name %> ( <%= control.id %>, <%= control.ordinal %>, "<%=control.name%>", *group );
+	<%= variable_name %>s[0x<%=control.id.to_hex %>] = <%= variable_name %>;
+	controls.push_back( <%= variable_name %> );
 	<%- if control.group.class != Strip -%>
-	controls_by_name["<%= control.name %>"] = control;
+	controls_by_name["<%= control.name %>"] = <%= variable_name %>;
 	<%- end -%>
-	group->add( *control );
+	group->add( *<%= variable_name %> );
 
 % end
 }
@@ -82,7 +94,7 @@ void Mackie::<%= sf.name %>Surface::handle_button( MackieButtonHandler & mbh, Bu
 buttons = sf.controls.find_all{|x| x.class == Button && x.group.class != Strip}
 buttons.each do |button|
 %>
-		case 0x<%= button.id.to_hex %>: // <%= button.name %>
+		case 0x<%= ( button.class.midi_zero_byte << 8 | button.id ).to_hex %>: // <%= button.name %>
 			switch ( bs ) {
 				case press: ls = mbh.<%= button.name %>_press( button ); break;
 				case release: ls = mbh.<%= button.name %>_release( button ); break;

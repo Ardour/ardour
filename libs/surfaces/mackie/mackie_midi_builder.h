@@ -20,9 +20,12 @@
 
 #include "midi_byte_array.h"
 #include "types.h"
+#include "controls.h"
 
 namespace Mackie
 {
+
+class SurfacePort;
 
 /**
 	This knows how to build midi messages given a control and
@@ -37,9 +40,9 @@ public:
 		with the control id
 	*/
 	enum midi_types {
-		midi_fader_id = 0xe0
-		, midi_button_id = 0x90
-		, midi_pot_id = 0xb0
+		midi_fader_id = Control::type_fader
+		, midi_button_id = Control::type_button
+		, midi_pot_id = Control::type_pot
 	};
 
 	/**
@@ -52,8 +55,8 @@ public:
 		, midi_pot_mode_spread = 3
 	};
 
-	MidiByteArray build_led_ring( const Pot & pot, const ControlState & );
-	MidiByteArray build_led_ring( const LedRing & led_ring, const ControlState & );
+	MidiByteArray build_led_ring( const Pot & pot, const ControlState &, midi_pot_mode mode = midi_pot_mode_dot );
+	MidiByteArray build_led_ring( const LedRing & led_ring, const ControlState &, midi_pot_mode mode = midi_pot_mode_dot );
 
   	MidiByteArray build_led( const Led & led, LedState ls );
   	MidiByteArray build_led( const Button & button, LedState ls );
@@ -61,7 +64,8 @@ public:
 	MidiByteArray build_fader( const Fader & fader, float pos );
 	
 	/// return bytes that will reset all controls to their zero positions
-	MidiByteArray zero_strip( const Strip & strip );
+	/// And blank the display for the strip. Pass SurfacePort so we know which sysex header to use.
+	MidiByteArray zero_strip( SurfacePort &, const Strip & strip );
 	
 	// provide bytes to zero the given control
 	MidiByteArray zero_control( const Control & control );
@@ -71,6 +75,25 @@ public:
 	// be two characters
 	MidiByteArray two_char_display( const std::string & msg, const std::string & dots = "  " );
 	MidiByteArray two_char_display( unsigned int value, const std::string & dots = "  " );
+	
+	/**
+		Timecode display. Only the difference between timecode and last_timecode will
+		be encoded, to save midi bandwidth. If they're the same, an empty array will
+		be returned
+	*/
+	MidiByteArray timecode_display( SurfacePort &, const std::string & timecode, const std::string & last_timecode = "" );
+	
+	/**
+		for displaying characters on the strip LCD
+		pass SurfacePort so we know which sysex header to use
+	*/
+	MidiByteArray strip_display( SurfacePort &, const Strip & strip, unsigned int line_number, const std::string & line );
+	
+	/// blank the strip LCD, ie write all spaces. Pass SurfacePort so we know which sysex header to use.
+	MidiByteArray strip_display_blank( SurfacePort &, const Strip & strip, unsigned int line_number );
+	
+	/// for generating all strip names. Pass SurfacePort so we know which sysex header to use.
+	MidiByteArray all_strips_display( SurfacePort &, std::vector<std::string> & lines1, std::vector<std::string> & lines2 );
 	
 protected:
 	static MIDI::byte calculate_pot_value( midi_pot_mode mode, const ControlState & );

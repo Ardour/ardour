@@ -64,9 +64,22 @@ new_mackie_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 void
 delete_mackie_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
 {
-	delete cp;
+	try
+	{
+		delete cp;
+	}
+	catch ( exception & e )
+	{
+		cout << "Exception caught trying to destroy MackieControlProtocol: " << e.what() << endl;
+	}
 }
 
+/**
+	This is called on startup to check whether the lib should be loaded.
+
+	So anything that can be changed in the UI should not be used here to
+	prevent loading of the lib.
+*/
 bool
 probe_mackie_protocol (ControlProtocolDescriptor* descriptor)
 {
@@ -79,7 +92,11 @@ static ControlProtocolDescriptor mackie_descriptor = {
 	ptr : 0,
 	module : 0,
 	mandatory : 0,
-	supports_feedback : true,
+	// actually, the surface does support feedback, but all this
+	// flag does is show a submenu on the UI, which is useless for the mackie
+	// because feedback is always on. In any case, who'd want to use the
+	// mcu without the motorised sliders doing their thing?
+	supports_feedback : false,
 	probe : probe_mackie_protocol,
 	initialize : new_mackie_protocol,
 	destroy : delete_mackie_protocol

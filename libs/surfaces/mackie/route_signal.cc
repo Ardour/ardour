@@ -20,37 +20,41 @@
 #include <ardour/route.h>
 #include <ardour/track.h>
 #include <ardour/panner.h>
-#include <ardour/types.h>
 
 #include "mackie_control_protocol.h"
 
 #include <stdexcept>
 
 using namespace Mackie;
+using namespace std;
 
 void RouteSignal::connect()
 {
+	back_insert_iterator<Connections> cins = back_inserter( _connections );
+	
 	if ( _strip.has_solo() )
-		_solo_changed_connection = _route.solo_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
+		cins = _route.solo_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
 	
 	if ( _strip.has_mute() )
-		_mute_changed_connection = _route.mute_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
+		cins = _route.mute_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
 	
 	if ( _strip.has_gain() )
-		_gain_changed_connection = _route.gain_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
+		cins = _route.gain_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this, true ) );
 		
-	_name_changed_connection = _route.NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
+	cins = _route.NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
-	if ( _route.panner().npanners() == 1 )
+	cins = _route.panner().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
+	for ( unsigned int i = 0; i < _route.panner().npanners(); ++i )
 	{
-		_panner_changed_connection = _route.panner().pan_control(0)->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this ) );
+		cins = _route.panner().streampanner (i).Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
 	}
 	
 	try
 	{
-		_record_enable_changed_connection =
-			dynamic_cast<ARDOUR::Track&>( _route ).rec_enable_control()->Changed
-				.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), this ) )
+		cins = dynamic_cast<ARDOUR::Track&>( _route )
+			.rec_enable_control()
+			->Changed
+			.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), this ) )
 		;
 	}
 	catch ( std::bad_cast & )
@@ -59,24 +63,28 @@ void RouteSignal::connect()
 		// with can't be record-enabled
 	}
 
+	// TODO this works when a currently-banked route is made inactive, but not
+	// when a route is activated which should be currently banked.
+	cins = _route.active_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_active_changed ), this ) );
+	
 	// TODO
-	// active_changed
 	// SelectedChanged
 	// RemoteControlIDChanged. Better handled at Session level.
 }
 
 void RouteSignal::disconnect()
 {
-	_solo_changed_connection.disconnect();
-	_mute_changed_connection.disconnect();
-	_gain_changed_connection.disconnect();
-	_name_changed_connection.disconnect();
-	_panner_changed_connection.disconnect();
-	_record_enable_changed_connection.disconnect();
+	for ( Connections::iterator it = _connections.begin(); it != _connections.end(); ++it )
+	{
+		it->disconnect();
+	}
 }
 
 void RouteSignal::notify_all()
 {
+#ifdef DEBUG
+	cout << "RouteSignal::notify_all for " << _strip << endl;
+#endif
 	if ( _strip.has_solo() )
 		_mcp.notify_solo_changed( this );
 	
@@ -93,4 +101,7 @@ void RouteSignal::notify_all()
 	
 	if ( _strip.has_recenable() )
 		_mcp.notify_record_enable_changed( this );
+#ifdef DEBUG
+	cout << "RouteSignal::notify_all finish" << endl;
+#endif
 }

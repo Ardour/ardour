@@ -20,9 +20,11 @@
 #include <typeinfo>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
 #include "controls.h"
 #include "midi_byte_array.h"
+#include "mackie_port.h"
 
 using namespace Mackie;
 using namespace std;
@@ -44,12 +46,12 @@ MIDI::byte MackieMidiBuilder::calculate_pot_value( midi_pot_mode mode, const Con
 	return retval;
 }
 
-MidiByteArray MackieMidiBuilder::build_led_ring( const Pot & pot, const ControlState & state )
+MidiByteArray MackieMidiBuilder::build_led_ring( const Pot & pot, const ControlState & state, midi_pot_mode mode  )
 {
-	return build_led_ring( pot.led_ring(), state );
+	return build_led_ring( pot.led_ring(), state, mode );
 }
 
-MidiByteArray MackieMidiBuilder::build_led_ring( const LedRing & led_ring, const ControlState & state )
+MidiByteArray MackieMidiBuilder::build_led_ring( const LedRing & led_ring, const ControlState & state, midi_pot_mode mode )
 {
 	// The other way of doing this:
 	// 0x30 + pot/ring number (0-7)
@@ -58,9 +60,9 @@ MidiByteArray MackieMidiBuilder::build_led_ring( const LedRing & led_ring, const
 		// the control type
 		, midi_pot_id
 		// the id
-		, 0x20 + led_ring.id()
+		, 0x20 + led_ring.raw_id()
 		// the value
-		, calculate_pot_value( midi_pot_mode_dot, state )
+		, calculate_pot_value( mode, state )
 	);
 }
 
@@ -82,7 +84,7 @@ MidiByteArray MackieMidiBuilder::build_led( const Led & led, LedState ls )
 	
 	return MidiByteArray ( 3
 		, midi_button_id
-		, led.id()
+		, led.raw_id()
 		, state
 	);
 }
@@ -92,7 +94,7 @@ MidiByteArray MackieMidiBuilder::build_fader( const Fader & fader, float pos )
 	int posi = int( 0x3fff * pos );
 	
 	return MidiByteArray ( 3
-		, midi_fader_id | fader.id()
+		, midi_fader_id | fader.raw_id()
 		// lower-order bits
 		, posi & 0x7f
 		// higher-order bits
@@ -100,7 +102,7 @@ MidiByteArray MackieMidiBuilder::build_fader( const Fader & fader, float pos )
 	);
 }
 
-MidiByteArray MackieMidiBuilder::zero_strip( const Strip & strip )
+MidiByteArray MackieMidiBuilder::zero_strip( SurfacePort & port, const Strip & strip )
 {
 	Group::Controls::const_iterator it = strip.controls().begin();
 	MidiByteArray retval;
@@ -110,6 +112,10 @@ MidiByteArray MackieMidiBuilder::zero_strip( const Strip & strip )
 		if ( control.accepts_feedback() )
 			retval << zero_control( control );
 	}
+	
+	// These must have sysex headers
+	retval << strip_display_blank( port, strip, 0 );
+	retval << strip_display_blank( port, strip, 1 );
 	return retval;
 }
 
@@ -170,4 +176,99 @@ MidiByteArray MackieMidiBuilder::two_char_display( unsigned int value, const std
 	ostringstream os;
 	os << setfill('0') << setw(2) << value % 100;
 	return two_char_display( os.str() );
+}
+
+MidiByteArray MackieMidiBuilder::strip_display_blank( SurfacePort & port, const Strip & strip, unsigned int line_number )
+{
+	// 6 spaces, not 7 because strip_display adds a space where appropriate
+	return strip_display( port, strip, line_number, "      " );
+}
+
+MidiByteArray MackieMidiBuilder::strip_display( SurfacePort & port, const Strip & strip, unsigned int line_number, const std::string & line )
+{
+	if ( line_number > 1 )
+	{
+		throw runtime_error( "line_number must be 0 or 1" );
+	}
+	
+	if ( strip.index() > 7 )
+	{
+		throw runtime_error( "strip.index() must be between 0 and 7" );
+	}
+
+#ifdef DEBUG	
+	cout << "MackieMidiBuilder::strip_display index: " << strip.index() << ", line " << line_number << ": " << line << endl;
+#endif
+
+	MidiByteArray retval;
+	
+	// sysex header
+	retval << port.sysex_hdr();
+	
+	// code for display
+	retval << 0x12;
+	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line )
+	retval << ( strip.index() * 7 + ( line_number * 0x38 ) );
+	
+	// ascii data to display
+	retval << line;
+	// pad with " " out to 6 chars
+	for ( int i = line.length(); i < 6; ++i ) retval << ' ';
+	
+	// column spacer, unless it's the right-hand column
+	if ( strip.index() < 7 ) retval << ' ';
+
+	// sysex trailer
+	retval << MIDI::eox;
+	
+#ifdef DEBUG	
+	cout << "MackieMidiBuilder::strip_display midi: " << retval << endl;
+#endif
+	return retval;
+}
+	
+MidiByteArray MackieMidiBuilder::all_strips_display( SurfacePort & port, std::vector<std::string> & lines1, std::vector<std::string> & lines2 )
+{
+	MidiByteArray retval;
+	retval << 0x12 << 0;
+	// NOTE remember max 112 bytes per message, including sysex headers
+	retval << "Not working yet";
+	return retval;
+}
+
+MidiByteArray MackieMidiBuilder::timecode_display( SurfacePort & port, const std::string & timecode, const std::string & last_timecode )
+{
+	// if there's no change, send nothing, not even sysex header
+	if ( timecode == last_timecode ) return MidiByteArray();
+	
+	// length sanity checking
+	string local_timecode = timecode;
+	// truncate to 10 characters
+	if ( local_timecode.length() > 10 ) local_timecode = local_timecode.substr( 0, 10 );
+	// pad to 10 characters
+	while ( local_timecode.length() < 10 ) local_timecode += " ";
+		
+	// find the suffix of local_timecode that differs from last_timecode
+	std::pair<string::const_iterator,string::iterator> pp = mismatch( last_timecode.begin(), last_timecode.end(), local_timecode.begin() );
+	
+	MidiByteArray retval;
+	
+	// sysex header
+	retval << port.sysex_hdr();
+	
+	// code for timecode display
+	retval << 0x10;
+	
+	// translate characters. These are sent in reverse order of display
+	// hence the reverse iterators
+	string::reverse_iterator rend = reverse_iterator<string::iterator>( pp.second );
+	for ( string::reverse_iterator it = local_timecode.rbegin(); it != rend; ++it )
+	{
+		retval << translate_seven_segment( *it );
+	}
+	
+	// sysex trailer
+	retval << MIDI::eox;
+	
+	return retval;
 }

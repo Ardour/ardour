@@ -1,20 +1,48 @@
-* how long can UI signal callbacks take to execute? What happens if they block?
-  where ENSURE_CORRECT_THREAD is a macro that is modelled on ENSURE_GUI_THREAD
-  if the handler is not called in the "correct thread", it will use a pseudo-RT-safe-enough technique to get the correct thread to recall "handler" later on, and return.
-
-* jog with transport rolling doesn't work properly. My use of ScrollTimeline also doesn't work.
-* make loop button sensitive to current transport state
-* make sure rew button can go past the previous if pressed twice, relatively quickly.
-* finish button mapping. Only shifted buttons left for bcf.
+* implement handle_port_inactive properly
+* two bcf doesn't work
+* remappable buttons (OSC or Surfax?)
+* 7/1 configurable to 8
+* need an object that can encapsulate different port types, ie BCF vs MCU. Not at the surface level.
+* finish button implementations.
 * concurrency for bank switching? And make sure "old" events aren't sent to "new" faders
 * TODOs in code
 * removal of a route results in a strip that isn't dead, but doesn't have any effect on the session
 * use i18n. see string_compose
-* docs in manual, including button assignment diagram
+
+MCU
+---
+* if mackie wheel moves too fast, it's ignored.
+* gain/panner display in second line
+* metering on second line
+* per-strip signal led
+* midi bandwidth?
+* Zoom buttons, from Jean-Martin Barbut. In fact I'm a bit desappointed with those functions, because I was used
+	to use the 4 "N-E-S-W" buttons to zoom in and out with horizontal
+	buttons and zoom in/out on track height with vertical buttons. That is
+	with the zoom button in. with the zoom button off, it selects tracks
+	with vertical buttons and selects regions with horizontal buttons. This
+	was quite useful. The fact that the zoom button switches the wheel to
+	zoom is fine, but it would be great to also have the track/region
+	selection and the track height available from those buttons. I.e : you
+	select a track with the vertical arrows and you increase/decrease the
+	eight of the track with the zoom btn on. This combined with the region
+	selection allows to zoom in a region (vertical and horizontal zoom) very
+	easily.
+
 
 Later
 -----
+* how long can UI signal callbacks take to execute? What happens if they block?
+  where ENSURE_CORRECT_THREAD is a macro that is modelled on ENSURE_GUI_THREAD
+  if the handler is not called in the "correct thread", it will use a pseudo-RT-safe-enough technique to get the correct thread to recall "handler" later on, and return.
+* alsa/sequencer ports unstable. possibly problems with use of ::poll
+* use glib::Timer instead of mine. Actually don't because it's not very useable.
+* crash when mmc port set to mcu?
 * remove commented couts
+* Perhaps MackieControlProtocol shouldn't implement MackieButtonHandler
+* Need a HostAdapter class to encapsulate ardour calls
+* talk to route plugins
+* check for excessiveness (ie too many events making other subsystems work too hard)
 * Queueing of writes?
 * Generic surface code to common location
 * bulk remote id changes cause too many surface updates. use Config->remote_model.
@@ -25,21 +53,16 @@ Later
 * mix busses and/or a "bus-only" bank/mode
 * what about surfaces like Mackie C4 and BCR2000?
 
-Need UI integration
--------------------
+UI integration
+--------------
+
+* maybe use current snap state for jog wheel and ffwd/rew
 * Some indication on the UI of currently bank-switched-in routes?
   Useful for surfaces that don't have a scribble strip.
-* use current zoom setting and snap state for shuttle wheel
-
-Actual Mackie
--------------
-* docs claim that unit will send a host query on init.
-* test Mackie surface object. Apparently led rings don't work. Stereo busses?
-* timecode & 55 char displays
-* midi bandwidth
 
 Bugs
 ----
-
-* definitely something wrong with remote_id assignment on session create
-  (master strip assigned 0).
+* when using alsa/sequencer, some midi events intended for mcu port end up being
+  read by the seq port.
+* MIDI::Port::type() returns _type, which is undefined. It might be in the descriptor
+* auditioner doesn't connect to master 1 and master 2 - it loses the spaces.

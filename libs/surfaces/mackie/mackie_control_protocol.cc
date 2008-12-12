@@ -14,7 +14,6 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <iostream>
@@ -22,6 +21,7 @@
 #include <cmath>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -38,12 +38,15 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/error.h>
 #include <pbd/memento_command.h>
+#include <pbd/convert.h>
 
 #include <ardour/route.h>
 #include <ardour/session.h>
 #include <ardour/location.h>
 #include <ardour/dB.h>
 #include <ardour/panner.h>
+#include <ardour/tempo.h>
+#include <ardour/types.h>
 
 #include "mackie_control_protocol.h"
 
@@ -68,27 +71,6 @@ using boost::shared_ptr;
 
 MackieMidiBuilder builder;
 
-// Copied from tranzport_control_protocol.cc
-static inline double 
-gain_to_slider_position (ARDOUR::gain_t g)
-{
-	if (g == 0) return 0;
-	return pow((6.0*log(g)/log(2.0)+192.0)/198.0, 8.0);
-}
-
-/*
-	Copied from tranzport_control_protocol.cc
-	TODO this seems to return slightly wrong values, namely
-	with the UI slider at max, we get a 0.99something value.
-*/
-static inline ARDOUR::gain_t 
-slider_position_to_gain (double pos)
-{
-	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
-	if (pos == 0.0) return 0;
-	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
-}
-
 MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol  (session, X_("Mackie"))
 	, _current_initial_bank( 0 )
@@ -98,15 +80,21 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _polling( true )
 	, pfd( 0 )
 	, nfds( 0 )
+	, _jog_wheel( *this )
+	, _timecode_type( ARDOUR::AnyTime::BBT )
 {
-	//cout << "MackieControlProtocol::MackieControlProtocol" << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::MackieControlProtocol" << endl;
+#endif
 	// will start reading from ports, as soon as there are some
 	pthread_create_and_store (X_("mackie monitor"), &thread, 0, _monitor_work, this);
 }
 
 MackieControlProtocol::~MackieControlProtocol()
 {
-	//cout << "~MackieControlProtocol::MackieControlProtocol" << endl;
+#ifdef DEBUG
+	cout << "~MackieControlProtocol::MackieControlProtocol" << endl;
+#endif
 	try
 	{
 		close();
@@ -119,7 +107,9 @@ MackieControlProtocol::~MackieControlProtocol()
 	{
 		cout << "~MackieControlProtocol caught unknown" << endl;
 	}
-	//cout << "finished ~MackieControlProtocol::MackieControlProtocol" << endl;
+#ifdef DEBUG
+	cout << "finished ~MackieControlProtocol::MackieControlProtocol" << endl;
+#endif
 }
 
 Mackie::Surface & MackieControlProtocol::surface()
@@ -131,14 +121,28 @@ Mackie::Surface & MackieControlProtocol::surface()
 	return *_surface;
 }
 
-const Mackie::MackiePort & MackieControlProtocol::mcu_port() const
+const Mackie::SurfacePort & MackieControlProtocol::mcu_port() const
 {
-	return dynamic_cast<const MackiePort &>( *_ports[0] );
+	if ( _ports.size() < 1 )
+	{
+		return _dummy_port;
+	}
+	else
+	{
+		return dynamic_cast<const MackiePort &>( *_ports[0] );
+	}
 }
 
-Mackie::MackiePort & MackieControlProtocol::mcu_port()
+Mackie::SurfacePort & MackieControlProtocol::mcu_port()
 {
-	return dynamic_cast<const MackiePort &>( *_ports[0] );
+	if ( _ports.size() < 1 )
+	{
+		return _dummy_port;
+	}
+	else
+	{
+		return dynamic_cast<MackiePort &>( *_ports[0] );
+	}
 }
 
 // go to the previous track.
@@ -275,7 +279,9 @@ void MackieControlProtocol::switch_banks( int initial )
 		uint32_t end_pos = min( route_table.size(), sorted.size() );
 		Sorted::iterator it = sorted.begin() + _current_initial_bank;
 		Sorted::iterator end = sorted.begin() + _current_initial_bank + end_pos;
-		//cout << "switch to " << _current_initial_bank << ", " << end_pos << endl;
+#ifdef DEBUG
+		cout << "switch to " << _current_initial_bank << ", " << end_pos << endl;
+#endif
 		
 		// link routes to strips
 		uint32_t i = 0;
@@ -283,7 +289,9 @@ void MackieControlProtocol::switch_banks( int initial )
 		{
 			boost::shared_ptr<Route> route = *it;
 			Strip & strip = *surface().strips[i];
-			//cout << "remote id " << route->remote_control_id() << " connecting " << route->name() << " to " << strip.name() << " with port " << port_for_id(i) << endl;
+#ifdef DEBUG
+			cout << "remote id " << route->remote_control_id() << " connecting " << route->name() << " to " << strip.name() << " with port " << port_for_id(i) << endl;
+#endif
 			route_table[i] = route;
 			RouteSignal * rs = new RouteSignal( *route, *this, strip, port_for_id(i) );
 			route_signals.push_back( rs );
@@ -297,51 +305,28 @@ void MackieControlProtocol::switch_banks( int initial )
 		{
 			Strip & strip = *surface().strips[i];
 			// send zero for this strip
-			port_for_id(i).write( builder.zero_strip( strip ) );
+			MackiePort & port = port_for_id(i);
+			port.write( builder.zero_strip( port, strip ) );
 		}
 	}
 	
 	// display the current start bank.
-	if ( mcu_port().emulation() == MackiePort::bcf2000 )
-	{
-		if ( _current_initial_bank == 0 )
-		{
-			// send Ar. to 2-char display on the master
-			mcu_port().write( builder.two_char_display( "Ar", ".." ) );
-		}
-		else
-		{
-			// write the current first remote_id to the 2-char display
-			mcu_port().write( builder.two_char_display( _current_initial_bank ) );
-		}
-	}
+	surface().display_bank_start( mcu_port(), builder, _current_initial_bank );
 }
 
 void MackieControlProtocol::zero_all()
 {
-	// TODO turn off 55-char and SMPTE displays
-	
-	if ( mcu_port().emulation() == MackiePort::bcf2000 )
-	{
-		// clear 2-char display
-		mcu_port().write( builder.two_char_display( "LC" ) );
-	}
+	// TODO turn off SMPTE displays
 	
 	// zero all strips
 	for ( Surface::Strips::iterator it = surface().strips.begin(); it != surface().strips.end(); ++it )
 	{
-		port_for_id( (*it)->index() ).write( builder.zero_strip( **it ) );
+		MackiePort & port = port_for_id( (*it)->index() );
+		port.write( builder.zero_strip( port, **it ) );
 	}
 	
 	// and the master strip
-	mcu_port().write( builder.zero_strip( master_strip() ) );
-	
-	// and the led ring for the master strip, in bcf mode
-	if ( mcu_port().emulation() == MackiePort::bcf2000 )
-	{
-		Control & control = *surface().controls_by_name["jog"];
-		mcu_port().write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
-	}
+	mcu_port().write( builder.zero_strip( dynamic_cast<MackiePort&>( mcu_port() ), master_strip() ) );
 	
 	// turn off global buttons and leds
 	// global buttons are only ever on mcu_port, so we don't have
@@ -354,9 +339,12 @@ void MackieControlProtocol::zero_all()
 			mcu_port().write( builder.zero_control( control ) );
 		}
 	}
+
+	// any hardware-specific stuff
+	surface().zero_all( mcu_port(), builder );
 }
 
-int MackieControlProtocol::set_active (bool yn)
+int MackieControlProtocol::set_active( bool yn )
 {
 	if ( yn != _active )
 	{
@@ -466,7 +454,7 @@ bool MackieControlProtocol::handle_strip_button( Control & control, ButtonState 
 	if ( control.name() == "fader_touch" )
 	{
 		state = bs == press;
-		control.strip().gain().touch( state );
+		control.strip().gain().in_use( state );
 	}
 	
 	return state;
@@ -474,28 +462,50 @@ bool MackieControlProtocol::handle_strip_button( Control & control, ButtonState 
 
 void MackieControlProtocol::update_led( Mackie::Button & button, Mackie::LedState ls )
 {
-	MackiePort * port = 0;
-	if ( button.group().is_strip() )
+	if ( ls != none )
 	{
-		if ( button.group().is_master() )
+		SurfacePort * port = 0;
+		if ( button.group().is_strip() )
 		{
-			port = &mcu_port();
+			if ( button.group().is_master() )
+			{
+				port = &mcu_port();
+			}
+			else
+			{
+				port = &port_for_id( dynamic_cast<const Strip&>( button.group() ).index() );
+			}
 		}
 		else
 		{
-			port = &port_for_id( dynamic_cast<const Strip&>( button.group() ).index() );
+			port = &mcu_port();
 		}
+		port->write( builder.build_led( button, ls ) );
 	}
-	else
+}
+
+void MackieControlProtocol::update_smpte_beats_led()
+{
+	switch ( _timecode_type )
 	{
-		port = &mcu_port();
+		case ARDOUR::AnyTime::BBT:
+			update_global_led( "beats", on );
+			update_global_led( "smpte", off );
+			break;
+		case ARDOUR::AnyTime::SMPTE:
+			update_global_led( "smpte", on );
+			update_global_led( "beats", off );
+			break;
+		default:
+			ostringstream os;
+			os << "Unknown Anytime::Type " << _timecode_type;
+			throw runtime_error( os.str() );
 	}
-	if ( ls != none ) port->write( builder.build_led( button, ls ) );
 }
 
 void MackieControlProtocol::update_global_button( const string & name, LedState ls )
 {
-	if ( surface().controls_by_name.find( name ) !=surface().controls_by_name.end() )
+	if ( surface().controls_by_name.find( name ) != surface().controls_by_name.end() )
 	{
 		Button * button = dynamic_cast<Button*>( surface().controls_by_name[name] );
 		mcu_port().write( builder.build_led( button->led(), ls ) );
@@ -505,7 +515,22 @@ void MackieControlProtocol::update_global_button( const string & name, LedState 
 #ifdef DEBUG
 		cout << "Button " << name << " not found" << endl;
 #endif
-		}
+	}
+}
+
+void MackieControlProtocol::update_global_led( const string & name, LedState ls )
+{
+	if ( surface().controls_by_name.find( name ) != surface().controls_by_name.end() )
+	{
+		Led * led = dynamic_cast<Led*>( surface().controls_by_name[name] );
+		mcu_port().write( builder.build_led( *led, ls ) );
+	}
+	else
+	{
+#ifdef DEBUG
+		cout << "Led " << name << " not found" << endl;
+#endif
+	}
 }
 
 // send messages to surface to set controls to correct values
@@ -523,9 +548,13 @@ void MackieControlProtocol::update_surface()
 		// update strip from route
 		master_route_signal->notify_all();
 		
+		// sometimes the jog wheel is a pot
+		surface().blank_jog_ring( mcu_port(), builder );
+		
 		// update global buttons and displays
 		notify_record_state_changed();
 		notify_transport_state_changed();
+		update_smpte_beats_led();
 	}
 }
 
@@ -553,31 +582,47 @@ void MackieControlProtocol::connect_session_signals()
 
 void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 {
-	MackiePort * sport = new MackiePort( *this, midi_port, number );
-	_ports.push_back( sport );
+#ifdef DEBUG
+	cout << "add port " << midi_port.name() << ", " << midi_port.device() << ", " << midi_port.type() << endl;
+	cout << "MIDI::Port::ALSA_Sequencer " << MIDI::Port::ALSA_Sequencer << endl;
+	cout << "MIDI::Port::Unknown " << MIDI::Port::Unknown << endl;
+#endif
+	if ( string( midi_port.device() ) == string( "ardour" ) )
+	{
+		throw MackieControlException( "The Mackie MCU driver will not use a port with device=ardour" );
+	}
+	else if ( midi_port.type() == MIDI::Port::ALSA_Sequencer )
+	{
+		throw MackieControlException( "alsa/sequencer ports don't work with the Mackie MCU driver right now" );
+	}
+	else
+	{
+		MackiePort * sport = new MackiePort( *this, midi_port, number );
+		_ports.push_back( sport );
+		
+		connections_back = sport->init_event.connect(
+			sigc::bind (
+				mem_fun (*this, &MackieControlProtocol::handle_port_init)
+				, sport
+			)
+		);
 
-	connections_back = sport->init_event.connect(
-		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_init)
-			, sport
-		)
-	);
+		connections_back = sport->active_event.connect(
+			sigc::bind (
+				mem_fun (*this, &MackieControlProtocol::handle_port_active)
+				, sport
+			)
+		);
 
-	connections_back = sport->active_event.connect(
-		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_active)
-			, sport
-		)
-	);
-
-	connections_back = sport->inactive_event.connect(
-		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_inactive)
-			, sport
-		)
-	);
-	
-	_ports_changed = true;
+		connections_back = sport->inactive_event.connect(
+			sigc::bind (
+				mem_fun (*this, &MackieControlProtocol::handle_port_inactive)
+				, sport
+			)
+		);
+		
+		_ports_changed = true;
+	}
 }
 
 void MackieControlProtocol::create_ports()
@@ -636,15 +681,23 @@ void MackieControlProtocol::initialize_surface()
 	
 	set_route_table_size( strips );
 	
-	switch ( mcu_port().emulation() )
+	// TODO same as code in mackie_port.cc
+	string emulation = ARDOUR::Config->get_mackie_emulation();
+	if ( emulation == "bcf" )
 	{
-		case MackiePort::bcf2000: _surface = new BcfSurface( strips ); break;
-		case MackiePort::mackie: _surface = new MackieSurface( strips ); break;
-		default:
-			ostringstream os;
-			os << "no Surface class found for emulation: " << mcu_port().emulation();
-			throw MackieControlException( os.str() );
+		_surface = new BcfSurface( strips );
 	}
+	else if ( emulation == "mcu" )
+	{
+		_surface = new MackieSurface( strips );
+	}
+	else
+	{
+		ostringstream os;
+		os << "no Surface class found for emulation: " << emulation;
+		throw MackieControlException( os.str() );
+	}
+
 	_surface->init();
 	
 	// Connect events. Must be after route table otherwise there will be trouble
@@ -656,6 +709,12 @@ void MackieControlProtocol::initialize_surface()
 
 void MackieControlProtocol::close()
 {
+	// stop polling, and wait for it...
+	// must be before other shutdown otherwise polling loop
+	// calls methods on objects that are deleted
+	_polling = false;
+	pthread_join( thread, 0 );
+	
 	// TODO disconnect port active/inactive signals
 	// Or at least put a lock here
 	
@@ -713,10 +772,6 @@ void MackieControlProtocol::close()
 		_surface = 0;
 	}
 	
-	// stop polling, and wait for it...
-	_polling = false;
-	pthread_join( thread, 0 );
-	
 	// shut down MackiePorts
 	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 	{
@@ -737,7 +792,9 @@ void* MackieControlProtocol::_monitor_work (void* arg)
 
 XMLNode & MackieControlProtocol::get_state()
 {
-	//cout << "MackieControlProtocol::get_state" << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::get_state" << endl;
+#endif
 	
 	// add name of protocol
 	XMLNode* node = new XMLNode( X_("Protocol") );
@@ -753,7 +810,9 @@ XMLNode & MackieControlProtocol::get_state()
 
 int MackieControlProtocol::set_state( const XMLNode & node )
 {
-	//cout << "MackieControlProtocol::set_state: active " << _active << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::set_state: active " << _active << endl;
+#endif
 	int retval = 0;
 	
 	// fetch current bank
@@ -780,7 +839,7 @@ int MackieControlProtocol::set_state( const XMLNode & node )
 
 void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & control, const ControlState & state )
 {
-	uint32_t index = control.ordinal() - 1 + ( port.number() * port.strips() );
+	// find the route for the control, if there is one
 	boost::shared_ptr<Route> route;
 	if ( control.group().is_strip() )
 	{
@@ -788,10 +847,14 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 		{
 			route = master_route();
 		}
-		else if ( index < route_table.size() )
-			route = route_table[index];
 		else
-			cerr << "Warning: index is " << index << " which is not in the route table, size: " << route_table.size() << endl;
+		{
+			uint32_t index = control.ordinal() - 1 + ( port.number() * port.strips() );
+			if ( index < route_table.size() )
+				route = route_table[index];
+			else
+				cerr << "Warning: index is " << index << " which is not in the route table, size: " << route_table.size() << endl;
+		}
 	}
 	
 	// This handles control element events from the surface
@@ -800,30 +863,17 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 	switch ( control.type() )
 	{
 		case Control::type_fader:
-			if ( control.group().is_strip() )
+			// find the route in the route table for the id
+			// if the route isn't available, skip it
+			// at which point the fader should just reset itself
+			if ( route != 0 )
 			{
-				// find the route in the route table for the id
-				// if the route isn't available, skip it
-				// at which point the fader should just reset itself
-				if ( route != 0 )
-				{
-					route->set_gain( slider_position_to_gain( state.pos ), this );
-					
-					// must echo bytes back to slider now, because
-					// the notifier only works if the fader is not being
-					// touched. Which it is if we're getting input.
-					port.write( builder.build_fader( (Fader&)control, state.pos ) );
-				}
-			}
-			else
-			{
-				// master fader
-				boost::shared_ptr<Route> route = master_route();
-				if ( route )
-				{
-					route->set_gain( slider_position_to_gain( state.pos ), this );
-					port.write( builder.build_fader( (Fader&)control, state.pos ) );
-				}
+				route->gain_control()->set_value( state.pos );
+				
+				// must echo bytes back to slider now, because
+				// the notifier only works if the fader is not being
+				// touched. Which it is if we're getting input.
+				port.write( builder.build_fader( (Fader&)control, state.pos ) );
 			}
 			break;
 			
@@ -845,9 +895,10 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			else if ( control.group().is_master() )
 			{
 				// master fader touch
-				boost::shared_ptr<Route> route = master_route();
-				if ( route )
+				if ( route != 0 )
+				{
 					handle_strip_button( control, state.button_state, route );
+				}
 			}
 			else
 			{
@@ -862,19 +913,21 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			{
 				if ( route != 0 )
 				{
-					if ( route->panner().npanners() == 1 )
+					// pan for mono input routes, or stereo linked panners
+					if ( route->panner().npanners() == 1 || ( route->panner().npanners() == 2 && route->panner().linked() ) )
 					{
 						// assume pan for now
-						float xpos = route->panner().pan_control(0)->get_value ();
+						float xpos;
+						route->panner().streampanner (0).get_effective_position (xpos);
 						
 						// calculate new value, and trim
-						xpos += state.delta;
+						xpos += state.delta * state.sign;
 						if ( xpos > 1.0 )
 							xpos = 1.0;
 						else if ( xpos < 0.0 )
 							xpos = 0.0;
 						
-						route->panner().pan_control(0)->set_value( xpos );
+						route->panner().streampanner (0).set_position( xpos );
 					}
 				}
 				else
@@ -885,29 +938,13 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			}
 			else
 			{
-				if ( control.name() == "jog" )
+				if ( control.is_jog() )
 				{
-					// TODO use current snap-to setting?
-					long delta = state.ticks * 1000;
-					nframes_t next = session->transport_frame() + delta;
-					if ( delta < 0 && session->transport_frame() < (nframes_t) abs( delta )  )
-					{
-						next = session->current_start_frame();
-					}
-					else if ( next > session->current_end_frame() )
-					{
-						next = session->current_end_frame();
-					}
-					
-					// doesn't work very well
-					session->request_locate( next, session->transport_rolling() );
-					
-					// turn off the led ring, for bcf emulation mode
-					port.write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
+					_jog_wheel.jog_event( port, control, state );
 				}
 				else
 				{
-					cout << "external controller" << state.ticks << endl;
+					cout << "external controller" << state.ticks * state.sign << endl;
 				}
 			}
 			break;
@@ -963,14 +1000,35 @@ void MackieControlProtocol::notify_record_enable_changed( RouteSignal * route_si
 	}
 }
 
-void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
+void MackieControlProtocol::notify_active_changed( RouteSignal * route_signal )
+{
+	try
+	{
+#ifdef DEBUG
+		cout << "MackieControlProtocol::notify_active_changed" << endl;
+#endif
+		refresh_current_bank();
+	}
+	catch( exception & e )
+	{
+		cout << e.what() << endl;
+	}
+}
+	
+void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal, bool force_update )
 {
 	try
 	{
 		Fader & fader = route_signal->strip().gain();
-		if ( !fader.touch() )
+		if ( !fader.in_use() )
 		{
-			route_signal->port().write( builder.build_fader( fader, gain_to_slider_position( route_signal->route().effective_gain() ) ) );
+			float gain_value = route_signal->route().gain_control()->get_value();
+			// check that something has actually changed
+			if ( force_update || gain_value != route_signal->last_gain_written() )
+			{
+				route_signal->port().write( builder.build_fader( fader, gain_value ) );
+				route_signal->last_gain_written( gain_value );
+			}
 		}
 	}
 	catch( exception & e )
@@ -983,7 +1041,25 @@ void MackieControlProtocol::notify_name_changed( RouteSignal * route_signal )
 {
 	try
 	{
-		// TODO implement MackieControlProtocol::notify_name_changed
+		Strip & strip = route_signal->strip();
+		if ( !strip.is_master() )
+		{
+			string line1;
+			string fullname = route_signal->route().name();
+			
+			if ( fullname.length() <= 6 )
+			{
+				line1 = fullname;
+			}
+			else
+			{
+				line1 = PBD::short_version( fullname, 6 );
+			}
+			
+			SurfacePort & port = route_signal->port();
+			port.write( builder.strip_display( port, strip, 0, line1 ) );
+			port.write( builder.strip_display_blank( port, strip, 1 ) );
+		}
 	}
 	catch( exception & e )
 	{
@@ -991,17 +1067,27 @@ void MackieControlProtocol::notify_name_changed( RouteSignal * route_signal )
 	}
 }
 
-// TODO deal with > 1 channel being panned
-void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
+void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal, bool force_update )
 {
 	try
 	{
 		Pot & pot = route_signal->strip().vpot();
-		
-		if ( route_signal->route().panner().npanners() == 1 )
+		const Panner & panner = route_signal->route().panner();
+		if ( panner.npanners() == 1 || ( panner.npanners() == 2 && panner.linked() ) )
 		{
-			float pos = route_signal->route().panner().pan_control(0)->get_value();
-			route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ) ) );
+			float pos;
+			route_signal->route().panner().streampanner(0).get_effective_position( pos );
+			
+			// cache the MidiByteArray here, because the mackie led control is much lower
+			// resolution than the panner control. So we save lots of byte
+			// sends in spite of more work on the comparison
+			MidiByteArray bytes = builder.build_led_ring( pot, ControlState( on, pos ), MackieMidiBuilder::midi_pot_mode_dot );
+			// check that something has actually changed
+			if ( force_update || bytes != route_signal->last_pan_written() )
+			{
+				route_signal->port().write( bytes );
+				route_signal->last_pan_written( bytes );
+			}
 		}
 		else
 		{
@@ -1017,39 +1103,18 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 // TODO handle plugin automation polling
 void MackieControlProtocol::update_automation( RouteSignal & rs )
 {
-	ARDOUR::AutoState gain_state = rs.route().gain_control()->alist()->automation_state();
+	ARDOUR::AutoState gain_state = rs.route().gain_control()->automation_state();
 	if ( gain_state == Touch || gain_state == Play )
 	{
-		notify_gain_changed( &rs );
+		notify_gain_changed( &rs, false );
 	}
 	
 	ARDOUR::AutoState panner_state = rs.route().panner().automation_state();
 	if ( panner_state == Touch || panner_state == Play )
 	{
-		notify_panner_changed( &rs );
+		notify_panner_changed( &rs, false );
 	}
-}
-
-void MackieControlProtocol::poll_automation ()
-{
-	if ( _active && _automation_last.elapsed() >= 20 )
-	{
-		// do all currently mapped routes
-		for( RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it )
-		{
-			update_automation( **it );
-		}
-		
-		// and the master strip
-		if ( master_route_signal != 0 )
-		{
-			update_automation( *master_route_signal );
-		}
-		
-		update_timecode_display();
-		
-		_automation_last.start();
-	}
+	_automation_last.start();
 }
 
 string MackieControlProtocol::format_bbt_timecode( nframes_t now_frame )
@@ -1130,6 +1195,28 @@ void MackieControlProtocol::update_timecode_display()
 	}
 }
 
+void MackieControlProtocol::poll_session_data()
+{
+	if ( _active && _automation_last.elapsed() >= 20 )
+	{
+		// do all currently mapped routes
+		for( RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it )
+		{
+			update_automation( **it );
+		}
+		
+		// and the master strip
+		if ( master_route_signal != 0 )
+		{
+			update_automation( *master_route_signal );
+		}
+		
+		update_timecode_display();
+		
+		_automation_last.start();
+	}
+}
+
 /////////////////////////////////////
 // Transport Buttons
 /////////////////////////////////////
@@ -1137,10 +1224,28 @@ void MackieControlProtocol::update_timecode_display()
 LedState MackieControlProtocol::frm_left_press( Button & button )
 {
 	// can use first_mark_before/after as well
+	unsigned long elapsed = _frm_left_last.restart();
+	
 	Location * loc = session->locations()->first_location_before (
 		session->transport_frame()
 	);
-	if ( loc != 0 ) session->request_locate( loc->start(), session->transport_rolling() );
+	
+	// allow a quick double to go past a previous mark 
+	if ( session->transport_rolling() && elapsed < 500 && loc != 0 )
+	{
+		Location * loc_two_back = session->locations()->first_location_before ( loc->start() );
+		if ( loc_two_back != 0 )
+		{
+			loc = loc_two_back;
+		}
+	}
+	
+	// move to the location, if it's valid
+	if ( loc != 0 )
+	{
+		session->request_locate( loc->start(), session->transport_rolling() );
+	}
+	
 	return on;
 }
 
@@ -1210,12 +1315,16 @@ LedState MackieControlProtocol::record_release( Button & button )
 
 LedState MackieControlProtocol::rewind_press( Button & button )
 {
-	session->request_transport_speed( -4.0 );
+	_jog_wheel.push( JogWheel::speed );
+	_jog_wheel.transport_direction( -1 );
+	session->request_transport_speed( -_jog_wheel.transport_speed() );
 	return on;
 }
 
 LedState MackieControlProtocol::rewind_release( Button & button )
 {
+	_jog_wheel.pop();
+	_jog_wheel.transport_direction( 0 );
 	if ( _transport_previously_rolling )
 		session->request_transport_speed( 1.0 );
 	else
@@ -1225,17 +1334,102 @@ LedState MackieControlProtocol::rewind_release( Button & button )
 
 LedState MackieControlProtocol::ffwd_press( Button & button )
 {
-	session->request_transport_speed( 4.0 );
+	_jog_wheel.push( JogWheel::speed );
+	_jog_wheel.transport_direction( 1 );
+	session->request_transport_speed( _jog_wheel.transport_speed() );
 	return on;
 }
 
 LedState MackieControlProtocol::ffwd_release( Button & button )
 {
+	_jog_wheel.pop();
+	_jog_wheel.transport_direction( 0 );
 	if ( _transport_previously_rolling )
 		session->request_transport_speed( 1.0 );
 	else
 		session->request_stop();
 	return off;
+}
+
+LedState MackieControlProtocol::loop_press( Button & button )
+{
+	session->request_play_loop( !session->get_play_loop() );
+	return on;
+}
+
+LedState MackieControlProtocol::loop_release( Button & button )
+{
+	return session->get_play_loop();
+}
+
+LedState MackieControlProtocol::punch_in_press( Button & button )
+{
+	bool state = !Config->get_punch_in();
+	Config->set_punch_in( state );
+	return state;
+}
+
+LedState MackieControlProtocol::punch_in_release( Button & button )
+{
+	return Config->get_punch_in();
+}
+
+LedState MackieControlProtocol::punch_out_press( Button & button )
+{
+	bool state = !Config->get_punch_out();
+	Config->set_punch_out( state );
+	return state;
+}
+
+LedState MackieControlProtocol::punch_out_release( Button & button )
+{
+	return Config->get_punch_out();
+}
+
+LedState MackieControlProtocol::home_press( Button & button )
+{
+	session->goto_start();
+	return on;
+}
+
+LedState MackieControlProtocol::home_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::end_press( Button & button )
+{
+	session->goto_end();
+	return on;
+}
+
+LedState MackieControlProtocol::end_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::clicking_press( Button & button )
+{
+	bool state = !Config->get_clicking();
+	Config->set_clicking( state );
+	return state;
+}
+
+LedState MackieControlProtocol::clicking_release( Button & button )
+{
+	return Config->get_clicking();
+}
+
+LedState MackieControlProtocol::global_solo_press( Button & button )
+{
+	bool state = !session->soloing();
+	session->set_all_solo ( state );
+	return state;
+}
+
+LedState MackieControlProtocol::global_solo_release( Button & button )
+{
+	return session->soloing();
 }
 
 ///////////////////////////////////////////
@@ -1331,87 +1525,6 @@ void MackieControlProtocol::notify_transport_state_changed()
 	// rec is special because it's tristate
 	Button * rec = reinterpret_cast<Button*>( surface().controls_by_name["record"] );
 	mcu_port().write( builder.build_led( *rec, record_release( *rec ) ) );
-}
-
-LedState MackieControlProtocol::loop_press( Button & button )
-{
-	session->request_play_loop( !session->get_play_loop() );
-	return on;
-}
-
-LedState MackieControlProtocol::loop_release( Button & button )
-{
-	return session->get_play_loop();
-}
-
-LedState MackieControlProtocol::punch_in_press( Button & button )
-{
-	bool state = !Config->get_punch_in();
-	Config->set_punch_in( state );
-	return state;
-}
-
-LedState MackieControlProtocol::punch_in_release( Button & button )
-{
-	return Config->get_punch_in();
-}
-
-LedState MackieControlProtocol::punch_out_press( Button & button )
-{
-	bool state = !Config->get_punch_out();
-	Config->set_punch_out( state );
-	return state;
-}
-
-LedState MackieControlProtocol::punch_out_release( Button & button )
-{
-	return Config->get_punch_out();
-}
-
-LedState MackieControlProtocol::home_press( Button & button )
-{
-	session->goto_start();
-	return on;
-}
-
-LedState MackieControlProtocol::home_release( Button & button )
-{
-	return off;
-}
-
-LedState MackieControlProtocol::end_press( Button & button )
-{
-	session->goto_end();
-	return on;
-}
-
-LedState MackieControlProtocol::end_release( Button & button )
-{
-	return off;
-}
-
-LedState MackieControlProtocol::clicking_press( Button & button )
-{
-	bool state = !Config->get_clicking();
-	Config->set_clicking( state );
-	return state;
-}
-
-LedState MackieControlProtocol::clicking_release( Button & button )
-{
-	return Config->get_clicking();
-}
-
-LedState MackieControlProtocol::global_solo_press( Button & button )
-{
-	bool state = !session->soloing();
-	session->set_all_solo ( state );
-	return state;
-}
-
-LedState MackieControlProtocol::global_solo_release( Button & button )
-{
-	return session->soloing();
 }
 
 /////////////////////////////////////
@@ -1527,6 +1640,99 @@ LedState MackieControlProtocol::marker_press( Button & button )
 }
 
 LedState MackieControlProtocol::marker_release( Button & button )
+{
+	return off;
+}
+
+void jog_wheel_state_display( JogWheel::State state, SurfacePort & port )
+{
+	switch( state )
+	{
+		case JogWheel::zoom: port.write( builder.two_char_display( "Zm" ) ); break;
+		case JogWheel::scroll: port.write( builder.two_char_display( "Sc" ) ); break;
+		case JogWheel::scrub: port.write( builder.two_char_display( "Sb" ) ); break;
+		case JogWheel::shuttle: port.write( builder.two_char_display( "Sh" ) ); break;
+		case JogWheel::speed: port.write( builder.two_char_display( "Sp" ) ); break;
+		case JogWheel::select: port.write( builder.two_char_display( "Se" ) ); break;
+	}
+}
+
+Mackie::LedState MackieControlProtocol::zoom_press( Mackie::Button & )
+{
+	_jog_wheel.zoom_state_toggle();
+	update_global_button( "scrub", _jog_wheel.jog_wheel_state() == JogWheel::scrub );
+	jog_wheel_state_display( _jog_wheel.jog_wheel_state(), mcu_port() );
+	return _jog_wheel.jog_wheel_state() == JogWheel::zoom;
+}
+
+Mackie::LedState MackieControlProtocol::zoom_release( Mackie::Button & )
+{
+	return _jog_wheel.jog_wheel_state() == JogWheel::zoom;
+}
+
+Mackie::LedState MackieControlProtocol::scrub_press( Mackie::Button & )
+{
+	_jog_wheel.scrub_state_cycle();
+	update_global_button( "zoom", _jog_wheel.jog_wheel_state() == JogWheel::zoom );
+	jog_wheel_state_display( _jog_wheel.jog_wheel_state(), mcu_port() );
+	return
+		_jog_wheel.jog_wheel_state() == JogWheel::scrub
+		||
+		_jog_wheel.jog_wheel_state() == JogWheel::shuttle
+	;
+}
+
+Mackie::LedState MackieControlProtocol::scrub_release( Mackie::Button & )
+{
+	return
+		_jog_wheel.jog_wheel_state() == JogWheel::scrub
+		||
+		_jog_wheel.jog_wheel_state() == JogWheel::shuttle
+	;
+}
+
+LedState MackieControlProtocol::drop_press( Button & button )
+{
+	session->remove_last_capture();
+	return on;
+}
+
+LedState MackieControlProtocol::drop_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::save_press( Button & button )
+{
+	session->save_state( "" );
+	return on;
+}
+
+LedState MackieControlProtocol::save_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::smpte_beats_press( Button & )
+{
+	switch ( _timecode_type )
+	{
+		case ARDOUR::AnyTime::BBT:
+			_timecode_type = ARDOUR::AnyTime::SMPTE;
+			break;
+		case ARDOUR::AnyTime::SMPTE:
+			_timecode_type = ARDOUR::AnyTime::BBT;
+			break;
+		default:
+			ostringstream os;
+			os << "Unknown Anytime::Type " << _timecode_type;
+			throw runtime_error( os.str() );
+	}
+	update_smpte_beats_led();
+	return on;
+}
+
+LedState MackieControlProtocol::smpte_beats_release( Button & )
 {
 	return off;
 }
