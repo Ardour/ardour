@@ -658,7 +658,7 @@ MidiRegionView::find_and_insert_program_change_flags()
 						lsb = uint8_t(lsb_control->get_float(true, event_time));
 					}
 					
-					//cerr << " got msb " << int(msb) << " and lsb " << int(lsb) << endl;
+					cerr << " got msb " << int(msb) << " and lsb " << int(lsb) << " thread_id: " << pthread_self() << endl;
 					
 					patch = master_device->find_patch(
 							_custom_device_mode, 
@@ -668,9 +668,9 @@ MidiRegionView::find_and_insert_program_change_flags()
 							uint8_t(program_number)
 					);
 
-					//cerr << " got patch with name " << patch.name() << " number " << patch.number() << endl;
 				}
 				if (patch != 0) {
+					cerr << " got patch with name " << patch->name() << " number " << patch->number() << endl;
 					add_pgm_change(event_time, patch->name());
 				} else {
 					char buf[4];
@@ -1000,7 +1000,7 @@ MidiRegionView::add_pgm_change(nframes_t time, string displaytext)
 {
 	assert(time >= 0);
 	
-	// dont display notes beyond the region bounds
+	// dont display program changes beyond the region bounds
 	if (time - _region->start() >= _region->length() || time <  _region->start()) 
 		return;
 	

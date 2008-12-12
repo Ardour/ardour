@@ -5,16 +5,32 @@
 using namespace Gnome::Canvas;
 using namespace std;
 
-		
+
 void 
-CanvasFlag::set_text(string& a_text)
+CanvasFlag::delete_allocated_objects()
 {
 	if (_text) {
 		delete _text;
 		_text = 0;
 	}
 	
-	_text = new Text(*this, 0.0, 0.0, a_text);
+	if (_line) {
+		delete _line;
+		_line = 0;
+	}
+	
+	if (_rect) {
+		delete _rect;
+		_rect = 0;
+	}
+}
+
+void 
+CanvasFlag::set_text(string& a_text)
+{
+	delete_allocated_objects();
+	
+	_text = new Text(*this, 0.0, 0.0, Glib::ustring(a_text));
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = _outline_color_rgba;
 	double flagwidth  = _text->property_text_width()  + 10.0;
@@ -33,10 +49,6 @@ CanvasFlag::set_text(string& a_text)
 
 CanvasFlag::~CanvasFlag()
 {
-	delete _line;
-	delete _rect;
-	if(_text) {
-		delete _text;
-	}
+	delete_allocated_objects();
 }
 

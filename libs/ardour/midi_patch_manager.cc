@@ -50,6 +50,8 @@ void
 MidiPatchManager::refresh()
 {
 	_documents.clear();
+	_master_devices_by_model.clear();
+	_all_models.clear();
 	
 	path path_to_patches = _session->session_directory().midi_patch_path();
 	
@@ -97,4 +99,6 @@ MidiPatchManager::drop_session ()
 {
 	_session = 0;
 	_documents.clear();
+	_master_devices_by_model.clear();
+	_all_models.clear();
 }

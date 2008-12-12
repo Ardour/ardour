@@ -47,6 +47,8 @@ protected:
 	guint                             _fill_color_rgba;
 	
 private:
+	void delete_allocated_objects();
+	
 	MidiRegionView&                   _region;
 	SimpleLine*                       _line;
 	SimpleRect*                       _rect;
