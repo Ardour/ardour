@@ -22,6 +22,8 @@ public:
 	
 	virtual ~CanvasProgramChange();
 	
+	virtual bool on_event(GdkEvent* ev);
+	
 private:
 };
 

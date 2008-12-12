@@ -41,6 +41,7 @@
 #include "canvas_impl.h"
 #include "simplerect.h"
 #include "canvas-note-event.h"
+#include "canvas-program-change.h"
 
 #include "i18n.h"
 
@@ -58,7 +59,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	double wx, wy;
 	nframes64_t xdelta;
 	int direction = ev->direction;
-	CanvasNoteEvent *midi_event = dynamic_cast<CanvasNoteEvent *>(track_canvas->get_item_at(ev->x, ev->y));
+	CanvasNoteEvent     *midi_event = dynamic_cast<CanvasNoteEvent *>(track_canvas->get_item_at(ev->x, ev->y));
+	CanvasFlagRect      *flag_rect  = dynamic_cast<CanvasFlagRect *>(track_canvas->get_item_at(ev->x, ev->y));
+	CanvasFlagText      *flag_text  = dynamic_cast<CanvasFlagText *>(track_canvas->get_item_at(ev->x, ev->y));
 
   retry:
 	switch (direction) {
@@ -97,6 +100,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else {
 			if(midi_event) {
 				return midi_event->on_event(reinterpret_cast<GdkEvent *>(ev));
+			} else if (flag_rect) {
+				return flag_rect->on_event(reinterpret_cast<GdkEvent *>(ev));				
+			} else if (flag_text) {
+				return flag_text->on_event(reinterpret_cast<GdkEvent *>(ev));				
 			}
 			scroll_tracks_up_line ();
 			return true;
@@ -133,6 +140,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else {
 			if(midi_event) {
 				return midi_event->on_event(reinterpret_cast<GdkEvent *>(ev));
+			} else if (flag_rect) {
+				return flag_rect->on_event(reinterpret_cast<GdkEvent *>(ev));				
+			} else if (flag_text) {
+				return flag_text->on_event(reinterpret_cast<GdkEvent *>(ev));				
 			}
 			scroll_tracks_down_line ();
 			return true;

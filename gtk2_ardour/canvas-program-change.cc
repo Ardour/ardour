@@ -29,3 +29,22 @@ CanvasProgramChange::~CanvasProgramChange()
 {
 }
 
+bool
+CanvasProgramChange::on_event(GdkEvent* ev)
+{
+	cerr << "CanvasProgramChange::on_event(GdkEvent* ev) type " << ev->type << endl;
+	switch (ev->type) {
+	case GDK_SCROLL:
+		if (ev->scroll.direction == GDK_SCROLL_UP) {
+			cerr << "increasing program" <<  endl;
+			return true;
+		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
+			cerr << "decreasing program" <<  endl;
+			return true;
+		} 
+	default:
+		break;
+	}
+	
+	return false;
+}
