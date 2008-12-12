@@ -43,6 +43,7 @@
 #ifndef __CAAudioFile_h__
 #define __CAAudioFile_h__
 
+#include <iostream>
 #include <AvailabilityMacros.h>
 
 #if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
@@ -98,6 +99,7 @@ public:
 	// implementation-independent helpers
 	void	Open(const char *filePath) {
 		FSRef fsref;
+		std::cerr << "Opening " << filePath << std::endl;
 		XThrowIfError(FSPathMakeRef((UInt8 *)filePath, &fsref, NULL), "locate audio file");
 		Open(fsref);
 	}
@@ -112,9 +114,10 @@ public:
 				// or the file's sample rate is 0 (unknown)
 
 #if CAAF_USE_EXTAUDIOFILE
+#warning HERE WE ARE
 public:
-	CAAudioFile() : mExtAF(NULL) { }
-	virtual ~CAAudioFile() { if (mExtAF) Close(); }
+	CAAudioFile() : mExtAF(NULL) { std::cerr << "Constructing CAAudioFile\n"; }
+	virtual ~CAAudioFile() { std::cerr << "Destroying CAAudiofile @ " << this << std::endl; if (mExtAF) Close(); }
 
 	void	Open(const FSRef &fsref) {
 				// open an existing file
@@ -131,6 +134,7 @@ public:
 	}
 	
 	void	Close() {
+		std::cerr << "\tdisposeo of ext audio file @ " << mExtAF << std::endl;
 		XThrowIfError(ExtAudioFileDispose(mExtAF), "ExtAudioFileClose failed");
 		mExtAF = NULL;
 	}

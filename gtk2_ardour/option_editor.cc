@@ -28,6 +28,7 @@
 #include <ardour/auditioner.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/crossfade.h>
+#include <ardour/profile.h>
 #include <midi++/manager.h>
 #include <midi++/factory.h>
 #include <gtkmm2ext/stop_signal.h>
@@ -148,9 +149,11 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	setup_keyboard_options ();
 	setup_auditioner_editor ();
 
-	notebook.pages().push_back (TabElem (sync_packer, _("Sync")));
-	notebook.pages().push_back (TabElem (path_table, _("Paths/Files")));
-	notebook.pages().push_back (TabElem (keyboard_mouse_table, _("Kbd/Mouse")));
+	if (!Profile->get_sae()) {
+		notebook.pages().push_back (TabElem (sync_packer, _("Sync")));
+		notebook.pages().push_back (TabElem (path_table, _("Paths/Files")));
+		notebook.pages().push_back (TabElem (keyboard_mouse_table, _("Kbd/Mouse")));
+	}
 	notebook.pages().push_back (TabElem (click_packer, _("Click")));
 	notebook.pages().push_back (TabElem (audition_packer, _("Audition")));
 	notebook.pages().push_back (TabElem (misc_packer, _("Misc")));

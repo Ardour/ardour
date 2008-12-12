@@ -22,6 +22,7 @@
 
 #include "gain_meter.h"
 #include "panner_ui.h"
+#include "ardour_dialog.h"
 
 namespace ARDOUR {
 	class Send;
@@ -59,7 +60,7 @@ class SendUI : public Gtk::HBox
 	void outs_changed (ARDOUR::IOChange, void*);
 };
 
-class SendUIWindow : public Gtk::Window
+class SendUIWindow : public ArdourDialog
 {
   public:
 	SendUIWindow(boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session&);
@@ -68,7 +69,6 @@ class SendUIWindow : public Gtk::Window
 	SendUI*     ui;
 
   private:
-	Gtk::VBox vpacker;
 	Gtk::HBox hpacker;
 
 	void send_going_away ();

@@ -132,7 +132,7 @@ _thread_init_callback (void *arg)
 	   knows about it.
 	*/
 
-	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("Audioengine"), 4096);
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Audioengine"), 4096);
 	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
 }
 
@@ -922,8 +922,6 @@ AudioEngine::halted (void *arg)
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
 
-	cerr << "!!! HALTED !!!\n";
-
 	if (was_running) {
 		ae->Halted(); /* EMIT SIGNAL */
 	}
@@ -1318,7 +1316,7 @@ AudioEngine::reconnect_to_jack ()
 	
 	if (Config->get_jack_time_master()) {
 		jack_set_timebase_callback (_jack, 0, _jack_timebase_callback, this);
-	}
+	} 
 	
 	if (jack_activate (_jack) == 0) {
 		_running = true;

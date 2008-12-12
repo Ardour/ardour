@@ -17,9 +17,6 @@
 
 */
 
-#include "i18n.h"
-#include "new_session_dialog.h"
-
 #include <pbd/error.h>
 
 #include <ardour/recent_sessions.h>
@@ -46,6 +43,8 @@ using namespace ARDOUR;
 
 #include "opts.h"
 #include "utils.h"
+#include "i18n.h"
+#include "new_session_dialog.h"
 
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
@@ -426,6 +425,8 @@ NewSessionDialog::NewSessionDialog()
 	m_notebook->show();
 	m_notebook->show_all_children();
 
+	engine_page_session_folder = X_("");
+	engine_page_session_name = X_("");
 
 	set_default_response (Gtk::RESPONSE_OK);
 	if (!ARDOUR_COMMAND_LINE::session_name.length()) {
@@ -466,7 +467,9 @@ NewSessionDialog::run ()
 		/* nothing to display */
 		return Gtk::RESPONSE_OK;
 	}
-
+	if (!(page_set & NewPage) && !(page_set & OpenPage)) {
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
+	}
 	return ArdourDialog::run ();
 }
 
@@ -521,13 +524,13 @@ void
 NewSessionDialog::set_session_name (const Glib::ustring& name)
 {
 	m_name->set_text (name);
+	engine_page_session_name = name;
 }
 
 void
 NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 {
 	Glib::ustring realdir = dir;
-	char* res;
 
 	/* this little tangled mess is a result of 4 things:
 
@@ -547,15 +550,17 @@ NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 
 	char buf[PATH_MAX];
 
-	if((res = realpath (dir.c_str(), buf)) != 0) {
+	if(realpath (dir.c_str(), buf) != 0) {
 		if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 			realdir = Glib::path_get_dirname (realdir);
 		}
 		m_folder->set_current_folder (realdir);
+		engine_page_session_folder = realdir;
 	}
 
 	
 #else 
+	char* res;
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		realdir = Glib::path_get_dirname (realdir);
 		cerr << "didn't exist, use " << realdir << endl;
@@ -593,6 +598,9 @@ NewSessionDialog::session_name() const
 	case NewPage:
 	case EnginePage:
 		/* new or audio setup pages */
+		if (!(page_set & OpenPage) && !(page_set & NewPage)) {
+			return Glib::filename_from_utf8(engine_page_session_name);
+		}
 	        return Glib::filename_from_utf8(m_name->get_text());
 	default:
 		break;
@@ -613,8 +621,12 @@ NewSessionDialog::session_folder() const
 	        return Glib::filename_from_utf8(m_folder->get_filename());
 		
 	case EnginePage:
+		if (!(page_set & OpenPage) && !(page_set & NewPage)) {
+			/* just engine page, nothing else */
+			return Glib::filename_from_utf8(engine_page_session_folder);
+		}
 		if (page_set == EnginePage) {
-			/* just engine page, nothing else : use m_folder since it should be set */
+			/* use m_folder since it should be set */
 			return Glib::filename_from_utf8(m_folder->get_filename());
 		}
 		break;

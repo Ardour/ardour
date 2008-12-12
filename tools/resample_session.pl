@@ -9,6 +9,8 @@
 # The peakfiles and dead_sounds aren't copied. Only "identified" files are copied, instant.xml's
 # or .bak's aren't copied either.
 
+use FindBin '$Bin';
+use lib "$Bin";
 use XML::Parser::PerlSAX;
 use XML::Handler::XMLWriter;
 use IO::Handle;

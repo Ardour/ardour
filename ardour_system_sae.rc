@@ -39,13 +39,33 @@
     <Option name="periodic-safety-backups" value="1"/>
     <Option name="periodic-safety-backup-interval" value="120"/>
     <Option name="show-track-meters" value="1"/>
-	<Option name="default-narrow_ms" value="0"/>
+    <Option name="default-narrow_ms" value="0"/>
     <Option name="smpte-format" value="6"/>
-	<Option name="font-scale" value="102400"/>
+    <Option name="font-scale" value="102400"/>
+    <Option name="auto-return" value="1"/>
+    <Option name="solo-latched" value="0"/>
+    <Option name="link-region-and-track-selection" value="1"/>
+    <Option name="send-mtc" value="1"/>
+    <Option name="tape-machine-mode" value="1"/>
+    <Option name="monitoring-model" value="1"/>
   </Config>
+
   <extra>
     <RulerVisibility smpte="yes" bbt="yes" frames="no" minsec="no" tempo="yes" meter="yes" marker="yes" rangemarker="no" transportmarker="yes" cdmarker="no"/>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
+    <AudioSetup>
+      <periods val="2"/>
+      <priority val="60"/>
+      <ports val="256"/>
+      <realtime val="1"/>
+      <samplerate val="44100Hz"/>
+      <periodsize val="256"/>
+      <driver val="CoreAudio"/>
+      <interface val="Aggregate Device"/>
+      <inputdevice val="Aggregate Device"/>
+      <outputdevice val="Aggregate Device"/>
+    </AudioSetup>
+
   </extra>
 </Ardour>
 

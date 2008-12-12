@@ -123,23 +123,31 @@ Session::Session (AudioEngine &eng,
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
 	  _mix_buffers(new BufferSet()),
+	  mmc (0),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
 	  _midi_clock_port (default_midi_clock_port),
 	  _session_dir (new SessionDirectory(fullpath)),
 	  pending_events (2048),
+	  state_tree (0),
+	  butler_mixdown_buffer (0),
+	  butler_gain_buffer (0),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
-	  midi_requests (128),
+	  midi_thread (pthread_t (0)),
+	  midi_requests (128), // the size of this should match the midi request pool size
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _total_free_4k_blocks (0),
 	  _bundle_xml_node (0),
 	  _click_io ((IO*) 0),
+	  click_data (0),
+	  click_emphasis_data (0),
 	  main_outs (0),
 	  _metadata (new SessionMetadata())
+
 {
 	bool new_session;
 
@@ -196,21 +204,30 @@ Session::Session (AudioEngine &eng,
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
 	  _mix_buffers(new BufferSet()),
+	  mmc (0),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
 	  _midi_clock_port (default_midi_clock_port),
 	  _session_dir ( new SessionDirectory(fullpath)),
 	  pending_events (2048),
+	  state_tree (0),
+	  butler_mixdown_buffer (0),
+	  butler_gain_buffer (0),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
+	  midi_thread (pthread_t (0)),
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
+	  auditioner ((Auditioner *) 0),
 	  _total_free_4k_blocks (0),
 	  _bundle_xml_node (0),
-	  main_outs (0)
-
+	  _click_io ((IO *) 0),
+	  click_data (0),
+	  click_emphasis_data (0),
+	  main_outs (0),
+	  _metadata (new SessionMetadata())
 {
 	bool new_session;
 
@@ -316,18 +333,16 @@ Session::destroy ()
 
 	/* clear state tree so that no references to objects are held any more */
 
-	if (state_tree) {
-		delete state_tree;
-	}
+	delete state_tree;
 
 	terminate_butler_thread ();
 	//terminate_midi_thread ();
 
-	if (click_data && click_data != default_click) {
+	if (click_data != default_click) {
 		delete [] click_data;
 	}
 
-	if (click_emphasis_data && click_emphasis_data != default_click_emphasis) {
+	if (click_emphasis_data != default_click_emphasis) {
 		delete [] click_emphasis_data;
 	}
 
@@ -471,19 +486,12 @@ Session::destroy ()
 		i = tmp;
 	}
 
-	if (butler_mixdown_buffer) {
-		delete [] butler_mixdown_buffer;
-	}
-
-	if (butler_gain_buffer) {
-		delete [] butler_gain_buffer;
-	}
+	delete [] butler_mixdown_buffer;
+	delete [] butler_gain_buffer;
 
 	Crossfade::set_buffer_size (0);
 
-	if (mmc) {
-		delete mmc;
-	}
+	delete mmc;
 }
 
 void
@@ -1213,6 +1221,10 @@ Session::audible_frame () const
 	nframes_t offset;
 	nframes_t tf;
 
+	if (_transport_speed == 0.0f && non_realtime_work_pending()) {
+		return last_stop_frame;
+	}
+
 	/* the first of these two possible settings for "offset"
 	   mean that the audible frame is stationary until
 	   audio emerges from the latency compensation
@@ -1241,24 +1253,43 @@ Session::audible_frame () const
 	} else {
 		tf = _transport_frame;
 	}
-
-	if (_transport_speed == 0) {
-		return tf;
-	}
-
-	if (tf < offset) {
-		return 0;
-	}
-
+	
 	ret = tf;
 
 	if (!non_realtime_work_pending()) {
 
 		/* MOVING */
 
-		/* take latency into account */
+		/* check to see if we have passed the first guaranteed
+		   audible frame past our last stopping position. if not,
+		   the return that last stopping point because in terms
+		   of audible frames, we have not moved yet.
+		*/
 
-		ret -= offset;
+		if (_transport_speed > 0.0f) {
+
+			if (!play_loop || !have_looped) {
+				if (tf < last_stop_frame + offset) {
+					return last_stop_frame;
+					
+				}
+			} 
+			
+
+			/* forwards */
+			ret -= offset;
+
+		} else if (_transport_speed < 0.0f) {
+
+			/* XXX wot? no backward looping? */
+
+			if (tf > last_stop_frame - offset) {
+				return last_stop_frame;
+			} else {
+				/* backwards */
+				ret += offset;
+			}
+		}
 	}
 
 	return ret;
@@ -1875,6 +1906,10 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 	_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
 	_engine.get_physical_inputs (DataType::AUDIO, physinputs);
+
+	n_physical_audio_outputs = physoutputs.size();
+	n_physical_audio_inputs = physinputs.size();
+
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
@@ -1900,21 +1935,24 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				goto failure;
 			}
 
-			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs().n_audio(); ++x) {
 
+
+			/*
+			for (uint32_t x = 0; n_physical_audio_inputs && x < bus->n_inputs(); ++x) {
+					
 				port = "";
-
+				
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-						port = physinputs[((n+x)%n_physical_inputs)];
-				}
-
+					port = physinputs[((n+x)%n_physical_audio_inputs)];
+				} 
+				
 				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
 					break;
 				}
 			}
+			*/
 
-			for (uint32_t x = 0; x < bus->n_outputs().n_audio(); ++x) {
-
+			for (uint32_t x = 0; n_physical_audio_outputs && x < bus->n_outputs().n_audio(); ++x) {
 				port = "";
 
 				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
@@ -2240,8 +2278,6 @@ Session::update_route_solo_state ()
 	bool is_track = false;
 	bool signal = false;
 
-	/* caller must hold RouteLock */
-
 	/* this is where we actually implement solo by changing
 	   the solo mute setting of each track.
 	*/
@@ -2341,7 +2377,24 @@ Session::catch_up_on_solo ()
 	   has.
 	*/
 	update_route_solo_state();
-}
+}	
+
+void
+Session::catch_up_on_solo_mute_override ()
+{
+	if (Config->get_solo_model() != InverseMute) {
+		return;
+	}
+
+	/* this is called whenever the param solo-mute-override is
+	   changed.
+	*/
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->catch_up_on_solo_mute_override ();
+	}
+}	
 
 shared_ptr<Route>
 Session::route_by_name (string name)
@@ -4220,8 +4273,13 @@ Session::get_silent_buffers (ChanCount count)
 BufferSet&
 Session::get_scratch_buffers (ChanCount count)
 {
-	assert(_scratch_buffers->available() >= count);
-	_scratch_buffers->set_count(count);
+	if (count != ChanCount::ZERO) {
+		assert(_scratch_buffers->available() >= count);
+		_scratch_buffers->set_count(count);
+	} else {
+		_scratch_buffers->set_count (_scratch_buffers->available());
+	}
+
 	return *_scratch_buffers;
 }
 

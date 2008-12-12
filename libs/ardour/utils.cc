@@ -282,7 +282,7 @@ compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 {
 	double step;
 
-	step = 1.0/nframes;
+	step = 1.0/(nframes-1);
 
 	in[0] = 0.0f;
 

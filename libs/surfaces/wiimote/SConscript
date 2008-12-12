@@ -1,0 +1,60 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env final_prefix install_prefix final_config_prefix libraries i18n')
+
+wiimote = env.Clone()
+
+#
+# this defines the version number of libardour_wiimote
+# 
+
+domain = 'ardour_wiimote'
+
+wiimote.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+wiimote.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+wiimote.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+wiimote.Append(PACKAGE = domain)
+wiimote.Append(POTFILE = domain + '.pot')
+
+wiimote_files=Split("""
+wiimote.cc
+interface.cc
+""")
+
+wiimote.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+wiimote.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
+wiimote.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
+wiimote.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+wiimote.Append(LINKFLAGS="-lcwiid")
+#wiimote.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
+
+wiimote.Merge ([
+	libraries['ardour'],
+	libraries['ardour_cp'],
+	libraries['sndfile'],
+	libraries['midi++2'],
+	libraries['pbd'],
+	libraries['sigc2'],
+	libraries['usb'],
+	libraries['xml'],
+	libraries['glib2'],
+	libraries['glibmm2']
+	])
+
+libardour_wiimote = wiimote.SharedLibrary('ardour_wiimote', wiimote_files)
+
+if wiimote['WIIMOTE']:
+	Default(libardour_wiimote)
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_wiimote))
+
+if env['NLS']:
+	i18n (wiimote, wiimote_files, env)
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+				     [ 'SConscript' ] +
+				     wiimote_files + 
+				     glob.glob('po/*.po') + glob.glob('*.h')))

@@ -29,6 +29,7 @@
 #include <ardour/audiofilesource.h>
 #include <ardour/silentfilesource.h>
 #include <ardour/session_region.h>
+#include <ardour/profile.h>
 
 
 #include <gtkmm2ext/stop_signal.h>
@@ -777,8 +778,6 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	int cellx;
 	int celly;
 
-	// cerr << "Button press release, button = " << ev->button << endl;
-
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
 			region = (*iter)[region_list_columns.region];
@@ -787,14 +786,12 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_region_list_display_context_menu (ev->button, ev->time);
-		cerr << "\tcontext menu event, event handled\n";
 		return true;
 	}
 
 	if (region == 0) {
 		region_list_display.get_selection()->unselect_all();
 		deselect_all();
-		cerr << "\tSelection cleared\n";
 		return false;
 	}
 
@@ -807,7 +804,6 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			consider_auditioning (region);
 		}
-		cerr << "\taudition, event handled\n";
 		return true;
 		break;
 
@@ -815,7 +811,6 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		break; 
 	}
 
-	cerr << "\tnot handled\n";
 	return false;
 }	
 
@@ -1036,14 +1031,17 @@ Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& 
 	vector<ustring> paths;
 
 	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
-		cerr << "Delete drag data drop to treeview\n";
 		region_list_display.on_drag_data_received (context, x, y, data, info, time);
 		return;
 	}
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
 		nframes64_t pos = 0;
-		do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
+		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, SrcBest, pos); 
+		} else {
+			do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
+		}
 		context->drag_finish (true, false, time);
 	}
 }

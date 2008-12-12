@@ -323,6 +323,7 @@ class Editor : public PublicEditor
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 
+	double get_physical_screen_width () const { return physical_screen_width; };
 	double physical_screen_width;
 	double physical_screen_height;
 
@@ -342,7 +343,6 @@ class Editor : public PublicEditor
  	void toggle_region_fades_visible ();
  	void toggle_selected_region_fades (int dir);
  	void update_region_fade_visibility ();
-
 	void toggle_auto_xfade ();
 	void toggle_xfades_active ();
 	void toggle_xfade_visibility ();
@@ -649,6 +649,13 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      cd_marker_bar_group;
 
 	/** The group containing all items that require horizontal scrolling. */
+	ArdourCanvas::Group* _background_group;
+	/* 
+	   The _master_group is the group containing all items
+	   that require horizontal scrolling..
+	   It is primarily used to separate canvas items 
+	   that require horizontal scrolling from those that do not. 
+	*/
 	ArdourCanvas::Group* _master_group;
 
 	/* The group containing all trackviews.  Only scrolled vertically. */
@@ -779,6 +786,7 @@ class Editor : public PublicEditor
 	static const double timebar_height;
 	guint32 visible_timebars;
 	gdouble canvas_timebars_vsize;
+	gdouble get_canvas_timebars_vsize () const { return canvas_timebars_vsize; }
 	Gtk::Menu          *editor_ruler_menu;
 	
 	ArdourCanvas::SimpleRect* tempo_bar;
@@ -899,6 +907,8 @@ class Editor : public PublicEditor
 	sigc::connection control_scroll_connection;
 
 	gdouble get_trackview_group_vertical_offset () const { return vertical_adjustment.get_value () - canvas_timebars_vsize;}
+	
+	ArdourCanvas::Group* get_background_group () const { return _background_group; }
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
 	double last_trackview_group_vertical_offset;
 	void tie_vertical_scrolling ();
@@ -1138,6 +1148,7 @@ class Editor : public PublicEditor
 	void toggle_region_mute ();
 	void toggle_region_lock ();
 	void toggle_region_opaque ();
+	void toggle_record_enable ();
 	void set_region_lock_style (ARDOUR::Region::PositionLockStyle);
 	void raise_region ();
 	void raise_region_to_top ();
@@ -1248,16 +1259,14 @@ class Editor : public PublicEditor
 	
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
 
-	void _do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+	bool  idle_drop_paths  (std::vector<Glib::ustring> paths, nframes64_t frame, double ypos);
+	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
+	
 	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-	bool idle_do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-
-	void _do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 	void do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
-	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
 	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
-			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
+			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>, bool, uint32_t total);
 	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
@@ -1286,10 +1295,20 @@ class Editor : public PublicEditor
 
 	/* import specific info */
 
-	ARDOUR::Session::import_status import_status;
+	struct EditorImportStatus : public ARDOUR::Session::import_status {
+	    Editing::ImportMode mode;
+	    nframes64_t pos;
+	    int target_tracks;
+	    int target_regions;
+	    boost::shared_ptr<ARDOUR::Track> track;
+	    bool replace;
+	};
+
+	EditorImportStatus import_status;
 	gint import_progress_timeout (void *);
 	static void *_import_thread (void *);
 	void* import_thread ();
+	void finish_import ();
 
 	/* to support this ... */
 
@@ -1338,6 +1357,7 @@ class Editor : public PublicEditor
 
 	void add_location_mark (nframes64_t where);
 	void add_location_from_audio_region ();
+	void add_locations_from_audio_region ();
 	void add_location_from_selection ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
@@ -1382,6 +1402,7 @@ class Editor : public PublicEditor
 	double snap_threshold;
 
 	void handle_gui_changes (const string &, void *);
+	bool ignore_gui_changes;
 
 	void    hide_all_tracks (bool with_select);
 
@@ -1396,6 +1417,8 @@ class Editor : public PublicEditor
 
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
+
+	void region_gain_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	void start_fade_in_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_fade_out_grab (ArdourCanvas::Item*, GdkEvent*);
@@ -1428,6 +1451,7 @@ class Editor : public PublicEditor
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+	void cursor_drag_finished_ensure_locate_callback (ArdourCanvas::Item*, GdkEvent*);
 	void marker_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void marker_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void control_point_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -1448,6 +1472,7 @@ class Editor : public PublicEditor
 	void start_region_brush_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_cursor_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_cursor_grab_no_stop (ArdourCanvas::Item*, GdkEvent*);
 	void start_marker_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_control_point_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_line_grab_from_regionview (ArdourCanvas::Item*, GdkEvent*);
@@ -1784,7 +1809,9 @@ public:
 	ArdourCanvas::SimpleRect*  range_marker_drag_rect;
 
 	void update_marker_drag_item (ARDOUR::Location *);
-	
+#ifdef GTKOSX
+	ArdourCanvas::SimpleRect     *bogus_background_rect;
+#endif
 	ArdourCanvas::SimpleRect     *transport_bar_range_rect;
 	ArdourCanvas::SimpleRect     *transport_bar_preroll_rect;
 	ArdourCanvas::SimpleRect     *transport_bar_postroll_rect;
@@ -1996,7 +2023,6 @@ public:
 						       guint               info,
 						       guint               time);
 
-
 	void  drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
 			   gint                x,
 			   gint                y,
@@ -2109,6 +2135,7 @@ public:
 	    Gtk::ComboBoxText     stretch_opts_selector;
 	    Gtk::Label            stretch_opts_label;
 	    Gtk::ToggleButton     precise_button;
+	    Gtk::ToggleButton     preserve_formants_button;
 	    Gtk::HBox             opts_box;
 
 	    Gtk::Button*          cancel_button;
@@ -2151,7 +2178,9 @@ public:
 
 	void detach_tearoff (Gtk::Box* b, Gtk::Window* w);
 	void reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n);
-
+#ifdef GTKOSX
+	void ensure_all_elements_drawn ();
+#endif
 	/* nudging tracks */
 
 	void nudge_track (bool use_edit_point, bool forwards);
@@ -2250,6 +2279,7 @@ public:
 	bool entered_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);
 	void set_entered_regionview (RegionView*);
+	void ensure_track_visible (TimeAxisView*);
 	gint left_automation_track ();
 
 	bool _new_regionviews_show_envelope;

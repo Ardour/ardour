@@ -1,0 +1,542 @@
+Index: gtk/gtktreeview.c
+===================================================================
+--- gtk/gtktreeview.c	(revision 21770)
++++ gtk/gtktreeview.c	(working copy)
+@@ -2534,6 +2534,7 @@
+       gboolean row_double_click = FALSE;
+       gboolean rtl;
+       gboolean node_selected;
++      gboolean edits_allowed;
+ 
+       /* Empty tree? */
+       if (tree_view->priv->tree == NULL)
+@@ -2643,9 +2644,17 @@
+ 
+       tree_view->priv->focus_column = column;
+ 
++      /* ARDOUR HACK */
++
++      if (g_object_get_data (G_OBJECT(tree_view), "mouse-edits-require-mod1")) {
++	      edits_allowed = (event->state & GDK_MOD1_MASK);
++      } else {
++	      /* regular GTK design: do edits if none of the default modifiers are active */
++	      edits_allowed = !(event->state & gtk_accelerator_get_default_mod_mask ());
++      }
++
+       /* decide if we edit */
+-      if (event->type == GDK_BUTTON_PRESS && event->button == 1 &&
+-	  !(event->state & gtk_accelerator_get_default_mod_mask ()))
++      if (event->type == GDK_BUTTON_PRESS && event->button == 1 && edits_allowed)
+ 	{
+ 	  GtkTreePath *anchor;
+ 	  GtkTreeIter iter;
+Index: gtk/gtkquartz.c
+===================================================================
+--- gtk/gtkquartz.c	(revision 21770)
++++ gtk/gtkquartz.c	(working copy)
+@@ -24,6 +24,23 @@
+ #include "gtkalias.h"
+ 
+ NSImage *
++_gtk_quartz_create_image_from_drawable (GdkDrawable* drawable)
++{
++	GdkPixbuf* pixbuf;
++	NSImage* image = NULL;
++
++	pixbuf = gdk_pixbuf_get_from_drawable (NULL, drawable, NULL, 
++						  0, 0, /* src */
++						  0, 0, /* dst */
++						  -1, -1);
++	if (pixbuf) 
++   	  image = _gtk_quartz_create_image_from_pixbuf (pixbuf);
++	
++	return image;
++}
++
++
++NSImage *
+ _gtk_quartz_create_image_from_pixbuf (GdkPixbuf *pixbuf)
+ {
+   CGColorSpaceRef colorspace;
+Index: gtk/gtkquartz.h
+===================================================================
+--- gtk/gtkquartz.h	(revision 21770)
++++ gtk/gtkquartz.h	(working copy)
+@@ -41,6 +41,7 @@
+ 						    GtkSelectionData *selection_data);
+ 			
+ NSImage *_gtk_quartz_create_image_from_pixbuf (GdkPixbuf *pixbuf);
++NSImage *_gtk_quartz_create_image_from_drawable (GdkDrawable *drawable);
+ 			    
+ G_END_DECLS
+ 
+Index: gtk/gtktooltip.c
+===================================================================
+--- gtk/gtktooltip.c	(revision 21770)
++++ gtk/gtktooltip.c	(working copy)
+@@ -426,6 +426,7 @@
+ gtk_tooltip_trigger_tooltip_query (GdkDisplay *display)
+ {
+   gint x, y;
++  gint rx, ry;
+   GdkWindow *window;
+   GdkEvent event;
+ 
+@@ -434,10 +435,14 @@
+   if (!window)
+     return;
+ 
++  gdk_window_get_origin (window, &rx, &ry);
++
+   event.type = GDK_MOTION_NOTIFY;
+   event.motion.window = window;
+   event.motion.x = x;
++  event.motion.x_root = rx + x;
+   event.motion.y = y;
++  event.motion.y_root = ry + y;
+   event.motion.is_hint = FALSE;
+ 
+   _gtk_tooltip_handle_event (&event);
+Index: gtk/gtkdnd-quartz.c
+===================================================================
+--- gtk/gtkdnd-quartz.c	(revision 21770)
++++ gtk/gtkdnd-quartz.c	(working copy)
+@@ -63,6 +63,11 @@
+ 						 gboolean          create);
+ static void gtk_drag_source_site_destroy        (gpointer           data);
+ 
++static GtkDragSourceInfo *gtk_drag_get_source_info (GdkDragContext *context,
++						    gboolean        create);
++
++extern GdkDragContext *gdk_quartz_drag_source_context(); /* gdk/quartz/gdkdnd-quartz.c */
++
+ struct _GtkDragSourceSite 
+ {
+   GdkModifierType    start_button_mask;
+@@ -89,13 +94,16 @@
+ 
+ struct _GtkDragSourceInfo 
+ {
++  GtkWidget         *source_widget;
+   GtkWidget         *widget;
+   GtkTargetList     *target_list; /* Targets for drag data */
+   GdkDragAction      possible_actions; /* Actions allowed by source */
+   GdkDragContext    *context;	  /* drag context */
+-
++  NSEvent           *nsevent;     /* what started it */
+   gint hot_x, hot_y;		  /* Hot spot for drag */
+   GdkPixbuf         *icon_pixbuf;
++  gboolean           success;
++  gboolean           delete;
+ };
+ 
+ struct _GtkDragDestSite 
+@@ -223,7 +231,9 @@
+ 			     selection_data,
+ 			     0, time);
+     }
++
+   
++  
+   if (site && site->flags & GTK_DEST_DEFAULT_DROP)
+     {
+       gtk_drag_finish (context, 
+@@ -233,19 +243,24 @@
+     }      
+ }
+ 
+-
+-GtkWidget *
+-gtk_drag_get_source_widget (GdkDragContext *context)
+-{
+-  return NULL;
+-}
+-
+ void 
+ gtk_drag_finish (GdkDragContext *context,
+ 		 gboolean        success,
+ 		 gboolean        del,
+ 		 guint32         time)
+ {
++	GtkDragSourceInfo *info;
++	GdkDragContext* source_context = gdk_quartz_drag_source_context ();
++
++	if (source_context) 
++	  {
++	     info = gtk_drag_get_source_info (source_context, FALSE);
++	     if (info) 
++	       {
++   	          info->success = success;
++	          info->delete = del;
++	       }
++	  }
+ }
+ 
+ static void
+@@ -307,6 +322,22 @@
+   g_object_set_qdata (G_OBJECT (context), dest_info_quark, NULL);
+ }
+ 
++GtkWidget *
++gtk_drag_get_source_widget (GdkDragContext *context)
++{
++  GtkDragSourceInfo *info;
++  GdkDragContext* real_source_context = gdk_quartz_drag_source_context();
++
++  if (!real_source_context)
++    return NULL;
++
++  info = gtk_drag_get_source_info (real_source_context, FALSE);
++  if (!info)
++     return NULL;
++
++  return info->source_widget;
++}
++
+ /*************************************************************
+  * gtk_drag_highlight_expose:
+  *     Callback for expose_event for highlighted widgets.
+@@ -857,6 +888,8 @@
+ 	gtk_drag_get_data (widget, context, target, time);
+     }
+   
++  /* leave a note for the source-side context about the action chosen */
++  
+   g_signal_emit_by_name (widget, "drag-drop",
+ 			 context, x, y, time, &retval);
+ 
+@@ -1031,6 +1064,45 @@
+   return GDK_NONE;
+ }
+ 
++static gboolean
++gtk_drag_begin_idle (gpointer arg)
++{
++  GdkDragContext* context = (GdkDragContext*) arg;
++  GtkDragSourceInfo* info = gtk_drag_get_source_info (context, FALSE);
++  NSWindow *nswindow;
++  NSPasteboard *pasteboard;
++  GtkDragSourceOwner *owner;
++  NSPoint point;
++
++  g_assert (info != NULL);
++
++  pasteboard = [NSPasteboard pasteboardWithName:NSDragPboard];
++  owner = [[GtkDragSourceOwner alloc] initWithInfo:info];
++
++  [pasteboard declareTypes:_gtk_quartz_target_list_to_pasteboard_types (info->target_list) owner:owner];
++
++  if ((nswindow = get_toplevel_nswindow (info->source_widget)) == NULL)
++     return FALSE;
++  
++  /* Ref the context. It's unreffed when the drag has been aborted */
++  g_object_ref (info->context);
++
++  /* FIXME: If the event isn't a mouse event, use the global cursor position instead */
++  point = [info->nsevent locationInWindow];
++
++  [nswindow dragImage:_gtk_quartz_create_image_from_pixbuf (info->icon_pixbuf)
++                   at:point
++               offset:NSMakeSize(0, 0)
++                event:info->nsevent
++           pasteboard:pasteboard
++               source:nswindow
++            slideBack:YES];
++
++  [info->nsevent release];
++
++  return FALSE;
++}
++
+ static GdkDragContext *
+ gtk_drag_begin_internal (GtkWidget         *widget,
+ 			 GtkDragSourceSite *site,
+@@ -1042,16 +1114,13 @@
+   GtkDragSourceInfo *info;
+   GdkDragContext *context;
+   NSWindow *nswindow;
+-  NSPasteboard *pasteboard;
+-  GtkDragSourceOwner *owner;
+-  NSEvent *nsevent;
+-  NSPoint point;
+ 
+   context = gdk_drag_begin (NULL, NULL);
+   context->is_source = TRUE;
+ 
+   info = gtk_drag_get_source_info (context, TRUE);
+   
++  info->source_widget = g_object_ref (widget);
+   info->widget = g_object_ref (widget);
+   info->target_list = target_list;
+   gtk_target_list_ref (target_list);
+@@ -1086,13 +1155,13 @@
+ 		GdkPixbuf *pixbuf;
+ 
+ 		pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, 1, 1);
+-		gdk_pixbuf_fill (pixbuf, 0xffffff);
+-	    
+-		gtk_drag_set_icon_pixbuf (context,
+-					  pixbuf,
++ 		gdk_pixbuf_fill (pixbuf, 0xffffff);
++
++ 		gtk_drag_set_icon_pixbuf (context,
++ 					  pixbuf,
+ 					  0, 0);
+ 
+-		g_object_unref (pixbuf);
++ 		g_object_unref (pixbuf);
+ 	      }
+ 	    break;
+ 	  case GTK_IMAGE_PIXBUF:
+@@ -1117,31 +1186,17 @@
+ 	  }
+     }
+ 
+-  gdk_pointer_ungrab (0);
+-  
+-  pasteboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+-  owner = [[GtkDragSourceOwner alloc] initWithInfo:info];
++  nswindow = get_toplevel_nswindow (widget);
++  info->nsevent = [nswindow currentEvent];
++  [info->nsevent retain];
+ 
+-  [pasteboard declareTypes:_gtk_quartz_target_list_to_pasteboard_types (target_list) owner:owner];
++  /* drag will begin in an idle handler to avoid nested run loops */
+ 
+-  /* Ref the context. It's unreffed when the drag has been aborted */
+-  g_object_ref (info->context);
++  g_idle_add_full (G_PRIORITY_HIGH_IDLE, gtk_drag_begin_idle, context, NULL);
+ 
+-  nswindow = get_toplevel_nswindow (widget);
++  gdk_pointer_ungrab (0);
+ 
+-  /* FIXME: If the event isn't a mouse event, use the global cursor position instead */
+-  nsevent = [nswindow currentEvent];
+-  point = [nsevent locationInWindow];
+-
+-  [nswindow dragImage:_gtk_quartz_create_image_from_pixbuf (info->icon_pixbuf)
+-                   at:point
+-               offset:NSMakeSize(0, 0)
+-                event:nsevent
+-           pasteboard:pasteboard
+-               source:nswindow
+-            slideBack:YES];
+-
+-  return info->context;
++  return context;
+ }
+ 
+ GdkDragContext *
+@@ -1668,7 +1723,20 @@
+ 			  gint               hot_x,
+ 			  gint               hot_y)
+ {
+-  g_warning ("gtk_drag_set_icon_pixmap is not supported on Mac OS X");
++  GdkPixbuf *pixbuf;
++  
++  g_return_if_fail (GDK_IS_DRAG_CONTEXT (context));
++  g_return_if_fail (context->is_source);
++  g_return_if_fail (GDK_IS_COLORMAP (colormap));
++  g_return_if_fail (GDK_IS_PIXMAP (pixmap));
++  
++  pixbuf = gdk_pixbuf_get_from_drawable (NULL, pixmap, colormap,
++					 0, 0, /* src */
++					 0, 0, /* dst */
++					 -1, -1);
++  
++  gtk_drag_set_icon_pixbuf (context, pixbuf, hot_x, hot_y);
++  g_object_unref (pixbuf);
+ }
+ 
+ /**
+@@ -1760,6 +1828,9 @@
+   g_signal_emit_by_name (info->widget, "drag-end", 
+ 			 info->context);
+ 
++  if (info->source_widget)
++    g_object_unref (info->source_widget);
++
+   if (info->widget)
+     g_object_unref (info->widget);
+ 
+@@ -1781,6 +1852,10 @@
+ static void
+ gtk_drag_drop_finished (GtkDragSourceInfo *info)
+ {
++  if (info->success && info->delete) 
++     g_signal_emit_by_name (info->source_widget, "drag-data-delete",
++			    info->context);
++
+   /* Workaround for the fact that the NS API blocks until the drag is
+    * over. This way the context is still valid when returning from
+    * drag_begin, even if it will still be quite useless. See bug #501588.
+Index: gdk/quartz/gdkevents-quartz.c
+===================================================================
+--- gdk/quartz/gdkevents-quartz.c	(revision 21770)
++++ gdk/quartz/gdkevents-quartz.c	(working copy)
+@@ -112,6 +112,18 @@
+   return ((GdkEventPrivate *) event)->windowing_data;
+ }
+ 
++/* A category that exposes the protected carbon event for an NSEvent. */
++@interface NSEvent (GdkQuartzNSEvent)
++- (void *)gdk_quartz_event_ref;
++@end 
++
++@implementation NSEvent (GdkQuartzNSEvent)
++- (void *)gdk_quartz_event_ref
++{
++  return _eventRef;
++}
++@end
++
+ void 
+ _gdk_events_init (void)
+ {
+@@ -1668,6 +1680,65 @@
+ }
+ 
+ static gboolean
++_gdk_quartz_possibly_forward_accelerator (NSEvent* nsevent)
++{
++  /* Special-case menu shortcut events. We create command events for
++   * those and forward to the corresponding menu.
++   */
++  if ((!_gdk_quartz_keyboard_grab_window ||
++       (_gdk_quartz_keyboard_grab_window && keyboard_grab_owner_events)) &&
++      [nsevent type] == NSKeyDown)
++    {
++      EventRef event_ref;
++      MenuRef menu_ref;
++      MenuItemIndex index;
++
++      event_ref = [nsevent gdk_quartz_event_ref];
++      if (IsMenuKeyEvent (NULL, event_ref,
++                          kMenuEventQueryOnly, 
++                          &menu_ref, &index))
++        {
++          MenuCommand menu_command;
++          HICommand hi_command;
++
++          if (GetMenuItemCommandID (menu_ref, index, &menu_command) != noErr)
++            return FALSE;
++   
++          hi_command.commandID = menu_command;
++          hi_command.menu.menuRef = menu_ref;
++          hi_command.menu.menuItemIndex = index;
++
++          CreateEvent (NULL, kEventClassCommand, kEventCommandProcess, 
++                       0, kEventAttributeUserEvent, &event_ref);
++          SetEventParameter (event_ref, kEventParamDirectObject, 
++                             typeHICommand, 
++                             sizeof (HICommand), &hi_command);
++
++          SendEventToEventTarget (event_ref, GetMenuEventTarget (menu_ref));
++
++          ReleaseEvent (event_ref);
++
++          return TRUE;
++        }
++    }
++  return FALSE;
++}
++
++gboolean
++gdk_quartz_possibly_forward (GdkEvent* event)
++{
++  NSEvent *nsevent;
++  g_return_val_if_fail (event != NULL, FALSE);
++
++  nsevent = ((GdkEventPrivate*)event)->windowing_data;
++
++  if (nsevent)
++    return _gdk_quartz_possibly_forward_accelerator (nsevent);
++
++  return FALSE;
++}
++
++static gboolean
+ gdk_event_translate (NSEvent *nsevent)
+ {
+   NSWindow *nswindow;
+Index: gdk/quartz/gdkdnd-quartz.c
+===================================================================
+--- gdk/quartz/gdkdnd-quartz.c	(revision 21770)
++++ gdk/quartz/gdkdnd-quartz.c	(working copy)
+@@ -101,6 +101,12 @@
+ 
+ GdkDragContext *_gdk_quartz_drag_source_context = NULL;
+ 
++GdkDragContext*
++gdk_quartz_drag_source_context()
++{
++  return _gdk_quartz_drag_source_context;
++}
++
+ GdkDragContext * 
+ gdk_drag_begin (GdkWindow     *window,
+ 		GList         *targets)
+Index: gdk/quartz/GdkQuartzWindow.c
+===================================================================
+--- gdk/quartz/GdkQuartzWindow.c	(revision 21770)
++++ gdk/quartz/GdkQuartzWindow.c	(working copy)
+@@ -461,8 +461,29 @@
+ {
+   GdkDragAction result = 0;
+ 
++  /* GDK and Quartz drag operations do not map 1:1.
++     This mapping represents about the best that we
++     can come up.
++
++     Note that NSDragOperationPrivate and GDK_ACTION_PRIVATE
++     have almost opposite meanings: the GDK one means that the
++     destination is solely responsible for the action; the Quartz
++     one means that the source and destination will agree
++     privately on the action. NSOperationGeneric is close in meaning
++     to GDK_ACTION_PRIVATE but there is a problem: it will be
++     sent for any ordinary drag, and likely not understood
++     by any intra-widget drag (since the source & dest are the
++     same)
++   */
++
+   if (operation & NSDragOperationGeneric)
++    result |= GDK_ACTION_MOVE;
++  if (operation & NSDragOperationCopy)
+     result |= GDK_ACTION_COPY;
++  if (operation & NSDragOperationMove)
++    result |= GDK_ACTION_MOVE;
++  if (operation & NSDragOperationLink)
++    result |= GDK_ACTION_LINK;
+ 
+   return result;
+ }
+@@ -474,6 +495,10 @@
+ 
+   if (action & GDK_ACTION_COPY)
+     result |= NSDragOperationCopy;
++  if (action & GDK_ACTION_LINK)
++    result |= NSDragOperationLink;
++  if (action & GDK_ACTION_MOVE)
++    result |= NSDragOperationMove;
+ 
+   return result;
+ }
+@@ -485,6 +510,7 @@
+ 
+   GDK_DRAG_CONTEXT_PRIVATE (current_context)->dragging_info = sender;
+   current_context->suggested_action = drag_operation_to_drag_action ([sender draggingSourceOperationMask]);
++  current_context->actions = current_context->suggested_action;
+ }
+ 
+ - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+@@ -510,6 +536,10 @@
+ 
+ - (void)draggingEnded:(id <NSDraggingInfo>)sender
+ {
++  /* leave a note for the source about what action was taken */
++  if (_gdk_quartz_drag_source_context && current_context) 
++   _gdk_quartz_drag_source_context->action = current_context->action;
++
+   if (current_context)
+     g_object_unref (current_context);
+   current_context = NULL;

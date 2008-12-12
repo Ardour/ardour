@@ -1030,9 +1030,9 @@ void MackieControlProtocol::update_automation( RouteSignal & rs )
 	}
 }
 
-void MackieControlProtocol::poll_automation()
+void MackieControlProtocol::poll_automation ()
 {
-	if ( _active )
+	if ( _active && _automation_last.elapsed() >= 20 )
 	{
 		// do all currently mapped routes
 		for( RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it )
@@ -1041,7 +1041,92 @@ void MackieControlProtocol::poll_automation()
 		}
 		
 		// and the master strip
-		if ( master_route_signal != 0 ) update_automation( *master_route_signal );
+		if ( master_route_signal != 0 )
+		{
+			update_automation( *master_route_signal );
+		}
+		
+		update_timecode_display();
+		
+		_automation_last.start();
+	}
+}
+
+string MackieControlProtocol::format_bbt_timecode( nframes_t now_frame )
+{
+	BBT_Time bbt_time;
+	session->bbt_time( now_frame, bbt_time );
+	
+	// According to the Logic docs
+	// digits: 888/88/88/888
+	// BBT mode: Bars/Beats/Subdivisions/Ticks
+	ostringstream os;
+	os << setw(3) << setfill('0') << bbt_time.bars;
+	os << setw(2) << setfill('0') << bbt_time.beats;
+	
+	// figure out subdivisions per beat
+	const Meter & meter = session->tempo_map().meter_at( now_frame );
+	int subdiv = 2;
+	if ( meter.note_divisor() == 8 && (meter.beats_per_bar() == 12.0 || meter.beats_per_bar() == 9.0 || meter.beats_per_bar() == 6.0) )
+	{
+		subdiv = 3;
+	}
+	
+	uint32_t subdivisions = bbt_time.ticks / uint32_t( Meter::ticks_per_beat / subdiv );
+	uint32_t ticks = bbt_time.ticks % uint32_t( Meter::ticks_per_beat / subdiv );
+	
+	os << setw(2) << setfill('0') << subdivisions + 1;
+	os << setw(3) << setfill('0') << ticks;
+	
+	return os.str();
+}
+
+string MackieControlProtocol::format_smpte_timecode( nframes_t now_frame )
+{
+	SMPTE::Time smpte;
+	session->smpte_time( now_frame, smpte );
+
+	// According to the Logic docs
+	// digits: 888/88/88/888
+	// SMPTE mode: Hours/Minutes/Seconds/Frames
+	ostringstream os;
+	os << setw(3) << setfill('0') << smpte.hours;
+	os << setw(2) << setfill('0') << smpte.minutes;
+	os << setw(2) << setfill('0') << smpte.seconds;
+	os << setw(3) << setfill('0') << smpte.frames;
+	
+	return os.str();
+}
+
+void MackieControlProtocol::update_timecode_display()
+{
+	if ( surface().has_timecode_display() )
+	{
+		// do assignment here so current_frame is fixed
+		nframes_t current_frame = session->transport_frame();
+		string timecode;
+		
+		switch ( _timecode_type )
+		{
+			case ARDOUR::AnyTime::BBT:
+				timecode = format_bbt_timecode( current_frame );
+				break;
+			case ARDOUR::AnyTime::SMPTE:
+				timecode = format_smpte_timecode( current_frame );
+				break;
+			default:
+				ostringstream os;
+				os << "Unknown timecode: " << _timecode_type;
+				throw runtime_error( os.str() );
+		}	
+		
+		// only write the timecode string to the MCU if it's changed
+		// since last time. This is to reduce midi bandwidth used.
+		if ( timecode != _timecode_last )
+		{
+			surface().display_timecode( mcu_port(), builder, timecode, _timecode_last );
+			_timecode_last = timecode;
+		}
 	}
 }
 

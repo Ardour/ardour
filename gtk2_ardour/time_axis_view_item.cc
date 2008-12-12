@@ -165,6 +165,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame->property_y2() = (double) trackview.current_height();
 		frame->property_outline_pixels() = 1;
 		frame->property_outline_what() = 0xF;
+		frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 
 		/* by default draw all 4 edges */
 
@@ -230,12 +231,14 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame_handle_start->property_x2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH;
 		frame_handle_start->property_y1() = (double) 1.0;
 		frame_handle_start->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH+1;
+		frame_handle_start->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
 
 		frame_handle_end = new ArdourCanvas::SimpleRect (*group);
 		frame_handle_end->property_x1() = (double) (trackview.editor.frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
 		frame_handle_end->property_x2() = (double) trackview.editor.frame_to_pixel(get_duration());
 		frame_handle_end->property_y1() = (double) 1;
 		frame_handle_end->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1;
+		frame_handle_end->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
 
 	} else {
 		frame_handle_start = 0;

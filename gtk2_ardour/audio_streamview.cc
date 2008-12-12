@@ -32,6 +32,7 @@
 #include <ardour/playlist_templates.h>
 #include <ardour/source.h>
 #include <ardour/region_factory.h>
+#include <ardour/profile.h>
 
 #include "audio_streamview.h"
 #include "audio_region_view.h"
@@ -139,7 +140,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 						   _samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
 		} else {
 			region_view = new AudioRegionView (canvas_group, _trackview, region, 
-						   _samples_per_unit, region_color);
+							   _samples_per_unit, region_color);
 		}
 		break;
 	case Destructive:
@@ -821,9 +822,12 @@ AudioStreamView::color_handler ()
 
 	//case cAudioBusBase:
 	if (!_trackview.is_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
+		if (Profile->get_sae() && _trackview.route()->is_master()) {
+			canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioMasterBusBase.get();
+		} else {
+			canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
+		}
 	}
-
 }
 
 void

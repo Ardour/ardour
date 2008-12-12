@@ -206,7 +206,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 		while (pos < read_duration && !tsr.cancel) {
 			
 			nframes_t this_read = 0;
-			
+
 			for (uint32_t i = 0; i < channels; ++i) {
 				
 				this_read = 0;
@@ -229,7 +229,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 				if (this_read != this_time) {
 					error << string_compose
 						(_("tempoize: error reading data from %1 at %2 (wanted %3, got %4)"),
-						 region->name(), pos + region->position(), this_time, this_read) << endmsg;
+						 region->name(), this_position, this_time, this_read) << endmsg;
 					goto out;
 				}
 			}

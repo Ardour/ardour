@@ -165,6 +165,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_record_status, Disabled);
 	loop_changing = false;
 	play_loop = false;
+	have_looped = false;
 	_last_roll_location = 0;
 	_last_record_location = 0;
 	pending_locate_frame = 0;
@@ -172,7 +173,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_locate_flush = false;
 	audio_dstream_buffer_size = 0;
 	midi_dstream_buffer_size = 0;
-	state_tree = 0;
 	state_was_pending = false;
 	set_next_event ();
 	outbound_mtc_smpte_frame = 0;
@@ -187,9 +187,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
 
 	_slave = 0;
-	butler_mixdown_buffer = 0;
-	butler_gain_buffer = 0;
-	mmc = 0;
 	session_send_mmc = false;
 	session_send_mtc = false;
 	post_transport_work = PostTransportWork (0);
@@ -227,8 +224,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	   waveforms for clicks.
 	*/
 	
-	click_data = 0;
-	click_emphasis_data = 0;
 	click_length = 0;
 	click_emphasis_length = 0;
 	_clicking = false;
@@ -361,6 +356,8 @@ Session::second_stage_init (bool new_session)
 	
 	MidiClockTicker::instance().set_session(*this);
 	MIDI::Name::MidiPatchManager::instance().set_session(*this);
+
+	/* initial program change will be delivered later; see ::config_changed() */
 
 	BootMessage (_("Reset Control Protocols"));
 
@@ -3272,6 +3269,17 @@ Session::config_changed (const char* parameter_name)
 
 			_mmc_port->midimsg (buf, sizeof (buf), 0);
 		}
+	} else if (PARAM_IS ("initial-program-change")) {
+
+		if (_mmc_port && Config->get_initial_program_change() >= 0) {
+			MIDI::byte* buf = new MIDI::byte[2];
+			
+			buf[0] = MIDI::program; // channel zero by default
+			buf[1] = (Config->get_initial_program_change() & 0x7f);
+			// deliver_midi (_mmc_port, buf, 2);
+		}
+	} else if (PARAM_IS ("solo-mute-override")) {
+		catch_up_on_solo_mute_override ();
 	}
 
 	set_dirty ();

@@ -2331,8 +2331,9 @@ void
 IO::set_gain (gain_t val, void *src)
 {
 	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231f)
+	if (val > 1.99526231f) {
 		val = 1.99526231f;
+	}
 
 	if (src != _gain_control.get()) {
 		_gain_control->set_value(val);
@@ -2347,7 +2348,7 @@ IO::set_gain (gain_t val, void *src)
 	}
 
 	if (_session.transport_stopped()) {
-		_gain = val;
+		// _gain = val;
 	}
 	
 	/*
@@ -2540,7 +2541,6 @@ IO::set_active (bool yn)
 	_active = yn; 
 	 active_changed(); /* EMIT SIGNAL */
 }
-
 
 AudioPort*
 IO::audio_input(uint32_t n) const

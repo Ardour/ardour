@@ -78,6 +78,19 @@ public:
 
 		_silent = ( (src.silent() && _silent) || (_silent && gain_coeff == 0) );
 	}
+
+	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
+	 * scaling by @a gain_coeff */
+	void accumulate_with_gain_from(const Sample* src_raw, nframes_t len, nframes_t offset, gain_t gain_coeff) {
+		assert(_capacity > 0);
+		assert(offset + len <= _capacity);
+
+		Sample*       const dst_raw = _data + offset;
+
+		mix_buffers_with_gain (dst_raw, src_raw, len, gain_coeff);
+
+		_silent = (_silent && gain_coeff == 0);
+	}
 	
 	void apply_gain(gain_t gain, nframes_t len, nframes_t offset=0) {
 		apply_gain_to_buffer (_data + offset, len, gain);

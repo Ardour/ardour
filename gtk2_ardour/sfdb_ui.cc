@@ -732,7 +732,7 @@ SoundFileBrowser::found_search_clicked ()
 void*
 freesound_search_thread_entry (void* arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("Freesound Search"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freesound Search"));
 
 	static_cast<SoundFileBrowser*>(arg)->freesound_search_thread ();
 	

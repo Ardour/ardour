@@ -377,6 +377,65 @@ AudioTimeAxisView::update_pans (bool show)
 		++i;
 	}
 }
+#if 0
+void
+AudioTimeAxisView::toggle_gain_track ()
+{
+	bool showit = gain_automation_item->get_active();
+
+	if (showit != gain_track->marked_for_display()) {
+		if (showit) {
+			gain_track->set_marked_for_display (true);
+			gain_track->canvas_display->show();
+			gain_track->canvas_background->show();
+			gain_track->get_state_node()->add_property ("shown", X_("yes"));
+		} else {
+			gain_track->set_marked_for_display (false);
+			gain_track->hide ();
+			gain_track->get_state_node()->add_property ("shown", X_("no"));
+		}
+
+		/* now trigger a redisplay */
+		
+		if (!no_redraw) {
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
+AudioTimeAxisView::gain_hidden ()
+{
+	gain_track->get_state_node()->add_property (X_("shown"), X_("no"));
+
+	if (gain_automation_item && !_hidden) {
+		gain_automation_item->set_active (false);
+	}
+
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+}
+
+void
+AudioTimeAxisView::toggle_pan_track ()
+{
+	bool showit = pan_automation_item->get_active();
+
+	if (showit != pan_track->marked_for_display()) {
+		if (showit) {
+			pan_track->set_marked_for_display (true);
+			pan_track->canvas_display->show();
+			pan_track->canvas_background->show();
+			pan_track->get_state_node()->add_property ("shown", X_("yes"));
+		} else {
+			pan_track->set_marked_for_display (false);
+			pan_track->hide ();
+			pan_track->get_state_node()->add_property ("shown", X_("no"));
+		}
+
+		/* now trigger a redisplay */
+	}
+}
+#endif
 		
 void
 AudioTimeAxisView::show_all_automation ()

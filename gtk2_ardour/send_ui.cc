@@ -113,22 +113,20 @@ SendUI::fast_update ()
 }
 	
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
+	: ArdourDialog (string("Ardour: send ") + s->name())
 {
 	ui = new SendUI (s, ss);
 
-	vpacker.set_border_width (5);
-
 	hpacker.pack_start (*ui, true, true);
 
-	vpacker.pack_start (hpacker);
+	get_vbox()->set_border_width (5);
+	get_vbox()->pack_start (hpacker);
 
-	add (vpacker);
 	set_name ("SendUIWindow");
 	
 	going_away_connection = s->GoingAway.connect (mem_fun (*this, &SendUIWindow::send_going_away));
 
 	signal_delete_event().connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
-
 }
 
 SendUIWindow::~SendUIWindow ()

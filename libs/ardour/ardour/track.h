@@ -124,6 +124,9 @@ class Track : public Route
 	    vector<FreezeRecordProcessorInfo*> processor_info;
 	    bool                               have_mementos;
 	    FreezeState                        state;
+	    gain_t                          gain;
+	    AutoState                       gain_automation_state;
+	    AutoState                       pan_automation_state;
 	};
 
 	struct RecEnableControllable : public PBD::Controllable {

@@ -108,28 +108,30 @@
 (gtk_accel_path "<Actions>/Common/ToggleBigClock" "<%WINDOW%>b")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "<%SECONDARY%>n")
 (gtk_accel_path "<Actions>/Editor/mute-unmute-region" "<%SECONDARY%>m")
-(gtk_accel_path "<Actions>/Common/goto-mixer" "<%WINDOW%>m")
+(gtk_accel_path "<Actions>/Common/toggle-editor-mixer-on-top" "<%WINDOW%>m")
 
 ;; arrow keys, navigation etc.
 
 (gtk_accel_path "<Actions>/Editor/step-tracks-up" "uparrow")
-(gtk_accel_path "<Actions>/Transport/TransitionToRoll" "<%PRIMARY%>uparrow")
+(gtk_accel_path "<Actions>/Transport/TransitionToRoll" "<%TERTIARY%>uparrow")
 (gtk_accel_path "<Actions>/Editor/select-prev-route" "<%SECONDARY%>uparrow")
-(gtk_accel_path "<Actions>/Editor/move-selected-tracks-up" "<%TERTIARY%>uparrow")
+(gtk_accel_path "<Actions>/Editor/move-selected-tracks-up" "<%PRIMARY%>uparrow")
 
 (gtk_accel_path "<Actions>/Editor/step-tracks-down" "downarrow")
-(gtk_accel_path "<Actions>/Transport/TransitionToReverse" "<%PRIMARY%>downarrow")
+(gtk_accel_path "<Actions>/Transport/TransitionToReverse" "<%TERTIARY%>downarrow")
 (gtk_accel_path "<Actions>/Editor/select-next-route" "<%SECONDARY%>downarrow")
-(gtk_accel_path "<Actions>/Editor/move-selected-tracks-down" "<%TERTIARY%>downarrow")
+(gtk_accel_path "<Actions>/Editor/move-selected-tracks-down" "<%PRIMARY%>downarrow")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary" "leftarrow")
 (gtk_accel_path "<Actions>/Editor/tab-to-transient-backwards" "<%PRIMARY%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/nudge-playhead-backward" "<%SECONDARY%>leftarrow")
+(gtk_accel_path "<Actions>/Transport/Rewind" "<%TERTIARY%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/selected-marker-to-previous-region-boundary" "<%PRIMARY%><%TERTIARY%>leftarrow")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary" "rightarrow")
 (gtk_accel_path "<Actions>/Editor/tab-to-transient-forwards" "<%PRIMARY%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/nudge-playhead-forward" "<%SECONDARY%>rightarrow")
+(gtk_accel_path "<Actions>/Transport/Forward" "<%TERTIARY%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/selected-marker-to-next-region-boundary" "<%PRIMARY%><%TERTIARY%>rightarrow")
 
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
@@ -214,8 +216,9 @@
 (gtk_accel_path "<Actions>/Editor/toggle-edit-mode" "1")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-mode" "2")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-choice" "3")
-(gtk_accel_path "<Actions>/Transport/ToggleAutoReturn" "4")
-(gtk_accel_path "<Actions>/Transport/ToggleClick" "5")
+(gtk_accel_path "<Actions>/Editor/step-mouse-mode" "4")
+(gtk_accel_path "<Actions>/Transport/ToggleAutoReturn" "5")
+(gtk_accel_path "<Actions>/Transport/ToggleClick" "6")
 (gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "9")
 (gtk_accel_path "<Actions>/Editor/set-tempo-from-edit-range" "0")
 

@@ -152,7 +152,6 @@ Matrix::reset_size ()
 	*/
 	
 	float w = 0;
-	float w1;
 	float h = 0;
 	cairo_text_extents_t extents;
 	cairo_t* cr;

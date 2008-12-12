@@ -171,7 +171,7 @@ ALSA_SequencerMidiPort::create_ports (const Port::Descriptor& desc)
 		caps |= SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
 	if (desc.mode == O_RDONLY  ||  desc.mode == O_RDWR)
 		caps |= SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ;
-	
+
 	if (0 <= (err = snd_seq_create_simple_port (seq, desc.tag.c_str(), caps, 
 						    (SND_SEQ_PORT_TYPE_MIDI_GENERIC|
 						     SND_SEQ_PORT_TYPE_SOFTWARE|
@@ -308,13 +308,17 @@ ALSA_SequencerMidiPort::get_connections (vector<SequencerPortAddress>& connectio
 	seq_addr.client = snd_seq_client_id (seq);
 	seq_addr.port   = port_id;
 	snd_seq_query_subscribe_set_root(subs, &seq_addr);
-	
+
 	while (snd_seq_query_port_subscribers(seq, subs) >= 0) {
 
-		seq_addr = *snd_seq_query_subscribe_get_addr (subs);
-		
-		connections.push_back (SequencerPortAddress (seq_addr.client,
-							     seq_addr.port));
+		if (snd_seq_query_subscribe_get_time_real (subs)) {
+			/* interesting connection */
+
+			seq_addr = *snd_seq_query_subscribe_get_addr (subs);
+			
+			connections.push_back (SequencerPortAddress (seq_addr.client,
+								     seq_addr.port));
+		}
 
 		snd_seq_query_subscribe_set_index(subs, snd_seq_query_subscribe_get_index(subs) + 1);
 	}

@@ -413,6 +413,10 @@ class Session : public PBD::StatefulDestructible
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
 
+	MIDI::byte get_mtc_smpte_bits() const { 
+		return mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
+	}
+
 	float smpte_frames_per_second() const;
 	bool smpte_drop_frames() const;
 
@@ -610,6 +614,7 @@ class Session : public PBD::StatefulDestructible
 	    string doing_what;
 
 	    /* control info */
+	    uint32_t total;
 	    SrcQuality quality;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;
@@ -617,7 +622,6 @@ class Session : public PBD::StatefulDestructible
 
 	    /* result */
 	    SourceList sources;
-
 	};
 
 	void import_audiofiles (import_status&);
@@ -963,6 +967,10 @@ class Session : public PBD::StatefulDestructible
 
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);
+
+	/* metadata */
+
+	SessionMetadata & metadata () { return *_metadata; }
 
   protected:
 	friend class AudioEngine;
@@ -1457,6 +1465,7 @@ class Session : public PBD::StatefulDestructible
 	void route_mute_changed (void *src);
 	void route_solo_changed (void *src, boost::weak_ptr<Route>);
 	void catch_up_on_solo ();
+	void catch_up_on_solo_mute_override ();
 	void update_route_solo_state ();
 	void modify_solo_mute (bool, bool);
 	void strip_portname_for_solo (string& portname);
@@ -1701,6 +1710,12 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_physical_outputs;
 	uint32_t n_physical_inputs;
 
+	uint32_t n_physical_audio_outputs;
+	uint32_t n_physical_audio_inputs;
+
+	uint32_t n_physical_midi_outputs;
+	uint32_t n_physical_midi_inputs;
+
 
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
@@ -1728,8 +1743,10 @@ class Session : public PBD::StatefulDestructible
 	/* Metadata */
 
 	SessionMetadata * _metadata;
-  public:
-	SessionMetadata & metadata () { return *_metadata; }
+
+	/* used in ::audible_frame() */
+
+	mutable bool have_looped;
 };
 
 } // namespace ARDOUR

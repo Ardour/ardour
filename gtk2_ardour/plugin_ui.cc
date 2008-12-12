@@ -183,6 +183,22 @@ PluginUIWindow::on_leave_notify_event (GdkEventCrossing *ev)
 	return false;
 }
 
+bool
+PluginUIWindow::on_focus_in_event (GdkEventFocus *ev)
+{
+	Window::on_focus_in_event (ev);
+	//Keyboard::the_keyboard().magic_widget_grab_focus ();
+	return false;
+}
+
+bool
+PluginUIWindow::on_focus_out_event (GdkEventFocus *ev)
+{
+	Window::on_focus_out_event (ev);
+	//Keyboard::the_keyboard().magic_widget_drop_focus ();
+	return false;
+}
+
 void
 PluginUIWindow::on_show ()
 {
@@ -295,10 +311,6 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 bool
 PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
-	if (non_gtk_gui) {
-		return false;
-	}
-
 	if (!key_press_focus_accelerator_handler (*this, event)) {
 		return PublicEditor::instance().on_key_press_event(event);
 	} else {
@@ -347,6 +359,20 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	bypass_button.set_name ("PluginBypassButton");
 	bypass_button.signal_toggled().connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
+	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+
+	focus_button.signal_button_release_event().connect (mem_fun(*this, &PlugUIBase::focus_toggled));
+	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+
+	/* these images are not managed, so that we can remove them at will */
+
+	focus_out_image = new Image (get_icon (X_("computer_keyboard")));
+	focus_in_image = new Image (get_icon (X_("computer_keyboard_active")));
+	
+	focus_button.add (*focus_out_image);
+
+	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to focus all keyboard events on this plugin window"), "");
+	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
 }
 
 void
@@ -376,6 +402,7 @@ PlugUIBase::save_plugin_setting ()
 	prompter.set_prompt(_("Name of New Preset:"));
 	prompter.add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
 	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	prompter.set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 
 	prompter.show_all();
 
@@ -403,12 +430,27 @@ PlugUIBase::bypass_toggled ()
 
 	if ((x = bypass_button.get_active()) == insert->active()) {
 		insert->set_active (!x);
-		if (insert->active()) {
-			bypass_button.set_label (_("Bypass"));
-		} else {
-			bypass_button.set_label (_("Active"));
-		}
 	}
+}
+
+bool
+PlugUIBase::focus_toggled (GdkEventButton* ev)
+{
+	if (Keyboard::the_keyboard().some_magic_widget_has_focus()) {
+		Keyboard::the_keyboard().magic_widget_drop_focus();
+		focus_button.remove ();
+		focus_button.add (*focus_out_image);
+		focus_out_image->show ();
+		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to focus all keyboard events on this plugin window"), "");
+	} else {
+		Keyboard::the_keyboard().magic_widget_grab_focus();
+		focus_button.remove ();
+		focus_button.add (*focus_in_image);
+		focus_in_image->show ();
+		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to remove keyboard focus from this plugin window"), "");
+	}
+
+	return true;
 }
 
 void

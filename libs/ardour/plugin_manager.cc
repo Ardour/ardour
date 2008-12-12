@@ -130,6 +130,8 @@ PluginManager::PluginManager ()
 	_lv2_world = new LV2World();
 #endif
 
+	BootMessage (_("Discovering Plugins"));
+
 	refresh ();
 }
 
@@ -632,7 +634,7 @@ PluginManager::add_favorite (PluginType t, string id)
 {
 	FavoritePlugin fp (t, id);
 	pair<FavoritePluginList::iterator,bool> res = favorites.insert (fp);
-	cerr << "Added " << t << " " << id << " success ? " << res.second << endl;
+	//cerr << "Added " << t << " " << id << " success ? " << res.second << endl;
 }
 
 void

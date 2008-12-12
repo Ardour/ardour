@@ -128,6 +128,7 @@ setup_osc ()
 		return 0;
 	}
 }
+
 #endif
 
 int
@@ -204,16 +205,17 @@ ARDOUR::setup_midi ()
 			<< endmsg;
 		return 0;
 	}
+ 
 
 	if (default_mtc_port == 0) {
 		warning << string_compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name())
 			<< endmsg;
-	}
+	} 
 
 	if (default_midi_port == 0) {
 		warning << string_compose (_("No MIDI parameter support (MIDI port \"%1\" not available)"), Config->get_midi_port_name())
 			<< endmsg;
-	}
+	} 
 
 	if (default_midi_clock_port == 0) {
 		warning << string_compose (_("No MIDI Clock support (MIDI port \"%1\" not available)"), Config->get_midi_clock_port_name())

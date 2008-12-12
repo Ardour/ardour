@@ -23,6 +23,7 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/barcontroller.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/route_group.h>
 #include <pbd/memento_command.h>
@@ -46,6 +47,7 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/midi_track.h>
 #include <ardour/midi_diskstream.h>
+#include <ardour/profile.h>
 
 #include "i18n.h"
 using namespace sigc;
@@ -92,19 +94,24 @@ RouteUI::init ()
 	was_solo_safe = false;
 	polarity_menu_item = 0;
 	denormal_menu_item = 0;
+	multiple_mute_change = false;
+	multiple_solo_change = false;
 
 	mute_button = manage (new BindableToggleButton (""));
 	mute_button->set_self_managed (true);
 	mute_button->set_name ("MuteButton");
+	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
 
 	solo_button = manage (new BindableToggleButton (""));
 	solo_button->set_self_managed (true);
 	solo_button->set_name ("SoloButton");
+	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 
 	rec_enable_button = manage (new BindableToggleButton (""));
 	rec_enable_button->set_name ("RecordEnableButton");
 	rec_enable_button->set_self_managed (true);
-	
+	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
+
 	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
 }
 
@@ -123,11 +130,6 @@ RouteUI::reset ()
 		mute_menu = 0;
 	}
 	
-	if (remote_control_menu) {
-		delete remote_control_menu;
-		remote_control_menu = 0;
-	}
-
 	if (xml_node) {
 		/* do not delete the node - its owned by the route */
 		xml_node = 0;
@@ -207,10 +209,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 bool
 RouteUI::mute_press(GdkEventButton* ev)
 {
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
-
+	multiple_mute_change = false;
 	if (!ignore_toggle) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
@@ -223,7 +225,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 
 		} else {
 
-			if (ev->button == 2) {
+			if (Keyboard::is_button2_event (ev)) {
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
@@ -234,7 +236,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 				}
 			}
 
-			if (ev->button == 1 || ev->button == 2) {
+			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
@@ -246,6 +248,7 @@ RouteUI::mute_press(GdkEventButton* ev)
                                         cmd->mark();
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
+					multiple_mute_change = true;
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -260,8 +263,11 @@ RouteUI::mute_press(GdkEventButton* ev)
 				} else {
 
 					/* plain click applies change to this route */
-
-					reversibly_apply_route_boolean ("mute change", &Route::set_mute, !_route->muted(), this);
+					if (wait_for_release) {
+						_route->set_mute (!_route->muted(), this);
+					} else {
+						reversibly_apply_route_boolean ("mute change", &Route::set_mute, !_route->muted(), this);
+					}
 				}
 			}
 		}
@@ -277,9 +283,14 @@ RouteUI::mute_release(GdkEventButton* ev)
 	if (!ignore_toggle) {
 		if (wait_for_release){
 			wait_for_release = false;
-			// undo the last op
-			// because the press was the last undoable thing we did
-			_session.undo (1U);
+			if (multiple_mute_change) {
+				multiple_mute_change = false;
+				// undo the last op
+				// because the press was the last undoable thing we did
+				_session.undo (1U);
+			} else {
+				_route->set_mute (!_route->muted(), this);
+			}
 		}
 	}
 	return true;
@@ -288,16 +299,16 @@ RouteUI::mute_release(GdkEventButton* ev)
 bool
 RouteUI::solo_press(GdkEventButton* ev)
 {
-	/* ignore double clicks */
+	/* ignore double/triple clicks */
 
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
-
+	multiple_solo_change = false;
 	if (!ignore_toggle) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
-			
+
 			if (solo_menu == 0) {
 				build_solo_menu ();
 			}
@@ -306,7 +317,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 		} else {
 
-			if (ev->button == 2) {
+			if (Keyboard::is_button2_event (ev)) {
 
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
@@ -318,18 +329,31 @@ RouteUI::solo_press(GdkEventButton* ev)
 				}
 			}
 
-			if (ev->button == 1 || ev->button == 2) {
+			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 					/* Primary-Tertiary-click applies change to all routes */
-
+					bool was_not_latched = false;
+					if (!Config->get_solo_latched ()) {
+						was_not_latched = true;
+						/*
+						  XXX it makes no sense to solo all tracks if we're 
+						  not in latched mode, but doing nothing feels like a bug, 
+						  so do it anyway 
+						*/
+						Config->set_solo_latched (true);
+					}
 					_session.begin_reversible_command (_("solo change"));
                                         Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
 					_session.set_all_solo (!_route->soloed());
                                         cmd->mark();
 					_session.add_command (cmd);
 					_session.commit_reversible_command ();
+					multiple_solo_change = true;
+					if (was_not_latched) {
+						Config->set_solo_latched (false);
+					}
 					
 				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
@@ -347,8 +371,17 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					// shift-click: set this route to solo safe
 
-					_route->set_solo_safe (!_route->solo_safe(), this);
-					wait_for_release = false;
+					if (Profile->get_sae() && ev->button == 1) {
+						// button 1 and shift-click: disables solo_latched for this click
+						if (!Config->get_solo_latched ()) {
+							Config->set_solo_latched (true);
+							reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+							Config->set_solo_latched (false);
+						}
+					} else {
+						_route->set_solo_safe (!_route->solo_safe(), this);
+						wait_for_release = false;
+					}
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -363,7 +396,11 @@ RouteUI::solo_press(GdkEventButton* ev)
 				} else {
 
 					/* click: solo this route */
-					reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+					if (wait_for_release) {
+						_route->set_solo (!_route->soloed(), this);
+					} else {
+						reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+					}
 				}
 			}
 		}
@@ -378,10 +415,16 @@ RouteUI::solo_release(GdkEventButton* ev)
 	if (!ignore_toggle) {
 		if (wait_for_release) {
 			wait_for_release = false;
-			// undo the last op
-			// because the press was the last undoable thing we did
-
-			_session.undo (1U);
+			if (multiple_solo_change) {
+				multiple_solo_change = false;
+				// undo the last op
+				// because the press was the last undoable thing we did
+				_session.undo (1U);
+			} else {
+				// we don't use "undo the last op"
+				// here because its expensive for the GUI
+				_route->set_solo (!_route->soloed(), this);
+			}
 		}
 	}
 
@@ -391,7 +434,7 @@ RouteUI::solo_release(GdkEventButton* ev)
 bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
 
@@ -403,7 +446,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
-		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			// do nothing on midi bind event
 			return false;
@@ -449,6 +492,7 @@ RouteUI::rec_enable_release (GdkEventButton* ev)
 void
 RouteUI::solo_changed(void* src)
 {
+
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
 }
 
@@ -907,7 +951,7 @@ gint
 RouteUI::idle_remove_this_route (RouteUI *rui)
 {
 	rui->_session.remove_route (rui->_route);
-	return FALSE;
+	return false;
 }
 
 void

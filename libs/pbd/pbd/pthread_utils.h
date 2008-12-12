@@ -35,8 +35,11 @@ void pthread_exit_pbd (void* status);
 std::string pthread_name ();
 
 namespace PBD {
-  extern sigc::signal<void,pthread_t,std::string> ThreadCreated;
-  extern sigc::signal<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+	extern void notify_gui_about_thread_creation (pthread_t, std::string, int requests = 256);
+	extern void notify_gui_about_thread_exit (pthread_t);
+
+	extern sigc::signal<void,pthread_t>             ThreadLeaving;
+	extern sigc::signal<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 #endif /* __pbd_pthread_utils__ */

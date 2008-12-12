@@ -59,6 +59,10 @@ public:
 		return ((ARDOUR::AutomationList*)_list.get())->automation_state();
 	}
 	
+	inline void set_automation_state(AutoState as) {
+		return ((ARDOUR::AutomationList*)_list.get())->set_automation_state(as);
+	}
+	
 	inline void start_touch() {
 		return ((ARDOUR::AutomationList*)_list.get())->start_touch();
 	}

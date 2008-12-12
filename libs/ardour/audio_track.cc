@@ -586,19 +586,74 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 
 		
 		/* copy the diskstream data to all output buffers */
-		
-		const size_t limit = n_process_buffers().n_audio();
-		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
-		
+
+		size_t limit = n_process_buffers().n_audio();
+		BufferSet& bufs = _session.get_scratch_buffers ();
+		const size_t blimit = bufs.count().n_audio();
+
 		uint32_t n;
 		uint32_t i;
 
-		for (i = 0, n = 1; i < limit; ++i, ++n) {
-			memcpy (bufs.get_audio(i).data(), b, sizeof (Sample) * nframes); 
-			if (n < diskstream->n_channels().n_audio()) {
-				tmpb = diskstream->playback_buffer(n);
-				if (tmpb!=0) {
-					b = tmpb;
+		if (limit > blimit) {
+
+			/* example case: auditioner configured for stereo output,
+			   but loaded with an 8 channel file. there are only
+			   2 passthrough buffers, but n_process_buffers() will
+			   return 8.
+			   
+			   arbitrary decision: map all channels in the diskstream
+			   to the outputs available.
+			*/
+
+			float scaling = limit/blimit;
+			
+			for (i = 0, n = 1; i < blimit; ++i, ++n) {
+
+				/* first time through just copy a channel into 
+				   the output buffer.
+				*/
+				
+				Sample* bb = bufs.get_audio (i).data();
+
+				for (nframes_t xx = 0; xx < nframes; ++xx) {
+					bb[xx] = b[xx] * scaling;
+				}
+
+				if (n < diskstream->n_channels().n_audio()) {
+					tmpb = diskstream->playback_buffer(n);
+					if (tmpb!=0) {
+						b = tmpb;
+					}
+				}
+			}
+
+			for (;i < limit; ++i, ++n) {
+				
+				/* for all remaining channels, sum with existing
+				   data in the output buffers 
+				*/
+				
+				bufs.get_audio (i%blimit).accumulate_with_gain_from (b, nframes, 0, scaling);
+				
+				if (n < diskstream->n_channels().n_audio()) {
+					tmpb = diskstream->playback_buffer(n);
+					if (tmpb!=0) {
+						b = tmpb;
+					}
+				}
+				
+			}
+
+			limit = blimit;
+
+		} else {
+			for (i = 0, n = 1; i < limit; ++i, ++n) {
+				memcpy (bufs.get_audio (i).data(), b, sizeof (Sample) * nframes); 
+				if (n < diskstream->n_channels().n_audio()) {
+					tmpb = diskstream->playback_buffer(n);
+					if (tmpb!=0) {
+						b = tmpb;
+					}
 				}
 			}
 		}
@@ -830,6 +885,11 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	}
 
 	new_playlist = PlaylistFactory::create (DataType::AUDIO, _session, new_playlist_name, false);
+
+	_freeze_record.gain = _gain;
+	_freeze_record.gain_automation_state = _gain_control->automation_state();
+	_freeze_record.pan_automation_state = _panner->automation_state();
+
 	region_name = new_playlist_name;
 
 	/* create a new region from all filesources, keep it private */
@@ -846,6 +906,12 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	diskstream->use_playlist (boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
 	diskstream->set_record_enabled (false);
+
+	/* reset stuff that has already been accounted for in the freeze process */
+	
+	set_gain (1.0, this);
+	_gain_control->set_automation_state (Off);
+	_panner->set_automation_state (Off);
 
 	_freeze_record.state = Frozen;
 	FreezeChange(); /* EMIT SIGNAL */
@@ -877,6 +943,9 @@ AudioTrack::unfreeze ()
 		}
 		
 		_freeze_record.playlist.reset ();
+		set_gain (_freeze_record.gain, this);
+		_gain_control->set_automation_state (_freeze_record.gain_automation_state);
+		_panner->set_automation_state (_freeze_record.pan_automation_state);
 	}
 
 	_freeze_record.state = UnFrozen;

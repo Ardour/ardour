@@ -18,14 +18,12 @@
     $Id$
 */
 
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <time.h>
 
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
-#include <pbd/shiva.h>
 
 #include <sigc++/bind.h>
 
@@ -79,8 +77,10 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 void
 UndoTransaction::add_command (Command *const action)
 {
-	/* catch death */
-	new PBD::ProxyShiva<Command,UndoTransaction> (*action, *this, &command_death);
+	/* catch death of command (e.g. caused by death of object to
+	   which it refers.
+	 */
+	shivas.push_back (new PBD::ProxyShiva<Command,UndoTransaction> (*action, *this, &command_death));
 	actions.push_back (action);
 }
 
@@ -88,6 +88,21 @@ void
 UndoTransaction::remove_command (Command* const action)
 {
 	actions.remove (action);
+}
+
+void
+UndoTransaction::about_to_explicitly_delete ()
+{
+	/* someone is going to call our destructor and its not Shiva,
+	   the god of destruction and chaos. This happens when an UndoHistory
+	   is pruning itself. we must remove Shivas to avoid the god
+	   striking us down a second time, unnecessarily and illegally.
+	*/
+
+	for (list<PBD::ProxyShiva<Command,UndoTransaction>*>::iterator i = shivas.begin(); i != shivas.end(); ++i) {
+		delete *i;
+	}
+	shivas.clear ();
 }
 
 bool
@@ -154,27 +169,59 @@ UndoHistory::UndoHistory ()
 }
 
 void
-UndoHistory::set_depth (int32_t d)
+UndoHistory::set_depth (uint32_t d)
 {
+	UndoTransaction* ut;
+	uint32_t current_depth = UndoList.size();
+
 	_depth = d;
 
-	while (_depth > 0 && UndoList.size() > (uint32_t) _depth) {
-		UndoList.pop_front ();
+	if (d > current_depth) {
+		/* not even transactions to meet request */
+		return;
+	}
+
+	if (_depth > 0) {
+
+		uint32_t cnt = current_depth - d;
+
+		while (cnt--) {
+			ut = UndoList.front();
+			UndoList.pop_front ();
+			ut->about_to_explicitly_delete ();
+			delete ut;
+		}
 	}
 }
 
 void
 UndoHistory::add (UndoTransaction* const ut)
 {
+	uint32_t current_depth = UndoList.size();
+
 	ut->GoingAway.connect (bind (mem_fun (*this, &UndoHistory::remove), ut));
 
-	while (_depth > 0 && UndoList.size() > (uint32_t) _depth) {
-		UndoList.pop_front ();
+	/* if the current undo history is larger than or equal to the currently
+	   requested depth, then pop off at least 1 element to make space
+	   at the back for new one.
+	*/
+
+	if ((_depth > 0) && current_depth && (current_depth >= _depth)) {
+
+		uint32_t cnt = 1 + (current_depth - _depth);
+
+		while (cnt--) {
+			UndoTransaction* ut;
+			ut = UndoList.front ();
+			UndoList.pop_front ();
+			ut->about_to_explicitly_delete ();
+			delete ut;
+		}
 	}
 
 	UndoList.push_back (ut);
 
-	/* we are now owners of the transaction */
+	/* we are now owners of the transaction and must delete it when finished with it */
 
 	Changed (); /* EMIT SIGNAL */
 }

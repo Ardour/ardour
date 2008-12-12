@@ -163,3 +163,16 @@ ARDOUR_UI::platform_setup ()
 	} 
 }
 
+bool
+cocoa_open_url (const char* uri)
+{
+	NSString* struri = [[NSString alloc] initWithUTF8String:uri];
+	NSURL* nsurl = [[NSURL alloc] initWithString:struri];
+
+	bool ret = [[NSWorkspace sharedWorkspace] openURL:nsurl];
+
+	[struri release];
+	[nsurl release];
+
+	return ret;
+}

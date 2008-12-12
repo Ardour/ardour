@@ -204,6 +204,7 @@ midi_streamview.cc
 midi_time_axis.cc
 mixer_strip.cc
 mixer_ui.cc
+nag.cc
 new_session_dialog.cc
 option_editor.cc
 opts.cc
@@ -402,8 +403,28 @@ for style in ['', 'BOLD', 'ITALIC']:
 		key = '%' + key + '%'
 		my_font_dict[key] = fontstyle
 
-ardour_dark_theme = env.SubstInFile ('ardour3_ui_dark.rc', 'ardour3_ui_dark.rc.in', SUBST_DICT = my_font_dict)
-ardour_light_theme = env.SubstInFile ('ardour3_ui_light.rc', 'ardour3_ui_light.rc.in', SUBST_DICT = my_font_dict)
+#
+# create menus based on build platform
+# 
+
+if env['GTKOSX']:
+	ardour_menus = env.Command ('ardour.menus', 'ardour.menus.in', "cpp -E -P -DGTKOSX -DTOP_MENUBAR ardour.menus.in ardour.menus", chdir=1)
+else:
+	ardour_menus = env.Command ('ardour.menus', 'ardour.menus.in', "cpp -E -P ardour.menus.in ardour.menus", chdir=1)
+
+ardour_dark_theme = env.SubstInFile ('ardour3_ui_dark.rc', 
+                                     'ardour3_ui_dark.rc.in', 
+                                     SUBST_DICT = my_font_dict)
+ardour_light_theme = env.SubstInFile ('ardour3_ui_light.rc', 
+                                      'ardour3_ui_light.rc.in', 
+                                      SUBST_DICT = my_font_dict)
+
+ardour_dark_sae_theme = env.SubstInFile ('ardour3_ui_dark_sae.rc', 
+                                         'ardour3_ui_dark_sae.rc.in', 
+                                         SUBST_DICT = my_font_dict)
+ardour_light_sae_theme = env.SubstInFile ('ardour3_ui_light_sae.rc', 
+                                          'ardour3_ui_light_sae.rc.in', 
+                                          SUBST_DICT = my_font_dict)
 
 my_subst_dict = { }
 
@@ -436,7 +457,7 @@ else:
 	keybindings_dict['%LEVEL4%'] = env['WINDOWS_KEY']
 	keybindings_dict['%WINDOW%'] = 'Alt'
 
-for b in [ 'SAE-de',  'SAE-us', 'mnemonic-us', 'ergonomic-us' ]:
+for b in [ 'SAE-de-keypad',  'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad', 'mnemonic-us', 'ergonomic-us' ]:
 	target_file = b + '.bindings'
 	src_file = target_file + '.in'
 	Default (env.SubstInFile (target_file, src_file, SUBST_DICT = keybindings_dict))
@@ -455,6 +476,9 @@ Default(ardourdev)
 Default(ardoursh)
 Default(ardour_dark_theme)
 Default(ardour_light_theme)
+Default(ardour_dark_sae_theme)
+Default(ardour_light_sae_theme)
+Default(ardour_menus)
 
 if env['VST']:
 	Default(ardourlib)
@@ -480,12 +504,17 @@ if env['NLS']:
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_dark_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_light_theme))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_dark_sae_theme))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_light_sae_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour3_ui_default.conf'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour-sae.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ergonomic-us.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'mnemonic-us.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'SAE-de.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'SAE-de-keypad.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'SAE-us-keypad.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'SAE-de-nokeypad.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'SAE-us-nokeypad.bindings'))
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3', 'pixmaps'), pixmap_files))
@@ -539,12 +568,19 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
-                                        'ardour3_ui_dark.rc.in', 'ardour3_ui_light.rc.in', 'splash.png',
-                                        'ardour.menus', 'ardour-sae.menus', 
+                                        'ardour3_ui_dark.rc.in', 
+					'ardour3_ui_light.rc.in', 
+					'ardour3_ui_dark_sae.rc.in', 
+					'ardour3_ui_light_sae.rc.in', 
+					'splash.png', 
+					'ardour.menus.in',
+                                        'ardour-sae.menus', 
 					'mnemonic-us.bindings.in', 
 					'ergonomic-us.bindings.in', 
-					'SAE-us.bindings.in', 
-					'SAE-de.bindings.in', 
+					'SAE-us-keypad.bindings.in', 
+					'SAE-us-nokeypad.bindings.in', 
+					'SAE-de-keypad.bindings.in', 
+					'SAE-de-nokeypad.bindings.in', 
 					'ardour3_ui_default.conf',
 					'editor_xpms',
 					'ardour2.xml',
@@ -556,6 +592,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      icon_files +
 				      skipped_files +
 				      audiounit_files + 
+				      lv2_files +
 				      gtkosx_files +
 				      x11_files +
 				      freesound_files +

@@ -35,10 +35,7 @@ Editor::Cursor::Cursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanv
 	  canvas_item (*editor.cursor_group),
 	  length(1.0)
 {
-	
-	/* "randomly" initialize coords */
-	
-	points.push_back(Gnome::Art::Point(1.0, 0.0));
+	points.push_back(Gnome::Art::Point(-1.0, 0.0)); // first x-coord needs to be a non-normal value
 	points.push_back(Gnome::Art::Point(1.0, 1.0));
 
 	canvas_item.property_points() = points;

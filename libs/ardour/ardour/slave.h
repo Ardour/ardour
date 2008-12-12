@@ -186,6 +186,7 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	SafeTime    current;
 	nframes_t   mtc_frame;               /* current time */
 	nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
+	MIDI::byte  last_mtc_fps_byte;
 
 	float       mtc_speed;
 	nframes_t   first_mtc_frame;

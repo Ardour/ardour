@@ -369,6 +369,7 @@ Editor::Editor ()
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
 	set_midi_edit_mode (MidiEditPencil, true);
+	_edit_point = EditAtMouse;
 	set_mouse_mode (MouseObject, true);
 
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
@@ -944,22 +945,24 @@ Editor::set_entered_track (TimeAxisView* tav)
 void
 Editor::show_window ()
 {
-	show_all_children ();
+	if (! is_visible ()) {
+		show_all ();
 
-	/* re-hide editor list if necessary */
-	editor_list_button_toggled ();
+		 /* re-hide editor list if necessary */
+		 editor_list_button_toggled ();
+
+		/* now reset all audio_time_axis heights, because widgets might need
+		   to be re-hidden
+		*/
+
+		TimeAxisView *tv;
 	
-	/* now reset all audio_time_axis heights, because widgets might need
-	   to be re-hidden
-	*/
-	
-	TimeAxisView *tv;
-	
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		tv = (static_cast<TimeAxisView*>(*i));
-		tv->reset_height ();
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			tv = (static_cast<TimeAxisView*>(*i));
+			tv->reset_height ();
+		}
 	}
-	
+
 	present ();
 }
 
@@ -1098,8 +1101,6 @@ Editor::access_action (std::string action_group, std::string action_item)
 	}
 
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::access_action), action_group, action_item));
-
-	cout<< "OSC: Recieved: "<< action_item << endl;
 
 	RefPtr<Action> act;
 	act = ActionManager::get_action( action_group.c_str(), action_item.c_str() );
@@ -1276,11 +1277,23 @@ Editor::connect_to_session (Session *t)
 
 	edit_groups_changed ();
 
+	edit_point_clock.set_mode(AudioClock::BBT);
 	edit_point_clock.set_session (session);
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
-	nudge_clock.set (session->frame_rate() * 5); // default of 5 seconds
+	if (Profile->get_sae()) {
+		BBT_Time bbt;
+		bbt.bars = 0;
+		bbt.beats = 0;
+		bbt.ticks = 120;
+		nframes_t pos = session->tempo_map().bbt_duration_at (0, bbt, 1);
+		nudge_clock.set_mode(AudioClock::BBT);
+		nudge_clock.set (pos, true, 0, AudioClock::BBT);
+		
+	} else {
+		nudge_clock.set (session->frame_rate() * 5, true, 0, AudioClock::SMPTE); // default of 5 seconds
+	}
 
 	playhead_cursor->canvas_item.show ();
 
@@ -1338,15 +1351,15 @@ Editor::connect_to_session (Session *t)
 	redisplay_named_selections ();
 	redisplay_snapshots ();
 
+	restore_ruler_visibility ();
+	//tempo_map_changed (Change (0));
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
+
 	initial_route_list_display ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
 	}
-
-	restore_ruler_visibility ();
-	//tempo_map_changed (Change (0));
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	start_scrolling ();
 
@@ -1889,10 +1902,11 @@ void
 Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> region, Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
+	Gtk::MenuItem* foo_item;
 	Menu     *region_menu = manage (new Menu);
 	MenuList& items       = region_menu->items();
 	region_menu->set_name ("ArdourContextMenu");
-	
+
 	boost::shared_ptr<AudioRegion> ar;
 	boost::shared_ptr<MidiRegion>  mr;
 
@@ -2031,7 +2045,12 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 
 	/* range related stuff */
 
-	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_audio_region)));
+	items.push_back (MenuElem (_("Add Single Range"), mem_fun (*this, &Editor::add_location_from_audio_region)));
+	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_locations_from_audio_region)));
+	if (selection->regions.size() < 2) {
+		items.back().set_sensitive (false);
+	}
+
 	items.push_back (MenuElem (_("Set Range Selection"), mem_fun (*this, &Editor::set_selection_from_region)));
 	items.push_back (SeparatorElem());
 			 
@@ -2054,7 +2073,15 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	trim_menu->set_name ("ArdourContextMenu");
 	
 	trim_items.push_back (MenuElem (_("Start to edit point"), mem_fun(*this, &Editor::trim_region_from_edit_point)));
+	foo_item = &trim_items.back();
+	if (_edit_point == EditAtMouse) {
+		foo_item->set_sensitive (false);
+	}
 	trim_items.push_back (MenuElem (_("Edit point to end"), mem_fun(*this, &Editor::trim_region_to_edit_point)));
+	foo_item = &trim_items.back();
+	if (_edit_point == EditAtMouse) {
+		foo_item->set_sensitive (false);
+	}
 	trim_items.push_back (MenuElem (_("Trim To Loop"), mem_fun(*this, &Editor::trim_region_to_loop)));
 	trim_items.push_back (MenuElem (_("Trim To Punch"), mem_fun(*this, &Editor::trim_region_to_punch)));
 			     
@@ -2063,6 +2090,10 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 
 	items.push_back (MenuElem (_("Split"), (mem_fun(*this, &Editor::split_region))));
 	region_edit_menu_split_item = &items.back();
+	
+	if (_edit_point == EditAtMouse) {
+		region_edit_menu_split_item->set_sensitive (false);
+	}
 
 	items.push_back (MenuElem (_("Make mono regions"), (mem_fun(*this, &Editor::split_multichannel_region))));
 	region_edit_menu_split_multichannel_item = &items.back();
@@ -2418,23 +2449,56 @@ Editor::set_state (const XMLNode& node)
 		_id = prop->value ();
 	}
 
-	if ((geometry = find_named_node (node, "geometry")) == 0) {
+	g.base_width = default_width;
+	g.base_height = default_height;
+	x = 1;
+	y = 1;
+	xoff = 0;
+	yoff = 21;
 
-		g.base_width = default_width;
-		g.base_height = default_height;
-		x = 1;
-		y = 1;
-		xoff = 0;
-		yoff = 21;
+	if ((geometry = find_named_node (node, "geometry")) != 0) {
 
-	} else {
+		XMLProperty* prop;
 
-		g.base_width = atoi(geometry->property("x-size")->value());
-		g.base_height = atoi(geometry->property("y-size")->value());
-		x = atoi(geometry->property("x-pos")->value());
-		y = atoi(geometry->property("y-pos")->value());
-		xoff = atoi(geometry->property("x-off")->value());
-		yoff = atoi(geometry->property("y-off")->value());
+		if ((prop = geometry->property("x_size")) == 0) {
+			prop = geometry->property ("x-size");
+		}
+		if (prop) {
+			g.base_width = atoi(prop->value());
+		}
+		if ((prop = geometry->property("y_size")) == 0) {
+			prop = geometry->property ("y-size");
+		}
+		if (prop) {
+			g.base_height = atoi(prop->value());
+		}
+
+		if ((prop = geometry->property ("x_pos")) == 0) {
+			prop = geometry->property ("x-pos");
+		}
+		if (prop) {
+			x = atoi (prop->value());
+
+		}
+		if ((prop = geometry->property ("y_pos")) == 0) {
+			prop = geometry->property ("y-pos");
+		}
+		if (prop) {
+			y = atoi (prop->value());
+		}
+
+		if ((prop = geometry->property ("x_off")) == 0) {
+			prop = geometry->property ("x-off");
+		}
+		if (prop) {
+			xoff = atoi (prop->value());
+		}
+		if ((prop = geometry->property ("y_off")) == 0) {
+			prop = geometry->property ("y-off");
+		}
+		if (prop) {
+			yoff = atoi (prop->value());
+		}
 	}
 
 	set_default_size (g.base_width, g.base_height);
@@ -2941,7 +3005,7 @@ Editor::setup_toolbar ()
 #ifdef GTKOSX
 	const guint32 FUDGE = 38; // Combo's are stupid - they steal space from the entry for the button
 #else
-	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button
+	const guint32 FUDGE = 24; // Combo's are stupid - they steal space from the entry for the button
 #endif
 
 	/* Mode Buttons (tool selection) */
@@ -2996,7 +3060,9 @@ Editor::setup_toolbar ()
 
 	vector<string> edit_mode_strings;
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
-	edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	if (!Profile->get_sae()) {
+		edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	}
 	edit_mode_strings.push_back (edit_mode_to_string (Lock));
 
 	edit_mode_selector.set_name ("EditModeSelector");
@@ -3009,6 +3075,10 @@ Editor::setup_toolbar ()
 	
 	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
+
+	if (Profile->get_sae()) {
+		mouse_mode_tearoff->set_can_be_torn_off (false);
+	}
 
 	mouse_mode_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
 						  &mouse_mode_tearoff->tearoff_window()));
@@ -3137,6 +3207,10 @@ Editor::setup_toolbar ()
 
 	tools_tearoff = manage (new TearOff (*hbox));
 	tools_tearoff->set_name ("MouseModeBase");
+
+	if (Profile->get_sae()) {
+		tools_tearoff->set_can_be_torn_off (false);
+	}
 
 	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
 					     &tools_tearoff->tearoff_window()));
@@ -3306,11 +3380,18 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 		}
   
 		/* Parse the "uri-list" format that Nautilus provides, 
-		   where each pathname is delimited by \r\n
+		   where each pathname is delimited by \r\n.
+
+		   THERE MAY BE NO NULL TERMINATING CHAR!!!
 		*/
-	
-		const char* p = data.get_text().c_str();
+
+		ustring txt = data.get_text();
+		const char* p;
 		const char* q;
+
+		p = (const char *) malloc (txt.length() + 1);
+		txt.copy ((char *) p, txt.length(), 0);
+		((char*)p)[txt.length()] = '\0';
 
 		while (p)
 		{
@@ -3320,8 +3401,9 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 					p++;
 				
 				q = p;
-				while (*q && (*q != '\n') && (*q != '\r'))
+				while (*q && (*q != '\n') && (*q != '\r')) {
 					q++;
+				}
 				
 				if (q > p)
 				{
@@ -3340,6 +3422,8 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 				p++;
 		}
 
+		free ((void*)p);
+		
 		if (uris.empty()) {
 			return -1;
 		}
@@ -3638,7 +3722,11 @@ Editor::cycle_edit_mode ()
 {
 	switch (Config->get_edit_mode()) {
 	case Slide:
-		Config->set_edit_mode (Splice);
+		if (Profile->get_sae()) {
+			Config->set_edit_mode (Lock);
+		} else {
+			Config->set_edit_mode (Splice);
+		}
 		break;
 	case Splice:
 		Config->set_edit_mode (Lock);
@@ -3911,12 +3999,23 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	static int32_t done;
 	XMLNode* geometry;
 
-	if ((geometry = find_named_node (*node, "geometry")) == 0) {
-		width = default_width;
-		height = default_height;
-	} else {
-		width = atoi(geometry->property("x-size")->value());
-		height = atoi(geometry->property("y-size")->value());
+	width = default_width;
+	height = default_height;
+
+	if ((geometry = find_named_node (*node, "geometry")) != 0) {
+
+		if ((prop = geometry->property ("x_size")) == 0) {
+			prop = geometry->property ("x-size");
+		}
+		if (prop) {
+			width = atoi (prop->value());
+		}
+		if ((prop = geometry->property ("y_size")) == 0) {
+			prop = geometry->property ("y-size");
+		}
+		if (prop) {
+			height = atoi (prop->value());
+		}
 	}
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
@@ -4594,6 +4693,8 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::post_zoom ()
 {
+	nframes64_t cef = 0;
+
 	// convert fpu to frame count
 
 	nframes64_t frames = (nframes64_t) floor (frames_per_unit * canvas_width);
@@ -4614,9 +4715,16 @@ Editor::post_zoom ()
 		}
 	}
 
+
 	ZoomChanged (); /* EMIT_SIGNAL */
 
 	reset_hscrollbar_stepping ();
+
+	if (session) {
+		cef = session->current_end_frame() + (current_page_frames() / 10);// Add a little extra so we can see the end marker
+	}
+	horizontal_adjustment.set_upper (cef / frames_per_unit);
+
 	//reset_scrolling_region ();
 
 	if (playhead_cursor) {
@@ -4663,6 +4771,10 @@ Editor::idle_visual_changer ()
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
+#ifdef FIX_THIS_FOR_V3
+	double last_time_origin = horizontal_adjustment.get_value();
+#endif
+
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
 
@@ -4672,25 +4784,34 @@ Editor::idle_visual_changer ()
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {
+		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
+	}
 
-		nframes64_t csf=0, cef=0;
-		nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	nframes64_t csf=0, cef=0;
+	nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	
+	if (session) {
+		csf = session->current_start_frame();
+		cef = session->current_end_frame();
+	}
+	
+	/* if we seek beyond the current end of the canvas, move the end */
 
-		if (session) {
-			csf = session->current_start_frame();
-			cef = session->current_end_frame();
-		}
-
-		/* if we seek beyond the current end of the canvas, move the end */
-
-		if (current_time_origin != pending_visual_change.time_origin) {
-			cef += current_page_frames() / 10; // Add a little extra so we can see the end marker
-			horizontal_adjustment.set_upper (cef / frames_per_unit);
-			horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
-		} else {
-			update_fixed_rulers();
-			redisplay_tempo (true);
-		}
+#ifdef FIX_THIS_FOR_V3
+	if (last_time_origin == horizontal_adjustment.get_value() ) {
+		/* changed signal not emitted */
+		update_fixed_rulers ();
+		redisplay_tempo (true);
+	}
+#endif
+	
+	if (current_time_origin != pending_visual_change.time_origin) {
+		cef += current_page_frames() / 10; // Add a little extra so we can see the end marker
+		horizontal_adjustment.set_upper (cef / frames_per_unit);
+		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
+	} else {
+		update_fixed_rulers();
+		redisplay_tempo (true);
 	}
 	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;
@@ -5016,6 +5137,9 @@ Editor::first_idle ()
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
 		(*t)->first_idle();
 	}
+
+	// first idle adds route children (automation tracks), so we need to redisplay here
+	redisplay_route_list();
 	
 	if (dialog) {
 		delete dialog;
@@ -5171,7 +5295,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
 {
 	if (resize_idle_id < 0) {
 		resize_idle_id = g_idle_add (_idle_resizer, this);
-	}
+	} 
 
 	resize_idle_target = h;
 
@@ -5189,6 +5313,7 @@ Editor::idle_resize ()
 		(*i)->idle_resize (resize_idle_target);
 	}
 	pending_resizes.clear();
+	flush_canvas ();
 	resize_idle_id = -1;
 	return false;
 }

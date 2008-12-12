@@ -19,6 +19,8 @@
 */
 
 #include <algorithm>
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 
 #include <pbd/error.h>
 #include <ardour/coreaudiosource.h>
@@ -256,7 +258,103 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 		goto out;
 	}
 
-	_info.format_name = CFStringRefToStdString(name);
+	_info.format_name = "";
+
+	if (absd.mFormatID == kAudioFormatLinearPCM) {
+		if (absd.mFormatFlags & kAudioFormatFlagIsBigEndian) {
+			_info.format_name += "big-endian";
+		} else {
+			_info.format_name += "little-endian";
+		}
+		
+		char buf[32];
+		snprintf (buf, sizeof (buf), " %" PRIu32 " bit", absd.mBitsPerChannel);
+		_info.format_name += buf;
+		_info.format_name += '\n';
+		
+		if (absd.mFormatFlags & kAudioFormatFlagIsFloat) {
+			_info.format_name += "float";
+		} else {
+			if (absd.mFormatFlags & kAudioFormatFlagIsSignedInteger) {
+				_info.format_name += "signed";
+			} else {
+				_info.format_name += "unsigned";
+			}
+			/* integer is typical, do not show it */
+		}
+		
+		if (_info.channels > 1) {
+			if (absd.mFormatFlags & kAudioFormatFlagIsNonInterleaved) {
+				_info.format_name += " noninterleaved";
+			}
+			/* interleaved is the normal case, do not show it */
+		}
+		
+		_info.format_name += ' ';
+	}
+
+	switch (absd.mFormatID) {
+	case kAudioFormatLinearPCM:
+		_info.format_name += "PCM";
+		break;
+
+	case kAudioFormatAC3:
+		_info.format_name += "AC3";
+		break;
+
+	case kAudioFormat60958AC3:
+		_info.format_name += "60958 AC3";
+		break;
+
+	case kAudioFormatMPEGLayer1:
+		_info.format_name += "MPEG-1";
+		break;
+
+	case kAudioFormatMPEGLayer2:
+		_info.format_name += "MPEG-2";
+		break;
+
+	case kAudioFormatMPEGLayer3:
+		_info.format_name += "MPEG-3";
+		break;
+
+	case kAudioFormatAppleIMA4:
+		_info.format_name += "IMA-4";
+		break;
+
+	case kAudioFormatMPEG4AAC:
+		_info.format_name += "AAC";
+		break;
+
+	case kAudioFormatMPEG4CELP:
+		_info.format_name += "CELP";
+		break;
+
+	case kAudioFormatMPEG4HVXC:
+		_info.format_name += "HVXC";
+		break;
+
+	case kAudioFormatMPEG4TwinVQ:
+		_info.format_name += "TwinVQ";
+		break;
+
+	/* these really shouldn't show up, but we should do something
+	   somewhere else to make sure that doesn't happen. until
+	   that is guaranteed, print something anyway.
+	*/
+
+	case kAudioFormatTimeCode:
+		_info.format_name += "timecode";
+		break;
+
+	case kAudioFormatMIDIStream:
+		_info.format_name += "MIDI";
+		break;
+
+	case kAudioFormatParameterValueStream:
+		_info.format_name += "parameter values";
+		break;
+	}
 
 	// XXX it would be nice to find a way to get this information if it exists
 

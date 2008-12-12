@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instant>
+  <Editor id="12" mixer-width="Wide" zoom-focus="3" zoom="512.000000" snap-to="12" snap-mode="2" edit-point="EditAtPlayhead" playhead="0" show-waveforms="yes" show-waveforms-recording="yes" show-measures="no" follow-playhead="yes" xfades-visible="yes" region-list-sort-type="ByEndInFile" mouse-mode="MouseObject" show-editor-mixer="yes">
+    <geometry x_size="1242" y_size="768" x_pos="0" y_pos="0" x_off="0" y_off="0" edit_pane_pos="1024"/>
+  </Editor>
+  <Mixer narrow-strips="no" show-mixer="no"/>
+</instant>

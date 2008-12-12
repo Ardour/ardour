@@ -156,6 +156,16 @@ Editor::ensure_all_elements_drawn ()
 #endif
 
 void
+Editor::show_editor_list (bool yn)
+{
+	if (yn) {
+		the_notebook.show();
+	} else {
+		the_notebook.hide();
+	}
+}
+
+void
 Editor::create_editor_mixer ()
 {
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
@@ -168,16 +178,6 @@ Editor::create_editor_mixer ()
 #endif
 	current_mixer_strip->set_embedded (true);
 }	
-
-void
-Editor::show_editor_list (bool yn)
-{
-	if (yn) {
-		the_notebook.show();
-	} else {
-		the_notebook.hide();
-	}
-}
 
 void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
@@ -228,7 +228,6 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 }
 
 double current = 0.0;
-bool currentInitialized = 0;
 
 void
 Editor::update_current_screen ()

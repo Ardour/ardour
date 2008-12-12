@@ -636,14 +636,19 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	char buf[16];
 	BBT_Time bbt;
 
-	session->tempo_map().bbt_time (when, bbt);
-
 	/* handle a common case */
-
-	if (is_duration && when == 0) {
-		bbt.bars = 0;
-		bbt.beats = 0;
-
+	if (is_duration) {
+		if (when == 0) {
+			bbt.bars = 0;
+			bbt.beats = 0;
+			bbt.ticks = 0;	
+		} else {
+			session->tempo_map().bbt_time (when, bbt);
+			bbt.bars--;
+			bbt.beats--;
+		}
+	} else {
+		session->tempo_map().bbt_time (when, bbt);
 	}
 
 	sprintf (buf, "%03" PRIu32, bbt.bars);
@@ -1896,6 +1901,11 @@ AudioClock::bbt_frame_from_display (nframes_t pos) const
 	any.bbt.bars = atoi (bars_label.get_text());
 	any.bbt.beats = atoi (beats_label.get_text());
 	any.bbt.ticks = atoi (ticks_label.get_text());
+
+       if (is_duration) {
+               any.bbt.bars++;
+               any.bbt.beats++;
+       }
 
 	nframes_t ret = session->convert_to_frames_at (pos, any);
 

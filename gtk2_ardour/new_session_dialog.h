@@ -216,6 +216,8 @@ protected:
 
 	bool on_new_session_page;
 	bool have_engine;
+	Glib::ustring engine_page_session_folder;
+	Glib::ustring engine_page_session_name;
 };
 
 #endif // NEW_SESSION_DIALOG_H

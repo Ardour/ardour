@@ -74,17 +74,22 @@ class AudioRegionEditor : public RegionEditor
 	
 	Gtk::Table time_table;
 
-	Gtk::Label start_label;
+	Gtk::Label position_label;
 	Gtk::Label end_label;
 	Gtk::Label length_label;
-	Gtk::Alignment start_alignment;
+	Gtk::Label sync_label;
+	Gtk::Label start_label;
+	Gtk::Alignment position_alignment;
 	Gtk::Alignment end_alignment;
 	Gtk::Alignment length_alignment;
+	Gtk::Alignment sync_alignment;
+	Gtk::Alignment start_alignment;
 
-	AudioClock start_clock;
+	AudioClock position_clock;
 	AudioClock end_clock;
 	AudioClock length_clock;
 	AudioClock sync_offset_clock;
+	AudioClock start_clock;
 
 	Gtk::HSeparator sep3;
 	Gtk::VSeparator sep1;
@@ -99,7 +104,7 @@ class AudioRegionEditor : public RegionEditor
 	void activation ();
 
 	void name_entry_changed ();
-	void start_clock_changed ();
+	void position_clock_changed ();
 	void end_clock_changed ();
 	void length_clock_changed ();
 

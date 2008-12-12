@@ -480,6 +480,12 @@ ARDOUR_UI::toggle_editing_space()
 }
 
 void
+ARDOUR_UI::toggle_new_plugins_active ()
+{
+	ActionManager::toggle_config_state ("options", "NewPluginsActive", &Configuration::set_new_plugins_active, &Configuration::get_new_plugins_active);
+}
+
+void
 ARDOUR_UI::toggle_StopPluginsWithTransport()
 {
 	ActionManager::toggle_config_state ("options", "StopPluginsWithTransport", &Configuration::set_plugins_stop_with_transport, &Configuration::get_plugins_stop_with_transport);
@@ -555,6 +561,12 @@ void
 ARDOUR_UI::toggle_ShowSoloMutes()
 {
 	ActionManager::toggle_config_state ("options", "ShowSoloMutes", &Configuration::set_show_solo_mutes, &Configuration::get_show_solo_mutes);
+}
+
+void
+ARDOUR_UI::toggle_SoloMuteOverride()
+{
+	ActionManager::toggle_config_state ("options", "SoloMuteOverride", &Configuration::set_solo_mute_override, &Configuration::get_solo_mute_override);
 }
 
 void
@@ -1118,6 +1130,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
 	} else if (PARAM_IS ("show-solo-mutes")) {
 		ActionManager::map_some_state ("options", "ShowSoloMutes", &Configuration::get_show_solo_mutes);
+	} else if (PARAM_IS ("solo-mute-override")) {
+		ActionManager::map_some_state ("options", "SoloMuteOverride", &Configuration::get_solo_mute_override);
 	} else if (PARAM_IS ("solo-model")) {
 		map_solo_model ();
 	} else if (PARAM_IS ("auto-play")) {
@@ -1144,6 +1158,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", &Configuration::get_jack_time_master);
 	} else if (PARAM_IS ("plugins-stop-with-transport")) {
 		ActionManager::map_some_state ("options",  "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport);
+	} else if (PARAM_IS ("new-plugins-active")) {
+		ActionManager::map_some_state ("options",  "NewPluginsActive", &Configuration::get_new_plugins_active);
 	} else if (PARAM_IS ("latched-record-enable")) {
 		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("verify-remove-last-capture")) {

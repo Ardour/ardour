@@ -56,7 +56,9 @@
 #include <ardour/tempo.h>
 
 #ifdef HAVE_COREAUDIO
+#ifdef USE_COREAUDIO_FOR_FILE_IO
 #include <ardour/caimportable.h>
+#endif
 #endif
 
 #include "i18n.h"
@@ -69,11 +71,13 @@ static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
 #ifdef HAVE_COREAUDIO
+#ifdef USE_COREAUDIO_FOR_FILE_IO
 
 	/* see if we can use CoreAudio to handle the IO */
 	
 	try { 
-		boost::shared_ptr<CAImportableSource> source(new CAImportableSource(path));
+		CAImportableSource* src = new CAImportableSource(path);
+		boost::shared_ptr<CAImportableSource> source (src);
 		
 		if (source->samplerate() == samplerate) {
 			return source;
@@ -87,8 +91,8 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 	catch (...) {
 
 		/* fall back to SndFile */
-
 #endif	
+#endif
 
 		try { 
 			boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
@@ -96,7 +100,7 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 			if (source->samplerate() == samplerate) {
 				return source;
 			}
-
+			
 			/* rewrap as a resampled source */
 			
 			return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
@@ -107,7 +111,9 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 		}
 		
 #ifdef HAVE_COREAUDIO		
+#ifdef USE_COREAUDIO_FOR_FILE_IO
 	}
+#endif
 #endif
 }
 
@@ -437,7 +443,7 @@ Session::import_audiofiles (import_status& status)
 
 		if (source) { // audio
 			status.doing_what = compose_status_message (*p, source->samplerate(),
-								    frame_rate(), cnt, status.paths.size());
+								    frame_rate(), cnt, status.total);
 			write_audio_data_to_new_files (source.get(), status, newfiles);
 		} else if (smf_reader.get()) { // midi
 			status.doing_what = string_compose(_("loading MIDI file %1"), *p);
@@ -479,8 +485,7 @@ Session::import_audiofiles (import_status& status)
 
 		save_state (_name);
 
-		std::copy (all_new_sources.begin(), all_new_sources.end(),
-				std::back_inserter(status.sources));
+		std::copy (all_new_sources.begin(), all_new_sources.end(), std::back_inserter(status.sources));
 	} else {
 		// this can throw...but it seems very unlikely
 		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);

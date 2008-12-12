@@ -122,7 +122,7 @@ void CoreMidi_MidiPort::read_proc (const MIDIPacketList *pktlist, void *refCon, 
 
     if (driver->firstrecv) {
 	    driver->firstrecv = false;
-	    PBD::ThreadCreated (pthread_self(), "COREMIDI");
+	    PBD::notify_gui_about_thread_creation (pthread_self(), "COREMIDI");
     }
 
     for (unsigned int i = 0; i < pktlist->numPackets; ++i) {

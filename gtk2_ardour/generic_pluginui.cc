@@ -77,7 +77,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	//set_homogeneous (false);
 
 	pack1(main_contents);
-
 	settings_box.set_homogeneous (false);
 
 	HBox* constraint_hbox = manage (new HBox);
@@ -92,16 +91,25 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (latency_gui, false, false, 10);
 	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
+	smaller_hbox->pack_start (bypass_button, false, true);
 
 	constraint_hbox->set_spacing (5);
-	constraint_hbox->pack_start (*smaller_hbox, true, false);
-	constraint_hbox->pack_end (bypass_button, false, false);
+	constraint_hbox->set_homogeneous (false);
+	
+	VBox* v1_box = manage (new VBox);
+	VBox* v2_box = manage (new VBox);
 	constraint_hbox->pack_start (eqgui_toggle, false, false);
 
-	settings_box.pack_end (*constraint_hbox, false, false);
+	v1_box->pack_start (*smaller_hbox, false, true);
+	v2_box->pack_start (focus_button, false, true);
 
 	main_contents.pack_start (settings_box, false, false);
 
+	constraint_hbox->pack_end (*v2_box, false, false);
+	constraint_hbox->pack_end (*v1_box, false, false);
+
+	main_contents.pack_start (*constraint_hbox, false, false);
+	
 	if ( is_scrollable ) {
 		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 		scroller.set_name ("PluginEditor");
@@ -120,9 +128,10 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	eqgui_toggle.signal_toggled().connect( mem_fun(*this, &GenericPluginUI::toggle_plugin_analysis));
 
 	pi->ActiveChanged.connect (bind(mem_fun(*this, &GenericPluginUI::processor_active_changed),
-				boost::weak_ptr<Processor>(pi)));
-	bypass_button.set_active (!pi->active());
+					boost::weak_ptr<Processor>(pi)));
 	
+	bypass_button.set_active (!pi->active());
+
 	build ();
 }
 
@@ -202,7 +211,7 @@ GenericPluginUI::build ()
 			/* if we are scrollable, just use one long column */
 
 			if (!is_scrollable) {
-				if (x++ > 7){
+				if (x++ > 20){
 					frame = manage (new Frame);
 					frame->set_name ("BaseFrame");
 					box = manage (new VBox);

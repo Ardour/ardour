@@ -31,6 +31,7 @@
 
 #include <ardour/configuration.h>
 #include <ardour/filesystem_paths.h>
+#include <ardour/profile.h>
 
 #include "theme_manager.h"
 #include "rgb_macros.h"
@@ -207,12 +208,29 @@ load_rc_file (const string& filename, bool themechange)
 	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path.to_string(), themechange);
 }
 
+/* hmm, this is a problem. the profile doesn't
+   exist when the theme manager is constructed
+   and toggles buttons during "normal" GTK setup.
+   
+   a better solution will be to make all Profile
+   methods static or something.
+
+   XXX FIX ME
+*/
+
+#define HACK_PROFILE_IS_SAE() (getenv("ARDOUR_SAE")!=0)
+
 void
 ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
 
-	ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark.rc");
+	if (HACK_PROFILE_IS_SAE()){
+		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark_sae.rc");
+	} else {
+		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark.rc");
+	}
+
 	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
 }
 
@@ -221,7 +239,12 @@ ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
 
-	ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_light.rc");
+	if (HACK_PROFILE_IS_SAE()){
+		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_light_sae.rc");
+	} else {
+		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_light.rc");
+	}
+
 	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
 }
 
@@ -258,9 +281,9 @@ ThemeManager::setup_theme ()
 		rcfile = ARDOUR_UI::config()->ui_rc_file.get();
 	}
 
-	if (rcfile == "ardour3_ui_dark.rc") {
+	if (rcfile == "ardour3_ui_dark.rc" || rcfile == "ardour3_ui_dark_sae.rc") {
 		dark_button.set_active();
-	} else if (rcfile == "ardour3_ui_light.rc") {
+	} else if (rcfile == "ardour3_ui_light.rc" || "ardour3_ui_light_sae.rc") {
 		light_button.set_active();
 	}
 

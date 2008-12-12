@@ -27,6 +27,8 @@
 #include <ardour/audio_port.h>
 #include <ardour/buffer_set.h>
 #include <ardour/meter.h>
+#include <ardour/panner.h>
+
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -55,6 +57,41 @@ Send::Send (const Send& other)
 	: IOProcessor (other._session, string_compose (_("send %1"), (bitslot = other._session.next_send_id()) + 1), other.placement())
 {
 	_metering = false;
+
+	expected_inputs.set (DataType::AUDIO, 0);
+
+#ifdef THIS_NEEDS_FIXING_FOR_V3
+
+	/* set up the same outputs, and connect them to the same places */
+
+	_io->no_panner_reset = true;
+
+	for (uint32_t i = 0; i < other.n_outputs (); ++i) {
+		add_output_port ("", 0);
+		Port* p = other.output (i);
+		if (p) {
+			/* this is what the other send's output is connected to */
+			const char **connections = p->get_connections ();
+			if (connections) {
+				for (uint32_t c = 0; connections[c]; ++c) {
+					connect_output (output (i), connections [c], 0);
+				}
+			}
+		}
+	}
+	
+	/* setup panner */
+
+	_io->no_panner_reset = false;
+
+	/* copy state */
+
+	XMLNode& other_state (const_cast<Send*>(&other)->_panner->get_state());
+	_panner->set_state (other_state);
+	
+	delete &other_state;
+#endif
+
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 

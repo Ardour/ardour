@@ -107,6 +107,8 @@ class Route : public IO
 
 	/* end of vfunc-based API */
 
+	void shift (nframes64_t, nframes64_t);
+
 	/* override IO::set_gain() to provide group control */
 
 	void set_gain (gain_t val, void *src);
@@ -117,7 +119,7 @@ class Route : public IO
 
 	void set_solo_safe (bool yn, void *src);
 	bool solo_safe() const { return _solo_safe; }
-
+	
 	void set_mute (bool yn, void *src);
 	bool muted() const { return _muted; }
 	bool solo_muted() const { return desired_solo_gain == 0.0; }
@@ -262,6 +264,7 @@ class Route : public IO
   protected:
 	friend class Session;
 
+	void catch_up_on_solo_mute_override ();
 	void set_solo_mute (bool yn);
 	void set_block_size (nframes_t nframes);
 	bool has_external_redirects() const;

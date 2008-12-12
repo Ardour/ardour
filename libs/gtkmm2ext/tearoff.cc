@@ -36,6 +36,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 {
 	dragging = false;
 	_visible = true;
+	_can_be_torn_off = true;
 
 	tearoff_event_box.add (tearoff_arrow);
 	tearoff_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
@@ -79,6 +80,21 @@ TearOff::~TearOff ()
 }
 
 void
+TearOff::set_can_be_torn_off (bool yn)
+{
+	if (yn != _can_be_torn_off) {
+		if (yn) {
+			tearoff_arrow.set_no_show_all (false);
+			tearoff_arrow.show ();
+		} else {
+			tearoff_arrow.set_no_show_all (true);
+			tearoff_arrow.hide ();
+		}
+		_can_be_torn_off = yn;
+	}
+}
+
+void
 TearOff::set_visible (bool yn)
 {
 	/* don't change visibility if torn off */
@@ -102,13 +118,16 @@ TearOff::set_visible (bool yn)
 gint
 TearOff::tearoff_click (GdkEventButton* ev)
 {
-	remove (contents);
-	window_box.pack_start (contents);
-	own_window.set_name (get_name());
-	close_event_box.set_name (get_name());
-	own_window.show_all ();
-	hide ();
-	Detach ();
+	if (_can_be_torn_off) {
+		remove (contents);
+		window_box.pack_start (contents);
+		own_window.set_name (get_name());
+		close_event_box.set_name (get_name());
+		own_window.show_all ();
+		hide ();
+		Detach ();
+	}
+
 	return true;
 }
 

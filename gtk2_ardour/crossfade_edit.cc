@@ -36,6 +36,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/playlist_templates.h>
 #include <ardour/region_factory.h>
+#include <ardour/profile.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -48,6 +49,7 @@
 #include "canvas_impl.h"
 #include "simplerect.h"
 #include "waveview.h"
+#include "actions.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -98,6 +100,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	set_wmclass (X_("ardour_automationedit"), "Ardour");
 	set_name ("CrossfadeEditWindow");
 	set_position (Gtk::WIN_POS_MOUSE);
+
+	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
@@ -198,6 +202,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
 		pbutton->signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
+		ARDOUR_UI::instance()->set_tip (pbutton, (*i)->name, "");
 		fade_in_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_in_buttons.push_back (pbutton);
 
@@ -219,6 +224,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
 		pbutton->signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
+		ARDOUR_UI::instance()->set_tip (pbutton, (*i)->name, "");
 		fade_out_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_out_buttons.push_back (pbutton);
 
@@ -398,7 +404,7 @@ CrossfadeEditor::point_event (GdkEvent* event, Point* point)
 		if (Keyboard::is_delete_event (&event->button)) {
 			fade[current].points.remove (point);
 			delete point;
-		}
+		} 
 
 		redraw ();
 		break;
@@ -853,58 +859,19 @@ CrossfadeEditor::build_presets ()
 	fade_out_presets = new Presets;
 
 	/* FADE OUT */
-	// p = new Preset ("hiin.xpm");
-	p = new Preset ("crossfade_in_fast-cut");
+
+	p = new Preset ("Linear (-6dB)", "crossfade_in_dipped");
 	p->push_back (PresetPoint (0, 0));
-	p->push_back (PresetPoint (0.0207373, 0.197222));
-	p->push_back (PresetPoint (0.0645161, 0.525));
-	p->push_back (PresetPoint (0.152074, 0.802778));
-	p->push_back (PresetPoint (0.276498, 0.919444));
-	p->push_back (PresetPoint (0.481567, 0.980556));
-	p->push_back (PresetPoint (0.767281, 1));
-	p->push_back (PresetPoint (1, 1));
-	fade_in_presets->push_back (p);
-	
-	// p = new Preset ("loin.xpm");
-	p = new Preset ("crossfade_in_transition");
-	p->push_back (PresetPoint (0, 0));
-	p->push_back (PresetPoint (0.389401, 0.0333333));
-	p->push_back (PresetPoint (0.629032, 0.0861111));
-	p->push_back (PresetPoint (0.829493, 0.233333));
-	p->push_back (PresetPoint (0.9447, 0.483333));
-	p->push_back (PresetPoint (0.976959, 0.697222));
-	p->push_back (PresetPoint (1, 1));
+	p->push_back (PresetPoint (0.000000, 0.000000));
+	p->push_back (PresetPoint (0.166667, 0.166366));
+	p->push_back (PresetPoint (0.333333, 0.332853));
+	p->push_back (PresetPoint (0.500000, 0.499459));
+	p->push_back (PresetPoint (0.666667, 0.666186));
+	p->push_back (PresetPoint (0.833333, 0.833033));
+	p->push_back (PresetPoint (1.000000, 1.000000));
 	fade_in_presets->push_back (p);
 
-	// p = new Preset ("regin.xpm");
-	p = new Preset ("crossfade_in_constant");
-	p->push_back (PresetPoint (0, 0));
-	p->push_back (PresetPoint (0.0737327, 0.308333));
-	p->push_back (PresetPoint (0.246544, 0.658333));
-	p->push_back (PresetPoint (0.470046, 0.886111));
-	p->push_back (PresetPoint (0.652074, 0.972222));
-	p->push_back (PresetPoint (0.771889, 0.988889));
-	p->push_back (PresetPoint (1, 1));
-	fade_in_presets->push_back (p);
-
-	// p = new Preset ("regin2.xpm");
-	p = new Preset ("crossfade_in_slow-cut");
-	p->push_back (PresetPoint (0, 0));
-	p->push_back (PresetPoint (0.304147, 0.0694444));
-	p->push_back (PresetPoint (0.529954, 0.152778));
-	p->push_back (PresetPoint (0.725806, 0.333333));
-	p->push_back (PresetPoint (0.847926, 0.558333));
-	p->push_back (PresetPoint (0.919355, 0.730556));
-	p->push_back (PresetPoint (1, 1));
-	fade_in_presets->push_back (p);
-
-	// p = new Preset ("linin.xpm");
-	p = new Preset ("crossfade_in_dipped");
-	p->push_back (PresetPoint (0, 0));
-	p->push_back (PresetPoint (1, 1));
-	fade_in_presets->push_back (p);
-
-	p = new Preset ("crossfade_in_default");
+	p = new Preset ("S(1)-curve", "crossfade_in_default");
 	p->push_back (PresetPoint (0, 0));
 	p->push_back (PresetPoint (0.1, 0.01));
 	p->push_back (PresetPoint (0.2, 0.03));
@@ -912,59 +879,80 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (0.9, 0.99));
 	p->push_back (PresetPoint (1, 1));
 	fade_in_presets->push_back (p);
+
+	p = new Preset ("S(2)-curve", "crossfade_in_default");
+	p->push_back (PresetPoint (0.0, 0.0));
+	p->push_back (PresetPoint (0.055, 0.222));
+	p->push_back (PresetPoint (0.163, 0.35));
+	p->push_back (PresetPoint (0.837, 0.678));
+	p->push_back (PresetPoint (0.945, 0.783));
+	p->push_back (PresetPoint (1.0, 1.0));
+	fade_in_presets->push_back (p);
+
+	p = new Preset ("Constant Power (-3dB)", "crossfade_in_constant");
+
+	p->push_back (PresetPoint (0.000000, 0.000000));
+	p->push_back (PresetPoint (0.166667, 0.282192));
+	p->push_back (PresetPoint (0.333333, 0.518174));
+	p->push_back (PresetPoint (0.500000, 0.707946));
+	p->push_back (PresetPoint (0.666667, 0.851507));
+	p->push_back (PresetPoint (0.833333, 0.948859));
+	p->push_back (PresetPoint (1.000000, 1.000000));
+
+	fade_in_presets->push_back (p);
+
+	if (!Profile->get_sae()) {
+		// p = new Preset ("hiin.xpm");
+		p = new Preset ("Long cut", "crossfade_in_fast-cut");
+		p->push_back (PresetPoint (0, 0));
+		p->push_back (PresetPoint (0.0207373, 0.197222));
+		p->push_back (PresetPoint (0.0645161, 0.525));
+		p->push_back (PresetPoint (0.152074, 0.802778));
+		p->push_back (PresetPoint (0.276498, 0.919444));
+		p->push_back (PresetPoint (0.481567, 0.980556));
+		p->push_back (PresetPoint (0.767281, 1));
+		p->push_back (PresetPoint (1, 1));
+		fade_in_presets->push_back (p);
+		
+		// p = new Preset ("loin.xpm");
+		p = new Preset ("Short cut", "crossfade_in_transition");
+		p->push_back (PresetPoint (0, 0));
+		p->push_back (PresetPoint (0.389401, 0.0333333));
+		p->push_back (PresetPoint (0.629032, 0.0861111));
+		p->push_back (PresetPoint (0.829493, 0.233333));
+		p->push_back (PresetPoint (0.9447, 0.483333));
+		p->push_back (PresetPoint (0.976959, 0.697222));
+		p->push_back (PresetPoint (1, 1));
+		fade_in_presets->push_back (p);
+		
+		
+		// p = new Preset ("regin2.xpm");
+		p = new Preset ("Slow cut", "crossfade_in_slow-cut");
+		p->push_back (PresetPoint (0, 0));
+		p->push_back (PresetPoint (0.304147, 0.0694444));
+		p->push_back (PresetPoint (0.529954, 0.152778));
+		p->push_back (PresetPoint (0.725806, 0.333333));
+		p->push_back (PresetPoint (0.847926, 0.558333));
+		p->push_back (PresetPoint (0.919355, 0.730556));
+		p->push_back (PresetPoint (1, 1));
+		fade_in_presets->push_back (p);
+	}
 	
 	/* FADE OUT */
 
-	// p = new Preset ("hiout.xpm");
-	p = new Preset ("crossfade_out_fast-cut");
-	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (0.305556, 1));
-	p->push_back (PresetPoint (0.548611, 0.991736));
-	p->push_back (PresetPoint (0.759259, 0.931129));
-	p->push_back (PresetPoint (0.918981, 0.68595));
-	p->push_back (PresetPoint (0.976852, 0.22865));
-	p->push_back (PresetPoint (1, 0));
-	fade_out_presets->push_back (p);
-	
-	// p = new Preset ("loout.xpm");
-	p = new Preset ("crossfade_out_transition");
-	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (0.023041, 0.697222));
-	p->push_back (PresetPoint (0.0553,   0.483333));
-	p->push_back (PresetPoint (0.170507, 0.233333));
-	p->push_back (PresetPoint (0.370968, 0.0861111));
-	p->push_back (PresetPoint (0.610599, 0.0333333));
-	p->push_back (PresetPoint (1, 0));
-	fade_out_presets->push_back (p);
-
 	// p = new Preset ("regout.xpm");
-	p = new Preset ("crossfade_out_constant");
+	p = new Preset ("Linear (-6dB cut)", "crossfade_out_dipped");
 	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (0.228111, 0.988889));
-	p->push_back (PresetPoint (0.347926, 0.972222));
-	p->push_back (PresetPoint (0.529954, 0.886111));
-	p->push_back (PresetPoint (0.753456, 0.658333));
-	p->push_back (PresetPoint (0.9262673, 0.308333));
-	p->push_back (PresetPoint (1, 0));
+	p->push_back (PresetPoint (0.000000, 1.000000));
+	p->push_back (PresetPoint (0.166667, 0.833033));
+	p->push_back (PresetPoint (0.333333, 0.666186));
+	p->push_back (PresetPoint (0.500000, 0.499459));
+	p->push_back (PresetPoint (0.666667, 0.332853));
+	p->push_back (PresetPoint (0.833333, 0.166366));
+	p->push_back (PresetPoint (1.000000, 0.000000));
 	fade_out_presets->push_back (p);
 
-	// p = new Preset ("regout2.xpm");
-	p = new Preset ("crossfade_out_slow-fade");
-	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (0.080645, 0.730556));
-	p->push_back (PresetPoint (0.277778, 0.289256));
-	p->push_back (PresetPoint (0.470046, 0.152778));
-	p->push_back (PresetPoint (0.695853, 0.0694444));
-	p->push_back (PresetPoint (1, 0));
-	fade_out_presets->push_back (p);
-
-	// p = new Preset ("linout.xpm");
-	p = new Preset ("crossfade_out_dipped");
-	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (1, 0));
-	fade_out_presets->push_back (p);
-	
-	p = new Preset ("crossfade_out_default");
+	p = new Preset ("S(1)-Curve", "crossfade_out_default");
 	p->push_back (PresetPoint (0, 1));
 	p->push_back (PresetPoint (0.1, 0.99));
 	p->push_back (PresetPoint (0.2, 0.97));
@@ -972,6 +960,60 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (0.9, 0.01));
 	p->push_back (PresetPoint (1, 0));
 	fade_out_presets->push_back (p);
+
+	p = new Preset ("S(2)-Curve", "crossfade_out_default");
+	p->push_back (PresetPoint (0.0, 1.0));
+	p->push_back (PresetPoint (0.163, 0.678));
+	p->push_back (PresetPoint (0.055, 0.783));
+	p->push_back (PresetPoint (0.837, 0.35));
+	p->push_back (PresetPoint (0.945, 0.222));
+	p->push_back (PresetPoint (1.0, 0.0));
+	fade_out_presets->push_back (p);
+
+	// p = new Preset ("linout.xpm");
+	p = new Preset ("Constant Power (-3dB cut)", "crossfade_out_constant");
+	p->push_back (PresetPoint (0.000000, 1.000000));
+	p->push_back (PresetPoint (0.166667, 0.948859));
+	p->push_back (PresetPoint (0.333333, 0.851507));
+	p->push_back (PresetPoint (0.500000, 0.707946));
+	p->push_back (PresetPoint (0.666667, 0.518174));
+	p->push_back (PresetPoint (0.833333, 0.282192));
+	p->push_back (PresetPoint (1.000000, 0.000000));
+	fade_out_presets->push_back (p);
+	
+	if (!Profile->get_sae()) {
+		// p = new Preset ("hiout.xpm");
+		p = new Preset ("Slow end/cut", "crossfade_out_fast-cut");
+		p->push_back (PresetPoint (0, 1));
+		p->push_back (PresetPoint (0.305556, 1));
+		p->push_back (PresetPoint (0.548611, 0.991736));
+		p->push_back (PresetPoint (0.759259, 0.931129));
+		p->push_back (PresetPoint (0.918981, 0.68595));
+		p->push_back (PresetPoint (0.976852, 0.22865));
+		p->push_back (PresetPoint (1, 0));
+		fade_out_presets->push_back (p);
+		
+		// p = new Preset ("loout.xpm");
+		p = new Preset ("Fast start/cut", "crossfade_out_transition");
+		p->push_back (PresetPoint (0, 1));
+		p->push_back (PresetPoint (0.023041, 0.697222));
+		p->push_back (PresetPoint (0.0553,   0.483333));
+		p->push_back (PresetPoint (0.170507, 0.233333));
+		p->push_back (PresetPoint (0.370968, 0.0861111));
+		p->push_back (PresetPoint (0.610599, 0.0333333));
+		p->push_back (PresetPoint (1, 0));
+		fade_out_presets->push_back (p);
+		
+		// p = new Preset ("regout2.xpm");
+		p = new Preset ("Slow Fade", "crossfade_out_slow-fade");
+		p->push_back (PresetPoint (0, 1));
+		p->push_back (PresetPoint (0.080645, 0.730556));
+		p->push_back (PresetPoint (0.277778, 0.289256));
+		p->push_back (PresetPoint (0.470046, 0.152778));
+		p->push_back (PresetPoint (0.695853, 0.0694444));
+		p->push_back (PresetPoint (1, 0));
+		fade_out_presets->push_back (p);
+	}
 }
 
 void
@@ -1037,7 +1079,7 @@ CrossfadeEditor::x_coordinate (double& xfract) const
 {
 	xfract = min (1.0, xfract);
 	xfract = max (0.0, xfract);
-    
+
 	return canvas_border + (xfract * effective_width());
 }
 
@@ -1295,4 +1337,45 @@ CrossfadeEditor::audition_left_dry_toggled ()
 			cancel_audition ();
 		}
 	}
+}
+
+bool
+CrossfadeEditor::on_key_press_event (GdkEventKey *ev)
+{
+	return true;
+}
+
+bool
+CrossfadeEditor::on_key_release_event (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+	case GDK_Right:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			audition_right_dry_button.set_active (!audition_right_dry_button.get_active());
+		} else {
+			audition_right_button.set_active (!audition_right_button.get_active());
+		}
+		break;
+
+	case GDK_Left:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			audition_left_dry_button.set_active (!audition_left_dry_button.get_active());
+		} else {
+			audition_left_button.set_active (!audition_left_button.get_active());
+		}
+		break;
+
+	case GDK_space:
+		if (session.is_auditioning()) {
+			cancel_audition ();
+		} else {
+			audition_both_button.set_active (!audition_both_button.get_active());
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return true;
 }

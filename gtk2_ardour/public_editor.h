@@ -244,6 +244,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	/** @return true if the playhead is currently being dragged, otherwise false */
 	virtual bool dragging_playhead () const = 0;
+	virtual double get_physical_screen_width() const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
 	virtual TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0) = 0;
@@ -336,6 +337,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 
 	virtual gdouble get_trackview_group_vertical_offset () const = 0;
+	virtual gdouble get_canvas_timebars_vsize () const = 0;
+	virtual ArdourCanvas::Group* get_background_group () const = 0;
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
 
 	/// Singleton instance, set up by Editor::Editor()

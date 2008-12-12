@@ -131,8 +131,9 @@ class Region
 
 	nframes_t sync_offset(int& dir) const;
 	nframes_t sync_position() const;
+	nframes_t sync_point () const;
 
-	nframes_t adjust_to_sync (nframes_t);
+	nframes_t adjust_to_sync (nframes_t) const;
 	
 	/* first_frame() is an alias; last_frame() just hides some math */
 
@@ -264,6 +265,7 @@ class Region
 		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
 	
 	Region (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (boost::shared_ptr<const Region>, nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (boost::shared_ptr<const Region>);
 	Region (boost::shared_ptr<Source> src, const XMLNode&);
 	Region (const SourceList& srcs, const XMLNode&);
@@ -271,6 +273,8 @@ class Region
 	Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
 
   protected:
+	void copy_stuff (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const string& name, layer_t, Flag flags);
+
 	XMLNode& get_short_state (); /* used only by Session */
 
 	void send_change (Change);

@@ -255,11 +255,18 @@ class MackieControlProtocol
 
 	void add_port( MIDI::Port &, int number );
 
-	/// read automation data from the currently active routes and send to surface
-	void poll_automation();
+	/**
+		Read session data and send to surface. Includes
+		automation from the currently active routes and
+		timecode displays.
+	*/
+	void poll_automation ();
 	
 	// called from poll_automation to figure out which automations need to be sent
 	void update_automation( Mackie::RouteSignal & );
+
+	// also called from poll_automation to update timecode display
+	void update_timecode_display();
 
 	/**
 		notification that the port is about to start it's init sequence.

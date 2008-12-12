@@ -147,7 +147,7 @@ void
 Editor::handle_gui_changes (const string & what, void *src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
-	
+
 	if (what == "track_height") {
 		/* Optional :make tracks change height while it happens, instead 
 		   of on first-idle
@@ -643,14 +643,10 @@ Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& c
 						const SelectionData& data,
 						guint info, guint time)
 {
-	cerr << "RouteLD::dddr target = " << data.get_target() << endl;
-	
 	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
-		cerr << "Delete drag data drop to treeview\n";
 		route_list_display.on_drag_data_received (context, x, y, data, info, time);
 		return;
 	}
-	cerr << "some other kind of drag\n";
 	context->drag_finish (true, false, time);
 }
 
@@ -786,114 +782,6 @@ Editor::move_selected_tracks (bool up)
 	}
 
 	route_display_model->reorder (neworder);
+
+	session->sync_order_keys (_order_key);
 }
-
-#if 0
-	vector<boost::shared_ptr<Route> > selected_block;
-	boost::shared_ptr<Route> target_unselected_route;
-	bool last_track_was_selected = false;
-	vector<int> neworder;
-	TreeModel::Children rows = route_display_model->children();
-	TreeModel::Children::iterator ri;
-	uint32_t old_key;
-	uint32_t new_key;
-	int n;
-
-	/* preload "neworder" with the current order */
-	
-	for (n = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++n) {
-		neworder.push_back (n);
-	}
-
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-
-		TimeAxisView* tv = (*ri)[route_display_columns.tv];
-		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
-
-		if (selection->selected (tv)) {
-
-			selected_block.push_back (route);
-			cerr << "--SAVE as SELECTED " << route->name() << endl;
-			last_track_was_selected = true;
-			continue;
-
-		} else {
-
-			if (!last_track_was_selected) {
-				/* keep moving through unselected tracks, but save this
-				   one in case we need it later as the one that will
-				   move *down* as the selected block moves up.
-				*/
-				target_unselected_route = route;
-				cerr << "--pre-SAVE as UNSELECTED " << route->name() << endl;
-				continue;
-			}
-
-			last_track_was_selected = false;
-
-			if (!up) {
-				/* this is the track immediately after a selected block,
-				   and this is the one that will move *up* as 
-				   the selected block moves down.
-				*/
-
-				target_unselected_route = route;
-				cerr << "--post-SAVE as UNSELECTED " << route->name() << endl;
-			} else {
-				cerr << "--(up) plan to use existing unselected target\n";
-			}
-		}
-
-		cerr << "TRANSITION: sel = " << selected_block.size() << " unsel = " << target_unselected_route << endl;
-
-		/* transitioned between selected/not-selected */
-		
-		uint32_t distance;
-		
-		for (vector<boost::shared_ptr<Route> >::iterator x = selected_block.begin(); x != selected_block.end(); ++x) {
-			old_key = (*x)->order_key (_order_key);
-			new_key = compute_new_key (old_key, up, 1, rows.size());
-			neworder[new_key] = old_key;
-			cerr << "--SELECTED, reorder from " << old_key << " => " << new_key << endl;
-		}
-
-		/* now move the unselected tracks in the opposite direction */
-		
-		if (!selected_block.empty() && target_unselected_route) {
-			distance = selected_block.size();
-			old_key = target_unselected_route->order_key (_order_key);
-			new_key = compute_new_key (old_key, !up, distance, rows.size());
-			neworder[new_key] = old_key;
-			cerr << "--UNSELECTED, reorder from " << old_key << " => " << new_key << endl;
-		}
-
-		selected_block.clear ();
-		target_unselected_route.reset ();
-	}
-
-	cerr << "when done ... sel = " << selected_block.size() << " unsel = " << target_unselected_route << endl;
-	
-	if (!selected_block.empty() || target_unselected_route) {
-		
-		/* left over blocks */
-		
-		uint32_t distance;
-		
-		for (vector<boost::shared_ptr<Route> >::iterator x = selected_block.begin(); x != selected_block.end(); ++x) {
-			old_key = (*x)->order_key (_order_key);
-			new_key = compute_new_key (old_key, up, 1, rows.size());
-			neworder[new_key] = old_key;
-			cerr << "--SELECTED, reorder from " << old_key << " => " << new_key << endl;
-		}
-
-		if (!selected_block.empty() && target_unselected_route) {
-			distance = selected_block.size();
-			old_key = target_unselected_route->order_key (_order_key);
-			new_key = compute_new_key (old_key, !up, distance, rows.size());
-			neworder[new_key] = old_key;
-			cerr << "--UNSELECTED, reorder from " << old_key << " => " << new_key << endl;
-		}
-	}
-
-	route_display_model->reorder (neworder);
-#endif

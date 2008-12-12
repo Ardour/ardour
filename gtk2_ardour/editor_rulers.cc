@@ -33,6 +33,7 @@
 #include "actions.h"
 #include "gtk-custom-hruler.h"
 #include "gui_thread.h"
+#include "time_axis_view.h"
 
 #include "i18n.h"
 
@@ -64,6 +65,14 @@ Editor::initialize_rulers ()
 	_ruler_separator->set_name("TimebarPadding");
 	_ruler_separator->show();
 
+	_minsec_ruler = gtk_custom_hruler_new ();
+	minsec_ruler = Glib::wrap (_minsec_ruler);
+	minsec_ruler->set_name ("MinSecRuler");
+	minsec_ruler->set_size_request (-1, (int)timebar_height);
+	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
+	minsec_ruler->hide ();
+	minsec_ruler->set_no_show_all();
+
 	_smpte_ruler = gtk_custom_hruler_new ();
 	smpte_ruler = Glib::wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
@@ -90,11 +99,13 @@ Editor::initialize_rulers ()
 	frames_ruler->hide ();
 	frames_ruler->set_no_show_all();
 
-	_minsec_ruler = gtk_custom_hruler_new ();
-	minsec_ruler = Glib::wrap (_minsec_ruler);
-	minsec_ruler->set_name ("MinSecRuler");
-	minsec_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
+	_bbt_ruler = gtk_custom_hruler_new ();
+	bbt_ruler = Glib::wrap (_bbt_ruler);
+	bbt_ruler->set_name ("BBTRuler");
+	bbt_ruler->set_size_request (-1, (int)timebar_height);
+	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
+	bbt_ruler->hide ();
+	bbt_ruler->set_no_show_all();
 	minsec_ruler->hide ();
 	minsec_ruler->set_no_show_all();
 	minsec_nmarks = 0;
@@ -532,66 +543,76 @@ Editor::restore_ruler_visibility ()
 
 	if (node) {
 		if ((prop = node->property ("smpte")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_timecode_action->set_active (true);
-			else 
+			} else {
 				ruler_timecode_action->set_active (false);
+			}
 		}
 		if ((prop = node->property ("bbt")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_bbt_action->set_active (true);
-			else 
+			} else {
 				ruler_bbt_action->set_active (false);
+			}
 		}
 		if ((prop = node->property ("frames")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_samples_action->set_active (true);
-			else 
+			} else {
 				ruler_samples_action->set_active (false);
+			}
 		}
 		if ((prop = node->property ("minsec")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_minsec_action->set_active (true);
-			else 
+			} else {
 				ruler_minsec_action->set_active (false);
+			}
 		}
 		if ((prop = node->property ("tempo")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_tempo_action->set_active (true);
-			else 
+			} else {
 				ruler_tempo_action->set_active (false);
+			}
 		}
 		if ((prop = node->property ("meter")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_meter_action->set_active (true);
-			else 
+			} else {
 				ruler_meter_action->set_active (false);
+			}
 		}
 		if ((prop = node->property ("marker")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_marker_action->set_active (true);
-			else 
+			} else {
 				ruler_marker_action->set_active (false);
+			}
 		}
 		if ((prop = node->property ("rangemarker")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_range_action->set_active (true);
-			else 
+			} else {
 				ruler_range_action->set_active (false);
+			}
 		}
 
 		if ((prop = node->property ("transportmarker")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_loop_punch_action->set_active (true);
-			else 
+			} else {
 				ruler_loop_punch_action->set_active (false);
+			}
 		}
 
 		if ((prop = node->property ("cdmarker")) != 0) {
-			if (prop->value() == "yes") 
+			if (prop->value() == "yes") {
 				ruler_cd_marker_action->set_active (true);
-			else 
+			} else {
 				ruler_cd_marker_action->set_active (false);
+			}
 
 		} else {
 			// this session doesn't yet know about the cdmarker ruler
@@ -610,7 +631,6 @@ Editor::restore_ruler_visibility ()
 	}
 
 	no_ruler_shown_update = false;
-
 	update_ruler_visibility ();
 }
 
@@ -816,10 +836,17 @@ Editor::update_ruler_visibility ()
 		vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
 	} else {
 		_trackview_group->property_y () = - get_trackview_group_vertical_offset ();
+		_background_group->property_y () = - get_trackview_group_vertical_offset ();
 		_trackview_group->move (0, 0);
+		_background_group->move (0, 0);
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
 	
+	gdouble bottom_track_pos = vertical_adjustment.get_value() + canvas_height - canvas_timebars_vsize;
+	if (trackview_by_y_position(bottom_track_pos) != 0) {
+		trackview_by_y_position(bottom_track_pos)->clip_to_viewport ();
+	}
+
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
 	time_canvas_vbox.set_size_request (-1,-1);
 

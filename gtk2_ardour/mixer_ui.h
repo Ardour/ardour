@@ -152,6 +152,9 @@ class Mixer_UI : public Gtk::Window
 	void redisplay_track_list ();
 	bool no_track_list_redisplay;
 	bool track_display_button_press (GdkEventButton*);
+#ifdef GTKOSX
+	void queue_draw_all_strips ();
+#endif
 	
 	void track_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void track_list_delete (const Gtk::TreeModel::Path&);

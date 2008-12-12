@@ -749,10 +749,14 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 {
 	uint32_t n;
 	bool changed = false;
+	bool do_not_and_did_not_need_panning = ((nouts < 2) && (outputs.size() < 2));
 
-	//configure_io( ChanCount( DataType::AUDIO, nout ), ChanCount( DataType::AUDIO, nin ) )
-	
-	if (nouts < 2 || (nouts == outputs.size() && npans == _streampanners.size())) {
+	/* if new and old config don't need panning, or if 
+	   the config hasn't changed, we're done.
+	*/
+
+	if (do_not_and_did_not_need_panning || 
+	    ((nouts == outputs.size()) && (npans == _streampanners.size()))) {
 		return;
 	} 
 
@@ -768,6 +772,10 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 
 	if (n != nouts) {
 		changed = true;
+	}
+
+	if (nouts < 2) {
+		goto send_changed;
 	}
 
 	switch (nouts) {
@@ -871,6 +879,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		}
 	}
 
+  send_changed:
 	if (changed) {
 		Changed (); /* EMIT SIGNAL */
 	}

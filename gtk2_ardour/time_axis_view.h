@@ -104,6 +104,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	
 	uint32_t current_height() const { return height; }
 
+	ArdourCanvas::Group   *canvas_background;
 	ArdourCanvas::Group   *canvas_display;
  	Gtk::VBox       *control_parent;
 

@@ -62,6 +62,21 @@ class DnDTreeViewBase : public Gtk::TreeView
 	std::list<Gtk::TargetEntry> draggable;
 	Gdk::DragAction             suggested_action;
 	int                         data_column;
+	std::string                 object_type;
+
+	struct DragData {
+	    Gtk::TreeView* source;
+	    int            data_column;
+	    std::string    object_type;
+	};
+	
+	static DragData drag_data;
+
+	void start_object_drag () {
+		drag_data.source = this;
+		drag_data.data_column = data_column;
+		drag_data.object_type = object_type;
+	}
 };
 
 template<class DataType>
@@ -71,21 +86,26 @@ class DnDTreeView : public DnDTreeViewBase
 	DnDTreeView() {} 
 	~DnDTreeView() {}
 
-	sigc::signal<void,std::string,uint32_t,const DataType*> signal_object_drop;
+	sigc::signal<void,const std::list<DataType>& > signal_drop;
 
 	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time) {
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
-			
+
 			TreeView::on_drag_data_get (context, selection_data, info, time);
-			
-		} else if (data_column >= 0) {
-			
-			Gtk::TreeSelection::ListHandle_Path selection = get_selection()->get_selected_rows ();
-			SerializedObjectPointers<DataType>* sr = serialize_pointers (get_model(), &selection, selection_data.get_target());
-			selection_data.set (8, (guchar*)sr, sr->size);
+
+		} else if (selection_data.get_target() == object_type) {
+
+			start_object_drag ();
+
+			/* we don't care about the data passed around by DnD, but
+			   we have to provide something otherwise it will stop.
+			 */
+
+			guchar c;
+			selection_data.set (8, (guchar*)&c, 1);
 		}
 	}
-
+	
 	void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {
 		if (suggested_action) {
 			/* this is a drag motion callback. just update the status to
@@ -100,64 +120,39 @@ class DnDTreeView : public DnDTreeViewBase
 			
 			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
 			
-		} else if (data_column >= 0) {
+
+		} else if (selection_data.get_target() == object_type) {
 			
-			/* object D-n-D */
-			
-			const void* data = selection_data.get_data();
-			const SerializedObjectPointers<DataType>* sr = reinterpret_cast<const SerializedObjectPointers<DataType> *>(data);
-			
-			if (sr) {
-				signal_object_drop (sr->type, sr->cnt, sr->data);
-			}
-			
+			end_object_drag ();
+
 		} else {
 			/* some kind of target type added by the app, which will be handled by a signal handler */
 		}
 	}
 
-  private:
+	/**
+	 * this can be called by the Treeview itself or by some other
+	 * object that wants to get the list of dragged items.
+	 */
 
-	SerializedObjectPointers<DataType>* serialize_pointers (Glib::RefPtr<Gtk::TreeModel> model, 
-								Gtk::TreeSelection::ListHandle_Path* selection,
-								Glib::ustring type) {
-
-		/* this nasty chunk of code is here because X's DnD protocol (probably other graphics UI's too) 
-		   requires that we package up the entire data collection for DnD in a single contiguous region
-		   (so that it can be trivially copied between address spaces). We don't know the type of DataType so
-		   we have to mix-and-match C and C++ programming techniques here to get the right result.
-
-		   The C trick is to use the "someType foo[0];" declaration trick to create a zero-sized array at the
-		   end of a SerializedObjectPointers<DataType object. Then we allocate a raw memory buffer that extends
-		   past that array and thus provides space for however many DataType items we actually want to pass
-		   around.
-
-		   The C++ trick is to use the placement operator new() syntax to initialize that extra
-		   memory properly.
-		*/
+	void get_object_drag_data (std::list<DataType>& l) {
+		Glib::RefPtr<Gtk::TreeModel> model = drag_data.source->get_model();
+		DataType v;
+		Gtk::TreeSelection::ListHandle_Path selection = drag_data.source->get_selection()->get_selected_rows ();
 		
-		uint32_t cnt = selection->size();
-		uint32_t sz = (sizeof (DataType) * cnt) + sizeof (SerializedObjectPointers<DataType>);
-
-		char* buf = new char[sz];
-		SerializedObjectPointers<DataType>* sr = (SerializedObjectPointers<DataType>*) buf;
-
-		for (uint32_t i = 0; i < cnt; ++i) {
-			new ((void *) &sr->data[i]) DataType ();
+		for (Gtk::TreeSelection::ListHandle_Path::iterator x = selection.begin(); x != selection.end(); ++x) {
+			model->get_iter (*x)->get_value (drag_data.data_column, v);
+			l.push_back (v);
 		}
-		
-		sr->cnt = cnt;
-		sr->size = sz;
-		snprintf (sr->type, sizeof (sr->type), "%s", type.c_str());
-		
-		cnt = 0;
-		
-		for (Gtk::TreeSelection::ListHandle_Path::iterator x = selection->begin(); x != selection->end(); ++x, ++cnt) {
-			model->get_iter (*x)->get_value (data_column, sr->data[cnt]);
-		}
-
-		return sr;
 	}
+
+  private:
+	void end_object_drag () {
+		std::list<DataType> l;
+		get_object_drag_data (l);
+		signal_drop (l);
+	}
+
 };
 
 } // namespace

@@ -454,7 +454,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 
 		} else {
 
-			if (ev->button == 2) {
+			if (Keyboard::is_button2_event(ev)) {
 
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
@@ -465,7 +465,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 				}
 			}
 
-			if (ev->button == 1 || ev->button == 2) {
+			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 

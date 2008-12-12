@@ -32,11 +32,13 @@
 
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
+#include <pbd/filesystem.h>
 
 #include <ardour/osc.h>
 #include <ardour/session.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
+#include <ardour/dB.h>
 #include <ardour/filesystem_paths.h>
 
 #include "i18n.h"
@@ -107,10 +109,10 @@ OSC::start ()
 	
 	cerr << "OSC @ " << get_server_url () << endl;
 
-	sys::path url_file;
+	PBD::sys::path url_file;
 
 	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-				"osc_url", url_file)) {
+				      "osc_url", url_file)) {
 		_osc_url_file = url_file.to_string();
 		ofstream urlfile;
 		urlfile.open(_osc_url_file.c_str(), ios::trunc);
@@ -154,9 +156,9 @@ OSC::stop ()
 		unlink(_osc_unix_socket_path.c_str());
 	}
 	
-   if (!  _osc_url_file.empty() ) {
-      unlink(_osc_url_file.c_str() );
-   }
+	if (!  _osc_url_file.empty() ) {
+		unlink(_osc_url_file.c_str() );
+	}
 	return 0;
 }
 
@@ -203,6 +205,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_out", "", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/rec_enable_toggle", "", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
+
+		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
+		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);
+		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);
+		REGISTER_CALLBACK (serv, "/ardour/routes/gainabs", "if", route_set_gain_abs);
+		REGISTER_CALLBACK (serv, "/ardour/routes/gaindB", "if", route_set_gain_dB);
 
 #if 0
 		REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -310,7 +318,7 @@ OSC::get_unix_server_url()
 void *
 OSC::_osc_receiver(void * arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("OSC"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("OSC"));
 
 	static_cast<OSC*> (arg)->osc_receiver();
 	return 0;
@@ -378,7 +386,7 @@ OSC::osc_receiver()
 			if (pfd[i].revents & POLLIN)
 			{
 				// this invokes callbacks
-				//cerr << "invoking recv on " << pfd[i].fd << endl;
+				// cerr << "invoking recv on " << pfd[i].fd << endl;
 				lo_server_recv(srvs[i]);
 			}
 		}
@@ -390,7 +398,7 @@ OSC::osc_receiver()
 	if (_osc_server) {
 		int fd = lo_server_get_socket_fd(_osc_server);
 		if (fd >=0) {
-				// hack around
+			// hack around
 			close(fd);
 		}
 		lo_server_free (_osc_server);
@@ -498,5 +506,72 @@ OSC::current_value (const char *path, const char *types, lo_arg **argv, int argc
 		/* error */
 	}
 #endif
+	return 0;
+}
+
+int
+OSC::route_mute (int rid, int yn)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_mute (yn, this);
+	}
+	return 0;
+}
+
+int
+OSC::route_solo (int rid, int yn)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_solo (yn, this);
+	}
+	return 0;
+}
+
+int
+OSC::route_recenable (int rid, int yn)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_record_enable (yn, this);
+	}
+	return 0;
+}
+
+int
+OSC::route_set_gain_abs (int rid, float level)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_gain (level, this);
+	}
+
+	return 0;
+}
+
+int
+OSC::route_set_gain_dB (int rid, float dB)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		r->set_gain (dB_to_coefficient (dB), this);
+	}
+
 	return 0;
 }

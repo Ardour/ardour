@@ -193,7 +193,7 @@ ARDOUR_UI::install_actions ()
 
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (main_actions, X_("WindowMenu"), _("Window"));
-	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
+	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (mem_fun(*this, &ARDOUR_UI::finish))));
 
         /* windows visibility actions */
 
@@ -201,6 +201,7 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_action (common_actions, X_("goto-editor"), _("Show Editor"),  mem_fun(*this, &ARDOUR_UI::goto_editor_window));
 	ActionManager::register_action (common_actions, X_("goto-mixer"), _("Show Mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
+	ActionManager::register_action (common_actions, X_("toggle-editor-mixer-on-top"), _("Toggle Editor Mixer on Top"),  mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer_on_top));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Preferences"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -450,6 +451,7 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_toggle_action (option_actions, X_("SyncEditorAndMixerTrackOrder"), _("Sync Editor and Mixer track order"), mem_fun (*this, &ARDOUR_UI::toggle_sync_order_keys));
 	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
+	ActionManager::register_toggle_action (option_actions, X_("NewPluginsActive"), _("New plugins are active"), mem_fun (*this, &ARDOUR_UI::toggle_new_plugins_active));
 	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
 	ActionManager::register_toggle_action (option_actions, X_("PeriodicSafetyBackups"), _("Make periodic safety backups"), mem_fun (*this, &ARDOUR_UI::toggle_PeriodicSafetyBackups));
 	ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
@@ -514,6 +516,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("SoloMuteOverride"), _("Override muting"), mem_fun (*this, &ARDOUR_UI::toggle_SoloMuteOverride));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* act = ActionManager::register_action (option_actions, X_("DisableAllPlugins"), _("Disable All Plugins"), mem_fun (*this, &ARDOUR_UI::disable_all_plugins));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -562,7 +566,7 @@ ARDOUR_UI::install_actions ()
 	*/
 
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("JACK does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
-	if (engine->can_request_hardware_monitoring()) {
+	if (!engine->can_request_hardware_monitoring()) {
 		act->set_sensitive (false);
 	}
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Ardour does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));

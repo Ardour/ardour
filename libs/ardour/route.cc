@@ -25,6 +25,7 @@
 #include <pbd/xml++.h>
 #include <pbd/enumwriter.h>
 #include <pbd/stacktrace.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/timestamps.h>
 #include <ardour/audioengine.h>
@@ -1087,6 +1088,31 @@ Route::set_solo (bool yn, void *src)
 		_soloed = yn;
 		solo_changed (src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
+	}	
+	
+	catch_up_on_solo_mute_override ();
+}
+
+void
+Route::catch_up_on_solo_mute_override ()
+{
+	if (Config->get_solo_model() != InverseMute) {
+		return;
+	}
+	
+	{
+
+		Glib::Mutex::Lock lm (declick_lock);
+		
+		if (_muted) {
+			if (Config->get_solo_mute_override()) {
+				desired_mute_gain = (_soloed?1.0:0.0);
+			} else {
+				desired_mute_gain = 0.0;
+			}
+		} else {
+			desired_mute_gain = 1.0;
+		}
 	}
 }
 
@@ -1126,7 +1152,12 @@ Route::set_mute (bool yn, void *src)
 		_mute_control->Changed (); /* EMIT SIGNAL */
 		
 		Glib::Mutex::Lock lm (declick_lock);
-		desired_mute_gain = (yn?0.0f:1.0f);
+		
+		if (_soloed && Config->get_solo_mute_override()){
+			desired_mute_gain = 1.0f;
+		} else {
+			desired_mute_gain = (yn?0.0f:1.0f);
+		}
 	}
 }
 
@@ -1234,7 +1265,6 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 				return -1;
 			}
 			
-			(*i)->activate ();
 			(*i)->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 		}
 
@@ -3089,3 +3119,50 @@ Route::set_pending_declick (int declick)
 
 }
 
+/** Shift automation forwards from a particular place, thereby inserting time.
+ *  Adds undo commands for any shifts that are performed.
+ *
+ * @param pos Position to start shifting from.
+ * @param frames Amount to shift forwards by.
+ */
+
+void
+Route::shift (nframes64_t pos, nframes64_t frames)
+{
+#ifdef THIS_NEEDS_FIXING_FOR_V3
+
+	/* gain automation */
+	XMLNode &before = _gain_control->get_state ();
+	_gain_control->shift (pos, frames);
+	XMLNode &after = _gain_control->get_state ();
+	_session.add_command (new MementoCommand<AutomationList> (_gain_automation_curve, &before, &after));
+
+	/* pan automation */
+	for (std::vector<StreamPanner*>::iterator i = _panner->begin (); i != _panner->end (); ++i) {
+		Curve & c = (*i)->automation ();
+		XMLNode &before = c.get_state ();
+		c.shift (pos, frames);
+		XMLNode &after = c.get_state ();
+		_session.add_command (new MementoCommand<AutomationList> (c, &before, &after));
+	}
+
+	/* redirect automation */
+	{
+		Glib::RWLock::ReaderLock lm (redirect_lock);
+		for (RedirectList::iterator i = _redirects.begin (); i != _redirects.end (); ++i) {
+			
+			set<uint32_t> a;
+			(*i)->what_has_automation (a);
+			
+			for (set<uint32_t>::const_iterator j = a.begin (); j != a.end (); ++j) {
+				AutomationList & al = (*i)->automation_list (*j);
+				XMLNode &before = al.get_state ();
+				al.shift (pos, frames);
+				XMLNode &after = al.get_state ();
+				_session.add_command (new MementoCommand<AutomationList> (al, &before, &after));
+			}
+		}
+	}
+#endif
+
+}

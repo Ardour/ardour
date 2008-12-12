@@ -321,6 +321,16 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	RouteUI::set_route (rt);
 
+	if (input_selector) {
+		delete input_selector;
+		input_selector = 0;
+	}
+
+	if (output_selector) {
+		delete output_selector;
+		output_selector = 0;
+	}
+
 	panners.set_io (rt);
 	gpm.set_io (rt);
 	pre_processor_box.set_route (rt);
@@ -364,6 +374,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 #endif /* VARISPEED_IN_MIXER_STRIP */
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
+		rec_enable_button->show();
 	}
 
 	if (_route->phase_invert()) {
@@ -385,6 +396,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		meter_point_label.set_text (_("post"));
 		break;
 	}
+
+	delete route_ops_menu;
+	route_ops_menu = 0;
 	
 	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route->comment().empty() ?
 						   _("Click to Add/Edit Comments"):
@@ -518,20 +532,19 @@ MixerStrip::set_width (Width w, void* owner)
 
 	switch (w) {
 	case Wide:
-		set_size_request (-1, -1);
-		
+
 		if (rec_enable_button)  {
-			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("record"));
+			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Record"));
 		}
 		((Gtk::Label*)mute_button->get_child())->set_text  (_("Mute"));
 		((Gtk::Label*)solo_button->get_child())->set_text (_("Solo"));
 
 		if (_route->comment() == "") {
 		       comment_button.unset_bg (STATE_NORMAL);
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("comments"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("Comments"));
 		} else {
 		       comment_button.modify_bg (STATE_NORMAL, color());
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*comments*"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Comments*"));
 		}
 
 		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(gain_automation->automation_style()));
@@ -539,6 +552,7 @@ MixerStrip::set_width (Width w, void* owner)
 		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.astyle_string(_route->panner().automation_style()));
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
+		set_size_request (-1, -1);
 		break;
 
 	case Narrow:
@@ -564,12 +578,13 @@ MixerStrip::set_width (Width w, void* owner)
 		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
 	}
-
 	update_input_display ();
 	update_output_display ();
 	mix_group_changed (0);
 	name_changed ();
-
+#ifdef GTKOSX
+	WidthChanged();
+#endif
 }
 
 void
@@ -1084,7 +1099,7 @@ void
 MixerStrip::build_route_ops_menu ()
 {
 	using namespace Menu_Helpers;
-	route_ops_menu = manage (new Menu);
+	route_ops_menu = new Menu;
 	route_ops_menu->set_name ("ArdourContextMenu");
 
 	MenuList& items = route_ops_menu->items();
@@ -1107,11 +1122,10 @@ MixerStrip::build_route_ops_menu ()
 	denormal_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());
 
-	build_remote_control_menu ();
-	
-	items.push_back (SeparatorElem());
 	if (!Profile->get_sae()) {
-              items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		build_remote_control_menu ();
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
         }
 
 	items.push_back (SeparatorElem());
@@ -1121,7 +1135,7 @@ MixerStrip::build_route_ops_menu ()
 gint
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1) {
+	if (ev->button == 1 || ev->button == 3) {
 		list_route_operations ();
 
 		Menu_Helpers::MenuList& items = route_ops_menu->items();

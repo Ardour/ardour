@@ -74,6 +74,7 @@ public:
 
 	void set_layer_display (LayerDisplay);
 
+	ArdourCanvas::Group* background_group() { return _background_group; }
 	ArdourCanvas::Group* canvas_item() { return canvas_group; }
 
 	enum ColorTarget {
@@ -128,6 +129,7 @@ protected:
 
 	RouteTimeAxisView&        _trackview;
 	bool                      owns_canvas_group;
+	ArdourCanvas::Group*      _background_group;
 	ArdourCanvas::Group*      canvas_group;
 	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
 

@@ -119,6 +119,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void hide_about ();
 
 	void idle_load (const Glib::ustring& path);
+	void finish();
+
 	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
 	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot,
@@ -182,8 +184,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
 
 	void name_io_setup (ARDOUR::AudioEngine&, string&, ARDOUR::IO& io, bool in);
-
-	static gint hide_and_quit (GdkEventAny *ev, ArdourDialog *);
 
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
@@ -287,8 +287,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::Tooltips          _tooltips;
 
-	void                     goto_editor_window ();
-	void                     goto_mixer_window ();
+	void                goto_editor_window ();
+	void                goto_mixer_window ();
+	void                toggle_editor_mixer_on_top ();
+	bool                _mixer_on_top;
 
 	Gtk::Table               adjuster_table;
 	Gtk::Frame               adjuster_frame;
@@ -313,7 +315,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void startup ();
 	void shutdown ();
 
-	void finish();
 	int  ask_about_saving_session (const string & why);
 
 	/* periodic safety backup, to be precise */
@@ -715,6 +716,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_denormal_model (ARDOUR::DenormalModel);
 
 	void toggle_sync_order_keys ();
+	void toggle_new_plugins_active();
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();
@@ -725,6 +727,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();
 	void toggle_ShowSoloMutes();
+	void toggle_SoloMuteOverride();
 	void toggle_LatchedRecordEnable ();
 	void toggle_RegionEquivalentsOverlap ();
 	void toggle_PrimaryClockDeltaEditCursor ();

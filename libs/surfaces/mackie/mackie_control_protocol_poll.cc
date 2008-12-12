@@ -33,8 +33,7 @@ bool MackieControlProtocol::probe()
 
 void * MackieControlProtocol::monitor_work()
 {
-	// What does ThreadCreatedWithRequestSize do?
-	PBD::ThreadCreated (pthread_self(), X_("Mackie"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Mackie"));
 
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
@@ -105,6 +104,8 @@ void MackieControlProtocol::read_ports()
 	for ( int p = 0; p < nfds; ++p )
 	{
 		// this will cause handle_midi_any in the MackiePort to be triggered
+		// for alsa/raw ports
+		// alsa/sequencer ports trigger the midi parser off poll
 		if ( (pfd[p].revents & POLLIN) > 0 )
 		{
 			// avoid deadlocking?

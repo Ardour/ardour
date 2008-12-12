@@ -126,7 +126,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Processor> > processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 
-	void object_drop (std::string type, uint32_t cnt, const boost::shared_ptr<ARDOUR::Processor>*);
+	void object_drop (const std::list<boost::shared_ptr<ARDOUR::Processor> >&);
 
 	Width _width;
 	
@@ -186,7 +186,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void get_selected_processors (vector<boost::shared_ptr<ARDOUR::Processor> >&);
 
 	static Glib::RefPtr<Gtk::Action> paste_action;
-	void paste_processor_list (std::list<boost::shared_ptr<ARDOUR::Processor> >& processors);
+	void paste_processor_list (const std::list<boost::shared_ptr<ARDOUR::Processor> >& processors);
 	void paste_processor_state (const XMLNode&);
 	
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);

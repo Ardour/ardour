@@ -24,7 +24,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <iterator>
 

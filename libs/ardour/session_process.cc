@@ -677,12 +677,13 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			
 #if 0
 			cerr << "adjust using " << delta
-			<< " towards " << adjusted_speed
-			<< " ratio = " << adjusted_speed / slave_speed
-			<< " current = " << _transport_speed
-			<< " slave @ " << slave_speed
-			<< endl;
-#endif			
+			     << " towards " << adjusted_speed
+			     << " ratio = " << adjusted_speed / slave_speed
+			     << " current = " << _transport_speed
+			     << " slave @ " << slave_speed
+			     << endl;
+#endif
+			
 			request_transport_speed (adjusted_speed);
 			
 #if 1

@@ -1359,8 +1359,9 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			prev_pymax = pymax;
 			prev_pymin = pymin;
 		}
-	}
-	else if(waveview->filled && rectify) {
+
+	} else if (waveview->filled && rectify) {
+
 		int prev_pymax = -1;
 		int last_pymax = -1;
 		int next_pymax;
@@ -1611,11 +1612,10 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	int cache_index;
 	double zbegin, zend;
 	gboolean rectify;
-	double n;
 	double origin;
 	double clip_length;
 	double xoff;
-	double yoff;
+	double yoff = 0.0;
 	double ulx;
 	double uly;
 	double lrx;
@@ -1748,7 +1748,8 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 		
 		yoff = origin - (waveview->half_height * max) + 0.5;
 		
-		if (n == ulx) {
+		if (xoff == ulx) {
+			/* first point */
 			cairo_move_to (cr, xoff+0.5, yoff);
 		} else {
 			cairo_line_to (cr, xoff+0.5, yoff);

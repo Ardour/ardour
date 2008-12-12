@@ -42,12 +42,12 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
   public:
 	AutomationList (Evoral::Parameter id);
 	AutomationList (const XMLNode&, Evoral::Parameter id);
+	AutomationList (const AutomationList&);
+	AutomationList (const AutomationList&, double start, double end);
 	~AutomationList();
 
 	virtual boost::shared_ptr<Evoral::ControlList> create(Evoral::Parameter id);
 
-	AutomationList (const AutomationList&);
-	AutomationList (const AutomationList&, double start, double end);
 	AutomationList& operator= (const AutomationList&);
 	bool operator== (const AutomationList&);
 	

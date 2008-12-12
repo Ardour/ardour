@@ -64,6 +64,7 @@ guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
 #else
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
@@ -71,7 +72,9 @@ guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
 guint Keyboard::Level4Modifier = GDK_MOD4_MASK;     // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;    
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+guint Keyboard::button2_modifiers = 0; /* not used */
 #endif
+
 
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
@@ -265,10 +268,20 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		}
 	}
 
-	if (event->type == GDK_KEY_RELEASE && event->keyval == GDK_w && modifier_state_equals (event->state, PrimaryModifier)) {
-		if (current_window) {
-			current_window->hide ();
-			current_window = 0;
+	/* Special keys that we want to handle in
+	   any dialog, no matter whether it uses
+	   the regular set of accelerators or not
+	*/
+
+	if (event->type == GDK_KEY_RELEASE && modifier_state_equals (event->state, PrimaryModifier)) {
+		switch (event->keyval) {
+		case GDK_w:
+			if (current_window) {
+				current_window->hide ();
+				current_window = 0;
+				ret = true;
+			}
+			break;
 		}
 	}
 
@@ -291,25 +304,29 @@ Keyboard::enter_window (GdkEventCrossing *ev, Gtk::Window* win)
 bool
 Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* win)
 {
-	switch (ev->detail) {
-	case GDK_NOTIFY_INFERIOR:
-		if (debug_keyboard) {
-			cerr << "INFERIOR crossing ... out\n";
+	if (ev) {
+		switch (ev->detail) {
+		case GDK_NOTIFY_INFERIOR:
+			if (debug_keyboard) {
+				cerr << "INFERIOR crossing ... out\n";
+			}
+			break;
+			
+		case GDK_NOTIFY_VIRTUAL:
+			if (debug_keyboard) {
+				cerr << "VIRTUAL crossing ... out\n";
+			}
+			/* fallthru */
+			
+		default:
+			if (debug_keyboard) {
+				cerr << "REAL CROSSING ... out\n";
+				cerr << "clearing current target\n";
+			}
+			state.clear ();
+			current_window = 0;
 		}
-		break;
-
-	case GDK_NOTIFY_VIRTUAL:
-		if (debug_keyboard) {
-			cerr << "VIRTUAL crossing ... out\n";
-		}
-		/* fallthru */
-
-	default:
-		if (debug_keyboard) {
-			cerr << "REAL CROSSING ... out\n";
-			cerr << "clearing current target\n";
-		}
-		state.clear ();
+	} else {
 		current_window = 0;
 	}
 
@@ -363,10 +380,21 @@ Keyboard::set_snap_modifier (guint mod)
 bool
 Keyboard::is_edit_event (GdkEventButton *ev)
 {
-
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) && 
 		(ev->button == Keyboard::edit_button()) && 
 		((ev->state & RelevantModifierKeyMask) == Keyboard::edit_modifier());
+}
+
+bool
+Keyboard::is_button2_event (GdkEventButton* ev)
+{
+#ifdef GTKOSX
+	return (ev->button == 2) || 
+		((ev->button == 1) && 
+		 ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));
+#else
+	return ev->button == 2;
+#endif	
 }
 
 bool

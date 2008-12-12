@@ -38,7 +38,6 @@
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/popup.h>
 
-
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audioplaylist.h>
@@ -147,8 +146,6 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 	} else {
 		snap_to (where);
 	}
-
-	cerr << "Split " << regions.size() << " at " << where << endl;
 
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
@@ -2009,6 +2006,36 @@ Editor::add_location_from_playhead_cursor ()
 }
 
 void
+Editor::add_locations_from_audio_region ()
+{
+	RegionSelection rs; 
+
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
+	}
+
+	session->begin_reversible_command (rs.size () > 1 ? _("add markers") : _("add marker"));
+	XMLNode &before = session->locations()->get_state();
+	
+	cerr << "Add locations\n";
+
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
+		
+		boost::shared_ptr<Region> region = (*i)->region ();
+	
+		Location *location = new Location (region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
+		
+		session->locations()->add (location, true);
+	}
+
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	session->commit_reversible_command ();
+}
+
+void
 Editor::add_location_from_audio_region ()
 {
 	RegionSelection rs; 
@@ -2019,15 +2046,31 @@ Editor::add_location_from_audio_region ()
 		return;
 	}
 
-	RegionView* rv = *(rs.begin());
-	boost::shared_ptr<Region> region = rv->region();
-	
-	Location *location = new Location (region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
 	session->begin_reversible_command (_("add marker"));
-        XMLNode &before = session->locations()->get_state();
+	XMLNode &before = session->locations()->get_state();
+
+	string markername;
+
+	if (rs.size() > 1) {		// more than one region selected
+		session->locations()->next_available_name(markername, "regions");
+	} else {
+		RegionView* rv = *(rs.begin());
+		boost::shared_ptr<Region> region = rv->region();
+		markername = region->name();
+	}
+		
+	if (!choose_new_marker_name(markername)) {
+		return;
+	}
+
+	cerr << "Add location\n";
+
+	// single range spanning all selected 
+	Location *location = new Location (rs.start(), rs.end_frame(), markername, Location::IsRangeMarker);
 	session->locations()->add (location, true);
-        XMLNode &after = session->locations()->get_state();
-	session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
+
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	session->commit_reversible_command ();
 }
 
@@ -3607,7 +3650,7 @@ Editor::unfreeze_route ()
 void*
 Editor::_freeze_thread (void* arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("Freeze"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freeze"));
 	return static_cast<Editor*>(arg)->freeze_thread ();
 }
 
@@ -4734,6 +4777,28 @@ Editor::toggle_region_opaque ()
 }
 
 void
+Editor::toggle_record_enable ()
+{
+	bool new_state = false;
+	bool first = true;
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+		if (!rtav)
+			continue;
+		if (!rtav->is_track())
+			continue;
+
+		if (first) {
+			new_state = !rtav->track()->record_enabled();
+			first = false;
+		}
+
+		rtav->track()->set_record_enable(new_state, this);
+	}
+}
+
+
+void
 Editor::set_fade_length (bool in)
 {
 	RegionSelection rs; 
@@ -5216,17 +5281,26 @@ Editor::select_next_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if (*i == current) {
-			++i;
-			if (i != track_views.end()) {
-				selection->set (*i);
-			} else {
-				selection->set (*(track_views.begin()));
+	RouteUI *rui;
+	do {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if (*i == current) {
+				++i;
+				if (i != track_views.end()) {
+					current = (*i);
+				} else {
+					current = (*(track_views.begin()));
+					//selection->set (*(track_views.begin()));
+				}
+				break;
 			}
-			break;
 		}
-	}
+		rui = dynamic_cast<RouteUI *>(current);
+	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
+
+	selection->set(current);
+
+	ensure_track_visible(current);
 }
 
 void
@@ -5239,17 +5313,55 @@ Editor::select_prev_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
-	for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
-		if (*i == current) {
-			++i;
-			if (i != track_views.rend()) {
-				selection->set (*i);
-			} else {
-				selection->set (*(track_views.rbegin()));
+	RouteUI *rui;
+	do {
+		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
+			if (*i == current) {
+				++i;
+				if (i != track_views.rend()) {
+					current = (*i);
+				} else {
+					current = *(track_views.rbegin());
+				}
+				break;
 			}
-			break;
 		}
+		rui = dynamic_cast<RouteUI *>(current);
+	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
+
+	selection->set (current);
+
+	ensure_track_visible(current);
+}
+
+void
+Editor::ensure_track_visible(TimeAxisView *track)
+{
+	if (track->hidden())
+		return;
+
+	double current_view_min_y = vertical_adjustment.get_value();
+	double current_view_max_y = vertical_adjustment.get_value() + vertical_adjustment.get_page_size() - canvas_timebars_vsize;
+
+	double track_min_y = track->y_position;
+	double track_max_y = track->y_position + (double)track->effective_height;
+
+	if (track_min_y >= current_view_min_y &&
+            track_max_y <= current_view_max_y) {
+		return;
 	}
+
+	double new_value;
+
+	if (track_min_y < current_view_min_y) {
+		// Track is above the current view
+		new_value = track_min_y;
+	} else {
+		// Track is below the current view
+		new_value = track->y_position + (double)track->effective_height + canvas_timebars_vsize - vertical_adjustment.get_page_size();
+	}
+
+	vertical_adjustment.set_value(new_value);
 }
 
 void
@@ -6032,26 +6144,34 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 	begin_reversible_command (_("insert time"));
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+		/* regions */
 		boost::shared_ptr<Playlist> pl = (*x)->playlist();
 		
-		if (!pl) {
-			continue;
+		if (pl) {
+
+			XMLNode &before = pl->get_state();
+			
+			if (opt == SplitIntersected) {
+				pl->split (pos);
+			}
+			
+			pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
+			
+			XMLNode &after = pl->get_state();
+			
+			session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
+			commit = true;
 		}
-
-		XMLNode &before = pl->get_state();
-
-		if (opt == SplitIntersected) {
-			pl->split (pos);
+			
+		/* automation */
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
+		if (rtav) {
+			rtav->route ()->shift (pos, frames);
+			commit = true;
 		}
-		
-		pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
-
-		XMLNode &after = pl->get_state();
-
-		session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
-		commit = true;
 	}
 
+	/* markers */
 	if (markers_too) {
 		bool moved = false;
 		XMLNode& before (session->locations()->get_state());
@@ -6185,22 +6305,23 @@ Editor::goto_visual_state (uint32_t n)
 void
 Editor::start_visual_state_op (uint32_t n)
 {
-	cerr << "Start\n";
+	cerr << "Start visual op\n";
 	if (visual_state_op_connection.empty()) {
-		cerr << "\tqueue\n";
 		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
+		cerr << "\tqueued new timeout\n";
 	}
 }
 
 void
 Editor::cancel_visual_state_op (uint32_t n)
 {
-	cerr << "Cancel\n";
 	if (!visual_state_op_connection.empty()) {
-		cerr << "\tgoto\n";
+		cerr << "cancel visual op, time to goto\n";
 		visual_state_op_connection.disconnect();
 		goto_visual_state (n);
-	} 
+	} else {
+		cerr << "cancel visual op, do nothing\n";
+	}
 }
 
 bool

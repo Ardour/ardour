@@ -120,7 +120,7 @@ ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, PluginSelector &plug
 	processor_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	processor_display.get_column(0)->set_fixed_width(48);
 	processor_display.add_object_drag (columns.processor.index(), "processors");
-	processor_display.signal_object_drop.connect (mem_fun (*this, &ProcessorBox::object_drop));
+	processor_display.signal_drop.connect (mem_fun (*this, &ProcessorBox::object_drop));
 
 	TreeViewColumn* name_col = processor_display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(processor_display.get_column_cell_renderer (0));
@@ -167,22 +167,11 @@ ProcessorBox::route_going_away ()
 	no_processor_redisplay = true;
 }
 
+
 void
-ProcessorBox::object_drop (string type, uint32_t cnt, const boost::shared_ptr<Processor>* ptr)
+ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs)
 {
-	if (type != "processors" || cnt == 0 || !ptr) {
-		return;
-	}
-
-	/* do something with the dropped processors */
-
-	list<boost::shared_ptr<Processor> > processors;
-	
-	for (uint32_t n = 0; n < cnt; ++n) {
-		processors.push_back (ptr[n]);
-	}
-	
-	paste_processor_list (processors);
+	paste_processor_list (procs);
 }
 
 void
@@ -310,7 +299,13 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev)
 
 		// this is purely informational but necessary
 		ProcessorSelected (processor); // emit
+
+	} else if (!processor && ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
+
+		choose_plugin ();
+		_plugin_selector.show_manager ();
 	}
+
 	
 	return ret;
 }
@@ -343,7 +338,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 		show_processor_menu(ev->time);
 		ret = true;
 
-	} else if (processor && (ev->button == 2) && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))) {
+	} else if (processor && Keyboard::is_button2_event (ev) && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))) {
 		
 		/* button2-click with no modifiers */
 
@@ -399,6 +394,10 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 		boost::shared_ptr<Processor> processor (new PluginInsert (_session, *p, _placement));
 
 		Route::ProcessorStreams err_streams;
+
+		if (Config->get_new_plugins_active()) {
+			processor->set_active (true);
+		}
 		
 		if (_route->add_processor (processor, &err_streams)) {
 			weird_plugin_dialog (**p, err_streams, _route);
@@ -538,6 +537,9 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 
 	case IOSelector::Accepted:
 		_route->add_processor (processor);
+		if (Profile->get_sae()) {
+			processor->set_active (true);
+		}
 		break;
 	}
 
@@ -775,9 +777,10 @@ ProcessorBox::cut_processors ()
 
 	no_processor_redisplay = true;
 	for (vector<boost::shared_ptr<Processor> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
-		// Do not cut inserts or sends
+		// Do not cut inserts
+		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0 ||
+		    (boost::dynamic_pointer_cast<Send>((*i)) != 0)) {
 
-		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
 			void* gui = (*i)->get_gui ();
 		
 			if (gui) {
@@ -814,8 +817,9 @@ ProcessorBox::copy_processors ()
 	}
 
 	for (vector<boost::shared_ptr<Processor> >::iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
-		// Do not copy processors or sends
-		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
+		// Do not copy inserts
+		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0 ||
+		    (boost::dynamic_pointer_cast<Send>((*i)) != 0)) {
 			node->add_child_nocopy ((*i)->get_state());
 		}
   	}
@@ -905,11 +909,11 @@ ProcessorBox::paste_processors ()
 }
 
 void
-ProcessorBox::paste_processor_list (list<boost::shared_ptr<Processor> >& processors)
+ProcessorBox::paste_processor_list (const list<boost::shared_ptr<Processor> >& processors)
 {
  	list<boost::shared_ptr<Processor> > copies;
 	
-	for (list<boost::shared_ptr<Processor> >::iterator i = processors.begin(); i != processors.end(); ++i) {
+	for (list<boost::shared_ptr<Processor> >::const_iterator i = processors.begin(); i != processors.end(); ++i) {
 		
 		boost::shared_ptr<Processor> copy = Processor::clone (*i);
 		

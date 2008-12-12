@@ -151,6 +151,10 @@ fixup_bundle_environment ()
 	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
 
+	path = dir_path;
+	path += "/../Resources";
+	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
+
 	cstr = getenv ("LADSPA_PATH");
 	if (cstr) {
 		path = cstr;
@@ -264,7 +268,6 @@ fixup_bundle_environment ()
 	path += "/../Resources/gdk-pixbuf.loaders";
 
 	setenv ("GDK_PIXBUF_MODULE_FILE", path.c_str(), 1);
-	cerr << "Set GDK_PIXBUF_MODULE_FILE to " << path << endl;
 
 	if (getenv ("ARDOUR_WITH_JACK")) {
 		// JACK driver dir
@@ -297,12 +300,9 @@ int main (int argc, char *argv[])
 {
 	vector<Glib::ustring> null_file_list;
 	
-	cerr << "here we go\n";
-	
 #ifdef __APPLE__
 	fixup_bundle_environment ();
 #endif
-	cerr << "just did it\n";
 
         Glib::thread_init();
 	gtk_set_locale ();

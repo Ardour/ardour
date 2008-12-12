@@ -136,6 +136,13 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	visual_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
+	edit_group_button.unset_flags (Gtk::CAN_FOCUS);
+	playlist_button.unset_flags (Gtk::CAN_FOCUS);
+	automation_button.unset_flags (Gtk::CAN_FOCUS);
+	size_button.unset_flags (Gtk::CAN_FOCUS);
+	visual_button.unset_flags (Gtk::CAN_FOCUS);
+	hide_button.unset_flags (Gtk::CAN_FOCUS);
+
 	hide_button.add (*(manage (new Image (::get_icon("hide")))));
 	hide_button.show_all ();
 
@@ -147,9 +154,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	hide_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::hide_click));
 
 	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
-	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release));
+	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
-	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
+	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
 
 	if (is_track()) {
 
@@ -502,11 +509,10 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 
-	build_remote_control_menu ();
-	build_automation_action_menu ();
-
 	if (!Profile->get_sae()) {
+		build_remote_control_menu ();
 		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		build_automation_action_menu ();
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
 		items.push_back (SeparatorElem());
 	}
@@ -586,7 +592,12 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &RouteTimeAxisView::hide_click)));
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
+	} else {
+		items.push_front (SeparatorElem());
+		items.push_front (MenuElem (_("Delete"), mem_fun(*this, &RouteUI::remove_this_route)));
+	}
 }
 
 static bool __reset_item (RadioMenuItem* item)
@@ -823,6 +834,18 @@ RouteTimeAxisView::set_height (uint32_t h)
 		}
 
 	} else {
+
+
+		/* don't allow name_entry to be hidden while
+		   it has focus, otherwise the GUI becomes unusable.
+		*/
+
+		if (name_entry.has_focus()) {
+			if (name_entry.get_text() != _route->name()) {
+				name_entry_changed ();
+			}
+			controls_ebox.grab_focus ();
+		}
 
 		hide_name_entry ();
 		show_name_label ();
@@ -2054,6 +2077,7 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 		if (showit) {
 			pan->view->set_marked_for_display (true);
 			pan->view->canvas_display->show();
+			pan->view->canvas_background->show();
 		} else {
 			rai->processor->mark_automation_visible (pan->what, true);
 			pan->view->set_marked_for_display (false);

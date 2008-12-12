@@ -27,6 +27,7 @@
 #include <sigc++/bind.h>
 #include <sys/time.h>
 #include <pbd/command.h>
+#include <pbd/shiva.h>
 
 typedef sigc::slot<void> UndoAction;
 
@@ -36,7 +37,6 @@ class UndoTransaction : public Command
 	UndoTransaction ();
 	UndoTransaction (const UndoTransaction&);
 	UndoTransaction& operator= (const UndoTransaction&);
-	~UndoTransaction ();
 
 	void clear ();
 	bool empty() const;
@@ -61,10 +61,17 @@ class UndoTransaction : public Command
 
   private:
 	std::list<Command*>    actions;
+	std::list<PBD::ProxyShiva<Command,UndoTransaction>*> shivas;
 	struct timeval        _timestamp;
 	bool                  _clearing;
 
 	friend void command_death (UndoTransaction*, Command *);
+	
+	friend class UndoHistory;
+
+	~UndoTransaction ();
+	void about_to_explicitly_delete ();
+	
 };
 
 class UndoHistory : public sigc::trackable
@@ -87,17 +94,24 @@ class UndoHistory : public sigc::trackable
 	void clear_undo ();
 	void clear_redo ();
 
+	/* returns all or part of the history.
+	   If depth==0 it returns just the top
+	   node. If depth<0, it returns everything.
+	   If depth>0, it returns state for that
+	   many elements of the history, or 
+	   the full history, whichever is smaller.
+	*/
+
         XMLNode &get_state(int32_t depth = 0);
         void save_state();
 
-	void set_depth (int32_t);
-	int32_t get_depth() const { return _depth; }
+	void set_depth (uint32_t);
 
 	sigc::signal<void> Changed;
 	
   private:
 	bool _clearing;
-	int32_t _depth;
+	uint32_t _depth;
 	std::list<UndoTransaction*> UndoList;
 	std::list<UndoTransaction*> RedoList;
 

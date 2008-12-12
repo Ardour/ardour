@@ -57,6 +57,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("LatchMenu"), _("Latch"));
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
 	ActionManager::register_action (editor_actions, X_("Link"), _("Link"));
+	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
+	ActionManager::register_action (editor_actions, X_("KeyMouseActions"), _("Key Mouse"));
 	ActionManager::register_action (editor_actions, X_("LocateToMarker"), _("Locate To Markers"));
 	ActionManager::register_action (editor_actions, X_("MarkerMenu"), _("Markers"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
@@ -207,6 +209,9 @@ Editor::register_actions ()
        	act = ActionManager::register_action (editor_actions, "select-prev-route", _("Select Previous Track/Bus"), mem_fun(*this, &Editor::select_prev_route));
 	ActionManager::session_sensitive_actions.push_back (act);
 	
+       	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), mem_fun(*this, &Editor::toggle_record_enable));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 
 	act = ActionManager::register_action (editor_actions, "save-visual-state-1", _("Save View 1"), bind (mem_fun (*this, &Editor::start_visual_state_op), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -378,6 +383,7 @@ Editor::register_actions ()
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "loop-region", _("Loop Region"), bind (mem_fun(*this, &Editor::set_loop_from_region), true));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-punch-from-edit-range", _("Set Punch From Edit Range"), mem_fun(*this, &Editor::set_punch_from_edit_range));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-punch-from-region", _("Set Punch From Region"), mem_fun(*this, &Editor::set_punch_from_region));
@@ -387,6 +393,12 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-opaque-region", _("Toggle Opaque"), mem_fun(*this, &Editor::toggle_region_opaque));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "add-range-marker-from-region", _("Add 1 Range Marker"), mem_fun(*this, &Editor::add_location_from_audio_region));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "add-range-markers-from-region", _("Add Range Marker(s)"), mem_fun(*this, &Editor::add_locations_from_audio_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	
@@ -588,7 +600,11 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "toggle-track-active", _("Toggle Active"), (mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "remove-track", _("Remove"), (mem_fun(*this, &Editor::remove_tracks)));
+	if (Profile->get_sae()) {
+		act = ActionManager::register_action (editor_actions, "remove-track", _("Delete"), (mem_fun(*this, &Editor::remove_tracks)));
+	} else {
+		act = ActionManager::register_action (editor_actions, "remove-track", _("Remove"), (mem_fun(*this, &Editor::remove_tracks)));
+	}
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
@@ -640,6 +656,8 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-note", _("Note Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseNote, false));
 
+	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), bind (mem_fun(*this, &Editor::step_mouse_mode), true));
+	
 	RadioAction::Group edit_point_group;
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
@@ -647,8 +665,9 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, "cycle-edit-point", _("Change edit point"), bind (mem_fun (*this, &Editor::cycle_edit_point), false));
 	ActionManager::register_action (editor_actions, "cycle-edit-point-with-marker", _("Change edit point (w/Marker)"), bind (mem_fun (*this, &Editor::cycle_edit_point), true));
-
-	ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), bind (mem_fun (*this, &Editor::set_edit_mode), Splice));
+	if (!Profile->get_sae()) {
+		ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), bind (mem_fun (*this, &Editor::set_edit_mode), Splice));
+	}
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), bind (mem_fun (*this, &Editor::set_edit_mode), Slide));
 	ActionManager::register_action (editor_actions, "set-edit-lock", _("Lock"), bind (mem_fun (*this, &Editor::set_edit_mode), Lock));
 	ActionManager::register_action (editor_actions, "toggle-edit-mode", _("Toggle Edit Mode"), mem_fun (*this, &Editor::cycle_edit_mode));
@@ -706,12 +725,16 @@ Editor::register_actions ()
 	ruler_meter_action->set_active (true);
 	ruler_tempo_action->set_active (true);
 	ruler_marker_action->set_active (true);
-	ruler_range_action->set_active (true);
+	ruler_range_action->set_active (false);
+	ruler_loop_punch_action->set_active (true);
+	ruler_loop_punch_action->set_active (true);
 	if (Profile->get_sae()) {
+		ruler_bbt_action->set_active (true);
 		ruler_cd_marker_action->set_active (false);
 		ruler_timecode_action->set_active (false);
 		ruler_minsec_action->set_active (true);
 	} else {
+		ruler_bbt_action->set_active (false);
 		ruler_cd_marker_action->set_active (true);
 		ruler_timecode_action->set_active (true);
 		ruler_minsec_action->set_active (false);

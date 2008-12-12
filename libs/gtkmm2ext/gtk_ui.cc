@@ -65,6 +65,9 @@ UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr, true)
 {
 	theMain = new Main (argc, argv);
+#ifndef GTK_NEW_TOOLTIP_API
+	tips = new Tooltips;
+#endif
 
 	_active = false;
 
@@ -95,6 +98,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 
 	errors->dismiss_button().set_name ("ErrorLogCloseButton");
 	errors->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), (Window *) errors));
+	errors->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 
 	register_thread (pthread_self(), X_("GUI"));
 
@@ -372,7 +376,16 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == SetTip) {
 
-		/* XXX need to figure out how this works */
+#ifdef GTK_NEW_TOOLTIP_API
+		/* even if the installed GTK is up to date,
+		   at present (November 2008) our included
+		   version of gtkmm is not. so use the GTK
+		   API that we've verified has the right function.
+		*/
+		gtk_widget_set_tooltip_text (req->widget->gobj(), req->msg);
+#else
+		tips->set_tip (*req->widget, req->msg, "");
+#endif
 
 	} else {
 

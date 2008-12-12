@@ -96,6 +96,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ARDOUR::RouteGroup* mix_group() const;
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
+#ifdef GTKOSX
+	sigc::signal<void>      WidthChanged;
+#endif
+
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);

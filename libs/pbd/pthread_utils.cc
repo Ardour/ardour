@@ -30,13 +30,30 @@ using namespace std;
 typedef std::map<string,pthread_t> ThreadMap;
 static ThreadMap all_threads;
 static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t gui_notify_lock = PTHREAD_MUTEX_INITIALIZER;
 
 namespace PBD {
-   sigc::signal<void,pthread_t,std::string> ThreadCreated;
+   sigc::signal<void,pthread_t>             ThreadLeaving;
    sigc::signal<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 using namespace PBD;
+
+void
+PBD::notify_gui_about_thread_creation (pthread_t thread, std::string str, int request_count)
+{
+	pthread_mutex_lock (&gui_notify_lock);
+	ThreadCreatedWithRequestSize (thread, str, request_count);
+	pthread_mutex_unlock (&gui_notify_lock);
+}
+
+void
+PBD::notify_gui_about_thread_exit (pthread_t thread)
+{
+	pthread_mutex_lock (&gui_notify_lock);
+	ThreadLeaving (thread);
+	pthread_mutex_unlock (&gui_notify_lock);
+}
 
 int  
 pthread_create_and_store (string name, pthread_t  *thread, pthread_attr_t *attr, void * (*start_routine)(void *), void * arg)

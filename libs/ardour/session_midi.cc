@@ -1120,7 +1120,7 @@ Session::midi_thread_work ()
 	bool restart;
 	vector<MIDI::Port*> ports;
 
-	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("MIDI"), 2048);
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("MIDI"), 2048);
 
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
@@ -1145,6 +1145,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _mmc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mmc_port;
+			//cerr << "MIDI port " << nfds << " = MMC @ " << _mmc_port << endl;
 			nfds++;
 		}
 
@@ -1157,6 +1158,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _mtc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mtc_port;
+			//cerr << "MIDI port " << nfds << " = MTC @ " << _mtc_port << endl;
 			nfds++;
 		}
 
@@ -1175,6 +1177,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _midi_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _midi_port;
+			// cerr << "MIDI port " << nfds << " = MIDI @ " << _midi_port << endl;
 			nfds++;
 		}
 

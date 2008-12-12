@@ -95,6 +95,7 @@ CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
 CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", false)
+CONFIG_VARIABLE (bool, solo_mute_override, "solo-mute-override", false)
 CONFIG_VARIABLE (bool, tape_machine_mode, "tape-machine-mode", false)
 
 /* click */
@@ -161,6 +162,7 @@ CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-bac
 CONFIG_VARIABLE (float, automation_interval, "automation-interval", 50)
 CONFIG_VARIABLE (bool, sync_all_route_ordering, "sync-all-route-ordering", true)
 CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", true)
+CONFIG_VARIABLE (bool, new_plugins_active, "new-plugins-active", true)
 CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)

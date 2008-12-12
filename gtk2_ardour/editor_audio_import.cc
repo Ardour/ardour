@@ -57,6 +57,7 @@
 #include "midi_time_axis.h"
 #include "session_import_dialog.h"
 #include "utils.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -217,7 +218,6 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 
 	for (SourceMap::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 		string tmp (Glib::path_get_basename (i->second->path()));
-
 		if (tmp == wave_name) {
 			wave_name_exists = true;
 			break;
@@ -225,7 +225,6 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 	}
 
 	int function = 1;
-
 
 	if (wave_name_exists) {
 		string message;
@@ -248,7 +247,6 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 			dialog.add_button("Import", 1);
 			dialog.add_button("Cancel", 2);
 		}
-		
 		
 		//dialog.add_button("Skip all", 4); // All or rest?
 
@@ -322,29 +320,11 @@ Editor::get_nth_selected_midi_track (int nth) const
 	return mtv->midi_track();
 }	
 
-bool
-Editor::idle_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
-{
-	_do_import (paths, chns, mode, quality, pos);
-	return false;
-}
-
 void
 Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
 {
-#ifdef GTKOSX
-	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_import), paths, chns, mode, quality, pos));
-#else
-	_do_import (paths, chns, mode, quality, pos);
-#endif
-}
-
-void
-Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
-{
 	boost::shared_ptr<Track> track;
 	vector<ustring> to_import;
-	bool ok = true;
 	int nth = 0;
 
 	if (interthread_progress_window == 0) {
@@ -352,11 +332,13 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 	}
 
 	if (chns == Editing::ImportMergeFiles) {
+
 		/* create 1 region from all paths, add to 1 track,
 		   ignore "track"
 		*/
+
 		bool cancel = false;
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end() && ok; ++a) {
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 			int check = check_whether_and_how_to_import(*a, false);
 			if (check == 2) {
 				cancel = true;
@@ -365,20 +347,21 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 		}
 
 		if (!cancel) {
-			if (import_sndfiles (paths, mode, quality, pos, 1, 1, track, false)) {
-				ok = false;
-			}
+			import_sndfiles (paths, mode, quality, pos, 1, 1, track, false, paths.size());
 		}
 
 	} else {
+
 		bool replace = false;
+		bool ok = true;
+		vector<ustring>::size_type total = paths.size();
 
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end() && ok; ++a) {
 
 			int check = check_whether_and_how_to_import(*a, true);
 
 			if (check == 2 ) { 
-				// skip
+				// user said skip
 				continue;
 			}
 
@@ -390,81 +373,48 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 			}
 			
 
+
 			switch (chns) {
-				case Editing::ImportDistinctFiles:
+			case Editing::ImportDistinctFiles:
+				
+				to_import.clear ();
+				to_import.push_back (*a);
+				
+				if (mode == Editing::ImportToTrack) {
+					track = get_nth_selected_audio_track (nth++);
+				}
+				
+				ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace, total) == 0);
+				break;
+				
+			case Editing::ImportDistinctChannels:
+				
+				to_import.clear ();
+				to_import.push_back (*a);
+				
+				ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace, total) == 0);
+				break;
+				
+			case Editing::ImportSerializeFiles:
+				
+				to_import.clear ();
+				to_import.push_back (*a);
 
-					to_import.clear ();
-					to_import.push_back (*a);
+				ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace, total) == 0);
+				break;
 
-					if (mode == Editing::ImportToTrack) {
-						track = get_nth_selected_audio_track (nth++);
-					}
-
-					if (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace)) {
-						ok = false;
-					}
-
-					break;
-
-				case Editing::ImportDistinctChannels:
-
-					to_import.clear ();
-					to_import.push_back (*a);
-
-					if (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace)) {
-						ok = false;
-					}
-
-					break;
-
-				case Editing::ImportSerializeFiles:
-
-					to_import.clear ();
-					to_import.push_back (*a);
-
-					/* create 1 region from this path, add to 1 track,
-					   reuse "track" across paths
-					   */
-
-					if (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace)) {
-						ok = false;
-					}
-
-					break;
-
-				case Editing::ImportMergeFiles:
-					// Not entered
-					break;
+			case Editing::ImportMergeFiles:
+				// Not entered, handled in earlier if() branch
+				break;
 			}
 		}
-
-		if (ok) {
-			session->save_state ("");
-		}
-
-		interthread_progress_window->hide_all ();
 	}
-}
 
-bool
-Editor::idle_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
-{
-	_do_embed (paths, chns, mode, pos);
-	return false;
+	interthread_progress_window->hide_all ();
 }
 
 void
 Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
-{
-#ifdef GTKOSX
-	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_embed), paths, chns, mode, pos));
-#else
-	_do_embed (paths, chns, mode, pos);
-#endif
-}
-
-void
-Editor::_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
@@ -531,7 +481,7 @@ Editor::_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 
 int
 Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos, 
-			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace)
+			 int target_regions, int target_tracks, boost::shared_ptr<Track> track, bool replace, uint32_t total)
 {
 	WindowTitle title = string_compose (_("importing %1"), paths.front());
 
@@ -539,7 +489,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_bar.set_fraction (0.0f);
 	interthread_cancel_label.set_text (_("Cancel Import"));
-	current_interthread_info = &import_status;
+ 	current_interthread_info = &import_status;
 
 	import_status.paths = paths;
 	import_status.done = false;
@@ -548,42 +498,53 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	import_status.done = 0.0;
 	import_status.quality = quality;
 	import_status.replace_existing_source = replace;
+	import_status.total = total;
 
+	import_status.mode = mode;
+	import_status.pos = pos;
+	import_status.target_tracks = target_tracks;
+	import_status.target_regions = target_regions;
+	import_status.track = track;
+	import_status.replace = replace;
 	interthread_progress_connection = Glib::signal_timeout().connect 
 		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
 	
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
-	ARDOUR_UI::instance()->flush_pending ();
+	gdk_flush ();
 
 	/* start import thread for this spec. this will ultimately call Session::import_audiofiles()
-	   and if successful will add the file(s) as a region to the session region list.
+	   which, if successful, will add the files as regions to the region list. its up to us
+	   (the GUI) to direct additional steps after that.
 	*/
-	
+
 	pthread_create_and_store ("import", &import_status.thread, 0, _import_thread, this);
 	pthread_detach (import_status.thread);
 	
-	while (!(import_status.done || import_status.cancel)) {
+	while (!import_status.done && !import_status.cancel) {
 		gtk_main_iteration ();
 	}
 
 	interthread_progress_window->hide ();
-	
 	import_status.done = true;
 	interthread_progress_connection.disconnect ();
 	
-	/* import thread finished - see if we should build a new track */
-
-	boost::shared_ptr<AudioRegion> r;
-	
-	if (import_status.cancel || import_status.sources.empty()) {
-		goto out;
+	if (!import_status.cancel && !import_status.sources.empty()) {
+		if (add_sources (import_status.paths, 
+				 import_status.sources, 
+				 import_status.pos, 
+				 import_status.mode, 
+				 import_status.target_regions, 
+				 import_status.target_tracks, 
+				 import_status.track, false) == 0) {
+			session->save_state ("");
+		}
+		
+		/* update position from results */
+		
+		pos = import_status.pos;
 	}
 
-	if (add_sources (paths, import_status.sources, pos, mode, target_regions, target_tracks, track, false) == 0) {
-		session->save_state ("");
-	}
 
-  out:
 	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 	return 0;
 }
@@ -600,7 +561,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 	int ret = 0;
 
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
-	ARDOUR_UI::instance()->flush_pending ();
+	gdk_flush ();
 
 	for (vector<Glib::ustring>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
@@ -710,8 +671,6 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
 
-					cerr << "add embed/import source with defer_peaks = true\n";
-
 					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
 											       (DataType::AUDIO, *session, path,  n,
 												(mode == ImportAsTapeTrack ? 
@@ -775,7 +734,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		regions.push_back (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
 							   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 		
-	} else if (target_regions == -1) {
+	} else if (target_regions == -1 || target_regions > 1) {
 
 		/* take each source and create a region for each one */
 
@@ -922,7 +881,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 void *
 Editor::_import_thread (void *arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("Import"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Import"));
 
 	Editor *ed = (Editor *) arg;
 	return ed->import_thread ();

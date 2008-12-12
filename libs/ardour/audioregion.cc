@@ -133,9 +133,9 @@ AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t len
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
 	, _automatable(other->session())
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(*other->_fade_in, offset, offset + length))
+	, _fade_out (new AutomationList(*other->_fade_out, offset, offset + length))
+	, _envelope (new AutomationList(*other->_envelope, offset, offset + length))
 {
 	set<boost::shared_ptr<Source> > unique_srcs;
 
@@ -185,17 +185,48 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	: Region (other)
-	, _automatable(other->session())
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
+	, _automatable (other->session())
+	, _fade_in (new AutomationList (*other->_fade_in))
+	, _fade_out (new AutomationList (*other->_fade_out))
+	, _envelope (new AutomationList (*other->_envelope))
 {
 	assert(_type == DataType::AUDIO);
 	_scale_amplitude = other->_scale_amplitude;
-	_envelope = other->_envelope;
 
 	set_default_fades ();
-	
+
+	listen_to_my_curves ();
+	listen_to_my_sources ();
+}
+
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const SourceList& srcs,
+			  nframes_t length, const string& name, layer_t layer, Flag flags)
+	: Region (other, length, name, layer, flags)
+	, _automatable (other->session())
+	, _fade_in (new AutomationList (*other->_fade_in))
+	, _fade_out (new AutomationList (*other->_fade_out))
+	, _envelope (new AutomationList (*other->_envelope))
+{
+	/* make-a-sort-of-copy-with-different-sources constructor (used by audio filter) */
+
+	set<boost::shared_ptr<AudioSource> > unique_srcs;
+
+	for (SourceList::const_iterator i=srcs.begin(); i != srcs.end(); ++i) {
+
+		_sources.push_back (*i);
+		_master_sources.push_back (*i);
+
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> ((*i));
+		if (afs) {
+			afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+		}
+	}
+
+	_scale_amplitude = other->_scale_amplitude;
+
+	_fade_in_disabled = 0;
+	_fade_out_disabled = 0;
+
 	listen_to_my_curves ();
 	listen_to_my_sources ();
 }
@@ -296,19 +327,25 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 }
 
 nframes64_t
-AudioRegion::read (Sample* buf, nframes64_t position, nframes64_t cnt, int channel) const
+AudioRegion::read (Sample* buf, nframes64_t timeline_position, nframes64_t cnt, int channel) const
 {
 	/* raw read, no fades, no gain, nada */
-	return _read_at (_sources, _length, buf, 0, 0, _position + position, cnt, channel, 0, 0, true);
+	return _read_at (_sources, _length, buf, 0, 0, _position + timeline_position, cnt, channel, 0, 0, ReadOps (0));
+}
+
+nframes64_t
+AudioRegion::read_with_ops (Sample* buf, nframes64_t file_position, nframes64_t cnt, int channel, ReadOps rops) const
+{
+	return _read_at (_sources, _length, buf, 0, 0, file_position, cnt, channel, 0, 0, rops);
 }
 
 nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t file_position, 
 		      nframes_t cnt, 
 		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
 	/* regular diskstream/butler read complete with fades etc */
-	return _read_at (_sources, _length, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames, false);
+	return _read_at (_sources, _length, buf, mixdown_buffer, gain_buffer, file_position, cnt, chan_n, read_frames, skip_frames, ReadOps (~0));
 }
 
 nframes_t
@@ -325,11 +362,12 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 		       uint32_t chan_n, 
 		       nframes_t read_frames, 
 		       nframes_t skip_frames,
-		       bool raw) const
+		       ReadOps rops) const
 {
 	nframes_t internal_offset;
 	nframes_t buf_offset;
 	nframes_t to_read;
+	bool raw = (rops == ReadOpsNone);
 
 	if (muted() && !raw) {
 		return 0; /* read nothing */
@@ -361,7 +399,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 		mixdown_buffer += buf_offset;
 	}
 
-	if (!raw) {
+	if (rops & ReadOpsCount) {
 		_read_data_count = 0;
 	}
 
@@ -372,7 +410,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 			return 0; /* "read nothing" */
 		}
 		
-		if (!raw) {
+		if (rops & ReadOpsCount) {
 			_read_data_count += src->read_data_count();
 		}
 
@@ -383,18 +421,12 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 		*/
 
 		memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
-
-		/* no fades required */
-
-		if (!raw) {
-			goto merge;
-		}
 	}
 
-	/* fade in */
-
-	if (!raw) {
+	if (rops & ReadOpsFades) {
 	
+		/* fade in */
+
 		if ((_flags & FadeIn) && Config->get_use_region_fades()) {
 			
 			nframes_t fade_in_length = (nframes_t) _fade_in->back()->when;
@@ -407,6 +439,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 				
 				fi_limit = min (to_read, fade_in_length - internal_offset);
 				
+
 				_fade_in->curve().get_vector (internal_offset, internal_offset+fi_limit, gain_buffer, fi_limit);
 				
 				for (nframes_t n = 0; n < fi_limit; ++n) {
@@ -422,12 +455,12 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 			/* see if some part of this read is within the fade out */
 			
 		/* .................        >|            REGION
-		                            limit
+		                             limit
  					    
                                  {           }            FADE
 				             fade_out_length
                                  ^					     
-                                limit - fade_out_length
+                                 limit - fade_out_length
                         |--------------|
                         ^internal_offset
                                        ^internal_offset + to_read
@@ -457,39 +490,43 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 			} 
 			
 		}
-		
-		/* Regular gain curves */
-		
-		if (envelope_active())  {
-			_envelope->curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
-			
-			if (_scale_amplitude != 1.0f) {
-				for (nframes_t n = 0; n < to_read; ++n) {
-					mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
-				}
-			} else {
-				for (nframes_t n = 0; n < to_read; ++n) {
-					mixdown_buffer[n] *= gain_buffer[n];
-				}
-			}
-		} else if (_scale_amplitude != 1.0f) {
-			apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
-		}
-	
-	  merge:
-		
-		if (!opaque()) {
-			
-			/* gack. the things we do for users.
-			 */
-			
-			buf += buf_offset;
-			
-			for (nframes_t n = 0; n < to_read; ++n) {
-				buf[n] += mixdown_buffer[n];
-			}
-		} 
 	}
+		
+        /* Regular gain curves and scaling */
+	
+	if ((rops & ReadOpsOwnAutomation) && envelope_active())  {
+		_envelope->curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
+			
+		if ((rops & ReadOpsOwnScaling) && _scale_amplitude != 1.0f) {
+			for (nframes_t n = 0; n < to_read; ++n) {
+				mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
+			}
+		} else {
+			for (nframes_t n = 0; n < to_read; ++n) {
+				mixdown_buffer[n] *= gain_buffer[n];
+			}
+		}
+	} else if ((rops & ReadOpsOwnScaling) && _scale_amplitude != 1.0f) {
+
+		// XXX this should be using what in 2.0 would have been: 
+		// Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
+
+		for (nframes_t n = 0; n < to_read; ++n) {
+			mixdown_buffer[n] *= _scale_amplitude;
+		}
+	}
+	
+	if (!opaque()) {
+		
+		/* gack. the things we do for users.
+		 */
+		
+		buf += buf_offset;
+			
+		for (nframes_t n = 0; n < to_read; ++n) {
+			buf[n] += mixdown_buffer[n];
+		}
+	} 
 
 	return to_read;
 }

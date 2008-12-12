@@ -26,7 +26,7 @@
 class Command : public PBD::StatefulDestructible
 {
 public:
-	virtual ~Command() {}
+	virtual ~Command() { /* NOTE: derived classes must call drop_references() */ }
 
 	virtual void operator() () = 0;
 	

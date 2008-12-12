@@ -161,6 +161,9 @@
 		   <menuitem action='toggle-fade-in-active'/>
 		   <menuitem action='set-fade-out-length'/>
 		   <menuitem action='toggle-fade-out-active'/>
+   		   <separator/>
+	           <menuitem action='toggle-selected-region-fades'/>
+                   <menuitem action='toggle-region-fades'/>
                </menu>
 	       <menu action="SelectMenu">	   
 	           <menuitem action='select-all'/>
@@ -172,10 +175,14 @@
 		   <menuitem action='select-all-within-cursors'/>
 		   <menuitem action='select-all-in-punch-range'/>
 		   <menuitem action='select-all-in-loop-range'/>
+		   <separator/>
+		   <menuitem action='select-next-route'/>
+		   <menuitem action='select-prev-route'/>
 	       </menu>	   
         </menu>
 
         <menu action='TrackMenu'>
+		<menuitem action='remove-track'/>
 	        <menuitem action='AddTrackBus'/>	
 	        <menuitem action="move-selected-tracks-up"/>
 	        <menuitem action="move-selected-tracks-down"/>
@@ -193,7 +200,6 @@
 		      <menuitem action='logarithmic-waveforms'/>
 		</menu>
 		<menuitem action='toggle-track-active'/>	
-		<menuitem action='remove-track'/>	
 	</menu>
 
 	<menu action='RegionMenu'>
@@ -266,8 +272,8 @@
         </menu>
 
 	<menu action="WindowMenu">
-	      <menuitem action='goto-editor'/>
-	      <menuitem action='goto-mixer'/>
+	  
+	      <menuitem action='toggle-editor-mixer-on-top'/>
 	      <menuitem action='ToggleLocations'/>
 	      <menuitem action='ToggleKeyEditor'/>
 	      <menuitem action='ToggleThemeManager'/>
@@ -306,17 +312,16 @@
 	           <menuitem action='edit-at-selected-marker'/>
 	       </menu>
 	       <menu action='KeyMouseActions'>
-		   <menuitem action='select-next-route'/>
-		   <menuitem action='select-prev-route'/>
 		   <menuitem action='focus-on-clock'/>
 		   <menuitem action='GotoZero'/>
 		   <menuitem action='GotoStart'/>
 		   <menuitem action='GotoEnd'/>
+		   <separator/>
+		   <menuitem action='step-mouse-mode'/>
 		   <menuitem action='set-mouse-mode-object'/>
-		   <menuitem action='set-mouse-mode-range'/>
-		   <menuitem action='set-mouse-mode-gain'/>
 		   <menuitem action='set-mouse-mode-zoom'/>
 		   <menuitem action='set-mouse-mode-timefx'/>
+		   <separator/>
 		   <menuitem action='cycle-edit-point'/>
 		   <menuitem action='cycle-edit-point-with-marker'/>
 		   <menuitem action='toggle-edit-mode'/>
@@ -331,7 +336,6 @@
 
      </menubar>
 
-<<<<<<< .working
      <popup action="RulerMenuPopup">
      	  <menuitem action="toggle-minsec-ruler"/>
 	  <menuitem action="toggle-samples-ruler"/>
@@ -345,21 +349,8 @@
      </popup>
 
      <popup name='processormenu'>
-=======
-     <popup action="RulerMenuPopup">
-     	  <menuitem action="toggle-minsec-ruler"/>
-	  <menuitem action="toggle-samples-ruler"/>
-          <menuitem action="toggle-bbt-ruler"/>
+	 <menuitem action='delete'/>
 	  <separator/>
-	  <menuitem action="toggle-meter-ruler"/>
-	  <menuitem action="toggle-tempo-ruler"/>
-	  <menuitem action="toggle-loop-punch-ruler"/>
-	  <menuitem action="toggle-cd-marker-ruler"/>
-	  <menuitem action="toggle-marker-ruler"/>
-     </popup>
-
-     <popup name='redirectmenu'>
->>>>>>> .merge-right.r3622
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
@@ -369,7 +360,6 @@
 	 <menuitem action='cut'/>
 	 <menuitem action='copy'/>
 	 <menuitem action='paste'/>
-	 <menuitem action='delete'/>
 	  <separator/>
 	 <menuitem action='rename'/>
 	  <separator/>

@@ -458,7 +458,7 @@ PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 	float avgY = 0.0;
 	int avgNum = 0;
 
-	float width  = w->get_width();
+	// float width  = w->get_width();
 	float height = w->get_height();
 
         cairo_set_source_rgba(cr, 0.95, 0.3, 0.2, 1.0);
@@ -508,7 +508,7 @@ PluginEqGui::draw_scales_power(Gtk::Widget *w, cairo_t *cr)
 
 	cairo_font_extents_t extents;
 	cairo_font_extents(cr, &extents);
-	float fontXOffset = extents.descent + 1.0;
+	// float fontXOffset = extents.descent + 1.0;
 
 	char buf[256];
 
@@ -607,7 +607,7 @@ PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 	float avgY = 0.0;
 	int avgNum = 0;
 
-	float width  = w->get_width();
+	// float width  = w->get_width();
 	float height = w->get_height();
 
         cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
@@ -656,7 +656,7 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 	float avgY = 0.0;
 	int avgNum = 0;
 
-	float width  = w->get_width();
+	// float width  = w->get_width();
 	float height = w->get_height();
 
         cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);

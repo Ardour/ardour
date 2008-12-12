@@ -22,6 +22,7 @@
 
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 using namespace std;
 using namespace Gtk;
@@ -83,9 +84,17 @@ PopUp::remove ()
 	}
 }
 
+#define ENSURE_GUI_THREAD(slot) \
+     if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {\
+	Gtkmm2ext::UI::instance()->call_slot ((slot));\
+        return;\
+     }
+
 void
 PopUp::touch ()
 {
+	ENSURE_GUI_THREAD (mem_fun (*this, &PopUp::touch));
+
 	if (is_visible ()) {
 		remove ();
 	} else {

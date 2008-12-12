@@ -75,7 +75,7 @@ Analyser::queue_source_for_analysis (boost::shared_ptr<Source> src, bool force)
 void
 Analyser::work ()
 {
-	PBD::ThreadCreated (pthread_self(), string ("analyser-") + to_string (pthread_self(), std::dec));
+	PBD::notify_gui_about_thread_creation (pthread_self(), string ("analyser-") + to_string (pthread_self(), std::dec));
 
 	while (true) {
 		analysis_queue_lock.lock ();

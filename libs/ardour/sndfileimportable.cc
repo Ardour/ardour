@@ -1,5 +1,6 @@
 #include <ardour/sndfileimportable.h>
 #include <sndfile.h>
+#include <iostream>
 
 using namespace ARDOUR;
 using namespace std;

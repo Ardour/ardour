@@ -212,8 +212,7 @@ Session::butler_transport_work ()
 	}
 
 	if (post_transport_work & PostTransportReverse) {
-
-
+		
 		clear_clicks();
 		cumulative_rf_motion = 0;
 		reset_rf_scale (0);
@@ -448,6 +447,12 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		last_stop_frame = _requested_return_frame;
 		_requested_return_frame = -1;
 	}
+
+        have_looped = false; 
+
+        send_full_time_code (0);
+	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
+	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 	if (did_record) {
 
@@ -779,7 +784,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 					}
 				}
 			}
-
+			have_looped = true;
 			TransportLooped(); // EMIT SIGNAL
 		}
 	}
@@ -886,6 +891,7 @@ Session::set_transport_speed (float speed, bool abort)
 
 		if ((_transport_speed && speed * _transport_speed < 0.0f) || (_last_transport_speed * speed < 0.0f) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportReverse);
+			last_stop_frame = _transport_frame;
 		}
 
 		_last_transport_speed = _transport_speed;
@@ -951,6 +957,7 @@ void
 Session::start_transport ()
 {
 	_last_roll_location = _transport_frame;
+	have_looped = false;
 
 	/* if record status is Enabled, move it to Recording. if its
 	   already Recording, move it to Disabled.

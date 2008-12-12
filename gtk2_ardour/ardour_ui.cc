@@ -211,6 +211,15 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
+	_mixer_on_top = false;
+
+	roll_button.unset_flags (Gtk::CAN_FOCUS);
+	stop_button.unset_flags (Gtk::CAN_FOCUS);
+	goto_start_button.unset_flags (Gtk::CAN_FOCUS);
+	goto_end_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_loop_button.unset_flags (Gtk::CAN_FOCUS);
+	play_selection_button.unset_flags (Gtk::CAN_FOCUS);
+	rec_button.unset_flags (Gtk::CAN_FOCUS);
 
 	last_configure_time= 0;
 
@@ -352,11 +361,12 @@ ARDOUR_UI::post_engine ()
 	/* set default clock modes */
 
 	if (Profile->get_sae()) {
-		primary_clock.set_mode (AudioClock::MinSec);
+		primary_clock.set_mode (AudioClock::BBT);
+		secondary_clock.set_mode (AudioClock::MinSec);
 	}  else {
 		primary_clock.set_mode (AudioClock::SMPTE);
+		secondary_clock.set_mode (AudioClock::BBT);
 	}
-	secondary_clock.set_mode (AudioClock::BBT);
 
 	/* start the time-of-day-clock */
 	
@@ -640,7 +650,7 @@ void
 ARDOUR_UI::startup ()
 {
 	string name, path;
-
+	
 	new_session_dialog = new NewSessionDialog();
 
 	bool backend_audio_is_running = EngineControl::engine_running();
@@ -762,6 +772,7 @@ If you still wish to quit, please use the\n\n\
 		session->set_deletion_in_progress ();
 	}
 
+	ArdourDialog::close_all_dialogs ();
 	engine->stop (true);
 	save_ardour_state ();
 	quit ();
@@ -1980,14 +1991,6 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	}
 }
 
-gint
-ARDOUR_UI::hide_and_quit (GdkEventAny *ev, ArdourDialog *window)
-{
-	window->hide();
-	Gtk::Main::quit ();
-	return TRUE;
-}
-
 void
 ARDOUR_UI::save_template ()
 
@@ -2242,7 +2245,7 @@ ARDOUR_UI::loading_message (const std::string& msg)
 	splash->message (msg);
 	flush_pending ();
 }
-	
+
 void
 ARDOUR_UI::idle_load (const Glib::ustring& path)
 {
@@ -2255,11 +2258,16 @@ ARDOUR_UI::idle_load (const Glib::ustring& path)
 			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
 		}
 	} else {
+
 		ARDOUR_COMMAND_LINE::session_name = path;
+
 		if (new_session_dialog) {
+
+
 			/* make it break out of Dialog::run() and
 			   start again.
 			 */
+
 			new_session_dialog->response (1);
 		}
 	}
@@ -2329,6 +2337,9 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		case Gtk::RESPONSE_CANCEL:
 		case Gtk::RESPONSE_DELETE_EVENT:
 			if (!session) {
+				if (engine && engine->running()) {
+					engine->stop (true);
+				}
 				quit();
 			}
 			new_session_dialog->hide ();
@@ -2381,7 +2392,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			if (session_name[0] == '/' || 
 			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
-				
+
 				session_path = Glib::path_get_dirname (session_name);
 				session_name = Glib::path_get_basename (session_name);
 				
@@ -2439,7 +2450,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			
 		  loadit:
 			new_session_dialog->hide ();
-			
+
 			if (load_session (session_path, session_name, template_name)) {
 				/* force a retry */
 				response = Gtk::RESPONSE_NONE;
@@ -2519,10 +2530,10 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		MessageDialog msg (err.what(),
 				   true,
 				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_OK_CANCEL);
+				   Gtk::BUTTONS_CLOSE);
 		
-		msg.set_title (_("Loading Error"));
-		msg.set_secondary_text (_("Click the OK button to try again."));
+		msg.set_title (_("Port Registration Error"));
+		msg.set_secondary_text (_("Click the Close button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash ();
 		msg.present ();
@@ -2545,10 +2556,10 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
 				   true,
 				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_OK_CANCEL);
+				   Gtk::BUTTONS_CLOSE);
 		
 		msg.set_title (_("Loading Error"));
-		msg.set_secondary_text (_("Click the OK button to try again."));
+		msg.set_secondary_text (_("Click the Close button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash ();
 		msg.present ();
@@ -2630,6 +2641,9 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 	connect_to_session (new_session);
 
 	session_loaded = true;
+
+	new_session->save_state(new_session->name());
+
 	return 0;
 }
 
@@ -2947,8 +2961,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	/* XXX do something with name template */
 	
-	cerr << "Adding with " << input_chan << " in and " << output_chan << "out\n";
-
 	if (add_route_dialog->type() == ARDOUR::DataType::MIDI) {
 		if (track) {
 			session_add_midi_track(count);
@@ -2995,10 +3007,17 @@ ARDOUR_UI::editor_settings () const
 	} else {
 		node = Config->instant_xml(X_("Editor"));
 	}
+	
+	if (!node) {
+		if (getenv("ARDOUR_INSTANT_XML_PATH")) {
+			node = Config->instant_xml(getenv("ARDOUR_INSTANT_XML_PATH"));
+		}
+	}
 
 	if (!node) {
 		node = new XMLNode (X_("Editor"));
 	}
+
 	return node;
 }
 
@@ -3032,13 +3051,17 @@ ARDOUR_UI::halt_on_xrun_message ()
 void
 ARDOUR_UI::xrun_handler(nframes_t where)
 {
+	if (!session) {
+		return;
+	}
+
 	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::xrun_handler), where));
 
-	if (Config->get_create_xrun_marker() && session->actively_recording()) {
+	if (session && Config->get_create_xrun_marker() && session->actively_recording()) {
 		create_xrun_marker(where);
 	}
 
-	if (Config->get_stop_recording_on_xrun() && session->actively_recording()) {
+	if (session && Config->get_stop_recording_on_xrun() && session->actively_recording()) {
 		halt_on_xrun_message ();
 	}
 }

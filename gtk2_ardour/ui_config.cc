@@ -62,10 +62,17 @@ int
 UIConfiguration::load_defaults ()
 {
 	int found = 0;
+
 	sys::path default_ui_rc_file;
-	
-	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-			"ardour3_ui_default.conf", default_ui_rc_file) )
+	std::string rcfile;
+
+	if (getenv ("ARDOUR_SAE")) {
+		rcfile = "ardour3_ui_sae.conf";
+	} else {
+		rcfile = "ardour3_ui_default.conf";
+	}
+	if ( !find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+					rcfile, default_ui_rc_file) )
 	{
 		XMLTree tree;
 		found = 1;

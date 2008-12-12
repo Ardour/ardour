@@ -49,6 +49,7 @@ opts.AddOptions(
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
+    BoolOption('WIIMOTE', 'Build the wiimote control surface', 0),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
@@ -285,9 +286,9 @@ def create_stored_revision (target = None, source = None, env = None):
         print "Using packaged svn revision"
         return
     else:
-        print "Your source does not include revision information."
-        print "Please check out the code from a repository or use a properly packaged version!"
-        sys.exit (-1)
+        if not os.path.exists('libs/ardour/ardour/svn_revision.h'):    
+            print "This release of ardour is missing libs/ardour/ardour/svn_revision.h. Blame the packager."
+            sys.exit (-1)
 
     try:
 	text  = "#include <ardour/svn_revision.h>\n"
@@ -605,6 +606,9 @@ if env['LV2']:
 else:
 	print 'LV2 support is not enabled.  Build with \'scons LV2=1\' to enable.'
 
+if not env['WIIMOTE']:
+	print 'WIIMOTE not enabled. Build with \'scons WIIMOTE=1\' to enable support.'
+
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 
@@ -736,8 +740,14 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
     
     build_host_supports_sse = 0
     
-    debug_flags.append ("-DARCH_X86")
-    opt_flags.append ("-DARCH_X86")
+    #
+    # ARCH_X86 means anything in the x86 family from i386 to x86_64
+    # USE_X86_64_ASM is used to distingush 32 and 64 bit assembler
+    #
+
+    if (re.search ("(i[0-9]86|x86_64)", config[config_cpu]) != None):
+        debug_flags.append ("-DARCH_X86")
+        opt_flags.append ("-DARCH_X86")
     
     if config[config_kernel] == 'linux' :
         
@@ -869,15 +879,15 @@ if env['LIBLO']:
 def prep_libcheck(topenv, libinfo):
     if topenv['IS_OSX']:
 	#
-	# rationale: GTK-Quartz uses jhbuild and installs to $HOME/gtk/inst by default.
-	#            All libraries needed should be built against this location
+	# rationale: GTK-Quartz uses jhbuild and installs to ~/gtk/inst by default.
+	# All libraries needed should be built against this location
 
 	if topenv['GTKOSX']:
-		GTKROOT = os.path.expanduser ('~/gtk/inst')
-		libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
-		libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
-	        #libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
-	        #libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+            GTKROOT = os.path.expanduser ('~/gtk/inst')
+            libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
+            libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
+
+                
 
 prep_libcheck(env, env)
 
@@ -933,6 +943,45 @@ else:
     have_linux_input = False
 
 libraries['usb'] = conf.Finish ()
+
+#
+# Check for wiimote dependencies
+
+if env['WIIMOTE']:
+    wiimoteConf = env.Configure ( )
+    if not wiimoteConf.CheckHeader('cwiid.h'):
+	print 'WIIMOTE configured but you are missing libcwiid!'
+        sys.exit(1)
+    if not wiimoteConf.CheckHeader('bluetooth/bluetooth.h'):
+        print 'WIIMOTE configured but you are missing the libbluetooth headers which you need to compile wiimote support!'
+        sys.exit(1)
+    wiimoteConf.Finish()
+
+
+#
+# Check for FLAC
+
+libraries['flac'] = LibraryInfo ()
+prep_libcheck(env, libraries['flac'])
+libraries['flac'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
+
+#
+# june 1st 2007: look for a function that is in FLAC 1.1.2 and not in later versions
+#                since the version of libsndfile we have internally does not support
+#                the new API that libFLAC has adopted
+#
+
+conf = Configure (libraries['flac'])
+if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_init', language='CXX'):
+    conf.env.Append(CCFLAGS='-DHAVE_FLAC')
+    use_flac = True
+else:
+    use_flac = False
+    
+libraries['flac'] = conf.Finish ()
+
+# or if that fails...
+#libraries['flac']    = LibraryInfo (LIBS='FLAC')
 
 # boost (we don't link against boost, just use some header files)
 
@@ -1040,6 +1089,11 @@ else:
 
 env = conf.Finish()
 
+if env['GTKOSX']:
+    clearlooks_version = 'libs/clearlooks-newer'
+else:
+    clearlooks_version = 'libs/clearlooks-older'
+
 if env['SYSLIBS']:
 
     syslibdeps = \
@@ -1124,7 +1178,7 @@ if env['SYSLIBS']:
 #        'libs/flowcanvas',
         'libs/gtkmm2ext',
         'gtk2_ardour',
-        'libs/clearlooks'
+        clearlooks_version
         ]
 
 else:
@@ -1143,6 +1197,9 @@ else:
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')
+    libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
+                                    LIBPATH='#libs/cairomm',
+                                    CPPPATH='#libs/cairomm')
     libraries['atkmm'] = LibraryInfo(LIBS='atkmm',
                                      LIBPATH='#libs/gtkmm2/atk',
                                      CPPPATH='#libs/gtkmm2/atk')
@@ -1206,22 +1263,23 @@ else:
         'libs/libgnomecanvasmm',
         'libs/gtkmm2ext',
         'gtk2_ardour',
-        'libs/clearlooks',
-        'libs/cairomm'
+        'libs/cairomm',
+        clearlooks_version
         ]
 
 #
 # * always build the LGPL control protocol lib, since we link against it from libardour
 # * ditto for generic MIDI
-# * tranzport checks whether it should build internally, but we need here so that
-#   its included in the tarball
+# * tranzport & wiimote check whether they should build internally, but we need them here
+#   so that they are included in the tarball
 #
 
 surface_subdirs = [ 'libs/surfaces/control_protocol',
                     'libs/surfaces/generic_midi',
                     'libs/surfaces/tranzport',
                     'libs/surfaces/mackie',
-                    'libs/surfaces/powermate'
+                    'libs/surfaces/powermate',
+		    'libs/surfaces/wiimote'
                     ]
 
 if env['SURFACES']:
@@ -1337,6 +1395,21 @@ if not conf.CheckFunc('posix_memalign'):
 
 env = conf.Finish()
 
+# Which GTK tooltips API
+
+gtktestenv = env.Clone ()
+gtktestenv.Merge ([
+        libraries['gtk2']
+        ])
+
+conf = gtktestenv.Configure ()
+
+if conf.CheckFunc('gtk_widget_set_tooltip_text'):
+    env.Append (CXXFLAGS='-DGTK_NEW_TOOLTIP_API')
+
+conf.Finish ()
+
+
 # generate the per-user and system rc files from the same source
 
 sysrcbuild = env.SubstInFile ('ardour_system.rc','ardour.rc.in', SUBST_DICT = subst_dict)
@@ -1369,7 +1442,7 @@ Default (sysrcbuild)
 Precious (env['DISTTREE'])
 
 env.Distribute (env['DISTTREE'],
-               [ 'SConstruct',
+               [ 'SConstruct', 
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'tools/config.guess',
@@ -1384,12 +1457,10 @@ env.Distribute (env['DISTTREE'],
                   'icons/icon/ardour_icon_tango_48px_blue.png',
                   'icons/icon/ardour_icon_tango_48px_red.png'
                   ] +
-                glob.glob ('DOCUMENTATION/AUTHORS*') +
-                glob.glob ('DOCUMENTATION/CONTRIBUTORS*') +
-                glob.glob ('DOCUMENTATION/TRANSLATORS*') +
-                glob.glob ('DOCUMENTATION/BUILD*') +
-                glob.glob ('DOCUMENTATION/FAQ*') +
-                glob.glob ('DOCUMENTATION/README*')
+                glob.glob ('ardour.1*') +
+                glob.glob ('libs/clearlooks-newer/*.c') +
+                glob.glob ('libs/clearlooks-newer/*.h') +
+                glob.glob ('libs/clearlooks-newer/SConscript')
                 )
 
 srcdist = env.Tarball(env['TARBALL'], [ env['DISTTREE'], the_revision ])
