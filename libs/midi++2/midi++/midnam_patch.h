@@ -56,6 +56,13 @@ public:
 		0 <= program_number <= 127;
 	}
 	
+	inline PatchPrimaryKey& operator=(const PatchPrimaryKey& id) {
+		msb = id.msb;
+		lsb = id.lsb; 
+		program_number = id.program_number;
+		return *this;
+	}
+	
 	inline bool operator==(const PatchPrimaryKey& id) const {
 		return (msb == id.msb && lsb == id.lsb && program_number == id.program_number);
 	}
@@ -79,7 +86,7 @@ public:
 class Patch : public PBD::Stateful
 {
 public:
-	typedef std::list<Evoral::Event> PatchMidiCommands;
+	typedef std::list<boost::shared_ptr<Evoral::MIDIEvent> > PatchMidiCommands;
 
 	Patch() {};
 	Patch(string a_number, string a_name) : _number(a_number), _name(a_name) {};
@@ -108,7 +115,7 @@ private:
 class PatchBank : public PBD::Stateful
 {
 public:
-	typedef std::list<Patch> PatchNameList;
+	typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 
 	PatchBank() {};
 	virtual ~PatchBank() {};
@@ -130,9 +137,9 @@ private:
 class ChannelNameSet : public PBD::Stateful
 {
 public:
-	typedef std::set<uint8_t>    AvailableForChannels;
-	typedef std::list<PatchBank> PatchBanks;
-	typedef std::map<PatchPrimaryKey, Patch> PatchMap;
+	typedef std::set<uint8_t>                                    AvailableForChannels;
+	typedef std::list<boost::shared_ptr<PatchBank> >             PatchBanks;
+	typedef std::map<PatchPrimaryKey, boost::shared_ptr<Patch> > PatchMap;
 
 	ChannelNameSet() {};
 	virtual ~ChannelNameSet() {};
@@ -145,7 +152,7 @@ public:
 		return _available_for_channels.find(channel) != _available_for_channels.end(); 
 	}
 	
-	Patch& find_patch(uint8_t msb, uint8_t lsb, uint8_t program_number) {
+	boost::shared_ptr<Patch> find_patch(uint8_t msb, uint8_t lsb, uint8_t program_number) {
 		PatchPrimaryKey key(msb, lsb, program_number);
 		assert(key.is_sane());
 		return _patch_map[key];
@@ -185,7 +192,7 @@ private:
 class NoteNameList : public PBD::Stateful
 {
 public:
-	typedef std::list<Note> Notes;
+	typedef std::list<boost::shared_ptr<Note> > Notes;
 	NoteNameList() {};
 	NoteNameList(string a_name) : _name(a_name) {};
 	~NoteNameList() {};
@@ -233,11 +240,11 @@ class MasterDeviceNames : public PBD::Stateful
 public:
 	typedef std::list<std::string>                                       Models;
 	/// maps name to CustomDeviceMode
-	typedef std::map<std::string, CustomDeviceMode>                      CustomDeviceModes;
+	typedef std::map<std::string, boost::shared_ptr<CustomDeviceMode> >  CustomDeviceModes;
 	typedef std::list<std::string>                                       CustomDeviceModeNames;
 	/// maps name to ChannelNameSet
-	typedef std::map<std::string, ChannelNameSet>                        ChannelNameSets;
-	typedef std::list<NoteNameList>                                      NoteNameLists;
+	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >    ChannelNameSets;
+	typedef std::list<boost::shared_ptr<NoteNameList> >                  NoteNameLists;
 	
 	
 	MasterDeviceNames() {};
@@ -251,17 +258,17 @@ public:
 	
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 	
-	CustomDeviceMode& custom_device_mode_by_name(string& mode_name) {
+	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(string mode_name) {
 		assert(mode_name != "");
 		return _custom_device_modes[mode_name];
 	}
 	
-	ChannelNameSet& channel_name_set_by_device_mode_and_channel(string mode, uint8_t channel) {
-		return _channel_name_sets[custom_device_mode_by_name(mode).channel_name_set_name_by_channel(channel)];
+	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(string mode, uint8_t channel) {
+		return _channel_name_sets[custom_device_mode_by_name(mode)->channel_name_set_name_by_channel(channel)];
 	}
 	
-	Patch& find_patch(string mode, uint8_t channel, uint8_t msb, uint8_t lsb, uint8_t program_number) {
-		return channel_name_set_by_device_mode_and_channel(mode, channel).find_patch(msb, lsb, program_number);
+	boost::shared_ptr<Patch> find_patch(string mode, uint8_t channel, uint8_t msb, uint8_t lsb, uint8_t program_number) {
+		return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(msb, lsb, program_number);
 	}
 	
 	XMLNode& get_state (void);

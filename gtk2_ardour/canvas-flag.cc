@@ -7,10 +7,11 @@ using namespace std;
 
 		
 void 
-CanvasFlag::set_text(string a_text)
+CanvasFlag::set_text(string& a_text)
 {
 	if (_text) {
 		delete _text;
+		_text = 0;
 	}
 	
 	_text = new Text(*this, 0.0, 0.0, a_text);

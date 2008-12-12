@@ -58,7 +58,7 @@ Patch::set_state (const XMLNode& node)
 	assert(commands);
 	const XMLNodeList events = commands->children();
 	for (XMLNodeList::const_iterator i = events.begin(); i != events.end(); ++i) {
-		_patch_midi_commands.push_back(*(new Evoral::MIDIEvent(*(*i))));
+		_patch_midi_commands.push_back(boost::shared_ptr<Evoral::MIDIEvent> (new Evoral::MIDIEvent(*(*i))));
 		XMLNode* node = *i;
 		if (node->name() == "ControlChange") {
 			string control = node->property("Control")->value();
@@ -121,9 +121,9 @@ NoteNameList::set_state (const XMLNode& node)
 	boost::shared_ptr<XMLSharedNodeList> notes =
 					node.find("//Note");
 	for (XMLSharedNodeList::const_iterator i = notes->begin(); i != notes->end(); ++i) {
-		Note* note = new Note();
+		boost::shared_ptr<Note> note(new Note());
 		note->set_state(*(*i));
-		_notes.push_back(*note);
+		_notes.push_back(note);
 	}
 	
 	return 0;
@@ -139,7 +139,7 @@ PatchBank::get_state (void)
 	for (PatchNameList::iterator patch = _patch_name_list.begin();
 	    patch != _patch_name_list.end();
 	    ++patch) {
-		patch_name_list->add_child_nocopy(patch->get_state());
+		patch_name_list->add_child_nocopy((*patch)->get_state());
 	}
 
 	return *node;
@@ -154,9 +154,9 @@ PatchBank::set_state (const XMLNode& node)
 	assert(patch_name_list);
 	const XMLNodeList patches = patch_name_list->children();
 	for (XMLNodeList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
-		Patch* patch = new Patch();
+		boost::shared_ptr<Patch> patch(new Patch());
 		patch->set_state(*(*i));
-		_patch_name_list.push_back(*patch);
+		_patch_name_list.push_back(patch);
 	}
 
 	return 0;
@@ -187,7 +187,7 @@ ChannelNameSet::get_state (void)
 	for (PatchBanks::iterator patch_bank = _patch_banks.begin();
 	    patch_bank != _patch_banks.end();
 	    ++patch_bank) {
-		node->add_child_nocopy(patch_bank->get_state());
+		node->add_child_nocopy((*patch_bank)->get_state());
 	}
 
 	return *node;
@@ -221,14 +221,14 @@ ChannelNameSet::set_state (const XMLNode& node)
 
 		if (node->name() == "PatchBank") {
 			// cerr << "got PatchBank" << endl;
-			PatchBank* bank = new PatchBank();
+			boost::shared_ptr<PatchBank> bank(new PatchBank());
 			bank->set_state(*node);
-			_patch_banks.push_back(*bank);
+			_patch_banks.push_back(bank);
 			const PatchBank::PatchNameList& patches = bank->patch_name_list();
 			for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
 			     patch != patches.end();
 			     ++patch) {
-				_patch_map[patch->patch_primary_key()] = *patch;
+				_patch_map[(*patch)->patch_primary_key()] = *patch;
 			}
 			// cerr << "after PatchBank pushback" << endl;
 		}
@@ -254,7 +254,7 @@ CustomDeviceMode::set_state(const XMLNode& a_node)
 		int channel = atoi((*i)->property("Channel")->value().c_str());
 		string name_set = (*i)->property("NameSet")->value();
 		assert( 1 <= channel && channel <= 16 );
-		_channel_name_set_assignments[channel -1] = name_set;
+		_channel_name_set_assignments[channel - 1] = name_set;
 	}
 	return 0;
 }
@@ -305,10 +305,10 @@ MasterDeviceNames::set_state(const XMLNode& a_node)
 	for (XMLSharedNodeList::iterator i = custom_device_modes->begin();
 	     i != custom_device_modes->end();
 	     ++i) {
-		CustomDeviceMode* custom_device_mode = new CustomDeviceMode();
+		boost::shared_ptr<CustomDeviceMode> custom_device_mode(new CustomDeviceMode());
 		custom_device_mode->set_state(*(*i));
 		
-		_custom_device_modes[custom_device_mode->name()] = *custom_device_mode;
+		_custom_device_modes[custom_device_mode->name()] = custom_device_mode;
 		_custom_device_mode_names.push_back(custom_device_mode->name());
 	}
 
@@ -318,10 +318,10 @@ MasterDeviceNames::set_state(const XMLNode& a_node)
 	for (XMLSharedNodeList::iterator i = channel_name_sets->begin();
 	     i != channel_name_sets->end();
 	     ++i) {
-		ChannelNameSet* channel_name_set = new ChannelNameSet();
+		boost::shared_ptr<ChannelNameSet> channel_name_set(new ChannelNameSet());
 		// cerr << "MasterDeviceNames::set_state ChannelNameSet before set_state" << endl;
 		channel_name_set->set_state(*(*i));
-		_channel_name_sets[channel_name_set->name()] = *channel_name_set;
+		_channel_name_sets[channel_name_set->name()] = channel_name_set;
 	}
 
 	// cerr << "MasterDeviceNames::set_state NoteNameLists" << endl;
@@ -330,9 +330,9 @@ MasterDeviceNames::set_state(const XMLNode& a_node)
 	for (XMLSharedNodeList::iterator i = note_name_lists->begin();
 	     i != note_name_lists->end();
 	     ++i) {
-		NoteNameList* note_name_list = new NoteNameList();
+		boost::shared_ptr<NoteNameList> note_name_list(new NoteNameList());
 		note_name_list->set_state(*(*i));
-		_note_name_lists.push_back(*note_name_list);
+		_note_name_lists.push_back(note_name_list);
 	}
 
 	return 0;

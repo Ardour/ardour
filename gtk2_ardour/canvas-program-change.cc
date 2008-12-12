@@ -8,7 +8,7 @@ using namespace std;
 CanvasProgramChange::CanvasProgramChange(
 		MidiRegionView&                       region,
 		Group&                                parent,
-		string                                text,
+		string&                               text,
 		double                                height,
 		double                                x,
 		double                                y)

@@ -38,7 +38,7 @@ public:
 	
 	virtual ~CanvasFlag();
 	
-	void set_text(string a_text);
+	void set_text(string& a_text);
 
 protected:
 	Text*                             _text;

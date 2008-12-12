@@ -645,7 +645,7 @@ MidiRegionView::find_and_insert_program_change_flags()
 				boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device 
 					= MIDI::Name::MidiPatchManager::instance().master_device_by_model(_model_name);
 				
-				MIDI::Name::Patch patch;
+				boost::shared_ptr<MIDI::Name::Patch> patch;
 				
 				if (master_device != 0 && _custom_device_mode != "") {			 
 					uint8_t msb = 0;
@@ -670,8 +670,8 @@ MidiRegionView::find_and_insert_program_change_flags()
 
 					//cerr << " got patch with name " << patch.name() << " number " << patch.number() << endl;
 				}
-				if (patch.name() != "") {
-					add_pgm_change(event_time, patch.name());
+				if (patch != 0) {
+					add_pgm_change(event_time, patch->name());
 				} else {
 					char buf[4];
 					snprintf(buf, 4, "%d", int(program_number));

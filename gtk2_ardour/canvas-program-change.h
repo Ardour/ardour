@@ -14,7 +14,7 @@ public:
 	CanvasProgramChange(
 		MidiRegionView&                       region,
 		Group&                                parent,
-		string                                text,
+		string&                               text,
 		double                                height,
 		double                                x = 0.0,
 		double                                y = 0.0
