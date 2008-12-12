@@ -193,9 +193,7 @@ Sequence::const_iterator& Sequence::const_iterator::operator++()
 		const bool ret = _control_iter->list->rt_safe_earliest_event_unlocked(
 				_control_iter->x, DBL_MAX, x, y, false);
 
-		if ( !(!ret || x > _control_iter->x) ) {
-			cerr << "Warning: Assertion failed: !ret || x > _control_iter->x in Sequence.cpp" << endl;
-		}
+		assert(!ret || x > _control_iter->x);
 
 		if (ret) {
 			_control_iter->x = x;

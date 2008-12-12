@@ -1080,9 +1080,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 				 * (Optimize for immediate call this cycle within range) */
 				_search_cache.left = x;
 				//++_search_cache.range.first;
-				if (! (inclusive ? x >= start : x > start)) {
-					cerr << "Warning: failed assertion: inclusive ? x >= start : x > start in ControlList.cpp" << endl;
-				}
+				assert(inclusive ? x >= start : x > start);
 				return true;
 			} else {
 				return false;
