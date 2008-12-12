@@ -119,10 +119,10 @@ style "default_base" = "medium_text"
 
   engine "clearlooks" 
   {
-    style              = GLOSSY
-    colorize_scrollbar = TRUE
+    #style              = GLOSSY
+    #colorize_scrollbar = TRUE
     menubarstyle       = 2 # 0 = flat, 1 = sunken, 2 = flat gradient
-    toolbarstyle       = 0 # 0 = flat, 1 = enable effects
+    #toolbarstyle       = 0 # 0 = flat, 1 = enable effects
   }
 }
 
