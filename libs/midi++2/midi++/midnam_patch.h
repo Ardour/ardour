@@ -50,10 +50,9 @@ public:
 	}
 	
 	bool is_sane() { 	
-		return 
-		0 <= msb <= 127 &&
-		0 <= lsb <= 127 &&
-		0 <= program_number <= 127;
+		return ((msb >= 0) && (msb <= 127) &&
+			(lsb >= 0) && (lsb <= 127) &&
+			(program_number >=0 ) && (program_number <= 127));
 	}
 	
 	inline PatchPrimaryKey& operator=(const PatchPrimaryKey& id) {
