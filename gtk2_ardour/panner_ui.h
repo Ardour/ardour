@@ -37,6 +37,7 @@
 
 class Panner2d;
 class PannerBar;
+class Panner2dWindow;
 
 namespace ARDOUR {
 	class IO;
@@ -84,7 +85,8 @@ class PannerUI : public Gtk::HBox
 
 	static const int pan_bar_height;
 
-	Panner2d*   panner;
+	Panner2d*       panner;
+	Panner2dWindow* big_window;
 
 	Gtk::VBox           pan_bar_packer;
 	Gtk::Adjustment	    hAdjustment;

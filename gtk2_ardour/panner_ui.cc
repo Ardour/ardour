@@ -124,6 +124,7 @@ PannerUI::PannerUI (Session& s)
 	pack_start (pan_vbox, true, true);
 
 	panner = 0;
+	big_window = 0;
 
 	set_width(Narrow);
 }
@@ -308,6 +309,10 @@ PannerUI::~PannerUI ()
 		delete panner;
 	}
 
+	if (big_window) {
+		delete big_window;
+	}
+	
 	if (pan_menu) {
 		delete pan_menu;
 	}
@@ -437,10 +442,17 @@ PannerUI::setup_pan ()
 			panner = new Panner2d (_io->panner(), 61);
 			panner->set_name ("MixerPanZone");
 			panner->show ();
+
+ 
+ 			panner->signal_button_press_event().connect
+ 				(bind (mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) 0), false);
 		}
 		
 		update_pan_sensitive ();
 		panner->reset (_io->n_inputs().n_audio());
+ 		if (big_window) {
+ 			big_window->reset (_io->n_inputs().n_audio());
+ 		}
 		panner->set_size_request (-1, 61);
 
 		/* and finally, add it to the panner frame */
@@ -455,6 +467,16 @@ bool
 PannerUI::pan_button_event (GdkEventButton* ev, uint32_t which)
 {
 	switch (ev->button) {
+	case 1:
+		if (panner && ev->type == GDK_2BUTTON_PRESS) {
+			if (!big_window) {
+				big_window = new Panner2dWindow (panner->get_panner(), 400, _io->n_inputs().n_audio());
+			}
+			big_window->show ();
+			return true;
+		}
+		break;
+
 	case 3:
 		if (pan_menu == 0) {
 			pan_menu = manage (new Menu);
@@ -688,7 +710,7 @@ PannerUI::pan_printer (char *buf, uint32_t len, Adjustment* adj)
 }
 
 void
-PannerUI::update_pan_sensitive ()
+PannerUI::update_pan_sensitive () 
 {
 	bool sensitive = !(_io->panner().automation_state() & Play);
 
@@ -704,6 +726,9 @@ PannerUI::update_pan_sensitive ()
 	default:
 		if (panner) {
 			panner->set_sensitive (sensitive);
+		}
+		if (big_window) {
+			big_window->set_sensitive (sensitive);
 		}
 		break;
 	}

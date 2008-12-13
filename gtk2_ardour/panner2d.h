@@ -23,9 +23,15 @@
 #include <sys/types.h>
 #include <map>
 #include <string>
+#include <vector>
 
 #include <glibmm/refptr.h>
 #include <gtkmm/drawingarea.h>
+#include <gtkmm/window.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/adjustment.h>
 
 using std::map;
 using std::string;
@@ -43,15 +49,14 @@ namespace Pango {
 	class Layout;
 }
 
+class Panner2dWindow;
+
 class Panner2d : public Gtk::DrawingArea
 {
   public:
 	Panner2d (ARDOUR::Panner&, int32_t height);
 	~Panner2d ();
 	
-	int puck_position (int which_puck, float& x, float& y);
-	int target_position (int which_target, float& x, float& y);
-
 	void allow_x_motion(bool);
 	void allow_y_motion(bool);
 	void allow_target_motion (bool);
@@ -69,6 +74,10 @@ class Panner2d : public Gtk::DrawingArea
 	void move_puck (int, float x, float y);
 	void reset (uint32_t n_inputs);
 
+	Gtk::Adjustment& azimuth (uint32_t which);
+
+	ARDOUR::Panner& get_panner() const { return panner; }
+	
 	sigc::signal<void,int> PuckMoved;
 	sigc::signal<void,int> TargetMoved;
 
@@ -81,19 +90,19 @@ class Panner2d : public Gtk::DrawingArea
 
   private:
 	struct Target {
-	    float x;
-	    float y;
+	    Gtk::Adjustment x;
+	    Gtk::Adjustment y;
+	    Gtk::Adjustment azimuth;
 	    bool visible;
 	    char* text;
-	    size_t textlen;
 
 	    Target (float xa, float ya, const char* txt = 0);
 	    ~Target ();
+
+	    void set_text (const char*);
 	};
 
 	ARDOUR::Panner& panner;
-	Gtk::Menu* context_menu;
-	Gtk::CheckMenuItem* bypass_menu_item;
 	Glib::RefPtr<Pango::Layout> layout;
 
 	typedef std::map<int,Target *> Targets;
@@ -101,6 +110,8 @@ class Panner2d : public Gtk::DrawingArea
 	Targets pucks;
 
 	Target *drag_target;
+	int drag_x;
+	int drag_y;
 	int     drag_index;
 	bool    drag_is_puck;
 	bool  allow_x;
@@ -119,8 +130,29 @@ class Panner2d : public Gtk::DrawingArea
 	gint handle_motion (gint, gint, GdkModifierType);
 
 	void toggle_bypass ();
-	void show_context_menu ();
 	void handle_state_change ();
+	void handle_position_change ();
+};
+
+class Panner2dWindow : public Gtk::Window
+{
+  public:
+	Panner2dWindow (ARDOUR::Panner&, int32_t height, uint32_t inputs);
+	
+	void reset (uint32_t n_inputs);
+
+  private:
+	Panner2d widget;
+
+	Gtk::HBox   hpacker;
+	Gtk::VBox   button_box;
+	Gtk::Button reset_button;
+	Gtk::ToggleButton bypass_button;
+	Gtk::ToggleButton mute_button;
+	Gtk::VBox   spinner_box;
+	Gtk::VBox   left_side;
+
+	std::vector<Gtk::SpinButton*> spinners;
 };
 
 #endif /* __ardour_panner_2d_h__ */
