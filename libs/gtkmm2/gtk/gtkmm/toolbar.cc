@@ -539,12 +539,16 @@ ToolbarStyle Toolbar::get_toolbar_style() const
 
 void Toolbar::set_tooltips(bool enable)
 {
-gtk_toolbar_set_tooltips(gobj(), static_cast<int>(enable)); 
+#ifndef GTK_NEW_TOOLTIP_API
+  gtk_toolbar_set_tooltips(gobj(), static_cast<int>(enable)); 
+#endif
 }
 
 bool Toolbar::get_tooltips() const
 {
+#ifndef GTK_NEW_TOOLTIP_API
   return gtk_toolbar_get_tooltips(const_cast<GtkToolbar*>(gobj()));
+#endif
 }
 
 void Toolbar::unset_toolbar_style()
