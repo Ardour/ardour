@@ -86,7 +86,20 @@ class MidiRegionView : public RegionView
 	void add_note(const boost::shared_ptr<Evoral::Note> note);
 	void resolve_note(uint8_t note_num, double end_time);
 	
-	void add_pgm_change(nframes_t time, string displaytext);
+	struct ControlEvent
+	{
+		nframes_t time;
+		uint8_t   value;
+		uint8_t   channel;
+		
+		ControlEvent(nframes_t a_time, uint8_t a_value, uint8_t a_channel) 
+			: time(a_time), value(a_value), channel(a_channel) {}
+	};
+	
+	void add_pgm_change(ControlEvent& program, string displaytext);
+	void alter_program_change(ControlEvent& old_program, ControlEvent& new_program);
+	void previous_program(boost::shared_ptr<ArdourCanvas::CanvasProgramChange> program);
+	void next_program(boost::shared_ptr<ArdourCanvas::CanvasProgramChange> program);
 	void find_and_insert_program_change_flags();
 
 	void begin_write();

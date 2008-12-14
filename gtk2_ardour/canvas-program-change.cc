@@ -36,10 +36,10 @@ CanvasProgramChange::on_event(GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			cerr << "increasing program" <<  endl;
+			previous_patch();
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			cerr << "decreasing program" <<  endl;
+			next_patch();
 			return true;
 		} 
 	default:
@@ -47,4 +47,16 @@ CanvasProgramChange::on_event(GdkEvent* ev)
 	}
 	
 	return false;
+}
+
+void 
+CanvasProgramChange::previous_patch()
+{
+	cerr << "decreasing program" <<  endl;
+}
+
+void 
+CanvasProgramChange::next_patch()
+{
+	cerr << "increasing program" <<  endl;
 }

@@ -151,10 +151,19 @@ public:
 		return _available_for_channels.find(channel) != _available_for_channels.end(); 
 	}
 	
-	boost::shared_ptr<Patch> find_patch(uint8_t msb, uint8_t lsb, uint8_t program_number) {
-		PatchPrimaryKey key(msb, lsb, program_number);
+	boost::shared_ptr<Patch> find_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
 		return _patch_map[key];
+	}
+	
+	boost::shared_ptr<Patch> previous_patch(PatchPrimaryKey& key) {
+		assert(key.is_sane());
+		return (*(--_patch_map.find(key))).second;
+	}
+	
+	boost::shared_ptr<Patch> next_patch(PatchPrimaryKey& key) {
+		assert(key.is_sane());
+		return (*(++_patch_map.find(key))).second;
 	}
 
 	XMLNode& get_state (void);
@@ -266,8 +275,8 @@ public:
 		return _channel_name_sets[custom_device_mode_by_name(mode)->channel_name_set_name_by_channel(channel)];
 	}
 	
-	boost::shared_ptr<Patch> find_patch(string mode, uint8_t channel, uint8_t msb, uint8_t lsb, uint8_t program_number) {
-		return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(msb, lsb, program_number);
+	boost::shared_ptr<Patch> find_patch(string mode, uint8_t channel, PatchPrimaryKey& key) {
+		return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
 	}
 	
 	XMLNode& get_state (void);

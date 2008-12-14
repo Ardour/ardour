@@ -635,47 +635,42 @@ MidiRegionView::find_and_insert_program_change_flags()
 
 				//cerr << " got program change on channel " << int(channel) << " time: " << event_time << " number: " << program_number << endl;
 				
-				// find bank select msb and lsb for the program change
+				// find bank select msb and lsb for the program change				
 				Evoral::Parameter bank_select_msb(MidiCCAutomation, channel, MIDI_CTL_MSB_BANK);
-				Evoral::Parameter bank_select_lsb(MidiCCAutomation, channel, MIDI_CTL_LSB_BANK);
-				
-				boost::shared_ptr<Evoral::Control>  lsb_control = _model->control(bank_select_lsb);
 				boost::shared_ptr<Evoral::Control>  msb_control = _model->control(bank_select_msb);
-									
-				boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device 
-					= MIDI::Name::MidiPatchManager::instance().master_device_by_model(_model_name);
+				uint8_t msb = 0;
+				if (msb_control != 0) {
+					msb = uint8_t(msb_control->get_float(true, event_time));
+				}
+
+				Evoral::Parameter bank_select_lsb(MidiCCAutomation, channel, MIDI_CTL_LSB_BANK);
+				boost::shared_ptr<Evoral::Control>  lsb_control = _model->control(bank_select_lsb);
+				uint8_t lsb = 0;
+				if (lsb_control != 0) {
+					lsb = uint8_t(lsb_control->get_float(true, event_time));
+				}
+					
+				cerr << " got msb " << int(msb) << " and lsb " << int(lsb) << " thread_id: " << pthread_self() << endl;
+					
+				MIDI::Name::PatchPrimaryKey patch_key(msb, lsb, program_number);
 				
-				boost::shared_ptr<MIDI::Name::Patch> patch;
-				
-				if (master_device != 0 && _custom_device_mode != "") {			 
-					uint8_t msb = 0;
-					if (msb_control != 0) {
-						msb = uint8_t(msb_control->get_float(true, event_time));
-					}
-					
-					uint8_t lsb = 0;
-					if (lsb_control != 0) {
-						lsb = uint8_t(lsb_control->get_float(true, event_time));
-					}
-					
-					cerr << " got msb " << int(msb) << " and lsb " << int(lsb) << " thread_id: " << pthread_self() << endl;
-					
-					patch = master_device->find_patch(
+				boost::shared_ptr<MIDI::Name::Patch> patch = 
+					MIDI::Name::MidiPatchManager::instance().find_patch(
+							_model_name,
 							_custom_device_mode, 
 							channel, 
-							msb,
-							lsb,
-							uint8_t(program_number)
+							patch_key
 					);
-
-				}
+				
+				ControlEvent program_change(nframes_t(event_time), uint8_t(program_number), channel);
+				
 				if (patch != 0) {
 					cerr << " got patch with name " << patch->name() << " number " << patch->number() << endl;
-					add_pgm_change(event_time, patch->name());
+					add_pgm_change(program_change, patch->name());
 				} else {
 					char buf[4];
 					snprintf(buf, 4, "%d", int(program_number));
-					add_pgm_change(event_time, buf);
+					add_pgm_change(program_change, buf);
 				}
 			}
 			break;
@@ -996,21 +991,44 @@ MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
 }
 
 void
-MidiRegionView::add_pgm_change(nframes_t time, string displaytext)
+MidiRegionView::add_pgm_change(ControlEvent& program, string displaytext)
 {
-	assert(time >= 0);
+	assert(program.time >= 0);
 	
 	// dont display program changes beyond the region bounds
-	if (time - _region->start() >= _region->length() || time <  _region->start()) 
+	if (program.time - _region->start() >= _region->length() || program.time <  _region->start()) 
 		return;
 	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
-	const double x = trackview.editor.frame_to_pixel((nframes64_t)time - _region->start());
+	const double x = trackview.editor.frame_to_pixel((nframes64_t)program.time - _region->start());
 	
 	double height = midi_stream_view()->contents_height();
-	_pgm_changes.push_back(
-		boost::shared_ptr<CanvasProgramChange>(
-			new CanvasProgramChange(*this, *group, displaytext, height, x, 1.0)));
+	
+	boost::shared_ptr<CanvasProgramChange> pgm_change = boost::shared_ptr<CanvasProgramChange>(
+			new CanvasProgramChange(*this, *group, displaytext, height, x, 1.0));
+	pgm_change->set_event_time(program.time);
+	pgm_change->set_program(program.value);
+	pgm_change->set_channel(program.channel);
+	
+	_pgm_changes.push_back(pgm_change);
+}
+
+void 
+MidiRegionView::alter_program_change(ControlEvent& old_program, ControlEvent& new_program)
+{
+	
+}
+
+void 
+MidiRegionView::previous_program(boost::shared_ptr<CanvasProgramChange> program)
+{
+	
+}
+
+void 
+MidiRegionView::next_program(boost::shared_ptr<CanvasProgramChange> program)
+{
+	
 }
 
 void

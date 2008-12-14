@@ -78,6 +78,7 @@ Patch::set_state (const XMLNode& node)
 		}
 	}
 
+	//cerr << "deserialized Patch: name: " <<  _name << _id.msb << " lsb: " << _id.lsb << " program " << _id.program_number << endl;
 	assert(_id.is_sane());
 	
 	return 0;
