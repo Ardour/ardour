@@ -70,6 +70,7 @@ class PortMatrix : public Gtk::VBox {
   protected:
 
 	bool _offer_inputs;
+	void set_ports (const std::list<std::string>&);
 
   private:
 	PortGroupList _port_group_list;

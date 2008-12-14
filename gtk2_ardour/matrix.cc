@@ -50,6 +50,14 @@ Matrix::add_group (PortGroup& pg)
 	reset_size ();
 }
 
+
+void
+Matrix::clear ()
+{
+	others.clear ();
+	reset_size ();
+}
+
 void
 Matrix::remove_group (PortGroup& pg)
 {
@@ -118,7 +126,20 @@ Matrix::reset_size ()
 			++visible_others;
 		}
 	}
-	
+
+	if (!visible_others) {
+		cerr << "There are no visible others!\n";
+		xstep = 1;
+		ystep = 1;
+		line_width = 1;
+		line_height = 1;
+		border = 10;
+		arc_radius = 3;
+		labels_x_shift = 0;
+		labels_y_shift = 0;
+		return;
+	}
+
 	border = 10;
 
 	if (alloc_width > line_width) {
@@ -182,6 +203,18 @@ Matrix::reset_size ()
 	labels_x_shift = (int) ceil (w);
 
 	setup_nodes ();
+
+
+	cerr << "Based on ours = " << ours.size() << " others = " << others.size()
+	     << " dimens = "
+	     << " xstep " << xstep << endl
+	     << " ystep " << ystep << endl
+	     << " line_width " << line_width << endl
+	     << " line_height " << line_height << endl
+	     << " border " << border << endl
+	     << " arc_radius " << arc_radius << endl
+	     << " labels_x_shift " << labels_x_shift << endl
+	     << " labels_y_shift " << labels_y_shift << endl;
 }
 
 bool

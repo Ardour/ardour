@@ -471,7 +471,7 @@ deps = \
 {
 	'glib-2.0'             : '2.10.1',
 	'gthread-2.0'          : '2.10.1',
-	'gtk+-2.0'             : '2.8.1',
+	'gtk+-2.0'             : '2.12.1',
 	'libxml-2.0'           : '2.6.0',
 	'samplerate'           : '0.1.0',
 	'raptor'               : '1.4.2',
@@ -595,7 +595,7 @@ else:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 	
-	if conf.CheckPKGVersion('slv2', '0.6.1'):
+	if conf.CheckPKGVersion('slv2', '0.6.2'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
                 env.Append (CCFLAGS="-DHAVE_LV2")

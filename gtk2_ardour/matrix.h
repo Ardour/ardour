@@ -59,6 +59,7 @@ class Matrix : public Gtk::EventBox
     void remove_group (PortGroup&);
     void hide_group (PortGroup&);
     void show_group (PortGroup&);
+    void clear ();
 
     int row_spacing () const { return xstep; }
 

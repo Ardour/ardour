@@ -144,6 +144,12 @@ PortMatrix::~PortMatrix ()
 	clear ();
 }
 
+void 
+PortMatrix::set_ports (const std::list<std::string>& ports)
+{
+	matrix.set_ports (ports);
+}
+
 /** Clear out the things that change when the number of source or destination ports changes */
 void
 PortMatrix::clear ()
@@ -244,13 +250,17 @@ PortMatrix::setup ()
 		_side_vbox.pack_start (*_side_vbox_pad, false, false);
 	}
 
+	matrix.clear ();
+
  	/* Checkbutton tables and visibility checkbuttons */
  	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
 
 		PortGroupUI* t = new PortGroupUI (*this, **i);
 		
 		_port_group_ui.push_back (t);
-		
+
+		matrix.add_group (**i);
+
 		_visibility_checkbutton_box.pack_start (t->get_visibility_checkbutton(), false, false);
 
 		CheckButton* chk = dynamic_cast<CheckButton*>(&t->get_visibility_checkbutton());
@@ -370,6 +380,8 @@ PortGroupList::refresh ()
 
 	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
 
+	cerr << "Looking for arour routes\n";
+
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
 		PortGroup* g = 0;
@@ -408,12 +420,16 @@ PortGroupList::refresh ()
 	   finding all the ports that we can connect to. 
 	*/
 
+	cerr << "Looking for non-ardour ports\n";
+
 	const char **ports = _session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
 							  JackPortIsInput : JackPortIsOutput);
 	if (ports) {
 
 		int n = 0;
 		string client_matching_string;
+
+		cerr << "Got some\n";
 
 		client_matching_string = _session.engine().client_name();
 		client_matching_string += ':';
@@ -436,6 +452,11 @@ PortGroupList::refresh ()
 
 		free (ports);
 	}
+
+	cerr << "at end of refresh, we have " << buss.ports.size () << " buss\n";
+	cerr << "at end of refresh, we have " << track.ports.size () << " track\n";
+	cerr << "at end of refresh, we have " << system.ports.size () << " system\n";
+	cerr << "at end of refresh, we have " << other.ports.size () << " other\n";
 
 	push_back (&system);
 	push_back (&buss);

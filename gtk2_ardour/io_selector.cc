@@ -40,19 +40,36 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool offer_inputs)
-	: PortMatrix (
-		session, io->default_type(), offer_inputs,
-		PortGroupList::Mask (PortGroupList::BUSS | 
-				     PortGroupList::SYSTEM | 
-				     PortGroupList::OTHER)),
-	  _io (io)
+	: PortMatrix (session, io->default_type(), offer_inputs,
+		      PortGroupList::Mask (PortGroupList::BUSS | 
+					   PortGroupList::SYSTEM | 
+					   PortGroupList::OTHER))
+	, _io (io)
 {
+	list<string> our_ports;
+
 	/* Listen for ports changing on the IO */
 	if (_offer_inputs) {
 		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+
+		const PortSet& ps (_io->outputs());
+
+		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
+			our_ports.push_back ((*i).name());
+		}
+
 	} else {
 		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+
+		const PortSet& ps (_io->inputs());
+
+		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
+			our_ports.push_back ((*i).name());
+		}
+
 	}
+	
+	set_ports (our_ports);
 }
 
 void
@@ -204,16 +221,14 @@ IOSelector::row_descriptor () const
 	return _("port");
 }
 
-IOSelectorWindow::IOSelectorWindow (
-	ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel
-	)
-	: ArdourDialog ("I/O selector"),
-	  _selector (session, io, !for_input),
-	  add_button (_("Add Port")),
-	  disconnect_button (_("Disconnect All")),
-	  ok_button (can_cancel ? _("OK"): _("Close")),
-	  cancel_button (_("Cancel")),
-	  rescan_button (_("Rescan"))
+IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel)
+	: ArdourDialog ("I/O selector")
+	, _selector (session, io, !for_input)
+	, add_button (_("Add Port"))
+	, disconnect_button (_("Disconnect All"))
+	, ok_button (can_cancel ? _("OK"): _("Close"))
+	, cancel_button (_("Cancel"))
+	, rescan_button (_("Rescan"))
 
 {
 	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
