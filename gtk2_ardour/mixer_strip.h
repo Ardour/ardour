@@ -122,7 +122,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Button         hide_button;
 	Gtk::Button         width_button;
 	Gtk::HBox           width_hide_box;
+	Gtk::VBox           whvbox;
 	Gtk::EventBox       top_event_box;
+	Gtk::EventBox*      spacer;
+	Gtk::Alignment      gain_meter_alignment;
 
 	void hide_clicked();
 	void width_clicked ();

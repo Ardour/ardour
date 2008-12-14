@@ -139,9 +139,19 @@ MixerStrip::init ()
 	comment_window = 0;
 	comment_area = 0;
 	_width_owner = 0;
+	spacer = 0;
 
-	width_button.add (*(manage (new Gtk::Image (::get_icon("strip_width")))));
-	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
+	Gtk::Image* img;
+
+	img = manage (new Gtk::Image (::get_icon("strip_width")));
+	img->show ();
+
+	width_button.add (*img);
+
+	img = manage (new Gtk::Image (::get_icon("hide")));
+	img->show ();
+
+	hide_button.add (*img);
 
 	input_label.set_text (_("Input"));
 	ARDOUR_UI::instance()->set_tip (&input_button, _("Click to choose inputs"), "");
@@ -208,8 +218,6 @@ MixerStrip::init ()
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
 
-	VBox *whvbox = manage (new VBox);
-
 	width_button.set_name ("MixerWidthButton");
 	hide_button.set_name ("MixerHideButton");
 	top_event_box.set_name ("MixerTopEventBox");
@@ -220,17 +228,16 @@ MixerStrip::init ()
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_start (top_event_box, true, true);
 	width_hide_box.pack_end (hide_button, false, true);
-	Gtk::Alignment *gain_meter_alignment = Gtk::manage(new Gtk::Alignment());
-	gain_meter_alignment->set_padding(0, 4, 0, 0);
-	gain_meter_alignment->add(gpm);
+	gain_meter_alignment.set_padding(0, 4, 0, 0);
+	gain_meter_alignment.add(gpm);
 
-	whvbox->pack_start (width_hide_box, true, true);
+	whvbox.pack_start (width_hide_box, true, true);
 
-	global_vpacker.pack_start (*whvbox, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (pre_processor_box, true, true);
 	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (*gain_meter_alignment,Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (post_processor_box, true, true);
 	if (!is_midi_track()) {
@@ -297,13 +304,8 @@ MixerStrip::~MixerStrip ()
 {
 	GoingAway(); /* EMIT_SIGNAL */
 
-	if (input_selector) {
-		delete input_selector;
-	}
-
-	if (output_selector) {
-		delete output_selector;
-	}
+	delete input_selector;
+	delete output_selector;
 }
 
 void
@@ -348,7 +350,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			scrollbar_height = requisition.height;
 		}
 
-		EventBox* spacer = manage (new EventBox);
+		spacer = manage (new EventBox);
 		spacer->set_size_request (-1, scrollbar_height);
 		global_vpacker.pack_start (*spacer, false, false);
 	}
@@ -454,13 +456,20 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		/* we don't allow master or control routes to be hidden */
 		hide_button.show();
 	}
+
 	width_button.show();
 	width_hide_box.show();
+	whvbox.show ();
 	global_frame.show();
 	global_vpacker.show();
 	button_table.show();
 	middle_button_table.show();
 	bottom_button_table.show();
+	pre_processor_box.show_all ();
+	gpm.show_all ();
+	panners.show_all ();
+	gain_meter_alignment.show ();
+	post_processor_box.show_all ();
 	gain_unit_button.show();
 	gain_unit_label.show();
 	meter_point_button.show();
@@ -480,7 +489,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	speed_label.show();
 	speed_frame.show();
 
-	show();
+	show ();
 }
 
 void
