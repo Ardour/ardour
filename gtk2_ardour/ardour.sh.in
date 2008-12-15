@@ -20,7 +20,7 @@ fi
 
 ## Glib atomic test
 
-GLIB=$(ldd %INSTALL_PREFIX%/%LIBDIR%/ardour2/ardour-%VERSION% 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
+GLIB=$(ldd %INSTALL_PREFIX%/%LIBDIR%/ardour3/ardour-%VERSION% 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
 
 if [ "$GLIB" = "" ]; then
 	echo "WARNING: Could not check your glib-2.0 for mutex locking atomic operations."
@@ -36,7 +36,7 @@ elif [ $(nm -D --radix=dec --defined-only -S $GLIB | grep -w g_atomic_int_add | 
 	echo ""
 fi
 
-exec %INSTALL_PREFIX%/%LIBDIR%/ardour2/ardour-%VERSION% "$@"
+exec %INSTALL_PREFIX%/%LIBDIR%/ardour3/ardour-%VERSION% "$@"
 
 ## Glib atomic test
 
