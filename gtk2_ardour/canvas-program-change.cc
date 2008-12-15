@@ -1,6 +1,7 @@
 #include "canvas-program-change.h"
 #include <iostream>
 #include "ardour_ui.h"
+#include "midi_region_view.h"
 
 using namespace Gnome::Canvas;
 using namespace std;
@@ -32,14 +33,13 @@ CanvasProgramChange::~CanvasProgramChange()
 bool
 CanvasProgramChange::on_event(GdkEvent* ev)
 {
-	cerr << "CanvasProgramChange::on_event(GdkEvent* ev) type " << ev->type << endl;
 	switch (ev->type) {
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			previous_patch();
+			_region.previous_program(*this);
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			next_patch();
+			_region.next_program(*this);
 			return true;
 		} 
 	default:
@@ -47,16 +47,4 @@ CanvasProgramChange::on_event(GdkEvent* ev)
 	}
 	
 	return false;
-}
-
-void 
-CanvasProgramChange::previous_patch()
-{
-	cerr << "decreasing program" <<  endl;
-}
-
-void 
-CanvasProgramChange::next_patch()
-{
-	cerr << "increasing program" <<  endl;
 }

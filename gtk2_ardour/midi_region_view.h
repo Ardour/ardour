@@ -44,6 +44,12 @@ namespace ARDOUR {
 	class MidiModel;
 };
 
+namespace MIDI {
+	namespace Name {
+		struct PatchPrimaryKey;
+	};
+};
+
 class MidiTimeAxisView;
 class GhostRegion;
 class AutomationTimeAxisView;
@@ -94,12 +100,20 @@ class MidiRegionView : public RegionView
 		
 		ControlEvent(nframes_t a_time, uint8_t a_value, uint8_t a_channel) 
 			: time(a_time), value(a_value), channel(a_channel) {}
+		
+		ControlEvent& operator=(const ControlEvent& other) {
+			time = other.time;
+			value = other.value;
+			channel = other.channel;
+			return *this;
+		}
 	};
 	
 	void add_pgm_change(ControlEvent& program, string displaytext);
-	void alter_program_change(ControlEvent& old_program, ControlEvent& new_program);
-	void previous_program(boost::shared_ptr<ArdourCanvas::CanvasProgramChange> program);
-	void next_program(boost::shared_ptr<ArdourCanvas::CanvasProgramChange> program);
+	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
+	void alter_program_change(ControlEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
+	void previous_program(ArdourCanvas::CanvasProgramChange& program);
+	void next_program(ArdourCanvas::CanvasProgramChange& program);
 	void find_and_insert_program_change_flags();
 
 	void begin_write();

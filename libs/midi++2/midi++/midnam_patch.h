@@ -133,12 +133,15 @@ private:
 	PatchNameList _patch_name_list;
 };
 
+#include <iostream>
+
 class ChannelNameSet : public PBD::Stateful
 {
 public:
 	typedef std::set<uint8_t>                                    AvailableForChannels;
 	typedef std::list<boost::shared_ptr<PatchBank> >             PatchBanks;
 	typedef std::map<PatchPrimaryKey, boost::shared_ptr<Patch> > PatchMap;
+	typedef std::list<PatchPrimaryKey>                           PatchList;
 
 	ChannelNameSet() {};
 	virtual ~ChannelNameSet() {};
@@ -158,12 +161,39 @@ public:
 	
 	boost::shared_ptr<Patch> previous_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		return (*(--_patch_map.find(key))).second;
+		std::cerr << "finding patch with "  << key.msb << "/" << key.lsb << "/" <<key.program_number << std::endl; 
+		for (PatchList::const_iterator i = _patch_list.begin();
+			 i != _patch_list.end();
+			 ++i) {
+			if ((*i) == key) {
+				if (i != _patch_list.begin()) {
+					std::cerr << "got it!" << std::endl;
+					--i;
+					return  _patch_map[*i];
+				} 
+			}
+		}
+			
+		return boost::shared_ptr<Patch>();
 	}
 	
 	boost::shared_ptr<Patch> next_patch(PatchPrimaryKey& key) {
 		assert(key.is_sane());
-		return (*(++_patch_map.find(key))).second;
+		std::cerr << "finding patch with "  << key.msb << "/" << key.lsb << "/" <<key.program_number << std::endl; 
+		for (PatchList::const_iterator i = _patch_list.begin();
+			 i != _patch_list.end();
+			 ++i) {
+			if ((*i) == key) {
+				if (++i != _patch_list.end()) {
+					std::cerr << "got it!" << std::endl;
+					return  _patch_map[*i];
+				} else {
+					--i;
+				}
+			}
+		}
+			
+		return boost::shared_ptr<Patch>();
 	}
 
 	XMLNode& get_state (void);
@@ -174,6 +204,7 @@ private:
 	AvailableForChannels _available_for_channels;
 	PatchBanks           _patch_banks;
 	PatchMap             _patch_map;
+	PatchList            _patch_list;
 };
 
 class Note : public PBD::Stateful

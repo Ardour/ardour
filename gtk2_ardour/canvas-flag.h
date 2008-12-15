@@ -46,15 +46,15 @@ public:
 	void set_text(string& a_text);
 
 protected:
-	CanvasFlagText*                         _text;
+	CanvasFlagText*                   _text;
 	double                            _height;
 	guint                             _outline_color_rgba;
 	guint                             _fill_color_rgba;
+	MidiRegionView&                   _region;
 	
 private:
 	void delete_allocated_objects();
 	
-	MidiRegionView&                   _region;
 	SimpleLine*                       _line;
 	CanvasFlagRect*                   _rect;
 };

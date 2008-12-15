@@ -79,6 +79,7 @@ Patch::set_state (const XMLNode& node)
 	}
 
 	//cerr << "deserialized Patch: name: " <<  _name << _id.msb << " lsb: " << _id.lsb << " program " << _id.program_number << endl;
+	// TODO: handle that more gracefully
 	assert(_id.is_sane());
 	
 	return 0;
@@ -230,6 +231,7 @@ ChannelNameSet::set_state (const XMLNode& node)
 			     patch != patches.end();
 			     ++patch) {
 				_patch_map[(*patch)->patch_primary_key()] = *patch;
+				_patch_list.push_back((*patch)->patch_primary_key());
 			}
 			// cerr << "after PatchBank pushback" << endl;
 		}
