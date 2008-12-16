@@ -250,7 +250,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();
-	void hide_processor_editor (boost::shared_ptr<ARDOUR::Processor> processor);
+	void hide_processor_editor (boost::weak_ptr<ARDOUR::Processor> processor);
 	void hide_redirect_editors ();
 
 	bool ignore_speed_adjustment;

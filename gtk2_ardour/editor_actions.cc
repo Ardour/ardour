@@ -100,6 +100,7 @@ Editor::register_actions ()
 	/* add named actions for the editor */
 
 	ActionManager::register_toggle_action (editor_actions, "link-region-and-track-selection", _("Link Region/Track Selection"), mem_fun (*this, &Editor::toggle_link_region_and_track_selection));
+	ActionManager::register_toggle_action (editor_actions, "automation-follows-regions", _("Automation follows regions"), mem_fun (*this, &Editor::toggle_automation_follows_regions));
 	ActionManager::register_action (editor_actions, "break-drag", _("Break drag"), mem_fun (*this, &Editor::break_drag));
 
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
@@ -1731,6 +1732,12 @@ Editor::toggle_link_region_and_track_selection ()
 	ActionManager::toggle_config_state ("Editor", "link-region-and-track-selection", &Configuration::set_link_region_and_track_selection, &Configuration::get_link_region_and_track_selection);
 }
 
+void
+Editor::toggle_automation_follows_regions ()
+{
+	ActionManager::toggle_config_state ("Editor", "automation-follows-regions", &Configuration::set_automation_follows_regions, &Configuration::get_automation_follows_regions);
+}
+
 /** A Configuration parameter has changed.
  * @param parameter_name Name of the changed parameter.
  */
@@ -1777,6 +1784,8 @@ Editor::parameter_changed (const char* parameter_name)
 		toggle_meter_updating();
 	} else if (PARAM_IS ("link-region-and-track-selection")) {
 		ActionManager::map_some_state ("Editor", "link-region-and-track-selection", &Configuration::get_link_region_and_track_selection);
+	} else if (PARAM_IS ("automation-follows-regions")) {
+		ActionManager::map_some_state ("Editor", "automation-follows-regions", &Configuration::get_automation_follows_regions);
 	}
 
 #undef PARAM_IS

@@ -184,7 +184,7 @@ protected:
 
 	void processors_changed ();
 	
-	void add_processor_to_subplugin_menu (boost::shared_ptr<ARDOUR::Processor>);
+	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
 	void remove_processor_automation_node (ProcessorAutomationNode* pan);
 
 	void processor_menu_item_toggled (RouteTimeAxisView::ProcessorAutomationInfo*,
@@ -205,7 +205,7 @@ protected:
 	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
 	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, Evoral::Parameter);
-	void add_existing_processor_automation_curves (boost::shared_ptr<ARDOUR::Processor>);
+	void add_existing_processor_automation_curves (boost::weak_ptr<ARDOUR::Processor>);
 
 	void add_automation_child(Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show=true);
 	

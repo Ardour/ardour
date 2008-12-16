@@ -154,7 +154,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	bool processor_button_press_event (GdkEventButton *);
 	bool processor_button_release_event (GdkEventButton *);
 	void redisplay_processors ();
-	void add_processor_to_display (boost::shared_ptr<ARDOUR::Processor>);
+	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>);
 	void row_deleted (const Gtk::TreeModel::Path& path);
 	void show_processor_active (boost::weak_ptr<ARDOUR::Processor>);
 	void show_processor_name (boost::weak_ptr<ARDOUR::Processor>);

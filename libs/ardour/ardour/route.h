@@ -142,10 +142,10 @@ class Route : public IO
 
 	void flush_processors ();
 
-	template<class T> void foreach_processor (T *obj, void (T::*func)(boost::shared_ptr<Processor>)) {
+	void foreach_processor (sigc::slot<void, boost::weak_ptr<Processor> > method) {
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			(obj->*func) (*i);
+			method (boost::weak_ptr<Processor> (*i));
 		}
 	}
 

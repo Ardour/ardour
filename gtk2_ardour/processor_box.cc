@@ -562,8 +562,7 @@ ProcessorBox::redisplay_processors ()
 	processor_active_connections.clear ();
 	processor_name_connections.clear ();
 
-	void (ProcessorBox::*method)(boost::shared_ptr<Processor>) = &ProcessorBox::add_processor_to_display;
-	_route->foreach_processor (this, method);
+	_route->foreach_processor (mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
 	switch (_placement) {
 	case PreFader:
@@ -576,8 +575,13 @@ ProcessorBox::redisplay_processors ()
 }
 
 void
-ProcessorBox::add_processor_to_display (boost::shared_ptr<Processor> processor)
+ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 {
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor) {
+		return;
+	}
+	
 	if (processor->placement() != _placement) {
 		return;
 	}

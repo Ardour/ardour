@@ -37,6 +37,7 @@
 #include <pbd/basename.h>
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -48,6 +49,7 @@
 #include <ardour/playlist.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/region.h>
+#include <ardour/panner.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -312,6 +314,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 
 		plmod_connection.disconnect ();
 		plgone_connection.disconnect ();
+		plregion_connection.disconnect ();
 
 		if (_playlist) {
 			_playlist->release();
@@ -326,6 +329,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 		
 		plmod_connection = _playlist->Modified.connect (mem_fun (*this, &Diskstream::playlist_modified));
 		plgone_connection = _playlist->GoingAway.connect (bind (mem_fun (*this, &Diskstream::playlist_deleted), boost::weak_ptr<Playlist>(_playlist)));
+		plregion_connection = _playlist->RangesMoved.connect (mem_fun (*this, &Diskstream::playlist_ranges_moved));
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up
@@ -407,5 +411,66 @@ Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 	}
 	
 	_last_capture_regions.remove (region);
+}
+
+void
+Diskstream::playlist_ranges_moved (Evoral::RangeMoveList const & movements)
+{
+	if (Config->get_automation_follows_regions () == false) {
+		return;
+	}
+	
+	/* move gain automation */
+	boost::shared_ptr<AutomationList> gain_alist = _io->gain_control()->alist();
+	XMLNode & before = gain_alist->get_state ();
+	gain_alist->move_ranges (movements);
+	_session.add_command (
+		new MementoCommand<AutomationList> (
+			*gain_alist.get(), &before, &gain_alist->get_state ()
+			)
+		);
+	
+	/* move panner automation */
+	Panner & p = _io->panner ();
+	for (uint32_t i = 0; i < p.npanners (); ++i) {
+
+		boost::shared_ptr<AutomationList> pan_alist = p.streampanner(i).pan_control()->alist();
+		XMLNode & before = pan_alist->get_state ();
+		pan_alist->move_ranges (movements);
+		_session.add_command (
+			new MementoCommand<AutomationList> (
+				*pan_alist.get(), &before, &pan_alist->get_state ()
+				)
+			);
+	}
+
+	/* move processor automation */
+	/* XXX: ewww */
+	Route * route = dynamic_cast<Route*> (_io);
+	if (route) {
+		route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Diskstream::move_processor_automation), movements));
+	}
+}
+
+void
+Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, Evoral::RangeMoveList const & movements)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor) {
+		return;
+	}
+	
+	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
+
+	for (set<Evoral::Parameter>::iterator i = a.begin (); i != a.end (); ++i) {
+		boost::shared_ptr<AutomationList> al = processor->automation_control(*i)->alist();
+		XMLNode & before = al->get_state ();
+		al->move_ranges (movements);
+		_session.add_command (
+			new MementoCommand<AutomationList> (
+				*al.get(), &before, &al->get_state ()
+				)
+			);
+	}
 }
 

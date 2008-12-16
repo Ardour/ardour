@@ -1297,12 +1297,17 @@ MixerStrip::map_frozen ()
 void
 MixerStrip::hide_redirect_editors ()
 {
-	_route->foreach_processor (this, &MixerStrip::hide_processor_editor);
+	_route->foreach_processor (mem_fun (*this, &MixerStrip::hide_processor_editor));
 }
 
 void
-MixerStrip::hide_processor_editor (boost::shared_ptr<Processor> processor)
+MixerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 {
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor) {
+		return;
+	}
+	
 	void* gui = processor->get_gui ();
 	
 	if (gui) {

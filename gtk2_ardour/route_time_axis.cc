@@ -286,8 +286,8 @@ RouteTimeAxisView::post_construct ()
 	update_diskstream_display ();
 
 	subplugin_menu.items().clear ();
-	_route->foreach_processor (this, &RouteTimeAxisView::add_processor_to_subplugin_menu);
-	_route->foreach_processor (this, &RouteTimeAxisView::add_existing_processor_automation_curves);
+	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
+	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 	reset_processor_automation_curves ();
 }
 
@@ -1920,8 +1920,13 @@ RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::Process
 }
 
 void
-RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<Processor> processor)
+RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Processor> p)
 {
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor) {
+		return;
+	}
+	
 	set<Evoral::Parameter> s;
 	boost::shared_ptr<AutomationLine> al;
 
@@ -1977,8 +1982,13 @@ RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_p
 
 
 void
-RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor> processor)
+RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p)
 {
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor) {
+		return;
+	}
+	
 	using namespace Menu_Helpers;
 	ProcessorAutomationInfo *rai;
 	list<ProcessorAutomationInfo*>::iterator x;
@@ -2108,8 +2118,8 @@ RouteTimeAxisView::processors_changed ()
 
 	subplugin_menu.items().clear ();
 
-	_route->foreach_processor (this, &RouteTimeAxisView::add_processor_to_subplugin_menu);
-	_route->foreach_processor (this, &RouteTimeAxisView::add_existing_processor_automation_curves);
+	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
+	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ) {
 

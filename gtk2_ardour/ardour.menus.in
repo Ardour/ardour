@@ -567,6 +567,7 @@
                	     <menuitem action='RubberbandingSnapsToGrid'/>
                	     <menuitem action='AutoAnalyseAudio'/>
                	     <menuitem action='toggle-region-fades'/>
+                     <menuitem action='automation-follows-regions'/>
 		</menu>
          </menu>
 	 <menu name='Help' action='Help'>

@@ -390,16 +390,10 @@ ControlList::erase_range (double start, double endt)
 
 	{
 		Glib::Mutex::Lock lm (_lock);
-		ControlEvent cp (start, 0.0f);
-		iterator s;
-		iterator e;
+		erased = erase_range_internal (start, endt, _events);
 
-		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
-			cp.when = endt;
-			e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
-			_events.erase (s, e);
+		if (erased) {
 			reposition_for_rt_add (0);
-			erased = true;
 			mark_dirty ();
 		}
 		
@@ -410,36 +404,22 @@ ControlList::erase_range (double start, double endt)
 	}
 }
 
-void
-ControlList::move_range (iterator start, iterator end, double xdelta, double ydelta)
+bool
+ControlList::erase_range_internal (double start, double endt, EventList & events)
 {
-	/* note: we assume higher level logic is in place to avoid this
-	   reordering the time-order of control events in the list. ie. all
-	   points after end are later than (end)->when.
-	*/
+	bool erased = false;
+	ControlEvent cp (start, 0.0f);
+	iterator s;
+	iterator e;
 
-	{
-		Glib::Mutex::Lock lm (_lock);
-
-		while (start != end) {
-			(*start)->when += xdelta;
-			(*start)->value += ydelta;
-			if (isnan ((*start)->value)) {
-				abort ();
-			}
-			++start;
-		}
-
-		if (!_frozen) {
-			_events.sort (event_time_less_than);
-		} else {
-			_sort_pending = true;
-		}
-
-		mark_dirty ();
+	if ((s = lower_bound (events.begin(), events.end(), &cp, time_comparator)) != events.end()) {
+		cp.when = endt;
+		e = upper_bound (events.begin(), events.end(), &cp, time_comparator);
+		events.erase (s, e);
+		erased = true;
 	}
 
-	maybe_signal_changed ();
+	return erased;
 }
 
 void
@@ -1313,6 +1293,52 @@ ControlList::paste (ControlList& alist, double pos, float times)
 
 	maybe_signal_changed ();
 	return true;
+}
+
+/** Move automation around according to a list of region movements */
+void
+ControlList::move_ranges (RangeMoveList const & movements)
+{
+	{
+		Glib::Mutex::Lock lm (_lock);
+
+		/* a copy of the events list before we started moving stuff around */
+		EventList old_events = _events;
+
+		/* clear the source and destination ranges in the new list */
+		for (RangeMoveList::const_iterator i = movements.begin (); i != movements.end (); ++i) {
+
+			erase_range_internal (i->from, i->from + i->length, _events);
+			erase_range_internal (i->to, i->to + i->length, _events);
+
+		}
+
+		/* copy the events into the new list */
+		for (RangeMoveList::const_iterator i = movements.begin (); i != movements.end (); ++i) {
+			iterator j = old_events.begin ();
+			EventTime const limit = i->from + i->length;
+			EventTime const dx = i->to - i->from;
+			while (j != old_events.end () && (*j)->when <= limit) {
+				if ((*j)->when >= i->from) {
+					ControlEvent* ev = new ControlEvent (**j);
+					ev->when += dx;
+					_events.push_back (ev);
+				}
+				++j;
+			}
+		}
+
+		if (!_frozen) {
+			_events.sort (event_time_less_than);
+		} else {
+			_sort_pending = true;
+		}
+
+		reposition_for_rt_add (0);
+		mark_dirty ();
+	}
+
+	maybe_signal_changed ();
 }
 
 } // namespace Evoral

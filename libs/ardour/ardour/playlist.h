@@ -35,7 +35,9 @@
 
 #include <pbd/undo.h>
 #include <pbd/stateful.h> 
-#include <pbd/statefuldestructible.h> 
+#include <pbd/statefuldestructible.h>
+
+#include <evoral/types.hpp>
 
 #include <ardour/ardour.h>
 #include <ardour/session_object.h>
@@ -126,6 +128,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	sigc::signal<void>      Modified;
 	sigc::signal<void>      NameChanged;
 	sigc::signal<void>      LengthChanged;
+	sigc::signal<void, Evoral::RangeMoveList const &> RangesMoved;
 
 	static string bump_name (string old_name, Session&);
 
@@ -177,6 +180,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 
 	RegionList       regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
+	std::list<sigc::connection> region_state_changed_connections;
 	DataType        _type;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
@@ -186,6 +190,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	RegionList       pending_bounds;
 	bool             pending_modified;
 	bool             pending_length;
+	Evoral::RangeMoveList pending_range_moves;
 	bool             save_on_thaw;
 	string           last_save_reason;
 	uint32_t         in_set_state;
@@ -227,6 +232,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	void notify_layering_changed ();
 	void notify_modified ();
 	void notify_state_changed (Change);
+	void notify_region_moved (boost::shared_ptr<Region>);
 
 	void mark_session_dirty();
 

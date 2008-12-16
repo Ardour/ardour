@@ -1102,12 +1102,6 @@ AutomationLine::change_model (AutomationList::iterator i, double x, double y)
 }
 
 void
-AutomationLine::change_model_range (AutomationList::iterator start, AutomationList::iterator end, double xdelta, float ydelta)
-{
-	alist->move_range (start, end, xdelta, ydelta);
-}
-
-void
 AutomationLine::set_list(boost::shared_ptr<ARDOUR::AutomationList> list)
 {
 	alist = list;

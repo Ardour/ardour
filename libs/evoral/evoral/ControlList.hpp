@@ -120,7 +120,7 @@ public:
 	void erase_range (double start, double end);
 	void erase (iterator);
 	void erase (iterator, iterator);
-	void move_range (iterator start, iterator end, double, double);
+	void move_ranges (RangeMoveList const &);
 	void modify (iterator, double, double);
 
 	boost::shared_ptr<ControlList> cut (double, double);
@@ -241,6 +241,7 @@ protected:
 	bool rt_safe_earliest_event_linear_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
 
 	boost::shared_ptr<ControlList> cut_copy_clear (double, double, int op);
+	bool erase_range_internal (double start, double end, EventList &);
 
 	virtual void maybe_signal_changed ();
 	

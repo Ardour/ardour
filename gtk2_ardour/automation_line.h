@@ -162,7 +162,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void sync_model_with_view_line (uint32_t, uint32_t);
 	
 	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);
-	virtual void change_model_range (ARDOUR::AutomationList::iterator,ARDOUR::AutomationList::iterator, double delta, float ydelta);
 
 	void reset_callback (const Evoral::ControlList&);
 	void list_changed ();

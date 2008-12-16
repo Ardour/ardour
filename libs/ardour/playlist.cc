@@ -361,6 +361,25 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 }
 
 void
+Playlist::notify_region_moved (boost::shared_ptr<Region> r)
+{
+	Evoral::RangeMove const move (r->last_position (), r->length (), r->position ());
+			
+	if (holding_state ()) {
+
+		pending_range_moves.push_back (move);
+		
+	} else {
+
+		Evoral::RangeMoveList m;
+		m.push_back (move);
+		RangesMoved (m);
+
+	}
+
+}
+
+void
 Playlist::notify_region_added (boost::shared_ptr<Region> r)
 {
 	/* the length change might not be true, but we have to act
@@ -452,9 +471,14 @@ Playlist::flush_notifications ()
 		check_dependents (*s, false);
 	}
 
+	if (!pending_range_moves.empty ()) {
+		RangesMoved (pending_range_moves);
+	}
+
 	pending_adds.clear ();
 	pending_removes.clear ();
 	pending_bounds.clear ();
+	pending_range_moves.clear ();
 
 	in_flush = false;
 }
@@ -559,8 +583,10 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 		}
 	}
 
-	region->StateChanged.connect (sigc::bind (mem_fun (this, &Playlist::region_changed_proxy), 
-						  boost::weak_ptr<Region> (region)));
+	region_state_changed_connections.push_back (
+		region->StateChanged.connect (sigc::bind (mem_fun (this, &Playlist::region_changed_proxy), 
+							  boost::weak_ptr<Region> (region)))
+		);
 
 	return true;
 }
@@ -1288,20 +1314,22 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 		return false;
 	}
 
-	{
-		if (what_changed & BoundsChanged) {
-			region_bounds_changed (what_changed, region);
-			save = !(_splicing || _nudging);
-		}
+	if (what_changed & BoundsChanged) {
+		region_bounds_changed (what_changed, region);
+		save = !(_splicing || _nudging);
+	}
 		
-		if ((what_changed & our_interests) && 
-		    !(what_changed & Change (ARDOUR::PositionChanged|ARDOUR::LengthChanged))) {
-			check_dependents (region, false);
-		}
+	if ((what_changed & our_interests) && 
+	    !(what_changed & Change (ARDOUR::PositionChanged|ARDOUR::LengthChanged))) {
+		check_dependents (region, false);
+	}
+
+	if (what_changed & Change (ARDOUR::PositionChanged)) {
+		notify_region_moved (region);
+	}
 		
-		if (what_changed & our_interests) {
-			save = true;
-		}
+	if (what_changed & our_interests) {
+		save = true;
 	}
 
 	return save;
@@ -1320,6 +1348,17 @@ Playlist::clear (bool with_signals)
 {
 	{ 
 		RegionLock rl (this);
+
+		for (
+			std::list<sigc::connection>::iterator i = region_state_changed_connections.begin ();
+			i != region_state_changed_connections.end ();
+			++i
+			) {
+
+			i->disconnect ();
+			
+		}
+		     
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			pending_removes.insert (*i);
 		}

@@ -356,6 +356,7 @@ class Editor : public PublicEditor
 	void update_layering_model ();
 	
 	void toggle_link_region_and_track_selection ();
+	void toggle_automation_follows_regions ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 

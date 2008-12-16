@@ -20,6 +20,7 @@
 #define EVORAL_TYPES_HPP
 
 #include <stdint.h>
+#include <list>
 
 namespace Evoral {
 
@@ -40,6 +41,16 @@ typedef double EventLength;
 
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;
+
+/** Type to describe the movement of a time range */	
+struct RangeMove {
+	RangeMove (EventTime f, FrameTime l, EventTime t) : from (f), length (l), to (t) {}
+	EventTime from;   ///< start of the range
+	FrameTime length; ///< length of the range
+	EventTime to;     ///< new start of the range
+};
+
+typedef std::list<RangeMove> RangeMoveList;
 
 } // namespace Evoral
 
