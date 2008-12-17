@@ -78,7 +78,28 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 void
 Editor::kbd_mute_unmute_region ()
 {
-	if (entered_regionview) {
+	if (!selection->regions.empty ()) {
+
+		if (selection->regions.size() > 1) {
+			begin_reversible_command (_("mute regions"));
+		} else {
+			begin_reversible_command (_("mute region"));
+		}
+
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+
+			XMLNode &before = (*i)->region()->playlist()->get_state ();
+			(*i)->region()->set_muted (!(*i)->region()->muted ());
+			XMLNode &after = (*i)->region()->playlist()->get_state ();
+
+			session->add_command (new MementoCommand<ARDOUR::Playlist>(*((*i)->region()->playlist()), &before, &after));
+
+		}
+
+		commit_reversible_command ();
+
+	} else if (entered_regionview) {
+		
 		begin_reversible_command (_("mute region"));
 		XMLNode &before = entered_regionview->region()->playlist()->get_state();
 		
@@ -87,6 +108,7 @@ Editor::kbd_mute_unmute_region ()
 		XMLNode &after = entered_regionview->region()->playlist()->get_state();
 		session->add_command (new MementoCommand<ARDOUR::Playlist>(*(entered_regionview->region()->playlist()), &before, &after));
 		commit_reversible_command();
+		
 	}
 }
 
