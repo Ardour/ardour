@@ -396,26 +396,11 @@ ARDOUR_UI::~ARDOUR_UI ()
 {
 	save_ardour_state ();
 
-	if (keyboard) {
-		delete keyboard;
-	}
-
-	if (editor) {
-		delete editor;
-	}
-
-	if (mixer) {
-		delete mixer;
-	}
-
-	if (add_route_dialog) {
-		delete add_route_dialog;
-	}
-
-
-	if (new_session_dialog) {
-		delete new_session_dialog;
-	}
+	delete keyboard;
+	delete editor;
+	delete mixer;
+	delete add_route_dialog;
+	delete new_session_dialog;
 }
 
 void

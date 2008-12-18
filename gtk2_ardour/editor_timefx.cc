@@ -227,9 +227,7 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
 int
 Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 {
-	if (current_timefx != 0) {
-		delete current_timefx;
-	}
+	delete current_timefx;
 
 	current_timefx = new TimeFXDialog (*this, pitching);
 

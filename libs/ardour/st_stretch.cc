@@ -195,13 +195,8 @@ Stretch::run (boost::shared_ptr<Region> a_region)
 
   out:
 
-	if (gain_buffer) {
-		delete [] gain_buffer;
-	}
-
-	if (buffer) {
-		delete [] buffer;
-	}
+	delete [] gain_buffer;
+	delete [] buffer;
 
 	if (ret || tsr.cancel) {
 		for (SourceList::iterator si = nsrcs.begin(); si != nsrcs.end(); ++si) {

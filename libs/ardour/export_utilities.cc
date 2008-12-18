@@ -84,9 +84,9 @@ SampleRateConverter::~SampleRateConverter ()
 	if (src_state) {
 		src_delete (src_state);
 	}
-	if (data_out) {
-		delete [] data_out;
-	}
+
+	delete [] data_out;
+
 	if (leftover_data) {
 		free (leftover_data);
 	}
@@ -105,9 +105,8 @@ SampleRateConverter::process (float * data, nframes_t frames)
 	nframes_t out_samples_max = (nframes_t) ceil (frames * src_data.src_ratio * channels);
 	if (data_out_size < out_samples_max) {
 
-		if (data_out) {
-			delete[] data_out;
-		}
+		delete[] data_out;
+
 		data_out = new float[out_samples_max];
 		src_data.data_out = data_out;
 		
@@ -233,9 +232,8 @@ SampleFormatConverter<TOut>::~SampleFormatConverter ()
 	if (dither) {
 		gdither_free (dither);
 	}
-	if (data_out) {
-		delete[] data_out;
-	}
+
+	delete[] data_out;
 }
 
 template <typename TOut>
@@ -246,9 +244,9 @@ SampleFormatConverter<TOut>::process (float * data, nframes_t frames)
 	
 	size_t data_size = channels * frames * sizeof (TOut);
 	if (data_size  > data_out_size) {
-		if (data_out) {
-			delete[] data_out;
-		}
+
+		delete[] data_out;
+
 		data_out = new TOut[data_size];
 		data_out_size = data_size;
 	}

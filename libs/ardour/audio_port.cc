@@ -68,10 +68,8 @@ AudioPort::AudioPort (const std::string& name, Flags flags, bool external, nfram
 
 AudioPort::~AudioPort()
 {
-	if (_ext_port) {
-		delete _ext_port;
-		_ext_port = 0;
-	}
+	delete _ext_port;
+	_ext_port = 0;
 }
 
 void

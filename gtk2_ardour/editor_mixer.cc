@@ -400,10 +400,8 @@ Editor::session_going_away ()
 	hide_measures ();
 	clear_marker_display ();
 
-	if (current_bbt_points) {
-		delete current_bbt_points;
-		current_bbt_points = 0;
-	}
+	delete current_bbt_points;
+	current_bbt_points = 0;
 
 	/* mixer strip will be deleted all by itself 
 	   when its route is deleted.

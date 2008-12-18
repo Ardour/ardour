@@ -2470,33 +2470,21 @@ AudioDiskstream::ChannelInfo::~ChannelInfo ()
 		write_source.reset ();
 	}
 		
-	if (speed_buffer) {
-		delete [] speed_buffer;
-		speed_buffer = 0;
-	}
+	delete [] speed_buffer;
+	speed_buffer = 0;
 
-	if (playback_wrap_buffer) {
-		delete [] playback_wrap_buffer;
-		playback_wrap_buffer = 0;
-	}
+	delete [] playback_wrap_buffer;
+	playback_wrap_buffer = 0;
 
-	if (capture_wrap_buffer) {
-		delete [] capture_wrap_buffer;
-		capture_wrap_buffer = 0;
-	}
+	delete [] capture_wrap_buffer;
+	capture_wrap_buffer = 0;
 	
-	if (playback_buf) {
-		delete playback_buf;
-		playback_buf = 0;
-	}
+	delete playback_buf;
+	playback_buf = 0;
 
-	if (capture_buf) {
-		delete capture_buf;
-		capture_buf = 0;
-	}
+	delete capture_buf;
+	capture_buf = 0;
 
-	if (capture_transition_buf) {
-		delete capture_transition_buf;
-		capture_transition_buf = 0;
-	}
+	delete capture_transition_buf;
+	capture_transition_buf = 0;
 }

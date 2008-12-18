@@ -181,9 +181,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 
 RhythmFerret::~RhythmFerret()
 {
-	if (logo) {
-		delete logo;
-	}
+	delete logo;
 }
 
 void

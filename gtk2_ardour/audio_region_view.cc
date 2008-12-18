@@ -251,9 +251,7 @@ AudioRegionView::~AudioRegionView ()
 
 	/* all waveviews etc will be destroyed when the group is destroyed */
 
-	if (gain_line) {
-		delete gain_line;
-	}
+	delete gain_line;
 }
 
 boost::shared_ptr<ARDOUR::AudioRegion>

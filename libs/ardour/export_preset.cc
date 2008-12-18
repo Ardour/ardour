@@ -47,9 +47,7 @@ ExportPreset::ExportPreset (string filename, Session & s) :
 
 ExportPreset::~ExportPreset ()
 {
-	if (local) {
-		delete local;
-	}
+	delete local;
 }
 
 void

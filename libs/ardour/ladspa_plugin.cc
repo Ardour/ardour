@@ -149,13 +149,8 @@ LadspaPlugin::~LadspaPlugin ()
 
         // dlclose (module);
 
-	if (_control_data) {
-		delete [] _control_data;
-	}
-
-	if (_shadow_data) {
-		delete [] _shadow_data;
-	}
+	delete [] _control_data;
+	delete [] _shadow_data;
 }
 
 string

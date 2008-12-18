@@ -95,7 +95,7 @@ LocationImporter::LocationImporter (XMLTree const & source, Session & session, L
 
 LocationImporter::~LocationImporter ()
 {
-	if (!queued() && location) {
+	if (!queued()) {
 		delete location;
 	}
 }
@@ -178,10 +178,8 @@ LocationImporter::_prepare_move ()
 void
 LocationImporter::_cancel_move ()
 {	
-	if (location) {
-		delete location;
-		location = 0;
-	}
+	delete location;
+	location = 0;
 }
 
 void

@@ -231,9 +231,9 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 		throw;
 	}
 
-	if (tmp1) delete tmp1;
-	if (tmp2) delete tmp1;
-	if (tmp3) delete tmp1;
+	delete tmp1;
+	delete tmp2;
+	delete tmp3;
 		
 	_buffer_size = size;
 	_signal_buffer_size = signal_size;

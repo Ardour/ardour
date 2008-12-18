@@ -169,10 +169,8 @@ PortMatrix::clear ()
 	
 	_side_vbox.children().clear ();
 
-	if (_side_vbox_pad) {
-		delete _side_vbox_pad;
-		_side_vbox_pad = 0;
-	}
+	delete _side_vbox_pad;
+	_side_vbox_pad = 0;
 
 	for (std::vector<PortGroupUI*>::iterator i = _port_group_ui.begin(); i != _port_group_ui.end(); ++i) {
 		_visibility_checkbutton_box.remove ((*i)->get_visibility_checkbutton());

@@ -1338,10 +1338,8 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 
 	/* note: derived classes set flags */
 
-	if (_extra_xml) {
-		delete _extra_xml;
-		_extra_xml = 0;
-	}
+	delete _extra_xml;
+	_extra_xml = 0;
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		

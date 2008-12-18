@@ -885,10 +885,8 @@ Editor::~Editor()
 	}
 #endif
 
-	if (track_canvas) {
-		delete track_canvas;
-		track_canvas = 0;
-	}
+	delete track_canvas;
+	track_canvas = 0;
 }
 
 void
@@ -5141,9 +5139,7 @@ Editor::first_idle ()
 	// first idle adds route children (automation tracks), so we need to redisplay here
 	redisplay_route_list();
 	
-	if (dialog) {
-		delete dialog;
-	}
+	delete dialog;
 
 	_have_idled = true;
 }

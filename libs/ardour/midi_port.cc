@@ -52,10 +52,8 @@ MidiPort::MidiPort (const std::string& name, Flags flags, bool external, nframes
 
 MidiPort::~MidiPort()
 {
-	if (_ext_port) {
-		delete _ext_port;
-		_ext_port = 0;
-	}
+	delete _ext_port;
+	_ext_port = 0;
 }
 
 void

@@ -36,7 +36,7 @@ BaseMidiPort::BaseMidiPort (const std::string& name, Flags flags)
 
 BaseMidiPort::~BaseMidiPort()
 {
-	if (_own_buffer && _buffer) {
+	if (_own_buffer) {
 		delete _buffer;
 	}
 }

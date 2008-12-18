@@ -2274,10 +2274,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 
 	nlist = node.children();
 
-	if (deferred_state) {
-		delete deferred_state;
-	}
-
+	delete deferred_state;
 	deferred_state = new XMLNode(X_("deferred state"));
 
 	/* set parent class properties before anything else */
@@ -2521,10 +2518,8 @@ Route::set_control_outs (const vector<string>& ports)
 	vector<string>::const_iterator i;
 	size_t limit;
 	
- 	if (_control_outs) {
- 		delete _control_outs;
- 		_control_outs = 0;
- 	}
+	delete _control_outs;
+	_control_outs = 0;
 
 	if (is_control() || is_master()) {
 		/* no control outs for these two special busses */

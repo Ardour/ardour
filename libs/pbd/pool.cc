@@ -91,7 +91,7 @@ MultiAllocSingleReleasePool::MultiAllocSingleReleasePool (string n, unsigned lon
 
 MultiAllocSingleReleasePool::~MultiAllocSingleReleasePool ()
 {
-    if(m_lock) delete m_lock;
+    delete m_lock;
 }
 
 SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned long isize, unsigned long nitems) 
@@ -102,7 +102,7 @@ SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned lon
 
 SingleAllocMultiReleasePool::~SingleAllocMultiReleasePool ()
 {
-    if(m_lock) delete m_lock;
+    delete m_lock;
 }
 
 void*

@@ -97,9 +97,7 @@ AudioSource::~AudioSource ()
 		::close (peakfile);
 	}
 
-	if (peak_leftovers) {
-		delete [] peak_leftovers;
-	}
+	delete [] peak_leftovers;
 }
 
 XMLNode&
@@ -573,13 +571,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t s
 		close (_peakfile);
 	}
 
-	if (staging) {
-		delete [] staging;
-	} 
-
-	if (raw_staging) {
-		delete [] raw_staging;
-	}
+	delete [] staging;
+	delete [] raw_staging;
 
 #ifdef DEBUG_READ_PEAKS
 	cerr << "RP DONE\n";
@@ -656,9 +649,7 @@ AudioSource::build_peaks_from_scratch ()
 		unlink (peakpath.c_str());
 	}
 
-	if (buf) {
-		delete [] buf;
-	}
+	delete [] buf;
 
 	return ret;
 }
@@ -862,9 +853,8 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 
   out:
 	delete [] peakbuf;
-	if (buf2) {
-		delete [] buf2;
-	}
+	delete [] buf2;
+
 	return ret;
 }
 

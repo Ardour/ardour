@@ -592,9 +592,7 @@ SoundFileBrowser::set_session (Session* s)
 void
 SoundFileBrowser::add_gain_meter ()
 {
-	if (gm) {
-		delete gm;
-	}
+	delete gm;
 
 	gm = new GainMeter (*session);
 	gm->set_io (session->the_auditioner());

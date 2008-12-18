@@ -205,25 +205,17 @@
 		 delete (*i);
 	 }
 
-	 if (selection_group) {
-		 delete selection_group;
-		 selection_group = 0;
-	 }
+	 delete selection_group;
+	 selection_group = 0;
 
-	 if (canvas_background) {
-		 delete canvas_background;
-		 canvas_background = 0;
-	 }
+	 delete canvas_background;
+	 canvas_background = 0;
 
-	 if (canvas_display) {
-		 delete canvas_display;
-		 canvas_display = 0;
-	 }
+	 delete canvas_display;
+	 canvas_display = 0;
 
-	 if (display_menu) {
-		 delete display_menu;
-		 display_menu = 0;
-	 }
+	 delete display_menu;
+	 display_menu = 0;
  }
 
  guint32

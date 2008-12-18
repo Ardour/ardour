@@ -160,10 +160,8 @@ Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
 	}
 	next_beat.ticks = 0;
 	
-	if (current_bbt_points) {
-		delete current_bbt_points;
-		current_bbt_points = 0;
-	}
+	delete current_bbt_points;
+	current_bbt_points = 0;
 
 	current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat) + 1);
 }

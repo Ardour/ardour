@@ -120,15 +120,11 @@ RouteUI::reset ()
 {
 	connections.clear ();
 
-	if (solo_menu) {
-		delete solo_menu;
-		solo_menu = 0;
-	}
+	delete solo_menu;
+	solo_menu = 0;
 
-	if (mute_menu) {
-		delete mute_menu;
-		mute_menu = 0;
-	}
+	delete mute_menu;
+	mute_menu = 0;
 	
 	if (xml_node) {
 		/* do not delete the node - its owned by the route */

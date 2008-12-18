@@ -50,8 +50,7 @@ CanvasNoteEvent::~CanvasNoteEvent()
 		delete _text;
 	}
 	
-	if (_channel_selector_widget)
-		delete _channel_selector_widget;
+	delete _channel_selector_widget;
 }
 
 void 

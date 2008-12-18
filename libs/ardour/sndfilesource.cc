@@ -259,13 +259,8 @@ SndFileSource::~SndFileSource ()
 		touch_peakfile ();
 	}
 
-	if (_broadcast_info) {
-		delete _broadcast_info;
-	}
-
-	if (xfade_buf) {
-		delete [] xfade_buf;
-	}
+	delete _broadcast_info;
+	delete [] xfade_buf;
 }
 
 float
@@ -782,13 +777,8 @@ SndFileSource::setup_standard_crossfades (nframes_t rate)
 
 	xfade_frames = (nframes_t) floor ((Config->get_destructive_xfade_msecs () / 1000.0) * rate);
 
-	if (out_coefficient) {
-		delete [] out_coefficient;
-	}
-
-	if (in_coefficient) {
-		delete [] in_coefficient;
-	}
+	delete [] out_coefficient;
+	delete [] in_coefficient;
 
 	out_coefficient = new gain_t[xfade_frames];
 	in_coefficient = new gain_t[xfade_frames];

@@ -6280,9 +6280,7 @@ Editor::save_visual_state (uint32_t n)
 		visual_states.push_back (0);
 	}
 
-	if (visual_states[n] != 0) {
-		delete visual_states[n];
-	}
+	delete visual_states[n];
 
 	visual_states[n] = current_visual_state (true);
 	gdk_beep ();

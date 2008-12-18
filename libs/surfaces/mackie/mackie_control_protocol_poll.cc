@@ -93,11 +93,7 @@ void MackieControlProtocol::update_ports()
 		if ( _ports_changed )
 		{
 			// create new pollfd structures
-			if ( pfd != 0 )
-			{
-				delete[] pfd;
-				pfd = 0;
-			}
+			delete[] pfd;
 			pfd = new pollfd[_ports.size()];
 #ifdef DEBUG
 			cout << "pfd: " << pfd << endl;

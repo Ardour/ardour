@@ -91,17 +91,11 @@ MarkerTimeAxisView::~MarkerTimeAxisView()
 		iter = next ;
 	}
 	
-	if(canvas_rect)
-	{
-		delete canvas_rect;
-		canvas_rect = 0 ;
-	}
-	
-	if(canvas_group)
-	{
-		delete canvas_group;
-		canvas_group = 0 ;
-	}
+	delete canvas_rect;
+	canvas_rect = 0 ;
+
+	delete canvas_group;
+	canvas_group = 0 ;
 }
 
 

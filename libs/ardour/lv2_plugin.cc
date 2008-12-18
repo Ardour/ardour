@@ -165,13 +165,8 @@ LV2Plugin::~LV2Plugin ()
 	slv2_value_free(_name);
 	slv2_value_free(_author);
 
-	if (_control_data) {
-		delete [] _control_data;
-	}
-
-	if (_shadow_data) {
-		delete [] _shadow_data;
-	}
+	delete [] _control_data;
+	delete [] _shadow_data;
 }
 
 string

@@ -232,9 +232,7 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 		}
 	}
 	
-	if (dptr) {
-		delete dptr;
-	}
+	delete dptr;
 }
 
 void

@@ -39,7 +39,7 @@ BaseAudioPort::BaseAudioPort (const std::string& name, Flags flgs)
 
 BaseAudioPort::~BaseAudioPort ()
 {
-	if (_own_buffer && _buffer) {
+	if (_own_buffer) {
 		delete _buffer;
 	}
 }

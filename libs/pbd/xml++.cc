@@ -39,9 +39,7 @@ XMLTree::XMLTree(const XMLTree * from)
 
 XMLTree::~XMLTree()
 {
-	if (_root) {
-		delete _root;
-	}
+	delete _root;
 }
 
 int 
@@ -63,10 +61,9 @@ XMLTree::read_internal(bool validate)
 {
 	//shouldnt be used anywhere ATM, remove if so!
 	assert(!validate);
-	if (_root) {
-		delete _root;
-		_root = 0;
-	}
+
+	delete _root;
+	_root = 0;
 	
 	xmlParserCtxtPtr ctxt; /* the parser context */
 	xmlDocPtr doc; /* the resulting document tree */
@@ -119,10 +116,8 @@ XMLTree::read_buffer(const string & buffer)
 	
 	_filename = "";
 	
-	if (_root) {
-		delete _root;
-		_root = 0;
-	}
+	delete _root;
+	_root = 0;
 	
 	doc = xmlParseMemory((char *) buffer.c_str(), buffer.length());
 	if (!doc) {

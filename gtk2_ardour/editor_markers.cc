@@ -247,13 +247,8 @@ void Editor::ensure_cd_marker_updated (LocationMarkers * lam, Location * locatio
 
 Editor::LocationMarkers::~LocationMarkers ()
 {
-	if (start) {
-		delete start;
-	}
-
-	if (end) {
-		delete end;
-	}
+	delete start;
+	delete end;
 }
 
 Editor::LocationMarkers *

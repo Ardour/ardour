@@ -116,9 +116,7 @@ Reverse::run (boost::shared_ptr<Region> r)
 
   out:
 
-	if (buf) {
-		delete [] buf;
-	}
+	delete [] buf;
 
 	if (ret) {
 		for (si = nsrcs.begin(); si != nsrcs.end(); ++si) {

@@ -139,7 +139,7 @@ Session::setup_click_sounds (int which)
 
 	if ((which == 0 || which == 1)) {
 		
-		if (click_data && click_data != default_click) {
+		if (click_data != default_click) {
 			delete [] click_data;
 			click_data = 0;
 		}
@@ -178,7 +178,7 @@ Session::setup_click_sounds (int which)
 		
 	if ((which == 0 || which == -1)) {
 
-		if (click_emphasis_data && click_emphasis_data != default_click_emphasis) {
+		if (click_emphasis_data != default_click_emphasis) {
 			delete [] click_emphasis_data;
 			click_emphasis_data = 0;
 		}

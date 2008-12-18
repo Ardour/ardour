@@ -78,9 +78,7 @@ LevelMeter::on_theme_changed()
 LevelMeter::~LevelMeter ()
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
-		if ((*i).meter) {
-			delete (*i).meter;
-		}
+		delete (*i).meter;
 	}
 }
 

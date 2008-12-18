@@ -768,10 +768,8 @@ Session::restore_state (string snapshot_name)
 int
 Session::load_state (string snapshot_name)
 {
-	if (state_tree) {
-		delete state_tree;
-		state_tree = 0;
-	}
+	delete state_tree;
+	state_tree = 0;
 
 	state_was_pending = false;
 

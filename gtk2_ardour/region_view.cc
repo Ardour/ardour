@@ -179,9 +179,7 @@ RegionView::~RegionView ()
 		delete *g;
 	}
 
-	if (editor) {
-		delete editor;
-	}
+	delete editor;
 }
 
 gint

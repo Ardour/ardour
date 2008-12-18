@@ -159,9 +159,7 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 		g_rename (tmp_path.c_str(), path.c_str());
 	}
 
-	if (data) {
-		delete [] data;
-	}
+	delete [] data;
 
 	return ret;
 }

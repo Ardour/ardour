@@ -134,15 +134,11 @@ PannerUI::set_io (boost::shared_ptr<IO> io)
 {
  	connections.clear ();
 	
- 	if (pan_astyle_menu) {
- 		delete pan_astyle_menu;
- 		pan_astyle_menu = 0;
- 	}
- 
- 	if (pan_astate_menu) {
- 		delete pan_astate_menu;
- 		pan_astate_menu = 0;
- 	}
+	delete pan_astyle_menu;
+	pan_astyle_menu = 0;
+
+	delete pan_astate_menu;
+	pan_astate_menu = 0;
  			
  	_io = io;
  
@@ -150,10 +146,8 @@ PannerUI::set_io (boost::shared_ptr<IO> io)
  	connections.push_back (_io->panner().LinkStateChanged.connect (mem_fun(*this, &PannerUI::update_pan_linkage)));
  	connections.push_back (_io->panner().StateChanged.connect (mem_fun(*this, &PannerUI::update_pan_state)));
  
- 	if (panner) {
- 		delete panner;
- 		panner = 0;
- 	}
+	delete panner;
+	panner = 0;
  
 	setup_pan ();
 
@@ -305,25 +299,11 @@ PannerUI::~PannerUI ()
 		delete (*i);
 	}
 
-	if (panner) {
-		delete panner;
-	}
-
-	if (big_window) {
-		delete big_window;
-	}
-	
-	if (pan_menu) {
-		delete pan_menu;
-	}
-	
-	if (pan_astyle_menu) {
-		delete pan_astyle_menu;
-	}
-	
-	if (pan_astate_menu) {
-		delete pan_astate_menu;
-	}
+	delete panner;
+	delete big_window;
+	delete pan_menu;
+	delete pan_astyle_menu;
+	delete pan_astate_menu;
 }
 
 

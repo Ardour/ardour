@@ -358,9 +358,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 
   out:
 
-	if (gain_buffer) {
-		delete [] gain_buffer;
-	}
+	delete [] gain_buffer;
 
 	if (buffers) {
 		for (uint32_t i = 0; i < channels; ++i) {

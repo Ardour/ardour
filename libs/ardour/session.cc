@@ -1336,9 +1336,7 @@ Session::set_block_size (nframes_t nframes)
 
 		ensure_buffers(_scratch_buffers->available());
 
-		if (_gain_automation_buffer) {
-			delete [] _gain_automation_buffer;
-		}
+		delete [] _gain_automation_buffer;
 		_gain_automation_buffer = new gain_t[nframes];
 
 		allocate_pan_automation_buffers (nframes, _npan_buffers, true);

@@ -107,24 +107,15 @@ ImageFrameTimeAxis::~ImageFrameTimeAxis ()
 		iter = next ;
 	}
 	
-	if(image_action_menu)
-	{
-		delete image_action_menu ;
-		image_action_menu = 0 ;
-	}
+	delete image_action_menu ;
+	image_action_menu = 0 ;
 	
-	if (selection_group)
-	{
-		delete selection_group;
-		selection_group = 0 ;
-	}
+	delete selection_group;
+	selection_group = 0 ;
 	
 	// Destroy our Axis View helper
-	if(view)
-	{
-		delete view ;
-		view = 0 ;
-	}
+	delete view ;
+	view = 0 ;
 }
 
 //---------------------------------------------------------------------------------------//

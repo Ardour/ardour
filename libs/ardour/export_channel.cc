@@ -113,13 +113,8 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 
 RegionExportChannelFactory::~RegionExportChannelFactory ()
 {
-	if (mixdown_buffer) {
-		delete[] mixdown_buffer;
-	}
-	
-	if (gain_buffer) {
-		delete[] gain_buffer;
-	}
+	delete[] mixdown_buffer;
+	delete[] gain_buffer;
 }
 
 ExportChannelPtr

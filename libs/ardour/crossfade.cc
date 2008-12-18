@@ -51,15 +51,11 @@ Sample* Crossfade::crossfade_buffer_in = 0;
 void
 Crossfade::set_buffer_size (nframes_t sz)
 {
-	if (crossfade_buffer_out) {
-		delete [] crossfade_buffer_out;
-		crossfade_buffer_out = 0;
-	}
+	delete [] crossfade_buffer_out;
+	crossfade_buffer_out = 0;
 
-	if (crossfade_buffer_in) {
-		delete [] crossfade_buffer_in;
-		crossfade_buffer_in = 0;
-	}
+	delete [] crossfade_buffer_in;
+	crossfade_buffer_in = 0;
 
 	if (sz) {
 		crossfade_buffer_out = new Sample[sz];

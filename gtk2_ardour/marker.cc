@@ -283,10 +283,8 @@ Marker::~Marker ()
 	delete mark;
 	delete points;
 
-	if (line) {
-		delete line;
-		line = 0;
-	}
+	delete line;
+	line = 0;
 }
 
 void Marker::reparent(ArdourCanvas::Group & parent)

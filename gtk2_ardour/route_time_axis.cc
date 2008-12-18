@@ -256,20 +256,14 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 		delete *i;
 	}
 
- 	if (playlist_menu) {
- 		delete playlist_menu;
- 		playlist_menu = 0;
- 	}
+	delete playlist_menu;
+	playlist_menu = 0;
   
-	if (playlist_action_menu) {
-		delete playlist_action_menu;
-		playlist_action_menu = 0;
-	}
+	delete playlist_action_menu;
+	playlist_action_menu = 0;
 
-	if (_view) {
-		delete _view;
-		_view = 0;
-	}
+	delete _view;
+	_view = 0;
 
 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		delete i->second;
@@ -395,10 +389,8 @@ void
 RouteTimeAxisView::playlist_click ()
 {
 	// always build a new action menu
-	
-	if (playlist_action_menu != 0) {
-		delete playlist_action_menu;
-	} 
+  
+	delete playlist_action_menu;
 
 	playlist_action_menu = new Menu;
 	playlist_action_menu->set_name ("ArdourContextMenu");
@@ -473,8 +465,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 
 		automation_items.push_back (SeparatorElem());
 
-		if (i->second->menu_item)
-			delete i->second->menu_item;
+		delete i->second->menu_item;
 
 		automation_items.push_back(CheckMenuElem (_route->describe_parameter(i->second->param), 
 				bind (mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
@@ -1477,9 +1468,7 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	menu->set_name ("ArdourContextMenu");
 	playlist_items.clear();
 
-	if (playlist_menu) {
-		delete playlist_menu;
-	}
+	delete playlist_menu;
 
 	playlist_menu = new Menu;
 	playlist_menu->set_name ("ArdourContextMenu");

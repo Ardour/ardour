@@ -9,20 +9,14 @@ using namespace std;
 void 
 CanvasFlag::delete_allocated_objects()
 {
-	if (_text) {
-		delete _text;
-		_text = 0;
-	}
-	
-	if (_line) {
-		delete _line;
-		_line = 0;
-	}
-	
-	if (_rect) {
-		delete _rect;
-		_rect = 0;
-	}
+	delete _text;
+	_text = 0;
+
+	delete _line;
+	_line = 0;
+
+	delete _rect;
+	_rect = 0;
 }
 
 void 

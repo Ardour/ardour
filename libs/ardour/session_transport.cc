@@ -1062,10 +1062,8 @@ Session::set_slave_source (SlaveSource src)
 // 		return;
 // 	}
 
-	if (_slave) {
-		delete _slave;
-		_slave = 0;
-	}
+	delete _slave;
+	_slave = 0;
 
 	if (_transport_speed < 0.0) {
 		reverse = true;

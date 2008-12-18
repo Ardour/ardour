@@ -152,11 +152,8 @@ ImageFrameView::~ImageFrameView()
 		}
 	}
 
-	if(imageframe)
-	{
-delete imageframe;
-		imageframe = 0 ;
-	}
+	delete imageframe;
+	imageframe = 0 ;
 }
 
 

@@ -40,9 +40,7 @@ Stateful::~Stateful ()
 	// Do not delete _extra_xml.  The use of add_child_nocopy() 
 	// means it needs to live on indefinately.
 
-	if (_instant_xml) {
-		delete _instant_xml;
-	}
+	delete _instant_xml;
 }
 
 void
