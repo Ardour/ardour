@@ -36,9 +36,6 @@
 #include <ardour/automation_list.h>
 
 
-using std::vector;
-using std::string;
-
 class AutomationLine;
 class ControlPoint;
 class PointSelection;
@@ -66,8 +63,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void set_selected_points (PointSelection&);
 	void get_selectables (nframes_t& start, nframes_t& end,
 			      double botfrac, double topfrac, 
-			      list<Selectable*>& results);
-	void get_inverted_selectables (Selection&, list<Selectable*>& results);
+			      std::list<Selectable*>& results);
+	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	virtual void remove_point (ControlPoint&);
 	bool control_points_adjacent (double xval, uint32_t& before, uint32_t& after);
@@ -94,7 +91,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void    show ();
 	void    hide ();
 	void    set_height (guint32);
-	void    set_verbose_cursor_uses_gain_mapping (bool yn);
+	void    set_uses_gain_mapping (bool yn);
+	bool    get_uses_gain_mapping () const { return _uses_gain_mapping; }
 
 	TimeAxisView& trackview;
 
@@ -105,9 +103,11 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void show_selection();
 	void hide_selection ();
 
-	virtual string get_verbose_cursor_string (double);
-	virtual void view_to_model_y (double&);
-	virtual void model_to_view_y (double&);
+	string get_verbose_cursor_string (double) const;
+	string fraction_to_string (double) const;
+	double string_to_fraction (string const &) const;
+	void view_to_model_y (double&) const;
+	void model_to_view_y (double&) const;
 
 	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
@@ -125,6 +125,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	int set_state (const XMLNode&);
 	void set_colors();
 
+	void modify_point_y (ControlPoint&, double);
+
   protected:
 
 	string _name;
@@ -133,7 +135,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
 
 	bool    _visible  : 1;
-	bool    _vc_uses_gain_mapping : 1;
+	bool    _uses_gain_mapping : 1;
 	bool    terminal_points_can_slide : 1;
 	bool    update_pending : 1;
 	bool    no_draw : 1;
@@ -144,7 +146,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	ArdourCanvas::Group*   group;
 	ArdourCanvas::Line*    line; /* line */
 	ArdourCanvas::Points   line_points; /* coordinates for canvas line */
-	vector<ControlPoint*>  control_points; /* visible control points */
+	std::vector<ControlPoint*>  control_points; /* visible control points */
 
 	struct ALPoint {
 	    double x;
@@ -180,7 +182,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	
 	ARDOUR::AutomationList::InterpolationStyle _interpolation;
 
-	void modify_view_point(ControlPoint&, double, double, bool with_push);
+	void modify_view_point (ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);
 
 	double control_point_box_size ();

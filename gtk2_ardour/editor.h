@@ -1603,6 +1603,7 @@ public:
 	void edit_meter_section (ARDOUR::MeterSection*);
 	void edit_tempo_marker (ArdourCanvas::Item*);
 	void edit_meter_marker (ArdourCanvas::Item*);
+	void edit_control_point (ArdourCanvas::Item*);
 	
 	void marker_menu_edit ();
 	void marker_menu_remove ();

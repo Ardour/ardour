@@ -64,7 +64,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	_interpolation = al->interpolation();
 	points_visible = false;
 	update_pending = false;
-	_vc_uses_gain_mapping = false;
+	_uses_gain_mapping = false;
 	no_draw = false;
 	_visible = true;
 	terminal_points_can_slide = true;
@@ -84,8 +84,9 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	trackview.session().register_with_memento_command_factory(alist->id(), this);
 
-	if (alist->parameter().type() == GainAutomation)
-		set_verbose_cursor_uses_gain_mapping (true);
+	if (alist->parameter().type() == GainAutomation) {
+		set_uses_gain_mapping (true);
+	}
 
 	set_interpolation(alist->interpolation());
 }
@@ -176,10 +177,10 @@ AutomationLine::set_line_color (uint32_t color)
 }
 
 void
-AutomationLine::set_verbose_cursor_uses_gain_mapping (bool yn)
+AutomationLine::set_uses_gain_mapping (bool yn)
 {
-	if (yn != _vc_uses_gain_mapping) {
-		_vc_uses_gain_mapping = yn;
+	if (yn != _uses_gain_mapping) {
+		_uses_gain_mapping = yn;
 		reset ();
 	}
 }
@@ -193,6 +194,41 @@ AutomationLine::nth (uint32_t n)
 		return 0;
 	}
 }
+
+void
+AutomationLine::modify_point_y (ControlPoint& cp, double y)
+{
+	/* clamp y-coord appropriately. y is supposed to be a normalized fraction (0.0-1.0),
+	   and needs to be converted to a canvas unit distance.
+	*/
+
+	y = max (0.0, y);
+	y = min (1.0, y);
+	y = _height - (y * _height);
+
+	double const x = trackview.editor.frame_to_unit ((*cp.model())->when);
+
+	trackview.editor.current_session()->begin_reversible_command (_("automation event move"));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
+
+	cp.move_to (x, y, ControlPoint::Full);
+	reset_line_coords (cp);
+
+	if (line_points.size() > 1) {
+		line->property_points() = line_points;
+	}
+
+	alist->freeze ();
+	sync_model_with_view_point (cp, false, 0);
+	alist->thaw ();
+
+	update_pending = false;
+
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
+	trackview.editor.current_session()->commit_reversible_command ();
+	trackview.editor.current_session()->set_dirty ();
+}
+
 
 void
 AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool with_push)
@@ -602,19 +638,35 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 }
 
 string
-AutomationLine::get_verbose_cursor_string (double fraction)
+AutomationLine::get_verbose_cursor_string (double fraction) const
+{
+	std::string s = fraction_to_string (fraction);
+	if (_uses_gain_mapping) {
+		s += " dB";
+	}
+
+	return s;
+}
+
+/**
+ *  @param fraction y fraction
+ *  @return string representation of this value, using dB if appropriate.
+ */
+
+string
+AutomationLine::fraction_to_string (double fraction) const
 {
 	char buf[32];
 
-	if (_vc_uses_gain_mapping) {
+	if (_uses_gain_mapping) {
 		if (fraction == 0.0) {
-			snprintf (buf, sizeof (buf), "-inf dB");
+			snprintf (buf, sizeof (buf), "-inf");
 		} else {
-			snprintf (buf, sizeof (buf), "%.1fdB", coefficient_to_dB (slider_position_to_gain (fraction)));
+			snprintf (buf, sizeof (buf), "%.1f", coefficient_to_dB (slider_position_to_gain (fraction)));
 		}
 	} else {
-		view_to_model_y(fraction);
-		if (EventTypeMap::instance().is_integer(alist->parameter())) {
+		view_to_model_y (fraction);
+		if (EventTypeMap::instance().is_integer (alist->parameter())) {
 			snprintf (buf, sizeof (buf), "%d", (int)fraction);
 		} else {
 			snprintf (buf, sizeof (buf), "%.2f", fraction);
@@ -622,6 +674,31 @@ AutomationLine::get_verbose_cursor_string (double fraction)
 	}
 
 	return buf;
+}
+
+
+/**
+ *  @param s Value string in the form as returned by fraction_to_string.
+ *  @return Corresponding y fraction.
+ */
+
+double
+AutomationLine::string_to_fraction (string const & s) const
+{
+	if (s == "-inf") {
+		return 0;
+	}
+
+	double v;
+	sscanf (s.c_str(), "%lf", &v);
+	
+	if (_uses_gain_mapping) {
+		v = gain_to_slider_position (dB_to_coefficient (v));
+	} else {
+		model_to_view_y (v);
+	}
+
+	return v;
 }
 
 bool
@@ -1165,7 +1242,7 @@ AutomationLine::set_state (const XMLNode &node)
 }
 
 void
-AutomationLine::view_to_model_y (double& y)
+AutomationLine::view_to_model_y (double& y) const
 {
 	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation) {
@@ -1183,7 +1260,7 @@ AutomationLine::view_to_model_y (double& y)
 }
 
 void
-AutomationLine::model_to_view_y (double& y)
+AutomationLine::model_to_view_y (double& y) const
 {
 	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation) {

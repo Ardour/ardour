@@ -49,6 +49,7 @@
 #include "keyboard.h"
 #include "editing.h"
 #include "rgb_macros.h"
+#include "control_point_dialog.h"
 
 #include <ardour/types.h>
 #include <ardour/profile.h>
@@ -1069,6 +1070,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			if (clicked_regionview->name_active()) {
 				return mouse_rename_region (item, event);
 			}
+			break;
+
+		case ControlPointItem:
+			edit_control_point (item);
 			break;
 
 		default:
@@ -3201,6 +3206,28 @@ Editor::control_point_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent
 	}
 	cp->line().end_drag (cp);
 }
+
+void
+Editor::edit_control_point (ArdourCanvas::Item* item)
+{
+	ControlPoint* p = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
+
+	if (p == 0) {
+		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	ControlPointDialog d (p);
+	d.set_position (Gtk::WIN_POS_MOUSE);
+	ensure_float (d);
+
+	if (d.run () != RESPONSE_ACCEPT) {
+		return;
+	}
+
+	p->line().modify_point_y (*p, d.get_y_fraction ());
+}
+
 
 void
 Editor::start_line_grab_from_regionview (ArdourCanvas::Item* item, GdkEvent* event)

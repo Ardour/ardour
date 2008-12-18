@@ -137,6 +137,7 @@ canvas-simpleline.c
 canvas-simplerect.c
 canvas-waveview.c
 control_point.cc
+control_point_dialog.cc
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc

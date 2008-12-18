@@ -130,7 +130,7 @@ class RegionView : public TimeAxisViewItem
 
     RegionEditor* editor;
 
-    vector<ControlPoint *> control_points;
+    std::vector<ControlPoint *> control_points;
     double current_visible_sync_position;
 
     bool    valid; ///< see StreamView::redisplay_diskstream() 
@@ -142,7 +142,7 @@ class RegionView : public TimeAxisViewItem
     bool             wait_for_data;
     sigc::connection data_ready_connection;
     
-    vector<GhostRegion*> ghosts;
+    std::vector<GhostRegion*> ghosts;
 	
 	typedef std::map<const Evoral::Parameter, boost::shared_ptr<AutomationRegionView> > AutomationChildren;
 	AutomationChildren _automation_children;
