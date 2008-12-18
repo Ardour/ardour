@@ -78,7 +78,7 @@ StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	_muted = false;
 
 	_control = boost::dynamic_pointer_cast<AutomationControl>( parent.control( param, true ) );
-
+	
 	x = 0.5;
 	y = 0.5;
 	z = 0.5;
@@ -775,22 +775,24 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	}
 
 	if (nouts < 2) {
+		/* no need for panning with less than 2 outputs */
 		goto send_changed;
 	}
 
 	switch (nouts) {
 	case 0:
+		/* XXX: this can never happen */
 		break;
 
 	case 1:
+		/* XXX: this can never happen */
 		fatal << _("programming error:")
 		      << X_("Panner::reset() called with a single output")
 		      << endmsg;
 		/*NOTREACHED*/
 		break;
 
-	case 2:
-		/* line */
+	case 2: // line
 		outputs.push_back (Output (0, 0));
 		outputs.push_back (Output (1.0, 0));
 
@@ -899,6 +901,8 @@ Panner::remove (uint32_t which)
 	}
 }
 
+
+/** Remove all our StreamPanners */
 void
 Panner::clear_panners ()
 {
@@ -1060,7 +1064,7 @@ Panner::set_state (const XMLNode& node)
 						
 						/* note that we assume that all the stream panners
 						   are of the same type. pretty good
-						   assumption, but its still an assumption.
+						   assumption, but it's still an assumption.
 						*/
 						
 						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, num_panners));
@@ -1090,7 +1094,7 @@ Panner::set_state (const XMLNode& node)
 		} 	
 	}
 
-	reset(num_panners, outputs.size());
+	reset (outputs.size (), num_panners);
 	/* don't try to do old-school automation loading if it wasn't marked as existing */
 
 	if ((prop = node.property (X_("automation")))) {
