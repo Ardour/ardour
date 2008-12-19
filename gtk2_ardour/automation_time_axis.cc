@@ -49,6 +49,7 @@ Pango::FontDescription* AutomationTimeAxisView::name_font = 0;
 bool AutomationTimeAxisView::have_name_font = false;
 const string AutomationTimeAxisView::state_node_name = "AutomationChild";
 
+
 /** \a a the automatable object this time axis is to display data for.
  * For route/track automation (e.g. gain) pass the route for both \r and \a.
  * For route child (e.g. plugin) automation, pass the child for \a.
@@ -862,31 +863,19 @@ int
 AutomationTimeAxisView::set_state (const XMLNode& node)
 {
 	TimeAxisView::set_state (node);
-	
-	XMLNodeList kids;
-	XMLNodeConstIterator iter;
 
-	kids = node.children ();
-
-	for (iter = kids.begin(); iter != kids.end(); ++iter) {
-		
-		if ((*iter)->name() == state_node_name) {
-			XMLProperty* type = (*iter)->property("automation-id");
-
-			if (type && type->value() == ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter())) {
-				XMLProperty *shown = (*iter)->property("shown-editor");
-
-				if (shown && shown->value() == "yes") {
-					set_marked_for_display(true);
-					canvas_display->show(); /* FIXME: necessary? show_at? */
-				}
-				break;
-			}
+	XMLProperty const * type = node.property ("automation-id");
+	if (type && type->value () == ARDOUR::EventTypeMap::instance().to_symbol (_control->parameter())) {
+		XMLProperty const * shown = node.property ("shown");
+		if (shown && shown->value () == "yes") {
+			set_marked_for_display (true);
+			canvas_display->show (); /* FIXME: necessary? show_at? */
 		}
 	}
-
-	if (!_marked_for_display)
+	
+	if (!_marked_for_display) {
 		hide();
+	}
 
 	return 0;
 }

@@ -85,8 +85,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	_view = new AudioStreamView (*this);
 
-	create_automation_child (GainAutomation, false);
-
 	ignore_toggle = false;
 
 	mute_button->set_active (false);
@@ -101,14 +99,19 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	ensure_xml_node ();
 
 	set_state (*xml_node);
+
+	/* if set_state above didn't create a gain automation child, we need to make one */
+	if (automation_track (GainAutomation) == 0) {
+		create_automation_child (GainAutomation, false);
+	}
 	
-	_route->panner().Changed.connect (bind (mem_fun(*this, &AudioTimeAxisView::update_pans), false));
+	_route->panner().Changed.connect (bind (mem_fun(*this, &AudioTimeAxisView::ensure_pan_views), false));
 
 	/* map current state of the route */
 
 	processors_changed ();
 	reset_processor_automation_curves ();
-	update_pans (false);
+	ensure_pan_views (false);
 	update_control_names ();
 
 	if (is_audio_track()) {
@@ -342,20 +345,24 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 	} else if (param.type() == PanAutomation) {
 
 		ensure_xml_node ();
-		update_pans (show);
+		ensure_pan_views (show);
 
 	} else {
 		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 }
 
+/** Ensure that we have the appropriate AutomationTimeAxisViews for the
+ *  panners that we have.
+ *
+ *  @param show true to show any new views that we create, otherwise false.
+ */
 void
-AudioTimeAxisView::update_pans (bool show)
+AudioTimeAxisView::ensure_pan_views (bool show)
 {
 	const set<Evoral::Parameter>& params = _route->panner().what_can_be_automated();
 	set<Evoral::Parameter>::iterator p;
 
-	uint32_t i = 0;
 	for (p = params.begin(); p != params.end(); ++p) {
 		boost::shared_ptr<ARDOUR::AutomationControl> pan_control
 			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
@@ -366,15 +373,25 @@ AudioTimeAxisView::update_pans (bool show)
 			continue;
 		}
 
-		boost::shared_ptr<AutomationTimeAxisView> pan_track(new AutomationTimeAxisView (_session,
-					_route, _route, pan_control, 
-					editor,
-					*this,
-					false,
-					parent_canvas,
-					_route->describe_parameter(pan_control->parameter())));
-		add_automation_child(*p, pan_track, show);
-		++i;
+		if (automation_child (pan_control->parameter ()).get () == 0) {
+
+			/* we don't already have an AutomationTimeAxisView for this parameter */
+
+			std::string const name = _route->describe_parameter (pan_control->parameter ());
+
+			boost::shared_ptr<AutomationTimeAxisView> pan_track (
+				new AutomationTimeAxisView (_session,
+							    _route, _route, pan_control, 
+							    editor,
+							    *this,
+							    false,
+							    parent_canvas,
+							    name)
+				
+				);
+			
+			add_automation_child (*p, pan_track, show);
+		}
 	}
 }
 #if 0

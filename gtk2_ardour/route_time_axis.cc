@@ -426,6 +426,7 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
 			if ((prop = (*iter)->property ("automation-id")) != 0) {
+
 				Evoral::Parameter param = ARDOUR::EventTypeMap::instance().new_parameter(prop->value());
 				bool show = ((prop = (*iter)->property ("shown")) != 0) && prop->value() == "yes";
 				create_automation_child(param, show);
@@ -434,6 +435,7 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 			}
 		}
 	}
+
 	return 0;
 }
 
@@ -1249,25 +1251,26 @@ RouteTimeAxisView::show_automation(Evoral::Parameter param)
 	return (_show_automation.find(param) != _show_automation.end());
 }
 
-/** Retuns NULL if track for \a param doesn't exist.
+/** Retuns 0 if track for \a param doesn't exist.
  */
 RouteTimeAxisView::RouteAutomationNode*
-RouteTimeAxisView::automation_track(Evoral::Parameter param)
+RouteTimeAxisView::automation_track (Evoral::Parameter param)
 {
-	map<Evoral::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.find(param);
+	map<Evoral::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.find (param);
 
-	if (i != _automation_tracks.end())
+	if (i != _automation_tracks.end()) {
 		return i->second;
-	else
-		return NULL;
+	} else {
+		return 0;
+	}
 }
 
 /** Shorthand for GainAutomation, etc.
  */	
 RouteTimeAxisView::RouteAutomationNode*
-RouteTimeAxisView::automation_track(AutomationType type)
+RouteTimeAxisView::automation_track (AutomationType type)
 {
-	return automation_track(Evoral::Parameter(type));
+	return automation_track (Evoral::Parameter(type));
 }
 
 RouteGroup*

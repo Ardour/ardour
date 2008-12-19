@@ -110,7 +110,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void gain_hidden ();
 	void pan_hidden ();
 
-	void update_pans (bool show=true);
+	void ensure_pan_views (bool show = true);
 	void update_control_names ();
 
 	Gtk::CheckMenuItem* waveform_item;
