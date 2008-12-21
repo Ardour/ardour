@@ -25,8 +25,8 @@
 
 #include <glibmm/thread.h>
 
-#include <evoral/Curve.hpp>
-#include <evoral/ControlList.hpp>
+#include "evoral/Curve.hpp"
+#include "evoral/ControlList.hpp"
 
 using namespace std;
 using namespace sigc;

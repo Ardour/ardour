@@ -23,9 +23,9 @@
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <glibmm/thread.h>
-#include <evoral/types.hpp>
-#include <evoral/Parameter.hpp>
-#include <evoral/Curve.hpp>
+#include "evoral/types.hpp"
+#include "evoral/Parameter.hpp"
+#include "evoral/Curve.hpp"
 
 namespace Evoral {
 

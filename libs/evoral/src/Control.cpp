@@ -17,8 +17,8 @@
  */
 
 #include <iostream>
-#include <evoral/Control.hpp>
-#include <evoral/ControlList.hpp>
+#include "evoral/Control.hpp"
+#include "evoral/ControlList.hpp"
 
 namespace Evoral {
 

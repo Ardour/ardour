@@ -20,7 +20,7 @@
 #define EVORAL_SMF_HPP
 
 #include <string>
-#include <evoral/types.hpp>
+#include "evoral/types.hpp"
 
 namespace Evoral {
 	

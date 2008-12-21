@@ -24,8 +24,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <glibmm/thread.h>
-#include <evoral/types.hpp>
-#include <evoral/Parameter.hpp>
+#include "evoral/types.hpp"
+#include "evoral/Parameter.hpp"
 
 namespace Evoral {
 

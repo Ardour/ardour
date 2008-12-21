@@ -23,10 +23,10 @@
 #include <cassert>
 #include <iostream>
 #include <glibmm/miscutils.h>
-#include <evoral/midi_util.h>
-#include <evoral/SMF.hpp>
-#include <evoral/SMFReader.hpp>
-#include <evoral/Event.hpp>
+#include "evoral/midi_util.h"
+#include "evoral/SMF.hpp"
+#include "evoral/SMFReader.hpp"
+#include "evoral/Event.hpp"
 
 using namespace std;
 

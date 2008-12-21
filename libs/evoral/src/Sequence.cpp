@@ -23,13 +23,13 @@
 #include <algorithm>
 #include <stdexcept>
 #include <stdint.h>
-#include <evoral/Sequence.hpp>
-#include <evoral/ControlList.hpp>
-#include <evoral/Control.hpp>
-#include <evoral/ControlSet.hpp>
-#include <evoral/EventSink.hpp>
-#include <evoral/MIDIParameters.hpp>
-#include <evoral/TypeMap.hpp>
+#include "evoral/Sequence.hpp"
+#include "evoral/ControlList.hpp"
+#include "evoral/Control.hpp"
+#include "evoral/ControlSet.hpp"
+#include "evoral/EventSink.hpp"
+#include "evoral/MIDIParameters.hpp"
+#include "evoral/TypeMap.hpp"
 
 using namespace std;
 

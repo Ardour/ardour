@@ -22,8 +22,8 @@
 #include <iostream>
 #include <glibmm/miscutils.h>
 
-#include <evoral/midi_util.h>
-#include <evoral/SMFReader.hpp>
+#include "evoral/midi_util.h"
+#include "evoral/SMFReader.hpp"
 
 using namespace std;
 

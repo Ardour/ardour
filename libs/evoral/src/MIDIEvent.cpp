@@ -16,7 +16,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <evoral/MIDIEvent.hpp>
+#include "evoral/MIDIEvent.hpp"
 
 namespace Evoral {
 

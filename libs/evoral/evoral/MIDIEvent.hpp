@@ -19,8 +19,8 @@
 #ifndef EVORAL_MIDI_EVENT_HPP
 #define EVORAL_MIDI_EVENT_HPP
 
-#include <evoral/Event.hpp>
-#include <evoral/midi_events.h>
+#include "evoral/Event.hpp"
+#include "evoral/midi_events.h"
 #ifdef EVORAL_MIDI_XML
 	#include <pbd/xml++.h>
 #endif

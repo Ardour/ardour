@@ -20,7 +20,7 @@
 #define EVORAL_NOTE_HPP
 
 #include <stdint.h>
-#include <evoral/MIDIEvent.hpp>
+#include "evoral/MIDIEvent.hpp"
 
 namespace Evoral {
 

@@ -26,11 +26,11 @@
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include <glibmm/thread.h>
-#include <evoral/types.hpp>
-#include <evoral/Note.hpp>
-#include <evoral/Parameter.hpp>
-#include <evoral/ControlSet.hpp>
-#include <evoral/ControlList.hpp>
+#include "evoral/types.hpp"
+#include "evoral/Note.hpp"
+#include "evoral/Parameter.hpp"
+#include "evoral/ControlSet.hpp"
+#include "evoral/ControlList.hpp"
 
 namespace Evoral {
 

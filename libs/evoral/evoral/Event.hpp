@@ -24,7 +24,7 @@
 #include <cstring>
 #include <sstream>
 #include <assert.h>
-#include <evoral/types.hpp>
+#include "evoral/types.hpp"
 
 
 /** If this is not defined, all methods of MidiEvent are RT safe

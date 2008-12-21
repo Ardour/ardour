@@ -19,7 +19,7 @@
 #ifndef EVORAL_TYPE_MAP_HPP
 #define EVORAL_TYPE_MAP_HPP
 
-#include <evoral/types.hpp>
+#include "evoral/types.hpp"
 
 namespace Evoral {
 

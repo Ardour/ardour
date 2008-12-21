@@ -16,7 +16,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <evoral/Event.hpp>
+#include "evoral/Event.hpp"
 
 namespace Evoral {
 

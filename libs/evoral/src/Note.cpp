@@ -17,7 +17,7 @@
  */
 
 #include <iostream>
-#include <evoral/Note.hpp>
+#include "evoral/Note.hpp"
 
 namespace Evoral {
 

@@ -19,7 +19,7 @@
 #ifndef EVORAL_EVENT_SINK_HPP
 #define EVORAL_EVENT_SINK_HPP
 
-#include <evoral/types.hpp>
+#include "evoral/types.hpp"
 
 namespace Evoral {
 

@@ -19,9 +19,9 @@
 #define EVORAL_EVENT_RING_BUFFER_HPP
 
 #include <glib.h>
-#include <evoral/RingBuffer.hpp>
-#include <evoral/EventSink.hpp>
-#include <evoral/types.hpp>
+#include "evoral/RingBuffer.hpp"
+#include "evoral/EventSink.hpp"
+#include "evoral/types.hpp"
 
 #include <iostream>
 using namespace std;

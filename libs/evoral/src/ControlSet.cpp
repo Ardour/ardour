@@ -17,10 +17,10 @@
  */
 
 #include <limits>
-#include <evoral/ControlSet.hpp>
-#include <evoral/ControlList.hpp>
-#include <evoral/Control.hpp>
-#include <evoral/Event.hpp>
+#include "evoral/ControlSet.hpp"
+#include "evoral/ControlList.hpp"
+#include "evoral/Control.hpp"
+#include "evoral/Event.hpp"
 
 using namespace std;
 

@@ -22,8 +22,8 @@
 #include <set>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include <evoral/types.hpp>
-#include <evoral/Parameter.hpp>
+#include "evoral/types.hpp"
+#include "evoral/Parameter.hpp"
 
 namespace Evoral {
 
