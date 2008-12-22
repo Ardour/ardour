@@ -29,10 +29,9 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
-StateButton::StateButton ()
+StateButton::StateButton () : visual_state (0), _self_managed (false), _is_realized (false)
 {
-	_is_realized = false;
-	visual_state = 0;
+  
 }
 
 void
