@@ -63,18 +63,31 @@ public:
 	boost::shared_ptr<MasterDeviceNames> master_device_by_model(std::string model_name) 
 		{ return _master_devices_by_model[model_name]; }
 	
+	boost::shared_ptr<ChannelNameSet> find_channel_name_set(
+			string model, 
+			string custom_device_mode, 
+			uint8_t channel) {
+		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
+		
+		if (master_device != 0 && custom_device_mode != "") {
+			return master_device->
+			         channel_name_set_by_device_mode_and_channel(custom_device_mode, channel);
+		} else {
+			return boost::shared_ptr<ChannelNameSet>();
+		}		
+	}
+
+	
 	boost::shared_ptr<Patch> find_patch(
 			string model, 
 			string custom_device_mode, 
 			uint8_t channel, 
 			PatchPrimaryKey patch_key) {
 		
-		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
+		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
 		
-		if (master_device != 0 && custom_device_mode != "") {
-			return master_device->
-			         channel_name_set_by_device_mode_and_channel(custom_device_mode, channel)->
-				        find_patch(patch_key);			
+		if (channel_name_set) {
+			return  channel_name_set->find_patch(patch_key);			
 		} else {
 			return boost::shared_ptr<Patch>();
 		}
@@ -86,12 +99,10 @@ public:
 			uint8_t channel, 
 			PatchPrimaryKey patch_key) {
 		
-		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
+		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
 		
-		if (master_device != 0 && custom_device_mode != "") {
-			return master_device->
-			         channel_name_set_by_device_mode_and_channel(custom_device_mode, channel)->
-				        previous_patch(patch_key);			
+		if (channel_name_set) {
+			return  channel_name_set->previous_patch(patch_key);			
 		} else {
 			return boost::shared_ptr<Patch>();
 		}
@@ -103,12 +114,10 @@ public:
 			uint8_t channel, 
 			PatchPrimaryKey patch_key) {
 		
-		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
+		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
 		
-		if (master_device != 0 && custom_device_mode != "") {
-			return master_device->
-			         channel_name_set_by_device_mode_and_channel(custom_device_mode, channel)->
-				        next_patch(patch_key);			
+		if (channel_name_set) {
+			return  channel_name_set->next_patch(patch_key);			
 		} else {
 			return boost::shared_ptr<Patch>();
 		}

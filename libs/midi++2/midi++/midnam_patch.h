@@ -149,6 +149,8 @@ public:
 
 	const string& name() const               { return _name; }
 	void set_name(const string a_name)       { _name = a_name; }
+	
+	const PatchBanks& patch_banks() const    { return _patch_banks; }
 
 	bool available_for_channel(uint8_t channel) const { 
 		return _available_for_channels.find(channel) != _available_for_channels.end(); 

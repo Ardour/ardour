@@ -1005,10 +1005,18 @@ MidiRegionView::add_pgm_change(ControlEvent& program, string displaytext)
 	double height = midi_stream_view()->contents_height();
 	
 	boost::shared_ptr<CanvasProgramChange> pgm_change = boost::shared_ptr<CanvasProgramChange>(
-			new CanvasProgramChange(*this, *group, displaytext, height, x, 1.0));
-	pgm_change->set_event_time(program.time);
-	pgm_change->set_program(program.value);
-	pgm_change->set_channel(program.channel);
+			new CanvasProgramChange(
+					*this, 
+					*group, 
+					displaytext, 
+					height, 
+					x, 
+					1.0, 
+					_model_name, 
+					_custom_device_mode, 
+					program.time, 
+					program.channel, 
+					program.value));
 	
 	_pgm_changes.push_back(pgm_change);
 }
@@ -1074,6 +1082,13 @@ MidiRegionView::alter_program_change(ControlEvent& old_program, const MIDI::Name
 	program_control->set_float(float(new_patch.program_number), true, old_program.time);
 	
 	redisplay_model();
+}
+
+void
+MidiRegionView::program_selected(CanvasProgramChange& program, const MIDI::Name::PatchPrimaryKey& new_patch)
+{
+	ControlEvent program_change_event(program.event_time(), program.program(), program.channel());
+	alter_program_change(program_change_event, new_patch);
 }
 
 void 

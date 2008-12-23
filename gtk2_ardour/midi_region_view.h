@@ -109,11 +109,50 @@ class MidiRegionView : public RegionView
 		}
 	};
 	
+	/**
+	 * Adds a new program change flag to the canvas
+	 * @param program the MidiRegionView::ControlEvent to add
+	 * @param the text to display in the flag
+	 */
 	void add_pgm_change(ControlEvent& program, string displaytext);
+	
+	/**
+	 * Looks up in the automation list in the specified time and channel and sets keys
+	 * fields accordingly
+	 * @param time the time of the program change event
+	 * @param channel the MIDI channel of the event
+	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will 
+	 *        will be set according to the result of the lookup
+	 */
 	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
+	
+	/**
+	 * changes the automation list data of old_program to the new values which correspond to new_patch
+	 * @param old_program identifies the program change event which is to be altered
+	 * @param new_patch defines the new lsb, msb and program number which are to be set in the automation list data
+	 */
 	void alter_program_change(ControlEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
+	
+	/**
+	 * alters a given program to the new given one (called on context menu select on CanvasProgramChange)
+	 */
+	void program_selected(
+		ArdourCanvas::CanvasProgramChange& program, 
+		const MIDI::Name::PatchPrimaryKey& new_patch);
+	
+	/**
+	 * alters a given program to be its predecessor in the MIDNAM file
+	 */
 	void previous_program(ArdourCanvas::CanvasProgramChange& program);
+
+	/**
+	 * alters a given program to be its successor in the MIDNAM file
+	 */
 	void next_program(ArdourCanvas::CanvasProgramChange& program);
+	
+	/**
+	 * displays all program changed events in the region as flags on the canvas
+	 */
 	void find_and_insert_program_change_flags();
 
 	void begin_write();
