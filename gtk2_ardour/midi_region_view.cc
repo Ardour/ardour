@@ -1417,7 +1417,7 @@ MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
 			// calculate the colors: get the color settings
 			uint32_t fill_color =
 				UINT_RGBA_CHANGE_A(
-						ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(),
+						ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(),
 						128);
 
 			// make the resize preview notes more transparent and bright
@@ -1426,12 +1426,12 @@ MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
 			// calculate color based on note velocity
 			resize_rect->property_fill_color_rgba() =
 				UINT_INTERPOLATE(
-					note_fill_color(note->note()->velocity()),
+					CanvasNoteEvent::meter_style_fill_color(note->note()->velocity()),
 					fill_color,
 					0.85);
 
 			resize_rect->property_outline_color_rgba() =
-				ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
+				CanvasNoteEvent::calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get());
 
 			resize_data->resize_rect = resize_rect;
 

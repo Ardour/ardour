@@ -20,11 +20,16 @@
 #ifndef __gtk_ardour_canvas_midi_event_h__
 #define __gtk_ardour_canvas_midi_event_h__
 
-#include "simplerect.h"
-#include "midi_channel_selector.h"
+
 #include <libgnomecanvasmm/text.h>
 #include <libgnomecanvasmm/widget.h>
 #include <ardour/midi_model.h>
+
+#include "rgb_macros.h"
+#include "ardour_ui.h"
+#include "ui_config.h"
+#include "simplerect.h"
+#include "midi_channel_selector.h"
 
 class Editor;
 class MidiRegionView;
@@ -82,6 +87,35 @@ public:
 	virtual double y2() = 0;
 
 	const boost::shared_ptr<Evoral::Note> note() const { return _note; }
+	
+	inline static uint32_t meter_style_fill_color(uint8_t vel)
+	{
+		if (vel < 64) {
+			return UINT_INTERPOLATE(
+					ARDOUR_UI::config()->canvasvar_MeterColorBase.get(),
+					ARDOUR_UI::config()->canvasvar_MeterColorMid.get(),
+					(vel / (double)63.0));
+		} else {
+			return UINT_INTERPOLATE(
+					ARDOUR_UI::config()->canvasvar_MeterColorMid.get(),
+					ARDOUR_UI::config()->canvasvar_MeterColorTop.get(),
+					((vel-64) / (double)63.0));
+		}
+	}
+
+	inline static uint32_t meter_style_outline_color(uint8_t vel)
+	{
+		return calculate_outline(meter_style_fill_color(vel));
+	}
+	
+	/// calculate outline colors from fill colors of notes
+	inline static uint32_t calculate_outline(uint32_t color) 
+	{
+		return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
+	}
+	
+	/// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
+	static const uint32_t midi_channel_colors[16];
 
 protected:
 	enum State { None, Pressed, Dragging };

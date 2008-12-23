@@ -30,6 +30,13 @@ using ARDOUR::MidiModel;
 namespace Gnome {
 namespace Canvas {
 
+/// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
+const uint32_t CanvasNoteEvent::midi_channel_colors[16] = {
+	  0xd32d2d00,  0xd36b2d00,  0xd3972d00,  0xd3d12d00,  
+	  0xa0d32d00,  0x7dd32d00,  0x2dd45e00,  0x2dd3c400,  
+	  0x2da5d300,  0x2d6fd300,  0x432dd300,  0x662dd300,  
+	  0x832dd300,  0xa92dd300,  0xd32dbf00,  0xd32d6700 
+	};
 
 CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 		const boost::shared_ptr<Evoral::Note> note)
@@ -77,8 +84,7 @@ CanvasNoteEvent::show_velocity()
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteVelocityText.get();
 	_text->show();
-	_text->lower_to_bottom();
-	_text->raise(2);
+	_text->raise_to_top();
 }
 
 void
@@ -96,8 +102,8 @@ CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
 	if ( (selection & (1 << _note->channel())) == 0 ) {
-		set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteFillInactiveChannel.get());
-		set_outline_color(ARDOUR_UI::config()->canvasvar_MidiNoteOutlineInactiveChannel.get());
+		set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get());
+		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get()));
 	} else {
 		// set the color according to the notes selection state
 		selected(_selected);
@@ -157,13 +163,13 @@ CanvasNoteEvent::selected(bool yn)
 	if (!_note) {
 		return;
 	} else if (yn) {
-		set_fill_color(UINT_INTERPOLATE(note_fill_color(_note->velocity()),
-					ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(), 0.1));
-		set_outline_color(ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get());
+		set_fill_color(UINT_INTERPOLATE(meter_style_fill_color(_note->velocity()),
+					ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.1));
+		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
 		show_velocity();
 	} else {
-		set_fill_color(note_fill_color(_note->velocity()));
-		set_outline_color(note_outline_color(_note->velocity()));
+		set_fill_color(meter_style_fill_color(_note->velocity()));
+		set_outline_color(meter_style_outline_color(_note->velocity()));
 		hide_velocity();
 	}
 
