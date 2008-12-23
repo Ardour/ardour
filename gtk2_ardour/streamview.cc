@@ -431,6 +431,7 @@ StreamView::update_contents_height ()
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		switch (layer_display) {
 		case Overlaid:
+			(*i)->set_y (0);
 			(*i)->set_height (height);
 			break;
 		case Stacked:
