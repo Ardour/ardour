@@ -155,7 +155,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	}
 
 	/* return to default fades if the existing ones are too long */
-	init ();
 
 	if (_flags & LeftOfSplit) {
 		if (_fade_in->back()->when >= _length) {
@@ -180,6 +179,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	_scale_amplitude = other->_scale_amplitude;
 
 	assert(_type == DataType::AUDIO);
+	
+	listen_to_my_curves ();
 	listen_to_my_sources ();
 }
 

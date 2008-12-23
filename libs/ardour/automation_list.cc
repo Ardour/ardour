@@ -73,7 +73,7 @@ AutomationList::AutomationList (const AutomationList& other)
 }
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
-	: ControlList(other)
+	: ControlList(other, start, end)
 {
 	_style = other._style;
 	_state = other._state;
