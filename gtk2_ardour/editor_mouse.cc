@@ -1,4 +1,3 @@
-
 /*
     Copyright (C) 2000-2001 Paul Davis 
 
@@ -3902,7 +3901,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					double ix1, ix2, iy1, iy2;
 					rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 					rv2->get_canvas_frame()->i2w (ix1, iy1);
-			
+
 					if (-x_delta > ix1 + horizontal_adjustment.get_value()) {
 						//	do_move = false;
 						x_delta = 0;
@@ -3954,27 +3953,33 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
 	    
 			RegionView* rv = (*i);
-			double ix1, ix2, iy1, iy2;
 			int32_t temp_pointer_y_span = pointer_y_span;
 
 			if (rv->region()->locked()) {
 				continue;
 			}
 
-			/* get item BBox, which will be relative to parent. so we have
-			   to query on a child, then convert to world coordinates using
-			   the parent.
-			*/
+			/* here we are calculating the y distance from the
+			   top of the first track view to the top of the region
+			   area of the track view that we're working on */
 
-			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			rv->get_canvas_frame()->i2w (ix1, iy1);
+			/* this x value is just a dummy value so that we have something
+			   to pass to i2w () */
+
+			double ix1 = 0;
+
+			/* distance from the top of this track view to the region area
+			   of our track view is always 1 */
 			
-			cerr << "adjust y from " << iy1 << " using "
-			     << vertical_adjustment.get_value() << " - "
-			     << canvas_timebars_vsize
-			     << endl;
+			double iy1 = 1;
 
-			iy1 += get_trackview_group_vertical_offset ();;
+			/* convert to world coordinates, ie distance from the top of
+			   the ruler section */
+			
+			rv->get_canvas_frame()->i2w (ix1, iy1);
+
+			/* compensate for the ruler section and the vertical scrollbar position */
+			iy1 += get_trackview_group_vertical_offset ();
 
 			if (drag_info.first_move) {
 
@@ -3989,7 +3994,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				   parent groups have different coordinates.
 				*/
 
-				rv->get_canvas_group()->property_y() =  iy1 - 1;
+				rv->get_canvas_group()->property_y() = iy1 - 1;
 				rv->get_canvas_group()->reparent(*_region_motion_group);
 
 				rv->fake_set_opaque (true);
@@ -4040,7 +4045,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 							temp_pointer_y_span++;
 						}
 						/* find out where we'll be when we move and set height accordingly */
-		  
+
 						tvp2 = trackview_by_y_position (iy1 + y_delta);
 						temp_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
 						rv->set_height (temp_rtv->current_height());

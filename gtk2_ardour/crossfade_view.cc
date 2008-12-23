@@ -194,7 +194,7 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
-		p.set_y(_y_position + 2.0 + h - (h * vec[i]));
+		p.set_y(2.0 + h - (h * vec[i]));
 	}
 	fade_in->property_points() = *points;
 
@@ -202,7 +202,7 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
-		p.set_y(_y_position + 2.0 + h - (h * vec[i]));
+		p.set_y(2.0 + h - (h * vec[i]));
 	}
 	fade_out->property_points() = *points;
 

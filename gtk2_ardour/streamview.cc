@@ -167,6 +167,7 @@ StreamView::add_region_view (boost::shared_ptr<Region> r)
 	// ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
 
 	add_region_view_internal (r, true);
+	update_contents_height ();
 }
 
 void
@@ -433,8 +434,7 @@ StreamView::update_contents_height ()
 			(*i)->set_height (height);
 			break;
 		case Stacked:
-			cout << "FIXME: Stacked regions: set y position" << endl;
-			//double const y = (*i)->region()->layer() * lh;
+			(*i)->set_y ((*i)->region()->layer() * lh);
 			(*i)->set_height (lh);
 			break;
 		}

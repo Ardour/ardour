@@ -68,7 +68,6 @@ struct CrossfadeView : public TimeAxisViewItem
     bool _visible;
 
     double spu;
-    double _y_position;
     double _height;
 
     ArdourCanvas::Item *overlap_rect;

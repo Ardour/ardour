@@ -208,6 +208,8 @@ class TimeAxisViewItem : public Selectable
      */
     virtual void set_height(double h) ;
 
+    void set_y (double);
+
     /**
      * 
      */

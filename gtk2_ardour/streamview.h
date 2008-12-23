@@ -72,7 +72,7 @@ public:
 	virtual int set_samples_per_unit (gdouble spp);
 	gdouble     get_samples_per_unit () { return _samples_per_unit; }
 
-	void set_layer_display (LayerDisplay);
+ 	void set_layer_display (LayerDisplay);
 
 	ArdourCanvas::Group* background_group() { return _background_group; }
 	ArdourCanvas::Group* canvas_item() { return canvas_group; }

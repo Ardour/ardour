@@ -1048,3 +1048,14 @@ TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 	return false;
 }
 
+void
+TimeAxisViewItem::set_y (double y)
+{
+	double const old = group->property_y ();
+	if (y != old) {
+		group->move (0, y - old);
+	}
+}
+
+
+			   
