@@ -198,20 +198,10 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		}
 
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			_region.note_selected(this, true);
-			if (_region.mouse_state() == MidiRegionView::SelectTouchDragging) {
-				// TODO: absolute velocity
-			} else {
-				_region.change_velocity(d_velocity, true);
-			}
+			_region.change_velocity(this, d_velocity, true);
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			_region.note_selected(this, true);
-			if (_region.mouse_state() == MidiRegionView::SelectTouchDragging) {
-				// TODO: absolute velocity
-			} else {
-				_region.change_velocity(-d_velocity, true);
-			}
+			_region.change_velocity(this, -d_velocity, true);
 			return true;
 		} else {
 			return false;

@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <typeinfo>
 
 #include <pbd/stacktrace.h>
 
@@ -40,8 +41,7 @@
 #include "control_point.h"
 #include "canvas_impl.h"
 #include "simplerect.h"
-#include "canvas-note-event.h"
-#include "canvas-program-change.h"
+#include "interactive-item.h"
 
 #include "i18n.h"
 
@@ -59,9 +59,12 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	double wx, wy;
 	nframes64_t xdelta;
 	int direction = ev->direction;
-	CanvasNoteEvent     *midi_event = dynamic_cast<CanvasNoteEvent *>(track_canvas->get_item_at(ev->x, ev->y));
-	CanvasFlagRect      *flag_rect  = dynamic_cast<CanvasFlagRect *>(track_canvas->get_item_at(ev->x, ev->y));
-	CanvasFlagText      *flag_text  = dynamic_cast<CanvasFlagText *>(track_canvas->get_item_at(ev->x, ev->y));
+	
+	Gnome::Canvas::Item* item = track_canvas->get_item_at(ev->x, ev->y);
+	InteractiveItem* interactive_item = dynamic_cast<InteractiveItem*>(item);
+	if (interactive_item && interactive_item->on_event(reinterpret_cast<GdkEvent*>(ev))) {
+		return true;
+	}
 
   retry:
 	switch (direction) {
@@ -98,13 +101,6 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (true);
 			return true;
 		} else {
-			if(midi_event) {
-				return midi_event->on_event(reinterpret_cast<GdkEvent *>(ev));
-			} else if (flag_rect) {
-				return flag_rect->on_event(reinterpret_cast<GdkEvent *>(ev));				
-			} else if (flag_text) {
-				return flag_text->on_event(reinterpret_cast<GdkEvent *>(ev));				
-			}
 			scroll_tracks_up_line ();
 			return true;
 		}
@@ -138,13 +134,6 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (false);
 			return true;
 		} else {
-			if(midi_event) {
-				return midi_event->on_event(reinterpret_cast<GdkEvent *>(ev));
-			} else if (flag_rect) {
-				return flag_rect->on_event(reinterpret_cast<GdkEvent *>(ev));				
-			} else if (flag_text) {
-				return flag_text->on_event(reinterpret_cast<GdkEvent *>(ev));				
-			}
 			scroll_tracks_down_line ();
 			return true;
 		}

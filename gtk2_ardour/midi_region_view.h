@@ -109,16 +109,13 @@ class MidiRegionView : public RegionView
 		}
 	};
 	
-	/**
-	 * Adds a new program change flag to the canvas
+	/** Add a new program change flag to the canvas.
 	 * @param program the MidiRegionView::ControlEvent to add
 	 * @param the text to display in the flag
 	 */
 	void add_pgm_change(ControlEvent& program, string displaytext);
 	
-	/**
-	 * Looks up in the automation list in the specified time and channel and sets keys
-	 * fields accordingly
+	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the program change event
 	 * @param channel the MIDI channel of the event
 	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will 
@@ -126,32 +123,28 @@ class MidiRegionView : public RegionView
 	 */
 	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
 	
-	/**
-	 * changes the automation list data of old_program to the new values which correspond to new_patch
+	/** Change the 'automation' data of old_program to new values which correspond to new_patch.
 	 * @param old_program identifies the program change event which is to be altered
 	 * @param new_patch defines the new lsb, msb and program number which are to be set in the automation list data
 	 */
 	void alter_program_change(ControlEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
 	
-	/**
-	 * alters a given program to the new given one (called on context menu select on CanvasProgramChange)
+	/** Alter a given program to the new given one.
+	 * (Called on context menu select on CanvasProgramChange)
 	 */
 	void program_selected(
 		ArdourCanvas::CanvasProgramChange& program, 
 		const MIDI::Name::PatchPrimaryKey& new_patch);
 	
-	/**
-	 * alters a given program to be its predecessor in the MIDNAM file
+	/** Alter a given program to be its predecessor in the MIDNAM file.
 	 */
 	void previous_program(ArdourCanvas::CanvasProgramChange& program);
 
-	/**
-	 * alters a given program to be its successor in the MIDNAM file
+	/** Alters a given program to be its successor in the MIDNAM file.
 	 */
 	void next_program(ArdourCanvas::CanvasProgramChange& program);
 	
-	/**
-	 * displays all program changed events in the region as flags on the canvas
+	/** Displays all program changed events in the region as flags on the canvas.
 	 */
 	void find_and_insert_program_change_flags();
 
@@ -180,21 +173,19 @@ class MidiRegionView : public RegionView
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double dt, uint8_t dnote);
 
-	/**
+	/** Get the region position in pixels.
 	 * This function is needed to subtract the region start in pixels
 	 * from world coordinates submitted by the mouse
 	 */
-	double get_position_pixels(void);
+	double get_position_pixels();
 
-	/**
-	 * This function is called by CanvasMidiNote when resizing starts,
-	 * i.e. when the user presses mouse-2 on the note
+	/** Begin resizing of some notes.
+	 * Called by CanvasMidiNote when resizing starts.
 	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
 	 */
 	void  begin_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end);
 
-	/**
-	 * This function is called while the user moves the mouse when resizing notes
+	/** Update resizing notes while user drags.
 	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
 	 * @param x the difference in mouse motion, ie the motion difference if relative=true
 	 *           or the absolute mouse position (track-relative) if relative is false
@@ -202,24 +193,20 @@ class MidiRegionView : public RegionView
 	 */
 	void update_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double x, bool relative);
 
-	/**
-	 * This function is called while the user releases the mouse button when resizing notes
+	/** Finish resizing notes when the user releases the mouse button.
 	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
 	 * @param event_x the absolute mouse position (track-relative)
 	 * @param relative true if relative resizing is taking place, false if absolute resizing
 	 */
 	void commit_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double event_x, bool relative);
 
-	/**
-	 * This function is called while the user adjusts the velocity on a selection of notes
-	 * @param velocity the relative or absolute velocity, depending on the value of relative
-	 * @param relative true if the given velocity represents a delta to be applied to all notes, false
-	 *        if the absolute value of the note shoud be set
+	/** Adjust the velocity on a note, and the selection if applicable.
+	 * @param velocity the relative or absolute velocity
+	 * @param relative whether velocity is relative or absolute
 	 */
-	void change_velocity(uint8_t velocity, bool relative=false);
+	void change_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t velocity, bool relative=false);
 	
-	/**
-	 * This function is called when the user adjusts the midi channel of a selection of notes
+	/** Change the channel of the selection.
 	 * @param channel - the channel number of the new channel, zero-based
 	 */
 	void change_channel(uint8_t channel);
@@ -233,24 +220,20 @@ class MidiRegionView : public RegionView
 		double                     current_x;
 	};
 	
-	/**
-	 * This function provides the snap function for region position relative coordinates
+	/** Snap a region relative pixel coordinate to pixel units.
 	 * for pixel units (double) instead of nframes64_t
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped pixel coordinate relative to region start
 	 */
 	double snap_to_pixel(double x);
 
-	/**
-	 * This function provides the snap function for region position relative coordinates
-	 * for pixel units (double) instead of nframes64_t
+	/** Snap a region relative pixel coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped nframes64_t coordinate relative to region start
 	 */
 	nframes64_t snap_to_frame(double x);
 
-	/**
-	 * This function provides the snap function for region position relative coordinates
+	/** Snap a region relative frame coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped nframes64_t coordinate relative to region start
 	 */
@@ -258,11 +241,9 @@ class MidiRegionView : public RegionView
 	
   protected:
 
-    /**
-     * this constructor allows derived types
-     * to specify their visibility requirements
-     * to the TimeAxisViewItem parent class
-    */
+    /** Allows derived types to specify their visibility requirements
+     * to the TimeAxisViewItem parent class.
+     */
     MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
@@ -287,6 +268,8 @@ class MidiRegionView : public RegionView
 	
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
 	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
+	
+	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t velocity, bool relative=false);
 
 	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }

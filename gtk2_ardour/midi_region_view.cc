@@ -1338,7 +1338,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 			copy->set_note(new_pitch);
 			
 			command_remove_note(*i);
-			command_add_note(copy, true);
+			command_add_note(copy, (*i)->selected());
 
 			i = next;
 		}
@@ -1386,9 +1386,9 @@ MidiRegionView::snap_to_pixel(double x)
 }
 
 double
-MidiRegionView::get_position_pixels(void)
+MidiRegionView::get_position_pixels()
 {
-	nframes64_t  region_frame  = get_position();
+	nframes64_t region_frame = get_position();
 	return trackview.editor.frame_to_pixel(region_frame);
 }
 
@@ -1519,30 +1519,34 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 	apply_command();
 }
 
+void
+MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bool relative)
+{
+	const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(event->note().get())));
+
+	if (relative) {
+		uint8_t new_velocity = copy->velocity() + velocity;
+		clamp_0_to_127(new_velocity);
+		copy->set_velocity(new_velocity);
+	} else {
+		copy->set_velocity(velocity);			
+	}
+
+	command_remove_note(event);
+	command_add_note(copy, event->selected());
+}
 
 void
-MidiRegionView::change_velocity(uint8_t velocity, bool relative)
+MidiRegionView::change_velocity(CanvasNoteEvent* ev, int8_t velocity, bool relative)
 {
 	start_delta_command(_("change velocity"));
+	
+	change_note_velocity(ev, velocity, relative);
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
 		Selection::iterator next = i;
 		++next;
-
-		CanvasNoteEvent *event = *i;
-		const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(event->note().get())));
-
-		if (relative) {
-			uint8_t new_velocity = copy->velocity() + velocity;
-			clamp_0_to_127(new_velocity);
-				
-			copy->set_velocity(new_velocity);
-		} else { // absolute
-			copy->set_velocity(velocity);			
-		}
-		
-		command_remove_note(event);
-		command_add_note(copy, true);
-		
+		change_note_velocity(*i, velocity, relative);
 		i = next;
 	}
 	
@@ -1557,13 +1561,13 @@ MidiRegionView::change_channel(uint8_t channel)
 		Selection::iterator next = i;
 		++next;
 
-		CanvasNoteEvent *event = *i;
+		CanvasNoteEvent* event = *i;
 		const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(event->note().get())));
 
 		copy->set_channel(channel);
 		
 		command_remove_note(event);
-		command_add_note(copy, true);
+		command_add_note(copy, event->selected());
 		
 		i = next;
 	}

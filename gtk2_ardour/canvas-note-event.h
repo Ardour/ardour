@@ -20,19 +20,19 @@
 #ifndef __gtk_ardour_canvas_midi_event_h__
 #define __gtk_ardour_canvas_midi_event_h__
 
-
+#include <boost/shared_ptr.hpp>
 #include <libgnomecanvasmm/text.h>
 #include <libgnomecanvasmm/widget.h>
-#include <ardour/midi_model.h>
 
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 #include "ui_config.h"
-#include "simplerect.h"
-#include "midi_channel_selector.h"
+#include "interactive-item.h"
 
 class Editor;
 class MidiRegionView;
+
+namespace Evoral { class Note; }
 
 namespace Gnome {
 namespace Canvas {
@@ -49,7 +49,7 @@ namespace Canvas {
  *
  * A newer, better canvas should remove the need for all the ugly here.
  */
-class CanvasNoteEvent : public sigc::trackable {
+class CanvasNoteEvent : public sigc::trackable, public InteractiveItem {
 public:
 	CanvasNoteEvent(
 			MidiRegionView&                       region,
@@ -75,7 +75,6 @@ public:
 	void on_channel_selection_change(uint16_t selection);
 	
 	void show_channel_selector();
-	
 	void hide_channel_selector();
 
 	virtual void set_outline_color(uint32_t c) = 0;

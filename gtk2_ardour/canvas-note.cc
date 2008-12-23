@@ -17,7 +17,7 @@ CanvasNote::on_event(GdkEvent* ev)
 	static NoteEnd  note_end;
 	Editing::MidiEditMode edit_mode = _region.get_trackview().editor.current_midi_edit_mode();
 
-	switch(ev->type) {
+	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 2 ||
 				(ev->button.button == 1 &&
@@ -26,7 +26,7 @@ CanvasNote::on_event(GdkEvent* ev)
 			event_x = ev->button.x;
 			middle_point = region_start + x1() + (x2() - x1()) / 2.0L;
 
-			if(event_x <= middle_point) {
+			if (event_x <= middle_point) {
 				cursor = Gdk::Cursor(Gdk::LEFT_SIDE);
 				note_end = NOTE_ON;
 			} else {
