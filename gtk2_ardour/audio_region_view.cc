@@ -1004,8 +1004,8 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	/* compute vertical fractional position */
 
-	y = 1.0 - (y / (trackview.current_height() - NAME_HIGHLIGHT_SIZE));
-	
+	y = 1.0 - (y / (_height - NAME_HIGHLIGHT_SIZE));
+
 	/* map using gain line */
 
 	gain_line->view_to_model_y (y);

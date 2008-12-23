@@ -84,7 +84,8 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	trackview.session().register_with_memento_command_factory(alist->id(), this);
 
-	if (alist->parameter().type() == GainAutomation) {
+	if (alist->parameter().type() == GainAutomation ||
+	    alist->parameter().type() == EnvelopeAutomation) {
 		set_uses_gain_mapping (true);
 	}
 
@@ -1245,7 +1246,8 @@ void
 AutomationLine::view_to_model_y (double& y) const
 {
 	/* TODO: This should be more generic ... */
-	if (alist->parameter().type() == GainAutomation) {
+	if (alist->parameter().type() == GainAutomation ||
+	    alist->parameter().type() == EnvelopeAutomation) {
 		y = slider_position_to_gain (y);
 		y = max (0.0, y);
 		y = min (2.0, y);
@@ -1263,7 +1265,8 @@ void
 AutomationLine::model_to_view_y (double& y) const
 {
 	/* TODO: This should be more generic ... */
-	if (alist->parameter().type() == GainAutomation) {
+	if (alist->parameter().type() == GainAutomation ||
+	    alist->parameter().type() == EnvelopeAutomation) {
 		y = gain_to_slider_position (y);
 	} else if (alist->parameter().type() == PanAutomation) {
 		// vertical coordinate axis reversal
