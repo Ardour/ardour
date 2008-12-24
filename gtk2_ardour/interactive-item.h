@@ -52,9 +52,7 @@ public:
 	{}
 	
 	bool on_event(GdkEvent* ev) {
-		std::cerr << "InteractiveRect::on_event(GdkEvent* ev)" << std::endl;
 		if(_parent_item) {
-			std::cerr << " parent not null" << std::endl;
 			return _parent_item->on_event(ev);
 		} else {
 			return false;
@@ -74,9 +72,7 @@ public:
 		{}
 	
 	bool on_event(GdkEvent* ev) {
-		std::cerr << "InteractiveRect::on_event(GdkEvent* ev)" << std::endl;
 		if(_parent_item) {
-			std::cerr << " parent not null" << std::endl;
 			return _parent_item->on_event(ev);
 		} else {
 			return false;

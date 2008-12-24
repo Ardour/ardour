@@ -186,6 +186,7 @@ CanvasNoteEvent::base_color()
 	ColorMode mode = _region.color_mode();
 	
 	const uint8_t minimal_opaqueness = 15;
+	uint8_t       opaqueness = std::max(minimal_opaqueness, uint8_t(_note->velocity() + _note->velocity()));
 	
 	switch (mode) {
 	case TrackColor:
@@ -195,12 +196,12 @@ CanvasNoteEvent::base_color()
 					SCALE_USHORT_TO_UINT8_T(color.get_red()), 
 					SCALE_USHORT_TO_UINT8_T(color.get_green()), 
 					SCALE_USHORT_TO_UINT8_T(color.get_blue()), 
-					minimal_opaqueness + _note->velocity());
+					opaqueness);
 		}
 		
 	case ChannelColors:
 		return UINT_RGBA_CHANGE_A(CanvasNoteEvent::midi_channel_colors[_note->channel()], 
-				                  minimal_opaqueness + _note->velocity());
+				                  opaqueness);
 		
 	default:
 		return meter_style_fill_color(_note->velocity());

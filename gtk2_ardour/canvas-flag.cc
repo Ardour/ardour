@@ -48,6 +48,5 @@ CanvasFlag::~CanvasFlag()
 bool
 CanvasFlag::on_event(GdkEvent* ev)
 {
-	cerr << "CanvasFlag::on_event(GdkEvent* ev)" << endl;
 	return false;
 }
