@@ -62,8 +62,8 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	
 	Gnome::Canvas::Item* item = track_canvas->get_item_at(ev->x, ev->y);
 	InteractiveItem* interactive_item = dynamic_cast<InteractiveItem*>(item);
-	if (interactive_item && interactive_item->on_event(reinterpret_cast<GdkEvent*>(ev))) {
-		return true;
+	if (interactive_item) {
+		return interactive_item->on_event(reinterpret_cast<GdkEvent*>(ev));
 	}
 
   retry:

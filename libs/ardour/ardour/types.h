@@ -139,6 +139,12 @@ namespace ARDOUR {
 		FilterChannels,  ///< Ignore events on certain channels
 		ForceChannel     ///< Force all events to a certain channel
 	};
+	
+	enum ColorMode {
+		MeterColors = 0,
+		ChannelColors,
+		TrackColor
+	};
 
 	enum EventTimeUnit {
 		Frames,

@@ -93,8 +93,12 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	, _range_scroomer(0)
 	, _piano_roll_header(0)
 	, _note_mode(Sustained)
-	, _note_mode_item(NULL)
-	, _percussion_mode_item(NULL)
+	, _note_mode_item(0)
+	, _percussion_mode_item(0)
+	, _color_mode(MeterColors)
+	, _meter_color_mode_item(0)
+	, _channel_color_mode_item(0)
+	, _track_color_mode_item(0)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -322,6 +326,34 @@ MidiTimeAxisView::build_mode_menu()
 
 	return mode_menu;
 }
+
+Gtk::Menu*
+MidiTimeAxisView::build_color_mode_menu()
+{
+	using namespace Menu_Helpers;
+
+	Menu* mode_menu = manage (new Menu);
+	MenuList& items = mode_menu->items();
+	mode_menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group mode_group;
+	items.push_back (RadioMenuElem (mode_group, _("Meter Colors"),
+				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), MeterColors)));
+	_meter_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	_meter_color_mode_item->set_active(_color_mode == MeterColors);
+
+	items.push_back (RadioMenuElem (mode_group, _("Channel Colors"),
+				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), ChannelColors)));
+	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	_channel_color_mode_item->set_active(_color_mode == ChannelColors);
+	
+	items.push_back (RadioMenuElem (mode_group, _("Track Color"),
+				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), TrackColor)));
+	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	_channel_color_mode_item->set_active(_color_mode == TrackColor);
+		
+	return mode_menu;
+}
 	
 void
 MidiTimeAxisView::set_note_mode(NoteMode mode)
@@ -333,6 +365,14 @@ MidiTimeAxisView::set_note_mode(NoteMode mode)
 	}
 }
 
+void
+MidiTimeAxisView::set_color_mode(ColorMode mode)
+{
+	if (_color_mode != mode) {
+		_color_mode = mode;
+		_view->redisplay_diskstream();
+	}
+}
 
 void
 MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)

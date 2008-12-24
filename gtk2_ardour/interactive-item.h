@@ -20,6 +20,9 @@
 #ifndef __ardour_interactive_item_h__
 #define __ardour_interactive_item_h__
 
+#include <libgnomecanvasmm/text.h>
+#include "simplerect.h"
+
 namespace Gnome {
 namespace Canvas {
 
@@ -34,6 +37,53 @@ public:
 	virtual bool on_event(GdkEvent* ev) = 0;
 };
 
+/** A canvas text that forwards events to its parent.
+ */
+class InteractiveText : public Text, public InteractiveItem {
+public:
+	InteractiveText(Group& parent, double x, double y, const Glib::ustring& text) 
+		: Text(parent, x, y, text) 
+	{
+		_parent = dynamic_cast<InteractiveItem*>(&parent);
+	}
+	
+	InteractiveText(Group& parent)
+		: Text(parent) 
+	{
+		_parent = dynamic_cast<InteractiveItem*>(&parent);		
+	}
+	
+	bool on_event(GdkEvent* ev) {
+		if(_parent) {
+			return _parent->on_event(ev);
+		} else {
+			return false;
+		}
+	}
+
+protected:
+	InteractiveItem* _parent;
+};
+
+class InteractiveRect: public SimpleRect, public InteractiveItem
+{
+public:
+	InteractiveRect(Group& parent, double x1, double y1, double x2, double y2) 
+		: SimpleRect(parent, x1, y1, x2, y2) {
+		_parent = dynamic_cast<InteractiveItem*>(&parent);
+	}
+	
+	bool on_event(GdkEvent* ev) {
+		if(_parent) {
+			return _parent->on_event(ev);
+		} else {
+			return false;
+		}
+	}
+
+protected:
+	InteractiveItem* _parent;
+};
 
 } /* namespace Canvas */
 } /* namespace Gnome */

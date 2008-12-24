@@ -65,6 +65,8 @@ public:
 
 	void move_event(double dx, double dy);
 	
+	uint32_t base_color();
+	
 	void show_velocity();
 	void hide_velocity();
 	
@@ -101,11 +103,6 @@ public:
 					((vel-64) / (double)63.0));
 		}
 	}
-
-	inline static uint32_t meter_style_outline_color(uint8_t vel)
-	{
-		return calculate_outline(meter_style_fill_color(vel));
-	}
 	
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color) 
@@ -121,7 +118,7 @@ protected:
 
 	MidiRegionView&                       _region;
 	Item* const                           _item;
-	Text*                                 _text;
+	InteractiveText*                      _text;
 	Widget*                               _channel_selector_widget;
 	State                                 _state;
 	const boost::shared_ptr<Evoral::Note> _note;

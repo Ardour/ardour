@@ -2,23 +2,20 @@
 #define CANVASFLAG_H_
 
 #include <libgnomecanvasmm/group.h>
-#include <libgnomecanvasmm/text.h>
 #include <libgnomecanvasmm/widget.h>
 
 #include <ardour/midi_model.h>
 
 #include "simplerect.h"
 #include "simpleline.h"
+#include "interactive-item.h"
 
 class MidiRegionView;
 
 namespace Gnome {
 namespace Canvas {
 
-class CanvasFlagRect;
-class CanvasFlagText;
-
-class CanvasFlag : public Group
+class CanvasFlag : public Group, public InteractiveItem
 {
 public:
 	CanvasFlag(
@@ -46,7 +43,7 @@ public:
 	void set_text(string& a_text);
 
 protected:
-	CanvasFlagText*                   _text;
+	InteractiveText*                  _text;
 	double                            _height;
 	guint                             _outline_color_rgba;
 	guint                             _fill_color_rgba;
@@ -56,48 +53,7 @@ private:
 	void delete_allocated_objects();
 	
 	SimpleLine*                       _line;
-	CanvasFlagRect*                   _rect;
-};
-
-class CanvasFlagText: public Text
-{
-public:
-	CanvasFlagText(Group& parent, double x, double y, const Glib::ustring& text) 
-		: Text(parent, x, y, text) {
-		_parent = dynamic_cast<CanvasFlag*>(&parent);
-;
-	}
-	
-	virtual bool on_event(GdkEvent* ev) {
-		if(_parent) {
-			return _parent->on_event(ev);
-		} else {
-			return false;
-		}
-	}
-
-private:
-	CanvasFlag* _parent;
-};
-
-class CanvasFlagRect: public SimpleRect
-{
-public:
-	CanvasFlagRect(Group& parent, double x1, double y1, double x2, double y2) 
-		: SimpleRect(parent, x1, y1, x2, y2) {
-		_parent = dynamic_cast<CanvasFlag*>(&parent);
-	}
-	
-	virtual bool on_event(GdkEvent* ev) {
-		if(_parent) {
-			return _parent->on_event(ev);
-		} else {
-			return false;
-		}
-	}
-
-private:
-	CanvasFlag* _parent;
+	InteractiveRect*                  _rect;
 };
 
 

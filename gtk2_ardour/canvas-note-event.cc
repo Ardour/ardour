@@ -75,7 +75,7 @@ void
 CanvasNoteEvent::show_velocity()
 {
 	hide_velocity();
-	_text = new Text(*(_item->property_parent()));
+	_text = new InteractiveText(*(_item->property_parent()));
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
 	ostringstream velo(ios::ate);
@@ -158,24 +158,47 @@ CanvasNoteEvent::hide_channel_selector(void)
 }
 
 void
-CanvasNoteEvent::selected(bool yn)
+CanvasNoteEvent::selected(bool selected)
 {
 	if (!_note) {
 		return;
-	} else if (yn) {
-		set_fill_color(UINT_INTERPOLATE(meter_style_fill_color(_note->velocity()),
+	} else if (selected) {
+		set_fill_color(UINT_INTERPOLATE(base_color(),
 					ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.1));
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
 		show_velocity();
 	} else {
-		set_fill_color(meter_style_fill_color(_note->velocity()));
-		set_outline_color(meter_style_outline_color(_note->velocity()));
+		set_fill_color(base_color());
+		set_outline_color(calculate_outline(base_color()));
 		hide_velocity();
 	}
 
-	_selected = yn;
+	_selected = selected;
 }
 
+uint32_t 
+CanvasNoteEvent::base_color()
+{
+	using namespace ARDOUR;
+	
+	ColorMode mode = _region.color_mode();
+	
+	switch (mode) {
+	case TrackColor:
+		{
+			Gdk::Color color = _region.midi_stream_view()->get_region_color();
+			return RGBA_TO_UINT(color.get_red(), color.get_green(), color.get_blue(), 0xff);
+		}
+		
+	case ChannelColors:
+		return CanvasNoteEvent::midi_channel_colors[_note->channel()];
+		
+	default:
+		return meter_style_fill_color(_note->velocity());
+	};
+	
+	return 0;
+}
 
 bool
 CanvasNoteEvent::on_event(GdkEvent* ev)
@@ -188,6 +211,8 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	bool select_mod;
 	uint8_t d_velocity = 10;
 
+	cerr << "CanvasNoteEvent::on_event(GdkEvent* ev)" << endl;
+	
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
 

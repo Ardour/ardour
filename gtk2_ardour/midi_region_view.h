@@ -83,6 +83,8 @@ class MidiRegionView : public RegionView
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
+	inline ARDOUR::ColorMode color_mode() const { return midi_view()->color_mode(); }
+	
 	void set_frame_color();
 
 	void redisplay_model();

@@ -73,7 +73,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_parameter_track (const Evoral::Parameter& param);
 	void create_automation_child (const Evoral::Parameter& param, bool show);
 
-	ARDOUR::NoteMode note_mode() const { return _note_mode; }
+	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
+	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 
 	void update_range();
 	
@@ -94,8 +95,10 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void append_extra_display_menu_items ();
 	void build_automation_action_menu ();
 	Gtk::Menu* build_mode_menu();
+	Gtk::Menu* build_color_mode_menu();
 
-	void set_note_mode(ARDOUR::NoteMode mode);
+	void set_note_mode (ARDOUR::NoteMode mode);
+	void set_color_mode(ARDOUR::ColorMode mode);
 	void set_note_range(MidiStreamView::VisibleNoteRange range);
 
 	void route_active_changed ();
@@ -109,6 +112,10 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	ARDOUR::NoteMode             _note_mode;
 	Gtk::RadioMenuItem*          _note_mode_item;
 	Gtk::RadioMenuItem*          _percussion_mode_item;
+	ARDOUR::ColorMode            _color_mode;
+	Gtk::RadioMenuItem*          _meter_color_mode_item;
+	Gtk::RadioMenuItem*          _channel_color_mode_item;
+	Gtk::RadioMenuItem*          _track_color_mode_item;
 	Gtk::VBox                    _midi_controls_box;
 	MidiMultipleChannelSelector  _channel_selector;
 	Gtk::ComboBoxText            _model_selector;

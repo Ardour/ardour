@@ -24,7 +24,7 @@ CanvasFlag::set_text(string& a_text)
 {
 	delete_allocated_objects();
 	
-	_text = new CanvasFlagText(*this, 0.0, 0.0, Glib::ustring(a_text));
+	_text = new InteractiveText(*this, 0.0, 0.0, Glib::ustring(a_text));
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = _outline_color_rgba;
 	double flagwidth  = _text->property_text_width()  + 10.0;
@@ -34,11 +34,10 @@ CanvasFlag::set_text(string& a_text)
 	_text->show();
 	_line = new SimpleLine(*this, 0.0, 0.0, 0.0, _height);
 	_line->property_color_rgba() = _outline_color_rgba;
-	_rect = new CanvasFlagRect(*this, 0.0, 0.0, flagwidth, flagheight);
+	_rect = new InteractiveRect(*this, 0.0, 0.0, flagwidth, flagheight);
 	_rect->property_outline_color_rgba() = _outline_color_rgba;
 	_rect->property_fill_color_rgba() = _fill_color_rgba;
-	_text->lower_to_bottom();
-	_text->raise(2);	
+	_text->raise_to_top();	
 }
 
 CanvasFlag::~CanvasFlag()
