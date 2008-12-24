@@ -41,48 +41,51 @@ public:
  */
 class InteractiveText : public Text, public InteractiveItem {
 public:
-	InteractiveText(Group& parent, double x, double y, const Glib::ustring& text) 
+	InteractiveText(Group& parent, InteractiveItem* parent_item, double x, double y, const Glib::ustring& text) 
 		: Text(parent, x, y, text) 
-	{
-		_parent = dynamic_cast<InteractiveItem*>(&parent);
-	}
+		, _parent_item(parent_item)
+	{}
 	
-	InteractiveText(Group& parent)
-		: Text(parent) 
-	{
-		_parent = dynamic_cast<InteractiveItem*>(&parent);		
-	}
+	InteractiveText(Group& parent, InteractiveItem* parent_item)
+		: Text(parent)
+		, _parent_item(parent_item)
+	{}
 	
 	bool on_event(GdkEvent* ev) {
-		if(_parent) {
-			return _parent->on_event(ev);
+		std::cerr << "InteractiveRect::on_event(GdkEvent* ev)" << std::endl;
+		if(_parent_item) {
+			std::cerr << " parent not null" << std::endl;
+			return _parent_item->on_event(ev);
 		} else {
 			return false;
 		}
 	}
-
+	
 protected:
-	InteractiveItem* _parent;
+	InteractiveItem* _parent_item;
 };
 
 class InteractiveRect: public SimpleRect, public InteractiveItem
 {
 public:
-	InteractiveRect(Group& parent, double x1, double y1, double x2, double y2) 
-		: SimpleRect(parent, x1, y1, x2, y2) {
-		_parent = dynamic_cast<InteractiveItem*>(&parent);
-	}
+	InteractiveRect(Group& parent, InteractiveItem* parent_item, double x1, double y1, double x2, double y2) 
+		: SimpleRect(parent, x1, y1, x2, y2) 
+		, _parent_item(parent_item)
+		{}
 	
 	bool on_event(GdkEvent* ev) {
-		if(_parent) {
-			return _parent->on_event(ev);
+		std::cerr << "InteractiveRect::on_event(GdkEvent* ev)" << std::endl;
+		if(_parent_item) {
+			std::cerr << " parent not null" << std::endl;
+			return _parent_item->on_event(ev);
 		} else {
 			return false;
 		}
 	}
 
+
 protected:
-	InteractiveItem* _parent;
+	InteractiveItem* _parent_item;
 };
 
 } /* namespace Canvas */

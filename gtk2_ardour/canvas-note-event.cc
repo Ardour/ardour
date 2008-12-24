@@ -32,10 +32,10 @@ namespace Canvas {
 
 /// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
 const uint32_t CanvasNoteEvent::midi_channel_colors[16] = {
-	  0xd32d2d00,  0xd36b2d00,  0xd3972d00,  0xd3d12d00,  
-	  0xa0d32d00,  0x7dd32d00,  0x2dd45e00,  0x2dd3c400,  
-	  0x2da5d300,  0x2d6fd300,  0x432dd300,  0x662dd300,  
-	  0x832dd300,  0xa92dd300,  0xd32dbf00,  0xd32d6700 
+	  0xd32d2dff,  0xd36b2dff,  0xd3972dff,  0xd3d12dff,  
+	  0xa0d32dff,  0x7dd32dff,  0x2dd45eff,  0x2dd3c4ff,  
+	  0x2da5d3ff,  0x2d6fd3ff,  0x432dd3ff,  0x662dd3ff,  
+	  0x832dd3ff,  0xa92dd3ff,  0xd32dbfff,  0xd32d67ff
 	};
 
 CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
@@ -75,7 +75,7 @@ void
 CanvasNoteEvent::show_velocity()
 {
 	hide_velocity();
-	_text = new InteractiveText(*(_item->property_parent()));
+	_text = new InteractiveText(*(_item->property_parent()), this);
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
 	ostringstream velo(ios::ate);
@@ -176,6 +176,8 @@ CanvasNoteEvent::selected(bool selected)
 	_selected = selected;
 }
 
+#define SCALE_USHORT_TO_UINT8_T(x) ((x) / 257)
+
 uint32_t 
 CanvasNoteEvent::base_color()
 {
@@ -183,15 +185,22 @@ CanvasNoteEvent::base_color()
 	
 	ColorMode mode = _region.color_mode();
 	
+	const uint8_t minimal_opaqueness = 15;
+	
 	switch (mode) {
 	case TrackColor:
 		{
 			Gdk::Color color = _region.midi_stream_view()->get_region_color();
-			return RGBA_TO_UINT(color.get_red(), color.get_green(), color.get_blue(), 0xff);
+			return RGBA_TO_UINT(
+					SCALE_USHORT_TO_UINT8_T(color.get_red()), 
+					SCALE_USHORT_TO_UINT8_T(color.get_green()), 
+					SCALE_USHORT_TO_UINT8_T(color.get_blue()), 
+					minimal_opaqueness + _note->velocity());
 		}
 		
 	case ChannelColors:
-		return CanvasNoteEvent::midi_channel_colors[_note->channel()];
+		return UINT_RGBA_CHANGE_A(CanvasNoteEvent::midi_channel_colors[_note->channel()], 
+				                  minimal_opaqueness + _note->velocity());
 		
 	default:
 		return meter_style_fill_color(_note->velocity());
@@ -210,8 +219,6 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	double event_x, event_y, dx, dy;
 	bool select_mod;
 	uint8_t d_velocity = 10;
-
-	cerr << "CanvasNoteEvent::on_event(GdkEvent* ev)" << endl;
 	
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
