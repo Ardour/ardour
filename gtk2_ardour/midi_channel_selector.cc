@@ -21,6 +21,7 @@
 #include "midi_channel_selector.h"
 #include "gtkmm/separator.h"
 #include "i18n.h"
+#include "rgb_macros.h"
 
 using namespace std;
 using namespace Gtk;
@@ -61,6 +62,32 @@ MidiChannelSelector::MidiChannelSelector(int no_rows, int no_columns, int start_
 
 MidiChannelSelector::~MidiChannelSelector()
 {
+}
+
+void
+MidiChannelSelector::set_channel_colors(const uint32_t new_channel_colors[16])
+{
+	for (int row = 0; row < 4; ++row) {
+		for (int column = 0; column < 4; ++column) {
+			char color_normal[8];
+			char color_active[8];
+			snprintf(color_normal, 8, "#%x", UINT_INTERPOLATE(new_channel_colors[row * 4 + column], 0x000000ff, 0.6));
+			snprintf(color_active, 8, "#%x", new_channel_colors[row * 4 + column]);
+			_buttons[row][column].modify_bg(STATE_NORMAL, Gdk::Color(color_normal));
+			_buttons[row][column].modify_bg(STATE_ACTIVE, Gdk::Color(color_active));
+		}
+	}
+}
+
+void
+MidiChannelSelector::set_default_channel_color()
+{
+	for (int row = 0; row < 4; ++row) {
+		for (int column = 0; column < 4; ++column) {
+			_buttons[row][column].unset_bg(STATE_NORMAL);
+			_buttons[row][column].unset_bg(STATE_ACTIVE);
+		}
+	}
 }
 
 SingleMidiChannelSelector::SingleMidiChannelSelector(uint8_t active_channel)

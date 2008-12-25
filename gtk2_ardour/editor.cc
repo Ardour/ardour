@@ -3241,13 +3241,16 @@ Editor::setup_toolbar ()
 }
 
 void
-Editor::midi_panic_toggle ()
+Editor::midi_panic_button_pressed ()
 {
 	if (session) {
 		session->midi_panic();
-		midi_panic_button.set_active (false);
-		midi_panic_button.set_state (STATE_NORMAL);
 	}
+}
+
+void Editor::midi_sound_notes_toggled ()
+{
+	cerr << "toggle sound notes" << endl;
 }
 
 void
@@ -3281,18 +3284,18 @@ Editor::setup_midi_toolbar ()
 	midi_tool_button_box.pack_start(midi_tool_pencil_button, true, true);
 	midi_tool_button_box.pack_start(midi_tool_select_button, true, true);
 	midi_tool_button_box.pack_start(midi_tool_resize_button, true, true);
-	midi_tool_button_box.pack_start(midi_tool_erase_button, true, true);
+	midi_tool_button_box.pack_start(midi_tool_erase_button , true, true);
 	midi_tool_button_box.set_homogeneous(true);
 
 	midi_tool_pencil_button.set_name ("MouseModeButton");
 	midi_tool_select_button.set_name ("MouseModeButton");
 	midi_tool_resize_button.set_name ("MouseModeButton");
-	midi_tool_erase_button.set_name ("MouseModeButton");
+	midi_tool_erase_button .set_name ("MouseModeButton");
 
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_pencil_button, _("Add/Move/Stretch Notes"));
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_select_button, _("Select/Move Notes"));
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_resize_button, _("Resize Notes"));
-	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_erase_button, _("Erase Notes"));
+	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_erase_button,  _("Erase Notes"));
 
 	midi_tool_pencil_button.unset_flags (CAN_FOCUS);
 	midi_tool_select_button.unset_flags (CAN_FOCUS);
@@ -3308,12 +3311,22 @@ Editor::setup_midi_toolbar ()
 	midi_tool_erase_button.signal_toggled().connect (bind (mem_fun(*this,
 				&Editor::midi_edit_mode_toggled), Editing::MidiEditErase));
 
+	
+	/* Midi sound notes */
+	midi_sound_notes.add (*(manage (new Image (::get_icon("midi_sound_notes")))));
+	midi_sound_notes.set_relief(Gtk::RELIEF_NONE);
+	ARDOUR_UI::instance()->tooltips().set_tip (midi_sound_notes, _("Sound Notes"));
+	midi_sound_notes.unset_flags (CAN_FOCUS);
+	midi_sound_notes.signal_toggled().connect (mem_fun(*this,
+				&Editor::midi_sound_notes_toggled));
+	
 	/* Panic */
 	
-	VBox* panic_box = manage (new VBox);
+	HBox* panic_box = manage (new HBox);
 	midi_panic_button.set_name("MidiPanicButton");
 	midi_panic_button.signal_pressed().connect (
-			mem_fun(this, &Editor::midi_panic_toggle));
+			mem_fun(this, &Editor::midi_panic_button_pressed));
+	panic_box->pack_start (midi_sound_notes , true, true);
 	panic_box->pack_start (midi_panic_button, true, true);
 	
 	/* Pack everything in... */

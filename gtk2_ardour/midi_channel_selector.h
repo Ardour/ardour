@@ -38,6 +38,9 @@ public:
 	
 	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
 	
+	void set_channel_colors(const uint32_t new_channel_colors[16]);
+	void set_default_channel_color();
+	
 protected:
 	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr) = 0;
 	Gtk::Label        _button_labels[4][4];

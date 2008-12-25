@@ -1749,9 +1749,13 @@ public:
 	Gtk::ToggleButton        midi_tool_select_button;
 	Gtk::ToggleButton        midi_tool_resize_button;
 	Gtk::ToggleButton        midi_tool_erase_button;
-	Gtk::ToggleButton        midi_panic_button;
+	Gtk::Button              midi_panic_button;
+	Gtk::ToggleButton        midi_sound_notes;
 	GroupedButtons          *midi_tool_button_set;
 	void                     midi_edit_mode_toggled (Editing::MidiEditMode m);
+	void                     midi_panic_button_pressed ();
+	void                     midi_sound_notes_toggled();
+	
 	bool                     ignore_midi_edit_mode_toggle;
 
 	Gtkmm2ext::TearOff* midi_tools_tearoff;
@@ -1759,7 +1763,6 @@ public:
 	Gtk::EventBox       midi_toolbar_base;
 	Gtk::Frame          midi_toolbar_frame;
 	
-	void midi_panic_toggle ();
 	void setup_midi_toolbar ();
 
 	/* selection process */

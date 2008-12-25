@@ -71,6 +71,7 @@
 #include "midi_scroomer.h"
 #include "piano_roll_header.h"
 #include "ghostregion.h"
+#include "canvas-note-event.h"
 
 #include <ardour/midi_track.h>
 
@@ -369,6 +370,12 @@ void
 MidiTimeAxisView::set_color_mode(ColorMode mode)
 {
 	if (_color_mode != mode) {
+		if (mode == ChannelColors) {
+			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+		} else {
+			_channel_selector.set_default_channel_color();
+		}
+
 		_color_mode = mode;
 		_view->redisplay_diskstream();
 	}
