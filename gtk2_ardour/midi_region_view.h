@@ -261,7 +261,15 @@ class MidiRegionView : public RegionView
 	void reset_width_dependent_items (double pixel_width);
 
   private:
-
+	/** play back the given MIDI note immediately
+	 */
+	void play_midi_note(boost::shared_ptr<Evoral::Note> note);
+	
+	/** play back the NoteOff-Event of the given note (used by
+	 * @ref play_midi_note() ) after waiting the duration of the MIDI Note
+	 */
+	void play_midi_note_off(boost::shared_ptr<Evoral::Note> note);
+	  
 	void clear_events();
 	void switch_source(boost::shared_ptr<ARDOUR::Source> src);
 

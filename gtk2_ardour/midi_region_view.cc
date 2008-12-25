@@ -887,6 +887,36 @@ MidiRegionView::extend_active_notes()
 	}
 }
 
+void 
+MidiRegionView::play_midi_note(boost::shared_ptr<Evoral::Note> note)
+{
+	if (!trackview.editor.is_midi_sound_notes_active()) {
+		cerr << "not_active " << endl;
+		return;
+	}
+	
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+	assert(route_ui);
+	
+	route_ui->midi_track()->write_immediate_event(note->on_event().size(), note->on_event().buffer());
+	
+	Glib::Thread::create(bind(mem_fun(this, &MidiRegionView::play_midi_note_off), note), false);
+
+}
+
+void 
+MidiRegionView::play_midi_note_off(boost::shared_ptr<Evoral::Note> note)
+{
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+	assert(route_ui);
+	
+	Glib::usleep(
+		(note->off_event().time() - note->on_event().time()) * 
+		(1000000 / route_ui->session().nominal_frame_rate())
+	);
+	route_ui->midi_track()->write_immediate_event(note->off_event().size(), note->off_event().buffer());
+}
+
 
 /** Add a MIDI note to the view (with length).
  *
@@ -1181,6 +1211,7 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 	}
 
 	_selection.insert(ev);
+	play_midi_note(ev->note());
 
 	if ( ! ev->selected()) {
 		ev->selected(true);

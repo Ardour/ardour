@@ -3248,11 +3248,6 @@ Editor::midi_panic_button_pressed ()
 	}
 }
 
-void Editor::midi_sound_notes_toggled ()
-{
-	cerr << "toggle sound notes" << endl;
-}
-
 void
 Editor::setup_midi_toolbar ()
 {
@@ -3317,8 +3312,6 @@ Editor::setup_midi_toolbar ()
 	midi_sound_notes.set_relief(Gtk::RELIEF_NONE);
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_sound_notes, _("Sound Notes"));
 	midi_sound_notes.unset_flags (CAN_FOCUS);
-	midi_sound_notes.signal_toggled().connect (mem_fun(*this,
-				&Editor::midi_sound_notes_toggled));
 	
 	/* Panic */
 	
