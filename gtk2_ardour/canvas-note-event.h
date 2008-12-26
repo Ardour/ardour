@@ -58,7 +58,7 @@ public:
 
 	virtual ~CanvasNoteEvent();
 
-	bool on_event(GdkEvent* ev);
+	virtual bool on_event(GdkEvent* ev);
 
 	bool selected() const { return _selected; }
 	void selected(bool yn);
