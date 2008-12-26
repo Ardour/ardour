@@ -164,8 +164,9 @@ CanvasNoteEvent::selected(bool selected)
 		return;
 	} else if (selected) {
 		set_fill_color(UINT_INTERPOLATE(base_color(),
-					ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.1));
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
+				ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5));
+		set_outline_color(calculate_outline(
+				ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
 		show_velocity();
 	} else {
 		set_fill_color(base_color());
