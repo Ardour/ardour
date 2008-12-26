@@ -703,7 +703,6 @@ MidiTrack::unfreeze ()
 void
 MidiTrack::set_note_mode (NoteMode m)
 {
-	cout << _name << " SET NOTE MODE " << m << endl;
 	_note_mode = m;
 	midi_diskstream()->set_note_mode(m);
 }

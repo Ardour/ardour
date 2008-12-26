@@ -1012,7 +1012,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
 		event = 0;
 	}
 
-	if (event) {			
+	if (event) {
 		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
 			note_selected(event, true);
 		}
@@ -1577,7 +1577,9 @@ MidiRegionView::change_velocity(CanvasNoteEvent* ev, int8_t velocity, bool relat
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
 		Selection::iterator next = i;
 		++next;
-		change_note_velocity(*i, velocity, relative);
+		if ( !(*((*i)->note()) == *(ev->note())) ) {
+			change_note_velocity(*i, velocity, relative);
+		}
 		i = next;
 	}
 	
