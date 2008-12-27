@@ -96,7 +96,7 @@ MidiBuffer::copy(const MidiBuffer& copy)
 
 
 /** Read events from @a src starting at time @a offset into the START of this buffer, for
- * time direction @a nframes.  Relative time, where 0 = start of buffer.
+ * time duration @a nframes.  Relative time, where 0 = start of buffer.
  *
  * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
  */
@@ -118,13 +118,16 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	// FIXME: slow
 	for (size_t i=0; i < msrc.size(); ++i) {
 		const Evoral::MIDIEvent& ev = msrc[i];
-		if (ev.time() < offset)
-		    continue;
-		if (ev.time() < (nframes + offset)) {
-			//cout << "MidiBuffer::read_from got event, " << int(ev.type()) << " time: " << ev.time() << " buffer size: " << _size << endl;
+		//cout << "MidiBuffer::read_from event type: " << int(ev.type())
+		//		<< " time: " << ev.time() << " buffer size: " << _size << endl;
+		if (ev.time() < offset) {
+			//cout << "MidiBuffer::read_from skipped event before " << offset << endl;
+		} else if (ev.time() < (nframes + offset)) {
+			//cout << "MidiBuffer::read_from appending event" << endl;
 			push_back(ev);
 		} else {
-			cerr << "MidiBuffer event out of range, " << ev.time() << endl;
+			//cerr << "MidiBuffer::read_from skipped event after "
+			//	<< nframes << " + " << offset << endl;
 		}
 	}
 
@@ -142,18 +145,25 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 bool
 MidiBuffer::push_back(const Evoral::MIDIEvent& ev)
 {
-	if (_size == _capacity)
+	if (_size == _capacity) {
+		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
+	}
 
 	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
 	memcpy(write_loc, ev.buffer(), ev.size());
 	_events[_size] = ev;
 	_events[_size].set_buffer(ev.size(), write_loc, false);
+
+	/*cerr << "MidiBuffer: pushed @ " << _events[_size].time()
+		<< " size = " << _size << endl;
+	for (size_t i = 0; i < _events[_size].size(); ++i) {
+		printf("%X ", _events[_size].buffer()[i]);
+	}
+	printf("\n");*/
+
 	++_size;
-
-	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
-
 	_silent = false;
 
 	return true;
@@ -170,18 +180,25 @@ MidiBuffer::push_back(const Evoral::MIDIEvent& ev)
 bool
 MidiBuffer::push_back(const jack_midi_event_t& ev)
 {
-	if (_size == _capacity)
+	if (_size == _capacity) {
+		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
+	}
 
 	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
 	memcpy(write_loc, ev.buffer, ev.size);
 	_events[_size].time() = (double)ev.time;
 	_events[_size].set_buffer(ev.size, write_loc, false);
+
+	/*cerr << "MidiBuffer: pushed @ " << _events[_size].time()
+		<< " size = " << _size << endl;
+	for (size_t i = 0; i < _events[_size].size(); ++i) {
+		printf("%X ", _events[_size].buffer()[i]);
+	}
+	printf("\n");*/
+	
 	++_size;
-
-	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
-
 	_silent = false;
 
 	return true;

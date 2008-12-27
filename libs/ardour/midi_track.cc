@@ -427,6 +427,8 @@ MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fram
 
 		passthru (start_frame, end_frame, nframes, offset, 0, (_meter_point == MeterInput));
 	}
+	
+	flush_outputs( nframes, offset );
 
 	return 0;
 }
@@ -725,11 +727,11 @@ MidiTrack::midi_panic()
 bool
 MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 {
-	printf("Write immediate event: ");
+	/*printf("Write immediate event: ");
 	for (size_t i=0; i < size; ++i) {
 		printf("%X ", buf[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 	const uint32_t type = EventTypeMap::instance().midi_event_type(buf[0]);
 	return (_immediate_events.write(0, type, size, buf) == size);
 }
