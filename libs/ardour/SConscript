@@ -108,14 +108,15 @@ midi_buffer.cc
 midi_clock_slave.cc
 midi_diskstream.cc
 midi_model.cc
+midi_patch_manager.cc
 midi_playlist.cc
 midi_port.cc
 midi_region.cc
+midi_ring_buffer.cc
 midi_source.cc
 midi_state_tracker.cc
 midi_stretch.cc
 midi_track.cc
-midi_patch_manager.cc
 mix.cc
 mtc_slave.cc
 named_selection.cc
