@@ -85,9 +85,9 @@ Editor::show_editor_mixer (bool yn)
 			} 
 
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-				AudioTimeAxisView* atv;
+				RouteTimeAxisView* atv;
 				
-				if ((atv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
 					break;
 				}
@@ -98,9 +98,9 @@ Editor::show_editor_mixer (bool yn)
 			sort_track_selection ();
 			
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-				AudioTimeAxisView* atv;
+				RouteTimeAxisView* atv;
 				
-				if ((atv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
 					break;
 				}
@@ -182,11 +182,11 @@ Editor::create_editor_mixer ()
 void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
-	AudioTimeAxisView* at;
+	RouteTimeAxisView* at;
 	bool show = false;
 	bool created;
 
-	if (!session || (at = dynamic_cast<AudioTimeAxisView*>(&view)) == 0) {
+	if (!session || (at = dynamic_cast<RouteTimeAxisView*>(&view)) == 0) {
 		return;
 	}
 
@@ -323,9 +323,9 @@ Editor::current_mixer_strip_hidden ()
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		
-		AudioTimeAxisView* tmp;
+		RouteTimeAxisView* tmp;
 		
-		if ((tmp = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {
+		if ((tmp = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 			if (tmp->route() == current_mixer_strip->route()) {
 				(*i)->set_selected (false);
 				break;
