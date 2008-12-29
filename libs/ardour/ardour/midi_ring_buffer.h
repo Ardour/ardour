@@ -59,7 +59,7 @@ public:
 	 *     be forced to while reading.
 	 */
 	void set_channel_mode(ChannelMode mode, uint16_t mask) {
-		g_atomic_int_set(&_channel_mask, ((uint16_t)mode << 16) | mask);
+		g_atomic_int_set(&_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
 	}
 
 	ChannelMode get_channel_mode() const {
@@ -67,7 +67,7 @@ public:
 	}
 	
 	uint16_t get_channel_mask() const {
-		return static_cast<ChannelMode>((g_atomic_int_get(&_channel_mask) & 0x0000FFFF));
+		return g_atomic_int_get(&_channel_mask) & 0x0000FFFF;
 	}
 	
 protected:

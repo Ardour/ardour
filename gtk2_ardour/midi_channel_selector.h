@@ -72,7 +72,7 @@ public:
 	
 	virtual ~MidiMultipleChannelSelector();
 	
-	void set_channel_mode(ARDOUR::ChannelMode mode, uint8_t mask);
+	void set_channel_mode(ARDOUR::ChannelMode mode, uint16_t mask);
 
 	/**
 	 * @return each bit in the returned word represents a midi channel, eg. 

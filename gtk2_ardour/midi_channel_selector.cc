@@ -160,7 +160,7 @@ MidiMultipleChannelSelector::~MidiMultipleChannelSelector()
 }
 
 void
-MidiMultipleChannelSelector::set_channel_mode(ChannelMode mode, uint8_t mask)
+MidiMultipleChannelSelector::set_channel_mode(ChannelMode mode, uint16_t mask)
 {
 	switch (mode) {
 	case AllChannels:
