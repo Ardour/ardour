@@ -74,7 +74,7 @@ MidiBuffer::resize (size_t size)
 	_capacity = size;
 
 #ifdef NO_POSIX_MEMALIGN
-	_events = (Evoral::Event *) malloc(sizeof(Evoral::Event) * _capacity);
+	_events = (Evoral::MIDIEvent *) malloc(sizeof(Evoral::MIDIEvent) * _capacity);
 	_data = (uint8_t *) malloc(sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 #else
 	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(Evoral::Event) * _capacity);

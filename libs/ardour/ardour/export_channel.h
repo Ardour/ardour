@@ -38,6 +38,9 @@ class Session;
 class ExportChannel
 {
   public:
+
+	virtual ~ExportChannel () {}
+
 	virtual void read (Sample * data, nframes_t frames) const = 0;
 	virtual bool empty () const = 0;
 	
@@ -69,13 +72,13 @@ class PortExportChannel : public ExportChannel
 
 	PortExportChannel () {}
 	
-	virtual void read (Sample * data, nframes_t frames) const;
-	virtual bool empty () const { return ports.empty(); }
+	void read (Sample * data, nframes_t frames) const;
+	bool empty () const { return ports.empty(); }
 	
-	virtual void get_state (XMLNode * node) const;
-	virtual void set_state (XMLNode * node, Session & session);
+	void get_state (XMLNode * node) const;
+	void set_state (XMLNode * node, Session & session);
 	
-	virtual bool operator< (ExportChannel const & other) const;
+	bool operator< (ExportChannel const & other) const;
 
 	void add_port (AudioPort * port) { ports.insert (port); }
 	PortSet const & get_ports () { return ports; }
@@ -126,12 +129,12 @@ class RegionExportChannel : public ExportChannel
 	friend class RegionExportChannelFactory;
 
   public:
-	virtual void read (Sample * data, nframes_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
-	virtual void get_state (XMLNode * node) const {};
-	virtual void set_state (XMLNode * node, Session & session) {};
-	virtual bool empty () const { return false; }
+	void read (Sample * data, nframes_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
+	void get_state (XMLNode * node) const {};
+	void set_state (XMLNode * node, Session & session) {};
+	bool empty () const { return false; }
 	// Region export should never have duplicate channels, so there need not be any semantics here
-	virtual bool operator< (ExportChannel const & other) const { return this < &other; }
+	bool operator< (ExportChannel const & other) const { return this < &other; }
 
   private:
 

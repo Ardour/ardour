@@ -31,7 +31,7 @@
 #include <gtkmm/checkbutton.h>
 
 #include <iostream>
-
+#include <cmath>
 
 PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	: _min_dB(-12.0),
@@ -683,13 +683,13 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 		}
 		*/
 
-		if (isinf(power)) {
+		if (std::isinf(power)) {
 			if (power < 0) {
 				power = _min_dB - 1.0;
 			} else {
 				power = _max_dB - 1.0;
 			}
-		} else if (isnan(power)) {
+		} else if (std::isnan(power)) {
 			power = _min_dB - 1.0;
 		}
 

@@ -400,8 +400,6 @@ ExportFileFactory::create_sndfile (FormatPtr format, unsigned int channels, ustr
 	typedef boost::shared_ptr<SndfileWriter<int> > IntWriterPtr;
 	typedef boost::shared_ptr<SndfileWriter<float> > FloatWriterPtr;
 	
-	FilePair ret;
-
 	int real_format = format->format_id() | format->sample_format() | format->endianness();
 
 	uint32_t data_width = sndfile_data_width (real_format);
@@ -422,14 +420,13 @@ ExportFileFactory::create_sndfile (FormatPtr format, unsigned int channels, ustr
 		
 		return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));
 
-	} else {
-	
-		FloatConverterPtr sfc = FloatConverterPtr (new SampleFormatConverter<float> (channels, format->dither_type(), data_width));
-		FloatWriterPtr sfw = FloatWriterPtr (new SndfileWriter<float> (channels, format->sample_rate(), real_format, filename));
-		sfc->pipe_to (sfw);
-		
-		return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));;
 	}
+	
+	FloatConverterPtr sfc = FloatConverterPtr (new SampleFormatConverter<float> (channels, format->dither_type(), data_width));
+	FloatWriterPtr sfw = FloatWriterPtr (new SndfileWriter<float> (channels, format->sample_rate(), real_format, filename));
+	sfc->pipe_to (sfw);
+	
+	return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));
 }
 
 bool

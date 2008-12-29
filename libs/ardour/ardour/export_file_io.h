@@ -77,8 +77,9 @@ class SndfileWriterBase : public ExportFileWriter
 template <typename T>
 class SndfileWriter : public SndfileWriterBase, public GraphSink<T>
 {
-  protected:
+	// FIXME: having this protected doesn't work with Apple's gcc
 	// Should only be created vie ExportFileFactory and derived classes
+  public: // protected
 	friend class ExportFileFactory;
 	SndfileWriter (int channels, nframes_t samplerate, int format, string const & path);
 

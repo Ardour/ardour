@@ -12,7 +12,8 @@ evoral.Merge([
 	libraries['sigc2'],
 	libraries['glibmm2'],
 	libraries['xml'], 
-	libraries['pbd'],	
+	libraries['pbd'],
+	libraries['boost']	
 	])
 
 if evoral['IS_OSX']:

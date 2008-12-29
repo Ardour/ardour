@@ -60,7 +60,8 @@ pbd.Merge ([ libraries['sigc2'],
              libraries['xml'],
              libraries['uuid'],
              libraries['glibmm2'],
-             libraries['glib2'] ])
+             libraries['glib2'],
+             libraries['boost'] ])
 
 pbd.VersionBuild(['version.cc','pbd/version.h'], [])
 

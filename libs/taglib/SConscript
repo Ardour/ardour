@@ -64,6 +64,8 @@ taglib.Append (CPPATH= [ '#libs/taglib/taglib',
                            ]
                )
 
+if env['IS_OSX']:
+    taglib.Append (LINKFLAGS= [ "-lz" ] )
 
 #conf = Configure(taglib)
 #taglib = conf.finish ()
