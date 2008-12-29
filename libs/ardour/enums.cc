@@ -50,6 +50,7 @@ setup_enum_writer ()
 	TrackMode _TrackMode;
 	NoteMode _NoteMode;
 	ChannelMode _ChannelMode;
+	ColorMode _ColorMode;
 	MeterFalloff _MeterFalloff;
 	MeterHold _MeterHold;
 	EditMode _EditMode;
@@ -163,6 +164,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (ForceChannel);
 	REGISTER (_ChannelMode);
 
+	REGISTER_ENUM (MeterColors);
+	REGISTER_ENUM (ChannelColors);
+	REGISTER_ENUM (TrackColor);
+	REGISTER (_ColorMode);
+	
 	REGISTER_ENUM (MeterFalloffOff);
 	REGISTER_ENUM (MeterFalloffSlowest);
 	REGISTER_ENUM (MeterFalloffSlow);

@@ -94,7 +94,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	
 	void append_extra_display_menu_items ();
 	void build_automation_action_menu ();
-	Gtk::Menu* build_mode_menu();
+	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
 
 	void set_note_mode (ARDOUR::NoteMode mode);

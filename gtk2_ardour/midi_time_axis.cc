@@ -28,6 +28,7 @@
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 #include <pbd/whitespace.h>
+#include <pbd/enumwriter.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>
@@ -181,6 +182,13 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	_channel_selector.mode_changed.connect(
 		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mode));
 
+	XMLProperty *prop;
+	if ((prop = xml_node->property ("color-mode")) != 0) {
+		_color_mode = ColorMode (string_2_enum(prop->value(), _color_mode));
+		if (_color_mode == ChannelColors) {
+			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+		}
+	}
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()
@@ -306,7 +314,7 @@ MidiTimeAxisView::build_automation_action_menu ()
 }
 
 Gtk::Menu*
-MidiTimeAxisView::build_mode_menu()
+MidiTimeAxisView::build_note_mode_menu()
 {
 	using namespace Menu_Helpers;
 
@@ -377,6 +385,7 @@ MidiTimeAxisView::set_color_mode(ColorMode mode)
 		}
 
 		_color_mode = mode;
+		xml_node->add_property ("color-mode", enum_2_string(_color_mode));
 		_view->redisplay_diskstream();
 	}
 }
