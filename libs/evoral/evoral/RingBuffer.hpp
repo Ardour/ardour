@@ -56,6 +56,8 @@ public:
 		g_atomic_int_set(&_read_ptr, 0);
 	}
 
+	/** Calculate remaining space for writing
+	 */
 	size_t write_space() const {
 		const size_t w = g_atomic_int_get(&_write_ptr);
 		const size_t r = g_atomic_int_get(&_read_ptr);
@@ -69,6 +71,8 @@ public:
 		}
 	}
 	
+	/** Calculate how much still can be read
+	 */
 	size_t read_space() const {
 		const size_t w = g_atomic_int_get(&_write_ptr);
 		const size_t r = g_atomic_int_get(&_read_ptr);
@@ -80,14 +84,44 @@ public:
 		}
 	}
 
+	/** Report the buffers size
+	 */
 	size_t capacity() const { return _size; }
 
+	/** Peek at the ringbuffer (read w/o advancing read pointer).
+	 * @return how much has been peeked (read cannot exceed the end 
+	 * of the buffer):
+	 * <pre>
+	 * |-------------------------R=============================|
+	 *            read-pointer---^
+	 * </pre>
+	 */
 	size_t peek(size_t size, T* dst);
+
+	/** Peek at the ringbuffer (read w/o advancing read pointer).
+	 * @return how much has been peeked (wraps around if read exceeds
+	 * the end of the buffer):
+	 * <pre>
+	 * |===========--------------R=============================|
+	 *            read-pointer---^
+	 * </pre>
+	 */
 	bool   full_peek(size_t size, T* dst);
 
+	/** Read from the ringbuffer. (advances read pointer)
+	 * @return how much has been read (read cannot exceed the end 
+	 * of the buffer):
+	 */
 	size_t read(size_t size, T* dst);
+
+	/** Read from the ringbuffer. (advances read pointer)
+	 * @return how much has been peeked (wraps around if read exceeds
+	 * the end of the buffer):
+	 */
 	bool   full_read(size_t size, T* dst);
 
+	/** Advance read pointer by size
+	 */
 	bool   skip(size_t size);
 	
 	void   write(size_t size, const T* src);
