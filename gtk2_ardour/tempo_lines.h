@@ -27,7 +27,7 @@
 #include "simpleline.h"
 
 typedef boost::fast_pool_allocator<
-		std::pair<double, ArdourCanvas::SimpleLine>,
+		std::pair<const double, ArdourCanvas::SimpleLine*>,
 		boost::default_user_allocator_new_delete,
 		boost::details::pool::null_mutex,
 		8192>

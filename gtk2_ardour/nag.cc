@@ -192,15 +192,15 @@ NagScreen::open_uri (const char* uri)
 	GError* err;
 	return gtk_open_uri (0, uri, GDK_CURRENT_TIME, &err);
 #else
-#ifndef __APPLE__
+#ifdef GTKOSX
+	extern bool cocoa_open_url (const char*);
+	return cocoa_open_url (uri);
+#else
 	std::string command = "xdg-open ";
 	command += uri;
 	spawn_command_line_async (command);
 
 	return true;
-#else
-	extern bool cocoa_open_url (const char*);
-	return cocoa_open_url (uri);
 #endif
 #endif
 }
