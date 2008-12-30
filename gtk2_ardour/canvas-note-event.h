@@ -93,13 +93,13 @@ public:
 	{
 		if (vel < 64) {
 			return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->canvasvar_MeterColorBase.get(),
-					ARDOUR_UI::config()->canvasvar_MeterColorMid.get(),
+					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorBase.get(),
+					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorMid.get(),
 					(vel / (double)63.0));
 		} else {
 			return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->canvasvar_MeterColorMid.get(),
-					ARDOUR_UI::config()->canvasvar_MeterColorTop.get(),
+					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorMid.get(),
+					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorTop.get(),
 					((vel-64) / (double)63.0));
 		}
 	}
