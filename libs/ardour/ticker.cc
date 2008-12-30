@@ -53,7 +53,7 @@ void MidiClockTicker::set_session(Session& s)
 
 void MidiClockTicker::update_midi_clock_port()
 {
-	 _jack_port = (MIDI::JACK_MidiPort*) _session->midi_clock_port();
+	 _midi_port = _session->midi_clock_port();
 }
 
 void MidiClockTicker::transport_state_changed()
@@ -122,9 +122,12 @@ void MidiClockTicker::transport_looped()
 }
 
 void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& transport_bbt, const SMPTE::Time& transport_smpt)
-{	
+{
+#ifdef WITH_JACK_MIDI
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f)
 		return;
+
+	MIDI::Jack_MidiPort & jack_port (dynamic_cast<MIDI::Jack_MidiPort &> (*_midi_port));
 
 	while (true) {
 		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
@@ -135,17 +138,18 @@ void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& tr
 			 << ":Last tick time:" << _last_tick << ":" 
 			 << ":Next tick time:" << next_tick << ":" 
 			 << "Offset:" << next_tick_offset << ":"
-			 << "cycle length:" << _jack_port->nframes_this_cycle() 
+			 << "cycle length:" << jack_port.nframes_this_cycle() 
 			 << endl; 
 #endif	
 		
-		if (next_tick_offset >= _jack_port->nframes_this_cycle())
+		if (next_tick_offset >= jack_port.nframes_this_cycle())
 			return;
 	
 		send_midi_clock_event(next_tick_offset);
 		
 		_last_tick = next_tick;
 	}
+#endif // WITH_JACK_MIDI
 }
 
 double MidiClockTicker::one_ppqn_in_frames(nframes_t transport_position)
@@ -164,30 +168,32 @@ double MidiClockTicker::one_ppqn_in_frames(nframes_t transport_position)
 
 void MidiClockTicker::send_midi_clock_event(nframes_t offset)
 {
-	assert(_jack_port->is_process_thread());
+#ifdef WITH_JACK_MIDI
+	assert (MIDI::JACK_MidiPort::is_process_thread());
+#endif // WITH_JACK_MIDI
 #if DEBUG_TICKER	
 	cerr << "Tick with offset " << offset << endl;
-#endif	
+#endif // DEBUG_TICKER
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
-	_jack_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
 void MidiClockTicker::send_start_event(nframes_t offset)
 {
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_START };
-	_jack_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
 void MidiClockTicker::send_continue_event(nframes_t offset)
 {
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CONTINUE };
-	_jack_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
 void MidiClockTicker::send_stop_event(nframes_t offset)
 {
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_STOP };
-	_jack_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
 }

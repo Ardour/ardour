@@ -111,7 +111,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 		average_midi_clock_frame_duration += accumulator[i];
 	average_midi_clock_frame_duration /= double(accumulator_size);
 	
-#if 1
+#ifdef WITH_JACK_MIDI
 	JACK_MidiPort *jack_port = dynamic_cast<JACK_MidiPort *>(port);
 	pthread_t process_thread_id = 0;
 	if(jack_port) {
@@ -126,7 +126,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	          << " reference: " << one_ppqn_in_frames
 	          << " average: " << average_midi_clock_frame_duration
 	          << std::endl;
-#endif
+#endif // WITH_JACK_MIDI
 	
 	current.guard1++;
 	current.position += one_ppqn_in_frames;

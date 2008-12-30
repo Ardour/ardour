@@ -53,7 +53,7 @@ class MidiClockTicker : public Ticker
 {
 	/// Singleton
 private:
-	MidiClockTicker() : _jack_port(0), _ppqn(24), _last_tick(0.0) {};
+	MidiClockTicker() : _midi_port(0), _ppqn(24), _last_tick(0.0) {};
 	MidiClockTicker( const MidiClockTicker& );
 	MidiClockTicker& operator= (const MidiClockTicker&);
 	
@@ -71,7 +71,7 @@ public:
 		const SMPTE::Time& transport_smpte);
 	
 	void set_session(Session& s);
-	void going_away() { _jack_port = 0; Ticker::going_away(); }
+	void going_away() { _midi_port = 0; Ticker::going_away(); }
 	
 	/// slot for the signal session::MIDIClock_PortChanged
 	void update_midi_clock_port();
@@ -89,9 +89,9 @@ public:
 	void set_ppqn(int ppqn) { _ppqn = ppqn; }
 
 private:	
-	MIDI::JACK_MidiPort* _jack_port;
-	int                  _ppqn;
-	double               _last_tick;
+	MIDI::Port*  _midi_port;
+	int          _ppqn;
+	double       _last_tick;
 
 	double one_ppqn_in_frames(nframes_t transport_position);
 	

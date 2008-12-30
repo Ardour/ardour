@@ -133,7 +133,9 @@ _thread_init_callback (void *arg)
 	*/
 
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Audioengine"), 4096);
+#ifdef WITH_JACK_MIDI
 	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
+#endif // WITH_JACK_MIDI
 }
 
 int
