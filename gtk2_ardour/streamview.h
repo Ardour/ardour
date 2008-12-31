@@ -157,6 +157,10 @@ protected:
 
 	list<sigc::connection> rec_data_ready_connections;
 	jack_nframes_t         last_rec_data_frame;
+
+private:
+
+	void update_coverage_frames ();
 };
 
 #endif /* __ardour_streamview_h__ */

@@ -179,6 +179,10 @@ RegionView::~RegionView ()
 		delete *g;
 	}
 
+	for (std::list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
+		delete *i;
+	}
+
 	delete editor;
 }
 
@@ -598,3 +602,72 @@ RegionView::set_height (double h)
 	}
 }
 
+/** Remove old coverage frames and make new ones, if we're in a LayerDisplay mode
+ *  which uses them. */
+void
+RegionView::update_coverage_frames (LayerDisplay d)
+{
+	/* remove old coverage frames */
+	for (std::list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
+		delete *i;
+	}
+
+	_coverage_frames.clear ();
+
+	if (d != Stacked) {
+		/* don't do coverage frames unless we're in stacked mode */
+		return;
+	}
+
+	boost::shared_ptr<Playlist> pl (_region->playlist ());
+	if (!pl) {
+		return;
+	}
+
+	nframes_t const position = _region->first_frame ();
+	nframes_t t = position;
+	nframes_t const end = _region->last_frame ();
+
+	ArdourCanvas::SimpleRect* cr = 0;
+	bool me = false;
+
+	uint32_t const color = frame->property_fill_color_rgba ();
+	uint32_t const base_alpha = UINT_RGBA_A (color);
+	
+	while (t < end) {
+
+		t++;
+
+		/* is this region is on top at time t? */
+		bool const new_me = (pl->top_region_at (t) == _region);
+
+		/* finish off any old rect, if required */
+		if (cr && me != new_me) {
+			cr->property_x2() = trackview.editor.frame_to_pixel (t - position);
+		}
+
+		/* start off any new rect, if required */
+		if (cr == 0 || me != new_me) {
+			cr = new ArdourCanvas::SimpleRect (*group);
+			_coverage_frames.push_back (cr);
+			cr->property_x1() = trackview.editor.frame_to_pixel (t - position);
+			cr->property_y1() = 1;
+			cr->property_y2() = _height + 1;
+			cr->property_outline_pixels() = 0;
+			/* areas that will be played get a lower alpha */
+			uint32_t alpha = base_alpha;
+			if (new_me) {
+				alpha /= 2;
+			}
+			cr->property_fill_color_rgba () = UINT_RGBA_CHANGE_A (color, alpha);
+		}
+
+		t = pl->find_next_region_boundary (t, 1);
+		me = new_me;
+	}
+
+	if (cr) {
+		/* finish off the last rectangle */
+		cr->property_x2() = trackview.editor.frame_to_pixel (end - position);
+	}
+}

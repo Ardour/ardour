@@ -233,6 +233,7 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	if (ds->playlist()) {
 		layers = ds->playlist()->top_layer() + 1;
 		update_contents_height ();
+		update_coverage_frames ();
 		redisplay_diskstream ();
 	}
 }
@@ -255,6 +256,8 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	/* update layers count and the y positions and heights of our regions */
 	layers = ds->playlist()->top_layer() + 1;
 	update_contents_height ();
+
+	update_coverage_frames ();
 	
 	/* draw it */
 	redisplay_diskstream ();
@@ -435,7 +438,7 @@ StreamView::update_contents_height ()
 			(*i)->set_height (height);
 			break;
 		case Stacked:
-			(*i)->set_y ((*i)->region()->layer() * lh);
+			(*i)->set_y (height - ((*i)->region()->layer() + 1) * lh);
 			(*i)->set_height (lh);
 			break;
 		}
@@ -451,4 +454,13 @@ StreamView::set_layer_display (LayerDisplay d)
 {
 	layer_display = d;
 	update_contents_height ();
+	update_coverage_frames ();
+}
+
+void
+StreamView::update_coverage_frames ()
+{
+	for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
+		(*i)->update_coverage_frames (layer_display);
+	}
 }

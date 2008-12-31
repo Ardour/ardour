@@ -87,6 +87,7 @@ class RegionView : public TimeAxisViewItem
 	virtual void exited () {}
 
 	void enable_display(bool yn) { _enable_display = yn; }
+	void update_coverage_frames (LayerDisplay);
 	
 	static sigc::signal<void,RegionView*> RegionViewGoingAway;
 	
@@ -143,6 +144,12 @@ class RegionView : public TimeAxisViewItem
     sigc::connection data_ready_connection;
     
     std::vector<GhostRegion*> ghosts;
+
+	/** a list of rectangles which are used in stacked display mode to colour
+	    different bits of regions according to whether or not they are the one
+	    that will be played at any given time.
+	*/
+	std::list<ArdourCanvas::SimpleRect*> _coverage_frames;
 	
 	typedef std::map<const Evoral::Parameter, boost::shared_ptr<AutomationRegionView> > AutomationChildren;
 	AutomationChildren _automation_children;

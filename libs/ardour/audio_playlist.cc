@@ -676,7 +676,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 		return false;
 	}
 
-	{ 
+	{
 		RegionLock rlock (this);
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
