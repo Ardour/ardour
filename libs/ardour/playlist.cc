@@ -266,7 +266,7 @@ Playlist::Playlist (Playlist& pl)
 
 Playlist::~Playlist ()
 {
-	{ 
+	{
 		RegionLock rl (this);
 
 		for (set<boost::shared_ptr<Region> >::iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
@@ -489,7 +489,7 @@ Playlist::flush_notifications ()
 
 void
 Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, float times) 
-{ 
+{
 	RegionLock rlock (this);
 	times = fabs (times);
 	
@@ -1346,7 +1346,7 @@ Playlist::drop_regions ()
 void
 Playlist::clear (bool with_signals)
 {
-	{ 
+	{
 		RegionLock rl (this);
 
 		for (
@@ -1662,14 +1662,10 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 	if (dir > 0) {
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-			
+
 			boost::shared_ptr<Region> r = (*i);
 			nframes64_t distance;
-			nframes64_t end = r->position() + r->length();
-			bool reset;
-
-			reset = false;
-
+			
 			if (r->first_frame() > frame) {
 
 				distance = r->first_frame() - frame;
@@ -1677,23 +1673,17 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 				if (distance < closest) {
 					ret = r->first_frame();
 					closest = distance;
-					reset = true;
 				}
 			}
 
-			if (end > frame) {
+			if (r->last_frame () > frame) {
 				
-				distance = end - frame;
+				distance = r->last_frame () - frame;
 				
 				if (distance < closest) {
-					ret = end;
+					ret = r->last_frame ();
 					closest = distance;
-					reset = true;
 				}
-			}
-
-			if (reset) {
-				break;
 			}
 		}
 
@@ -1703,9 +1693,6 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 			
 			boost::shared_ptr<Region> r = (*i);
 			nframes64_t distance;
-			bool reset;
-
-			reset = false;
 
 			if (r->last_frame() < frame) {
 
@@ -1714,22 +1701,17 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 				if (distance < closest) {
 					ret = r->last_frame();
 					closest = distance;
-					reset = true;
 				}
 			}
 
 			if (r->first_frame() < frame) {
-				distance = frame - r->last_frame();
 				
+				distance = frame - r->first_frame();
+
 				if (distance < closest) {
 					ret = r->first_frame();
 					closest = distance;
-					reset = true;
 				}
-			}
-
-			if (reset) {
-				break;
 			}
 		}
 	}
@@ -1933,7 +1915,7 @@ Playlist::bump_name (string name, Session &session)
 layer_t
 Playlist::top_layer() const
 {
-	RegionLock rlock (const_cast<Playlist *> (this));
+	RegionLock rlock (const_cast<Playlist *> (this));	
 	layer_t top = 0;
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
