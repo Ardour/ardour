@@ -108,7 +108,7 @@ void MidiClockTicker::transport_looped()
 	assert(loop_location);
 
 #if DEBUG_TICKER	
-	cerr << "Transport looped, position:" <<  p_session->transport_frame()
+	cerr << "Transport looped, position:" <<  _session->transport_frame()
 	     << " loop start " << loop_location->start( )
 	     << " loop end " << loop_location->end( )
 	     << " play loop " << _session->get_play_loop()
@@ -127,8 +127,9 @@ void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& tr
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f)
 		return;
 
-	MIDI::Jack_MidiPort & jack_port (dynamic_cast<MIDI::Jack_MidiPort &> (*_midi_port));
-
+	MIDI::JACK_MidiPort* jack_port = dynamic_cast<MIDI::JACK_MidiPort*>(_midi_port);
+	assert(jack_port);
+	
 	while (true) {
 		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
 		nframes_t next_tick_offset = nframes_t(next_tick) - transport_frames;
@@ -138,11 +139,11 @@ void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& tr
 			 << ":Last tick time:" << _last_tick << ":" 
 			 << ":Next tick time:" << next_tick << ":" 
 			 << "Offset:" << next_tick_offset << ":"
-			 << "cycle length:" << jack_port.nframes_this_cycle() 
+			 << "cycle length:" << jack_port->nframes_this_cycle() 
 			 << endl; 
 #endif	
 		
-		if (next_tick_offset >= jack_port.nframes_this_cycle())
+		if (next_tick_offset >= jack_port->nframes_this_cycle())
 			return;
 	
 		send_midi_clock_event(next_tick_offset);

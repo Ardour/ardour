@@ -1064,6 +1064,7 @@ if conf.CheckCHeader('jack/midiport.h'):
     env['SYSMIDI'] = 'JACK MIDI'
     subst_dict['%MIDITAG%'] = "control"
     subst_dict['%MIDITYPE%'] = "jack"
+    env.Append(CCFLAGS=" -DWITH_JACK_MIDI")
     print "Using JACK MIDI"
 elif conf.CheckCHeader('alsa/asoundlib.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='asound')
