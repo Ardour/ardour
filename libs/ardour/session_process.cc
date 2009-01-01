@@ -540,8 +540,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 				delta *= dir;
 			#endif
 
-			float adjusted_speed = slave_speed +
-				(delta /  float(_current_frame_rate));
+			float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));
 			
 			#ifdef DEBUG_SLAVES
 			cerr << "adjust using " << delta
