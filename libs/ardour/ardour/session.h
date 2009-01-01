@@ -1079,6 +1079,13 @@ class Session : public PBD::StatefulDestructible
 
 	void reset_slave_state ();
 	bool follow_slave (nframes_t, nframes_t);
+	void calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta);
+	void track_slave_state(
+			float slave_speed, 
+			nframes_t slave_transport_frame, 
+			nframes_t this_delta,
+			bool starting);
+	
 	void set_slave_source (SlaveSource);
 
 	SlaveSource post_export_slave;

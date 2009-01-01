@@ -495,16 +495,6 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		slave_speed = 0.0f;
 	}
 
-#ifdef DEBUG_SLAVES
-	if (slave_speed != 0.0)
-	cerr << "delta = " << (int) (dir * this_delta)
-	     << " speed = " << slave_speed 
-	     << " ts = " << _transport_speed 
-	     << " M@ "<< slave_transport_frame << " S@ " << _transport_frame 
-	     << " avgdelta = " << average_slave_delta 
-	     << endl;
-#endif	
-
 	if (_slave->is_always_synced() || Config->get_timecode_source_is_synced()) {
 
 		/* if the TC source is synced, then we assume that its 
@@ -522,30 +512,157 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		   our speed to remain locked.
 		*/
 
-		if (delta_accumulator_cnt >= delta_accumulator_size) {
-			have_first_delta_accumulator = true;
-			delta_accumulator_cnt = 0;
-		}
+		calculate_moving_average_of_slave_delta(dir, this_delta);
+	}
+	
+	track_slave_state(slave_speed, slave_transport_frame, this_delta, starting);
 
-		if (delta_accumulator_cnt != 0 || this_delta < _current_frame_rate) {
-			delta_accumulator[delta_accumulator_cnt++] = long(dir) * long(this_delta);
-		}
-		
-		if (have_first_delta_accumulator) {
-			average_slave_delta = 0L;
-			for (int i = 0; i < delta_accumulator_size; ++i) {
-				average_slave_delta += delta_accumulator[i];
+	if (slave_state == Running && !_slave->is_always_synced() && !Config->get_timecode_source_is_synced()) {
+
+		if (_transport_speed != 0.0f) {
+			
+			/* 
+			   note that average_dir is +1 or -1 
+			*/
+			
+			float delta;
+
+			#ifdef USE_MOVING_AVERAGE_OF_SLAVE
+				if (average_slave_delta == 0) {
+					delta = this_delta;
+					delta *= dir;
+				} else {
+					delta = average_slave_delta;
+					delta *= average_dir;
+				}
+			#else
+				delta = this_delta;
+				delta *= dir;
+			#endif
+
+			float adjusted_speed = slave_speed +
+				(delta /  float(_current_frame_rate));
+			
+			#ifdef DEBUG_SLAVES
+			cerr << "adjust using " << delta
+			     << " towards " << adjusted_speed
+			     << " ratio = " << adjusted_speed / slave_speed
+			     << " current = " << _transport_speed
+			     << " slave @ " << slave_speed
+			     << endl;
+			#endif
+			
+			request_transport_speed (adjusted_speed);
+			
+			if (abs(average_slave_delta) > (long) _slave->resolution()) {
+				cerr << "average slave delta greater than slave resolution, going to silent motion\n";
+				goto silent_motion;
 			}
-			average_slave_delta /= long(delta_accumulator_size);
-			if (average_slave_delta < 0L) {
-				average_dir = -1;
-				average_slave_delta = abs(average_slave_delta);
-			} else {
-				average_dir = 1;
-			}
 		}
+	} 
+	
+	#ifdef DEBUG_SLAVES
+	if (slave_speed != 0.0)
+	cerr << "delta = " << (int) (dir * this_delta)
+		 << " speed = " << slave_speed 
+		 << " ts = " << _transport_speed 
+		 << " M@ "<< slave_transport_frame << " S@ " << _transport_frame 
+		 << " avgdelta = " << average_slave_delta 
+		 << endl;
+	#endif	
+
+	if (!starting && !non_realtime_work_pending()) {
+		/* speed is set, we're locked, and good to go */
+		return true;
 	}
 
+  silent_motion:
+#ifdef DEBUG_SLAVES	
+	cerr << "reached silent_motion:" <<endl;
+#endif
+	
+	if (slave_speed && _transport_speed) {
+
+		/* something isn't right, but we should move with the master
+		   for now.
+		*/
+
+		bool need_butler;
+		
+		prepare_diskstreams ();
+		silent_process_routes (nframes, offset);
+		commit_diskstreams (nframes, need_butler);
+
+		if (need_butler) {
+			summon_butler ();
+		}
+		
+		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
+		
+		if (frames_moved < 0) {
+			decrement_transport_position (-frames_moved);
+		} else {
+			increment_transport_position (frames_moved);
+		}
+		
+		nframes_t stop_limit;
+		
+		if (actively_recording()) {
+			stop_limit = max_frames;
+		} else {
+			if (Config->get_stop_at_session_end()) {
+				stop_limit = current_end_frame();
+			} else {
+				stop_limit = max_frames;
+			}
+		}
+
+		maybe_stop (stop_limit);
+	}
+
+  noroll:
+	/* don't move at all */
+#ifdef DEBUG_SLAVES	
+	cerr << "reached no_roll:" <<endl;
+#endif
+	no_roll (nframes, 0);
+	return false;
+}
+
+void
+Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
+{
+	if (delta_accumulator_cnt >= delta_accumulator_size) {
+		have_first_delta_accumulator = true;
+		delta_accumulator_cnt = 0;
+	}
+
+	if (delta_accumulator_cnt != 0 || this_delta < _current_frame_rate) {
+		delta_accumulator[delta_accumulator_cnt++] = long(dir) * long(this_delta);
+	}
+	
+	if (have_first_delta_accumulator) {
+		average_slave_delta = 0L;
+		for (int i = 0; i < delta_accumulator_size; ++i) {
+			average_slave_delta += delta_accumulator[i];
+		}
+		average_slave_delta /= long(delta_accumulator_size);
+		if (average_slave_delta < 0L) {
+			average_dir = -1;
+			average_slave_delta = abs(average_slave_delta);
+		} else {
+			average_dir = 1;
+		}
+	}
+}
+
+void
+Session::track_slave_state(
+		float slave_speed, 
+		nframes_t slave_transport_frame, 
+		nframes_t this_delta,
+		bool starting)
+{
 	if (slave_speed != 0.0f) {
 
 		/* slave is running */
@@ -631,7 +748,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			start_transport ();
 		} 
 
-	} else {
+	} else { // slave_speed is 0
 
 		/* slave has stopped */
 
@@ -658,104 +775,6 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 
 		slave_state = Stopped;
 	}
-
-	if (slave_state == Running && !_slave->is_always_synced() && !Config->get_timecode_source_is_synced()) {
-
-
-		if (_transport_speed != 0.0f) {
-			
-			/* 
-			   note that average_dir is +1 or -1 
-			*/
-			
-			const float adjust_seconds = 1.0f;
-			float delta;
-
-			//if (average_slave_delta == 0) {
-				delta = this_delta;
-				delta *= dir;
-//			} else {
-//				delta = average_slave_delta;
-//				delta *= average_dir;
-//			}
-
-			float adjusted_speed = slave_speed +
-				(delta / (adjust_seconds * _current_frame_rate));
-			
-#ifdef DEBUG_DELAY_LOCKED_LOOP
-			cerr << "adjust using " << delta
-			     << " towards " << adjusted_speed
-			     << " ratio = " << adjusted_speed / slave_speed
-			     << " current = " << _transport_speed
-			     << " slave @ " << slave_speed
-			     << endl;
-#endif
-			
-			request_transport_speed (adjusted_speed);
-			
-			if (abs(average_slave_delta) > (long) _slave->resolution()) {
-				cerr << "average slave delta greater than slave resolution, going to silent motion\n";
-				goto silent_motion;
-			}
-		}
-	} 
-
-	if (!starting && !non_realtime_work_pending()) {
-		/* speed is set, we're locked, and good to go */
-		return true;
-	}
-
-  silent_motion:
-#ifdef DEBUG_SLAVES	
-	cerr << "reached silent_motion:" <<endl;
-#endif
-	
-	if (slave_speed && _transport_speed) {
-
-		/* something isn't right, but we should move with the master
-		   for now.
-		*/
-
-		bool need_butler;
-		
-		prepare_diskstreams ();
-		silent_process_routes (nframes, offset);
-		commit_diskstreams (nframes, need_butler);
-
-		if (need_butler) {
-			summon_butler ();
-		}
-		
-		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
-		
-		if (frames_moved < 0) {
-			decrement_transport_position (-frames_moved);
-		} else {
-			increment_transport_position (frames_moved);
-		}
-		
-		nframes_t stop_limit;
-		
-		if (actively_recording()) {
-			stop_limit = max_frames;
-		} else {
-			if (Config->get_stop_at_session_end()) {
-				stop_limit = current_end_frame();
-			} else {
-				stop_limit = max_frames;
-			}
-		}
-
-		maybe_stop (stop_limit);
-	}
-
-  noroll:
-	/* don't move at all */
-#ifdef DEBUG_SLAVES	
-	cerr << "reached no_roll:" <<endl;
-#endif
-	no_roll (nframes, 0);
-	return false;
 }
 
 void

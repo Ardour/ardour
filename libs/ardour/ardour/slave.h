@@ -103,6 +103,7 @@ class Slave {
 	 * 
 	 * @param speed - The transport speed requested
 	 * @param position - The transport position requested
+	 * @return - The return value is currently ignored (see Session::follow_slave)
 	 */
 	virtual bool speed_and_position (float& speed, nframes_t& position) = 0;
 	
