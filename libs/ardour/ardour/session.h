@@ -1024,7 +1024,6 @@ class Session : public PBD::StatefulDestructible
 	Slave*                  _slave;
 	bool                    _silent;
 	volatile float          _transport_speed;
-	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;

@@ -1088,7 +1088,6 @@ Session::set_slave_source (SlaveSource src)
 			error << _("No MTC port defined: MTC slaving is impossible.") << endmsg;
 			return;
 		}
-		_desired_transport_speed = _transport_speed;
 		break;
 
 	case MIDIClock:
@@ -1105,12 +1104,10 @@ Session::set_slave_source (SlaveSource src)
 			error << _("No MIDI Clock port defined: MIDI Clock slaving is impossible.") << endmsg;
 			return;
 		}
-		_desired_transport_speed = _transport_speed;
 		break;
 
 	case JACK:
 		_slave = new JACK_Slave (_engine.jack());
-		_desired_transport_speed = _transport_speed;
 		break;
 
 	};
