@@ -358,12 +358,12 @@ Editor::update_region_row (boost::shared_ptr<Region> region)
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		
-		cerr << "Level 1: Compare " << region->name() << " with parent " << (*i)[region_list_columns.name] << "\n";
+//		cerr << "Level 1: Compare " << region->name() << " with parent " << (*i)[region_list_columns.name] << "\n";
 		
 		boost::shared_ptr<Region> compared_region = (*i)[region_list_columns.region];
 		
 		if (region == compared_region) {
-			cerr << "Matched\n";
+//			cerr << "Matched\n";
 			populate_row(region, (*i));
 			return;
 		}
@@ -374,7 +374,7 @@ Editor::update_region_row (boost::shared_ptr<Region> region)
 			}
 		}
 	}
-	cerr << "Returning - No match\n";
+//	cerr << "Returning - No match\n";
 }
 
 bool
@@ -385,13 +385,13 @@ Editor::update_region_subrows (boost::shared_ptr<Region> region, TreeModel::Row 
 	
 	for (i = subrows.begin(); i != subrows.end(); ++i) {
 		
-		cerr << "Level " << level << ": Compare " << region->name() << " with child " << (*i)[region_list_columns.name] << "\n";
+//		cerr << "Level " << level << ": Compare " << region->name() << " with child " << (*i)[region_list_columns.name] << "\n";
 		
 		boost::shared_ptr<Region> compared_region = (*i)[region_list_columns.region];
 		
 		if (region == compared_region) {
 			populate_row(region, (*i));
-			cerr << "Matched\n";
+//			cerr << "Matched\n";
 			return true;
 		}
 		
