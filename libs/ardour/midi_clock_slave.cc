@@ -83,7 +83,7 @@ MIDIClock_Slave::calculate_one_ppqn_in_frames_at(nframes_t time)
 	const Tempo& current_tempo = session.tempo_map().tempo_at(time);
 	const Meter& current_meter = session.tempo_map().meter_at(time);
 	double frames_per_beat =
-		current_tempo.frames_per_beat(session.nominal_frame_rate(),
+		current_tempo.frames_per_beat(session.frame_rate(),
 		                              current_meter);
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
