@@ -126,6 +126,7 @@ protected:
 	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
 	
 	virtual void color_handler () = 0;
+	double child_height () const;
 
 	RouteTimeAxisView&        _trackview;
 	bool                      owns_canvas_group;

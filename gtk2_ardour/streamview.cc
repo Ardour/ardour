@@ -424,24 +424,35 @@ StreamView::get_inverted_selectables (Selection& sel, list<Selectable*>& results
 	}
 }
 
+/** @return height of a child region view, depending on stacked / overlaid mode */
+double
+StreamView::child_height () const
+{
+	if (layer_display == Stacked) {
+		return height / layers;
+	}
+	
+	return height;
+}
+
 void
 StreamView::update_contents_height ()
 {
 	canvas_rect->property_y2() = height;
 
-	const double lh = height / layers;
+	const double h = child_height ();
 
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		switch (layer_display) {
 		case Overlaid:
 			(*i)->set_y (0);
-			(*i)->set_height (height);
 			break;
 		case Stacked:
-			(*i)->set_y (height - ((*i)->region()->layer() + 1) * lh);
-			(*i)->set_height (lh);
+			(*i)->set_y (height - ((*i)->region()->layer() + 1) * h);
 			break;
 		}
+
+		(*i)->set_height (h);
 	}
 
 	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {

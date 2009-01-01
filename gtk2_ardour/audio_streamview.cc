@@ -155,6 +155,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	region_view->init (region_color, wait_for_waves);
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
+	region_view->set_height (child_height ());
 	region_views.push_front (region_view);
 
 	/* if its the special single-sample length that we use for rec-regions, make it 
@@ -534,7 +535,6 @@ AudioStreamView::setup_rec_box ()
 								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
 				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
-
 				rec_regions.push_back (make_pair(region, (RegionView*)0));
 			}
 			
@@ -569,7 +569,7 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
-			rec_rect->property_y2() = (double) _trackview.current_height() - 1;
+			rec_rect->property_y2() = child_height ();
 			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 			rec_rect->property_outline_what() = 0x1 | 0x2 | 0x4 | 0x8;
 			rec_rect->property_fill_color_rgba() = fill_color;
