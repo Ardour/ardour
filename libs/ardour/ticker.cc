@@ -22,8 +22,6 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#define DEBUG_TICKER 0
-
 namespace ARDOUR
 {
 
@@ -60,7 +58,7 @@ void MidiClockTicker::transport_state_changed()
 {
 	float     speed     = _session->transport_speed();
 	nframes_t position  = _session->transport_frame();
-#if DEBUG_TICKER	
+#ifdef DEBUG_MIDI_CLOCK	
 	cerr << "Transport state change, speed:" << speed << "position:" << position<< " play loop " << _session->get_play_loop() << endl;
 #endif	
 	if (speed == 1.0f) {
@@ -96,7 +94,7 @@ void MidiClockTicker::transport_state_changed()
 
 void MidiClockTicker::position_changed(nframes_t position)
 {
-#if DEBUG_TICKER	
+#ifdef DEBUG_MIDI_CLOCK	
 	cerr << "Position changed:" << position << endl;
 #endif	
 	_last_tick = position;
@@ -107,7 +105,7 @@ void MidiClockTicker::transport_looped()
 	Location* loop_location = _session->locations()->auto_loop_location();
 	assert(loop_location);
 
-#if DEBUG_TICKER	
+#ifdef DEBUG_MIDI_CLOCK	
 	cerr << "Transport looped, position:" <<  _session->transport_frame()
 	     << " loop start " << loop_location->start( )
 	     << " loop end " << loop_location->end( )
@@ -134,7 +132,7 @@ void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& tr
 		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
 		nframes_t next_tick_offset = nframes_t(next_tick) - transport_frames;
 		
-#if DEBUG_TICKER	
+#ifdef DEBUG_MIDI_CLOCK	
 		cerr << "Transport:" << transport_frames 
 			 << ":Last tick time:" << _last_tick << ":" 
 			 << ":Next tick time:" << next_tick << ":" 
@@ -172,9 +170,9 @@ void MidiClockTicker::send_midi_clock_event(nframes_t offset)
 #ifdef WITH_JACK_MIDI
 	assert (MIDI::JACK_MidiPort::is_process_thread());
 #endif // WITH_JACK_MIDI
-#if DEBUG_TICKER	
+#ifdef DEBUG_MIDI_CLOCK	
 	cerr << "Tick with offset " << offset << endl;
-#endif // DEBUG_TICKER
+#endif // DEBUG_MIDI_CLOCK
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }

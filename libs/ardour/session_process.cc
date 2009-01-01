@@ -743,7 +743,6 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 
   noroll:
 	/* don't move at all */
-  cerr << "********* noroll" << endl;
 	no_roll (nframes, 0);
 	return false;
 }

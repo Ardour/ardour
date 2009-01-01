@@ -39,13 +39,13 @@ class Session;
 /**
  * @class Slave
  * 
- * @brief The class Slave can be used to sync ardours tempo to an external source
+ * @brief The Slave interface can be used to sync ARDOURs tempo to an external source
  * like MTC, MIDI Clock, etc.
  * 
- * The name of the class may be a bit misleading: A subclass of Slave actually
- * acts as a master for Ardour, that means Ardour will try to follow the
+ * The name of the interface may be a bit misleading: A subclass of Slave actually
+ * acts as a time master for ARDOUR, that means ARDOUR will try to follow the
  * speed and transport position of the implementation of Slave.
- * Therefor it is rather that class, that makes Ardour a slave by connecting it
+ * Therefore it is rather that class, that makes ARDOUR a slave by connecting it
  * to its external time master.
  */
 class Slave {
@@ -62,8 +62,8 @@ class Slave {
 	 * <emph>position</emph> using a delay locked loop (DLL),
 	 * starting with the first given transport speed.
 	 * If the values of speed and position contradict each other,
-	 * ardour will always follow the position and disregard the speed.
-	 * Although, a correct speed is important so that ardour
+	 * ARDOUR will always follow the position and disregard the speed.
+	 * Although, a correct speed is important so that ARDOUR
 	 * can sync to the master time source quickly.
 	 * 
 	 * For background information on delay locked loops, 
@@ -85,7 +85,7 @@ class Slave {
 	 * <ul>
 	 * 	  <li>
 	 *       The first position value on transport start should be 0,
-	 *       otherwise ardour will try to locate to the new position 
+	 *       otherwise ARDOUR will try to locate to the new position 
 	 *       rather than move to it
 	 *    </li>
 	 * 	  <li>
@@ -95,7 +95,7 @@ class Slave {
 	 *    </li>
 	 *   <li>
 	 *     Slave::resolution() should be greater than the maximum distance of 
-	 *     ardours transport position to the slaves requested transport position.
+	 *     ARDOURs transport position to the slaves requested transport position.
 	 *   </li>
 	 * 	 <li>Slave::locked() should return true, otherwise Session::no_roll will be called</li>
 	 * 	 <li>Slave::starting() should be false, otherwise the transport will not move until it becomes true</li>	 *   
@@ -107,7 +107,7 @@ class Slave {
 	virtual bool speed_and_position (float& speed, nframes_t& position) = 0;
 	
 	/**
-	 * reports to ardour whether the Slave is currently synced to its external 
+	 * reports to ARDOUR whether the Slave is currently synced to its external 
 	 * time source.
 	 * 
 	 * @return - when returning false, the transport will stop rolling
@@ -115,15 +115,15 @@ class Slave {
 	virtual bool locked() const = 0;
 	
 	/**
-	 * reports to ardour whether the slave is in a sane state
+	 * reports to ARDOUR whether the slave is in a sane state
 	 * 
 	 * @return - when returning false, the transport will be stopped and the slave 
-	 * disconnected from ardour.
+	 * disconnected from ARDOUR.
 	 */
 	virtual bool ok() const = 0;
 	
 	/**
-	 * reports to ardour whether the slave is in the process of starting
+	 * reports to ARDOUR whether the slave is in the process of starting
 	 * to roll
 	 * 
 	 * @return - when returning false, transport will not move until this method returns true
@@ -131,19 +131,19 @@ class Slave {
 	virtual bool starting() const { return false; }
 	
 	/**
-	 * @return - the timing resolution of the Slave - If the distance of ardours transport
+	 * @return - the timing resolution of the Slave - If the distance of ARDOURs transport
 	 * to the slave becomes greater than the resolution, sound will stop
 	 */
 	virtual nframes_t resolution() const = 0;
 	
 	/**
-	 * @return - when returning true, ardour will wait for one second before transport
+	 * @return - when returning true, ARDOUR will wait for one second before transport
 	 * starts rolling
 	 */
 	virtual bool requires_seekahead () const = 0;
 	
 	/**
-	 * @return - when returning true, ardour will use transport speed 1.0 no matter what 
+	 * @return - when returning true, ARDOUR will use transport speed 1.0 no matter what 
 	 *           the slave returns
 	 */
 	virtual bool is_always_synced() const { return false; }
@@ -214,7 +214,7 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 
 	bool locked() const;
 	bool ok() const;
-	bool starting() const { return false; }
+	bool starting() const;
 
 	nframes_t resolution() const;
 	bool requires_seekahead () const { return false; }
@@ -252,14 +252,18 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	void reset ();
 	void start (MIDI::Parser& parser, nframes_t timestamp);
 	void stop (MIDI::Parser& parser, nframes_t timestamp);
+	// we can't use continue because it is a C++ keyword
+	void contineu (MIDI::Parser& parser, nframes_t timestamp);
+	void calculate_one_ppqn_in_frames_at(nframes_t time);
 	void update_midi_clock (MIDI::Parser& parser, nframes_t timestamp);
 	void read_current (SafeTime *) const;
+	bool stop_if_no_more_clock_events(nframes_t& pos, nframes_t now, SafeTime& last);
 
 	/// whether transport should be rolling
 	bool _started;
 	
 	/// is true if the MIDI Start message has just been received until
-	/// the first call of speed_and_position(...)
+	/// the first MIDI Clock Event
 	bool _starting;
 };
 
