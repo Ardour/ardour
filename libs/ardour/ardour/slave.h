@@ -231,18 +231,14 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	double      one_ppqn_in_frames;
 
 	/// the time stamp and transport position of the last inbound MIDI clock message
-	SafeTime    current;
-	/// since current.position is integral, we need to keep track of decimal places
-	/// to be precise
-	double      current_position;
+	nframes_t   last_timestamp;
+	double      last_position;
 	
 	/// The duration of the current MIDI clock frame in frames
 	nframes_t   current_midi_clock_frame_duration;
-	/// the timestamp of the last inbound MIDI clock message
-	nframes_t   last_inbound_frame;             
 
 	/// how many MIDI clock frames to average over
-	static const int32_t accumulator_size = 4;
+	static const int32_t accumulator_size = 1;
 	double  accumulator[accumulator_size];
 	int32_t accumulator_index;
 	
@@ -257,7 +253,7 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	void calculate_one_ppqn_in_frames_at(nframes_t time);
 	void update_midi_clock (MIDI::Parser& parser, nframes_t timestamp);
 	void read_current (SafeTime *) const;
-	bool stop_if_no_more_clock_events(nframes_t& pos, nframes_t now, SafeTime& last);
+	bool stop_if_no_more_clock_events(nframes_t& pos, nframes_t now);
 
 	/// whether transport should be rolling
 	bool _started;

@@ -67,9 +67,9 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 
 	port = &p;
 
-#ifdef DEBUG_MIDI_CLOCK		
-	std::cerr << "MIDIClock_Slave: connecting to port " << port->name() << std::endl;
-#endif
+	#ifdef DEBUG_MIDI_CLOCK		
+		std::cerr << "MIDIClock_Slave: connecting to port " << port->name() << std::endl;
+	#endif
 
 	connections.push_back (port->input()->timing.connect   (mem_fun (*this, &MIDIClock_Slave::update_midi_clock)));
 	connections.push_back (port->input()->start.connect    (mem_fun (*this, &MIDIClock_Slave::start)));
@@ -94,88 +94,77 @@ MIDIClock_Slave::calculate_one_ppqn_in_frames_at(nframes_t time)
 
 void
 MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
-{	
-	nframes_t now = timestamp;
-
-	SafeTime last;
-	read_current (&last);
-	
-	if (_starting) {
-		assert(last.timestamp == 0);
-		// let ardour go after first MIDI Clock Event
-		_starting = false;
-	}
-		
-	calculate_one_ppqn_in_frames_at(now);
+{			
+	calculate_one_ppqn_in_frames_at(last_position);
 	
 	// for the first MIDI clock event we don't have any past
 	// data, so we assume a sane tempo
-	if(last.timestamp == 0) {
+	if(_starting) {
 		current_midi_clock_frame_duration = one_ppqn_in_frames;
 	} else {
-		current_midi_clock_frame_duration = now - last.timestamp;
+		current_midi_clock_frame_duration = timestamp - last_timestamp;
 	}
 		
 	// moving average over incoming intervals
 	accumulator[accumulator_index++] = current_midi_clock_frame_duration;
-	if(accumulator_index == accumulator_size)
+	if(accumulator_index == accumulator_size) {
 		accumulator_index = 0;
-	
+	}
 	average_midi_clock_frame_duration = 0.0;
-	for(int i = 0; i < accumulator_size; i++)
+	for(int i = 0; i < accumulator_size; i++) {
 		average_midi_clock_frame_duration += accumulator[i];
+	}
 	average_midi_clock_frame_duration /= double(accumulator_size);
 	
-#ifdef DEBUG_MIDI_CLOCK		
-#ifdef WITH_JACK_MIDI
-	JACK_MidiPort* jack_port = dynamic_cast<JACK_MidiPort*>(port);
-	pthread_t process_thread_id = 0;
-	if(jack_port) {
-		process_thread_id = jack_port->get_process_thread();
+	#ifdef DEBUG_MIDI_CLOCK		
+		std::cerr 
+				  << " got MIDI Clock message at time " << timestamp  
+				  << " engine time: " << session.engine().frame_time() 
+				  << " transport position: " << session.transport_frame()
+				  << " real delta: " << current_midi_clock_frame_duration 
+				  << " reference: " << one_ppqn_in_frames
+				  << " average: " << average_midi_clock_frame_duration
+				  << std::endl;
+	#endif // DEBUG_MIDI_CLOCK
+	
+	if (_starting) {
+		assert(last_timestamp == 0);
+		assert(last_position == 0);
+		
+		last_position = 0;
+		last_timestamp = timestamp;
+		
+		// let ardour go after first MIDI Clock Event
+		_starting = false;
+		session.request_transport_speed (1.0);
+	} else {;
+		last_position  += double(one_ppqn_in_frames);
+		last_timestamp = timestamp;
 	}
-	
-	std::cerr 
-	          << " got MIDI Clock message at time " << now  
-	          << " session time: " << session.engine().frame_time() 
-	          << " transport position: " << session.transport_frame()
-	          << " real delta: " << current_midi_clock_frame_duration 
-	          << " reference: " << one_ppqn_in_frames
-	          << " average: " << average_midi_clock_frame_duration
-	          << std::endl;
-#endif // DEBUG_MIDI_CLOCK
-#endif // WITH_JACK_MIDI
-	
-	current.guard1++;
-	current.position += one_ppqn_in_frames;
-	current_position += one_ppqn_in_frames;
-	current.timestamp = now;
-	current.guard2++;
 
-	last_inbound_frame = now;
 }
 
 void
 MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
-{
-	
-	nframes_t now = timestamp;
-	
-#ifdef DEBUG_MIDI_CLOCK	
-	cerr << "MIDIClock_Slave got start message at time "  <<  now << " session time: " << session.engine().frame_time() << endl;
-#endif
+{	
+	#ifdef DEBUG_MIDI_CLOCK	
+		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " session time: " << session.engine().frame_time() << endl;
+	#endif
 	
 	if(!locked()) {
 		cerr << "Did not start because not locked!" << endl;
 		return;
 	}
 	
-	current_midi_clock_frame_duration = 0;
+	// initialize accumulator to sane values
+	calculate_one_ppqn_in_frames_at(0);
 	
-	current.guard1++;
-	current.position = 0;
-	current_position = 0;	
-	current.timestamp = 0;
-	current.guard2++;
+	for(int i = 0; i < accumulator_size; i++) {
+		accumulator[i] = one_ppqn_in_frames;
+	}
+	
+	last_position = 0;
+	last_timestamp = 0;
 	
 	_started = true;
 	_starting = true;
@@ -184,9 +173,9 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 void
 MIDIClock_Slave::contineu (Parser& parser, nframes_t timestamp)
 {
-#ifdef DEBUG_MIDI_CLOCK	
-	std::cerr << "MIDIClock_Slave got continue message" << endl;
-#endif
+	#ifdef DEBUG_MIDI_CLOCK	
+		std::cerr << "MIDIClock_Slave got continue message" << endl;
+	#endif
 	start(parser, timestamp);
 }
 
@@ -194,37 +183,17 @@ MIDIClock_Slave::contineu (Parser& parser, nframes_t timestamp)
 void
 MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 {
-#ifdef DEBUG_MIDI_CLOCK	
-	std::cerr << "MIDIClock_Slave got stop message" << endl;
-#endif
+	#ifdef DEBUG_MIDI_CLOCK	
+		std::cerr << "MIDIClock_Slave got stop message" << endl;
+	#endif
 	
 	current_midi_clock_frame_duration = 0;
 
-	current.guard1++;
-	current.position = 0;
-	current_position = 0;	
-	current.timestamp = 0;
-	current.guard2++;
+	last_position = 0;
+	last_timestamp = 0;
 	
 	_started = false;
 	reset();
-}
-
-void
-MIDIClock_Slave::read_current (SafeTime *st) const
-{
-	int tries = 0;
-	do {
-		if (tries == 10) {
-			error << _("MIDI Clock Slave: atomic read of current time failed, sleeping!") << endmsg;
-			usleep (20);
-			tries = 0;
-		}
-
-		*st = current;
-		tries++;
-
-	} while (st->guard1 != st->guard2);
 }
 
 bool
@@ -242,20 +211,20 @@ MIDIClock_Slave::ok() const
 bool
 MIDIClock_Slave::starting() const
 {
-	return _starting;
+	return false;
 }
 
 bool
-MIDIClock_Slave::stop_if_no_more_clock_events(nframes_t& pos, nframes_t now, SafeTime& last)
+MIDIClock_Slave::stop_if_no_more_clock_events(nframes_t& pos, nframes_t now)
 {
 	/* no timecode for 1/4 second ? conclude that its stopped */
-	if (last_inbound_frame && 
-	    now > last_inbound_frame && 
-	    now - last_inbound_frame > session.frame_rate() / 4) {
-#ifdef DEBUG_MIDI_CLOCK			
-		cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
-#endif		
-		pos = last.position;
+	if (last_timestamp && 
+	    now > last_timestamp && 
+	    now - last_timestamp > session.frame_rate() / 4) {
+        #ifdef DEBUG_MIDI_CLOCK			
+			cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
+        #endif		
+		pos = last_position;
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
 		this->stop(*port->input(), now);
@@ -269,42 +238,46 @@ MIDIClock_Slave::stop_if_no_more_clock_events(nframes_t& pos, nframes_t now, Saf
 bool
 MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 {
-	if (!_started) {
+	if (!_started || _starting) {
 		speed = 0.0;
 		pos = 0;
 		return true;
 	}
 		
-	nframes_t now = session.engine().frame_time();
-	SafeTime last;
-	read_current (&last);
+	nframes_t engine_now = session.engine().frame_time();
 
-	if (stop_if_no_more_clock_events(pos, now, last)) {
+	if (stop_if_no_more_clock_events(pos, engine_now)) {
 		return false;
 	}
-	//cerr << " now: " << now << " last: " << last.timestamp;
-
+	
+	#ifdef DEBUG_MIDI_CLOCK	
+		cerr << "speed_and_position: engine time: " << engine_now << " last message timestamp: " << last_timestamp;
+	#endif
+	
 	// calculate speed
 	double speed_double = one_ppqn_in_frames / average_midi_clock_frame_duration;
 	speed = float(speed_double);
-	//cerr << " final speed: " << speed;
+	
+    #ifdef DEBUG_MIDI_CLOCK	
+		cerr << " final speed: " << speed;
+    #endif
 	
 	// calculate position
-	if (now > last.timestamp) {
+	if (engine_now > last_timestamp) {
 		// we are in between MIDI clock messages
 		// so we interpolate position according to speed
-		nframes_t elapsed = now - last.timestamp;
-		pos = nframes_t (current_position + double(elapsed) * speed_double);
+		nframes_t elapsed = engine_now - last_timestamp;
+		pos = nframes_t (last_position + double(elapsed) * speed_double);
 	} else {
 		// A new MIDI clock message has arrived this cycle
-		pos = current_position;
+		pos = last_position;
 	}
 	
-	/*
-   cerr << " transport position now: " <<  session.transport_frame(); 
-   cerr << " calculated position: " << pos; 
-   cerr << endl;
-   */
+   #ifdef DEBUG_MIDI_CLOCK	
+	   cerr << " transport position engine_now: " <<  session.transport_frame(); 
+	   cerr << " calculated position: " << pos; 
+	   cerr << endl;
+   #endif
    
 	return true;
 }
@@ -320,12 +293,8 @@ void
 MIDIClock_Slave::reset ()
 {
 
-	last_inbound_frame = 0;
-	current.guard1++;
-	current.position = 0;
-	current_position = 0;		
-	current.timestamp = 0;
-	current.guard2++;
+	last_position = 0;		
+	last_timestamp = 0;
 	
 	session.request_locate(0, false);
 }

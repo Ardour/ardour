@@ -495,7 +495,8 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		slave_speed = 0.0f;
 	}
 
-#if 0
+#ifdef DEBUG_SLAVES
+	if (slave_speed != 0.0)
 	cerr << "delta = " << (int) (dir * this_delta)
 	     << " speed = " << slave_speed 
 	     << " ts = " << _transport_speed 
@@ -542,7 +543,6 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			} else {
 				average_dir = 1;
 			}
-			// cerr << "avgdelta = " << average_slave_delta*average_dir << endl;
 		}
 	}
 
@@ -585,10 +585,13 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 
 		if (slave_state == Waiting) {
 
-			// cerr << "waiting at " << slave_transport_frame << endl;
+#ifdef DEBUG_SLAVES
+			cerr << "waiting at " << slave_transport_frame << endl;
+#endif			
 			if (slave_transport_frame >= slave_wait_end) {
-				// cerr << "\tstart at " << _transport_frame << endl;
-
+#ifdef DEBUG_SLAVES
+				cerr << "\tstart at " << _transport_frame << endl;
+#endif
 				slave_state = Running;
 
 				bool ok = true;
@@ -610,7 +613,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 					_transport_frame += frame_delta;
 				       
 				} else {
-					// cerr << "cannot micro-seek\n";
+					cerr << "cannot micro-seek\n";
 					/* XXX what? */
 				}
 
@@ -622,8 +625,9 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		
 		if (slave_state == Running && _transport_speed == 0.0f) {
 			
-			// cerr << "slave starts transport\n";
-			
+#ifdef DEBUG_SLAVES
+			cerr << "slave starts transport\n";
+#endif
 			start_transport ();
 		} 
 
@@ -633,9 +637,10 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 
 		if (_transport_speed != 0.0f) {
 
-			// cerr << "slave stops transport: " << slave_speed << " frame: " << slave_transport_frame 
-			// << " tf = " << _transport_frame
-			// << endl;
+#ifdef DEBUG_SLAVES
+			cerr << "slave stops transport: " << slave_speed << " frame: " << slave_transport_frame 
+			     << " tf = " << _transport_frame << endl;
+#endif
 			
 			if (Config->get_slave_source() == JACK) {
 				last_stop_frame = _transport_frame;
@@ -645,7 +650,9 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		}
 
 		if (slave_transport_frame != _transport_frame) {
-			// cerr << "slave stopped, move to " << slave_transport_frame << endl;
+#ifdef DEBUG_SLAVES			
+			cerr << "slave stopped, move to " << slave_transport_frame << endl;
+#endif
 			force_locate (slave_transport_frame, false);
 		}
 
@@ -675,7 +682,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			float adjusted_speed = slave_speed +
 				(delta / (adjust_seconds * _current_frame_rate));
 			
-#if 0
+#ifdef DEBUG_DELAY_LOCKED_LOOP
 			cerr << "adjust using " << delta
 			     << " towards " << adjusted_speed
 			     << " ratio = " << adjusted_speed / slave_speed
@@ -686,12 +693,10 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			
 			request_transport_speed (adjusted_speed);
 			
-#if 1
 			if (abs(average_slave_delta) > (long) _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution, going to silent motion\n";
 				goto silent_motion;
 			}
-#endif
 		}
 	} 
 
@@ -701,7 +706,10 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 	}
 
   silent_motion:
-
+#ifdef DEBUG_SLAVES	
+	cerr << "reached silent_motion:" <<endl;
+#endif
+	
 	if (slave_speed && _transport_speed) {
 
 		/* something isn't right, but we should move with the master
@@ -743,6 +751,9 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 
   noroll:
 	/* don't move at all */
+#ifdef DEBUG_SLAVES	
+	cerr << "reached no_roll:" <<endl;
+#endif
 	no_roll (nframes, 0);
 	return false;
 }
