@@ -158,6 +158,8 @@ StreamView::set_samples_per_unit (gdouble spp)
 		recbox.rectangle->property_x2() = xend;
 	}
 
+	update_coverage_frames ();
+
 	return 0;
 }
 
