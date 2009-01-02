@@ -34,6 +34,7 @@ Port::Port (const std::string& name, Flags flgs)
 
 Port::~Port ()
 {
+	drop_references ();
 	disconnect_all ();
 }
 
@@ -59,6 +60,7 @@ Port::connect (Port& other)
 	result = _connections.insert (&other);
 
 	if (result.second) {
+		other.GoingAway.connect (sigc::bind (mem_fun (*this, &Port::port_going_away), &other));
 		return 0;
 	} else {
 		return 1;
@@ -129,6 +131,14 @@ Port::get_connections (vector<string>& names) const
 	}
 
 	return i;
+}
+
+void
+Port::port_going_away (Port* p)
+{
+	/* caller must hold process lock */
+
+	disconnect (*p);
 }
 
 
@@ -377,3 +387,4 @@ PortFacade::reset ()
 		_ext_port->reset ();
 	}
 }
+

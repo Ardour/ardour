@@ -26,6 +26,7 @@
 #include <cstring>
 #include <sigc++/signal.h>
 #include <pbd/failed_constructor.h>
+#include <pbd/destructible.h>
 #include <ardour/ardour.h>
 #include <ardour/data_type.h>
 #include <jack/jack.h>
@@ -37,7 +38,7 @@ class Buffer;
 
 /** Abstract base for ports
  */
-class Port : public virtual sigc::trackable {
+class Port : public virtual PBD::Destructible {
    public:
 	enum Flags {
 		IsInput = JackPortIsInput,
@@ -132,6 +133,10 @@ class Port : public virtual sigc::trackable {
 	std::set<Port*> _connections;
 
 	static AudioEngine* engine;
+
+   private:
+
+        void port_going_away (Port *);
 };
 
 class PortConnectableByName {
