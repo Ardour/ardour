@@ -22,7 +22,7 @@ librb = rb.SharedLibrary('rubberband', rubberband_files)
 
 Default(librb)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), librb))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), librb))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript'] +
