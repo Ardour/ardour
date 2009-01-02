@@ -1523,7 +1523,8 @@ Route::state(bool full_state)
 	node->add_property("mute-affects-pre-fader", _mute_affects_pre_fader?"yes":"no"); 
 	node->add_property("mute-affects-post-fader", _mute_affects_post_fader?"yes":"no"); 
 	node->add_property("mute-affects-control-outs", _mute_affects_control_outs?"yes":"no"); 
-	node->add_property("mute-affects-main-outs", _mute_affects_main_outs?"yes":"no"); 
+	node->add_property("mute-affects-main-outs", _mute_affects_main_outs?"yes":"no");
+	node->add_property("meter-point", enum_2_string (_meter_point));
 
 	if (_edit_group) {
 		node->add_property("edit-group", _edit_group->name());
@@ -1738,6 +1739,10 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		_mute_affects_main_outs = (prop->value()=="yes")?true:false;
 	}
 
+	if ((prop = node.property (X_("meter-point"))) != 0) {
+		_meter_point = MeterPoint (string_2_enum (prop->value (), _meter_point));
+	}
+	
 	if ((prop = node.property (X_("edit-group"))) != 0) {
 		RouteGroup* edit_group = _session.edit_group_by_name(prop->value());
 		if(edit_group == 0) {
