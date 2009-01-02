@@ -69,7 +69,7 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 
 	model_representation (cp, mr);
 
-	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
+	trackview.editor().current_session()->begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
 	if (!rv.audio_region()->envelope_active()) {
@@ -81,9 +81,9 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	
 	alist->erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-	trackview.editor.current_session()->commit_reversible_command ();
-	trackview.editor.current_session()->set_dirty ();
+	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+	trackview.editor().current_session()->commit_reversible_command ();
+	trackview.editor().current_session()->set_dirty ();
 }
 
 void

@@ -49,7 +49,7 @@ using namespace Editing;
 struct TrackViewByPositionSorter
 {
     bool operator() (const TimeAxisView* a, const TimeAxisView *b) {
-	    return a->y_position < b->y_position;
+	    return a->y_position() < b->y_position();
     }
 };
 

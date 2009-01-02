@@ -65,7 +65,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	color_handler ();
 	_amplitude_above_axis = 1.0;
 
-	use_rec_regions = tv.editor.show_waveforms_recording ();
+	use_rec_regions = tv.editor().show_waveforms_recording ();
 }
 
 AudioStreamView::~AudioStreamView ()
@@ -189,7 +189,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	
 	/* follow global waveform setting */
 
-	region_view->set_waveform_visible(_trackview.editor.show_waveforms());
+	region_view->set_waveform_visible(_trackview.editor().show_waveforms());
 
 	/* catch regionview going away */
 	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
@@ -331,7 +331,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 		}
 	}
 
-	CrossfadeView *cv = new CrossfadeView (_trackview.canvas_display,
+	CrossfadeView *cv = new CrossfadeView (_trackview.canvas_display (),
 					       _trackview,
 					        crossfade,
 					       _samples_per_unit,
@@ -545,7 +545,7 @@ AudioStreamView::setup_rec_box ()
 			at = _trackview.audio_track(); /* we know what it is already */
 			boost::shared_ptr<AudioDiskstream> ds = at->audio_diskstream();
 			nframes_t frame_pos = ds->current_capture_start ();
-			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
+			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
 
@@ -720,7 +720,7 @@ AudioStreamView::update_rec_regions ()
 
 						/* also update rect */
 						ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
-						gdouble xend = _trackview.editor.frame_to_pixel (region->position() + region->length());
+						gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
 						rect->property_x2() = xend;
 					}
 				}

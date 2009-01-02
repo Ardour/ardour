@@ -78,7 +78,7 @@ AutomationRegionView::canvas_event(GdkEvent* ev)
 {
 	if (ev->type == GDK_BUTTON_RELEASE) {
 
-		const nframes_t when = trackview.editor.pixel_to_frame((nframes_t)ev->button.x)
+		const nframes_t when = trackview.editor().pixel_to_frame((nframes_t)ev->button.x)
 			- _region->position();
 		add_automation_event(ev, when, ev->button.y);
 	}
@@ -101,7 +101,7 @@ AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, dou
 	double x = 0;
 	AutomationTimeAxisView* const view = automation_view();
 
-	view->canvas_display->w2i (x, y);
+	view->canvas_display()->w2i (x, y);
 
 	/* compute vertical fractional position */
 

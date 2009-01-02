@@ -80,7 +80,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	vestigial_frame->hide();
 	show_vestigial = false;
 	
-	group->signal_event().connect (bind (mem_fun (tv.editor, &PublicEditor::canvas_crossfade_view_event), group, this));
+	group->signal_event().connect (bind (mem_fun (tv.editor(), &PublicEditor::canvas_crossfade_view_event), group, this));
 	
 	crossfade_changed (Change (~0));
 
@@ -174,7 +174,7 @@ CrossfadeView::redraw_curves ()
 		return;
 	}
 
-	npoints = get_time_axis_view().editor.frame_to_pixel (crossfade->length());
+	npoints = get_time_axis_view().editor().frame_to_pixel (crossfade->length());
 	// npoints = std::min (gdk_screen_width(), npoints);
 
 	if (!_visible || !crossfade->active() || npoints < 3) {

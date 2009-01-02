@@ -161,7 +161,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame = new ArdourCanvas::SimpleRect (*group);
 		frame->property_x1() = (double) 0.0;
 		frame->property_y1() = (double) 1.0;
-		frame->property_x2() = (double) trackview.editor.frame_to_pixel(duration);
+		frame->property_x2() = (double) trackview.editor().frame_to_pixel(duration);
 		frame->property_y2() = (double) trackview.current_height();
 		frame->property_outline_pixels() = 1;
 		frame->property_outline_what() = 0xF;
@@ -193,10 +193,10 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		name_highlight = new ArdourCanvas::SimpleRect (*group);
 		if (visibility & FullWidthNameHighlight) {
 			name_highlight->property_x1() = (double) 0.0;
-			name_highlight->property_x2() = (double) (trackview.editor.frame_to_pixel(item_duration));
+			name_highlight->property_x2() = (double) (trackview.editor().frame_to_pixel(item_duration));
 		} else {
 			name_highlight->property_x1() = (double) 1.0;
-			name_highlight->property_x2() = (double) (trackview.editor.frame_to_pixel(item_duration)) - 1;
+			name_highlight->property_x2() = (double) (trackview.editor().frame_to_pixel(item_duration)) - 1;
 		}
 		name_highlight->property_y1() = (double) (trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
 		name_highlight->property_y2() = (double) (trackview.current_height() - 1);
@@ -234,8 +234,8 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame_handle_start->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
 
 		frame_handle_end = new ArdourCanvas::SimpleRect (*group);
-		frame_handle_end->property_x1() = (double) (trackview.editor.frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
-		frame_handle_end->property_x2() = (double) trackview.editor.frame_to_pixel(get_duration());
+		frame_handle_end->property_x1() = (double) (trackview.editor().frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
+		frame_handle_end->property_x2() = (double) trackview.editor().frame_to_pixel(get_duration());
 		frame_handle_end->property_y1() = (double) 1;
 		frame_handle_end->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1;
 		frame_handle_end->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
@@ -339,7 +339,7 @@ TimeAxisViewItem::set_duration (nframes_t dur, void* src)
 
 	item_duration = dur;
 	
-	reset_width_dependent_items (trackview.editor.frame_to_pixel (dur));
+	reset_width_dependent_items (trackview.editor().frame_to_pixel (dur));
 	
 	DurationChanged (dur, src) ; /* EMIT_SIGNAL */
 	return true;

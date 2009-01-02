@@ -341,9 +341,7 @@ Editor::track_canvas_size_allocated ()
 		double height = 0;
 
 		for (i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((*i)->control_parent) {
-				height += (*i)->effective_height;
-			}
+			height += (*i)->effective_height ();
 			(*i)->clip_to_viewport ();
 		}
 		
@@ -391,7 +389,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		if (tv != 0) {
-			pos += tv->effective_height;
+			pos += tv->effective_height ();
 			tv->clip_to_viewport ();
 		}
 	}

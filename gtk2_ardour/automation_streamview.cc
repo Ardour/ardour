@@ -54,14 +54,14 @@ using namespace Editing;
 
 AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
-			new ArdourCanvas::Group(*tv.canvas_display))
+		      new ArdourCanvas::Group(*tv.canvas_display()))
 	, _controller(tv.controller())
 	, _automation_view(tv)
 {
 	//canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
 
-	use_rec_regions = tv.editor.show_waveforms_recording ();
+	use_rec_regions = tv.editor().show_waveforms_recording ();
 }
 
 AutomationStreamView::~AutomationStreamView ()

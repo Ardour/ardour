@@ -220,7 +220,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	}
 
-	y_position = -1;
+	_y_position = -1;
 
 	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
@@ -241,7 +241,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	}
 
-	editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
+	_editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	ColorsChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	gm.get_gain_slider().signal_scroll_event().connect(mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
@@ -372,7 +372,7 @@ RouteTimeAxisView::label_view ()
 void
 RouteTimeAxisView::route_name_changed ()
 {
-	editor.route_name_changed (this);
+	_editor.route_name_changed (this);
 	label_view ();
 }
 
@@ -716,7 +716,7 @@ RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 #endif
 
 	if (timestretch_rect == 0) {
-		timestretch_rect = new SimpleRect (*canvas_display);
+		timestretch_rect = new SimpleRect (*canvas_display ());
 		timestretch_rect->property_x1() =  0.0;
 		timestretch_rect->property_y1() =  0.0;
 		timestretch_rect->property_x2() =  0.0;
@@ -728,8 +728,8 @@ RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 	timestretch_rect->show ();
 	timestretch_rect->raise_to_top ();
 
-	x1 = start / editor.get_current_zoom();
-	x2 = (end - 1) / editor.get_current_zoom();
+	x1 = start / _editor.get_current_zoom();
+	x2 = (end - 1) / _editor.get_current_zoom();
 	y2 = current_height() - 2;
 	
 	timestretch_rect->property_x1() = x1;
@@ -882,7 +882,7 @@ RouteTimeAxisView::select_track_color ()
 void
 RouteTimeAxisView::reset_samples_per_unit ()
 {
-	set_samples_per_unit (editor.get_current_zoom());
+	set_samples_per_unit (_editor.get_current_zoom());
 }
 
 void
@@ -1120,7 +1120,7 @@ RouteTimeAxisView::clear_playlist ()
 	if (!pl)
 		return;
 
-	editor.clear_playlist (pl);
+	_editor.clear_playlist (pl);
 }
 
 void
@@ -1151,38 +1151,38 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
 
 		/* special case: select/deselect all tracks */
-		if (editor.get_selection().selected (this)) {
-			editor.get_selection().clear_tracks ();
+		if (_editor.get_selection().selected (this)) {
+			_editor.get_selection().clear_tracks ();
 		} else {
-			editor.select_all_tracks ();
+			_editor.select_all_tracks ();
 		}
 
 		return;
 	} 
 
-	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route->edit_group());
+	PublicEditor::TrackViewList* tracks = _editor.get_valid_views (this, _route->edit_group());
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
-		editor.get_selection().toggle (*tracks);
+		_editor.get_selection().toggle (*tracks);
 		break;
 		
 	case Selection::Set:
-		editor.get_selection().set (*tracks);
+		_editor.get_selection().set (*tracks);
 		break;
 
 	case Selection::Extend:
 		if (tracks->size() > 1) {
 			/* add each one, do not "extend" */
-			editor.get_selection().add (*tracks);
+			_editor.get_selection().add (*tracks);
 		} else {
 			/* extend to the single track */
-			editor.extend_selection_to_track (*tracks->front());
+			_editor.extend_selection_to_track (*tracks->front());
 		}
 		break;
 
 	case Selection::Add:
-		editor.get_selection().add (*tracks);
+		_editor.get_selection().add (*tracks);
 		break;
 	}
 
@@ -1339,7 +1339,7 @@ RouteTimeAxisView::hide_click ()
 	// LAME fix for hide_button refresh fix
 	hide_button.set_sensitive(false);
 	
-	editor.hide_track_in_display (*this);
+	_editor.hide_track_in_display (*this);
 	
 	hide_button.set_sensitive(true);
 }
@@ -1398,14 +1398,14 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	switch (op) {
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			editor.get_cut_buffer().add (what_we_got);
+			_editor.get_cut_buffer().add (what_we_got);
 			_session.add_command( new MementoCommand<Playlist>(*playlist.get(), &before, &playlist->get_state()));
 			ret = true;
 		}
 		break;
 	case Copy:
 		if ((what_we_got = playlist->copy (time)) != 0) {
-			editor.get_cut_buffer().add (what_we_got);
+			_editor.get_cut_buffer().add (what_we_got);
 		}
 		break;
 
@@ -1508,18 +1508,18 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (SeparatorElem());
 
 	if (!edit_group() || !edit_group()->is_active()) {
-		playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(_editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
 	} else {
 		// Use a label which tells the user what is happening
-		playlist_items.push_back (MenuElem (_("New Take"), bind(mem_fun(editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Take"), bind(mem_fun(editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Take"), bind(mem_fun(_editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Copy Take"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 		
 	}
 
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), bind(mem_fun(editor, &PublicEditor::clear_playlists), this)));
+	playlist_items.push_back (MenuElem (_("Clear Current"), bind(mem_fun(_editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
 
 	playlist_items.push_back (MenuElem(_("Select from all ..."), mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
@@ -1590,7 +1590,7 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 void
 RouteTimeAxisView::show_playlist_selector ()
 {
-	editor.playlist_selector().show_for (this);
+	_editor.playlist_selector().show_for (this);
 }
 
 void
@@ -1642,7 +1642,7 @@ RouteTimeAxisView::toggle_automation_track (Evoral::Parameter param)
 	if (showit != node->track->marked_for_display()) {
 		if (showit) {
 			node->track->set_marked_for_display (true);
-			node->track->canvas_display->show();
+			node->track->canvas_display()->show();
 			node->track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			node->track->set_marked_for_display (false);
@@ -1687,7 +1687,7 @@ RouteTimeAxisView::show_all_automation ()
 	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		i->second->track->set_marked_for_display (true);
-		i->second->track->canvas_display->show();
+		i->second->track->canvas_display()->show();
 		i->second->track->get_state_node()->add_property ("shown", X_("yes"));
 		i->second->menu_item->set_active(true);
 	}
@@ -1723,7 +1723,7 @@ RouteTimeAxisView::show_existing_automation ()
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		if (i->second->track->line() && i->second->track->line()->npoints() > 0) {
 			i->second->track->set_marked_for_display (true);
-			i->second->track->canvas_display->show();
+			i->second->track->canvas_display()->show();
 			i->second->track->get_state_node()->add_property ("shown", X_("yes"));
 			i->second->menu_item->set_active(true);
 		}
@@ -1884,7 +1884,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 
 	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
 			new AutomationTimeAxisView (_session, _route, processor, control,
-				editor, *this, false, parent_canvas, name, state_name));
+				_editor, *this, false, parent_canvas, name, state_name));
 
 	pan->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
 
@@ -2082,8 +2082,8 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 
 		if (showit) {
 			pan->view->set_marked_for_display (true);
-			pan->view->canvas_display->show();
-			pan->view->canvas_background->show();
+			pan->view->canvas_display()->show();
+			pan->view->canvas_background()->show();
 		} else {
 			rai->processor->mark_automation_visible (pan->what, true);
 			pan->view->set_marked_for_display (false);
@@ -2271,12 +2271,12 @@ RouteTimeAxisView::set_underlay_state()
 		}
 
 		XMLProperty* prop = child_node->property ("id");
-		if(prop) {
-			PBD::ID id(prop->value());
+		if (prop) {
+			PBD::ID id (prop->value());
 
-			RouteTimeAxisView* v = editor.get_route_view_by_id(id);
+			RouteTimeAxisView* v = _editor.get_route_view_by_id (id);
 
-			if(v) {
+			if (v) {
 				add_underlay(v->view(), false);
 			}
 		}

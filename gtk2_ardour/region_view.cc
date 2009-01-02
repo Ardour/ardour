@@ -643,14 +643,14 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
-			cr->property_x2() = trackview.editor.frame_to_pixel (t - position);
+			cr->property_x2() = trackview.editor().frame_to_pixel (t - position);
 		}
 
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
 			cr = new ArdourCanvas::SimpleRect (*group);
 			_coverage_frames.push_back (cr);
-			cr->property_x1() = trackview.editor.frame_to_pixel (t - position);
+			cr->property_x1() = trackview.editor().frame_to_pixel (t - position);
 			cr->property_y1() = 1;
 			cr->property_y2() = _height + 1;
 			cr->property_outline_pixels() = 0;
@@ -668,6 +668,6 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 	if (cr) {
 		/* finish off the last rectangle */
-		cr->property_x2() = trackview.editor.frame_to_pixel (end - position);
+		cr->property_x2() = trackview.editor().frame_to_pixel (end - position);
 	}
 }

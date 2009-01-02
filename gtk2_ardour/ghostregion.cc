@@ -101,7 +101,7 @@ GhostRegion::is_automation_ghost() {
 }
 
 AudioGhostRegion::AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(tv.ghost_group, tv, source_tv, initial_unit_pos) {
+	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos) {
 }
 
 void
@@ -157,7 +157,7 @@ AudioGhostRegion::set_colors ()
  * no range controller in these tracks. maybe show the whole range.
  */
 MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(tv.ghost_group, tv, source_tv, initial_unit_pos)
+	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
 {
 
 	base_rect->lower_to_bottom();

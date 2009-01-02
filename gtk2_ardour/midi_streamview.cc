@@ -67,7 +67,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	else
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();
 
-	use_rec_regions = tv.editor.show_waveforms_recording ();
+	use_rec_regions = tv.editor().show_waveforms_recording ();
 
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Group (*canvas_group);
@@ -79,10 +79,10 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	_note_lines->property_x1() = 0;
 	_note_lines->property_y1() = 0;
-	_note_lines->property_x2() = trackview().editor.frame_to_pixel (max_frames);
+	_note_lines->property_x2() = trackview().editor().frame_to_pixel (max_frames);
 	_note_lines->property_y2() = 0;
 
-	_note_lines->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), _note_lines, &_trackview));
+	_note_lines->signal_event().connect (bind (mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), _note_lines, &_trackview));
 	_note_lines->lower_to_bottom();
 
 	ColorsChanged.connect(mem_fun(*this, &MidiStreamView::draw_note_lines));
@@ -457,7 +457,7 @@ MidiStreamView::setup_rec_box ()
 			boost::shared_ptr<MidiTrack> mt = _trackview.midi_track(); /* we know what it is already */
 			boost::shared_ptr<MidiDiskstream> ds = mt->midi_diskstream();
 			jack_nframes_t frame_pos = ds->current_capture_start ();
-			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
+			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
 
@@ -595,7 +595,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 						/* also update rect */
 						ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
-						gdouble xend = _trackview.editor.frame_to_pixel (region->position() + region->length());
+						gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
 						rect->property_x2() = xend;
 
 						/* draw events */

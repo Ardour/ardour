@@ -4824,7 +4824,7 @@ Editor::idle_visual_changer ()
 
 struct EditorOrderTimeAxisSorter {
     bool operator() (const TimeAxisView* a, const TimeAxisView* b) const {
-	    return a->order < b->order;
+	    return a->order () < b->order ();
     }
 };
 	

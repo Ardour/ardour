@@ -119,7 +119,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (mem_fun(*this, &AudioTimeAxisView::region_view_added));
 
-		if (!editor.have_idled()) {
+		if (!_editor.have_idled()) {
 			/* first idle will do what we need */
 		} else {
 			first_idle ();
@@ -187,7 +187,7 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	waveform_items.push_back (CheckMenuElem (_("Show waveforms"), mem_fun(*this, &AudioTimeAxisView::toggle_waveforms)));
 	waveform_item = static_cast<CheckMenuItem *> (&waveform_items.back());
 	ignore_toggle = true;
-	waveform_item->set_active (editor.show_waveforms());
+	waveform_item->set_active (_editor.show_waveforms());
 	ignore_toggle = false;
 
 	waveform_items.push_back (SeparatorElem());
@@ -334,7 +334,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 		boost::shared_ptr<AutomationTimeAxisView> gain_track(new AutomationTimeAxisView (_session,
 				_route, _route, c,
-				editor,
+				_editor,
 				*this,
 				false,
 				parent_canvas,
@@ -382,7 +382,7 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 			boost::shared_ptr<AutomationTimeAxisView> pan_track (
 				new AutomationTimeAxisView (_session,
 							    _route, _route, pan_control, 
-							    editor,
+							    _editor,
 							    *this,
 							    false,
 							    parent_canvas,

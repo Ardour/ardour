@@ -450,7 +450,7 @@ MidiTimeAxisView::add_cc_track()
 
 	{
 		AddMidiCCTrackDialog dialog;
-		dialog.set_transient_for(editor);
+		dialog.set_transient_for (_editor);
 		response = dialog.run();
 		
 		if (response == Gtk::RESPONSE_ACCEPT)
@@ -496,7 +496,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 
 		boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
 				_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
-				editor,
+				_editor,
 				*this,
 				true,
 				parent_canvas,

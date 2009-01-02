@@ -222,7 +222,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	bool select_mod;
 	uint8_t d_velocity = 10;
 	
-	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
+	if (_region.get_time_axis_view().editor().current_mouse_mode() != Editing::MouseNote)
 		return false;
 
 	switch (ev->type) {
@@ -284,7 +284,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Drag begin
-			if (_region.midi_view()->editor.current_midi_edit_mode() == Editing::MidiEditSelect
+			if (_region.midi_view()->editor().current_midi_edit_mode() == Editing::MidiEditSelect
 					&& _region.mouse_state() != MidiRegionView::SelectTouchDragging
 					&& _region.mouse_state() != MidiRegionView::EraseTouchDragging) {
 				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
@@ -356,7 +356,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		
 		switch (_state) {
 		case Pressed: // Clicked
-			if (_region.midi_view()->editor.current_midi_edit_mode() == Editing::MidiEditSelect) {
+			if (_region.midi_view()->editor().current_midi_edit_mode() == Editing::MidiEditSelect) {
 				_state = None;
 
 				if (_selected && !select_mod && _region.selection_size() > 1)
@@ -365,7 +365,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 					_region.note_deselected(this, select_mod);
 				else
 					_region.note_selected(this, select_mod);
-			} else if (_region.midi_view()->editor.current_midi_edit_mode() == Editing::MidiEditErase) {
+			} else if (_region.midi_view()->editor().current_midi_edit_mode() == Editing::MidiEditErase) {
 				_region.start_delta_command();
 				_region.command_remove_note(this);
 				_region.apply_command();
@@ -378,7 +378,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 			if (_note)
 				_region.note_dropped(this,
-						_region.midi_view()->editor.pixel_to_frame(abs(drag_delta_x))
+						     _region.midi_view()->editor().pixel_to_frame(abs(drag_delta_x))
 								* ((drag_delta_x < 0.0) ? -1 : 1),
 						drag_delta_note);
 			return true;

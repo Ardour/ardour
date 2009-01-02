@@ -91,43 +91,33 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
-	XMLNode& get_state (void);
+	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	/* public data: XXX create accessor/mutators for these ?? */
+	/** @return index of this TimeAxisView within its parent */
+	int order () const { return _order; }
 
-	PublicEditor& editor;
-	
-	uint32_t effective_height;  /* in canvas units */
-	double   y_position;
-	int      order;
-	
+	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
+	ArdourCanvas::Group* canvas_background () { return _canvas_background; }
+	ArdourCanvas::Group* ghost_group () { return _ghost_group; }
+
+	/** @return effective height (taking children into account) in canvas units, or
+	    0 if this TimeAxisView has not yet been shown */
+	uint32_t effective_height () const { return _effective_height; }
+
+	/** @return y position, or -1 if hidden */
+	double y_position () const { return _y_position; }
+
+	/** @return our Editor */
+	PublicEditor& editor () const { return _editor; }
+
 	uint32_t current_height() const { return height; }
-
-	ArdourCanvas::Group   *canvas_background;
-	ArdourCanvas::Group   *canvas_display;
- 	Gtk::VBox       *control_parent;
-
-	/* The Standard LHS Controls */
-	Gtk::Frame    controls_frame;
-	Gtk::HBox     controls_hbox;
-	Gtk::EventBox controls_lhs_pad;
-	Gtk::Table    controls_table;
-	Gtk::EventBox controls_ebox;
-	Gtk::VBox     controls_vbox;
-	Gtk::DrawingArea resizer;
-	Gtk::HBox     resizer_box;
-	Gtk::HBox     name_hbox;
-	Gtk::Frame    name_frame;
- 	Gtkmm2ext::FocusEntry name_entry;
 
 	bool resizer_button_press (GdkEventButton*);
 	bool resizer_button_release (GdkEventButton*);
 	bool resizer_motion (GdkEventMotion*);
 	bool resizer_expose (GdkEventExpose*);
 
-	double resize_drag_start;
-	int32_t resize_idle_target;
 	void idle_resize (uint32_t);
 
 	void hide_name_label ();
@@ -135,22 +125,17 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	void show_name_label ();
 	void show_name_entry ();
 
-	/** Display this TrackView as the nth component of the parent box, at y.
-	 *
-	 * @param y 
-	 * @param nth
-	 * @param parent the parent component
-	 * @return the height of this TrackView
-	 */
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 
 	void clip_to_viewport ();
 
 	bool touched (double top, double bot);
 
-	/** Hides this TrackView */
+	/** Hide this TrackView */
 	virtual void hide ();
-	bool hidden() const { return _hidden; }
+
+	/** @return true if hidden, otherwise false */
+	bool hidden () const { return _hidden; }
 
 	virtual void set_selected (bool);
 
@@ -163,12 +148,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	virtual void set_height (uint32_t h);
 	void reset_height();
-
-	/**
-	 * Returns a TimeAxisView* if this object covers y, or one of its children does.
-	 *  If the covering object is a child axis, then the child is returned.
-	 * Returns 0 otherwise.
-	 */
 
 	TimeAxisView* covers_y_position (double y);
 
@@ -213,19 +192,13 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results);
 	virtual void get_inverted_selectables (Selection&, list<Selectable *>& results);
 
-	ArdourCanvas::Group* ghost_group;
-
 	void add_ghost (RegionView*);
 	void remove_ghost (RegionView*);
 	void erase_ghost (GhostRegion*);
 
-	/* called at load time when first GUI idle occurs. put
-	   expensive data loading/redisplay code in here.
-	*/
-	
+	/** called at load time when first GUI idle occurs. put
+	    expensive data loading/redisplay code in here. */
 	virtual void first_idle () {}
-
-	/* state/serialization management */
 
 	TimeAxisView* get_parent () { return parent; }
 	void set_parent (TimeAxisView& p);
@@ -238,6 +211,19 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
   protected:
+	/* The Standard LHS Controls */
+	Gtk::Frame    controls_frame;
+	Gtk::HBox     controls_hbox;
+	Gtk::EventBox controls_lhs_pad;
+	Gtk::Table    controls_table;
+	Gtk::EventBox controls_ebox;
+	Gtk::VBox     controls_vbox;
+	Gtk::DrawingArea resizer;
+	Gtk::HBox     resizer_box;
+	Gtk::HBox     name_hbox;
+	Gtk::Frame    name_frame;
+ 	Gtkmm2ext::FocusEntry name_entry;
+
 	uint32_t height;  /* in canvas units */
 
 	string controls_base_unselected_name;
@@ -337,13 +323,26 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	void set_heights (uint32_t h);
 	void color_handler ();
 
-
 	std::list<ArdourCanvas::SimpleLine*> feature_lines;
 	ARDOUR::AnalysisFeatureList analysis_features;
 	void reshow_feature_lines ();
 
 	void conditionally_add_to_selection ();
 
+	ArdourCanvas::Group* _canvas_display;
+	double _y_position;
+	PublicEditor& _editor;
+	
+private:
+
+	ArdourCanvas::Group* _canvas_background;
+ 	Gtk::VBox* control_parent;
+	int _order;
+	uint32_t _effective_height;
+	double _resize_drag_start;
+	int32_t _resize_idle_target;
+	ArdourCanvas::Group* _ghost_group;
+	
 }; /* class TimeAxisView */
 
 #endif /* __ardour_gtk_time_axis_h__ */

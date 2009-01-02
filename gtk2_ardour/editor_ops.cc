@@ -5340,11 +5340,11 @@ Editor::ensure_track_visible(TimeAxisView *track)
 	if (track->hidden())
 		return;
 
-	double current_view_min_y = vertical_adjustment.get_value();
-	double current_view_max_y = vertical_adjustment.get_value() + vertical_adjustment.get_page_size() - canvas_timebars_vsize;
+	double const current_view_min_y = vertical_adjustment.get_value();
+	double const current_view_max_y = vertical_adjustment.get_value() + vertical_adjustment.get_page_size() - canvas_timebars_vsize;
 
-	double track_min_y = track->y_position;
-	double track_max_y = track->y_position + (double)track->effective_height;
+	double const track_min_y = track->y_position ();
+	double const track_max_y = track->y_position () + track->effective_height ();
 
 	if (track_min_y >= current_view_min_y &&
             track_max_y <= current_view_max_y) {
@@ -5358,7 +5358,7 @@ Editor::ensure_track_visible(TimeAxisView *track)
 		new_value = track_min_y;
 	} else {
 		// Track is below the current view
-		new_value = track->y_position + (double)track->effective_height + canvas_timebars_vsize - vertical_adjustment.get_page_size();
+		new_value = track->y_position () + track->effective_height() + canvas_timebars_vsize - vertical_adjustment.get_page_size();
 	}
 
 	vertical_adjustment.set_value(new_value);
@@ -6216,7 +6216,7 @@ Editor::fit_tracks ()
 			continue;
 		}
 
-		child_heights += ((*t)->effective_height - (*t)->current_height());
+		child_heights += (*t)->effective_height() - (*t)->current_height();
 	}
 
 	uint32_t h = (uint32_t) floor ((canvas_height - child_heights - canvas_timebars_vsize)/selection->tracks.size());
@@ -6251,7 +6251,7 @@ Editor::fit_tracks ()
 
 		if (is_selected) {
 			(*t)->set_height (h);
-			first_y_pos = std::min ((*t)->y_position, first_y_pos);
+			first_y_pos = std::min ((*t)->y_position (), first_y_pos);
 		} else {
 			if (prev_was_selected && next_is_selected) {
 				hide_track_in_display (**t);

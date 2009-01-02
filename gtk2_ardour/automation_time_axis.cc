@@ -87,7 +87,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	ignore_state_request = false;
 	first_call_to_set_height = true;
 	
-	_base_rect = new SimpleRect(*canvas_display);
+	_base_rect = new SimpleRect(*_canvas_display);
 	_base_rect->property_x1() = 0.0;
 	_base_rect->property_y1() = 0.0;
 	_base_rect->property_x2() = LONG_MAX - 2;
@@ -99,7 +99,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	
 	_base_rect->set_data ("trackview", this);
 
-	_base_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_automation_track_event),
+	_base_rect->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
 						 _base_rect, this));
 
 	_base_rect->lower_to_bottom();
@@ -214,7 +214,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 		boost::shared_ptr<AutomationLine> line(new AutomationLine (
 					ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
 					*this,
-					*canvas_display,
+					*_canvas_display,
 					_control->alist()));
 
 		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
@@ -561,7 +561,7 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent
 
 	double x = 0;
 
-	canvas_display->w2i (x, y);
+	_canvas_display->w2i (x, y);
 
 	/* compute vertical fractional position */
 
@@ -601,14 +601,14 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	switch (op) {
 	case Cut:
 		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
-			editor.get_cut_buffer().add (what_we_got);
+			_editor.get_cut_buffer().add (what_we_got);
 			_session.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 			ret = true;
 		}
 		break;
 	case Copy:
 		if ((what_we_got = alist->copy (selection.time.front().start, selection.time.front().end)) != 0) {
-			editor.get_cut_buffer().add (what_we_got);
+			_editor.get_cut_buffer().add (what_we_got);
 		}
 		break;
 
@@ -678,14 +678,14 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		switch (op) {
 		case Cut:
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
-				editor.get_cut_buffer().add (what_we_got);
+				_editor.get_cut_buffer().add (what_we_got);
 				_session.add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
 				ret = true;
 			}
 			break;
 		case Copy:
 			if ((what_we_got = alist->copy ((*i).start, (*i).end)) != 0) {
-				editor.get_cut_buffer().add (what_we_got);
+				_editor.get_cut_buffer().add (what_we_got);
 			}
 			break;
 			
@@ -757,14 +757,14 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 		double botfrac;
 
 		/* remember: this is X Window - coordinate space starts in upper left and moves down.
-		   y_position is the "origin" or "top" of the track.
+		   _y_position is the "origin" or "top" of the track.
 		*/
 
-		double mybot = y_position + height;
+		double mybot = _y_position + height;
 
-		if (y_position >= top && mybot <= bot) {
+		if (_y_position >= top && mybot <= bot) {
 
-			/* y_position is below top, mybot is above bot, so we're fully
+			/* _y_position is below top, mybot is above bot, so we're fully
 			   covered vertically.
 			*/
 
@@ -773,10 +773,10 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 
 		} else {
 
-			/* top and bot are within y_position .. mybot */
+			/* top and bot are within _y_position .. mybot */
 
-			topfrac = 1.0 - ((top - y_position) / height);
-			botfrac = 1.0 - ((bot - y_position) / height);
+			topfrac = 1.0 - ((top - _y_position) / height);
+			botfrac = 1.0 - ((bot - _y_position) / height);
 		}
 
 		if (_line)
@@ -869,7 +869,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 		XMLProperty const * shown = node.property ("shown");
 		if (shown && shown->value () == "yes") {
 			set_marked_for_display (true);
-			canvas_display->show (); /* FIXME: necessary? show_at? */
+			_canvas_display->show (); /* FIXME: necessary? show_at? */
 		}
 	}
 	

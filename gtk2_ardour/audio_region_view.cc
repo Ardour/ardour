@@ -161,7 +161,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		store_flags ();
 	}
 
-	if (trackview.editor.new_regionviews_display_gain()) {
+	if (trackview.editor().new_regionviews_display_gain()) {
 		_flags |= EnvelopeVisible;
 	}
 
@@ -996,7 +996,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	item->w2i (x, y);
 
-	nframes_t fx = trackview.editor.pixel_to_frame (x);
+	nframes_t fx = trackview.editor().pixel_to_frame (x);
 
 	if (fx > _region->length()) {
 		return;

@@ -347,6 +347,7 @@ Editor::redisplay_route_list ()
 
 		bool visible = (*i)[route_display_columns.visible];
 
+		/* show or hide the TimeAxisView */
 		if (visible) {
 			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &edit_controls_vbox);

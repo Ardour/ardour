@@ -268,10 +268,10 @@ struct RegionSortByTrack {
 	    
 	    /* really, track and position */
 
-	    if (a->get_trackview().order == b->get_trackview().order) {
+	    if (a->get_trackview().order() == b->get_trackview().order()) {
 		    return a->region()->position() < b->region()->position();
 	    } else {
-		    return a->get_trackview().order < b->get_trackview().order;
+		    return a->get_trackview().order() < b->get_trackview().order();
 	    }
     }
 };
