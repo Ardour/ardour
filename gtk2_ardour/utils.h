@@ -68,6 +68,8 @@ Pango::FontDescription* get_font_for_style (std::string widgetname);
 uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
 
 Gdk::Color color_from_style (std::string widget_style_name, int state, std::string attr);
+Glib::RefPtr<Gdk::GC> gc_from_style (string widget_style_name, int state, string attr);
+
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 

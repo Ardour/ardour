@@ -384,6 +384,61 @@ color_from_style (string widget_style_name, int state, string attr)
 	return Gdk::Color ("red");
 }
 
+Glib::RefPtr<Gdk::GC>
+gc_from_style (string widget_style_name, int state, string attr)
+{
+        GtkStyle* style;
+
+        style = gtk_rc_get_style_by_paths (gtk_settings_get_default(),
+                                           widget_style_name.c_str(),
+                                           0, G_TYPE_NONE);
+
+        if (!style) {
+                error << string_compose (_("no style found for %1, using red"), style) << endmsg;
+		Glib::RefPtr<Gdk::GC> ret = Gdk::GC::create();
+		ret->set_rgb_fg_color(Gdk::Color("red"));
+                return ret;
+        }
+
+        if (attr == "fg") {
+                return Glib::wrap(style->fg_gc[state]);
+        }
+
+        if (attr == "bg") {
+                return Glib::wrap(style->bg_gc[state]);
+        }
+
+        if (attr == "light") {
+                return Glib::wrap(style->light_gc[state]);
+        }
+
+        if (attr == "dark") {
+                return Glib::wrap(style->dark_gc[state]);
+        }
+
+        if (attr == "mid") {
+                return Glib::wrap(style->mid_gc[state]);
+        }
+
+        if (attr == "text") {
+                return Glib::wrap(style->text_gc[state]);
+        }
+
+        if (attr == "base") {
+                return Glib::wrap(style->base_gc[state]);
+        }
+
+        if (attr == "text_aa") {
+                return Glib::wrap(style->text_aa_gc[state]);
+        }
+
+        error << string_compose (_("unknown style attribute %1 requested for color; using \"red\""), attr) << endmsg;
+	Glib::RefPtr<Gdk::GC> ret = Gdk::GC::create();
+	ret->set_rgb_fg_color(Gdk::Color("red"));
+        return ret;
+}
+
+
 bool 
 canvas_item_visible (ArdourCanvas::Item* item)
 {
