@@ -229,7 +229,7 @@ OptionEditor::setup_path_options()
 
 	session_raid_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::raid_path_changed));
 
-	label = manage(new Label(_("session RAID path")));
+	label = manage (new Label (_("Session RAID path")));
 	label->set_name ("OptionsLabel");
 	path_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
 	path_table.attach (session_raid_entry, 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
@@ -278,7 +278,7 @@ OptionEditor::setup_misc_options ()
 	Gtk::Adjustment* dpi_adj = new Gtk::Adjustment ((double)Config->get_font_scale() / 1024, 50, 250, 1, 10);
 	Gtk::HScale * dpi_range = new Gtk::HScale (*dpi_adj);
 
-	label = manage (new Label (_("Font Scaling")));
+	label = manage (new Label (_("Font scaling")));
 	label->set_name ("OptionsLabel");
 
 	dpi_range->set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
@@ -510,7 +510,7 @@ OptionEditor::setup_midi_options ()
 	hbox->pack_start (midi_port_table, true, false);
 
 	midi_packer.pack_start (*hbox, false, false);
-	add_midi_port_button.set_label ("Add MIDI port");
+	add_midi_port_button.set_label ("Add MIDI Port");
 	midi_packer.pack_start (add_midi_port_button, false, false);
 
 	hbox = manage (new HBox);
@@ -583,11 +583,11 @@ OptionEditor::redisplay_midi_ports ()
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 1, 2, 0, 1);
-	label = (manage (new Label (_("Trace\nInput"))));
+	label = (manage (new Label (_("Trace\ninput"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 2, 3, 0, 1);
-	label = (manage (new Label (_("Trace\nOutput"))));
+	label = (manage (new Label (_("Trace\noutput"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 3, 4, 0, 1);
@@ -595,7 +595,7 @@ OptionEditor::redisplay_midi_ports ()
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 4, 5, 0, 1);
-	label = (manage (new Label (_("MIDI\nClock"))));
+	label = (manage (new Label (_("MIDI\nclock"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 6, 7, 0, 1);
@@ -603,7 +603,7 @@ OptionEditor::redisplay_midi_ports ()
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 8, 9, 0, 1);
-	label = (manage (new Label (_("MIDI Parameter\nControl"))));
+	label = (manage (new Label (_("MIDI parameter\ncontrol"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 10, 11, 0, 1);
@@ -1095,21 +1095,22 @@ OptionEditor::setup_click_editor ()
 
 		click_table.set_col_spacings (10);
 		
-		label = manage(new Label(_("Click audio file")));
+		label = manage(new Label(_("Click audio file:")));
 		label->set_name ("OptionsLabel");
+		label->set_alignment (0, 0.5);
 		click_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
 		click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 		click_table.attach (click_browse_button, 2, 3, 0, 1, FILL|EXPAND, FILL);
 		
-		label = manage(new Label(_("Click emphasis audiofile")));
+		label = manage(new Label(_("Click emphasis audiofile:")));
 		label->set_name ("OptionsLabel");
+		label->set_alignment (0, 0.5);
 		click_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
 		click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
 		click_table.attach (click_emphasis_browse_button, 2, 3, 1, 2, FILL|EXPAND, FILL);
 
 		click_packer.pack_start (click_table, false, false);
 		click_packer.pack_start (click_hpacker, false, false);
-
 
 		click_hpacker.set_spacing (10);
 
@@ -1125,20 +1126,6 @@ OptionEditor::setup_click_editor ()
 
 	click_hpacker.pack_start (*click_io_selector, false, false);
 	click_hpacker.pack_start (*click_gpm, false, false);
-
-	click_table.set_col_spacings (10);
-
-	label = manage(new Label(_("Click audio file")));
-	label->set_name ("OptionsLabel");
-	click_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
-	click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
-	click_table.attach (click_browse_button, 2, 3, 0, 1, FILL|EXPAND, FILL);
-
-	label = manage(new Label(_("Click emphasis audiofile")));
-	label->set_name ("OptionsLabel");
-	click_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
-	click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
-	click_table.attach (click_emphasis_browse_button, 2, 3, 1, 2, FILL|EXPAND, FILL);
 
 	click_packer.show_all ();
 }
@@ -1256,7 +1243,7 @@ OptionEditor::setup_keyboard_options ()
 		}
 	}
 
-	label = manage (new Label (_("Edit using")));
+	label = manage (new Label (_("Edit using:")));
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 
@@ -1283,7 +1270,7 @@ OptionEditor::setup_keyboard_options ()
 		}
 	}
 
-	label = manage (new Label (_("Delete using")));
+	label = manage (new Label (_("Delete using:")));
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 
@@ -1310,7 +1297,7 @@ OptionEditor::setup_keyboard_options ()
 		}
 	}
 
-	label = manage (new Label (_("Ignore snap using")));
+	label = manage (new Label (_("Ignore snap using:")));
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 
@@ -1327,7 +1314,7 @@ OptionEditor::setup_keyboard_options ()
 	keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
 	keyboard_layout_selector.signal_changed().connect (mem_fun (*this, &OptionEditor::bindings_changed));
 
-	label = manage (new Label (_("Keyboard layout")));
+	label = manage (new Label (_("Keyboard layout:")));
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
 
