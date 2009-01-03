@@ -104,6 +104,7 @@ public:
 	EngineControl engine_control;
 	void set_have_engine (bool yn);
 	void set_existing_session (bool yn);
+	void set_offer_cancel (bool yn);
 
 protected:
 
@@ -218,6 +219,8 @@ protected:
 	bool have_engine;
 	Glib::ustring engine_page_session_folder;
 	Glib::ustring engine_page_session_name;
+
+	Gtk::Button* quit_or_cancel_button;
 };
 
 #endif // NEW_SESSION_DIALOG_H

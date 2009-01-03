@@ -50,7 +50,7 @@ NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
 {
 	in_destructor = false;
-	session_name_label = new Gtk::Label(_("Name :"));
+	session_name_label = new Gtk::Label(_("Name:"));
 	m_name = new Gtk::Entry();
 	m_name->set_text(ARDOUR_COMMAND_LINE::session_name);
 
@@ -79,20 +79,20 @@ NewSessionDialog::NewSessionDialog()
 	input_label = new Gtk::Label(_("<b>Inputs</b>"));
 	output_label = new Gtk::Label(_("<b>Outputs</b>"));
 
-	session_location_label = new Gtk::Label(_("Create Folder In :"));
+	session_location_label = new Gtk::Label(_("Create folder in:"));
 	m_folder = new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-	session_template_label = new Gtk::Label(_("Template :"));
+	session_template_label = new Gtk::Label(_("Template:"));
 	m_template = new Gtk::FileChooserButton();
-	m_create_control_bus = new Gtk::CheckButton(_("Create Monitor Bus"));
+	m_create_control_bus = new Gtk::CheckButton(_("Create monitor bus"));
 	
 	Gtk::Adjustment *m_control_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 10));
 	m_control_bus_channel_count = new Gtk::SpinButton(*m_control_bus_channel_count_adj, 1, 0);
 	
 	Gtk::Adjustment *m_master_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 10));
 	m_master_bus_channel_count = new Gtk::SpinButton(*m_master_bus_channel_count_adj, 1, 0);
-	m_create_master_bus = new Gtk::CheckButton(_("Create Master Bus"));
+	m_create_master_bus = new Gtk::CheckButton(_("Create master bus"));
 	advanced_table = new Gtk::Table(2, 2, true);
-	m_connect_inputs = new Gtk::CheckButton(_("Automatically Connect to Physical Inputs"));
+	m_connect_inputs = new Gtk::CheckButton(_("Automatically connect to physical inputs"));
 	m_limit_input_ports = new Gtk::CheckButton(_("Use only"));
 	
 	Gtk::Adjustment *m_input_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 10));
@@ -105,7 +105,7 @@ NewSessionDialog::NewSessionDialog()
 	bus_table = new Gtk::Table (2, 3, false);
 	
 	input_frame = new Gtk::Frame();
-	m_connect_outputs = new Gtk::CheckButton(_("Automatically Connect Outputs"));
+	m_connect_outputs = new Gtk::CheckButton(_("Automatically connect outputs"));
 	m_limit_output_ports = new Gtk::CheckButton(_("Use only"));
 	
 	Gtk::Adjustment *m_output_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 10));
@@ -114,14 +114,14 @@ NewSessionDialog::NewSessionDialog()
 	output_port_vbox = new Gtk::VBox(false, 0);
 	
 	Gtk::RadioButton::Group _RadioBGroup_m_connect_outputs_to_master;
-	m_connect_outputs_to_master = new Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to Master Bus"));
-	m_connect_outputs_to_physical = new Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to Physical Outputs"));
+	m_connect_outputs_to_master = new Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to master bus"));
+	m_connect_outputs_to_physical = new Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to physical outputs"));
 	output_conn_vbox = new Gtk::VBox(false, 0);
 	output_vbox = new Gtk::VBox(false, 0);
 
 	output_frame = new Gtk::Frame();
 	advanced_vbox = new Gtk::VBox(false, 0);
-	advanced_label = new Gtk::Label(_("Advanced Options"));
+	advanced_label = new Gtk::Label(_("Advanced options"));
 	advanced_expander = new Gtk::Expander();
 	new_session_table = new Gtk::Table(2, 2, false);
 	m_open_filechooser = new Gtk::FileChooserButton();
@@ -382,13 +382,13 @@ NewSessionDialog::NewSessionDialog()
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_resizable(false);
 	set_has_separator(false);
-	add_button(Gtk::Stock::QUIT, Gtk::RESPONSE_CANCEL);
+	quit_or_cancel_button = add_button(Gtk::Stock::QUIT, Gtk::RESPONSE_CANCEL);
 	add_button(Gtk::Stock::CLEAR, Gtk::RESPONSE_NONE);
 	m_okbutton = add_button(Gtk::Stock::NEW, Gtk::RESPONSE_OK);
 
 	recent_model = Gtk::TreeStore::create (recent_columns);
 	m_treeview->set_model (recent_model);
-	m_treeview->append_column (_("Recent Sessions"), recent_columns.visible_name);
+	m_treeview->append_column (_("Recent sessions"), recent_columns.visible_name);
 	m_treeview->set_headers_visible (false);
 	m_treeview->get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 
@@ -1041,4 +1041,14 @@ NewSessionDialog::reset()
 	reset_name();
 	reset_template();
 	set_response_sensitive (Gtk::RESPONSE_NONE, false);
+}
+
+void
+NewSessionDialog::set_offer_cancel (bool yn)
+{
+	if (yn) {
+		quit_or_cancel_button->set_label (X_("gtk-cancel"));
+	} else {
+		quit_or_cancel_button->set_label (X_("gtk-quit"));
+	}
 }
