@@ -101,20 +101,20 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("ControlSurfaces"), _("Control Surfaces"));
 	ActionManager::register_action (main_actions, X_("Plugins"), _("Plugins"));
 	ActionManager::register_action (main_actions, X_("Metering"), _("Metering"));
-	ActionManager::register_action (main_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
+	ActionManager::register_action (main_actions, X_("MeteringFallOffRate"), _("Fall Off Rate"));
 	ActionManager::register_action (main_actions, X_("MeteringHoldTime"), _("Hold Time"));
 	ActionManager::register_action (main_actions, X_("Denormals"), _("Denormal Handling"));
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::get_session_parameters), true, true)));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New..."),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::get_session_parameters), true, true, true)));
 
-	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
-	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
+	ActionManager::register_action (main_actions, X_("Open"), _("Open..."),  mem_fun(*this, &ARDOUR_UI::open_session));
+	ActionManager::register_action (main_actions, X_("Recent"), _("Recent..."),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus..."),
 					      bind (mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -130,7 +130,7 @@ ARDOUR_UI::install_actions ()
 
 #endif
 
-	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot"),  mem_fun(*this, &ARDOUR_UI::snapshot_session));
+	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot..."),  mem_fun(*this, &ARDOUR_UI::snapshot_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  mem_fun(*this, &ARDOUR_UI::save_template));
@@ -145,15 +145,15 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("ImportMetadata"), _("Import Metadata"),  mem_fun(*this, &ARDOUR_UI::import_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export to audiofile(s)..."),  mem_fun (*editor, &PublicEditor::export_audio));
+	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export To Audio File(s)..."),  mem_fun (*editor, &PublicEditor::export_audio));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Cleanup unused sources"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
+	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Cleanup Unused Sources"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush wastebasket"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
+	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* JACK actions for controlling ... JACK */
@@ -249,7 +249,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), bind (mem_fun (*editor, &PublicEditor::toggle_playback), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), bind (mem_fun(*editor, &PublicEditor::toggle_playback), true));
+	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop and Forget Capture"), bind (mem_fun(*editor, &PublicEditor::toggle_playback), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
@@ -356,7 +356,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::transport_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync startup to video"), mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
-	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time master"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time Master"), mem_fun(*this, &ARDOUR_UI::toggle_time_master));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack1"), _("Toggle Record Enable Track1"), bind (mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  0U));
@@ -439,31 +439,31 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMidiClock"), _("Send MIDI Clock"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_clock));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
+	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI Feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (option_actions, X_("UseOSC"), _("Use OSC"), mem_fun (*this, &ARDOUR_UI::toggle_use_osc));
 #ifndef HAVE_LIBLO
 	act->set_sensitive (false);
 #endif
-	act = ActionManager::register_toggle_action (option_actions, X_("ToggleTapeMachineMode"), _("Tape Machine mode"), mem_fun (*this, &ARDOUR_UI::toggle_TapeMachineMode));
+	act = ActionManager::register_toggle_action (option_actions, X_("ToggleTapeMachineMode"), _("Tape Machine Mode"), mem_fun (*this, &ARDOUR_UI::toggle_TapeMachineMode));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_toggle_action (option_actions, X_("SyncEditorAndMixerTrackOrder"), _("Sync Editor and Mixer track order"), mem_fun (*this, &ARDOUR_UI::toggle_sync_order_keys));
-	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
-	ActionManager::register_toggle_action (option_actions, X_("NewPluginsActive"), _("New plugins are active"), mem_fun (*this, &ARDOUR_UI::toggle_new_plugins_active));
-	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
-	ActionManager::register_toggle_action (option_actions, X_("PeriodicSafetyBackups"), _("Make periodic safety backups"), mem_fun (*this, &ARDOUR_UI::toggle_PeriodicSafetyBackups));
-	ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
-	ActionManager::register_toggle_action (option_actions, X_("CreateXrunMarker"), _("Create marker at xrun location"), mem_fun (*this, &ARDOUR_UI::toggle_CreateXrunMarker));
-	ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop transport at session end"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
-	ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
-	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable stays engaged at stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
-	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region equivalents overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
-	ActionManager::register_toggle_action (option_actions, X_("PrimaryClockDeltaEditCursor"), _("Primary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor));
-	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));
+	ActionManager::register_toggle_action (option_actions, X_("SyncEditorAndMixerTrackOrder"), _("Sync Editor and Mixer Track Order"), mem_fun (*this, &ARDOUR_UI::toggle_sync_order_keys));
+	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop Plugins with Transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
+	ActionManager::register_toggle_action (option_actions, X_("NewPluginsActive"), _("New Plugins are Active"), mem_fun (*this, &ARDOUR_UI::toggle_new_plugins_active));
+	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify Remove Last Capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
+	ActionManager::register_toggle_action (option_actions, X_("PeriodicSafetyBackups"), _("Make Periodic Safety Backups"), mem_fun (*this, &ARDOUR_UI::toggle_PeriodicSafetyBackups));
+	ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop Recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
+	ActionManager::register_toggle_action (option_actions, X_("CreateXrunMarker"), _("Create Marker at xrun Location"), mem_fun (*this, &ARDOUR_UI::toggle_CreateXrunMarker));
+	ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop Transport at Session End"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
+	ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB Gain Reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
+	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable Stays Engaged at Stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
+	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region Equivalents Overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
+	ActionManager::register_toggle_action (option_actions, X_("PrimaryClockDeltaEditCursor"), _("Primary Clock Delta to Edit Point"), mem_fun (*this, &ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor));
+	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock Delta to Edit Point"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));
 	ActionManager::register_toggle_action (option_actions, X_("ShowTrackMeters"), _("Enable Editor Meters"), mem_fun (*this, &ARDOUR_UI::toggle_ShowTrackMeters));
-	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));
+	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always Copy Imported Files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));
 	ActionManager::register_toggle_action (option_actions, X_("RubberbandingSnapsToGrid"), _("Rubberbanding Snaps to Grid"), mem_fun (*this, &ARDOUR_UI::toggle_rubberbanding_snaps_to_grid));
 	ActionManager::register_toggle_action (option_actions, X_("AutoAnalyseAudio"), _("Auto-analyse new audio"), mem_fun (*this, &ARDOUR_UI::toggle_auto_analyse_audio));
 
@@ -509,14 +509,14 @@ ARDOUR_UI::install_actions ()
 		}
 	}
 
-	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
+	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not Run Plugins While Recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
+	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched Solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
+	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show Solo Muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("SoloMuteOverride"), _("Override muting"), mem_fun (*this, &ARDOUR_UI::toggle_SoloMuteOverride));
+	act = ActionManager::register_toggle_action (option_actions, X_("SoloMuteOverride"), _("Override Muting"), mem_fun (*this, &ARDOUR_UI::toggle_SoloMuteOverride));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* act = ActionManager::register_action (option_actions, X_("DisableAllPlugins"), _("Disable All Plugins"), mem_fun (*this, &ARDOUR_UI::disable_all_plugins));
@@ -554,9 +554,9 @@ ARDOUR_UI::install_actions ()
 	RadioAction::Group file_data_group;
 
 
-	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormatFloat"), X_("32-bit floating point"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatFloat));
-	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
-	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat16bit"), X_("16-bit integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt16));
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormatFloat"), X_("32-bit Floating Point"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatFloat));
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit Integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat16bit"), X_("16-bit Integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt16));
 
 	RadioAction::Group monitoring_group;
 
@@ -565,43 +565,43 @@ ARDOUR_UI::install_actions ()
 	   sensitive only if it makes sense.
 	*/
 
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("JACK does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("JACK Does Monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
 	if (!engine->can_request_hardware_monitoring()) {
 		act->set_sensitive (false);
 	}
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Ardour does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("Audio Hardware does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Ardour Does Monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("Audio Hardware Does Monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
 
 	RadioAction::Group solo_group;
 
 	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloInPlace"), _("Solo in-place"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_solo_model), InverseMute)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloViaBus"), _("Solo via bus"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_solo_model), SoloBus)));
+	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloViaBus"), _("Solo via Bus"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_solo_model), SoloBus)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	RadioAction::Group input_auto_connect_group;
 
-	act = ActionManager::register_radio_action (option_actions, input_auto_connect_group, X_("InputAutoConnectPhysical"), _("Auto-connect inputs to physical inputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_input_auto_connect), AutoConnectPhysical)));
+	act = ActionManager::register_radio_action (option_actions, input_auto_connect_group, X_("InputAutoConnectPhysical"), _("Auto-connect Inputs to Physical Inputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_input_auto_connect), AutoConnectPhysical)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, input_auto_connect_group, X_("InputAutoConnectManual"), _("Manually connect inputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_input_auto_connect), (AutoConnectOption) 0)));
+	act = ActionManager::register_radio_action (option_actions, input_auto_connect_group, X_("InputAutoConnectManual"), _("Manually Connect Inputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_input_auto_connect), (AutoConnectOption) 0)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	RadioAction::Group output_auto_connect_group;
 
-	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectPhysical"), _("Auto-connect outputs to physical outs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), AutoConnectPhysical)));
+	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectPhysical"), _("Auto-connect Outputs to Physical Outputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), AutoConnectPhysical)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectMaster"), _("Auto-connect outputs to master bus"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), AutoConnectMaster)));
+	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectMaster"), _("Auto-connect Outputs to Master Bus"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), AutoConnectMaster)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectManual"), _("Manually connect outputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), (AutoConnectOption) 0)));
+	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectManual"), _("Manually Connect Outputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), (AutoConnectOption) 0)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	RadioAction::Group remote_group;
 
-	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteUserDefined"), _("Remote ID assigned by User"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), UserOrdered)));
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteUserDefined"), _("Remote ID Assigned by User"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), UserOrdered)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteMixerDefined"), _("Remote ID follows order of Mixer"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), MixerOrdered)));
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteMixerDefined"), _("Remote ID Follows Order of Mixer"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), MixerOrdered)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteEditorDefined"), _("Remote ID follows order of Editor"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), EditorOrdered)));
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteEditorDefined"), _("Remote ID Follows Order of Editor"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), EditorOrdered)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (option_actions, X_("AutoRebinding"), _("Auto Rebind Controls"), mem_fun (*(this->mixer), &Mixer_UI::toggle_auto_rebinding));

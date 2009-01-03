@@ -50,8 +50,8 @@ sigc::signal<void,uint32_t> ColorChanged;
 
 ThemeManager::ThemeManager()
 	: ArdourDialog ("ThemeManager"),
-	dark_button ("Dark Theme"),
-	light_button ("Light Theme"),
+	dark_button ("Dark theme"),
+	light_button ("Light theme"),
 	reset_button ("Restore Defaults")
 {
 	Gtkmm2ext::WindowTitle title (Glib::get_application_name ());

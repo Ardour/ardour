@@ -40,11 +40,11 @@ using namespace PBD;
 static const char* channel_setup_names[] = {
 	N_("Mono"),
 	N_("Stereo"),
-	N_("3 Channels"),
-	N_("4 Channels"),
-	N_("6 Channels"),
-	N_("8 Channels"),
-	N_("Manual Setup"),
+	N_("3 channels"),
+	N_("4 channels"),
+	N_("6 channels"),
+	N_("8 channels"),
+	N_("Manual setup"),
 	"MIDI",
 	0
 };
@@ -136,7 +136,7 @@ AddRouteDialog::AddRouteDialog ()
 	VBox *dvbox = manage (new VBox);
 	HBox *dhbox = manage (new HBox);
 
-	ccframe.set_label (_("Channel Configuration"));
+	ccframe.set_label (_("Channel configuration"));
 	ccframe.set_shadow_type (SHADOW_IN);
 
 	dvbox->pack_start (channel_combo, true, false, 5);

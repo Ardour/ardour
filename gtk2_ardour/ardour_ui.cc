@@ -2258,8 +2258,9 @@ ARDOUR_UI::idle_load (const Glib::ustring& path)
 	}
 }
 
+/** @param offer_quit true to offer a Cancel button, otherwise call it Quit */
 bool
-ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be_new)
+ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be_new, bool offer_cancel)
 {
 	bool existing_session = false;
 	Glib::ustring session_name;
@@ -2300,6 +2301,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 	new_session_dialog->set_current_page (0);
 	new_session_dialog->set_existing_session (existing_session);
 	new_session_dialog->reset_recent();
+	new_session_dialog->set_offer_cancel (offer_cancel);
 
 	do {
 		new_session_dialog->set_have_engine (backend_audio_is_running);

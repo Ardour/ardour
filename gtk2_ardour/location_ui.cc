@@ -659,7 +659,7 @@ LocationUI::LocationUI ()
 	loc_frame_box.pack_start (add_location_button, false, false);
 
 	loc_frame.set_name ("LocationLocEditorFrame");
-	loc_frame.set_label (_("Location (CD Index) Markers"));
+	loc_frame.set_label (_("Location (CD index) markers"));
 	loc_frame.add (loc_frame_box);
 	loc_range_panes.pack1(loc_frame, true, false);
 
@@ -679,7 +679,7 @@ LocationUI::LocationUI ()
 	range_frame_box.pack_start (add_range_button, false, false);
 
 	range_frame.set_name ("LocationRangeEditorFrame");
-	range_frame.set_label (_("Range (CD Track) Markers"));
+	range_frame.set_label (_("Range (CD track) markers"));
 	range_frame.add (range_frame_box);
 	loc_range_panes.pack2(range_frame, true, false);
 	location_vpacker.pack_start (loc_range_panes, true, true);

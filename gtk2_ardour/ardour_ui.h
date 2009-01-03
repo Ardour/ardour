@@ -143,7 +143,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-	bool get_session_parameters (bool have_engine = false, bool should_be_new = false);
+	bool get_session_parameters (bool have_engine = false, bool should_be_new = false, bool offer_quit = false);
 	void parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring& session_name, Glib::ustring& session_path, bool& existing_session);
 	int  load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session);
 	int  build_session_from_nsd (const Glib::ustring& session_name, const Glib::ustring& session_path);
