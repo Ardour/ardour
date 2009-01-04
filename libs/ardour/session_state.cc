@@ -1394,7 +1394,7 @@ Session::load_routes (const XMLNode& node)
 		boost::shared_ptr<Route> route (XMLRouteFactory (**niter));
 
 		if (route == 0) {
-			error << _("Session: cannot create Route from XML description.")			      << endmsg;
+			error << _("Session: cannot create Route from XML description.") << endmsg;
 			return -1;
 		}
 
