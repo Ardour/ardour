@@ -583,45 +583,8 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 	cerr << "reached silent_motion:" <<endl;
 	#endif
 	
-	if (slave_speed && _transport_speed) {
-
-		/* something isn't right, but we should move with the master
-		   for now.
-		*/
-
-		bool need_butler;
-		
-		prepare_diskstreams ();
-		silent_process_routes (nframes, offset);
-		commit_diskstreams (nframes, need_butler);
-
-		if (need_butler) {
-			summon_butler ();
-		}
-		
-		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
-		
-		if (frames_moved < 0) {
-			decrement_transport_position (-frames_moved);
-		} else {
-			increment_transport_position (frames_moved);
-		}
-		
-		nframes_t stop_limit;
-		
-		if (actively_recording()) {
-			stop_limit = max_frames;
-		} else {
-			if (Config->get_stop_at_session_end()) {
-				stop_limit = current_end_frame();
-			} else {
-				stop_limit = max_frames;
-			}
-		}
-
-		maybe_stop (stop_limit);
-	}
-
+	follow_slave_silently(nframes, offset, slave_speed);
+	
   noroll:
 	/* don't move at all */
 	#ifdef DEBUG_SLAVES	
@@ -776,6 +739,49 @@ Session::track_slave_state(
 		}
 
 		slave_state = Stopped;
+	}
+}
+
+void
+Session::follow_slave_silently(nframes_t nframes, nframes_t offset, float slave_speed)
+{
+	if (slave_speed && _transport_speed) {
+
+		/* something isn't right, but we should move with the master
+		   for now.
+		*/
+
+		bool need_butler;
+		
+		prepare_diskstreams ();
+		silent_process_routes (nframes, offset);
+		commit_diskstreams (nframes, need_butler);
+
+		if (need_butler) {
+			summon_butler ();
+		}
+		
+		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
+		
+		if (frames_moved < 0) {
+			decrement_transport_position (-frames_moved);
+		} else {
+			increment_transport_position (frames_moved);
+		}
+		
+		nframes_t stop_limit;
+		
+		if (actively_recording()) {
+			stop_limit = max_frames;
+		} else {
+			if (Config->get_stop_at_session_end()) {
+				stop_limit = current_end_frame();
+			} else {
+				stop_limit = max_frames;
+			}
+		}
+
+		maybe_stop (stop_limit);
 	}
 }
 

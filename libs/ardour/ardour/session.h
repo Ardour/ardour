@@ -1084,6 +1084,7 @@ class Session : public PBD::StatefulDestructible
 			nframes_t slave_transport_frame, 
 			nframes_t this_delta,
 			bool starting);
+	void follow_slave_silently(nframes_t nframes, nframes_t offset, float slave_speed);
 	
 	void set_slave_source (SlaveSource);
 
