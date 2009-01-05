@@ -44,14 +44,10 @@ using namespace PBD;
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 	: session (s)
 	, ppqn (ppqn)
-	, accumulator_index (0)
-	, average_midi_clock_frame_duration (0.0)
+	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	rebind (p);
 	reset ();
-
-	for(int i = 0; i < accumulator_size; i++)
-		accumulator[i]=0.0;
 }
 
 MIDIClock_Slave::~MIDIClock_Slave()
@@ -92,56 +88,79 @@ MIDIClock_Slave::calculate_one_ppqn_in_frames_at(nframes_t time)
 	one_ppqn_in_frames = frames_per_quarter_note / double (ppqn);
 }
 
+void 
+MIDIClock_Slave::calculate_filter_coefficients()
+{
+	// omega = 2 * PI * Bandwidth / MIDI clock frame frequency in Hz
+	omega = 2.0 * 3.14159265358979323846 * bandwidth * one_ppqn_in_frames / session.frame_rate();
+	b = 1.4142135623730950488 * omega;
+	c = omega * omega;	
+}
+
 void
 MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
-{			
+{					
+	// the number of midi clock messages (zero-based)
+	static long midi_clock_count;
+	
 	calculate_one_ppqn_in_frames_at(last_position);
 	
-	// for the first MIDI clock event we don't have any past
-	// data, so we assume a sane tempo
-	if(_starting) {
-		current_midi_clock_frame_duration = one_ppqn_in_frames;
-	} else {
-		current_midi_clock_frame_duration = timestamp - last_timestamp;
-	}
-		
-	// moving average over incoming intervals
-	accumulator[accumulator_index++] = current_midi_clock_frame_duration;
-	if(accumulator_index == accumulator_size) {
-		accumulator_index = 0;
-	}
-	average_midi_clock_frame_duration = 0.0;
-	for(int i = 0; i < accumulator_size; i++) {
-		average_midi_clock_frame_duration += accumulator[i];
-	}
-	average_midi_clock_frame_duration /= double(accumulator_size);
-	
-	#ifdef DEBUG_MIDI_CLOCK		
-		std::cerr 
-				  << " got MIDI Clock message at time " << timestamp  
-				  << " engine time: " << session.engine().frame_time() 
-				  << " transport position: " << session.transport_frame()
-				  << " real delta: " << current_midi_clock_frame_duration 
-				  << " reference: " << one_ppqn_in_frames
-				  << " average: " << average_midi_clock_frame_duration
-				  << std::endl;
-	#endif // DEBUG_MIDI_CLOCK
+	nframes_t timestamp_relative_to_transport = timestamp - first_timestamp;
 	
 	if (_starting) {
+		midi_clock_count = 0;
 		assert(last_timestamp == 0);
 		assert(last_position == 0);
 		
-		last_position = 0;
-		last_timestamp = timestamp;
+		first_timestamp = timestamp;
+		timestamp_relative_to_transport = 0;
+		
+		// calculate filter coefficients
+		calculate_filter_coefficients();
+		
+		// initialize DLL
+		e2 = double(one_ppqn_in_frames) / double(session.frame_rate());
+		t0 = double(timestamp_relative_to_transport) / double(session.frame_rate());
+		t1 = t0 + e2;
 		
 		// let ardour go after first MIDI Clock Event
 		_starting = false;
-		session.request_transport_speed (1.0);
-	} else {;
-		last_position  += double(one_ppqn_in_frames);
-		last_timestamp = timestamp;
-	}
+	} else {		
+		midi_clock_count++;
+		last_position  += one_ppqn_in_frames;
+		calculate_filter_coefficients();
 
+		// calculate loop error
+		// we use session.transport_frame() instead of t1 here
+		// because t1 is used to calculate the transport speed, and since this
+		// is float, the loop will compensate for accumulating rounding errors
+		e = (double(last_position) - double(session.transport_frame())) 
+		    / double(session.frame_rate());
+		
+		// update DLL
+		t0 = t1;
+		t1 += b * e + e2;
+		e2 += c * e;
+				
+	}	
+	
+	#ifdef DEBUG_MIDI_CLOCK		
+		std::cerr 
+				  << "MIDI Clock #" << midi_clock_count
+				  //<< "@" << timestamp  
+				  << " (transport-relative: " << timestamp_relative_to_transport << " should be: " << last_position << ", delta: " << (double(last_position) - double(session.transport_frame())) <<" )"
+				  << " transport: " << session.transport_frame()
+				  //<< " engine: " << session.engine().frame_time() 
+				  << " real delta: " << timestamp - last_timestamp 
+				  << " reference: " << one_ppqn_in_frames
+				  << " t1-t0: " << (t1 -t0) * session.frame_rate()
+				  << " t0: " << t0 * session.frame_rate()
+				  << " t1: " << t1 * session.frame_rate() 
+				  << " frame-rate: " << session.frame_rate() 
+				  << std::endl;
+	#endif // DEBUG_MIDI_CLOCK
+
+	last_timestamp = timestamp;
 }
 
 void
@@ -150,18 +169,6 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 	#ifdef DEBUG_MIDI_CLOCK	
 		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " session time: " << session.engine().frame_time() << endl;
 	#endif
-	
-	if(!locked()) {
-		cerr << "Did not start because not locked!" << endl;
-		return;
-	}
-	
-	// initialize accumulator to sane values
-	calculate_one_ppqn_in_frames_at(0);
-	
-	for(int i = 0; i < accumulator_size; i++) {
-		accumulator[i] = one_ppqn_in_frames;
-	}
 	
 	last_position = 0;
 	last_timestamp = 0;
@@ -187,8 +194,6 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 		std::cerr << "MIDIClock_Slave got stop message" << endl;
 	#endif
 	
-	current_midi_clock_frame_duration = 0;
-
 	last_position = 0;
 	last_timestamp = 0;
 	
@@ -249,18 +254,10 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 	if (stop_if_no_more_clock_events(pos, engine_now)) {
 		return false;
 	}
-	
-	#ifdef DEBUG_MIDI_CLOCK	
-		cerr << "speed_and_position: engine time: " << engine_now << " last message timestamp: " << last_timestamp;
-	#endif
-	
+
 	// calculate speed
-	double speed_double = one_ppqn_in_frames / average_midi_clock_frame_duration;
+	double speed_double = ((t1 - t0) * session.frame_rate()) / one_ppqn_in_frames;
 	speed = float(speed_double);
-	
-    #ifdef DEBUG_MIDI_CLOCK	
-		cerr << " final speed: " << speed;
-    #endif
 	
 	// calculate position
 	if (engine_now > last_timestamp) {
@@ -272,13 +269,7 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		// A new MIDI clock message has arrived this cycle
 		pos = last_position;
 	}
-	
-   #ifdef DEBUG_MIDI_CLOCK	
-	   cerr << " transport position engine_now: " <<  session.transport_frame(); 
-	   cerr << " calculated position: " << pos; 
-	   cerr << endl;
-   #endif
-   
+
 	return true;
 }
 

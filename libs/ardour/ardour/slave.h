@@ -148,6 +148,11 @@ class Slave {
 	 *           the slave returns
 	 */
 	virtual bool is_always_synced() const { return false; }
+	
+	/**
+	 * @return - whether ARDOUR should use the slave speed without any adjustments 
+	 */
+	virtual bool give_slave_full_control_over_transport_speed() const { return false; }
 };
 
 struct SafeTime {
@@ -219,7 +224,8 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 
 	nframes_t resolution() const;
 	bool requires_seekahead () const { return false; }
-
+	bool give_slave_full_control_over_transport_speed() const { return true; }
+	
   private:
 	Session&    session;
 	MIDI::Port* port;
@@ -231,27 +237,40 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	/// the duration of one ppqn in frame time
 	double      one_ppqn_in_frames;
 
+	/// the timestamp of the first MIDI clock message
+	nframes_t   first_timestamp;
+	
 	/// the time stamp and transport position of the last inbound MIDI clock message
 	nframes_t   last_timestamp;
 	double      last_position;
 	
-	/// The duration of the current MIDI clock frame in frames
-	nframes_t   current_midi_clock_frame_duration;
-
-	/// how many MIDI clock frames to average over
-	static const int32_t accumulator_size = 1;
-	double  accumulator[accumulator_size];
-	int32_t accumulator_index;
+	//the delay locked loop (DLL), see www.kokkinizita.net/papers/usingdll.pdf
 	
-	/// the running average of current_midi_clock_frame_duration
-	double  average_midi_clock_frame_duration;
-
+	/// time at the beginning of the MIDI clock frame
+	double t0;
+	
+	/// calculated end of the MIDI clock frame
+	double t1;
+	
+	/// loop error = real value - expected value
+	double e;
+	
+	/// second order loop error
+	double e2;
+	
+	/// DLL filter bandwidth
+	double bandwidth;
+	
+	/// DLL filter coefficients
+	double b, c, omega;
+	
 	void reset ();
 	void start (MIDI::Parser& parser, nframes_t timestamp);
 	void stop (MIDI::Parser& parser, nframes_t timestamp);
 	// we can't use continue because it is a C++ keyword
 	void contineu (MIDI::Parser& parser, nframes_t timestamp);
 	void calculate_one_ppqn_in_frames_at(nframes_t time);
+	void calculate_filter_coefficients();
 	void update_midi_clock (MIDI::Parser& parser, nframes_t timestamp);
 	void read_current (SafeTime *) const;
 	bool stop_if_no_more_clock_events(nframes_t& pos, nframes_t now);
