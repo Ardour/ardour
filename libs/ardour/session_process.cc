@@ -50,7 +50,7 @@ using namespace std;
 void
 Session::process (nframes_t nframes)
 {
-	// This is no more the appriopriate place to call cycle
+	// This is no more the appropriate place to call cycle
 	// start. cycle_start needs to be called at the Route::roll()
 	// where the signals which we want to mixdown have been calculated.
 	//
