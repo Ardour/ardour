@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2008 Hans Baier
+    Copyright (C) 2008 Paul Davis
+    Author: Hans Baier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
