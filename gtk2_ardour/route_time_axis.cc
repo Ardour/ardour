@@ -2171,8 +2171,22 @@ RouteTimeAxisView::update_rec_display ()
 void
 RouteTimeAxisView::set_layer_display (LayerDisplay d)
 {
-	_view->set_layer_display (d);
+	if (_view) {
+		_view->set_layer_display (d);
+	}
 }
+
+LayerDisplay
+RouteTimeAxisView::layer_display () const
+{
+	if (_view) {
+		return _view->layer_display ();
+	}
+
+	/* we don't know, since we don't have a _view, so just return something */
+	return Overlaid;
+}
+
 	
 
 boost::shared_ptr<AutomationTimeAxisView>

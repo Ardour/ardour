@@ -50,6 +50,7 @@
  #include "keyboard.h"
  #include "rgb_macros.h"
  #include "utils.h"
+ #include "streamview.h"
 
  #include "i18n.h"
 
@@ -70,6 +71,7 @@
  uint32_t TimeAxisView::hSmaller = 0;
  uint32_t TimeAxisView::hSmall = 0;
  bool TimeAxisView::need_size_info = true;
+ int const TimeAxisView::_max_order = 512;
 
  TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
 	 : AxisView (sess), 
@@ -1191,30 +1193,46 @@ TimeAxisView::color_handler ()
 	}
 }
 
-/** Returns a TimeAxisView* if this object covers y, or one of its children does.
+/** @return Pair: TimeAxisView, layer index.
+ * TimeAxisView is non-0 if this object covers y, or one of its children does.
  * If the covering object is a child axis, then the child is returned.
- * Returns 0 otherwise.
+ * TimeAxisView is 0 otherwise.
+ * Layer index is the layer number if the TimeAxisView is valid and is in stacked
+ * region display mode, otherwise 0.
  */
-TimeAxisView*
+std::pair<TimeAxisView*, layer_t>
 TimeAxisView::covers_y_position (double y)
 {
 	if (hidden()) {
-		return 0;
+		return std::make_pair ( (TimeAxisView *) 0, 0);
 	}
 
 	if (_y_position <= y && y < (_y_position + height)) {
-		return this;
+
+		/* work out the layer index if appropriate */
+		layer_t l = 0;
+		if (layer_display () == Stacked && view ()) {
+			/* compute layer */
+			l = layer_t ((_y_position + height - y) / (view()->child_height ()));
+			/* clamp to max layers to be on the safe side; sometimes the above calculation
+			   returns a too-high value */
+			if (l >= view()->layers ()) {
+				l = view()->layers() - 1;
+			}
+		}
+			
+		return std::make_pair (this, l);
 	}
 
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		TimeAxisView* tv;
+	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
 
-		if ((tv = (*i)->covers_y_position (y)) != 0) {
-			return tv;
+		std::pair<TimeAxisView*, int> const r = (*i)->covers_y_position (y);
+		if (r.first) {
+			return r;
 		}
 	}
 
-	return 0;
+	return std::make_pair ( (TimeAxisView *) 0, 0);
 }
 
 void

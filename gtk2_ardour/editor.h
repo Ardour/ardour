@@ -25,6 +25,7 @@
 #include <set>
 #include <string>
 #include <sys/time.h>
+#include <bitset>
 
 #include <glibmm/ustring.h>
 
@@ -51,6 +52,7 @@
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
 #include <ardour/track.h>
+#include <ardour/types.h>
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -1071,7 +1073,7 @@ class Editor : public PublicEditor
 
 	/* track views */
 	TrackViewList  track_views;
-	TimeAxisView     *trackview_by_y_position (double ypos);
+	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
 
 	static Gdk::Cursor* cross_hair_cursor;
 	static Gdk::Cursor* trimmer_cursor;
@@ -1442,7 +1444,7 @@ class Editor : public PublicEditor
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void create_region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void create_region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	bool check_region_drag_possible (RouteTimeAxisView**);
+	bool check_region_drag_possible (RouteTimeAxisView**, ARDOUR::layer_t*);
 	void possibly_copy_regions_during_grab (GdkEvent*);
 	void region_drag_splice_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_splice_finished_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -2361,6 +2363,9 @@ public:
 	bool idle_resize();
 	friend gboolean _idle_resize (gpointer);
 	std::vector<TimeAxisView*> pending_resizes;
+
+	void visible_order_range (int*, int*) const;
+	bool y_movement_disallowed (int, int, int, int, int, std::bitset<512> const &, std::vector<int32_t> const &) const;
 };
 
 #endif /* __ardour_editor_h__ */

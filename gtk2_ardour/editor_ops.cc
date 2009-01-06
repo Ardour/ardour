@@ -2261,7 +2261,6 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 {
 	double wx, wy;
 	double cx, cy;
-	TimeAxisView *tv;
 	nframes64_t where;
 	RouteTimeAxisView *rtv = 0;
 	boost::shared_ptr<Playlist> playlist;
@@ -2281,12 +2280,13 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 		/* clearly outside canvas area */
 		return;
 	}
-	
-	if ((tv = trackview_by_y_position (cy)) == 0) {
+
+	std::pair<TimeAxisView*, int> tv = trackview_by_y_position (cy);
+	if (tv.first == 0) {
 		return;
 	}
 	
-	if ((rtv = dynamic_cast<RouteTimeAxisView*>(tv)) == 0) {
+	if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv.first)) == 0) {
 		return;
 	}
 
@@ -2307,7 +2307,6 @@ void
 Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 	double wx, wy;
 	double cx, cy;
-	TimeAxisView *tv;
 	nframes_t where;
 	RouteTimeAxisView *dest_rtv = 0;
 	RouteTimeAxisView *source_rtv = 0;
@@ -2323,11 +2322,12 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 
 	where = event_frame (&event, &cx, &cy);
 
-	if ((tv = trackview_by_y_position (cy)) == 0) {
+	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (cy);
+	if (tv.first == 0) {
 		return;
 	}
 
-	if ((dest_rtv = dynamic_cast<RouteTimeAxisView*>(tv)) == 0) {
+	if ((dest_rtv = dynamic_cast<RouteTimeAxisView*> (tv.first)) == 0) {
 		return;
 	}
 

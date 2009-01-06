@@ -462,10 +462,10 @@ Editor::idle_drop_paths (vector<ustring> paths, nframes64_t frame, double ypos)
 void
 Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, double ypos)
 {
-	TimeAxisView* tvp;
 	AudioTimeAxisView* tv;
 
-	if ((tvp = trackview_by_y_position (ypos)) == 0) {
+	std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (ypos);
+	if (tvp.first == 0) {
 
 		/* drop onto canvas background: create new tracks */
 
@@ -477,7 +477,7 @@ Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, do
 			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
 		}
 		
-	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
+	} else if ((tv = dynamic_cast<AudioTimeAxisView*> (tvp.first)) != 0) {
 
 		/* check that its an audio track, not a bus */
 		

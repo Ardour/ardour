@@ -73,6 +73,7 @@ public:
 	gdouble     get_samples_per_unit () { return _samples_per_unit; }
 
  	void set_layer_display (LayerDisplay);
+	LayerDisplay layer_display () const { return _layer_display; }
 
 	ArdourCanvas::Group* background_group() { return _background_group; }
 	ArdourCanvas::Group* canvas_item() { return canvas_group; }
@@ -97,6 +98,8 @@ public:
 	virtual void update_contents_height ();
 	
 	virtual void redisplay_diskstream () = 0;
+	double child_height () const;
+	ARDOUR::layer_t layers () const { return _layers; }
 	
 	sigc::signal<void,RegionView*> RegionViewAdded;
 
@@ -126,7 +129,6 @@ protected:
 	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
 	
 	virtual void color_handler () = 0;
-	double child_height () const;
 
 	RouteTimeAxisView&        _trackview;
 	bool                      owns_canvas_group;
@@ -152,9 +154,9 @@ protected:
 	vector<sigc::connection> playlist_connections;
 	sigc::connection         playlist_change_connection;
 
-	int layers;
+	ARDOUR::layer_t _layers;
 	double height;
-	LayerDisplay layer_display;
+	LayerDisplay _layer_display;
 
 	list<sigc::connection> rec_data_ready_connections;
 	jack_nframes_t         last_rec_data_frame;

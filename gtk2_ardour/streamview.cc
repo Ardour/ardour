@@ -56,9 +56,9 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	, use_rec_regions (tv.editor().show_waveforms_recording ())
 	, region_color(_trackview.color())
 	, stream_base_color(0xFFFFFFFF)
-	, layers(1)
+	, _layers (1)
 	, height(tv.height)
-	, layer_display(Overlaid)
+	, _layer_display (Overlaid)
 	, last_rec_data_frame(0)
 {
 	/* set_position() will position the group */
@@ -233,7 +233,7 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 
 	/* update layers count and the y positions and heights of our regions */
 	if (ds->playlist()) {
-		layers = ds->playlist()->top_layer() + 1;
+		_layers = ds->playlist()->top_layer() + 1;
 		update_contents_height ();
 		update_coverage_frames ();
 		redisplay_diskstream ();
@@ -256,7 +256,7 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	undisplay_diskstream ();
 
 	/* update layers count and the y positions and heights of our regions */
-	layers = ds->playlist()->top_layer() + 1;
+	_layers = ds->playlist()->top_layer() + 1;
 	update_contents_height ();
 
 	update_coverage_frames ();
@@ -430,8 +430,8 @@ StreamView::get_inverted_selectables (Selection& sel, list<Selectable*>& results
 double
 StreamView::child_height () const
 {
-	if (layer_display == Stacked) {
-		return height / layers;
+	if (_layer_display == Stacked) {
+		return height / _layers;
 	}
 	
 	return height;
@@ -445,7 +445,7 @@ StreamView::update_contents_height ()
 	const double h = child_height ();
 
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		switch (layer_display) {
+		switch (_layer_display) {
 		case Overlaid:
 			(*i)->set_y (0);
 			break;
@@ -465,7 +465,7 @@ StreamView::update_contents_height ()
 void
 StreamView::set_layer_display (LayerDisplay d)
 {
-	layer_display = d;
+	_layer_display = d;
 	update_contents_height ();
 	update_coverage_frames ();
 }
@@ -474,6 +474,6 @@ void
 StreamView::update_coverage_frames ()
 {
 	for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
-		(*i)->update_coverage_frames (layer_display);
+		(*i)->update_coverage_frames (_layer_display);
 	}
 }

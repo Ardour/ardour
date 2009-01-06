@@ -85,6 +85,7 @@ public:
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
 	bool show_automation(Evoral::Parameter param);
 	void set_layer_display (LayerDisplay d);
+	LayerDisplay layer_display () const;
 		
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 	nframes64_t find_next_region_boundary (nframes64_t pos, int32_t dir);

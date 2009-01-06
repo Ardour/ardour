@@ -66,6 +66,7 @@ class Selection;
 class Selectable;
 class RegionView;
 class GhostRegion;
+class StreamView;
 
 /** Abstract base class for time-axis views (horizontal editor 'strips')
  *
@@ -96,6 +97,9 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	/** @return index of this TimeAxisView within its parent */
 	int order () const { return _order; }
+
+	/** @return maximum allowable value of order */
+	static int max_order () { return _max_order; }
 
 	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
 	ArdourCanvas::Group* canvas_background () { return _canvas_background; }
@@ -149,7 +153,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void set_height (uint32_t h);
 	void reset_height();
 
-	TimeAxisView* covers_y_position (double y);
+	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);
 
 	/**
 	 * Steps through the defined heights for this TrackView.
@@ -207,6 +211,9 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	/* call this on the parent */
 
 	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter param) { return 0; }
+
+	virtual LayerDisplay layer_display () const { return Overlaid; }
+	virtual StreamView* view () const { return 0; }
 	
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
@@ -342,6 +349,8 @@ private:
 	double _resize_drag_start;
 	int32_t _resize_idle_target;
 	ArdourCanvas::Group* _ghost_group;
+
+	static int const _max_order;
 	
 }; /* class TimeAxisView */
 

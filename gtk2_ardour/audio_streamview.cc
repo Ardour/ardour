@@ -308,7 +308,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		if ((*i)->crossfade == crossfade) {
 
-			if (!crossfades_visible || layer_display == Stacked) {
+			if (!crossfades_visible || _layer_display == Stacked) {
 				(*i)->hide();
 			} else {
 				(*i)->show ();
@@ -340,7 +340,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 	cv->set_valid (true);
 	crossfade->Invalidated.connect (mem_fun (*this, &AudioStreamView::remove_crossfade));
 	crossfade_views.push_back (cv);
-	if (!Config->get_xfades_visible() || !crossfades_visible || layer_display == Stacked) {
+	if (!Config->get_xfades_visible() || !crossfades_visible || _layer_display == Stacked) {
 		cv->hide ();
 	}
 }
@@ -373,7 +373,7 @@ AudioStreamView::redisplay_diskstream ()
 
 	for (xi = crossfade_views.begin(); xi != crossfade_views.end(); ++xi) {
 		(*xi)->set_valid (false);
-		if ((*xi)->visible() && layer_display != Stacked) {
+		if ((*xi)->visible() && _layer_display != Stacked) {
 			(*xi)->show ();
 		}
 	}
@@ -806,7 +806,7 @@ void
 AudioStreamView::reveal_xfades_involving (AudioRegionView& rv)
 {
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if ((*i)->crossfade->involves (rv.audio_region()) && (*i)->visible() && layer_display != Stacked) {
+		if ((*i)->crossfade->involves (rv.audio_region()) && (*i)->visible() && _layer_display != Stacked) {
 			(*i)->show ();
 		}
 	}
@@ -836,7 +836,7 @@ AudioStreamView::update_contents_height ()
 	StreamView::update_contents_height ();
 	
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (layer_display == Overlaid) {
+		if (_layer_display == Overlaid) {
 			(*i)->show ();
 			(*i)->set_height (height);
 		} else {

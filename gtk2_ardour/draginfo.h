@@ -57,7 +57,9 @@ struct DragInfo {
     void (Editor::*motion_callback)(ArdourCanvas::Item*, GdkEvent*);
     void (Editor::*finished_callback)(ArdourCanvas::Item*, GdkEvent*);
     TimeAxisView* source_trackview;
+    ARDOUR::layer_t source_layer;
     TimeAxisView* dest_trackview;
+    ARDOUR::layer_t dest_layer;
     bool x_constrained;
     bool y_constrained;
     bool copy;
