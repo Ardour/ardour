@@ -3760,34 +3760,38 @@ Editor::y_movement_disallowed (
 	return false;
 }
 
-
 void
 Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	double x_delta;
 	double y_delta = 0;
 	nframes64_t pending_region_position = 0;
-	int32_t pointer_y_span = 0, canvas_pointer_y_span = 0;
-	int32_t layer_span = 0;
+	int32_t pointer_order_span = 0, canvas_pointer_order_span = 0;
+	int32_t pointer_layer_span = 0;
 	
 	bool clamp_y_axis = false;
 	vector<int32_t>::iterator j;
 
 	possibly_copy_regions_during_grab (event);
 
-	/* tv will become the TimeAxisView that we're currently pointing at, and
-	   current_layer the current layer on that TimeAxisView */
-	RouteTimeAxisView* tv;
-	layer_t current_layer;
-	if (!check_region_drag_possible (&tv, &current_layer)) {
+	/* *pointer* variables reflect things about the pointer; as we may be moving
+	   multiple regions, much detail must be computed per-region */
+
+	/* current_pointer_view will become the TimeAxisView that we're currently pointing at, and
+	   current_pointer_layer the current layer on that TimeAxisView */
+	RouteTimeAxisView* current_pointer_view;
+	layer_t current_pointer_layer;
+	if (!check_region_drag_possible (&current_pointer_view, &current_pointer_layer)) {
 		return;
 	}
 
+	/* TimeAxisView that we were pointing at last time we entered this method */
+	TimeAxisView const * const last_pointer_view = drag_info.dest_trackview;
 	/* the order of the track that we were pointing at last time we entered this method */
-	int32_t const last_pointer_order = drag_info.dest_trackview->order ();
+	int32_t const last_pointer_order = last_pointer_view->order ();
 	/* the layer that we were pointing at last time we entered this method */
 	layer_t const last_pointer_layer = drag_info.dest_layer;
-	
+
 	/************************************************************
 	     Y DELTA COMPUTATION
 	************************************************************/	
@@ -3798,16 +3802,17 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	
 	if (drag_info.brushing) {
 		clamp_y_axis = true;
-		pointer_y_span = 0;
+		pointer_order_span = 0;
 		goto y_axis_done;
 	}
 
 	/* the change in track order between this callback and the last */
-	pointer_y_span = drag_info.dest_trackview->order() - tv->order();
-	/* the change in layer between this callback and the last */
-	layer_span = drag_info.dest_layer - current_layer;
-	
-	if (pointer_y_span != 0) {
+	pointer_order_span = last_pointer_view->order() - current_pointer_view->order();
+	/* the change in layer between this callback and the last;
+	   only meaningful if pointer_order_span == 0 (ie we've not moved tracks) */
+	pointer_layer_span = last_pointer_layer - current_pointer_layer;
+
+	if (pointer_order_span != 0) {
 
 		int32_t children = 0;
 		/* XXX: hard-coded limit of tracks */
@@ -3845,20 +3850,21 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 		}
 		
-		/* find the actual span, in terms of the number of visible tracks;
-		   to do this, we reduce |pointer_y_span| by the number of hidden tracks */
+		/* find the actual pointer span, in terms of the number of visible tracks;
+		   to do this, we reduce |pointer_order_span| by the number of hidden tracks
+		   over the span */
 
-		canvas_pointer_y_span = pointer_y_span;
-		if (drag_info.dest_trackview->order() >= tv->order()) {
-			for (int32_t y = tv->order(); y < drag_info.dest_trackview->order(); y++) {
+		canvas_pointer_order_span = pointer_order_span;
+		if (last_pointer_view->order() >= current_pointer_view->order()) {
+			for (int32_t y = current_pointer_view->order(); y < last_pointer_view->order(); y++) {
 				if (height_list[y] == 0) {
-					canvas_pointer_y_span--;
+					canvas_pointer_order_span--;
 				}
 			}
 		} else {
-			for (int32_t y = drag_info.dest_trackview->order(); y <= tv->order(); y++) {
+			for (int32_t y = last_pointer_view->order(); y <= current_pointer_view->order(); y++) {
 				if (height_list[y] == 0) {
-					canvas_pointer_y_span++;
+					canvas_pointer_order_span++;
 				}
 			}
 		}
@@ -3876,16 +3882,22 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			rv->get_canvas_frame()->i2w (ix1, iy1);
 			iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
+			/* get the new trackview for this particular region */
 			std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (iy1);
 			assert (tvp.first);
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
 
 			/* I know this method has a slightly excessive argument list, but I think
-			   it's nice to separate the code out all the same, since it has such a simple result,
-			   and it makes it clear that there are no other side-effects.
+			   it's nice to separate the code out all the same, since it has such a
+			   simple result, and it makes it clear that there are no other
+			   side-effects.
 			*/
+
+			/* XXX: not sure that we should be passing canvas_pointer_order_span in here,
+			   as surely this is a per-region thing... */
+			
 			clamp_y_axis = y_movement_disallowed (
-				rtv->order(), last_pointer_order, canvas_pointer_y_span, visible_y_low, visible_y_high,
+				rtv->order(), last_pointer_order, canvas_pointer_order_span, visible_y_low, visible_y_high,
 				tracks, height_list
 				);
 
@@ -3894,9 +3906,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 		}
 
-	} else if (drag_info.dest_trackview == tv) {
+	} else if (drag_info.dest_trackview == current_pointer_view) {
 
-		if (current_layer == last_pointer_layer) {
+		if (current_pointer_layer == last_pointer_layer) {
 			/* No movement; clamp */
 			clamp_y_axis = true;
 		} 
@@ -3904,8 +3916,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
   y_axis_done:
 	if (!clamp_y_axis) {
-		drag_info.dest_trackview = tv;
-		drag_info.dest_layer = current_layer;
+		drag_info.dest_trackview = current_pointer_view;
+		drag_info.dest_layer = current_pointer_layer;
 	}
 	  
 	/************************************************************
@@ -4011,7 +4023,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	    PREPARE TO MOVE
 	************************************************************/
 
-	if (x_delta == 0 && pointer_y_span == 0 && layer_span == 0) {
+	if (x_delta == 0 && pointer_order_span == 0 && pointer_layer_span == 0) {
 		/* haven't reached next snap point, and we're not switching
 		   trackviews nor layers. nothing to do.
 		*/
@@ -4034,7 +4046,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		const list<RegionView*>& layered_regions = selection->regions.by_layer();
 		
 		for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
-	    
+
 			RegionView* rv = (*i);
 
 			if (rv->region()->locked()) {
@@ -4082,48 +4094,86 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				rv->fake_set_opaque (true);
 			}
 
+			/* current view for this particular region */
 			std::pair<TimeAxisView*, int> pos = trackview_by_y_position (iy1);
-			RouteTimeAxisView* canvas_rtv = dynamic_cast<RouteTimeAxisView*> (pos.first);
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (pos.first);
 
-			if (pointer_y_span != 0 && !clamp_y_axis) {
+			if (pointer_order_span != 0 && !clamp_y_axis) {
 
 				/* INTER-TRACK MOVEMENT */
 
-				/* move through the height list to the track that the region is going to */
+				/* move through the height list to the track that the region is currently on */
 				vector<int32_t>::iterator j = height_list.begin ();
 				int32_t x = 0;
-				while (j != height_list.end () && x != canvas_rtv->order ()) {
+				while (j != height_list.end () && x != rtv->order ()) {
 					++x;
 					++j;
 				}
 
 				y_delta = 0;
-				int32_t temp_pointer_y_span = pointer_y_span;
+				int32_t temp_pointer_order_span = canvas_pointer_order_span;
 
 				if (j != height_list.end ()) {
-				
-					while (temp_pointer_y_span > 0) {
+
+					/* Account for layers in the original and
+					   destination tracks.  If we're moving around in layers we assume
+					   that only one track is involved, so it's ok to use *pointer*
+					   variables here. */
+
+					StreamView* lv = last_pointer_view->view ();
+					assert (lv);
+
+					/* move to the top of the last trackview */
+					if (lv->layer_display () == Stacked) {
+						y_delta -= (lv->layers() - last_pointer_layer - 1) * lv->child_height ();
+					}
+					
+ 					StreamView* cv = current_pointer_view->view ();
+ 					assert (cv);
+
+					/* move to the right layer on the current trackview */
+					if (cv->layer_display () == Stacked) {
+						y_delta += (cv->layers() - current_pointer_layer - 1) * cv->child_height ();
+					}
+
+					/* And for being on a non-topmost layer on the new
+					   track */
+
+					while (temp_pointer_order_span > 0) {
 						/* we're moving up canvas-wise,
 						   so we need to find the next track height
 						*/
 						if (j != height_list.begin()) {		  
 							j--;
 						}
-						
+
+						if (x != last_pointer_order) {
+							if ((*j) == 0) {
+								++temp_pointer_order_span;
+							}
+						}
+
 						y_delta -= (*j);
-						temp_pointer_y_span--;	
+						temp_pointer_order_span--;
 					}
-					
-					while (temp_pointer_y_span < 0) {
+
+					while (temp_pointer_order_span < 0) {
 
 						y_delta += (*j);
+
+						if (x != last_pointer_order) {
+							if ((*j) == 0) {
+								--temp_pointer_order_span;
+							}
+						}
 						
 						if (j != height_list.end()) {		      
 							j++;
 						}
-						
-						temp_pointer_y_span++;
+
+						temp_pointer_order_span++;
 					}
+
 					
 					/* find out where we'll be when we move and set height accordingly */
 
@@ -4141,11 +4191,10 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				}
 			}
 
-	                if (pointer_y_span == 0 && layer_span != 0 && !clamp_y_axis) {
+	                if (pointer_order_span == 0 && pointer_layer_span != 0 && !clamp_y_axis) {
 
 				/* INTER-LAYER MOVEMENT in the same track */
-				assert (tv->view ());
-				y_delta = tv->view()->child_height () * layer_span;
+				y_delta = rtv->view()->child_height () * pointer_layer_span;
 			}
 
 
