@@ -569,6 +569,7 @@ NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 	if ((res = canonicalize_file_name (realdir.c_str())) != 0) {
 		cerr << "canonical, use " << res << endl;
 		m_folder->set_current_folder (res);
+		engine_page_session_folder = res;
 		free (res);
 	}
 	
