@@ -163,7 +163,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	
 	/** @return Sound edited notes in MIDI regions while editing
 	 */
-	virtual bool is_midi_sound_notes_active () const = 0;
+	virtual bool sound_notes () const = 0;
 
 	/** Possibly start the audition of a region.  If \ref r is 0, or not an AudioRegion
 	 * any current audition is cancelled.  If we are currently auditioning \ref r,

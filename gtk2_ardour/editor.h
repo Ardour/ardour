@@ -1756,7 +1756,7 @@ public:
 	GroupedButtons          *midi_tool_button_set;
 	void                     midi_edit_mode_toggled (Editing::MidiEditMode m);
 	void                     midi_panic_button_pressed ();
-	bool                     is_midi_sound_notes_active () const { return midi_sound_notes.get_active(); }
+	bool                     sound_notes () const { return midi_sound_notes.get_active(); }
 	
 	bool                     ignore_midi_edit_mode_toggle;
 

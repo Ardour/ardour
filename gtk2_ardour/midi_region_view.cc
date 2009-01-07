@@ -890,31 +890,30 @@ MidiRegionView::extend_active_notes()
 void 
 MidiRegionView::play_midi_note(boost::shared_ptr<Evoral::Note> note)
 {
-	if (!trackview.editor().is_midi_sound_notes_active()) {
-		cerr << "not_active " << endl;
+	if (!trackview.editor().sound_notes()) {
 		return;
 	}
-	
+
 	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
 	assert(route_ui);
 	
 	route_ui->midi_track()->write_immediate_event(note->on_event().size(), note->on_event().buffer());
 	
-	Glib::Thread::create(bind(mem_fun(this, &MidiRegionView::play_midi_note_off), note), false);
-
+	nframes_t note_length_ms = (note->off_event().time() - note->on_event().time())
+			* (1000 / (double)route_ui->session().nominal_frame_rate());
+	Glib::signal_timeout().connect(bind(mem_fun(this, &MidiRegionView::play_midi_note_off), note),
+			note_length_ms, G_PRIORITY_DEFAULT);
 }
 
-void 
+bool
 MidiRegionView::play_midi_note_off(boost::shared_ptr<Evoral::Note> note)
 {
 	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
 	assert(route_ui);
 	
-	Glib::usleep(
-		(note->off_event().time() - note->on_event().time()) * 
-		(1000000 / route_ui->session().nominal_frame_rate())
-	);
 	route_ui->midi_track()->write_immediate_event(note->off_event().size(), note->off_event().buffer());
+
+	return false;
 }
 
 
@@ -1210,8 +1209,9 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 		clear_selection_except(ev);
 	}
 
-	_selection.insert(ev);
-	play_midi_note(ev->note());
+	if (_selection.insert(ev).second) {
+		play_midi_note(ev->note());
+	}
 
 	if ( ! ev->selected()) {
 		ev->selected(true);
@@ -1260,6 +1260,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 				if (!(*i)->selected()) {
 					(*i)->selected(true);
 					_selection.insert(*i);
+					play_midi_note((*i)->note());
 				}
 			// Not inside rectangle
 			} else if ((*i)->selected()) {
@@ -1279,6 +1280,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 				if (!(*i)->selected()) {
 					(*i)->selected(true);
 					_selection.insert(*i);
+					play_midi_note((*i)->note());
 				}
 			// Not inside rectangle
 			} else if ((*i)->selected()) {
