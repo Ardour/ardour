@@ -54,6 +54,8 @@ Shared=$Resources/share
 Etc=$Resources/etc
 Locale=$Resources/locale
 
+SAE_PKG_DIR=ArdourSAE
+
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
 # print system dependencies
@@ -146,7 +148,7 @@ fi
 echo "Copying ardour executable ...."
 cp ../../gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
 if test x$SAE != x ; then
-    cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
+    # cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour2-SAE.icns $Resources/appIcon.icns
 else
     cp  Ardour2.icns $Resources/appIcon.icns
@@ -296,7 +298,7 @@ if test x$WITH_JACK != x ; then
     executables="$executables jackd"
 fi
 if test x$SAE != x ; then
-    executables="$executables gtkevents"
+    executables="$executables"
 fi
 
 for exe in $executables; do
@@ -353,6 +355,16 @@ for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Surfaces/*.dylib ; do
 	install_name_tool -id @executable_path/../Frameworks/$base $dylib
     fi
 done
+
+if [ x$SAE != x ] ; then
+    echo "Creating SAE packaging directory"
+    rm -rf $SAE_PKG_DIR
+    mkdir $SAE_PKG_DIR
+    mv Ardour2.app $SAE_PKG_DIR
+    cp HowToInstallArdourSAE.pdf "$SAE_PKG_DIR/How To Install Ardour SAE.pdf"
+    cp SAE-de-keypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
+    cp SAE-de-nokeypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts.pdf"
+fi
 
 echo "Done."
 
