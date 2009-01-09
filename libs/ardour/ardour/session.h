@@ -170,9 +170,9 @@ class Session : public PBD::StatefulDestructible
 
 		Type           type;
 	    Action         action;
-	    nframes_t action_frame;
-	    nframes_t target_frame;
-	    float          speed;
+	    nframes_t      action_frame;
+	    nframes_t      target_frame;
+	    double         speed;
 
 	    union {
 			void*                ptr;
@@ -187,7 +187,7 @@ class Session : public PBD::StatefulDestructible
 	    list<AudioRange>     audio_range;
 	    list<MusicRange>     music_range;
 
-	    Event(Type t, Action a, nframes_t when, nframes_t where, float spd, bool yn = false)
+	    Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false)
 		    : type (t),
 		      action (a),
 		      action_frame (when),
@@ -388,9 +388,9 @@ class Session : public PBD::StatefulDestructible
 	void set_session_end (nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
-	void request_transport_speed (float speed);
+	void request_transport_speed (double speed);
 	void request_overwrite_buffer (Diskstream*);
-	void request_diskstream_speed (Diskstream&, float speed);
+	void request_diskstream_speed (Diskstream&, double speed);
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
@@ -572,7 +572,7 @@ class Session : public PBD::StatefulDestructible
 	void        request_slave_source (SlaveSource);
 	bool        synced_to_jack() const { return Config->get_slave_source() == JACK; }
 
-	float       transport_speed() const { return _transport_speed; }
+	double      transport_speed() const { return _transport_speed; }
 	bool        transport_stopped() const { return _transport_speed == 0.0f; }
 	bool        transport_rolling() const { return _transport_speed != 0.0f; }
 
@@ -1023,8 +1023,8 @@ class Session : public PBD::StatefulDestructible
 	Location*                start_location;
 	Slave*                  _slave;
 	bool                    _silent;
-	volatile float          _transport_speed;
-	float                   _last_transport_speed;
+	volatile double         _transport_speed;
+	double                  _last_transport_speed;
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
@@ -1419,8 +1419,8 @@ class Session : public PBD::StatefulDestructible
 	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (nframes_t frame, bool with_roll = false);
-	void set_diskstream_speed (Diskstream*, float speed);
-	void set_transport_speed (float speed, bool abort = false);
+	void set_diskstream_speed (Diskstream*, double speed);
+	void set_transport_speed (double speed, bool abort = false);
 	void stop_transport (bool abort = false);
 	void start_transport ();
 	void realtime_stop (bool abort);

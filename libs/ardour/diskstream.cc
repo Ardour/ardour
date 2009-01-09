@@ -109,6 +109,7 @@ Diskstream::init (Flag f)
 	wrap_buffer_size = 0;
 	speed_buffer_size = 0;
 	last_phase = 0;
+	// speed = 1 in 40.24 fixed point math
 	phi = (uint64_t) (0x1000000);
 	target_phi = phi;
 	file_frame = 0;

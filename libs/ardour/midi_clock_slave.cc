@@ -133,8 +133,8 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 
 		// calculate loop error
 		// we use session.transport_frame() instead of t1 here
-		// because t1 is used to calculate the transport speed, and since this
-		// is float, the loop will compensate for accumulating rounding errors
+		// because t1 is used to calculate the transport speed,
+		// so the loop will compensate for accumulating rounding errors
 		e = (double(last_position) - double(session.transport_frame())) 
 		    / double(session.frame_rate());
 		
@@ -242,7 +242,7 @@ MIDIClock_Slave::stop_if_no_more_clock_events(nframes_t& pos, nframes_t now)
 }
 
 bool
-MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
+MIDIClock_Slave::speed_and_position (double& speed, nframes_t& pos)
 {
 	if (!_started || _starting) {
 		speed = 0.0;
@@ -257,15 +257,14 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 	}
 
 	// calculate speed
-	double speed_double = ((t1 - t0) * session.frame_rate()) / one_ppqn_in_frames;
-	speed = float(speed_double);
+	speed = ((t1 - t0) * session.frame_rate()) / one_ppqn_in_frames;
 	
 	// calculate position
 	if (engine_now > last_timestamp) {
 		// we are in between MIDI clock messages
 		// so we interpolate position according to speed
 		nframes_t elapsed = engine_now - last_timestamp;
-		pos = nframes_t (last_position + double(elapsed) * speed_double);
+		pos = nframes_t (last_position + double(elapsed) * speed);
 	} else {
 		// A new MIDI clock message has arrived this cycle
 		pos = last_position;

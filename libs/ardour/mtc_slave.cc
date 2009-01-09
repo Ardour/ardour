@@ -257,13 +257,13 @@ MTC_Slave::ok() const
 }
 
 bool 
-MTC_Slave::speed_and_position (float& speed, nframes_t& pos)
+MTC_Slave::speed_and_position (double& speed, nframes_t& pos)
 {
 	nframes_t now = session.engine().frame_time();
 	SafeTime last;
 	nframes_t frame_rate;
 	nframes_t elapsed;
-	float speed_now;
+	double speed_now;
 
 	read_current (&last);
 
@@ -287,7 +287,7 @@ MTC_Slave::speed_and_position (float& speed, nframes_t& pos)
 
 	frame_rate = session.frame_rate();
 
-	speed_now = (float) ((last.position - first_mtc_frame) / (double) (now - first_mtc_time));
+	speed_now = (double) ((last.position - first_mtc_frame) / (double) (now - first_mtc_time));
 
 	accumulator[accumulator_index++] = speed_now;
 
@@ -297,7 +297,7 @@ MTC_Slave::speed_and_position (float& speed, nframes_t& pos)
 	}
 
 	if (have_first_accumulated_speed) {
-		float total = 0;
+		double total = 0;
 
 		for (int32_t i = 0; i < accumulator_size; ++i) {
 			total += accumulator[i];

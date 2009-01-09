@@ -277,9 +277,13 @@ class Diskstream : public SessionObject
 	nframes_t            wrap_buffer_size;
 	nframes_t            speed_buffer_size;
 
-	uint64_t                  last_phase;
-	uint64_t                  phi;
-	uint64_t                  target_phi;
+	uint64_t             last_phase;
+	
+	/// diskstream speed in 40.24 fixed point math
+	uint64_t             phi;
+	
+	/// target diskstream speed in 40.24 fixed point math
+	uint64_t             target_phi;
 	
 	nframes_t            file_frame;		
 	nframes_t            playback_sample;

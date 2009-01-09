@@ -50,8 +50,8 @@ class BasicUI {
 	void ffwd ();
 	void transport_stop ();
 	void transport_play (bool jump_back = true);
-	void set_transport_speed (float speed);
-	float get_transport_speed ();
+	void set_transport_speed (double speed);
+	double get_transport_speed ();
 
 	jack_nframes_t transport_frame ();
 	void locate (jack_nframes_t frame, bool play = false);

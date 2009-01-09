@@ -785,8 +785,17 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 			nframes_t i = 0;
 
 			// Linearly interpolate into the alt buffer
-			// using 40.24 fixp maths (swh)
+			// using 40.24 fixp maths
+			//
+			// Fixedpoint is just an integer with an implied scaling factor. 
+			// In 40.24 the scaling factor is 2^24 = 16777216,  
+			// so a value of 10*2^24 (in integer space) is equivalent to 10.0. 
+			//
+			// The advantage is that addition and modulus [like x = (x + y) % 2^40]  
+			// has no rounding errors and no drift, and just requires a single integer add.
+			// (swh)
 
+			// phi = fixed point speed
 			if (phi != target_phi) {
 				phi_delta = ((int64_t)(target_phi - phi)) / nframes;
 			} else {
@@ -795,7 +804,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 			for (chan = c->begin(); chan != c->end(); ++chan) {
 
-				float fr;
+				Sample fractional_part;
 				ChannelInfo* chaninfo (*chan);
 
 				i = 0;
@@ -803,10 +812,10 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 				for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
 					i = phase >> 24;
-					fr = (phase & 0xFFFFFF) / 16777216.0f;
+					fractional_part = (phase & 0xFFFFFF) / 16777216.0f;
 					chaninfo->speed_buffer[outsample] = 
-						chaninfo->current_playback_buffer[i] * (1.0f - fr) +
-						chaninfo->current_playback_buffer[i+1] * fr;
+						chaninfo->current_playback_buffer[i] * (1.0f - fractional_part) +
+						chaninfo->current_playback_buffer[i+1] * fractional_part;
 					phase += phi + phi_delta;
 				}
 				

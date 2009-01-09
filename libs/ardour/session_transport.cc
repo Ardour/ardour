@@ -74,14 +74,14 @@ Session::request_slave_source (SlaveSource src)
 }
 
 void
-Session::request_transport_speed (float speed)
+Session::request_transport_speed (double speed)
 {
 	Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, speed);
 	queue_event (ev);
 }
 
 void
-Session::request_diskstream_speed (Diskstream& ds, float speed)
+Session::request_diskstream_speed (Diskstream& ds, double speed)
 {
 	Event* ev = new Event (Event::SetDiskstreamSpeed, Event::Add, Event::Immediate, 0, speed);
 	ev->set_ptr (&ds);
@@ -628,7 +628,7 @@ Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, 
 {
 	if (synced_to_jack()) {
 
-		float sp;
+		double sp;
 		nframes_t pos;
 
 		_slave->speed_and_position (sp, pos);
@@ -799,16 +799,16 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
  * @param abort
  */
 void
-Session::set_transport_speed (float speed, bool abort)
+Session::set_transport_speed (double speed, bool abort)
 {
 	if (_transport_speed == speed) {
 		return;
 	}
 
 	if (speed > 0) {
-		speed = min (8.0f, speed);
+		speed = min (8.0, speed);
 	} else if (speed < 0) {
-		speed = max (-8.0f, speed);
+		speed = max (-8.0, speed);
 	}
 
 	if (transport_rolling() && speed == 0.0) {
@@ -875,11 +875,11 @@ Session::set_transport_speed (float speed, bool abort)
 			return;
 		}
 
-		if (speed > 0.0f && _transport_frame == current_end_frame()) {
+		if (speed > 0.0 && _transport_frame == current_end_frame()) {
 			return;
 		}
 
-		if (speed < 0.0f && _transport_frame == 0) {
+		if (speed < 0.0 && _transport_frame == 0) {
 			return;
 		}
 
@@ -889,7 +889,7 @@ Session::set_transport_speed (float speed, bool abort)
 		   before the last stop, then we have to do extra work.
 		*/
 
-		if ((_transport_speed && speed * _transport_speed < 0.0f) || (_last_transport_speed * speed < 0.0f) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
+		if ((_transport_speed && speed * _transport_speed < 0.0) || (_last_transport_speed * speed < 0.0) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportReverse);
 			last_stop_frame = _transport_frame;
 		}
@@ -1144,7 +1144,7 @@ Session::reverse_diskstream_buffers ()
 }
 
 void
-Session::set_diskstream_speed (Diskstream* stream, float speed)
+Session::set_diskstream_speed (Diskstream* stream, double speed)
 {
 	if (stream->realtime_set_speed (speed, false)) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);

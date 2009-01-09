@@ -184,12 +184,12 @@ BasicUI::next_marker ()
 }
 
 void
-BasicUI::set_transport_speed (float speed)
+BasicUI::set_transport_speed (double speed)
 {
 	session->request_transport_speed (speed);
 }
 
-float
+double
 BasicUI::get_transport_speed ()
 {
 	return session->transport_speed ();

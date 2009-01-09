@@ -465,7 +465,7 @@ Session::transport_locked () const
 bool
 Session::follow_slave (nframes_t nframes, nframes_t offset)
 {
-	float slave_speed;
+	double slave_speed;
 	nframes_t slave_transport_frame;
 	nframes_t this_delta;
 	int dir;

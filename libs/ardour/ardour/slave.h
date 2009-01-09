@@ -105,7 +105,7 @@ class Slave {
 	 * @param position - The transport position requested
 	 * @return - The return value is currently ignored (see Session::follow_slave)
 	 */
-	virtual bool speed_and_position (float& speed, nframes_t& position) = 0;
+	virtual bool speed_and_position (double& speed, nframes_t& position) = 0;
 	
 	/**
 	 * reports to ARDOUR whether the Slave is currently synced to its external 
@@ -174,7 +174,7 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	~MTC_Slave ();
 
 	void rebind (MIDI::Port&);
-	bool speed_and_position (float&, nframes_t&);
+	bool speed_and_position (double&, nframes_t&);
 
 	bool locked() const;
 	bool ok() const;
@@ -194,12 +194,12 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte  last_mtc_fps_byte;
 
-	float       mtc_speed;
+	double      mtc_speed;
 	nframes_t   first_mtc_frame;
 	nframes_t   first_mtc_time;
 
 	static const int32_t accumulator_size = 128;
-	float   accumulator[accumulator_size];
+	double   accumulator[accumulator_size];
 	int32_t accumulator_index;
 	bool    have_first_accumulated_speed;
 
@@ -216,7 +216,7 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	~MIDIClock_Slave ();
 
 	void rebind (MIDI::Port&);
-	bool speed_and_position (float&, nframes_t&);
+	bool speed_and_position (double&, nframes_t&);
 
 	bool locked() const;
 	bool ok() const;
@@ -289,7 +289,7 @@ class ADAT_Slave : public Slave
 	ADAT_Slave () {}
 	~ADAT_Slave () {}
 
-	bool speed_and_position (float& speed, nframes_t& pos) {
+	bool speed_and_position (double& speed, nframes_t& pos) {
 		speed = 0;
 		pos = 0;
 		return false;
@@ -307,7 +307,7 @@ class JACK_Slave : public Slave
 	JACK_Slave (jack_client_t*);
 	~JACK_Slave ();
 
-	bool speed_and_position (float& speed, nframes_t& pos);
+	bool speed_and_position (double& speed, nframes_t& pos);
 
 	bool starting() const { return _starting; }
 	bool locked() const;
@@ -319,7 +319,7 @@ class JACK_Slave : public Slave
 
   private:
 	jack_client_t* jack;
-	float speed;
+	double speed;
 	bool _starting;
 };
 
