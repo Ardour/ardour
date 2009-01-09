@@ -780,6 +780,11 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 		if (rec_nframes == 0 && _actual_speed != 1.0f && _actual_speed != -1.0f) {
 			
+			// the idea behind phase is that when the speed is not 1.0, we have to 
+			// interpolate between samples and then we have to store where we thought we were. 
+			// rather than being at sample N or N+1, we were at N+0.8792922
+			// so the "phase" element, if you want to think about this way, 
+			// varies from 0 to 1, representing the "offset" between samples
 			uint64_t phase = last_phase;
 			int64_t phi_delta;
 			nframes_t i = 0;
@@ -794,6 +799,9 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 			// The advantage is that addition and modulus [like x = (x + y) % 2^40]  
 			// has no rounding errors and no drift, and just requires a single integer add.
 			// (swh)
+			
+			const int64_t fractional_part_mask  = 0xFFFFFF;
+			const Sample  binary_scaling_factor = 16777216.0f;
 
 			// phi = fixed point speed
 			if (phi != target_phi) {
@@ -812,7 +820,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 				for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
 					i = phase >> 24;
-					fractional_part = (phase & 0xFFFFFF) / 16777216.0f;
+					fractional_part = (phase & fractional_part_mask) / binary_scaling_factor;
 					chaninfo->speed_buffer[outsample] = 
 						chaninfo->current_playback_buffer[i] * (1.0f - fractional_part) +
 						chaninfo->current_playback_buffer[i+1] * fractional_part;
@@ -823,7 +831,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 			}
 
 			playback_distance = i; // + 1;
-			last_phase = (phase & 0xFFFFFF);
+			last_phase = (phase & fractional_part_mask);
 
 		} else {
 			playback_distance = nframes;
