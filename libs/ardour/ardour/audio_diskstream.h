@@ -175,7 +175,7 @@ class AudioDiskstream : public Diskstream
   protected:
 	friend class AudioTrack;
 
-	int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input);
+	int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input);	
 	bool commit  (nframes_t nframes);
 
   private:
@@ -216,6 +216,8 @@ class AudioDiskstream : public Diskstream
 
 	typedef std::vector<ChannelInfo*> ChannelList;
 
+	void process_varispeed_playback(nframes_t nframes, boost::shared_ptr<ChannelList> c);
+	
 	/* The two central butler operations */
 	int do_flush (Session::RunContext context, bool force = false);
 	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer); }
@@ -226,6 +228,7 @@ class AudioDiskstream : public Diskstream
 		  nframes_t& start, nframes_t cnt, 
 		  ChannelInfo* channel_info, int channel, bool reversed);
 
+	
 	void finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList>);
 	void transport_stopped (struct tm&, time_t, bool abort);
 	void transport_looped (nframes_t transport_frame);
