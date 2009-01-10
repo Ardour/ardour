@@ -271,11 +271,11 @@ void
 Session::process_with_events (nframes_t nframes)
 {
 	Event*         ev;
-	nframes_t this_nframes;
-	nframes_t end_frame;
-	nframes_t offset;
-	bool session_needs_butler = false;
-	nframes_t stop_limit;
+	nframes_t      this_nframes;
+	nframes_t      end_frame;
+	nframes_t      offset;
+	bool           session_needs_butler = false;
+	nframes_t      stop_limit;
 	long           frames_moved;
 	
 	/* make sure the auditioner is silent */
@@ -319,7 +319,17 @@ Session::process_with_events (nframes_t nframes)
 		return;
 	}
 
-	end_frame = _transport_frame + (nframes_t)abs(floor(nframes * _transport_speed));
+	/// TODO: Figure out what happens to phi and phase, if transport speed momentarily becomes
+	/// 1.0 eg. during the adjustments of a slave. If that is a bug, then AudioDiskstream::process
+	/// is very likely broken too
+	if (_transport_speed == 1.0) {
+		frames_moved = (long) nframes;
+	} else {		
+		frames_moved = (long) AudioDiskstream::
+			calculate_varispeed_playback_distance(nframes, phase, phi, target_phi); 
+	}
+
+	end_frame = _transport_frame + (nframes_t)frames_moved;
 
 	{
 		Event* this_event;
@@ -372,7 +382,6 @@ Session::process_with_events (nframes_t nframes)
 		while (nframes) {
 
 			this_nframes = nframes; /* real (jack) time relative */
-			frames_moved = (long) floor (_transport_speed * nframes); /* transport relative */
 
 			/* running an event, position transport precisely to its time */
 			if (this_event && this_event->action_frame <= end_frame && this_event->action_frame >= _transport_frame) {
@@ -836,7 +845,15 @@ Session::process_without_events (nframes_t nframes)
 
 	prepare_diskstreams ();
 	
-	frames_moved = (long) floor (_transport_speed * nframes);
+	/// TODO: Figure out what happens to phi and phase, if transport speed momentarily becomes
+	/// 1.0 eg. during the adjustments of a slave. If that is a bug, then AudioDiskstream::process
+	/// is very likely broken too
+	if (_transport_speed == 1.0) {
+		frames_moved = (long) nframes;
+	} else {		
+		frames_moved = (long) AudioDiskstream::
+			calculate_varispeed_playback_distance(nframes, phase, phi, target_phi); 
+	}
 
 	if (process_routes (nframes, offset)) {
 		no_roll (nframes, offset);

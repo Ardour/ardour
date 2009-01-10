@@ -150,6 +150,48 @@ class AudioDiskstream : public Diskstream
 
 	XMLNode* deprecated_io_node;
 
+	/**
+	 * Calculate the playback distance during varispeed playback.
+	 * Important for Session::process to know exactly, how many frames
+	 * were passed by.
+	 */
+	static nframes_t calculate_varispeed_playback_distance(
+			nframes_t nframes, 
+			uint64_t& the_last_phase, 
+			uint64_t& the_phi,
+			uint64_t& the_target_phi)
+	{
+		// calculate playback distance in the same way 
+		// as in AudioDiskstream::process_varispeed_playback
+		uint64_t    phase = the_last_phase;
+		int64_t     phi_delta;
+		nframes_t   i = 0;
+		
+		const int64_t fractional_part_mask  = 0xFFFFFF;
+		const Sample  binary_scaling_factor = 16777216.0f;
+
+		if (the_phi != the_target_phi) {
+			phi_delta = ((int64_t)(the_target_phi - the_phi)) / nframes;
+		} else {
+			phi_delta = 0;
+		}
+
+		Sample fractional_phase_part;
+
+		i = 0;
+		phase = the_last_phase;
+
+		for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
+			i = phase >> 24;
+			fractional_phase_part = (phase & fractional_part_mask) / binary_scaling_factor;
+			phase += the_phi + phi_delta;
+		}
+
+		the_last_phase = (phase & fractional_part_mask);
+		the_phi = the_target_phi;
+		return i; // + 1;
+	}
+	
   protected:
 	friend class Session;
 

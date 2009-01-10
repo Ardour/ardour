@@ -176,6 +176,9 @@ Session::realtime_stop (bool abort)
 	reset_slave_state ();
 
 	_transport_speed = 0;
+	phi = 0;
+	target_phi = 0;
+	phase = 0;
 
 	if (Config->get_use_video_sync()) {
 		waiting_for_sync_offset = true;
@@ -805,6 +808,8 @@ Session::set_transport_speed (double speed, bool abort)
 		return;
 	}
 
+	target_phi = (uint64_t) (0x1000000 * fabs(speed));
+	
 	if (speed > 0) {
 		speed = min (8.0, speed);
 	} else if (speed < 0) {
@@ -981,7 +986,11 @@ Session::start_transport ()
 	}
 
 	transport_sub_state |= PendingDeclickIn;
+	
 	_transport_speed = 1.0;
+	target_phi       = 0x1000000; // speed = 1
+	phi              = target_phi;
+	phase            = 0;
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {

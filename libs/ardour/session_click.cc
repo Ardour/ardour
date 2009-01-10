@@ -53,7 +53,7 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 		return;
 	} 
 
-	const nframes_t end = start + (nframes_t)floor(nframes * _transport_speed);
+	const nframes_t end = start + nframes;
 
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 	buf = bufs.get_audio(0).data();
