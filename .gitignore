@@ -12,7 +12,6 @@ Makefile
 .scache
 .deps
 *.so
-libs/gtkmm2
 
 .sconf_temp/
 .sconsign.dblite
