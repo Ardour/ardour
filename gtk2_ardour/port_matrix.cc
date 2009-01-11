@@ -110,7 +110,6 @@ PortGroupUI::setup_visibility ()
 PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool offer_inputs, PortGroupList::Mask mask)
 	: _offer_inputs (offer_inputs), _port_group_list (session, type, offer_inputs, mask), _type (type)
 {
-	_row_labels_vbox = 0;
 	_side_vbox_pad = 0;
 
 	_visibility_checkbutton_box.pack_start (*(manage (new Label (_("Connections displayed: ")))), false, false, 10);
@@ -118,11 +117,6 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 
 	_scrolled_window.set_policy (POLICY_ALWAYS, POLICY_AUTOMATIC);
 	_scrolled_window.set_shadow_type (SHADOW_NONE);
-
-	VBox* b = manage (new VBox);
-
-	b->pack_start (_port_group_hbox, false, false);
-	b->pack_start (_port_group_hbox, false, false);
 
 	_scrolled_window.add (matrix);
 
@@ -135,8 +129,6 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 	}
 
 	pack_start (_overall_hbox);
-
-	_port_group_hbox.signal_size_allocate().connect (sigc::hide (sigc::mem_fun (*this, &IOSelector::setup_dimensions)));
 }
 
 PortMatrix::~PortMatrix ()
@@ -154,17 +146,6 @@ PortMatrix::set_ports (const std::list<std::string>& ports)
 void
 PortMatrix::clear ()
 {
-	for (std::vector<EventBox*>::iterator j = _row_labels.begin(); j != _row_labels.end(); ++j) {
-		delete *j;
-	}
-	_row_labels.clear ();
-		
-	if (_row_labels_vbox) {
-		_side_vbox.remove (*_row_labels_vbox);
-		delete _row_labels_vbox;
-		_row_labels_vbox = 0;
-	}
-	
 	/* remove lurking, invisible label and padding */
 	
 	_side_vbox.children().clear ();
@@ -180,73 +161,16 @@ PortMatrix::clear ()
 	_port_group_ui.clear ();
 }
 
-
-/** Set up dimensions of some of our widgets which depend on other dimensions
- *  within the dialogue.
- */
-void
-PortMatrix::setup_dimensions ()
-{
-	/* Row labels */
-	for (std::vector<EventBox*>::iterator j = _row_labels.begin(); j != _row_labels.end(); ++j) {
-		(*j)->get_child()->set_size_request (-1, matrix.row_spacing());
-	}
-	
-	if (_side_vbox_pad) {
-		if (_offer_inputs) {
-			_side_vbox_pad->set_size_request (-1, matrix.row_spacing() / 4);
-		} else {
-			_side_vbox_pad->set_size_request (-1, matrix.row_spacing() / 4);
-		}
-	} 
-}
-
-
 /** Set up the dialogue */
 void
 PortMatrix::setup ()
 {
 	clear ();
 
- 	int const rows = n_rows ();
-	
- 	/* Row labels */
-
-	_row_labels_vbox = new VBox;
-	int const run_rows = std::max (1, rows);
-
-	for (int j = 0; j < run_rows; ++j) {
-		
-		/* embolden the port/channel name */
-		
-		string s = "<b>";
-		s += row_name (j);
-		s += "</b>";
-		
-		Label* label = manage (new Label (s));
-		EventBox* b = manage (new EventBox);
-		
-		label->set_use_markup (true);
-		
-		b->set_events (Gdk::BUTTON_PRESS_MASK);
-		b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), j));
-		b->add (*label);
-		
-		_row_labels.push_back (b);
-		_row_labels_vbox->pack_start (*b, false, false);
-	}
-
 	_side_vbox_pad = new Label (""); /* unmanaged, explicitly deleted */
 
-	if (_offer_inputs) {
-		_side_vbox.pack_start (*_side_vbox_pad, false, false);
-		_side_vbox.pack_start (*_row_labels_vbox, false, false);
-		_side_vbox.pack_start (*manage (new Label ("")));
-	} else {
-		_side_vbox.pack_start (*manage (new Label ("")));
-		_side_vbox.pack_start (*_row_labels_vbox, false, false);
-		_side_vbox.pack_start (*_side_vbox_pad, false, false);
-	}
+	_side_vbox.pack_start (*_side_vbox_pad, false, false);
+	_side_vbox.pack_start (*manage (new Label ("")));
 
 	matrix.clear ();
 
@@ -418,16 +342,12 @@ PortGroupList::refresh ()
 	   finding all the ports that we can connect to. 
 	*/
 
-	cerr << "Looking for non-ardour ports\n";
-
 	const char **ports = _session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
 							  JackPortIsInput : JackPortIsOutput);
 	if (ports) {
 
 		int n = 0;
 		string client_matching_string;
-
-		cerr << "Got some\n";
 
 		client_matching_string = _session.engine().client_name();
 		client_matching_string += ':';
@@ -450,11 +370,6 @@ PortGroupList::refresh ()
 
 		free (ports);
 	}
-
-	cerr << "at end of refresh, we have " << buss.ports.size () << " buss\n";
-	cerr << "at end of refresh, we have " << track.ports.size () << " track\n";
-	cerr << "at end of refresh, we have " << system.ports.size () << " system\n";
-	cerr << "at end of refresh, we have " << other.ports.size () << " other\n";
 
 	push_back (&system);
 	push_back (&buss);

@@ -88,7 +88,6 @@ class PortMatrix : public Gtk::VBox {
 
 	void setup ();
 	void clear ();
-	void setup_dimensions ();
 	bool row_label_button_pressed (GdkEventButton*, int);
 	void reset_visibility ();
 };
