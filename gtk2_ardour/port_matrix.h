@@ -42,7 +42,7 @@ class PortMatrix : public Gtk::VBox {
 	PortMatrix (ARDOUR::Session&, ARDOUR::DataType, bool, PortGroupList::Mask);
 	~PortMatrix ();
 
-	void redisplay ();
+	void setup ();
 
 	enum Result {
 		Cancelled,
@@ -55,8 +55,19 @@ class PortMatrix : public Gtk::VBox {
 	void set_offer_inputs (bool);
 	bool offering_input() const { return _offer_inputs; }
 
-	virtual void set_state (int, std::string const &, bool, uint32_t) = 0;
-	virtual bool get_state (int, std::string const &) const = 0;
+	/** @param r Our row index.
+	 *  @param p Other port.
+	 *  @param s New state.
+	 *  @param k XXX
+	 */
+	virtual void set_state (int r, std::string const & p, bool s, uint32_t k) = 0;
+
+	/** @param r Our row index.
+	 *  @param p Other port.
+	 *  @return true if r is connected to p, otherwise false.
+	 */
+	virtual bool get_state (int r, std::string const &p) const = 0;
+	
 	virtual uint32_t n_rows () const = 0;
 	virtual uint32_t maximum_rows () const = 0;
 	virtual uint32_t minimum_rows () const = 0;
@@ -86,7 +97,6 @@ class PortMatrix : public Gtk::VBox {
 	Gtk::Label* _side_vbox_pad;
 	Gtk::HBox _visibility_checkbutton_box;
 
-	void setup ();
 	void clear ();
 	bool row_label_button_pressed (GdkEventButton*, int);
 	void reset_visibility ();

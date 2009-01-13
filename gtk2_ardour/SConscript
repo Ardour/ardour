@@ -217,6 +217,7 @@ playlist_selector.cc
 plugin_selector.cc
 plugin_ui.cc
 port_matrix.cc
+port_group.cc
 processor_box.cc
 prompter.cc
 public_editor.cc

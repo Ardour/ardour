@@ -55,7 +55,7 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 		const PortSet& ps (_io->outputs());
 
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
-			our_ports.push_back ((*i).name());
+			our_ports.push_back (i->name());
 		}
 
 	} else {
@@ -64,12 +64,14 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 		const PortSet& ps (_io->inputs());
 
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
-			our_ports.push_back ((*i).name());
+			our_ports.push_back (i->name());
 		}
 
 	}
 	
 	set_ports (our_ports);
+
+	setup ();
 }
 
 void
@@ -77,7 +79,7 @@ IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &IOSelector::ports_changed), change, src));
 
-	redisplay ();
+	setup ();
 }
 
 void
@@ -109,17 +111,7 @@ IOSelector::get_state (int r, std::string const & p) const
 		_io->input(r)->get_connections (connections);
 	}
 
-	int k = 0;
-	for (vector<string>::iterator i = connections.begin(); i != connections.end(); ++i) {
-
-		if ((*i)== p) {
-			return true;
-		}
-		
-		++k;
-	}
-
-	return false;
+	return (std::find (connections.begin (), connections.end (), p) != connections.end ());
 }
 
 uint32_t
@@ -160,9 +152,9 @@ IOSelector::row_name (int r) const
 	string::size_type pos;
 
 	if (!_offer_inputs) {
-		n =  _io->input(r)->short_name();
+		n = _io->input(r)->name();
 	} else {
-		n = _io->output(r)->short_name();
+		n = _io->output(r)->name();
 	}
 	
 	if ((pos = n.find ('/')) != string::npos) {
@@ -270,11 +262,11 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	get_action_area()->pack_start (ok_button, false, false);
 
 	get_vbox()->set_spacing (8);
-	get_vbox()->pack_start (_selector);
+	get_vbox()->pack_start (_selector, true, true);
 
 	suggestion.set_alignment (0.5, 0.5);
 	suggestion_box.pack_start (suggestion, true, true);
-	get_vbox()->pack_start (suggestion_box);
+	get_vbox()->pack_start (suggestion_box, false, false);
 
 	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
 	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
@@ -329,7 +321,7 @@ IOSelectorWindow::ports_changed (ARDOUR::IOChange change, void *src)
 void
 IOSelectorWindow::rescan ()
 {
-	_selector.redisplay ();
+	_selector.setup ();
 }
 
 void
@@ -349,7 +341,7 @@ IOSelectorWindow::accept ()
 void
 IOSelectorWindow::on_map ()
 {
-	_selector.redisplay ();
+	_selector.setup ();
 	Window::on_map ();
 }
 
@@ -382,8 +374,8 @@ PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::Por
 void
 PortInsertUI::redisplay ()
 {
-	input_selector.redisplay();
-	output_selector.redisplay();
+	input_selector.setup ();
+	output_selector.setup ();
 }
 
 void

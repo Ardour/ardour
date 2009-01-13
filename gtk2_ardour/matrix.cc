@@ -9,12 +9,13 @@
 #include <vector>
 
 #include "matrix.h"
+#include "port_matrix.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
 
-Matrix::Matrix ()
+Matrix::Matrix (PortMatrix* p) : _port_matrix (p)
 {
 	alloc_width = 0;
 	alloc_height = 0;
@@ -27,9 +28,11 @@ Matrix::Matrix ()
 	ystep = 0;
 	pixmap = 0;
 	drawn = false;
-	angle_radians = M_PI/4.0;
+	angle_radians = M_PI / 4.0;
 	motion_x = -1;
 	motion_y = -1;
+
+	border = 10;
 
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::LEAVE_NOTIFY_MASK);
 }
@@ -47,7 +50,10 @@ Matrix::add_group (PortGroup& pg)
 	for (vector<string>::const_iterator s = pg.ports.begin(); s != pg.ports.end(); ++s) {
 		others.push_back (OtherPort (*s, pg));
 	}
-	reset_size ();
+
+	if (pg.visible) {
+		reset_size ();
+	}
 }
 
 
@@ -68,7 +74,10 @@ Matrix::remove_group (PortGroup& pg)
 			++o;
 		}
 	}
-	reset_size ();
+
+	if (pg.visible) {
+		reset_size ();
+	}
 }
 
 void
@@ -86,29 +95,23 @@ Matrix::show_group (PortGroup& pg)
 void
 Matrix::setup_nodes ()
 {
-	int n, x, y;
-	list<string>::iterator m;
-	list<OtherPort>::iterator s;
-
 	for (vector<MatrixNode*>::iterator p = nodes.begin(); p != nodes.end(); ++p) {
 		delete *p;
 	}
+	
 	nodes.clear ();
 
-	list<OtherPort>::size_type visible_others = 0;
-	
-	for (list<OtherPort>::iterator s = others.begin(); s != others.end(); ++s) {
-		if ((*s).visible()) {
-			++visible_others;
-		}
-	}
-	
-	nodes.assign (ours.size() * visible_others, 0);
+	nodes.assign (ours.size() * get_visible_others (), 0);
 
+	int n, x, y;
+	list<string>::iterator m;
+	list<OtherPort>::iterator s;
+	
 	for (n = 0, y = 0, m = ours.begin(); m != ours.end(); ++m, ++y) {
 		for (x = 0, s = others.begin(); s != others.end(); ++s) {
-			if ((*s).visible()) {
-				nodes[n] = new MatrixNode (*m, *s, x, y);
+			if (s->visible ()) {
+				bool const c = _port_matrix->get_state (y, s->name());
+				nodes[n] = new MatrixNode (*m, *s, c, x, y);
 				n++;
 				x++;
 			}
@@ -116,78 +119,27 @@ Matrix::setup_nodes ()
 	}
 }
 
+
 void
-Matrix::reset_size ()
+Matrix::other_name_size_information (double* rotated_width, double* rotated_height, double* typical_height) const
 {
-	list<OtherPort>::size_type visible_others = 0;
-	
-	for (list<OtherPort>::iterator s = others.begin(); s != others.end(); ++s) {
-		if ((*s).visible()) {
-			++visible_others;
-		}
-	}
+	double w = 0;
+	double h = 0;
 
-	if (!visible_others) {
-		cerr << "There are no visible others!\n";
-		xstep = 1;
-		ystep = 1;
-		line_width = 1;
-		line_height = 1;
-		border = 10;
-		arc_radius = 3;
-		labels_x_shift = 0;
-		labels_y_shift = 0;
-		return;
-	}
-
-	border = 10;
-
-	if (alloc_width > line_width) {
-
-		xstep = (alloc_width - labels_x_shift - (2 * border) - (2 * arc_radius)) / visible_others;
-		line_width = xstep * (others.size() - 1);
-
-		ystep = (alloc_height - labels_y_shift - (2 * border) - (2 * arc_radius)) / (ours.size() - 1);
-		line_height = ystep * (ours.size() - 1);
-
-	} else {
-
-		xstep = 20;
-		ystep = 20;
-		
-		line_height = (ours.size() - 1) * ystep;
-		line_width = visible_others * xstep;
-	}
-
-	int half_step = min (ystep/2,xstep/2);
-	if (half_step > 3) {
-		arc_radius = half_step - 5;
-	} else {
-		arc_radius = 3;
-	}
-
-	arc_radius = min (arc_radius, 10);
-
-	/* scan all the port names that will be rotated, and compute
-	   how much space we need for them
-	*/
-	
-	float w = 0;
-	float h = 0;
-	cairo_text_extents_t extents;
-	cairo_t* cr;
-	GdkPixmap* pm;
-
-	pm = gdk_pixmap_new (NULL, 1, 1, 24);
+	GdkPixmap* pm = gdk_pixmap_new (NULL, 1, 1, 24);
 	gdk_drawable_set_colormap (pm, gdk_colormap_get_system());
+	cairo_t* cr = gdk_cairo_create (pm);
 
-	cr = gdk_cairo_create (pm);
-
-	for (list<OtherPort>::iterator s = others.begin(); s != others.end(); ++s) {
-		if ((*s).visible()) {
-			cairo_text_extents (cr, (*s).name().c_str(), &extents);
-			w = max ((float) extents.width, w);
-			h = max ((float) extents.height, h);
+	for (list<OtherPort>::const_iterator s = others.begin(); s != others.end(); ++s) {
+		if (s->visible()) {
+			
+			cairo_text_extents_t extents;
+			cairo_text_extents (cr, s->short_name().c_str(), &extents);
+			
+			if (extents.width > w) {
+				w = extents.width;
+				h = extents.height;
+			}
 		}
 	}
 
@@ -196,25 +148,99 @@ Matrix::reset_size ()
 
 	/* transform */
 
-	w = fabs (w * cos (angle_radians) + h * sin (angle_radians));
-	h = fabs (w * sin (angle_radians) + h * cos (angle_radians));
+	*rotated_width = fabs (w * cos (angle_radians) + h * sin (angle_radians));
+	*rotated_height = fabs (w * sin (angle_radians) + h * cos (angle_radians));
+	*typical_height = h;
+}
 
-	labels_y_shift = (int) ceil (h) + 10;
-	labels_x_shift = (int) ceil (w);
+
+std::pair<int, int>
+Matrix::ideal_size () const
+{
+	double rw;
+	double rh;
+	double th;
+
+	other_name_size_information (&rw, &rh, &th);
+
+	double const ideal_xstep = th * 2;
+	double const ideal_ystep = 16;
+
+	uint32_t const visible_others = get_visible_others ();
+
+	return std::make_pair (
+		int (rw + (2 * border) + ideal_xstep * visible_others),
+		int (rh + (2 * border) + ideal_ystep * ours.size ())
+		);
+}
+
+
+void
+Matrix::reset_size ()
+{
+	double rw;
+	double rh;
+	double th;
+			  
+	other_name_size_information (&rw, &rh, &th);
+
+	/* y shift is the largest transformed text height plus a bit for luck */
+	labels_y_shift = int (ceil (rh) + 10);
+	/* x shift is the width of the leftmost label */
+	labels_x_shift = int (ceil (rw));
+
+	uint32_t const visible_others = get_visible_others ();
+
+	if (!visible_others) {
+		xstep = 1;
+		ystep = 1;
+		line_width = 1;
+		line_height = 1;
+		arc_radius = 3;
+		return;
+	}
+
+	if (ours.size () > 1) {
+
+		xstep = (alloc_width - labels_x_shift - (2 * border)) / visible_others;
+		line_width = xstep * (visible_others - 1);
+
+		ystep = (alloc_height - labels_y_shift - (2 * border)) / (ours.size() - 1);
+		line_height = ystep * (ours.size() - 1);
+
+	} else {
+
+		/* we have <= 1 of our ports, so steps don't matter */
+		
+		xstep = 20;
+		ystep = 20;
+		
+		line_height = (ours.size() - 1) * ystep;
+		line_width = visible_others * xstep;
+	}
+
+	int half_step = min (ystep / 2, xstep / 2);
+	if (half_step > 3) {
+		arc_radius = half_step - 5;
+	} else {
+		arc_radius = 3;
+	}
+
+	arc_radius = min (arc_radius, 10);
+
 
 	setup_nodes ();
 
-
-	cerr << "Based on ours = " << ours.size() << " others = " << others.size()
-	     << " dimens = "
-	     << " xstep " << xstep << endl
-	     << " ystep " << ystep << endl
-	     << " line_width " << line_width << endl
-	     << " line_height " << line_height << endl
-	     << " border " << border << endl
-	     << " arc_radius " << arc_radius << endl
-	     << " labels_x_shift " << labels_x_shift << endl
-	     << " labels_y_shift " << labels_y_shift << endl;
+ 	// cerr << "Based on ours = " << ours.size() << " others = " << others.size()
+ 	//      << " dimens = "
+ 	//      << " xstep " << xstep << endl
+ 	//      << " ystep " << ystep << endl
+ 	//      << " line_width " << line_width << endl
+ 	//      << " line_height " << line_height << endl
+ 	//      << " border " << border << endl
+ 	//      << " arc_radius " << arc_radius << endl
+ 	//      << " labels_x_shift " << labels_x_shift << endl
+ 	//      << " labels_y_shift " << labels_y_shift << endl;
 }
 
 bool
@@ -238,32 +264,33 @@ Matrix::on_leave_notify_event (GdkEventCrossing *ev)
 void
 Matrix::on_size_request (Requisition* req)
 {
-	req->width = labels_x_shift + line_width + (2*border) + (2*arc_radius);
-	req->height = labels_y_shift + line_height + (2*border) + (2*arc_radius);
+	std::pair<int, int> const is = ideal_size ();
+	req->width = is.first;
+	req->height = is.second;
 }
 
 MatrixNode*
 Matrix::get_node (int32_t x, int32_t y)
 {
-	int half_xstep = xstep / 2;
-	int half_ystep = ystep / 2;
+	int const half_xstep = xstep / 2;
+	int const half_ystep = ystep / 2;
 
-	x -= labels_x_shift - border;
-	if (x < half_xstep) {
+	x -= labels_x_shift + border;
+	if (x < -half_xstep) {
 		return 0;
 	}
 
-	y -= labels_y_shift - border;
-	if (y < half_ystep) {
+	y -= labels_y_shift + border;
+	if (y < -half_ystep) {
 		return 0;
 	}
 
-	x = (x - half_xstep) / xstep;
-	y = (y - half_ystep) / ystep;
+	x = (x + half_xstep) / xstep;
+	y = (y + half_ystep) / ystep;
 
-	x = y*ours.size() + x;
+	x = y * get_visible_others () + x;
 
-	if (x >= nodes.size()) {
+	if (x >= int32_t (nodes.size())) {
 		return 0;
 	}
 
@@ -276,11 +303,14 @@ Matrix::on_button_press_event (GdkEventButton* ev)
 	MatrixNode* node;
 	
 	if ((node = get_node (ev->x, ev->y)) != 0) {
-		cerr << "Event in node " << node->our_name() << " x " << node->their_name () << endl;
 		node->set_connected (!node->connected());
+		_port_matrix->set_state (node->y (), node->their_name (), node->connected (), 0);
 		drawn = false;
 		queue_draw();
-	} 
+		return true;
+	}
+
+	return false;
 }
 
 void
@@ -328,10 +358,8 @@ Matrix::redraw (GdkDrawable* drawable, GdkRectangle* rect)
 	list<string>::iterator o;
 	list<OtherPort>::iterator t;
 	int x, y;
-	uint32_t top_shift, bottom_shift, left_shift, right_shift;
-	cairo_t* cr;
 
-	cr = gdk_cairo_create (drawable);
+	cairo_t* cr = gdk_cairo_create (drawable);
 
 	cairo_set_source_rgb (cr, 0.83, 0.83, 0.83);
 	cairo_rectangle (cr, rect->x, rect->y, rect->width, rect->height);
@@ -339,10 +367,8 @@ Matrix::redraw (GdkDrawable* drawable, GdkRectangle* rect)
 
 	cairo_set_line_width (cr, 0.5);
 	
-	top_shift = labels_y_shift + border;
-	left_shift = labels_x_shift + border;
-	bottom_shift = 0;
-	right_shift = 0;
+	int32_t const top_shift = labels_y_shift + border;
+	int32_t const left_shift = labels_x_shift + border;
 
 	/* horizontal grid lines and side labels */
 
@@ -376,7 +402,7 @@ Matrix::redraw (GdkDrawable* drawable, GdkRectangle* rect)
 		
 		cairo_save (cr);
 		cairo_rotate (cr, angle_radians);
-		cairo_show_text (cr, (*t).name().c_str());
+		cairo_show_text (cr, t->short_name().c_str());
 		cairo_restore (cr);
 
 	}
@@ -394,10 +420,10 @@ Matrix::redraw (GdkDrawable* drawable, GdkRectangle* rect)
 			cairo_arc (cr, left_shift+x, top_shift+y, arc_radius, 0, 2.0 * M_PI);
 			if ((*n)->connected()) {
 				cairo_set_source_rgba (cr, 1.0, 0, 0, 1.0);
-				cairo_stroke (cr);
+				cairo_fill (cr);
 			} else {
 				cairo_set_source_rgba (cr, 1.0, 0, 0, 0.7);
-				cairo_fill (cr);
+				cairo_stroke (cr);
 			}
 		}
 	}
@@ -406,8 +432,8 @@ Matrix::redraw (GdkDrawable* drawable, GdkRectangle* rect)
 
 	if (motion_x >= left_shift && motion_y >= top_shift) {
 		
-		int col_left = left_shift + ((motion_x - left_shift) / xstep) * xstep;
-		int row_top = top_shift + ((motion_y - top_shift) / ystep) * ystep;
+		int col_left = left_shift + ((motion_x + (xstep / 2) + - left_shift) / xstep) * xstep;
+		int row_top = top_shift + ((motion_y + (ystep / 2) - top_shift) / ystep) * ystep;
 
 		cairo_set_line_width (cr, 5);
 		cairo_set_source_rgba (cr, 1.0, 0.0, 0.0, 0.3);
@@ -456,4 +482,30 @@ Matrix::on_expose_event (GdkEventExpose* event)
 
 
 	return true;
+}
+
+uint32_t
+Matrix::get_visible_others () const
+{
+	uint32_t v = 0;
+	
+	for (list<OtherPort>::const_iterator s = others.begin(); s != others.end(); ++s) {
+		if (s->visible()) {
+			++v;
+		}
+	}
+
+	return v;
+}
+
+MatrixNode::MatrixNode (std::string a, OtherPort o, bool c, int32_t x, int32_t y)
+	: _name (a), them (o), _connected (c), _x(x), _y(y)
+{
+	
+}
+
+std::string
+OtherPort::name () const
+{
+	return _group.prefix + _short_name;
 }

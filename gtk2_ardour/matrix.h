@@ -11,24 +11,26 @@
 
 #include "port_group.h"
 
+/// One of the other ports that we're connecting ours to
 class OtherPort {
 public:
     OtherPort (const std::string& n, PortGroup& g)
-	    : _name (n), _group (g) {}
+	    : _short_name (n), _group (g) {}
 
-    std::string name() const { return _name; }
+    std::string name () const;
+    std::string short_name () const { return _short_name; }
     PortGroup& group() const { return _group; }
     bool visible() const { return _group.visible; }
 
 public:
-    std::string _name;
+    std::string _short_name;
     PortGroup& _group;
 };
 
+/// A node on the matrix
 class MatrixNode {
   public:
-    MatrixNode (std::string a, OtherPort o, int32_t x, int32_t y)
-	    : _name (a), them (o), _connected (random()%3), _x(x), _y(y) {}
+    MatrixNode (std::string, OtherPort, bool, int32_t, int32_t);
     ~MatrixNode() {}
 
     PortGroup& get_group() const { return them.group(); }
@@ -52,7 +54,7 @@ class MatrixNode {
 class Matrix : public Gtk::EventBox
 {
   public: 
-    Matrix();
+    Matrix (PortMatrix*);
 
     void set_ports (const std::list<std::string>&);
     void add_group (PortGroup&);
@@ -74,7 +76,8 @@ class Matrix : public Gtk::EventBox
 
     MatrixNode* get_node (int32_t x, int32_t y);
 
-private: 
+private:
+    PortMatrix* _port_matrix; ///< the PortMatrix that we're working for
     int height;
     int width;
     int alloc_width;
@@ -100,6 +103,9 @@ private:
     void redraw (GdkDrawable*, GdkRectangle*);
     void alloc_pixmap ();
     void setup_nodes ();
+    uint32_t get_visible_others () const;
+    void other_name_size_information (double *, double *, double *) const;
+    std::pair<int, int> ideal_size () const;
 
     GdkPixmap* pixmap;
 };

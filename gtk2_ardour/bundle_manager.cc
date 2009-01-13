@@ -89,14 +89,14 @@ void
 BundleEditorMatrix::add_row ()
 {
 	_bundle->add_channel ();
-	redisplay ();
+	setup ();
 }
 
 void
 BundleEditorMatrix::remove_row (int r)
 {
 	_bundle->remove_channel (r);
-	redisplay ();
+	setup ();
 }
 
 std::string
@@ -205,7 +205,7 @@ BundleEditor::type_changed ()
 void
 BundleEditor::on_map ()
 {
-	_matrix.redisplay ();
+	_matrix.setup ();
 	Window::on_map ();
 }
 
