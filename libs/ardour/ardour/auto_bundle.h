@@ -39,10 +39,6 @@ class AutoBundle : public Bundle {
 	void set_port (uint32_t, std::string const &);
 
   private:
-	/// mutex for _ports;
-	/// XXX: is this necessary?
-	mutable Glib::Mutex _ports_mutex;
-	std::vector<PortList> _ports;
 };
 
 }	

@@ -319,7 +319,7 @@ class MackieControlProtocol
    static const char * default_port_name;
   
 	/// The Midi port(s) connected to the units
-	typedef vector<Mackie::MackiePort*> MackiePorts;
+	typedef std::vector<Mackie::MackiePort*> MackiePorts;
 	MackiePorts _ports;
   
 	/// Sometimes the real port goes away, and we want to contain the breakage

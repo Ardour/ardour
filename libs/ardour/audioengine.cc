@@ -36,10 +36,13 @@
 #include <ardour/port.h>
 #include <ardour/jack_audio_port.h>
 #include <ardour/jack_midi_port.h>
+#include <ardour/midi_port.h>
 #include <ardour/audio_port.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
+#include <ardour/event_type_map.h>
+#include <ardour/io.h>
 #ifdef VST_SUPPORT
 #include <fst.h>
 #endif

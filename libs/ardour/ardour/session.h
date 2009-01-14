@@ -53,7 +53,7 @@
 #include <ardour/configuration.h>
 #include <ardour/location.h>
 #include <ardour/gain.h>
-#include <ardour/io.h>
+#include <ardour/chan_count.h>
 
 #include <ardour/smpte.h>
 
@@ -80,6 +80,7 @@ class AuxInput;
 class Source;
 class AudioSource;
 class BufferSet;
+class IO;
 
 class Diskstream;
 class AudioDiskstream;

@@ -48,7 +48,6 @@ audioregion.cc
 audio_region_importer.cc
 audiosource.cc
 auditioner.cc
-auto_bundle.cc
 automatable.cc
 automation.cc
 automation_control.cc
@@ -58,6 +57,7 @@ base_midi_port.cc
 broadcast_info.cc
 buffer.cc
 buffer_set.cc
+bundle.cc
 chan_count.cc
 configuration.cc
 control_protocol_manager.cc

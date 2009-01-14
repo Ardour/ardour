@@ -23,105 +23,6 @@ ARDOUR::UserBundle::UserBundle (XMLNode const & x, bool i)
 	}
 }
 
-ARDOUR::ChanCount
-ARDOUR::UserBundle::nchannels () const
-{
-	Glib::Mutex::Lock lm (_ports_mutex);
-	return ChanCount (type(), _ports.size ());
-}
-
-const ARDOUR::PortList&
-ARDOUR::UserBundle::channel_ports (uint32_t n) const
-{
-	assert (n < nchannels ().get (type()));
-
-	Glib::Mutex::Lock lm (_ports_mutex);
-	return _ports[n];
-}
-
-void
-ARDOUR::UserBundle::add_port_to_channel (uint32_t c, std::string const & p)
-{
-	assert (c < nchannels ().get (type()));
-	
-	PortsWillChange (c);
-
-	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports[c].push_back (p);
-	}
-	
-	PortsHaveChanged (c);
-}
-
-void
-ARDOUR::UserBundle::remove_port_from_channel (uint32_t c, std::string const & p)
-{
-	assert (c < nchannels ().get (type()));
-
-	PortsWillChange (c);
-
-	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		PortList::iterator i = std::find (_ports[c].begin(), _ports[c].end(), p);
-		if (i != _ports[c].end()) {
-			_ports[c].erase (i);
-		}
-	}
-	
-	PortsHaveChanged (c);
-}
-
-bool
-ARDOUR::UserBundle::port_attached_to_channel (uint32_t c, std::string const & p) const
-{
-	assert (c < nchannels ().get (type()));
-
-	Glib::Mutex::Lock lm (_ports_mutex);
-	return std::find (_ports[c].begin(), _ports[c].end(), p) != _ports[c].end();
-}
-
-void
-ARDOUR::UserBundle::add_channel ()
-{
-	ConfigurationWillChange ();
-
-	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports.resize (_ports.size() + 1);
-	}
-	
-	ConfigurationHasChanged ();
-}
-
-void
-ARDOUR::UserBundle::set_channels (uint32_t n)
-{
-	ConfigurationWillChange ();
-
-	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports.resize (n);
-	}
-
-	ConfigurationHasChanged ();
-}
-
-void
-ARDOUR::UserBundle::remove_channel (uint32_t r)
-{
-	assert (r < nchannels ().get (type()));
-
-	ConfigurationWillChange ();
-
-	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports.erase (_ports.begin() + r, _ports.begin() + r + 1);
-	}
-
-	ConfigurationHasChanged ();
-}
-
 int
 ARDOUR::UserBundle::set_state (XMLNode const & node)
 {
@@ -181,17 +82,21 @@ ARDOUR::UserBundle::get_state ()
 
 	node->add_property ("name", name ());
 
-	for (std::vector<PortList>::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+	{
+		Glib::Mutex::Lock lm (_ports_mutex);
 
-		XMLNode* c = new XMLNode ("Channel");
-
-		for (PortList::iterator j = i->begin(); j != i->end(); ++j) {
-			XMLNode* p = new XMLNode ("Port");
-			p->add_property ("name", *j);
-			c->add_child_nocopy (*p);
+		for (std::vector<PortList>::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+			
+			XMLNode* c = new XMLNode ("Channel");
+			
+			for (PortList::iterator j = i->begin(); j != i->end(); ++j) {
+				XMLNode* p = new XMLNode ("Port");
+				p->add_property ("name", *j);
+				c->add_child_nocopy (*p);
+			}
+			
+			node->add_child_nocopy (*c);
 		}
-
-		node->add_child_nocopy (*c);
 	}
 
 	return *node;

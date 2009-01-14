@@ -37,13 +37,13 @@
 #include <ardour/port.h>
 #include <ardour/audio_port.h>
 #include <ardour/midi_port.h>
-#include <ardour/auto_bundle.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/panner.h>
 #include <ardour/buffer_set.h>
 #include <ardour/meter.h>
 #include <ardour/amp.h>
+#include <ardour/user_bundle.h>
 
 #include "i18n.h"
 
@@ -360,18 +360,17 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 	
 	for (std::vector<UserBundleInfo>::iterator i = list.begin(); i != list.end(); ++i) {
 
-		ChanCount const N = i->bundle->nchannels ();
+		uint32_t const N = i->bundle->nchannels ();
 
-		if (ports.num_ports (default_type()) < N.get (default_type())) {
+		if (ports.num_ports (default_type()) < N) {
 			continue;
 		}
 
 		bool ok = true;
-		uint32_t n = N.get (default_type());
 
-		for (uint32_t j = 0; j < n; ++j) {
+		for (uint32_t j = 0; j < N; ++j) {
 			/* Every port on bundle channel j must be connected to our input j */
-			PortList const pl = i->bundle->channel_ports (j);
+			Bundle::PortList const pl = i->bundle->channel_ports (j);
 			for (uint32_t k = 0; k < pl.size(); ++k) {
 				if (ports.port(j)->connected_to (pl[k]) == false) {
 					ok = false;
@@ -387,10 +386,8 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 		if (ok) {
 			new_list.push_back (*i);
 		} else {
-			i->configuration_will_change.disconnect ();
-			i->configuration_has_changed.disconnect ();
-			i->ports_will_change.disconnect ();
-			i->ports_have_changed.disconnect ();
+			i->configuration_changed.disconnect ();
+			i->ports_changed.disconnect ();
 		}
 	}
 
@@ -1681,8 +1678,8 @@ int
 IO::create_ports (const XMLNode& node)
 {
 	XMLProperty const * prop;
-	ChanCount num_inputs;
-	ChanCount num_outputs;
+	uint32_t num_inputs = 0;
+	uint32_t num_outputs = 0;
 
 	if ((prop = node.property ("input-connection")) != 0) {
 
@@ -1696,7 +1693,7 @@ IO::create_ports (const XMLNode& node)
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 
-		num_inputs.set (default_type(), count (prop->value().begin(), prop->value().end(), '{'));
+		num_inputs = count (prop->value().begin(), prop->value().end(), '{');
 	}
 	
 	if ((prop = node.property ("output-connection")) != 0) {
@@ -1711,12 +1708,15 @@ IO::create_ports (const XMLNode& node)
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
 
-		num_outputs.set (default_type(), count (prop->value().begin(), prop->value().end(), '{'));
+		num_outputs = count (prop->value().begin(), prop->value().end(), '{');
 	}
 
 	no_panner_reset = true;
 
-	if (ensure_io (num_inputs, num_outputs, true, this)) {
+	if (ensure_io (ChanCount (_default_type, num_inputs),
+		       ChanCount (_default_type, num_outputs),
+		       true, this)) {
+		
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
 	}
@@ -2065,13 +2065,12 @@ IO::connect_input_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		/* Connect to the bundle, not worrying about any connections
 		   that are already made. */
 
-		ChanCount const channels = c->nchannels ();
-		uint32_t cnt = channels.get (default_type());
+		uint32_t cnt = c->nchannels ();
 
 		for (uint32_t n = 0; n < cnt; ++n) {
-			const PortList& pl = c->channel_ports (n);
+			const Bundle::PortList& pl = c->channel_ports (n);
 
-			for (PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 
 			  if (!_inputs.port(n)->connected_to (*i)) {
 					
@@ -2115,14 +2114,13 @@ IO::connect_output_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		/* Connect to the bundle, not worrying about any connections
 		   that are already made. */
 
-		ChanCount const channels = c->nchannels ();
-		uint32_t cnt = channels.get (default_type());
+		uint32_t cnt = c->nchannels ();
 
 		for (uint32_t n = 0; n < cnt; ++n) {
 
-			const PortList& pl = c->channel_ports (n);
+			const Bundle::PortList& pl = c->channel_ports (n);
 
-			for (PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 
 				if (!_outputs.port(n)->connected_to (*i)) {
 						
@@ -2199,28 +2197,14 @@ IO::reset_panners ()
 }
 
 void
-IO::bundle_configuration_will_change ()
+IO::bundle_configuration_changed ()
 {
 	//XXX
 //	connect_input_ports_to_bundle (_input_bundle, this);
 }
 
 void
-IO::bundle_configuration_has_changed ()
-{
-	//XXX
-//	connect_input_ports_to_bundle (_input_bundle, this);
-}
-
-void
-IO::bundle_ports_will_change (int ignored)
-{
-//XXX
-//	connect_output_ports_to_bundle (_output_bundle, this);
-}
-
-void
-IO::bundle_ports_have_changed (int ignored)
+IO::bundle_ports_changed (int ignored)
 {
 	//XXX
 //	connect_output_ports_to_bundle (_output_bundle, this);
@@ -2611,7 +2595,7 @@ IO::setup_bundles_for_inputs_and_outputs ()
         snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
         _bundle_for_inputs->set_name (buf);
 	uint32_t const ni = inputs().num_ports();
-	_bundle_for_inputs->set_channels (ni);
+	_bundle_for_inputs->set_nchannels (ni);
 	for (uint32_t i = 0; i < ni; ++i) {
 		_bundle_for_inputs->set_port (i, inputs().port(i)->name());
 	}
@@ -2619,7 +2603,7 @@ IO::setup_bundles_for_inputs_and_outputs ()
         snprintf(buf, sizeof (buf), _("%s out"), _name.c_str());
         _bundle_for_outputs->set_name (buf);
 	uint32_t const no = outputs().num_ports();
-	_bundle_for_outputs->set_channels (no);
+	_bundle_for_outputs->set_nchannels (no);
 	for (uint32_t i = 0; i < no; ++i) {
 		_bundle_for_outputs->set_port (i, outputs().port(i)->name());
 	}
@@ -2633,8 +2617,8 @@ IO::setup_bundles_for_inputs_and_outputs ()
 void
 IO::create_bundles_for_inputs_and_outputs ()
 {
-	_bundle_for_inputs = boost::shared_ptr<AutoBundle> (new AutoBundle (true));
-        _bundle_for_outputs = boost::shared_ptr<AutoBundle> (new AutoBundle (false));
+	_bundle_for_inputs = boost::shared_ptr<Bundle> (new Bundle (true));
+        _bundle_for_outputs = boost::shared_ptr<Bundle> (new Bundle (false));
         setup_bundles_for_inputs_and_outputs ();
 }
 
@@ -2645,19 +2629,17 @@ IO::create_bundles_for_inputs_and_outputs ()
 void
 IO::maybe_add_input_bundle_to_list (boost::shared_ptr<Bundle> b, std::vector<boost::shared_ptr<Bundle> >* bundles)
 {
-	boost::shared_ptr<AutoBundle> ab = boost::dynamic_pointer_cast<AutoBundle, Bundle> (b);
-
-	if (ab == 0 || ab->ports_are_outputs() == false) {
+	if (b->ports_are_outputs() == false) {
 		return;
 	}
 	
-	if (ab->nchannels().get (default_type()) != n_inputs().n_total ()) {
+	if (b->nchannels() != n_inputs().n_total ()) {
 		return;
 	}
 
 	for (uint32_t i = 0; i < n_inputs().n_total (); ++i) {
 
-		PortList const & pl = b->channel_ports (i);
+		Bundle::PortList const & pl = b->channel_ports (i);
 
 		if (pl.empty()) {
 			return;
@@ -2682,7 +2664,7 @@ IO::bundles_connected_to_inputs ()
 		bundles.push_back (i->bundle);
 	}
 
-	/* Auto bundles */
+	/* Normal bundles */
 	_session.foreach_bundle (
 		sigc::bind (sigc::mem_fun (*this, &IO::maybe_add_input_bundle_to_list), &bundles)
 		);
@@ -2698,18 +2680,17 @@ IO::bundles_connected_to_inputs ()
 void
 IO::maybe_add_output_bundle_to_list (boost::shared_ptr<Bundle> b, std::vector<boost::shared_ptr<Bundle> >* bundles)
 {
-	boost::shared_ptr<AutoBundle> ab = boost::dynamic_pointer_cast<AutoBundle, Bundle> (b);
-	if (ab == 0 || ab->ports_are_inputs() == false) {
+	if (b->ports_are_inputs() == false) {
 		return;
 	}
 
-	if (ab->nchannels ().get (default_type()) != n_outputs().n_total ()) {
+	if (b->nchannels () != n_outputs().n_total ()) {
 		return;
 	}
 
 	for (uint32_t i = 0; i < n_outputs().n_total (); ++i) {
 
-		PortList const & pl = b->channel_ports (i);
+		Bundle::PortList const & pl = b->channel_ports (i);
 
 		if (pl.empty()) {
 			return;
@@ -2747,17 +2728,11 @@ IO::bundles_connected_to_outputs ()
 IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 {
 	bundle = b;
-	configuration_will_change = b->ConfigurationWillChange.connect (
-		sigc::mem_fun (*io, &IO::bundle_configuration_will_change)
+	configuration_changed = b->ConfigurationChanged.connect (
+		sigc::mem_fun (*io, &IO::bundle_configuration_changed)
 		);
-	configuration_has_changed = b->ConfigurationHasChanged.connect (
-		sigc::mem_fun (*io, &IO::bundle_configuration_has_changed)
-		);
-	ports_will_change = b->PortsWillChange.connect (
-		sigc::mem_fun (*io, &IO::bundle_ports_will_change)
-		);
-	ports_have_changed = b->PortsHaveChanged.connect (
-		sigc::mem_fun (*io, &IO::bundle_ports_have_changed)
+	ports_changed = b->PortsChanged.connect (
+		sigc::mem_fun (*io, &IO::bundle_ports_changed)
 		);
 }
 

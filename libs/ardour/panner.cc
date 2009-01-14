@@ -40,6 +40,7 @@
 #include <ardour/session.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
+#include <ardour/audio_buffer.h>
 
 #include <ardour/runtime_functions.h>
 #include <ardour/buffer_set.h>

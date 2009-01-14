@@ -81,7 +81,7 @@
 #include <ardour/io_processor.h>
 #include <ardour/send.h>
 #include <ardour/processor.h>
-#include <ardour/bundle.h>
+#include <ardour/user_bundle.h>
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>

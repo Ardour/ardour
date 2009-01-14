@@ -37,6 +37,7 @@
 #include <libgnomecanvasmm/canvas.h>
 
 #include <pbd/xml++.h>
+#include <pbd/controllable.h>
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>

@@ -64,7 +64,6 @@
 #include <ardour/processor.h>
 #include <ardour/plugin_insert.h>
 #include <ardour/port_insert.h>
-#include <ardour/auto_bundle.h>
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
@@ -82,6 +81,7 @@
 #include <ardour/session_directory.h>
 #include <ardour/tape_file_matcher.h>
 #include <ardour/analyser.h>
+#include <ardour/bundle.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -601,8 +601,8 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
- 		shared_ptr<AutoBundle> c (new AutoBundle (buf, true));
- 		c->set_channels (1);
+ 		shared_ptr<Bundle> c (new Bundle (buf, true));
+ 		c->set_nchannels (1);
  		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
  		add_bundle (c);
@@ -612,8 +612,8 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
- 		shared_ptr<AutoBundle> c (new AutoBundle (buf, false));
- 		c->set_channels (1);
+ 		shared_ptr<Bundle> c (new Bundle (buf, false));
+ 		c->set_nchannels (1);
  		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
  		add_bundle (c);
@@ -625,8 +625,8 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
 
- 		shared_ptr<AutoBundle> c (new AutoBundle (buf, true));
- 		c->set_channels (2);
+ 		shared_ptr<Bundle> c (new Bundle (buf, true));
+ 		c->set_nchannels (2);
  		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
  		c->set_port (1, _engine.get_nth_physical_output (DataType::AUDIO, np + 1));
 
@@ -637,8 +637,8 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
 
- 		shared_ptr<AutoBundle> c (new AutoBundle (buf, false));
- 		c->set_channels (2);
+ 		shared_ptr<Bundle> c (new Bundle (buf, false));
+ 		c->set_nchannels (2);
  		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
  		c->set_port (1, _engine.get_nth_physical_input (DataType::AUDIO, np + 1));
 
@@ -686,14 +686,6 @@ Session::when_engine_running ()
 			_master_out->allow_pan_reset ();
 
 		}
-
- 		shared_ptr<AutoBundle> c (new AutoBundle (_("Master Out"), true));
-
- 		c->set_channels (_master_out->n_inputs().n_total());
- 		for (uint32_t n = 0; n < _master_out->n_inputs ().n_total(); ++n) {
- 			c->set_port (n, _master_out->input(n)->name());
- 		}
- 		add_bundle (c);
 	}
 
 	BootMessage (_("Setup signal flow and plugins"));

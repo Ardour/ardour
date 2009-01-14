@@ -21,6 +21,8 @@
 #include <pbd/error.h>
 #include "ardour/automation_list.h"
 #include "ardour/automation_control.h"
+#include "ardour/event_type_map.h"
+#include "ardour/automatable.h"
 #include "ardour_ui.h"
 #include "utils.h"
 #include "automation_controller.h"

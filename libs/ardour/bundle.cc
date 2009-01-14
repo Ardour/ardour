@@ -29,72 +29,53 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-/** Construct a Bundle from an XML node.
- * @param node XML node.
- */
-Bundle::Bundle (const XMLNode& node)
+uint32_t
+Bundle::nchannels () const
 {
-	if (set_state (node)) {
-		throw failed_constructor();
-	}
+	Glib::Mutex::Lock lm (_ports_mutex);
+	return _ports.size ();
 }
 
-/** Construct an InputBundle from an XML node.
- * @param node XML node.
- */
-InputBundle::InputBundle (const XMLNode& node)
-	: Bundle (node)
+Bundle::PortList const &
+Bundle::channel_ports (uint32_t c) const
 {
-  
+	assert (c < nchannels());
+
+	Glib::Mutex::Lock lm (_ports_mutex);
+	return _ports[c];
 }
 
-/** Construct an OutputBundle from an XML node.
- * @param node XML node.
- */
-OutputBundle::OutputBundle (const XMLNode& node)
-	: Bundle (node)
-{
-  
-}
-
-/** Set the name.
- * @param name New name.
+/** Add an association between one of our channels and a port.
+ *  @param ch Channel index.
+ *  @param portname port name to associate with.
  */
 void
-Bundle::set_name (string name, void *src)
+Bundle::add_port_to_channel (uint32_t ch, string portname)
 {
-	_name = name;
-	NameChanged (src);
-}
+	assert (ch < nchannels());
 
-/** Add an association between one of our channels and a JACK port.
- * @param ch Channel index.
- * @param portname JACK port name to associate with.
- */
-void
-Bundle::add_port_to_channel (int ch, string portname)
-{
 	{
-		Glib::Mutex::Lock lm (channels_lock);
-		_channels[ch].push_back (portname);
+		Glib::Mutex::Lock lm (_ports_mutex);
+		_ports[ch].push_back (portname);
 	}
 	
 	PortsChanged (ch); /* EMIT SIGNAL */
 }
 
-/** Disassociate a JACK port from one of our channels.
- * @param ch Channel index.
- * @param portname JACK port name to disassociate from.
+/** Disassociate a port from one of our channels.
+ *  @param ch Channel index.
+ *  @param portname port name to disassociate from.
  */
-
 void
-Bundle::remove_port_from_channel (int ch, string portname)
+Bundle::remove_port_from_channel (uint32_t ch, string portname)
 {
+	assert (ch < nchannels());
+
 	bool changed = false;
 
 	{
-		Glib::Mutex::Lock lm (channels_lock);
-		PortList& pl = _channels[ch];
+		Glib::Mutex::Lock lm (_ports_mutex);
+		PortList& pl = _ports[ch];
 		PortList::iterator i = find (pl.begin(), pl.end(), portname);
 		
 		if (i != pl.end()) {
@@ -108,24 +89,13 @@ Bundle::remove_port_from_channel (int ch, string portname)
 	}
 }
 
-/**
- * @param ch Channel index.
- * @return List of JACK ports that this channel is connected to.
- */
-const Bundle::PortList&
-Bundle::channel_ports (int ch) const
-{
-	Glib::Mutex::Lock lm (channels_lock);
-	return _channels[ch];
-}
-
 /** operator== for Bundles; they are equal if their channels are the same.
  * @param other Bundle to compare with this one.
  */
 bool
 Bundle::operator== (const Bundle& other) const
 {
-	return other._channels == _channels;
+	return other._ports == _ports;
 }
 
 
@@ -134,149 +104,58 @@ Bundle::operator== (const Bundle& other) const
  */
 
 void
-Bundle::set_nchannels (int n)
+Bundle::set_nchannels (uint32_t n)
 {
 	{
-		Glib::Mutex::Lock lm (channels_lock);
-		_channels.clear ();
-		for (int i = 0; i < n; ++i) {
-			_channels.push_back (PortList());
+		Glib::Mutex::Lock lm (_ports_mutex);
+		_ports.clear ();
+		for (uint32_t i = 0; i < n; ++i) {
+			_ports.push_back (PortList());
 		}
 	}
 
 	ConfigurationChanged (); /* EMIT SIGNAL */
 }
 
-XMLNode&
-Bundle::get_state ()
+void
+Bundle::set_port (uint32_t ch, string portname)
 {
-	XMLNode *node;
-	string str;
+	assert (ch < nchannels());
 
-	if (dynamic_cast<InputBundle *> (this)) {
-		node = new XMLNode ("InputConnection");
-	} else {
-		node = new XMLNode ("OutputConnection");
+	{
+		Glib::Mutex::Lock lm (_ports_mutex);
+		_ports[ch].clear ();
+		_ports[ch].push_back (portname);
 	}
 
-	node->add_property ("name", _name);
-
-	for (vector<PortList>::iterator i = _channels.begin(); i != _channels.end(); ++i) {
-
-		str += '{';
-
-		for (vector<string>::iterator ii = (*i).begin(); ii != (*i).end(); ++ii) {
-			if (ii != (*i).begin()) {
-				str += ',';
-			}
-			str += *ii;
-		}
-		str += '}';
-	}
-
-	node->add_property ("connections", str);
-
-	return *node;
+	PortsChanged (ch); /* EMIT SIGNAL */
 }
 
-int
-Bundle::set_state (const XMLNode& node)
+void
+Bundle::add_channel ()
 {
-	const XMLProperty *prop;
-
-	if ((prop = node.property ("name")) == 0) {
-		error << _("Node for Connection has no \"name\" property") << endmsg;
-		return -1;
+	{
+		Glib::Mutex::Lock lm (_ports_mutex);
+		_ports.push_back (PortList ());
 	}
 
-	_name = prop->value();
-	_dynamic = false;
-	
-	if ((prop = node.property ("connections")) == 0) {
-		error << _("Node for Connection has no \"connections\" property") << endmsg;
-		return -1;
-	}
-	
-	set_channels (prop->value());
-
-	return 0;
+	ConfigurationChanged (); /* EMIT SIGNAL */
 }
 
-/** Set up channels from an XML property string.
- * @param str String.
- * @return 0 on success, -1 on error.
- */
-int
-Bundle::set_channels (const string& str)
+bool
+Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 {
-	vector<string> ports;
-	int i;
-	int n;
-	int nchannels;
+	assert (ch < nchannels());
 	
-	if ((nchannels = count (str.begin(), str.end(), '{')) == 0) {
-		return 0;
-	}
-
-	set_nchannels (nchannels);
-
-	string::size_type start, end, ostart;
-
-	ostart = 0;
-	start = 0;
-	end = 0;
-	i = 0;
-
-	while ((start = str.find_first_of ('{', ostart)) != string::npos) {
-		start += 1;
-
-		if ((end = str.find_first_of ('}', start)) == string::npos) {
-			error << string_compose(_("IO: badly formed string in XML node for inputs \"%1\""), str) << endmsg;
-			return -1;
-		}
-
-		if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
-			error << string_compose(_("bad input string in XML node \"%1\""), str) << endmsg;
-
-			return -1;
-			
-		} else if (n > 0) {
-
-			for (int x = 0; x < n; ++x) {
-				add_port_to_channel (i, ports[x]);
-			}
-		}
-
-		ostart = end+1;
-		i++;
-	}
-
-	return 0;
+	Glib::Mutex::Lock lm (_ports_mutex);
+	return (std::find (_ports[ch].begin (), _ports[ch].end (), portname) != _ports[ch].end ());
 }
 
-int
-Bundle::parse_io_string (const string& str, vector<string>& ports)
+void
+Bundle::remove_channel (uint32_t ch)
 {
-	string::size_type pos, opos;
+	assert (ch < nchannels ());
 
-	if (str.length() == 0) {
-		return 0;
-	}
-
-	pos = 0;
-	opos = 0;
-
-	ports.clear ();
-
-	while ((pos = str.find_first_of (',', opos)) != string::npos) {
-		ports.push_back (str.substr (opos, pos - opos));
-		opos = pos + 1;
-	}
-	
-	if (opos < str.length()) {
-		ports.push_back (str.substr(opos));
-	}
-
-	return ports.size();
+	Glib::Mutex::Lock lm (_ports_mutex);
+	_ports.erase (_ports.begin () + ch);
 }
-

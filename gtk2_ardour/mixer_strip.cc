@@ -43,7 +43,6 @@
 #include <ardour/processor.h>
 #include <ardour/profile.h>
 #include <ardour/ladspa_plugin.h>
-#include <ardour/auto_bundle.h>
 #include <ardour/user_bundle.h>
 
 #include "ardour_ui.h"
@@ -758,7 +757,7 @@ MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, std::vector<b
 
 	MenuList& citems = input_menu.items();
 	
-	if (b->nchannels() == _route->n_inputs()) {
+	if (b->nchannels() == _route->n_inputs().get (b->type ())) {
 
 		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_chosen), b)));
 
@@ -781,7 +780,7 @@ MixerStrip::add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, std::vector<
  		return;
  	}
 
-	if (b->nchannels() == _route->n_outputs()) {
+	if (b->nchannels() == _route->n_outputs().get (b->type ())) {
 
 		MenuList& citems = output_menu.items();
 		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));

@@ -35,36 +35,10 @@ class UserBundle : public Bundle, public PBD::Stateful {
 	UserBundle (std::string const &);
 	UserBundle (XMLNode const &, bool);
 
-	ChanCount nchannels () const;
-	const ARDOUR::PortList& channel_ports (uint32_t) const;
-
-	void add_channel ();
-	void set_channels (uint32_t);
-	void remove_channel (uint32_t);
-	void add_port_to_channel (uint32_t, std::string const &);
-	void remove_port_from_channel (uint32_t, std::string const &);
-	bool port_attached_to_channel (uint32_t, std::string const &) const;
 	XMLNode& get_state ();
-
-	/// The number of channels is about to change
-	sigc::signal<void> ConfigurationWillChange;
-	/// The number of channels has changed
-	sigc::signal<void> ConfigurationHasChanged;
-	/// The port set associated with one of our channels is about to change
-	/// Parameter is the channel number
-	sigc::signal<void, int> PortsWillChange;
-	/// The port set associated with one of our channels has changed
-	/// Parameter is the channel number
-	sigc::signal<void, int> PortsHaveChanged;
 	
   private:
-
-	int set_state (const XMLNode &);
-
-	/// mutex for _ports;
-	/// XXX: is this necessary?
-	mutable Glib::Mutex _ports_mutex; 
-	std::vector<PortList> _ports;
+	int set_state (XMLNode const &);
 };
 
 }

@@ -22,42 +22,69 @@
 
 #include <string>
 #include <sigc++/signal.h>
-
 #include "ardour/data_type.h"
-#include "ardour/chan_count.h"
 
 namespace ARDOUR {
-
-typedef std::vector<std::string> PortList;
   
-/**
- *  A set of `channels', each of which is associated with 0 or more JACK ports.
+/** A set of `channels', each of which is associated with 0 or more ports.
+ *  Intended for grouping things like, for example, a buss' outputs.
+ *  `Channel' is a rather overloaded term but I can't think of a better
+ *  one right now.
  */
-
-class Bundle {
+class Bundle : public sigc::trackable {
   public:
-	Bundle () : _type (DataType::AUDIO) {}
-	Bundle (bool i) : _type (DataType::AUDIO), _ports_are_inputs (i) {}
+
+	/// List of ports associated with a channel.  We can't use a
+	/// PortSet because we might want to involve non-Ardour ports
+	/// (ie those without a Port object)
+	typedef std::vector<std::string> PortList;
+
+	/** Construct an audio bundle.
+	 *  @param i true if ports are inputs, otherwise false.
+	 */
+	Bundle (bool i = true) : _type (DataType::AUDIO), _ports_are_inputs (i) {}
+
+	/** Construct an audio bundle.
+	 *  @param n Name.
+	 *  @param i true if ports are inputs, otherwise false.
+	 */
 	Bundle (std::string const & n, bool i = true) : _name (n), _type (DataType::AUDIO), _ports_are_inputs (i) {}
 
 	virtual ~Bundle() {}
 
-	/**
-	 *  @return Number of channels that this Bundle has.
-	 */
-	virtual ChanCount nchannels () const = 0;
-	virtual const PortList& channel_ports (uint32_t) const = 0;
+	/** @return Number of channels that this Bundle has */
+	uint32_t nchannels () const;
 
+	/** @param Channel index.
+	 *  @return Ports associated with this channel.
+	 */
+	PortList const & channel_ports (uint32_t) const;
+
+	void add_channel ();
+	void add_port_to_channel (uint32_t, std::string);
+	void set_port (uint32_t, std::string);
+	void remove_port_from_channel (uint32_t, std::string);
+	void set_nchannels (uint32_t);
+	bool port_attached_to_channel (uint32_t, std::string);
+	void remove_channel (uint32_t);
+
+	/** Set the name.
+	 *  @param n New name.
+	 */
 	void set_name (std::string const & n) {
 		_name = n;
 		NameChanged ();
 	}
-	
+
+	/** @return Bundle name */
 	std::string name () const { return _name; }
 
-	sigc::signal<void> NameChanged;
-
+	/** Set the type of the ports in this Bundle.
+	 *  @param t New type.
+	 */
 	void set_type (DataType t) { _type = t; }
+
+	/** @return Type of the ports in this Bundle. */
 	DataType type () const { return _type; }
 
 	void set_ports_are_inputs () { _ports_are_inputs = true; }
@@ -65,7 +92,26 @@ class Bundle {
 	bool ports_are_inputs () const { return _ports_are_inputs; }
 	bool ports_are_outputs () const { return !_ports_are_inputs; }
 
+	bool operator== (Bundle const &) const;
+
+	/** Emitted when the name changes */
+	sigc::signal<void> NameChanged;
+	/** The number of channels has changed */
+	sigc::signal<void> ConfigurationChanged;
+	/** The port list associated with one of our channels has changed */
+	sigc::signal<void, int> PortsChanged;
+
+  protected:
+	
+	/// mutex for _ports;
+	/// XXX: is this necessary?
+	mutable Glib::Mutex _ports_mutex;
+	std::vector<PortList> _ports;
+
   private:
+	int set_channels (std::string const &);
+	int parse_io_string (std::string const &, std::vector<std::string> &);
+	
 	std::string _name;
 	ARDOUR::DataType _type;
 	bool _ports_are_inputs;
