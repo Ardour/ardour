@@ -44,12 +44,18 @@ void
 LV2PluginUI::parameter_changed (uint32_t port_index, float val)
 {
 	if (val != _values[port_index]) {
-		const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
-		LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
-		if (ui_desc->port_event)
-			ui_desc->port_event(ui_handle, port_index, 4, 0, &val);
-		_values[port_index] = val;
+		parameter_update(port_index, val);
 	}
+}
+
+void
+LV2PluginUI::parameter_update (uint32_t port_index, float val)
+{
+	const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
+	LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
+	if (ui_desc->port_event)
+		ui_desc->port_event(ui_handle, port_index, 4, 0, &val);
+	_values[port_index] = val;
 }
 
 bool
@@ -107,9 +113,13 @@ LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	_values = new float[num_ports];
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		bool ok;
-		_values[i] = lv2p->nth_parameter(i, ok);
-		if (ok)
-			lv2_ui_write(this, i, 4, /* FIXME: format */0, &_values[i]);
+		uint32_t port = lv2p->nth_parameter(i, ok);
+		if (ok) {
+			_values[port] = lv2p->get_parameter(port);
+			if (lv2p->parameter_is_control(port) && lv2p->parameter_is_input(port)) {
+				parameter_update(port, _values[port]);
+			}
+		}
 	}
 		
 	_lv2->ParameterChanged.connect(mem_fun(*this, &LV2PluginUI::parameter_changed));
