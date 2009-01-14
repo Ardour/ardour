@@ -61,6 +61,7 @@ private:
 	uint8_t       _channel;
 	uint8_t       _program;
 	Gtk::Menu     _popup;
+	bool          _popup_initialized;
 };
 
 } // namespace Canvas

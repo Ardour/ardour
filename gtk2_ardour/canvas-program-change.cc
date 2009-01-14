@@ -36,9 +36,9 @@ CanvasProgramChange::CanvasProgramChange(
 	 , _event_time(event_time)
 	 , _channel(channel)
 	 , _program(program)
+	 , _popup_initialized(false)
 {
 	set_text(text);
-	initialize_popup_menus();
 }
 
 CanvasProgramChange::~CanvasProgramChange()
@@ -100,6 +100,11 @@ CanvasProgramChange::on_event(GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 3) {
+			// lazy init
+			if (!_popup_initialized) {
+				initialize_popup_menus();
+				_popup_initialized = true;
+			}
 		    _popup.popup(ev->button.button, ev->button.time);
 			return true;
 		}
