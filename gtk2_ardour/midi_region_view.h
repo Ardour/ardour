@@ -292,7 +292,10 @@ class MidiRegionView : public RegionView
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 	
+	/// MIDNAM information of the current track: Model name of MIDNAM file
 	string   _model_name;
+	
+	/// MIDNAM information of the current track: CustomDeviceMode
 	string   _custom_device_mode;   
 
 	typedef std::vector<ArdourCanvas::CanvasNoteEvent*> Events;
