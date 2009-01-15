@@ -33,6 +33,7 @@
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
+#include <ardour/audio_buffer.h>
 #include <ardour/lv2_plugin.h>
 
 #include <pbd/stl_delete.h>
