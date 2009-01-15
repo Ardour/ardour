@@ -38,27 +38,22 @@ Patch::get_state (void)
 	XMLNode* node = new XMLNode("Patch");
 	node->add_property("Number", _number);
 	node->add_property("Name",   _name);
+	/*
 	XMLNode* commands = node->add_child("PatchMIDICommands");
 	for (PatchMidiCommands::const_iterator event = _patch_midi_commands.begin();
 	    event != _patch_midi_commands.end();
 	    ++event) {
 		commands->add_child_copy(*((((Evoral::MIDIEvent&)*event)).to_xml()));
 	}
+	*/
 
 	return *node;
 }
 
-int
-Patch::set_state (const XMLNode& node)
+void initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* node)
 {
-	assert(node.name() == "Patch");
-	_number = node.property("Number")->value();
-	_name   = node.property("Name")->value();
-	XMLNode* commands = node.child("PatchMIDICommands");
-	assert(commands);
-	const XMLNodeList events = commands->children();
+	const XMLNodeList events = node->children();
 	for (XMLNodeList::const_iterator i = events.begin(); i != events.end(); ++i) {
-		_patch_midi_commands.push_back(boost::shared_ptr<Evoral::MIDIEvent> (new Evoral::MIDIEvent(*(*i))));
 		XMLNode* node = *i;
 		if (node->name() == "ControlChange") {
 			string control = node->property("Control")->value();
@@ -67,18 +62,42 @@ Patch::set_state (const XMLNode& node)
 			assert(value != "");
 			
 			if (control == "0") {
-				_id.msb = PBD::atoi(value);
+				id.msb = PBD::atoi(value);
 			} else if (control == "32") {
-				_id.lsb = PBD::atoi(value);
+				id.lsb = PBD::atoi(value);
 			}
 		} else if (node->name() == "ProgramChange") {
 			string number = node->property("Number")->value();
 			assert(number != "");
-			_id.program_number = PBD::atoi(number);
+			id.program_number = PBD::atoi(number);
+		}
+	}
+}
+
+
+int
+Patch::set_state (const XMLNode& node)
+{
+	assert(node.name() == "Patch");
+	_number = node.property("Number")->value();
+	_name   = node.property("Name")->value();
+	XMLNode* commands = node.child("PatchMIDICommands");
+	
+	if (commands) {
+		initialize_primary_key_from_commands(_id, commands);
+	} else {
+		string program_change = node.property("ProgramChange")->value();
+		assert(program_change.length());
+		assert(_bank);
+		assert(_bank->patch_primary_key());
+		if ( _bank && _bank->patch_primary_key() ) {
+			_id.msb = _bank->patch_primary_key()->msb;
+			_id.lsb = _bank->patch_primary_key()->lsb;
+			_id.program_number = PBD::atoi(program_change);
 		}
 	}
 
-	//cerr << "deserialized Patch: name: " <<  _name << _id.msb << " lsb: " << _id.lsb << " program " << _id.program_number << endl;
+	cerr << "deserialized Patch: name: " <<  _name << " msb: " << _id.msb << " lsb: " << _id.lsb << " program " << _id.program_number << endl;
 	// TODO: handle that more gracefully
 	assert(_id.is_sane());
 	
@@ -152,15 +171,22 @@ PatchBank::set_state (const XMLNode& node)
 {
 	assert(node.name() == "PatchBank");
 	_name   = node.property("Name")->value();
+
+	XMLNode* commands = node.child("MIDICommands");
+	if (commands) {
+		_id = new PatchPrimaryKey();
+		initialize_primary_key_from_commands(*_id, commands);
+	}
+	
 	XMLNode* patch_name_list = node.child("PatchNameList");
 	assert(patch_name_list);
 	const XMLNodeList patches = patch_name_list->children();
 	for (XMLNodeList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
-		boost::shared_ptr<Patch> patch(new Patch());
+		boost::shared_ptr<Patch> patch(new Patch(this));
 		patch->set_state(*(*i));
 		_patch_name_list.push_back(patch);
 	}
-
+	
 	return 0;
 }
 

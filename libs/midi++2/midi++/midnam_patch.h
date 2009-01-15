@@ -82,22 +82,24 @@ public:
 	}
 };
 
+class PatchBank;
+
+typedef std::list<boost::shared_ptr<Evoral::MIDIEvent> > PatchMidiCommands;
+	
 class Patch : public PBD::Stateful
 {
 public:
-	typedef std::list<boost::shared_ptr<Evoral::MIDIEvent> > PatchMidiCommands;
 
-	Patch() {};
-	Patch(string a_number, string a_name) : _number(a_number), _name(a_name) {};
-	~Patch() {};
+	Patch(PatchBank* a_bank = 0) : _bank(a_bank) {};
+	Patch(string a_number, string a_name, PatchBank* a_bank = 0) 
+		: _number(a_number), _name(a_name), _bank(a_bank) {};
+	virtual ~Patch() {};
 
 	const string& name() const               { return _name; }
 	void set_name(const string a_name)       { _name = a_name; }
 
 	const string& number() const             { return _number; }
 	void set_number(const string a_number)   { _number = a_number; }
-
-	const PatchMidiCommands& patch_midi_commands() const { return _patch_midi_commands; }
 	
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
@@ -107,8 +109,9 @@ public:
 private:
 	string            _number;
 	string            _name;
+	// cannot use a boost::shared_ptr here in order to avoid retain cycles
+	PatchBank*        _bank;
 	PatchPrimaryKey   _id;
-	PatchMidiCommands _patch_midi_commands;
 };
 
 class PatchBank : public PBD::Stateful
@@ -116,21 +119,24 @@ class PatchBank : public PBD::Stateful
 public:
 	typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 
-	PatchBank() {};
-	virtual ~PatchBank() {};
-	PatchBank(string a_name) : _name(a_name) {};
+	PatchBank() : _id(0) {};
+	PatchBank(string a_name, PatchPrimaryKey* an_id = 0) : _name(a_name), _id(an_id) {};
+	virtual ~PatchBank() { delete _id; };
 
 	const string& name() const               { return _name; }
 	void set_name(const string a_name)       { _name = a_name; }
 
 	const PatchNameList& patch_name_list() const { return _patch_name_list; }
+	
+	const PatchPrimaryKey* patch_primary_key()  const { return _id; }
 
 	XMLNode& get_state (void);
 	int      set_state (const XMLNode& a_node);
 
 private:
-	string        _name;
-	PatchNameList _patch_name_list;
+	string            _name;
+	PatchNameList     _patch_name_list;
+	PatchPrimaryKey*  _id;
 };
 
 #include <iostream>
