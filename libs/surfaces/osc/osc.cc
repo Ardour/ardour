@@ -33,19 +33,22 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
 #include <pbd/filesystem.h>
+#include <pbd/failed_constructor.h>
 
-#include <ardour/osc.h>
 #include <ardour/session.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
+#include <ardour/midi_track.h>
 #include <ardour/dB.h>
 #include <ardour/filesystem_paths.h>
 
+#include "osc.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace sigc;
 using namespace std;
+
 
 static void error_callback(int num, const char *m, const char *path)
 {
@@ -54,13 +57,61 @@ static void error_callback(int num, const char *m, const char *path)
 #endif
 }
 
-OSC::OSC (uint32_t port)
-	: _port(port)
+OSC::OSC (Session& s, uint32_t port)
+	: ControlProtocol (s, "OSC")
+	, _port(port)
 {
 	_shutdown = false;
 	_osc_server = 0;
 	_osc_unix_server = 0;
 	_osc_thread = 0;
+	_namespace_root = "/ardour";
+	_send_route_changes = true;
+
+	// "Application Hooks"
+	session_loaded (s);
+	session->Exported.connect( mem_fun( *this, &OSC::session_exported ) );
+
+	/* catch up with existing routes */
+
+	boost::shared_ptr<Session::RouteList> rl = session->get_routes ();
+	route_added (*(rl.get()));
+
+	// session->RouteAdded.connect (mem_fun (*this, &OSC::route_added));
+}
+
+OSC::~OSC()
+{
+	stop ();
+}
+
+int
+OSC::set_active (bool yn)
+{
+	if (yn) {
+		return start ();
+	} else {
+		return stop ();
+	}
+}
+
+bool
+OSC::get_active () const
+{
+	return _osc_server != 0;
+}
+
+int 
+OSC::set_feedback (bool yn)
+{
+	_send_route_changes = yn;
+	return 0;
+}
+
+bool
+OSC::get_feedback () const
+{
+	return _send_route_changes;
 }
 
 int
@@ -162,11 +213,6 @@ OSC::stop ()
 	return 0;
 }
 
-OSC::~OSC()
-{
-	stop ();
-}
-
 void
 OSC::register_callbacks()
 {
@@ -183,6 +229,10 @@ OSC::register_callbacks()
 		}
 
 		serv = srvs[i];
+		
+		/* this is a special catchall handler */
+		
+		lo_server_add_method (serv, 0, 0, _catchall, this);
 
 #define REGISTER_CALLBACK(serv,path,types, function) lo_server_add_method (serv, path, types, OSC::_ ## function, this)
 		
@@ -416,20 +466,217 @@ OSC::osc_receiver()
 }
 
 void
-OSC::set_session (Session& s)
+OSC::current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg)
 {
-	session = &s;
-	session->GoingAway.connect (mem_fun (*this, &OSC::session_going_away));
-
-	// "Application Hooks"
-	session_loaded( s );
-	session->Exported.connect( mem_fun( *this, &OSC::session_exported ) );
+	char* subpath;
+	
+	subpath = (char*) malloc (len-15+1);
+	memcpy (subpath, path, len-15);
+	subpath[len-15] = '\0';
+	
+	send_current_value (subpath, argv, argc, msg);
+	
+	free (subpath);
 }
 
 void
-OSC::session_going_away ()
+OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg)
 {
-	session = 0;
+	if (!session) {
+		return;
+	}
+
+	lo_message reply = lo_message_new ();
+	boost::shared_ptr<Route> r;
+	int id;
+
+	lo_message_add_string (reply, path);
+	
+	if (argc == 0) {
+		lo_message_add_string (reply, "bad syntax");
+	} else {
+		id = argv[0]->i;
+		r = session->route_by_remote_id (id);
+
+		if (!r) {
+			lo_message_add_string (reply, "not found");
+		} else {
+
+			if (strcmp (path, "/routes/state") == 0) {
+				
+				if (boost::dynamic_pointer_cast<AudioTrack>(r)) {
+					lo_message_add_string (reply, "AT");
+				} else if (boost::dynamic_pointer_cast<MidiTrack>(r)) {
+					lo_message_add_string (reply, "MT");
+				} else {
+					lo_message_add_string (reply, "B");
+				}
+				
+				lo_message_add_string (reply, r->name().c_str());
+				lo_message_add_int32 (reply, r->n_inputs().n_audio());
+				lo_message_add_int32 (reply, r->n_outputs().n_audio());
+				lo_message_add_int32 (reply, r->muted());
+				lo_message_add_int32 (reply, r->soloed());
+				
+			} else if (strcmp (path, "/routes/mute") == 0) {
+				
+				lo_message_add_int32 (reply, (float) r->muted());
+				
+			} else if (strcmp (path, "/routes/solo") == 0) {
+				
+				lo_message_add_int32 (reply, r->soloed());
+			}
+		}
+	}
+
+	lo_send_message (lo_message_get_source (msg), "#reply", reply);
+	lo_message_free (reply);
+}
+	
+int
+OSC::_catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) 
+{
+	return ((OSC*)user_data)->catchall (path, types, argv, argc, data);
+}
+
+int
+OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg) 
+{
+	size_t len;
+	int ret = 1; /* unhandled */
+
+	cerr << "Received a message, path = " << path << " types = \"" 
+	     << (types ? types : "NULL") << '"' << endl;
+
+	/* 15 for /#current_value plus 2 for /<path> */
+
+	len = strlen (path);
+
+	if (len >= 17 && !strcmp (&path[len-15], "/#current_value")) {
+		current_value_query (path, len, argv, argc, msg);
+		ret = 0;
+
+	} else if (strcmp (path, "/routes/listen") == 0) {
+		
+		cerr << "set up listener\n";
+
+		lo_message reply = lo_message_new ();
+
+		if (argc > 0) {
+			int id = argv[0]->i;
+			boost::shared_ptr<Route> r = session->route_by_remote_id (id);
+			
+			if (!r) {
+				lo_message_add_string (reply, "not found");
+				cerr << "no such route\n";
+			} else {			
+				
+				ListenerPair listener;
+
+				listener.first = r.get();
+				listener.second = lo_message_get_source (msg);
+				
+				cerr << "add listener\n";
+				
+				listen_to_route (listener);
+
+				lo_message_add_string (reply, "0");
+			}
+
+		} else {
+			lo_message_add_string (reply, "syntax error");
+		}
+
+		lo_send_message (lo_message_get_source (msg), "#reply", reply);
+		lo_message_free (reply);
+
+	} else if (strcmp (path, "/routes/ignore") == 0) {
+
+		if (argc > 0) {
+			int id = argv[0]->i;
+			boost::shared_ptr<Route> r = session->route_by_remote_id (id);
+			
+			if (r) {
+				ListenerPair listener;
+
+				listener.first = r.get();
+				listener.second = lo_message_get_source (msg);
+				
+				drop_listener_pair (listener);
+			}
+		}
+	}
+
+	return ret;
+}
+
+void
+OSC::route_added (Session::RouteList& rl)
+{
+}
+
+void
+OSC::listen_to_route (const ListenerPair& lp)
+{
+	Listeners::iterator x;
+	bool route_exists = false;
+
+	cerr << "listen to route\n";
+
+	/* check existing listener pairs to avoid duplicate listens */
+
+	for (x = listeners.begin(); x != listeners.end(); ++x) {
+
+		if ((*x)->route == lp.first) {
+			route_exists = true;
+
+			if ((*x)->addr == lp.second ) {
+				return;
+			}
+		}
+	}
+
+	Listener* l = new Listener (lp.first, lp.second);
+
+	cerr << "listener binding to signals\n";
+
+	l->connections.push_back (lp.first->solo_changed.connect (bind (mem_fun (*this, &OSC::route_changed), RouteSolo, lp.first, lp.second)));
+	l->connections.push_back (lp.first->mute_changed.connect (bind (mem_fun (*this, &OSC::route_changed), RouteMute, lp.first, lp.second)));
+	l->connections.push_back (lp.first->gain_control()->Changed.connect (bind (mem_fun (*this, &OSC::route_changed_deux), RouteGain, lp.first, lp.second)));
+	
+	if (!route_exists) {
+		l->route->GoingAway.connect (bind (mem_fun (*this, &OSC::drop_listeners_by_route), l->route));
+	}
+
+	listeners.push_back (l);
+}
+
+void
+OSC::drop_listeners_by_route (Route* r)
+{
+	Listeners::iterator x;
+
+	for (x = listeners.begin(); x != listeners.end();) {
+		if ((*x)->route == r) {
+			delete *x;
+			x = listeners.erase (x);
+		} else {
+			++x;
+		}
+	}
+}
+
+void
+OSC::drop_listener_pair (const ListenerPair& lp)
+{
+	Listeners::iterator x;
+
+	for (x = listeners.begin(); x != listeners.end(); ++x) {
+		if ((*x)->route == lp.first && (*x)->addr == lp.second) {
+			listeners.erase (x);
+			return;
+		}
+	}
 }
 
 // "Application Hook" Handlers //
@@ -443,6 +690,61 @@ void
 OSC::session_exported( std::string path, std::string name ) {
 	lo_address listener = lo_address_new( NULL, "7770" );
 	lo_send( listener, "/session/exported", "ss", path.c_str(), name.c_str() );
+}
+
+void
+OSC::set_send_route_changes (bool yn)
+{
+	_send_route_changes = yn;
+}
+
+void
+OSC::route_changed (void* src, RouteChangeType what, Route* r, lo_address addr)
+{
+	route_changed_deux (what, r, addr);
+}
+
+void
+OSC::route_changed_deux (RouteChangeType what, Route* r, lo_address addr)
+{
+	if (!_send_route_changes) {
+		return;
+	}
+
+	string prefix = _namespace_root;
+	int ret;
+
+	switch (what) {
+
+	case OSC::RouteSolo:
+		prefix += "/changed/route/solo";
+		ret = lo_send (addr, prefix.c_str(), "ii", r->remote_control_id(), (int) r->soloed());
+		break;
+
+	case OSC::RouteMute:
+		prefix += "/changed/route/mute";
+		ret = lo_send (addr, prefix.c_str(), "ii", r->remote_control_id(), (int) r->muted());
+		break;
+
+	case OSC::RouteGain:
+		prefix += "/changed/route/gain";
+		ret = lo_send (addr, prefix.c_str(), "if", r->remote_control_id(), r->effective_gain());
+
+	default:
+		error << "OSC: unhandled route change\n";
+		return;
+	}
+
+	if (ret < 0) {
+		ListenerPair lp;
+
+		lp.first = r;
+		lp.second = addr;
+
+		cerr << "Error sending to listener ... dropping\n";
+		drop_listener_pair (lp);
+	}
+
 }
 
 // end "Application Hook" Handlers //
@@ -465,38 +767,38 @@ OSC::current_value (const char *path, const char *types, lo_arg **argv, int argc
 	const char *retpath = argv[2]->s;
 
 	
-	if (strcmp (argv[0]->s, "transport_frame")) {
+	if (strcmp (argv[0]->s, "transport_frame") == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_frame());
 		}
 
-	} else if (strcmp (argv[0]->s, "transport_speed")) {
+	} else if (strcmp (argv[0]->s, "transport_speed") == 0) {
+		
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+		
+	} else if (strcmp (argv[0]->s, "transport_locked") == 0) {
+		
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+		
+	} else if (strcmp (argv[0]->s, "punch_in") == 0) {
+		
+		if (session) {
+			lo_send (addr, retpath, "i", session->transport_frame());
+		}
+		
+	} else if (strcmp (argv[0]->s, "punch_out") == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_frame());
 		}
-
-	} else if (strcmp (argv[0]->s, "transport_locked")) {
-
-		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
-		}
-
-	} else if (strcmp (argv[0]->s, "punch_in") {
-
-		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
-		}
-
-	} else if (strcmp (argv[0]->s, "punch_out") {
-
-		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
-		}
-
-	} else if (strcmp (argv[0]->s, "rec_enable") {
-
+		
+	} else if (strcmp (argv[0]->s, "rec_enable") == 0) {
+			
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_frame());
 		}
@@ -572,6 +874,18 @@ OSC::route_set_gain_dB (int rid, float dB)
 	if (r) {
 		r->set_gain (dB_to_coefficient (dB), this);
 	}
+	
+	return 0;
+}
 
+XMLNode& 
+OSC::get_state () 
+{
+	return *(new XMLNode ("OSC"));
+}
+		
+int 
+OSC::set_state (const XMLNode&)
+{
 	return 0;
 }

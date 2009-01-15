@@ -45,7 +45,6 @@ opts.AddOptions(
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FREESOUND', 'Include Freesound database lookup', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
-    BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
@@ -867,10 +866,6 @@ if env['EXTRA_WARN']:
     env.Append(CXXFLAGS="-ansi")
 #    env.Append(CFLAGS="-iso")
 
-if env['LIBLO']:
-    env.Append(CCFLAGS="-DHAVE_LIBLO")
-
-
 #
 # fix scons nitpickiness on APPLE
 #
@@ -998,16 +993,17 @@ libraries['boost'] = conf.Finish ()
 #
 # Check for liblo
 
-if env['LIBLO']:
-    libraries['lo'] = LibraryInfo ()
-    prep_libcheck(env, libraries['lo'])
+libraries['lo'] = LibraryInfo ()
+prep_libcheck(env, libraries['lo'])
 
-    conf = Configure (libraries['lo'])
-    if conf.CheckLib ('lo', 'lo_server_new') == False:
-        print "liblo does not appear to be installed."
-        sys.exit (1)
-    
-    libraries['lo'] = conf.Finish ()
+conf = Configure (libraries['lo'])
+if conf.CheckLib ('lo', 'lo_server_new') == False:
+    print "liblo does not appear to be installed."
+    env['HAVE_LIBLO'] = False
+else:
+    env['HAVE_LIBLO'] = True
+
+libraries['lo'] = conf.Finish ()
 
 #
 # Check for dmalloc
@@ -1270,7 +1266,7 @@ else:
 
 #
 # * always build the LGPL control protocol lib, since we link against it from libardour
-# * ditto for generic MIDI
+# * ditto for generic MIDI and OSC
 # * tranzport & wiimote check whether they should build internally, but we need them here
 #   so that they are included in the tarball
 #
@@ -1280,7 +1276,8 @@ surface_subdirs = [ 'libs/surfaces/control_protocol',
                     'libs/surfaces/tranzport',
                     'libs/surfaces/mackie',
                     'libs/surfaces/powermate',
-		    'libs/surfaces/wiimote'
+		    'libs/surfaces/wiimote',
+		    'libs/surfaces/osc'
                     ]
 
 if env['SURFACES']:

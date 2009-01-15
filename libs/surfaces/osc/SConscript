@@ -1,0 +1,63 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env final_prefix install_prefix final_config_prefix libraries i18n')
+
+osc = env.Clone()
+
+#
+# this defines the translation domain of libardour_osc
+# 
+
+domain = 'ardour_osc'
+
+osc.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+osc.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+osc.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+osc.Append(PACKAGE = domain)
+osc.Append(POTFILE = domain + '.pot')
+
+osc_files=Split("""
+osc.cc
+osc_controllable.cc
+interface.cc
+""")
+
+osc.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+osc.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
+osc.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
+osc.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+osc.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
+
+osc.Merge ([
+	libraries['lo'],
+	libraries['midi++2'],
+	libraries['evoral'],
+	libraries['ardour'],
+	libraries['ardour_cp'],
+	libraries['pbd'],
+	libraries['sigc2'],
+	libraries['xml'],
+	libraries['glib2'],
+	libraries['glibmm2']
+	])
+
+libardour_osc = osc.SharedLibrary('ardour_osc', osc_files)
+
+if osc['HAVE_LIBLO']:
+	Default(libardour_osc)
+	if env['NLS']:
+		i18n (osc, osc_files, env)
+	env.Alias('install', env.Install(os.path.join(install_prefix, 
+						      env['LIBDIR'], 
+						      'ardour3', 
+						      'surfaces'), 
+					 libardour_osc))
+		
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+				     [ 'SConscript' ] +
+				     osc_files + 
+				     glob.glob('po/*.po') + glob.glob('*.h')))

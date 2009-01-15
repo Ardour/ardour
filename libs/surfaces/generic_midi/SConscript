@@ -9,7 +9,7 @@ Import('env final_prefix install_prefix final_config_prefix libraries i18n')
 genericmidi = env.Clone()
 
 #
-# this defines the version number of libardour_genericmidi
+# this defines the translation domain of libardour_genericmidi
 # 
 
 domain = 'ardour_genericmidi'

@@ -67,10 +67,6 @@
 #include <ardour/audioengine.h>
 #include <ardour/filesystem_paths.h>
 
-#ifdef HAVE_LIBLO
-#include <ardour/osc.h>
-#endif
-
 #include <ardour/mix.h>
 #include <ardour/runtime_functions.h>
 
@@ -83,10 +79,6 @@
 ARDOUR::Configuration* ARDOUR::Config = 0;
 ARDOUR::RuntimeProfile* ARDOUR::Profile = 0;
 ARDOUR::AudioLibrary* ARDOUR::Library = 0;
-
-#ifdef HAVE_LIBLO
-ARDOUR::OSC* ARDOUR::osc = 0;
-#endif
 
 using namespace ARDOUR;
 using namespace std;
@@ -110,26 +102,6 @@ mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
 sigc::signal<void,std::string> ARDOUR::BootMessage;
-
-#ifdef HAVE_LIBLO
-static int
-setup_osc ()
-{
-	/* no real cost to creating this object, and it avoids
-	   conditionals anywhere that uses it
-	*/
-
-	osc = new OSC (Config->get_osc_port());
-
-	if (Config->get_use_osc ()) {
-		BootMessage (_("Starting OSC"));
-		return osc->start ();
-	} else {
-		return 0;
-	}
-}
-
-#endif
 
 int
 ARDOUR::setup_midi ()
@@ -341,11 +313,6 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	Profile = new RuntimeProfile;
 
-#ifdef HAVE_LIBLO
-	if (setup_osc ()) {
-		return -1;
-	}
-#endif
 
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst() && fst_init ()) {

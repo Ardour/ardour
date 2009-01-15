@@ -83,10 +83,6 @@
 #include <ardour/analyser.h>
 #include <ardour/bundle.h>
 
-#ifdef HAVE_LIBLO
-#include <ardour/osc.h>
-#endif
-
 #include "i18n.h"
 
 using namespace std;
@@ -728,15 +724,6 @@ Session::when_engine_running ()
 	BootMessage (_("Connect to engine"));
 
 	_engine.set_session (this);
-
-#ifdef HAVE_LIBLO
-	/* and to OSC */
-
-	BootMessage (_("OSC startup"));
-
-	osc->set_session (*this);
-#endif
-
 }
 
 void

@@ -30,20 +30,32 @@
 #include <sigc++/sigc++.h>
 
 #include <ardour/types.h>
-
-#include <control_protocol/basic_ui.h>
+#include <ardour/session.h>
+#include <control_protocol/control_protocol.h>
 
 namespace ARDOUR {
-	class Session;
-	class Route;
 
-class OSC : public BasicUI, public sigc::trackable
+class Session;
+class Route;
+	
+class OSC : public ControlProtocol
 {
   public:
-	OSC (uint32_t port);
+	OSC (Session&, uint32_t port);
 	virtual ~OSC();
-	
-	void set_session (ARDOUR::Session&);
+
+	XMLNode& get_state ();
+	int set_state (const XMLNode&);
+
+	int set_active (bool yn);
+	bool get_active () const;
+	int set_feedback (bool yn);
+	bool get_feedback () const;
+
+	void set_namespace_root (std::string);
+	bool send_route_changes () const { return _send_route_changes; }
+	void set_send_route_changes (bool yn);
+
 	int start ();
 	int stop ();
 
@@ -55,6 +67,8 @@ class OSC : public BasicUI, public sigc::trackable
 	lo_server _osc_unix_server;
 	std::string _osc_unix_socket_path;
 	std::string _osc_url_file;
+	std::string _namespace_root;
+	bool _send_route_changes;
 	pthread_t _osc_thread;
 	int _request_pipe[2];
 
@@ -68,15 +82,30 @@ class OSC : public BasicUI, public sigc::trackable
 
 	void register_callbacks ();
 
-	void session_going_away ();
-
+	void route_added (ARDOUR::Session::RouteList&);
+		
 	// Handlers for "Application Hook" signals
-	void session_loaded( ARDOUR::Session& );
-	void session_exported( std::string, std::string );
+	void session_loaded (ARDOUR::Session&);
+	void session_exported (std::string, std::string);
+
+	enum RouteChangeType {
+		RouteSolo,
+		RouteMute,
+		RouteGain
+	};
+
+	void route_changed (void* ignored, RouteChangeType, ARDOUR::Route*, lo_address);
+	void route_changed_deux (RouteChangeType, ARDOUR::Route*, lo_address);
+
 	// end "Application Hook" handles
 
 	std::string get_server_url ();
 	std::string get_unix_server_url ();
+
+	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
+	void current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg);
+	int catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data);
+	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
 	int current_value (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
@@ -143,6 +172,23 @@ class OSC : public BasicUI, public sigc::trackable
 	int route_recenable (int rid, int yn);
 	int route_set_gain_abs (int rid, float level);
 	int route_set_gain_dB (int rid, float dB);
+
+	struct Listener {
+	    Route* route;
+	    lo_address addr;
+	    std::vector<sigc::connection> connections;
+
+	    Listener (Route* r, lo_address a) : route (r), addr (a) {}
+	};
+
+	typedef std::pair<Route*, lo_address> ListenerPair;
+	typedef std::list<Listener*> Listeners;
+
+	Listeners listeners;
+
+	void listen_to_route (const ListenerPair&);
+	void drop_listener_pair (const ListenerPair&);
+	void drop_listeners_by_route (Route*);
 };
 
 }
