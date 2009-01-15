@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <glibmm/regex.h>
+
 #include "ardour/midi_patch_manager.h"
 #include "ardour_ui.h"
 #include "midi_region_view.h"
@@ -64,6 +66,9 @@ CanvasProgramChange::initialize_popup_menus()
 	for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
 	     bank != patch_banks.end();
 	     ++bank) {
+		Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
+		Glib::ustring replacement(" ");
+		
 		Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
 		
 		const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
@@ -72,17 +77,22 @@ CanvasProgramChange::initialize_popup_menus()
 		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
+			Glib::ustring name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
+		    
 			patch_menus.push_back(
 				Gtk::Menu_Helpers::MenuElem(
-					(*patch)->name(), 
+					name, 
 					sigc::bind(
 						sigc::mem_fun(*this, &CanvasProgramChange::on_patch_menu_selected), 
 						(*patch)->patch_primary_key())) );		
 		}
+
+
+		Glib::ustring name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
 		
 		patch_bank_menus.push_back( 
 			Gtk::Menu_Helpers::MenuElem(
-				(*bank)->name(), 
+				name, 
 				patch_bank_menu) );		
 	}
 }
