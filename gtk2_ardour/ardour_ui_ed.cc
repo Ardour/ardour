@@ -441,11 +441,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI Feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_toggle_action (option_actions, X_("UseOSC"), _("Use OSC"), mem_fun (*this, &ARDOUR_UI::toggle_use_osc));
-#ifndef HAVE_LIBLO
-	act->set_sensitive (false);
-#endif
 	act = ActionManager::register_toggle_action (option_actions, X_("ToggleTapeMachineMode"), _("Tape Machine Mode"), mem_fun (*this, &ARDOUR_UI::toggle_TapeMachineMode));
 	ActionManager::session_sensitive_actions.push_back (act);
 

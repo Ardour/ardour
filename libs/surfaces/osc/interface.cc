@@ -1,6 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
- *   Copyright (C) 2007 Michael Taht
+ *   Copyright (C) 2009 Paul Davis 
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -50,7 +49,7 @@ static ControlProtocolDescriptor osc_descriptor = {
 	id : "uri://ardour.org/surfaces/osc:0",
 	ptr : 0,
 	module : 0,
-	mandatory : 1,
+	mandatory : 0,
 	supports_feedback : true,
 	probe : probe_osc_protocol,
 	initialize : new_osc_protocol,
