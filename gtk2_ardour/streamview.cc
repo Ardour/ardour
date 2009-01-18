@@ -399,6 +399,7 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 		for (RegionSelection::iterator ii = regions.begin(); ii != regions.end(); ++ii) {
 			if (*i == *ii) {
 				selected = true;
+				break;
 			}
 		}
 

@@ -111,9 +111,7 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		TreeModel::Row child;
 
 		if (!iter) {
-
 			parent = *(region_list_model->append());
-			
 			parent[region_list_columns.name] = _("Hidden");
 			boost::shared_ptr<Region> proxy = parent[region_list_columns.region];
 			proxy.reset ();
@@ -136,7 +134,6 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		TreeModel::Children rows = region_list_model->children();
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
-			
 			boost::shared_ptr<Region> rr = (*i)[region_list_columns.region];
 			
 			if (rr && region->region_list_equivalent (rr)) {
@@ -145,17 +142,24 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		}
 
 		row = *(region_list_model->append());
+		
 		if (missing_source) {
 			c.set_rgb(65535,0,0);     // FIXME: error color from style
+		
 		} else if (region->automatic()){
 			c.set_rgb(0,65535,0);     // FIXME: error color from style
+		
 		} else {
 			set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+		
 		}
+		
 		row[region_list_columns.color_] = c;
 
 		if (region->source()->name()[0] == '/') { // external file
+			
 			if (region->whole_file()) {
+				
 				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
 				str = ".../";
 
@@ -186,8 +190,10 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		
 		if (missing_source) {
 			row[region_list_columns.path] = _("(MISSING) ") + region->source()->name();
+		
 		} else {
 			row[region_list_columns.path] = region->source()->name();
+		
 		} 
 		
 		if (region->automatic()) {
@@ -205,27 +211,29 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			boost::shared_ptr<Region> rr = (*i)[region_list_columns.region];
 			boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion>(rr);
-
+			
 			if (r && r->whole_file()) {
+				
 				if (region->source_equivalent (r)) {
 					row = *(region_list_model->append ((*i).children()));
 					found_parent = true;
 					break;
 				}
 			}
-
+			
 			TreeModel::iterator ii;
 			TreeModel::Children subrows = (*i).children();
 
 			for (ii = subrows.begin(); ii != subrows.end(); ++ii) {
-				
 				boost::shared_ptr<Region> rrr = (*ii)[region_list_columns.region];
 
 				if (region->region_list_equivalent (rrr)) {
 					return;
+				
 				}
 			}
 		}
+		
 		if (!found_parent) {
 			row = *(region_list_model->append());
 		}	
@@ -290,13 +298,76 @@ Editor::region_list_selection_changed()
 				boost::shared_ptr<Region> region = (*iter)[region_list_columns.region];
 				
 				if (region) {
-					set_selected_regionview_from_region_list (region, Selection::Add);
 					
+					if (region->automatic()) {
+						region_list_display.get_selection()->unselect(*i);
+						
+					} else {
+						region_list_change_connection.block(true);
+						//editor_regions_selection_changed_connection.block(true);
+
+						set_selected_regionview_from_region_list (region, Selection::Add);
+
+						region_list_change_connection.block(false);
+						//editor_regions_selection_changed_connection.block(false);
+					}
 				}
 			}
 		}
-		
+	} else {
+		deselect_all();
 	}
+}
+
+void
+Editor::set_selected_in_region_list(RegionSelection& regions)
+{
+	for (RegionSelection::iterator iter = regions.begin(); iter != regions.end(); ++iter) {
+	
+		TreeModel::iterator i;
+		TreeModel::Children rows = region_list_model->children();
+		boost::shared_ptr<Region> r ((*iter)->region());
+		
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			
+			boost::shared_ptr<Region> compared_region = (*i)[region_list_columns.region];
+
+			if (r == compared_region) {
+				region_list_display.get_selection()->select(*i);;
+				break;
+			}
+			
+			if (!(*i).children().empty()) {
+				if (set_selected_in_region_list_subrow(r, (*i), 2)) {
+					break;
+				}
+			}
+		}
+	}
+}
+
+bool
+Editor::set_selected_in_region_list_subrow (boost::shared_ptr<Region> region, TreeModel::Row const &parent_row, int level)
+{
+	TreeModel::iterator i;
+	TreeModel::Children subrows = (*parent_row).children();
+	
+	for (i = subrows.begin(); i != subrows.end(); ++i) {
+		
+		boost::shared_ptr<Region> compared_region = (*i)[region_list_columns.region];
+		
+		if (region == compared_region) {
+			region_list_display.get_selection()->select(*i);;
+			return true;
+		}
+		
+		if (!(*i).children().empty()) {
+			if (update_region_subrows(region, (*i), level + 1)) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void
@@ -630,10 +701,10 @@ Editor::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &ro
 		row[region_list_columns.sync] = _("Multiple");
 		row[region_list_columns.fadein] = _("Multiple");
 		row[region_list_columns.fadeout] = _("Multiple");
-		row[region_list_columns.locked] = _(" ");
-		row[region_list_columns.glued] = _(" ");
-		row[region_list_columns.muted] = _(" ");
-		row[region_list_columns.opaque] = _(" ");
+		row[region_list_columns.locked] = false;
+		row[region_list_columns.glued] = false;
+		row[region_list_columns.muted] = false;
+		row[region_list_columns.opaque] = false;
 	} else {
 		row[region_list_columns.start] = start_str;
 		row[region_list_columns.end] = end_str;
@@ -1024,9 +1095,9 @@ Editor::remove_region_from_region_list ()
 
 void  
 Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
-						int x, int y, 
-						const SelectionData& data,
-						guint info, guint time)
+												int x, int y, 
+												const SelectionData& data,
+												guint info, guint time)
 {
 	vector<ustring> paths;
 

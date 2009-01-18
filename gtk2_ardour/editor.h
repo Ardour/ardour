@@ -990,6 +990,9 @@ class Editor : public PublicEditor
 
 	void region_list_region_changed (ARDOUR::Change, boost::weak_ptr<ARDOUR::Region>);
 	void region_list_selection_changed ();
+	sigc::connection region_list_change_connection;
+	void set_selected_in_region_list(RegionSelection&);
+	bool set_selected_in_region_list_subrow(boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
 	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 	void region_name_edit (const Glib::ustring&, const Glib::ustring&);
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
@@ -1775,6 +1778,7 @@ public:
 	void time_selection_changed ();
 	void track_selection_changed ();
 	void region_selection_changed ();
+	sigc::connection editor_regions_selection_changed_connection;
 	void sensitize_the_right_region_actions (bool have_selected_regions);
 	void point_selection_changed ();
 	void marker_selection_changed ();

@@ -446,7 +446,7 @@ Editor::Editor ()
 
 	selection->TimeChanged.connect (mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (mem_fun(*this, &Editor::track_selection_changed));
-	selection->RegionsChanged.connect (mem_fun(*this, &Editor::region_selection_changed));
+	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (mem_fun(*this, &Editor::region_selection_changed));
 	selection->PointsChanged.connect (mem_fun(*this, &Editor::point_selection_changed));
 	selection->MarkersChanged.connect (mem_fun(*this, &Editor::marker_selection_changed));
 
@@ -667,7 +667,7 @@ Editor::Editor ()
 	region_list_display.append_column (_("Used"), region_list_columns.used);
 	region_list_display.append_column (_("Path"), region_list_columns.path);
 	region_list_display.set_headers_visible (true);
-	region_list_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
+	//region_list_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 	
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
@@ -701,7 +701,7 @@ Editor::Editor ()
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
 	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press), false);
 	region_list_display.signal_button_release_event().connect (mem_fun(*this, &Editor::region_list_display_button_release));
-	region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
+	region_list_change_connection = region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
 	// region_list_display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show_region_list_display_context_menu), 1, 0));
 	
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::redisplay_regions));
@@ -3526,7 +3526,7 @@ Editor::restore_state (State *state)
 
 	*selection = *state->selection;
 	time_selection_changed ();
-	region_selection_changed ();   
+	region_selection_changed ();
 
 	/* XXX other selection change handlers? */
 }

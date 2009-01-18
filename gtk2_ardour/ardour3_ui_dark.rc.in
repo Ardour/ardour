@@ -859,27 +859,31 @@ style "treeview_parent_node"
 
 style "treeview_display" = "small_bold_text"
 {
+	GtkWidget::focus-line-width = 0
+
 	# expander arrow border and DnD "icon" text
-	fg[NORMAL] = { 0.8, 0.8, 0.8 } 
+	#fg[NORMAL] = { 0.8, 0.8, 0.8 } 
+
+	bg[NORMAL] = { 0.8, 0.8, 0.8 }
 
 	# background with no rows or no selection, plus
 	# expander arrow core and DnD "icon" background
-	base[NORMAL] = { 0.20, 0.20, 0.25 }
+	#base[NORMAL] = { 0.20, 0.20, 0.25 }
 
 	# selected row bg when window does not have focus (including during DnD)
- 	base[ACTIVE] = { 0.0, 0.60, 0.60 }    
+	#base[ACTIVE] = { 0.0, 0.60, 0.60 }    
 
 	# selected row bg when window has focus
- 	base[SELECTED] = { 0, 0.75, 0.75 }
+	#base[SELECTED] = { 0, 0.75, 0.75 }
 
 	# row text when in normal state and not a parent
-	text[NORMAL] = { 0.80, 0.80, 0.80 }
+	#text[NORMAL] = { 0.80, 0.80, 0.80 }
 
 	# selected row text with window focus
-	text[SELECTED] = { 0, 1.0, 1.0 }  
+	#text[SELECTED] = { 0, 1.0, 1.0 }  
 
 	# selected row text without window focus (including during DnD)
-	text[ACTIVE] = { 0, 1.0, 1.0 }  
+	#text[ACTIVE] = { 0, 1.0, 1.0 }  
 }
 
 style "main_canvas_area"
