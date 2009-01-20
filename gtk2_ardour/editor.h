@@ -110,6 +110,7 @@ class ControlPoint;
 class SoundFileOmega;
 class RhythmFerret;
 class AnalysisWindow;
+class BundleManager;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -394,6 +395,7 @@ class Editor : public PublicEditor
 	void toggle_meter_updating();
 
 	void show_rhythm_ferret();
+	void show_bundle_manager ();
 
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
@@ -2347,6 +2349,7 @@ public:
 	void snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
 
 	RhythmFerret* rhythm_ferret;
+	BundleManager* _bundle_manager;
 
 	void fit_tracks ();
 	void set_track_height (uint32_t h);

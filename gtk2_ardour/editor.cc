@@ -87,6 +87,7 @@
 #include "actions.h"
 #include "tempo_lines.h"
 #include "analysis_window.h"
+#include "bundle_manager.h"
 
 #include "i18n.h"
 
@@ -347,6 +348,7 @@ Editor::Editor ()
 	select_new_marker = false;
 	zoomed_to_region = false;
 	rhythm_ferret = 0;
+	_bundle_manager = 0;
 	allow_vertical_scroll = false;
 	no_save_visual = false;
 	need_resize_line = false;
@@ -5125,6 +5127,16 @@ Editor::show_rhythm_ferret ()
 	rhythm_ferret->set_session (session);
 	rhythm_ferret->show ();
 	rhythm_ferret->present ();
+}
+
+void
+Editor::show_bundle_manager ()
+{
+	if (_bundle_manager == 0) {
+		_bundle_manager = new BundleManager (*session);
+	}
+
+	_bundle_manager->show ();
 }
 
 void

@@ -563,6 +563,7 @@ Editor::register_actions ()
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret"), mem_fun(*this, &Editor::show_rhythm_ferret));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "toggle-bundle-manager", _("Bundle Manager"), mem_fun (*this, &Editor::show_bundle_manager));
 
 	act = ActionManager::register_action (editor_actions, "tab-to-transient-forwards", _("Move Forward to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), true));
 	ActionManager::session_sensitive_actions.push_back (act);

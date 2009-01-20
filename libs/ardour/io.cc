@@ -593,7 +593,7 @@ IO::remove_output_port (Port* port, void* src)
 		PortCountChanged (n_outputs()); /* EMIT SIGNAL */
 	}
 
-	if (change == ConnectionsChanged) {
+	if (change == ConfigurationChanged) {
 		setup_bundles_for_inputs_and_outputs ();
 	}
 
@@ -2592,19 +2592,24 @@ IO::setup_bundles_for_inputs_and_outputs ()
 {
         char buf[32];
 
+	_bundle_for_inputs->remove_channels ();
+	_bundle_for_outputs->remove_channels ();
+		
         snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
         _bundle_for_inputs->set_name (buf);
 	uint32_t const ni = inputs().num_ports();
-	_bundle_for_inputs->set_nchannels (ni);
 	for (uint32_t i = 0; i < ni; ++i) {
+		snprintf (buf, sizeof(buf), _("in %d"), (i + 1));
+		_bundle_for_inputs->add_channel (buf);
 		_bundle_for_inputs->set_port (i, inputs().port(i)->name());
 	}
 
         snprintf(buf, sizeof (buf), _("%s out"), _name.c_str());
         _bundle_for_outputs->set_name (buf);
 	uint32_t const no = outputs().num_ports();
-	_bundle_for_outputs->set_nchannels (no);
 	for (uint32_t i = 0; i < no; ++i) {
+		snprintf (buf, sizeof(buf), _("out %d"), (i + 1));
+		_bundle_for_outputs->add_channel (buf);
 		_bundle_for_outputs->set_port (i, outputs().port(i)->name());
 	}
 }

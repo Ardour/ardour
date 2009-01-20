@@ -45,7 +45,7 @@ ARDOUR::UserBundle::set_state (XMLNode const & node)
 			return -1;
 		}
 
-		add_channel ();
+		add_channel ("XXX");
 
 		XMLNodeList const ports = (*i)->children ();
 
@@ -83,13 +83,13 @@ ARDOUR::UserBundle::get_state ()
 	node->add_property ("name", name ());
 
 	{
-		Glib::Mutex::Lock lm (_ports_mutex);
+		Glib::Mutex::Lock lm (_channel_mutex);
 
-		for (std::vector<PortList>::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-			
+		for (std::vector<Channel>::iterator i = _channel.begin(); i != _channel.end(); ++i) {
 			XMLNode* c = new XMLNode ("Channel");
+			c->add_property ("name", i->name);
 			
-			for (PortList::iterator j = i->begin(); j != i->end(); ++j) {
+			for (PortList::iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
 				XMLNode* p = new XMLNode ("Port");
 				p->add_property ("name", *j);
 				c->add_child_nocopy (*p);

@@ -38,71 +38,79 @@ BundleEditorMatrix::BundleEditorMatrix (
 		PortGroupList::Mask (PortGroupList::SYSTEM | PortGroupList::OTHER)
 		)
 {
-	_bundle = boost::dynamic_pointer_cast<ARDOUR::UserBundle> (bundle);
-	assert (_bundle != 0);
+	_our_bundle = bundle;
 }
 
 void
-BundleEditorMatrix::set_state (int r, std::string const & p, bool s, uint32_t keymod)
+BundleEditorMatrix::set_state (
+	boost::shared_ptr<ARDOUR::Bundle> ab,
+	uint32_t ac,
+	boost::shared_ptr<ARDOUR::Bundle> bb,
+	uint32_t bc,
+	bool s,
+	uint32_t k
+	)
 {
-	if (s) {
-		_bundle->add_port_to_channel (r, p);
-	} else {
-		_bundle->remove_port_from_channel (r, p);
+	ARDOUR::Bundle::PortList const& pl = bb->channel_ports (bc);
+	for (ARDOUR::Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+		if (s) {
+			ab->add_port_to_channel (ac, *i);
+		} else {
+			ab->remove_port_from_channel (ac, *i);
+		}
 	}
 }
 
 bool
-BundleEditorMatrix::get_state (int r, std::string const & p) const
+BundleEditorMatrix::get_state (
+	boost::shared_ptr<ARDOUR::Bundle> ab,
+	uint32_t ac,
+	boost::shared_ptr<ARDOUR::Bundle> bb,
+	uint32_t bc
+	) const
 {
-	return _bundle->port_attached_to_channel (r, p);
-}
+	ARDOUR::Bundle::PortList const& pl = bb->channel_ports (bc);
+	for (ARDOUR::Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+		if (!ab->port_attached_to_channel (ac, *i)) {
+			return false;
+		}
+	}
 
-uint32_t
-BundleEditorMatrix::n_rows () const
-{
-	return _bundle->nchannels ();
-}
-
-uint32_t
-BundleEditorMatrix::maximum_rows () const
-{
-	/* 65536 channels in a bundle ought to be enough for anyone (TM) */
-	return 65536;
-}
-
-uint32_t
-BundleEditorMatrix::minimum_rows () const
-{
-	return 0;
-}
-
-std::string
-BundleEditorMatrix::row_name (int r) const
-{
-	std::stringstream s;
-	s << r + 1; // 1-based counting
-	return s.str();
+	return true;
 }
 
 void
-BundleEditorMatrix::add_row ()
+BundleEditorMatrix::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 {
-	_bundle->add_channel ();
+	NameChannelDialog d;
+	d.set_position (Gtk::WIN_POS_MOUSE);
+
+	if (d.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
+	}
+
+	_our_bundle->add_channel (d.get_name());
 	setup ();
 }
 
 void
-BundleEditorMatrix::remove_row (int r)
+BundleEditorMatrix::remove_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
 {
-	_bundle->remove_channel (r);
+	_our_bundle->remove_channel (c);
 	setup ();
 }
 
-std::string
-BundleEditorMatrix::row_descriptor () const
+void
+BundleEditorMatrix::rename_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
 {
-	return _("channel");
+	NameChannelDialog d (b, c);
+	d.set_position (Gtk::WIN_POS_MOUSE);
+
+	if (d.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
+	}
+
+	b->set_channel_name (c, d.get_name ());
 }
 
 BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::UserBundle> bundle, bool add)
@@ -111,21 +119,21 @@ BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::
 	Gtk::Table* t = new Gtk::Table (3, 2);
 	t->set_spacings (4);
 
+	/* Bundle name */
 	Gtk::Alignment* a = new Gtk::Alignment (1, 0.5, 0, 1);
 	a->add (*Gtk::manage (new Gtk::Label (_("Name:"))));
 	t->attach (*Gtk::manage (a), 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
 	t->attach (_name, 1, 2, 0, 1);
-	
 	_name.set_text (_bundle->name ());
 	_name.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::name_changed));
 
+	/* Direction (input or output) */
 	a = new Gtk::Alignment (1, 0.5, 0, 1);
 	a->add (*Gtk::manage (new Gtk::Label (_("Direction:"))));
 	t->attach (*Gtk::manage (a), 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
 	a = new Gtk::Alignment (0, 0.5, 0, 1);
 	a->add (_input_or_output);
 	t->attach (*Gtk::manage (a), 1, 2, 1, 2);
-	
 	_input_or_output.append_text (_("Input"));
 	_input_or_output.append_text (_("Output"));
 	
@@ -137,6 +145,7 @@ BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::
 
 	_input_or_output.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::input_or_output_changed));
 
+	/* Type (audio or MIDI) */
 	a = new Gtk::Alignment (1, 0.5, 0, 1);
 	a->add (*Gtk::manage (new Gtk::Label (_("Type:"))));
 	t->attach (*Gtk::manage (a), 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
@@ -159,10 +168,15 @@ BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::
 	_type.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::type_changed));
 					
 	get_vbox()->pack_start (*Gtk::manage (t), false, false);
-	
 	get_vbox()->pack_start (_matrix);
-
 	get_vbox()->set_spacing (4);
+
+	/* Add Channel button */
+	Gtk::Button* add_channel_button = Gtk::manage (new Gtk::Button (_("Add Channel")));
+	add_channel_button->set_name ("IOSelectorButton");
+	add_channel_button->set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
+	get_action_area()->pack_start (*add_channel_button, false, false);
+	add_channel_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (_matrix, &BundleEditorMatrix::add_channel), boost::shared_ptr<ARDOUR::Bundle> ()));
 
 	if (add) {
 		add_button (Gtk::Stock::CANCEL, 1);
@@ -269,7 +283,7 @@ BundleManager::new_clicked ()
 	boost::shared_ptr<ARDOUR::UserBundle> b (new ARDOUR::UserBundle (""));
 
 	/* Start off with a single channel */
-	b->add_channel ();
+	b->add_channel ("");
 
 	BundleEditor e (_session, b, true);
 	if (e.run () == 0) {
@@ -333,3 +347,47 @@ BundleManager::bundle_name_changed (boost::shared_ptr<ARDOUR::UserBundle> b)
 	}
 }
 
+
+NameChannelDialog::NameChannelDialog ()
+	: ArdourDialog (_("Add channel")),
+	  _adding (true)
+{
+	setup ();
+}
+
+NameChannelDialog::NameChannelDialog (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
+	: ArdourDialog (_("Rename channel")),
+	  _bundle (b),
+	  _channel (c),
+	  _adding (false)
+{
+	_name.set_text (b->channel_name (c));
+
+	setup ();
+}
+
+void
+NameChannelDialog::setup ()
+{	
+	Gtk::HBox* box = Gtk::manage (new Gtk::HBox ());
+
+	box->pack_start (*Gtk::manage (new Gtk::Label (_("Name"))));
+	box->pack_start (_name);
+
+	get_vbox ()->pack_end (*box);
+	box->show_all ();
+
+	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	if (_adding) {
+		add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
+	} else {
+		add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
+	}
+	set_default_response (Gtk::RESPONSE_ACCEPT);
+}
+
+std::string
+NameChannelDialog::get_name () const
+{
+	return _name.get_text ();
+}

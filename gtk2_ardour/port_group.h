@@ -22,37 +22,39 @@
 
 #include <vector>
 #include <string>
-
 #include <gtkmm/widget.h>
 #include <gtkmm/checkbutton.h>
-
+#include <boost/shared_ptr.hpp>
 #include <ardour/data_type.h>
 
 namespace ARDOUR {
 	class Session;
-	class IO;
-	class PortInsert;
+	class Bundle;
 }
 
 class PortMatrix;
 
-/// A list of port names, grouped by some aspect of their type e.g. busses, tracks, system
+/** A list of bundles and ports, grouped by some aspect of their
+ *  type e.g. busses, tracks, system.  Each group has 0 or more bundles
+ *  and 0 or more ports, where the ports are not in the bundles.
+ */
 class PortGroup
 {
   public:
 	/** PortGroup constructor.
 	 * @param n Name.
-	 * @param p Port name prefix (including trailing :)
 	 * @param v true if group should be visible in the UI, otherwise false.
 	 */
-	PortGroup (std::string const & n, std::string const & p, bool v)
-		: name (n), prefix (p), visible (v) {}
+	PortGroup (std::string const & n, bool v)
+		: name (n), visible (v) {}
 
-	void add (std::string const & p);
+	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	void add_port (std::string const &);
+	void clear ();
 
 	std::string name; ///< name for the group
-	std::string prefix; ///< prefix e.g. "ardour:"
-	std::vector<std::string> ports; ///< port names
+	std::vector<boost::shared_ptr<ARDOUR::Bundle> > bundles;
+	std::vector<std::string> ports;
 	bool visible; ///< true if the group is visible in the UI
 };
 
@@ -60,20 +62,18 @@ class PortGroup
 class PortGroupUI
 {
   public:
-	PortGroupUI (PortMatrix&, PortGroup&);
+	PortGroupUI (PortMatrix*, PortGroup*);
 
-	Gtk::Widget& get_visibility_checkbutton ();
-	PortGroup& port_group () { return _port_group; }
-	void setup_visibility ();
+	Gtk::Widget& visibility_checkbutton () {
+		return _visibility_checkbutton;
+	}
 
   private:
-	void port_checkbutton_toggled (Gtk::CheckButton*, int, int);
-	bool port_checkbutton_release (GdkEventButton* ev, Gtk::CheckButton* b, int r, int c);
 	void visibility_checkbutton_toggled ();
+	void setup_visibility_checkbutton ();
 
-	PortMatrix& _port_matrix; ///< the PortMatrix that we are working for
-	PortGroup& _port_group; ///< the PortGroup that we are representing
-	bool _ignore_check_button_toggle;
+	PortMatrix* _port_matrix; ///< the PortMatrix that we are working for
+	PortGroup* _port_group; ///< the PortGroup that we are representing
 	Gtk::CheckButton _visibility_checkbutton;
 };
 
@@ -91,12 +91,12 @@ class PortGroupList : public std::list<PortGroup*>
 	PortGroupList (ARDOUR::Session &, ARDOUR::DataType, bool, Mask);
 
 	void refresh ();
-	int n_visible_ports () const;
-	std::string get_port_by_index (int, bool with_prefix = true) const;
 	void set_type (ARDOUR::DataType);
 	void set_offer_inputs (bool);
 	
   private:
+	void maybe_add_session_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	
 	ARDOUR::Session& _session;
 	ARDOUR::DataType _type;
 	bool _offer_inputs;

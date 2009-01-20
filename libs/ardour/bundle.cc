@@ -32,8 +32,8 @@ using namespace PBD;
 uint32_t
 Bundle::nchannels () const
 {
-	Glib::Mutex::Lock lm (_ports_mutex);
-	return _ports.size ();
+	Glib::Mutex::Lock lm (_channel_mutex);
+	return _channel.size ();
 }
 
 Bundle::PortList const &
@@ -41,8 +41,8 @@ Bundle::channel_ports (uint32_t c) const
 {
 	assert (c < nchannels());
 
-	Glib::Mutex::Lock lm (_ports_mutex);
-	return _ports[c];
+	Glib::Mutex::Lock lm (_channel_mutex);
+	return _channel[c].ports;
 }
 
 /** Add an association between one of our channels and a port.
@@ -55,8 +55,8 @@ Bundle::add_port_to_channel (uint32_t ch, string portname)
 	assert (ch < nchannels());
 
 	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports[ch].push_back (portname);
+		Glib::Mutex::Lock lm (_channel_mutex);
+		_channel[ch].ports.push_back (portname);
 	}
 	
 	PortsChanged (ch); /* EMIT SIGNAL */
@@ -74,8 +74,8 @@ Bundle::remove_port_from_channel (uint32_t ch, string portname)
 	bool changed = false;
 
 	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		PortList& pl = _ports[ch];
+		Glib::Mutex::Lock lm (_channel_mutex);
+		PortList& pl = _channel[ch].ports;
 		PortList::iterator i = find (pl.begin(), pl.end(), portname);
 		
 		if (i != pl.end()) {
@@ -95,27 +95,9 @@ Bundle::remove_port_from_channel (uint32_t ch, string portname)
 bool
 Bundle::operator== (const Bundle& other) const
 {
-	return other._ports == _ports;
+	return other._channel == _channel;
 }
 
-
-/** Set the number of channels.
- * @param n New number of channels.
- */
-
-void
-Bundle::set_nchannels (uint32_t n)
-{
-	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports.clear ();
-		for (uint32_t i = 0; i < n; ++i) {
-			_ports.push_back (PortList());
-		}
-	}
-
-	ConfigurationChanged (); /* EMIT SIGNAL */
-}
 
 void
 Bundle::set_port (uint32_t ch, string portname)
@@ -123,20 +105,21 @@ Bundle::set_port (uint32_t ch, string portname)
 	assert (ch < nchannels());
 
 	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports[ch].clear ();
-		_ports[ch].push_back (portname);
+		Glib::Mutex::Lock lm (_channel_mutex);
+		_channel[ch].ports.clear ();
+		_channel[ch].ports.push_back (portname);
 	}
 
 	PortsChanged (ch); /* EMIT SIGNAL */
 }
 
+/** @param n Channel name */
 void
-Bundle::add_channel ()
+Bundle::add_channel (std::string const & n)
 {
 	{
-		Glib::Mutex::Lock lm (_ports_mutex);
-		_ports.push_back (PortList ());
+		Glib::Mutex::Lock lm (_channel_mutex);
+		_channel.push_back (Channel (n));
 	}
 
 	ConfigurationChanged (); /* EMIT SIGNAL */
@@ -147,8 +130,8 @@ Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 {
 	assert (ch < nchannels());
 	
-	Glib::Mutex::Lock lm (_ports_mutex);
-	return (std::find (_ports[ch].begin (), _ports[ch].end (), portname) != _ports[ch].end ());
+	Glib::Mutex::Lock lm (_channel_mutex);
+	return (std::find (_channel[ch].ports.begin (), _channel[ch].ports.end (), portname) != _channel[ch].ports.end ());
 }
 
 void
@@ -156,6 +139,52 @@ Bundle::remove_channel (uint32_t ch)
 {
 	assert (ch < nchannels ());
 
-	Glib::Mutex::Lock lm (_ports_mutex);
-	_ports.erase (_ports.begin () + ch);
+	Glib::Mutex::Lock lm (_channel_mutex);
+	_channel.erase (_channel.begin () + ch);
+}
+
+void
+Bundle::remove_channels ()
+{
+	Glib::Mutex::Lock lm (_channel_mutex);
+
+	_channel.clear ();
+}
+
+bool
+Bundle::uses_port (std::string p) const
+{
+	Glib::Mutex::Lock lm (_channel_mutex);
+
+	for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
+		for (PortList::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+			if (*j == p) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+std::string
+Bundle::channel_name (uint32_t ch) const
+{
+	assert (ch < nchannels());
+
+	Glib::Mutex::Lock lm (_channel_mutex);
+	return _channel[ch].name;
+}
+
+void
+Bundle::set_channel_name (uint32_t ch, std::string const & n)
+{
+	assert (ch < nchannels());
+
+	{
+		Glib::Mutex::Lock lm (_channel_mutex);
+		_channel[ch].name = n;
+	}
+
+	NameChanged (); /* EMIT SIGNAL */
 }

@@ -196,7 +196,6 @@ lineset.cc
 location_ui.cc
 main.cc
 marker.cc
-matrix.cc
 midi_channel_selector.cc
 midi_port_dialog.cc
 midi_region_view.cc
@@ -216,8 +215,13 @@ piano_roll_header.cc
 playlist_selector.cc
 plugin_selector.cc
 plugin_ui.cc
-port_matrix.cc
 port_group.cc
+port_matrix.cc
+port_matrix_body.cc
+port_matrix_column_labels.cc
+port_matrix_component.cc
+port_matrix_grid.cc
+port_matrix_row_labels.cc
 processor_box.cc
 prompter.cc
 public_editor.cc

@@ -23,25 +23,47 @@
 #include "ardour_dialog.h"
 #include "port_matrix.h"
 
+namespace ARDOUR {
+	class PortInsert;
+}
+
 class IOSelector : public PortMatrix {
   public:
 	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
 
-	void set_state (int, std::string const &, bool, uint32_t);
-	bool get_state (int, std::string const &) const;
+	void set_state (
+		boost::shared_ptr<ARDOUR::Bundle>,
+		uint32_t,
+		boost::shared_ptr<ARDOUR::Bundle>,
+		uint32_t,
+		bool,
+		uint32_t
+		);
+	
+	bool get_state (
+		boost::shared_ptr<ARDOUR::Bundle>,
+		uint32_t,
+		boost::shared_ptr<ARDOUR::Bundle>,
+		uint32_t
+		) const;
+
+	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
+	void remove_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
+	bool can_rename_channels () const {
+		return false;
+	}
+	
 	uint32_t n_rows () const;
 	uint32_t maximum_rows () const;
 	uint32_t minimum_rows () const;
-	std::string row_name (int) const;
-	void add_row ();
-	void remove_row (int);
-	std::string row_descriptor () const;
-	boost::shared_ptr<ARDOUR::IO> const io() { return _io; }
+	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
+	void setup ();
 
   private:
+	ARDOUR::Session& _session;
 	boost::shared_ptr<ARDOUR::IO> _io;
 	
-	void ports_changed (ARDOUR::IOChange, void*);
+	void ports_changed ();
 };
 
 class IOSelectorWindow : public ArdourDialog
@@ -66,17 +88,11 @@ class IOSelectorWindow : public ArdourDialog
 	Gtk::Button cancel_button;
 	Gtk::Button rescan_button;
 
-	Gtk::HBox  suggestion_box;
-	Gtk::Label suggestion;
-
-	void rescan ();
 	void cancel ();
 	void accept ();
 
-	void ports_changed (ARDOUR::IOChange change, void *src);
+	void ports_changed ();
 	void io_name_changed (void *src);
-	bool enter_scroller (GdkEventCrossing*);
-	bool leave_scroller (GdkEventCrossing*);
 };
 
 
@@ -89,7 +105,6 @@ class PortInsertUI : public Gtk::VBox
 	void finished (IOSelector::Result);
 
   private:
-	Gtk::HBox hbox;
 	IOSelector input_selector;
 	IOSelector output_selector;
 };
@@ -111,7 +126,6 @@ class PortInsertWindow : public ArdourDialog
 	Gtk::Button rescan_button;
 	Gtk::Frame button_frame;
 	
-	void rescan ();
 	void cancel ();
 	void accept ();
 

@@ -21,23 +21,38 @@
 #define __ardour_bundle_h__
 
 #include <string>
+#include <vector>
+#include <glibmm/thread.h>
 #include <sigc++/signal.h>
 #include "ardour/data_type.h"
 
 namespace ARDOUR {
   
 /** A set of `channels', each of which is associated with 0 or more ports.
+ *  Each channel has a name which can be anything useful.
  *  Intended for grouping things like, for example, a buss' outputs.
  *  `Channel' is a rather overloaded term but I can't think of a better
  *  one right now.
  */
-class Bundle : public sigc::trackable {
+class Bundle : public sigc::trackable
+{
   public:
 
 	/// List of ports associated with a channel.  We can't use a
 	/// PortSet because we might want to involve non-Ardour ports
 	/// (ie those without a Port object)
 	typedef std::vector<std::string> PortList;
+
+	struct Channel {
+		Channel (std::string n) : name (n) {}
+
+		bool operator== (Channel const &o) const {
+			return name == o.name && ports == o.ports;
+		}
+		
+		std::string name;
+		PortList ports;
+	};
 
 	/** Construct an audio bundle.
 	 *  @param i true if ports are inputs, otherwise false.
@@ -50,6 +65,13 @@ class Bundle : public sigc::trackable {
 	 */
 	Bundle (std::string const & n, bool i = true) : _name (n), _type (DataType::AUDIO), _ports_are_inputs (i) {}
 
+	/** Construct a bundle.
+	 *  @param n Name.
+	 *  @param t Type.
+	 *  @param i true if ports are inputs, otherwise false.
+	 */
+	Bundle (std::string const & n, DataType t, bool i = true) : _name (n), _type (t), _ports_are_inputs (i) {}
+
 	virtual ~Bundle() {}
 
 	/** @return Number of channels that this Bundle has */
@@ -60,13 +82,16 @@ class Bundle : public sigc::trackable {
 	 */
 	PortList const & channel_ports (uint32_t) const;
 
-	void add_channel ();
+	void add_channel (std::string const &);
+	std::string channel_name (uint32_t) const;
+	void set_channel_name (uint32_t, std::string const &);
 	void add_port_to_channel (uint32_t, std::string);
 	void set_port (uint32_t, std::string);
 	void remove_port_from_channel (uint32_t, std::string);
-	void set_nchannels (uint32_t);
 	bool port_attached_to_channel (uint32_t, std::string);
+	bool uses_port (std::string) const;
 	void remove_channel (uint32_t);
+	void remove_channels ();
 
 	/** Set the name.
 	 *  @param n New name.
@@ -94,7 +119,7 @@ class Bundle : public sigc::trackable {
 
 	bool operator== (Bundle const &) const;
 
-	/** Emitted when the name changes */
+	/** Emitted when the bundle name or a channel name has changed */
 	sigc::signal<void> NameChanged;
 	/** The number of channels has changed */
 	sigc::signal<void> ConfigurationChanged;
@@ -103,10 +128,10 @@ class Bundle : public sigc::trackable {
 
   protected:
 	
-	/// mutex for _ports;
+	/// mutex for _channel_ports and _channel_names
 	/// XXX: is this necessary?
-	mutable Glib::Mutex _ports_mutex;
-	std::vector<PortList> _ports;
+	mutable Glib::Mutex _channel_mutex;
+	std::vector<Channel> _channel;
 
   private:
 	int set_channels (std::string const &);

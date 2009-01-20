@@ -598,7 +598,7 @@ Session::when_engine_running ()
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
  		shared_ptr<Bundle> c (new Bundle (buf, true));
- 		c->set_nchannels (1);
+		c->add_channel (_("mono"));
  		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
  		add_bundle (c);
@@ -609,7 +609,7 @@ Session::when_engine_running ()
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
  		shared_ptr<Bundle> c (new Bundle (buf, false));
- 		c->set_nchannels (1);
+		c->add_channel (_("mono"));
  		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
  		add_bundle (c);
@@ -622,8 +622,9 @@ Session::when_engine_running ()
 		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
 
  		shared_ptr<Bundle> c (new Bundle (buf, true));
- 		c->set_nchannels (2);
+		c->add_channel (_("left"));
  		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+		c->add_channel (_("right"));
  		c->set_port (1, _engine.get_nth_physical_output (DataType::AUDIO, np + 1));
 
  		add_bundle (c);
@@ -634,8 +635,9 @@ Session::when_engine_running ()
 		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
 
  		shared_ptr<Bundle> c (new Bundle (buf, false));
- 		c->set_nchannels (2);
+		c->add_channel (_("left"));
  		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+		c->add_channel (_("right"));
  		c->set_port (1, _engine.get_nth_physical_input (DataType::AUDIO, np + 1));
 
  		add_bundle (c);
@@ -2002,13 +2004,6 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		if ((*x)->is_control()) {
 			_control_out = (*x);
-		}
-
-		/* only busses get automatic bundles formed */
-
-		if (!boost::dynamic_pointer_cast<Track> (*x)) {
-			add_bundle ((*x)->bundle_for_inputs());
-			add_bundle ((*x)->bundle_for_outputs());
 		}
 	}
 

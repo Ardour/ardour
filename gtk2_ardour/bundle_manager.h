@@ -22,6 +22,7 @@
 
 #include <gtkmm/treeview.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/entry.h>
 #include "ardour_dialog.h"
 #include "port_matrix.h"
 
@@ -35,19 +36,28 @@ class BundleEditorMatrix : public PortMatrix
   public:
 	BundleEditorMatrix (ARDOUR::Session &, boost::shared_ptr<ARDOUR::Bundle>);
 
-	void set_state (int, std::string const &, bool, uint32_t);
-	bool get_state (int, std::string const &) const;
-	uint32_t n_rows () const;
-	uint32_t maximum_rows () const;
-	uint32_t minimum_rows () const;
-	std::string row_name (int) const;
-	void add_row ();
-	void remove_row (int);
-	std::string row_descriptor () const;
+	void set_state (
+		boost::shared_ptr<ARDOUR::Bundle> ab,
+		uint32_t ac,
+		boost::shared_ptr<ARDOUR::Bundle> bb,
+		uint32_t bc,
+		bool s,
+		uint32_t k
+		);
+	
+	bool get_state (
+		boost::shared_ptr<ARDOUR::Bundle> ab,
+		uint32_t ac,
+		boost::shared_ptr<ARDOUR::Bundle> bb,
+		uint32_t bc
+		) const;
 
-  private:
-
-	boost::shared_ptr<ARDOUR::UserBundle> _bundle;
+	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
+	void remove_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
+	bool can_rename_channels () const {
+		return true;
+	}
+	void rename_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
 };
 
 class BundleEditor : public ArdourDialog
@@ -102,6 +112,24 @@ class BundleManager : public ArdourDialog
 	ARDOUR::Session& _session;
 	Gtk::Button edit_button;
 	Gtk::Button delete_button;
+};
+
+class NameChannelDialog : public ArdourDialog
+{
+public:
+	NameChannelDialog ();
+	NameChannelDialog (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
+
+	std::string get_name () const;
+
+private:
+
+	void setup ();
+	
+	boost::shared_ptr<ARDOUR::Bundle> _bundle;
+	uint32_t _channel;
+	Gtk::Entry _name;
+	bool _adding;
 };
 
 #endif

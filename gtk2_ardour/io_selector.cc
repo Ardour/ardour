@@ -30,6 +30,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/data_type.h"
+#include "ardour/bundle.h"
 
 #include "io_selector.h"
 #include "utils.h"
@@ -44,80 +45,130 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 		      PortGroupList::Mask (PortGroupList::BUSS | 
 					   PortGroupList::SYSTEM | 
 					   PortGroupList::OTHER))
+	, _session (session)
 	, _io (io)
 {
-	list<string> our_ports;
-
 	/* Listen for ports changing on the IO */
-	if (_offer_inputs) {
-		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+	_io->PortCountChanged.connect (sigc::hide (mem_fun (*this, &IOSelector::ports_changed)));
+	
+	setup ();
+}
 
+void
+IOSelector::setup ()
+{
+	_our_bundle = boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle);
+	_our_bundle->set_name (_io->name());
+
+	if (offering_input ()) {
 		const PortSet& ps (_io->outputs());
 
+		int j = 0;
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
-			our_ports.push_back (i->name());
+			char buf[32];
+			snprintf (buf, sizeof(buf), _("out %d"), j + 1);
+			_our_bundle->add_channel (buf);
+			_our_bundle->add_port_to_channel (j, i->name());
+			++j;
 		}
-
+		
 	} else {
-		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
-
+		
 		const PortSet& ps (_io->inputs());
 
+		int j = 0;
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
-			our_ports.push_back (i->name());
+			char buf[32];
+			snprintf (buf, sizeof(buf), _("in %d"), j + 1);
+			_our_bundle->add_channel (buf);
+			_our_bundle->add_port_to_channel (j, i->name());
+			++j;
 		}
 
 	}
-	
-	set_ports (our_ports);
+
+	PortMatrix::setup ();
+}
+
+void
+IOSelector::ports_changed ()
+{
+	ENSURE_GUI_THREAD (mem_fun (*this, &IOSelector::ports_changed));
 
 	setup ();
 }
 
 void
-IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
+IOSelector::set_state (
+	boost::shared_ptr<ARDOUR::Bundle> ab,
+	uint32_t ac,
+	boost::shared_ptr<ARDOUR::Bundle> bb,
+	uint32_t bc,
+	bool s,
+	uint32_t k
+	)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &IOSelector::ports_changed), change, src));
+	ARDOUR::Bundle::PortList const& our_ports = ab->channel_ports (ac);
+	ARDOUR::Bundle::PortList const& other_ports = bb->channel_ports (bc);
 
-	setup ();
-}
+	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
+		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-void
-IOSelector::set_state (int r, std::string const & p, bool s, uint32_t keymod)
-{
-	if (s) {
-		if (!_offer_inputs) {
-			_io->connect_input (_io->input(r), p, 0);
-		} else {
-			_io->connect_output (_io->output(r), p, 0);
-		}
-	} else {
-		if (!_offer_inputs) {
-			_io->disconnect_input (_io->input(r), p, 0);
-		} else {
-			_io->disconnect_output (_io->output(r), p, 0);
+			Port* f = _session.engine().get_port_by_name (*i);
+			if (!f) {
+				return;
+			}
+
+			if (s) {
+				if (!offering_input()) {
+					_io->connect_input (f, *j, 0);
+				} else {
+					_io->connect_output (f, *j, 0);
+				}
+			} else {
+				if (!offering_input()) {
+					_io->disconnect_input (f, *j, 0);
+				} else {
+					_io->disconnect_output (f, *j, 0);
+				}
+			}
 		}
 	}
 }
 
 bool
-IOSelector::get_state (int r, std::string const & p) const
+IOSelector::get_state (
+	boost::shared_ptr<ARDOUR::Bundle> ab,
+	uint32_t ac,
+	boost::shared_ptr<ARDOUR::Bundle> bb,
+	uint32_t bc
+	) const
 {
-	vector<string> connections;
+	ARDOUR::Bundle::PortList const& our_ports = ab->channel_ports (ac);
+	ARDOUR::Bundle::PortList const& other_ports = bb->channel_ports (bc);
 
-	if (_offer_inputs) {
-		_io->output(r)->get_connections (connections);
-	} else {
-		_io->input(r)->get_connections (connections);
+	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
+		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
+
+			Port* f = _session.engine().get_port_by_name (*i);
+			if (!f) {
+				return false;
+			}
+
+			if (!f->connected_to (*j)) {
+				/* if any one thing is not connected, all bets are off */
+				return false;
+			}
+		}
 	}
 
-	return (std::find (connections.begin (), connections.end (), p) != connections.end ());
+	return true;
 }
 
 uint32_t
 IOSelector::n_rows () const
 {
-	if (!_offer_inputs) {
+	if (!offering_input()) {
 		return _io->inputs().num_ports (_io->default_type());
 	} else {
 		return _io->outputs().num_ports (_io->default_type());
@@ -127,7 +178,7 @@ IOSelector::n_rows () const
 uint32_t
 IOSelector::maximum_rows () const
 {
-	if (!_offer_inputs) {
+	if (!offering_input()) {
 		return _io->input_maximum ().get (_io->default_type());
 	} else {
 		return _io->output_maximum ().get (_io->default_type());
@@ -138,39 +189,22 @@ IOSelector::maximum_rows () const
 uint32_t
 IOSelector::minimum_rows () const
 {
-	if (!_offer_inputs) {
+	if (!offering_input()) {
 		return _io->input_minimum ().get (_io->default_type());
 	} else {
 		return _io->output_minimum ().get (_io->default_type());
 	}
 }
 
-std::string
-IOSelector::row_name (int r) const
-{
-	string n;
-	string::size_type pos;
-
-	if (!_offer_inputs) {
-		n = _io->input(r)->name();
-	} else {
-		n = _io->output(r)->name();
-	}
-	
-	if ((pos = n.find ('/')) != string::npos) {
-		return n.substr (pos+1);
-	} else {
-		return n;
-	}
-}
-
 void
-IOSelector::add_row ()
+IOSelector::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 {
+	/* we ignore the bundle parameter, as we know what it is that we're adding to */
+	
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 
-	if (!_offer_inputs) {
+	if (!offering_input()) {
 
 		try {
 			_io->add_input_port ("", this);
@@ -195,22 +229,18 @@ IOSelector::add_row ()
 }
 
 void
-IOSelector::remove_row (int r)
+IOSelector::remove_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
 {
-	// The IO selector only works for single typed IOs
-	const ARDOUR::DataType t = _io->default_type ();
-	
-	if (!_offer_inputs) {
-		_io->remove_input_port (_io->input (r), this);
-	} else {
-		_io->remove_output_port (_io->output (r), this);
+	Port* f = _session.engine().get_port_by_name (b->channel_ports(c)[0]);
+	if (!f) {
+		return;
 	}
-}
-
-std::string
-IOSelector::row_descriptor () const
-{
-	return _("port");
+	
+	if (offering_input()) {
+		_io->remove_output_port (f, this);
+	} else {
+		_io->remove_input_port (f, this);
+	}
 }
 
 IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel)
@@ -223,30 +253,34 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	, rescan_button (_("Rescan"))
 
 {
+	/* XXX: what's this for? */
 	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+	
 	set_name ("IOSelectorWindow2");
 
+	/* Disconnect All button */
 	disconnect_button.set_name ("IOSelectorButton");
 	disconnect_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::DISCONNECT, Gtk::ICON_SIZE_BUTTON)));
+	disconnect_button.signal_clicked().connect (sigc::mem_fun (_selector, &IOSelector::disassociate_all));
 	get_action_area()->pack_start (disconnect_button, false, false);
 
+	/* Add Port button */
 	if (_selector.maximum_rows() > _selector.n_rows()) {
 		add_button.set_name ("IOSelectorButton");
 		add_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
 		get_action_area()->pack_start (add_button, false, false);
-		add_button.signal_clicked().connect (sigc::mem_fun (_selector, &IOSelector::add_row));
+		add_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (_selector, &IOSelector::add_channel), boost::shared_ptr<Bundle> ()));
 	} 
 
-	if (!for_input) {
-		io->output_changed.connect (mem_fun(*this, &IOSelectorWindow::ports_changed));
-	} else {
-		io->input_changed.connect (mem_fun(*this, &IOSelectorWindow::ports_changed));
-	}
-
-	rescan_button.set_name ("IOSelectorButton");
+	/* Rescan button */
+ 	rescan_button.set_name ("IOSelectorButton");
 	rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
+	rescan_button.signal_clicked().connect (sigc::mem_fun (_selector, &IOSelector::setup));
 	get_action_area()->pack_start (rescan_button, false, false);
 
+	io->PortCountChanged.connect (sigc::hide (mem_fun (*this, &IOSelectorWindow::ports_changed)));
+
+	/* Cancel button */
 	if (can_cancel) {
 		cancel_button.set_name ("IOSelectorButton");
 		cancel_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CANCEL, Gtk::ICON_SIZE_BUTTON)));
@@ -254,37 +288,32 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	} else {
 		cancel_button.hide();
 	}
-		
+	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
+
+	/* OK button */
 	ok_button.set_name ("IOSelectorButton");
 	if (!can_cancel) {
 		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
 	}
+	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
 	get_action_area()->pack_start (ok_button, false, false);
 
 	get_vbox()->set_spacing (8);
-	get_vbox()->pack_start (_selector, true, true);
 
-	suggestion.set_alignment (0.5, 0.5);
-	suggestion_box.pack_start (suggestion, true, true);
-	get_vbox()->pack_start (suggestion_box, false, false);
-
-	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
-	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
-	rescan_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::rescan));
+	/* XXX: do we still need the ScrolledWindow? */
+	Gtk::ScrolledWindow* sel_scroll = Gtk::manage (new Gtk::ScrolledWindow);
+	sel_scroll->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+	sel_scroll->add (_selector);
+	get_vbox()->pack_start (*sel_scroll, true, true);
 
 	set_position (Gtk::WIN_POS_MOUSE);
 
 	io_name_changed (this);
-	ports_changed (IOChange (0), this);
-	leave_scroller ((GdkEventCrossing*) 0);
+	ports_changed ();
 
 	show_all ();
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
-
-	_selector.scrolled_window().add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
-	_selector.scrolled_window().signal_enter_notify_event().connect (mem_fun (*this, &IOSelectorWindow::enter_scroller), false);
-	_selector.scrolled_window().signal_leave_notify_event().connect (mem_fun (*this, &IOSelectorWindow::leave_scroller), false);
 }
 
 IOSelectorWindow::~IOSelectorWindow()
@@ -292,36 +321,14 @@ IOSelectorWindow::~IOSelectorWindow()
 	
 }
 
-bool
-IOSelectorWindow::enter_scroller (GdkEventCrossing* ignored)
-{
-	cerr << "IN\n";
-	suggestion.set_text (_("Click to connect. Ctrl-click to disconnect. Shift-click for cross-connect"));
-	return false;
-}
-
-bool
-IOSelectorWindow::leave_scroller (GdkEventCrossing* ignored)
-{
-	cerr << "OUT, ev = " << ignored << "\n";
-	suggestion.set_text (_("Right-click on individual port names for per-port operations"));
-	return false;
-}
-
 void
-IOSelectorWindow::ports_changed (ARDOUR::IOChange change, void *src)
+IOSelectorWindow::ports_changed ()
 {
 	if (_selector.maximum_rows() > _selector.n_rows()) {
 		add_button.set_sensitive (true);
 	} else {
 		add_button.set_sensitive (false);
 	}
-}
-
-void
-IOSelectorWindow::rescan ()
-{
-	_selector.setup ();
 }
 
 void
@@ -365,10 +372,8 @@ PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::Por
 	: input_selector (sess, pi->io(), true),
 	  output_selector (sess, pi->io(), false)
 {
-	hbox.pack_start (output_selector, true, true);
-	hbox.pack_start (input_selector, true, true);
-
-	pack_start (hbox);
+	pack_start (output_selector, true, true);
+	pack_start (input_selector, true, true);
 }
 
 void
@@ -420,7 +425,6 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARD
 
 	ok_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::accept));
 	cancel_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::cancel));
-	rescan_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::rescan));
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
 
@@ -443,12 +447,6 @@ PortInsertWindow::on_map ()
 	Window::on_map ();
 }
 
-
-void
-PortInsertWindow::rescan ()
-{
-	_portinsertui.redisplay ();
-}
 
 void
 PortInsertWindow::cancel ()

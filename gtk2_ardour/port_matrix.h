@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2007 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,32 +17,43 @@
 
 */
 
-#ifndef __ardour_ui_port_matrix_h__
-#define __ardour_ui_port_matrix_h__
+#ifndef __gtk_ardour_port_matrix_h__
+#define __gtk_ardour_port_matrix_h__
 
+#include <list>
 #include <gtkmm/box.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/table.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/scrolledwindow.h>
-
-#include "ardour_dialog.h"
+#include <gtkmm/scrollbar.h>
+#include <boost/shared_ptr.hpp>
+#include "port_matrix_body.h"
 #include "port_group.h"
-#include "matrix.h"
+
+/** The `port matrix' UI.  This is a widget which lets the user alter
+ *  associations between one set of ports and another.  e.g. to connect
+ *  things together.
+ *
+ *  The columns are labelled with various ports from around Ardour and the
+ *  system.
+ *
+ *  It is made up of a body, PortMatrixBody, which is rendered using cairo,
+ *  and some scrollbars.  All of this is arranged inside the VBox that we
+ *  inherit from.
+ */
 
 namespace ARDOUR {
-	class Session;
-	class IO;
-	class PortInsert;
+	class Bundle;
 }
 
-class PortMatrix : public Gtk::VBox {
-  public:
+class PortMatrix : public Gtk::VBox
+{
+public:
 	PortMatrix (ARDOUR::Session&, ARDOUR::DataType, bool, PortGroupList::Mask);
 	~PortMatrix ();
 
-	void setup ();
+	virtual void setup ();
+	void set_offer_inputs (bool);
+	void set_type (ARDOUR::DataType);
+	bool offering_input () const { return _offer_inputs; }
+	void disassociate_all ();
 
 	enum Result {
 		Cancelled,
@@ -51,55 +62,63 @@ class PortMatrix : public Gtk::VBox {
 
 	sigc::signal<void, Result> Finished;
 
-	void set_type (ARDOUR::DataType);
-	void set_offer_inputs (bool);
-	bool offering_input() const { return _offer_inputs; }
-
-	/** @param r Our row index.
-	 *  @param p Other port.
+	/** @param ab Our bundle.
+	 *  @param ac Channel on our bundle.
+	 *  @param bb Other bundle.
+	 *  @arapm bc Channel on other bundle.
 	 *  @param s New state.
 	 *  @param k XXX
 	 */
-	virtual void set_state (int r, std::string const & p, bool s, uint32_t k) = 0;
+	virtual void set_state (
+		boost::shared_ptr<ARDOUR::Bundle> ab,
+		uint32_t ac,
+		boost::shared_ptr<ARDOUR::Bundle> bb,
+		uint32_t bc,
+		bool s,
+		uint32_t k
+		) = 0;
 
-	/** @param r Our row index.
-	 *  @param p Other port.
+	/** @param ab Our bundle.
+	 *  @param ac Channel on our bundle.
+	 *  @param bb Other bundle.
+	 *  @arapm bc Channel on other bundle.
 	 *  @return true if r is connected to p, otherwise false.
 	 */
-	virtual bool get_state (int r, std::string const &p) const = 0;
+	virtual bool get_state (
+		boost::shared_ptr<ARDOUR::Bundle> ab,
+		uint32_t ac,
+		boost::shared_ptr<ARDOUR::Bundle> bb,
+		uint32_t bc
+		) const = 0;
+
+	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>) = 0;
+	virtual void remove_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t) = 0;
+	virtual bool can_rename_channels () const = 0;
+	virtual void rename_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t) {}
 	
-	virtual uint32_t n_rows () const = 0;
-	virtual uint32_t maximum_rows () const = 0;
-	virtual uint32_t minimum_rows () const = 0;
-	virtual std::string row_name (int) const = 0;
-	virtual void add_row () = 0;
-	virtual void remove_row (int) = 0;
-	virtual std::string row_descriptor () const = 0;
+	void setup_scrollbars ();
 
-	Gtk::Widget& scrolled_window() { return _scrolled_window; }
+protected:
+	/// our bundle
+	boost::shared_ptr<ARDOUR::Bundle> _our_bundle;
+	
+private:
 
-  protected:
-
+	void hscroll_changed ();
+	void vscroll_changed ();
+	std::string common_prefix (std::vector<std::string> const &) const;
+	
+	/// true to offer inputs, otherwise false
 	bool _offer_inputs;
-	void set_ports (const std::list<std::string>&);
-
-  private:
+	/// list of port groups
 	PortGroupList _port_group_list;
+	/// port type that we are working with
 	ARDOUR::DataType _type;
-	Matrix matrix;
-	std::vector<PortGroupUI*> _port_group_ui;
-	std::vector<Gtk::EventBox*> _row_labels;
-	Gtk::VBox* _row_labels_vbox;
-	Gtk::HBox _overall_hbox;
-	Gtk::VBox _side_vbox;
-	Gtk::HBox _port_group_hbox;
-	Gtk::ScrolledWindow _scrolled_window;
-	Gtk::Label* _side_vbox_pad;
-	Gtk::HBox _visibility_checkbutton_box;
 
-	void clear ();
-	bool row_label_button_pressed (GdkEventButton*, int);
-	void reset_visibility ();
+	PortMatrixBody _body;
+	Gtk::HScrollbar _hscroll;
+	Gtk::VScrollbar _vscroll;
+	std::list<PortGroupUI*> _port_group_uis;
 };
 
 #endif
