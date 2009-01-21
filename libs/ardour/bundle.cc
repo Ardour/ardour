@@ -47,12 +47,13 @@ Bundle::channel_ports (uint32_t c) const
 
 /** Add an association between one of our channels and a port.
  *  @param ch Channel index.
- *  @param portname port name to associate with.
+ *  @param portname full port name to associate with (including prefix).
  */
 void
 Bundle::add_port_to_channel (uint32_t ch, string portname)
 {
 	assert (ch < nchannels());
+	assert (portname.find_first_of (':') != string::npos);
 
 	{
 		Glib::Mutex::Lock lm (_channel_mutex);
@@ -99,10 +100,15 @@ Bundle::operator== (const Bundle& other) const
 }
 
 
+/** Set a single port to be associated with a channel, removing any others.
+ *  @param ch Channel.
+ *  @param portname Full port name, including prefix.
+ */
 void
 Bundle::set_port (uint32_t ch, string portname)
 {
 	assert (ch < nchannels());
+	assert (portname.find_first_of (':') != string::npos);
 
 	{
 		Glib::Mutex::Lock lm (_channel_mutex);

@@ -837,6 +837,8 @@ AudioEngine::frames_per_cycle ()
 Port *
 AudioEngine::get_port_by_name (const string& portname)
 {
+	assert (portname.find_first_of (':') != string::npos);
+	
 	Glib::Mutex::Lock lm (_process_lock);
 	return get_port_by_name_locked (portname);
 }

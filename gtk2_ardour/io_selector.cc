@@ -69,7 +69,7 @@ IOSelector::setup ()
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %d"), j + 1);
 			_our_bundle->add_channel (buf);
-			_our_bundle->add_port_to_channel (j, i->name());
+			_our_bundle->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 		
@@ -82,7 +82,7 @@ IOSelector::setup ()
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("in %d"), j + 1);
 			_our_bundle->add_channel (buf);
-			_our_bundle->add_port_to_channel (j, i->name());
+			_our_bundle->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 
@@ -152,10 +152,11 @@ IOSelector::get_state (
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
 			Port* f = _session.engine().get_port_by_name (*i);
-			if (!f) {
-				return false;
-			}
 
+			/* since we are talking about an IO, our ports should all have an associated Port *,
+			   so the above call should never fail */
+			assert (f);
+			
 			if (!f->connected_to (*j)) {
 				/* if any one thing is not connected, all bets are off */
 				return false;
