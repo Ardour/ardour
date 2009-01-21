@@ -24,6 +24,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/audioengine.h"
+#include "ardour/port.h"
 #include "ardour/bundle.h"
 #include <boost/shared_ptr.hpp>
 #include <cstring>

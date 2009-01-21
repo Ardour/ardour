@@ -25,6 +25,7 @@
 #include <ardour/tempo.h>
 #include <ardour/io.h>
 #include <ardour/buffer_set.h>
+#include <ardour/audio_buffer.h>
 
 #include <sndfile.h>
 

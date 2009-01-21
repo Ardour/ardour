@@ -34,14 +34,12 @@
 
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
- 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
 #include <ardour/route_group.h>
 #include <ardour/route.h>
-#include <ardour/port.h>
 #include <ardour/utils.h>
 #include <ardour/diskstream.h>
 #include <ardour/midi_playlist.h>

@@ -39,6 +39,7 @@
 #include <ardour/panner.h>
 #include <ardour/utils.h>
 #include <ardour/buffer_set.h>
+#include <ardour/audio_buffer.h>
 #include "i18n.h"
 
 using namespace std;

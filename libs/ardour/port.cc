@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2006 Paul Davis 
+    Copyright (C) 2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,101 +17,111 @@
 
 */
 
-#include <ardour/port.h>
+#include "ardour/port.h"
+#include "ardour/audioengine.h"
+#include "ardour/i18n.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/error.h"
+#include "pbd/compose.h"
+#include <stdexcept>
 
-using namespace ARDOUR;
-using namespace std;
+ARDOUR::AudioEngine* ARDOUR::Port::_engine = 0;
 
-AudioEngine* Port::engine = 0;
-
-Port::Port (const std::string& name, Flags flgs)
-	: _flags (flgs)
-	, _name (name)
-	, _metering (0)
-	, _last_monitor (false)
+ARDOUR::Port::Port (std::string const & n, DataType t, Flags f, bool e) : _jack_port (0), _last_monitor (false), _latency (0), _name (n), _flags (f)
 {
-}
-
-Port::~Port ()
-{
-	drop_references ();
-	disconnect_all ();
-}
-
-void
-Port::reset ()
-{
-	_last_monitor = false;
-}
-
-void
-Port::set_engine (AudioEngine* e) 
-{
-	engine = e;
-}
-
-int
-Port::connect (Port& other)
-{
-	/* caller must hold process lock */
-
-	pair<set<Port*>::iterator,bool> result;
-
-	result = _connections.insert (&other);
-
-	if (result.second) {
-		other.GoingAway.connect (sigc::bind (mem_fun (*this, &Port::port_going_away), &other));
-		return 0;
-	} else {
-		return 1;
-	}
-}
-
-int
-Port::disconnect (Port& other)
-{
-	/* caller must hold process lock */
+	/* Unfortunately we have to pass the DataType into this constructor so that we can
+	   create the right kind of JACK port; aside from this we'll use the virtual function type ()
+	   to establish type. */
 	
-	for (set<Port*>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
-		if ((*i) == &other) {
-			_connections.erase (i);
-			return 0;
+	if (e) {
+		try {
+			do_make_external (t);
+		}
+		catch (...) {
+			throw failed_constructor ();
 		}
 	}
-
-	return -1;
 }
 
+/** Port destructor */
+ARDOUR::Port::~Port ()
+{
+	if (_jack_port) {
+		jack_port_unregister (_engine->jack (), _jack_port);
+	}
+}
+
+/** Make this port externally visible by setting it up to use a JACK port.
+ * @param t Data type, so that we can call this method from the constructor.
+ */
+void
+ARDOUR::Port::do_make_external (DataType t)
+{
+	if (_jack_port) {
+		/* already external */
+		return;
+	}
+	
+	_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0);
+	if (_jack_port == 0) {
+		throw std::runtime_error ("Could not register JACK port");
+	}
+}
+
+void
+ARDOUR::Port::make_external ()
+{
+	do_make_external (type ());
+}
+
+/** @return true if this port is connected to anything */
+bool
+ARDOUR::Port::connected () const
+{
+	if (!_connections.empty ()) {
+		/* connected to a Port* */
+		return true;
+	}
+
+	if (_jack_port == 0) {
+		/* not using a JACK port, so can't be connected to anything else */
+		return false;
+	}
+	
+	return (jack_port_connected (_jack_port) != 0);
+}
 
 int
-Port::disconnect_all ()
+ARDOUR::Port::disconnect_all ()
 {
-	/* caller must hold process lock */
+	/* Disconnect from Port* connections */
+	for (std::set<Port*>::iterator i = _connections.begin (); i != _connections.end (); ++i) {
+		(*i)->_connections.erase (this);
+	}
 
 	_connections.clear ();
+
+	/* And JACK connections */
+	jack_port_disconnect (_engine->jack(), _jack_port);
+	_named_connections.clear ();
+
 	return 0;
 }
 
-void
-Port::set_latency (nframes_t val)
-{
-	_latency = val;
-}
-
+/** @param o Port name
+ * @return true if this port is connected to o, otherwise false.
+ */
 bool
-Port::connected() const
+ARDOUR::Port::connected_to (std::string const & o) const
 {
-	/* caller must hold process lock */
-	return !_connections.empty();
-}
+	if (_jack_port && jack_port_connected_to (_jack_port, o.c_str ())) {
+		/* connected via JACK */
+		return true;
+	}
 
-bool
-Port::connected_to (const string& portname) const
-{
-	/* caller must hold process lock */
-
-	for (set<Port*>::const_iterator p = _connections.begin(); p != _connections.end(); ++p) {
-		if ((*p)->name() == portname) {
+	for (std::set<Port*>::iterator i = _connections.begin (); i != _connections.end (); ++i) {
+		if ((*i)->name () == o) {
+			/* connected internally */
 			return true;
 		}
 	}
@@ -120,271 +130,259 @@ Port::connected_to (const string& portname) const
 }
 
 int
-Port::get_connections (vector<string>& names) const
+ARDOUR::Port::get_connections (std::vector<std::string> & c) const
 {
-	/* caller must hold process lock */
-	int i = 0;
-	set<Port*>::const_iterator p;
+	int n = 0;
 
-	for (i = 0, p = _connections.begin(); p != _connections.end(); ++p, ++i) {
-		names.push_back ((*p)->name());
-	}
-
-	return i;
-}
-
-void
-Port::port_going_away (Port* p)
-{
-	/* caller must hold process lock */
-
-	disconnect (*p);
-}
-
-
-//-------------------------------------
-
-int
-PortFacade::set_name (const std::string& str)
-{
-	int ret;
-
-	if (_ext_port) {
-		if ((ret = _ext_port->set_name (str)) == 0) {
-			_name = _ext_port->name();
+	/* JACK connections */
+	if (_jack_port) {
+		const char** jc = jack_port_get_connections (_jack_port);
+		if (jc) {
+			for (int i = 0; jc[i]; ++i) {
+				c.push_back (jc[i]);
+				++n;
+			}
 		}
-	} else {
-		_name = str;
-		ret = 0;
 	}
 
-	return ret;
-}
-
-string
-PortFacade::short_name ()  const
-{
-	if (_ext_port) {
-		return _ext_port->short_name(); 
-	} else {
-		return _name;
+	/* Internal connections */
+	for (std::set<Port*>::iterator i = _connections.begin (); i != _connections.end (); ++i) {
+		c.push_back ((*i)->name ());
+		++n;
 	}
-}
 
+	return n;
+}
 
 int
-PortFacade::reestablish ()
+ARDOUR::Port::connect (std::string const & other)
 {
-	if (_ext_port) {
-		return _ext_port->reestablish ();
+	/* caller must hold process lock */
+	
+	Port* p = _engine->get_port_by_name_locked (other);
+	
+	int r;
+	
+	if (p && !p->external ()) {
+		/* non-external Ardour port; connect using Port* */
+		r = connect (p);
 	} else {
-		return 0;
+		/* connect using name */
+
+		/* for this to work, we must be an external port */
+		if (!external ()) {
+			make_external ();
+		}
+
+		std::string const this_nr = _engine->make_port_name_non_relative (_name);
+		std::string const other_nr = _engine->make_port_name_non_relative (other);
+
+		if (sends_output ()) {
+			r = jack_connect (_engine->jack (), this_nr.c_str (), other_nr.c_str ());
+		} else {
+			r = jack_connect (_engine->jack (), other_nr.c_str (), this_nr.c_str());
+		}
+
+		if (r == 0) {
+			_named_connections.insert (other);
+		}
 	}
+
+	return r;
+}
+
+int
+ARDOUR::Port::disconnect (std::string const & other)
+{
+	/* caller must hold process lock */
+	
+	Port* p = _engine->get_port_by_name_locked (other);
+	int r;
+
+	if (p && !p->external ()) {
+		/* non-external Ardour port; disconnect using Port* */
+		r = disconnect (p);
+	} else {
+		/* disconnect using name */
+
+		std::string const this_nr = _engine->make_port_name_non_relative (_name);
+		std::string const other_nr = _engine->make_port_name_non_relative (other);
+
+		if (sends_output ()) {
+			r = jack_disconnect (_engine->jack (), this_nr.c_str (), other_nr.c_str ());
+		} else {
+			r = jack_disconnect (_engine->jack (), other_nr.c_str (), this_nr.c_str ());
+		}
+
+		if (r == 0) {
+			_named_connections.erase (other);
+		}
+	}
+
+	return r;
 }
 
 
-int
-PortFacade::reconnect()
+bool
+ARDOUR::Port::connected_to (Port *o) const
 {
-	if (_ext_port) {
-		return _ext_port->reconnect ();
-	} else {
-		return 0;
+	return connected_to (o->name ());
+}
+
+int
+ARDOUR::Port::connect (Port* o)
+{
+	/* caller must hold process lock */
+
+	if (external () && o->external ()) {
+		/* we're both external; connect using name */
+		return connect (o->name ());
 	}
+
+	/* otherwise connect by Port* */
+	_connections.insert (o);
+	o->_connections.insert (this);
+
+	return 0;
+}
+
+int
+ARDOUR::Port::disconnect (Port* o)
+{
+	if (external () && o->external ()) {
+		/* we're both external; try disconnecting using name */
+		int const r = disconnect (o->name ());
+		if (r == 0) {
+			return 0;
+		}
+	}
+	
+	_connections.erase (o);
+	o->_connections.erase (this);
+
+	return 0;
 }
 
 void
-PortFacade::set_latency (nframes_t val)
+ARDOUR::Port::set_engine (AudioEngine* e)
 {
-	if (_ext_port) {
-		_ext_port->set_latency (val);
-	} else {
-		_latency = val;
-	}
+	_engine = e;
 }
 
-nframes_t
-PortFacade::latency() const
+void
+ARDOUR::Port::ensure_monitor_input (bool yn)
 {
-	if (_ext_port) {
-		return _ext_port->latency();
-	} else {
-		return _latency;
-	}
-}
-
-nframes_t
-PortFacade::total_latency() const
-{
-	if (_ext_port) {
-		return _ext_port->total_latency();
-	} else {
-		return _latency;
+	if (_jack_port) {
+		jack_port_ensure_monitor (_jack_port, yn);
 	}
 }
 
 bool
-PortFacade::monitoring_input() const
+ARDOUR::Port::monitoring_input () const
 {
-	if (_ext_port) {
-		return _ext_port->monitoring_input ();
+	if (_jack_port) {
+		return jack_port_monitoring_input (_jack_port);
 	} else {
 		return false;
 	}
 }
 
 void
-PortFacade::ensure_monitor_input (bool yn)
+ARDOUR::Port::reset ()
 {
-	if (_ext_port) {
-		_ext_port->ensure_monitor_input (yn);
-	}
+	_last_monitor = false;
+
+	// XXX
+	// _metering = 0;
+	// reset_meters ();
 }
 
 void
-PortFacade::request_monitor_input (bool yn)
+ARDOUR::Port::recompute_total_latency () const
 {
-	if (_ext_port) {
-		_ext_port->request_monitor_input (yn);
-	} 
+#ifdef HAVE_JACK_RECOMPUTE_LATENCY	
+	if (_jack_port) {
+		jack_recompute_total_latency (_engine->jack (), _jack_port);
+	}
+#endif	
+}
+
+nframes_t
+ARDOUR::Port::total_latency () const
+{
+	if (_jack_port) {
+		return jack_port_get_total_latency (_engine->jack (), _jack_port);
+	} else {
+		return _latency;
+	}
 }
 
 int
-PortFacade::connect (Port& other)
+ARDOUR::Port::reestablish ()
 {
-	int ret;
+	if (!_jack_port) {
+		return 0;
+	}
+
+	_jack_port = jack_port_register (_engine->jack(), _name.c_str(), type().to_jack_type(), _flags, 0);
+
+	if (_jack_port == 0) {
+		PBD::error << string_compose (_("could not reregister %1"), _name) << endmsg;
+		return -1;
+	}
+
+	reset ();
+
+	return 0;
+}
+
+
+int
+ARDOUR::Port::reconnect ()
+{
+	/* caller must hold process lock; intended to be used only after reestablish() */
+
+	if (!_jack_port) {
+		return 0;
+	}
 	
-	if (_ext_port) {
-		ret = _ext_port->connect (other);
-	} else {
-		ret = 0;
+	for (std::set<string>::iterator i = _named_connections.begin(); i != _named_connections.end(); ++i) {
+		if (connect (*i)) {
+			return -1;
+		}
 	}
 
-	if (ret == 0) {
-		ret = Port::connect (other);
-	}
-
-	return ret;
-}
-
-int
-PortFacade::connect (const std::string& other)
-{
-	PortConnectableByName* pcn;
-
-	if (!_ext_port) {
-		return -1;
-	}
-		
-	pcn = dynamic_cast<PortConnectableByName*>(_ext_port);
-
-	if (pcn) {
-		return pcn->connect (other);
-	} else {
-		return -1;
-	}
+	return 0;
 }
 
 
 int
-PortFacade::disconnect (Port& other)
+ARDOUR::Port::set_name (std::string const & n)
 {
-	int reta;
-	int retb;
+	int r = 0;
 	
-	if (_ext_port) {
-		reta = _ext_port->disconnect (other);
+	if (_jack_port) {
+		r = jack_port_set_name (_jack_port, n.c_str());
+		if (r) {
+			_name = n;
+		}
 	} else {
-		reta = 0;
+		_name = n;
 	}
 
-	retb = Port::disconnect (other);
-
-	return reta || retb;
-}
-
-int 
-PortFacade::disconnect_all ()
-{
-	int reta = 0;
-	int retb = 0;
-
-	if (_ext_port) {
-		reta = _ext_port->disconnect_all ();
-	} 
-
-	retb = Port::disconnect_all ();
-
-	return reta || retb;
-}
-		
-int
-PortFacade::disconnect (const std::string& other)
-{
-	PortConnectableByName* pcn;
-
-	if (!_ext_port) {
-		return -1;
-	}
-		
-	pcn = dynamic_cast<PortConnectableByName*>(_ext_port);
-
-	if (pcn) {
-		return pcn->disconnect (other);
-	} else {
-		return -1;
-	}
-}
-
-bool
-PortFacade::connected () const 
-{
-	if (Port::connected()) {
-		return true;
-	}
-
-	if (_ext_port) {
-		return _ext_port->connected();
-	}
-
-	return false;
-}
-bool
-PortFacade::connected_to (const std::string& portname) const 
-{
-	if (Port::connected_to (portname)) {
-		return true;
-	}
-
-	if (_ext_port) {
-		return _ext_port->connected_to (portname);
-	}
-
-	return false;
-
-}
-
-int
-PortFacade::get_connections (vector<string>& names) const 
-{
-	int i = 0;
-
-	if (_ext_port) {
-		i = _ext_port->get_connections (names);
-	}
-
-	i += Port::get_connections (names);
-
-	return i;
+	return r;
 }
 
 void
-PortFacade::reset ()
+ARDOUR::Port::set_latency (nframes_t n)
 {
-	Port::reset ();
-
-	if (_ext_port) {
-		_ext_port->reset ();
-	}
+	_latency = n;
 }
 
+void
+ARDOUR::Port::request_monitor_input (bool yn)
+{
+	if (_jack_port) {
+		jack_port_request_monitor (_jack_port, yn);
+	}
+}

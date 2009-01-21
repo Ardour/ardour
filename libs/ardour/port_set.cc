@@ -17,6 +17,8 @@
 */
 
 #include <ardour/port_set.h>
+#include <ardour/midi_port.h>
+#include <ardour/audio_port.h>
 
 namespace ARDOUR {
 

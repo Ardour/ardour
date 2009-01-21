@@ -23,8 +23,9 @@
 #include <ardour/peak.h>
 #include <ardour/dB.h>
 #include <ardour/session.h>
-#include <ardour/audio_buffer.h>
 #include <ardour/midi_buffer.h>
+#include <ardour/audio_buffer.h>
+#include <ardour/runtime_functions.h>
 
 namespace ARDOUR {
 

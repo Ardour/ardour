@@ -31,6 +31,7 @@
 #include <ardour/ladspa_plugin.h>
 #include <ardour/buffer_set.h>
 #include <ardour/automation_list.h>
+#include <ardour/audio_buffer.h>
 
 #ifdef HAVE_SLV2
 #include <ardour/lv2_plugin.h>

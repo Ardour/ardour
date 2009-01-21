@@ -44,6 +44,7 @@
 
 #include <ardour/runtime_functions.h>
 #include <ardour/buffer_set.h>
+#include <ardour/audio_buffer.h>
 
 #include "i18n.h"
 

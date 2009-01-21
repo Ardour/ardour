@@ -1965,13 +1965,13 @@ IO::set_name (const string& requested_name)
 	}
 
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		string current_name = i->short_name();
+		string current_name = i->name();
 		current_name.replace (current_name.find (_name), _name.length(), name);
 		i->set_name (current_name);
 	}
 
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		string current_name = i->short_name();
+		string current_name = i->name();
 		current_name.replace (current_name.find (_name), _name.length(), name);
 		i->set_name (current_name);
 	}
@@ -2028,7 +2028,7 @@ IO::output_latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		if ((latency = _session.engine().get_port_total_latency (*i)) > max_latency) {
+		if ((latency = i->total_latency ()) > max_latency) {
 			max_latency = latency;
 		}
 	}
@@ -2047,7 +2047,7 @@ IO::input_latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		if ((latency = _session.engine().get_port_total_latency (*i)) > max_latency) {
+		if ((latency = i->total_latency ()) > max_latency) {
 			max_latency = latency;
 		} 
 	}
@@ -2473,7 +2473,7 @@ IO::find_input_port_hole (const char* base)
 		snprintf (buf, jack_port_name_size(), _("%s %u"), base, n);
 
 		for ( ; i != _inputs.end(); ++i) {
-			if (i->short_name() == buf) {
+			if (i->name() == buf) {
 				break;
 			}
 		}
@@ -2506,7 +2506,7 @@ IO::find_output_port_hole (const char* base)
 		snprintf (buf, jack_port_name_size(), _("%s %u"), base, n);
 
 		for ( ; i != _outputs.end(); ++i) {
-			if (i->short_name() == buf) {
+			if (i->name() == buf) {
 				break;
 			}
 		}

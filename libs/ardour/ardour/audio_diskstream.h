@@ -39,10 +39,10 @@
 #include <ardour/session.h>
 #include <ardour/route_group.h>
 #include <ardour/route.h>
-#include <ardour/port.h>
 #include <ardour/utils.h>
 #include <ardour/diskstream.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/port.h>
 
 struct tm;
 

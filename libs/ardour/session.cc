@@ -81,6 +81,7 @@
 #include <ardour/session_directory.h>
 #include <ardour/tape_file_matcher.h>
 #include <ardour/analyser.h>
+#include <ardour/audio_buffer.h>
 #include <ardour/bundle.h>
 
 #include "i18n.h"

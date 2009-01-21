@@ -20,13 +20,13 @@
 #define __ardour_port_set_h__
 
 #include <vector>
-#include <ardour/port.h>
-#include <ardour/audio_port.h>
-#include <ardour/midi_port.h>
 #include <ardour/chan_count.h>
 
 namespace ARDOUR {
 
+class Port;
+class AudioPort;
+class MidiPort;
 
 /** An ordered list of Ports, possibly of various types.
  *

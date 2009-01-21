@@ -52,6 +52,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audio_port.h>
 #include <ardour/source_factory.h>
+#include <ardour/audio_buffer.h>
 
 #include "i18n.h"
 #include <locale.h>

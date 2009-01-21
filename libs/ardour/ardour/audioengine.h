@@ -146,13 +146,11 @@ class AudioEngine : public sigc::trackable
 		return get_nth_physical (type, n, JackPortIsOutput);
 	}
 
-	nframes_t get_port_total_latency (const Port&);
 	void update_total_latencies ();
 	void update_total_latency (const Port&);
 
-	/** Caller may not delete the object pointed to by the return value
-	*/
-	Port *get_port_by_name (const std::string& name, bool keep = true);
+	Port *get_port_by_name (const std::string &);
+	Port *get_port_by_name_locked (const std::string &);
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,
@@ -233,8 +231,6 @@ class AudioEngine : public sigc::trackable
 
 	int    process_callback (nframes_t nframes);
 	void   remove_all_ports ();
-
-	Port* get_port (const std::string& short_name);
 
 	typedef std::pair<std::string,std::string> PortConnection;
 	typedef std::list<PortConnection> PortConnections;

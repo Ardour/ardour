@@ -22,6 +22,8 @@
 
 #include <ardour/export_failed.h>
 #include <ardour/audioengine.h>
+#include <ardour/audio_port.h>
+#include <ardour/audio_buffer.h>
 
 using namespace ARDOUR;
 

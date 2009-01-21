@@ -52,8 +52,6 @@ automatable.cc
 automation.cc
 automation_control.cc
 automation_list.cc
-base_audio_port.cc
-base_midi_port.cc
 broadcast_info.cc
 buffer.cc
 buffer_set.cc
@@ -96,9 +94,6 @@ globals.cc
 import.cc
 io.cc
 io_processor.cc
-jack_audio_port.cc
-jack_midi_port.cc
-jack_port.cc
 jack_slave.cc
 ladspa_plugin.cc
 location.cc

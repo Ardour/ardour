@@ -34,10 +34,8 @@
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
 #include <ardour/port.h>
-#include <ardour/jack_audio_port.h>
-#include <ardour/jack_midi_port.h>
-#include <ardour/midi_port.h>
 #include <ardour/audio_port.h>
+#include <ardour/midi_port.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
@@ -356,6 +354,7 @@ AudioEngine::process_callback (nframes_t nframes)
 		   which requires interleaving with route processing.
 		*/
 
+		/* XXX: we're running this on both inputs and outputs... */
 		(*i)->cycle_start (nframes, 0);
 	}
 
@@ -619,21 +618,6 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input, 
 	}
 }
 
-Port*
-AudioEngine::get_port (const std::string& full_name)
-{
-	boost::shared_ptr<Ports> p = ports.reader();
-	
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		//cerr << "comparing port name '" << (*i)->name() << "' with '" << full_name << "'" << endl;
-		if ((*i)->name() == full_name) {
-			return *i;
-		}
-	}
-	return 0;
-}
-
-
 Port *
 AudioEngine::register_input_port (DataType type, const string& portname, bool publish)
 {
@@ -692,6 +676,8 @@ AudioEngine::unregister_port (Port& port)
 int 
 AudioEngine::connect (const string& source, const string& destination)
 {
+	/* caller must hold process lock */
+	
 	int ret;
 
 	if (!_running) {
@@ -705,39 +691,24 @@ AudioEngine::connect (const string& source, const string& destination)
 
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
-		
-	//cerr << "Trying to connect source: " << s << " with destination " << d << endl;
-	
-	Port* src = get_port (s);
-	Port* dst = get_port (d);
+
+	Port* src = get_port_by_name_locked (s);
+	Port* dst = get_port_by_name_locked (d);
 
 	if (src && dst) {
 
 		/* both ports are known to us, so do the internal connect stuff */
 
-		if ((ret = src->connect (*dst)) == 0) {
-			ret = dst->connect (*src);
-		}
+		ret = src->connect (dst);
 
 	} else if (src || dst) {
 
 		/* one port is known to us, try to connect it to something external */
 
-		PortConnectableByName* pcn;
-		string other;
-
 		if (src) {
-			pcn = dynamic_cast<PortConnectableByName*>(src);
-			other = d;
+			ret = src->connect (d);
 		} else {
-			pcn = dynamic_cast<PortConnectableByName*>(dst);
-			other = s;
-		}
-
-		if (pcn) {
-			ret = pcn->connect (other);
-		} else {
-			ret = -1;
+			ret = dst->connect (s);
 		}
 
 	} else {
@@ -764,6 +735,8 @@ AudioEngine::connect (const string& source, const string& destination)
 int 
 AudioEngine::disconnect (const string& source, const string& destination)
 {
+	/* caller must hold process lock */
+	
 	int ret;
 
 	if (!_running) {
@@ -778,39 +751,23 @@ AudioEngine::disconnect (const string& source, const string& destination)
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
-	//cerr << "trying to disconnect port '" << s << "' from port '" << d << endl;
-	
-	Port* src = get_port (s);
-	Port* dst = get_port (d);
+	Port* src = get_port_by_name_locked (s);
+	Port* dst = get_port_by_name_locked (d);
 
 	if (src && dst) {
 
-		/* both ports are known to us, so do the internal connect stuff */
+		/* both ports are known to us, so do the internal disconnect stuff */
 		
-		if ((ret = src->disconnect (*dst)) == 0) {
-			ret = dst->disconnect (*src);
-		}
+		ret = src->disconnect (dst);
 
 	} else if (src || dst) {
 
-		/* one port is known to us, try to connect it to something external */
-
-
-		PortConnectableByName* pcn;
-		string other;
+		/* one port is known to us, try to disconnect it from something external */
 
 		if (src) {
-			pcn = dynamic_cast<PortConnectableByName*>(src);
-			other = d;
+			ret = src->disconnect (d);
 		} else {
-			pcn = dynamic_cast<PortConnectableByName*>(dst);
-			other = s;
-		}
-
-		if (pcn) {
-			ret = pcn->disconnect (other);
-		} else {
-			ret = -1;
+			ret = dst->disconnect (s);
 		}
 
 	} else {
@@ -873,33 +830,52 @@ AudioEngine::frames_per_cycle ()
 	}
 }
 
-/** Get a port by name.
- * Note this can return NULL, it will NOT create a port if it is not found (any more).
+/** @param name Full name of port (including prefix:)
+ *  @return Corresponding Port*, or 0.  This object remains the property of the AudioEngine
+ *  so must not be deleted.
  */
 Port *
-AudioEngine::get_port_by_name (const string& portname, bool keep)
+AudioEngine::get_port_by_name (const string& portname)
 {
 	Glib::Mutex::Lock lm (_process_lock);
+	return get_port_by_name_locked (portname);
+}
+
+Port *
+AudioEngine::get_port_by_name_locked (const string& portname)
+{
+	/* caller must hold process lock */
 
 	if (!_running) {
 		if (!_has_run) {
-			fatal << _("get_port_by_name() called before engine was started") << endmsg;
+			fatal << _("get_port_by_name_locked() called before engine was started") << endmsg;
 			/*NOTREACHED*/
 		} else {
 			return 0;
 		}
 	}
-	
+
+	if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {
+		/* not an ardour: port */
+		return 0;
+	}
+
+	std::string const rel = make_port_name_relative (portname);
+
 	boost::shared_ptr<Ports> pr = ports.reader();
-	
+
 	for (Ports::iterator i = pr->begin(); i != pr->end(); ++i) {
-		if (portname == (*i)->name()) {
-			return (*i);
+		if (rel == (*i)->name()) {
+			return *i;
 		}
 	}
 
 	return 0;
 }
+
+
+
+
 
 const char **
 AudioEngine::get_ports (const string& port_name_pattern, const string& type_name_pattern, uint32_t flags)
@@ -1069,12 +1045,6 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 	free ((char *) ports);
 
 	return ret;
-}
-
-ARDOUR::nframes_t
-AudioEngine::get_port_total_latency (const Port& port)
-{
-	return port.total_latency ();
 }
 
 void

@@ -31,6 +31,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
+#include <ardour/port.h>
 
 #include "i18n.h"
 

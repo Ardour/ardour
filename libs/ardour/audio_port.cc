@@ -18,118 +18,86 @@
 
 #include <cassert>
 #include <ardour/audio_port.h>
-#include <ardour/jack_audio_port.h>
 #include <ardour/audioengine.h>
 #include <ardour/data_type.h>
+#include <ardour/audio_buffer.h>
 
 using namespace ARDOUR;
 using namespace std;
 
-AudioPort::AudioPort (const std::string& name, Flags flags, bool external, nframes_t capacity)
-	: Port (name, flags)
-	, BaseAudioPort (name, flags)
-	, PortFacade (name, flags)
-	, _has_been_mixed_down( false )
+AudioPort::AudioPort (const std::string& name, Flags flags, bool ext, nframes_t capacity)
+	: Port (name, DataType::AUDIO, flags, ext)
+	, _has_been_mixed_down (false)
+	, _buffer (0)
 {
-	if (!external || receives_input()) {
-
-		/* internal-only and input ports need their own buffers.
-		   external output ports use the external port buffer.
-		*/
-
-		_buffer = new AudioBuffer (capacity);
-		_own_buffer = true;
-	}
-
-	if (!external) {
-
-		_ext_port = 0;
-		set_name (name);
+	assert (name.find_first_of (':') == string::npos);
+	
+	if (external ()) {
+		
+		/* external ports use the external port buffer */
+		_buffer = new AudioBuffer (0);
 
 	} else {
+
+		/* internal ports need their own buffers */
+		_buffer = new AudioBuffer (capacity);
 		
-		/* make the JackAudioPort create its own buffer. For input,
-		   we will copy from it during cycle_start(). For output,
-		   we will set up our buffer to point to its buffer, which
-		   will in turn be using the JACK port buffer for data.
-		*/
-
-		_ext_port = new JackAudioPort (name, flags, 0);
-
-		//if (sends_output()) {
-		//	_buffer = &dynamic_cast<JackAudioPort*>(_ext_port)->get_audio_buffer( nframes, offset );
-		//} 
-
-		Port::set_name (_ext_port->name());
 	}
-
-	reset ();
+	
 }
 
 AudioPort::~AudioPort()
 {
-	delete _ext_port;
-	_ext_port = 0;
+	delete _buffer;
 }
-
-void
-AudioPort::reset()
-{
-	BaseAudioPort::reset();
-
-	if (_ext_port) {
-		_ext_port->reset ();
-	}
-}
-
 
 void
 AudioPort::cycle_start (nframes_t nframes, nframes_t offset)
 {
 	/* caller must hold process lock */
 
-	if (_ext_port) {
-		_ext_port->cycle_start (nframes, offset);
-	}
 	_has_been_mixed_down = false;
+
+	if (external ()) {
+		/* external ports use JACK's memory */
+		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes), nframes + offset);
+	}
 }
 
 AudioBuffer &
-AudioPort::get_audio_buffer( nframes_t nframes, nframes_t offset ) {
+AudioPort::get_audio_buffer (nframes_t nframes, nframes_t offset)
+{
+	/* caller must hold process lock */
 
-	if (_has_been_mixed_down)	
+	if (_has_been_mixed_down) {
 		return *_buffer;
-
-	if (_flags & IsInput) {
-
-		if (_ext_port) {
-			_buffer->read_from (dynamic_cast<BaseAudioPort*>(_ext_port)->get_audio_buffer (nframes, offset), nframes, offset);
-
-			if (!_connections.empty()) {
-				(*_mixdown) (_connections, _buffer, nframes, offset, false);
-			}
-
-		} else {
-		
-			if (_connections.empty()) {
-				_buffer->silence (nframes, offset);
-			} else {
-				(*_mixdown) (_connections, _buffer, nframes, offset, true);
-			}
-		}
-
-	} else {
-		
-		// XXX if we could get the output stage to not purely mix into, but also
-		// to initially overwrite the buffer, we could avoid this silence step.
-		if (_ext_port) {
-			_buffer = & (dynamic_cast<BaseAudioPort*>(_ext_port)->get_audio_buffer( nframes, offset ));
-		}
-		if (nframes)
-			_buffer->silence (nframes, offset);
 	}
-	if (nframes)
+
+	if (receives_input ()) {
+
+		/* INPUT */
+
+		/* If we're external (), we have some data in our buffer set up by JACK;
+		   otherwise, we have an undefined buffer.  In either case we mix down
+		   our non-JACK inputs; either accumulating into the JACK data or
+		   overwriting the undefined data */
+		   
+		mixdown (nframes, offset, !external ());
+		
+	} else {
+
+		/* OUTPUT */
+
+		if (!external ()) {
+			/* start internal output buffers with silence */
+			_buffer->silence (nframes, offset);
+		}
+		
+	}
+	
+	if (nframes) {
 		_has_been_mixed_down = true;
+	}
 
 	return *_buffer;
 }
@@ -137,5 +105,38 @@ AudioPort::get_audio_buffer( nframes_t nframes, nframes_t offset ) {
 void
 AudioPort::cycle_end (nframes_t nframes, nframes_t offset)
 {
-	_has_been_mixed_down=false;
+	_has_been_mixed_down = false;
+}
+
+void
+AudioPort::mixdown (nframes_t cnt, nframes_t offset, bool first_overwrite)
+{
+	if (_connections.empty()) {
+		if (first_overwrite) {
+			_buffer->silence (cnt, offset);
+		}
+		return;
+	}
+	
+	set<Port*>::const_iterator p = _connections.begin();
+
+	if (first_overwrite) {
+		_buffer->read_from (dynamic_cast<AudioPort*>(*p)->get_audio_buffer (cnt, offset), cnt, offset);
+		++p;
+	}
+
+	for (; p != _connections.end (); ++p) {
+		_buffer->accumulate_from (dynamic_cast<AudioPort*>(*p)->get_audio_buffer (cnt, offset), cnt, offset);
+	}
+}
+
+void
+AudioPort::reset ()
+{
+	Port::reset ();
+	
+	if (_buffer->capacity () != 0) {
+		_buffer->resize (_engine->frames_per_cycle ());
+		_buffer->clear ();
+	}
 }

@@ -30,6 +30,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/data_type.h"
+#include "ardour/port.h"
 #include "ardour/bundle.h"
 
 #include "io_selector.h"

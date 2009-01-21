@@ -21,29 +21,40 @@
 #ifndef __ardour_midi_port_h__
 #define __ardour_midi_port_h__
 
-#include <ardour/base_midi_port.h>
+#include <ardour/port.h>
+#include <ardour/midi_buffer.h>
 
 namespace ARDOUR {
 
 class MidiEngine;
 
-class MidiPort : public BaseMidiPort, public PortFacade {
+class MidiPort : public Port {
    public:
 	~MidiPort();
 
-	void reset ();
+	DataType type () const {
+		return DataType::MIDI;
+	}
 
 	void cycle_start (nframes_t nframes, nframes_t offset);
 	void cycle_end (nframes_t nframes, nframes_t offset);
 	void flush_buffers (nframes_t nframes, nframes_t offset);
 
+	Buffer& get_buffer (nframes_t nframes, nframes_t offset) {
+		return get_midi_buffer (nframes, offset);
+	}
+	
 	MidiBuffer& get_midi_buffer( nframes_t nframes, nframes_t offset );
 
   protected:
 	friend class AudioEngine;
 
 	MidiPort (const std::string& name, Flags, bool external, nframes_t bufsize);
+  
   private:
+	void mixdown (nframes_t, nframes_t, bool);
+	
+	MidiBuffer* _buffer;
 	bool _has_been_mixed_down;
 };
  

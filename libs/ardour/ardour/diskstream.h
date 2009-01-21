@@ -40,7 +40,6 @@
 #include <ardour/session.h>
 #include <ardour/route_group.h>
 #include <ardour/route.h>
-#include <ardour/port.h>
 #include <ardour/utils.h>
 
 struct tm;

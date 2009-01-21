@@ -20,76 +20,74 @@
 #include <iostream>
 
 #include <ardour/midi_port.h>
-#include <ardour/jack_midi_port.h>
 #include <ardour/data_type.h>
 
 using namespace ARDOUR;
 using namespace std;
 
-MidiPort::MidiPort (const std::string& name, Flags flags, bool external, nframes_t capacity)
-	: Port (name, flags)
-	, BaseMidiPort (name, flags)
-	, PortFacade (name, flags)
+MidiPort::MidiPort (const std::string& name, Flags flags, bool ext, nframes_t capacity)
+        : Port (name, DataType::MIDI, flags, ext)
 	, _has_been_mixed_down (false)
 {
 	// FIXME: size kludge (see BufferSet::ensure_buffers)
 	// Jack needs to tell us this
 	_buffer = new MidiBuffer (capacity * 8);
-
-	if (external) {
-		/* external ports use the same buffer for the jack port (_ext_port)
-		 * and internal ports (this) */
-		_ext_port = new JackMidiPort (name, flags, _buffer);
-		Port::set_name (_ext_port->name());
-	} else {
-		/* internal ports just have a single buffer, no jack port */
-		_ext_port = 0;
-		set_name (name);
-	}
-
-	reset ();
 }
 
 MidiPort::~MidiPort()
 {
-	delete _ext_port;
-	_ext_port = 0;
+	delete _buffer;
 }
 
-void
-MidiPort::reset()
-{
-	BaseMidiPort::reset();
-
-	if (_ext_port) {
-		_ext_port->reset ();
-	}
-}
 
 void
 MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 {
-	if (_ext_port) {
-		_ext_port->cycle_start (nframes, offset);
+	if (external ()) {
+		_buffer->clear ();
+		assert (_buffer->size () == 0);
+
+		if (sends_output ()) {
+			jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, nframes));
+		}
 	}
 }
 
 MidiBuffer &
 MidiPort::get_midi_buffer( nframes_t nframes, nframes_t offset ) {
 	
-	if (_has_been_mixed_down)
+	if (_has_been_mixed_down) {
 	    return *_buffer;
+	}
 
-	if (_flags & IsInput) {
+	if (receives_input ()) {
 			
-		if (_ext_port) {
+		if (external ()) {
 		
-			BaseMidiPort* mprt = dynamic_cast<BaseMidiPort*>(_ext_port);
-			assert(mprt);
-			assert(&mprt->get_midi_buffer(nframes,offset) == _buffer);
+			void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
+			const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
+
+			assert (event_count < _buffer->capacity());
+
+			jack_midi_event_t ev;
+
+			for (nframes_t i = 0; i < event_count; ++i) {
+
+				jack_midi_event_get (&ev, jack_buffer, i);
+
+				// i guess this should do but i leave it off to test the rest first.
+				//if (ev.time > offset && ev.time < offset+nframes)
+				_buffer->push_back (ev);
+			}
+
+			assert(_buffer->size() == event_count);
+
+			if (nframes) {
+				_has_been_mixed_down = true;
+			}
 
 			if (!_connections.empty()) {
-				(*_mixdown) (_connections, _buffer, nframes, offset, false);
+				mixdown (nframes, offset, false);
 			}
 
 		} else {
@@ -97,15 +95,17 @@ MidiPort::get_midi_buffer( nframes_t nframes, nframes_t offset ) {
 			if (_connections.empty()) {
 				_buffer->silence (nframes, offset);
 			} else {
-				(*_mixdown) (_connections, _buffer, nframes, offset, true);
+				mixdown (nframes, offset, true);
 			}
 		}
 
 	} else {
 		_buffer->silence (nframes, offset);
 	}
-	if (nframes)
+	
+	if (nframes) {
 		_has_been_mixed_down = true;
+	}
 
 	return *_buffer;
 }
@@ -114,16 +114,65 @@ MidiPort::get_midi_buffer( nframes_t nframes, nframes_t offset ) {
 void
 MidiPort::cycle_end (nframes_t nframes, nframes_t offset)
 {
-	if (_ext_port) {
-		_ext_port->cycle_end (nframes, offset);
+#if 0
+
+	if (external () && sends_output ()) {
+		/* FIXME: offset */
+
+		// We're an output - copy events from source buffer to Jack buffer
+		
+		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
+		
+		jack_midi_clear_buffer (jack_buffer);
+		
+		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
+			const Evoral::Event& ev = *i;
+
+			// event times should be frames, relative to cycle start
+			assert(ev.time() >= 0);
+			assert(ev.time() < nframes);
+			jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
+		}
 	}
+#endif
+
 	_has_been_mixed_down = false;
 }
 
 void
 MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 {
-	if (_ext_port) {
-		_ext_port->flush_buffers (nframes, offset);
+	/* FIXME: offset */
+	
+	if (external () && sends_output ()) {
+		
+		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
+
+		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
+			const Evoral::Event& ev = *i;
+			// event times should be frames, relative to cycle start
+			assert(ev.time() >= 0);
+			assert(ev.time() < (nframes+offset));
+			if (ev.time() >= offset) {
+				jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
+			}
+		}
+	}
+}
+
+void
+MidiPort::mixdown (nframes_t cnt, nframes_t offset, bool first_overwrite)
+{
+	set<Port*>::const_iterator p = _connections.begin();
+
+	if (first_overwrite) {
+		_buffer->read_from ((dynamic_cast<MidiPort*>(*p))->get_midi_buffer (cnt, offset), cnt, offset);
+		p++;
+	}
+
+	// XXX DAVE: this is just a guess
+
+	for (; p != _connections.end(); ++p) {
+		_buffer->merge (*_buffer, (dynamic_cast<MidiPort*>(*p))->get_midi_buffer (cnt, offset));
 	}
 }
