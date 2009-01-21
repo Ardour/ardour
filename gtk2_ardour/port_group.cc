@@ -209,7 +209,7 @@ PortGroupList::set_offer_inputs (bool i)
 void
 PortGroupList::maybe_add_session_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
 {
-	if (b->ports_are_inputs () == _offer_inputs) {
+	if (b->ports_are_inputs () == _offer_inputs && b->type () == _type) {
 		_system.bundles.push_back (b);
 	}
 }
