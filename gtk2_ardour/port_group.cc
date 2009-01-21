@@ -172,8 +172,8 @@ PortGroupList::refresh ()
 		while (ports[n]) {
 			std::string const p = ports[n];
 
-			if (p.substr(0, strlen ("system:")) == "system:") {
-				/* system: prefix */
+			if (p.substr(0, strlen ("system:")) == "system:" || p.substr (0, strlen ("alsa_pcm:")) == "alsa_pcm:") {
+				/* system: or alsa_pcm: prefix */
 				_system.add_port (p);
 			} else {
 				if (p.substr(0, client_matching_string.length()) != client_matching_string) {
