@@ -89,7 +89,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 
 	/* SIDE BUNDLE NAMES */
 
-	uint32_t x;
+	uint32_t x = 0;
 	if (_location == LEFT) {
 		x = name_pad();
 	} else if (_location == RIGHT) {
@@ -131,7 +131,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 
-			uint32_t x;
+			uint32_t x = 0;
 			if (_location == LEFT) {
 				x = _longest_bundle_name + name_pad() * 2;
 			} else if (_location == RIGHT) {
@@ -186,7 +186,7 @@ PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 		uint32_t row = y / row_height ();
 
 		boost::shared_ptr<ARDOUR::Bundle> bundle;
-		uint32_t channel;
+		uint32_t channel = 0;
 		
 		for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
 			if (row < (*i)->nchannels ()) {
