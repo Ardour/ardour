@@ -24,7 +24,7 @@
 #include <string>
 #include <evoral/TypeMap.hpp>
 
-class Evoral::Parameter;
+namespace Evoral { class Parameter; }
 
 namespace ARDOUR {
 
