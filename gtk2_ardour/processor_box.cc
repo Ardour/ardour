@@ -516,6 +516,10 @@ ProcessorBox::choose_send ()
 
 	ios->show_all ();
 
+	/* bit of a hack; keep a shared_ptr to send around so that it doesn't get deleted while
+	   the IOSelectorWindow is doing its stuff */
+	_send_being_created = send;
+
 	boost::shared_ptr<Processor> r = boost::static_pointer_cast<Processor>(send);
 	
 	ios->selector().Finished.connect (bind (mem_fun(*this, &ProcessorBox::send_io_finished), boost::weak_ptr<Processor>(r), ios));
@@ -525,6 +529,9 @@ void
 ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor> weak_processor, IOSelectorWindow* ios)
 {
 	boost::shared_ptr<Processor> processor (weak_processor.lock());
+
+	/* now we can lose the dummy shared_ptr */
+	_send_being_created.reset ();
 
 	if (!processor) {
 		return;

@@ -94,6 +94,9 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	bool                 ab_direction;
 	std::vector<sigc::connection> connections;
 
+	/// a send that is in the process of creation
+	boost::shared_ptr<ARDOUR::Send> _send_being_created;
+
 	ARDOUR::Placement   _placement;
 
 	PluginSelector     & _plugin_selector;
