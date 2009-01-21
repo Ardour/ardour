@@ -349,24 +349,27 @@ AutomationTimeAxisView::interpolation_changed ()
 		}
 	}
 	
-	if (_line)
+	if (_line) {
 		_line->set_interpolation(style);
+	}
 }
 
 void
 AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle style)
 {
 	_control->list()->set_interpolation(style);
-	if (_line)
+	if (_line) {
 		_line->set_interpolation(style);
+	}
 }
 
 void
 AutomationTimeAxisView::clear_clicked ()
 {
 	_session.begin_reversible_command (_("clear automation"));
-	if (_line)
+	if (_line) {
 		_line->clear ();
+	}
 	_session.commit_reversible_command ();
 }
 
@@ -524,8 +527,9 @@ AutomationTimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
 	
 	/* mode menu */
-	
-	if (_control->parameter().type() == MidiCCAutomation) {
+		
+	if ( EventTypeMap::instance().is_midi_parameter(_control->parameter()) ) {
+		
 		Menu* auto_mode_menu = manage (new Menu);
 		auto_mode_menu->set_name ("ArdourContextMenu");
 		MenuList& am_items = auto_mode_menu->items();

@@ -38,6 +38,12 @@ EventTypeMap::type_is_midi(uint32_t type) const
 	return (type >= MidiCCAutomation) && (type <= MidiChannelPressureAutomation);
 }
 
+bool
+EventTypeMap::is_midi_parameter(const Evoral::Parameter& param)
+{
+		return type_is_midi(param.type());
+}
+
 uint8_t
 EventTypeMap::parameter_midi_type(const Evoral::Parameter& param) const
 {

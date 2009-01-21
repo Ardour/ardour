@@ -24,6 +24,8 @@
 #include <string>
 #include <evoral/TypeMap.hpp>
 
+class Evoral::Parameter;
+
 namespace ARDOUR {
 
 /** This is the interface Ardour provides to Evoral about what
@@ -35,10 +37,12 @@ public:
 	uint8_t  parameter_midi_type(const Evoral::Parameter& param) const;
 	uint32_t midi_event_type(uint8_t status) const;
 
-	bool              is_integer(const Evoral::Parameter& param) const;
-	Evoral::Parameter new_parameter(uint32_t type, uint8_t channel=0, uint32_t id=0) const;
-	Evoral::Parameter new_parameter(const std::string& str) const;
-	std::string       to_symbol(const Evoral::Parameter& param) const;
+	bool                 is_integer(const Evoral::Parameter& param) const;
+	Evoral::Parameter    new_parameter(uint32_t type, uint8_t channel=0, uint32_t id=0) const;
+	Evoral::Parameter    new_parameter(const std::string& str) const;
+	std::string          to_symbol(const Evoral::Parameter& param) const;
+	
+	bool                 is_midi_parameter(const Evoral::Parameter& param);
 
 	static EventTypeMap& instance() { return event_type_map; }
 

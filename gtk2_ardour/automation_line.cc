@@ -116,8 +116,9 @@ AutomationLine::queue_reset ()
 void
 AutomationLine::show () 
 {
-	if (_interpolation != AutomationList::Discrete)
+	if (_interpolation != AutomationList::Discrete) {
 		line->show();
+	}
 
 	if (points_visible) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
@@ -629,8 +630,9 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		
 		line->property_points() = line_points;
 
-		if (_visible && _interpolation != AutomationList::Discrete)
+		if (_visible && _interpolation != AutomationList::Discrete) {
 			line->show();
+		}
 
 	} 
 
@@ -1201,8 +1203,9 @@ AutomationLine::show_all_control_points ()
 void
 AutomationLine::hide_all_but_selected_control_points ()
 {
-	if (alist->interpolation() == AutomationList::Discrete)
+	if (alist->interpolation() == AutomationList::Discrete) {
 		return;
+	}
 
 	points_visible = false;
 
@@ -1216,8 +1219,9 @@ AutomationLine::hide_all_but_selected_control_points ()
 void
 AutomationLine::track_entered()
 {
-	if (alist->interpolation() != AutomationList::Discrete)
+	if (alist->interpolation() != AutomationList::Discrete) {
 		show_all_control_points();
+	}
 }
 
 void

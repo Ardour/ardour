@@ -469,11 +469,7 @@ MidiTimeAxisView::add_cc_track()
 void
 MidiTimeAxisView::add_parameter_track(const Evoral::Parameter& param)
 {
-	if (	param.type() != MidiCCAutomation &&
-			param.type() != MidiPgmChangeAutomation &&
-			param.type() != MidiPitchBenderAutomation &&
-			param.type() != MidiChannelPressureAutomation
-	   ) {
+	if ( !EventTypeMap::instance().is_midi_parameter(param) ) {
 		error << "MidiTimeAxisView: unknown automation child "
 			<< ARDOUR::EventTypeMap::instance().to_symbol(param) << endmsg;
 		return;

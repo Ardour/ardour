@@ -770,6 +770,7 @@ ControlList::unlocked_eval (double x) const
 		if (x >= _events.front()->when) {
 			return _events.front()->value;
 		} else {
+			// hansfbaier: v--------- Why commented ??? 
 			// return _default_value;
 			return _events.front()->value;
 		} 
@@ -780,6 +781,7 @@ ControlList::unlocked_eval (double x) const
 		} else if (x == _events.front()->when) {
 			return _events.front()->value;
  		} else if (x < _events.front()->when) {
+			// hansfbaier: v--------- Why commented ??? 
 			// return _default_value;
 			return _events.front()->value;
 		}
@@ -789,8 +791,9 @@ ControlList::unlocked_eval (double x) const
 		upos = _events.back()->when;
 		uval = _events.back()->value;
 		
-		if (_interpolation == Discrete)
+		if (_interpolation == Discrete) {
 			return lval;
+		}
 
 		/* linear interpolation betweeen the two points
 		*/
@@ -805,6 +808,7 @@ ControlList::unlocked_eval (double x) const
 		} else if (x == _events.front()->when) {
 			return _events.front()->value;
  		} else if (x < _events.front()->when) {
+			// hansfbaier: v--------- Why commented ??? 
 			// return _default_value;
 			return _events.front()->value;
 		}

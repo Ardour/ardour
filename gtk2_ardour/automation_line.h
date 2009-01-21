@@ -106,8 +106,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	string get_verbose_cursor_string (double) const;
 	string fraction_to_string (double) const;
 	double string_to_fraction (string const &) const;
-	void view_to_model_y (double&) const;
-	void model_to_view_y (double&) const;
+	void   view_to_model_y (double&) const;
+	void   model_to_view_y (double&) const;
 
 	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
@@ -129,23 +129,24 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
   protected:
 
-	string _name;
-	guint32 _height;
-	uint32_t _line_color;
+	string    _name;
+	guint32   _height;
+	uint32_t  _line_color;
+	
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
 
-	bool    _visible  : 1;
-	bool    _uses_gain_mapping : 1;
+	bool    _visible                  : 1;
+	bool    _uses_gain_mapping        : 1;
 	bool    terminal_points_can_slide : 1;
-	bool    update_pending : 1;
-	bool    no_draw : 1;
-	bool    points_visible : 1;
+	bool    update_pending            : 1;
+	bool    no_draw                   : 1;
+	bool    points_visible            : 1;
 	bool    did_push;
 
-	ArdourCanvas::Group&  _parent_group;
-	ArdourCanvas::Group*   group;
-	ArdourCanvas::Line*    line; /* line */
-	ArdourCanvas::Points   line_points; /* coordinates for canvas line */
+	ArdourCanvas::Group&        _parent_group;
+	ArdourCanvas::Group*        group;
+	ArdourCanvas::Line*         line; /* line */
+	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 
 	struct ALPoint {
