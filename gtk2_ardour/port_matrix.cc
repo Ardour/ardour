@@ -35,7 +35,7 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 	: _offer_inputs (offer_inputs),
 	  _port_group_list (session, type, offer_inputs, mask),
 	  _type (type),
-	  _body (this)
+	  _body (this, offer_inputs ? PortMatrixBody::BOTTOM_AND_LEFT : PortMatrixBody::TOP_AND_RIGHT)
 {
 	/* checkbuttons for visibility of groups */
 	Gtk::HBox* visibility_buttons = Gtk::manage (new Gtk::HBox);

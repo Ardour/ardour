@@ -22,19 +22,16 @@
 #include "port_matrix_body.h"
 #include "port_matrix.h"
 
-PortMatrixBody::PortMatrixBody (PortMatrix* p)
+PortMatrixBody::PortMatrixBody (PortMatrix* p, Arrangement a)
 	: _port_matrix (p),
-	  _column_labels (this),
-	  _row_labels (p, this),
+	  _column_labels (this, a == TOP_AND_RIGHT ? PortMatrixColumnLabels::TOP : PortMatrixColumnLabels::BOTTOM),
+	  _row_labels (p, this, a == BOTTOM_AND_LEFT ? PortMatrixRowLabels::LEFT : PortMatrixRowLabels::RIGHT),
 	  _grid (p, this),
-	  _alloc_width (0),
-	  _alloc_height (0),
-	  _alloc_xdiv (0),
-	  _alloc_ydiv (0),
+	  _arrangement (a),
 	  _xoffset (0),
 	  _yoffset (0)
 {
-
+	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
 }
 
 
@@ -45,21 +42,17 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 		event->area.x, event->area.y, event->area.width, event->area.height
 		);
 
-	Gdk::Rectangle const col (0, 0, _alloc_width, _alloc_ydiv);
-	Gdk::Rectangle const row (_alloc_xdiv, _alloc_ydiv, _alloc_width - _alloc_xdiv, _alloc_height - _alloc_ydiv);
-	Gdk::Rectangle const grid (0, _alloc_ydiv, _alloc_xdiv, _alloc_height - _alloc_ydiv);
-
 	bool intersects;
 	Gdk::Rectangle r = exposure;
-	r.intersect (col, intersects);
+	r.intersect (_column_labels_rect, intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
 			_column_labels.get_pixmap (get_window()->gobj()),
-			r.get_x() + _xoffset,
-			r.get_y(),
+			r.get_x() - _column_labels_rect.get_x() + _xoffset,
+			r.get_y() - _column_labels_rect.get_y(),
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -68,15 +61,15 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
-	r.intersect (row, intersects);
+	r.intersect (_row_labels_rect, intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
 			_row_labels.get_pixmap (get_window()->gobj()),
-			r.get_x() - _alloc_xdiv,
-			r.get_y() + _yoffset - _alloc_ydiv,
+			r.get_x() - _row_labels_rect.get_x(),
+			r.get_y() - _row_labels_rect.get_y() + _yoffset,
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -85,15 +78,15 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
-	r.intersect (grid, intersects);
+	r.intersect (_grid_rect, intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
 			_grid.get_pixmap (get_window()->gobj()),
-			r.get_x() + _xoffset,
-			r.get_y() + _yoffset - _alloc_ydiv,
+			r.get_x() - _grid_rect.get_x() + _xoffset,
+			r.get_y() - _grid_rect.get_y() + _yoffset,
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -124,37 +117,100 @@ PortMatrixBody::on_size_allocate (Gtk::Allocation& alloc)
 	_alloc_width = alloc.get_width ();
 	_alloc_height = alloc.get_height ();
 
-	compute_divs ();
+	compute_rectangles ();
 	_port_matrix->setup_scrollbars ();
 }
 
 void
-PortMatrixBody::compute_divs ()
+PortMatrixBody::compute_rectangles ()
 {
+	/* full sizes of components */
 	std::pair<uint32_t, uint32_t> const col = _column_labels.dimensions ();
-	if (_alloc_height > col.second) {
-		/* allocated height is enough for the column labels */
-		_alloc_ydiv = col.second;
-	} else {
-		/* not enough space for the column labels */
-		_alloc_ydiv = _alloc_height;
-	}
-
-	std::pair<uint32_t, uint32_t> const grid = _grid.dimensions ();
 	std::pair<uint32_t, uint32_t> const row = _row_labels.dimensions ();
+	std::pair<uint32_t, uint32_t> const grid = _grid.dimensions ();
 
-	if (_alloc_width > (grid.first + row.first)) {
-		/* allocated width is larger than we need, so
-		   put the x division at the extent of the grid */
-		_alloc_xdiv = grid.first;
-	} else if (_alloc_width > row.first) {
-		/* allocated width is large enough for the row labels
-		   but not for the whole grid, so display the whole
-		   row label section and cut part of the grid off */
-		_alloc_xdiv = _alloc_width - row.first;
-	} else {
-		/* allocated width isn't even enough for the row labels */
-		_alloc_xdiv = 0;
+	if (_arrangement == TOP_AND_RIGHT) {
+
+		/* build from top left */
+
+		_column_labels_rect.set_x (0);
+		_column_labels_rect.set_y (0);
+		_grid_rect.set_x (0);
+
+		if (_alloc_width > col.first) {
+			_column_labels_rect.set_width (col.first);
+		} else {
+			_column_labels_rect.set_width (_alloc_width);
+		}
+
+		/* move down to y division */
+		
+		uint32_t y = 0;
+		if (_alloc_height > col.second) {
+			y = col.second;
+		} else {
+			y = _alloc_height;
+		}
+
+		_column_labels_rect.set_height (y);
+		_row_labels_rect.set_y (y);
+		_row_labels_rect.set_height (_alloc_height - y);
+		_grid_rect.set_y (y);
+		_grid_rect.set_height (_alloc_height - y);
+
+		/* move right to x division */
+
+		uint32_t x = 0;
+		if (_alloc_width > (grid.first + row.first)) {
+			x = grid.first;
+		} else if (_alloc_width > row.first) {
+			x = _alloc_width - row.first;
+		}
+
+		_grid_rect.set_width (x);
+		_row_labels_rect.set_x (x);
+		_row_labels_rect.set_width (_alloc_width - x);
+			
+
+	} else if (_arrangement == BOTTOM_AND_LEFT) {
+
+		/* build from bottom right */
+
+		/* move left to x division */
+
+		uint32_t x = 0;
+		if (_alloc_width > (grid.first + row.first)) {
+			x = grid.first;
+		} else if (_alloc_width > row.first) {
+			x = _alloc_width - row.first;
+		}
+
+		_grid_rect.set_x (_alloc_width - x);
+		_grid_rect.set_width (x);
+		_column_labels_rect.set_width (std::min (_alloc_width, col.first));
+		_column_labels_rect.set_x (_alloc_width - _column_labels_rect.get_width());
+
+		_row_labels_rect.set_width (std::min (_alloc_width - x, row.first));
+		_row_labels_rect.set_x (_alloc_width - x - _row_labels_rect.get_width());
+
+		/* move up to the y division */
+		
+		uint32_t y = 0;
+		if (_alloc_height > col.second) {
+			y = col.second;
+		} else {
+			y = _alloc_height;
+		}
+
+		_column_labels_rect.set_y (_alloc_height - y);
+		_column_labels_rect.set_height (y);
+
+		_grid_rect.set_height (std::min (grid.second, _alloc_height - y));
+		_grid_rect.set_y (_alloc_height - y - _grid_rect.get_height());
+
+		_row_labels_rect.set_height (_grid_rect.get_height());
+		_row_labels_rect.set_y (_grid_rect.get_y());
+
 	}
 }
 
@@ -191,7 +247,7 @@ PortMatrixBody::setup (
 	_row_labels.setup ();
 	_grid.setup ();
 
-	compute_divs ();
+	compute_rectangles ();
 }
 
 uint32_t
@@ -204,7 +260,7 @@ PortMatrixBody::full_scroll_width ()
 uint32_t
 PortMatrixBody::alloc_scroll_width ()
 {
-	return _alloc_xdiv;
+	return _grid_rect.get_width();
 }
 
 uint32_t
@@ -216,7 +272,7 @@ PortMatrixBody::full_scroll_height ()
 uint32_t
 PortMatrixBody::alloc_scroll_height ()
 {
-	return _alloc_height - _alloc_ydiv;
+	return _grid_rect.get_height();
 }
 
 void
@@ -236,12 +292,26 @@ PortMatrixBody::set_yoffset (uint32_t yo)
 bool
 PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 {
-	if (ev->x < _alloc_xdiv && ev->y > _alloc_ydiv) {
-		_grid.button_press (ev->x + _xoffset, ev->y + _yoffset - _alloc_ydiv, ev->button);
-	} else if (ev->x > _alloc_xdiv && ev->y > _alloc_ydiv) {
-		_row_labels.button_press (ev->x - _alloc_xdiv, ev->y + _yoffset - _alloc_ydiv, ev->button, ev->time);
+	if (Gdk::Region (_grid_rect).point_in (ev->x, ev->y)) {
+
+		_grid.button_press (
+			ev->x - _grid_rect.get_x() + _xoffset,
+			ev->y - _grid_rect.get_y() + _yoffset,
+			ev->button
+			);
+
+	} else if (Gdk::Region (_row_labels_rect).point_in (ev->x, ev->y)) {
+
+		_row_labels.button_press (
+			ev->x - _row_labels_rect.get_x(),
+			ev->y - _row_labels_rect.get_y() + _yoffset,
+			ev->button, ev->time
+			);
+	
 	} else {
+	
 		return false;
+		
 	}
 
 	return true;

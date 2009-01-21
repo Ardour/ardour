@@ -37,7 +37,12 @@ namespace Gtk {
 class PortMatrixRowLabels : public PortMatrixComponent
 {
 public:
-	PortMatrixRowLabels (PortMatrix *, PortMatrixBody *);
+	enum Location {
+		LEFT,
+		RIGHT
+	};
+	
+	PortMatrixRowLabels (PortMatrix *, PortMatrixBody *, Location);
 	~PortMatrixRowLabels ();
 
 	void button_press (double, double, int, uint32_t);
@@ -52,6 +57,7 @@ private:
 	uint32_t _longest_port_name;
 	uint32_t _longest_bundle_name;
 	Gtk::Menu* _menu;
+	Location _location;
 };
 
 #endif

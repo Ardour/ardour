@@ -33,7 +33,12 @@ class PortMatrix;
 class PortMatrixBody : public Gtk::EventBox
 {
 public:
-	PortMatrixBody (PortMatrix *);
+	enum Arrangement {
+		TOP_AND_RIGHT,
+		BOTTOM_AND_LEFT
+	};
+
+	PortMatrixBody (PortMatrix *, Arrangement);
 
 	/** @return bundles to offer for columns */
 	std::vector<boost::shared_ptr<ARDOUR::Bundle> > const & column_bundles () {
@@ -67,7 +72,7 @@ protected:
 	bool on_button_press_event (GdkEventButton *);
 
 private:
-	void compute_divs ();
+	void compute_rectangles ();
 	void repaint_column_labels ();
 	void repaint_row_labels ();
 	
@@ -76,10 +81,12 @@ private:
 	PortMatrixRowLabels _row_labels;
 	PortMatrixGrid _grid;
 
+	Arrangement _arrangement;
 	uint32_t _alloc_width; ///< allocated width
 	uint32_t _alloc_height; ///< allocated height
-	uint32_t _alloc_xdiv; ///< position of the division between grid and row labels
-	uint32_t _alloc_ydiv; ///< position of the division between column labels and grid
+	Gdk::Rectangle _column_labels_rect;
+	Gdk::Rectangle _row_labels_rect;
+	Gdk::Rectangle _grid_rect;
 	uint32_t _xoffset;
 	uint32_t _yoffset;
 

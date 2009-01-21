@@ -33,17 +33,24 @@ namespace ARDOUR {
 class PortMatrixColumnLabels : public PortMatrixComponent
 {
 public:
-	PortMatrixColumnLabels (PortMatrixBody *);
+
+	enum Location {
+		TOP,
+		BOTTOM
+	};
+	
+	PortMatrixColumnLabels (PortMatrixBody *, Location);
 
 private:
 	void render (cairo_t *);
 	void compute_dimensions ();
-	uint32_t basic_text_x_pos (int) const;
+	double basic_text_x_pos (int) const;
 
 	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _bundles;
-	uint32_t _longest_bundle_name;
-	uint32_t _longest_channel_name;
-	uint32_t _highest_text;
+	double _longest_bundle_name;
+	double _longest_channel_name;
+	double _highest_text;
+	Location _location;
 };
 
 #endif

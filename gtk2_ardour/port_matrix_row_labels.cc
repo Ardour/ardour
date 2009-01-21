@@ -28,8 +28,8 @@
 #include "port_matrix.h"
 #include "i18n.h"
 
-PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* p, PortMatrixBody* b)
-	: PortMatrixComponent (b), _port_matrix (p), _menu (0)
+PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* p, PortMatrixBody* b, Location l)
+	: PortMatrixComponent (b), _port_matrix (p), _menu (0), _location (l)
 {
 	
 }
@@ -74,9 +74,7 @@ PortMatrixRowLabels::compute_dimensions ()
 		_height += (*i)->nchannels() * row_height();
 	}
 
-	_width = _longest_port_name +
-		name_pad() * 4 +
-		_longest_bundle_name + name_pad() * 2;
+	_width = _longest_port_name + name_pad() * 4 + _longest_bundle_name;
 }
 
 
@@ -91,20 +89,19 @@ PortMatrixRowLabels::render (cairo_t* cr)
 
 	/* SIDE BUNDLE NAMES */
 
-	uint32_t x = _longest_port_name + name_pad() * 3;
+	uint32_t x;
+	if (_location == LEFT) {
+		x = name_pad();
+	} else if (_location == RIGHT) {
+		x = _longest_port_name + name_pad() * 3;
+	}
 
 	uint32_t y = 0;
 	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
 
 		Gdk::Color const colour = get_a_bundle_colour (i - _body->row_bundles().begin ());
 		set_source_rgb (cr, colour);
-		cairo_rectangle (
-			cr,
-			0,
-			y,
-			_longest_port_name + name_pad() * 4 + _longest_bundle_name + name_pad() * 2,
-			row_height() * (*i)->nchannels()
-			);
+		cairo_rectangle (cr, 0, y, _width, row_height() * (*i)->nchannels());
 		cairo_fill_preserve (cr);
 		set_source_rgb (cr, background_colour());
 		cairo_set_line_width (cr, label_border_width ());
@@ -134,11 +131,18 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 
+			uint32_t x;
+			if (_location == LEFT) {
+				x = _longest_bundle_name + name_pad() * 2;
+			} else if (_location == RIGHT) {
+				x = 0;
+			}
+
 			Gdk::Color const colour = get_a_bundle_colour (i - _body->row_bundles().begin ());
 			set_source_rgb (cr, colour);
 			cairo_rectangle (
 				cr,
-				0,
+				x,
 				y,
 				_longest_port_name + (name_pad() * 2),
 				row_height()
@@ -153,7 +157,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 			uint32_t const off = (row_height() - ext.height) / 2;
 
 			set_source_rgb (cr, text_colour());
-			cairo_move_to (cr, name_pad(), y + name_pad() + off);
+			cairo_move_to (cr, x + name_pad(), y + name_pad() + off);
 			cairo_show_text (cr, (*i)->channel_name(j).c_str());
 
 			y += row_height();
@@ -164,7 +168,13 @@ PortMatrixRowLabels::render (cairo_t* cr)
 void
 PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 {
-	if (b == 3 && x < (_longest_port_name + name_pad() * 2) ) {
+	if (b != 3) {
+		return;
+	}
+
+	if ( (_location ==  LEFT && x > (_longest_bundle_name + name_pad() * 2)) ||
+	     (_location == RIGHT && x < (_longest_port_name + name_pad() * 2))
+		) {
 
 		delete _menu;
 		
@@ -172,7 +182,6 @@ PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 		_menu->set_name ("ArdourContextMenu");
 		
 		Gtk::Menu_Helpers::MenuList& items = _menu->items ();
-
 		
 		uint32_t row = y / row_height ();
 

@@ -22,10 +22,10 @@
 #include "port_matrix_column_labels.h"
 #include "port_matrix.h"
 
-PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrixBody* b)
-	: PortMatrixComponent (b)
+PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrixBody* b, Location l)
+	: PortMatrixComponent (b), _location (l)
 {
-	
+
 }
 
 void
@@ -87,7 +87,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 	_width += _height / tan (angle ());
 }
 
-uint32_t
+double
 PortMatrixColumnLabels::basic_text_x_pos (int c) const
 {
 	return column_width() / 2 +
@@ -105,16 +105,16 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
         /* BUNDLE PARALLELOGRAM-TYPE-THING AND NAME */
 
-	uint32_t x = 0;
+	double x = 0;
 	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->column_bundles().begin (); i != _body->column_bundles().end(); ++i) {
 
 		Gdk::Color colour = get_a_bundle_colour (i - _body->column_bundles().begin ());
 		set_source_rgb (cr, colour);
 
-		uint32_t const w = (*i)->nchannels() * column_width();
+		double const w = (*i)->nchannels() * column_width();
 
-		uint32_t x_ = x;
-		uint32_t y_ = _height;
+		double x_ = x;
+		double y_ = _height;
 		
 		cairo_move_to (cr, x_, y_);
 		x_ += w;
@@ -132,14 +132,25 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 		set_source_rgb (cr, text_colour());
 
-		uint32_t const rl = 3 * name_pad() + _longest_channel_name;
 
-		cairo_move_to (
-			cr,
-			x + basic_text_x_pos (0) + rl * cos (angle()),
-			_height - rl * sin (angle())
-			);
-		
+		if (_location == TOP) {
+			
+			double const rl = 3 * name_pad() + _longest_channel_name;
+			cairo_move_to (
+				cr,
+				x + basic_text_x_pos (0) + rl * cos (angle()),
+				_height - rl * sin (angle())
+				);
+			
+		} else if (_location == BOTTOM) {
+
+			cairo_move_to (
+				cr,
+				x + basic_text_x_pos (0),
+				_height - name_pad() * sin (angle())
+				);
+		}
+			
 		cairo_save (cr);
 		cairo_rotate (cr, -angle());
 		cairo_show_text (cr, (*i)->name().c_str());
@@ -156,21 +167,42 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 
-			uint32_t const p = _longest_channel_name + (2 * name_pad());
-			uint32_t const w = column_width();
+			double const lc = _longest_channel_name + (2 * name_pad());
+			double const lb = _longest_bundle_name + (2 * name_pad());
+			double const w = column_width();
 
-			uint32_t x_ = x;
-			uint32_t y_ = _height;
-			cairo_move_to (cr, x_, y_);
-			x_ += w;
-			cairo_line_to (cr, x_, y_);
-			x_ += p * cos (angle());
-			y_ -= p * sin (angle());
- 			cairo_line_to (cr, x_, y_);
- 			x_ -= column_width() * pow (sin (angle()), 2);
- 			y_ -= column_width() * sin (angle()) * cos (angle());
- 			cairo_line_to (cr, x_, y_);
- 			cairo_line_to (cr, x, _height);
+			if (_location == BOTTOM) {
+
+				double x_ = x + _height / tan (angle()) + w;
+				double const ix = x_;
+				double y_ = 0;
+				cairo_move_to (cr, x_, y_);
+				x_ -= w;
+				cairo_line_to (cr, x_, y_);
+				x_ -= lb * cos (angle());
+				y_ += lb * sin (angle());
+				cairo_line_to (cr, x_, y_);
+				x_ += w * pow (sin (angle()), 2);
+				y_ += w * sin (angle()) * cos (angle());
+				cairo_line_to (cr, x_, y_);
+				cairo_line_to (cr, ix, 0);
+
+			} else if (_location == TOP) {
+
+				double x_ = x;
+				double y_ = _height;
+				cairo_move_to (cr, x_, y_);
+				x_ += w;
+				cairo_line_to (cr, x_, y_);
+				x_ += lc * cos (angle());
+				y_ -= lc * sin (angle());
+				cairo_line_to (cr, x_, y_);
+				x_ -= column_width() * pow (sin (angle()), 2);
+				y_ -= column_width() * sin (angle()) * cos (angle());
+				cairo_line_to (cr, x_, y_);
+				cairo_line_to (cr, x, _height);
+
+			}
 
 			Gdk::Color colour = get_a_bundle_colour (i - _body->column_bundles().begin());
 			set_source_rgb (cr, colour);
@@ -180,7 +212,13 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 			cairo_stroke (cr);
 
 			set_source_rgb (cr, text_colour());
-			cairo_move_to (cr, x + basic_text_x_pos(j), _height - name_pad() * sin (angle()));
+
+			if (_location == TOP) {
+				cairo_move_to (cr, x + basic_text_x_pos(j), _height - name_pad() * sin (angle()));
+			} else if (_location == BOTTOM) {
+				double const rl = 3 * name_pad() + _longest_bundle_name;
+				cairo_move_to (cr, x + basic_text_x_pos(j) + rl * cos (angle ()), _height - rl * sin (angle()));
+			}
 			
 			cairo_save (cr);
 			cairo_rotate (cr, -angle());
