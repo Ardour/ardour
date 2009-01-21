@@ -47,8 +47,8 @@ public:
 	virtual ~Parameter() {}
     
 	inline uint32_t type()    const { return _type; }
-	inline uint32_t id()      const { return _id; }
 	inline uint8_t  channel() const { return _channel; }
+	inline uint32_t id()      const { return _id; }
 
 	/** Equivalence operator
 	 * It is obvious from the definition that this operator
@@ -56,7 +56,7 @@ public:
 	 * (see: http://www.sgi.com/tech/stl/StrictWeakOrdering.html)
 	 */
 	inline bool operator==(const Parameter& id) const {
-		return (_type == id._type && _id == id._id && _channel == id._channel);
+		return (_type == id._type && _channel == id._channel && _id == id._id );
 	}
 	
 	/** Strict weak ordering
@@ -68,9 +68,11 @@ public:
 	 * <li>Irreflexivity: f(x, x) is false because of the irreflexivity of \c < in each branch.</li>
 	 * <li>Antisymmetry: given x != y, f(x, y) implies !f(y, x) because of the same 
 	 *     property of \c < in each branch and the symmetry of operator==. </li>
-	 * <li>Transitivity: let f(x, y) and f(y, z) be true.
-	 *    We prove by contradiction, assuming the contrary (f(x, z) is false).
-	 *    That would imply exactly one of the following:
+	 * <li>Transitivity: let f(x, y) and f(y, z) => f(x, z) be true.
+	 *    We prove by contradiction, assuming the contrary:
+	 *    f(x, y) and f(x, z) hold => !f(x, z) 
+	 *    
+	 *    That implies one of the following:
 	 * 	  <ol>
 	 *      <li> x == z which contradicts the assumption f(x, y) and f(y, x)
 	 *                 because of antisymmetry.
@@ -87,12 +89,12 @@ public:
 	 * </li>
 	 * </ol>
 	 */
-	inline bool operator<(const Parameter& id) const {
-		if (_type < id._type) {
+	inline bool operator<(const Parameter& other) const {
+		if (_type < other._type) {
 			return true;
-		} else if (_type == id._type && _id < id._id) {
+		} else if (_type == other._type && _channel < other._channel) {
 			return true;
-		} else if (_id == id._id && _channel < id._channel) {
+		} else if (_type == other._type && _channel == other._channel && _id < other._id ) {
 			return true;
 		}
 		

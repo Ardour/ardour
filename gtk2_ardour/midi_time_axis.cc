@@ -304,13 +304,15 @@ MidiTimeAxisView::build_automation_action_menu ()
 	automation_items.push_back (SeparatorElem());
 	automation_items.push_back (MenuElem (_("Controller..."), 
 			mem_fun(*this, &MidiTimeAxisView::add_cc_track)));
+	automation_items.push_back (MenuElem (_("Program Change"), 
+			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
+				Evoral::Parameter(MidiPgmChangeAutomation))));	
 	automation_items.push_back (MenuElem (_("Bender"), 
 			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
 				Evoral::Parameter(MidiPitchBenderAutomation))));
 	automation_items.push_back (MenuElem (_("Pressure"), 
 			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
 				Evoral::Parameter(MidiChannelPressureAutomation))));
-
 }
 
 Gtk::Menu*
@@ -467,48 +469,56 @@ MidiTimeAxisView::add_cc_track()
 void
 MidiTimeAxisView::add_parameter_track(const Evoral::Parameter& param)
 {
-	create_automation_child(param, true);
+	if (	param.type() != MidiCCAutomation &&
+			param.type() != MidiPgmChangeAutomation &&
+			param.type() != MidiPitchBenderAutomation &&
+			param.type() != MidiChannelPressureAutomation
+	   ) {
+		error << "MidiTimeAxisView: unknown automation child "
+			<< ARDOUR::EventTypeMap::instance().to_symbol(param) << endmsg;
+		return;
+	} 
+
+	// create the parameter lane for each selected channel
+	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	
+	for (uint8_t i = 0; i < 16; i++) {
+		if (selected_channels & (0x0001 << i)) {
+			Evoral::Parameter param_with_channel(param.type(), i, param.id());
+			create_automation_child(param_with_channel, true);
+		}
+	}
 }
 
 void
 MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
-	if (	param.type() == MidiCCAutomation ||
-			param.type() == MidiPgmChangeAutomation ||
-			param.type() == MidiPitchBenderAutomation ||
-			param.type() == MidiChannelPressureAutomation
-	   ) {
-	
-		/* These controllers are region "automation", so we do not create
-		 * an AutomationList/Line for the track */
+	/* These controllers are region "automation", so we do not create
+	 * an AutomationList/Line for the track */
 
-		AutomationTracks::iterator existing = _automation_tracks.find(param);
-		if (existing != _automation_tracks.end())
-			return;
+	AutomationTracks::iterator existing = _automation_tracks.find(param);
+	if (existing != _automation_tracks.end())
+		return;
 
-		boost::shared_ptr<AutomationControl> c
-			= boost::dynamic_pointer_cast<AutomationControl>(_route->data().control(param));
+	boost::shared_ptr<AutomationControl> c
+		= boost::dynamic_pointer_cast<AutomationControl>(_route->data().control(param));
 
-		if (!c) {
-			c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(param));
-			_route->add_control(c);
-		}
-
-		boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
-				_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
-				_editor,
-				*this,
-				true,
-				parent_canvas,
-				_route->describe_parameter(param)));
-		
-		add_automation_child(param, track, show);
-
-	} else {
-		error << "MidiTimeAxisView: unknown automation child "
-			<< ARDOUR::EventTypeMap::instance().to_symbol(param) << endmsg;
+	if (!c) {
+		c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(param));
+		_route->add_control(c);
 	}
+
+	boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
+			_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
+			_editor,
+			*this,
+			true,
+			parent_canvas,
+			_route->describe_parameter(param)));
+	
+	add_automation_child(param, track, show);
 }
+
 
 void
 MidiTimeAxisView::route_active_changed ()

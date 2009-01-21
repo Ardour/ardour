@@ -1665,7 +1665,8 @@ RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 	if (!ran) {
 		return;
 	}
-
+	
+	// if Evoral::Parameter::operator< doesn't obey strict weak ordering, we may crash here....
 	_show_automation.erase(param);
 	ran->track->get_state_node()->add_property (X_("shown"), X_("no"));
 
