@@ -85,17 +85,17 @@ NewSessionDialog::NewSessionDialog()
 	m_template = new Gtk::FileChooserButton();
 	m_create_control_bus = new Gtk::CheckButton(_("Create monitor bus"));
 	
-	Gtk::Adjustment *m_control_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 10));
+	Gtk::Adjustment *m_control_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 0));
 	m_control_bus_channel_count = new Gtk::SpinButton(*m_control_bus_channel_count_adj, 1, 0);
 	
-	Gtk::Adjustment *m_master_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 10));
+	Gtk::Adjustment *m_master_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 0));
 	m_master_bus_channel_count = new Gtk::SpinButton(*m_master_bus_channel_count_adj, 1, 0);
 	m_create_master_bus = new Gtk::CheckButton(_("Create master bus"));
 	advanced_table = new Gtk::Table(2, 2, true);
 	m_connect_inputs = new Gtk::CheckButton(_("Automatically connect to physical inputs"));
 	m_limit_input_ports = new Gtk::CheckButton(_("Use only"));
 	
-	Gtk::Adjustment *m_input_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 10));
+	Gtk::Adjustment *m_input_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 0));
 	m_input_limit_count = new Gtk::SpinButton(*m_input_limit_count_adj, 1, 0);
 	input_port_limit_hbox = new Gtk::HBox(false, 0);
 	input_port_vbox = new Gtk::VBox(false, 0);
@@ -108,7 +108,7 @@ NewSessionDialog::NewSessionDialog()
 	m_connect_outputs = new Gtk::CheckButton(_("Automatically connect outputs"));
 	m_limit_output_ports = new Gtk::CheckButton(_("Use only"));
 	
-	Gtk::Adjustment *m_output_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 10));
+	Gtk::Adjustment *m_output_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 0));
 	m_output_limit_count = new Gtk::SpinButton(*m_output_limit_count_adj, 1, 0);
 	output_port_limit_hbox = new Gtk::HBox(false, 0);
 	output_port_vbox = new Gtk::VBox(false, 0);
