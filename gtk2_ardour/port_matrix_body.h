@@ -63,7 +63,7 @@ public:
 	void set_xoffset (uint32_t);
 	void set_yoffset (uint32_t);
 
-	void repaint_grid ();
+	void rebuild_and_draw_grid ();
 
 protected:
 	bool on_expose_event (GdkEventExpose *);
@@ -73,8 +73,8 @@ protected:
 
 private:
 	void compute_rectangles ();
-	void repaint_column_labels ();
-	void repaint_row_labels ();
+	void rebuild_and_draw_column_labels ();
+	void rebuild_and_draw_row_labels ();
 	
 	PortMatrix* _port_matrix;
 	PortMatrixColumnLabels _column_labels;

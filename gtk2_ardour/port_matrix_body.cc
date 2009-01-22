@@ -232,14 +232,14 @@ PortMatrixBody::setup (
 	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::iterator i = _row_bundles.begin(); i != _row_bundles.end(); ++i) {
 		
 		_bundle_connections.push_back (
-			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::repaint_row_labels))
+			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels))
 			);
 		
 	}
 
 	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::iterator i = _column_bundles.begin(); i != _column_bundles.end(); ++i) {
 		_bundle_connections.push_back (
-			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::repaint_column_labels))
+			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels))
 			);
 	}
 	
@@ -318,22 +318,22 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 }
 
 void
-PortMatrixBody::repaint_grid ()
+PortMatrixBody::rebuild_and_draw_grid ()
 {
-	_grid.require_render ();
+	_grid.require_rebuild ();
 	queue_draw ();
 }
 
 void
-PortMatrixBody::repaint_column_labels ()
+PortMatrixBody::rebuild_and_draw_column_labels ()
 {
-	_column_labels.require_render ();
+	_column_labels.require_rebuild ();
 	queue_draw ();
 }
 
 void
-PortMatrixBody::repaint_row_labels ()
+PortMatrixBody::rebuild_and_draw_row_labels ()
 {
-	_row_labels.require_render ();
+	_row_labels.require_rebuild ();
 	queue_draw ();
 }

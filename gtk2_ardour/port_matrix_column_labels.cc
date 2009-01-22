@@ -167,8 +167,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 
-			double const lc = _longest_channel_name + (2 * name_pad());
-			double const lb = _longest_bundle_name + (2 * name_pad());
+			double const lc = _longest_channel_name + name_pad();
 			double const w = column_width();
 
 			if (_location == BOTTOM) {
@@ -179,8 +178,8 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 				cairo_move_to (cr, x_, y_);
 				x_ -= w;
 				cairo_line_to (cr, x_, y_);
-				x_ -= lb * cos (angle());
-				y_ += lb * sin (angle());
+				x_ -= lc * cos (angle());
+				y_ += lc * sin (angle());
 				cairo_line_to (cr, x_, y_);
 				x_ += w * pow (sin (angle()), 2);
 				y_ += w * sin (angle()) * cos (angle());

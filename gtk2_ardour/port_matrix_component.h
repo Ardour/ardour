@@ -36,7 +36,13 @@ public:
 	void setup ();
 	GdkPixmap* get_pixmap (GdkDrawable *);
 	std::pair<uint32_t, uint32_t> dimensions ();
+
 	void require_render () {
+		_render_required = true;
+	}
+	
+	void require_rebuild () {
+		_dimension_computation_required = true;
 		_render_required = true;
 	}
 

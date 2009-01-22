@@ -217,5 +217,5 @@ PortMatrix::disassociate_all ()
 		}
 	}
 
-	_body.repaint_grid ();
+	_body.rebuild_and_draw_grid ();
 }
