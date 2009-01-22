@@ -43,7 +43,7 @@ public:
 
 	virtual ~Port ();
 
-	/** @return Port name (excluding prefix) */
+	/** @return Port short name */
 	std::string name () const {
 		return _name;
 	}
@@ -124,7 +124,7 @@ private:
 	bool _last_monitor;
 	nframes_t _latency;
 
-	std::string _name; ///< port name (excluding prefix)
+	std::string _name; ///< port short name
 	Flags _flags; ///< flags
 
 	/// list of JACK ports that we are connected to; we only keep this around

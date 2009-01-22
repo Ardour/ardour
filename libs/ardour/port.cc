@@ -27,11 +27,14 @@
 
 ARDOUR::AudioEngine* ARDOUR::Port::_engine = 0;
 
+/** @param n Port short name */
 ARDOUR::Port::Port (std::string const & n, DataType t, Flags f, bool e) : _jack_port (0), _last_monitor (false), _latency (0), _name (n), _flags (f)
 {
 	/* Unfortunately we have to pass the DataType into this constructor so that we can
 	   create the right kind of JACK port; aside from this we'll use the virtual function type ()
 	   to establish type. */
+
+	assert (_name.find_first_of (':') == std::string::npos);
 	
 	if (e) {
 		try {
@@ -114,13 +117,16 @@ ARDOUR::Port::disconnect_all ()
 bool
 ARDOUR::Port::connected_to (std::string const & o) const
 {
-	if (_jack_port && jack_port_connected_to (_jack_port, o.c_str ())) {
+	std::string const full = _engine->make_port_name_non_relative (o);
+	std::string const shrt = _engine->make_port_name_non_relative (o);
+	
+	if (_jack_port && jack_port_connected_to (_jack_port, full.c_str ())) {
 		/* connected via JACK */
 		return true;
 	}
 
 	for (std::set<Port*>::iterator i = _connections.begin (); i != _connections.end (); ++i) {
-		if ((*i)->name () == o) {
+		if ((*i)->name () == shrt) {
 			/* connected internally */
 			return true;
 		}
@@ -129,6 +135,7 @@ ARDOUR::Port::connected_to (std::string const & o) const
 	return false;
 }
 
+/** @param o Filled in with port full names of ports that we are connected to */
 int
 ARDOUR::Port::get_connections (std::vector<std::string> & c) const
 {
@@ -147,7 +154,8 @@ ARDOUR::Port::get_connections (std::vector<std::string> & c) const
 
 	/* Internal connections */
 	for (std::set<Port*>::iterator i = _connections.begin (); i != _connections.end (); ++i) {
-		c.push_back ((*i)->name ());
+		std::string const full = _engine->make_port_name_non_relative ((*i)->name());
+		c.push_back (full);
 		++n;
 	}
 
@@ -158,8 +166,10 @@ int
 ARDOUR::Port::connect (std::string const & other)
 {
 	/* caller must hold process lock */
+
+	std::string const other_shrt = _engine->make_port_name_non_relative (other);
 	
-	Port* p = _engine->get_port_by_name_locked (other);
+	Port* p = _engine->get_port_by_name_locked (other_shrt);
 	
 	int r;
 	
@@ -174,13 +184,12 @@ ARDOUR::Port::connect (std::string const & other)
 			make_external ();
 		}
 
-		std::string const this_nr = _engine->make_port_name_non_relative (_name);
-		std::string const other_nr = _engine->make_port_name_non_relative (other);
+		std::string const this_shrt = _engine->make_port_name_non_relative (_name);
 
 		if (sends_output ()) {
-			r = jack_connect (_engine->jack (), this_nr.c_str (), other_nr.c_str ());
+			r = jack_connect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
 		} else {
-			r = jack_connect (_engine->jack (), other_nr.c_str (), this_nr.c_str());
+			r = jack_connect (_engine->jack (), other_shrt.c_str (), this_shrt.c_str());
 		}
 
 		if (r == 0) {
@@ -195,8 +204,10 @@ int
 ARDOUR::Port::disconnect (std::string const & other)
 {
 	/* caller must hold process lock */
+
+	std::string const other_shrt = _engine->make_port_name_non_relative (other);
 	
-	Port* p = _engine->get_port_by_name_locked (other);
+	Port* p = _engine->get_port_by_name_locked (other_shrt);
 	int r;
 
 	if (p && !p->external ()) {
@@ -205,13 +216,12 @@ ARDOUR::Port::disconnect (std::string const & other)
 	} else {
 		/* disconnect using name */
 
-		std::string const this_nr = _engine->make_port_name_non_relative (_name);
-		std::string const other_nr = _engine->make_port_name_non_relative (other);
+		std::string const this_shrt = _engine->make_port_name_non_relative (_name);
 
 		if (sends_output ()) {
-			r = jack_disconnect (_engine->jack (), this_nr.c_str (), other_nr.c_str ());
+			r = jack_disconnect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
 		} else {
-			r = jack_disconnect (_engine->jack (), other_nr.c_str (), this_nr.c_str ());
+			r = jack_disconnect (_engine->jack (), other_shrt.c_str (), this_shrt.c_str ());
 		}
 
 		if (r == 0) {
@@ -224,7 +234,7 @@ ARDOUR::Port::disconnect (std::string const & other)
 
 
 bool
-ARDOUR::Port::connected_to (Port *o) const
+ARDOUR::Port::connected_to (Port* o) const
 {
 	return connected_to (o->name ());
 }
@@ -355,10 +365,12 @@ ARDOUR::Port::reconnect ()
 	return 0;
 }
 
-
+/** @param n Short name */
 int
 ARDOUR::Port::set_name (std::string const & n)
 {
+	assert (_name.find_first_of (':') == std::string::npos);
+
 	int r = 0;
 	
 	if (_jack_port) {
