@@ -548,7 +548,6 @@
                </menu>
                <separator/>
 	       <menu action='MiscOptions'>
-               	     <menuitem action='UseOSC'/>
                	     <menuitem action='StopPluginsWithTransport'/>
                	     <menuitem action='NewPluginsActive'/>
                	     <menuitem action='DoNotRunPluginsWhileRecording'/>
