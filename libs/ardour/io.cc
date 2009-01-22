@@ -295,7 +295,7 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 	/* ********** MIDI ********** */
 
 	// No MIDI, we're done here
-	if (bufs.count().n_midi() == 0) {
+	if (bufs.count().n_midi() == 0 || output_buffers().count().n_midi () == 0) {
 		return;
 	}
 
