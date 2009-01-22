@@ -375,7 +375,7 @@ ARDOUR::Port::set_name (std::string const & n)
 	
 	if (_jack_port) {
 		r = jack_port_set_name (_jack_port, n.c_str());
-		if (r) {
+		if (r == 0) {
 			_name = n;
 		}
 	} else {
