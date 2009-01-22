@@ -47,7 +47,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	vbox.pack_start (hbox, false, false, false);
 	vbox.pack_start (panners, false,false);
 
-	io = manage (new IOSelector (se, s->io(), false));
+	io = manage (new IOSelector (se, s->io(), true));
 	
 	pack_start (vbox, false, false);
 
