@@ -10,15 +10,18 @@
            <menuitem action='Save'/>
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
+           <menu name='Metadata' action='Metadata'>
+               <menuitem action='EditMetadata'/>
+               <menuitem action='ImportMetadata'/>
+           </menu>
            <separator/>
            <menuitem action='AddTrackBus'/>	
            <separator/>
            <menuitem action='addExistingAudioFiles'/>
+           <menuitem action='importFromSession'/>
            <separator/>
            <menu name='Export' action='Export'>
-               <menuitem action='ExportSession'/>
-               <menuitem action='ExportSelection'/>
-               <menuitem action='ExportRangeMarkers'/>
+               <menuitem action='ExportAudio'/>
            </menu>
            <separator/>
            <menu name='Cleanup' action='Cleanup'>
@@ -390,6 +393,7 @@
 
 	       <menuitem action='ToggleMaximalEditor'/>
 	       <menuitem action='show-editor-mixer'/>
+	       <menuitem action='show-editor-list'/>
                <menuitem action='ToggleMeasureVisibility'/>
                <menuitem action='toggle-waveform-visible'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
@@ -420,6 +424,7 @@
                <menuitem action='ToggleInspector'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleKeyEditor'/>
+               <menuitem action='ToggleBundleManager'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
                <menuitem action='toggle-rhythm-ferret'/>
@@ -562,6 +567,7 @@
 	       	     <menuitem action='PrimaryClockDeltaEditCursor'/>
 	       	     <menuitem action='SecondaryClockDeltaEditCursor'/>
 	       	     <menuitem action='OnlyCopyImportedFiles'/>
+	       	     <menuitem action='ShowTrackMeters'/>
 	       	     <menuitem action='DefaultNarrowMS'/>
                	     <menuitem action='link-region-and-track-selection'/>
 	             <menuitem action='NameNewMarkers'/>
@@ -591,7 +597,7 @@
 	   <menuitem action="toggle-loop-punch-ruler"/>
      </popup>
 
-     <popup name='redirectmenu'>
+     <popup name='processormenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
