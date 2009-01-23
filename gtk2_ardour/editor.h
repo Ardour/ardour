@@ -111,6 +111,7 @@ class SoundFileOmega;
 class RhythmFerret;
 class AnalysisWindow;
 class BundleManager;
+class GlobalPortMatrixWindow;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -396,6 +397,7 @@ class Editor : public PublicEditor
 
 	void show_rhythm_ferret();
 	void show_bundle_manager ();
+	void show_global_port_matrix (ARDOUR::DataType);
 
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
@@ -2350,6 +2352,7 @@ public:
 
 	RhythmFerret* rhythm_ferret;
 	BundleManager* _bundle_manager;
+	GlobalPortMatrixWindow* _global_port_matrix[ARDOUR::DataType::num_types];
 
 	void fit_tracks ();
 	void set_track_height (uint32_t h);

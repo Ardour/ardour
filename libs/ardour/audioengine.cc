@@ -695,28 +695,13 @@ AudioEngine::connect (const string& source, const string& destination)
 	Port* src = get_port_by_name_locked (s);
 	Port* dst = get_port_by_name_locked (d);
 
-	if (src && dst) {
-
-		/* both ports are known to us, so do the internal connect stuff */
-
-		ret = src->connect (dst);
-
-	} else if (src || dst) {
-
-		/* one port is known to us, try to connect it to something external */
-
 		if (src) {
 			ret = src->connect (d);
-		} else {
+	} else if (dst) {
 			ret = dst->connect (s);
-		}
-
 	} else {
-
 		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
-
 		ret = -1;
-		
 	}
 	
 	if (ret > 0) {
@@ -754,30 +739,14 @@ AudioEngine::disconnect (const string& source, const string& destination)
 	Port* src = get_port_by_name_locked (s);
 	Port* dst = get_port_by_name_locked (d);
 
-	if (src && dst) {
-
-		/* both ports are known to us, so do the internal disconnect stuff */
-		
-		ret = src->disconnect (dst);
-
-	} else if (src || dst) {
-
-		/* one port is known to us, try to disconnect it from something external */
-
 		if (src) {
 			ret = src->disconnect (d);
-		} else {
+	} else if (dst) {
 			ret = dst->disconnect (s);
-		}
-
 	} else {
-
 		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
-		
 		ret = -1;
-		
 	}
-	
 	return ret;
 }
 

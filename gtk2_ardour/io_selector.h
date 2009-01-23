@@ -40,7 +40,7 @@ class IOSelector : public PortMatrix {
 		uint32_t
 		);
 	
-	bool get_state (
+	State get_state (
 		boost::shared_ptr<ARDOUR::Bundle>,
 		uint32_t,
 		boost::shared_ptr<ARDOUR::Bundle>,
@@ -70,7 +70,6 @@ class IOSelectorWindow : public ArdourDialog
 {
   public:
 	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool for_input, bool can_cancel = false);
-	~IOSelectorWindow ();
 
 	IOSelector& selector() { return _selector; }
 

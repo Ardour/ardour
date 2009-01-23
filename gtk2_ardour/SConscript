@@ -185,6 +185,7 @@ plugin_eq_gui.cc
 gain_meter.cc
 generic_pluginui.cc
 ghostregion.cc
+global_port_matrix.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
 io_selector.cc

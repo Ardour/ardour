@@ -58,8 +58,9 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 void
 IOSelector::setup ()
 {
-	_our_bundle = boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle);
-	_our_bundle->set_name (_io->name());
+	_our_bundles.clear ();
+	_our_bundles.push_back (boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle));
+	_our_bundles.front()->set_name (_io->name());
 
 	if (offering_input ()) {
 		const PortSet& ps (_io->outputs());
@@ -68,8 +69,8 @@ IOSelector::setup ()
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %d"), j + 1);
-			_our_bundle->add_channel (buf);
-			_our_bundle->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
+			_our_bundles.front()->add_channel (buf);
+			_our_bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 		
@@ -81,8 +82,8 @@ IOSelector::setup ()
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("in %d"), j + 1);
-			_our_bundle->add_channel (buf);
-			_our_bundle->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
+			_our_bundles.front()->add_channel (buf);
+			_our_bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 
@@ -137,7 +138,7 @@ IOSelector::set_state (
 	}
 }
 
-bool
+PortMatrix::State
 IOSelector::get_state (
 	boost::shared_ptr<ARDOUR::Bundle> ab,
 	uint32_t ac,
@@ -159,12 +160,12 @@ IOSelector::get_state (
 			
 			if (!f->connected_to (*j)) {
 				/* if any one thing is not connected, all bets are off */
-				return false;
+				return NOT_ASSOCIATED;
 			}
 		}
 	}
 
-	return true;
+	return ASSOCIATED;
 }
 
 uint32_t
@@ -316,11 +317,6 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	show_all ();
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
-}
-
-IOSelectorWindow::~IOSelectorWindow()
-{
-	
 }
 
 void

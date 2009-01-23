@@ -429,6 +429,8 @@
                <menuitem action='ToggleBigClock'/>
                <menuitem action='toggle-rhythm-ferret'/>
                <menuitem action='toggle-bundle-manager'/>
+               <menuitem action='toggle-audio-connection-manager'/>
+               <menuitem action='toggle-midi-connection-manager'/>
    	       <separator/>
         </menu>
         <menu name='Options' action='Options'>

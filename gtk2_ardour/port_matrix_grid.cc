@@ -117,8 +117,10 @@ PortMatrixGrid::render (cairo_t* cr)
 				y = by;
 				for (uint32_t l = 0; l < (*j)->nchannels (); ++l) {
 					
-					if (_port_matrix->get_state (*j, l, *i, k)) {
+					PortMatrix::State const s = _port_matrix->get_state (*j, l, *i, k);
 						
+					switch (s) {
+					case PortMatrix::ASSOCIATED:
 						set_source_rgba (cr, association_colour(), 0.5);
 						cairo_arc (
 							cr,
@@ -130,8 +132,24 @@ PortMatrixGrid::render (cairo_t* cr)
 							);
 
 						cairo_fill (cr);
+						break;
+
+					case PortMatrix::UNKNOWN:
+						set_source_rgba (cr, unknown_colour(), 0.5);
+						cairo_rectangle (
+							cr,
+							x + thick_grid_line_width(),
+							y + thick_grid_line_width(),
+							column_width() - 2 * thick_grid_line_width(),
+							row_height() - 2 * thick_grid_line_width()
+							);
+						cairo_fill (cr);
+						break;
 					
+					case PortMatrix::NOT_ASSOCIATED:
+						break;
 					}
+
 					y += row_height();
 				}
 				x += column_width();

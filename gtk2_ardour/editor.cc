@@ -88,6 +88,7 @@
 #include "tempo_lines.h"
 #include "analysis_window.h"
 #include "bundle_manager.h"
+#include "global_port_matrix.h"
 
 #include "i18n.h"
 
@@ -349,6 +350,9 @@ Editor::Editor ()
 	zoomed_to_region = false;
 	rhythm_ferret = 0;
 	_bundle_manager = 0;
+        for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+		_global_port_matrix[*i] = 0;
+	}
 	allow_vertical_scroll = false;
 	no_save_visual = false;
 	need_resize_line = false;
@@ -5137,6 +5141,16 @@ Editor::show_bundle_manager ()
 	}
 
 	_bundle_manager->show ();
+}
+
+void
+Editor::show_global_port_matrix (ARDOUR::DataType t)
+{
+	if (_global_port_matrix[t] == 0) {
+		_global_port_matrix[t] = new GlobalPortMatrixWindow (*session, t);
+	}
+
+	_global_port_matrix[t]->show ();
 }
 
 void

@@ -78,13 +78,19 @@ public:
 		uint32_t k
 		) = 0;
 
+	enum State {
+		ASSOCIATED,
+		NOT_ASSOCIATED,
+		UNKNOWN
+	};
+
 	/** @param ab Our bundle.
 	 *  @param ac Channel on our bundle.
 	 *  @param bb Other bundle.
 	 *  @arapm bc Channel on other bundle.
-	 *  @return true if r is connected to p, otherwise false.
+	 *  @return state
 	 */
-	virtual bool get_state (
+	virtual State get_state (
 		boost::shared_ptr<ARDOUR::Bundle> ab,
 		uint32_t ac,
 		boost::shared_ptr<ARDOUR::Bundle> bb,
@@ -99,19 +105,18 @@ public:
 	void setup_scrollbars ();
 
 protected:
-	/// our bundle
-	boost::shared_ptr<ARDOUR::Bundle> _our_bundle;
+
+	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _our_bundles;
+	/// list of port groups
+	PortGroupList _port_group_list;
 	
 private:
 
 	void hscroll_changed ();
 	void vscroll_changed ();
-	std::string common_prefix (std::vector<std::string> const &) const;
 	
 	/// true to offer inputs, otherwise false
 	bool _offer_inputs;
-	/// list of port groups
-	PortGroupList _port_group_list;
 	/// port type that we are working with
 	ARDOUR::DataType _type;
 

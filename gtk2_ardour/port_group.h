@@ -38,15 +38,15 @@ class PortMatrix;
  *  type e.g. busses, tracks, system.  Each group has 0 or more bundles
  *  and 0 or more ports, where the ports are not in the bundles.
  */
-class PortGroup
+class PortGroup : public sigc::trackable
 {
-  public:
+public:
 	/** PortGroup constructor.
 	 * @param n Name.
 	 * @param v true if group should be visible in the UI, otherwise false.
 	 */
 	PortGroup (std::string const & n, bool v)
-		: name (n), visible (v) {}
+		: name (n), _visible (v) {}
 
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	void add_port (std::string const &);
@@ -55,7 +55,19 @@ class PortGroup
 	std::string name; ///< name for the group
 	std::vector<boost::shared_ptr<ARDOUR::Bundle> > bundles;
 	std::vector<std::string> ports;
-	bool visible; ///< true if the group is visible in the UI
+	bool visible () const {
+		return _visible;
+	}
+
+	void set_visible (bool v) {
+		_visible = v;
+		VisibilityChanged ();
+	}
+
+	sigc::signal<void> VisibilityChanged;
+
+private:	
+	bool _visible; ///< true if the group is visible in the UI
 };
 
 /// The UI for a PortGroup
@@ -78,7 +90,7 @@ class PortGroupUI
 };
 
 /// A list of PortGroups
-class PortGroupList : public std::list<PortGroup*>
+class PortGroupList : public std::list<PortGroup*>, public sigc::trackable
 {
   public:
 	enum Mask {
@@ -93,9 +105,15 @@ class PortGroupList : public std::list<PortGroup*>
 	void refresh ();
 	void set_type (ARDOUR::DataType);
 	void set_offer_inputs (bool);
+	std::vector<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+	void take_visibility_from (PortGroupList const &);
+
+	sigc::signal<void> VisibilityChanged;
 	
   private:
 	void maybe_add_session_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	std::string common_prefix (std::vector<std::string> const &) const;
+	void visibility_changed ();
 	
 	ARDOUR::Session& _session;
 	ARDOUR::DataType _type;

@@ -187,7 +187,7 @@ PortMatrixBody::compute_rectangles ()
 
 		_grid_rect.set_x (_alloc_width - x);
 		_grid_rect.set_width (x);
-		_column_labels_rect.set_width (std::min (_alloc_width, col.first));
+		_column_labels_rect.set_width (col.first - grid.first + x);
 		_column_labels_rect.set_x (_alloc_width - _column_labels_rect.get_width());
 
 		_row_labels_rect.set_width (std::min (_alloc_width - x, row.first));

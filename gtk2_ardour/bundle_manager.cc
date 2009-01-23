@@ -38,7 +38,7 @@ BundleEditorMatrix::BundleEditorMatrix (
 		PortGroupList::Mask (PortGroupList::SYSTEM | PortGroupList::OTHER)
 		)
 {
-	_our_bundle = bundle;
+	_our_bundles.push_back (bundle);
 }
 
 void
@@ -61,7 +61,7 @@ BundleEditorMatrix::set_state (
 	}
 }
 
-bool
+PortMatrix::State
 BundleEditorMatrix::get_state (
 	boost::shared_ptr<ARDOUR::Bundle> ab,
 	uint32_t ac,
@@ -72,11 +72,11 @@ BundleEditorMatrix::get_state (
 	ARDOUR::Bundle::PortList const& pl = bb->channel_ports (bc);
 	for (ARDOUR::Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 		if (!ab->port_attached_to_channel (ac, *i)) {
-			return false;
+			return NOT_ASSOCIATED;
 		}
 	}
 
-	return true;
+	return ASSOCIATED;
 }
 
 void
@@ -89,14 +89,14 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 		return;
 	}
 
-	_our_bundle->add_channel (d.get_name());
+	_our_bundles.front()->add_channel (d.get_name());
 	setup ();
 }
 
 void
 BundleEditorMatrix::remove_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
 {
-	_our_bundle->remove_channel (c);
+	_our_bundles.front()->remove_channel (c);
 	setup ();
 }
 

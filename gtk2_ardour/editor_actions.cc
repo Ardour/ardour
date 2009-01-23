@@ -564,6 +564,11 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret"), mem_fun(*this, &Editor::show_rhythm_ferret));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-bundle-manager", _("Bundle Manager"), mem_fun (*this, &Editor::show_bundle_manager));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "toggle-audio-connection-manager", _("Audio Connection Manager"), bind (mem_fun (*this, &Editor::show_global_port_matrix), ARDOUR::DataType::AUDIO));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "toggle-midi-connection-manager", _("MIDI Connection Manager"), bind (mem_fun (*this, &Editor::show_global_port_matrix), ARDOUR::DataType::MIDI));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "tab-to-transient-forwards", _("Move Forward to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), true));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -45,7 +45,7 @@ class BundleEditorMatrix : public PortMatrix
 		uint32_t k
 		);
 	
-	bool get_state (
+	State get_state (
 		boost::shared_ptr<ARDOUR::Bundle> ab,
 		uint32_t ac,
 		boost::shared_ptr<ARDOUR::Bundle> bb,

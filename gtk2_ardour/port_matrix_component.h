@@ -90,24 +90,29 @@ protected:
 
 	/* XXX I guess these colours should come from a theme, or something */
 
-	/* @return background colour */
+	/** @return background colour */
 	static Gdk::Color background_colour () {
  		return Gdk::Color ("#000000");
 	}
 
-	/* @return text colour */
+	/** @return text colour */
 	static Gdk::Color text_colour () {
 		return Gdk::Color ("#ffffff");
 	}
 
-	/* @return grid line colour */
+	/** @return grid line colour */
 	static Gdk::Color grid_colour () {
 		return Gdk::Color ("#333333");
 	}
 
-	/* @return colour of association blobs */
+	/** @return colour of association blobs */
 	static Gdk::Color association_colour () {
 		return Gdk::Color ("#00ff00");
+	}
+
+	/** @return colour to paint grid squares when they can't be associated */
+	static Gdk::Color unknown_colour () {
+		return Gdk::Color ("#cccccc");
 	}
 
 	/* XXX */

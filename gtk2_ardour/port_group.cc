@@ -67,7 +67,7 @@ PortGroupUI::PortGroupUI (PortMatrix* m, PortGroup* g)
 	, _port_group (g)
 	, _visibility_checkbutton (g->name)
 {
-	_port_group->visible = true;
+	_port_group->set_visible (true);
 	setup_visibility_checkbutton ();
 	
 	_visibility_checkbutton.signal_toggled().connect (sigc::mem_fun (*this, &PortGroupUI::visibility_checkbutton_toggled));
@@ -77,7 +77,7 @@ PortGroupUI::PortGroupUI (PortMatrix* m, PortGroup* g)
 void
 PortGroupUI::visibility_checkbutton_toggled ()
 {
-	_port_group->visible = _visibility_checkbutton.get_active ();
+	_port_group->set_visible (_visibility_checkbutton.get_active ());
 	setup_visibility_checkbutton ();
 	_port_matrix->setup ();
 }
@@ -86,8 +86,8 @@ PortGroupUI::visibility_checkbutton_toggled ()
 void
 PortGroupUI::setup_visibility_checkbutton ()
 {
-	if (_visibility_checkbutton.get_active () != _port_group->visible) {
-		_visibility_checkbutton.set_active (_port_group->visible);
+	if (_visibility_checkbutton.get_active () != _port_group->visible()) {
+		_visibility_checkbutton.set_active (_port_group->visible());
 	}
 }
 
@@ -106,6 +106,10 @@ PortGroupList::PortGroupList (ARDOUR::Session & session, ARDOUR::DataType type, 
 	  _other (_("Other"), mask & OTHER)
 {
 	refresh ();
+
+	for (iterator i = begin(); i != end(); ++i) {
+		(*i)->VisibilityChanged.connect (sigc::mem_fun (*this, &PortGroupList::visibility_changed));
+	}
 }
 
 /** Find or re-find all our bundles and set up our lists */
@@ -211,5 +215,96 @@ PortGroupList::maybe_add_session_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
 {
 	if (b->ports_are_inputs () == _offer_inputs && b->type () == _type) {
 		_system.bundles.push_back (b);
+	}
+}
+
+std::vector<boost::shared_ptr<ARDOUR::Bundle> >
+PortGroupList::bundles ()
+{
+	std::vector<boost::shared_ptr<ARDOUR::Bundle> > bundles;
+		
+	for (iterator i = begin (); i != end (); ++i) {
+		if ((*i)->visible()) {
+			
+			std::copy ((*i)->bundles.begin(), (*i)->bundles.end(), std::back_inserter (bundles));
+			
+			/* make a bundle for the ports, if there are any */
+			if (!(*i)->ports.empty()) {
+
+				boost::shared_ptr<ARDOUR::Bundle> b (new ARDOUR::Bundle ("", _type, !_offer_inputs));
+				
+				std::string const pre = common_prefix ((*i)->ports);
+				if (!pre.empty()) {
+					b->set_name (pre.substr (0, pre.length() - 1));
+				}
+
+				for (uint32_t j = 0; j < (*i)->ports.size(); ++j) {
+					std::string const p = (*i)->ports[j];
+					b->add_channel (p.substr (pre.length()));
+					b->set_port (j, p);
+				}
+					
+				bundles.push_back (b);
+			}
+		}
+	}
+
+	return bundles;
+}
+
+std::string
+PortGroupList::common_prefix (std::vector<std::string> const & p) const
+{
+	/* common prefix before '/' ? */
+	if (p[0].find_first_of ("/") != std::string::npos) {
+		std::string const fp = p[0].substr (0, (p[0].find_first_of ("/") + 1));
+		uint32_t j = 1;
+		while (j < p.size()) {
+			if (p[j].substr (0, fp.length()) != fp) {
+				break;
+			}
+			++j;
+		}
+		
+		if (j == p.size()) {
+			return fp;
+		}
+	}
+	
+	/* or before ':' ? */
+	if (p[0].find_first_of (":") != std::string::npos) {
+		std::string const fp = p[0].substr (0, (p[0].find_first_of (":") + 1));
+		uint32_t j = 1;
+		while (j < p.size()) {
+			if (p[j].substr (0, fp.length()) != fp) {
+				break;
+			}
+			++j;
+		}
+		
+		if (j == p.size()) {
+			return fp;
+		}
+	}
+
+	return "";
+}
+
+void
+PortGroupList::visibility_changed ()
+{
+	VisibilityChanged ();
+}
+
+void
+PortGroupList::take_visibility_from (PortGroupList const & o)
+{
+	iterator i = begin ();
+	const_iterator j = o.begin ();
+
+	while (i != end() && j != o.end()) {
+		(*i)->set_visible ((*j)->visible());
+		++i;
+		++j;
 	}
 }

@@ -32,8 +32,8 @@
  *  @param mask Mask of port groups to offer.
  */
 PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool offer_inputs, PortGroupList::Mask mask)
-	: _offer_inputs (offer_inputs),
-	  _port_group_list (session, type, offer_inputs, mask),
+	: _port_group_list (session, type, offer_inputs, mask),
+	  _offer_inputs (offer_inputs),
 	  _type (type),
 	  _body (this, offer_inputs ? PortMatrixBody::BOTTOM_AND_LEFT : PortMatrixBody::TOP_AND_RIGHT)
 {
@@ -77,39 +77,7 @@ void
 PortMatrix::setup ()
 {
 	_port_group_list.refresh ();
-
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > column;
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > row;
-
-	for (PortGroupList::iterator i = _port_group_list.begin (); i != _port_group_list.end (); ++i) {
-		if ((*i)->visible) {
-			
-			std::copy ((*i)->bundles.begin(), (*i)->bundles.end(), std::back_inserter (column));
-			
-			/* make a bundle for the ports, if there are any */
-			if (!(*i)->ports.empty()) {
-
-				boost::shared_ptr<ARDOUR::Bundle> b (new ARDOUR::Bundle ("", _type, !_offer_inputs));
-				
-				std::string const pre = common_prefix ((*i)->ports);
-				if (!pre.empty()) {
-					b->set_name (pre.substr (0, pre.length() - 1));
-				}
-
-				for (uint32_t j = 0; j < (*i)->ports.size(); ++j) {
-					std::string const p = (*i)->ports[j];
-					b->add_channel (p.substr (pre.length()));
-					b->set_port (j, p);
-				}
-					
-				column.push_back (b);
-			}
-		}
-	}
-
-	row.push_back (_our_bundle);
-
-	_body.setup (row, column);
+	_body.setup (_our_bundles, _port_group_list.bundles ());
 	setup_scrollbars ();
 	queue_draw ();
 }
@@ -160,44 +128,6 @@ PortMatrix::setup_scrollbars ()
 	a->set_page_increment (128);
 }
 
-std::string
-PortMatrix::common_prefix (std::vector<std::string> const & p) const
-{
-	/* common prefix before '/' ? */
-	if (p[0].find_first_of ("/") != std::string::npos) {
-		std::string const fp = p[0].substr (0, (p[0].find_first_of ("/") + 1));
-		uint32_t j = 1;
-		while (j < p.size()) {
-			if (p[j].substr (0, fp.length()) != fp) {
-				break;
-			}
-			++j;
-		}
-		
-		if (j == p.size()) {
-			return fp;
-		}
-	}
-	
-	/* or before ':' ? */
-	if (p[0].find_first_of (":") != std::string::npos) {
-		std::string const fp = p[0].substr (0, (p[0].find_first_of (":") + 1));
-		uint32_t j = 1;
-		while (j < p.size()) {
-			if (p[j].substr (0, fp.length()) != fp) {
-				break;
-			}
-			++j;
-		}
-		
-		if (j == p.size()) {
-			return fp;
-		}
-	}
-
-	return "";
-}
-
 void
 PortMatrix::disassociate_all ()
 {
@@ -207,10 +137,10 @@ PortMatrix::disassociate_all ()
 
 			for (uint32_t k = 0; k < (*j)->nchannels(); ++k) {
 
-				for (uint32_t l = 0; l < _our_bundle->nchannels(); ++l) {
+				for (uint32_t l = 0; l < _our_bundles.front()->nchannels(); ++l) {
 
 					set_state (
-						_our_bundle, l, *j, k, false, 0
+						_our_bundles.front(), l, *j, k, false, 0
 						);
 				}
 			}
