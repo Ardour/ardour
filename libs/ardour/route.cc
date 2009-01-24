@@ -458,8 +458,12 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	}
 
-	// This really should already be true...
-	bufs.set_count(pre_fader_streams());
+	/* When we entered this method, the number of bufs was set by n_process_buffers(), so
+	 * it may be larger than required.  Consider, for example, a mono track with two redirects A and B.
+	 * If A has one input and three outputs, and B three inputs and one output, n_process_buffers()
+	 * will be 3.  In this case, now we've done pre-fader redirects, we can reset the number of bufs.
+	 */
+	bufs.set_count (pre_fader_streams());
 	
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
 		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
@@ -1398,9 +1402,10 @@ Route::pre_fader_streams() const
 {
 	boost::shared_ptr<Processor> processor;
 
-	// Find the last pre-fader redirect
+	/* Find the last pre-fader redirect that isn't a send; sends don't affect the number
+	 * of streams. */
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->placement() == PreFader) {
+		if ((*i)->placement() == PreFader && boost::dynamic_pointer_cast<Send> (*i) == 0) {
 			processor = *i;
 		}
 	}
