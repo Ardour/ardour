@@ -648,7 +648,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			limit = blimit;
 
 		} else {
-			for (i = 0, n = 1; i < limit; ++i, ++n) {
+			for (i = 0, n = 1; i < blimit; ++i, ++n) {
 				memcpy (bufs.get_audio (i).data(), b, sizeof (Sample) * nframes); 
 				if (n < diskstream->n_channels().n_audio()) {
 					tmpb = diskstream->playback_buffer(n);
