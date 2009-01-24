@@ -64,6 +64,8 @@ public:
 		VisibilityChanged ();
 	}
 
+	bool has_port (std::string const &) const;
+
 	sigc::signal<void> VisibilityChanged;
 
 private:	
@@ -112,6 +114,7 @@ class PortGroupList : public std::list<PortGroup*>, public sigc::trackable
 	
   private:
 	void maybe_add_session_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	bool port_has_prefix (std::string const &, std::string const &) const;
 	std::string common_prefix (std::vector<std::string> const &) const;
 	void visibility_changed ();
 	

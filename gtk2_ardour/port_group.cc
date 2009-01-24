@@ -57,6 +57,25 @@ PortGroup::clear ()
 	ports.clear ();
 }
 
+bool
+PortGroup::has_port (std::string const& p) const
+{
+	for (vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
+		if ((*i)->offers_port_alone (p)) {
+			return true;
+		}
+	}
+
+	for (vector<std::string>::const_iterator i = ports.begin(); i != ports.end(); ++i) {
+		if (*i == p) {
+			return true;
+		}
+	}
+
+	return false;
+}
+	
+
 /** PortGroupUI constructor.
  *  @param m PortMatrix to work for.
  *  @Param g PortGroup to represent.
@@ -159,9 +178,7 @@ PortGroupList::refresh ()
 	
 	/* XXX: inserts, sends, plugin inserts? */
 	
-	/* Now we need to find the non-ardour ports; we do this by first
-	   finding all the ports that we can connect to. 
-	*/
+	/* Now find all other ports that we haven't thought of yet */
 
  	const char **ports = _session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
  							  JackPortIsInput : JackPortIsOutput);
@@ -174,31 +191,20 @@ PortGroupList::refresh ()
 		client_matching_string += ':';
 
 		while (ports[n]) {
+			
 			std::string const p = ports[n];
 
-			if (p.substr(0, strlen ("system:")) == "system:" || p.substr (0, strlen ("alsa_pcm:")) == "alsa_pcm:") {
-				/* system: or alsa_pcm: prefix */
-
-				/* see if this port is already in one of the system: bundles */
-				std::vector<boost::shared_ptr<ARDOUR::Bundle> >::iterator i = _system.bundles.begin();
-				while (i != _system.bundles.end()) {
-					if ((*i)->uses_port (p)) {
-						break;
-					}
-					++i;
-				}
-
-				if (i == _system.bundles.end()) {
-					/* it's not already in there, so add it */
+			if (!_system.has_port(p) && !_buss.has_port(p) && !_track.has_port(p) && !_other.has_port(p)) {
+				
+				if (port_has_prefix (p, "system:") ||
+				    port_has_prefix (p, "alsa_pcm") ||
+				    port_has_prefix (p, "ardour:")) {
 					_system.add_port (p);
-				}
-			} else {
-				if (p.substr(0, client_matching_string.length()) != client_matching_string) {
-					/* other (non-ardour) prefix */
+				} else {
 					_other.add_port (p);
 				}
 			}
-
+			
 			++n;
 		}
 
@@ -210,6 +216,13 @@ PortGroupList::refresh ()
 	push_back (&_track);
 	push_back (&_other);
 }
+
+bool
+PortGroupList::port_has_prefix (const std::string& n, const std::string& p) const
+{
+	return n.substr (0, p.length()) == p;
+}
+	
 
 void
 PortGroupList::set_type (ARDOUR::DataType t)

@@ -90,6 +90,7 @@ class Bundle : public sigc::trackable
 	void remove_port_from_channel (uint32_t, std::string);
 	bool port_attached_to_channel (uint32_t, std::string);
 	bool uses_port (std::string) const;
+	bool offers_port_alone (std::string) const;
 	void remove_channel (uint32_t);
 	void remove_channels ();
 

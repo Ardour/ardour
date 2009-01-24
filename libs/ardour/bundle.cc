@@ -173,6 +173,23 @@ Bundle::uses_port (std::string p) const
 	return false;
 }
 
+/** @param p Port name.
+ *  @return true if this bundle offers this port on its own on a channel.
+ */
+bool
+Bundle::offers_port_alone (std::string p) const
+{
+	Glib::Mutex::Lock lm (_channel_mutex);
+
+	for (std::vector<Channel>::const_iterator i = _channel.begin(); i != _channel.end(); ++i) {
+		if (i->ports.size() == 1 && i->ports[0] == p) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 std::string
 Bundle::channel_name (uint32_t ch) const
 {
