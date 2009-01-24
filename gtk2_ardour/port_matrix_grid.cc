@@ -200,15 +200,15 @@ PortMatrixGrid::button_press (double x, double y, int b)
 		PortMatrix::State const s = _port_matrix->get_state (
 			our_bundle, our_channel, other_bundle, other_channel
 			);
-				
+
 		if (s == PortMatrix::ASSOCIATED || s == PortMatrix::NOT_ASSOCIATED) {
 
 			bool const n = !(s == PortMatrix::ASSOCIATED);
 			
-		_port_matrix->set_state (
-			our_bundle, our_channel, other_bundle, other_channel,
+			_port_matrix->set_state (
+				our_bundle, our_channel, other_bundle, other_channel,
 				n, 0
-			);
+				);
 		}
 
 		require_render ();
