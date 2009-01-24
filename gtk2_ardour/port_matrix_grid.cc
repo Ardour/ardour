@@ -194,16 +194,22 @@ PortMatrixGrid::button_press (double x, double y, int b)
 		}
 	}
 
+	
 	if (our_bundle && other_bundle) {
 		
-		bool const s = _port_matrix->get_state (
+		PortMatrix::State const s = _port_matrix->get_state (
 			our_bundle, our_channel, other_bundle, other_channel
 			);
 				
+		if (s == PortMatrix::ASSOCIATED || s == PortMatrix::NOT_ASSOCIATED) {
+
+			bool const n = !(s == PortMatrix::ASSOCIATED);
+			
 		_port_matrix->set_state (
 			our_bundle, our_channel, other_bundle, other_channel,
-			!s, 0
+				n, 0
 			);
+		}
 
 		require_render ();
 		_body->queue_draw ();
