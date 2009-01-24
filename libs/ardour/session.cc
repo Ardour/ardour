@@ -586,13 +586,10 @@ Session::when_engine_running ()
 		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
 	}
 
-	/* Create a set of Bundle objects that map
-	   to the physical outputs currently available
-	*/
-
 	BootMessage (_("Set up standard connections"));
 
-	/* ONE: MONO */
+	/* Create a set of Bundle objects that map
+	   to the physical I/O currently available */
 
 	for (uint32_t np = 0; np < n_physical_outputs; ++np) {
 		char buf[32];
@@ -615,36 +612,6 @@ Session::when_engine_running ()
 
  		add_bundle (c);
 	}
-
-	/* TWO: STEREO */
-
-	for (uint32_t np = 0; np < n_physical_outputs; np +=2) {
-		char buf[32];
-		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
-
- 		shared_ptr<Bundle> c (new Bundle (buf, true));
-		c->add_channel (_("left"));
- 		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
-		c->add_channel (_("right"));
- 		c->set_port (1, _engine.get_nth_physical_output (DataType::AUDIO, np + 1));
-
- 		add_bundle (c);
-	}
-
-	for (uint32_t np = 0; np < n_physical_inputs; np +=2) {
-		char buf[32];
-		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
-
- 		shared_ptr<Bundle> c (new Bundle (buf, false));
-		c->add_channel (_("left"));
- 		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
-		c->add_channel (_("right"));
- 		c->set_port (1, _engine.get_nth_physical_input (DataType::AUDIO, np + 1));
-
- 		add_bundle (c);
-	}
-
-	/* THREE MASTER */
 
 	if (_master_out) {
 
