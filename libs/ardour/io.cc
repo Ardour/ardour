@@ -261,8 +261,10 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 
 		}
 
-		if (dg != _gain || dg != 1.0)
+		if (dg != _gain || dg != 1.0) {
 			Amp::run_in_place(bufs, nframes, _gain, dg, _phase_invert);
+			_gain = dg;
+		}
 	}
 
 	// Use the panner to distribute audio to output port buffers
