@@ -1061,8 +1061,8 @@ Session::state(bool full_state)
 	
 	child = node->add_child ("Bundles");
 	{
-		Glib::Mutex::Lock lm (bundle_lock);
-		for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+		boost::shared_ptr<BundleList> bundles = _bundles.reader ();
+		for (BundleList::iterator i = bundles->begin(); i != bundles->end(); ++i) {
 			boost::shared_ptr<UserBundle> b = boost::dynamic_pointer_cast<UserBundle> (*i);
 			if (b) {
 				child->add_child_nocopy (b->get_state());

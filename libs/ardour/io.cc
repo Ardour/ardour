@@ -2629,42 +2629,11 @@ IO::create_bundles_for_inputs_and_outputs ()
         setup_bundles_for_inputs_and_outputs ();
 }
 
-/** Add a bundle to a list if is connected to our inputs.
- *  @param b Bundle to check.
- *  @param bundles List to add to.
- */
-void
-IO::maybe_add_input_bundle_to_list (boost::shared_ptr<Bundle> b, std::vector<boost::shared_ptr<Bundle> >* bundles)
-{
-	if (b->ports_are_outputs() == false) {
-		return;
-	}
-	
-	if (b->nchannels() != n_inputs().n_total ()) {
-		return;
-	}
-
-	for (uint32_t i = 0; i < n_inputs().n_total (); ++i) {
-
-		Bundle::PortList const & pl = b->channel_ports (i);
-
-		if (pl.empty()) {
-			return;
-		}
-
-		if (!input(i)->connected_to (pl[0])) {
-			return;
-		}
-	}
-
-	bundles->push_back (b);
-}
-
 /** @return Bundles connected to our inputs */
-std::vector<boost::shared_ptr<Bundle> >
+BundleList
 IO::bundles_connected_to_inputs ()
 {
-	std::vector<boost::shared_ptr<Bundle> > bundles;
+	BundleList bundles;
 	
 	/* User bundles */
 	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_inputs.begin(); i != _bundles_connected_to_inputs.end(); ++i) {
@@ -2672,51 +2641,31 @@ IO::bundles_connected_to_inputs ()
 	}
 
 	/* Normal bundles */
-	_session.foreach_bundle (
-		sigc::bind (sigc::mem_fun (*this, &IO::maybe_add_input_bundle_to_list), &bundles)
-		);
+	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if ((*i)->ports_are_outputs() == false || (*i)->nchannels() != n_inputs().n_total()) {
+			continue;
+		}
+
+		for (uint32_t j = 0; j < n_inputs().n_total(); ++j) {
+
+			Bundle::PortList const& pl = (*i)->channel_ports (j);
+			if (!pl.empty() && input(j)->connected_to (pl[0])) {
+				bundles.push_back (*i);
+			}
+
+		}
+	}
 
 	return bundles;
 }
 
 
-/** Add a bundle to a list if is connected to our outputs.
- *  @param b Bundle to check.
- *  @param bundles List to add to.
- */
-void
-IO::maybe_add_output_bundle_to_list (boost::shared_ptr<Bundle> b, std::vector<boost::shared_ptr<Bundle> >* bundles)
-{
-	if (b->ports_are_inputs() == false) {
-		return;
-	}
-
-	if (b->nchannels () != n_outputs().n_total ()) {
-		return;
-	}
-
-	for (uint32_t i = 0; i < n_outputs().n_total (); ++i) {
-
-		Bundle::PortList const & pl = b->channel_ports (i);
-
-		if (pl.empty()) {
-			return;
-		}
-
-		if (!output(i)->connected_to (pl[0])) {
-			return;
-		}
-	}
-
-	bundles->push_back (b);
-}
-
-
 /* @return Bundles connected to our outputs */
-std::vector<boost::shared_ptr<Bundle> >
+BundleList
 IO::bundles_connected_to_outputs ()
 {
-	std::vector<boost::shared_ptr<Bundle> > bundles;
+	BundleList bundles;
 
 	/* User bundles */
 	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_outputs.begin(); i != _bundles_connected_to_outputs.end(); ++i) {
@@ -2724,9 +2673,21 @@ IO::bundles_connected_to_outputs ()
 	}
 
 	/* Auto bundles */
-	_session.foreach_bundle (
-		sigc::bind (sigc::mem_fun (*this, &IO::maybe_add_output_bundle_to_list), &bundles)
-		);
+	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if ((*i)->ports_are_inputs() == false || (*i)->nchannels() != n_outputs().n_total()) {
+			continue;
+		}
+
+		for (uint32_t j = 0; j < n_outputs().n_total(); ++j) {
+
+			Bundle::PortList const& pl = (*i)->channel_ports (j);
+
+			if (!pl.empty() && output(j)->connected_to (pl[0])) {
+				bundles.push_back (*i);
+			}
+		}
+	}
 
 	return bundles;	
 }

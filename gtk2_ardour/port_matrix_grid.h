@@ -44,9 +44,6 @@ private:
 	void compute_dimensions ();
 	void render (cairo_t *);
 
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _column_bundles;
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _row_bundles;
-
 	PortMatrix* _port_matrix;
 };
 

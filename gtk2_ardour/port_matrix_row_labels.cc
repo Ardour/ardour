@@ -47,7 +47,10 @@ PortMatrixRowLabels::compute_dimensions ()
 	cairo_t* cr = gdk_cairo_create (pm);
 	
 	_longest_port_name = 0;
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
+	_longest_bundle_name = 0;
+	_height = 0;
+	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 			cairo_text_extents_t ext;
 			cairo_text_extents (cr, (*i)->channel_name(j).c_str(), &ext);
@@ -55,26 +58,34 @@ PortMatrixRowLabels::compute_dimensions ()
 				_longest_port_name = ext.width;
 			}
 		}
-	}
 
-	_longest_bundle_name = 0;
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, (*i)->name().c_str(), &ext);
 		if (ext.width > _longest_bundle_name) {
 			_longest_bundle_name = ext.width;
 		}
-	}
 
-	cairo_destroy (cr);
-	gdk_pixmap_unref (pm);
-
-	_height = 0;
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
 		_height += (*i)->nchannels() * row_height();
 	}
 
-	_width = _longest_port_name + name_pad() * 4 + _longest_bundle_name;
+	_highest_group_name = 0;
+	for (PortGroupList::const_iterator i = _body->row_ports().begin(); i != _body->row_ports().end(); ++i) {
+		if ((*i)->visible()) {
+			cairo_text_extents_t ext;
+			cairo_text_extents (cr, (*i)->name.c_str(), &ext);
+			if (ext.height > _highest_group_name) {
+				_highest_group_name = ext.height;
+			}
+		}
+	}
+			
+	cairo_destroy (cr);
+	gdk_pixmap_unref (pm);
+
+	_width = _highest_group_name +
+		_longest_port_name +
+		_longest_bundle_name +
+		name_pad() * 6;
 }
 
 
@@ -87,27 +98,73 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
 
-	/* SIDE BUNDLE NAMES */
+	/* PORT GROUP NAMES */
 
-	uint32_t x = 0;
+	double x = 0;
 	if (_location == LEFT) {
-		x = name_pad();
+		x = 0;
 	} else if (_location == RIGHT) {
-		x = _longest_port_name + name_pad() * 3;
+		x = _width - _highest_group_name - 2 * name_pad();
 	}
 
-	uint32_t y = 0;
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
+	double y = 0;
+	int g = 0;
+	for (PortGroupList::const_iterator i = _body->row_ports().begin(); i != _body->row_ports().end(); ++i) {
 
-		Gdk::Color const colour = get_a_bundle_colour (i - _body->row_bundles().begin ());
+		if (!(*i)->visible() || ((*i)->bundles.empty() && (*i)->ports.empty()) ) {
+			continue;
+		}
+			
+		/* compute height of this group */
+		double h = 0;
+		for (ARDOUR::BundleList::const_iterator j = (*i)->bundles.begin(); j != (*i)->bundles.end(); ++j) {
+			h += (*j)->nchannels() * row_height();
+		}
+		h += (*i)->ports.size() * row_height();
+
+		/* rectangle */
+		set_source_rgb (cr, get_a_group_colour (g));
+		double const rw = _highest_group_name + 2 * name_pad();
+		cairo_rectangle (cr, x, y, rw, h);
+		cairo_fill (cr);
+		    
+		/* hence what abbreviation (or not) we need for the group name */
+		std::pair<std::string, double> display = display_port_name (cr, (*i)->name, h);
+
+		/* plot it */
+		set_source_rgb (cr, text_colour());
+		cairo_move_to (cr, x + rw - name_pad(), y + (h + display.second) / 2);
+		cairo_save (cr);
+		cairo_rotate (cr, - M_PI / 2);
+		cairo_show_text (cr, display.first.c_str());
+		cairo_restore (cr);
+
+		y += h;
+		++g;
+	}
+
+	/* SIDE BUNDLE NAMES */
+
+	x = 0;
+	if (_location == LEFT) {
+		x = _highest_group_name + 2 * name_pad();
+	} else if (_location == RIGHT) {
+		x = _longest_port_name + name_pad() * 2;
+	}
+
+	y = 0;
+	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
+
+		Gdk::Color const colour = get_a_bundle_colour (i - r.begin ());
 		set_source_rgb (cr, colour);
-		cairo_rectangle (cr, 0, y, _width, row_height() * (*i)->nchannels());
+		cairo_rectangle (cr, x, y, _longest_bundle_name + name_pad() * 2, row_height() * (*i)->nchannels());
 		cairo_fill_preserve (cr);
 		set_source_rgb (cr, background_colour());
 		cairo_set_line_width (cr, label_border_width ());
 		cairo_stroke (cr);
 
-		uint32_t off = 0;
+		double off = 0;
 		if ((*i)->nchannels () > 0) {
 			/* use the extent of our first channel name so that the bundle name is vertically aligned with it */
 			cairo_text_extents_t ext;
@@ -118,7 +175,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 		}
 
 		set_source_rgb (cr, text_colour());
-		cairo_move_to (cr, x, y + name_pad() + off);
+		cairo_move_to (cr, x + name_pad(), y + name_pad() + off);
 		cairo_show_text (cr, (*i)->name().c_str());
 		
 		y += row_height() * (*i)->nchannels ();
@@ -128,17 +185,17 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	/* SIDE PORT NAMES */
 
 	y = 0;
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
+	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 
-			uint32_t x = 0;
+			double x = 0;
 			if (_location == LEFT) {
-				x = _longest_bundle_name + name_pad() * 2;
+				x = _longest_bundle_name + _highest_group_name + name_pad() * 4;
 			} else if (_location == RIGHT) {
 				x = 0;
 			}
 
-			Gdk::Color const colour = get_a_bundle_colour (i - _body->row_bundles().begin ());
+			Gdk::Color const colour = get_a_bundle_colour (i - r.begin ());
 			set_source_rgb (cr, colour);
 			cairo_rectangle (
 				cr,
@@ -154,7 +211,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 
 			cairo_text_extents_t ext;
 			cairo_text_extents (cr, (*i)->channel_name(j).c_str(), &ext);
-			uint32_t const off = (row_height() - ext.height) / 2;
+			double const off = (row_height() - ext.height) / 2;
 
 			set_source_rgb (cr, text_colour());
 			cairo_move_to (cr, x + name_pad(), y + name_pad() + off);
@@ -187,8 +244,9 @@ PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 
 		boost::shared_ptr<ARDOUR::Bundle> bundle;
 		uint32_t channel = 0;
-		
-		for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
+
+		ARDOUR::BundleList const r = _body->row_ports().bundles();
+		for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 			if (row < (*i)->nchannels ()) {
 				bundle = *i;
 				channel = row;

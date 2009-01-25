@@ -50,6 +50,7 @@ private:
 	double _longest_bundle_name;
 	double _longest_channel_name;
 	double _highest_text;
+	double _highest_group_name;
 	Location _location;
 };
 

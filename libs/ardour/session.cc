@@ -138,6 +138,7 @@ Session::Session (AudioEngine &eng,
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _total_free_4k_blocks (0),
+	  _bundles (new BundleList),
 	  _bundle_xml_node (0),
 	  _click_io ((IO*) 0),
 	  click_data (0),
@@ -219,6 +220,7 @@ Session::Session (AudioEngine &eng,
 	  routes (new RouteList),
 	  auditioner ((Auditioner *) 0),
 	  _total_free_4k_blocks (0),
+	  _bundles (new BundleList),
 	  _bundle_xml_node (0),
 	  _click_io ((IO *) 0),
 	  click_data (0),
@@ -3761,8 +3763,9 @@ void
 Session::add_bundle (shared_ptr<Bundle> bundle)
 {
 	{
-		Glib::Mutex::Lock guard (bundle_lock);
-		_bundles.push_back (bundle);
+		RCUWriter<BundleList> writer (_bundles);
+		boost::shared_ptr<BundleList> b = writer.get_copy ();
+		b->push_back (bundle);
 	}
 
 	BundleAdded (bundle); /* EMIT SIGNAL */
@@ -3776,11 +3779,12 @@ Session::remove_bundle (shared_ptr<Bundle> bundle)
 	bool removed = false;
 
 	{
-		Glib::Mutex::Lock guard (bundle_lock);
-		BundleList::iterator i = find (_bundles.begin(), _bundles.end(), bundle);
+		RCUWriter<BundleList> writer (_bundles);
+		boost::shared_ptr<BundleList> b = writer.get_copy ();
+		BundleList::iterator i = find (b->begin(), b->end(), bundle);
 
-		if (i != _bundles.end()) {
-			_bundles.erase (i);
+		if (i != b->end()) {
+			b->erase (i);
 			removed = true;
 		}
 	}
@@ -3795,9 +3799,9 @@ Session::remove_bundle (shared_ptr<Bundle> bundle)
 shared_ptr<Bundle>
 Session::bundle_by_name (string name) const
 {
-	Glib::Mutex::Lock lm (bundle_lock);
-
-	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+	boost::shared_ptr<BundleList> b = _bundles.reader ();
+	
+	for (BundleList::const_iterator i = b->begin(); i != b->end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}
@@ -4290,12 +4294,4 @@ Session::sync_order_keys (const char* base)
 	Route::SyncOrderKeys (base); // EMIT SIGNAL
 }
 
-void
-Session::foreach_bundle (sigc::slot<void, boost::shared_ptr<Bundle> > sl)
-{
-	Glib::Mutex::Lock lm (bundle_lock);
-	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-		sl (*i);
-	}
-}
 

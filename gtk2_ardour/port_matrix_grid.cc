@@ -20,6 +20,7 @@
 #include <iostream>
 #include <cairo/cairo.h>
 #include "ardour/bundle.h"
+#include "ardour/types.h"
 #include "port_matrix_grid.h"
 #include "port_matrix.h"
 
@@ -34,13 +35,15 @@ void
 PortMatrixGrid::compute_dimensions ()
 {
 	_width = 0;
-	for (uint32_t i = 0; i < _body->column_bundles().size(); ++i) {
-		_width += _body->column_bundles()[i]->nchannels() * column_width();
+	ARDOUR::BundleList const c = _body->column_ports().bundles();
+	for (ARDOUR::BundleList::const_iterator i = c.begin(); i != c.end(); ++i) {
+		_width += (*i)->nchannels() * column_width();
 	}
 
 	_height = 0;
-	for (uint32_t i = 0; i < _body->row_bundles().size(); ++i) {
-		_height += _body->row_bundles()[i]->nchannels() * row_height();
+	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
+		_height += (*i)->nchannels() * row_height();
 	}
 }
 
@@ -58,17 +61,18 @@ PortMatrixGrid::render (cairo_t* cr)
 	
 	set_source_rgb (cr, grid_colour());
 	uint32_t x = 0;
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::size_type i = 0; i < _body->column_bundles().size(); ++i) {
+	ARDOUR::BundleList const c = _body->column_ports().bundles();
+	for (ARDOUR::BundleList::size_type i = 0; i < c.size(); ++i) {
 
 		cairo_set_line_width (cr, thin_grid_line_width());
-		for (uint32_t j = 1; j < _body->column_bundles()[i]->nchannels(); ++j) {
+		for (uint32_t j = 1; j < c[i]->nchannels(); ++j) {
 			x += column_width();
 			cairo_move_to (cr, x, 0);
 			cairo_line_to (cr, x, _height);
 			cairo_stroke (cr);
 		}
 
-		if (i < (_body->column_bundles().size() - 1)) {
+		if (i < (c.size() - 1)) {
 			x += column_width();
 			cairo_set_line_width (cr, thick_grid_line_width());
 			cairo_move_to (cr, x, 0);
@@ -82,17 +86,18 @@ PortMatrixGrid::render (cairo_t* cr)
 	/* HORIZONTAL GRID LINES */
 	
 	uint32_t y = 0;
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::size_type i = 0; i < _body->row_bundles().size(); ++i) {
+	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	for (ARDOUR::BundleList::size_type i = 0; i < r.size(); ++i) {
 
 		cairo_set_line_width (cr, thin_grid_line_width());
-		for (uint32_t j = 1; j < _body->row_bundles()[i]->nchannels(); ++j) {
+		for (uint32_t j = 1; j < r[i]->nchannels(); ++j) {
 			y += row_height();
 			cairo_move_to (cr, 0, y);
 			cairo_line_to (cr, grid_width, y);
 			cairo_stroke (cr);
 		}
 
-		if (i < (_body->row_bundles().size() - 1)) {
+		if (i < (r.size() - 1)) {
 			y += row_height();
 			cairo_set_line_width (cr, thick_grid_line_width());
 			cairo_move_to (cr, 0, y);
@@ -106,10 +111,10 @@ PortMatrixGrid::render (cairo_t* cr)
 	uint32_t bx = 0;
 	uint32_t by = 0;
 	
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->column_bundles().begin(); i < _body->column_bundles().end(); ++i) {
+	for (ARDOUR::BundleList::const_iterator i = c.begin(); i < c.end(); ++i) {
 		by = 0;
 		
-		for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator j = _body->row_bundles().begin(); j < _body->row_bundles().end(); ++j) {
+		for (ARDOUR::BundleList::const_iterator j = r.begin(); j < r.end(); ++j) {
 
 			x = bx;
 			for (uint32_t k = 0; k < (*i)->nchannels (); k++) {
@@ -174,7 +179,8 @@ PortMatrixGrid::button_press (double x, double y, int b)
 	boost::shared_ptr<ARDOUR::Bundle> other_bundle;
 	uint32_t other_channel = 0;
 
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->row_bundles().begin(); i != _body->row_bundles().end(); ++i) {
+	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		if (grid_row < (*i)->nchannels ()) {
 			our_bundle = *i;
 			our_channel = grid_row;
@@ -184,7 +190,8 @@ PortMatrixGrid::button_press (double x, double y, int b)
 		}
 	}
 
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = _body->column_bundles().begin(); i != _body->column_bundles().end(); ++i) {
+	ARDOUR::BundleList const c = _body->column_ports().bundles();
+	for (ARDOUR::BundleList::const_iterator i = c.begin(); i != c.end(); ++i) {
 		if (grid_column < (*i)->nchannels ()) {
 			other_bundle = *i;
 			other_channel = grid_column;

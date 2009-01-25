@@ -25,25 +25,19 @@
 #include "ardour/port.h"
 
 GlobalPortMatrix::GlobalPortMatrix (ARDOUR::Session& s, ARDOUR::DataType t)
-	: PortMatrix (s, t, true, PortGroupList::Mask (PortGroupList::BUSS |
-						       PortGroupList::TRACK |
-						       PortGroupList::SYSTEM | 
-						       PortGroupList::OTHER)),
+	: PortMatrix (s, t, true),
 	  _session (s),
-	  _our_port_group_list (s, t, false, PortGroupList::Mask (PortGroupList::BUSS |
-								  PortGroupList::TRACK |
-								  PortGroupList::SYSTEM | 
-								  PortGroupList::OTHER))
+	  _our_port_group_list (t, false)
 {
 	setup ();
 
-	_port_group_list.VisibilityChanged.connect (sigc::mem_fun (*this, &GlobalPortMatrix::group_visibility_changed));
+	_column_ports.VisibilityChanged.connect (sigc::mem_fun (*this, &GlobalPortMatrix::group_visibility_changed));
 }
 
 void
 GlobalPortMatrix::group_visibility_changed ()
 {
-	_our_port_group_list.take_visibility_from (_port_group_list);
+	_row_ports.take_visibility_from (_column_ports);
 	setup ();
 }
 
@@ -51,11 +45,8 @@ GlobalPortMatrix::group_visibility_changed ()
 void
 GlobalPortMatrix::setup ()
 {
-	_our_port_group_list.refresh ();
-	_our_bundles = _our_port_group_list.bundles ();
-	
+	_row_ports.gather (_session);
 	PortMatrix::setup ();
-	
 }
 
 void

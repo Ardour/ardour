@@ -23,6 +23,7 @@
 #include "port_matrix_column_labels.h"
 #include "port_matrix_row_labels.h"
 #include "port_matrix_grid.h"
+#include "port_group.h"
 
 class PortMatrix;
 
@@ -40,20 +41,17 @@ public:
 
 	PortMatrixBody (PortMatrix *, Arrangement);
 
-	/** @return bundles to offer for columns */
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > const & column_bundles () {
-		return _column_bundles;
+	/** @return ports to offer for columns */
+	PortGroupList const & column_ports () {
+		return _column_ports;
 	}
 
-	/** @return bundles to offer for rows */
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > const & row_bundles () {
-		return _row_bundles;
+	/** @return ports to offer for rows */
+	PortGroupList const & row_ports () {
+		return _row_ports;
 	}
 	
-	void setup (
-		std::vector<boost::shared_ptr<ARDOUR::Bundle> > const &,
-		std::vector<boost::shared_ptr<ARDOUR::Bundle> > const &
-		);
+	void setup (PortGroupList const &, PortGroupList const &);
 
 	uint32_t full_scroll_width ();
 	uint32_t alloc_scroll_width ();
@@ -91,9 +89,9 @@ private:
 	uint32_t _yoffset;
 
 	/// bundles to offer for columns
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _column_bundles;
+	PortGroupList _column_ports;
 	/// bundles to offer for rows
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _row_bundles;
+	PortGroupList _row_ports;
 
 	std::list<sigc::connection> _bundle_connections;
 };

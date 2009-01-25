@@ -22,6 +22,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
 #include "ardour/bundle.h"
+#include "ardour/types.h"
 #include "port_matrix.h"
 #include "i18n.h"
 
@@ -29,20 +30,23 @@
  *  @param session Our session.
  *  @param type Port type that we are handling.
  *  @param offer_inputs true to offer inputs, otherwise false.
- *  @param mask Mask of port groups to offer.
  */
-PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool offer_inputs, PortGroupList::Mask mask)
-	: _port_group_list (session, type, offer_inputs, mask),
+PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool offer_inputs)
+	: _row_ports (type, !offer_inputs),
+	  _column_ports (type, offer_inputs),
+	  _session (session),
 	  _offer_inputs (offer_inputs),
 	  _type (type),
 	  _body (this, offer_inputs ? PortMatrixBody::BOTTOM_AND_LEFT : PortMatrixBody::TOP_AND_RIGHT)
 {
+	setup ();
+	
 	/* checkbuttons for visibility of groups */
 	Gtk::HBox* visibility_buttons = Gtk::manage (new Gtk::HBox);
 
 	visibility_buttons->pack_start (*Gtk::manage (new Gtk::Label (_("Show:"))), Gtk::PACK_SHRINK);
-	
-	for (std::list<PortGroup*>::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
+
+	for (std::list<PortGroup*>::iterator i = _column_ports.begin(); i != _column_ports.end(); ++i) {
 		_port_group_uis.push_back (new PortGroupUI (this, *i));
 	}
 
@@ -76,8 +80,8 @@ PortMatrix::~PortMatrix ()
 void
 PortMatrix::setup ()
 {
-	_port_group_list.refresh ();
-	_body.setup (_our_bundles, _port_group_list.bundles ());
+	_column_ports.gather (_session);
+	_body.setup (_row_ports, _column_ports);
 	setup_scrollbars ();
 	queue_draw ();
 }
@@ -86,7 +90,8 @@ void
 PortMatrix::set_offer_inputs (bool s)
 {
 	_offer_inputs = s;
-	_port_group_list.set_offer_inputs (s);
+	_column_ports.set_offer_inputs (s);
+	_row_ports.set_offer_inputs (!s);
 	setup ();
 }
 
@@ -94,7 +99,8 @@ void
 PortMatrix::set_type (ARDOUR::DataType t)
 {
 	_type = t;
-	_port_group_list.set_type (t);
+	_column_ports.set_type (t);
+	_row_ports.set_type (t);
 	setup ();
 }
 
@@ -131,18 +137,17 @@ PortMatrix::setup_scrollbars ()
 void
 PortMatrix::disassociate_all ()
 {
-	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		
-		for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::iterator j = (*i)->bundles.begin(); j != (*i)->bundles.end(); ++j) {
+	ARDOUR::BundleList c = _column_ports.bundles ();
+	ARDOUR::BundleList r = _row_ports.bundles ();
+	
+	for (ARDOUR::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
+		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
+			for (uint32_t k = 0; k < r.front()->nchannels(); ++k) {
 
-			for (uint32_t k = 0; k < (*j)->nchannels(); ++k) {
-
-				for (uint32_t l = 0; l < _our_bundles.front()->nchannels(); ++l) {
-
-					set_state (
-						_our_bundles.front(), l, *j, k, false, 0
-						);
-				}
+				set_state (
+					r.front(), k, *i, j, false, 0
+					);
+				
 			}
 		}
 	}

@@ -26,6 +26,7 @@
 #include <gtkmm/checkbutton.h>
 #include <boost/shared_ptr.hpp>
 #include <ardour/data_type.h>
+#include <ardour/types.h>
 
 namespace ARDOUR {
 	class Session;
@@ -53,7 +54,7 @@ public:
 	void clear ();
 
 	std::string name; ///< name for the group
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > bundles;
+	ARDOUR::BundleList bundles;
 	std::vector<std::string> ports;
 	bool visible () const {
 		return _visible;
@@ -95,30 +96,22 @@ class PortGroupUI
 class PortGroupList : public std::list<PortGroup*>, public sigc::trackable
 {
   public:
-	enum Mask {
-		BUSS = 0x1,
-		TRACK = 0x2,
-		SYSTEM = 0x4,
-		OTHER = 0x8
-	};
+	PortGroupList (ARDOUR::DataType, bool);
 
-	PortGroupList (ARDOUR::Session &, ARDOUR::DataType, bool, Mask);
-
-	void refresh ();
+	void gather (ARDOUR::Session &);
 	void set_type (ARDOUR::DataType);
 	void set_offer_inputs (bool);
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+	ARDOUR::BundleList bundles () const;
 	void take_visibility_from (PortGroupList const &);
+	void clear_list ();
 
 	sigc::signal<void> VisibilityChanged;
 	
   private:
-	void maybe_add_session_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	bool port_has_prefix (std::string const &, std::string const &) const;
 	std::string common_prefix (std::vector<std::string> const &) const;
 	void visibility_changed ();
 	
-	ARDOUR::Session& _session;
 	ARDOUR::DataType _type;
 	bool _offer_inputs;
 
@@ -126,6 +119,8 @@ class PortGroupList : public std::list<PortGroup*>, public sigc::trackable
 	PortGroup _track;
 	PortGroup _system;
 	PortGroup _other;
+
+	std::vector<sigc::connection> _visibility_connections;
 };
 
 #endif /* __gtk_ardour_port_group_h__ */

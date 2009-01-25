@@ -105,3 +105,35 @@ PortMatrixComponent::dimensions ()
 
 	return std::make_pair (_width, _height);
 }
+
+std::pair<std::string, double>
+PortMatrixComponent::display_port_name (cairo_t* cr, std::string const &n, double avail) const
+{
+	/* XXX hopefully there exists a more efficient way of doing this */
+	
+	Glib::ustring name = Glib::ustring (n).uppercase ();
+	bool abbreviated = false;
+	uint32_t width = 0;
+		
+	while (1) {
+		if (name.length() <= 2) {
+			break;
+		}
+			
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, name.c_str(), &ext);
+		if (ext.width < avail) {
+			width = ext.width;
+			break;
+		}
+			
+		if (abbreviated) {
+			name = name.substr (0, name.length() - 2) + ".";
+		} else {
+			name = name.substr (0, name.length() - 1) + ".";
+			abbreviated = true;
+		}
+	}
+
+	return std::make_pair (name, width);
+}

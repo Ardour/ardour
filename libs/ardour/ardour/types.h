@@ -419,6 +419,9 @@ namespace ARDOUR {
 
 	typedef std::list<nframes64_t> AnalysisFeatureList;
 
+	class Bundle;
+	typedef std::vector<boost::shared_ptr<Bundle> > BundleList;
+  
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

@@ -30,6 +30,7 @@ namespace ARDOUR {
 class IOSelector : public PortMatrix {
   public:
 	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
+	~IOSelector ();
 
 	void set_state (
 		boost::shared_ptr<ARDOUR::Bundle>,
@@ -62,6 +63,7 @@ class IOSelector : public PortMatrix {
   private:
 	ARDOUR::Session& _session;
 	boost::shared_ptr<ARDOUR::IO> _io;
+	PortGroup* _port_group;
 	
 	void ports_changed ();
 };

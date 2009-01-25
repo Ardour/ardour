@@ -54,8 +54,9 @@ private:
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 
 	PortMatrix* _port_matrix;
-	uint32_t _longest_port_name;
-	uint32_t _longest_bundle_name;
+	double _longest_port_name;
+	double _longest_bundle_name;
+	double _highest_group_name;
 	Gtk::Menu* _menu;
 	Location _location;
 };

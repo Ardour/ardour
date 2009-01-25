@@ -33,12 +33,16 @@
 BundleEditorMatrix::BundleEditorMatrix (
 	ARDOUR::Session& session, boost::shared_ptr<ARDOUR::Bundle> bundle
 	)
-	: PortMatrix (
-		session, bundle->type(), bundle->ports_are_inputs(),
-		PortGroupList::Mask (PortGroupList::SYSTEM | PortGroupList::OTHER)
-		)
+	: PortMatrix (session, bundle->type(), bundle->ports_are_inputs())
 {
-	_our_bundles.push_back (bundle);
+	_port_group = new PortGroup ("", true);
+	_port_group->bundles.push_back (bundle);
+	_row_ports.push_back (_port_group);
+}
+
+BundleEditorMatrix::~BundleEditorMatrix ()
+{
+	delete _port_group;
 }
 
 void
@@ -89,14 +93,14 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 		return;
 	}
 
-	_our_bundles.front()->add_channel (d.get_name());
+	_port_group->bundles.front()->add_channel (d.get_name());
 	setup ();
 }
 
 void
 BundleEditorMatrix::remove_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
 {
-	_our_bundles.front()->remove_channel (c);
+	_port_group->bundles.front()->remove_channel (c);
 	setup ();
 }
 
@@ -232,7 +236,10 @@ BundleManager::BundleManager (ARDOUR::Session& session)
 	_tree_view.append_column (_("Name"), _list_model_columns.name);
 	_tree_view.set_headers_visible (false);
 
-	_session.foreach_bundle (sigc::mem_fun (*this, &BundleManager::add_bundle));
+	boost::shared_ptr<ARDOUR::BundleList> bundles = _session.bundles ();
+	for (ARDOUR::BundleList::iterator i = bundles->begin(); i != bundles->end(); ++i) {
+		add_bundle (*i);
+	}
 	
 	/* New / Edit / Delete buttons */
 	Gtk::VBox* buttons = new Gtk::VBox;

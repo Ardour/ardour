@@ -60,7 +60,7 @@ PortGroup::clear ()
 bool
 PortGroup::has_port (std::string const& p) const
 {
-	for (vector<boost::shared_ptr<ARDOUR::Bundle> >::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
+	for (ARDOUR::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
 		if ((*i)->offers_port_alone (p)) {
 			return true;
 		}
@@ -111,40 +111,29 @@ PortGroupUI::setup_visibility_checkbutton ()
 }
 
 /** PortGroupList constructor.
- *  @param session Session to get bundles from.
  *  @param type Type of bundles to offer (audio or MIDI)
  *  @param offer_inputs true to offer output bundles, otherwise false.
- *  @param mask Mask of groups to make visible by default.
  */
 
-PortGroupList::PortGroupList (ARDOUR::Session & session, ARDOUR::DataType type, bool offer_inputs, Mask mask)
-	: _session (session), _type (type), _offer_inputs (offer_inputs),
-	  _buss (_("Bus"), mask & BUSS),
-	  _track (_("Track"), mask & TRACK),
-	  _system (_("System"), mask & SYSTEM),
-	  _other (_("Other"), mask & OTHER)
+PortGroupList::PortGroupList (ARDOUR::DataType type, bool offer_inputs)
+	: _type (type), _offer_inputs (offer_inputs),
+	  _buss (_("Bus"), true),
+	  _track (_("Track"), true),
+	  _system (_("System"), true),
+	  _other (_("Other"), true)
 {
-	refresh ();
-
-	for (iterator i = begin(); i != end(); ++i) {
-		(*i)->VisibilityChanged.connect (sigc::mem_fun (*this, &PortGroupList::visibility_changed));
-	}
+	
 }
 
-/** Find or re-find all our bundles and set up our lists */
+/** Gather bundles from around the system and put them in this PortGroupList */
 void
-PortGroupList::refresh ()
+PortGroupList::gather (ARDOUR::Session& session)
 {
-	clear ();
-
-	_buss.clear ();
-	_track.clear ();
-	_system.clear ();
-	_other.clear ();
+	clear_list ();
 
 	/* Find the bundles for routes */
 
-	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
+	boost::shared_ptr<ARDOUR::Session::RouteList> routes = session.get_routes ();
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
@@ -174,20 +163,25 @@ PortGroupList::refresh ()
 	}
 
 	/* Bundles created by the session */
-	_session.foreach_bundle (sigc::mem_fun (*this, &PortGroupList::maybe_add_session_bundle));
+	boost::shared_ptr<ARDOUR::BundleList> b = session.bundles ();
+	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if ((*i)->ports_are_inputs() == _offer_inputs && (*i)->type() == _type) {
+			_system.bundles.push_back (*i);
+		}
+	}
 	
 	/* XXX: inserts, sends, plugin inserts? */
 	
 	/* Now find all other ports that we haven't thought of yet */
 
- 	const char **ports = _session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
+ 	const char **ports = session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
  							  JackPortIsInput : JackPortIsOutput);
  	if (ports) {
 
 		int n = 0;
 		string client_matching_string;
 
-		client_matching_string = _session.engine().client_name();
+		client_matching_string = session.engine().client_name();
 		client_matching_string += ':';
 
 		while (ports[n]) {
@@ -215,6 +209,12 @@ PortGroupList::refresh ()
 	push_back (&_buss);
 	push_back (&_track);
 	push_back (&_other);
+
+	for (iterator i = begin(); i != end(); ++i) {
+		_visibility_connections.push_back (
+			(*i)->VisibilityChanged.connect (sigc::mem_fun (*this, &PortGroupList::visibility_changed))
+			);
+	}
 }
 
 bool
@@ -236,20 +236,12 @@ PortGroupList::set_offer_inputs (bool i)
 	_offer_inputs = i;
 }
 
-void
-PortGroupList::maybe_add_session_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
+ARDOUR::BundleList
+PortGroupList::bundles () const
 {
-	if (b->ports_are_inputs () == _offer_inputs && b->type () == _type) {
-		_system.bundles.push_back (b);
-	}
-}
-
-std::vector<boost::shared_ptr<ARDOUR::Bundle> >
-PortGroupList::bundles ()
-{
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > bundles;
+	ARDOUR::BundleList bundles;
 		
-	for (iterator i = begin (); i != end (); ++i) {
+	for (const_iterator i = begin (); i != end (); ++i) {
 		if ((*i)->visible()) {
 			
 			std::copy ((*i)->bundles.begin(), (*i)->bundles.end(), std::back_inserter (bundles));
@@ -333,4 +325,21 @@ PortGroupList::take_visibility_from (PortGroupList const & o)
 		++i;
 		++j;
 	}
+}
+
+void
+PortGroupList::clear_list ()
+{
+	clear ();
+
+	_buss.clear ();
+	_track.clear ();
+	_system.clear ();
+	_other.clear ();
+
+	for (std::vector<sigc::connection>::iterator i = _visibility_connections.begin(); i != _visibility_connections.end(); ++i) {
+		i->disconnect ();
+	}
+
+	_visibility_connections.clear ();
 }

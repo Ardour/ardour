@@ -124,8 +124,18 @@ protected:
 		}
 	}
 
+	/* XXX */
+	static Gdk::Color get_a_group_colour (int x) {
+		if ((x % 2) == 0) {
+			return Gdk::Color ("#222222");
+		} else {
+			return Gdk::Color ("#444444");
+		}
+	}
+	
 	void set_source_rgb (cairo_t *, Gdk::Color const &);
 	void set_source_rgba (cairo_t *, Gdk::Color const &, double);
+	std::pair<std::string, double> display_port_name (cairo_t*, std::string const &, double) const;
 
 	/** Render the complete component to a cairo context. */
 	virtual void render (cairo_t *) = 0;

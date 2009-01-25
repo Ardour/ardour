@@ -46,13 +46,21 @@ namespace ARDOUR {
 class PortMatrix : public Gtk::VBox
 {
 public:
-	PortMatrix (ARDOUR::Session&, ARDOUR::DataType, bool, PortGroupList::Mask);
+	PortMatrix (ARDOUR::Session&, ARDOUR::DataType, bool);
 	~PortMatrix ();
 
 	virtual void setup ();
 	void set_offer_inputs (bool);
 	void set_type (ARDOUR::DataType);
-	bool offering_input () const { return _offer_inputs; }
+
+	ARDOUR::DataType type () const {
+		return _type;
+	}
+	
+	bool offering_input () const {
+		return _offer_inputs;
+	}
+	
 	void disassociate_all ();
 
 	enum Result {
@@ -106,15 +114,15 @@ public:
 
 protected:
 
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _our_bundles;
-	/// list of port groups
-	PortGroupList _port_group_list;
+	PortGroupList _row_ports;
+	PortGroupList _column_ports;
 	
 private:
 
 	void hscroll_changed ();
 	void vscroll_changed ();
-	
+
+	ARDOUR::Session& _session;
 	/// true to offer inputs, otherwise false
 	bool _offer_inputs;
 	/// port type that we are working with

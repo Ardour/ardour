@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include "ardour/bundle.h"
+#include "ardour/types.h"
 #include "port_matrix_body.h"
 #include "port_matrix.h"
 
@@ -29,7 +30,9 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p, Arrangement a)
 	  _grid (p, this),
 	  _arrangement (a),
 	  _xoffset (0),
-	  _yoffset (0)
+	  _yoffset (0),
+	  _column_ports (_port_matrix->type(), _port_matrix->offering_input()),
+	  _row_ports (_port_matrix->type(), !_port_matrix->offering_input())
 {
 	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
 }
@@ -215,10 +218,7 @@ PortMatrixBody::compute_rectangles ()
 }
 
 void
-PortMatrixBody::setup (
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > const & row,
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > const & column
-	)
+PortMatrixBody::setup (PortGroupList const& row, PortGroupList const& column)
 {
 	for (std::list<sigc::connection>::iterator i = _bundle_connections.begin(); i != _bundle_connections.end(); ++i) {
 		i->disconnect ();
@@ -226,10 +226,11 @@ PortMatrixBody::setup (
 
 	_bundle_connections.clear ();
 	
-	_row_bundles = row;
-	_column_bundles = column;
+	_row_ports = row;
+	_column_ports = column;
 
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::iterator i = _row_bundles.begin(); i != _row_bundles.end(); ++i) {
+	ARDOUR::BundleList r = _row_ports.bundles ();
+	for (ARDOUR::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 		
 		_bundle_connections.push_back (
 			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels))
@@ -237,7 +238,8 @@ PortMatrixBody::setup (
 		
 	}
 
-	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::iterator i = _column_bundles.begin(); i != _column_bundles.end(); ++i) {
+	ARDOUR::BundleList c = _column_ports.bundles ();
+	for (ARDOUR::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
 		_bundle_connections.push_back (
 			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels))
 			);

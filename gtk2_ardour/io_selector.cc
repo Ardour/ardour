@@ -42,25 +42,30 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool offer_inputs)
-	: PortMatrix (session, io->default_type(), offer_inputs,
-		      PortGroupList::Mask (PortGroupList::BUSS | 
-					   PortGroupList::SYSTEM | 
-					   PortGroupList::OTHER))
+	: PortMatrix (session, io->default_type(), offer_inputs)
 	, _session (session)
 	, _io (io)
 {
 	/* Listen for ports changing on the IO */
 	_io->PortCountChanged.connect (sigc::hide (mem_fun (*this, &IOSelector::ports_changed)));
+
+	_port_group = new PortGroup ("", true);
+	_row_ports.push_back (_port_group);
 	
 	setup ();
+}
+
+IOSelector::~IOSelector ()
+{
+	delete _port_group;
 }
 
 void
 IOSelector::setup ()
 {
-	_our_bundles.clear ();
-	_our_bundles.push_back (boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle));
-	_our_bundles.front()->set_name (_io->name());
+	_port_group->bundles.clear ();
+	_port_group->bundles.push_back (boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle));
+	_port_group->bundles.front()->set_name (_io->name());
 
 	if (offering_input ()) {
 		const PortSet& ps (_io->outputs());
@@ -69,8 +74,8 @@ IOSelector::setup ()
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %d"), j + 1);
-			_our_bundles.front()->add_channel (buf);
-			_our_bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
+			_port_group->bundles.front()->add_channel (buf);
+			_port_group->bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 		
@@ -82,8 +87,8 @@ IOSelector::setup ()
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("in %d"), j + 1);
-			_our_bundles.front()->add_channel (buf);
-			_our_bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
+			_port_group->bundles.front()->add_channel (buf);
+			_port_group->bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 
@@ -303,11 +308,7 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 
 	get_vbox()->set_spacing (8);
 
-	/* XXX: do we still need the ScrolledWindow? */
-	Gtk::ScrolledWindow* sel_scroll = Gtk::manage (new Gtk::ScrolledWindow);
-	sel_scroll->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-	sel_scroll->add (_selector);
-	get_vbox()->pack_start (*sel_scroll, true, true);
+	get_vbox()->pack_start (_selector, true, true);
 
 	set_position (Gtk::WIN_POS_MOUSE);
 

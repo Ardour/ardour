@@ -35,6 +35,7 @@ class BundleEditorMatrix : public PortMatrix
 {
   public:
 	BundleEditorMatrix (ARDOUR::Session &, boost::shared_ptr<ARDOUR::Bundle>);
+	~BundleEditorMatrix ();
 
 	void set_state (
 		boost::shared_ptr<ARDOUR::Bundle> ab,
@@ -58,6 +59,9 @@ class BundleEditorMatrix : public PortMatrix
 		return true;
 	}
 	void rename_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
+
+  private:
+	PortGroup* _port_group;
 };
 
 class BundleEditor : public ArdourDialog

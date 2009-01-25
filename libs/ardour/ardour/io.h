@@ -127,8 +127,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int connect_input_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
 	int connect_output_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
 
-	std::vector<boost::shared_ptr<Bundle> > bundles_connected_to_inputs ();
-	std::vector<boost::shared_ptr<Bundle> > bundles_connected_to_outputs ();
+	BundleList bundles_connected_to_inputs ();
+	BundleList bundles_connected_to_outputs ();
 
         boost::shared_ptr<Bundle> bundle_for_inputs () { return _bundle_for_inputs; }
         boost::shared_ptr<Bundle> bundle_for_outputs () { return _bundle_for_outputs; }
@@ -380,9 +380,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	void create_bundles_for_inputs_and_outputs ();
 	void setup_bundles_for_inputs_and_outputs ();
-
-	void maybe_add_input_bundle_to_list (boost::shared_ptr<Bundle>, std::vector<boost::shared_ptr<Bundle> >*);
-	void maybe_add_output_bundle_to_list (boost::shared_ptr<Bundle>, std::vector<boost::shared_ptr<Bundle> >*);
 };
 
 } // namespace ARDOUR

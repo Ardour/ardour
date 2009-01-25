@@ -317,6 +317,10 @@ class Session : public PBD::StatefulDestructible
 	uint32_t ntracks () const;
 	uint32_t nbusses () const;
 
+	boost::shared_ptr<BundleList> bundles () {
+		return _bundles.reader ();
+	}
+
 	struct RoutePublicOrderSorter {
 	    bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
@@ -771,7 +775,6 @@ class Session : public PBD::StatefulDestructible
 
 	/* I/O bundles */
 
-	void foreach_bundle (sigc::slot<void, boost::shared_ptr<Bundle> >);
 	void add_bundle (boost::shared_ptr<Bundle>);
 	void remove_bundle (boost::shared_ptr<Bundle>);
 	boost::shared_ptr<Bundle> bundle_by_name (string) const;
@@ -1616,9 +1619,7 @@ class Session : public PBD::StatefulDestructible
 
 	/* I/O bundles */
 
-	typedef list<boost::shared_ptr<Bundle> > BundleList;
-	mutable Glib::Mutex bundle_lock;
-	BundleList _bundles;
+	SerializedRCUManager<BundleList> _bundles;
 	XMLNode* _bundle_xml_node;
 	int load_bundles (XMLNode const &);
 

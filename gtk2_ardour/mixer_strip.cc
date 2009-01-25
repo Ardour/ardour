@@ -629,11 +629,12 @@ MixerStrip::output_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 		citems.push_back (SeparatorElem());
 
-		std::vector<boost::shared_ptr<Bundle> > current = _route->bundles_connected_to_outputs ();
+		ARDOUR::BundleList current = _route->bundles_connected_to_outputs ();
 
- 		_session.foreach_bundle (
-			bind (mem_fun (*this, &MixerStrip::add_bundle_to_output_menu), current)
- 			);
+		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			add_bundle_to_output_menu (*i, current);
+		}
 
 		output_menu.popup (1, ev->time);
 		break;
@@ -697,11 +698,12 @@ MixerStrip::input_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
 
-		std::vector<boost::shared_ptr<Bundle> > current = _route->bundles_connected_to_inputs ();
+		ARDOUR::BundleList current = _route->bundles_connected_to_inputs ();
 
-		_session.foreach_bundle (
-			bind (mem_fun (*this, &MixerStrip::add_bundle_to_input_menu), current)
-			);
+		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			add_bundle_to_input_menu (*i, current);
+		}
 
 		input_menu.popup (1, ev->time);
 		break;
@@ -745,7 +747,7 @@ MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 }
 
 void
-MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, std::vector<boost::shared_ptr<Bundle> > const & current)
+MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
 {
 	using namespace Menu_Helpers;
 
@@ -770,7 +772,7 @@ MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, std::vector<b
 }
 
 void
-MixerStrip::add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, std::vector<boost::shared_ptr<Bundle> > const & current)
+MixerStrip::add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
 {
 	using namespace Menu_Helpers;
 
@@ -833,7 +835,7 @@ MixerStrip::connect_to_pan ()
 void
 MixerStrip::update_input_display ()
 {
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > c = _route->bundles_connected_to_inputs ();
+	ARDOUR::BundleList c = _route->bundles_connected_to_inputs ();
 
 	/* XXX: how do we represent >1 connected bundle? */
 	if (c.empty() == false) {
@@ -854,7 +856,7 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > c = _route->bundles_connected_to_outputs ();
+	ARDOUR::BundleList c = _route->bundles_connected_to_outputs ();
 
 	/* XXX: how do we represent >1 connected bundle? */
 	if (c.empty() == false) {
