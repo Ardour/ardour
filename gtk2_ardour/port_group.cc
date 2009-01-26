@@ -137,6 +137,7 @@ PortGroupList::gather (ARDOUR::Session& session)
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
+		/* Route IO */
 		PortGroup* g = 0;
 
 		if (_type == ARDOUR::DataType::AUDIO) {
@@ -160,18 +161,34 @@ PortGroupList::gather (ARDOUR::Session& session)
 		if (g) {
 			g->add_bundle (_offer_inputs ? (*i)->bundle_for_inputs() : (*i)->bundle_for_outputs ());
 		}
+
+		/* Ports from this route's processors */
+
+		uint32_t n = 0;
+		while (1) {
+			boost::shared_ptr<ARDOUR::Processor> p = (*i)->nth_processor (n);
+			if (p == 0) {
+				break;
+			}
+
+			boost::shared_ptr<ARDOUR::IOProcessor> iop = boost::dynamic_pointer_cast<ARDOUR::IOProcessor> (p);
+			if (iop) {
+				g->add_bundle (_offer_inputs ? iop->io()->bundle_for_inputs() : iop->io()->bundle_for_outputs());
+			}
+
+			++n;
+		}
 	}
 
 	/* Bundles created by the session */
+	
 	boost::shared_ptr<ARDOUR::BundleList> b = session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if ((*i)->ports_are_inputs() == _offer_inputs && (*i)->type() == _type) {
 			_system.bundles.push_back (*i);
 		}
 	}
-	
-	/* XXX: inserts, sends, plugin inserts? */
-	
+
 	/* Now find all other ports that we haven't thought of yet */
 
  	const char **ports = session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
