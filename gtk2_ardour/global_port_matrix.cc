@@ -124,12 +124,19 @@ GlobalPortMatrix::get_state (
 
 
 GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::DataType t)
-	: ArdourDialog (
-		t == ARDOUR::DataType::AUDIO ?
-		_("Audio Connections Manager") :
-		_("MIDI Connections Manager")),
-	  _port_matrix (s, t)
+	: _port_matrix (s, t)
 {
-	get_vbox()->pack_start (_port_matrix);
+	switch (t) {
+	case ARDOUR::DataType::AUDIO:
+		set_title (_("Audio Connections Manager"));
+		break;
+	case ARDOUR::DataType::MIDI:
+		set_title (_("MIDI Connections Manager"));
+		break;
+	}
+	
+	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox);
+	vbox->pack_start (_port_matrix);
+	add (*vbox);
 	show_all ();
 }
