@@ -74,6 +74,10 @@ public:
 	PortMatrixNode mouseover () const {
 		return _mouseover;
 	}
+
+	Arrangement arrangement () const {
+		return _arrangement;
+	}
 	
 protected:
 	bool on_expose_event (GdkEventExpose *);

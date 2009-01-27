@@ -252,25 +252,33 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 	set_source_rgba (cr, mouseover_line_colour(), 0.3);
 	cairo_set_line_width (cr, mouseover_line_width());
 
+	double const x = component_to_parent_x (
+		channel_position (_body->mouseover().column, _body->column_ports().bundles(), column_width()) + column_width() / 2
+		);
+	
+	double const y = component_to_parent_y (
+		channel_position (_body->mouseover().row, _body->row_ports().bundles(), row_height()) + row_height() / 2
+		);
+	
 	if (_body->mouseover().row.bundle) {
 
-		double const y = component_to_parent_y (
-			channel_position (_body->mouseover().row, _body->row_ports().bundles(), row_height()) + row_height() / 2
-			);
-		
-		cairo_move_to (cr, _parent_rectangle.get_x(), y);
-		cairo_line_to (cr, _parent_rectangle.get_x() + _parent_rectangle.get_width(), y);
+		cairo_move_to (cr, x, y);
+		if (_body->arrangement() == PortMatrixBody::BOTTOM_AND_LEFT) {
+			cairo_line_to (cr, component_to_parent_x (0), y);
+		} else if (_body->arrangement() == PortMatrixBody::TOP_AND_RIGHT) {
+			cairo_line_to (cr, _parent_rectangle.get_x() + _parent_rectangle.get_width(), y);
+		}
 		cairo_stroke (cr);
 	}
 
 	if (_body->mouseover().column.bundle) {
 
-		double const x = component_to_parent_x (
-			channel_position (_body->mouseover().column, _body->column_ports().bundles(), column_width()) + column_width() / 2
-			);
-		
-		cairo_move_to (cr, x, _parent_rectangle.get_y());
-		cairo_line_to (cr, x, _parent_rectangle.get_y() + _parent_rectangle.get_height());
+		cairo_move_to (cr, x, y);
+		if (_body->arrangement() == PortMatrixBody::BOTTOM_AND_LEFT) {
+			cairo_line_to (cr, x, _parent_rectangle.get_y() + _parent_rectangle.get_height());
+		} else if (_body->arrangement() == PortMatrixBody::TOP_AND_RIGHT) {
+			cairo_line_to (cr, x, component_to_parent_y (0));
+		}
 		cairo_stroke (cr);
 	}
 }
