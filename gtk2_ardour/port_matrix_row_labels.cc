@@ -111,13 +111,13 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	int g = 0;
 	for (PortGroupList::const_iterator i = _body->row_ports().begin(); i != _body->row_ports().end(); ++i) {
 
-		if (!(*i)->visible() || ((*i)->bundles.empty() && (*i)->ports.empty()) ) {
+		if (!(*i)->visible() || ((*i)->bundles().empty() && (*i)->ports.empty()) ) {
 			continue;
 		}
 			
 		/* compute height of this group */
 		double h = 0;
-		for (ARDOUR::BundleList::const_iterator j = (*i)->bundles.begin(); j != (*i)->bundles.end(); ++j) {
+		for (ARDOUR::BundleList::const_iterator j = (*i)->bundles().begin(); j != (*i)->bundles().end(); ++j) {
 			h += (*j)->nchannels() * row_height();
 		}
 		h += (*i)->ports.size() * row_height();
@@ -143,7 +143,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 		++g;
 	}
 
-	/* SIDE BUNDLE NAMES */
+	/* BUNDLE NAMES */
 
 	x = 0;
 	if (_location == LEFT) {
@@ -182,41 +182,12 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	}
 	
 
-	/* SIDE PORT NAMES */
+	/* PORT NAMES */
 
 	y = 0;
 	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-
-			double x = 0;
-			if (_location == LEFT) {
-				x = _longest_bundle_name + _highest_group_name + name_pad() * 4;
-			} else if (_location == RIGHT) {
-				x = 0;
-			}
-
-			Gdk::Color const colour = get_a_bundle_colour (i - r.begin ());
-			set_source_rgb (cr, colour);
-			cairo_rectangle (
-				cr,
-				x,
-				y,
-				_longest_port_name + (name_pad() * 2),
-				row_height()
-				);
-			cairo_fill_preserve (cr);
-			set_source_rgb (cr, background_colour());
-			cairo_set_line_width (cr, label_border_width ());
-			cairo_stroke (cr);
-
-			cairo_text_extents_t ext;
-			cairo_text_extents (cr, (*i)->channel_name(j).c_str(), &ext);
-			double const off = (row_height() - ext.height) / 2;
-
-			set_source_rgb (cr, text_colour());
-			cairo_move_to (cr, x + name_pad(), y + name_pad() + off);
-			cairo_show_text (cr, (*i)->channel_name(j).c_str());
-
+			render_port_name (cr, get_a_bundle_colour (i - r.begin()), port_name_x(), y, PortMatrixBundleChannel (*i, j));
 			y += row_height();
 		}
 	}
@@ -304,4 +275,114 @@ PortMatrixRowLabels::rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, ui
 	}
 
 	_port_matrix->rename_channel (sb, c);
+}
+
+
+double
+PortMatrixRowLabels::component_to_parent_x (double x) const
+{
+	return x + _parent_rectangle.get_x();
+}
+
+double
+PortMatrixRowLabels::parent_to_component_x (double x) const
+{
+	return x - _parent_rectangle.get_x();
+}
+
+double
+PortMatrixRowLabels::component_to_parent_y (double y) const
+{
+	return y - _body->yoffset() + _parent_rectangle.get_y();
+}
+
+double
+PortMatrixRowLabels::parent_to_component_y (double y) const
+{
+	return y + _body->yoffset() - _parent_rectangle.get_y();
+}
+
+double
+PortMatrixRowLabels::port_name_x () const
+{
+	if (_location == LEFT) {
+		return _longest_bundle_name + _highest_group_name + name_pad() * 4;
+	} else if (_location == RIGHT) {
+		return 0;
+	}
+
+	return 0;
+}
+
+void
+PortMatrixRowLabels::render_port_name (
+	cairo_t* cr, Gdk::Color colour, double x, double y, PortMatrixBundleChannel const& bc
+	)
+{
+	set_source_rgb (cr, colour);
+	cairo_rectangle (cr, x, y, _longest_port_name + name_pad() * 2, row_height());
+	cairo_fill_preserve (cr);
+	set_source_rgb (cr, background_colour());
+	cairo_set_line_width (cr, label_border_width ());
+	cairo_stroke (cr);
+	
+	cairo_text_extents_t ext;
+	cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
+	double const off = (row_height() - ext.height) / 2;
+	
+	set_source_rgb (cr, text_colour());
+	cairo_move_to (cr, x + name_pad(), y + name_pad() + off);
+	cairo_show_text (cr, bc.bundle->channel_name(bc.channel).c_str());
+}
+
+double
+PortMatrixRowLabels::channel_y (PortMatrixBundleChannel const& bc) const
+{
+	double y = 0;
+
+	ARDOUR::BundleList::const_iterator i = _body->row_ports().bundles().begin();
+	while (i != _body->row_ports().bundles().end() && *i != bc.bundle) {
+		y += row_height() * (*i)->nchannels();
+		++i;
+	}
+
+	y += row_height() * bc.channel;
+
+	return y;
+}
+
+void
+PortMatrixRowLabels::queue_draw_for (PortMatrixNode const& n)
+{
+	if (n.row.bundle) {
+
+		_body->queue_draw_area (
+			component_to_parent_x (port_name_x()),
+			component_to_parent_y (channel_y (n.row)),
+			_longest_port_name + name_pad() * 2,
+			row_height()
+			);
+	}
+
+}
+
+void
+PortMatrixRowLabels::mouseover_changed (PortMatrixNode const& old)
+{
+	queue_draw_for (old);
+	queue_draw_for (_body->mouseover());
+}
+
+void
+PortMatrixRowLabels::draw_extra (cairo_t* cr)
+{
+	if (_body->mouseover().row.bundle) {
+		render_port_name (
+			cr,
+			mouseover_port_colour (),
+			component_to_parent_x (port_name_x()),
+			component_to_parent_y (channel_y (_body->mouseover().row)),
+			_body->mouseover().row
+			);
+	}
 }

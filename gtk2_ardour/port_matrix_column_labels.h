@@ -23,11 +23,12 @@
 #include <boost/shared_ptr.hpp>
 #include "port_matrix_component.h"
 
-class PortMatrixBody;
-
 namespace ARDOUR {
 	class Bundle;
 }
+
+class PortMatrixNode;
+class PortMatrixBundleChannel;
 
 /** The column labels part of the port matrix */
 class PortMatrixColumnLabels : public PortMatrixComponent
@@ -41,10 +42,20 @@ public:
 	
 	PortMatrixColumnLabels (PortMatrixBody *, Location);
 
+	double component_to_parent_x (double x) const;
+	double parent_to_component_x (double x) const;
+	double component_to_parent_y (double y) const;
+	double parent_to_component_y (double y) const;
+	void mouseover_changed (PortMatrixNode const &);
+	void draw_extra (cairo_t *);
+
 private:
 	void render (cairo_t *);
 	void compute_dimensions ();
 	double basic_text_x_pos (int) const;
+	void render_port_name (cairo_t *, Gdk::Color, double, double, PortMatrixBundleChannel const &);
+	double channel_x (PortMatrixBundleChannel const &) const;
+	void queue_draw_for (PortMatrixNode const &);
 
 	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _bundles;
 	double _longest_bundle_name;

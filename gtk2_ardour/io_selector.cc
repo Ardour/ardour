@@ -63,9 +63,9 @@ IOSelector::~IOSelector ()
 void
 IOSelector::setup ()
 {
-	_port_group->bundles.clear ();
-	_port_group->bundles.push_back (boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle));
-	_port_group->bundles.front()->set_name (_io->name());
+	_port_group->clear ();
+	_port_group->add_bundle (boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle));
+	_port_group->only_bundle()->set_name (_io->name());
 
 	if (offering_input ()) {
 		const PortSet& ps (_io->outputs());
@@ -74,8 +74,8 @@ IOSelector::setup ()
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %d"), j + 1);
-			_port_group->bundles.front()->add_channel (buf);
-			_port_group->bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
+			_port_group->only_bundle()->add_channel (buf);
+			_port_group->only_bundle()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 		
@@ -87,8 +87,8 @@ IOSelector::setup ()
 		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("in %d"), j + 1);
-			_port_group->bundles.front()->add_channel (buf);
-			_port_group->bundles.front()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
+			_port_group->only_bundle()->add_channel (buf);
+			_port_group->only_bundle()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
 			++j;
 		}
 

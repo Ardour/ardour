@@ -23,7 +23,9 @@
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include "ardour/types.h"
 #include "port_matrix_component.h"
+#include "port_matrix_types.h"
 
 class PortMatrix;
 class PortMatrixBody;
@@ -39,10 +41,24 @@ public:
 	PortMatrixGrid (PortMatrix *, PortMatrixBody *);
 
 	void button_press (double, double, int);
+	void mouseover_event (double, double);
+
+	double component_to_parent_x (double x) const;
+	double parent_to_component_x (double x) const;
+	double component_to_parent_y (double y) const;
+	double parent_to_component_y (double y) const;
+	void mouseover_changed (PortMatrixNode const &);
+	void draw_extra (cairo_t *);
 
 private:
+	
 	void compute_dimensions ();
 	void render (cairo_t *);
+
+	double channel_position (PortMatrixBundleChannel, ARDOUR::BundleList const &, double) const;
+	PortMatrixNode position_to_node (double, double) const;
+	PortMatrixBundleChannel position_to_channel (double, ARDOUR::BundleList const &, double) const;
+	void queue_draw_for (PortMatrixNode const &);
 
 	PortMatrix* _port_matrix;
 };

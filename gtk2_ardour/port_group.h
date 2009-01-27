@@ -50,12 +50,17 @@ public:
 		: name (n), _visible (v) {}
 
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	boost::shared_ptr<ARDOUR::Bundle> only_bundle ();
 	void add_port (std::string const &);
 	void clear ();
 
 	std::string name; ///< name for the group
-	ARDOUR::BundleList bundles;
 	std::vector<std::string> ports;
+
+	ARDOUR::BundleList const & bundles () const {
+		return _bundles;
+	}
+	
 	bool visible () const {
 		return _visible;
 	}
@@ -70,6 +75,7 @@ public:
 	sigc::signal<void> VisibilityChanged;
 
 private:	
+	ARDOUR::BundleList _bundles;
 	bool _visible; ///< true if the group is visible in the UI
 };
 
@@ -101,7 +107,7 @@ class PortGroupList : public std::list<PortGroup*>, public sigc::trackable
 	void gather (ARDOUR::Session &);
 	void set_type (ARDOUR::DataType);
 	void set_offer_inputs (bool);
-	ARDOUR::BundleList bundles () const;
+	ARDOUR::BundleList const & bundles () const;
 	void take_visibility_from (PortGroupList const &);
 	void clear_list ();
 
@@ -111,9 +117,12 @@ class PortGroupList : public std::list<PortGroup*>, public sigc::trackable
 	bool port_has_prefix (std::string const &, std::string const &) const;
 	std::string common_prefix (std::vector<std::string> const &) const;
 	void visibility_changed ();
+	void update_bundles () const;
 	
 	ARDOUR::DataType _type;
 	bool _offer_inputs;
+	mutable ARDOUR::BundleList _bundles;
+	mutable bool _bundles_dirty;
 
 	PortGroup _buss;
 	PortGroup _track;

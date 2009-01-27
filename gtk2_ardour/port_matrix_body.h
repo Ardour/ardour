@@ -24,6 +24,7 @@
 #include "port_matrix_row_labels.h"
 #include "port_matrix_grid.h"
 #include "port_group.h"
+#include "port_matrix_types.h"
 
 class PortMatrix;
 
@@ -58,21 +59,35 @@ public:
 	uint32_t full_scroll_height ();
 	uint32_t alloc_scroll_height ();
 
+	uint32_t xoffset () const {
+		return _xoffset;
+	}
 	void set_xoffset (uint32_t);
+	uint32_t yoffset () const {
+		return _yoffset;
+	}
 	void set_yoffset (uint32_t);
 
 	void rebuild_and_draw_grid ();
-
+	
+	void set_mouseover (PortMatrixNode const &);
+	PortMatrixNode mouseover () const {
+		return _mouseover;
+	}
+	
 protected:
 	bool on_expose_event (GdkEventExpose *);
 	void on_size_request (Gtk::Requisition *);
 	void on_size_allocate (Gtk::Allocation &);
 	bool on_button_press_event (GdkEventButton *);
-
+	bool on_enter_notify_event (GdkEventCrossing *);
+	bool on_motion_notify_event (GdkEventMotion *);
+	
 private:
 	void compute_rectangles ();
 	void rebuild_and_draw_column_labels ();
 	void rebuild_and_draw_row_labels ();
+	void update_bundles ();
 	
 	PortMatrix* _port_matrix;
 	PortMatrixColumnLabels _column_labels;
@@ -87,11 +102,14 @@ private:
 	Gdk::Rectangle _grid_rect;
 	uint32_t _xoffset;
 	uint32_t _yoffset;
+	bool _pointer_inside;
 
 	/// bundles to offer for columns
 	PortGroupList _column_ports;
 	/// bundles to offer for rows
 	PortGroupList _row_ports;
+
+	PortMatrixNode _mouseover;
 
 	std::list<sigc::connection> _bundle_connections;
 };

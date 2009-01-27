@@ -38,7 +38,8 @@ using namespace Gtk;
 void
 PortGroup::add_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
 {
-	bundles.push_back (b);
+	assert (b.get());
+	_bundles.push_back (b);
 }
 
 /** Add a port to a group.
@@ -53,14 +54,14 @@ PortGroup::add_port (std::string const &p)
 void
 PortGroup::clear ()
 {
-	bundles.clear ();
+	_bundles.clear ();
 	ports.clear ();
 }
 
 bool
 PortGroup::has_port (std::string const& p) const
 {
-	for (ARDOUR::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
+	for (ARDOUR::BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
 		if ((*i)->offers_port_alone (p)) {
 			return true;
 		}
@@ -73,6 +74,13 @@ PortGroup::has_port (std::string const& p) const
 	}
 
 	return false;
+}
+
+boost::shared_ptr<ARDOUR::Bundle>
+PortGroup::only_bundle ()
+{
+	assert (_bundles.size() == 1);
+	return _bundles.front();
 }
 	
 
@@ -116,7 +124,7 @@ PortGroupUI::setup_visibility_checkbutton ()
  */
 
 PortGroupList::PortGroupList (ARDOUR::DataType type, bool offer_inputs)
-	: _type (type), _offer_inputs (offer_inputs),
+	: _type (type), _offer_inputs (offer_inputs), _bundles_dirty (true),
 	  _buss (_("Bus"), true),
 	  _track (_("Track"), true),
 	  _system (_("System"), true),
@@ -185,7 +193,7 @@ PortGroupList::gather (ARDOUR::Session& session)
 	boost::shared_ptr<ARDOUR::BundleList> b = session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if ((*i)->ports_are_inputs() == _offer_inputs && (*i)->type() == _type) {
-			_system.bundles.push_back (*i);
+			_system.add_bundle (*i);
 		}
 	}
 
@@ -232,6 +240,8 @@ PortGroupList::gather (ARDOUR::Session& session)
 			(*i)->VisibilityChanged.connect (sigc::mem_fun (*this, &PortGroupList::visibility_changed))
 			);
 	}
+
+	_bundles_dirty = true;
 }
 
 bool
@@ -245,24 +255,26 @@ void
 PortGroupList::set_type (ARDOUR::DataType t)
 {
 	_type = t;
+	_bundles_dirty = true;
 }
 
 void
 PortGroupList::set_offer_inputs (bool i)
 {
 	_offer_inputs = i;
+	_bundles_dirty = true;
 }
 
-ARDOUR::BundleList
-PortGroupList::bundles () const
+void
+PortGroupList::update_bundles () const
 {
-	ARDOUR::BundleList bundles;
+	_bundles.clear ();
 		
 	for (const_iterator i = begin (); i != end (); ++i) {
 		if ((*i)->visible()) {
 			
-			std::copy ((*i)->bundles.begin(), (*i)->bundles.end(), std::back_inserter (bundles));
-			
+			std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
+
 			/* make a bundle for the ports, if there are any */
 			if (!(*i)->ports.empty()) {
 
@@ -279,12 +291,12 @@ PortGroupList::bundles () const
 					b->set_port (j, p);
 				}
 					
-				bundles.push_back (b);
+				_bundles.push_back (b);
 			}
 		}
 	}
 
-	return bundles;
+	_bundles_dirty = false;
 }
 
 std::string
@@ -359,4 +371,15 @@ PortGroupList::clear_list ()
 	}
 
 	_visibility_connections.clear ();
+	_bundles_dirty = true;
+}
+
+ARDOUR::BundleList const &
+PortGroupList::bundles () const
+{
+	if (_bundles_dirty) {
+		update_bundles ();
+	}
+
+	return _bundles;
 }

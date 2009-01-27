@@ -36,7 +36,7 @@ BundleEditorMatrix::BundleEditorMatrix (
 	: PortMatrix (session, bundle->type(), bundle->ports_are_inputs())
 {
 	_port_group = new PortGroup ("", true);
-	_port_group->bundles.push_back (bundle);
+	_port_group->add_bundle (bundle);
 	_row_ports.push_back (_port_group);
 }
 
@@ -93,14 +93,14 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 		return;
 	}
 
-	_port_group->bundles.front()->add_channel (d.get_name());
+	_port_group->only_bundle()->add_channel (d.get_name());
 	setup ();
 }
 
 void
 BundleEditorMatrix::remove_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
 {
-	_port_group->bundles.front()->remove_channel (c);
+	_port_group->only_bundle()->remove_channel (c);
 	setup ();
 }
 

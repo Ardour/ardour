@@ -23,6 +23,7 @@
 #include <gtkmm/eventbox.h>
 
 class PortMatrixBody;
+class PortMatrixNode;
 
 /** One component of the PortMatrix.  This is a cairo-rendered
  *  Pixmap.
@@ -32,6 +33,13 @@ class PortMatrixComponent
 public:
 	PortMatrixComponent (PortMatrixBody *);
 	virtual ~PortMatrixComponent ();
+
+	virtual double component_to_parent_x (double x) const = 0;
+	virtual double parent_to_component_x (double x) const = 0;
+	virtual double component_to_parent_y (double y) const = 0;
+	virtual double parent_to_component_y (double y) const = 0;
+	virtual void mouseover_changed (PortMatrixNode const &) = 0;
+	virtual void draw_extra (cairo_t *) = 0;
 
 	void setup ();
 	GdkPixmap* get_pixmap (GdkDrawable *);
@@ -44,6 +52,14 @@ public:
 	void require_rebuild () {
 		_dimension_computation_required = true;
 		_render_required = true;
+	}
+
+	void set_parent_rectangle (Gdk::Rectangle const & r) {
+		_parent_rectangle = r;
+	}
+
+	Gdk::Rectangle parent_rectangle () const {
+		return _parent_rectangle;
 	}
 
 	/** @return width of columns in the grid */
@@ -83,6 +99,10 @@ protected:
 		return 8;
 	}
 
+	static uint32_t mouseover_line_width () {
+		return 4;
+	}
+
 	/** @return angle of column labels, in radians */
 	static double angle () {
 		return M_PI / 4;
@@ -113,6 +133,16 @@ protected:
 	/** @return colour to paint grid squares when they can't be associated */
 	static Gdk::Color unknown_colour () {
 		return Gdk::Color ("#cccccc");
+	}
+
+	/** @return colour to paint mouseover lines */
+	static Gdk::Color mouseover_line_colour () {
+		return Gdk::Color ("#ff0000");
+	}
+
+	/** @return colour to paint mouseover lines */
+	static Gdk::Color mouseover_port_colour () {
+		return Gdk::Color ("#777777");
 	}
 
 	/* XXX */
@@ -147,6 +177,7 @@ protected:
 	PortMatrixBody* _body; ///< the PortMatrixBody that we're in
 	uint32_t _width; ///< full width of the contents
 	uint32_t _height; ///< full height of the contents
+	Gdk::Rectangle _parent_rectangle;
 
 private:	
 	GdkPixmap* _pixmap; ///< pixmap

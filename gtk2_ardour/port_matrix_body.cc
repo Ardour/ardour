@@ -31,10 +31,12 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p, Arrangement a)
 	  _arrangement (a),
 	  _xoffset (0),
 	  _yoffset (0),
+	  _pointer_inside (false),
 	  _column_ports (_port_matrix->type(), _port_matrix->offering_input()),
 	  _row_ports (_port_matrix->type(), !_port_matrix->offering_input())
 {
 	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
+	add_events (Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
 }
 
 
@@ -47,15 +49,15 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 
 	bool intersects;
 	Gdk::Rectangle r = exposure;
-	r.intersect (_column_labels_rect, intersects);
+	r.intersect (_column_labels.parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
 			_column_labels.get_pixmap (get_window()->gobj()),
-			r.get_x() - _column_labels_rect.get_x() + _xoffset,
-			r.get_y() - _column_labels_rect.get_y(),
+			_column_labels.parent_to_component_x (r.get_x()),
+			_column_labels.parent_to_component_y (r.get_y()),
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -64,15 +66,15 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
-	r.intersect (_row_labels_rect, intersects);
+	r.intersect (_row_labels.parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
 			_row_labels.get_pixmap (get_window()->gobj()),
-			r.get_x() - _row_labels_rect.get_x(),
-			r.get_y() - _row_labels_rect.get_y() + _yoffset,
+			_row_labels.parent_to_component_x (r.get_x()),
+			_row_labels.parent_to_component_y (r.get_y()),
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -81,21 +83,27 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
-	r.intersect (_grid_rect, intersects);
+	r.intersect (_grid.parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
 			_grid.get_pixmap (get_window()->gobj()),
-			r.get_x() - _grid_rect.get_x() + _xoffset,
-			r.get_y() - _grid_rect.get_y() + _yoffset,
+			_grid.parent_to_component_x (r.get_x()),
+			_grid.parent_to_component_y (r.get_y()),
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
 			r.get_height()
 			);
 	}
+
+	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+	_grid.draw_extra (cr);
+	_row_labels.draw_extra (cr);
+	_column_labels.draw_extra (cr);
+	cairo_destroy (cr);
 
 	return true;
 }
@@ -132,18 +140,22 @@ PortMatrixBody::compute_rectangles ()
 	std::pair<uint32_t, uint32_t> const row = _row_labels.dimensions ();
 	std::pair<uint32_t, uint32_t> const grid = _grid.dimensions ();
 
+	Gdk::Rectangle col_rect;
+	Gdk::Rectangle row_rect;
+	Gdk::Rectangle grid_rect;
+
 	if (_arrangement == TOP_AND_RIGHT) {
 
 		/* build from top left */
 
-		_column_labels_rect.set_x (0);
-		_column_labels_rect.set_y (0);
-		_grid_rect.set_x (0);
+		col_rect.set_x (0);
+		col_rect.set_y (0);
+		grid_rect.set_x (0);
 
 		if (_alloc_width > col.first) {
-			_column_labels_rect.set_width (col.first);
+			col_rect.set_width (col.first);
 		} else {
-			_column_labels_rect.set_width (_alloc_width);
+			col_rect.set_width (_alloc_width);
 		}
 
 		/* move down to y division */
@@ -155,11 +167,11 @@ PortMatrixBody::compute_rectangles ()
 			y = _alloc_height;
 		}
 
-		_column_labels_rect.set_height (y);
-		_row_labels_rect.set_y (y);
-		_row_labels_rect.set_height (_alloc_height - y);
-		_grid_rect.set_y (y);
-		_grid_rect.set_height (_alloc_height - y);
+		col_rect.set_height (y);
+		row_rect.set_y (y);
+		row_rect.set_height (_alloc_height - y);
+		grid_rect.set_y (y);
+		grid_rect.set_height (_alloc_height - y);
 
 		/* move right to x division */
 
@@ -170,9 +182,9 @@ PortMatrixBody::compute_rectangles ()
 			x = _alloc_width - row.first;
 		}
 
-		_grid_rect.set_width (x);
-		_row_labels_rect.set_x (x);
-		_row_labels_rect.set_width (_alloc_width - x);
+		grid_rect.set_width (x);
+		row_rect.set_x (x);
+		row_rect.set_width (_alloc_width - x);
 			
 
 	} else if (_arrangement == BOTTOM_AND_LEFT) {
@@ -188,13 +200,13 @@ PortMatrixBody::compute_rectangles ()
 			x = _alloc_width - row.first;
 		}
 
-		_grid_rect.set_x (_alloc_width - x);
-		_grid_rect.set_width (x);
-		_column_labels_rect.set_width (col.first - grid.first + x);
-		_column_labels_rect.set_x (_alloc_width - _column_labels_rect.get_width());
+		grid_rect.set_x (_alloc_width - x);
+		grid_rect.set_width (x);
+		col_rect.set_width (col.first - grid.first + x);
+		col_rect.set_x (_alloc_width - col_rect.get_width());
 
-		_row_labels_rect.set_width (std::min (_alloc_width - x, row.first));
-		_row_labels_rect.set_x (_alloc_width - x - _row_labels_rect.get_width());
+		row_rect.set_width (std::min (_alloc_width - x, row.first));
+		row_rect.set_x (_alloc_width - x - row_rect.get_width());
 
 		/* move up to the y division */
 		
@@ -205,16 +217,19 @@ PortMatrixBody::compute_rectangles ()
 			y = _alloc_height;
 		}
 
-		_column_labels_rect.set_y (_alloc_height - y);
-		_column_labels_rect.set_height (y);
+		col_rect.set_y (_alloc_height - y);
+		col_rect.set_height (y);
 
-		_grid_rect.set_height (std::min (grid.second, _alloc_height - y));
-		_grid_rect.set_y (_alloc_height - y - _grid_rect.get_height());
+		grid_rect.set_height (std::min (grid.second, _alloc_height - y));
+		grid_rect.set_y (_alloc_height - y - grid_rect.get_height());
 
-		_row_labels_rect.set_height (_grid_rect.get_height());
-		_row_labels_rect.set_y (_grid_rect.get_y());
-
+		row_rect.set_height (grid_rect.get_height());
+		row_rect.set_y (grid_rect.get_y());
 	}
+
+	_row_labels.set_parent_rectangle (row_rect);
+	_column_labels.set_parent_rectangle (col_rect);
+	_grid.set_parent_rectangle (grid_rect);
 }
 
 void
@@ -262,7 +277,7 @@ PortMatrixBody::full_scroll_width ()
 uint32_t
 PortMatrixBody::alloc_scroll_width ()
 {
-	return _grid_rect.get_width();
+	return _grid.parent_rectangle().get_width();
 }
 
 uint32_t
@@ -274,7 +289,7 @@ PortMatrixBody::full_scroll_height ()
 uint32_t
 PortMatrixBody::alloc_scroll_height ()
 {
-	return _grid_rect.get_height();
+	return _grid.parent_rectangle().get_height();
 }
 
 void
@@ -294,19 +309,19 @@ PortMatrixBody::set_yoffset (uint32_t yo)
 bool
 PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 {
-	if (Gdk::Region (_grid_rect).point_in (ev->x, ev->y)) {
+	if (Gdk::Region (_grid.parent_rectangle()).point_in (ev->x, ev->y)) {
 
 		_grid.button_press (
-			ev->x - _grid_rect.get_x() + _xoffset,
-			ev->y - _grid_rect.get_y() + _yoffset,
+			_grid.parent_to_component_x (ev->x),
+			_grid.parent_to_component_y (ev->y),
 			ev->button
 			);
 
-	} else if (Gdk::Region (_row_labels_rect).point_in (ev->x, ev->y)) {
+	} else if (Gdk::Region (_row_labels.parent_rectangle()).point_in (ev->x, ev->y)) {
 
 		_row_labels.button_press (
-			ev->x - _row_labels_rect.get_x(),
-			ev->y - _row_labels_rect.get_y() + _yoffset,
+			_row_labels.parent_to_component_x (ev->x),
+			_row_labels.parent_to_component_y (ev->y),
 			ev->button, ev->time
 			);
 	
@@ -338,4 +353,44 @@ PortMatrixBody::rebuild_and_draw_row_labels ()
 {
 	_row_labels.require_rebuild ();
 	queue_draw ();
+}
+
+bool
+PortMatrixBody::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	if (ev->type == GDK_ENTER_NOTIFY) {
+		_pointer_inside = true;
+	} else if (ev->type == GDK_LEAVE_NOTIFY) {
+		_pointer_inside = false;
+	}
+
+	return true;
+}
+
+bool
+PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
+{
+	if (_pointer_inside && Gdk::Region (_grid.parent_rectangle()).point_in (ev->x, ev->y)) {
+		_grid.mouseover_event (
+			_grid.parent_to_component_x (ev->x),
+			_grid.parent_to_component_y (ev->y)
+			);
+	}
+
+	return true;
+}
+
+void
+PortMatrixBody::set_mouseover (PortMatrixNode const & n)
+{
+	if (n == _mouseover) {
+		return;
+	}
+
+	PortMatrixNode old = _mouseover;
+	_mouseover = n;
+	
+	_grid.mouseover_changed (old);
+	_row_labels.mouseover_changed (old);
+	_column_labels.mouseover_changed (old);
 }
