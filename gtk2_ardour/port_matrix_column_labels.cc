@@ -123,7 +123,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	double y = 0;
 	
 	if (_location == TOP) {
-		x = (_height - _highest_group_name - 2 * name_pad()) / tan (angle());
+		x = slanted_height() / tan (angle());
 		y = _highest_group_name + name_pad();
 	} else {
 		x = 0;
@@ -175,22 +175,21 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		set_source_rgb (cr, colour);
 
 		double const w = (*i)->nchannels() * column_width();
-		double const ph = _height - _highest_group_name - 2 * name_pad();
 
 		double x_ = x;
 		
 		if (_location == TOP) {
 			y = _height;
 		} else if (_location == BOTTOM) {
-			y = ph;
+			y = slanted_height();
 		}
 
 		double y_ = y;
  		cairo_move_to (cr, x_, y_);
  		x_ += w;
  		cairo_line_to (cr, x_, y_);
- 		x_ += ph / tan (angle ());
- 		y_ -= ph;
+ 		x_ += slanted_height() / tan (angle ());
+ 		y_ -= slanted_height();
  		cairo_line_to (cr, x_, y_);
  		x_ -= w;
  		cairo_line_to (cr, x_, y_);
@@ -216,7 +215,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 			cairo_move_to (
 				cr,
 				x + basic_text_x_pos (0),
-				ph - name_pad() * sin (angle())
+				slanted_height() - name_pad() * sin (angle())
 				);
 		}
 			
@@ -285,21 +284,19 @@ PortMatrixColumnLabels::draw_extra (cairo_t* cr)
 			_body->mouseover().column
 			);
 	}
-
 }
 
 void
-PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double x, double y, PortMatrixBundleChannel const &bc)
+PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double xoff, double yoff, PortMatrixBundleChannel const &bc)
 {
 	double const lc = _longest_channel_name + name_pad();
 	double const w = column_width();
-	double const ph = _height - _highest_group_name - 2 * name_pad();
 
 	if (_location == BOTTOM) {
 
-		double x_ = x + ph / tan (angle()) + w;
+		double x_ = xoff + slanted_height() / tan (angle()) + w;
 		double const ix = x_;
-		double y_ = y;
+		double y_ = yoff;
 		cairo_move_to (cr, x_, y_);
 		x_ -= w;
 		cairo_line_to (cr, x_, y_);
@@ -309,12 +306,12 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 		x_ += w * pow (sin (angle()), 2);
 		y_ += w * sin (angle()) * cos (angle());
 		cairo_line_to (cr, x_, y_);
-		cairo_line_to (cr, ix, y);
+		cairo_line_to (cr, ix, yoff);
 		
 	} else if (_location == TOP) {
 		
-		double x_ = x;
-		double y_ = y + _height;
+		double x_ = xoff;
+		double y_ = yoff + _height;
 		cairo_move_to (cr, x_, y_);
 		x_ += w;
 		cairo_line_to (cr, x_, y_);
@@ -324,7 +321,7 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 		x_ -= column_width() * pow (sin (angle()), 2);
 		y_ -= column_width() * sin (angle()) * cos (angle());
 		cairo_line_to (cr, x_, y_);
-		cairo_line_to (cr, x, y + _height);
+		cairo_line_to (cr, xoff, yoff + _height);
 		
 	}
 	
@@ -340,8 +337,8 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 
 		cairo_move_to (
 			cr,
-			x + basic_text_x_pos(bc.channel),
-			y + _height - name_pad() * sin (angle())
+			xoff + basic_text_x_pos(bc.channel),
+			yoff + _height - name_pad() * sin (angle())
 			);
 		
 	} else if (_location == BOTTOM) {
@@ -349,8 +346,8 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 		double const rl = 3 * name_pad() + _longest_bundle_name;
 		cairo_move_to (
 			cr,
-			x + basic_text_x_pos(bc.channel) + rl * cos (angle ()),
-			y + ph - rl * sin (angle())
+			xoff + basic_text_x_pos(bc.channel) + rl * cos (angle ()),
+			yoff + slanted_height() - rl * sin (angle())
 			);
 	}
 	
@@ -368,17 +365,7 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 double
 PortMatrixColumnLabels::channel_x (PortMatrixBundleChannel const &bc) const
 {
-	double x = 0;
-
-	ARDOUR::BundleList::const_iterator i = _body->column_ports().bundles().begin();
-	while (i != _body->column_ports().bundles().end() && *i != bc.bundle) {
-		x += column_width() * (*i)->nchannels();
-		++i;
-	}
-
-	x += column_width() * bc.channel;
-
-	return x;
+	return bc.nchannels (_body->column_ports().bundles()) * column_width();
 }
 
 void
@@ -400,9 +387,7 @@ PortMatrixColumnLabels::queue_draw_for (PortMatrixNode const& n)
 			
 		} else if (_location == BOTTOM) {
 			
-			double const ph = _height - _highest_group_name - 2 * name_pad();
-			double const w = column_width() + lc * cos (angle());
-			double const x_ = x + ph / tan (angle()) - lc * cos (angle());
+			double const x_ = x + slanted_height() / tan (angle()) - lc * cos (angle());
 			
 			_body->queue_draw_area (
 				component_to_parent_x (x_),

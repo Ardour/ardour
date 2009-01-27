@@ -187,7 +187,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	y = 0;
 	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-			render_port_name (cr, get_a_bundle_colour (i - r.begin()), port_name_x(), y, PortMatrixBundleChannel (*i, j));
+			render_port_name (cr, get_a_bundle_colour (i - r.begin()), 0, y, PortMatrixBundleChannel (*i, j));
 			y += row_height();
 		}
 	}
@@ -316,11 +316,11 @@ PortMatrixRowLabels::port_name_x () const
 
 void
 PortMatrixRowLabels::render_port_name (
-	cairo_t* cr, Gdk::Color colour, double x, double y, PortMatrixBundleChannel const& bc
+	cairo_t* cr, Gdk::Color colour, double xoff, double yoff, PortMatrixBundleChannel const& bc
 	)
 {
 	set_source_rgb (cr, colour);
-	cairo_rectangle (cr, x, y, _longest_port_name + name_pad() * 2, row_height());
+	cairo_rectangle (cr, port_name_x() + xoff, yoff, _longest_port_name + name_pad() * 2, row_height());
 	cairo_fill_preserve (cr);
 	set_source_rgb (cr, background_colour());
 	cairo_set_line_width (cr, label_border_width ());
@@ -331,24 +331,14 @@ PortMatrixRowLabels::render_port_name (
 	double const off = (row_height() - ext.height) / 2;
 	
 	set_source_rgb (cr, text_colour());
-	cairo_move_to (cr, x + name_pad(), y + name_pad() + off);
+	cairo_move_to (cr, port_name_x() + xoff + name_pad(), yoff + name_pad() + off);
 	cairo_show_text (cr, bc.bundle->channel_name(bc.channel).c_str());
 }
 
 double
 PortMatrixRowLabels::channel_y (PortMatrixBundleChannel const& bc) const
 {
-	double y = 0;
-
-	ARDOUR::BundleList::const_iterator i = _body->row_ports().bundles().begin();
-	while (i != _body->row_ports().bundles().end() && *i != bc.bundle) {
-		y += row_height() * (*i)->nchannels();
-		++i;
-	}
-
-	y += row_height() * bc.channel;
-
-	return y;
+	return bc.nchannels (_body->row_ports().bundles()) * row_height();
 }
 
 void
@@ -380,7 +370,7 @@ PortMatrixRowLabels::draw_extra (cairo_t* cr)
 		render_port_name (
 			cr,
 			mouseover_port_colour (),
-			component_to_parent_x (port_name_x()),
+			component_to_parent_x (0),
 			component_to_parent_y (channel_y (_body->mouseover().row)),
 			_body->mouseover().row
 			);

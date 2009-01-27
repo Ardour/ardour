@@ -57,6 +57,10 @@ private:
 	double channel_x (PortMatrixBundleChannel const &) const;
 	void queue_draw_for (PortMatrixNode const &);
 
+	double slanted_height () const {
+		return _height - _highest_group_name - 2 * name_pad();
+	}
+
 	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _bundles;
 	double _longest_bundle_name;
 	double _longest_channel_name;

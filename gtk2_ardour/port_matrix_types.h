@@ -20,6 +20,8 @@
 #ifndef __ardour_gtk_port_matrix_types_h__
 #define __ardour_gtk_port_matrix_types_h__
 
+#include "ardour/bundle.h"
+
 struct PortMatrixBundleChannel {
 	PortMatrixBundleChannel () : channel (0) {}
 	PortMatrixBundleChannel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
@@ -30,6 +32,17 @@ struct PortMatrixBundleChannel {
 	}
 	bool operator!= (PortMatrixBundleChannel const& other) const {
 		return bundle != other.bundle || channel != other.channel;
+	}
+
+	uint32_t nchannels (ARDOUR::BundleList const& bl) const {
+		uint32_t n = 0;
+		ARDOUR::BundleList::const_iterator i = bl.begin();
+		while (i != bl.end() && *i != bundle) {
+			n += (*i)->nchannels ();
+			++i;
+		}
+		n += channel;
+		return n;
 	}
 	
 	boost::shared_ptr<ARDOUR::Bundle> bundle;

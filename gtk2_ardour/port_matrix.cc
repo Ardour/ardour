@@ -23,6 +23,8 @@
 #include <gtkmm/label.h>
 #include "ardour/bundle.h"
 #include "ardour/types.h"
+#include "ardour/session.h"
+#include "ardour/route.h"
 #include "port_matrix.h"
 #include "i18n.h"
 
@@ -65,6 +67,9 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 	_vscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::vscroll_changed));
 	setup_scrollbars ();
 
+	_session.RouteAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::routes_changed)));
+	routes_changed ();
+
 	/* XXX hard-coded initial size suggestion */
 	set_size_request (400, 200);
 	show_all ();
@@ -75,6 +80,23 @@ PortMatrix::~PortMatrix ()
 	for (std::list<PortGroupUI*>::iterator i = _port_group_uis.begin(); i != _port_group_uis.end(); ++i) {
 		delete *i;
 	}
+}
+
+void
+PortMatrix::routes_changed ()
+{
+	for (std::vector<sigc::connection>::iterator i = _route_connections.begin(); i != _route_connections.end(); ++i) {
+		i->disconnect ();
+	}
+
+	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
+	for (ARDOUR::Session::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		_route_connections.push_back (
+			(*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::setup))
+			);
+	}
+
+	setup ();
 }
 
 void

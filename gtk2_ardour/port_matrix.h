@@ -121,6 +121,7 @@ private:
 
 	void hscroll_changed ();
 	void vscroll_changed ();
+	void routes_changed ();
 
 	ARDOUR::Session& _session;
 	/// true to offer inputs, otherwise false
@@ -132,6 +133,7 @@ private:
 	Gtk::HScrollbar _hscroll;
 	Gtk::VScrollbar _vscroll;
 	std::list<PortGroupUI*> _port_group_uis;
+	std::vector<sigc::connection> _route_connections;
 };
 
 #endif
