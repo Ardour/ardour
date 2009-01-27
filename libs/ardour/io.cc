@@ -2601,8 +2601,7 @@ IO::setup_bundles_for_inputs_and_outputs ()
         _bundle_for_inputs->set_name (buf);
 	uint32_t const ni = inputs().num_ports();
 	for (uint32_t i = 0; i < ni; ++i) {
-		snprintf (buf, sizeof(buf), _("in %d"), (i + 1));
-		_bundle_for_inputs->add_channel (buf);
+		_bundle_for_inputs->add_channel (bundle_channel_name (i, ni));
 		_bundle_for_inputs->set_port (i, _session.engine().make_port_name_non_relative (inputs().port(i)->name()));
 	}
 
@@ -2610,8 +2609,7 @@ IO::setup_bundles_for_inputs_and_outputs ()
         _bundle_for_outputs->set_name (buf);
 	uint32_t const no = outputs().num_ports();
 	for (uint32_t i = 0; i < no; ++i) {
-		snprintf (buf, sizeof(buf), _("out %d"), (i + 1));
-		_bundle_for_outputs->add_channel (buf);
+		_bundle_for_outputs->add_channel (bundle_channel_name (i, no));
 		_bundle_for_outputs->set_port (i, _session.engine().make_port_name_non_relative (outputs().port(i)->name()));
 	}
 }
@@ -2724,4 +2722,22 @@ IO::flush_outputs (nframes_t nframes, nframes_t offset)
 		(*i).flush_buffers (nframes, offset);
 	}
 		
+}
+
+std::string
+IO::bundle_channel_name (uint32_t c, uint32_t n) const
+{
+	char buf[32];
+	
+	switch (n) {
+	case 1:
+		return _("mono");
+	case 2:
+		return c == 0 ? _("L") : _("R");
+	default:
+		snprintf (buf, sizeof(buf), _("%d"), (c + 1));
+		return buf;
+	}
+
+	return "";
 }

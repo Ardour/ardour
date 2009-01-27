@@ -139,15 +139,40 @@ PortGroupList::gather (ARDOUR::Session& session)
 {
 	clear_list ();
 
-	/* Find the bundles for routes */
+	/* Find the bundles for routes.  We take their bundles, copy them,
+	   and add ports from the route's processors */
 
 	boost::shared_ptr<ARDOUR::Session::RouteList> routes = session.get_routes ();
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+		/* Copy the appropriate bundle from the route */
+		boost::shared_ptr<ARDOUR::Bundle> bundle (
+			new ARDOUR::Bundle (
+				_offer_inputs ? (*i)->bundle_for_inputs() : (*i)->bundle_for_outputs ()
+				)
+			);
 
-		/* Route IO */
+		/* Add ports from the route's processors */
+		uint32_t n = 0;
+		while (1) {
+			boost::shared_ptr<ARDOUR::Processor> p = (*i)->nth_processor (n);
+			if (p == 0) {
+				break;
+			}
+
+			boost::shared_ptr<ARDOUR::IOProcessor> iop = boost::dynamic_pointer_cast<ARDOUR::IOProcessor> (p);
+
+			if (iop) {
+				boost::shared_ptr<ARDOUR::Bundle> pb = _offer_inputs ?
+					iop->io()->bundle_for_inputs() : iop->io()->bundle_for_outputs();
+				bundle->add_channels_from_bundle (pb);
+			}
+
+			++n;
+		}
+			
+		/* Work out which group to put this bundle in */
 		PortGroup* g = 0;
-
 		if (_type == ARDOUR::DataType::AUDIO) {
 
 			if (boost::dynamic_pointer_cast<ARDOUR::AudioTrack> (*i)) {
@@ -167,24 +192,7 @@ PortGroupList::gather (ARDOUR::Session& session)
 		} 
 			
 		if (g) {
-			g->add_bundle (_offer_inputs ? (*i)->bundle_for_inputs() : (*i)->bundle_for_outputs ());
-		}
-
-		/* Ports from this route's processors */
-
-		uint32_t n = 0;
-		while (1) {
-			boost::shared_ptr<ARDOUR::Processor> p = (*i)->nth_processor (n);
-			if (p == 0) {
-				break;
-			}
-
-			boost::shared_ptr<ARDOUR::IOProcessor> iop = boost::dynamic_pointer_cast<ARDOUR::IOProcessor> (p);
-			if (iop) {
-				g->add_bundle (_offer_inputs ? iop->io()->bundle_for_inputs() : iop->io()->bundle_for_outputs());
-			}
-
-			++n;
+			g->add_bundle (bundle);
 		}
 	}
 

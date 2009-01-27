@@ -380,6 +380,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	void create_bundles_for_inputs_and_outputs ();
 	void setup_bundles_for_inputs_and_outputs ();
+	std::string bundle_channel_name (uint32_t, uint32_t) const;
 };
 
 } // namespace ARDOUR

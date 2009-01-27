@@ -29,6 +29,15 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+Bundle::Bundle (boost::shared_ptr<Bundle> other)
+	: _channel (other->_channel),
+	  _name (other->_name),
+	  _type (other->_type),
+	  _ports_are_inputs (other->_ports_are_inputs)
+{
+	
+}
+
 uint32_t
 Bundle::nchannels () const
 {
@@ -210,4 +219,27 @@ Bundle::set_channel_name (uint32_t ch, std::string const & n)
 	}
 
 	NameChanged (); /* EMIT SIGNAL */
+}
+
+/** Take the channels from another bundle and add them to this bundle,
+ *  so that channels from other are added to this (with their ports)
+ *  and are named "<other_bundle_name> <other_channel_name>".
+ */
+void
+Bundle::add_channels_from_bundle (boost::shared_ptr<Bundle> other)
+{
+	uint32_t const ch = nchannels ();
+	
+	for (uint32_t i = 0; i < other->nchannels(); ++i) {
+
+		std::stringstream s;
+		s << other->name() << " " << other->channel_name(i);
+
+		add_channel (s.str());
+
+		PortList const& pl = other->channel_ports (i);
+		for (uint32_t j = 0; j < pl.size(); ++j) {
+			add_port_to_channel (ch + i, pl[j]);
+		}
+	}
 }

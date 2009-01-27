@@ -24,6 +24,7 @@
 #include <vector>
 #include <glibmm/thread.h>
 #include <sigc++/signal.h>
+#include <boost/shared_ptr.hpp>
 #include "ardour/data_type.h"
 
 namespace ARDOUR {
@@ -72,6 +73,8 @@ class Bundle : public sigc::trackable
 	 */
 	Bundle (std::string const & n, DataType t, bool i = true) : _name (n), _type (t), _ports_are_inputs (i) {}
 
+	Bundle (boost::shared_ptr<Bundle>);
+	
 	virtual ~Bundle() {}
 
 	/** @return Number of channels that this Bundle has */
@@ -93,6 +96,7 @@ class Bundle : public sigc::trackable
 	bool offers_port_alone (std::string) const;
 	void remove_channel (uint32_t);
 	void remove_channels ();
+	void add_channels_from_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 
 	/** Set the name.
 	 *  @param n New name.
