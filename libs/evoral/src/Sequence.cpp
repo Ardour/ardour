@@ -630,7 +630,8 @@ Sequence::append_control_unlocked(const Parameter& param, EventTime time, double
 {
 	debugout << this << " " << _type_map.to_symbol(param) << " @ " << time << " \t= \t" << value
 			<< " # controls: " << _controls.size() << endl;
-	control(param, true)->list()->rt_add(time, value);
+	boost::shared_ptr<Control> c = control(param, true);
+	c->list()->rt_add(time, value);
 }
 
 

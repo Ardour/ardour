@@ -147,8 +147,9 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 void
 MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-	if (wfd)
+	if (wfd) {
 		midi_region()->midi_source(0)->load_model();
+	}
 
 	const Meter& m = trackview.session().tempo_map().meter_at(_region->position());
 	const Tempo& t = trackview.session().tempo_map().tempo_at(_region->position());

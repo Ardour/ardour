@@ -208,17 +208,17 @@ inline static const char* midi_name(uint8_t status)
 	case MIDI_CTL_RESET_CONTROLLERS:
 		return "Reset Controllers"; break;
 	case MIDI_CTL_LOCAL_CONTROL_SWITCH:
-		return "Local Control Switch"; break;
+		return "Local Keyboard on/off"; break;
 	case MIDI_CTL_ALL_NOTES_OFF:
 		return "All Notes Off"; break;
 	case MIDI_CTL_OMNI_OFF:
 		return "Omni Off"; break;
 	case MIDI_CTL_OMNI_ON:
 		return "Omni On"; break;
-	case MIDI_CTL_MONO1:
-		return "Mono 1"; break;
-	case MIDI_CTL_MONO2:
-		return "Mono 2"; break;
+	case MIDI_CTL_MONO:
+		return "Monophonic Mode"; break;
+	case MIDI_CTL_POLY:
+		return "Polyphonic Mode"; break;
 	default:
 		return "Unnamed"; break;
 	}

@@ -68,6 +68,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 				ARDOUR::EventTypeMap::instance().to_symbol(list->parameter()),
 				trackview, *get_canvas_group(), list));
 	_line->set_colors();
+	_line->set_interpolation(list->interpolation());
 	_line->show();
 	_line->show_all_control_points();
 	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));

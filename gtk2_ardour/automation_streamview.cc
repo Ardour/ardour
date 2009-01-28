@@ -158,11 +158,13 @@ AutomationStreamView::redisplay_diskstream ()
 {
 	list<RegionView *>::iterator i, tmp;
 
-	for (i = region_views.begin(); i != region_views.end(); ++i)
+	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
+	}
 	
 	if (_trackview.is_track()) {
-		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
+		_trackview.get_diskstream()->playlist()->foreach_region (
+			static_cast<StreamView*>(this), &StreamView::add_region_view);
 	}
 
 	for (i = region_views.begin(); i != region_views.end(); ) {

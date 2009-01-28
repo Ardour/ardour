@@ -503,6 +503,8 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(param));
 		_route->add_control(c);
 	}
+	
+	assert(c);
 
 	boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
 			_route, boost::shared_ptr<ARDOUR::Automatable>(), c,

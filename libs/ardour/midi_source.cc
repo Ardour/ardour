@@ -147,8 +147,9 @@ MidiSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_fr
 void
 MidiSource::mark_streaming_write_started ()
 {
-	if (_model)
+	if (_model) {
 		_model->start_write();
+	}
 
 	_writing = true;
 }
@@ -156,8 +157,9 @@ MidiSource::mark_streaming_write_started ()
 void
 MidiSource::mark_streaming_write_completed ()
 {
-	if (_model)
+	if (_model) {
 		_model->end_write(false); // FIXME: param?
+	}
 
 	_writing = false;
 }

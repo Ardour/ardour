@@ -75,6 +75,63 @@ EventTypeMap::is_integer(const Evoral::Parameter& param) const
 			&& param.type() <= MidiChannelPressureAutomation);
 }
 
+Evoral::ControlList::InterpolationStyle 
+EventTypeMap::interpolation_of(const Evoral::Parameter& param)
+{
+	switch (param.type()) {
+	case MidiCCAutomation:              
+		switch (param.id()) {
+		case MIDI_CTL_LSB_BANK:
+		case MIDI_CTL_MSB_BANK:
+		case MIDI_CTL_LSB_EFFECT1:
+		case MIDI_CTL_LSB_EFFECT2:
+		case MIDI_CTL_MSB_EFFECT1:
+		case MIDI_CTL_MSB_EFFECT2:
+		case MIDI_CTL_MSB_GENERAL_PURPOSE1:
+		case MIDI_CTL_MSB_GENERAL_PURPOSE2:
+		case MIDI_CTL_MSB_GENERAL_PURPOSE3:
+		case MIDI_CTL_MSB_GENERAL_PURPOSE4:
+		case MIDI_CTL_SUSTAIN:
+		case MIDI_CTL_PORTAMENTO:
+		case MIDI_CTL_SOSTENUTO:
+		case MIDI_CTL_SOFT_PEDAL:
+		case MIDI_CTL_LEGATO_FOOTSWITCH:
+		case MIDI_CTL_HOLD2:
+		case MIDI_CTL_GENERAL_PURPOSE5:
+		case MIDI_CTL_GENERAL_PURPOSE6:
+		case MIDI_CTL_GENERAL_PURPOSE7:
+		case MIDI_CTL_GENERAL_PURPOSE8:
+		case MIDI_CTL_DATA_INCREMENT:
+		case MIDI_CTL_DATA_DECREMENT:
+		case MIDI_CTL_NONREG_PARM_NUM_LSB:
+		case MIDI_CTL_NONREG_PARM_NUM_MSB:
+		case MIDI_CTL_REGIST_PARM_NUM_LSB:
+		case MIDI_CTL_REGIST_PARM_NUM_MSB:
+		case MIDI_CTL_ALL_SOUNDS_OFF:
+		case MIDI_CTL_RESET_CONTROLLERS:
+		case MIDI_CTL_LOCAL_CONTROL_SWITCH:
+		case MIDI_CTL_ALL_NOTES_OFF:
+		case MIDI_CTL_OMNI_OFF:
+		case MIDI_CTL_OMNI_ON:
+		case MIDI_CTL_MONO:
+		case MIDI_CTL_POLY:
+			
+			return Evoral::ControlList::Discrete;
+			break;
+
+		default: return Evoral::ControlList::Linear; break;
+		}
+		
+		break; 
+		
+	case MidiPgmChangeAutomation:       return Evoral::ControlList::Discrete; break; 
+	case MidiChannelPressureAutomation: return Evoral::ControlList::Linear; break; 
+	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break; 
+	default: assert(false);
+	}
+}
+
+
 Evoral::Parameter
 EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 {

@@ -177,8 +177,9 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
 
-	if (load_model)
+	if (load_model) {
 		source->load_model();
+	}
 
 	_range_dirty = update_data_note_range(
 			source->model()->lowest_note(),

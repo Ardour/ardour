@@ -23,8 +23,7 @@
 
 #include <string>
 #include <evoral/TypeMap.hpp>
-
-namespace Evoral { class Parameter; }
+#include <evoral/ControlList.hpp>
 
 namespace ARDOUR {
 
@@ -36,6 +35,7 @@ public:
 	bool     type_is_midi(uint32_t type) const;
 	uint8_t  parameter_midi_type(const Evoral::Parameter& param) const;
 	uint32_t midi_event_type(uint8_t status) const;
+	Evoral::ControlList::InterpolationStyle interpolation_of(const Evoral::Parameter& param);
 
 	bool                 is_integer(const Evoral::Parameter& param) const;
 	Evoral::Parameter    new_parameter(uint32_t type, uint8_t channel=0, uint32_t id=0) const;

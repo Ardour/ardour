@@ -100,8 +100,8 @@
 #define MIDI_CTL_ALL_NOTES_OFF          0x7B /**< All Notes Off */
 #define MIDI_CTL_OMNI_OFF               0x7C /**< Omni Off */
 #define MIDI_CTL_OMNI_ON                0x7D /**< Omni On */
-#define MIDI_CTL_MONO1                  0x7E /**< Mono1 */
-#define MIDI_CTL_MONO2                  0x7F /**< Mono2 */
+#define MIDI_CTL_MONO                   0x7E /**< Monophonic mode */
+#define MIDI_CTL_POLY                   0x7F /**< Polyphonic mode */
 
 // Commands
 #define MIDI_CMD_NOTE_OFF               0x80 /**< Note Off */

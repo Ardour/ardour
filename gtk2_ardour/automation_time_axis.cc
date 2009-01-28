@@ -377,7 +377,11 @@ void
 AutomationTimeAxisView::set_height (uint32_t h)
 {
 	bool changed = (height != (uint32_t) h) || first_call_to_set_height;
-	bool changed_between_small_and_normal = ( (height < hNormal && h >= hNormal) || (height >= hNormal || h < hNormal) );
+	bool changed_between_small_and_normal = ( 
+		(height < hNormal && h >= hNormal) || 
+		(height >= hNormal || 
+		h < hNormal)
+	);
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
@@ -527,7 +531,9 @@ AutomationTimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
 	
 	/* mode menu */
-		
+
+	// To be deleted: MIDI events should always be discrete, so no choice for the user here.
+	/*
 	if ( EventTypeMap::instance().is_midi_parameter(_control->parameter()) ) {
 		
 		Menu* auto_mode_menu = manage (new Menu);
@@ -540,16 +546,17 @@ AutomationTimeAxisView::build_display_menu ()
 						mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 						AutomationList::Discrete)));
 		mode_discrete_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
-		//mode_discrete_item->set_active(_control->list()->interpolation() == AutomationList::Discrete);
+		mode_discrete_item->set_active(_control->list()->interpolation() == AutomationList::Discrete);
 
 		am_items.push_back (RadioMenuElem (group, _("Line"), bind (
 						mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 						AutomationList::Linear)));
 		mode_line_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
-		//mode_line_item->set_active(_control->list()->interpolation() == AutomationList::Linear);
+		mode_line_item->set_active(_control->list()->interpolation() == AutomationList::Linear);
 
 		items.push_back (MenuElem (_("Mode"), *auto_mode_menu));
 	}
+	*/
 
 	/* make sure the automation menu state is correct */
 

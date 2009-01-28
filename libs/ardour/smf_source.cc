@@ -241,8 +241,9 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		
 		append_event_unlocked(Frames, ev);
 
-		if (_model)
+		if (_model) {
 			_model->append(ev);
+		}
 	}
 
 	SMF::flush();
@@ -601,14 +602,18 @@ SMFSource::set_source_name (string newname, bool destructive)
 void
 SMFSource::load_model(bool lock, bool force_reload)
 {
-	if (_writing)
+	if (_writing) {
 		return;
+	}
+	
 
-	if (lock)
+	if (lock) {
 		Glib::Mutex::Lock lm (_lock);
+	}
 
-	if (_model && !force_reload && !_model->empty())
+	if (_model && !force_reload && !_model->empty()) {
 		return;
+	}
 
 	if (! _model) {
 		_model = boost::shared_ptr<MidiModel>(new MidiModel(this));
@@ -648,10 +653,18 @@ SMFSource::load_model(bool lock, bool force_reload)
 			_model->append(ev);
 		}
 
-		if (ev.size() > scratch_size)
+		if (ev.size() > scratch_size) {
 			scratch_size = ev.size();
-		else
+		} else {
 			ev.size() = scratch_size;
+		}
+	}
+
+	// set interpolation style to defaults, can be changed by the GUI later
+	Evoral::ControlSet::Controls controls = _model->controls();
+	for (Evoral::ControlSet::Controls::iterator c = controls.begin(); c != controls.end(); ++c) {
+		(*c).second->list()->set_interpolation(
+			EventTypeMap::instance().interpolation_of((*c).first));
 	}
 	
 	_model->end_write(false);
