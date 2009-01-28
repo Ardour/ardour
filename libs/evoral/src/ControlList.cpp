@@ -1001,8 +1001,6 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
 
 /** Get the earliest time the line crosses an integer (Linear interpolation).
  *
- * In other words: send out multiple events to interpolate the line
- * defined by its control points
  * If an event is found, \a x and \a y are set to its coordinates.
  *
  * \param inclusive Include events with timestamp exactly equal to \a start
