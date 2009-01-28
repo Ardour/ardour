@@ -58,6 +58,8 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+sigc::signal<bool> Plugin::PresetFileExists;
+
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e), _session (s)
 {

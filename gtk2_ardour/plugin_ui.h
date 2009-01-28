@@ -87,9 +87,10 @@ class PlugUIBase : public virtual sigc::trackable
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
 	Gtk::EventBox focus_button;
-
+	
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;
+	bool no_load_preset;
 
 	void setting_selected();
 	void save_plugin_setting (void);

@@ -28,6 +28,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <ardour/plugin.h>
 
@@ -96,7 +97,8 @@ class AUPlugin : public ARDOUR::Plugin
 	bool save_preset (string name);
 	bool load_preset (const string preset_label);
 	std::vector<std::string> get_presets ();
-    
+	std::string current_preset() const;
+
 	bool has_editor () const;
 	
 	int32_t can_do (int32_t in, int32_t& out);
@@ -115,13 +117,18 @@ class AUPlugin : public ARDOUR::Plugin
   private:
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
-
+	
         bool initialized;
 	int32_t input_channels;
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
 	AudioBufferList* buffers;
-	
+
+	/* XXX this should really be shared across all AUPlugin instances */
+
+	typedef std::map<std::string,std::string> PresetMap;
+	PresetMap preset_map;
+
 	UInt32 global_elements;
 	UInt32 output_elements;
 	UInt32 input_elements;
@@ -167,7 +174,7 @@ class AUPluginInfo : public PluginInfo {
   private:
 	boost::shared_ptr<CAComponentDescription> descriptor;
 	UInt32 version;
-
+	
 	static void discover_music (PluginInfoList&);
 	static void discover_fx (PluginInfoList&);
 	static void discover_by_description (PluginInfoList&, CAComponentDescription&);

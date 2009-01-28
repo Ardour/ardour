@@ -59,8 +59,8 @@ opts.AddOptions(
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
-    BoolOption('AUBIO', "Use Paul Brossier's aubio library for feature detection (if available)", 1)
-    
+    BoolOption('AUBIO', "Use Paul Brossier's aubio library for feature detection (if available)", 1),
+    BoolOption('AUSTATE', "Build with support for AU settings & presets saving/loading", 0)
 )
 
 #----------------------------------------------------------------------
@@ -851,10 +851,7 @@ def prep_libcheck(topenv, libinfo):
             GTKROOT = os.path.expanduser ('~/gtk/inst')
             libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
             libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
-
-
-                
-
+	    
 prep_libcheck(env, env)
 
 

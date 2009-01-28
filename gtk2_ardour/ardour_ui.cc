@@ -58,6 +58,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/playlist.h>
 #include <ardour/utils.h>
+#include <ardour/plugin.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/recent_sessions.h>
@@ -224,6 +225,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+
+	ARDOUR::Plugin::PresetFileExists.connect (mem_fun(*this, &ARDOUR_UI::preset_file_exists_handler));
 
 	/* handle dialog requests */
 
@@ -2958,6 +2961,45 @@ ARDOUR_UI::xrun_handler(nframes_t where)
 
 	if (session && Config->get_stop_recording_on_xrun() && session->actively_recording()) {
 		halt_on_xrun_message ();
+	}
+}
+
+bool
+ARDOUR_UI::preset_file_exists_handler ()
+{
+	/* if driven from another thread, say "do not overwrite" and show the user nothing.
+	 */
+
+	if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {	\
+		return false;
+	}
+	
+ 	HBox* hbox = new HBox();
+	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	Gtk::Dialog dialog (_("Preset Exists"), true, false);
+	Label  message (_("\
+A preset with this name already exists for this plugin.\n\
+\n\
+What you would like to do?\n"));
+	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
+	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
+	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
+	dialog.add_button (_("Overwrite the existing preset"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Leave the existing preset alone"), RESPONSE_REJECT);
+	dialog.set_default_response (RESPONSE_ACCEPT);
+	dialog.set_position (WIN_POS_MOUSE);
+	dialog.set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY); // need to make it float above the preset name dialog
+
+	message.show();
+	image->show();
+	hbox->show();
+
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		return true;
+	default:
+		return false;
 	}
 }
 

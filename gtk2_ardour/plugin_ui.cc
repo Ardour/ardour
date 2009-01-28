@@ -325,14 +325,15 @@ PluginUIWindow::plugin_going_away ()
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	: insert (pi),
 	  plugin (insert->plugin()),
-	  save_button(_("Add")),
+	  save_button(_("Save")),
 	  bypass_button (_("Bypass"))
 {
         //preset_combo.set_use_arrows_always(true);
-	set_popdown_strings (preset_combo, plugin->get_presets());
 	preset_combo.set_size_request (100, -1);
-	preset_combo.set_active_text ("");
+	update_presets ();
+
 	preset_combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
+	no_load_preset = false;
 
 	save_button.set_name ("PluginSaveButton");
 	save_button.signal_clicked().connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
@@ -367,6 +368,10 @@ PlugUIBase::redirect_active_changed (Redirect* r, void* src)
 void
 PlugUIBase::setting_selected()
 {
+	if (no_load_preset) {
+		return;
+	}
+	
 	if (preset_combo.get_active_text().length() > 0) {
 		if (!plugin->load_preset(preset_combo.get_active_text())) {
 			warning << string_compose(_("Plugin preset %1 not found"), preset_combo.get_active_text()) << endmsg;
@@ -393,9 +398,16 @@ PlugUIBase::save_plugin_setting ()
 		prompter.get_result(name);
 
 		if (name.length()) {
-			if(plugin->save_preset(name)){
+			if (plugin->save_preset(name)) {
+
+				/* a rather inefficient way to add the newly saved preset
+				   to the list.
+				*/
+
 				set_popdown_strings (preset_combo, plugin->get_presets());
+				no_load_preset = true;
 				preset_combo.set_active_text (name);
+				no_load_preset = false;
 			}
 		}
 		break;
@@ -435,5 +447,16 @@ PlugUIBase::focus_toggled (GdkEventButton* ev)
 void
 PlugUIBase::update_presets ()
 {
+	vector<string> presets = plugin->get_presets();
 	set_popdown_strings (preset_combo, plugin->get_presets());
+
+	string current_preset = plugin->current_preset();
+
+	if (!current_preset.empty()) {
+		for (vector<string>::iterator p = presets.begin(); p != presets.end(); ++p) {
+			if (*p == current_preset) {
+				preset_combo.set_active_text (current_preset);
+			}
+		}
+	}
 }

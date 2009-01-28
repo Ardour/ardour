@@ -659,6 +659,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
+	
+	bool preset_file_exists_handler ();
 
 	void session_dialog (std::string);
 	int pending_state_dialog ();

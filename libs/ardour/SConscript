@@ -23,6 +23,7 @@ ardour.Append(POTFILE = domain + '.pot')
 if ardour['IS_OSX']:
 	ardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
 
+
 #
 # explicitly reference the control protocol LGPL library for includes
 # 
@@ -253,6 +254,8 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Headers/Cor
 if conf.CheckCHeader('/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h') and ardour['AUDIOUNITS']:
     ardour.Append(CXXFLAGS="-DHAVE_AUDIOUNITS")
     ardour.Append(LINKFLAGS="-framework AudioUnit")
+    if ardour['AUSTATE']:
+	    ardour.Append(CXXFLAGS="-DAU_STATE_SUPPORT")
     extra_sources += audiounit_files
  
 if ardour['COREAUDIO']:

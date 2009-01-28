@@ -67,7 +67,8 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	HBox* smaller_hbox = manage (new HBox);
 
-	smaller_hbox->pack_start (preset_label, false, false, 10);
+	smaller_hbox->set_spacing (6);
+	smaller_hbox->pack_start (preset_label, false, false, 4);
 	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (automation_mode_label, false, false);

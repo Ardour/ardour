@@ -138,6 +138,9 @@ class Plugin : public PBD::StatefulDestructible
 	virtual bool save_preset(string name) = 0;
 	virtual bool load_preset (const string preset_label);
 	virtual std::vector<std::string> get_presets();
+	virtual std::string current_preset() const { return std::string(); }
+
+	static sigc::signal<bool> PresetFileExists;
 
 	virtual bool has_editor() const = 0;
 

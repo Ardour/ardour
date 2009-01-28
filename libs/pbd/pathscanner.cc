@@ -23,6 +23,8 @@
 #include <cstring>
 #include <vector>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
@@ -33,7 +35,7 @@ using namespace PBD;
 vector<string *> *
 PathScanner::operator() (const string &dirpath, const string &regexp,
 			 bool match_fullpath, bool return_fullpath, 
-			 long limit)
+			 long limit, bool recurse)
 
 {
 	int err;
@@ -58,7 +60,7 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 			 0,
 			 match_fullpath,
 			 return_fullpath,
-			 limit);
+			 limit, recurse);
 }	
 
 vector<string *> *
@@ -67,10 +69,22 @@ PathScanner::run_scan (const string &dirpath,
 		       bool (*filter)(const string &, void *),
 		       void *arg,
 		       bool match_fullpath, bool return_fullpath,
-		       long limit)
-
+		       long limit,
+		       bool recurse)
 {
-	vector<string *> *result = 0;
+	return run_scan_internal ((vector<string*>*) 0, dirpath, memberfilter, filter, arg, match_fullpath, return_fullpath, limit, recurse);
+}
+	
+vector<string *> *
+PathScanner::run_scan_internal (vector<string *> *result,
+				const string &dirpath, 
+				bool (PathScanner::*memberfilter)(const string &),
+				bool (*filter)(const string &, void *),
+				void *arg,
+				bool match_fullpath, bool return_fullpath,
+				long limit,
+				bool recurse)
+{
 	DIR *dir;
 	struct dirent *finfo;
 	char *pathcopy = strdup (dirpath.c_str());
@@ -86,7 +100,9 @@ PathScanner::run_scan (const string &dirpath,
 		return 0;
 	}
 
-	result = new vector<string *>;
+	if (result == 0) {
+		result = new vector<string *>;
+	}
 
 	do {
 
@@ -96,37 +112,51 @@ PathScanner::run_scan (const string &dirpath,
 		
 		while ((finfo = readdir (dir)) != 0) {
 
+			if ((finfo->d_name[0] == '.' && finfo->d_name[1] == '\0') ||
+			    (finfo->d_name[0] == '.' && finfo->d_name[1] == '.' && finfo->d_name[2] == '\0')) {
+				continue;
+			}
+
 			snprintf (fullpath, sizeof(fullpath), "%s/%s",
 				  thisdir, finfo->d_name);
 
-			if (match_fullpath) {
-				search_str = fullpath;
-			} else {
-				search_str = finfo->d_name;
+			struct stat statbuf;
+			if (stat (fullpath, &statbuf) < 0) {
+				continue;
 			}
 
-			/* handle either type of function ptr */
-
-			if (memberfilter) {
-				if (!(this->*memberfilter)(search_str)) {
-					continue;
-				} 
+			if (statbuf.st_mode & S_IFDIR && recurse) {
+				run_scan_internal (result, fullpath, memberfilter, filter, arg, match_fullpath, return_fullpath, limit, recurse);
 			} else {
-				if (!filter(search_str, arg)) {
-					continue;
+				
+				if (match_fullpath) {
+					search_str = fullpath;
+				} else {
+					search_str = finfo->d_name;
 				}
+				
+				/* handle either type of function ptr */
+				
+				if (memberfilter) {
+					if (!(this->*memberfilter)(search_str)) {
+						continue;
+					} 
+				} else {
+					if (!filter(search_str, arg)) {
+						continue;
+					}
+				}
+				
+				if (return_fullpath) {
+					newstr = new string (fullpath);
+				} else {
+					newstr = new string (finfo->d_name);
+				} 
+				
+				result->push_back (newstr);
+				nfound++;
 			}
-
-			if (return_fullpath) {
-				newstr = new string (fullpath);
-			} else {
-				newstr = new string (finfo->d_name);
-			} 
-
-			result->push_back (newstr);
-			nfound++;
 		}
-
 		closedir (dir);
 		
 	} while ((limit < 0 || (nfound < limit)) && (thisdir = strtok (0, ":")));
