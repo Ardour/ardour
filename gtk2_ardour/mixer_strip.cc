@@ -153,13 +153,13 @@ MixerStrip::init ()
 	hide_button.add (*img);
 
 	input_label.set_text (_("Input"));
-	ARDOUR_UI::instance()->set_tip (&input_button, _("Click to choose inputs"), "");
+	ARDOUR_UI::instance()->set_tip (&input_button, _("Button 1 to choose inputs from a port matrix, button 3 to select inputs from a menu"), "");
 	input_button.add (input_label);
 	input_button.set_name ("MixerIOButton");
 	input_label.set_name ("MixerIOButtonLabel");
 
 	output_label.set_text (_("Output"));
-	ARDOUR_UI::instance()->set_tip (&output_button, _("Click to choose outputs"), "");
+	ARDOUR_UI::instance()->set_tip (&output_button, _("Button 1 to choose outputs from a port matrix, button 3 to select inputs from a menu"), "");
 	output_button.add (output_label);
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
@@ -620,12 +620,14 @@ MixerStrip::output_press (GdkEventButton *ev)
 	switch (ev->button) {
 
 	case 1:
+		edit_output_configuration ();
+		break;
+		
+	case 3:
 	{
 		output_menu.set_name ("ArdourContextMenu");
 		citems.clear();
 		
-		citems.push_back (MenuElem (_("Edit"), mem_fun(*this, &MixerStrip::edit_output_configuration)));
-		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 		citems.push_back (SeparatorElem());
 
@@ -639,7 +641,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		output_menu.popup (1, ev->time);
 		break;
 	}
-		
+
 	default:
 	        break;
 	}
@@ -692,9 +694,11 @@ MixerStrip::input_press (GdkEventButton *ev)
 	switch (ev->button) {
 
 	case 1:
+		edit_input_configuration ();
+		break;
+
+	case 3:
 	{
-		citems.push_back (MenuElem (_("Edit"), mem_fun(*this, &MixerStrip::edit_input_configuration)));
-		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
 
