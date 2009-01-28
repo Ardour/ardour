@@ -975,7 +975,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
 		const bool past_start = (inclusive ? first->when >= start : first->when > start);
 
 		/* Earliest points is in range, return it */
-		if (past_start >= start && first->when < end) {
+		if (past_start && first->when < end) {
 
 			x = first->when;
 			y = first->value;
@@ -987,17 +987,14 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
 
 			assert(x >= start);
 			assert(x < end);
-			cerr << "returned something" << endl;
 			return true;
 
 		} else {
-			cerr << "not between start and end" << endl;
 			return false;
 		}
 	
 	/* No points in range */
 	} else {
-		cerr << "no points in range" << endl;
 		return false;
 	}
 }
