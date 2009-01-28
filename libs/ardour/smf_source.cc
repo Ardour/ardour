@@ -664,7 +664,12 @@ SMFSource::load_model(bool lock, bool force_reload)
 	Evoral::ControlSet::Controls controls = _model->controls();
 	for (Evoral::ControlSet::Controls::iterator c = controls.begin(); c != controls.end(); ++c) {
 		(*c).second->list()->set_interpolation(
+			// to be enabled when ControlList::rt_safe_earliest_event_linear_unlocked works properly
+			#if 0
 			EventTypeMap::instance().interpolation_of((*c).first));
+			#else
+			Evoral::ControlList::Discrete);
+			#endif
 	}
 	
 	_model->end_write(false);

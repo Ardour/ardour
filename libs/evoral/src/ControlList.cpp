@@ -1001,6 +1001,8 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
 
 /** Get the earliest time the line crosses an integer (Linear interpolation).
  *
+ * In other words: send out multiple events to interpolate the line
+ * defined by its control points
  * If an event is found, \a x and \a y are set to its coordinates.
  *
  * \param inclusive Include events with timestamp exactly equal to \a start
@@ -1009,7 +1011,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
 bool
 ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, double& x, double& y, bool inclusive) const
 {
-	//cerr << "earliest_event(" << start << ", " << end << ", " << x << ", " << y << ", " << inclusive << endl;
+	cerr << "earliest_event(start: " << start << ", end: " << end << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
 
 	const_iterator length_check_iter = _events.begin();
 	if (_events.empty()) // 0 events
@@ -1052,12 +1054,12 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 			 * (Optimize for immediate call this cycle within range) */
 			_search_cache.left = x;
 			//++_search_cache.range.first;
-			assert(inclusive ? x >= start : x > start);
+			assert(x >= start);
 			return true;
 		}
 			
 		if (fabs(first->value - next->value) <= 1) {
-			if (next->when <= end && (!inclusive || next->when > start)) {
+			if (next->when <= end && (next->when > start)) {
 				x = next->when;
 				y = next->value;
 				/* Move left of cache to this point
@@ -1094,9 +1096,9 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 			x = first->when + (y - first->value) / (double)slope;
 		}
 
-		/*cerr << first->value << " @ " << first->when << " ... "
+		cerr << first->value << " @ " << first->when << " ... "
 				<< next->value << " @ " << next->when
-				<< " = " << y << " @ " << x << endl;*/
+				<< " = " << y << " @ " << x << endl;
 
 		assert(    (y >= first->value && y <= next->value)
 				|| (y <= first->value && y >= next->value) );
