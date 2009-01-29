@@ -386,7 +386,11 @@ Sequence::control_to_midi_event(boost::shared_ptr<Event>& ev, const ControlItera
 		assert(iter.list.get());
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.list->parameter().id() <= INT8_MAX);
-		assert(iter.y <= INT8_MAX);
+		cerr << "CONTROL with id :" << iter.list->parameter().id() << " : " << iter.y << endl;
+		assert(iter.y <= UINT8_MAX);
+		if (iter.y > INT8_MAX) {
+			cerr << "Warning: Found non-standard conforming controller value (> 127)" << endl;
+		}
 		
 		ev->time() = iter.x;
 		ev->realloc(3);
