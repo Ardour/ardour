@@ -235,7 +235,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
 		if (! (ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex()) ) {
-			//cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type " << std::hex << int(ev.buffer()[0]) << endl;
+			cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type " << std::hex << int(ev.buffer()[0]) << endl;
 			continue;
 		}
 		
@@ -244,6 +244,10 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		if (_model) {
 			_model->append(ev);
 		}
+	}
+
+	if (_model) {
+		make_sure_controls_have_the_right_interpolation();
 	}
 
 	SMF::flush();
@@ -660,22 +664,30 @@ SMFSource::load_model(bool lock, bool force_reload)
 		}
 	}
 
-	// set interpolation style to defaults, can be changed by the GUI later
-	Evoral::ControlSet::Controls controls = _model->controls();
-	for (Evoral::ControlSet::Controls::iterator c = controls.begin(); c != controls.end(); ++c) {
-		(*c).second->list()->set_interpolation(
-			// to be enabled when ControlList::rt_safe_earliest_event_linear_unlocked works properly
-			#if 0
-			EventTypeMap::instance().interpolation_of((*c).first));
-			#else
-			Evoral::ControlList::Discrete);
-			#endif
-	}
+	make_sure_controls_have_the_right_interpolation();
 	
 	_model->end_write(false);
 	_model->set_edited(false);
 
 	free(buf);
+}
+
+#define LINEAR_INTERPOLATION_MODE_WORKS_PROPERLY 0
+
+void
+SMFSource::make_sure_controls_have_the_right_interpolation()
+{
+	// set interpolation style to defaults, can be changed by the GUI later
+	Evoral::ControlSet::Controls controls = _model->controls();
+	for (Evoral::ControlSet::Controls::iterator c = controls.begin(); c != controls.end(); ++c) {
+		(*c).second->list()->set_interpolation(
+			// to be enabled when ControlList::rt_safe_earliest_event_linear_unlocked works properly
+			#if LINEAR_INTERPOLATION_MODE_WORKS_PROPERLY
+			EventTypeMap::instance().interpolation_of((*c).first));
+			#else
+			Evoral::ControlList::Discrete);
+			#endif
+	}
 }
 
 
