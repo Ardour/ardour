@@ -20,15 +20,16 @@
 #ifndef __ardour_diskstream_h__
 #define __ardour_diskstream_h__
 
-#include <sigc++/signal.h>
-
-#include <cmath>
 #include <string>
 #include <queue>
 #include <map>
 #include <vector>
-
+#include <cmath>
 #include <time.h>
+
+#include <sigc++/signal.h>
+
+#include <evoral/types.hpp>
 
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
@@ -37,20 +38,23 @@
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
-#include <ardour/session.h>
-#include <ardour/route_group.h>
-#include <ardour/route.h>
+#include <ardour/location.h>
+#include <ardour/session_object.h>
+#include <ardour/types.h>
 #include <ardour/utils.h>
+#include <ardour/chan_count.h>
 
 struct tm;
 
 namespace ARDOUR {
 
 class AudioEngine;
+class IO;
+class Playlist;
+class Processor;
+class Region;
 class Send;
 class Session;
-class Playlist;
-class IO;
 
 class Diskstream : public SessionObject
 {	
@@ -195,7 +199,7 @@ class Diskstream : public SessionObject
 	};
 
 	/* The two central butler operations */
-	virtual int do_flush (Session::RunContext context, bool force = false) = 0;
+	virtual int do_flush (RunContext context, bool force = false) = 0;
 	virtual int do_refill () = 0;
 	
 	/** For non-butler contexts (allocates temporary working buffers) */

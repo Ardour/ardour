@@ -20,6 +20,9 @@
 #ifndef __ardour_route_time_axis_h__
 #define __ardour_route_time_axis_h__
 
+#include <list>
+#include <set>
+
 #include <gtkmm/table.h>
 #include <gtkmm/button.h>
 #include <gtkmm/box.h>
@@ -31,7 +34,6 @@
 
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/slider_controller.h>
-#include <list>
 
 #include <ardour/playlist.h>
 #include <ardour/types.h>
@@ -305,7 +307,7 @@ protected:
 	ProcessorAutomationCurves processor_automation_curves;
 	
 	// Set from XML so context menu automation buttons can be correctly initialized
-	set<Evoral::Parameter> _show_automation;
+	std::set<Evoral::Parameter> _show_automation;
 
 	AutomationTracks _automation_tracks;
 

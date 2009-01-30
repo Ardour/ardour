@@ -27,6 +27,7 @@
 #include <string>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include <pbd/fastlog.h>
 #include <glibmm/thread.h>
@@ -38,13 +39,12 @@
 
 #include <ardour/ardour.h>
 #include <ardour/io.h>
-#include <ardour/session.h>
-#include <ardour/io_processor.h>
 #include <ardour/types.h>
 
 namespace ARDOUR {
 
 class Processor;
+class IOProcessor;
 class Send;
 class RouteGroup;
 
@@ -154,7 +154,7 @@ class Route : public IO
 		ProcessorList::iterator i;
 		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n);
 		if (i == _processors.end()) {
-			return boost::shared_ptr<IOProcessor> ();
+			return boost::shared_ptr<Processor> ();
 		} else {
 			return *i;
 		}
@@ -227,7 +227,7 @@ class Route : public IO
 	IO* control_outs() { return _control_outs; }
 
 	bool feeds (boost::shared_ptr<Route>);
-	set<boost::shared_ptr<Route> > fed_by;
+	std::set<boost::shared_ptr<Route> > fed_by;
 
 	struct ToggleControllable : public PBD::Controllable {
 	    enum ToggleType {

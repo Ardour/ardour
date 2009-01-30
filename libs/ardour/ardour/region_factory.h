@@ -28,6 +28,7 @@ class XMLNode;
 namespace ARDOUR {
 
 class Session;
+class AudioRegion;
 
 class RegionFactory {
 

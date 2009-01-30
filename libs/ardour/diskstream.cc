@@ -50,6 +50,9 @@
 #include <ardour/cycle_timer.h>
 #include <ardour/region.h>
 #include <ardour/panner.h>
+#include <ardour/session.h>
+#include <ardour/io.h>
+#include <ardour/route.h>
 
 #include "i18n.h"
 #include <locale.h>

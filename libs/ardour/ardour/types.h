@@ -378,6 +378,12 @@ namespace ARDOUR {
 		LV2,
 		VST
 	};
+	
+	enum RunContext {
+		ButlerContext = 0,
+		TransportContext,
+		ExportContext
+	};
 
 	enum SlaveSource {
 		None = 0,

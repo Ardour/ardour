@@ -23,9 +23,6 @@
 #include <set>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include <ardour/session_object.h>
-#include <ardour/automation_list.h>
-#include <ardour/automation_control.h>
 #include <ardour/event_type_map.h>
 #include <evoral/ControlSet.hpp>
 #include <evoral/Sequence.hpp>

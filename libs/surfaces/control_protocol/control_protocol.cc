@@ -117,12 +117,12 @@ ControlProtocol::prev_track (uint32_t initial_id)
 	}
 
 	if (id < 0) {
-		id = limit;
-		while (id > initial_id) {
-			if ((cr = session->route_by_remote_id (id)) != 0) {
+		uint32_t i = limit;
+		while (i > initial_id) {
+			if ((cr = session->route_by_remote_id (i)) != 0) {
 				break;
 			}
-			id--;
+			i--;
 		}
 	}
 

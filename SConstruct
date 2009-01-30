@@ -677,9 +677,9 @@ env = conf.Finish()
 
 opt_flags = []
 if env['GPROFILE'] == 1:
-    debug_flags = [ '-g', '-pg' ]
+    debug_flags = [ '-O0', '-g', '-pg' ]
 else:
-    debug_flags = [ '-g' ]
+    debug_flags = [ '-O0', '-g' ]
 
 # guess at the platform, used to define compiler flags
 

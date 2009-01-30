@@ -42,9 +42,7 @@
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
-#include <ardour/io.h>
 #include <ardour/processor.h>
-#include <ardour/io_processor.h>
 
 #include <pbd/fastlog.h>
 

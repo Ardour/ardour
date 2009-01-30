@@ -20,41 +20,38 @@
 #ifndef __ardour_session_h__
 #define __ardour_session_h__
 
-#include <string>
 #include <list>
 #include <map>
-#include <vector>
 #include <set>
 #include <stack>
+#include <string>
+#include <vector>
+#include <stdint.h>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <boost/dynamic_bitset.hpp>
-
-#include <stdint.h>
 
 #include <sndfile.h>
 
 #include <glibmm/thread.h>
 
 #include <pbd/error.h>
-#include <pbd/undo.h>
 #include <pbd/pool.h>
 #include <pbd/rcu.h>
 #include <pbd/statefuldestructible.h>
+#include <pbd/undo.h>
 
-#include <midi++/types.h>
 #include <midi++/mmc.h>
+#include <midi++/types.h>
 
-#include <pbd/stateful.h>
 #include <pbd/destructible.h>
+#include <pbd/stateful.h>
 
 #include <ardour/ardour.h>
+#include <ardour/chan_count.h>
 #include <ardour/configuration.h>
 #include <ardour/location.h>
-#include <ardour/gain.h>
-#include <ardour/chan_count.h>
-
 #include <ardour/smpte.h>
 
 class XMLTree;
@@ -69,51 +66,50 @@ namespace PBD {
 	class Controllable;
 }
 
+namespace Evoral {
+	class Curve;
+}
+
 namespace ARDOUR {
 
-class Port;
-class AudioEngine;
-class Slave;
-class Diskstream;
-class Route;
-class AuxInput;
-class Source;
-class AudioSource;
-class BufferSet;
-class IO;
-
-class Diskstream;
 class AudioDiskstream;
-class MidiDiskstream;
+class AudioEngine;
 class AudioFileSource;
-class MidiSource;
-class Auditioner;
-class Processor;
-class Send;
-class IOProcessor;
-class PortInsert;
-class PluginInsert;
-class Bundle;
-class TempoMap;
-class AudioTrack;
-class NamedSelection;
 class AudioRegion;
-
-class Region;
-class Playlist;
-class VSTPlugin;
+class AudioSource;
+class AudioTrack;
+class Auditioner;
+class AutomationList;
+class AuxInput;
+class BufferSet;
+class Bundle;
 class ControlProtocolInfo;
-
-class MidiTrack;
-class MidiRegion;
-class SMFSource;
-
-class SessionDirectory;
-class SessionMetadata;
+class Diskstream;
 class ExportHandler;
 class ExportStatus;
-
-struct RouteGroup;
+class IO;
+class IOProcessor;
+class MidiDiskstream;
+class MidiRegion;
+class MidiSource;
+class MidiTrack;
+class NamedSelection;
+class Playlist;
+class PluginInsert;
+class Port;
+class PortInsert;
+class Processor;
+class Region;
+class Route;
+class RouteGroup;
+class SMFSource;
+class Send;
+class SessionDirectory;
+class SessionMetadata;
+class Slave;
+class Source;
+class TempoMap;
+class VSTPlugin;
 
 using std::vector;
 using std::string;
@@ -136,115 +132,115 @@ class Session : public PBD::StatefulDestructible
 	};
 
 	struct Event {
-	    enum Type {
-		    SetTransportSpeed,
-		    SetDiskstreamSpeed,
-		    Locate,
-		    LocateRoll,
-		    LocateRollLocate,
-		    SetLoop,
-		    PunchIn,
-		    PunchOut,
-		    RangeStop,
-		    RangeLocate,
-		    Overwrite,
-		    SetSlaveSource,
-		    Audition,
-		    InputConfigurationChange,
-		    SetAudioRange,
-		    SetPlayRange,
+		enum Type {
+			SetTransportSpeed,
+			SetDiskstreamSpeed,
+			Locate,
+			LocateRoll,
+			LocateRollLocate,
+			SetLoop,
+			PunchIn,
+			PunchOut,
+			RangeStop,
+			RangeLocate,
+			Overwrite,
+			SetSlaveSource,
+			Audition,
+			InputConfigurationChange,
+			SetAudioRange,
+			SetPlayRange,
 
-		    /* only one of each of these events
-		       can be queued at any one time
-		    */
+			/* only one of each of these events
+			   can be queued at any one time
+			   */
 
-		    StopOnce,
-		    AutoLoop
-	    };
+			StopOnce,
+			AutoLoop
+		};
 
-	    enum Action {
-		    Add,
-		    Remove,
-		    Replace,
-		    Clear
-	    };
+		enum Action {
+			Add,
+			Remove,
+			Replace,
+			Clear
+		};
 
 		Type           type;
-	    Action         action;
-	    nframes_t      action_frame;
-	    nframes_t      target_frame;
-	    double         speed;
+		Action         action;
+		nframes_t      action_frame;
+		nframes_t      target_frame;
+		double         speed;
 
-	    union {
+		union {
 			void*                ptr;
 			bool                 yes_or_no;
-		        nframes_t            target2_frame;
+			nframes_t            target2_frame;
 			SlaveSource slave;
 			Route*               route;
-	    };
+		};
 
-	    boost::shared_ptr<Region>     region;
+		boost::shared_ptr<Region>     region;
 
-	    list<AudioRange>     audio_range;
-	    list<MusicRange>     music_range;
+		list<AudioRange>     audio_range;
+		list<MusicRange>     music_range;
 
-	    Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false)
-		    : type (t),
-		      action (a),
-		      action_frame (when),
-		      target_frame (where),
-		      speed (spd),
-		      yes_or_no (yn) {}
+		Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false)
+			: type (t),
+			action (a),
+			action_frame (when),
+			target_frame (where),
+			speed (spd),
+			yes_or_no (yn) {}
 
-	    void set_ptr (void* p) {
-		    ptr = p;
-	    }
+		void set_ptr (void* p) {
+			ptr = p;
+		}
 
-	    bool before (const Event& other) const {
-		    return action_frame < other.action_frame;
-	    }
+		bool before (const Event& other) const {
+			return action_frame < other.action_frame;
+		}
 
-	    bool after (const Event& other) const {
-		    return action_frame > other.action_frame;
-	    }
+		bool after (const Event& other) const {
+			return action_frame > other.action_frame;
+		}
 
-	    static bool compare (const Event *e1, const Event *e2) {
-		    return e1->before (*e2);
-	    }
+		static bool compare (const Event *e1, const Event *e2) {
+			return e1->before (*e2);
+		}
 
-	    void *operator new (size_t ignored) {
-		    return pool.alloc ();
-	    }
+		void *operator new (size_t ignored) {
+			return pool.alloc ();
+		}
 
-	    void operator delete(void *ptr, size_t size) {
-		    pool.release (ptr);
-	    }
+		void operator delete(void *ptr, size_t size) {
+			pool.release (ptr);
+		}
 
-	    static const nframes_t Immediate = 0;
+		static const nframes_t Immediate = 0;
 
-	 private:
-	    static MultiAllocSingleReleasePool pool;
+		private:
+		static MultiAllocSingleReleasePool pool;
 	};
 
 	/* creating from an XML file */
 
 	Session (AudioEngine&,
-		 const string& fullpath,
-		 const string& snapshot_name,
-		 string mix_template = "");
+			const string& fullpath,
+			const string& snapshot_name,
+			string mix_template = "");
 
 	/* creating a new Session */
 
 	Session (AudioEngine&,
-		 string fullpath,
-		 string snapshot_name,
-		 AutoConnectOption input_auto_connect,
-		 AutoConnectOption output_auto_connect,
-		 uint32_t control_out_channels,
-		 uint32_t master_out_channels,
-		 uint32_t n_physical_in,
-		 uint32_t n_physical_out,
-		 nframes_t initial_length);
+			string fullpath,
+			string snapshot_name,
+			AutoConnectOption input_auto_connect,
+			AutoConnectOption output_auto_connect,
+			uint32_t control_out_channels,
+			uint32_t master_out_channels,
+			uint32_t n_physical_in,
+			uint32_t n_physical_out,
+			nframes_t initial_length);
 
 	virtual ~Session ();
 
@@ -573,12 +569,12 @@ class Session : public PBD::StatefulDestructible
 	static sigc::signal<void> EndTimeChanged;
 	static sigc::signal<void> SMPTEOffsetChanged;
 
-	void        request_slave_source (SlaveSource);
-	bool        synced_to_jack() const { return Config->get_slave_source() == JACK; }
+	void   request_slave_source (SlaveSource);
+	bool   synced_to_jack() const { return Config->get_slave_source() == JACK; }
 
-	double      transport_speed() const { return _transport_speed; }
-	bool        transport_stopped() const { return _transport_speed == 0.0f; }
-	bool        transport_rolling() const { return _transport_speed != 0.0f; }
+	double transport_speed() const { return _transport_speed; }
+	bool   transport_stopped() const { return _transport_speed == 0.0f; }
+	bool   transport_rolling() const { return _transport_speed != 0.0f; }
 
 	void set_silent (bool yn);
 	bool silent () { return _silent; }
@@ -615,17 +611,17 @@ class Session : public PBD::StatefulDestructible
 	/* source management */
 
 	struct import_status : public InterThreadInfo {
-	    string doing_what;
+		string doing_what;
 
-	    /* control info */
-	    uint32_t total;
-	    SrcQuality quality;
-	    volatile bool freeze;
-	    std::vector<Glib::ustring> paths;
-	    bool replace_existing_source;
+		/* control info */
+		uint32_t total;
+		SrcQuality quality;
+		volatile bool freeze;
+		std::vector<Glib::ustring> paths;
+		bool replace_existing_source;
 
-	    /* result */
-	    SourceList sources;
+		/* result */
+		SourceList sources;
 	};
 
 	void import_audiofiles (import_status&);
@@ -728,8 +724,8 @@ class Session : public PBD::StatefulDestructible
 
 	/* flattening stuff */
 
-	boost::shared_ptr<Region> write_one_track (AudioTrack&, nframes_t start, nframes_t end, bool overwrite, vector<boost::shared_ptr<Source> >&,
-						   InterThreadInfo& wot);
+	boost::shared_ptr<Region> write_one_track (AudioTrack&, nframes_t start, nframes_t end,
+			bool overwrite, vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -946,21 +942,14 @@ class Session : public PBD::StatefulDestructible
 	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
 	pan_t** pan_automation_buffer () const  { return _pan_automation_buffer; }
 
-	/* buffers for conversion */
-	enum RunContext {
-		ButlerContext = 0,
-		TransportContext,
-		ExportContext
-	};
-
 	/* VST support */
 
 	static long vst_callback (AEffect* effect,
-				  long opcode,
-				  long index,
-				  long value,
-				  void* ptr,
-				  float opt);
+			long opcode,
+			long index,
+			long value,
+			void* ptr,
+			float opt);
 
 	static sigc::signal<void> SendFeedback;
 
@@ -970,8 +959,6 @@ class Session : public PBD::StatefulDestructible
 
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);
-
-	/* metadata */
 
 	SessionMetadata & metadata () { return *_metadata; }
 
@@ -1208,12 +1195,12 @@ class Session : public PBD::StatefulDestructible
 	inline bool transport_work_requested() const { return g_atomic_int_get(&butler_should_do_transport_work); }
 
 	struct ButlerRequest {
-	    enum Type {
-		    Wake,
-		    Run,
-		    Pause,
-		    Quit
-	    };
+		enum Type {
+			Wake,
+			Run,
+			Pause,
+			Quit
+		};
 	};
 
 	enum PostTransportWork {
@@ -1235,14 +1222,15 @@ class Session : public PBD::StatefulDestructible
 	};
 
 	static const PostTransportWork ProcessCannotProceedMask =
-		PostTransportWork (PostTransportInputChange|
-				   PostTransportSpeed|
-				   PostTransportReverse|
-				   PostTransportCurveRealloc|
-				   PostTransportScrub|
-				   PostTransportAudition|
-				   PostTransportLocate|
-				   PostTransportStop);
+		PostTransportWork (
+				PostTransportInputChange|
+				PostTransportSpeed|
+				PostTransportReverse|
+				PostTransportCurveRealloc|
+				PostTransportScrub|
+				PostTransportAudition|
+				PostTransportLocate|
+				PostTransportStop);
 
 	PostTransportWork post_transport_work;
 
@@ -1397,15 +1385,11 @@ class Session : public PBD::StatefulDestructible
 	bool process_can_proceed() const { return !(post_transport_work & ProcessCannotProceedMask); }
 
 	struct MIDIRequest {
-
-	    enum Type {
-		    PortChange,
-		    Quit
-	    };
-
-	    Type type;
-
-	    MIDIRequest () {}
+		enum Type {
+			PortChange,
+			Quit
+		};
+		Type type;
 	};
 
 	Glib::Mutex  midi_lock;
@@ -1587,18 +1571,18 @@ class Session : public PBD::StatefulDestructible
 	/* S/W RAID */
 
 	struct space_and_path {
-	    uint32_t blocks; /* 4kB blocks */
-	    string path;
+		uint32_t blocks; /* 4kB blocks */
+		string path;
 
-	    space_and_path() {
-		    blocks = 0;
-	    }
+		space_and_path() {
+			blocks = 0;
+		}
 	};
 
 	struct space_and_path_ascending_cmp {
-	    bool operator() (space_and_path a, space_and_path b) {
-		    return a.blocks > b.blocks;
-	    }
+		bool operator() (space_and_path a, space_and_path b) {
+			return a.blocks > b.blocks;
+		}
 	};
 
 	void setup_raid_path (string path);
@@ -1647,36 +1631,36 @@ class Session : public PBD::StatefulDestructible
 	/* click track */
 
 	struct Click {
-	    nframes_t start;
-	    nframes_t duration;
-	    nframes_t offset;
-	    const Sample *data;
+		nframes_t start;
+		nframes_t duration;
+		nframes_t offset;
+		const Sample *data;
 
-	    Click (nframes_t s, nframes_t d, const Sample *b)
-		    : start (s), duration (d), data (b) { offset = 0; }
+		Click (nframes_t s, nframes_t d, const Sample *b)
+			: start (s), duration (d), data (b) { offset = 0; }
 
-	    void *operator new(size_t ignored) {
-		    return pool.alloc ();
-	    };
+		void *operator new(size_t ignored) {
+			return pool.alloc ();
+		};
 
-	    void operator delete(void *ptr, size_t size) {
-		    pool.release (ptr);
-	    }
+		void operator delete(void *ptr, size_t size) {
+			pool.release (ptr);
+		}
 
 	  private:
-	    static Pool pool;
+		static Pool pool;
 	};
 
 	typedef list<Click*> Clicks;
 
-	Clicks          clicks;
-	bool           _clicking;
+	Clicks                 clicks;
+	bool                  _clicking;
 	boost::shared_ptr<IO> _click_io;
-	Sample*         click_data;
-	Sample*         click_emphasis_data;
-	nframes_t  click_length;
-	nframes_t  click_emphasis_length;
-	mutable Glib::RWLock click_lock;
+	Sample*                click_data;
+	Sample*                click_emphasis_data;
+	nframes_t              click_length;
+	nframes_t              click_emphasis_length;
+	mutable Glib::RWLock   click_lock;
 
 	static const Sample    default_click[];
 	static const nframes_t default_click_length;
@@ -1711,11 +1695,11 @@ class Session : public PBD::StatefulDestructible
 	/* VST support */
 
 	long _vst_callback (VSTPlugin*,
-			    long opcode,
-			    long index,
-			    long value,
-			    void* ptr,
-			    float opt);
+			long opcode,
+			long index,
+			long value,
+			void* ptr,
+			float opt);
 
 	/* number of hardware ports we're using,
 	   based on max (requested,available)
@@ -1729,7 +1713,6 @@ class Session : public PBD::StatefulDestructible
 
 	uint32_t n_physical_midi_outputs;
 	uint32_t n_physical_midi_inputs;
-
 
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
@@ -1754,13 +1737,9 @@ class Session : public PBD::StatefulDestructible
 
 	static bool _disable_all_loaded_plugins;
 	
-	/* Metadata */
-
 	SessionMetadata * _metadata;
 
-	/* used in ::audible_frame() */
-
-	mutable bool have_looped;
+	mutable bool have_looped; ///< Used in ::audible_frame(*)
 };
 
 } // namespace ARDOUR

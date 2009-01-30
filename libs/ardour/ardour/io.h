@@ -42,6 +42,7 @@
 #include <ardour/chan_count.h>
 #include <ardour/latent.h>
 #include <ardour/automation_control.h>
+#include <ardour/session_object.h>
 
 using std::string;
 using std::vector;

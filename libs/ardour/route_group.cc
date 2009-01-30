@@ -31,6 +31,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/configuration.h>
+#include <ardour/session.h>
 
 using namespace ARDOUR;
 using namespace sigc;

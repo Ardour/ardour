@@ -17,17 +17,21 @@
 
 */
 
+#include <cstring>
+#include <boost/shared_ptr.hpp>
+
+#include "ardour/audio_track.h"
+#include "ardour/audioengine.h"
+#include "ardour/bundle.h"
+#include "ardour/io_processor.h"
+#include "ardour/midi_track.h"
+#include "ardour/port.h"
+#include "ardour/session.h"
+
 #include "port_group.h"
 #include "port_matrix.h"
+
 #include "i18n.h"
-#include "ardour/session.h"
-#include "ardour/audio_track.h"
-#include "ardour/midi_track.h"
-#include "ardour/audioengine.h"
-#include "ardour/port.h"
-#include "ardour/bundle.h"
-#include <boost/shared_ptr.hpp>
-#include <cstring>
 
 using namespace std;
 using namespace Gtk;

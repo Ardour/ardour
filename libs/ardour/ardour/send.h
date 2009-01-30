@@ -27,7 +27,6 @@
 #include <pbd/stateful.h> 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
-#include <ardour/io.h>
 #include <ardour/io_processor.h>
 
 namespace ARDOUR {

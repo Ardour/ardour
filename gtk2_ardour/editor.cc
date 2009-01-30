@@ -46,19 +46,20 @@
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/choice.h>
 
-#include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
-#include <ardour/plugin_manager.h>
-#include <ardour/location.h>
+#include <ardour/audio_track.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
+#include <ardour/location.h>
 #include <ardour/midi_region.h>
-#include <ardour/session_route.h>
+#include <ardour/plugin_manager.h>
+#include <ardour/profile.h>
+#include <ardour/route_group.h>
 #include <ardour/session_directory.h>
+#include <ardour/session_route.h>
 #include <ardour/session_state_utils.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
-#include <ardour/profile.h>
 
 #include <control_protocol/control_protocol.h>
 

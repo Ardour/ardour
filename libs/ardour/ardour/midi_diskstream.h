@@ -37,25 +37,23 @@
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
-#include <ardour/session.h>
-#include <ardour/route_group.h>
-#include <ardour/route.h>
-#include <ardour/utils.h>
 #include <ardour/diskstream.h>
 #include <ardour/midi_playlist.h>
 #include <ardour/midi_ring_buffer.h>
 #include <ardour/midi_state_tracker.h>
+#include <ardour/utils.h>
 
 struct tm;
 
 namespace ARDOUR {
 
+class IO;
 class MidiEngine;
+class MidiPort;
+class MidiRingbuffer;
+class SMFSource;
 class Send;
 class Session;
-class MidiPlaylist;
-class SMFSource;
-class IO;
 
 class MidiDiskstream : public Diskstream
 {	
@@ -145,7 +143,7 @@ class MidiDiskstream : public Diskstream
   private:
 
 	/* The two central butler operations */
-	int do_flush (Session::RunContext context, bool force = false);
+	int do_flush (RunContext context, bool force = false);
 	int do_refill ();
 	
 	int do_refill_with_alloc();

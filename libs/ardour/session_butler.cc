@@ -31,12 +31,13 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/stacktrace.h>
 
-#include <ardour/configuration.h>
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
 #include <ardour/audio_diskstream.h>
-#include <ardour/midi_diskstream.h>
+#include <ardour/audioengine.h>
+#include <ardour/configuration.h>
 #include <ardour/crossfade.h>
+#include <ardour/io.h>
+#include <ardour/midi_diskstream.h>
+#include <ardour/session.h>
 #include <ardour/timestamps.h>
 
 #include "i18n.h"
@@ -315,7 +316,7 @@ Session::butler_thread_work ()
 			/* note that we still try to flush diskstreams attached to inactive routes
 			 */
 			
-			switch ((*i)->do_flush (Session::ButlerContext)) {
+			switch ((*i)->do_flush (ButlerContext)) {
 			case 0:
 				bytes += (*i)->write_data_count();
 				break;

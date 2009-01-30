@@ -21,10 +21,9 @@
 #ifndef __ardour_export_filename_h__
 #define __ardour_export_filename_h__
 
+#include <boost/shared_ptr.hpp>
 #include <glibmm/ustring.h>
 #include <pbd/statefuldestructible.h>
-
-#include <ardour/session.h>
 
 using Glib::ustring;
 

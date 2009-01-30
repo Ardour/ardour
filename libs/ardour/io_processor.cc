@@ -35,6 +35,7 @@
 #include <ardour/send.h>
 #include <ardour/port_insert.h>
 #include <ardour/plugin_insert.h>
+#include <ardour/io.h>
 
 #include "i18n.h"
 
@@ -121,3 +122,34 @@ IOProcessor::silence (nframes_t nframes, nframes_t offset)
 {
 	_io->silence(nframes, offset);
 }
+
+ChanCount
+IOProcessor::output_streams() const
+{
+	return _io->n_outputs();
+}
+
+ChanCount
+IOProcessor::input_streams () const
+{
+	return _io->n_inputs();
+}
+
+ChanCount
+IOProcessor::natural_output_streams() const
+{
+	return _io->n_outputs();
+}
+
+ChanCount
+IOProcessor::natural_input_streams () const
+{
+	return _io->n_inputs();
+}
+
+void
+IOProcessor::automation_snapshot (nframes_t now, bool force)
+{
+	_io->automation_snapshot(now, force);
+}
+

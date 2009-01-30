@@ -28,6 +28,7 @@
 #include <ardour/buffer_set.h>
 #include <ardour/meter.h>
 #include <ardour/panner.h>
+#include <ardour/io.h>
 
 #include "i18n.h"
 

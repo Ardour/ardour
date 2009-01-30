@@ -18,12 +18,13 @@
 
 */
 
-#include <ardour/export_channel.h>
-
-#include <ardour/export_failed.h>
-#include <ardour/audioengine.h>
-#include <ardour/audio_port.h>
 #include <ardour/audio_buffer.h>
+#include <ardour/audio_port.h>
+#include <ardour/audio_track.h>
+#include <ardour/audioengine.h>
+#include <ardour/export_channel.h>
+#include <ardour/export_failed.h>
+#include <ardour/session.h>
 
 using namespace ARDOUR;
 

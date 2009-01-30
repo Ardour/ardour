@@ -36,6 +36,7 @@
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
+#include <ardour/route_group.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/panner.h>

@@ -38,17 +38,19 @@
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
-#include <ardour/midi_diskstream.h>
-#include <ardour/utils.h>
 #include <ardour/configuration.h>
-#include <ardour/smf_source.h>
-#include <ardour/send.h>
-#include <ardour/region_factory.h>
-#include <ardour/midi_playlist.h>
-#include <ardour/playlist_factory.h>
 #include <ardour/cycle_timer.h>
-#include <ardour/midi_region.h>
+#include <ardour/io.h>
+#include <ardour/midi_diskstream.h>
+#include <ardour/midi_playlist.h>
 #include <ardour/midi_port.h>
+#include <ardour/midi_region.h>
+#include <ardour/playlist_factory.h>
+#include <ardour/region_factory.h>
+#include <ardour/send.h>
+#include <ardour/session.h>
+#include <ardour/smf_source.h>
+#include <ardour/utils.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -870,7 +872,7 @@ MidiDiskstream::do_refill ()
  * written at all unless @a force_flush is true.
  */
 int
-MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
+MidiDiskstream::do_flush (RunContext context, bool force_flush)
 {
 	uint32_t to_write;
 	int32_t ret = 0;
@@ -941,7 +943,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 	   */
 
 	while (more_work && !err) {
-		switch (do_flush (Session::TransportContext, true)) {
+		switch (do_flush (TransportContext, true)) {
 			case 0:
 				more_work = false;
 				break;

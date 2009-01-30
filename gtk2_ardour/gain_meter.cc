@@ -924,3 +924,10 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	return true;
 }
 
+boost::shared_ptr<PBD::Controllable>
+GainMeterBase::get_controllable()
+{
+	return _io->gain_control();
+}
+
+

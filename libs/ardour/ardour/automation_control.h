@@ -28,7 +28,6 @@
 
 namespace ARDOUR {
 
-class AutomationList;
 class Session;
 class Automatable;
 

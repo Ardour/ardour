@@ -36,9 +36,6 @@
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
-#include <ardour/session.h>
-#include <ardour/route_group.h>
-#include <ardour/route.h>
 #include <ardour/utils.h>
 #include <ardour/diskstream.h>
 #include <ardour/audioplaylist.h>
@@ -261,7 +258,7 @@ class AudioDiskstream : public Diskstream
 	void process_varispeed_playback(nframes_t nframes, boost::shared_ptr<ChannelList> c);
 	
 	/* The two central butler operations */
-	int do_flush (Session::RunContext context, bool force = false);
+	int do_flush (RunContext context, bool force = false);
 	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer); }
 	
 	int do_refill_with_alloc ();

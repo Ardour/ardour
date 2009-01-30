@@ -35,7 +35,6 @@
 #include <pbd/stateful.h>
 
 #include <ardour/ardour.h>
-#include <ardour/io.h>
 
 #include "route_processor_selection.h"
 #include "enums.h"

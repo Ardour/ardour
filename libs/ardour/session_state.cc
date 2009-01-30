@@ -103,6 +103,7 @@
 #include <ardour/directory_names.h>
 #include <ardour/template_utils.h>
 #include <ardour/ticker.h>
+#include <ardour/route_group.h>
 
 #include <control_protocol/control_protocol.h>
 

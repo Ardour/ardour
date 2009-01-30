@@ -18,6 +18,8 @@
 */
 
 #include <pbd/memento_command.h>
+#include <ardour/session.h>
+#include <ardour/automation_control.h>
 #include "automation_region_view.h"
 #include "public_editor.h"
 

@@ -33,7 +33,6 @@
 #include <ardour/types.h>
 #include <ardour/automation_control.h>
 #include <ardour/processor.h>
-#include <ardour/session.h>
 
 using std::istream;
 using std::ostream;

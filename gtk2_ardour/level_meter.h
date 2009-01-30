@@ -21,7 +21,6 @@
 #define __ardour_gtk_track_meter_h__
 
 #include <vector>
-#include <map>
 
 #include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
@@ -93,7 +92,7 @@ class LevelMeter : public Gtk::HBox
 
 	guint16 regular_meter_width;
 	static const guint16 thin_meter_width = 2;
-	vector<MeterInfo>    meters;
+	std::vector<MeterInfo>    meters;
 	float       max_peak;
 	
 	void hide_all_meters ();

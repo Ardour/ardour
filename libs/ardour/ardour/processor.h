@@ -33,6 +33,7 @@
 #include <ardour/buffer_set.h>
 #include <ardour/automatable.h>
 #include <ardour/latent.h>
+#include <ardour/session_object.h>
 
 class XMLNode;
 

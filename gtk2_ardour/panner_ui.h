@@ -114,8 +114,8 @@ class PannerUI : public Gtk::HBox
 
 	void panning_link_direction_clicked ();
 
-	vector<Gtk::Adjustment*> pan_adjustments;
-	vector<PannerBar*> pan_bars;
+	std::vector<Gtk::Adjustment*> pan_adjustments;
+	std::vector<PannerBar*> pan_bars;
 
 	void pan_adjustment_changed (uint32_t which);
 	void pan_value_changed (uint32_t which);

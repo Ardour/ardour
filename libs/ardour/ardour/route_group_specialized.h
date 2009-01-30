@@ -21,7 +21,7 @@
 #define __ardour_route_group_specialized_h__
 
 #include <ardour/route_group.h>
-#include <ardour/audio_track.h>
+#include <ardour/track.h>
 
 namespace ARDOUR {
 

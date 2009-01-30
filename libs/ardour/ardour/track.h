@@ -29,6 +29,7 @@ class Session;
 class Diskstream;
 class Playlist;
 class RouteGroup;
+class Region;
 
 class Track : public Route
 {

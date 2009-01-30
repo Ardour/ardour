@@ -633,7 +633,7 @@ Panner2d::on_button_release_event (GdkEventButton *ev)
 
 
 			for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
-				Target* puck = i->second;
+				//Target* puck = i->second;
 
 				/* XXX DO SOMETHING TO SET PUCK BACK TO "normal" */
 			}

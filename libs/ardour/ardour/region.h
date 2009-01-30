@@ -30,6 +30,7 @@
 #include <ardour/data_type.h>
 #include <ardour/automatable.h>
 #include <ardour/readable.h>
+#include <ardour/session_object.h>
 
 class XMLNode;
 

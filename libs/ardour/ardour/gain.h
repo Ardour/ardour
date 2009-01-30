@@ -22,7 +22,6 @@
 
 #include "ardour.h"
 #include "automation_list.h"
-#include <evoral/Curve.hpp>
 
 namespace ARDOUR {
 

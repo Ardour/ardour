@@ -33,6 +33,7 @@
 #include <glibmm/miscutils.h>
 
 #include <evoral/SMFReader.hpp>
+#include <evoral/Control.hpp>
 
 #include <ardour/smf_source.h>
 #include <ardour/session.h>

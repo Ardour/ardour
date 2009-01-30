@@ -22,7 +22,6 @@
 #define __ardour_export_channel_h__
 
 #include <ardour/audioregion.h>
-#include <ardour/audio_track.h>
 #include <ardour/buffer_set.h>
 
 #include <set>
@@ -33,6 +32,8 @@
 namespace ARDOUR {
 
 class Session;
+class AudioTrack;
+class AudioPort;
 
 /// Export channel base class interface for different source types
 class ExportChannel

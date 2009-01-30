@@ -20,13 +20,13 @@
 #ifndef __ardour_port_h__
 #define __ardour_port_h__
 
+#include <set>
+#include <string>
+#include <vector>
+#include <jack/jack.h>
+#include <sigc++/trackable.h>
 #include "ardour/data_type.h"
 #include "ardour/types.h"
-#include <sigc++/trackable.h>
-#include <jack/jack.h>
-#include <string>
-#include <set>
-#include <vector>
 
 namespace ARDOUR {
 

@@ -29,7 +29,7 @@
 #include <ardour/ardour.h>
 #include <ardour/types.h>
 #include <ardour/processor.h>
-#include <ardour/automation_list.h>
+#include <ardour/automation_control.h>
 
 class XMLNode;
 

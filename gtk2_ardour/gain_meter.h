@@ -74,7 +74,7 @@ class GainMeterBase : virtual public sigc::trackable
 
 	virtual void setup_meters (int len=0);
 
-	boost::shared_ptr<PBD::Controllable> get_controllable() { return _io->gain_control(); }
+	boost::shared_ptr<PBD::Controllable> get_controllable();
 
 	LevelMeter& get_level_meter() const { return *level_meter; }
 	Gtkmm2ext::SliderController& get_gain_slider() const { return *gain_slider; }

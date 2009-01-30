@@ -21,26 +21,25 @@
 
 #include <ardour/types.h>
 #include <ardour/utils.h>
-#include <ardour/io.h>
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 
 extern "C" {
 /* SSE functions */
-	float x86_sse_compute_peak		(const ARDOUR::Sample * buf, nframes_t nsamples, float current);
-	void  x86_sse_apply_gain_to_buffer	(ARDOUR::Sample * buf, nframes_t nframes, float gain);
-	void  x86_sse_mix_buffers_with_gain	(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
-	void  x86_sse_mix_buffers_no_gain	(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
+    float x86_sse_compute_peak         (const ARDOUR::Sample * buf, nframes_t nsamples, float current);
+    void  x86_sse_apply_gain_to_buffer (ARDOUR::Sample * buf, nframes_t nframes, float gain);
+    void  x86_sse_mix_buffers_with_gain(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
+    void  x86_sse_mix_buffers_no_gain  (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
 }
 
-void  x86_sse_find_peaks                (const ARDOUR::Sample * buf, nframes_t nsamples, float *min, float *max);
+void  x86_sse_find_peaks               (const ARDOUR::Sample * buf, nframes_t nsamples, float *min, float *max);
 
 /* debug wrappers for SSE functions */
 
-float debug_compute_peak		(const ARDOUR::Sample * buf, nframes_t nsamples, float current);
-void  debug_apply_gain_to_buffer	(ARDOUR::Sample * buf, nframes_t nframes, float gain);
-void  debug_mix_buffers_with_gain	(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
-void  debug_mix_buffers_no_gain		(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
+float debug_compute_peak               (const ARDOUR::Sample * buf, nframes_t nsamples, float current);
+void  debug_apply_gain_to_buffer       (ARDOUR::Sample * buf, nframes_t nframes, float gain);
+void  debug_mix_buffers_with_gain      (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
+void  debug_mix_buffers_no_gain        (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
 
 #endif
 

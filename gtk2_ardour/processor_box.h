@@ -36,7 +36,6 @@
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
-#include <ardour/io.h>
 #include <ardour/plugin_insert.h>
 #include <ardour/port_insert.h>
 #include <ardour/processor.h>
@@ -56,6 +55,7 @@ class RouteRedirectSelection;
 
 namespace ARDOUR {
 	class Connection;
+	class IO;
 	class Insert;
 	class Plugin;
 	class PluginInsert;

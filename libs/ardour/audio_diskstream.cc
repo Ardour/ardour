@@ -53,6 +53,8 @@
 #include <ardour/audio_port.h>
 #include <ardour/source_factory.h>
 #include <ardour/audio_buffer.h>
+#include <ardour/session.h>
+#include <ardour/io.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -1403,7 +1405,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
  * written at all unless @a force_flush is true.
  */
 int
-AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
+AudioDiskstream::do_flush (RunContext context, bool force_flush)
 {
 	uint32_t to_write;
 	int32_t ret = 0;
@@ -1555,7 +1557,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	*/
 
 	while (more_work && !err) {
-		switch (do_flush (Session::TransportContext, true)) {
+		switch (do_flush (TransportContext, true)) {
 		case 0:
 			more_work = false;
 			break;

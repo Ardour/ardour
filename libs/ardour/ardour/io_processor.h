@@ -21,9 +21,6 @@
 #define __ardour_redirect_h__
 
 #include <string>
-#include <vector>
-#include <set>
-#include <map>
 #include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
 
@@ -33,19 +30,15 @@
 
 #include <ardour/ardour.h>
 #include <ardour/processor.h>
-#include <ardour/io.h>
-#include <ardour/automation_list.h>
 
-using std::map;
-using std::set;
 using std::string;
-using std::vector;
 
 class XMLNode;
 
 namespace ARDOUR {
 
 class Session;
+class IO;
 
 /** A mixer strip element (Processor) with Jack ports (IO).
  */
@@ -59,17 +52,18 @@ class IOProcessor : public Processor
 	IOProcessor (const IOProcessor&);
 	virtual ~IOProcessor ();
 	
-	virtual ChanCount output_streams() const { return _io->n_outputs(); }
-	virtual ChanCount input_streams () const { return _io->n_inputs(); }
-	virtual ChanCount natural_output_streams() const { return _io->n_outputs(); }
-	virtual ChanCount natural_input_streams () const { return _io->n_inputs(); }
+	virtual ChanCount output_streams() const;
+	virtual ChanCount input_streams () const;
+	virtual ChanCount natural_output_streams() const;
+	virtual ChanCount natural_input_streams () const;
 
 	boost::shared_ptr<IO>       io()       { return _io; }
 	boost::shared_ptr<const IO> io() const { return _io; }
 	
-	virtual void automation_snapshot (nframes_t now, bool force) { _io->automation_snapshot(now, force); }
+	virtual void automation_snapshot (nframes_t now, bool force);
 
-	virtual void run_in_place (BufferSet& in, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
+	virtual void run_in_place (BufferSet& in, nframes_t start, nframes_t end,
+			nframes_t nframes, nframes_t offset) = 0;
 
 	void silence (nframes_t nframes, nframes_t offset);
 
