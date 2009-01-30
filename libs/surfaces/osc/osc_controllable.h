@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-2006 Paul Davis
+    Copyright (C) 2009 Paul Davis
  
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #define __osc_osccontrollable_h__
 
 #include <string>
-
+#include <boost/shared_ptr.hpp>
 #include <sigc++/sigc++.h>
 #include <lo/lo.h>
 
@@ -29,18 +29,46 @@
 #include <pbd/stateful.h>
 #include <ardour/types.h>
 
+namespace ARDOUR {
+
+class Route;
+
+}
+
 class OSCControllable : public PBD::Stateful
 {
   public:
-	OSCControllable (lo_address addr, PBD::Controllable&);
+	OSCControllable (lo_address addr, const string& path, boost::shared_ptr<PBD::Controllable>);
 	virtual ~OSCControllable ();
+
+	lo_address address() const { return addr; }
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode& node);
 
-  private:
-	PBD::Controllable& controllable;
+  protected:
+	boost::shared_ptr<PBD::Controllable> controllable;
 	lo_address addr;
+	string path;
+
+	virtual void send_change ();
+};
+
+class OSCRouteControllable : public OSCControllable
+{
+
+  public:
+	OSCRouteControllable (lo_address addr, const string& path, 
+			      boost::shared_ptr<PBD::Controllable>, 
+			      boost::shared_ptr<ARDOUR::Route>);
+	~OSCRouteControllable ();
+
+	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+
+  private:
+	boost::shared_ptr<ARDOUR::Route> _route;
+
+	void send_change ();
 };
 
 #endif /* __osc_osccontrollable_h__ */

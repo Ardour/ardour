@@ -102,7 +102,7 @@ class MackieControlProtocol
 	/// Signal handler from Panner::Change
 	void notify_panner_changed( Mackie::RouteSignal *, bool force_update = true );
 	/// Signal handler for new routes added
-	void notify_route_added( ARDOUR::Session::RouteList & );
+	void notify_route_added( ARDOUR::RouteList & );
 	/// Signal handler for Route::active_changed
 	void notify_active_changed( Mackie::RouteSignal * );
  

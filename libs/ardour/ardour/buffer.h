@@ -68,7 +68,7 @@ public:
 	 * passed to the constructor must have been non-zero.
 	 */
 	virtual void resize(size_t) = 0;
-
+	
 	/** Clear (eg zero, or empty) buffer starting at TIME @a offset */
 	virtual void silence(nframes_t len, nframes_t offset=0) = 0;
 	
@@ -77,9 +77,9 @@ public:
 	
 	virtual void read_from(const Buffer& src, nframes_t offset, nframes_t len) = 0;
 
-protected:
+  protected:
 	Buffer(DataType type, size_t capacity)
-	: _type(type), _capacity(capacity), _size(0), _silent(true)
+		: _type(type), _capacity(capacity), _size(0), _silent(true)
 	{}
 
 	DataType _type;

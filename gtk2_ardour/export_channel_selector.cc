@@ -105,14 +105,14 @@ void
 PortExportChannelSelector::fill_route_list ()
 {
 	channel_view.clear_routes ();
-	Session::RouteList routes = *session->get_routes();
+	RouteList routes = *session->get_routes();
 
 	/* Add master bus and then everything else */
 	
 	ARDOUR::IO * master = session->master_out().get();
 	channel_view.add_route (master);
 	
-	for (Session::RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
+	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (it->get() == master) {
 			continue;
 		}

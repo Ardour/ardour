@@ -1273,7 +1273,7 @@ void
 ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
-	Session::RouteList routes;
+	RouteList routes;
 
 	if (session == 0) {
 		warning << _("You cannot add a track or bus without a session already loaded.") << endmsg;

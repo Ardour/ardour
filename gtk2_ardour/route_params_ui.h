@@ -167,7 +167,7 @@ class RouteParams_UI : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> route_display_model;
 
 	
-	void add_routes (ARDOUR::Session::RouteList&);
+	void add_routes (ARDOUR::RouteList&);
 
 	void route_name_changed (boost::shared_ptr<ARDOUR::Route> route);
 	void route_removed (boost::shared_ptr<ARDOUR::Route> route);

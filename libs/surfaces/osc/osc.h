@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Paul Davis
+ * Copyright (C) 2006-2009 Paul Davis
  *  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #include <sys/time.h>
 #include <pthread.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include <lo/lo.h>
 
 #include <sigc++/sigc++.h>
@@ -33,15 +35,17 @@
 #include <ardour/session.h>
 #include <control_protocol/control_protocol.h>
 
-namespace ARDOUR {
+class OSCControllable;
 
+namespace ARDOUR {
 class Session;
 class Route;
+}
 	
-class OSC : public ControlProtocol
+class OSC : public ARDOUR::ControlProtocol
 {
   public:
-	OSC (Session&, uint32_t port);
+	OSC (ARDOUR::Session&, uint32_t port);
 	virtual ~OSC();
 
 	XMLNode& get_state ();
@@ -53,8 +57,6 @@ class OSC : public ControlProtocol
 	bool get_feedback () const;
 
 	void set_namespace_root (std::string);
-	bool send_route_changes () const { return _send_route_changes; }
-	void set_send_route_changes (bool yn);
 
 	int start ();
 	int stop ();
@@ -82,20 +84,11 @@ class OSC : public ControlProtocol
 
 	void register_callbacks ();
 
-	void route_added (ARDOUR::Session::RouteList&);
+	void route_added (ARDOUR::RouteList&);
 		
 	// Handlers for "Application Hook" signals
 	void session_loaded (ARDOUR::Session&);
 	void session_exported (std::string, std::string);
-
-	enum RouteChangeType {
-		RouteSolo,
-		RouteMute,
-		RouteGain
-	};
-
-	void route_changed (void* ignored, RouteChangeType, ARDOUR::Route*, lo_address);
-	void route_changed_deux (RouteChangeType, ARDOUR::Route*, lo_address);
 
 	// end "Application Hook" handles
 
@@ -173,24 +166,13 @@ class OSC : public ControlProtocol
 	int route_set_gain_abs (int rid, float level);
 	int route_set_gain_dB (int rid, float dB);
 
-	struct Listener {
-	    Route* route;
-	    lo_address addr;
-	    std::vector<sigc::connection> connections;
+	void listen_to_route (boost::shared_ptr<ARDOUR::Route>, lo_address);
+	void end_listen (boost::shared_ptr<ARDOUR::Route>, lo_address);
+	void drop_route (boost::weak_ptr<ARDOUR::Route>);
 
-	    Listener (Route* r, lo_address a) : route (r), addr (a) {}
-	};
+	typedef std::list<OSCControllable*> Controllables;
 
-	typedef std::pair<Route*, lo_address> ListenerPair;
-	typedef std::list<Listener*> Listeners;
-
-	Listeners listeners;
-
-	void listen_to_route (const ListenerPair&);
-	void drop_listener_pair (const ListenerPair&);
-	void drop_listeners_by_route (Route*);
+	Controllables controllables;
 };
-
-}
 
 #endif // ardour_osc_h

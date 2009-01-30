@@ -35,6 +35,7 @@
 #include <ardour/plugin_insert.h>
 #include <ardour/port_insert.h>
 #include <ardour/send.h>
+#include <ardour/internal_send.h>
 #include <ardour/session.h>
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
@@ -1229,6 +1230,11 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 int
 Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 {
+	/* NOTE: this is intended to be used ONLY when copying
+	   processors from another Route. Hence the subtle
+	   differences between this and ::add_processor()
+	*/
+
 	ChanCount old_pmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
@@ -1292,7 +1298,7 @@ Route::disable_processors (Placement p)
 	
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->placement() == p) {
-			(*i)->set_active (false);
+			(*i)->deactivate ();
 		}
 	}
 
@@ -1308,7 +1314,7 @@ Route::disable_processors ()
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->set_active (false);
+		(*i)->deactivate ();
 	}
 	
 	_session.set_dirty ();
@@ -1325,7 +1331,7 @@ Route::disable_plugins (Placement p)
 	
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i) && (*i)->placement() == p) {
-			(*i)->set_active (false);
+			(*i)->deactivate ();
 		}
 	}
 	
@@ -1342,7 +1348,7 @@ Route::disable_plugins ()
 	
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
-			(*i)->set_active (false);
+			(*i)->deactivate ();
 		}
 	}
 	
@@ -1367,7 +1373,7 @@ Route::ab_plugins (bool forward)
 			}
 
 			if ((*i)->active()) {
-				(*i)->set_active (false);
+				(*i)->deactivate ();
 				(*i)->set_next_ab_is_active (true);
 			} else {
 				(*i)->set_next_ab_is_active (false);
@@ -1385,9 +1391,9 @@ Route::ab_plugins (bool forward)
 			}
 
 			if ((*i)->get_next_ab_is_active()) {
-				(*i)->set_active (true);
+				(*i)->activate ();
 			} else {
-				(*i)->set_active (false);
+				(*i)->deactivate ();
 			}
 		}
 	}
@@ -1602,9 +1608,11 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 
 		} else if (boost::dynamic_pointer_cast<Send> (*r) != 0) {
 			++send_cnt;
+		} else if (boost::dynamic_pointer_cast<InternalSend> (*r) != 0) {
+			++send_cnt;
 		}
 	}
-	
+
 	if (insert_cnt == 0) {
 		if (send_cnt) {
 			goto recompute;
@@ -1665,19 +1673,31 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 
 	for (r = _processors.begin(); r != _processors.end(); prev = r, ++r) {
 		boost::shared_ptr<Send> s;
+		boost::shared_ptr<InternalSend> is;
 
 		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
+
+			/* don't pay any attention to send output configuration, since it doesn't
+			   affect the route.
+			 */
+
 			if (r == _processors.begin()) {
 				s->expect_inputs (n_inputs());
 			} else {
 				s->expect_inputs ((*prev)->output_streams());
 			}
 
+		} else if ((is = boost::dynamic_pointer_cast<InternalSend> (*r)) != 0) {
+
+			/* XXX ditto, but clean this inheritance pattern up someday soon */
+
+			if (r == _processors.begin()) {
+				is->expect_inputs (n_inputs());
+			} else {
+				is->expect_inputs ((*prev)->output_streams());
+			}
+
 		} else {
-			
-			/* don't pay any attention to send output configuration, since it doesn't
-			   affect the route.
-			 */
 			
 			max_audio = max ((*r)->output_streams ().n_audio(), max_audio);
 			max_midi = max ((*r)->output_streams ().n_midi(), max_midi);
@@ -1711,8 +1731,6 @@ Route::apply_some_processor_counts (list<ProcessorCount>& iclist)
 
 		ProcessorCount& pc (*i);
 
-		cerr << "now applying for " << (*i).processor->name() << " in = " << pc.in.n_audio() << " out = " << pc.out.n_audio() << endl;
-
 		if (pc.processor->configure_io (pc.in, pc.out)) {
 			return -1;
 		}
@@ -1742,8 +1760,6 @@ Route::check_some_processor_counts (list<ProcessorCount>& iclist, ChanCount requ
 	}
 
 	for (i = iclist.begin(); i != iclist.end(); ++i, ++index) {
-
-		cerr << "Checking whether " << (*i).processor->name() << " can support " << required_inputs.n_audio() << " inputs\n";
 
 		if (!(*i).processor->can_support_io_configuration (required_inputs, (*i).out)) {
 			if (err) {
@@ -1853,7 +1869,11 @@ Route::all_processors_flip ()
 	bool first_is_on = _processors.front()->active();
 	
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->set_active (!first_is_on);
+		if (first_is_on) {
+			(*i)->deactivate ();
+		} else {
+			(*i)->activate ();
+		}
 	}
 	
 	_session.set_dirty ();
@@ -1874,7 +1894,11 @@ Route::all_processors_active (Placement p, bool state)
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->placement() == p) {
-			(*i)->set_active (state);
+			if (state) {
+				(*i)->activate ();
+			} else {
+				(*i)->deactivate ();
+			}
 		}
 	}
 	

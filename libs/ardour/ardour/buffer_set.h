@@ -23,6 +23,7 @@
 #include <vector>
 #include <ardour/chan_count.h>
 #include <ardour/data_type.h>
+#include <ardour/types.h>
 
 namespace ARDOUR {
 
@@ -53,7 +54,7 @@ public:
 
 	void clear();
 	
-	void attach_buffers(PortSet& ports);
+	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset);
 
 	void ensure_buffers(const ChanCount& count, size_t buffer_capacity);
 	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);

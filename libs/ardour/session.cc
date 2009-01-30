@@ -72,6 +72,7 @@
 #include <ardour/named_selection.h>
 #include <ardour/crossfade.h>
 #include <ardour/playlist.h>
+#include <ardour/internal_send.h>
 #include <ardour/click.h>
 #include <ardour/data_type.h>
 #include <ardour/buffer_set.h>
@@ -1822,7 +1823,7 @@ Session::set_remote_control_ids ()
 }
 
 
-Session::RouteList
+RouteList
 Session::new_audio_route (int input_channels, int output_channels, uint32_t how_many)
 {
 	char bus_name[32];
@@ -3685,6 +3686,8 @@ Session::add_processor (Processor* processor)
 		_plugin_inserts.insert (_plugin_inserts.begin(), plugin_insert);
 	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		_sends.insert (_sends.begin(), send);
+	} else if (dynamic_cast<InternalSend *> (processor) != 0) {
+		/* relax */
 	} else {
 		fatal << _("programming error: unknown type of Insert created!") << endmsg;
 		/*NOTREACHED*/
@@ -3710,6 +3713,8 @@ Session::remove_processor (Processor* processor)
 		}
 	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (processor)) != 0) {
 		_plugin_inserts.remove (plugin_insert);
+	} else if (dynamic_cast<InternalSend *> (processor) != 0) {
+		/* relax */
 	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		list<Send*>::iterator x = find (_sends.begin(), _sends.end(), send);
 		if (x != _sends.end()) {

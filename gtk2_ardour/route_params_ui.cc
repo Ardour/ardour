@@ -171,11 +171,11 @@ RouteParams_UI::~RouteParams_UI ()
 }
 
 void
-RouteParams_UI::add_routes (Session::RouteList& routes)
+RouteParams_UI::add_routes (RouteList& routes)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::add_routes), routes));
 	
-	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
 		if (route->is_hidden()) {
@@ -423,7 +423,7 @@ RouteParams_UI::set_session (Session *sess)
 	route_display_model->clear();
 
 	if (session) {
-		boost::shared_ptr<Session::RouteList> r = session->get_routes();
+		boost::shared_ptr<RouteList> r = session->get_routes();
 		add_routes (*r);
 		session->GoingAway.connect (mem_fun(*this, &ArdourDialog::session_gone));
 		session->RouteAdded.connect (mem_fun(*this, &RouteParams_UI::add_routes));

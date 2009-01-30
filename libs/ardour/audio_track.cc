@@ -40,6 +40,7 @@
 #include <ardour/utils.h>
 #include <ardour/buffer_set.h>
 #include <ardour/audio_buffer.h>
+#include <ardour/internal_send.h>
 #include "i18n.h"
 
 using namespace std;
@@ -65,6 +66,8 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 	
 	_session.add_diskstream (ds);
 
+	_session.RouteAdded.connect (mem_fun (*this, &AudioTrack::catch_up_on_busses));
+
 	set_diskstream (boost::dynamic_pointer_cast<AudioDiskstream> (ds), this);
 }
 
@@ -72,10 +75,45 @@ AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node)
 {
 	_set_state (node, false);
+
+	_session.RouteAdded.connect (mem_fun (*this, &AudioTrack::catch_up_on_busses));
 }
 
 AudioTrack::~AudioTrack ()
 {
+}
+
+void
+AudioTrack::catch_up_on_busses (RouteList& added)
+{
+	if (is_hidden()) {
+		return;
+	}
+
+	for (RouteList::iterator x = added.begin(); x != added.end(); ++x) {
+		if (boost::dynamic_pointer_cast<Track>(*x) == 0 && (*x)->default_type() == DataType::AUDIO)  {
+			/* Audio bus */
+			if (!(*x)->is_master() && !(*x)->is_control()) {
+				add_internal_send (*x);
+			}
+		}
+	}
+}
+
+void
+AudioTrack::add_internal_send (boost::shared_ptr<Route> r)
+{
+	boost::shared_ptr<InternalSend> is (new InternalSend (_session, PreFader, r));
+
+	cerr << name() << " Adding processor\n";
+	
+	add_processor (is, 0);
+
+	cerr << "After add, we have " << _processors.size() << endl;
+		
+	/* note: if adding failed, the InternalSend will be cleaned up automatically when
+	   the shared_ptr goes out of scope.
+	*/
 }
 
 int
@@ -879,7 +917,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 				
 				/* now deactivate the processor */
 				
-				processor->set_active (false);
+				processor->deactivate ();
 				_session.set_dirty ();
 			}
 		}

@@ -151,14 +151,22 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 				/* no motion - just a click */
 
 				if (ev->state & Gdk::SHIFT_MASK) {
+					cerr << "SV A\n";
 					adjustment.set_value (default_value);
+					cerr << "SV A OUT\n";
 				} else if (ev->state & fine_scale_modifier) {
+					cerr << "SV B\n";
 					adjustment.set_value (adjustment.get_lower());
+					cerr << "SV B OUT\n";
 				} else if ((_orien == VERT && ev_pos < span - display_span()) || (_orien == HORIZ && ev_pos > span - display_span())) {
 					/* above the current display height, remember X Window coords */
+					cerr << "SV C\n";
 					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
+					cerr << "SV C OUT\n";
 				} else {
+					cerr << "SV D\n";
 					adjustment.set_value (adjustment.get_value() - adjustment.get_step_increment());
+					cerr << "SV D OUT\n";
 				}
 			}
 

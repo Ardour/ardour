@@ -68,8 +68,13 @@ public:
 	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
 	 * scaling by @a gain_coeff */
 	void accumulate_with_gain_from(const AudioBuffer& src, nframes_t len, nframes_t offset, gain_t gain_coeff) {
+
 		assert(_capacity > 0);
 		assert(offset + len <= _capacity);
+
+		if (src.silent()) {
+			return;
+		}
 
 		Sample*       const dst_raw = _data + offset;
 		const Sample* const src_raw = src.data();
@@ -82,6 +87,7 @@ public:
 	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
 	 * scaling by @a gain_coeff */
 	void accumulate_with_gain_from(const Sample* src_raw, nframes_t len, nframes_t offset, gain_t gain_coeff) {
+
 		assert(_capacity > 0);
 		assert(offset + len <= _capacity);
 
@@ -123,7 +129,22 @@ public:
 	Sample* data (nframes_t nframes, nframes_t offset)
 		{ assert(offset + nframes <= _capacity); return _data + offset; }
 
-private:
+	void replace_data (size_t nframes);
+
+	void drop_data () {
+		assert (_owns_data);
+		assert (_data);
+
+		free (_data);
+		_data = 0;
+		_size = 0;
+		_capacity = 0;
+		_silent = false;
+	}
+
+	void copy_to_internal (Sample* p, nframes_t cnt, nframes_t offset);
+
+  private:
 	bool    _owns_data;
 	Sample* _data; ///< Actual buffer contents
 };

@@ -51,12 +51,16 @@ class AudioPort : public Port
 
 	AudioPort (std::string const &, Flags, bool, nframes_t);
   
+	bool using_internal_data() const;
+	void use_internal_data ();
+	void use_external_data (); 
+
   private:
 	void mixdown (nframes_t, nframes_t, bool);
 
 	bool _has_been_mixed_down;
 	AudioBuffer* _buffer;
-	bool _own_buffer;
+	bool _internal_buffer;
 };
  
 } // namespace ARDOUR

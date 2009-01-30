@@ -16,6 +16,7 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <iostream>
 #include <algorithm>
 #include <ardour/buffer_set.h>
 #include <ardour/buffer.h>
@@ -61,7 +62,7 @@ BufferSet::clear()
 /** Make this BufferSet a direct mirror of a PortSet's buffers.
  */
 void
-BufferSet::attach_buffers(PortSet& ports)
+BufferSet::attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset)
 {
 	clear();
 
@@ -71,9 +72,8 @@ BufferSet::attach_buffers(PortSet& ports)
 
 		for (PortSet::iterator p = ports.begin(*t); p != ports.end(*t); ++p) {
 			assert(p->type() == *t);
-			v.push_back(&(p->get_buffer(0,0)));
+			v.push_back(&(p->get_buffer(nframes, offset)));
 		}
-
 	}
 	
 	_count = ports.count();

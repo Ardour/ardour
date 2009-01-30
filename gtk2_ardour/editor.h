@@ -595,7 +595,7 @@ class Editor : public PublicEditor
 
 	void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList&, Gtk::Menu_Helpers::MenuElem, bool) const;
 
-	void handle_new_route (ARDOUR::Session::RouteList&);
+	void handle_new_route (ARDOUR::RouteList&);
 	void remove_route (TimeAxisView *);
 	bool route_removal;
 

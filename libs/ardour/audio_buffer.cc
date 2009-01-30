@@ -29,9 +29,7 @@ static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it mat
 #endif
 
 using namespace PBD;
-
-namespace ARDOUR {
-
+using namespace ARDOUR;
 
 AudioBuffer::AudioBuffer(size_t capacity)
 	: Buffer(DataType::AUDIO, capacity)
@@ -41,6 +39,7 @@ AudioBuffer::AudioBuffer(size_t capacity)
 	if (_capacity > 0) {
 		_owns_data = true; // prevent resize() from gagging
 		resize (_capacity);
+		_silent = false; // force silence on the intial buffer state
 		silence (_capacity);
 	}
 }
@@ -51,10 +50,28 @@ AudioBuffer::~AudioBuffer()
 		free(_data);
 }
 
+/* called to replace a pointer to an external buffer (e.g. JACK) with 
+   buffer-owned memory.
+*/
+
+void
+AudioBuffer::replace_data (size_t capacity)
+{
+	_owns_data = true;
+	_data = 0;
+	_capacity = 0; // force reallocation
+	resize (capacity);
+}
+
 void
 AudioBuffer::resize (size_t size)
 {
-	if (!_owns_data || (size < _capacity)) {
+	if (!_owns_data) {
+		return;
+	}
+
+	if (size < _capacity) {
+		_size = size;
 		return;
 	}
 
@@ -74,9 +91,12 @@ AudioBuffer::resize (size_t size)
 				CPU_CACHE_ALIGN, sizeof (Sample) * _capacity, strerror (errno)) << endmsg;
 	}
 #endif	
-	
-	_owns_data = true;
+
 }
 
-} // namespace ARDOUR
+void
+AudioBuffer::copy_to_internal (Sample* p, nframes_t cnt, nframes_t offset)
+{
+	memcpy (_data + offset, p, sizeof(Sample*) * cnt);
+}
 

@@ -54,6 +54,8 @@ xml++.cc
 conf = Configure(pbd)
 if conf.CheckFunc('getmntent'):
     conf.env.Append(CCFLAGS="-DHAVE_GETMNTENT")
+if conf.CheckCHeader('execinfo.h'):
+    conf.env.Append(CXXFLAGS="-DHAVE_EXECINFO")
 pbd = conf.Finish()
 
 pbd.Merge ([ libraries['sigc2'],

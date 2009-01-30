@@ -105,13 +105,6 @@ Processor::set_placement (Placement p)
 	}
 }
 
-void
-Processor::set_active (bool yn)
-{
-	_active = yn; 
-	ActiveChanged (); 
-}
-
 XMLNode&
 Processor::get_state (void)
 {

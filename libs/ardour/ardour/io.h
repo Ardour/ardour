@@ -109,6 +109,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	void just_meter_input (nframes_t start_frame, nframes_t end_frame, 
 			       nframes_t nframes, nframes_t offset);
 
+	BufferSet& output_buffers() { return *_output_buffers; }
+
 	gain_t         gain () const { return _desired_gain; }
 	virtual gain_t effective_gain () const;
 	
@@ -121,6 +123,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	Panner& panner()        { return *_panner; }
 	PeakMeter& peak_meter() { return *_meter; }
 	const Panner& panner() const { return *_panner; }
+	void reset_panner ();
 	
 	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
@@ -196,15 +199,10 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int set_state (const XMLNode&);
 
 	static int  disable_connecting (void);
-
 	static int  enable_connecting (void);
-
 	static int  disable_ports (void);
-
 	static int  enable_ports (void);
-
 	static int  disable_panners (void);
-
 	static int  reset_panners (void);
 	
 	static sigc::signal<int>            PortsLegal;
@@ -214,16 +212,16 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	static sigc::signal<void,ChanCount> PortCountChanged;
 	static sigc::signal<int>            PortsCreated;
 
-    static void update_meters();
+	static void update_meters();
 
   private: 
-
-    static sigc::signal<void>   Meter;
-    static Glib::StaticMutex    m_meter_signal_lock;
-    sigc::connection            m_meter_connection;
+	
+	static sigc::signal<void>   Meter;
+	static Glib::StaticMutex    m_meter_signal_lock;
+	sigc::connection            m_meter_connection;
 
   public:
-
+    
 	/* automation */
 
 	struct GainControl : public AutomationControl {
@@ -292,8 +290,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	virtual void set_deferred_state() {}
 
-	void reset_panner ();
-
 	virtual uint32_t pans_required() const
 		{ return _inputs.count().n_audio(); }
 
@@ -314,14 +310,11 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	static bool connecting_legal;
 	static bool ports_legal;
 
-	BufferSet& output_buffers() { return *_output_buffers; }
-
   private:
-
-	friend class Send;
-
 	static bool panners_legal;
-	
+
+	void copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset);
+
 	int connecting_became_legal ();
 	int panners_became_legal ();
 	sigc::connection connection_legal_c;

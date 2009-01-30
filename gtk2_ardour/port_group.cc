@@ -142,9 +142,9 @@ PortGroupList::gather (ARDOUR::Session& session)
 	/* Find the bundles for routes.  We take their bundles, copy them,
 	   and add ports from the route's processors */
 
-	boost::shared_ptr<ARDOUR::Session::RouteList> routes = session.get_routes ();
+	boost::shared_ptr<ARDOUR::RouteList> routes = session.get_routes ();
 
-	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+	for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 		/* Copy the appropriate bundle from the route */
 		boost::shared_ptr<ARDOUR::Bundle> bundle (
 			new ARDOUR::Bundle (

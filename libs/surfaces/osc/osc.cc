@@ -43,6 +43,7 @@
 #include <ardour/filesystem_paths.h>
 
 #include "osc.h"
+#include "osc_controllable.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -74,7 +75,7 @@ OSC::OSC (Session& s, uint32_t port)
 
 	/* catch up with existing routes */
 
-	boost::shared_ptr<Session::RouteList> rl = session->get_routes ();
+	boost::shared_ptr<RouteList> rl = session->get_routes ();
 	route_added (*(rl.get()));
 
 	// session->RouteAdded.connect (mem_fun (*this, &OSC::route_added));
@@ -562,29 +563,23 @@ OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_
 
 		lo_message reply = lo_message_new ();
 
-		if (argc > 0) {
-			int id = argv[0]->i;
-			boost::shared_ptr<Route> r = session->route_by_remote_id (id);
-			
-			if (!r) {
-				lo_message_add_string (reply, "not found");
-				cerr << "no such route\n";
-			} else {			
-				
-				ListenerPair listener;
-
-				listener.first = r.get();
-				listener.second = lo_message_get_source (msg);
-				
-				cerr << "add listener\n";
-				
-				listen_to_route (listener);
-
-				lo_message_add_string (reply, "0");
-			}
-
-		} else {
+		if (argc <= 0) {
 			lo_message_add_string (reply, "syntax error");
+		} else {
+			for (int n = 0; n < argc; ++n) {
+
+				boost::shared_ptr<Route> r = session->route_by_remote_id (argv[n]->i);
+				
+				if (!r) {
+					lo_message_add_string (reply, "not found");
+					cerr << "no such route\n";
+					break;
+				} else {			
+					cerr << "add listener\n";
+					listen_to_route (r, lo_message_get_source (msg));
+					lo_message_add_int32 (reply, argv[n]->i);
+				}
+			}
 		}
 
 		lo_send_message (lo_message_get_source (msg), "#reply", reply);
@@ -592,17 +587,12 @@ OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_
 
 	} else if (strcmp (path, "/routes/ignore") == 0) {
 
-		if (argc > 0) {
-			int id = argv[0]->i;
-			boost::shared_ptr<Route> r = session->route_by_remote_id (id);
+		for (int n = 0; n < argc; ++n) {
+
+			boost::shared_ptr<Route> r = session->route_by_remote_id (argv[n]->i);
 			
 			if (r) {
-				ListenerPair listener;
-
-				listener.first = r.get();
-				listener.second = lo_message_get_source (msg);
-				
-				drop_listener_pair (listener);
+				end_listen (r, lo_message_get_source (msg));
 			}
 		}
 	}
@@ -611,55 +601,86 @@ OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_
 }
 
 void
-OSC::route_added (Session::RouteList& rl)
+OSC::route_added (RouteList& rl)
 {
 }
 
 void
-OSC::listen_to_route (const ListenerPair& lp)
+OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
 {
-	Listeners::iterator x;
+	Controllables::iterator x;
 	bool route_exists = false;
 
 	cerr << "listen to route\n";
 
-	/* check existing listener pairs to avoid duplicate listens */
+	/* avoid duplicate listens */
+	
+	for (x = controllables.begin(); x != controllables.end(); ++x) {
+		
+		OSCRouteControllable* rc;
 
-	for (x = listeners.begin(); x != listeners.end(); ++x) {
-
-		if ((*x)->route == lp.first) {
-			route_exists = true;
-
-			if ((*x)->addr == lp.second ) {
-				return;
+		if ((rc = dynamic_cast<OSCRouteControllable*>(*x)) != 0) {
+			
+			if (rc->route() == route) {
+				route_exists = true;
+				
+				/* XXX NEED lo_address_equal() */
+				
+				if (rc->address() == addr) {
+					return;
+				}
 			}
 		}
 	}
 
-	Listener* l = new Listener (lp.first, lp.second);
-
 	cerr << "listener binding to signals\n";
 
-	l->connections.push_back (lp.first->solo_changed.connect (bind (mem_fun (*this, &OSC::route_changed), RouteSolo, lp.first, lp.second)));
-	l->connections.push_back (lp.first->mute_changed.connect (bind (mem_fun (*this, &OSC::route_changed), RouteMute, lp.first, lp.second)));
-	l->connections.push_back (lp.first->gain_control()->Changed.connect (bind (mem_fun (*this, &OSC::route_changed_deux), RouteGain, lp.first, lp.second)));
+	OSCControllable* c;
+	string path;
+
+	path = X_("/route/solo");
+	c = new OSCRouteControllable (addr, path, route->solo_control(), route);
+	controllables.push_back (c);
+
+	path = X_("/route/mute");
+	c = new OSCRouteControllable (addr, path, route->mute_control(), route);
+	controllables.push_back (c);
+
+	path = X_("/route/gain");
+	c = new OSCRouteControllable (addr, path, route->gain_control(), route);
+	controllables.push_back (c);
+
+	cerr << "Now have " << controllables.size() << " controllables\n";
+
+	/* if there is no existing controllable related to this route, make sure we clean up
+	   if it is ever deleted.
+	*/
 	
 	if (!route_exists) {
-		l->route->GoingAway.connect (bind (mem_fun (*this, &OSC::drop_listeners_by_route), l->route));
+		route->GoingAway.connect (bind (mem_fun (*this, &OSC::drop_route), boost::weak_ptr<Route> (route)));
 	}
-
-	listeners.push_back (l);
 }
 
 void
-OSC::drop_listeners_by_route (Route* r)
+OSC::drop_route (boost::weak_ptr<Route> wr)
 {
-	Listeners::iterator x;
+	boost::shared_ptr<Route> r = wr.lock ();
 
-	for (x = listeners.begin(); x != listeners.end();) {
-		if ((*x)->route == r) {
-			delete *x;
-			x = listeners.erase (x);
+	if (!r) {
+		return;
+	}
+
+	for (Controllables::iterator x = controllables.begin(); x != controllables.end();) {
+
+		OSCRouteControllable* rc;
+		
+		if ((rc = dynamic_cast<OSCRouteControllable*>(*x)) != 0) {
+			if (rc->route() == r) {
+				delete *x;
+				x = controllables.erase (x);
+			} else {
+				++x;
+			}
 		} else {
 			++x;
 		}
@@ -667,14 +688,22 @@ OSC::drop_listeners_by_route (Route* r)
 }
 
 void
-OSC::drop_listener_pair (const ListenerPair& lp)
+OSC::end_listen (boost::shared_ptr<Route> r, lo_address addr)
 {
-	Listeners::iterator x;
+	Controllables::iterator x;
 
-	for (x = listeners.begin(); x != listeners.end(); ++x) {
-		if ((*x)->route == lp.first && (*x)->addr == lp.second) {
-			listeners.erase (x);
-			return;
+	for (x = controllables.begin(); x != controllables.end(); ++x) {
+
+		OSCRouteControllable* rc;
+		
+		if ((rc = dynamic_cast<OSCRouteControllable*>(*x)) != 0) {
+
+			/* XXX NEED lo_address_equal () */
+
+			if (rc->route() == r && rc->address() == addr) {
+				controllables.erase (x);
+				return;
+			}
 		}
 	}
 }
@@ -690,61 +719,6 @@ void
 OSC::session_exported( std::string path, std::string name ) {
 	lo_address listener = lo_address_new( NULL, "7770" );
 	lo_send( listener, "/session/exported", "ss", path.c_str(), name.c_str() );
-}
-
-void
-OSC::set_send_route_changes (bool yn)
-{
-	_send_route_changes = yn;
-}
-
-void
-OSC::route_changed (void* src, RouteChangeType what, Route* r, lo_address addr)
-{
-	route_changed_deux (what, r, addr);
-}
-
-void
-OSC::route_changed_deux (RouteChangeType what, Route* r, lo_address addr)
-{
-	if (!_send_route_changes) {
-		return;
-	}
-
-	string prefix = _namespace_root;
-	int ret;
-
-	switch (what) {
-
-	case OSC::RouteSolo:
-		prefix += "/changed/route/solo";
-		ret = lo_send (addr, prefix.c_str(), "ii", r->remote_control_id(), (int) r->soloed());
-		break;
-
-	case OSC::RouteMute:
-		prefix += "/changed/route/mute";
-		ret = lo_send (addr, prefix.c_str(), "ii", r->remote_control_id(), (int) r->muted());
-		break;
-
-	case OSC::RouteGain:
-		prefix += "/changed/route/gain";
-		ret = lo_send (addr, prefix.c_str(), "if", r->remote_control_id(), r->effective_gain());
-
-	default:
-		error << "OSC: unhandled route change\n";
-		return;
-	}
-
-	if (ret < 0) {
-		ListenerPair lp;
-
-		lp.first = r;
-		lp.second = addr;
-
-		cerr << "Error sending to listener ... dropping\n";
-		drop_listener_pair (lp);
-	}
-
 }
 
 // end "Application Hook" Handlers //

@@ -48,7 +48,7 @@ using namespace Glib;
 const char* _order_key = N_("editor");
 
 void
-Editor::handle_new_route (Session::RouteList& routes)
+Editor::handle_new_route (RouteList& routes)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), routes));
 	
@@ -60,7 +60,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 	route_redisplay_does_not_sync_order_keys = true;
 	no_route_list_redisplay = true;
 
-	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
 		if (route->is_hidden()) {
@@ -592,8 +592,8 @@ struct EditorOrderRouteSorter {
 void
 Editor::initial_route_list_display ()
 {
-	boost::shared_ptr<Session::RouteList> routes = session->get_routes();
-	Session::RouteList r (*routes);
+	boost::shared_ptr<RouteList> routes = session->get_routes();
+	RouteList r (*routes);
 	EditorOrderRouteSorter sorter;
 
 	r.sort (sorter);

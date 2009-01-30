@@ -92,6 +92,7 @@ gain.cc
 gdither.cc
 globals.cc
 import.cc
+internal_send.cc
 io.cc
 io_processor.cc
 jack_slave.cc

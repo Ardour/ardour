@@ -306,7 +306,6 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_diskstreams() const;
 
 	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
-	typedef std::list<boost::shared_ptr<Route> >      RouteList;
 
 	int load_routes (const XMLNode&);
 	boost::shared_ptr<RouteList> get_routes() const {

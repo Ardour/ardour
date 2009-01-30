@@ -25,19 +25,30 @@
 #include "pbd/compose.h"
 #include <stdexcept>
 
-ARDOUR::AudioEngine* ARDOUR::Port::_engine = 0;
+using namespace std;
+using namespace ARDOUR;
+
+AudioEngine* Port::_engine = 0;
 
 /** @param n Port short name */
-ARDOUR::Port::Port (std::string const & n, DataType t, Flags f, bool e) : _jack_port (0), _last_monitor (false), _latency (0), _name (n), _flags (f)
+Port::Port (std::string const & n, DataType t, Flags f, bool e) 
+	: _jack_port (0)
+	, _last_monitor (false)
+	, _latency (0)
+	, _name (n)
+	, _flags (f)
 {
+
 	/* Unfortunately we have to pass the DataType into this constructor so that we can
 	   create the right kind of JACK port; aside from this we'll use the virtual function type ()
-	   to establish type. */
+	   to establish type. 
+	*/
 
 	assert (_name.find_first_of (':') == std::string::npos);
 	
 	if (e) {
 		try {
+			cerr << "NEW PORT " << _name << " ext = " << e << endl;
 			do_make_external (t);
 		}
 		catch (...) {
@@ -47,7 +58,7 @@ ARDOUR::Port::Port (std::string const & n, DataType t, Flags f, bool e) : _jack_
 }
 
 /** Port destructor */
-ARDOUR::Port::~Port ()
+Port::~Port ()
 {
 	if (_jack_port) {
 		jack_port_unregister (_engine->jack (), _jack_port);
@@ -58,28 +69,27 @@ ARDOUR::Port::~Port ()
  * @param t Data type, so that we can call this method from the constructor.
  */
 void
-ARDOUR::Port::do_make_external (DataType t)
+Port::do_make_external (DataType t)
 {
 	if (_jack_port) {
 		/* already external */
 		return;
 	}
 	
-	_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0);
-	if (_jack_port == 0) {
+	if ((_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0)) == 0) {
 		throw std::runtime_error ("Could not register JACK port");
 	}
 }
 
 void
-ARDOUR::Port::make_external ()
+Port::make_external ()
 {
 	do_make_external (type ());
 }
 
 /** @return true if this port is connected to anything */
 bool
-ARDOUR::Port::connected () const
+Port::connected () const
 {
 	if (!_connections.empty ()) {
 		/* connected to a Port* */
@@ -94,8 +104,20 @@ ARDOUR::Port::connected () const
 	return (jack_port_connected (_jack_port) != 0);
 }
 
+/** @return true if this port is connected to anything via an external port */
+bool
+Port::externally_connected () const
+{
+	if (_jack_port == 0) {
+		/* not using a JACK port, so can't be connected to anything else */
+		return false;
+	}
+	
+	return (jack_port_connected (_jack_port) != 0);
+}
+
 int
-ARDOUR::Port::disconnect_all ()
+Port::disconnect_all ()
 {
 	/* Disconnect from Port* connections */
 	for (std::set<Port*>::iterator i = _connections.begin (); i != _connections.end (); ++i) {
@@ -108,6 +130,8 @@ ARDOUR::Port::disconnect_all ()
 	jack_port_disconnect (_engine->jack(), _jack_port);
 	_named_connections.clear ();
 
+	check_buffer_status ();
+
 	return 0;
 }
 
@@ -115,7 +139,7 @@ ARDOUR::Port::disconnect_all ()
  * @return true if this port is connected to o, otherwise false.
  */
 bool
-ARDOUR::Port::connected_to (std::string const & o) const
+Port::connected_to (std::string const & o) const
 {
 	std::string const full = _engine->make_port_name_non_relative (o);
 	std::string const shrt = _engine->make_port_name_non_relative (o);
@@ -137,7 +161,7 @@ ARDOUR::Port::connected_to (std::string const & o) const
 
 /** @param o Filled in with port full names of ports that we are connected to */
 int
-ARDOUR::Port::get_connections (std::vector<std::string> & c) const
+Port::get_connections (std::vector<std::string> & c) const
 {
 	int n = 0;
 
@@ -163,7 +187,7 @@ ARDOUR::Port::get_connections (std::vector<std::string> & c) const
 }
 
 int
-ARDOUR::Port::connect (std::string const & other)
+Port::connect (std::string const & other)
 {
 	/* caller must hold process lock */
 
@@ -197,11 +221,13 @@ ARDOUR::Port::connect (std::string const & other)
 		}
 	}
 
+	check_buffer_status ();
+
 	return r;
 }
 
 int
-ARDOUR::Port::disconnect (std::string const & other)
+Port::disconnect (std::string const & other)
 {
 	/* caller must hold process lock */
 
@@ -227,6 +253,8 @@ ARDOUR::Port::disconnect (std::string const & other)
 		if (r == 0) {
 			_named_connections.erase (other);
 		}
+
+		check_buffer_status ();
 	}
 
 	return r;
@@ -234,13 +262,13 @@ ARDOUR::Port::disconnect (std::string const & other)
 
 
 bool
-ARDOUR::Port::connected_to (Port* o) const
+Port::connected_to (Port* o) const
 {
 	return connected_to (o->name ());
 }
 
 int
-ARDOUR::Port::connect (Port* o)
+Port::connect (Port* o)
 {
 	/* caller must hold process lock */
 
@@ -253,11 +281,14 @@ ARDOUR::Port::connect (Port* o)
 	_connections.insert (o);
 	o->_connections.insert (this);
 
+	check_buffer_status ();
+	o->check_buffer_status ();
+
 	return 0;
 }
 
 int
-ARDOUR::Port::disconnect (Port* o)
+Port::disconnect (Port* o)
 {
 	if (external () && o->external ()) {
 		/* we're both external; try disconnecting using name */
@@ -270,17 +301,20 @@ ARDOUR::Port::disconnect (Port* o)
 	_connections.erase (o);
 	o->_connections.erase (this);
 
+	check_buffer_status ();
+	o->check_buffer_status ();
+
 	return 0;
 }
 
 void
-ARDOUR::Port::set_engine (AudioEngine* e)
+Port::set_engine (AudioEngine* e)
 {
 	_engine = e;
 }
 
 void
-ARDOUR::Port::ensure_monitor_input (bool yn)
+Port::ensure_monitor_input (bool yn)
 {
 	if (_jack_port) {
 		jack_port_ensure_monitor (_jack_port, yn);
@@ -288,7 +322,7 @@ ARDOUR::Port::ensure_monitor_input (bool yn)
 }
 
 bool
-ARDOUR::Port::monitoring_input () const
+Port::monitoring_input () const
 {
 	if (_jack_port) {
 		return jack_port_monitoring_input (_jack_port);
@@ -298,7 +332,7 @@ ARDOUR::Port::monitoring_input () const
 }
 
 void
-ARDOUR::Port::reset ()
+Port::reset ()
 {
 	_last_monitor = false;
 
@@ -308,7 +342,7 @@ ARDOUR::Port::reset ()
 }
 
 void
-ARDOUR::Port::recompute_total_latency () const
+Port::recompute_total_latency () const
 {
 #ifdef HAVE_JACK_RECOMPUTE_LATENCY	
 	if (_jack_port) {
@@ -318,7 +352,7 @@ ARDOUR::Port::recompute_total_latency () const
 }
 
 nframes_t
-ARDOUR::Port::total_latency () const
+Port::total_latency () const
 {
 	if (_jack_port) {
 		return jack_port_get_total_latency (_engine->jack (), _jack_port);
@@ -328,7 +362,7 @@ ARDOUR::Port::total_latency () const
 }
 
 int
-ARDOUR::Port::reestablish ()
+Port::reestablish ()
 {
 	if (!_jack_port) {
 		return 0;
@@ -348,7 +382,7 @@ ARDOUR::Port::reestablish ()
 
 
 int
-ARDOUR::Port::reconnect ()
+Port::reconnect ()
 {
 	/* caller must hold process lock; intended to be used only after reestablish() */
 
@@ -367,7 +401,7 @@ ARDOUR::Port::reconnect ()
 
 /** @param n Short name */
 int
-ARDOUR::Port::set_name (std::string const & n)
+Port::set_name (std::string const & n)
 {
 	assert (_name.find_first_of (':') == std::string::npos);
 
@@ -386,15 +420,48 @@ ARDOUR::Port::set_name (std::string const & n)
 }
 
 void
-ARDOUR::Port::set_latency (nframes_t n)
+Port::set_latency (nframes_t n)
 {
 	_latency = n;
 }
 
 void
-ARDOUR::Port::request_monitor_input (bool yn)
+Port::request_monitor_input (bool yn)
 {
 	if (_jack_port) {
 		jack_port_request_monitor (_jack_port, yn);
+	}
+}
+
+void
+Port::check_buffer_status ()
+{
+	if (external() && receives_input()) {
+		if (!externally_connected()) {
+			if (!_connections.empty()) {
+
+				/* There are no external connections, so the
+				   external port buffer will be the silent buffer. We cannot write into it.
+				   But we have to write somewhere because there is at least one internal
+				   connection that is supplying us with data.
+				*/
+
+				if (!using_internal_data()) {
+					use_internal_data ();
+				}
+
+			} else {
+				
+				/* There are no external connections and no internal ones
+				   either, so we can revert to use the externally supplied
+				   buffer which will be silent (whatever the semantics of 
+				   that are for a particular data type.
+				*/
+
+				if (using_internal_data()) {
+					use_external_data ();
+				}
+			}
+		} 
 	}
 }

@@ -94,15 +94,16 @@ public:
 	Evoral::ControlSet&       data()       { return *this; }
 	const Evoral::ControlSet& data() const { return *this; }
 
-protected:
+	int set_automation_state (const XMLNode&, Evoral::Parameter default_param);
+	XMLNode& get_automation_state();
+
+  protected:
 	Session& _a_session;
 
 	void can_automate(Evoral::Parameter);
 
 	virtual void auto_state_changed (Evoral::Parameter which) {}
 
-	int set_automation_state(const XMLNode&, Evoral::Parameter default_param);
-	XMLNode& get_automation_state();
 	
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);

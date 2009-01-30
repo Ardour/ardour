@@ -218,7 +218,7 @@ MackieControlProtocol::Sorted MackieControlProtocol::get_sorted_routes()
 	Sorted sorted;
 	
 	// fetch all routes
-	boost::shared_ptr<Session::RouteList> routes = session->get_routes();
+	boost::shared_ptr<RouteList> routes = session->get_routes();
 	set<uint32_t> remote_ids;
 	
 	// routes with remote_id 0 should never be added
@@ -227,7 +227,7 @@ MackieControlProtocol::Sorted MackieControlProtocol::get_sorted_routes()
 	
 	// sort in remote_id order, and exclude master, control and hidden routes
 	// and any routes that are already set.
-	for ( Session::RouteList::iterator it = routes->begin(); it != routes->end(); ++it )
+	for (RouteList::iterator it = routes->begin(); it != routes->end(); ++it )
 	{
 		Route & route = **it;
 		if (
@@ -1460,7 +1460,7 @@ void MackieControlProtocol::notify_parameter_changed( const char * name_str )
 }
 
 // RouteList is the set of routes that have just been added
-void MackieControlProtocol::notify_route_added( ARDOUR::Session::RouteList & rl )
+void MackieControlProtocol::notify_route_added( ARDOUR::RouteList & rl )
 {
 	// currently assigned banks are less than the full set of
 	// strips, so activate the new strip now.
@@ -1471,7 +1471,7 @@ void MackieControlProtocol::notify_route_added( ARDOUR::Session::RouteList & rl 
 	// otherwise route added, but current bank needs no updating
 	
 	// make sure remote id changes in the new route are handled
-	typedef ARDOUR::Session::RouteList ARS;
+	typedef ARDOUR::RouteList ARS;
 	for ( ARS::iterator it = rl.begin(); it != rl.end(); ++it )
 	{
 		connections_back = (*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );

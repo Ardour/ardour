@@ -71,6 +71,7 @@ public:
 	}
 
 	bool connected () const;
+	bool externally_connected () const;
 	int disconnect_all ();
 	int get_connections (std::vector<std::string> &) const;
 
@@ -81,7 +82,7 @@ public:
 
 	/* connection by Port* */
 	bool connected_to (Port *) const;
-	int connect (Port *);
+	virtual int connect (Port *);
 	int disconnect (Port *);
 
 	void ensure_monitor_input (bool);
@@ -113,6 +114,12 @@ protected:
 	std::set<Port*> _connections; ///< internal Ports that we are connected to
 
 	static AudioEngine* _engine; ///< the AudioEngine
+
+	virtual bool using_internal_data() const { return false; }
+	virtual void use_internal_data () {}
+	virtual void use_external_data () {} 
+
+	void check_buffer_status ();
 	
 private:
 	friend class AudioEngine;
@@ -130,6 +137,7 @@ private:
 	/// list of JACK ports that we are connected to; we only keep this around
 	/// so that we can implement ::reconnect ()
 	std::set<std::string> _named_connections;
+
 };
 
 }

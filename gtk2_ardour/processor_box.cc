@@ -342,7 +342,11 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 		
 		/* button2-click with no modifiers */
 
-		processor->set_active (!processor->active());
+		if (processor->active()) {
+			processor->deactivate ();
+		} else {
+			processor->activate ();
+		}
 		ret = true;
 
 	} 
@@ -396,7 +400,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 		Route::ProcessorStreams err_streams;
 
 		if (Config->get_new_plugins_active()) {
-			processor->set_active (true);
+			processor->activate ();
 		}
 		
 		if (_route->add_processor (processor, &err_streams)) {
@@ -405,7 +409,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 		} else {
 			
 			if (Profile->get_sae()) {
-				processor->set_active (true);
+				processor->activate ();
 			}
 			processor->ActiveChanged.connect (bind (mem_fun (*this, &ProcessorBox::show_processor_active), boost::weak_ptr<Processor>(processor)));
 		}
@@ -545,7 +549,7 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 	case IOSelector::Accepted:
 		_route->add_processor (processor);
 		if (Profile->get_sae()) {
-			processor->set_active (true);
+			processor->activate ();
 		}
 		break;
 	}
@@ -982,13 +986,13 @@ could not match the configuration of this track.");
 void
 ProcessorBox::activate_processor (boost::shared_ptr<Processor> r)
 {
-	r->set_active (true);
+	r->activate ();
 }
 
 void
 ProcessorBox::deactivate_processor (boost::shared_ptr<Processor> r)
 {
-	r->set_active (false);
+	r->deactivate ();
 }
 
 void

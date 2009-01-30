@@ -30,7 +30,6 @@ PBD::trace_twb ()
 #ifdef HAVE_EXECINFO
 
 #include <execinfo.h>
-#include <cstdlib>
 
 void
 PBD::stacktrace (std::ostream& out, int levels)

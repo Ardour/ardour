@@ -51,6 +51,7 @@ namespace ARDOUR {
 
 	class Source;
 	class AudioSource;
+	class Route;
 
 	typedef jack_default_audio_sample_t Sample;
 	typedef float                       pan_t;
@@ -419,9 +420,11 @@ namespace ARDOUR {
 
 	typedef std::list<nframes64_t> AnalysisFeatureList;
 
+	typedef std::list<boost::shared_ptr<Route> >      RouteList;
+
 	class Bundle;
 	typedef std::vector<boost::shared_ptr<Bundle> > BundleList;
-  
+
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

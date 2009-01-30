@@ -297,7 +297,7 @@ Mixer_UI::hide_window (GdkEventAny *ev)
 
 
 void
-Mixer_UI::add_strip (Session::RouteList& routes)
+Mixer_UI::add_strip (RouteList& routes)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_strip), routes));
 	
@@ -306,7 +306,7 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 	no_track_list_redisplay = true;
 	strip_redisplay_does_not_sync_order_keys = true;
 
-	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
 		if (route->is_hidden()) {
@@ -885,8 +885,8 @@ struct SignalOrderRouteSorter {
 void
 Mixer_UI::initial_track_display ()
 {
-	boost::shared_ptr<Session::RouteList> routes = session->get_routes();
-	Session::RouteList copy (*routes);
+	boost::shared_ptr<RouteList> routes = session->get_routes();
+	RouteList copy (*routes);
 	SignalOrderRouteSorter sorter;
 
 	copy.sort (sorter);

@@ -39,6 +39,7 @@ class XMLNode;
 namespace ARDOUR {
 
 class Session;
+class Route;
 
 /* A mixer strip element - plugin, send, meter, etc.
  */
@@ -60,7 +61,6 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	void set_placement (Placement);
 	
 	bool active () const { return _active; }
-	void set_active (bool yn);
 	
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
@@ -77,8 +77,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	
 	virtual void silence (nframes_t nframes, nframes_t offset) {}
 	
-	virtual void activate () { _active = true; ActiveChanged.emit(); }
-	virtual void deactivate () { _active = false; ActiveChanged.emit(); }
+	void activate () { _active = true; ActiveChanged(); }
+	void deactivate () { _active = false; ActiveChanged(); }
 	
 	virtual bool configure_io (ChanCount in, ChanCount out);
 
@@ -108,6 +108,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	sigc::signal<void> PlacementChanged;
 
 protected:
+	int       _pending_active;
 	bool      _active;
 	bool      _next_ab_is_active;
 	bool      _configured;

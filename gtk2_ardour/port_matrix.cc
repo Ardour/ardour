@@ -89,8 +89,8 @@ PortMatrix::routes_changed ()
 		i->disconnect ();
 	}
 
-	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
-	for (ARDOUR::Session::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+	boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
+	for (ARDOUR::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		_route_connections.push_back (
 			(*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::setup))
 			);

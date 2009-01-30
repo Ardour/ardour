@@ -153,9 +153,6 @@ IO::IO (Session& s, const string& name,
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 	
-	// Connect to our own PortCountChanged signal to connect output buffers
-	IO::PortCountChanged.connect (mem_fun (*this, &IO::attach_buffers));
-
 	_session.add_controllable (_gain_control);
 
 	create_bundles_for_inputs_and_outputs ();
@@ -195,9 +192,6 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 	
-	// Connect to our own PortCountChanged signal to connect output buffers
-	IO::PortCountChanged.connect (mem_fun (*this, &IO::attach_buffers));
-
 	_session.add_controllable (_gain_control);
 
 	create_bundles_for_inputs_and_outputs ();
@@ -222,7 +216,6 @@ IO::~IO ()
 
 	delete _meter;
 	delete _panner;
-	delete _output_buffers;
 }
 
 void
@@ -266,48 +259,61 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 			_gain = dg;
 		}
 	}
+	
+	/* do this so that any processing that comes after deliver_outputs()
+	   can use the output buffers.
+	*/
+
+	output_buffers().attach_buffers (_outputs, nframes, offset);
 
 	// Use the panner to distribute audio to output port buffers
-	if( _panner && _panner->npanners() && !_panner->bypassed()) {
+
+	if (0 && _panner && _panner->npanners() && !_panner->bypassed()) {
+
+		/* blech .. we shouldn't be creating and tearing this down every process()
+		   cycle. XXX fix me to not waste cycles and do memory allocation etc.
+		*/
+		
 		_panner->run_out_of_place(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
+
 	} else {
-		const DataType type = DataType::AUDIO;
-		
-		// Copy any audio 1:1 to outputs
-		
-		BufferSet::iterator o = output_buffers().begin(type);
-		BufferSet::iterator i = bufs.begin(type);
-		BufferSet::iterator prev = i;
-		
-		while (i != bufs.end(type) && o != output_buffers().end (type)) {
-			o->read_from(*i, nframes, offset);
-			prev = i;
-			++i;
-			++o;
+
+		/* do a 1:1 copy of data to output ports */
+
+		if (bufs.count().n_audio() > 0 && _outputs.count().n_audio () > 0) {
+			copy_to_outputs (bufs, DataType::AUDIO, nframes, offset);
 		}
-
-		/* extra outputs get a copy of the last buffer */
-
-		while (o != output_buffers().end(type)) {
-			o->read_from(*prev, nframes, offset);
-			++o;
+		if (bufs.count().n_midi() > 0 && _outputs.count().n_midi () > 0) {
+			copy_to_outputs (bufs, DataType::MIDI, nframes, offset);
 		}
 	}
+}
 
-	/* ********** MIDI ********** */
+void
+IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset)
+{
+	// Copy any buffers 1:1 to outputs
+	
+	PortSet::iterator o = _outputs.begin(type);
+	BufferSet::iterator i = bufs.begin(type);
+	BufferSet::iterator prev = i;
+	
+	while (i != bufs.end(type) && o != _outputs.end (type)) {
+		
+		Buffer& port_buffer (o->get_buffer (nframes, offset));
+		port_buffer.read_from (*i, nframes, offset);
 
-	// No MIDI, we're done here
-	if (bufs.count().n_midi() == 0 || output_buffers().count().n_midi () == 0) {
-		return;
+		prev = i;
+		++i;
+		++o;
 	}
-
-	const DataType type = DataType::MIDI;
-
-	// Copy any MIDI 1:1 to outputs
-	assert(bufs.count().n_midi() == output_buffers().count().n_midi());
-	BufferSet::iterator o = output_buffers().begin(type);
-	for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i, ++o) {
-		o->read_from(*i, nframes, offset);
+	
+	/* extra outputs get a copy of the last buffer */
+	
+	while (o != _outputs.end(type)) {
+		Buffer& port_buffer (o->get_buffer (nframes, offset));
+		port_buffer.read_from(*prev, nframes, offset);
+		++o;
 	}
 }
 
@@ -324,8 +330,10 @@ IO::collect_input (BufferSet& outs, nframes_t nframes, nframes_t offset)
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		
 		BufferSet::iterator o = outs.begin(*t);
-		for (PortSet::iterator i = _inputs.begin(*t); i != _inputs.end(*t); ++i, ++o) {
-			o->read_from(i->get_buffer(nframes,offset), nframes, offset);
+		PortSet::iterator e = _inputs.end (*t);
+		for (PortSet::iterator i = _inputs.begin(*t); i != e; ++i, ++o) {
+			Buffer& b (i->get_buffer (nframes,offset));
+			o->read_from (b, nframes, offset);
 		}
 
 	}
@@ -877,16 +885,6 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 	}
 
 	return changed;
-}
-
-/** Attach output_buffers to port buffers.
- * 
- * Connected to IO's own PortCountChanged signal.
- */
-void
-IO::attach_buffers(ChanCount ignored)
-{
-	_output_buffers->attach_buffers(_outputs);
 }
 
 int
@@ -2321,6 +2319,8 @@ IO::set_gain (gain_t val, void *src)
 		val = 1.99526231f;
 	}
 
+	cerr << "set desired gain to " << val << " when curgain = " << _gain_control->get_value () << endl;
+
 	if (src != _gain_control.get()) {
 		_gain_control->set_value(val);
 		// bit twisty, this will come back and call us again
@@ -2741,3 +2741,5 @@ IO::bundle_channel_name (uint32_t c, uint32_t n) const
 
 	return "";
 }
+
+

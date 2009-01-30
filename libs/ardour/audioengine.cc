@@ -348,13 +348,6 @@ AudioEngine::process_callback (nframes_t nframes)
 	boost::shared_ptr<Ports> p = ports.reader();
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-
-		/* Only run cycle_start() on output ports, because 
-		   inputs must be done in the correct processing order,
-		   which requires interleaving with route processing.
-		*/
-
-		/* XXX: we're running this on both inputs and outputs... */
 		(*i)->cycle_start (nframes, 0);
 	}
 
@@ -416,10 +409,8 @@ AudioEngine::process_callback (nframes_t nframes)
 	// Finalize ports (ie write data if necessary)
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-
 		(*i)->cycle_end (nframes, 0);
 	}
-
 	_processed_frames = next_processed_frames;
 	return 0;
 }
