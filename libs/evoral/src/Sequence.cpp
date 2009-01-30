@@ -536,7 +536,11 @@ Sequence::append(const Event& event)
 	} else if (ev.is_note_off()) {
 		append_note_off_unlocked(ev.channel(), ev.time(), ev.note());
 	} else if (!_type_map.type_is_midi(ev.event_type())) {
-		printf("WARNING: Sequence: Unknown event type %X\n", ev.event_type());
+		printf("WARNING: Sequence: Unknown event type %X: ", ev.event_type());
+		for (size_t i=0; i < ev.size(); ++i) {
+			printf("%X ", ev.buffer()[i]);
+		}
+		printf("\n");
 	} else if (ev.is_cc()) {
 		append_control_unlocked(
 				Evoral::MIDI::ContinuousController(ev.event_type(), ev.channel(), ev.cc_number()),

@@ -85,7 +85,7 @@ private:
 	Evoral::MIDIEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
 	// FIXME: Eliminate this
-	static const size_t MAX_EVENT_SIZE = 4; // bytes
+	static const size_t MAX_EVENT_SIZE = 128; // bytes
 	
 	/* We use _size as "number of events", so the size of _data is
 	 * (_size * MAX_EVENT_SIZE)
