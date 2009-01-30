@@ -28,15 +28,15 @@ struct ContinuousController : public Parameter {
 };
 
 struct ProgramChange : public Parameter {
-	ProgramChange(uint32_t pc_type, uint8_t channel) : Parameter(pc_type, 0, channel) {}
+	ProgramChange(uint32_t pc_type, uint8_t channel) : Parameter(pc_type, channel, 0) {}
 };
 
 struct ChannelPressure : public Parameter {
-	ChannelPressure(uint32_t ca_type, uint32_t channel) : Parameter(ca_type, 0, channel) {}
+	ChannelPressure(uint32_t ca_type, uint32_t channel) : Parameter(ca_type, channel, 0) {}
 };
 
 struct PitchBender : public Parameter {
-	PitchBender(uint32_t pb_type, uint32_t channel) : Parameter(pb_type, 0, channel) {}
+	PitchBender(uint32_t pb_type, uint32_t channel) : Parameter(pb_type, channel, 0) {}
 };
 
 inline static void controller_range(double& min, double& max, double& normal) {
