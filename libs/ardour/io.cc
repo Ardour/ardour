@@ -155,7 +155,7 @@ IO::IO (Session& s, const string& name,
 	
 	_session.add_controllable (_gain_control);
 
-	create_bundles_for_inputs_and_outputs ();
+	setup_bundles_for_inputs_and_outputs ();
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
@@ -194,7 +194,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	
 	_session.add_controllable (_gain_control);
 
-	create_bundles_for_inputs_and_outputs ();
+	setup_bundles_for_inputs_and_outputs ();
 }
 
 IO::~IO ()
@@ -2586,13 +2586,20 @@ IO::update_port_total_latencies ()
 
 
 /**
- *  Setup bundles that describe our inputs and outputs.
+ *  Setup bundles that describe our inputs and outputs. Also creates bundles if necessary.
  */
 
 void
 IO::setup_bundles_for_inputs_and_outputs ()
 {
         char buf[32];
+
+	if (!_bundle_for_inputs) {
+		_bundle_for_inputs.reset (new Bundle (true));
+	}
+	if (!_bundle_for_outputs) {
+		_bundle_for_outputs.reset (new Bundle (false));
+	}
 
 	_bundle_for_inputs->remove_channels ();
 	_bundle_for_outputs->remove_channels ();
@@ -2612,19 +2619,6 @@ IO::setup_bundles_for_inputs_and_outputs ()
 		_bundle_for_outputs->add_channel (bundle_channel_name (i, no));
 		_bundle_for_outputs->set_port (i, _session.engine().make_port_name_non_relative (outputs().port(i)->name()));
 	}
-}
-
-
-/**
- *  Create and setup bundles that describe our inputs and outputs.
- */
-
-void
-IO::create_bundles_for_inputs_and_outputs ()
-{
-	_bundle_for_inputs = boost::shared_ptr<Bundle> (new Bundle (true));
-        _bundle_for_outputs = boost::shared_ptr<Bundle> (new Bundle (false));
-        setup_bundles_for_inputs_and_outputs ();
 }
 
 /** @return Bundles connected to our inputs */

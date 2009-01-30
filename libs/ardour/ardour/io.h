@@ -371,7 +371,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int32_t find_input_port_hole (const char* base);
 	int32_t find_output_port_hole (const char* base);
 
-	void create_bundles_for_inputs_and_outputs ();
 	void setup_bundles_for_inputs_and_outputs ();
 	std::string bundle_channel_name (uint32_t, uint32_t) const;
 };

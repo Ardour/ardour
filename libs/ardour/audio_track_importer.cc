@@ -28,6 +28,7 @@
 #include <pbd/convert.h>
 
 #include <sstream>
+#include <algorithm>
 
 #include "i18n.h"
 
@@ -154,10 +155,6 @@ AudioTrackImporter::parse_io ()
 		return false;
 	}
 	
-	// TODO
-	io->remove_property ("inputs");
-	io->remove_property ("outputs");
-	
 	XMLPropertyList const & props = io->properties();
 
 	for (XMLPropertyList::const_iterator it = props.begin(); it != props.end(); ++it) {
@@ -172,9 +169,18 @@ AudioTrackImporter::parse_io ()
 			(*it)->set_value (id.to_s());
 			id_ok = true;
 		} else if (!prop.compare("inputs")) {
-			// TODO Let the IO class do it's thing for now...
+			// TODO Handle this properly!
+			/* Input and output ports are counted and added empty, so that no in/output connecting function fails. */
+			uint32_t num_inputs = std::count ((*it)->value().begin(), (*it)->value().end(), '{');
+			std::string value;
+			for (uint32_t i = 0; i < num_inputs; i++) { value += "{}"; }
+			(*it)->set_value (value);
 		} else if (!prop.compare("outputs")) {
-			// TODO Let the IO class do it's thing for now...
+			// TODO See comments above
+			uint32_t num_outputs = std::count ((*it)->value().begin(), (*it)->value().end(), '{');
+			std::string value;
+			for (uint32_t i = 0; i < num_outputs; i++) { value += "{}"; }
+			(*it)->set_value (value);
 		} else {
 			std::cerr << string_compose (X_("AudioTrackImporter: did not recognise XML-property \"%1\""), prop) << endmsg;
 		}
