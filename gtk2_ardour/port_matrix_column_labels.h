@@ -25,23 +25,19 @@
 
 namespace ARDOUR {
 	class Bundle;
+	class BundleChannel;
 }
 
 class PortMatrixNode;
-class PortMatrixBundleChannel;
 
 /** The column labels part of the port matrix */
 class PortMatrixColumnLabels : public PortMatrixComponent
 {
 public:
+	PortMatrixColumnLabels (PortMatrix *, PortMatrixBody *);
 
-	enum Location {
-		TOP,
-		BOTTOM
-	};
-	
-	PortMatrixColumnLabels (PortMatrixBody *, Location);
-
+	void button_press (double, double, int, uint32_t);
+  
 	double component_to_parent_x (double x) const;
 	double parent_to_component_x (double x) const;
 	double component_to_parent_y (double y) const;
@@ -53,9 +49,10 @@ private:
 	void render (cairo_t *);
 	void compute_dimensions ();
 	double basic_text_x_pos (int) const;
-	void render_port_name (cairo_t *, Gdk::Color, double, double, PortMatrixBundleChannel const &);
-	double channel_x (PortMatrixBundleChannel const &) const;
+	void render_port_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
+	double channel_x (ARDOUR::BundleChannel const &) const;
 	void queue_draw_for (PortMatrixNode const &);
+	std::vector<std::pair<double, double> > port_name_shape (double, double) const;
 
 	double slanted_height () const {
 		return _height - _highest_group_name - 2 * name_pad();
@@ -66,7 +63,6 @@ private:
 	double _longest_channel_name;
 	double _highest_text;
 	double _highest_group_name;
-	Location _location;
 };
 
 #endif

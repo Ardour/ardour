@@ -19,24 +19,16 @@
 
 #include <iostream>
 #include <boost/weak_ptr.hpp>
-#include <gtkmm/menu.h>
-#include <gtkmm/menushell.h>
-#include <gtkmm/menu_elems.h>
 #include <cairo/cairo.h>
 #include "ardour/bundle.h"
 #include "port_matrix_row_labels.h"
 #include "port_matrix.h"
 #include "i18n.h"
 
-PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* p, PortMatrixBody* b, Location l)
-	: PortMatrixComponent (b), _port_matrix (p), _menu (0), _location (l)
+PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* m, PortMatrixBody* b)
+	: PortMatrixComponent (m, b)
 {
 	
-}
-
-PortMatrixRowLabels::~PortMatrixRowLabels ()
-{
-	delete _menu;
 }
 
 void
@@ -49,7 +41,7 @@ PortMatrixRowLabels::compute_dimensions ()
 	_longest_port_name = 0;
 	_longest_bundle_name = 0;
 	_height = 0;
-	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	ARDOUR::BundleList const r = _matrix->rows()->bundles();
 	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 			cairo_text_extents_t ext;
@@ -69,7 +61,7 @@ PortMatrixRowLabels::compute_dimensions ()
 	}
 
 	_highest_group_name = 0;
-	for (PortGroupList::const_iterator i = _body->row_ports().begin(); i != _body->row_ports().end(); ++i) {
+	for (PortGroupList::List::const_iterator i = _matrix->rows()->begin(); i != _matrix->rows()->end(); ++i) {
 		if ((*i)->visible()) {
 			cairo_text_extents_t ext;
 			cairo_text_extents (cr, (*i)->name.c_str(), &ext);
@@ -101,15 +93,15 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	/* PORT GROUP NAMES */
 
 	double x = 0;
-	if (_location == LEFT) {
+	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 		x = 0;
-	} else if (_location == RIGHT) {
+	} else {
 		x = _width - _highest_group_name - 2 * name_pad();
 	}
 
 	double y = 0;
 	int g = 0;
-	for (PortGroupList::const_iterator i = _body->row_ports().begin(); i != _body->row_ports().end(); ++i) {
+	for (PortGroupList::List::const_iterator i = _matrix->rows()->begin(); i != _matrix->rows()->end(); ++i) {
 
 		if (!(*i)->visible() || ((*i)->bundles().empty() && (*i)->ports.empty()) ) {
 			continue;
@@ -146,14 +138,14 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	/* BUNDLE NAMES */
 
 	x = 0;
-	if (_location == LEFT) {
+	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 		x = _highest_group_name + 2 * name_pad();
-	} else if (_location == RIGHT) {
+	} else {
 		x = _longest_port_name + name_pad() * 2;
 	}
 
 	y = 0;
-	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	ARDOUR::BundleList const r = _matrix->rows()->bundles();
 	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 
 		Gdk::Color const colour = get_a_bundle_colour (i - r.begin ());
@@ -187,7 +179,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	y = 0;
 	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-			render_port_name (cr, get_a_bundle_colour (i - r.begin()), 0, y, PortMatrixBundleChannel (*i, j));
+			render_port_name (cr, get_a_bundle_colour (i - r.begin()), 0, y, ARDOUR::BundleChannel (*i, j));
 			y += row_height();
 		}
 	}
@@ -200,83 +192,19 @@ PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 		return;
 	}
 
-	if ( (_location ==  LEFT && x > (_longest_bundle_name + name_pad() * 2)) ||
-	     (_location == RIGHT && x < (_longest_port_name + name_pad() * 2))
+	if (!_matrix->can_rename_channels (_matrix->row_index()) &&
+	    !_matrix->can_remove_channels (_matrix->row_index())) {
+		return;
+	}
+
+	if ( (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && x > (_longest_bundle_name + name_pad() * 2)) ||
+	     (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && x < (_longest_port_name + name_pad() * 2))
 		) {
 
-		delete _menu;
+		_matrix->popup_channel_context_menu (_matrix->row_index(), y / row_height(), t);
 		
-		_menu = new Gtk::Menu;
-		_menu->set_name ("ArdourContextMenu");
-		
-		Gtk::Menu_Helpers::MenuList& items = _menu->items ();
-		
-		uint32_t row = y / row_height ();
-
-		boost::shared_ptr<ARDOUR::Bundle> bundle;
-		uint32_t channel = 0;
-
-		ARDOUR::BundleList const r = _body->row_ports().bundles();
-		for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
-			if (row < (*i)->nchannels ()) {
-				bundle = *i;
-				channel = row;
-				break;
-			} else {
-				row -= (*i)->nchannels ();
-			}
-		}
-
-		if (bundle) {
-			char buf [64];
-
-			if (_port_matrix->can_rename_channels ()) {
-				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bundle->channel_name (channel).c_str());
-				items.push_back (
-					Gtk::Menu_Helpers::MenuElem (
-						buf,
-						sigc::bind (sigc::mem_fun (*this, &PortMatrixRowLabels::rename_channel_proxy), bundle, channel)
-						)
-					);
-			}
-			
-			snprintf (buf, sizeof (buf), _("Remove '%s'"), bundle->channel_name (channel).c_str());
-			items.push_back (
-				Gtk::Menu_Helpers::MenuElem (
-					buf,
-					sigc::bind (sigc::mem_fun (*this, &PortMatrixRowLabels::remove_channel_proxy), bundle, channel)
-					)
-				);
-
-			_menu->popup (1, t);
-		}
 	}
 }
-
-
-void
-PortMatrixRowLabels::remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)
-{
-	boost::shared_ptr<ARDOUR::Bundle> sb = b.lock ();
-	if (!sb) {
-		return;
-	}
-
-	_port_matrix->remove_channel (sb, c);
-
-}
-
-void
-PortMatrixRowLabels::rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)
-{
-	boost::shared_ptr<ARDOUR::Bundle> sb = b.lock ();
-	if (!sb) {
-		return;
-	}
-
-	_port_matrix->rename_channel (sb, c);
-}
-
 
 double
 PortMatrixRowLabels::component_to_parent_x (double x) const
@@ -305,9 +233,9 @@ PortMatrixRowLabels::parent_to_component_y (double y) const
 double
 PortMatrixRowLabels::port_name_x () const
 {
-	if (_location == LEFT) {
+	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 		return _longest_bundle_name + _highest_group_name + name_pad() * 4;
-	} else if (_location == RIGHT) {
+	} else {
 		return 0;
 	}
 
@@ -316,7 +244,7 @@ PortMatrixRowLabels::port_name_x () const
 
 void
 PortMatrixRowLabels::render_port_name (
-	cairo_t* cr, Gdk::Color colour, double xoff, double yoff, PortMatrixBundleChannel const& bc
+	cairo_t* cr, Gdk::Color colour, double xoff, double yoff, ARDOUR::BundleChannel const& bc
 	)
 {
 	set_source_rgb (cr, colour);
@@ -336,9 +264,18 @@ PortMatrixRowLabels::render_port_name (
 }
 
 double
-PortMatrixRowLabels::channel_y (PortMatrixBundleChannel const& bc) const
+PortMatrixRowLabels::channel_y (ARDOUR::BundleChannel const& bc) const
 {
-	return bc.nchannels (_body->row_ports().bundles()) * row_height();
+	uint32_t n = 0;
+
+	ARDOUR::BundleList::const_iterator i = _matrix->rows()->bundles().begin();
+	while (i != _matrix->rows()->bundles().end() && *i != bc.bundle) {
+		n += (*i)->nchannels ();
+		++i;
+	}
+	
+	n += bc.channel;
+	return n * row_height();
 }
 
 void

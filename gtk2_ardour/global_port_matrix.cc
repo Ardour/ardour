@@ -25,45 +25,28 @@
 #include "ardour/port.h"
 
 GlobalPortMatrix::GlobalPortMatrix (ARDOUR::Session& s, ARDOUR::DataType t)
-	: PortMatrix (s, t, true),
-	  _session (s),
-	  _our_port_group_list (t, false)
+	: PortMatrix (s, t)
 {
 	setup ();
-
-	_column_ports.VisibilityChanged.connect (sigc::mem_fun (*this, &GlobalPortMatrix::group_visibility_changed));
 }
-
-void
-GlobalPortMatrix::group_visibility_changed ()
-{
-	_row_ports.take_visibility_from (_column_ports);
-	setup ();
-}
-
 
 void
 GlobalPortMatrix::setup ()
 {
-	_row_ports.gather (_session);
+	_ports[IN].gather (_session, true);
+	_ports[OUT].gather (_session, false);
+	
 	PortMatrix::setup ();
 }
 
 void
-GlobalPortMatrix::set_state (
-	boost::shared_ptr<ARDOUR::Bundle> ab,
-	uint32_t ac,
-	boost::shared_ptr<ARDOUR::Bundle> bb,
-	uint32_t bc,
-	bool s,
-	uint32_t k
-	)
+GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 {
-	ARDOUR::Bundle::PortList const& our_ports = ab->channel_ports (ac);
-	ARDOUR::Bundle::PortList const& other_ports = bb->channel_ports (bc);
+	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
+	ARDOUR::Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 
-	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
-		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
+	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
+		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
 			ARDOUR::Port* p = _session.engine().get_port_by_name (*i);
 			ARDOUR::Port* q = _session.engine().get_port_by_name (*j);
@@ -78,7 +61,7 @@ GlobalPortMatrix::set_state (
 				if (s) {
 					q->connect (*i);
 				} else {
-					q->disconnect (*j);
+					q->disconnect (*i);
 				}
 			}
 
@@ -89,18 +72,13 @@ GlobalPortMatrix::set_state (
 
 
 PortMatrix::State
-GlobalPortMatrix::get_state (
-	boost::shared_ptr<ARDOUR::Bundle> ab,
-	uint32_t ac,
-	boost::shared_ptr<ARDOUR::Bundle> bb,
-	uint32_t bc
-	) const
+GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 {
-	ARDOUR::Bundle::PortList const& our_ports = ab->channel_ports (ac);
-	ARDOUR::Bundle::PortList const& other_ports = bb->channel_ports (bc);
+	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
+	ARDOUR::Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 
-	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
-		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
+	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
+		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
 			ARDOUR::Port* p = _session.engine().get_port_by_name (*i);
 			ARDOUR::Port* q = _session.engine().get_port_by_name (*j);

@@ -22,6 +22,7 @@
 
 #include <gtkmm/eventbox.h>
 
+class PortMatrix;
 class PortMatrixBody;
 class PortMatrixNode;
 
@@ -31,7 +32,7 @@ class PortMatrixNode;
 class PortMatrixComponent
 {
 public:
-	PortMatrixComponent (PortMatrixBody *);
+	PortMatrixComponent (PortMatrix *, PortMatrixBody *);
 	virtual ~PortMatrixComponent ();
 
 	virtual double component_to_parent_x (double x) const = 0;
@@ -174,6 +175,7 @@ protected:
 	 */
 	virtual void compute_dimensions () = 0;
 
+	PortMatrix* _matrix;
 	PortMatrixBody* _body; ///< the PortMatrixBody that we're in
 	uint32_t _width; ///< full width of the contents
 	uint32_t _height; ///< full height of the contents

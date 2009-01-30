@@ -23,17 +23,14 @@
 #include "port_matrix_body.h"
 #include "port_matrix.h"
 
-PortMatrixBody::PortMatrixBody (PortMatrix* p, Arrangement a)
-	: _port_matrix (p),
-	  _column_labels (this, a == TOP_AND_RIGHT ? PortMatrixColumnLabels::TOP : PortMatrixColumnLabels::BOTTOM),
-	  _row_labels (p, this, a == BOTTOM_AND_LEFT ? PortMatrixRowLabels::LEFT : PortMatrixRowLabels::RIGHT),
+PortMatrixBody::PortMatrixBody (PortMatrix* p)
+	: _matrix (p),
+	  _column_labels (p, this),
+	  _row_labels (p, this),
 	  _grid (p, this),
-	  _arrangement (a),
 	  _xoffset (0),
 	  _yoffset (0),
-	  _pointer_inside (false),
-	  _column_ports (_port_matrix->type(), _port_matrix->offering_input()),
-	  _row_ports (_port_matrix->type(), !_port_matrix->offering_input())
+	  _pointer_inside (false)
 {
 	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
 	add_events (Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
@@ -115,21 +112,23 @@ PortMatrixBody::on_size_request (Gtk::Requisition *req)
 	std::pair<int, int> const row = _row_labels.dimensions ();
 	std::pair<int, int> const grid = _grid.dimensions ();
 
-	req->width = std::max (col.first, grid.first + row.first);
-	req->height = col.second + grid.second;
+	/* don't ask for the maximum size of our contents, otherwise GTK won't
+	   let the containing window shrink below this size */
+
+	req->width = std::min (512, std::max (col.first, grid.first + row.first));
+	req->height = std::min (512, col.second + grid.second);
 }
 
 void
 PortMatrixBody::on_size_allocate (Gtk::Allocation& alloc)
 {
 	Gtk::EventBox::on_size_allocate (alloc);
-	set_allocation (alloc);
 
 	_alloc_width = alloc.get_width ();
 	_alloc_height = alloc.get_height ();
 
 	compute_rectangles ();
-	_port_matrix->setup_scrollbars ();
+	_matrix->setup_scrollbars ();
 }
 
 void
@@ -144,7 +143,7 @@ PortMatrixBody::compute_rectangles ()
 	Gdk::Rectangle row_rect;
 	Gdk::Rectangle grid_rect;
 
-	if (_arrangement == TOP_AND_RIGHT) {
+	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
 		/* build from top left */
 
@@ -187,7 +186,7 @@ PortMatrixBody::compute_rectangles ()
 		row_rect.set_width (_alloc_width - x);
 			
 
-	} else if (_arrangement == BOTTOM_AND_LEFT) {
+	} else if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 
 		/* build from bottom right */
 
@@ -233,18 +232,18 @@ PortMatrixBody::compute_rectangles ()
 }
 
 void
-PortMatrixBody::setup (PortGroupList const& row, PortGroupList const& column)
+PortMatrixBody::setup ()
 {
+	/* Discard any old connections to bundles */
+	
 	for (std::list<sigc::connection>::iterator i = _bundle_connections.begin(); i != _bundle_connections.end(); ++i) {
 		i->disconnect ();
 	}
-
 	_bundle_connections.clear ();
-	
-	_row_ports = row;
-	_column_ports = column;
 
-	ARDOUR::BundleList r = _row_ports.bundles ();
+	/* Connect to bundles so that we find out when their names change */
+	
+	ARDOUR::BundleList r = _matrix->rows()->bundles ();
 	for (ARDOUR::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 		
 		_bundle_connections.push_back (
@@ -253,7 +252,7 @@ PortMatrixBody::setup (PortGroupList const& row, PortGroupList const& column)
 		
 	}
 
-	ARDOUR::BundleList c = _column_ports.bundles ();
+	ARDOUR::BundleList c = _matrix->columns()->bundles ();
 	for (ARDOUR::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
 		_bundle_connections.push_back (
 			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels))
@@ -263,6 +262,13 @@ PortMatrixBody::setup (PortGroupList const& row, PortGroupList const& column)
 	_column_labels.setup ();
 	_row_labels.setup ();
 	_grid.setup ();
+
+	set_mouseover (
+		PortMatrixNode (
+			ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0),
+			ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0)
+			)
+		);
 
 	compute_rectangles ();
 }
@@ -325,10 +331,13 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 			ev->button, ev->time
 			);
 	
-	} else {
-	
-		return false;
-		
+	} else if (Gdk::Region (_column_labels.parent_rectangle()).point_in (ev->x, ev->y)) {
+
+		_column_labels.button_press (
+			_column_labels.parent_to_component_x (ev->x),
+			_column_labels.parent_to_component_y (ev->y),
+			ev->button, ev->time
+			);
 	}
 
 	return true;

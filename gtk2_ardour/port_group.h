@@ -44,15 +44,15 @@ class PortGroup : public sigc::trackable
 public:
 	/** PortGroup constructor.
 	 * @param n Name.
-	 * @param v true if group should be visible in the UI, otherwise false.
 	 */
-	PortGroup (std::string const & n, bool v)
-		: name (n), _visible (v) {}
+	PortGroup (std::string const & n)
+		: name (n), _visible (true) {}
 
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	boost::shared_ptr<ARDOUR::Bundle> only_bundle ();
 	void add_port (std::string const &);
 	void clear ();
+	uint32_t total_ports () const;
 
 	std::string name; ///< name for the group
 	std::vector<std::string> ports;
@@ -67,69 +67,56 @@ public:
 
 	void set_visible (bool v) {
 		_visible = v;
-		VisibilityChanged ();
+		Modified ();
 	}
 
 	bool has_port (std::string const &) const;
 
-	sigc::signal<void> VisibilityChanged;
+	sigc::signal<void> Modified;
 
 private:	
 	ARDOUR::BundleList _bundles;
 	bool _visible; ///< true if the group is visible in the UI
 };
 
-/// The UI for a PortGroup
-class PortGroupUI
-{
-  public:
-	PortGroupUI (PortMatrix*, PortGroup*);
-
-	Gtk::Widget& visibility_checkbutton () {
-		return _visibility_checkbutton;
-	}
-
-  private:
-	void visibility_checkbutton_toggled ();
-	void setup_visibility_checkbutton ();
-
-	PortMatrix* _port_matrix; ///< the PortMatrix that we are working for
-	PortGroup* _port_group; ///< the PortGroup that we are representing
-	Gtk::CheckButton _visibility_checkbutton;
-};
-
 /// A list of PortGroups
-class PortGroupList : public std::list<PortGroup*>, public sigc::trackable
+class PortGroupList
 {
   public:
-	PortGroupList (ARDOUR::DataType, bool);
+	PortGroupList ();
 
-	void gather (ARDOUR::Session &);
+	typedef std::vector<boost::shared_ptr<PortGroup> > List;
+
+	void add_group (boost::shared_ptr<PortGroup>);
 	void set_type (ARDOUR::DataType);
+	void gather (ARDOUR::Session &, bool);
 	void set_offer_inputs (bool);
 	ARDOUR::BundleList const & bundles () const;
-	void take_visibility_from (PortGroupList const &);
-	void clear_list ();
+	void clear ();
+	uint32_t total_visible_ports () const;
+	uint32_t size () const {
+		return _groups.size();
+	}
 
-	sigc::signal<void> VisibilityChanged;
+	List::const_iterator begin () const {
+		return _groups.begin();
+	}
+
+	List::const_iterator end () const {
+		return _groups.end();
+	}
 	
   private:
 	bool port_has_prefix (std::string const &, std::string const &) const;
 	std::string common_prefix (std::vector<std::string> const &) const;
-	void visibility_changed ();
 	void update_bundles () const;
+	void group_modified ();
 	
 	ARDOUR::DataType _type;
 	bool _offer_inputs;
 	mutable ARDOUR::BundleList _bundles;
 	mutable bool _bundles_dirty;
-
-	PortGroup _buss;
-	PortGroup _track;
-	PortGroup _system;
-	PortGroup _other;
-
-	std::vector<sigc::connection> _visibility_connections;
+	List _groups;
 };
 
 #endif /* __gtk_ardour_port_group_h__ */

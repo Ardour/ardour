@@ -31,34 +31,24 @@ public:
 
 	void setup ();
 	
-	void set_state (
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t,
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t,
-		bool,
-		uint32_t
-		);
-	
-	State get_state (
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t,
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t
-		) const;
+	void set_state (ARDOUR::BundleChannel c[2], bool);
+	State get_state (ARDOUR::BundleChannel c[2]) const;
 
 	void add_channel (boost::shared_ptr<ARDOUR::Bundle>) {}
-	void remove_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t) {}
-	bool can_rename_channels () const {
+	bool can_remove_channels (int d) const {
+		return false;
+	}
+	void remove_channel (ARDOUR::BundleChannel) {}
+	bool can_rename_channels (int d) const {
 		return false;
 	}
 
 private:
-	void group_visibility_changed ();
-	
-	ARDOUR::Session& _session;
-	PortGroupList _our_port_group_list;
-
+	/* see PortMatrix: signal flow from 0 to 1 (out to in) */
+	enum {
+		OUT = 0,
+		IN = 1,
+	};
 };
 
 

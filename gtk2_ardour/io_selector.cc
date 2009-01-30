@@ -41,33 +41,39 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool offer_inputs)
-	: PortMatrix (session, io->default_type(), offer_inputs)
-	, _session (session)
+IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool in)
+	: PortMatrix (session, io->default_type())
 	, _io (io)
+	, _find_inputs_for_io_outputs (in)
 {
 	/* Listen for ports changing on the IO */
 	_io->PortCountChanged.connect (sigc::hide (mem_fun (*this, &IOSelector::ports_changed)));
 
-	_port_group = new PortGroup ("", true);
-	_row_ports.push_back (_port_group);
+	/* signal flow from 0 to 1 */
+	if (_find_inputs_for_io_outputs) {
+		_other = 1;
+		_ours = 0;
+	} else {
+		_other = 0;
+		_ours = 1;
+	}
+
+	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
+	_ports[_ours].add_group (_port_group);
 	
 	setup ();
-}
-
-IOSelector::~IOSelector ()
-{
-	delete _port_group;
 }
 
 void
 IOSelector::setup ()
 {
+	_ports[_other].gather (_session, _find_inputs_for_io_outputs);
+		
 	_port_group->clear ();
 	_port_group->add_bundle (boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle));
 	_port_group->only_bundle()->set_name (_io->name());
 
-	if (offering_input ()) {
+	if (_find_inputs_for_io_outputs) {
 		const PortSet& ps (_io->outputs());
 
 		int j = 0;
@@ -106,17 +112,10 @@ IOSelector::ports_changed ()
 }
 
 void
-IOSelector::set_state (
-	boost::shared_ptr<ARDOUR::Bundle> ab,
-	uint32_t ac,
-	boost::shared_ptr<ARDOUR::Bundle> bb,
-	uint32_t bc,
-	bool s,
-	uint32_t k
-	)
+IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 {
-	ARDOUR::Bundle::PortList const& our_ports = ab->channel_ports (ac);
-	ARDOUR::Bundle::PortList const& other_ports = bb->channel_ports (bc);
+	ARDOUR::Bundle::PortList const & our_ports = c[_ours].bundle->channel_ports (c[_ours].channel);
+	ARDOUR::Bundle::PortList const & other_ports = c[_other].bundle->channel_ports (c[_other].channel);
 
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
@@ -127,13 +126,13 @@ IOSelector::set_state (
 			}
 
 			if (s) {
-				if (!offering_input()) {
+				if (!_find_inputs_for_io_outputs) {
 					_io->connect_input (f, *j, 0);
 				} else {
 					_io->connect_output (f, *j, 0);
 				}
 			} else {
-				if (!offering_input()) {
+				if (!_find_inputs_for_io_outputs) {
 					_io->disconnect_input (f, *j, 0);
 				} else {
 					_io->disconnect_output (f, *j, 0);
@@ -144,15 +143,10 @@ IOSelector::set_state (
 }
 
 PortMatrix::State
-IOSelector::get_state (
-	boost::shared_ptr<ARDOUR::Bundle> ab,
-	uint32_t ac,
-	boost::shared_ptr<ARDOUR::Bundle> bb,
-	uint32_t bc
-	) const
+IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 {
-	ARDOUR::Bundle::PortList const& our_ports = ab->channel_ports (ac);
-	ARDOUR::Bundle::PortList const& other_ports = bb->channel_ports (bc);
+	ARDOUR::Bundle::PortList const & our_ports = c[_ours].bundle->channel_ports (c[_ours].channel);
+	ARDOUR::Bundle::PortList const & other_ports = c[_other].bundle->channel_ports (c[_other].channel);
 
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
@@ -174,9 +168,9 @@ IOSelector::get_state (
 }
 
 uint32_t
-IOSelector::n_rows () const
+IOSelector::n_io_ports () const
 {
-	if (!offering_input()) {
+	if (!_find_inputs_for_io_outputs) {
 		return _io->inputs().num_ports (_io->default_type());
 	} else {
 		return _io->outputs().num_ports (_io->default_type());
@@ -184,9 +178,9 @@ IOSelector::n_rows () const
 }
 
 uint32_t
-IOSelector::maximum_rows () const
+IOSelector::maximum_io_ports () const
 {
-	if (!offering_input()) {
+	if (!_find_inputs_for_io_outputs) {
 		return _io->input_maximum ().get (_io->default_type());
 	} else {
 		return _io->output_maximum ().get (_io->default_type());
@@ -195,9 +189,9 @@ IOSelector::maximum_rows () const
 
 
 uint32_t
-IOSelector::minimum_rows () const
+IOSelector::minimum_io_ports () const
 {
-	if (!offering_input()) {
+	if (!_find_inputs_for_io_outputs) {
 		return _io->input_minimum ().get (_io->default_type());
 	} else {
 		return _io->output_minimum ().get (_io->default_type());
@@ -212,7 +206,7 @@ IOSelector::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 
-	if (!offering_input()) {
+	if (!_find_inputs_for_io_outputs) {
 
 		try {
 			_io->add_input_port ("", this);
@@ -237,14 +231,14 @@ IOSelector::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 }
 
 void
-IOSelector::remove_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
+IOSelector::remove_channel (ARDOUR::BundleChannel bc)
 {
-	Port* f = _session.engine().get_port_by_name (b->channel_ports(c)[0]);
+	Port* f = _session.engine().get_port_by_name (bc.bundle->channel_ports(bc.channel)[0]);
 	if (!f) {
 		return;
 	}
 	
-	if (offering_input()) {
+	if (_find_inputs_for_io_outputs) {
 		_io->remove_output_port (f, this);
 	} else {
 		_io->remove_input_port (f, this);
@@ -273,7 +267,7 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	get_action_area()->pack_start (disconnect_button, false, false);
 
 	/* Add Port button */
-	if (_selector.maximum_rows() > _selector.n_rows()) {
+	if (_selector.maximum_io_ports() > _selector.n_io_ports()) {
 		add_button.set_name ("IOSelectorButton");
 		add_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
 		get_action_area()->pack_start (add_button, false, false);
@@ -323,7 +317,7 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 void
 IOSelectorWindow::ports_changed ()
 {
-	if (_selector.maximum_rows() > _selector.n_rows()) {
+	if (_selector.maximum_io_ports() > _selector.n_io_ports()) {
 		add_button.set_sensitive (true);
 	} else {
 		add_button.set_sensitive (false);
@@ -358,7 +352,7 @@ IOSelectorWindow::io_name_changed (void* src)
 	
 	string title;
 
-	if (!_selector.offering_input()) {
+	if (!_selector.find_inputs_for_io_outputs()) {
 		title = string_compose(_("%1 input"), _selector.io()->name());
 	} else {
 		title = string_compose(_("%1 output"), _selector.io()->name());

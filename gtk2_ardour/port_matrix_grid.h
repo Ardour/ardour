@@ -34,7 +34,7 @@ namespace ARDOUR {
 	class Bundle;
 }
 
-/// The grid part of the port matrix
+/**  The grid part of the port matrix */
 class PortMatrixGrid : public PortMatrixComponent
 {
 public:
@@ -55,12 +55,10 @@ private:
 	void compute_dimensions ();
 	void render (cairo_t *);
 
-	double channel_position (PortMatrixBundleChannel, ARDOUR::BundleList const &, double) const;
+	double channel_position (ARDOUR::BundleChannel, ARDOUR::BundleList const &, double) const;
 	PortMatrixNode position_to_node (double, double) const;
-	PortMatrixBundleChannel position_to_channel (double, ARDOUR::BundleList const &, double) const;
+	ARDOUR::BundleChannel position_to_channel (double, ARDOUR::BundleList const &, double) const;
 	void queue_draw_for (PortMatrixNode const &);
-
-	PortMatrix* _port_matrix;
 };
 
 #endif

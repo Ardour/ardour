@@ -23,6 +23,9 @@
 #include <list>
 #include <gtkmm/box.h>
 #include <gtkmm/scrollbar.h>
+#include <gtkmm/table.h>
+#include <gtkmm/label.h>
+#include <gtkmm/checkbutton.h>
 #include <boost/shared_ptr.hpp>
 #include "port_matrix_body.h"
 #include "port_group.h"
@@ -31,12 +34,9 @@
  *  associations between one set of ports and another.  e.g. to connect
  *  things together.
  *
- *  The columns are labelled with various ports from around Ardour and the
- *  system.
- *
  *  It is made up of a body, PortMatrixBody, which is rendered using cairo,
- *  and some scrollbars.  All of this is arranged inside the VBox that we
- *  inherit from.
+ *  and some scrollbars and other stuff.  All of this is arranged inside the
+ *  VBox that we inherit from.
  */
 
 namespace ARDOUR {
@@ -46,23 +46,67 @@ namespace ARDOUR {
 class PortMatrix : public Gtk::VBox
 {
 public:
-	PortMatrix (ARDOUR::Session&, ARDOUR::DataType, bool);
+	PortMatrix (ARDOUR::Session&, ARDOUR::DataType);
 	~PortMatrix ();
 
-	virtual void setup ();
-	void set_offer_inputs (bool);
 	void set_type (ARDOUR::DataType);
 
 	ARDOUR::DataType type () const {
 		return _type;
 	}
 	
-	bool offering_input () const {
-		return _offer_inputs;
+	void disassociate_all ();
+	void setup_scrollbars ();
+	void popup_channel_context_menu (int, uint32_t, uint32_t);
+
+	enum Arrangement {
+		TOP_TO_RIGHT,  ///< column labels on top, row labels to the right
+		LEFT_TO_BOTTOM ///< row labels to the left, column labels on the bottom
+	};
+
+	/** @return Arrangement in use */
+	Arrangement arrangement () const {
+		return _arrangement;
+	}
+
+	PortGroupList const * columns () const;
+
+	/** @return index into the _ports array for the list which is displayed as columns */
+	int column_index () const {
+		return _column_index;
+	}
+
+	PortGroupList const * rows () const;
+
+	/** @return index into the _ports array for the list which is displayed as rows */
+	int row_index () const {
+		return _row_index;
 	}
 	
-	void disassociate_all ();
+	virtual void setup ();
 
+	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
+	 *  @param s New state.
+	 */
+	virtual void set_state (ARDOUR::BundleChannel c[2], bool s) = 0;
+
+	enum State {
+		ASSOCIATED,     ///< the ports are associaed
+		NOT_ASSOCIATED, ///< the ports are not associated
+		UNKNOWN         ///< we don't know anything about these two ports' relationship
+	};
+
+	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
+	 *  @return state
+	 */
+	virtual State get_state (ARDOUR::BundleChannel c[2]) const = 0;
+
+	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>) = 0;
+	virtual bool can_remove_channels (int) const = 0;
+	virtual void remove_channel (ARDOUR::BundleChannel) = 0;
+	virtual bool can_rename_channels (int) const = 0;
+	virtual void rename_channel (ARDOUR::BundleChannel) {}
+	
 	enum Result {
 		Cancelled,
 		Accepted
@@ -70,70 +114,48 @@ public:
 
 	sigc::signal<void, Result> Finished;
 
-	/** @param ab Our bundle.
-	 *  @param ac Channel on our bundle.
-	 *  @param bb Other bundle.
-	 *  @arapm bc Channel on other bundle.
-	 *  @param s New state.
-	 *  @param k XXX
-	 */
-	virtual void set_state (
-		boost::shared_ptr<ARDOUR::Bundle> ab,
-		uint32_t ac,
-		boost::shared_ptr<ARDOUR::Bundle> bb,
-		uint32_t bc,
-		bool s,
-		uint32_t k
-		) = 0;
-
-	enum State {
-		ASSOCIATED,
-		NOT_ASSOCIATED,
-		UNKNOWN
-	};
-
-	/** @param ab Our bundle.
-	 *  @param ac Channel on our bundle.
-	 *  @param bb Other bundle.
-	 *  @arapm bc Channel on other bundle.
-	 *  @return state
-	 */
-	virtual State get_state (
-		boost::shared_ptr<ARDOUR::Bundle> ab,
-		uint32_t ac,
-		boost::shared_ptr<ARDOUR::Bundle> bb,
-		uint32_t bc
-		) const = 0;
-
-	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>) = 0;
-	virtual void remove_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t) = 0;
-	virtual bool can_rename_channels () const = 0;
-	virtual void rename_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t) {}
-	
-	void setup_scrollbars ();
-
 protected:
 
-	PortGroupList _row_ports;
-	PortGroupList _column_ports;
+	/** We have two port group lists.  One will be presented on the rows of the matrix,
+	    the other on the columns.  The PortMatrix chooses the arrangement based on which has
+	    more ports in it.  Subclasses must fill these two lists with the port groups that they
+	    wish to present.  The PortMatrix will arrange its layout such that signal flow is vaguely
+	    from left to right as you go from list 0 to list 1.  Hence subclasses which deal with
+	    inputs and outputs should put outputs in list 0 and inputs in list 1. */
+	PortGroupList _ports[2];
+	ARDOUR::Session& _session;
 	
 private:
 
 	void hscroll_changed ();
 	void vscroll_changed ();
 	void routes_changed ();
+	void reconnect_to_routes ();
+	void visibility_toggled (boost::weak_ptr<PortGroup>, Gtk::CheckButton *);
+	void select_arrangement ();
+	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
+	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 
-	ARDOUR::Session& _session;
-	/// true to offer inputs, otherwise false
-	bool _offer_inputs;
 	/// port type that we are working with
 	ARDOUR::DataType _type;
+	std::vector<sigc::connection> _route_connections;
 
 	PortMatrixBody _body;
 	Gtk::HScrollbar _hscroll;
 	Gtk::VScrollbar _vscroll;
-	std::list<PortGroupUI*> _port_group_uis;
-	std::vector<sigc::connection> _route_connections;
+	Gtk::HBox _main_hbox;
+	Gtk::HBox _column_visibility_box;
+	Gtk::Label _column_visibility_label;
+	std::vector<Gtk::CheckButton*> _column_visibility_buttons;
+	Gtk::VBox _row_visibility_box;
+	Gtk::Label _row_visibility_label;
+	std::vector<Gtk::CheckButton*> _row_visibility_buttons;
+	Gtk::Table _scroller_table;
+	Gtk::Menu* _menu;
+	bool _setup_once;
+	Arrangement _arrangement;
+	int _row_index;
+	int _column_index;
 };
 
 #endif

@@ -27,43 +27,41 @@ namespace ARDOUR {
 	class PortInsert;
 }
 
-class IOSelector : public PortMatrix {
+class IOSelector : public PortMatrix
+{
   public:
 	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
-	~IOSelector ();
 
-	void set_state (
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t,
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t,
-		bool,
-		uint32_t
-		);
-	
-	State get_state (
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t,
-		boost::shared_ptr<ARDOUR::Bundle>,
-		uint32_t
-		) const;
+	void set_state (ARDOUR::BundleChannel c[2], bool);
+	State get_state (ARDOUR::BundleChannel c[2]) const;
 
 	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
-	void remove_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
-	bool can_rename_channels () const {
+	bool can_remove_channels (int d) const {
+		return d == _ours;
+	}
+	void remove_channel (ARDOUR::BundleChannel);
+	bool can_rename_channels (int d) const {
 		return false;
 	}
 	
-	uint32_t n_rows () const;
-	uint32_t maximum_rows () const;
-	uint32_t minimum_rows () const;
+	uint32_t n_io_ports () const;
+	uint32_t maximum_io_ports () const;
+	uint32_t minimum_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
 	void setup ();
 
+	bool find_inputs_for_io_outputs () const {
+		return _find_inputs_for_io_outputs;
+	}
+
   private:
-	ARDOUR::Session& _session;
+	
+	int _other;
+	int _ours;
+	
 	boost::shared_ptr<ARDOUR::IO> _io;
-	PortGroup* _port_group;
+	boost::shared_ptr<PortGroup> _port_group;
+	bool _find_inputs_for_io_outputs;
 	
 	void ports_changed ();
 };

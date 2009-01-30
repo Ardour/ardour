@@ -49,7 +49,6 @@
 #include <pbd/fastlog.h>
 
 #include "route_ui.h"
-#include "io_selector.h"
 #include "gain_meter.h"
 #include "panner_ui.h"
 #include "enums.h"
@@ -78,6 +77,7 @@ namespace Gtk {
 }
 
 class Mixer_UI;
+class IOSelectorWindow;
 
 class MixerStrip : public RouteUI, public Gtk::EventBox
 {

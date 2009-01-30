@@ -30,29 +30,13 @@ class PortMatrix;
 
 /** The main body of the port matrix.  It is made up of three parts:
  *  column labels, grid and row labels, each drawn using cairo.
- *  This class handles the arrangement of these parts.
  */
 class PortMatrixBody : public Gtk::EventBox
 {
 public:
-	enum Arrangement {
-		TOP_AND_RIGHT,
-		BOTTOM_AND_LEFT
-	};
+	PortMatrixBody (PortMatrix *);
 
-	PortMatrixBody (PortMatrix *, Arrangement);
-
-	/** @return ports to offer for columns */
-	PortGroupList const & column_ports () {
-		return _column_ports;
-	}
-
-	/** @return ports to offer for rows */
-	PortGroupList const & row_ports () {
-		return _row_ports;
-	}
-	
-	void setup (PortGroupList const &, PortGroupList const &);
+	void setup ();
 
 	uint32_t full_scroll_width ();
 	uint32_t alloc_scroll_width ();
@@ -75,10 +59,6 @@ public:
 		return _mouseover;
 	}
 
-	Arrangement arrangement () const {
-		return _arrangement;
-	}
-	
 protected:
 	bool on_expose_event (GdkEventExpose *);
 	void on_size_request (Gtk::Requisition *);
@@ -93,12 +73,11 @@ private:
 	void rebuild_and_draw_row_labels ();
 	void update_bundles ();
 	
-	PortMatrix* _port_matrix;
+	PortMatrix* _matrix;
 	PortMatrixColumnLabels _column_labels;
 	PortMatrixRowLabels _row_labels;
 	PortMatrixGrid _grid;
 
-	Arrangement _arrangement;
 	uint32_t _alloc_width; ///< allocated width
 	uint32_t _alloc_height; ///< allocated height
 	Gdk::Rectangle _column_labels_rect;
@@ -107,11 +86,6 @@ private:
 	uint32_t _xoffset;
 	uint32_t _yoffset;
 	bool _pointer_inside;
-
-	/// bundles to offer for columns
-	PortGroupList _column_ports;
-	/// bundles to offer for rows
-	PortGroupList _row_ports;
 
 	PortMatrixNode _mouseover;
 

@@ -23,8 +23,8 @@
 #include "port_matrix_column_labels.h"
 #include "port_matrix.h"
 
-PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrixBody* b, Location l)
-	: PortMatrixComponent (b), _location (l)
+PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b)
+	: PortMatrixComponent (m, b)
 {
 
 }
@@ -45,7 +45,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 	/* width of the whole thing */
 	_width = 0;
 
-	ARDOUR::BundleList const c = _body->column_ports().bundles();
+	ARDOUR::BundleList const c = _matrix->columns()->bundles();
 	for (ARDOUR::BundleList::const_iterator i = c.begin (); i != c.end(); ++i) {
 
 		cairo_text_extents_t ext;
@@ -77,7 +77,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 	}
 
 	_highest_group_name = 0;
-	for (PortGroupList::const_iterator i = _body->column_ports().begin(); i != _body->column_ports().end(); ++i) {
+	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 		if ((*i)->visible()) {
 			cairo_text_extents_t ext;
 			cairo_text_extents (cr, (*i)->name.c_str(), &ext);
@@ -122,7 +122,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	double x = 0;
 	double y = 0;
 	
-	if (_location == TOP) {
+	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 		x = slanted_height() / tan (angle());
 		y = _highest_group_name + name_pad();
 	} else {
@@ -131,7 +131,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	}
 
 	int g = 0;
-	for (PortGroupList::const_iterator i = _body->column_ports().begin(); i != _body->column_ports().end(); ++i) {
+	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 
 		if (!(*i)->visible() || ((*i)->bundles().empty() && (*i)->ports.empty()) ) {
 			continue;
@@ -147,9 +147,9 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		/* rectangle */
 		set_source_rgb (cr, get_a_group_colour (g));
 		double const rh = _highest_group_name + 2 * name_pad();
-		if (_location == TOP) {
+		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 			cairo_rectangle (cr, x, 0, w, rh);
-		} else if (_location == BOTTOM) {
+		} else {
 			cairo_rectangle (cr, x, _height - rh, w, rh);
 		}
 		cairo_fill (cr);
@@ -168,7 +168,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
         /* BUNDLE PARALLELOGRAM-TYPE-THING AND NAME */
 
 	x = 0;
-	ARDOUR::BundleList const c = _body->column_ports().bundles();
+	ARDOUR::BundleList const c = _matrix->columns()->bundles();
 	for (ARDOUR::BundleList::const_iterator i = c.begin (); i != c.end(); ++i) {
 
 		Gdk::Color colour = get_a_bundle_colour (i - c.begin ());
@@ -178,9 +178,9 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 		double x_ = x;
 		
-		if (_location == TOP) {
+		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 			y = _height;
-		} else if (_location == BOTTOM) {
+		} else {
 			y = slanted_height();
 		}
 
@@ -201,7 +201,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 		set_source_rgb (cr, text_colour());
 
-		if (_location == TOP) {
+		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 			
 			double const rl = 3 * name_pad() + _longest_channel_name;
 			cairo_move_to (
@@ -210,7 +210,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 				_height - rl * sin (angle())
 				);
 			
-		} else if (_location == BOTTOM) {
+		} else {
 
 			cairo_move_to (
 				cr,
@@ -235,7 +235,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 
-			render_port_name (cr, get_a_bundle_colour (i - c.begin()), x, 0, PortMatrixBundleChannel (*i, j));
+			render_port_name (cr, get_a_bundle_colour (i - c.begin()), x, 0, ARDOUR::BundleChannel (*i, j));
 			x += column_width();
 		}
 	}
@@ -286,44 +286,56 @@ PortMatrixColumnLabels::draw_extra (cairo_t* cr)
 	}
 }
 
-void
-PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double xoff, double yoff, PortMatrixBundleChannel const &bc)
+std::vector<std::pair<double, double> >
+PortMatrixColumnLabels::port_name_shape (double xoff, double yoff) const
 {
+	std::vector<std::pair<double, double> > shape;
+	
 	double const lc = _longest_channel_name + name_pad();
 	double const w = column_width();
-
-	if (_location == BOTTOM) {
+	
+	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 
 		double x_ = xoff + slanted_height() / tan (angle()) + w;
-		double const ix = x_;
 		double y_ = yoff;
-		cairo_move_to (cr, x_, y_);
+		shape.push_back (std::make_pair (x_, y_));
 		x_ -= w;
-		cairo_line_to (cr, x_, y_);
+		shape.push_back (std::make_pair (x_, y_));
 		x_ -= lc * cos (angle());
 		y_ += lc * sin (angle());
-		cairo_line_to (cr, x_, y_);
+		shape.push_back (std::make_pair (x_, y_));
 		x_ += w * pow (sin (angle()), 2);
 		y_ += w * sin (angle()) * cos (angle());
-		cairo_line_to (cr, x_, y_);
-		cairo_line_to (cr, ix, yoff);
+		shape.push_back (std::make_pair (x_, y_));
 		
-	} else if (_location == TOP) {
+	} else {
 		
 		double x_ = xoff;
 		double y_ = yoff + _height;
-		cairo_move_to (cr, x_, y_);
+		shape.push_back (std::make_pair (x_, y_));
 		x_ += w;
-		cairo_line_to (cr, x_, y_);
+		shape.push_back (std::make_pair (x_, y_));
 		x_ += lc * cos (angle());
 		y_ -= lc * sin (angle());
-		cairo_line_to (cr, x_, y_);
+		shape.push_back (std::make_pair (x_, y_));
 		x_ -= column_width() * pow (sin (angle()), 2);
 		y_ -= column_width() * sin (angle()) * cos (angle());
-		cairo_line_to (cr, x_, y_);
-		cairo_line_to (cr, xoff, yoff + _height);
-		
+		shape.push_back (std::make_pair (x_, y_));
 	}
+
+	return shape;
+}
+
+void
+PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double xoff, double yoff, ARDOUR::BundleChannel const &bc)
+{
+	std::vector<std::pair<double, double> > const shape = port_name_shape (xoff, yoff);
+
+	cairo_move_to (cr, shape[0].first, shape[0].second);
+	for (uint32_t i = 1; i < 4; ++i) {
+		cairo_line_to (cr, shape[i].first, shape[i].second);
+	}
+	cairo_line_to (cr, shape[0].first, shape[0].second);
 	
 	set_source_rgb (cr, colour);
 	cairo_fill_preserve (cr);
@@ -333,7 +345,7 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 	
 	set_source_rgb (cr, text_colour());
 	
-	if (_location == TOP) {
+	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
 		cairo_move_to (
 			cr,
@@ -341,7 +353,7 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 			yoff + _height - name_pad() * sin (angle())
 			);
 		
-	} else if (_location == BOTTOM) {
+	} else { 
 
 		double const rl = 3 * name_pad() + _longest_bundle_name;
 		cairo_move_to (
@@ -363,9 +375,18 @@ PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double
 }
 
 double
-PortMatrixColumnLabels::channel_x (PortMatrixBundleChannel const &bc) const
+PortMatrixColumnLabels::channel_x (ARDOUR::BundleChannel const &bc) const
 {
-	return bc.nchannels (_body->column_ports().bundles()) * column_width();
+	uint32_t n = 0;
+
+	ARDOUR::BundleList::const_iterator i = _matrix->columns()->bundles().begin();
+	while (i != _matrix->columns()->bundles().end() && *i != bc.bundle) {
+		n += (*i)->nchannels ();
+		++i;
+	}
+
+	n += bc.channel;
+	return n * column_width();
 }
 
 void
@@ -376,7 +397,7 @@ PortMatrixColumnLabels::queue_draw_for (PortMatrixNode const& n)
 		double const x = channel_x (n.column);
 		double const lc = _longest_channel_name + name_pad();
 		double const h = lc * sin (angle ()) + column_width() * sin (angle()) * cos (angle());
-		if (_location == TOP) {
+		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
 			_body->queue_draw_area (
 				component_to_parent_x (x),
@@ -385,7 +406,7 @@ PortMatrixColumnLabels::queue_draw_for (PortMatrixNode const& n)
 				h
 				);
 			
-		} else if (_location == BOTTOM) {
+		} else if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 			
 			double const x_ = x + slanted_height() / tan (angle()) - lc * cos (angle());
 			
@@ -399,5 +420,42 @@ PortMatrixColumnLabels::queue_draw_for (PortMatrixNode const& n)
 		}
 			
 				
+	}
+}
+
+void
+PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
+{
+	if (b != 3) {
+		return;
+	}
+
+	if (!_matrix->can_rename_channels (_matrix->column_index()) &&
+	    !_matrix->can_remove_channels (_matrix->column_index())) {
+		return;
+	}
+
+	uint32_t N = _matrix->columns()->total_visible_ports ();
+	uint32_t i = 0;
+	for (; i < N; ++i) {
+		
+		std::vector<std::pair<double, double> > const shape = port_name_shape (i * column_width(), 0);
+
+		uint32_t j = 0;
+		for (; j < 4; ++j) {
+			uint32_t k = (j + 1) % 4;
+
+			double const P = (y - shape[j].second) * (shape[k].first - shape[j].first) -
+				(x - shape[j].first) * (shape[k].second - shape[j].second);
+
+			if (P > 0) {
+				break;
+			}
+		}
+
+		if (j == 4) {
+			_matrix->popup_channel_context_menu (_matrix->column_index(), i, t);
+			break;
+		}
 	}
 }

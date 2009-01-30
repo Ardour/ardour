@@ -33,49 +33,40 @@
 BundleEditorMatrix::BundleEditorMatrix (
 	ARDOUR::Session& session, boost::shared_ptr<ARDOUR::Bundle> bundle
 	)
-	: PortMatrix (session, bundle->type(), bundle->ports_are_inputs())
+	: PortMatrix (session, bundle->type()),
+	  _bundle (bundle)
 {
-	_port_group = new PortGroup ("", true);
+	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
 	_port_group->add_bundle (bundle);
-	_row_ports.push_back (_port_group);
-}
-
-BundleEditorMatrix::~BundleEditorMatrix ()
-{
-	delete _port_group;
+	_ports[OURS].add_group (_port_group);
 }
 
 void
-BundleEditorMatrix::set_state (
-	boost::shared_ptr<ARDOUR::Bundle> ab,
-	uint32_t ac,
-	boost::shared_ptr<ARDOUR::Bundle> bb,
-	uint32_t bc,
-	bool s,
-	uint32_t k
-	)
+BundleEditorMatrix::setup ()
 {
-	ARDOUR::Bundle::PortList const& pl = bb->channel_ports (bc);
+	_ports[OTHER].gather (_session, _bundle->ports_are_inputs());
+	PortMatrix::setup ();
+}
+
+void
+BundleEditorMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
+{
+	ARDOUR::Bundle::PortList const& pl = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 	for (ARDOUR::Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 		if (s) {
-			ab->add_port_to_channel (ac, *i);
+			c[OURS].bundle->add_port_to_channel (c[OURS].channel, *i);
 		} else {
-			ab->remove_port_from_channel (ac, *i);
+			c[OURS].bundle->remove_port_from_channel (c[OURS].channel, *i);
 		}
 	}
 }
 
 PortMatrix::State
-BundleEditorMatrix::get_state (
-	boost::shared_ptr<ARDOUR::Bundle> ab,
-	uint32_t ac,
-	boost::shared_ptr<ARDOUR::Bundle> bb,
-	uint32_t bc
-	) const
+BundleEditorMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 {
-	ARDOUR::Bundle::PortList const& pl = bb->channel_ports (bc);
+	ARDOUR::Bundle::PortList const& pl = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 	for (ARDOUR::Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
-		if (!ab->port_attached_to_channel (ac, *i)) {
+		if (!c[OURS].bundle->port_attached_to_channel (c[OURS].channel, *i)) {
 			return NOT_ASSOCIATED;
 		}
 	}
@@ -93,28 +84,28 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 		return;
 	}
 
-	_port_group->only_bundle()->add_channel (d.get_name());
+	_bundle->add_channel (d.get_name());
 	setup ();
 }
 
 void
-BundleEditorMatrix::remove_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
+BundleEditorMatrix::remove_channel (ARDOUR::BundleChannel bc)
 {
-	_port_group->only_bundle()->remove_channel (c);
+	bc.bundle->remove_channel (bc.channel);
 	setup ();
 }
 
 void
-BundleEditorMatrix::rename_channel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
+BundleEditorMatrix::rename_channel (ARDOUR::BundleChannel bc)
 {
-	NameChannelDialog d (b, c);
+	NameChannelDialog d (bc.bundle, bc.channel);
 	d.set_position (Gtk::WIN_POS_MOUSE);
 
 	if (d.run () != Gtk::RESPONSE_ACCEPT) {
 		return;
 	}
 
-	b->set_channel_name (c, d.get_name ());
+	bc.bundle->set_channel_name (bc.channel, d.get_name ());
 }
 
 BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::UserBundle> bundle, bool add)
@@ -203,11 +194,11 @@ BundleEditor::input_or_output_changed ()
 {
 	if (_input_or_output.get_active_text() == _("Output")) {
 		_bundle->set_ports_are_inputs ();
-		_matrix.set_offer_inputs (true);
 	} else {
 		_bundle->set_ports_are_outputs ();
-		_matrix.set_offer_inputs (false);
 	}
+
+	_matrix.setup ();
 }
 
 void

@@ -35,33 +35,28 @@ class BundleEditorMatrix : public PortMatrix
 {
   public:
 	BundleEditorMatrix (ARDOUR::Session &, boost::shared_ptr<ARDOUR::Bundle>);
-	~BundleEditorMatrix ();
 
-	void set_state (
-		boost::shared_ptr<ARDOUR::Bundle> ab,
-		uint32_t ac,
-		boost::shared_ptr<ARDOUR::Bundle> bb,
-		uint32_t bc,
-		bool s,
-		uint32_t k
-		);
-	
-	State get_state (
-		boost::shared_ptr<ARDOUR::Bundle> ab,
-		uint32_t ac,
-		boost::shared_ptr<ARDOUR::Bundle> bb,
-		uint32_t bc
-		) const;
-
+	void set_state (ARDOUR::BundleChannel c[2], bool s);
+	State get_state (ARDOUR::BundleChannel c[2]) const;
 	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
-	void remove_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
-	bool can_rename_channels () const {
-		return true;
+	bool can_remove_channels (int d) const {
+		return d == OURS;
 	}
-	void rename_channel (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
+	void remove_channel (ARDOUR::BundleChannel);
+	bool can_rename_channels (int d) const {
+		return d == OURS;
+	}
+	void rename_channel (ARDOUR::BundleChannel);
+	void setup ();
 
   private:
-	PortGroup* _port_group;
+	enum {
+		OTHER = 0,
+		OURS = 1
+	};
+		
+	boost::shared_ptr<PortGroup> _port_group;
+	boost::shared_ptr<ARDOUR::Bundle> _bundle;
 };
 
 class BundleEditor : public ArdourDialog

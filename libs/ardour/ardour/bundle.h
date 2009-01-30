@@ -147,6 +147,30 @@ class Bundle : public sigc::trackable
 	bool _ports_are_inputs;
 };
 
+
+
+struct BundleChannel
+{
+	BundleChannel () : channel (0) {}
+	
+	BundleChannel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
+		: bundle (b), channel (c) {}
+	
+	bool operator== (BundleChannel const& other) const {
+		return bundle == other.bundle && channel == other.channel;
+	}
+	
+	bool operator!= (BundleChannel const& other) const {
+		return bundle != other.bundle || channel != other.channel;
+	}
+
+	boost::shared_ptr<ARDOUR::Bundle> bundle;
+	uint32_t channel;
+};
+	
+
+
+	
 }
 
 #endif /* __ardour_bundle_h__ */

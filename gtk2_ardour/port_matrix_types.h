@@ -22,36 +22,10 @@
 
 #include "ardour/bundle.h"
 
-struct PortMatrixBundleChannel {
-	PortMatrixBundleChannel () : channel (0) {}
-	PortMatrixBundleChannel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
-		: bundle (b), channel (c) {}
-	
-	bool operator== (PortMatrixBundleChannel const& other) const {
-		return bundle == other.bundle && channel == other.channel;
-	}
-	bool operator!= (PortMatrixBundleChannel const& other) const {
-		return bundle != other.bundle || channel != other.channel;
-	}
-
-	uint32_t nchannels (ARDOUR::BundleList const& bl) const {
-		uint32_t n = 0;
-		ARDOUR::BundleList::const_iterator i = bl.begin();
-		while (i != bl.end() && *i != bundle) {
-			n += (*i)->nchannels ();
-			++i;
-		}
-		n += channel;
-		return n;
-	}
-	
-	boost::shared_ptr<ARDOUR::Bundle> bundle;
-	uint32_t channel;
-};
-
-struct PortMatrixNode {
+struct PortMatrixNode
+{
 	PortMatrixNode () {}
-	PortMatrixNode (PortMatrixBundleChannel r, PortMatrixBundleChannel c) : row (r), column (c) {}
+	PortMatrixNode (ARDOUR::BundleChannel r, ARDOUR::BundleChannel c) : row (r), column (c) {}
 	
 	bool operator== (PortMatrixNode const& other) const {
 		return row == other.row && column == other.column;
@@ -60,8 +34,8 @@ struct PortMatrixNode {
 		return row != other.row || column != other.column;
 	}
 	
-	PortMatrixBundleChannel row;
-	PortMatrixBundleChannel column;
+	ARDOUR::BundleChannel row;
+	ARDOUR::BundleChannel column;
 };
 
 #endif

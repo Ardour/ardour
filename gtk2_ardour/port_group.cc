@@ -40,6 +40,8 @@ PortGroup::add_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
 {
 	assert (b.get());
 	_bundles.push_back (b);
+
+	Modified ();
 }
 
 /** Add a port to a group.
@@ -49,6 +51,8 @@ void
 PortGroup::add_port (std::string const &p)
 {
 	ports.push_back (p);
+
+	Modified ();
 }
 
 void
@@ -56,6 +60,8 @@ PortGroup::clear ()
 {
 	_bundles.clear ();
 	ports.clear ();
+
+	Modified ();
 }
 
 bool
@@ -82,62 +88,48 @@ PortGroup::only_bundle ()
 	assert (_bundles.size() == 1);
 	return _bundles.front();
 }
-	
 
-/** PortGroupUI constructor.
- *  @param m PortMatrix to work for.
- *  @Param g PortGroup to represent.
- */
 
-PortGroupUI::PortGroupUI (PortMatrix* m, PortGroup* g)
-	: _port_matrix (m)
-	, _port_group (g)
-	, _visibility_checkbutton (g->name)
+uint32_t
+PortGroup::total_ports () const
 {
-	_port_group->set_visible (true);
-	setup_visibility_checkbutton ();
-	
-	_visibility_checkbutton.signal_toggled().connect (sigc::mem_fun (*this, &PortGroupUI::visibility_checkbutton_toggled));
-}
-
-/** The visibility of a PortGroupUI has been toggled */
-void
-PortGroupUI::visibility_checkbutton_toggled ()
-{
-	_port_group->set_visible (_visibility_checkbutton.get_active ());
-	setup_visibility_checkbutton ();
-	_port_matrix->setup ();
-}
-
-/** Set up the visibility checkbutton according to PortGroup::visible */
-void
-PortGroupUI::setup_visibility_checkbutton ()
-{
-	if (_visibility_checkbutton.get_active () != _port_group->visible()) {
-		_visibility_checkbutton.set_active (_port_group->visible());
+	uint32_t n = 0;
+	for (ARDOUR::BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+		n += (*i)->nchannels ();
 	}
+
+	n += ports.size();
+
+	return n;
 }
 
+	
 /** PortGroupList constructor.
- *  @param type Type of bundles to offer (audio or MIDI)
- *  @param offer_inputs true to offer output bundles, otherwise false.
  */
 
-PortGroupList::PortGroupList (ARDOUR::DataType type, bool offer_inputs)
-	: _type (type), _offer_inputs (offer_inputs), _bundles_dirty (true),
-	  _buss (_("Bus"), true),
-	  _track (_("Track"), true),
-	  _system (_("System"), true),
-	  _other (_("Other"), true)
+PortGroupList::PortGroupList ()
+	: _type (ARDOUR::DataType::AUDIO), _bundles_dirty (true)
 {
 	
+}
+
+void
+PortGroupList::set_type (ARDOUR::DataType t)
+{
+	_type = t;
+	clear ();
 }
 
 /** Gather bundles from around the system and put them in this PortGroupList */
 void
-PortGroupList::gather (ARDOUR::Session& session)
+PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 {
-	clear_list ();
+	clear ();
+
+	boost::shared_ptr<PortGroup> buss (new PortGroup (_("Buss")));
+	boost::shared_ptr<PortGroup> track (new PortGroup (_("Track")));
+	boost::shared_ptr<PortGroup> system (new PortGroup (_("System")));
+	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
 	/* Find the bundles for routes.  We take their bundles, copy them,
 	   and add ports from the route's processors */
@@ -148,7 +140,7 @@ PortGroupList::gather (ARDOUR::Session& session)
 		/* Copy the appropriate bundle from the route */
 		boost::shared_ptr<ARDOUR::Bundle> bundle (
 			new ARDOUR::Bundle (
-				_offer_inputs ? (*i)->bundle_for_inputs() : (*i)->bundle_for_outputs ()
+				inputs ? (*i)->bundle_for_inputs() : (*i)->bundle_for_outputs ()
 				)
 			);
 
@@ -163,7 +155,7 @@ PortGroupList::gather (ARDOUR::Session& session)
 			boost::shared_ptr<ARDOUR::IOProcessor> iop = boost::dynamic_pointer_cast<ARDOUR::IOProcessor> (p);
 
 			if (iop) {
-				boost::shared_ptr<ARDOUR::Bundle> pb = _offer_inputs ?
+				boost::shared_ptr<ARDOUR::Bundle> pb = inputs ?
 					iop->io()->bundle_for_inputs() : iop->io()->bundle_for_outputs();
 				bundle->add_channels_from_bundle (pb);
 			}
@@ -172,20 +164,20 @@ PortGroupList::gather (ARDOUR::Session& session)
 		}
 			
 		/* Work out which group to put this bundle in */
-		PortGroup* g = 0;
+		boost::shared_ptr<PortGroup> g;
 		if (_type == ARDOUR::DataType::AUDIO) {
 
 			if (boost::dynamic_pointer_cast<ARDOUR::AudioTrack> (*i)) {
-				g = &_track;
+				g = track;
 			} else if (!boost::dynamic_pointer_cast<ARDOUR::MidiTrack>(*i)) {
-				g = &_buss;
+				g = buss;
 			} 
 
 
 		} else if (_type == ARDOUR::DataType::MIDI) {
 
 			if (boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (*i)) {
-				g = &_track;
+				g = track;
 			}
 
 			/* No MIDI busses yet */
@@ -200,14 +192,14 @@ PortGroupList::gather (ARDOUR::Session& session)
 	
 	boost::shared_ptr<ARDOUR::BundleList> b = session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->ports_are_inputs() == _offer_inputs && (*i)->type() == _type) {
-			_system.add_bundle (*i);
+		if ((*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
+			system->add_bundle (*i);
 		}
 	}
 
 	/* Now find all other ports that we haven't thought of yet */
 
- 	const char **ports = session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
+ 	const char **ports = session.engine().get_ports ("", _type.to_jack_type(), inputs ? 
  							  JackPortIsInput : JackPortIsOutput);
  	if (ports) {
 
@@ -221,14 +213,14 @@ PortGroupList::gather (ARDOUR::Session& session)
 			
 			std::string const p = ports[n];
 
-			if (!_system.has_port(p) && !_buss.has_port(p) && !_track.has_port(p) && !_other.has_port(p)) {
+			if (!system->has_port(p) && !buss->has_port(p) && !track->has_port(p) && !other->has_port(p)) {
 				
 				if (port_has_prefix (p, "system:") ||
 				    port_has_prefix (p, "alsa_pcm") ||
 				    port_has_prefix (p, "ardour:")) {
-					_system.add_port (p);
+					system->add_port (p);
 				} else {
-					_other.add_port (p);
+					other->add_port (p);
 				}
 			}
 			
@@ -238,16 +230,10 @@ PortGroupList::gather (ARDOUR::Session& session)
 		free (ports);
 	}
 
-	push_back (&_system);
-	push_back (&_buss);
-	push_back (&_track);
-	push_back (&_other);
-
-	for (iterator i = begin(); i != end(); ++i) {
-		_visibility_connections.push_back (
-			(*i)->VisibilityChanged.connect (sigc::mem_fun (*this, &PortGroupList::visibility_changed))
-			);
-	}
+	add_group (system);
+	add_group (buss);
+	add_group (track);
+	add_group (other);
 
 	_bundles_dirty = true;
 }
@@ -260,25 +246,11 @@ PortGroupList::port_has_prefix (const std::string& n, const std::string& p) cons
 	
 
 void
-PortGroupList::set_type (ARDOUR::DataType t)
-{
-	_type = t;
-	_bundles_dirty = true;
-}
-
-void
-PortGroupList::set_offer_inputs (bool i)
-{
-	_offer_inputs = i;
-	_bundles_dirty = true;
-}
-
-void
 PortGroupList::update_bundles () const
 {
 	_bundles.clear ();
 		
-	for (const_iterator i = begin (); i != end (); ++i) {
+	for (PortGroupList::List::const_iterator i = begin (); i != end (); ++i) {
 		if ((*i)->visible()) {
 			
 			std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
@@ -346,39 +318,9 @@ PortGroupList::common_prefix (std::vector<std::string> const & p) const
 }
 
 void
-PortGroupList::visibility_changed ()
+PortGroupList::clear ()
 {
-	VisibilityChanged ();
-}
-
-void
-PortGroupList::take_visibility_from (PortGroupList const & o)
-{
-	iterator i = begin ();
-	const_iterator j = o.begin ();
-
-	while (i != end() && j != o.end()) {
-		(*i)->set_visible ((*j)->visible());
-		++i;
-		++j;
-	}
-}
-
-void
-PortGroupList::clear_list ()
-{
-	clear ();
-
-	_buss.clear ();
-	_track.clear ();
-	_system.clear ();
-	_other.clear ();
-
-	for (std::vector<sigc::connection>::iterator i = _visibility_connections.begin(); i != _visibility_connections.end(); ++i) {
-		i->disconnect ();
-	}
-
-	_visibility_connections.clear ();
+	_groups.clear ();
 	_bundles_dirty = true;
 }
 
@@ -390,4 +332,32 @@ PortGroupList::bundles () const
 	}
 
 	return _bundles;
+}
+
+uint32_t
+PortGroupList::total_visible_ports () const
+{
+	uint32_t n = 0;
+	
+	for (PortGroupList::List::const_iterator i = begin(); i != end(); ++i) {
+		if ((*i)->visible()) {
+			n += (*i)->total_ports ();
+		}
+	}
+
+	return n;
+}
+
+void
+PortGroupList::group_modified ()
+{
+	_bundles_dirty = true;
+}
+
+void
+PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
+{
+	_groups.push_back (g);
+	g->Modified.connect (sigc::mem_fun (*this, &PortGroupList::group_modified));
+	_bundles_dirty = true;
 }

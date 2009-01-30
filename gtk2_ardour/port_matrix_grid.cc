@@ -24,9 +24,8 @@
 #include "port_matrix_grid.h"
 #include "port_matrix.h"
 
-PortMatrixGrid::PortMatrixGrid (PortMatrix* p, PortMatrixBody* b)
-	: PortMatrixComponent (b),
-	  _port_matrix (p)
+PortMatrixGrid::PortMatrixGrid (PortMatrix* m, PortMatrixBody* b)
+	: PortMatrixComponent (m, b)
 {
 	
 }
@@ -35,13 +34,13 @@ void
 PortMatrixGrid::compute_dimensions ()
 {
 	_width = 0;
-	ARDOUR::BundleList const c = _body->column_ports().bundles();
+	ARDOUR::BundleList const c = _matrix->columns()->bundles();
 	for (ARDOUR::BundleList::const_iterator i = c.begin(); i != c.end(); ++i) {
 		_width += (*i)->nchannels() * column_width();
 	}
 
 	_height = 0;
-	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	ARDOUR::BundleList const r = _matrix->rows()->bundles();
 	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		_height += (*i)->nchannels() * row_height();
 	}
@@ -61,7 +60,7 @@ PortMatrixGrid::render (cairo_t* cr)
 	
 	set_source_rgb (cr, grid_colour());
 	uint32_t x = 0;
-	ARDOUR::BundleList const c = _body->column_ports().bundles();
+	ARDOUR::BundleList const c = _matrix->columns()->bundles();
 	for (ARDOUR::BundleList::size_type i = 0; i < c.size(); ++i) {
 
 		cairo_set_line_width (cr, thin_grid_line_width());
@@ -86,7 +85,7 @@ PortMatrixGrid::render (cairo_t* cr)
 	/* HORIZONTAL GRID LINES */
 	
 	uint32_t y = 0;
-	ARDOUR::BundleList const r = _body->row_ports().bundles();
+	ARDOUR::BundleList const r = _matrix->rows()->bundles();
 	for (ARDOUR::BundleList::size_type i = 0; i < r.size(); ++i) {
 
 		cairo_set_line_width (cr, thin_grid_line_width());
@@ -121,8 +120,12 @@ PortMatrixGrid::render (cairo_t* cr)
 
 				y = by;
 				for (uint32_t l = 0; l < (*j)->nchannels (); ++l) {
+
+					ARDOUR::BundleChannel c[2];
+					c[_matrix->column_index()] = ARDOUR::BundleChannel (*i, k);
+					c[_matrix->row_index()] = ARDOUR::BundleChannel (*j, l);
 					
-					PortMatrix::State const s = _port_matrix->get_state (*j, l, *i, k);
+					PortMatrix::State const s = _matrix->get_state (c);
 						
 					switch (s) {
 					case PortMatrix::ASSOCIATED:
@@ -172,32 +175,32 @@ PortMatrixNode
 PortMatrixGrid::position_to_node (double x, double y) const
 {
 	return PortMatrixNode (
-		position_to_channel (y, _body->row_ports().bundles(), row_height()),
-		position_to_channel (x, _body->column_ports().bundles(), column_width())
+		position_to_channel (y, _matrix->rows()->bundles(), row_height()),
+		position_to_channel (x, _matrix->columns()->bundles(), column_width())
 		);
 }
 
 
-PortMatrixBundleChannel
+ARDOUR::BundleChannel
 PortMatrixGrid::position_to_channel (double p, ARDOUR::BundleList const& bundles, double inc) const
 {
 	uint32_t pos = p / inc;
 
 	for (ARDOUR::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
 		if (pos < (*i)->nchannels()) {
-			return PortMatrixBundleChannel (*i, pos);
+			return ARDOUR::BundleChannel (*i, pos);
 		} else {
 			pos -= (*i)->nchannels();
 		}
 	}
 			
-	return PortMatrixBundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0);
+	return ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0);
 }
 
 
 double
 PortMatrixGrid::channel_position (
-	PortMatrixBundleChannel bc,
+	ARDOUR::BundleChannel bc,
 	ARDOUR::BundleList const& bundles,
 	double inc) const
 {
@@ -224,21 +227,22 @@ PortMatrixGrid::button_press (double x, double y, int b)
 	PortMatrixNode const node = position_to_node (x, y);
 	
 	if (node.row.bundle && node.column.bundle) {
-		
-		PortMatrix::State const s = _port_matrix->get_state (
-			node.row.bundle, node.row.channel, node.column.bundle, node.column.channel
-			);
 
+		ARDOUR::BundleChannel c[2];
+		c[_matrix->row_index()] = node.row;
+		c[_matrix->column_index()] = node.column;
+		
+		PortMatrix::State const s = _matrix->get_state (c);
 		
 		if (s == PortMatrix::ASSOCIATED || s == PortMatrix::NOT_ASSOCIATED) {
 
 			bool const n = !(s == PortMatrix::ASSOCIATED);
+
+			ARDOUR::BundleChannel c[2];
+			c[_matrix->row_index()] = node.row;
+			c[_matrix->column_index()] = node.column;
 			
-			_port_matrix->set_state (
-				node.row.bundle, node.row.channel,
-				node.column.bundle, node.column.channel,
-				n, 0
-				);
+			_matrix->set_state (c, n);
 		}
 
 		require_render ();
@@ -253,19 +257,19 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 	cairo_set_line_width (cr, mouseover_line_width());
 
 	double const x = component_to_parent_x (
-		channel_position (_body->mouseover().column, _body->column_ports().bundles(), column_width()) + column_width() / 2
+		channel_position (_body->mouseover().column, _matrix->columns()->bundles(), column_width()) + column_width() / 2
 		);
 	
 	double const y = component_to_parent_y (
-		channel_position (_body->mouseover().row, _body->row_ports().bundles(), row_height()) + row_height() / 2
+		channel_position (_body->mouseover().row, _matrix->rows()->bundles(), row_height()) + row_height() / 2
 		);
 	
 	if (_body->mouseover().row.bundle) {
 
 		cairo_move_to (cr, x, y);
-		if (_body->arrangement() == PortMatrixBody::BOTTOM_AND_LEFT) {
+		if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 			cairo_line_to (cr, component_to_parent_x (0), y);
-		} else if (_body->arrangement() == PortMatrixBody::TOP_AND_RIGHT) {
+		} else if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 			cairo_line_to (cr, _parent_rectangle.get_x() + _parent_rectangle.get_width(), y);
 		}
 		cairo_stroke (cr);
@@ -274,9 +278,9 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 	if (_body->mouseover().column.bundle) {
 
 		cairo_move_to (cr, x, y);
-		if (_body->arrangement() == PortMatrixBody::BOTTOM_AND_LEFT) {
+		if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 			cairo_line_to (cr, x, _parent_rectangle.get_y() + _parent_rectangle.get_height());
-		} else if (_body->arrangement() == PortMatrixBody::TOP_AND_RIGHT) {
+		} else if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 			cairo_line_to (cr, x, component_to_parent_y (0));
 		}
 		cairo_stroke (cr);
@@ -301,7 +305,7 @@ PortMatrixGrid::queue_draw_for (PortMatrixNode const &n)
 {
 	if (n.row.bundle) {
 
-		double const y = channel_position (n.row, _body->row_ports().bundles(), row_height());
+		double const y = channel_position (n.row, _matrix->rows()->bundles(), row_height());
 		_body->queue_draw_area (
 			_parent_rectangle.get_x(),
 			component_to_parent_y (y),
@@ -312,7 +316,7 @@ PortMatrixGrid::queue_draw_for (PortMatrixNode const &n)
 
 	if (n.column.bundle) {
 
-		double const x = channel_position (n.column, _body->column_ports().bundles(), column_width());
+		double const x = channel_position (n.column, _matrix->columns()->bundles(), column_width());
 		
 		_body->queue_draw_area (
 			component_to_parent_x (x),

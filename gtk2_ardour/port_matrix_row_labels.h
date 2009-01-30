@@ -27,26 +27,21 @@
 class PortMatrix;
 class PortMatrixBody;
 class PortMatrixNode;
-class PortMatrixBundleChannel;
 
 namespace ARDOUR {
 	class Bundle;
+	class BundleChannel;
 }
 
 namespace Gtk {
 	class Menu;
 }
 
+/** The row labels part of the port matrix */
 class PortMatrixRowLabels : public PortMatrixComponent
 {
 public:
-	enum Location {
-		LEFT,
-		RIGHT
-	};
-	
-	PortMatrixRowLabels (PortMatrix *, PortMatrixBody *, Location);
-	~PortMatrixRowLabels ();
+	PortMatrixRowLabels (PortMatrix *, PortMatrixBody *);
 
 	void button_press (double, double, int, uint32_t);
   
@@ -62,17 +57,14 @@ private:
 	void compute_dimensions ();
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
-	void render_port_name (cairo_t *, Gdk::Color, double, double, PortMatrixBundleChannel const &);
-	double channel_y (PortMatrixBundleChannel const &) const;
+	void render_port_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
+	double channel_y (ARDOUR::BundleChannel const &) const;
 	void queue_draw_for (PortMatrixNode const &);
 	double port_name_x () const;
 
-	PortMatrix* _port_matrix;
 	double _longest_port_name;
 	double _longest_bundle_name;
 	double _highest_group_name;
-	Gtk::Menu* _menu;
-	Location _location;
 };
 
 #endif

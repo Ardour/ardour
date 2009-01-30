@@ -23,8 +23,9 @@
 /** Constructor.
  *  @param p Port matrix that we're in.
  */
-PortMatrixComponent::PortMatrixComponent (PortMatrixBody* b)
-	: _body (b),
+PortMatrixComponent::PortMatrixComponent (PortMatrix* m, PortMatrixBody* b)
+	: _matrix (m),
+	  _body (b),
 	  _pixmap (0),
 	  _render_required (true),
 	  _dimension_computation_required (true)
