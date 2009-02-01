@@ -182,7 +182,8 @@ MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr<Evoral::Note> note
 	return *xml_note;
 }
 
-boost::shared_ptr<Evoral::Note> MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
+boost::shared_ptr<Evoral::Note>
+MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 {
 	unsigned int note;
 	XMLProperty* prop;
@@ -239,7 +240,8 @@ boost::shared_ptr<Evoral::Note> MidiModel::DeltaCommand::unmarshal_note(XMLNode 
 #define REMOVED_NOTES_ELEMENT "removed_notes"
 #define DELTA_COMMAND_ELEMENT "DeltaCommand"
 
-int MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
+int
+MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
 {
 	if (delta_command.name() != string(DELTA_COMMAND_ELEMENT)) {
 		return 1;
@@ -260,7 +262,8 @@ int MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
 	return 0;
 }
 
-XMLNode& MidiModel::DeltaCommand::get_state()
+XMLNode&
+MidiModel::DeltaCommand::get_state()
 {
 	XMLNode *delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
 	delta_command->add_property("midi-source", _model->midi_source()->id().to_s());
@@ -285,7 +288,8 @@ XMLNode& MidiModel::DeltaCommand::get_state()
  * to percussive, save, reload, then switch it back to sustained without
  * destroying the original note durations.
  */
-bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
+bool
+MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 {
 	read_lock();
 
@@ -304,7 +308,8 @@ bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	return true;
 }
 
-XMLNode& MidiModel::get_state()
+XMLNode&
+MidiModel::get_state()
 {
 	XMLNode *node = new XMLNode("MidiModel");
 	return *node;
