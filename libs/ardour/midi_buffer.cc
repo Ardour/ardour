@@ -33,7 +33,7 @@ using namespace ARDOUR;
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
 	: Buffer(DataType::MIDI, capacity)
-	, _events(0)
+	, _size(0)
 	, _data(0)
 {
 	if (capacity) {
@@ -44,12 +44,7 @@ MidiBuffer::MidiBuffer(size_t capacity)
 	
 MidiBuffer::~MidiBuffer()
 {
-	if (_events) {
-		free(_events);
-	}
-	if (_data) {
-		free(_data);
-	}
+	free(_data);
 }
 
 void
@@ -62,30 +57,24 @@ MidiBuffer::resize(size_t size)
 	}
 
 	free(_data);
-	free(_events);
 
 	_size = 0;
 	_capacity = size;
 
 #ifdef NO_POSIX_MEMALIGN
-	_events = (Evoral::MIDIEvent *) malloc(sizeof(Evoral::MIDIEvent) * _capacity);
-	_data = (uint8_t *) malloc(sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
+	_data = (uint8_t*)malloc(_capacity);
 #else
-	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(Evoral::Event) * _capacity);
-	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
+	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, _capacity);
 #endif	
 	assert(_data);
-	assert(_events);
 }
 
 void
 MidiBuffer::copy(const MidiBuffer& copy)
 {
-	assert(_capacity >= copy._capacity);
-	_size = 0;
-
-	for (size_t i = 0; i < copy.size(); ++i)
-		push_back(copy[i]);
+	assert(_capacity >= copy._size);
+	_size = copy._size;
+	memcpy(_data, copy._data, copy._size);
 }
 
 
@@ -109,11 +98,11 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 		assert(_size == 0);
 	}
 	
-	// FIXME: slow
-	for (size_t i = 0; i < msrc.size(); ++i) {
-		const Evoral::MIDIEvent& ev = msrc[i];
-		//cout << "MidiBuffer::read_from event type: " << int(ev.type())
-		//		<< " time: " << ev.time() << " buffer size: " << _size << endl;
+	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
+		const Evoral::MIDIEvent ev(*i, false);
+		/*cout << this << " MidiBuffer::read_from event type: " << int(ev.type())
+				<< " time: " << ev.time() << " size: " << ev.size()
+				<< " status: " << (int)*ev.buffer() << " buffer size: " << _size << endl;*/
 		if (ev.time() < offset) {
 			//cout << "MidiBuffer::read_from skipped event before " << offset << endl;
 		} else if (ev.time() < (nframes + offset)) {
@@ -139,27 +128,19 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 bool
 MidiBuffer::push_back(const Evoral::MIDIEvent& ev)
 {
-	if (_size == _capacity) {
+	const size_t stamp_size = sizeof(Evoral::EventTime);
+	if (_size + stamp_size + ev.size() >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
 	}
 
-	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+	uint8_t* const write_loc = _data + _size;
+	*((Evoral::EventTime*)write_loc) = ev.time();
+	memcpy(write_loc + stamp_size, ev.buffer(), ev.size());
 
-	memcpy(write_loc, ev.buffer(), ev.size());
-	_events[_size] = ev;
-	_events[_size].set_buffer(ev.size(), write_loc, false);
-
-	/*cerr << "MidiBuffer: pushed @ " << _events[_size].time()
-		<< " size = " << _size << endl;
-	for (size_t i = 0; i < _events[_size].size(); ++i) {
-		printf("%X ", _events[_size].buffer()[i]);
-	}
-	printf("\n");*/
-
-	++_size;
+	_size += stamp_size + ev.size();
 	_silent = false;
-
+	
 	return true;
 }
 
@@ -174,27 +155,19 @@ MidiBuffer::push_back(const Evoral::MIDIEvent& ev)
 bool
 MidiBuffer::push_back(const jack_midi_event_t& ev)
 {
-	if (_size == _capacity) {
+	const size_t stamp_size = sizeof(Evoral::EventTime);
+	if (_size + stamp_size + ev.size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
 	}
 
-	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+	uint8_t* const write_loc = _data + _size;
+	*((Evoral::EventTime*)write_loc) = ev.time;
+	memcpy(write_loc + stamp_size, ev.buffer, ev.size);
 
-	memcpy(write_loc, ev.buffer, ev.size);
-	_events[_size].time() = (double)ev.time;
-	_events[_size].set_buffer(ev.size, write_loc, false);
-
-	/*cerr << "MidiBuffer: pushed @ " << _events[_size].time()
-		<< " size = " << _size << endl;
-	for (size_t i = 0; i < _events[_size].size(); ++i) {
-		printf("%X ", _events[_size].buffer()[i]);
-	}
-	printf("\n");*/
-	
-	++_size;
+	_size += stamp_size + ev.size;
 	_silent = false;
-
+	
 	return true;
 }
 
@@ -207,27 +180,19 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
  * location, or the buffer will be corrupted and very nasty things will happen.
  */
 uint8_t*
-MidiBuffer::reserve(double time, size_t size)
+MidiBuffer::reserve(Evoral::EventTime time, size_t size)
 {
-	if (size > MAX_EVENT_SIZE) {
-		cerr << "WARNING: Failed to reserve " << size << " bytes for event";
+	const size_t stamp_size = sizeof(Evoral::EventTime);
+	if (_size + stamp_size + size >= _capacity) {
 		return 0;
 	}
 
-	if (_size == _capacity) {
-		return 0;
-	}
+	uint8_t* const write_loc = _data + _size;
+	*((Evoral::EventTime*)write_loc) = time;
 
-	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
-
-	_events[_size].time() = time;
-	_events[_size].set_buffer(size, write_loc, false);
-	++_size;
-
-	//cerr << "MidiBuffer: reserved, size = " << _size << endl;
-
+	_size += stamp_size + size;
 	_silent = false;
-
+	
 	return write_loc;
 }
 
@@ -239,12 +204,11 @@ MidiBuffer::silence(nframes_t dur, nframes_t offset)
 	if (offset != 0)
 		cerr << "WARNING: MidiBuffer::silence w/ offset != 0 (not implemented)" << endl;
 
-	memset(_events, 0, sizeof(Evoral::Event) * _capacity);
-	memset(_data, 0, sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 	_size = 0;
 	_silent = true;
 }
 
+/** Merge \a other into this buffer.  Realtime safe. */
 bool
 MidiBuffer::merge_in_place(const MidiBuffer &other)
 {
@@ -252,36 +216,21 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		return true;
 	}
 
-	if (this->size() == 0) {
+	if (_size == 0) {
 		copy(other);
 		return true;
 	}
 
-	{
-		MidiBuffer merge_buffer(0);
-		Evoral::MIDIEvent onstack_events[_capacity];
-		uint8_t	onstack_data[_capacity * MAX_EVENT_SIZE];
-		merge_buffer._events = onstack_events;
-		merge_buffer._data = onstack_data;
-		merge_buffer._size = 0;
-
-		bool retval = merge_buffer.merge(*this, other);
-
-		copy(merge_buffer);
-
-		// set pointers to zero again, so destructor
-		// does not end in calling free() for memory
-		// on the stack;
-		merge_buffer._events = 0;
-		merge_buffer._data = 0;
-
-		return retval;
+	if (_size + other.size() > _capacity) {
+		cerr << "MidiBuffer::merge failed (no space)" << endl;
+		return false;
 	}
+	
+	cerr << "FIXME: MIDI BUFFER IN-PLACE MERGE" << endl;
+	return true;
 }
 
 /** Clear, and merge \a a and \a b into this buffer.
- *
- * FIXME: This is slow.
  *
  * \return true if complete merge was successful
  */
@@ -297,40 +246,8 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 	if (this == &b) {
 	    merge_in_place(a);
 	}
-
-	size_t a_index = 0;
-	size_t b_index = 0;
-	size_t count = a.size() + b.size();
-
-	while (count > 0) {
-		
-		if (size() == capacity()) {
-			cerr << "WARNING: MIDI buffer overrun, events lost!" << endl;
-			return false;
-		}
-		
-		if (a_index == a.size()) {
-			push_back(b[b_index]);
-			++b_index;
-		} else if (b_index == b.size()) {
-			push_back(a[a_index]);
-			++a_index;
-		} else {
-			const Evoral::MIDIEvent& a_ev = a[a_index];
-			const Evoral::MIDIEvent& b_ev = b[b_index];
-
-			if (a_ev.time() <= b_ev.time()) {
-				push_back(a_ev);
-				++a_index;
-			} else {
-				push_back(b_ev);
-				++b_index;
-			}
-		}
-
-		--count;
-	}
-
+	
+	cerr << "FIXME: MIDI BUFFER MERGE" << endl;
 	return true;
 }
 

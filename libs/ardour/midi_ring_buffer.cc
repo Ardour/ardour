@@ -33,7 +33,6 @@ size_t
 MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset)
 {
 	if (read_space() == 0) {
-		//cerr << "MRB: NO READ SPACE" << endl;
 		return 0;
 	}
 
@@ -100,7 +99,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {
-			//cerr << "MRB: Unable to reserve space in buffer, event skipped";
+			cerr << "MRB: Unable to reserve space in buffer, event skipped";
 			continue;
 		}
 
@@ -113,7 +112,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			++count;
 			//cerr << "MRB - read event at time " << ev_time << endl;
 		} else {
-			//cerr << "WARNING: error reading event contents from MIDI ring" << endl;
+			cerr << "WARNING: error reading event contents from MIDI ring" << endl;
 		}
 	}
 	

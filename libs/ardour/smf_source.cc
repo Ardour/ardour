@@ -266,11 +266,13 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev)
 {
-	if (ev.size() == 0)
+	if (ev.size() == 0)  {
+		cerr << "SMFSource: Warning: skipping empty event" << endl;
 		return;
+	}
 
-	/*printf("SMFSource: %s - append_event_unlocked chan = %u, time = %lf, size = %u, data = ",
-			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size()); 
+	/*printf("SMFSource: %s - append_event_unlocked time = %lf, size = %u, data = ",
+			name().c_str(), ev.time(), ev.size()); 
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}

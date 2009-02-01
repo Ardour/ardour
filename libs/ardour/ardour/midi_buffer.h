@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006-2009 Paul Davis 
     Author: Dave Robillard
     
     This program is free software; you can redistribute it and/or modify it
@@ -20,8 +20,10 @@
 #ifndef __ardour_midi_buffer_h__
 #define __ardour_midi_buffer_h__
 
+#include <evoral/midi_util.h>
 #include <midi++/event.h>
 #include <ardour/buffer.h>
+#include <ardour/event_type_map.h>
 
 namespace ARDOUR {
 
@@ -50,16 +52,23 @@ public:
 	
 	template<typename B, typename E>
 	struct iterator_base {
-		iterator_base<B,E>(B& b, size_t i) : buffer(b), index(i) {}
-
-		inline E& operator*() const { return buffer[index]; }
-		inline iterator_base<B,E>& operator++() { ++index; return *this; } // prefix
-		inline bool operator!=(const iterator_base<B,E>& other) const {
-			return index != other.index;
+		iterator_base<B,E>(B& b, size_t o) : buffer(b), offset(o) {}
+		inline E operator*() const {
+			uint8_t* ev_start = buffer._data + offset + sizeof(Evoral::EventTime);
+			return E(EventTypeMap::instance().midi_event_type(*ev_start),
+					*(Evoral::EventTime*)(buffer._data + offset),
+					Evoral::midi_event_size(*ev_start) + 1, ev_start);
 		}
-		
+		inline iterator_base<B,E>& operator++() {
+			uint8_t* ev_start = buffer._data + offset + sizeof(Evoral::EventTime);
+			offset += sizeof(Evoral::EventTime) + Evoral::midi_event_size(*ev_start) + 1;
+			return *this;
+		}
+		inline bool operator!=(const iterator_base<B,E>& other) const {
+			return (&buffer != &other.buffer) || (offset != other.offset);
+		}
 		B&     buffer;
-		size_t index;
+		size_t offset;
 	};
 	
 	typedef iterator_base<MidiBuffer, Evoral::MIDIEvent>             iterator;
@@ -72,24 +81,11 @@ public:
 	const_iterator end()   const { return const_iterator(*this, _size); }
 
 private:
-
 	friend class iterator_base<MidiBuffer, Evoral::MIDIEvent>;
 	friend class iterator_base<const MidiBuffer, const Evoral::MIDIEvent>;
 	
-	const Evoral::MIDIEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
-	Evoral::MIDIEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
-
-	// FIXME: Eliminate this
-	static const size_t MAX_EVENT_SIZE = 4; // bytes
-	
-	/* We use _size as "number of events", so the size of _data is
-	 * (_size * MAX_EVENT_SIZE)
-	 */
-
-	/* FIXME: this is utter crap.  rewrite as a flat/packed buffer like MidiRingBuffer */
-
-	Evoral::MIDIEvent* _events; ///< Event structs that point to offsets in _data
-	uint8_t*           _data;   ///< MIDI, straight up.  No time stamps.
+	size_t   _size; ///< Size in bytes of used portion of _data
+	uint8_t* _data; ///< timestamp, event, timestamp, event, ...
 };
 
 

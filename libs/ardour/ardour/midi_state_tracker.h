@@ -40,7 +40,7 @@ public:
 	void resolve_notes (MidiBuffer& buffer, nframes_t time);
 
 private:
-	void track_note_onoffs(Evoral::MIDIEvent& event);
+	void track_note_onoffs(const Evoral::MIDIEvent& event);
 
 	std::bitset<128*16> _active_notes;
 };

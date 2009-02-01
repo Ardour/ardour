@@ -586,76 +586,11 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 }
 
 void
-MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_frame, nframes_t end_frame, 
+MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start, nframes_t end, 
 			       nframes_t nframes, nframes_t offset)
 {
-#if 0
-	BufferSet& mix_buffers = _session.get_mix_buffers(ChanCount(DataType::MIDI, 2));
-
-	/* FIXME: this could be more realtimey */
-
-	// Write immediate events (UI controls)
-	MidiBuffer& cc_buf = mix_buffers.get_midi(0);
-	cc_buf.silence(nframes, offset);
-	
-	uint8_t buf[3]; // CC = 3 bytes
-	buf[0] = MIDI_CMD_CONTROL;
-	Evoral::Event ev(0, 3, buf, false);
-
-	// Write track controller automation
-	// This now lives in MidiModel.  Any need for track automation like this?
-	// Relative Velocity?
-	if (_session.transport_rolling()) {
-		for (Controls::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
-			const boost::shared_ptr<AutomationList> list = (*i).second->list();
-
-			if ( (!list->automation_playback())
-					|| (list->parameter().type() != MidiCCAutomation))
-				continue;
-
-			double start = start_frame;
-			double x, y;
-			while ((*i).second->list()->rt_safe_earliest_event(start, end_frame, x, y)) {
-				assert(x >= start_frame);
-				assert(x <= end_frame);
-
-				const nframes_t stamp = (nframes_t)floor(x - start_frame);
-				assert(stamp < nframes);
-
-				assert(y >= 0.0);
-				assert(y <= 127.0);
-
-				ev.time() = stamp;
-				ev.buffer()[1] = (uint8_t)list->parameter().id();
-				ev.buffer()[2] = (uint8_t)y;
-
-				cc_buf.push_back(ev);
-
-				start = x + 1; // FIXME?  maybe?
-			}
-		}
-	}
-
-	/* FIXME: too much copying! */
-
-	// Merge cc buf into output
-	if (cc_buf.size() > 0) {
-
-		// Both CC and route, must merge
-		if (output_buf.size() > 0) {
-
-			MidiBuffer& mix_buf = mix_buffers.get_midi(1);
-			mix_buf.merge(output_buf, cc_buf);
-			output_buf.copy(mix_buf);
-
-		} else {
-			output_buf.copy(cc_buf);
-		}
-	}
-#endif
-
 	// Append immediate events (UI controls)
-	_immediate_events.read(output_buf, 0, 0, offset + nframes-1); // all stamps = 0
+	_immediate_events.read(output_buf, 0, 0, offset + nframes - 1); // all stamps = 0
 }
 
 int

@@ -31,7 +31,7 @@ MidiPort::MidiPort (const std::string& name, Flags flags, bool ext, nframes_t ca
 {
 	// FIXME: size kludge (see BufferSet::ensure_buffers)
 	// Jack needs to tell us this
-	_buffer = new MidiBuffer (capacity * 8);
+	_buffer = new MidiBuffer (capacity * 32);
 }
 
 MidiPort::~MidiPort()
@@ -54,8 +54,8 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 }
 
 MidiBuffer &
-MidiPort::get_midi_buffer( nframes_t nframes, nframes_t offset ) {
-	
+MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
+{
 	if (_has_been_mixed_down) {
 	    return *_buffer;
 	}
@@ -79,8 +79,6 @@ MidiPort::get_midi_buffer( nframes_t nframes, nframes_t offset ) {
 				//if (ev.time > offset && ev.time < offset+nframes)
 				_buffer->push_back (ev);
 			}
-
-			assert(_buffer->size() == event_count);
 
 			if (nframes) {
 				_has_been_mixed_down = true;
@@ -167,7 +165,7 @@ MidiPort::mixdown (nframes_t cnt, nframes_t offset, bool first_overwrite)
 
 	if (first_overwrite) {
 		_buffer->read_from ((dynamic_cast<MidiPort*>(*p))->get_midi_buffer (cnt, offset), cnt, offset);
-		p++;
+		++p;
 	}
 
 	// XXX DAVE: this is just a guess
@@ -176,3 +174,4 @@ MidiPort::mixdown (nframes_t cnt, nframes_t offset, bool first_overwrite)
 		_buffer->merge (*_buffer, (dynamic_cast<MidiPort*>(*p))->get_midi_buffer (cnt, offset));
 	}
 }
+

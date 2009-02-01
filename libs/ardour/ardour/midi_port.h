@@ -44,7 +44,7 @@ class MidiPort : public Port {
 		return get_midi_buffer (nframes, offset);
 	}
 	
-	MidiBuffer& get_midi_buffer( nframes_t nframes, nframes_t offset );
+	MidiBuffer& get_midi_buffer (nframes_t nframes, nframes_t offset);
 
   protected:
 	friend class AudioEngine;
