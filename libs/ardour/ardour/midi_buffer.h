@@ -46,29 +46,24 @@ public:
 	void resize(size_t);
 
 	bool merge(const MidiBuffer& a, const MidiBuffer& b);
-	bool merge_in_place( const MidiBuffer &other );
+	bool merge_in_place(const MidiBuffer &other);
 	
-	struct iterator {
-		iterator(MidiBuffer& b, size_t i) : buffer(b), index(i) {}
+	template<typename B, typename E>
+	struct iterator_base {
+		iterator_base<B,E>(B& b, size_t i) : buffer(b), index(i) {}
 
-		inline Evoral::MIDIEvent& operator*() const { return buffer[index]; }
-		inline iterator& operator++() { ++index; return *this; } // prefix
-		inline bool operator!=(const iterator& other) const { return index != other.index; }
+		inline E& operator*() const { return buffer[index]; }
+		inline iterator_base<B,E>& operator++() { ++index; return *this; } // prefix
+		inline bool operator!=(const iterator_base<B,E>& other) const {
+			return index != other.index;
+		}
 		
-		MidiBuffer& buffer;
-		size_t      index;
+		B&     buffer;
+		size_t index;
 	};
 	
-	struct const_iterator {
-		const_iterator(const MidiBuffer& b, size_t i) : buffer(b), index(i) {}
-
-		inline const Evoral::MIDIEvent& operator*() const { return buffer[index]; }
-		inline const_iterator& operator++() { ++index; return *this; } // prefix
-		inline bool operator!=(const const_iterator& other) const { return index != other.index; }
-		
-		const MidiBuffer& buffer;
-		size_t            index;
-	};
+	typedef iterator_base<MidiBuffer, Evoral::MIDIEvent>             iterator;
+	typedef iterator_base<const MidiBuffer, const Evoral::MIDIEvent> const_iterator;
 
 	iterator begin() { return iterator(*this, 0); }
 	iterator end()   { return iterator(*this, _size); }
@@ -78,8 +73,8 @@ public:
 
 private:
 
-	friend class iterator;
-	friend class const_iterator;
+	friend class iterator_base<MidiBuffer, Evoral::MIDIEvent>;
+	friend class iterator_base<const MidiBuffer, const Evoral::MIDIEvent>;
 	
 	const Evoral::MIDIEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
 	Evoral::MIDIEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }

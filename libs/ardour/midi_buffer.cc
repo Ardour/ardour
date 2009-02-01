@@ -35,10 +35,9 @@ MidiBuffer::MidiBuffer(size_t capacity)
 	: Buffer(DataType::MIDI, capacity)
 	, _events(0)
 	, _data(0)
-//	, _owns_data(false)
 {
 	if (capacity) {
-		resize (_capacity);
+		resize(_capacity);
 		silence(_capacity);
 	}
 }
@@ -54,7 +53,7 @@ MidiBuffer::~MidiBuffer()
 }
 
 void
-MidiBuffer::resize (size_t size)
+MidiBuffer::resize(size_t size)
 {
 	assert(size > 0);
 
@@ -62,13 +61,8 @@ MidiBuffer::resize (size_t size)
 		return;
 	}
 
-	if (_data) {
-		free (_data);
-	}
-
-	if (_events) {
-		free (_events);
-	}
+	free(_data);
+	free(_events);
 
 	_size = 0;
 	_capacity = size;
@@ -116,7 +110,7 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	}
 	
 	// FIXME: slow
-	for (size_t i=0; i < msrc.size(); ++i) {
+	for (size_t i = 0; i < msrc.size(); ++i) {
 		const Evoral::MIDIEvent& ev = msrc[i];
 		//cout << "MidiBuffer::read_from event type: " << int(ev.type())
 		//		<< " time: " << ev.time() << " buffer size: " << _size << endl;
@@ -220,8 +214,9 @@ MidiBuffer::reserve(double time, size_t size)
 		return 0;
 	}
 
-	if (_size == _capacity)
+	if (_size == _capacity) {
 		return 0;
+	}
 
 	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
@@ -251,27 +246,28 @@ MidiBuffer::silence(nframes_t dur, nframes_t offset)
 }
 
 bool
-MidiBuffer::merge_in_place( const MidiBuffer &other )
+MidiBuffer::merge_in_place(const MidiBuffer &other)
 {
-	if( other.size() == 0 )
+	if (other.size() == 0) {
 		return true;
+	}
 
-	if( this->size() == 0 ) {
-		copy( other );
+	if (this->size() == 0) {
+		copy(other);
 		return true;
 	}
 
 	{
-		MidiBuffer merge_buffer( 0 );
+		MidiBuffer merge_buffer(0);
 		Evoral::MIDIEvent onstack_events[_capacity];
-		uint8_t	  onstack_data[_capacity * MAX_EVENT_SIZE];
+		uint8_t	onstack_data[_capacity * MAX_EVENT_SIZE];
 		merge_buffer._events = onstack_events;
 		merge_buffer._data = onstack_data;
 		merge_buffer._size = 0;
 
-		bool retval = merge_buffer.merge( *this, other );
+		bool retval = merge_buffer.merge(*this, other);
 
-		copy( merge_buffer );
+		copy(merge_buffer);
 
 		// set pointers to zero again, so destructor
 		// does not end in calling free() for memory
@@ -293,13 +289,14 @@ bool
 MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 {
 	_size = 0;
+	
+	if (this == &a) {
+	    merge_in_place(b);
+	}
 
-	// This is mostly the case :(
-	if( this == &a )
-	    merge_in_place( b );
-
-	if( this == &b )
-	    merge_in_place( a );
+	if (this == &b) {
+	    merge_in_place(a);
+	}
 
 	size_t a_index = 0;
 	size_t b_index = 0;
