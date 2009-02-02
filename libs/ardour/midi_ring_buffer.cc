@@ -98,7 +98,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		ev_time -= start;
 		ev_time += offset;
 
-		// this writes the timestamp to write_loc[0]
+		// this writes the timestamp to address (write_loc - 1)
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {
 			cerr << "MRB: Unable to reserve space in buffer, event skipped";
