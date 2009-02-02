@@ -119,6 +119,7 @@ Session::Session (AudioEngine &eng,
 		  string mix_template)
 
 	: _engine (eng),
+	  _requested_return_frame (-1),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
 	  _mix_buffers(new BufferSet()),
@@ -201,6 +202,7 @@ Session::Session (AudioEngine &eng,
 		  nframes_t initial_length)
 
 	: _engine (eng),
+	  _requested_return_frame (-1),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
 	  _mix_buffers(new BufferSet()),
@@ -1214,16 +1216,16 @@ Session::audible_frame () const
 		/* MOVING */
 
 		/* check to see if we have passed the first guaranteed
-		   audible frame past our last stopping position. if not,
-		   the return that last stopping point because in terms
+		   audible frame past our last start position. if not,
+		   return that last start point because in terms
 		   of audible frames, we have not moved yet.
 		*/
 
 		if (_transport_speed > 0.0f) {
 
 			if (!play_loop || !have_looped) {
-				if (tf < last_stop_frame + offset) {
-					return last_stop_frame;
+				if (tf < _last_roll_location + offset) {
+					return _last_roll_location;
 					
 				}
 			} 
@@ -1236,8 +1238,8 @@ Session::audible_frame () const
 
 			/* XXX wot? no backward looping? */
 
-			if (tf > last_stop_frame - offset) {
-				return last_stop_frame;
+			if (tf > _last_roll_location - offset) {
+				return _last_roll_location;
 			} else {
 				/* backwards */
 				ret += offset;
