@@ -720,34 +720,34 @@ MixerStrip::input_press (GdkEventButton *ev)
 }
 
 void
-MixerStrip::bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
+MixerStrip::bundle_input_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
 {
-	if (!ignore_toggle) {
+	if (ignore_toggle) {
+		return;
+	}
 
-		try { 
-			_route->connect_input_ports_to_bundle (c, this);
-		}
+	ARDOUR::BundleList current = _route->bundles_connected_to_inputs ();
 
-		catch (AudioEngine::PortRegistrationFailure& err) {
-			error << _("could not register new ports required for that bundle")
-			      << endmsg;
-		}
+	if (std::find (current.begin(), current.end(), c) == current.end()) {
+		_route->connect_input_ports_to_bundle (c, this);
+	} else {
+		_route->disconnect_input_ports_from_bundle (c, this);
 	}
 }
 
 void
-MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
+MixerStrip::bundle_output_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
 {
-	if (!ignore_toggle) {
+	if (ignore_toggle) {
+		return;
+	}
 
-		try { 
-			_route->connect_output_ports_to_bundle (c, this);
-		}
+	ARDOUR::BundleList current = _route->bundles_connected_to_outputs ();
 
-		catch (AudioEngine::PortRegistrationFailure& err) {
-			error << _("could not register new ports required for that bundle")
-			      << endmsg;
-		}
+	if (std::find (current.begin(), current.end(), c) == current.end()) {
+		_route->connect_output_ports_to_bundle (c, this);
+	} else {
+		_route->disconnect_output_ports_from_bundle (c, this);
 	}
 }
 
@@ -766,7 +766,7 @@ MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::Bundl
 	
 	if (b->nchannels() == _route->n_inputs().get (b->type ())) {
 
-		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_chosen), b)));
+		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_toggled), b)));
 
 		if (std::find (current.begin(), current.end(), b) != current.end()) {
 			ignore_toggle = true;
@@ -790,7 +790,7 @@ MixerStrip::add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::Bund
 	if (b->nchannels() == _route->n_outputs().get (b->type ())) {
 
 		MenuList& citems = output_menu.items();
-		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));
+		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_toggled), b)));
 		
 		if (std::find (current.begin(), current.end(), b) != current.end()) {
 			ignore_toggle = true;

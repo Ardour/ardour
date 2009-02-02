@@ -2062,25 +2062,7 @@ IO::connect_input_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
-		/* Connect to the bundle, not worrying about any connections
-		   that are already made. */
-
-		uint32_t cnt = c->nchannels ();
-
-		for (uint32_t n = 0; n < cnt; ++n) {
-			const Bundle::PortList& pl = c->channel_ports (n);
-
-			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
-
-			  if (!_inputs.port(n)->connected_to (*i)) {
-					
-					if (_session.engine().connect (*i, _inputs.port(n)->name())) {
-						return -1;
-					}
-				}
-				
-			}
-		}
+		c->connect (_bundle_for_inputs, _session.engine());
 
 		/* If this is a UserBundle, make a note of what we've done */
 
@@ -2105,31 +2087,42 @@ IO::connect_input_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 }
 
 int
+IO::disconnect_input_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
+{
+	{
+		BLOCK_PROCESS_CALLBACK ();
+		Glib::Mutex::Lock lm2 (io_lock);
+
+		c->disconnect (_bundle_for_inputs, _session.engine());
+			
+		/* If this is a UserBundle, make a note of what we've done */
+
+		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
+		if (ub) {
+
+			std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_inputs.begin();
+			while (i != _bundles_connected_to_inputs.end() && i->bundle != ub) {
+				++i;
+			}
+
+			if (i != _bundles_connected_to_inputs.end()) {
+				_bundles_connected_to_inputs.erase (i);
+			}
+		}
+	}
+
+	input_changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
+	return 0;
+}
+
+int
 IO::connect_output_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
 	{
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
-		/* Connect to the bundle, not worrying about any connections
-		   that are already made. */
-
-		uint32_t cnt = c->nchannels ();
-
-		for (uint32_t n = 0; n < cnt; ++n) {
-
-			const Bundle::PortList& pl = c->channel_ports (n);
-
-			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
-
-				if (!_outputs.port(n)->connected_to (*i)) {
-						
-					if (_session.engine().connect (_outputs.port(n)->name(), *i)) {
-						return -1;
-					}
-				}
-			}
-		}
+		c->connect (_bundle_for_outputs, _session.engine());
 
 		/* If this is a UserBundle, make a note of what we've done */
 
@@ -2153,6 +2146,36 @@ IO::connect_output_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 
 	return 0;
 }
+
+int
+IO::disconnect_output_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
+{
+	{
+		BLOCK_PROCESS_CALLBACK ();
+		Glib::Mutex::Lock lm2 (io_lock);
+
+		c->disconnect (_bundle_for_outputs, _session.engine());
+			
+		/* If this is a UserBundle, make a note of what we've done */
+
+		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
+		if (ub) {
+
+			std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_outputs.begin();
+			while (i != _bundles_connected_to_outputs.end() && i->bundle != ub) {
+				++i;
+			}
+
+			if (i != _bundles_connected_to_outputs.end()) {
+				_bundles_connected_to_outputs.erase (i);
+			}
+		}
+	}
+
+	output_changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
+	return 0;
+}
+
 
 int
 IO::disable_connecting ()

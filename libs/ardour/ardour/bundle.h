@@ -28,6 +28,8 @@
 #include "ardour/data_type.h"
 
 namespace ARDOUR {
+
+class AudioEngine;	
   
 /** A set of `channels', each of which is associated with 0 or more ports.
  *  Each channel has a name which can be anything useful.
@@ -96,7 +98,9 @@ class Bundle : public sigc::trackable
 	bool offers_port_alone (std::string) const;
 	void remove_channel (uint32_t);
 	void remove_channels ();
-	void add_channels_from_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	void add_channels_from_bundle (boost::shared_ptr<Bundle>);
+	void connect (boost::shared_ptr<Bundle>, AudioEngine &);
+	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
 
 	/** Set the name.
 	 *  @param n New name.
@@ -143,7 +147,7 @@ class Bundle : public sigc::trackable
 	int parse_io_string (std::string const &, std::vector<std::string> &);
 	
 	std::string _name;
-	ARDOUR::DataType _type;
+	DataType _type;
 	bool _ports_are_inputs;
 };
 
@@ -153,7 +157,7 @@ struct BundleChannel
 {
 	BundleChannel () : channel (0) {}
 	
-	BundleChannel (boost::shared_ptr<ARDOUR::Bundle> b, uint32_t c)
+	BundleChannel (boost::shared_ptr<Bundle> b, uint32_t c)
 		: bundle (b), channel (c) {}
 	
 	bool operator== (BundleChannel const& other) const {
@@ -164,12 +168,9 @@ struct BundleChannel
 		return bundle != other.bundle || channel != other.channel;
 	}
 
-	boost::shared_ptr<ARDOUR::Bundle> bundle;
+	boost::shared_ptr<Bundle> bundle;
 	uint32_t channel;
 };
-	
-
-
 	
 }
 

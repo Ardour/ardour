@@ -192,11 +192,12 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 		}
 	}
 
-	/* Bundles created by the session */
+	/* Bundles created by the session.  We only add the mono ones,
+	   otherwise there is duplication of the same ports within the matrix */
 	
 	boost::shared_ptr<ARDOUR::BundleList> b = session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
+		if ((*i)->nchannels() == 1 && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
 			system->add_bundle (*i);
 		}
 	}

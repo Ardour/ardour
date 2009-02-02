@@ -22,6 +22,7 @@
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>
 #include <ardour/bundle.h>
+#include <ardour/audioengine.h>
 #include <pbd/xml++.h>
 
 #include "i18n.h"
@@ -240,6 +241,42 @@ Bundle::add_channels_from_bundle (boost::shared_ptr<Bundle> other)
 		PortList const& pl = other->channel_ports (i);
 		for (uint32_t j = 0; j < pl.size(); ++j) {
 			add_port_to_channel (ch + i, pl[j]);
+		}
+	}
+}
+
+void
+Bundle::connect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
+{
+	uint32_t const N = nchannels ();
+	assert (N == other->nchannels ());
+
+	for (uint32_t i = 0; i < N; ++i) {
+		Bundle::PortList const & our_ports = channel_ports (i);
+		Bundle::PortList const & other_ports = other->channel_ports (i);
+
+		for (Bundle::PortList::const_iterator j = our_ports.begin(); j != our_ports.end(); ++j) {
+			for (Bundle::PortList::const_iterator k = other_ports.begin(); k != other_ports.end(); ++k) {
+				engine.connect (*j, *k);
+			}
+		}
+	}
+}
+
+void
+Bundle::disconnect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
+{
+	uint32_t const N = nchannels ();
+	assert (N == other->nchannels ());
+
+	for (uint32_t i = 0; i < N; ++i) {
+		Bundle::PortList const & our_ports = channel_ports (i);
+		Bundle::PortList const & other_ports = other->channel_ports (i);
+
+		for (Bundle::PortList::const_iterator j = our_ports.begin(); j != our_ports.end(); ++j) {
+			for (Bundle::PortList::const_iterator k = other_ports.begin(); k != other_ports.end(); ++k) {
+				engine.disconnect (*j, *k);
+			}
 		}
 	}
 }

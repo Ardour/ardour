@@ -595,7 +595,11 @@ Session::when_engine_running ()
 	BootMessage (_("Set up standard connections"));
 
 	/* Create a set of Bundle objects that map
-	   to the physical I/O currently available */
+	   to the physical I/O currently available.  We create both
+	   mono and stereo bundles, so that the common cases of mono
+	   and stereo tracks get bundles to put in their mixer strip
+	   in / out menus.  There may be a nicer way of achieving that;
+	   it doesn't really scale that well to higher channel counts */
 
 	for (uint32_t np = 0; np < n_physical_outputs; ++np) {
 		char buf[32];
@@ -608,6 +612,20 @@ Session::when_engine_running ()
  		add_bundle (c);
 	}
 
+	for (uint32_t np = 0; np < n_physical_outputs; np += 2) {
+		if (np + 1 < n_physical_outputs) {
+			char buf[32];
+			snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
+			shared_ptr<Bundle> c (new Bundle (buf, true));
+			c->add_channel (_("L"));
+			c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+			c->add_channel (_("R"));
+			c->set_port (1, _engine.get_nth_physical_output (DataType::AUDIO, np + 1));
+
+			add_bundle (c);
+		}
+	}
+
 	for (uint32_t np = 0; np < n_physical_inputs; ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
@@ -617,6 +635,21 @@ Session::when_engine_running ()
  		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
  		add_bundle (c);
+	}
+
+	for (uint32_t np = 0; np < n_physical_inputs; np += 2) {
+		if (np + 1 < n_physical_inputs) {
+			char buf[32];
+			snprintf (buf, sizeof(buf), _("in %" PRIu32 "+%" PRIu32), np + 1, np + 2);
+
+			shared_ptr<Bundle> c (new Bundle (buf, false));
+			c->add_channel (_("L"));
+			c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+			c->add_channel (_("R"));
+			c->set_port (1, _engine.get_nth_physical_input (DataType::AUDIO, np + 1));
+
+			add_bundle (c);
+		}
 	}
 
 	if (_master_out) {

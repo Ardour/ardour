@@ -128,8 +128,10 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	
 	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
-	int connect_input_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
-	int connect_output_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
+	int connect_input_ports_to_bundle (boost::shared_ptr<Bundle>, void *);
+	int disconnect_input_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
+	int connect_output_ports_to_bundle (boost::shared_ptr<Bundle>, void *);
+	int disconnect_output_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
 
 	BundleList bundles_connected_to_inputs ();
 	BundleList bundles_connected_to_outputs ();
