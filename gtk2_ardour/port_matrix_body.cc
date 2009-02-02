@@ -29,11 +29,10 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	  _row_labels (p, this),
 	  _grid (p, this),
 	  _xoffset (0),
-	  _yoffset (0),
-	  _pointer_inside (false)
+	  _yoffset (0)
 {
 	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
-	add_events (Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
+	add_events (Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
 }
 
 
@@ -263,13 +262,7 @@ PortMatrixBody::setup ()
 	_row_labels.setup ();
 	_grid.setup ();
 
-	set_mouseover (
-		PortMatrixNode (
-			ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0),
-			ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0)
-			)
-		);
-
+	set_mouseover (PortMatrixNode ());
 	compute_rectangles ();
 }
 
@@ -365,12 +358,10 @@ PortMatrixBody::rebuild_and_draw_row_labels ()
 }
 
 bool
-PortMatrixBody::on_enter_notify_event (GdkEventCrossing* ev)
+PortMatrixBody::on_leave_notify_event (GdkEventCrossing* ev)
 {
-	if (ev->type == GDK_ENTER_NOTIFY) {
-		_pointer_inside = true;
-	} else if (ev->type == GDK_LEAVE_NOTIFY) {
-		_pointer_inside = false;
+	if (ev->type == GDK_LEAVE_NOTIFY) {
+		set_mouseover (PortMatrixNode ());
 	}
 
 	return true;
@@ -379,7 +370,7 @@ PortMatrixBody::on_enter_notify_event (GdkEventCrossing* ev)
 bool
 PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
 {
-	if (_pointer_inside && Gdk::Region (_grid.parent_rectangle()).point_in (ev->x, ev->y)) {
+	if (Gdk::Region (_grid.parent_rectangle()).point_in (ev->x, ev->y)) {
 		_grid.mouseover_event (
 			_grid.parent_to_component_x (ev->x),
 			_grid.parent_to_component_y (ev->y)

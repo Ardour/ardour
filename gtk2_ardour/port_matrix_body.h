@@ -64,7 +64,7 @@ protected:
 	void on_size_request (Gtk::Requisition *);
 	void on_size_allocate (Gtk::Allocation &);
 	bool on_button_press_event (GdkEventButton *);
-	bool on_enter_notify_event (GdkEventCrossing *);
+	bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_motion_notify_event (GdkEventMotion *);
 	
 private:
@@ -85,7 +85,6 @@ private:
 	Gdk::Rectangle _grid_rect;
 	uint32_t _xoffset;
 	uint32_t _yoffset;
-	bool _pointer_inside;
 
 	PortMatrixNode _mouseover;
 
