@@ -1209,10 +1209,6 @@ Session::audible_frame () const
 	nframes_t offset;
 	nframes_t tf;
 
-	if (_transport_speed == 0.0f && non_realtime_work_pending()) {
-		return last_stop_frame;
-	}
-
 	/* the first of these two possible settings for "offset"
 	   mean that the audible frame is stationary until
 	   audio emerges from the latency compensation
@@ -1259,7 +1255,6 @@ Session::audible_frame () const
 			if (!play_loop || !have_looped) {
 				if (tf < _last_roll_location + offset) {
 					return _last_roll_location;
-					
 				}
 			} 
 			

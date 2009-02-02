@@ -733,10 +733,6 @@ Session::track_slave_state(
 			     << " tf = " << _transport_frame << endl;
          #endif
 			
-			if (Config->get_slave_source() == JACK) {
-				last_stop_frame = _transport_frame;
-			}
-
 			stop_transport();
 		}
 

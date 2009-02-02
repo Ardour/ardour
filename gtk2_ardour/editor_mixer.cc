@@ -234,9 +234,7 @@ Editor::update_current_screen ()
 {
 	if (session && session->engine().running()) {
 
-		nframes64_t frame;
-
-		frame = session->audible_frame();
+		nframes64_t const frame = session->audible_frame();
 
 		if (_dragging_playhead) {
 			goto almost_done;

@@ -161,7 +161,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	auto_play_legal = false;
 	transport_sub_state = 0;
 	_transport_frame = 0;
-	last_stop_frame = 0;
 	end_location = new Location (0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
 	start_location = new Location (0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
 	_end_location_is_free = true;

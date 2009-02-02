@@ -390,7 +390,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		update_latency_compensation (true, abort);
 	}
 
-	if ((Config->get_slave_source() == None && Config->get_auto_return()) ||
+	bool const auto_return_enabled =
+		(Config->get_slave_source() == None && Config->get_auto_return());
+	
+	if (auto_return_enabled ||
 	    (post_transport_work & PostTransportLocate) ||
 	    (_requested_return_frame >= 0) ||
 	    synced_to_jack()) {
@@ -399,9 +402,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			flush_all_inserts ();
 		}
 
-		if (((Config->get_slave_source() == None && Config->get_auto_return()) ||
-		     synced_to_jack() ||
-		     _requested_return_frame >= 0) &&
+		if ((auto_return_enabled || synced_to_jack() || _requested_return_frame >= 0) &&
 		    !(post_transport_work & PostTransportLocate)) {
 
 			bool do_locate = false;
@@ -411,8 +412,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				_requested_return_frame = -1;
 				do_locate = true;
 			} else {
-				_transport_frame = last_stop_frame;
-				_requested_return_frame = -1;
+				_transport_frame = _last_roll_location;
 			}
 
 			if (synced_to_jack() && !play_loop) {
@@ -443,13 +443,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 #ifdef LEAVE_TRANSPORT_UNADJUSTED
 	}
 #endif
-
-        if (_requested_return_frame < 0) {
-		last_stop_frame = _transport_frame;
-	} else {
-		last_stop_frame = _requested_return_frame;
-		_requested_return_frame = -1;
-	}
 
         have_looped = false; 
 
@@ -896,7 +889,6 @@ Session::set_transport_speed (double speed, bool abort)
 
 		if ((_transport_speed && speed * _transport_speed < 0.0) || (_last_transport_speed * speed < 0.0) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportReverse);
-			last_stop_frame = _transport_frame;
 		}
 
 		_last_transport_speed = _transport_speed;

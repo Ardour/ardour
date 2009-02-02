@@ -1024,7 +1024,6 @@ class Session : public PBD::StatefulDestructible
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
-	nframes_t                last_stop_frame;
 	volatile nframes64_t    _requested_return_frame;
 	BufferSet*              _scratch_buffers;
 	BufferSet*              _silent_buffers;

@@ -355,7 +355,6 @@ Session::process_event (Event* ev)
 	case Event::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
 		_requested_return_frame = ev->target_frame;
-		cerr << "Set RRF " << ev->target_frame << endl;
 		request_locate (ev->target2_frame, true);
 		break;
 
