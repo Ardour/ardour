@@ -57,12 +57,14 @@ public:
 		iterator_base<B,E>(B& b, size_t o) : buffer(b), offset(o) {}
 		inline E operator*() const {
 			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
+			assert(Evoral::midi_event_size(*ev_start) >= 0);
 			return E(EventTypeMap::instance().midi_event_type(*ev_start),
-					*(TimeType*)(buffer._data + offset),
+					*((TimeType*)(buffer._data + offset)),
 					Evoral::midi_event_size(*ev_start) + 1, ev_start);
 		}
 		inline iterator_base<B,E>& operator++() {
 			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
+			assert(Evoral::midi_event_size(*ev_start) >= 0);
 			offset += sizeof(TimeType) + Evoral::midi_event_size(*ev_start) + 1;
 			return *this;
 		}
