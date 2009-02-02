@@ -1491,16 +1491,16 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nf
 	// Translates stamps to be relative to start, but add offset.
 	const size_t events_read = _playback_buf->read(dst, start, end, offset);
 
-	gint32 frames_read = end-start;
-	cout << "frames read = " << frames_read << " events read = " << events_read << " end=" << end << " start=" << start << " offset= " << offset
-		<< " readspace " << _playback_buf->read_space() << " writespace " << _playback_buf->write_space() << endl;
+	gint32 frames_read = end - start;
+	/*cout << "frames read = " << frames_read << " events read = " << events_read
+		<< " end = " << end << " start = " << start << " offset = " << offset
+		<< " readspace " << _playback_buf->read_space()
+		<< " writespace " << _playback_buf->write_space() << endl;*/
 	g_atomic_int_add(&_frames_read_from_ringbuffer, frames_read);
 	
-	// Now feed the data through the MidiStateTracker.
-	// In case it detects a LoopEvent it will add necessary note
-	// offs.
-
-	if (_midistate_tracker.track(this_cycle_start, dst.end())) {
-		_midistate_tracker.resolve_notes(dst, end-start - 1 + offset);
+	// Feed the data through the MidiStateTracker
+	// If it detects a LoopEvent it will add necessary note offs
+	if (_midi_state_tracker.track(this_cycle_start, dst.end())) {
+		_midi_state_tracker.resolve_notes(dst, end-start - 1 + offset);
 	}
 }

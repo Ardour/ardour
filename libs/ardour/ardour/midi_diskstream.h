@@ -179,7 +179,7 @@ class MidiDiskstream : public Diskstream
 	boost::shared_ptr<SMFSource>          _write_source;
 	nframes_t                             _last_flush_frame;
 	NoteMode                              _note_mode;  
-	MidiStateTracker                      _midistate_tracker;
+	MidiStateTracker                      _midi_state_tracker;
 	volatile gint                         _frames_written_to_ringbuffer;
 	volatile gint                         _frames_read_from_ringbuffer;
 };
