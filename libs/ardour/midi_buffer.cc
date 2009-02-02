@@ -129,8 +129,14 @@ bool
 MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 {
 	const size_t stamp_size = sizeof(TimeType);
+	cerr << "MidiBuffer: pushing event " << " size: " << _size 
+    << " event size: " << ev.size() 
+    << " capacity: " << _capacity 
+    << " stamp size: " << stamp_size << " \n";
+	
 	if (_size + stamp_size + ev.size() >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		cerr << "MidiBuffer::push_back failed (buffer is full)" 
+		     << endl;
 		return false;
 	}
 
@@ -187,8 +193,12 @@ MidiBuffer::reserve(TimeType time, size_t size)
 		return 0;
 	}
 
-	uint8_t* const write_loc = _data + _size;
+	// write timestamp
+	uint8_t* write_loc = _data + _size;
 	*((TimeType*)write_loc) = time;
+	
+	// move write_loc to begin of MIDI buffer data to write to
+	write_loc += stamp_size;
 
 	_size += stamp_size + size;
 	_silent = false;
@@ -201,8 +211,9 @@ void
 MidiBuffer::silence(nframes_t dur, nframes_t offset)
 {
 	// FIXME use parameters
-	if (offset != 0)
+	if (offset != 0) {
 		cerr << "WARNING: MidiBuffer::silence w/ offset != 0 (not implemented)" << endl;
+	}
 
 	_size = 0;
 	_silent = true;
