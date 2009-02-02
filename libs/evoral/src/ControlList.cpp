@@ -1285,8 +1285,10 @@ ControlList::paste (ControlList& alist, double pos, float times)
 
 /** Move automation around according to a list of region movements */
 void
-ControlList::move_ranges (RangeMoveList const & movements)
+ControlList::move_ranges (const list< RangeMove<double> >& movements)
 {
+	typedef list< RangeMove<double> > RangeMoveList;
+
 	{
 		Glib::Mutex::Lock lm (_lock);
 
@@ -1304,8 +1306,8 @@ ControlList::move_ranges (RangeMoveList const & movements)
 		/* copy the events into the new list */
 		for (RangeMoveList::const_iterator i = movements.begin (); i != movements.end (); ++i) {
 			iterator j = old_events.begin ();
-			EventTime const limit = i->from + i->length;
-			EventTime const dx = i->to - i->from;
+			const double limit = i->from + i->length;
+			const double dx    = i->to - i->from;
 			while (j != old_events.end () && (*j)->when <= limit) {
 				if ((*j)->when >= i->from) {
 					ControlEvent* ev = new ControlEvent (**j);

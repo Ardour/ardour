@@ -29,11 +29,13 @@ namespace Canvas {
 
 class CanvasHit : public Diamond, public CanvasNoteEvent {
 public:
+	typedef Evoral::Note<double> NoteType;
+
 	CanvasHit(
-			MidiRegionView&                       region,
-			Group&                                group,
-			double                                size,
-			const boost::shared_ptr<Evoral::Note> note = boost::shared_ptr<Evoral::Note>())
+			MidiRegionView&                   region,
+			Group&                            group,
+			double                            size,
+			const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
 
 		: Diamond(group, size), CanvasNoteEvent(region, this, note)
 	{

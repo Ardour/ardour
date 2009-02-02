@@ -26,10 +26,11 @@ namespace Evoral {
 
 /** Pure virtual base for anything you can write events to.
  */
+template<typename T>
 class EventSink {
 public:
 	virtual ~EventSink() {}
-	virtual uint32_t write(EventTime time, EventType type, uint32_t size, const uint8_t* buf) = 0;
+	virtual uint32_t write(T time, EventType type, uint32_t size, const uint8_t* buf) = 0;
 };
 
 

@@ -16,27 +16,34 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <string>
 #include "evoral/MIDIEvent.hpp"
+#ifdef EVORAL_MIDI_XML
+	#include <pbd/xml++.h>
+#endif
+
+using namespace std;
 
 namespace Evoral {
 
 #ifdef EVORAL_MIDI_XML
 
-MIDIEvent::MIDIEvent(const XMLNode& event) 
-  : Event()
+template<typename T>
+MIDIEvent<T>::MIDIEvent(const XMLNode& event) 
+  : Event<T>()
 {
 	string name = event.name();
 	
 	if (name == "ControlChange") {
-		_buffer = (uint8_t*) ::malloc(3);
-		_owns_buffer = true;
+		this->_buf = (uint8_t*) ::malloc(3);
+		this->_owns_buf = true;
 		set_type(MIDI_CMD_CONTROL);
 		
 		set_cc_number(atoi(event.property("Control")->value().c_str()));
 		set_cc_value (atoi(event.property("Value")->value().c_str()));
 	} else if (name == "ProgramChange") {
-		_buffer = (uint8_t*) ::malloc(2);
-		_owns_buffer = true;
+		this->_buf = (uint8_t*) ::malloc(2);
+		this->_owns_buf = true;
 		set_type(MIDI_CMD_PGM_CHANGE);
 
 		set_pgm_number(atoi(event.property("Number")->value().c_str()));
@@ -44,8 +51,9 @@ MIDIEvent::MIDIEvent(const XMLNode& event)
 }
 
 
+template<typename T>
 boost::shared_ptr<XMLNode> 
-MIDIEvent::to_xml() const
+MIDIEvent<T>::to_xml() const
 {
 	XMLNode *result = 0;
 	
@@ -73,5 +81,7 @@ MIDIEvent::to_xml() const
 
 #endif // EVORAL_MIDI_XML
 
-} // namespace MIDI
+template class MIDIEvent<double>;
+
+} // namespace Evoral
 

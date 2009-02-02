@@ -121,8 +121,9 @@ MidiDiskstream::init (Diskstream::Flag f)
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
 
-	_playback_buf = new MidiRingBuffer (_session.midi_diskstream_buffer_size());
-	_capture_buf = new MidiRingBuffer (_session.midi_diskstream_buffer_size());
+	const size_t size = _session.midi_diskstream_buffer_size();
+	_playback_buf = new MidiRingBuffer<MidiBuffer::TimeType> (size);
+	_capture_buf = new MidiRingBuffer<MidiBuffer::TimeType> (size);
 	
 	_n_channels = ChanCount(DataType::MIDI, 1);
 
@@ -521,7 +522,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
 		MidiBuffer& buf = _source_port->get_midi_buffer(nframes, offset);
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-			const Evoral::MIDIEvent ev(*i, false);
+			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 			assert(ev.buffer());
 			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
 		}

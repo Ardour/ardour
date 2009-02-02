@@ -363,7 +363,7 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 void
 Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 {
-	Evoral::RangeMove const move (r->last_position (), r->length (), r->position ());
+	Evoral::RangeMove<nframes_t> const move (r->last_position (), r->length (), r->position ());
 			
 	if (holding_state ()) {
 
@@ -371,7 +371,7 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 		
 	} else {
 
-		Evoral::RangeMoveList m;
+		list< Evoral::RangeMove<nframes_t> > m;
 		m.push_back (move);
 		RangesMoved (m);
 

@@ -35,21 +35,25 @@ using namespace std;
 
 namespace Evoral {
 
-void Sequence::write_lock() {
+template<typename T>
+void Sequence<T>::write_lock() {
 	_lock.writer_lock();
 	_control_lock.lock();
 }
 
-void Sequence::write_unlock() {
+template<typename T>
+void Sequence<T>::write_unlock() {
 	_lock.writer_unlock();
 	_control_lock.unlock();
 }
 
-void Sequence::read_lock() const {
+template<typename T>
+void Sequence<T>::read_lock() const {
 	_lock.reader_lock();
 }
 
-void Sequence::read_unlock() const {
+template<typename T>
+void Sequence<T>::read_unlock() const {
 	_lock.reader_unlock();
 }
 
@@ -64,7 +68,8 @@ static ostream& errorout = cerr;
 
 // Read iterator (const_iterator)
 
-Sequence::const_iterator::const_iterator(const Sequence& seq, EventTime t)
+template<typename T>
+Sequence<T>::const_iterator::const_iterator(const Sequence<T>& seq, T t)
 	: _seq(&seq)
 	, _is_end( (t == DBL_MAX) || seq.empty() )
 	, _locked( !_is_end )
@@ -79,7 +84,8 @@ Sequence::const_iterator::const_iterator(const Sequence& seq, EventTime t)
 
 	// find first note which begins after t
 	_note_iter = seq.notes().end();
-	for (Sequence::Notes::const_iterator i = seq.notes().begin(); i != seq.notes().end(); ++i) {
+	for (typename Sequence<T>::Notes::const_iterator i = seq.notes().begin();
+			i != seq.notes().end(); ++i) {
 		if ((*i)->time() >= t) {
 			_note_iter = i;
 			break;
@@ -130,7 +136,7 @@ Sequence::const_iterator::const_iterator(const Sequence& seq, EventTime t)
 			&& (!earliest_control.list
 				|| (*_note_iter)->on_event().time() < earliest_control.x)) {
 		debugout << "Reading note on event @ " << (*_note_iter)->on_event().time() << endl;
-		_event = boost::shared_ptr<Event>(new Event((*_note_iter)->on_event(), true));
+		_event = boost::shared_ptr< Event<T> >(new Event<T>((*_note_iter)->on_event(), true));
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 		_control_iter = _control_iters.end();
@@ -152,22 +158,24 @@ Sequence::const_iterator::const_iterator(const Sequence& seq, EventTime t)
 		}
 	} else {
 		debugout << "New Iterator = " << _event->event_type();
-		debugout << " : " << hex << (int)((MIDIEvent*)_event.get())->type();
+		debugout << " : " << hex << (int)((MIDIEvent<T>*)_event.get())->type();
 		debugout << " @ " <<  _event->time() << endl;
 	}
 
 	//assert(_is_end || (_event->buffer() && _event->buffer()[0] != '\0'));
 }
 
-Sequence::const_iterator::~const_iterator()
+template<typename T>
+Sequence<T>::const_iterator::~const_iterator()
 {
 	if (_locked) {
 		_seq->read_unlock();
 	}
 }
 
-const
-Sequence::const_iterator& Sequence::const_iterator::operator++()
+template<typename T>
+const typename Sequence<T>::const_iterator&
+Sequence<T>::const_iterator::operator++()
 {
 	if (_is_end) {
 		throw std::logic_error("Attempt to iterate past end of Sequence");
@@ -176,7 +184,7 @@ Sequence::const_iterator& Sequence::const_iterator::operator++()
 	debugout << "Iterator ++" << endl;
 	assert(_event->buffer() && _event->size() > 0);
 	
-	const MIDIEvent& ev = *((MIDIEvent*)_event.get());
+	const MIDIEvent<T>& ev = *((MIDIEvent<T>*)_event.get());
 
 	//debugout << "const_iterator::operator++: " << _event->to_string() << endl;
 
@@ -214,10 +222,10 @@ Sequence::const_iterator& Sequence::const_iterator::operator++()
 		}
 	}
 
-	enum Type {NIL, NOTE_ON, NOTE_OFF, CONTROL};
+	enum Type { NIL, NOTE_ON, NOTE_OFF, CONTROL };
 
 	Type type = NIL;
-	EventTime t = 0;
+	T    t    = 0;
 
 	// Next earliest note on
 	if (_note_iter != _seq->notes().end()) {
@@ -262,8 +270,9 @@ Sequence::const_iterator& Sequence::const_iterator::operator++()
 	return *this;
 }
 
+template<typename T>
 bool
-Sequence::const_iterator::operator==(const const_iterator& other) const
+Sequence<T>::const_iterator::operator==(const const_iterator& other) const
 {
 	if (_is_end || other._is_end) {
 		return (_is_end == other._is_end);
@@ -272,8 +281,9 @@ Sequence::const_iterator::operator==(const const_iterator& other) const
 	}
 }
 
-Sequence::const_iterator&
-Sequence::const_iterator::operator=(const const_iterator& other)
+template<typename T>
+typename Sequence<T>::const_iterator&
+Sequence<T>::const_iterator::operator=(const const_iterator& other)
 {
 	if (_locked && _seq != other._seq) {
 		_seq->read_unlock();
@@ -292,7 +302,7 @@ Sequence::const_iterator::operator=(const const_iterator& other)
 		if (_event) {
 			*_event = *other._event.get();
 		} else {
-			_event = boost::shared_ptr<Event>(new Event(*other._event, true));
+			_event = boost::shared_ptr< Event<T> >(new Event<T>(*other._event, true));
 		}
 	} else {
 		if (_event) {
@@ -305,7 +315,8 @@ Sequence::const_iterator::operator=(const const_iterator& other)
 
 // Sequence
 
-Sequence::Sequence(const TypeMap& type_map, size_t size)
+template<typename T>
+Sequence<T>::Sequence(const TypeMap& type_map, size_t size)
 	: _read_iter(*this, DBL_MAX)
 	, _edited(false)
 	, _type_map(type_map)
@@ -326,8 +337,9 @@ Sequence::Sequence(const TypeMap& type_map, size_t size)
  * adding \a offset to each event's timestamp.
  * \return number of events written to \a dst
  */
+template<typename T>
 size_t
-Sequence::read(EventSink& dst, timestamp_t start, timedur_t nframes, timestamp_t offset) const
+Sequence<T>::read(EventSink<T>& dst, timestamp_t start, timedur_t nframes, timestamp_t offset) const
 {
 	debugout << this << " read @ " << start << " * " << nframes << " + " << offset << endl;
 	debugout << this << " # notes: " << n_notes() << endl;
@@ -370,13 +382,14 @@ Sequence::read(EventSink& dst, timestamp_t start, timedur_t nframes, timestamp_t
  * The event_type of \a ev should be set to the expected output type.
  * \return true on success
  */
+template<typename T>
 bool
-Sequence::control_to_midi_event(boost::shared_ptr<Event>& ev, const ControlIterator& iter) const
+Sequence<T>::control_to_midi_event(boost::shared_ptr< Event<T> >& ev, const ControlIterator& iter) const
 {
 	assert(iter.list.get());
 	const uint32_t event_type = iter.list->parameter().type();
 	if (!ev) {
-		ev = boost::shared_ptr<Event>(new Event(event_type, 0, 3, NULL, true));
+		ev = boost::shared_ptr< Event<T> >(new Event<T>(event_type, 0, 3, NULL, true));
 	}
 	
 	uint8_t midi_type = _type_map.parameter_midi_type(iter.list->parameter());
@@ -438,8 +451,9 @@ Sequence::control_to_midi_event(boost::shared_ptr<Event>& ev, const ControlItera
 
 /** Clear all events from the model.
  */
+template<typename T>
 void
-Sequence::clear()
+Sequence<T>::clear()
 {
 	_lock.writer_lock();
 	_notes.clear();
@@ -457,8 +471,9 @@ Sequence::clear()
  * stored; note off events are discarded entirely and all contained notes will
  * have length 0.
  */
+template<typename T>
 void
-Sequence::start_write()
+Sequence<T>::start_write()
 {
 	debugout << this << " START WRITE, PERCUSSIVE = " << _percussive << endl;
 	write_lock();
@@ -476,8 +491,9 @@ Sequence::start_write()
  * that were never resolved with a corresonding note off will be deleted.
  * Otherwise they will remain as notes with length 0.
  */
+template<typename T>
 void
-Sequence::end_write(bool delete_stuck)
+Sequence<T>::end_write(bool delete_stuck)
 {
 	write_lock();
 	assert(_writing);
@@ -485,7 +501,7 @@ Sequence::end_write(bool delete_stuck)
 	debugout << this << " END WRITE: " << _notes.size() << " NOTES\n";
 
 	if (!_percussive && delete_stuck) {
-		for (Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
+		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
 			if ((*n)->length() == 0) {
 				errorout << "WARNING: Stuck note lost: " << (*n)->note() << endl;
 				n = _notes.erase(n);
@@ -499,7 +515,7 @@ Sequence::end_write(bool delete_stuck)
 
 	for (int i = 0; i < 16; ++i) {
 		if (!_write_notes[i].empty()) {
-			errorout << "WARNING: Sequence::end_write: Channel " << i << " has "
+			errorout << "WARNING: Sequence<T>::end_write: Channel " << i << " has "
 					<< _write_notes[i].size() << " stuck notes" << endl;
 		}
 		_write_notes[i].clear();
@@ -519,13 +535,14 @@ Sequence::end_write(bool delete_stuck)
  * the start of this model (t=0) and MUST be monotonically increasing
  * and MUST be >= the latest event currently in the model.
  */
+template<typename T>
 void
-Sequence::append(const Event& event)
+Sequence<T>::append(const Event<T>& event)
 {
 	write_lock();
 	_edited = true;
 	
-	const MIDIEvent& ev = (const MIDIEvent&)event;
+	const MIDIEvent<T>& ev = (const MIDIEvent<T>&)event;
 
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
@@ -565,8 +582,9 @@ Sequence::append(const Event& event)
 	write_unlock();
 }
 
+template<typename T>
 void
-Sequence::append_note_on_unlocked(uint8_t chan, EventTime time, uint8_t note_num, uint8_t velocity)
+Sequence<T>::append_note_on_unlocked(uint8_t chan, T time, uint8_t note_num, uint8_t velocity)
 {
 	debugout << this << " c" << (int)chan << " note " << (int)note_num << " off @ " << time << endl;
 	assert(note_num <= 127);
@@ -579,7 +597,7 @@ Sequence::append_note_on_unlocked(uint8_t chan, EventTime time, uint8_t note_num
 	if (note_num > _highest_note)
 		_highest_note = note_num;
 
-	boost::shared_ptr<Note> new_note(new Note(chan, time, 0, note_num, velocity));
+	boost::shared_ptr< Note<T> > new_note(new Note<T>(chan, time, 0, note_num, velocity));
 	_notes.push_back(new_note);
 	if (!_percussive) {
 		debugout << "Sustained: Appending active note on " << (unsigned)(uint8_t)note_num << endl;
@@ -589,8 +607,9 @@ Sequence::append_note_on_unlocked(uint8_t chan, EventTime time, uint8_t note_num
 	 }
 }
 
+template<typename T>
 void
-Sequence::append_note_off_unlocked(uint8_t chan, EventTime time, uint8_t note_num)
+Sequence<T>::append_note_off_unlocked(uint8_t chan, T time, uint8_t note_num)
 {
 	debugout << this << " c" << (int)chan << " note " << (int)note_num << " off @ " << time << endl;
 	assert(note_num <= 127);
@@ -612,7 +631,7 @@ Sequence::append_note_off_unlocked(uint8_t chan, EventTime time, uint8_t note_nu
 
 	for (WriteNotes::iterator n = _write_notes[chan].begin(); n
 			!= _write_notes[chan].end(); ++n) {
-		Note& note = *_notes[*n].get();
+		Note<T>& note = *_notes[*n].get();
 		if (note.note() == note_num) {
 			assert(time >= note.time());
 			note.set_length(time - note.time());
@@ -629,8 +648,9 @@ Sequence::append_note_off_unlocked(uint8_t chan, EventTime time, uint8_t note_nu
 	}
 }
 
+template<typename T>
 void
-Sequence::append_control_unlocked(const Parameter& param, EventTime time, double value)
+Sequence<T>::append_control_unlocked(const Parameter& param, T time, double value)
 {
 	debugout << this << " " << _type_map.to_symbol(param) << " @ " << time << " \t= \t" << value
 			<< " # controls: " << _controls.size() << endl;
@@ -638,25 +658,26 @@ Sequence::append_control_unlocked(const Parameter& param, EventTime time, double
 	c->list()->rt_add(time, value);
 }
 
-
+template<typename T>
 void
-Sequence::add_note_unlocked(const boost::shared_ptr<Note> note)
+Sequence<T>::add_note_unlocked(const boost::shared_ptr< Note<T> > note)
 {
 	debugout << this << " add note " << (int)note->note() << " @ " << note->time() << endl;
 	_edited = true;
-	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note,
+	typename Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note,
 			note_time_comparator);
 	_notes.insert(i, note);
 }
 
+template<typename T>
 void
-Sequence::remove_note_unlocked(const boost::shared_ptr<const Note> note)
+Sequence<T>::remove_note_unlocked(const boost::shared_ptr< const Note<T> > note)
 {
 	_edited = true;
 	debugout << this << " remove note " << (int)note->note() << " @ " << note->time() << endl;
-	for (Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
-		Note& _n = *(*n);
-		const Note& _note = *note;
+	for (typename Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
+		Note<T>& _n = *(*n);
+		const Note<T>& _note = *note;
 		// TODO: There is still the issue, that after restarting ardour
 		// persisted undo does not work, because of rounding errors in the
 		// event times after saving/restoring to/from MIDI files
@@ -675,10 +696,11 @@ Sequence::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 
 /** Slow!  for debugging only. */
 #ifndef NDEBUG
+template<typename T>
 bool
-Sequence::is_sorted() const {
+Sequence<T>::is_sorted() const {
 	bool t = 0;
-	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n)
+	for (typename Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n)
 		if ((*n)->time() < t)
 			return false;
 		else
@@ -687,6 +709,8 @@ Sequence::is_sorted() const {
 	return true;
 }
 #endif
+
+template class Sequence<double>;
 
 } // namespace Evoral
 

@@ -101,7 +101,7 @@ MidiSource::set_state (const XMLNode& node)
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+MidiSource::midi_read (MidiRingBuffer<MidiBuffer::TimeType>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	if (_model) {
@@ -115,7 +115,7 @@ MidiSource::midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nfra
 }
 
 nframes_t
-MidiSource::midi_write (MidiRingBuffer& dst, nframes_t cnt)
+MidiSource::midi_write (MidiRingBuffer<MidiBuffer::TimeType>& dst, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
 	return write_unlocked (dst, cnt);

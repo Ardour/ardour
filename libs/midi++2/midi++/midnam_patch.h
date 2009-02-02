@@ -84,7 +84,7 @@ public:
 
 class PatchBank;
 
-typedef std::list<boost::shared_ptr<Evoral::MIDIEvent> > PatchMidiCommands;
+typedef std::list< boost::shared_ptr< Evoral::MIDIEvent<double> > > PatchMidiCommands;
 	
 class Patch : public PBD::Stateful
 {

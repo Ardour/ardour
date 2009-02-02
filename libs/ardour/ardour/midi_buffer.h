@@ -32,6 +32,8 @@ namespace ARDOUR {
 class MidiBuffer : public Buffer
 {
 public:
+	typedef double TimeType;
+
 	MidiBuffer(size_t capacity);
 	~MidiBuffer();
 
@@ -41,7 +43,7 @@ public:
 	
 	void copy(const MidiBuffer& copy);
 
-	bool     push_back(const Evoral::MIDIEvent& event);
+	bool     push_back(const Evoral::MIDIEvent<TimeType>& event);
 	bool     push_back(const jack_midi_event_t& event);
 	uint8_t* reserve(double time, size_t size);
 
@@ -54,14 +56,14 @@ public:
 	struct iterator_base {
 		iterator_base<B,E>(B& b, size_t o) : buffer(b), offset(o) {}
 		inline E operator*() const {
-			uint8_t* ev_start = buffer._data + offset + sizeof(Evoral::EventTime);
+			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
 			return E(EventTypeMap::instance().midi_event_type(*ev_start),
-					*(Evoral::EventTime*)(buffer._data + offset),
+					*(TimeType*)(buffer._data + offset),
 					Evoral::midi_event_size(*ev_start) + 1, ev_start);
 		}
 		inline iterator_base<B,E>& operator++() {
-			uint8_t* ev_start = buffer._data + offset + sizeof(Evoral::EventTime);
-			offset += sizeof(Evoral::EventTime) + Evoral::midi_event_size(*ev_start) + 1;
+			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
+			offset += sizeof(TimeType) + Evoral::midi_event_size(*ev_start) + 1;
 			return *this;
 		}
 		inline bool operator!=(const iterator_base<B,E>& other) const {
@@ -71,8 +73,8 @@ public:
 		size_t offset;
 	};
 	
-	typedef iterator_base<MidiBuffer, Evoral::MIDIEvent>             iterator;
-	typedef iterator_base<const MidiBuffer, const Evoral::MIDIEvent> const_iterator;
+	typedef iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >             iterator;
+	typedef iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> > const_iterator;
 
 	iterator begin() { return iterator(*this, 0); }
 	iterator end()   { return iterator(*this, _size); }
@@ -81,8 +83,8 @@ public:
 	const_iterator end()   const { return const_iterator(*this, _size); }
 
 private:
-	friend class iterator_base<MidiBuffer, Evoral::MIDIEvent>;
-	friend class iterator_base<const MidiBuffer, const Evoral::MIDIEvent>;
+	friend class iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >;
+	friend class iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> >;
 	
 	size_t   _size; ///< Size in bytes of used portion of _data
 	uint8_t* _data; ///< timestamp, event, timestamp, event, ...

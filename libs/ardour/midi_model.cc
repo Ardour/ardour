@@ -38,7 +38,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MidiModel::MidiModel(MidiSource *s, size_t size)
-	: AutomatableSequence(s->session(), size)
+	: AutomatableSequence<TimeType>(s->session(), size)
 	, _midi_source(s)
 {
 	cerr << "MidiModel \"" << s->name() << "\" constructed: " << this << endl;
@@ -90,7 +90,7 @@ MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m,
 }
 
 void
-MidiModel::DeltaCommand::add(const boost::shared_ptr<Evoral::Note> note)
+MidiModel::DeltaCommand::add(const boost::shared_ptr< Evoral::Note<TimeType> > note)
 {
 	//cerr << "MEC: apply" << endl;
 	_removed_notes.remove(note);
@@ -98,7 +98,7 @@ MidiModel::DeltaCommand::add(const boost::shared_ptr<Evoral::Note> note)
 }
 
 void
-MidiModel::DeltaCommand::remove(const boost::shared_ptr<Evoral::Note> note)
+MidiModel::DeltaCommand::remove(const boost::shared_ptr< Evoral::Note<TimeType> > note)
 {
 	//cerr << "MEC: remove" << endl;
 	_added_notes.remove(note);
@@ -156,7 +156,7 @@ MidiModel::DeltaCommand::undo()
 }
 
 XMLNode&
-MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr<Evoral::Note> note)
+MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr< Evoral::Note<TimeType> > note)
 {
 	XMLNode *xml_note = new XMLNode("note");
 	ostringstream note_str(ios::ate);
@@ -182,7 +182,7 @@ MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr<Evoral::Note> note
 	return *xml_note;
 }
 
-boost::shared_ptr<Evoral::Note>
+boost::shared_ptr< Evoral::Note<double> >
 MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 {
 	unsigned int note;
@@ -232,7 +232,8 @@ MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 		velocity = 127;
 	}
 
-	boost::shared_ptr<Evoral::Note> note_ptr(new Evoral::Note(channel, time, length, note, velocity));
+	boost::shared_ptr< Evoral::Note<TimeType> > note_ptr(new Evoral::Note<TimeType>(
+			channel, time, length, note, velocity));
 	return note_ptr;
 }
 
@@ -296,7 +297,7 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	const bool old_percussive = percussive();
 	set_percussive(false);
 	
-	for (Evoral::Sequence::const_iterator i = begin(); i != end(); ++i) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
 		source->append_event_unlocked(Frames, *i);
 	}
 		

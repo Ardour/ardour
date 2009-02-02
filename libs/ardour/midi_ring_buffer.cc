@@ -29,14 +29,15 @@ namespace ARDOUR {
  * Timestamps of events returned are relative to start (i.e. event with stamp 0
  * occurred at start), with offset added.
  */
+template<typename T>
 size_t
-MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset)
+MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset)
 {
-	if (read_space() == 0) {
+	if (this->read_space() == 0) {
 		return 0;
 	}
 
-	Evoral::EventTime ev_time;
+	T                 ev_time;
 	Evoral::EventType ev_type;
 	uint32_t          ev_size;
 
@@ -44,9 +45,9 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 	//cerr << "MRB read " << start << " .. " << end << " + " << offset << endl;
 
-	while (read_space() >= sizeof(Evoral::EventTime) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
+	while (this->read_space() >= sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
 
-		full_peek(sizeof(Evoral::EventTime), (uint8_t*)&ev_time);
+		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
 
 		if (ev_time > end) {
 			//cerr << "MRB: PAST END (" << ev_time << " : " << end << ")" << endl;
@@ -67,7 +68,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		if (ev_type == LoopEventType) {
 			ev_time -= start;
 			ev_time += offset;
-			Evoral::MIDIEvent loopevent(LoopEventType, ev_time); 
+			Evoral::MIDIEvent<T> loopevent(LoopEventType, ev_time); 
 			dst.push_back(loopevent);
 			
 			// We can safely return, without reading the data, because
@@ -76,7 +77,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		}
 
 		uint8_t status;
-		success = full_peek(sizeof(uint8_t), &status);
+		success = this->full_peek(sizeof(uint8_t), &status);
 		assert(success); // If this failed, buffer is corrupt, all hope is lost
 
 		// Ignore event if it doesn't match channel filter
@@ -84,7 +85,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			const uint8_t channel = status & 0x0F;
 			if ( !(get_channel_mask() & (1L << channel)) ) {
 				//cerr << "MRB skipping event due to channel mask" << endl;
-				skip(ev_size); // Advance read pointer to next event
+				this->skip(ev_size); // Advance read pointer to next event
 				continue;
 			}
 		}
@@ -103,7 +104,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			continue;
 		}
 
-		success = Evoral::EventRingBuffer::full_read(ev_size, write_loc);
+		success = Evoral::EventRingBuffer<T>::full_read(ev_size, write_loc);
 
 		if (success) {
 			if (is_channel_event(status) && get_channel_mode() == ForceChannel) {
@@ -121,6 +122,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 	return count;
 }
 
+template class MidiRingBuffer<double>;
 
 } // namespace ARDOUR
 

@@ -143,7 +143,8 @@ class Diskstream : public SessionObject
 
 	void remove_region_from_last_capture (boost::weak_ptr<Region> wregion);
 
-	void move_processor_automation (boost::weak_ptr<Processor>, Evoral::RangeMoveList const &);
+	void move_processor_automation (boost::weak_ptr<Processor>,
+			list< Evoral::RangeMove<nframes_t> > const &);
 
 	sigc::signal<void>            RecordEnableChanged;
 	sigc::signal<void>            SpeedChanged;
@@ -209,7 +210,7 @@ class Diskstream : public SessionObject
 
 	virtual void playlist_changed (Change);
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
-	virtual void playlist_ranges_moved (Evoral::RangeMoveList const &);
+	virtual void playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const &);
 
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
 	virtual void transport_looped (nframes_t transport_frame) = 0;

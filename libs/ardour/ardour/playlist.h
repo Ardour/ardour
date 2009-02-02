@@ -128,7 +128,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	sigc::signal<void>      Modified;
 	sigc::signal<void>      NameChanged;
 	sigc::signal<void>      LengthChanged;
-	sigc::signal<void, Evoral::RangeMoveList const &> RangesMoved;
+	sigc::signal<void, list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;
 
 	static string bump_name (string old_name, Session&);
 
@@ -190,7 +190,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	RegionList       pending_bounds;
 	bool             pending_modified;
 	bool             pending_length;
-	Evoral::RangeMoveList pending_range_moves;
+	list< Evoral::RangeMove<nframes_t> > pending_range_moves;
 	bool             save_on_thaw;
 	string           last_save_reason;
 	uint32_t         in_set_state;

@@ -58,6 +58,8 @@ class AutomationRegionView;
 class MidiRegionView : public RegionView
 {
   public:
+	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
+
 	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
@@ -91,7 +93,7 @@ class MidiRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void add_note(const boost::shared_ptr<Evoral::Note> note);
+	void add_note(const boost::shared_ptr<NoteType> note);
 	void resolve_note(uint8_t note_num, double end_time);
 	
 	struct ControlEvent
@@ -159,7 +161,7 @@ class MidiRegionView : public RegionView
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
 	void start_delta_command(string name = "midi edit");
-	void command_add_note(const boost::shared_ptr<Evoral::Note> note, bool selected);
+	void command_add_note(const boost::shared_ptr<NoteType> note, bool selected);
 	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
 
 	void apply_command();
@@ -264,12 +266,12 @@ class MidiRegionView : public RegionView
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
-	void play_midi_note(boost::shared_ptr<Evoral::Note> note);
+	void play_midi_note(boost::shared_ptr<NoteType> note);
 	
 	/** Play the NoteOff-Event of the given note immediately
 	 * (scheduled by @ref play_midi_note()).
 	 */
-	bool play_midi_note_off(boost::shared_ptr<Evoral::Note> note);
+	bool play_midi_note_off(boost::shared_ptr<NoteType> note);
 	  
 	void clear_events();
 	void switch_source(boost::shared_ptr<ARDOUR::Source> src);
@@ -317,7 +319,7 @@ class MidiRegionView : public RegionView
 
 	/** New notes (created in the current command) which should be selected
 	 * when they appear after the command is applied. */
-	std::set< boost::shared_ptr<Evoral::Note> > _marked_for_selection;
+	std::set< boost::shared_ptr<NoteType> > _marked_for_selection;
 
 	std::vector<NoteResizeData *> _resize_data;
 };

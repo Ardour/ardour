@@ -21,7 +21,8 @@
 
 namespace Evoral {
 
-Note::Note(uint8_t chan, EventTime t, EventLength l, uint8_t n, uint8_t v)
+template<typename T>
+Note<T>::Note(uint8_t chan, T t, EventLength l, uint8_t n, uint8_t v)
 	// FIXME: types?
 	: _on_event(0xDE, t, 3, NULL, true)
 	, _off_event(0xAD, t + l, 3, NULL, true)
@@ -45,7 +46,8 @@ Note::Note(uint8_t chan, EventTime t, EventLength l, uint8_t n, uint8_t v)
 }
 
 
-Note::Note(const Note& copy)
+template<typename T>
+Note<T>::Note(const Note<T>& copy)
 	: _on_event(copy._on_event, true)
 	, _off_event(copy._off_event, true)
 {
@@ -71,13 +73,15 @@ Note::Note(const Note& copy)
 }
 
 
-Note::~Note()
+template<typename T>
+Note<T>::~Note()
 {
 }
 
 
-const Note&
-Note::operator=(const Note& copy)
+template<typename T>
+const Note<T>&
+Note<T>::operator=(const Note<T>& copy)
 {
 	_on_event = copy._on_event;
 	_off_event = copy._off_event;
@@ -92,5 +96,7 @@ Note::operator=(const Note& copy)
 	
 	return *this;
 }
+
+template class Note<double>;
 
 } // namespace Evoral

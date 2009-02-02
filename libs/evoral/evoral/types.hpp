@@ -34,23 +34,19 @@ typedef double timestamp_t;
 typedef timestamp_t timedur_t;
 
 /** Time stamp of an event */
-typedef double EventTime;
-
-/** Time stamp of an event */
 typedef double EventLength;
 
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;
 
 /** Type to describe the movement of a time range */	
+template<typename T>
 struct RangeMove {
-	RangeMove (EventTime f, FrameTime l, EventTime t) : from (f), length (l), to (t) {}
-	EventTime from;   ///< start of the range
+	RangeMove (T f, FrameTime l, T t) : from (f), length (l), to (t) {}
+	T         from;   ///< start of the range
 	FrameTime length; ///< length of the range
-	EventTime to;     ///< new start of the range
+	T         to;     ///< new start of the range
 };
-
-typedef std::list<RangeMove> RangeMoveList;
 
 } // namespace Evoral
 

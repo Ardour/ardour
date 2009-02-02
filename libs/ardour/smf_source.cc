@@ -55,7 +55,7 @@ uint64_t                              SMFSource::header_position_offset;
 
 SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	: MidiSource (s, region_name_from_path(path, false))
-	, SMF ()
+	, Evoral::SMF<double> ()
 	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
 	, _allow_remove_if_empty(true)
 {
@@ -128,7 +128,7 @@ SMFSource::init (string pathstr, bool must_exist)
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+SMFSource::read_unlocked (MidiRingBuffer<double>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	//cerr << "SMF read_unlocked " << name() << " read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
@@ -146,7 +146,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
 	// FIXME: don't seek to start and search every read (brutal!)
-	SMF::seek_to_start();
+	Evoral::SMF<double>::seek_to_start();
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
@@ -155,7 +155,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	
 	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * ppqn());
 
-	while (!SMF::eof()) {
+	while (!Evoral::SMF<double>::eof()) {
 		int ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 		if (ret == -1) { // EOF
 			//cerr << "SMF - EOF\n";
@@ -194,11 +194,11 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
+SMFSource::write_unlocked (MidiRingBuffer<double>& src, nframes_t cnt)
 {
 	_write_data_count = 0;
 		
-	Evoral::EventTime time;
+	double            time;
 	Evoral::EventType type;
 	uint32_t          size;
 
@@ -208,7 +208,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	if (_model && ! _model->writing())
 		_model->start_write();
 
-	Evoral::MIDIEvent ev(0, 0.0, 4, NULL, true);
+	Evoral::MIDIEvent<double> ev(0, 0.0, 4, NULL, true);
 
 	while (true) {
 		bool ret = src.peek_time(&time);
@@ -251,7 +251,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		make_sure_controls_have_the_right_interpolation();
 	}
 
-	SMF::flush();
+	Evoral::SMF<double>::flush();
 	free(buf);
 
 	const nframes_t oldlen = _length;
@@ -264,7 +264,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		
 
 void
-SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev)
+SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>& ev)
 {
 	if (ev.size() == 0)  {
 		cerr << "SMFSource: Warning: skipping empty event" << endl;
@@ -299,7 +299,7 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev)
 		delta_time = (uint32_t)((ev.time() - last_event_time()) * ppqn());
 	}
 
-	SMF::append_event_unlocked(delta_time, ev);
+	Evoral::SMF<double>::append_event_unlocked(delta_time, ev);
 
 	_write_data_count += ev.size();
 }
@@ -354,7 +354,7 @@ void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
-	SMF::begin_write (start_frame);
+	Evoral::SMF<double>::begin_write (start_frame);
 }
 
 void
@@ -367,7 +367,7 @@ SMFSource::mark_streaming_write_completed ()
 	}
 	
 	_model->set_edited(false);
-	SMF::end_write ();
+	Evoral::SMF<double>::end_write ();
 }
 
 void
@@ -632,10 +632,10 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	_model->start_write();
-	SMF::seek_to_start();
+	Evoral::SMF<double>::seek_to_start();
 
 	uint64_t time = 0; /* in SMF ticks */
-	Evoral::Event ev;
+	Evoral::Event<double> ev;
 	
 	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
 	
@@ -655,7 +655,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 		
 		if (ret > 0) { // didn't skip (meta) event
 			// make ev.time absolute time in frames
-			ev.time() = time * frames_per_beat / (Evoral::EventTime)ppqn();
+			ev.time() = time * frames_per_beat / (double)ppqn();
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 			_model->append(ev);
 		}
@@ -704,6 +704,6 @@ SMFSource::destroy_model()
 void
 SMFSource::flush_midi()
 {
-	SMF::end_write();
+	Evoral::SMF<double>::end_write();
 }
 

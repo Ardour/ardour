@@ -170,18 +170,18 @@ class MidiDiskstream : public Diskstream
 	
 	void engage_record_enable ();
 	void disengage_record_enable ();
-	void check_note_onoffs(Evoral::MIDIEvent &event);
+	void check_note_onoffs(Evoral::MIDIEvent<MidiBuffer::TimeType> &event);
 	void emit_pending_note_offs(MidiBuffer &dst, nframes_t time);
 
-	MidiRingBuffer*                   _playback_buf;
-	MidiRingBuffer*                   _capture_buf;
-	MidiPort*                         _source_port;
-	boost::shared_ptr<SMFSource>      _write_source;
-	nframes_t                         _last_flush_frame;
-	NoteMode                          _note_mode;  
-	MidiStateTracker                  _midistate_tracker;
-	volatile gint                     _frames_written_to_ringbuffer;
-	volatile gint                     _frames_read_from_ringbuffer;
+	MidiRingBuffer<MidiBuffer::TimeType>* _playback_buf;
+	MidiRingBuffer<MidiBuffer::TimeType>* _capture_buf;
+	MidiPort*                             _source_port;
+	boost::shared_ptr<SMFSource>          _write_source;
+	nframes_t                             _last_flush_frame;
+	NoteMode                              _note_mode;  
+	MidiStateTracker                      _midistate_tracker;
+	volatile gint                         _frames_written_to_ringbuffer;
+	volatile gint                         _frames_read_from_ringbuffer;
 };
 
 }; /* namespace ARDOUR */

@@ -43,11 +43,13 @@ class Playlist;
 class Session;
 class MidiFilter;
 class MidiSource;
-class MidiRingBuffer;
+template<typename T> class MidiRingBuffer;
 
 class MidiRegion : public Region
 {
   public:
+	typedef double TimeType;
+
 	~MidiRegion();
 
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
@@ -56,13 +58,13 @@ class MidiRegion : public Region
 	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const { return 0; }
 	virtual nframes64_t readable_length() const { return length(); }
 
-	nframes_t read_at (MidiRingBuffer& dst,
+	nframes_t read_at (MidiRingBuffer<TimeType>& dst,
 			   nframes_t position,
 			   nframes_t dur, 
 			   uint32_t  chan_n = 0,
 			   NoteMode  mode = Sustained) const;
 
-	nframes_t master_read_at (MidiRingBuffer& dst,
+	nframes_t master_read_at (MidiRingBuffer<TimeType>& dst,
 			nframes_t position,
 			nframes_t dur,
 			uint32_t  chan_n = 0,
@@ -106,7 +108,7 @@ class MidiRegion : public Region
 	MidiRegion (const SourceList &, const XMLNode&);
 
   private:
-	nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,
+	nframes_t _read_at (const SourceList&, MidiRingBuffer<TimeType>& dst,
 			    nframes_t position,
 			    nframes_t dur, 
 			    uint32_t chan_n = 0,

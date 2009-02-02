@@ -22,47 +22,52 @@ namespace Evoral {
 
 #ifdef EVORAL_EVENT_ALLOC
 
-Event::Event(uint32_t tid, EventTime t, uint32_t s, uint8_t* b, bool owns_buffer)
+template<typename T>
+Event<T>::Event(uint32_t tid, T t, uint32_t s, uint8_t* b, bool owns_buf)
 	: _type(tid)
 	, _time(t)
 	, _size(s)
-	, _buffer(b)
-	, _owns_buffer(owns_buffer)
+	, _buf(b)
+	, _owns_buf(owns_buf)
 {
-	if (owns_buffer) {
-		_buffer = (uint8_t*)malloc(_size);
+	if (owns_buf) {
+		_buf = (uint8_t*)malloc(_size);
 		if (b) {
-			memcpy(_buffer, b, _size);
+			memcpy(_buf, b, _size);
 		} else {
-			memset(_buffer, 0, _size);
+			memset(_buf, 0, _size);
 		}
 	}
 }
 
-Event::Event(const Event& copy, bool owns_buffer)
+template<typename T>
+Event<T>::Event(const Event& copy, bool owns_buf)
 	: _type(copy._type)
 	, _time(copy._time)
 	, _size(copy._size)
-	, _buffer(copy._buffer)
-	, _owns_buffer(owns_buffer)
+	, _buf(copy._buf)
+	, _owns_buf(owns_buf)
 {
-	if (owns_buffer) {
-		_buffer = (uint8_t*)malloc(_size);
-		if (copy._buffer) {
-			memcpy(_buffer, copy._buffer, _size);
+	if (owns_buf) {
+		_buf = (uint8_t*)malloc(_size);
+		if (copy._buf) {
+			memcpy(_buf, copy._buf, _size);
 		} else {
-			memset(_buffer, 0, _size);
+			memset(_buf, 0, _size);
 		}
 	}
 }
 
-Event::~Event() {
-	if (_owns_buffer) {
-		free(_buffer);
+template<typename T>
+Event<T>::~Event() {
+	if (_owns_buf) {
+		free(_buf);
 	}
 }
 
 #endif // EVORAL_EVENT_ALLOC
 
-} // namespace MIDI
+template class Event<double>;
+
+} // namespace Evoral
 

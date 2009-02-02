@@ -34,7 +34,7 @@ class Session;
 class Region;
 class MidiRegion;
 class Source;
-class MidiRingBuffer;
+template<typename T> class MidiRingBuffer;
 
 class MidiPlaylist : public ARDOUR::Playlist
 {
@@ -47,7 +47,7 @@ public:
 
 	~MidiPlaylist ();
 
-	nframes_t read (MidiRingBuffer& buf,
+	nframes_t read (MidiRingBuffer<double>& buf,
 			nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);

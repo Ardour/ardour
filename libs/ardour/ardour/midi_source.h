@@ -39,12 +39,14 @@ using std::string;
 
 namespace ARDOUR {
 
-class MidiRingBuffer;
+template<typename T> class MidiRingBuffer;
 
 /** Source for MIDI data */
 class MidiSource : public Source
 {
   public:
+	typedef double TimeType;
+
 	MidiSource (Session& session, string name);
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
@@ -55,10 +57,10 @@ class MidiSource : public Source
 	virtual uint32_t    n_channels () const { return 1; }
 	
 	// FIXME: integrate this with the Readable::read interface somehow
-	virtual nframes_t midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
-	virtual nframes_t midi_write (MidiRingBuffer& src, nframes_t cnt);
+	virtual nframes_t midi_read (MidiRingBuffer<TimeType>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
+	virtual nframes_t midi_write (MidiRingBuffer<TimeType>& src, nframes_t cnt);
 
-	virtual void append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev) = 0;
+	virtual void append_event_unlocked(EventTimeUnit unit, const Evoral::Event<TimeType>& ev) = 0;
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
@@ -99,8 +101,8 @@ class MidiSource : public Source
 	//virtual int flush_header() = 0;
 	//virtual int flush_footer() = 0;
 	
-	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
-	virtual nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt) = 0;
+	virtual nframes_t read_unlocked (MidiRingBuffer<TimeType>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
+	virtual nframes_t write_unlocked (MidiRingBuffer<TimeType>& dst, nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;
 	string              _captured_for;

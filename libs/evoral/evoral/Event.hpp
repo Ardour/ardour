@@ -38,12 +38,12 @@ namespace Evoral {
 
 /** An event (much like a type generic jack_midi_event_t)
  *
- * time is either a frame time (from/to Jack) or a beat time (internal
- * tempo time, used in MidiModel) depending on context.
+ * Template parameter T is the type of the time stamp used for this event.
  */
+template<typename T>
 struct Event {
 #ifdef EVORAL_EVENT_ALLOC
-	Event(EventType type=0, EventTime t=0, uint32_t s=0, uint8_t* b=NULL, bool alloc=false);
+	Event(EventType type=0, T t=0, uint32_t s=0, uint8_t* b=NULL, bool alloc=false);
 	
 	/** Copy \a copy.
 	 * 
@@ -58,18 +58,18 @@ struct Event {
 	inline const Event& operator=(const Event& copy) {
 		_type = copy._type;
 		_time = copy._time;
-		if (_owns_buffer) {
-			if (copy._buffer) {
+		if (_owns_buf) {
+			if (copy._buf) {
 				if (copy._size > _size) {
-					_buffer = (uint8_t*)::realloc(_buffer, copy._size);
+					_buf = (uint8_t*)::realloc(_buf, copy._size);
 				}
-				memcpy(_buffer, copy._buffer, copy._size);
+				memcpy(_buf, copy._buf, copy._size);
 			} else {
-				free(_buffer);
-				_buffer = NULL;
+				free(_buf);
+				_buf = NULL;
 			}
 		} else {
-			_buffer = copy._buffer;
+			_buf = copy._buf;
 		}
 
 		_size = copy._size;
@@ -77,26 +77,26 @@ struct Event {
 	}
 
 	inline void shallow_copy(const Event& copy) {
-		if (_owns_buffer) {
-			free(_buffer);
-			_buffer = false;
-			_owns_buffer = false;
+		if (_owns_buf) {
+			free(_buf);
+			_buf = false;
+			_owns_buf = false;
 		}
 
 		_type = copy._type;
 		_time = copy._time;
 		_size = copy._size;
-		_buffer = copy._buffer;
+		_buf  = copy._buf;
 	}
 	
-	inline void set(uint8_t* buf, uint32_t size, EventTime t) {
-		if (_owns_buffer) {
+	inline void set(uint8_t* buf, uint32_t size, T t) {
+		if (_owns_buf) {
 			if (_size < size) {
-				_buffer = (uint8_t*) ::realloc(_buffer, size);
+				_buf = (uint8_t*) ::realloc(_buf, size);
 			}
-			memcpy (_buffer, buf, size);
+			memcpy (_buf, buf, size);
 		} else {
-			_buffer = buf;
+			_buf = buf;
 		}
 
 		_time = t;
@@ -113,11 +113,11 @@ struct Event {
 		if (_size != other._size)
 			return false;
 
-		if (_buffer == other._buffer)
+		if (_buf == other._buf)
 			return true;
 
 		for (uint32_t i=0; i < _size; ++i)
-			if (_buffer[i] != other._buffer[i])
+			if (_buf[i] != other._buf[i])
 				return false;
 
 		return true;
@@ -125,25 +125,25 @@ struct Event {
 	
 	inline bool operator!=(const Event& other) const { return ! operator==(other); }
 
-	inline bool owns_buffer() const { return _owns_buffer; }
+	inline bool owns_buffer() const { return _owns_buf; }
 	
 	inline void set_buffer(uint32_t size, uint8_t* buf, bool own) {
-		if (_owns_buffer) {
-			free(_buffer);
-			_buffer = NULL;
+		if (_owns_buf) {
+			free(_buf);
+			_buf = NULL;
 		}
-		_size = size;
-		_buffer = buf;
-		_owns_buffer = own;
+		_size     = size;
+		_buf      = buf;
+		_owns_buf = own;
 	}
 
 	inline void realloc(uint32_t size) {
-		if (_owns_buffer) {
+		if (_owns_buf) {
 			if (size > _size)
-				_buffer = (uint8_t*) ::realloc(_buffer, size);
+				_buf = (uint8_t*) ::realloc(_buf, size);
 		} else {
-			_buffer = (uint8_t*) ::malloc(size);
-			_owns_buffer = true;
+			_buf = (uint8_t*) ::malloc(size);
+			_owns_buf = true;
 		}
 
 		_size = size;
@@ -153,33 +153,33 @@ struct Event {
 		_type = 0;
 		_time = 0;
 		_size = 0;
-		_buffer = NULL;
+		_buf  = NULL;
 	}
 
 #else
 
-	inline void set_buffer(uint8_t* buf) { _buffer = buf; }
+	inline void set_buffer(uint8_t* buf) { _buf = buf; }
 
 #endif // EVORAL_EVENT_ALLOC
 
 	inline EventType   event_type()            const { return _type; }
 	inline void        set_event_type(EventType t)   { _type = t; }
-	inline EventTime   time()                  const { return _time; }
-	inline EventTime&  time()                        { return _time; }
+	inline T           time()                  const { return _time; }
+	inline T&          time()                        { return _time; }
 	inline uint32_t    size()                  const { return _size; }
 	inline uint32_t&   size()                        { return _size; }
 
-	inline const uint8_t* buffer()             const { return _buffer; }
-	inline uint8_t*&      buffer()                   { return _buffer; }
+	inline const uint8_t* buffer()             const { return _buf; }
+	inline uint8_t*&      buffer()                   { return _buf; }
 
 protected:
-	EventType _type;   /**< Type of event (application relative, NOT MIDI 'type') */
-	EventTime _time;   /**< Sample index (or beat time) at which event is valid */
-	uint32_t  _size;   /**< Number of uint8_ts of data in \a buffer */
-	uint8_t*  _buffer; /**< Raw MIDI data */
+	EventType _type; /**< Type of event (application relative, NOT MIDI 'type') */
+	T         _time; /**< Sample index (or beat time) at which event is valid */
+	uint32_t  _size; /**< Number of uint8_ts of data in \a buffer */
+	uint8_t*  _buf;  /**< Raw MIDI data */
 
 #ifdef EVORAL_EVENT_ALLOC
-	bool _owns_buffer; /**< Whether buffer is locally allocated */
+	bool _owns_buf; /**< Whether buffer is locally allocated */
 #endif
 };
 

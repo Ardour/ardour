@@ -31,6 +31,8 @@ namespace Canvas {
 
 class CanvasNote : public SimpleRect, public CanvasNoteEvent {
 public:
+	typedef Evoral::Note<double> NoteType;
+
 	double x1() { return property_x1(); }
 	double y1() { return property_y1(); }
 	double x2() { return property_x2(); }
@@ -53,9 +55,9 @@ public:
 	};
 
 	CanvasNote(
-			MidiRegionView&                       region,
-			Group&                                group,
-			const boost::shared_ptr<Evoral::Note> note = boost::shared_ptr<Evoral::Note>())
+			MidiRegionView&                   region,
+			Group&                            group,
+			const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
 
 		: SimpleRect(group), CanvasNoteEvent(region, this, note), _note_state(None)
 	{

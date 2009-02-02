@@ -47,8 +47,10 @@ class MidiSource;
  * Because of this MIDI controllers and automatable controllers/widgets/etc
  * are easily interchangeable.
  */
-class MidiModel : public AutomatableSequence {
+class MidiModel : public AutomatableSequence<double> {
 public:
+	typedef double TimeType;
+
 	MidiModel(MidiSource* s, size_t size=0);
 	
 	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
@@ -71,17 +73,17 @@ public:
 		int set_state (const XMLNode&);
 		XMLNode& get_state ();
 
-		void add(const boost::shared_ptr<Evoral::Note> note);
-		void remove(const boost::shared_ptr<Evoral::Note> note);
+		void add(const boost::shared_ptr< Evoral::Note<TimeType> > note);
+		void remove(const boost::shared_ptr< Evoral::Note<TimeType> > note);
 
 	private:
-		XMLNode &marshal_note(const boost::shared_ptr<Evoral::Note> note);
-		boost::shared_ptr<Evoral::Note> unmarshal_note(XMLNode *xml_note);
+		XMLNode &marshal_note(const boost::shared_ptr< Evoral::Note<TimeType> > note);
+		boost::shared_ptr< Evoral::Note<TimeType> > unmarshal_note(XMLNode *xml_note);
 		
 		boost::shared_ptr<MidiModel> _model;
 		const std::string            _name;
 		
-		typedef std::list< boost::shared_ptr<Evoral::Note> > NoteList;
+		typedef std::list< boost::shared_ptr< Evoral::Note<TimeType> > > NoteList;
 		
 		NoteList _added_notes;
 		NoteList _removed_notes;

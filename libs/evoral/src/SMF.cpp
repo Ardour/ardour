@@ -32,7 +32,8 @@ using namespace std;
 
 namespace Evoral {
 
-SMF::SMF()
+template<typename T>
+SMF<T>::SMF()
 	: _fd(0)
 	, _last_ev_time(0)
 	, _track_size(4) // 4 bytes for the ever-present EOT event
@@ -41,7 +42,8 @@ SMF::SMF()
 {
 }
 
-SMF::~SMF()
+template<typename T>
+SMF<T>::~SMF()
 {
 }
 
@@ -53,8 +55,9 @@ SMF::~SMF()
  *         -1 if the file can not be opened for reading,
  *         -2 if the file can not be opened for writing
  */
+template<typename T>
 int
-SMF::open(const std::string& path)
+SMF<T>::open(const std::string& path)
 {
 	//cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
 	_fd = fopen(path.c_str(), "r+");
@@ -87,8 +90,9 @@ SMF::open(const std::string& path)
 	return (_fd == 0) ? -1 : 0;
 }
 
+template<typename T>
 void
-SMF::close()
+SMF<T>::close()
 {
 	if (_fd) {
 		flush_header();
@@ -98,14 +102,16 @@ SMF::close()
 	}
 }
 
+template<typename T>
 void
-SMF::seek_to_start() const
+SMF<T>::seek_to_start() const
 {
 	fseek(_fd, _header_size, SEEK_SET);
 }
 
+template<typename T>
 void
-SMF::seek_to_footer_position()
+SMF<T>::seek_to_footer_position()
 {
 	uint8_t buffer[4];
 	
@@ -126,14 +132,16 @@ SMF::seek_to_footer_position()
 	}
 }
 
+template<typename T>
 void
-SMF::flush()
+SMF<T>::flush()
 {
 	fflush(_fd);
 }
 
+template<typename T>
 int
-SMF::flush_header()
+SMF<T>::flush_header()
 {
 	// FIXME: write timeline position somehow?
 	
@@ -161,8 +169,9 @@ SMF::flush_header()
 	return 0;
 }
 
+template<typename T>
 int
-SMF::flush_footer()
+SMF<T>::flush_footer()
 {
 	//cerr << path() << " SMF Flushing footer\n";
 	seek_to_footer_position();
@@ -172,8 +181,9 @@ SMF::flush_footer()
 	return 0;
 }
 
+template<typename T>
 void
-SMF::write_footer()
+SMF<T>::write_footer()
 {
 	write_var_len(0);
 	char eot[3] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
@@ -196,8 +206,9 @@ SMF::write_footer()
  * Returns event length (including status byte) on success, 0 if event was
  * skipped (eg a meta event), or -1 on EOF (or end of track).
  */
+template<typename T>
 int
-SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
+SMF<T>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 {
 	if (feof(_fd)) {
 		return -1;
@@ -263,8 +274,9 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	return (int)*size;
 }
 
+template<typename T>
 void
-SMF::append_event_unlocked(uint32_t delta_t, const Evoral::Event& ev)
+SMF<T>::append_event_unlocked(uint32_t delta_t, const Event<T>& ev)
 {
 	if (ev.size() == 0)
 		return;
@@ -279,22 +291,25 @@ SMF::append_event_unlocked(uint32_t delta_t, const Evoral::Event& ev)
 		_empty = false;
 }
 
+template<typename T>
 void
-SMF::begin_write(FrameTime start_frame)
+SMF<T>::begin_write(FrameTime start_frame)
 {
 	_last_ev_time = 0;
 	fseek(_fd, _header_size, SEEK_SET);
 }
 
+template<typename T>
 void
-SMF::end_write()
+SMF<T>::end_write()
 {
 	flush_header();
 	flush_footer();
 }
 
+template<typename T>
 void
-SMF::write_chunk_header(const char id[4], uint32_t length)
+SMF<T>::write_chunk_header(const char id[4], uint32_t length)
 {
 	const uint32_t length_be = GUINT32_TO_BE(length);
 
@@ -302,8 +317,9 @@ SMF::write_chunk_header(const char id[4], uint32_t length)
 	fwrite(&length_be, 4, 1, _fd);
 }
 
+template<typename T>
 void
-SMF::write_chunk(const char id[4], uint32_t length, void* data)
+SMF<T>::write_chunk(const char id[4], uint32_t length, void* data)
 {
 	write_chunk_header(id, length);
 	
@@ -311,8 +327,9 @@ SMF::write_chunk(const char id[4], uint32_t length, void* data)
 }
 
 /** Returns the size (in bytes) of the value written. */
+template<typename T>
 size_t
-SMF::write_var_len(uint32_t value)
+SMF<T>::write_var_len(uint32_t value)
 {
 	size_t ret = 0;
 
@@ -335,5 +352,7 @@ SMF::write_var_len(uint32_t value)
 
 	return ret;
 }
+
+template class SMF<double>;
 
 } // namespace Evoral

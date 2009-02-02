@@ -39,7 +39,7 @@ const uint32_t CanvasNoteEvent::midi_channel_colors[16] = {
 	};
 
 CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
-		const boost::shared_ptr<Evoral::Note> note)
+		const boost::shared_ptr<NoteType> note)
 	: _region(region)
 	, _item(item)
 	, _text(0)

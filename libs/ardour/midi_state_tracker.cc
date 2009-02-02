@@ -31,7 +31,7 @@ MidiStateTracker::MidiStateTracker ()
 }
 
 void
-MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent &event)
+MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent<MidiBuffer::TimeType>& event)
 {
 	if (event.is_note_on()) {
 		_active_notes [event.note() + 128 * event.channel()] = true;
@@ -46,7 +46,7 @@ MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::ite
 	bool ret = false;
 
 	for (MidiBuffer::iterator i = from; i != to; ++i) {
-		const Evoral::MIDIEvent ev(*i, false);
+		const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 		if (ev.event_type() == LoopEventType) {
 			ret = true;
 			continue;
@@ -68,7 +68,8 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes_t time)
 		for (int note = 0; note < 128; ++note) {
 			if (_active_notes[channel * 128 + note]) {
 				uint8_t buffer[3] = { MIDI_CMD_NOTE_OFF | channel, note, 0 };
-				Evoral::MIDIEvent noteoff (time, MIDI_CMD_NOTE_OFF, 3, buffer, false);
+				Evoral::MIDIEvent<MidiBuffer::TimeType> noteoff
+						(time, MIDI_CMD_NOTE_OFF, 3, buffer, false);
 
 				dst.push_back (noteoff);	
 

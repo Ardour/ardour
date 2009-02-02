@@ -37,16 +37,17 @@ class MidiBuffer;
  *
  * [timestamp][type][size][size bytes of raw MIDI][timestamp][type][size](etc...)
  */
-class MidiRingBuffer : public Evoral::EventRingBuffer {
+template<typename T>
+class MidiRingBuffer : public Evoral::EventRingBuffer<T> {
 public:
 	/** @param size Size in bytes.
 	 */
 	MidiRingBuffer(size_t size)
-		: Evoral::EventRingBuffer(size)
+		: Evoral::EventRingBuffer<T>(size)
 		, _channel_mask(0x0000FFFF)
 	{}
 
-	inline bool read_prefix(Evoral::EventTime* time, Evoral::EventType* type, uint32_t* size);
+	inline bool read_prefix(T* time, Evoral::EventType* type, uint32_t* size);
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
@@ -86,14 +87,15 @@ private:
 /** Read the time and size of an event.  This call MUST be immediately proceeded
  * by a call to read_contents (or the read pointer will be garbage).
  */
+template<typename T>
 inline bool
-MidiRingBuffer::read_prefix(Evoral::EventTime* time, Evoral::EventType* type, uint32_t* size)
+MidiRingBuffer<T>::read_prefix(T* time, Evoral::EventType* type, uint32_t* size)
 {
-	bool success = Evoral::EventRingBuffer::full_read(sizeof(Evoral::EventTime), (uint8_t*)time);
+	bool success = Evoral::EventRingBuffer<T>::full_read(sizeof(T), (uint8_t*)time);
 	if (success)
-		success = Evoral::EventRingBuffer::full_read(sizeof(Evoral::EventType), (uint8_t*)type);
+		success = Evoral::EventRingBuffer<T>::full_read(sizeof(Evoral::EventType), (uint8_t*)type);
 	if (success)
-		success = Evoral::EventRingBuffer::full_read(sizeof(uint32_t), (uint8_t*)size);
+		success = Evoral::EventRingBuffer<T>::full_read(sizeof(uint32_t), (uint8_t*)size);
 
 	return success;
 }
@@ -102,10 +104,11 @@ MidiRingBuffer::read_prefix(Evoral::EventTime* time, Evoral::EventType* type, ui
 /** Read the content of an event.  This call MUST be immediately preceded
  * by a call to read_prefix (or the returned even will be garbage).
  */
+template<typename T>
 inline bool
-MidiRingBuffer::read_contents(uint32_t size, uint8_t* buf)
+MidiRingBuffer<T>::read_contents(uint32_t size, uint8_t* buf)
 {
-	return Evoral::EventRingBuffer::full_read(size, buf);
+	return Evoral::EventRingBuffer<T>::full_read(size, buf);
 }
 
 

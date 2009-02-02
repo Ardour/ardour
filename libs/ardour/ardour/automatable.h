@@ -114,12 +114,13 @@ public:
 
 
 /** Contains notes and controllers */
-class AutomatableSequence : public Automatable, public Evoral::Sequence {
+template<typename T>
+class AutomatableSequence : public Automatable, public Evoral::Sequence<T> {
 public:
 	AutomatableSequence(Session& s, size_t size)
 		: Evoral::ControlSet()
 		, Automatable(s)
-		, Evoral::Sequence(EventTypeMap::instance())
+		, Evoral::Sequence<T>(EventTypeMap::instance())
 	{}
 };
 

@@ -312,7 +312,7 @@ static void
 write_midi_data_to_new_files (Evoral::SMFReader* source, Session::import_status& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
-	Evoral::Event ev(0, 0.0, 4, NULL, true);
+	Evoral::Event<double> ev(0, 0.0, 4, NULL, true);
 
 	status.progress = 0.0f;
 

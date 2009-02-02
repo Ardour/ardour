@@ -32,7 +32,7 @@
 class Editor;
 class MidiRegionView;
 
-namespace Evoral { class Note; }
+namespace Evoral { template<typename T> class Note; }
 
 namespace Gnome {
 namespace Canvas {
@@ -51,10 +51,11 @@ namespace Canvas {
  */
 class CanvasNoteEvent : public sigc::trackable, public InteractiveItem {
 public:
+	typedef Evoral::Note<double> NoteType;
 	CanvasNoteEvent(
-			MidiRegionView&                       region,
-			Item*                                 item,
-			const boost::shared_ptr<Evoral::Note> note = boost::shared_ptr<Evoral::Note>());
+			MidiRegionView&                   region,
+			Item*                             item,
+			const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
 
 	virtual ~CanvasNoteEvent();
 
@@ -87,7 +88,7 @@ public:
 	virtual double x2() = 0;
 	virtual double y2() = 0;
 
-	const boost::shared_ptr<Evoral::Note> note() const { return _note; }
+	const boost::shared_ptr<NoteType> note() const { return _note; }
 	
 	inline static uint32_t meter_style_fill_color(uint8_t vel)
 	{
@@ -116,14 +117,14 @@ public:
 protected:
 	enum State { None, Pressed, Dragging };
 
-	MidiRegionView&                       _region;
-	Item* const                           _item;
-	InteractiveText*                      _text;
-	Widget*                               _channel_selector_widget;
-	State                                 _state;
-	const boost::shared_ptr<Evoral::Note> _note;
-	bool                                  _own_note;
-	bool                                  _selected;
+	MidiRegionView&                   _region;
+	Item* const                       _item;
+	InteractiveText*                  _text;
+	Widget*                           _channel_selector_widget;
+	State                             _state;
+	const boost::shared_ptr<NoteType> _note;
+	bool                              _own_note;
+	bool                              _selected;
 };
 
 } // namespace Gnome

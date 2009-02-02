@@ -456,7 +456,7 @@ MidiRegionView::create_note_at(double x, double y, double length)
 	new_note_length = snap_to_frame(new_note_time_position_relative + new_note_length) + _region->start() 
 	                    - new_note_time;
 
-	const boost::shared_ptr<Evoral::Note> new_note(new Evoral::Note(
+	const boost::shared_ptr<NoteType> new_note(new NoteType(
 			0, new_note_time, new_note_length, (uint8_t)note, 0x40));
 	view->update_note_range(new_note->note());
 
@@ -504,7 +504,7 @@ MidiRegionView::start_delta_command(string name)
 }
 
 void
-MidiRegionView::command_add_note(const boost::shared_ptr<Evoral::Note> note, bool selected)
+MidiRegionView::command_add_note(const boost::shared_ptr<NoteType> note, bool selected)
 {
 	if (_delta_command)
 		_delta_command->add(note);
@@ -889,7 +889,7 @@ MidiRegionView::extend_active_notes()
 }
 
 void 
-MidiRegionView::play_midi_note(boost::shared_ptr<Evoral::Note> note)
+MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 {
 	if (!trackview.editor().sound_notes()) {
 		return;
@@ -907,7 +907,7 @@ MidiRegionView::play_midi_note(boost::shared_ptr<Evoral::Note> note)
 }
 
 bool
-MidiRegionView::play_midi_note_off(boost::shared_ptr<Evoral::Note> note)
+MidiRegionView::play_midi_note_off(boost::shared_ptr<NoteType> note)
 {
 	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
 	assert(route_ui);
@@ -925,7 +925,7 @@ MidiRegionView::play_midi_note_off(boost::shared_ptr<Evoral::Note> note)
  * event arrives, to properly display the note.
  */
 void
-MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
+MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 {
 	assert(note->time() >= 0);
 	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
@@ -967,7 +967,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
 				// finish the old note rectangle
 				if (_active_notes[note->note()]) {
 					CanvasNote* const old_rect = _active_notes[note->note()];
-					boost::shared_ptr<Evoral::Note> old_note = old_rect->note();
+					boost::shared_ptr<NoteType> old_note = old_rect->note();
 					cerr << "MidiModel: WARNING: Note has length 0: chan " << old_note->channel()
 						<< "note " << (int)old_note->note() << " @ " << old_note->time() << endl;
 					/* FIXME: How large to make it?  Make it a diamond? */
@@ -1338,7 +1338,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 			Selection::iterator next = i;
 			++next;
 
-			const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(*i)->note().get()));
+			const boost::shared_ptr<NoteType> copy(new NoteType(*(*i)->note().get()));
 
 			// we need to snap here again in nframes64_t in order to be sample accurate 
 			double new_note_time = (*i)->note()->time();
@@ -1530,7 +1530,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 		// transform to region start relative
 		current_frame += _region->start();
 		
-		const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(canvas_note->note().get())));
+		const boost::shared_ptr<NoteType> copy(new NoteType(*(canvas_note->note().get())));
 
 		// resize beginning of note
 		if (note_end == CanvasNote::NOTE_ON && current_frame < copy->end_time()) {
@@ -1556,7 +1556,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 void
 MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bool relative)
 {
-	const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(event->note().get())));
+	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
 
 	if (relative) {
 		uint8_t new_velocity = copy->velocity() + velocity;
@@ -1598,7 +1598,7 @@ MidiRegionView::change_channel(uint8_t channel)
 		++next;
 
 		CanvasNoteEvent* event = *i;
-		const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(event->note().get())));
+		const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
 
 		copy->set_channel(channel);
 		

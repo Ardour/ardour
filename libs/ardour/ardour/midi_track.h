@@ -104,8 +104,8 @@ private:
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	MidiRingBuffer _immediate_events;
-	NoteMode       _note_mode;
+	MidiRingBuffer<double> _immediate_events;
+	NoteMode               _note_mode;
 };
 
 } /* namespace ARDOUR*/

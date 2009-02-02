@@ -19,10 +19,11 @@
 #ifndef EVORAL_MIDI_EVENT_HPP
 #define EVORAL_MIDI_EVENT_HPP
 
+#include <boost/shared_ptr.hpp>
 #include "evoral/Event.hpp"
 #include "evoral/midi_events.h"
 #ifdef EVORAL_MIDI_XML
-	#include <pbd/xml++.h>
+class XMLNode;
 #endif
 
 namespace Evoral {
@@ -33,13 +34,14 @@ namespace Evoral {
  * but the application must make sure the event actually contains
  * valid MIDI data for these functions to make sense.
  */
-struct MIDIEvent : public Event {
-	MIDIEvent(EventType type=0, EventTime t=0, uint32_t s=0, uint8_t* b=NULL, bool alloc=false)
-		: Event(type, t, s, b, alloc)
+template<typename T>
+struct MIDIEvent : public Event<T> {
+	MIDIEvent(EventType type=0, T t=0, uint32_t s=0, uint8_t* b=NULL, bool alloc=false)
+		: Event<T>(type, t, s, b, alloc)
 	{}
 	
-	MIDIEvent(const Event& copy, bool alloc)
-		: Event(copy, alloc)
+	MIDIEvent(const Event<T>& copy, bool alloc)
+		: Event<T>(copy, alloc)
 	{}
 
 #ifdef EVORAL_MIDI_XML
@@ -52,12 +54,12 @@ struct MIDIEvent : public Event {
 	boost::shared_ptr<XMLNode> to_xml() const;
 #endif
 
-	inline uint8_t  type()                  const { return (_buffer[0] & 0xF0); }
-	inline void     set_type(uint8_t type)        { _buffer[0] =   (0x0F & _buffer[0])
-	                                                             | (0xF0 & type); }
-	inline uint8_t  channel()               const { return (_buffer[0] & 0x0F); }
-	inline void     set_channel(uint8_t channel)  { _buffer[0] =   (0xF0 & _buffer[0])
-	                                                             | (0x0F & channel); }
+	inline uint8_t  type()                  const { return (this->_buf[0] & 0xF0); }
+	inline void     set_type(uint8_t type)        { this->_buf[0] =   (0x0F & this->_buf[0])
+	                                                                | (0xF0 & type); }
+	inline uint8_t  channel()               const { return (this->_buf[0] & 0x0F); }
+	inline void     set_channel(uint8_t channel)  { this->_buf[0] =   (0xF0 & this->_buf[0])
+	                                                                | (0x0F & channel); }
 	inline bool     is_note_on()            const { return (type() == MIDI_CMD_NOTE_ON); }
 	inline bool     is_note_off()           const { return (type() == MIDI_CMD_NOTE_OFF); }
 	inline bool     is_cc()                 const { return (type() == MIDI_CMD_CONTROL); }
@@ -66,24 +68,24 @@ struct MIDIEvent : public Event {
 	inline bool     is_note()               const { return (is_note_on() || is_note_off()); }
 	inline bool     is_aftertouch()         const { return (type() == MIDI_CMD_NOTE_PRESSURE); }
 	inline bool     is_channel_pressure()   const { return (type() == MIDI_CMD_CHANNEL_PRESSURE); }
-	inline uint8_t  note()                  const { return (_buffer[1]); }
-	inline uint8_t  velocity()              const { return (_buffer[2]); }
-	inline uint8_t  cc_number()             const { return (_buffer[1]); }
-	inline void     set_cc_number(uint8_t number) { _buffer[1] = number; }
-	inline uint8_t  cc_value()              const { return (_buffer[2]); }
-	inline void     set_cc_value(uint8_t value)   { _buffer[2] = value; }
-	inline uint8_t  pitch_bender_lsb()      const { return (_buffer[1]); }
-	inline uint8_t  pitch_bender_msb()      const { return (_buffer[2]); }
-	inline uint16_t pitch_bender_value()    const { return ( ((0x7F & _buffer[2]) << 7)
-	                                                        | (0x7F & _buffer[1]) ); }
-	inline uint8_t  pgm_number()            const { return (_buffer[1]); }
-	inline void     set_pgm_number(uint8_t number){ _buffer[1] = number; }
-	inline uint8_t  aftertouch()            const { return (_buffer[1]); }
-	inline uint8_t  channel_pressure()      const { return (_buffer[1]); }
+	inline uint8_t  note()                  const { return (this->_buf[1]); }
+	inline uint8_t  velocity()              const { return (this->_buf[2]); }
+	inline uint8_t  cc_number()             const { return (this->_buf[1]); }
+	inline void     set_cc_number(uint8_t number) { this->_buf[1] = number; }
+	inline uint8_t  cc_value()              const { return (this->_buf[2]); }
+	inline void     set_cc_value(uint8_t value)   { this->_buf[2] = value; }
+	inline uint8_t  pitch_bender_lsb()      const { return (this->_buf[1]); }
+	inline uint8_t  pitch_bender_msb()      const { return (this->_buf[2]); }
+	inline uint16_t pitch_bender_value()    const { return ( ((0x7F & this->_buf[2]) << 7)
+	                                                        | (0x7F & this->_buf[1]) ); }
+	inline uint8_t  pgm_number()            const { return (this->_buf[1]); }
+	inline void     set_pgm_number(uint8_t number){ this->_buf[1] = number; }
+	inline uint8_t  aftertouch()            const { return (this->_buf[1]); }
+	inline uint8_t  channel_pressure()      const { return (this->_buf[1]); }
 	inline bool     is_channel_event()      const { return (0x80 <= type()) && (type() <= 0xE0);	}
-	inline bool     is_smf_meta_event()     const { return _buffer[0] == 0xFF; }
-	inline bool     is_sysex()              const { return    _buffer[0] == 0xF0
-	                                                          || _buffer[0] == 0xF7; }
+	inline bool     is_smf_meta_event()     const { return this->_buf[0] == 0xFF; }
+	inline bool     is_sysex()              const { return this->_buf[0] == 0xF0
+	                                                    || this->_buf[0] == 0xF7; }
 };
 
 } // namespace Evoral

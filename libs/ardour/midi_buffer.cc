@@ -99,7 +99,7 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	}
 	
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
-		const Evoral::MIDIEvent ev(*i, false);
+		const Evoral::MIDIEvent<TimeType> ev(*i, false);
 		/*cout << this << " MidiBuffer::read_from event type: " << int(ev.type())
 				<< " time: " << ev.time() << " size: " << ev.size()
 				<< " status: " << (int)*ev.buffer() << " buffer size: " << _size << endl;*/
@@ -126,16 +126,16 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
  * @return false if operation failed (not enough room)
  */
 bool
-MidiBuffer::push_back(const Evoral::MIDIEvent& ev)
+MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 {
-	const size_t stamp_size = sizeof(Evoral::EventTime);
+	const size_t stamp_size = sizeof(TimeType);
 	if (_size + stamp_size + ev.size() >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
 	}
 
 	uint8_t* const write_loc = _data + _size;
-	*((Evoral::EventTime*)write_loc) = ev.time();
+	*((TimeType*)write_loc) = ev.time();
 	memcpy(write_loc + stamp_size, ev.buffer(), ev.size());
 
 	_size += stamp_size + ev.size();
@@ -155,14 +155,14 @@ MidiBuffer::push_back(const Evoral::MIDIEvent& ev)
 bool
 MidiBuffer::push_back(const jack_midi_event_t& ev)
 {
-	const size_t stamp_size = sizeof(Evoral::EventTime);
+	const size_t stamp_size = sizeof(TimeType);
 	if (_size + stamp_size + ev.size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
 	}
 
 	uint8_t* const write_loc = _data + _size;
-	*((Evoral::EventTime*)write_loc) = ev.time;
+	*((TimeType*)write_loc) = ev.time;
 	memcpy(write_loc + stamp_size, ev.buffer, ev.size);
 
 	_size += stamp_size + ev.size;
@@ -180,15 +180,15 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
  * location, or the buffer will be corrupted and very nasty things will happen.
  */
 uint8_t*
-MidiBuffer::reserve(Evoral::EventTime time, size_t size)
+MidiBuffer::reserve(TimeType time, size_t size)
 {
-	const size_t stamp_size = sizeof(Evoral::EventTime);
+	const size_t stamp_size = sizeof(TimeType);
 	if (_size + stamp_size + size >= _capacity) {
 		return 0;
 	}
 
 	uint8_t* const write_loc = _data + _size;
-	*((Evoral::EventTime*)write_loc) = time;
+	*((TimeType*)write_loc) = time;
 
 	_size += stamp_size + size;
 	_silent = false;

@@ -82,9 +82,8 @@ private:
 	void flush (void* jack_port_buffer);
 
 	static pthread_t _process_thread;
-	
 
-	RingBuffer<Evoral::Event> non_process_thread_fifo;
+	RingBuffer< Evoral::Event<double> > non_process_thread_fifo;
 	Glib::Mutex non_process_thread_fifo_lock;
 };
 

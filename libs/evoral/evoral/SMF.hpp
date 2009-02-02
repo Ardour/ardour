@@ -24,12 +24,13 @@
 
 namespace Evoral {
 	
-class Event;
-class EventRingBuffer;
+template<typename T> class Event;
+template<typename T> class EventRingBuffer;
 
 
 /** Standard Midi File (Type 0)
  */
+template<typename T>
 class SMF {
 public:
 	SMF();
@@ -37,14 +38,14 @@ public:
 
 	void seek_to_start() const;
 	
-	uint16_t ppqn() const { return _ppqn; }
+	uint16_t ppqn()     const { return _ppqn; }
 	bool     is_empty() const { return _empty; }
-	bool     eof() const { return feof(_fd); }
+	bool     eof()      const { return feof(_fd); }
 	
-	EventTime last_event_time() const { return _last_ev_time; }
+	T last_event_time() const { return _last_ev_time; }
 	
 	void begin_write(FrameTime start_time);
-	void append_event_unlocked(uint32_t delta_t, const Evoral::Event& ev);
+	void append_event_unlocked(uint32_t delta_t, const Event<T>& ev);
 	void end_write();
 	
 	void flush();
@@ -70,11 +71,11 @@ protected:
 private:
 	static const uint16_t _ppqn = 19200;
 
-	FILE*          _fd;
-	EventTime      _last_ev_time; ///< last frame time written, relative to source start
-	uint32_t       _track_size;
-	uint32_t       _header_size; ///< size of SMF header, including MTrk chunk header
-	bool           _empty; ///< true iff file contains(non-empty) events
+	FILE*    _fd;
+	T        _last_ev_time; ///< last frame time written, relative to source start
+	uint32_t _track_size;
+	uint32_t _header_size; ///< size of SMF header, including MTrk chunk header
+	bool     _empty; ///< true iff file contains(non-empty) events
 };
 
 }; /* namespace Evoral */

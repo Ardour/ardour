@@ -27,14 +27,14 @@
 #include <ardour/midi_source.h>
 #include <evoral/SMF.hpp>
 
-namespace Evoral { class Event; }
+namespace Evoral { template<typename T> class Event; }
 
 namespace ARDOUR {
 
-class MidiRingBuffer;
+template<typename T> class MidiRingBuffer;
 
 /** Standard Midi File (Type 0) Source */
-class SMFSource : public MidiSource, public Evoral::SMF {
+class SMFSource : public MidiSource, public Evoral::SMF<double> {
   public:
 	enum Flag {
 		Writable = 0x1,
@@ -74,7 +74,7 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
 
-	void append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev);
+	void append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>& ev);
 
 	int move_to_trash (const string trash_dir_name);
 
@@ -100,14 +100,14 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 	int init (string idstr, bool must_exist);
 
 	nframes_t read_unlocked (
-			MidiRingBuffer& dst,
+			MidiRingBuffer<double>& dst,
 			nframes_t start,
 			nframes_t cn,
 			nframes_t stamp_offset,
 			nframes_t negative_stamp_offset) const;
 
 	nframes_t write_unlocked (
-			MidiRingBuffer& src,
+			MidiRingBuffer<double>& src,
 			nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);
