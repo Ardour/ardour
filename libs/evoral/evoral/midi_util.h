@@ -19,7 +19,7 @@
 #ifndef EVORAL_MIDI_UTIL_H
 #define EVORAL_MIDI_UTIL_H
 
-#include <evoral/midi_events.h>
+#include "evoral/midi_events.h"
 
 namespace Evoral {
 

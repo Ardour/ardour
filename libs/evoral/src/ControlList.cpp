@@ -758,31 +758,23 @@ ControlList::unlocked_eval (double x) const
 	double fraction;
 
 	const_iterator length_check_iter = _events.begin();
-	for (npoints = 0; npoints < 4; ++npoints, ++length_check_iter)
-		if (length_check_iter == _events.end())
+	for (npoints = 0; npoints < 4; ++npoints, ++length_check_iter) {
+		if (length_check_iter == _events.end()) {
 			break;
+		}
+	}
 
 	switch (npoints) {
 	case 0:
 		return _default_value;
 
 	case 1:
-		if (x >= _events.front()->when) {
-			return _events.front()->value;
-		} else {
-			// hansfbaier: v--------- Why commented ??? 
-			// return _default_value;
-			return _events.front()->value;
-		} 
+		return _events.front()->value;
 		
 	case 2:
 		if (x >= _events.back()->when) {
 			return _events.back()->value;
-		} else if (x == _events.front()->when) {
-			return _events.front()->value;
- 		} else if (x < _events.front()->when) {
-			// hansfbaier: v--------- Why commented ??? 
-			// return _default_value;
+ 		} else if (x <= _events.front()->when) {
 			return _events.front()->value;
 		}
 
@@ -795,30 +787,22 @@ ControlList::unlocked_eval (double x) const
 			return lval;
 		}
 
-		/* linear interpolation betweeen the two points
-		*/
-
+		/* linear interpolation betweeen the two points */
 		fraction = (double) (x - lpos) / (double) (upos - lpos);
 		return lval + (fraction * (uval - lval));
 
 	default:
-
 		if (x >= _events.back()->when) {
 			return _events.back()->value;
-		} else if (x == _events.front()->when) {
-			return _events.front()->value;
- 		} else if (x < _events.front()->when) {
-			// hansfbaier: v--------- Why commented ??? 
-			// return _default_value;
+ 		} else if (x <= _events.front()->when) {
 			return _events.front()->value;
 		}
 
 		return multipoint_eval (x);
-		break;
 	}
 
 	/*NOTREACHED*/ /* stupid gcc */
-	return 0.0;
+	return _default_value;
 }
 
 double
