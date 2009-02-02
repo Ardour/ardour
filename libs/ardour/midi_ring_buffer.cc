@@ -98,13 +98,22 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		ev_time -= start;
 		ev_time += offset;
 
+		// this writes the timestamp to write_loc[0]
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {
 			cerr << "MRB: Unable to reserve space in buffer, event skipped";
 			continue;
 		}
-
+		
+		// write MIDI buffer contents
 		success = Evoral::EventRingBuffer<T>::full_read(ev_size, write_loc);
+		
+		cerr << "wrote MidiEvent to Buffer: ";
+		for (size_t i=0; i < ev_size; ++i) {
+			printf("%X ", write_loc[i]);
+		}
+		printf("\n");
+
 
 		if (success) {
 			if (is_channel_event(status) && get_channel_mode() == ForceChannel) {
