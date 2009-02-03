@@ -25,7 +25,7 @@
 
 namespace Evoral {
 
-/** Return the size of the given event NOT the status byte,
+/** Return the size of the given event including the status byte,
  * or -1 if unknown (eg sysex)
  */
 static inline int
