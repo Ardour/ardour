@@ -52,27 +52,29 @@ public:
 	bool merge(const MidiBuffer& a, const MidiBuffer& b);
 	bool merge_in_place(const MidiBuffer &other);
 	
-	template<typename B, typename E>
+	template<typename BufferType, typename MIDIEventType>
 	struct iterator_base {
-		iterator_base<B,E>(B& b, size_t o) : buffer(b), offset(o) {}
-		inline E operator*() const {
+		iterator_base<BufferType, MIDIEventType>(BufferType& b, size_t o) : buffer(b), offset(o) {}
+		inline MIDIEventType operator*() const {
 			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
-			assert(Evoral::midi_event_size(*ev_start) >= 0);
-			return E(EventTypeMap::instance().midi_event_type(*ev_start),
+			int event_size = Evoral::midi_event_size(ev_start);
+			assert(event_size >= 0);
+			return MIDIEventType(EventTypeMap::instance().midi_event_type(*ev_start),
 					*((TimeType*)(buffer._data + offset)),
-					Evoral::midi_event_size(*ev_start) + 1, ev_start);
+					event_size, ev_start);
 		}
-		inline iterator_base<B,E>& operator++() {
+		inline iterator_base<BufferType, MIDIEventType>& operator++() {
 			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
-			assert(Evoral::midi_event_size(*ev_start) >= 0);
-			offset += sizeof(TimeType) + Evoral::midi_event_size(*ev_start) + 1;
+			int event_size = Evoral::midi_event_size(ev_start);
+			assert(event_size >= 0);
+			offset += sizeof(TimeType) + event_size;
 			return *this;
 		}
-		inline bool operator!=(const iterator_base<B,E>& other) const {
+		inline bool operator!=(const iterator_base<BufferType, MIDIEventType>& other) const {
 			return (&buffer != &other.buffer) || (offset != other.offset);
 		}
-		B&     buffer;
-		size_t offset;
+		BufferType&     buffer;
+		size_t          offset;
 	};
 	
 	typedef iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >             iterator;

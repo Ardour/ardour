@@ -200,7 +200,7 @@ SMFReader::read_event(size_t    buf_len,
 		fseek(_fd, -1, SEEK_CUR);
 	} else {
 		last_status = status;
-		*ev_size = midi_event_size(status) + 1;
+		*ev_size = midi_event_size(status);
 		last_size = *ev_size;
 	}
 

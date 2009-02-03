@@ -19,11 +19,13 @@
 #ifndef EVORAL_MIDI_UTIL_H
 #define EVORAL_MIDI_UTIL_H
 
+#include <assert.h>
+
 #include "evoral/midi_events.h"
 
 namespace Evoral {
 
-/** Return the size of the given event NOT including the status byte,
+/** Return the size of the given event NOT the status byte,
  * or -1 if unknown (eg sysex)
  */
 static inline int
@@ -41,13 +43,13 @@ midi_event_size(unsigned char status)
 	case MIDI_CMD_CONTROL:
 	case MIDI_CMD_BENDER:
 	case MIDI_CMD_COMMON_SONG_POS:
-		return 2;
+		return 3;
 
 	case MIDI_CMD_PGM_CHANGE:
 	case MIDI_CMD_CHANNEL_PRESSURE:
 	case MIDI_CMD_COMMON_MTC_QUARTER:
 	case MIDI_CMD_COMMON_SONG_SELECT:
-		return 1;
+		return 2;
 
 	case MIDI_CMD_COMMON_TUNE_REQUEST:
 	case MIDI_CMD_COMMON_SYSEX_END:
@@ -57,13 +59,37 @@ midi_event_size(unsigned char status)
 	case MIDI_CMD_COMMON_STOP:
 	case MIDI_CMD_COMMON_SENSING:
 	case MIDI_CMD_COMMON_RESET:
-		return 0;
+		return 1;
 	
 	case MIDI_CMD_COMMON_SYSEX:
 		return -1;
 	}
 
 	return -1;
+}
+
+/** Return the size of the given event including the status byte
+ * (which must be the first byte in \a buffer),
+ * or -1 if unknown (eg sysex)
+ */
+static inline int
+midi_event_size(uint8_t* buffer)
+{
+	uint8_t status = buffer[0];
+	
+	// if we have a channel event
+	if (status >= 0x80 && status < 0xF0) {
+		status &= 0xF0; // mask off the channel
+	}
+	
+	if (status == MIDI_CMD_COMMON_SYSEX) {
+		int end;
+		for (end = 1; buffer[end] != MIDI_CMD_COMMON_SYSEX_END; end++);
+		assert(buffer[end] == MIDI_CMD_COMMON_SYSEX_END);
+		return end + 1;
+	} else {
+		return midi_event_size(status);
+	}
 }
 
 } // namespace Evoral

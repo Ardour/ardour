@@ -249,7 +249,7 @@ SMF<T>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 		}
 	}
 	
-	const int event_size = midi_event_size((unsigned char)status) + 1;
+	const int event_size = midi_event_size((unsigned char)status);
 	if (event_size <= 0) {
 		*size = 0;
 		return 0;
