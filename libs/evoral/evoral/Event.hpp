@@ -38,12 +38,12 @@ namespace Evoral {
 
 /** An event (much like a type generic jack_midi_event_t)
  *
- * Template parameter T is the type of the time stamp used for this event.
+ * Template parameter Timestamp is the type of the time stamp used for this event.
  */
-template<typename T>
+template<typename Timestamp>
 struct Event {
 #ifdef EVORAL_EVENT_ALLOC
-	Event(EventType type=0, T t=0, uint32_t s=0, uint8_t* b=NULL, bool alloc=false);
+	Event(EventType type=0, Timestamp timestamp=0, uint32_t size=0, uint8_t* buffer=NULL, bool alloc=false);
 	
 	/** Copy \a copy.
 	 * 
@@ -89,7 +89,7 @@ struct Event {
 		_buf  = copy._buf;
 	}
 	
-	inline void set(uint8_t* buf, uint32_t size, T t) {
+	inline void set(uint8_t* buf, uint32_t size, Timestamp t) {
 		if (_owns_buf) {
 			if (_size < size) {
 				_buf = (uint8_t*) ::realloc(_buf, size);
@@ -164,8 +164,8 @@ struct Event {
 
 	inline EventType   event_type()            const { return _type; }
 	inline void        set_event_type(EventType t)   { _type = t; }
-	inline T           time()                  const { return _time; }
-	inline T&          time()                        { return _time; }
+	inline Timestamp   time()                  const { return _time; }
+	inline Timestamp&  time()                        { return _time; }
 	inline uint32_t    size()                  const { return _size; }
 	inline uint32_t&   size()                        { return _size; }
 
@@ -174,7 +174,7 @@ struct Event {
 
 protected:
 	EventType _type; /**< Type of event (application relative, NOT MIDI 'type') */
-	T         _time; /**< Sample index (or beat time) at which event is valid */
+	Timestamp _time; /**< Sample index (or beat time) at which event is valid */
 	uint32_t  _size; /**< Number of uint8_ts of data in \a buffer */
 	uint8_t*  _buf;  /**< Raw MIDI data */
 

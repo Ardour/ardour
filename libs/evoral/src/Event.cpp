@@ -22,26 +22,26 @@ namespace Evoral {
 
 #ifdef EVORAL_EVENT_ALLOC
 
-template<typename T>
-Event<T>::Event(uint32_t tid, T t, uint32_t s, uint8_t* b, bool owns_buf)
-	: _type(tid)
-	, _time(t)
-	, _size(s)
-	, _buf(b)
-	, _owns_buf(owns_buf)
+template<typename Timestamp>
+Event<Timestamp>::Event(EventType type, Timestamp timestamp, uint32_t size, uint8_t* buffer, bool alloc)
+	: _type(type)
+	, _time(timestamp)
+	, _size(size)
+	, _buf(buffer)
+	, _owns_buf(alloc)
 {
-	if (owns_buf) {
+	if (alloc) {
 		_buf = (uint8_t*)malloc(_size);
-		if (b) {
-			memcpy(_buf, b, _size);
+		if (buffer) {
+			memcpy(_buf, buffer, _size);
 		} else {
 			memset(_buf, 0, _size);
 		}
 	}
 }
 
-template<typename T>
-Event<T>::Event(const Event& copy, bool owns_buf)
+template<typename Timestamp>
+Event<Timestamp>::Event(const Event& copy, bool owns_buf)
 	: _type(copy._type)
 	, _time(copy._time)
 	, _size(copy._size)
@@ -58,8 +58,8 @@ Event<T>::Event(const Event& copy, bool owns_buf)
 	}
 }
 
-template<typename T>
-Event<T>::~Event() {
+template<typename Timestamp>
+Event<Timestamp>::~Event() {
 	if (_owns_buf) {
 		free(_buf);
 	}
