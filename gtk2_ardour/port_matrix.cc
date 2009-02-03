@@ -39,6 +39,8 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	: _session (session),
 	  _type (type),
 	  _body (this),
+	  _column_visibility_box_added (false),
+	  _row_visibility_box_added (false),
 	  _menu (0),
 	  _setup_once (false),
 	  _arrangement (TOP_TO_RIGHT),
@@ -111,7 +113,10 @@ PortMatrix::setup ()
 	if (_setup_once) {
 
 		/* we've set up before, so we need to clean up before re-setting-up */
-		
+		/* XXX: we ought to be able to do this by just getting a list of children
+		   from each container widget, but I couldn't make that work */
+
+               
 		for (std::vector<Gtk::CheckButton*>::iterator i = _column_visibility_buttons.begin(); i != _column_visibility_buttons.end(); ++i) {
 			_column_visibility_box.remove (**i);
 			delete *i;
@@ -131,9 +136,13 @@ PortMatrix::setup ()
 		_scroller_table.remove (_hscroll);
 
 		_main_hbox.remove (_scroller_table);
-		_main_hbox.remove (_row_visibility_box);
+		if (_row_visibility_box_added) {
+			_main_hbox.remove (_row_visibility_box);
+		}
 		
-		remove (_column_visibility_box);
+		if (_column_visibility_box_added) {
+			remove (_column_visibility_box);
+		}
 		remove (_main_hbox);
 	}
 
@@ -145,27 +154,22 @@ PortMatrix::setup ()
 		_row_visibility_label.set_text (_("Show Outputs"));
 	}
 
-	/* only show visibility checkbuttons if there is more than one group */
-	if (columns()->size() > 1) {
-		for (PortGroupList::List::const_iterator i = columns()->begin(); i != columns()->end(); ++i) {
-			Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
-			b->set_active ((*i)->visible());
-			boost::weak_ptr<PortGroup> w (*i);
-			b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortMatrix::visibility_toggled), w, b));
-			_column_visibility_buttons.push_back (b);
-			_column_visibility_box.pack_start (*b, Gtk::PACK_SHRINK);
-		}
+	for (PortGroupList::List::const_iterator i = columns()->begin(); i != columns()->end(); ++i) {
+		Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
+		b->set_active ((*i)->visible());
+		boost::weak_ptr<PortGroup> w (*i);
+		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortMatrix::visibility_toggled), w, b));
+		_column_visibility_buttons.push_back (b);
+		_column_visibility_box.pack_start (*b, Gtk::PACK_SHRINK);
 	}
 
-	if (rows()->size() > 1) {
-		for (PortGroupList::List::const_iterator i = rows()->begin(); i != rows()->end(); ++i) {
-			Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
-			b->set_active ((*i)->visible());
-			boost::weak_ptr<PortGroup> w (*i);
-			b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortMatrix::visibility_toggled), w, b));
-			_row_visibility_buttons.push_back (b);
-			_row_visibility_box.pack_start (*b, Gtk::PACK_SHRINK);
-		}
+	for (PortGroupList::List::const_iterator i = rows()->begin(); i != rows()->end(); ++i) {
+		Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
+		b->set_active ((*i)->visible());
+		boost::weak_ptr<PortGroup> w (*i);
+		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortMatrix::visibility_toggled), w, b));
+		_row_visibility_buttons.push_back (b);
+		_row_visibility_box.pack_start (*b, Gtk::PACK_SHRINK);
 	}
 
 	if (_arrangement == TOP_TO_RIGHT) {
@@ -175,9 +179,21 @@ PortMatrix::setup ()
 		_scroller_table.attach (_vscroll, 1, 2, 1, 2, Gtk::SHRINK);
 
 		_main_hbox.pack_start (_scroller_table);
-		_main_hbox.pack_start (_row_visibility_box, Gtk::PACK_SHRINK);
 
-		pack_start (_column_visibility_box, Gtk::PACK_SHRINK);
+		if (rows()->size() > 1) {
+			_main_hbox.pack_start (_row_visibility_box, Gtk::PACK_SHRINK);
+			_row_visibility_box_added = true;
+		} else {
+			_row_visibility_box_added = false;
+		}
+
+		if (columns()->size() > 1) {
+			pack_start (_column_visibility_box, Gtk::PACK_SHRINK);
+			_column_visibility_box_added = true;
+		} else {
+			_column_visibility_box_added = false;
+		}
+		
 		pack_start (_main_hbox);
 		
 	} else {
@@ -185,11 +201,23 @@ PortMatrix::setup ()
 		_scroller_table.attach (_body, 1, 2, 0, 1);
 		_scroller_table.attach (_hscroll, 1, 2, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
-		_main_hbox.pack_start (_row_visibility_box, Gtk::PACK_SHRINK);
+		if (rows()->size() > 1) {
+			_main_hbox.pack_start (_row_visibility_box, Gtk::PACK_SHRINK);
+			_row_visibility_box_added = true;
+		} else {
+			_row_visibility_box_added = false;
+		}
+		
 		_main_hbox.pack_start (_scroller_table);
 
 		pack_start (_main_hbox);
-		pack_start (_column_visibility_box, Gtk::PACK_SHRINK);
+		
+		if (columns()->size() > 1) {
+			pack_start (_column_visibility_box, Gtk::PACK_SHRINK);
+			_column_visibility_box_added = true;
+		} else {
+			_column_visibility_box_added = false;
+		}
 	}
 
 	_setup_once = true;

@@ -145,9 +145,11 @@ private:
 	Gtk::VScrollbar _vscroll;
 	Gtk::HBox _main_hbox;
 	Gtk::HBox _column_visibility_box;
+	bool _column_visibility_box_added;
 	Gtk::Label _column_visibility_label;
 	std::vector<Gtk::CheckButton*> _column_visibility_buttons;
 	Gtk::VBox _row_visibility_box;
+	bool _row_visibility_box_added;
 	Gtk::Label _row_visibility_label;
 	std::vector<Gtk::CheckButton*> _row_visibility_buttons;
 	Gtk::Table _scroller_table;
