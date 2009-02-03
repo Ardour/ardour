@@ -21,7 +21,7 @@
 #define __port_matrix_column_labels_h__
 
 #include <boost/shared_ptr.hpp>
-#include "port_matrix_component.h"
+#include "port_matrix_labels.h"
 
 namespace ARDOUR {
 	class Bundle;
@@ -31,7 +31,7 @@ namespace ARDOUR {
 class PortMatrixNode;
 
 /** The column labels part of the port matrix */
-class PortMatrixColumnLabels : public PortMatrixComponent
+class PortMatrixColumnLabels : public PortMatrixLabels
 {
 public:
 	PortMatrixColumnLabels (PortMatrix *, PortMatrixBody *);
@@ -43,15 +43,17 @@ public:
 	double component_to_parent_y (double y) const;
 	double parent_to_component_y (double y) const;
 	void mouseover_changed (PortMatrixNode const &);
-	void draw_extra (cairo_t *);
 
 private:
+	void render_channel_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
+	double channel_x (ARDOUR::BundleChannel const &) const;
+	double channel_y (ARDOUR::BundleChannel const &) const;
+	void queue_draw_for (ARDOUR::BundleChannel const &);
+	void maybe_popup_context_menu (int, uint32_t);
+	
 	void render (cairo_t *);
 	void compute_dimensions ();
 	double basic_text_x_pos (int) const;
-	void render_port_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
-	double channel_x (ARDOUR::BundleChannel const &) const;
-	void queue_draw_for (PortMatrixNode const &);
 	std::vector<std::pair<double, double> > port_name_shape (double, double) const;
 
 	double slanted_height () const {

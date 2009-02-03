@@ -26,7 +26,7 @@
 #include "i18n.h"
 
 PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* m, PortMatrixBody* b)
-	: PortMatrixComponent (m, b)
+	: PortMatrixLabels (m, b)
 {
 	
 }
@@ -179,7 +179,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	y = 0;
 	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-			render_port_name (cr, get_a_bundle_colour (i - r.begin()), 0, y, ARDOUR::BundleChannel (*i, j));
+			render_channel_name (cr, get_a_bundle_colour (i - r.begin()), 0, y, ARDOUR::BundleChannel (*i, j));
 			y += row_height();
 		}
 	}
@@ -188,10 +188,19 @@ PortMatrixRowLabels::render (cairo_t* cr)
 void
 PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 {
-	if (b != 3) {
-		return;
+	switch (b) {
+	case 1:
+		_body->highlight_associated_channels (_matrix->row_index(), y / row_height ());
+		break;
+	case 3:
+		maybe_popup_context_menu (x, y, t);
+		break;
 	}
+}
 
+void
+PortMatrixRowLabels::maybe_popup_context_menu (double x, double y, uint32_t t)
+{
 	if (!_matrix->can_rename_channels (_matrix->row_index()) &&
 	    !_matrix->can_remove_channels (_matrix->row_index())) {
 		return;
@@ -243,7 +252,7 @@ PortMatrixRowLabels::port_name_x () const
 }
 
 void
-PortMatrixRowLabels::render_port_name (
+PortMatrixRowLabels::render_channel_name (
 	cairo_t* cr, Gdk::Color colour, double xoff, double yoff, ARDOUR::BundleChannel const& bc
 	)
 {
@@ -264,6 +273,12 @@ PortMatrixRowLabels::render_port_name (
 }
 
 double
+PortMatrixRowLabels::channel_x (ARDOUR::BundleChannel const& bc) const
+{
+	return 0;
+}
+
+double
 PortMatrixRowLabels::channel_y (ARDOUR::BundleChannel const& bc) const
 {
 	uint32_t n = 0;
@@ -279,13 +294,13 @@ PortMatrixRowLabels::channel_y (ARDOUR::BundleChannel const& bc) const
 }
 
 void
-PortMatrixRowLabels::queue_draw_for (PortMatrixNode const& n)
+PortMatrixRowLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 {
-	if (n.row.bundle) {
+	if (bc.bundle) {
 
 		_body->queue_draw_area (
 			component_to_parent_x (port_name_x()),
-			component_to_parent_y (channel_y (n.row)),
+			component_to_parent_y (channel_y (bc)),
 			_longest_port_name + name_pad() * 2,
 			row_height()
 			);
@@ -294,22 +309,10 @@ PortMatrixRowLabels::queue_draw_for (PortMatrixNode const& n)
 }
 
 void
-PortMatrixRowLabels::mouseover_changed (PortMatrixNode const& old)
+PortMatrixRowLabels::mouseover_changed (PortMatrixNode const &)
 {
-	queue_draw_for (old);
-	queue_draw_for (_body->mouseover());
-}
-
-void
-PortMatrixRowLabels::draw_extra (cairo_t* cr)
-{
+	clear_channel_highlights ();
 	if (_body->mouseover().row.bundle) {
-		render_port_name (
-			cr,
-			mouseover_port_colour (),
-			component_to_parent_x (0),
-			component_to_parent_y (channel_y (_body->mouseover().row)),
-			_body->mouseover().row
-			);
+		add_channel_highlight (_body->mouseover().row);
 	}
 }

@@ -82,6 +82,10 @@ public:
 	int row_index () const {
 		return _row_index;
 	}
+
+	PortGroupList const * ports (int d) const {
+		return &_ports[d];
+	}
 	
 	virtual void setup ();
 

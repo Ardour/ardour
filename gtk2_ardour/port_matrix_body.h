@@ -59,11 +59,14 @@ public:
 		return _mouseover;
 	}
 
+	void highlight_associated_channels (int, uint32_t);
+
 protected:
 	bool on_expose_event (GdkEventExpose *);
 	void on_size_request (Gtk::Requisition *);
 	void on_size_allocate (Gtk::Allocation &);
 	bool on_button_press_event (GdkEventButton *);
+	bool on_button_release_event (GdkEventButton *);
 	bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_motion_notify_event (GdkEventMotion *);
 	
@@ -87,6 +90,7 @@ private:
 	uint32_t _yoffset;
 
 	PortMatrixNode _mouseover;
+	bool _mouse_over_grid;
 
 	std::list<sigc::connection> _bundle_connections;
 };

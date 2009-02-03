@@ -22,7 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <gdkmm/color.h>
-#include "port_matrix_component.h"
+#include "port_matrix_labels.h"
 
 class PortMatrix;
 class PortMatrixBody;
@@ -38,7 +38,7 @@ namespace Gtk {
 }
 
 /** The row labels part of the port matrix */
-class PortMatrixRowLabels : public PortMatrixComponent
+class PortMatrixRowLabels : public PortMatrixLabels
 {
 public:
 	PortMatrixRowLabels (PortMatrix *, PortMatrixBody *);
@@ -50,17 +50,19 @@ public:
 	double component_to_parent_y (double y) const;
 	double parent_to_component_y (double y) const;
 	void mouseover_changed (PortMatrixNode const &);
-	void draw_extra (cairo_t* cr);
 
 private:
+	void render_channel_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
+	double channel_x (ARDOUR::BundleChannel const &) const;
+	double channel_y (ARDOUR::BundleChannel const &) const;
+	
 	void render (cairo_t *);
 	void compute_dimensions ();
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
-	void render_port_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
-	double channel_y (ARDOUR::BundleChannel const &) const;
-	void queue_draw_for (PortMatrixNode const &);
+	void queue_draw_for (ARDOUR::BundleChannel const &);
 	double port_name_x () const;
+	void maybe_popup_context_menu (double, double, uint32_t);
 
 	double _longest_port_name;
 	double _longest_bundle_name;

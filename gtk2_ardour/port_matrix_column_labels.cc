@@ -24,7 +24,7 @@
 #include "port_matrix.h"
 
 PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b)
-	: PortMatrixComponent (m, b)
+	: PortMatrixLabels (m, b)
 {
 
 }
@@ -235,7 +235,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 
-			render_port_name (cr, get_a_bundle_colour (i - c.begin()), x, 0, ARDOUR::BundleChannel (*i, j));
+			render_channel_name (cr, get_a_bundle_colour (i - c.begin()), x, 0, ARDOUR::BundleChannel (*i, j));
 			x += column_width();
 		}
 	}
@@ -266,23 +266,11 @@ PortMatrixColumnLabels::parent_to_component_y (double y) const
 }
 
 void
-PortMatrixColumnLabels::mouseover_changed (PortMatrixNode const& old)
+PortMatrixColumnLabels::mouseover_changed (PortMatrixNode const &)
 {
-	queue_draw_for (old);
-	queue_draw_for (_body->mouseover());
-}
-
-void
-PortMatrixColumnLabels::draw_extra (cairo_t* cr)
-{
+	clear_channel_highlights ();
 	if (_body->mouseover().column.bundle) {
-		render_port_name (
-			cr,
-			mouseover_port_colour (),
-			component_to_parent_x (channel_x (_body->mouseover().column)),
-			component_to_parent_y (0),
-			_body->mouseover().column
-			);
+		add_channel_highlight (_body->mouseover().column);
 	}
 }
 
@@ -327,7 +315,7 @@ PortMatrixColumnLabels::port_name_shape (double xoff, double yoff) const
 }
 
 void
-PortMatrixColumnLabels::render_port_name (cairo_t* cr, Gdk::Color colour, double xoff, double yoff, ARDOUR::BundleChannel const &bc)
+PortMatrixColumnLabels::render_channel_name (cairo_t* cr, Gdk::Color colour, double xoff, double yoff, ARDOUR::BundleChannel const &bc)
 {
 	std::vector<std::pair<double, double> > const shape = port_name_shape (xoff, yoff);
 
@@ -389,12 +377,18 @@ PortMatrixColumnLabels::channel_x (ARDOUR::BundleChannel const &bc) const
 	return n * column_width();
 }
 
-void
-PortMatrixColumnLabels::queue_draw_for (PortMatrixNode const& n)
+double
+PortMatrixColumnLabels::channel_y (ARDOUR::BundleChannel const &bc) const
 {
-	if (n.column.bundle) {
+	return 0;
+}
+
+void
+PortMatrixColumnLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
+{
+	if (bc.bundle) {
 		
-		double const x = channel_x (n.column);
+		double const x = channel_x (bc);
 		double const lc = _longest_channel_name + name_pad();
 		double const h = lc * sin (angle ()) + column_width() * sin (angle()) * cos (angle());
 		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
@@ -426,15 +420,6 @@ PortMatrixColumnLabels::queue_draw_for (PortMatrixNode const& n)
 void
 PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
 {
-	if (b != 3) {
-		return;
-	}
-
-	if (!_matrix->can_rename_channels (_matrix->column_index()) &&
-	    !_matrix->can_remove_channels (_matrix->column_index())) {
-		return;
-	}
-
 	uint32_t N = _matrix->columns()->total_visible_ports ();
 	uint32_t i = 0;
 	for (; i < N; ++i) {
@@ -454,8 +439,32 @@ PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
 		}
 
 		if (j == 4) {
-			_matrix->popup_channel_context_menu (_matrix->column_index(), i, t);
 			break;
 		}
 	}
+
+	if (i == N) {
+		return;
+	}
+	
+	switch (b) {
+	case 1:
+		_body->highlight_associated_channels (_matrix->column_index(), i);
+		break;
+	case 3:
+		maybe_popup_context_menu (i, t);
+		break;
+	}
+}
+
+
+void
+PortMatrixColumnLabels::maybe_popup_context_menu (int i, uint32_t t)
+{
+	if (!_matrix->can_rename_channels (_matrix->column_index()) &&
+	    !_matrix->can_remove_channels (_matrix->column_index())) {
+		return;
+	}
+
+	_matrix->popup_channel_context_menu (_matrix->column_index(), i, t);
 }

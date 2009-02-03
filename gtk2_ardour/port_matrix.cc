@@ -427,3 +427,4 @@ PortMatrix::rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)
 
 	rename_channel (ARDOUR::BundleChannel (sb, c));
 }
+

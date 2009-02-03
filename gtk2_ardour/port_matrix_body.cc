@@ -29,7 +29,8 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	  _row_labels (p, this),
 	  _grid (p, this),
 	  _xoffset (0),
-	  _yoffset (0)
+	  _yoffset (0),
+	  _mouse_over_grid (false)
 {
 	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
 	add_events (Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
@@ -336,6 +337,20 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 	return true;
 }
 
+bool
+PortMatrixBody::on_button_release_event (GdkEventButton* ev)
+{
+	if (Gdk::Region (_row_labels.parent_rectangle()).point_in (ev->x, ev->y) ||
+	    Gdk::Region (_column_labels.parent_rectangle()).point_in (ev->x, ev->y)) {
+
+		_row_labels.clear_channel_highlights ();
+		_column_labels.clear_channel_highlights ();
+		
+	}
+
+	return true;
+}
+
 void
 PortMatrixBody::rebuild_and_draw_grid ()
 {
@@ -375,6 +390,12 @@ PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
 			_grid.parent_to_component_x (ev->x),
 			_grid.parent_to_component_y (ev->y)
 			);
+		_mouse_over_grid = true;
+	} else {
+		if (_mouse_over_grid) {
+			set_mouseover (PortMatrixNode ());
+			_mouse_over_grid = false;
+		}
 	}
 
 	return true;
@@ -393,4 +414,47 @@ PortMatrixBody::set_mouseover (PortMatrixNode const & n)
 	_grid.mouseover_changed (old);
 	_row_labels.mouseover_changed (old);
 	_column_labels.mouseover_changed (old);
+}
+
+
+
+void
+PortMatrixBody::highlight_associated_channels (int dim, uint32_t N)
+{
+	ARDOUR::BundleChannel bc[2];
+	
+	ARDOUR::BundleList const a = _matrix->ports(dim)->bundles ();
+	for (ARDOUR::BundleList::const_iterator i = a.begin(); i != a.end(); ++i) {
+		if (N < (*i)->nchannels ()) {
+			bc[dim] = ARDOUR::BundleChannel (*i, N);
+			break;
+		} else {
+			N -= (*i)->nchannels ();
+		}
+	}
+
+	if (!bc[dim].bundle) {
+		return;
+	}
+
+	if (dim == _matrix->column_index()) {
+		_column_labels.add_channel_highlight (bc[dim]);
+	} else {
+		_row_labels.add_channel_highlight (bc[dim]);
+	}
+
+	ARDOUR::BundleList const b = _matrix->ports(1 - dim)->bundles ();
+
+	for (ARDOUR::BundleList::const_iterator i = b.begin(); i != b.end(); ++i) {
+	        for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
+			bc[1 - dim] = ARDOUR::BundleChannel (*i, j);
+			if (_matrix->get_state (bc) == PortMatrix::ASSOCIATED) {
+				if (dim == _matrix->column_index()) {
+					_row_labels.add_channel_highlight (bc[1 - dim]);
+				} else {
+					_column_labels.add_channel_highlight (bc[1 - dim]);
+				}
+			}
+		}
+	}
 }

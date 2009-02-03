@@ -141,8 +141,8 @@ protected:
 		return Gdk::Color ("#ff0000");
 	}
 
-	/** @return colour to paint mouseover lines */
-	static Gdk::Color mouseover_port_colour () {
+	/** @return colour to paint channel highlights */
+	static Gdk::Color highlighted_channel_colour () {
 		return Gdk::Color ("#777777");
 	}
 

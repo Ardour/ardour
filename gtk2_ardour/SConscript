@@ -222,6 +222,7 @@ port_matrix_body.cc
 port_matrix_column_labels.cc
 port_matrix_component.cc
 port_matrix_grid.cc
+port_matrix_labels.cc
 port_matrix_row_labels.cc
 processor_box.cc
 prompter.cc
