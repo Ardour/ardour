@@ -130,7 +130,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 {
 	clear ();
 
-	boost::shared_ptr<PortGroup> buss (new PortGroup (_("Buss")));
+	boost::shared_ptr<PortGroup> bus (new PortGroup (_("Bus")));
 	boost::shared_ptr<PortGroup> track (new PortGroup (_("Track")));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("System")));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
@@ -174,7 +174,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 			if (boost::dynamic_pointer_cast<ARDOUR::AudioTrack> (*i)) {
 				g = track;
 			} else if (!boost::dynamic_pointer_cast<ARDOUR::MidiTrack>(*i)) {
-				g = buss;
+				g = bus;
 			} 
 
 
@@ -218,7 +218,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 			
 			std::string const p = ports[n];
 
-			if (!system->has_port(p) && !buss->has_port(p) && !track->has_port(p) && !other->has_port(p)) {
+			if (!system->has_port(p) && !bus->has_port(p) && !track->has_port(p) && !other->has_port(p)) {
 				
 				if (port_has_prefix (p, "system:") ||
 				    port_has_prefix (p, "alsa_pcm") ||
@@ -236,7 +236,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 	}
 
 	add_group (system);
-	add_group (buss);
+	add_group (bus);
 	add_group (track);
 	add_group (other);
 
