@@ -75,6 +75,7 @@ private:
 	void rebuild_and_draw_column_labels ();
 	void rebuild_and_draw_row_labels ();
 	void update_bundles ();
+	void set_cairo_clip (cairo_t *, Gdk::Rectangle const &) const;
 	
 	PortMatrix* _matrix;
 	PortMatrixColumnLabels _column_labels;

@@ -97,9 +97,22 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+
+	cairo_save (cr);
+	set_cairo_clip (cr, _grid.parent_rectangle ());
 	_grid.draw_extra (cr);
+	cairo_restore (cr);
+
+	cairo_save (cr);
+	set_cairo_clip (cr, _row_labels.parent_rectangle ());
 	_row_labels.draw_extra (cr);
+	cairo_restore (cr);
+
+	cairo_save (cr);
+	set_cairo_clip (cr, _column_labels.parent_rectangle ());
 	_column_labels.draw_extra (cr);
+	cairo_restore (cr);
+	
 	cairo_destroy (cr);
 
 	return true;
@@ -457,4 +470,11 @@ PortMatrixBody::highlight_associated_channels (int dim, uint32_t N)
 			}
 		}
 	}
+}
+
+void
+PortMatrixBody::set_cairo_clip (cairo_t* cr, Gdk::Rectangle const & r) const
+{
+	cairo_rectangle (cr, r.get_x(), r.get_y(), r.get_width(), r.get_height());
+	cairo_clip (cr);
 }
