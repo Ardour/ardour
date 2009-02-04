@@ -23,6 +23,7 @@
 #include "ardour/types.h"
 #include "port_matrix_grid.h"
 #include "port_matrix.h"
+#include "port_matrix_body.h"
 
 PortMatrixGrid::PortMatrixGrid (PortMatrix* m, PortMatrixBody* b)
 	: PortMatrixComponent (m, b)

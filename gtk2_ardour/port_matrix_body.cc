@@ -22,20 +22,31 @@
 #include "ardour/types.h"
 #include "port_matrix_body.h"
 #include "port_matrix.h"
+#include "port_matrix_column_labels.h"
+#include "port_matrix_row_labels.h"
+#include "port_matrix_grid.h"
 
 PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	: _matrix (p),
-	  _column_labels (p, this),
-	  _row_labels (p, this),
-	  _grid (p, this),
 	  _xoffset (0),
 	  _yoffset (0),
 	  _mouse_over_grid (false)
 {
+	_column_labels = new PortMatrixColumnLabels (p, this);
+	_row_labels = new PortMatrixRowLabels (p, this);
+	_grid = new PortMatrixGrid (p, this);
+	
 	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
 	add_events (Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
 }
 
+
+PortMatrixBody::~PortMatrixBody ()
+{
+	delete _column_labels;
+	delete _row_labels;
+	delete _grid;
+}
 
 bool
 PortMatrixBody::on_expose_event (GdkEventExpose* event)
@@ -46,15 +57,15 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 
 	bool intersects;
 	Gdk::Rectangle r = exposure;
-	r.intersect (_column_labels.parent_rectangle(), intersects);
+	r.intersect (_column_labels->parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
-			_column_labels.get_pixmap (get_window()->gobj()),
-			_column_labels.parent_to_component_x (r.get_x()),
-			_column_labels.parent_to_component_y (r.get_y()),
+			_column_labels->get_pixmap (get_window()->gobj()),
+			_column_labels->parent_to_component_x (r.get_x()),
+			_column_labels->parent_to_component_y (r.get_y()),
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -63,15 +74,15 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
-	r.intersect (_row_labels.parent_rectangle(), intersects);
+	r.intersect (_row_labels->parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
-			_row_labels.get_pixmap (get_window()->gobj()),
-			_row_labels.parent_to_component_x (r.get_x()),
-			_row_labels.parent_to_component_y (r.get_y()),
+			_row_labels->get_pixmap (get_window()->gobj()),
+			_row_labels->parent_to_component_x (r.get_x()),
+			_row_labels->parent_to_component_y (r.get_y()),
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -80,15 +91,15 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
-	r.intersect (_grid.parent_rectangle(), intersects);
+	r.intersect (_grid->parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
-			_grid.get_pixmap (get_window()->gobj()),
-			_grid.parent_to_component_x (r.get_x()),
-			_grid.parent_to_component_y (r.get_y()),
+			_grid->get_pixmap (get_window()->gobj()),
+			_grid->parent_to_component_x (r.get_x()),
+			_grid->parent_to_component_y (r.get_y()),
 			r.get_x(),
 			r.get_y(),
 			r.get_width(),
@@ -99,18 +110,18 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
 	cairo_save (cr);
-	set_cairo_clip (cr, _grid.parent_rectangle ());
-	_grid.draw_extra (cr);
+	set_cairo_clip (cr, _grid->parent_rectangle ());
+	_grid->draw_extra (cr);
 	cairo_restore (cr);
 
 	cairo_save (cr);
-	set_cairo_clip (cr, _row_labels.parent_rectangle ());
-	_row_labels.draw_extra (cr);
+	set_cairo_clip (cr, _row_labels->parent_rectangle ());
+	_row_labels->draw_extra (cr);
 	cairo_restore (cr);
 
 	cairo_save (cr);
-	set_cairo_clip (cr, _column_labels.parent_rectangle ());
-	_column_labels.draw_extra (cr);
+	set_cairo_clip (cr, _column_labels->parent_rectangle ());
+	_column_labels->draw_extra (cr);
 	cairo_restore (cr);
 	
 	cairo_destroy (cr);
@@ -121,9 +132,9 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 void
 PortMatrixBody::on_size_request (Gtk::Requisition *req)
 {
-	std::pair<int, int> const col = _column_labels.dimensions ();
-	std::pair<int, int> const row = _row_labels.dimensions ();
-	std::pair<int, int> const grid = _grid.dimensions ();
+	std::pair<int, int> const col = _column_labels->dimensions ();
+	std::pair<int, int> const row = _row_labels->dimensions ();
+	std::pair<int, int> const grid = _grid->dimensions ();
 
 	/* don't ask for the maximum size of our contents, otherwise GTK won't
 	   let the containing window shrink below this size */
@@ -148,9 +159,9 @@ void
 PortMatrixBody::compute_rectangles ()
 {
 	/* full sizes of components */
-	std::pair<uint32_t, uint32_t> const col = _column_labels.dimensions ();
-	std::pair<uint32_t, uint32_t> const row = _row_labels.dimensions ();
-	std::pair<uint32_t, uint32_t> const grid = _grid.dimensions ();
+	std::pair<uint32_t, uint32_t> const col = _column_labels->dimensions ();
+	std::pair<uint32_t, uint32_t> const row = _row_labels->dimensions ();
+	std::pair<uint32_t, uint32_t> const grid = _grid->dimensions ();
 
 	Gdk::Rectangle col_rect;
 	Gdk::Rectangle row_rect;
@@ -239,9 +250,9 @@ PortMatrixBody::compute_rectangles ()
 		row_rect.set_y (grid_rect.get_y());
 	}
 
-	_row_labels.set_parent_rectangle (row_rect);
-	_column_labels.set_parent_rectangle (col_rect);
-	_grid.set_parent_rectangle (grid_rect);
+	_row_labels->set_parent_rectangle (row_rect);
+	_column_labels->set_parent_rectangle (col_rect);
+	_grid->set_parent_rectangle (grid_rect);
 }
 
 void
@@ -272,9 +283,9 @@ PortMatrixBody::setup ()
 			);
 	}
 	
-	_column_labels.setup ();
-	_row_labels.setup ();
-	_grid.setup ();
+	_column_labels->setup ();
+	_row_labels->setup ();
+	_grid->setup ();
 
 	set_mouseover (PortMatrixNode ());
 	compute_rectangles ();
@@ -283,26 +294,26 @@ PortMatrixBody::setup ()
 uint32_t
 PortMatrixBody::full_scroll_width ()
 {
-	return _grid.dimensions().first;
+	return _grid->dimensions().first;
 
 }
 
 uint32_t
 PortMatrixBody::alloc_scroll_width ()
 {
-	return _grid.parent_rectangle().get_width();
+	return _grid->parent_rectangle().get_width();
 }
 
 uint32_t
 PortMatrixBody::full_scroll_height ()
 {
-	return _grid.dimensions().second;
+	return _grid->dimensions().second;
 }
 
 uint32_t
 PortMatrixBody::alloc_scroll_height ()
 {
-	return _grid.parent_rectangle().get_height();
+	return _grid->parent_rectangle().get_height();
 }
 
 void
@@ -322,27 +333,27 @@ PortMatrixBody::set_yoffset (uint32_t yo)
 bool
 PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 {
-	if (Gdk::Region (_grid.parent_rectangle()).point_in (ev->x, ev->y)) {
+	if (Gdk::Region (_grid->parent_rectangle()).point_in (ev->x, ev->y)) {
 
-		_grid.button_press (
-			_grid.parent_to_component_x (ev->x),
-			_grid.parent_to_component_y (ev->y),
+		_grid->button_press (
+			_grid->parent_to_component_x (ev->x),
+			_grid->parent_to_component_y (ev->y),
 			ev->button
 			);
 
-	} else if (Gdk::Region (_row_labels.parent_rectangle()).point_in (ev->x, ev->y)) {
+	} else if (Gdk::Region (_row_labels->parent_rectangle()).point_in (ev->x, ev->y)) {
 
-		_row_labels.button_press (
-			_row_labels.parent_to_component_x (ev->x),
-			_row_labels.parent_to_component_y (ev->y),
+		_row_labels->button_press (
+			_row_labels->parent_to_component_x (ev->x),
+			_row_labels->parent_to_component_y (ev->y),
 			ev->button, ev->time
 			);
 	
-	} else if (Gdk::Region (_column_labels.parent_rectangle()).point_in (ev->x, ev->y)) {
+	} else if (Gdk::Region (_column_labels->parent_rectangle()).point_in (ev->x, ev->y)) {
 
-		_column_labels.button_press (
-			_column_labels.parent_to_component_x (ev->x),
-			_column_labels.parent_to_component_y (ev->y),
+		_column_labels->button_press (
+			_column_labels->parent_to_component_x (ev->x),
+			_column_labels->parent_to_component_y (ev->y),
 			ev->button, ev->time
 			);
 	}
@@ -353,11 +364,11 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 bool
 PortMatrixBody::on_button_release_event (GdkEventButton* ev)
 {
-	if (Gdk::Region (_row_labels.parent_rectangle()).point_in (ev->x, ev->y) ||
-	    Gdk::Region (_column_labels.parent_rectangle()).point_in (ev->x, ev->y)) {
+	if (Gdk::Region (_row_labels->parent_rectangle()).point_in (ev->x, ev->y) ||
+	    Gdk::Region (_column_labels->parent_rectangle()).point_in (ev->x, ev->y)) {
 
-		_row_labels.clear_channel_highlights ();
-		_column_labels.clear_channel_highlights ();
+		_row_labels->clear_channel_highlights ();
+		_column_labels->clear_channel_highlights ();
 		
 	}
 
@@ -367,21 +378,21 @@ PortMatrixBody::on_button_release_event (GdkEventButton* ev)
 void
 PortMatrixBody::rebuild_and_draw_grid ()
 {
-	_grid.require_rebuild ();
+	_grid->require_rebuild ();
 	queue_draw ();
 }
 
 void
 PortMatrixBody::rebuild_and_draw_column_labels ()
 {
-	_column_labels.require_rebuild ();
+	_column_labels->require_rebuild ();
 	queue_draw ();
 }
 
 void
 PortMatrixBody::rebuild_and_draw_row_labels ()
 {
-	_row_labels.require_rebuild ();
+	_row_labels->require_rebuild ();
 	queue_draw ();
 }
 
@@ -398,10 +409,10 @@ PortMatrixBody::on_leave_notify_event (GdkEventCrossing* ev)
 bool
 PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
 {
-	if (Gdk::Region (_grid.parent_rectangle()).point_in (ev->x, ev->y)) {
-		_grid.mouseover_event (
-			_grid.parent_to_component_x (ev->x),
-			_grid.parent_to_component_y (ev->y)
+	if (Gdk::Region (_grid->parent_rectangle()).point_in (ev->x, ev->y)) {
+		_grid->mouseover_event (
+			_grid->parent_to_component_x (ev->x),
+			_grid->parent_to_component_y (ev->y)
 			);
 		_mouse_over_grid = true;
 	} else {
@@ -424,9 +435,9 @@ PortMatrixBody::set_mouseover (PortMatrixNode const & n)
 	PortMatrixNode old = _mouseover;
 	_mouseover = n;
 	
-	_grid.mouseover_changed (old);
-	_row_labels.mouseover_changed (old);
-	_column_labels.mouseover_changed (old);
+	_grid->mouseover_changed (old);
+	_row_labels->mouseover_changed (old);
+	_column_labels->mouseover_changed (old);
 }
 
 
@@ -451,9 +462,9 @@ PortMatrixBody::highlight_associated_channels (int dim, uint32_t N)
 	}
 
 	if (dim == _matrix->column_index()) {
-		_column_labels.add_channel_highlight (bc[dim]);
+		_column_labels->add_channel_highlight (bc[dim]);
 	} else {
-		_row_labels.add_channel_highlight (bc[dim]);
+		_row_labels->add_channel_highlight (bc[dim]);
 	}
 
 	ARDOUR::BundleList const b = _matrix->ports(1 - dim)->bundles ();
@@ -463,9 +474,9 @@ PortMatrixBody::highlight_associated_channels (int dim, uint32_t N)
 			bc[1 - dim] = ARDOUR::BundleChannel (*i, j);
 			if (_matrix->get_state (bc) == PortMatrix::ASSOCIATED) {
 				if (dim == _matrix->column_index()) {
-					_row_labels.add_channel_highlight (bc[1 - dim]);
+					_row_labels->add_channel_highlight (bc[1 - dim]);
 				} else {
-					_column_labels.add_channel_highlight (bc[1 - dim]);
+					_column_labels->add_channel_highlight (bc[1 - dim]);
 				}
 			}
 		}

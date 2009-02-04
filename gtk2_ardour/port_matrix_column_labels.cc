@@ -22,6 +22,7 @@
 #include "ardour/types.h"
 #include "port_matrix_column_labels.h"
 #include "port_matrix.h"
+#include "port_matrix_body.h"
 
 PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b)
 	: PortMatrixLabels (m, b)

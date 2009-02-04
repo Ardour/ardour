@@ -29,6 +29,7 @@
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "port_matrix.h"
+#include "port_matrix_body.h"
 #include "i18n.h"
 
 /** PortMatrix constructor.
@@ -38,7 +39,6 @@
 PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	: _session (session),
 	  _type (type),
-	  _body (this),
 	  _column_visibility_box_added (false),
 	  _row_visibility_box_added (false),
 	  _menu (0),
@@ -47,6 +47,8 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	  _row_index (0),
 	  _column_index (1)
 {
+	_body = new PortMatrixBody (this);
+	
 	_ports[0].set_type (type);
 	_ports[1].set_type (type);
 
@@ -66,6 +68,8 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 
 PortMatrix::~PortMatrix ()
 {
+	delete _body;
+	
 	for (std::vector<Gtk::CheckButton*>::iterator i = _column_visibility_buttons.begin(); i != _column_visibility_buttons.end(); ++i) {
 		delete *i;
 	}
@@ -106,7 +110,7 @@ void
 PortMatrix::setup ()
 {
 	select_arrangement ();
-	_body.setup ();
+	_body->setup ();
 	setup_scrollbars ();
 	queue_draw ();
 
@@ -132,7 +136,7 @@ PortMatrix::setup ()
 		_row_visibility_buttons.clear ();
 		
 		_scroller_table.remove (_vscroll);
-		_scroller_table.remove (_body);
+		_scroller_table.remove (*_body);
 		_scroller_table.remove (_hscroll);
 
 		_main_hbox.remove (_scroller_table);
@@ -175,7 +179,7 @@ PortMatrix::setup ()
 	if (_arrangement == TOP_TO_RIGHT) {
 	  
 		_scroller_table.attach (_hscroll, 0, 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-		_scroller_table.attach (_body, 0, 1, 1, 2);
+		_scroller_table.attach (*_body, 0, 1, 1, 2);
 		_scroller_table.attach (_vscroll, 1, 2, 1, 2, Gtk::SHRINK);
 
 		_main_hbox.pack_start (_scroller_table);
@@ -198,7 +202,7 @@ PortMatrix::setup ()
 		
 	} else {
 		_scroller_table.attach (_vscroll, 0, 1, 0, 1, Gtk::SHRINK);
-		_scroller_table.attach (_body, 1, 2, 0, 1);
+		_scroller_table.attach (*_body, 1, 2, 0, 1);
 		_scroller_table.attach (_hscroll, 1, 2, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
 		if (rows()->size() > 1) {
@@ -237,13 +241,13 @@ PortMatrix::set_type (ARDOUR::DataType t)
 void
 PortMatrix::hscroll_changed ()
 {
-	_body.set_xoffset (_hscroll.get_adjustment()->get_value());
+	_body->set_xoffset (_hscroll.get_adjustment()->get_value());
 }
 
 void
 PortMatrix::vscroll_changed ()
 {
-	_body.set_yoffset (_vscroll.get_adjustment()->get_value());
+	_body->set_yoffset (_vscroll.get_adjustment()->get_value());
 }
 
 void
@@ -251,15 +255,15 @@ PortMatrix::setup_scrollbars ()
 {
 	Gtk::Adjustment* a = _hscroll.get_adjustment ();
 	a->set_lower (0);
-	a->set_upper (_body.full_scroll_width());
-	a->set_page_size (_body.alloc_scroll_width());
+	a->set_upper (_body->full_scroll_width());
+	a->set_page_size (_body->alloc_scroll_width());
 	a->set_step_increment (32);
 	a->set_page_increment (128);
 
 	a = _vscroll.get_adjustment ();
 	a->set_lower (0);
-	a->set_upper (_body.full_scroll_height());
-	a->set_page_size (_body.alloc_scroll_height());
+	a->set_upper (_body->full_scroll_height());
+	a->set_page_size (_body->alloc_scroll_height());
 	a->set_step_increment (32);
 	a->set_page_increment (128);
 }
@@ -288,7 +292,7 @@ PortMatrix::disassociate_all ()
 		}
 	}
 
-	_body.rebuild_and_draw_grid ();
+	_body->rebuild_and_draw_grid ();
 }
 
 /* Decide how to arrange the components of the matrix */
@@ -347,7 +351,7 @@ PortMatrix::visibility_toggled (boost::weak_ptr<PortGroup> w, Gtk::CheckButton* 
 	}
 	
 	g->set_visible (b->get_active());
-	_body.setup ();
+	_body->setup ();
 	setup_scrollbars ();
 	queue_draw ();
 }

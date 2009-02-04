@@ -20,13 +20,14 @@
 #ifndef __gtk_ardour_port_matrix_body_h__
 #define __gtk_ardour_port_matrix_body_h__
 
-#include "port_matrix_column_labels.h"
-#include "port_matrix_row_labels.h"
-#include "port_matrix_grid.h"
+#include <gtkmm/eventbox.h>
 #include "port_group.h"
 #include "port_matrix_types.h"
 
 class PortMatrix;
+class PortMatrixColumnLabels;
+class PortMatrixRowLabels;
+class PortMatrixGrid;
 
 /** The main body of the port matrix.  It is made up of three parts:
  *  column labels, grid and row labels, each drawn using cairo.
@@ -35,6 +36,7 @@ class PortMatrixBody : public Gtk::EventBox
 {
 public:
 	PortMatrixBody (PortMatrix *);
+	~PortMatrixBody ();
 
 	void setup ();
 
@@ -78,9 +80,9 @@ private:
 	void set_cairo_clip (cairo_t *, Gdk::Rectangle const &) const;
 	
 	PortMatrix* _matrix;
-	PortMatrixColumnLabels _column_labels;
-	PortMatrixRowLabels _row_labels;
-	PortMatrixGrid _grid;
+	PortMatrixColumnLabels* _column_labels;
+	PortMatrixRowLabels* _row_labels;
+	PortMatrixGrid* _grid;
 
 	uint32_t _alloc_width; ///< allocated width
 	uint32_t _alloc_height; ///< allocated height

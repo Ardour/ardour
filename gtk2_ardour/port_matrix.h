@@ -27,7 +27,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/checkbutton.h>
 #include <boost/shared_ptr.hpp>
-#include "port_matrix_body.h"
+#include "ardour/bundle.h"
 #include "port_group.h"
 
 /** The `port matrix' UI.  This is a widget which lets the user alter
@@ -42,6 +42,8 @@
 namespace ARDOUR {
 	class Bundle;
 }
+
+class PortMatrixBody;
 
 class PortMatrix : public Gtk::VBox
 {
@@ -144,7 +146,7 @@ private:
 	ARDOUR::DataType _type;
 	std::vector<sigc::connection> _route_connections;
 
-	PortMatrixBody _body;
+	PortMatrixBody* _body;
 	Gtk::HScrollbar _hscroll;
 	Gtk::VScrollbar _vscroll;
 	Gtk::HBox _main_hbox;
