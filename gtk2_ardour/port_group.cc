@@ -110,7 +110,6 @@ PortGroup::total_ports () const
 	
 /** PortGroupList constructor.
  */
-
 PortGroupList::PortGroupList ()
 	: _type (ARDOUR::DataType::AUDIO), _bundles_dirty (true)
 {

@@ -56,14 +56,19 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 		);
 
 	bool intersects;
+	
 	Gdk::Rectangle r = exposure;
+	/* the get_pixmap call may cause things to be rerendered and sizes to change,
+	   so fetch the pixmaps before calculating where to put it */
+	GdkPixmap* p = _column_labels->get_pixmap (get_window()->gobj());
 	r.intersect (_column_labels->parent_rectangle(), intersects);
 
 	if (intersects) {
+
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
-			_column_labels->get_pixmap (get_window()->gobj()),
+			p,
 			_column_labels->parent_to_component_x (r.get_x()),
 			_column_labels->parent_to_component_y (r.get_y()),
 			r.get_x(),
@@ -74,13 +79,14 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
+	p = _row_labels->get_pixmap (get_window()->gobj());
 	r.intersect (_row_labels->parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
-			_row_labels->get_pixmap (get_window()->gobj()),
+			p,
 			_row_labels->parent_to_component_x (r.get_x()),
 			_row_labels->parent_to_component_y (r.get_y()),
 			r.get_x(),
@@ -91,13 +97,14 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	r = exposure;
+	p = _grid->get_pixmap (get_window()->gobj());
 	r.intersect (_grid->parent_rectangle(), intersects);
 
 	if (intersects) {
 		gdk_draw_drawable (
 			get_window()->gobj(),
 			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
-			_grid->get_pixmap (get_window()->gobj()),
+			p,
 			_grid->parent_to_component_x (r.get_x()),
 			_grid->parent_to_component_y (r.get_y()),
 			r.get_x(),
@@ -489,3 +496,11 @@ PortMatrixBody::set_cairo_clip (cairo_t* cr, Gdk::Rectangle const & r) const
 	cairo_rectangle (cr, r.get_x(), r.get_y(), r.get_width(), r.get_height());
 	cairo_clip (cr);
 }
+
+void
+PortMatrixBody::component_size_changed ()
+{
+	compute_rectangles ();
+	_matrix->setup_scrollbars ();
+}
+

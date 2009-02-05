@@ -17,8 +17,9 @@
 
 */
 
-#include <iostream>
 #include "port_matrix_component.h"
+#include "port_matrix.h"
+#include "port_matrix_body.h"
 
 /** Constructor.
  *  @param p Port matrix that we're in.
@@ -56,6 +57,7 @@ PortMatrixComponent::get_pixmap (GdkDrawable *drawable)
 		if (_dimension_computation_required) {
 			compute_dimensions ();
 			_dimension_computation_required = false;
+			_body->component_size_changed ();
 		}
 
 		/* we may be zero width or height; if so, just
@@ -102,6 +104,7 @@ PortMatrixComponent::dimensions ()
 	if (_dimension_computation_required) {
 		compute_dimensions ();
 		_dimension_computation_required = false;
+		_body->component_size_changed ();
 	}
 
 	return std::make_pair (_width, _height);

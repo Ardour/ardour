@@ -24,7 +24,7 @@ void
 PortMatrixLabels::draw_extra (cairo_t* cr)
 {
 	for (std::vector<ARDOUR::BundleChannel>::const_iterator i = _channel_highlights.begin(); i != _channel_highlights.end(); ++i) {
-		
+
 		render_channel_name (
 			cr,
 			highlighted_channel_colour(),

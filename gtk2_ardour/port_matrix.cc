@@ -88,6 +88,7 @@ PortMatrix::reconnect_to_routes ()
 	for (std::vector<sigc::connection>::iterator i = _route_connections.begin(); i != _route_connections.end(); ++i) {
 		i->disconnect ();
 	}
+	_route_connections.clear ();
 
 	boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
 	for (ARDOUR::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
@@ -119,7 +120,6 @@ PortMatrix::setup ()
 		/* we've set up before, so we need to clean up before re-setting-up */
 		/* XXX: we ought to be able to do this by just getting a list of children
 		   from each container widget, but I couldn't make that work */
-
                
 		for (std::vector<Gtk::CheckButton*>::iterator i = _column_visibility_buttons.begin(); i != _column_visibility_buttons.end(); ++i) {
 			_column_visibility_box.remove (**i);
@@ -431,4 +431,3 @@ PortMatrix::rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)
 
 	rename_channel (ARDOUR::BundleChannel (sb, c));
 }
-
