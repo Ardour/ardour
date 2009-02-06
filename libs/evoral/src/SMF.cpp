@@ -249,10 +249,33 @@ SMF<T>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 		}
 	}
 	
-	const int event_size = midi_event_size((unsigned char)status);
+	int event_size = midi_event_size((unsigned char)status);
 	if (event_size <= 0) {
-		*size = 0;
-		return 0;
+		// if sysex, determine the size of the event
+		if ((status & 0xF0) == MIDI_CMD_COMMON_SYSEX) {
+			fpos_t after_sysex_status_byte_position;
+			int success = fgetpos(_fd, &after_sysex_status_byte_position);
+			assert(success == 0);
+			event_size = 1;
+			
+			while(true) {
+				int byte = fgetc(_fd);
+				if (byte == EOF) {
+					// premature end
+					return -1;
+				}
+				++event_size;
+				if ((byte & 0xff) == MIDI_CMD_COMMON_SYSEX_END) {
+					break;
+				}
+			}
+			
+			success = fsetpos(_fd, &after_sysex_status_byte_position);
+			assert(success == 0);
+		} else {
+			*size = 0;
+			return 0;
+		}
 	}
 	
 	// Make sure we have enough scratch buffer
@@ -265,11 +288,11 @@ SMF<T>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	if (event_size > 1)
 		fread((*buf) + 1, 1, *size - 1, _fd);
 
-	/*printf("SMF %s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
+	printf("SMF read event: delta = %u, size = %u, data = ",  *delta_t, *size);
 	for (size_t i=0; i < *size; ++i) {
 		printf("%X ", (*buf)[i]);
 	}
-	printf("\n");*/
+	printf("\n");
 	
 	return (int)*size;
 }

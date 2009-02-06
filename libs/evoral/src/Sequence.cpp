@@ -62,8 +62,8 @@ struct null_ostream : public std::ostream {
 };
 static null_ostream nullout;
 
-//static ostream& debugout = cout;
-static ostream& debugout = nullout;
+static ostream& debugout = cout;
+//static ostream& debugout = nullout;
 static ostream& errorout = cerr;
 
 // Read iterator (const_iterator)
@@ -91,6 +91,18 @@ Sequence<T>::const_iterator::const_iterator(const Sequence<T>& seq, T t)
 			break;
 		}
 	}
+	assert(_note_iter == seq.notes().end() || (*_note_iter)->time() >= t);
+	
+	// find first sysex which begins after t
+	_sysex_iter = seq.sysexes().end();
+	for (typename Sequence<T>::SysExes::const_iterator i = seq.sysexes().begin();
+			i != seq.sysexes().end(); ++i) {
+		if ((*i)->time() >= t) {
+			_sysex_iter = i;
+			break;
+		}
+	}
+	assert(_sysex_iter == seq.sysexes().end() || (*_sysex_iter)->time() >= t);
 
 	ControlIterator earliest_control(boost::shared_ptr<ControlList>(), DBL_MAX, 0.0);
 
@@ -130,19 +142,65 @@ Sequence<T>::const_iterator::const_iterator(const Sequence<T>& seq, T t)
 			// now _control_iter points to the last Element in _control_iters
 		}
 	}
+	
+#define MAKE_SURE_ADDING_SYSEXES_PRESERVES_OLD_SEMANTICS 1
+#if MAKE_SURE_ADDING_SYSEXES_PRESERVES_OLD_SEMANTICS
+	MIDIMessageType original_type       = NIL;
+	assert (!earliest_control.list || earliest_control.x >= t);
+	
+	       if (_note_iter != seq.notes().end()
+	                       && (*_note_iter)->on_event().time() >= t
+	                       && (!earliest_control.list
+	                               || (*_note_iter)->on_event().time() < earliest_control.x)) {
+	    	   original_type = NOTE_ON;
+	       } else {
+	    	   original_type = CONTROL;
+	       }
+#endif
+	
+	MIDIMessageType type       = NIL;
+	T       earliest_t = t;
 
-	if (_note_iter != seq.notes().end()
-			&& (*_note_iter)->on_event().time() >= t
-			&& (!earliest_control.list
-				|| (*_note_iter)->on_event().time() < earliest_control.x)) {
-		debugout << "Reading note on event @ " << (*_note_iter)->on_event().time() << endl;
-		_event = boost::shared_ptr< Event<T> >(new Event<T>((*_note_iter)->on_event(), true));
+	// if the note comes before anything else set the iterator to the note
+	if (_note_iter != seq.notes().end() && (*_note_iter)->on_event().time() >= t) {
+		type = NOTE_ON;
+		earliest_t = (*_note_iter)->on_event().time();
+	}
+	     
+	if (earliest_control.list && 
+	    earliest_control.x >= t &&
+	    earliest_control.x <= earliest_t) {
+		type = CONTROL;
+		earliest_t = earliest_control.x;
+	}
+	
+	if (_sysex_iter != seq.sysexes().end() &&
+	    (*_sysex_iter)->time() >= t &&
+	    (*_sysex_iter)->time() <= earliest_t) {
+		type = SYSEX;
+		earliest_t = (*_sysex_iter)->time();
+	}
+	
+#if MAKE_SURE_ADDING_SYSEXES_PRESERVES_OLD_SEMANTICS
+	assert (type == original_type || type == SYSEX);
+#endif
+	
+	if (type == NOTE_ON) {
+		debugout << "Reading note on event @ " << earliest_t << endl;
+		// initialize the event pointer with a new event
+		_event = boost::shared_ptr< Event<T> >(new Event<T>((*_note_iter)->on_event(), true));		
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 		_control_iter = _control_iters.end();
-	} else if (earliest_control.list) {
-		debugout << "Reading control event @ " << earliest_control.x << endl;
+	} else if (type == CONTROL) {
+		debugout << "Reading control event @ " << earliest_t << endl;
 		seq.control_to_midi_event(_event, earliest_control);
+	} else if (type == SYSEX) {
+		debugout << "Reading system exclusive event @ " << earliest_t << endl;
+		// initialize the event pointer with a new event
+		_event = boost::shared_ptr< Event<T> >(new Event<T>(*(*_sysex_iter), true));
+		++_sysex_iter;
+		_control_iter = _control_iters.end();		
 	}
 
 	if ( (! _event.get()) || _event->size() == 0) {
@@ -189,11 +247,19 @@ Sequence<T>::const_iterator::operator++()
 	//debugout << "const_iterator::operator++: " << _event->to_string() << endl;
 
 	if (! (ev.is_note() || ev.is_cc() || ev.is_pgm_change()
-				|| ev.is_pitch_bender() || ev.is_channel_pressure()) ) {
+				|| ev.is_pitch_bender() || ev.is_channel_pressure() || ev.is_sysex()) ) {
 		errorout << "Unknown event type: " << hex << int(ev.buffer()[0])
 			<< int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
-	assert((ev.is_note() || ev.is_cc() || ev.is_pgm_change() || ev.is_pitch_bender() || ev.is_channel_pressure()));
+	
+	assert((
+	        ev.is_note() || 
+	        ev.is_cc() || 
+	        ev.is_pgm_change() || 
+	        ev.is_pitch_bender() || 
+	        ev.is_channel_pressure() ||
+	        ev.is_sysex()
+	      ));
 
 	// Increment past current control event
 	if (!ev.is_note() && _control_iter != _control_iters.end() && _control_iter->list.get()) {
@@ -222,29 +288,36 @@ Sequence<T>::const_iterator::operator++()
 		}
 	}
 
-	enum Type { NIL, NOTE_ON, NOTE_OFF, CONTROL };
-
-	Type type = NIL;
-	T    t    = 0;
+	MIDIMessageType type       = NIL;
+	T       earliest_t = 0;
 
 	// Next earliest note on
 	if (_note_iter != _seq->notes().end()) {
 		type = NOTE_ON;
-		t = (*_note_iter)->time();
+		earliest_t = (*_note_iter)->time();
 	}
 
 	// Use the next earliest note off iff it's earlier than the note on
 	if (!_seq->percussive() && (! _active_notes.empty())) {
-		if (type == NIL || _active_notes.top()->end_time() <= t) {
+		if (type == NIL || _active_notes.top()->end_time() <= earliest_t) {
 			type = NOTE_OFF;
-			t = _active_notes.top()->end_time();
+			earliest_t = _active_notes.top()->end_time();
 		}
 	}
 
 	// Use the next earliest controller iff it's earlier than the note event
 	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX) {
-		if (type == NIL || _control_iter->x < t) {
+		if (type == NIL || _control_iter->x <= earliest_t) {
 			type = CONTROL;
+			earliest_t = _control_iter->x;
+		}
+	}
+	
+	// Use the next earliest SysEx iff it's earlier than the controller
+	if (_sysex_iter != _seq->sysexes().end()) {
+		if (type == NIL || (*_sysex_iter)->time() <= earliest_t) {
+			type = SYSEX;
+			earliest_t = (*_sysex_iter)->time();
 		}
 	}
 
@@ -260,6 +333,10 @@ Sequence<T>::const_iterator::operator++()
 	} else if (type == CONTROL) {
 		debugout << "Iterator = control" << endl;
 		_seq->control_to_midi_event(_event, *_control_iter);
+	} else if (type == SYSEX) {
+		debugout << "Iterator = SysEx" << endl;
+		*_event =*(*_sysex_iter);
+		++_sysex_iter;
 	} else {
 		debugout << "Iterator = End" << endl;
 		_is_end = true;
@@ -294,6 +371,7 @@ Sequence<T>::const_iterator::operator=(const const_iterator& other)
 	_is_end        = other._is_end;
 	_locked        = other._locked;
 	_note_iter     = other._note_iter;
+	_sysex_iter    = other._sysex_iter;
 	_control_iters = other._control_iters;
 	size_t index   = other._control_iter - other._control_iters.begin();
 	_control_iter  = _control_iters.begin() + index;
@@ -388,6 +466,8 @@ Sequence<T>::control_to_midi_event(boost::shared_ptr< Event<T> >& ev, const Cont
 {
 	assert(iter.list.get());
 	const uint32_t event_type = iter.list->parameter().type();
+	
+	// initialize the event pointer with a new event, if necessary
 	if (!ev) {
 		ev = boost::shared_ptr< Event<T> >(new Event<T>(event_type, 0, 3, NULL, true));
 	}
@@ -552,6 +632,8 @@ Sequence<T>::append(const Event<T>& event)
 				ev.velocity());
 	} else if (ev.is_note_off()) {
 		append_note_off_unlocked(ev.channel(), ev.time(), ev.note());
+	} else if (ev.is_sysex()) {
+		append_sysex_unlocked(ev);
 	} else if (!_type_map.type_is_midi(ev.event_type())) {
 		printf("WARNING: Sequence: Unknown event type %X: ", ev.event_type());
 		for (size_t i=0; i < ev.size(); ++i) {
@@ -656,6 +738,20 @@ Sequence<T>::append_control_unlocked(const Parameter& param, T time, double valu
 			<< " # controls: " << _controls.size() << endl;
 	boost::shared_ptr<Control> c = control(param, true);
 	c->list()->rt_add(time, value);
+}
+
+template<typename T>
+void
+Sequence<T>::append_sysex_unlocked(const MIDIEvent<T>& ev)
+{
+	debugout << this << " SysEx @ " << ev.time() << " \t= \t [ " << hex;
+	for (size_t i=0; i < ev.size(); ++i) {
+		debugout << int(ev.buffer()[i]) << " ";
+	}
+	debugout << "]" << endl;
+
+	boost::shared_ptr<MIDIEvent<T> > event(new MIDIEvent<T>(ev, true));
+	_sysexes.push_back(event);
 }
 
 template<typename T>

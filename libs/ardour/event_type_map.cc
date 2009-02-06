@@ -52,6 +52,7 @@ EventTypeMap::parameter_midi_type(const Evoral::Parameter& param) const
 	case MidiPgmChangeAutomation:       return MIDI_CMD_PGM_CHANGE; break; 
 	case MidiChannelPressureAutomation: return MIDI_CMD_CHANNEL_PRESSURE; break; 
 	case MidiPitchBenderAutomation:     return MIDI_CMD_BENDER; break; 
+	case MidiSystemExclusiveAutomation: return MIDI_CMD_COMMON_SYSEX; break;
 	default: return 0;
 	}
 }
@@ -64,6 +65,7 @@ EventTypeMap::midi_event_type(uint8_t status) const
 	case MIDI_CMD_PGM_CHANGE:       return MidiPgmChangeAutomation; break;
 	case MIDI_CMD_CHANNEL_PRESSURE: return MidiChannelPressureAutomation; break;
 	case MIDI_CMD_BENDER:           return MidiPitchBenderAutomation; break;
+	case MIDI_CMD_COMMON_SYSEX:     return MidiSystemExclusiveAutomation; break;
 	default: return 0;
 	}
 }

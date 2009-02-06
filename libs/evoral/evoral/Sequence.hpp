@@ -111,6 +111,11 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
+	// useful for storing SysEx / Meta events
+	typedef std::vector< boost::shared_ptr< Event<T> > > SysExes;
+	inline       SysExes& sysexes()       { return _sysexes; }
+	inline const SysExes& sysexes() const { return _sysexes; }
+
 	/** Read iterator */
 	class const_iterator {
 	public:
@@ -132,6 +137,8 @@ public:
 
 	private:
 		friend class Sequence<T>;
+		
+		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX };
 
 		const Sequence<T>*            _seq;
 		boost::shared_ptr< Event<T> > _event;
@@ -145,17 +152,18 @@ public:
 
 		typedef std::vector<ControlIterator> ControlIterators;
 
-		bool                           _is_end;
-		bool                           _locked;
-		typename Notes::const_iterator _note_iter;
-		ControlIterators               _control_iters;
-		ControlIterators::iterator     _control_iter;
+		bool                             _is_end;
+		bool                             _locked;
+		typename Notes::const_iterator   _note_iter;
+		typename SysExes::const_iterator _sysex_iter;
+		ControlIterators                 _control_iters;
+		ControlIterators::iterator       _control_iter;
 	};
 	
 	const_iterator        begin(T t=0) const { return const_iterator(*this, t); }
 	const const_iterator& end()        const { return _end_iter; }
 	
-	void read_seek(T t)    { _read_iter = begin(t); }
+	void         read_seek(T t)    { _read_iter = begin(t); }
 	T    read_time() const { return _read_iter.valid() ? _read_iter->time() : 0.0; }
 
 	bool control_to_midi_event(boost::shared_ptr< Event<T> >& ev,
@@ -184,12 +192,15 @@ private:
 	void append_note_on_unlocked(uint8_t chan, T time, uint8_t note, uint8_t velocity);
 	void append_note_off_unlocked(uint8_t chan, T time, uint8_t note);
 	void append_control_unlocked(const Parameter& param, T time, double value);
+	void append_sysex_unlocked(const MIDIEvent<T>& ev);
 
 	mutable Glib::RWLock _lock;
 
 	const TypeMap& _type_map;
 	
 	Notes _notes;
+	
+	SysExes _sysexes;
 	
 	typedef std::vector<size_t> WriteNotes;
 	WriteNotes _write_notes[16];
