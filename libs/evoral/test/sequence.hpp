@@ -75,7 +75,7 @@ public:
 	sigc::signal<uint32_t, Time, EventType, uint32_t, const uint8_t*> writing;
 	
 	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) {
-		writing(time, type, size, buf);
+		return writing(time, type, size, buf);
 	}
 };
 

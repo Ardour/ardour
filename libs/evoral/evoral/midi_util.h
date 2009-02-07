@@ -84,7 +84,7 @@ midi_event_size(uint8_t* buffer)
 	
 	if (status == MIDI_CMD_COMMON_SYSEX) {
 		int end;
-		for (end = 1; buffer[end] != MIDI_CMD_COMMON_SYSEX_END; end++);
+		for (end = 1; buffer[end] != MIDI_CMD_COMMON_SYSEX_END; end++) {}
 		assert(buffer[end] == MIDI_CMD_COMMON_SYSEX_END);
 		return end + 1;
 	} else {
