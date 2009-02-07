@@ -1,6 +1,16 @@
 #include <evoral/Sequence.hpp>
 #include <evoral/TypeMap.hpp>
 
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+
+#include <cppunit/CompilerOutputter.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
+#include <cppunit/TestResult.h>
+#include <cppunit/TestResultCollector.h>
+#include <cppunit/TestRunner.h>
+#include <cppunit/BriefTestProgressListener.h>
+
 using namespace Evoral;
 
 class DummyTypeMap : public TypeMap {
@@ -28,13 +38,47 @@ public:
 	boost::shared_ptr<Control> control_factory(const Parameter& param) {return boost::shared_ptr<Control>();}
 };
 
+class SequenceTest : public CPPUNIT_NS::TestFixture
+{
+    CPPUNIT_TEST_SUITE (SequenceTest);
+    CPPUNIT_TEST (createTest);
+    CPPUNIT_TEST_SUITE_END ();
+
+    public:
+        void setUp (void) {
+        	Glib::thread_init();
+        }
+        
+        void tearDown (void);
+
+    protected:
+        void createTest (void) {
+        	DummyTypeMap type_map;
+        	MySequence<double> s(type_map, 100);
+        }
+
+    private:
+};
+
 
 int
 main()
 {
-	Glib::thread_init();
-	DummyTypeMap type_map;
 
-	MySequence<double> s(type_map, 100);
-	return 0;
+    CPPUNIT_NS::TestResult testresult;
+
+    CPPUNIT_NS::TestResultCollector collectedresults;
+    testresult.addListener (&collectedresults);
+
+    CPPUNIT_NS::BriefTestProgressListener progress;
+    testresult.addListener (&progress);
+
+    CPPUNIT_NS::TestRunner testrunner;
+    testrunner.addTest (CPPUNIT_NS::TestFactoryRegistry::getRegistry ().makeTest ());
+    testrunner.run (testresult);
+
+    CPPUNIT_NS::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
+    compileroutputter.write ();
+
+    return collectedresults.wasSuccessful () ? 0 : 1;
 }
