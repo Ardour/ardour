@@ -16,6 +16,13 @@ EVORAL_LIB_VERSION = '0.0.0'
 APPNAME = 'evoral'
 VERSION = EVORAL_VERSION
 
+# Custom variables
+DEBUG = True
+if DEBUG:
+	cxxflags = '-g'
+else:
+	cxxflags = ''
+
 # Mandatory variables
 srcdir = '.'
 blddir = 'build'
@@ -58,6 +65,7 @@ def build(bld):
 	obj.target       = 'evoral'
 	obj.uselib       = 'GLIBMM GTHREAD'
 	obj.vnum         = EVORAL_LIB_VERSION
+	obj.cxxflags     = cxxflags
 	obj.install_path = ''
 	
 	# Unit tests
@@ -70,7 +78,9 @@ def build(bld):
 	obj.uselib_local = 'libevoral'
 	obj.uselib       = 'CPPUNIT'
 	obj.target       = 'run-tests'
+	obj.cxxflags     = cxxflags
 	obj.install_path = ''
+
 
 def shutdown():
 	autowaf.shutdown()

@@ -5,10 +5,13 @@
 #include <cppunit/TestRunner.h>
 #include <cppunit/BriefTestProgressListener.h>
 
+#include <glibmm.h>
 
 int
 main()
 {
+	Glib::thread_init();
+	
     CppUnit::TestResult testresult;
 
     CppUnit::TestResultCollector collectedresults;

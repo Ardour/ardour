@@ -3,46 +3,121 @@
 
 #include <evoral/Sequence.hpp>
 #include <evoral/TypeMap.hpp>
+#include <evoral/EventSink.hpp>
+#include <evoral/midi_events.h>
+#include <evoral/Control.hpp>
+
+#include <sigc++/sigc++.h>
+
+#include <cassert>
 
 
 using namespace Evoral;
 
 class DummyTypeMap : public TypeMap {
 public:
-	virtual ~DummyTypeMap() {}
-
-	virtual bool type_is_midi(uint32_t type) const {return true;}
-
-	virtual uint8_t parameter_midi_type(const Parameter& param) const {return 0;}
 	
-	virtual uint32_t midi_event_type(uint8_t status) const {return 0;}
+	enum DummyEventType {
+		NOTE,
+		CONTROL,
+		SYSEX
+	};
 	
-	virtual bool is_integer(const Evoral::Parameter& param) const {return true;}
+	~DummyTypeMap() {}
 
-	virtual Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const {return Parameter(type, channel, id);}
+	bool type_is_midi(uint32_t type) const {return true;}
 
-	virtual std::string to_symbol(const Parameter& param) const {return "foo";}
+	uint8_t parameter_midi_type(const Parameter& param) const {
+		switch (param.type()) {
+		case CONTROL:		return MIDI_CMD_CONTROL;
+		case SYSEX:			return MIDI_CMD_COMMON_SYSEX;
+		default:			return 0;
+		};		
+	}
+	
+	uint32_t midi_event_type(uint8_t status) const {
+		status &= 0xf0;
+		switch (status) {
+		case MIDI_CMD_CONTROL:			return CONTROL;
+		case MIDI_CMD_COMMON_SYSEX:		return SYSEX;			
+		default:						return 0;
+		};
+	}
+	
+	bool is_integer(const Evoral::Parameter& param) const {return true;}
+
+	Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const {
+		Parameter p(type, channel, id);
+		p.set_range(type, 0.0f, 1.0f, 0.0f);
+		return p;
+	}
+
+	std::string to_symbol(const Parameter& param) const {return "control";}
 };
 
 template<typename Time>
 class MySequence : public Sequence<Time> {
 public:
 	MySequence(DummyTypeMap&map, int size) : Sequence<Time>(map, size) {}
+	
+	boost::shared_ptr<Control> control_factory(const Parameter& param) {
+		
+		return boost::shared_ptr<Control>(
+			new Control(param, boost::shared_ptr<ControlList> (
+				new ControlList(param)
+		)));
+	}
+};
 
-	boost::shared_ptr<Control> control_factory(const Parameter& param) {return boost::shared_ptr<Control>();}
+template<typename Time>
+class TestSink : public EventSink<Time> {
+public:
+	sigc::signal<uint32_t, Time, EventType, uint32_t, const uint8_t*> writing;
+	
+	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) {
+		writing(time, type, size, buf);
+	}
 };
 
 class SequenceTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE (SequenceTest);
     CPPUNIT_TEST (createTest);
+    CPPUNIT_TEST (preserveEventOrderingTest);
     CPPUNIT_TEST_SUITE_END ();
 
     public:
-        void setUp (void) { Glib::thread_init(); }
-        void tearDown (void) {}
+    
+    	typedef double Time;
+       	typedef std::vector<boost::shared_ptr<Note<Time> > > Notes;
+       	
+        void setUp (void) { 
+        	std::cerr << "SetUp" << std::endl;
+        	type_map = new DummyTypeMap();
+           	assert(type_map);
+           	seq = new MySequence<Time>(*type_map, 0);
+           	assert(seq);
+           	
+           	for(int i = 0; i < 12; i++) {
+           		test_notes.push_back(boost::shared_ptr<Note<Time> >
+					(new Note<Time>(0, i * 100, 100, 64 + i, 64)));
+           	}
+        }
+        
+        void tearDown (void) {
+        	test_notes.clear();
+        	delete seq;
+        	delete type_map;
+        }
 
         void createTest (void);
+        void preserveEventOrderingTest (void);
 
     private:
+       	DummyTypeMap*       type_map;
+       	MySequence<Time>*   seq;
+       	
+       	Notes test_notes;
+       	       	
+       	
 };
