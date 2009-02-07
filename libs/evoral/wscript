@@ -28,7 +28,7 @@ def configure(conf):
 	autowaf.check_tool(conf, 'compiler_cxx')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0', mandatory=True)
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0', mandatory=True)
-	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
+	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
 
 def build(bld):
 	# Headers
@@ -62,11 +62,14 @@ def build(bld):
 	
 	# Unit tests
 	obj              = bld.new_task_gen('cxx', 'program')
-	obj.source       = 'test/sequence.cpp'
+	obj.source       = '''
+		test/sequence.cpp
+		test/testrunner.cpp
+	'''
 	obj.includes     = ['.', './src']
 	obj.uselib_local = 'libevoral'
 	obj.uselib       = 'CPPUNIT'
-	obj.target       = 'sequence'
+	obj.target       = 'run-tests'
 	obj.install_path = ''
 
 def shutdown():
