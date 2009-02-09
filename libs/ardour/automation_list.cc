@@ -65,6 +65,7 @@ AutomationList::AutomationList (Evoral::Parameter id)
 AutomationList::AutomationList (const AutomationList& other)
 	: ControlList(other)
 {
+	_style = other._style;
 	_state = other._state;
 	_touching = other._touching;
 	
@@ -232,7 +233,7 @@ AutomationList::state (bool full)
 	root->add_property ("max-yval", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _max_xval);
 	root->add_property ("max-xval", buf);
-	
+
 	root->add_property ("interpolation-style", enum_2_string (_interpolation));
 
 	if (full) {
