@@ -63,7 +63,7 @@ def build(bld):
 	# Unit tests
 	obj              = bld.new_task_gen('cxx', 'program')
 	obj.source       = '''
-		test/sequence.cpp
+		test/SequenceTest.cpp
 		test/testrunner.cpp
 	'''
 	obj.includes     = ['.', './src']
