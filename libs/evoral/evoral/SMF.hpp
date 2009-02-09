@@ -56,6 +56,9 @@ protected:
 	int  open(const std::string& path);
 	void close();
 	
+	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
+
+private:
 	/** Used by flush_footer() to find the position to write the footer */
 	void seek_to_footer_position();
 	
@@ -66,9 +69,7 @@ protected:
 	void     write_chunk(const char id[4], uint32_t length, void* data);
 	size_t   write_var_len(uint32_t val);
 	uint32_t read_var_len() const;
-	int      read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
 
-private:
 	static const uint16_t _ppqn = 19200;
 
 	FILE*    _fd;
