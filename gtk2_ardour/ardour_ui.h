@@ -173,7 +173,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_theme_manager ();
 	void toggle_bundle_manager ();
 	void toggle_big_clock_window ();
-	void toggle_connection_editor ();
 	void toggle_route_params_window ();
 	void toggle_editing_space();
 
@@ -620,9 +619,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	BundleManager *bundle_manager;
 	void create_bundle_manager ();
-
-	ConnectionEditor *connection_editor;
-	int               create_connection_editor ();
 
 	LocationUI *location_ui;
 	int         create_location_ui ();

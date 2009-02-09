@@ -27,7 +27,6 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
-#include "connection_editor.h"
 #include "location_ui.h"
 #include "mixer_ui.h"
 #include "option_editor.h"
@@ -92,10 +91,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 	rec_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
 	
-	if (connection_editor) {
-		connection_editor->set_session (s);
-	}
-
 	if (location_ui) {
 		location_ui->set_session(s);
 	}
@@ -217,45 +212,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	update_buffer_load ();
 
 	return 0;
-}
-
-int
-ARDOUR_UI::create_connection_editor ()
-{
-#if 0
-	if (connection_editor == 0) {
-		connection_editor = new ConnectionEditor ();
-		connection_editor->signal_unmap().connect (sigc::bind (ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleConnections")));
-	}
-
-	if (session) {
-		connection_editor->set_session (session);
-	}
-#endif
-
-	return 0;
-}
-
-void
-ARDOUR_UI::toggle_connection_editor ()
-{
-	if (create_connection_editor()) {
-		return;
-	}
-
-#if 0
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleConnections"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
-		if (tact->get_active()) {
-			connection_editor->show_all ();
-			connection_editor->present ();
-		} else {
-			connection_editor->hide ();
-		} 
-	}
-#endif
 }
 
 void
