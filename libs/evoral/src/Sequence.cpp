@@ -219,6 +219,8 @@ Sequence<T>::const_iterator::const_iterator(const Sequence<T>& seq, T t)
 		debugout << " : " << hex << (int)((MIDIEvent<T>*)_event.get())->type();
 		debugout << " @ " <<  _event->time() << endl;
 	}
+	
+	assert(_event && _event->size() > 0);
 
 	//assert(_is_end || (_event->buffer() && _event->buffer()[0] != '\0'));
 }
@@ -240,7 +242,7 @@ Sequence<T>::const_iterator::operator++()
 	}
 	
 	debugout << "Iterator ++" << endl;
-	assert(_event->buffer() && _event->size() > 0);
+	assert(_event && _event->buffer() && _event->size() > 0);
 	
 	const MIDIEvent<T>& ev = *((MIDIEvent<T>*)_event.get());
 

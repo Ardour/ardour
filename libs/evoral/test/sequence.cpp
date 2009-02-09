@@ -13,6 +13,7 @@ SequenceTest::createTest (void)
        	CPPUNIT_ASSERT(seq->notes().begin() == seq->notes().end());
 }
 
+
 void 
 SequenceTest::preserveEventOrderingTest (void)
 {
@@ -50,6 +51,7 @@ SequenceTest::preserveEventOrderingTest (void)
 	seq->end_write();
 
 	TestSink<Time> sink;
+	sink.writing.connect(sigc::mem_fun(&sink, &TestSink<Time>::assertLastEventTimeLessOrEqualEventTime));
 
 	seq->read(sink, timestamp_t(0), timedur_t(1200), timestamp_t(0));
 	

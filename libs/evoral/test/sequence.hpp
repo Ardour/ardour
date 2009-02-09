@@ -29,18 +29,18 @@ public:
 
 	uint8_t parameter_midi_type(const Parameter& param) const {
 		switch (param.type()) {
-		case CONTROL:		return MIDI_CMD_CONTROL;
-		case SYSEX:			return MIDI_CMD_COMMON_SYSEX;
-		default:			return 0;
+		case CONTROL:       return MIDI_CMD_CONTROL;
+		case SYSEX:         return MIDI_CMD_COMMON_SYSEX;
+		default:            return 0;
 		};		
 	}
 	
 	uint32_t midi_event_type(uint8_t status) const {
 		status &= 0xf0;
 		switch (status) {
-		case MIDI_CMD_CONTROL:			return CONTROL;
-		case MIDI_CMD_COMMON_SYSEX:		return SYSEX;			
-		default:						return 0;
+		case MIDI_CMD_CONTROL:          return CONTROL;
+		case MIDI_CMD_COMMON_SYSEX:     return SYSEX;			
+		default:                        return 0;
 		};
 	}
 	
@@ -72,11 +72,27 @@ public:
 template<typename Time>
 class TestSink : public EventSink<Time> {
 public:
+	TestSink() : _last_event_time(-1) {}
+	
+	/// return value, time, type, size, buffer
 	sigc::signal<uint32_t, Time, EventType, uint32_t, const uint8_t*> writing;
 	
 	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) {
-		return writing(time, type, size, buf);
+		std::cerr << "last event time: " << _last_event_time << " time: " << time << std::endl;
+		uint32_t result = writing(time, type, size, buf);
+		_last_event_time = time;
+		return result;
 	}
+	
+   	uint32_t assertLastEventTimeLessOrEqualEventTime(
+   		Time time, EventType type, uint32_t size, const uint8_t* buf) {
+   		assert(_last_event_time <= time);
+   	}
+	
+	Time last_event_time() const { return _last_event_time; }
+	
+private:
+	Time _last_event_time;
 };
 
 class SequenceTest : public CppUnit::TestFixture
@@ -118,6 +134,4 @@ class SequenceTest : public CppUnit::TestFixture
        	MySequence<Time>*   seq;
        	
        	Notes test_notes;
-       	       	
-       	
 };
