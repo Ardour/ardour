@@ -23,6 +23,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/bundle.h"
+#include "ardour/user_bundle.h"
 #include "ardour/io_processor.h"
 #include "ardour/midi_track.h"
 #include "ardour/port.h"
@@ -36,6 +37,15 @@
 using namespace std;
 using namespace Gtk;
 
+/** PortGroup constructor.
+ * @param n Name.
+ */
+PortGroup::PortGroup (std::string const & n)
+	: name (n), _visible (true)
+{
+	
+}
+
 /** Add a bundle to a group.
  *  @param b Bundle.
  */
@@ -45,25 +55,47 @@ PortGroup::add_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
 	assert (b.get());
 	_bundles.push_back (b);
 
+	_bundle_changed_connections[b] = 
+		b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
+	
 	Modified ();
 }
 
-/** Add a port to a group.
- *  @param p Port.
- */
 void
-PortGroup::add_port (std::string const &p)
+PortGroup::remove_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
 {
-	ports.push_back (p);
+	assert (b.get());
 
+	ARDOUR::BundleList::iterator i = std::find (_bundles.begin(), _bundles.end(), b);
+	if (i == _bundles.end()) {
+		return;
+	}
+
+	_bundles.erase (i);
+	_bundle_changed_connections[b].disconnect ();
+	
 	Modified ();
 }
+
+void
+PortGroup::bundle_changed (ARDOUR::Bundle::Change c)
+{
+	BundleChanged (c);
+}
+
 
 void
 PortGroup::clear ()
 {
 	_bundles.clear ();
-	ports.clear ();
+
+	for (ConnectionList::iterator i = _bundle_changed_connections.begin(); i != _bundle_changed_connections.end(); ++i) {
+
+		i->second.disconnect ();
+
+	}
+	
+	_bundle_changed_connections.clear ();
 
 	Modified ();
 }
@@ -73,12 +105,6 @@ PortGroup::has_port (std::string const& p) const
 {
 	for (ARDOUR::BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
 		if ((*i)->offers_port_alone (p)) {
-			return true;
-		}
-	}
-
-	for (vector<std::string>::const_iterator i = ports.begin(); i != ports.end(); ++i) {
-		if (*i == p) {
 			return true;
 		}
 	}
@@ -95,14 +121,12 @@ PortGroup::only_bundle ()
 
 
 uint32_t
-PortGroup::total_ports () const
+PortGroup::total_channels () const
 {
 	uint32_t n = 0;
 	for (ARDOUR::BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
 		n += (*i)->nchannels ();
 	}
-
-	n += ports.size();
 
 	return n;
 }
@@ -111,7 +135,7 @@ PortGroup::total_ports () const
 /** PortGroupList constructor.
  */
 PortGroupList::PortGroupList ()
-	: _type (ARDOUR::DataType::AUDIO), _bundles_dirty (true)
+	: _type (ARDOUR::DataType::AUDIO), _signals_suspended (false), _pending_change (false)
 {
 	
 }
@@ -134,20 +158,20 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("System")));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
-	/* Find the bundles for routes.  We take their bundles, copy them,
-	   and add ports from the route's processors */
+	/* Find the bundles for routes.  We use the RouteBundle class to join
+	   the route's IO bundles and processor bundles together so that they
+	   are presented as one bundle in the matrix. */
 
 	boost::shared_ptr<ARDOUR::RouteList> routes = session.get_routes ();
 
 	for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
-		/* Copy the appropriate bundle from the route */
-		boost::shared_ptr<ARDOUR::Bundle> bundle (
-			new ARDOUR::Bundle (
-				inputs ? (*i)->bundle_for_inputs() : (*i)->bundle_for_outputs ()
+
+		boost::shared_ptr<RouteBundle> rb (
+			new RouteBundle (
+				inputs ? (*i)->bundle_for_inputs() : (*i)->bundle_for_outputs()
 				)
 			);
 
-		/* Add ports from the route's processors */
 		uint32_t n = 0;
 		while (1) {
 			boost::shared_ptr<ARDOUR::Processor> p = (*i)->nth_processor (n);
@@ -158,9 +182,10 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 			boost::shared_ptr<ARDOUR::IOProcessor> iop = boost::dynamic_pointer_cast<ARDOUR::IOProcessor> (p);
 
 			if (iop) {
-				boost::shared_ptr<ARDOUR::Bundle> pb = inputs ?
-					iop->io()->bundle_for_inputs() : iop->io()->bundle_for_outputs();
-				bundle->add_channels_from_bundle (pb);
+				rb->add_processor_bundle (
+					inputs ? iop->io()->bundle_for_inputs() : iop->io()->bundle_for_outputs()
+					);
+					
 			}
 
 			++n;
@@ -187,21 +212,28 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 		} 
 			
 		if (g) {
-			g->add_bundle (bundle);
+			g->add_bundle (rb);
 		}
 	}
 
-	/* Bundles created by the session.  We only add the mono ones,
+	/* Bundles owned by the session.  We only add the mono ones and the User ones
 	   otherwise there is duplication of the same ports within the matrix */
 	
 	boost::shared_ptr<ARDOUR::BundleList> b = session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->nchannels() == 1 && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
-			system->add_bundle (*i);
+		if ((*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
+
+			if ((*i)->nchannels() == 1 || boost::dynamic_pointer_cast<ARDOUR::UserBundle> (*i)) {
+				system->add_bundle (*i);
+			}
+		
 		}
 	}
 
 	/* Now find all other ports that we haven't thought of yet */
+
+	std::vector<std::string> extra_system;
+	std::vector<std::string> extra_other;
 
  	const char **ports = session.engine().get_ports ("", _type.to_jack_type(), inputs ? 
  							  JackPortIsInput : JackPortIsOutput);
@@ -222,9 +254,9 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 				if (port_has_prefix (p, "system:") ||
 				    port_has_prefix (p, "alsa_pcm") ||
 				    port_has_prefix (p, "ardour:")) {
-					system->add_port (p);
+					extra_system.push_back (p);
 				} else {
-					other->add_port (p);
+					extra_other.push_back (p);
 				}
 			}
 			
@@ -234,12 +266,38 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 		free (ports);
 	}
 
+	if (!extra_system.empty()) {
+		system->add_bundle (make_bundle_from_ports (extra_system, inputs));
+	}
+
+	if (!extra_other.empty()) {
+		other->add_bundle (make_bundle_from_ports (extra_other, inputs));
+	}
+
 	add_group (system);
 	add_group (bus);
 	add_group (track);
 	add_group (other);
 
-	_bundles_dirty = true;
+	emit_changed ();
+}
+
+boost::shared_ptr<ARDOUR::Bundle>
+PortGroupList::make_bundle_from_ports (std::vector<std::string> const & p, bool inputs) const
+{
+	boost::shared_ptr<ARDOUR::Bundle> b (new ARDOUR::Bundle ("", _type, inputs));
+
+	std::string const pre = common_prefix (p);
+	if (!pre.empty()) {
+		b->set_name (pre.substr (0, pre.length() - 1));
+	}
+
+	for (uint32_t j = 0; j < p.size(); ++j) {
+		b->add_channel (p[j].substr (pre.length()));
+		b->set_port (j, p[j]);
+	}
+
+	return b;
 }
 
 bool
@@ -247,75 +305,47 @@ PortGroupList::port_has_prefix (const std::string& n, const std::string& p) cons
 {
 	return n.substr (0, p.length()) == p;
 }
-	
 
-void
-PortGroupList::update_bundles () const
+std::string
+PortGroupList::common_prefix_before (std::vector<std::string> const & p, std::string const & s) const
 {
-	_bundles.clear ();
-		
-	for (PortGroupList::List::const_iterator i = begin (); i != end (); ++i) {
-		if ((*i)->visible()) {
-			
-			std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
-
-			/* make a bundle for the ports, if there are any */
-			if (!(*i)->ports.empty()) {
-
-				boost::shared_ptr<ARDOUR::Bundle> b (new ARDOUR::Bundle ("", _type, !_offer_inputs));
-				
-				std::string const pre = common_prefix ((*i)->ports);
-				if (!pre.empty()) {
-					b->set_name (pre.substr (0, pre.length() - 1));
-				}
-
-				for (uint32_t j = 0; j < (*i)->ports.size(); ++j) {
-					std::string const p = (*i)->ports[j];
-					b->add_channel (p.substr (pre.length()));
-					b->set_port (j, p);
-				}
-					
-				_bundles.push_back (b);
-			}
-		}
+	/* we must have some strings and the first must contain the separator string */
+	if (p.empty() || p[0].find_first_of (s) == std::string::npos) {
+		return "";
 	}
 
-	_bundles_dirty = false;
+	/* prefix of the first string */
+	std::string const fp = p[0].substr (0, p[0].find_first_of (s) + 1);
+
+	/* see if the other strings also start with fp */
+	uint32_t j = 1;
+	while (j < p.size()) {
+		if (p[j].substr (0, fp.length()) != fp) {
+			break;
+		}
+		++j;
+	}
+
+	if (j != p.size()) {
+		return "";
+	}
+
+	return fp;
 }
+	
 
 std::string
 PortGroupList::common_prefix (std::vector<std::string> const & p) const
 {
 	/* common prefix before '/' ? */
-	if (p[0].find_first_of ("/") != std::string::npos) {
-		std::string const fp = p[0].substr (0, (p[0].find_first_of ("/") + 1));
-		uint32_t j = 1;
-		while (j < p.size()) {
-			if (p[j].substr (0, fp.length()) != fp) {
-				break;
-			}
-			++j;
-		}
-		
-		if (j == p.size()) {
-			return fp;
-		}
+	std::string cp = common_prefix_before (p, "/");
+	if (!cp.empty()) {
+		return cp;
 	}
-	
-	/* or before ':' ? */
-	if (p[0].find_first_of (":") != std::string::npos) {
-		std::string const fp = p[0].substr (0, (p[0].find_first_of (":") + 1));
-		uint32_t j = 1;
-		while (j < p.size()) {
-			if (p[j].substr (0, fp.length()) != fp) {
-				break;
-			}
-			++j;
-		}
-		
-		if (j == p.size()) {
-			return fp;
-		}
+
+	cp = common_prefix_before (p, ":");
+	if (!cp.empty()) {
+		return cp;
 	}
 
 	return "";
@@ -325,43 +355,134 @@ void
 PortGroupList::clear ()
 {
 	_groups.clear ();
-	_bundles_dirty = true;
+
+	for (std::vector<sigc::connection>::iterator i = _bundle_changed_connections.begin(); i != _bundle_changed_connections.end(); ++i) {
+		i->disconnect ();
+	}
+
+	_bundle_changed_connections.clear ();
+
+	emit_changed ();
 }
+
 
 ARDOUR::BundleList const &
 PortGroupList::bundles () const
 {
-	if (_bundles_dirty) {
-		update_bundles ();
+	_bundles.clear ();
+
+	for (PortGroupList::List::const_iterator i = begin (); i != end (); ++i) {
+		if ((*i)->visible()) {
+			std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
+		}
 	}
 
 	return _bundles;
 }
 
 uint32_t
-PortGroupList::total_visible_ports () const
+PortGroupList::total_visible_channels () const
 {
 	uint32_t n = 0;
 	
 	for (PortGroupList::List::const_iterator i = begin(); i != end(); ++i) {
 		if ((*i)->visible()) {
-			n += (*i)->total_ports ();
+			n += (*i)->total_channels ();
 		}
 	}
 
 	return n;
 }
 
-void
-PortGroupList::group_modified ()
-{
-	_bundles_dirty = true;
-}
 
 void
 PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
 {
 	_groups.push_back (g);
-	g->Modified.connect (sigc::mem_fun (*this, &PortGroupList::group_modified));
-	_bundles_dirty = true;
+	
+	g->Modified.connect (sigc::mem_fun (*this, &PortGroupList::emit_changed));
+	
+	_bundle_changed_connections.push_back (
+		g->BundleChanged.connect (sigc::hide (sigc::mem_fun (*this, &PortGroupList::emit_changed)))
+		);
+
+	emit_changed ();
 }
+
+void
+PortGroupList::remove_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
+{
+	for (List::iterator i = _groups.begin(); i != _groups.end(); ++i) {
+		(*i)->remove_bundle (b);
+	}
+
+	emit_changed ();
+}
+
+void
+PortGroupList::emit_changed ()
+{
+	if (_signals_suspended) {
+		_pending_change = true;
+	} else {
+		Changed ();
+	}
+}
+		
+void
+PortGroupList::suspend_signals ()
+{
+	_signals_suspended = true;
+}
+
+void
+PortGroupList::resume_signals ()
+{
+	if (_pending_change) {
+		Changed ();
+		_pending_change = false;
+	}
+
+	_signals_suspended = false;
+}
+
+RouteBundle::RouteBundle (boost::shared_ptr<ARDOUR::Bundle> r)
+	: _route (r)
+{
+	_route->Changed.connect (sigc::hide (sigc::mem_fun (*this, &RouteBundle::reread_component_bundles)));
+	reread_component_bundles ();
+}
+
+void
+RouteBundle::reread_component_bundles ()
+{
+	suspend_signals ();
+	
+	remove_channels ();
+
+	set_name (_route->name());
+
+	for (uint32_t i = 0; i < _route->nchannels(); ++i) {
+		add_channel (_route->channel_name (i));
+		PortList const & pl = _route->channel_ports (i);
+		for (uint32_t j = 0; j < pl.size(); ++j) {
+			add_port_to_channel (i, pl[j]);
+		}
+	}
+		
+	for (std::vector<boost::shared_ptr<ARDOUR::Bundle> >::iterator i = _processor.begin(); i != _processor.end(); ++i) {
+		add_channels_from_bundle (*i);
+	}
+
+	resume_signals ();
+}
+
+void
+RouteBundle::add_processor_bundle (boost::shared_ptr<ARDOUR::Bundle> p)
+{
+	p->Changed.connect (sigc::hide (sigc::mem_fun (*this, &RouteBundle::reread_component_bundles)));
+	_processor.push_back (p);
+	
+	reread_component_bundles ();
+}
+	

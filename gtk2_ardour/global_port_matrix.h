@@ -29,7 +29,7 @@ class GlobalPortMatrix : public PortMatrix
 public:
 	GlobalPortMatrix (ARDOUR::Session&, ARDOUR::DataType);
 
-	void setup ();
+	void setup_ports (int);
 	
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	State get_state (ARDOUR::BundleChannel c[2]) const;
@@ -41,6 +41,10 @@ public:
 	void remove_channel (ARDOUR::BundleChannel) {}
 	bool can_rename_channels (int d) const {
 		return false;
+	}
+
+	bool list_is_global (int) const {
+		return true;
 	}
 
 private:

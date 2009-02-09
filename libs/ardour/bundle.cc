@@ -30,11 +30,57 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+/** Construct an audio bundle.
+ *  @param i true if ports are inputs, otherwise false.
+ */
+Bundle::Bundle (bool i)
+	: _type (DataType::AUDIO),
+	  _ports_are_inputs (i),
+	  _signals_suspended (false),
+	  _pending_change (Change (0))
+{
+
+}
+
+
+/** Construct an audio bundle.
+ *  @param n Name.
+ *  @param i true if ports are inputs, otherwise false.
+ */
+Bundle::Bundle (std::string const & n, bool i)
+	: _name (n),
+	  _type (DataType::AUDIO),
+	  _ports_are_inputs (i),
+	  _signals_suspended (false),
+	  _pending_change (Change (0))
+{
+
+}
+
+
+/** Construct a bundle.
+ *  @param n Name.
+ *  @param t Type.
+ *  @param i true if ports are inputs, otherwise false.
+ */
+Bundle::Bundle (std::string const & n, DataType t, bool i)
+	: _name (n),
+	  _type (t),
+	  _ports_are_inputs (i),
+	  _signals_suspended (false),
+	  _pending_change (Change (0))
+{
+
+}
+
+
 Bundle::Bundle (boost::shared_ptr<Bundle> other)
 	: _channel (other->_channel),
 	  _name (other->_name),
 	  _type (other->_type),
-	  _ports_are_inputs (other->_ports_are_inputs)
+	  _ports_are_inputs (other->_ports_are_inputs),
+	  _signals_suspended (other->_signals_suspended),
+	  _pending_change (other->_pending_change)
 {
 	
 }
@@ -69,8 +115,8 @@ Bundle::add_port_to_channel (uint32_t ch, string portname)
 		Glib::Mutex::Lock lm (_channel_mutex);
 		_channel[ch].ports.push_back (portname);
 	}
-	
-	PortsChanged (ch); /* EMIT SIGNAL */
+
+	emit_changed (PortsChanged);
 }
 
 /** Disassociate a port from one of our channels.
@@ -96,19 +142,9 @@ Bundle::remove_port_from_channel (uint32_t ch, string portname)
 	}
 
 	if (changed) {
-		 PortsChanged (ch); /* EMIT SIGNAL */
+		emit_changed (PortsChanged);
 	}
 }
-
-/** operator== for Bundles; they are equal if their channels are the same.
- * @param other Bundle to compare with this one.
- */
-bool
-Bundle::operator== (const Bundle& other) const
-{
-	return other._channel == _channel;
-}
-
 
 /** Set a single port to be associated with a channel, removing any others.
  *  @param ch Channel.
@@ -126,7 +162,7 @@ Bundle::set_port (uint32_t ch, string portname)
 		_channel[ch].ports.push_back (portname);
 	}
 
-	PortsChanged (ch); /* EMIT SIGNAL */
+	emit_changed (PortsChanged);
 }
 
 /** @param n Channel name */
@@ -138,7 +174,7 @@ Bundle::add_channel (std::string const & n)
 		_channel.push_back (Channel (n));
 	}
 
-	ConfigurationChanged (); /* EMIT SIGNAL */
+	emit_changed (ConfigurationChanged);
 }
 
 bool
@@ -150,6 +186,9 @@ Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 	return (std::find (_channel[ch].ports.begin (), _channel[ch].ports.end (), portname) != _channel[ch].ports.end ());
 }
 
+/** Remove a channel.
+ *  @param ch Channel.
+ */
 void
 Bundle::remove_channel (uint32_t ch)
 {
@@ -159,6 +198,7 @@ Bundle::remove_channel (uint32_t ch)
 	_channel.erase (_channel.begin () + ch);
 }
 
+/** Remove all channels */
 void
 Bundle::remove_channels ()
 {
@@ -167,6 +207,9 @@ Bundle::remove_channels ()
 	_channel.clear ();
 }
 
+/** @param p Port name.
+ *  @return true if any channel is associated with p.
+ */
 bool
 Bundle::uses_port (std::string p) const
 {
@@ -200,6 +243,10 @@ Bundle::offers_port_alone (std::string p) const
 	return false;
 }
 
+
+/** @param ch Channel.
+ *  @return Channel name.
+ */
 std::string
 Bundle::channel_name (uint32_t ch) const
 {
@@ -209,6 +256,10 @@ Bundle::channel_name (uint32_t ch) const
 	return _channel[ch].name;
 }
 
+/** Set the name of a channel.
+ *  @param ch Channel.
+ *  @param n New name.
+ */
 void
 Bundle::set_channel_name (uint32_t ch, std::string const & n)
 {
@@ -219,7 +270,7 @@ Bundle::set_channel_name (uint32_t ch, std::string const & n)
 		_channel[ch].name = n;
 	}
 
-	NameChanged (); /* EMIT SIGNAL */
+	emit_changed (NameChanged);
 }
 
 /** Take the channels from another bundle and add them to this bundle,
@@ -245,6 +296,11 @@ Bundle::add_channels_from_bundle (boost::shared_ptr<Bundle> other)
 	}
 }
 
+/** Connect the ports associated with our channels to the ports associated
+ *  with another bundle's channels.
+ *  @param other Other bundle.
+ *  @param engine AudioEngine to use to make the connections.
+ */
 void
 Bundle::connect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 {
@@ -280,3 +336,62 @@ Bundle::disconnect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 		}
 	}
 }
+
+/** Remove all ports from all channels */
+void
+Bundle::remove_ports_from_channels ()
+{
+	{
+		Glib::Mutex::Lock lm (_channel_mutex);
+		for (uint32_t c = 0; c < _channel.size(); ++c) {
+			_channel[c].ports.clear ();
+		}
+
+	}
+
+	emit_changed (PortsChanged);
+}
+
+/** Remove all ports from a given channel.
+ *  @param ch Channel.
+ */
+void
+Bundle::remove_ports_from_channel (uint32_t ch)
+{
+	assert (ch < nchannels ());
+	
+	{
+		Glib::Mutex::Lock lm (_channel_mutex);
+		_channel[ch].ports.clear ();
+	}
+
+	emit_changed (PortsChanged);
+}
+
+void
+Bundle::suspend_signals ()
+{
+	_signals_suspended = true;
+}
+
+void
+Bundle::resume_signals ()
+{
+	if (_pending_change) {
+		Changed (_pending_change);
+		_pending_change = Change (0);
+	}
+
+	_signals_suspended = false;
+}
+
+void
+Bundle::emit_changed (Change c)
+{
+	if (_signals_suspended) {
+		_pending_change = Change (int (_pending_change) | int (c));
+	} else {
+		Changed (c);
+	}
+}
+		

@@ -43,6 +43,7 @@
 #include <ardour/latent.h>
 #include <ardour/automation_control.h>
 #include <ardour/session_object.h>
+#include <ardour/bundle.h>
 
 using std::string;
 using std::vector;
@@ -53,15 +54,14 @@ namespace ARDOUR {
 
 class Session;
 class AudioEngine;
-class Bundle;
 class UserBundle;
+class Bundle;
 class Panner;
 class PeakMeter;
 class Port;
 class AudioPort;
 class MidiPort;
 class BufferSet;
-
 
 /** A collection of input and output ports with connections.
  *
@@ -336,8 +336,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 		UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
 		
 		boost::shared_ptr<UserBundle> bundle;
-		sigc::connection configuration_changed;
-		sigc::connection ports_changed;
+		sigc::connection changed;
 	};
 	
 	std::vector<UserBundleInfo> _bundles_connected_to_outputs; ///< user bundles connected to our outputs
@@ -357,8 +356,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	void check_bundles_connected_to_outputs ();
 	void check_bundles (std::vector<UserBundleInfo>&, const PortSet&);
 
-	void bundle_configuration_changed ();
-	void bundle_ports_changed (int);
+	void bundle_changed (Bundle::Change);
 
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
@@ -375,6 +373,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int32_t find_output_port_hole (const char* base);
 
 	void setup_bundles_for_inputs_and_outputs ();
+	void setup_bundle_for_inputs ();
+	void setup_bundle_for_outputs ();
 	std::string bundle_channel_name (uint32_t, uint32_t) const;
 };
 

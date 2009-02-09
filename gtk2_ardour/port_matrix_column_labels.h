@@ -49,7 +49,6 @@ private:
 	double channel_x (ARDOUR::BundleChannel const &) const;
 	double channel_y (ARDOUR::BundleChannel const &) const;
 	void queue_draw_for (ARDOUR::BundleChannel const &);
-	void maybe_popup_context_menu (int, uint32_t);
 	
 	void render (cairo_t *);
 	void compute_dimensions ();

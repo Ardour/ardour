@@ -42,20 +42,15 @@ class PortMatrix;
 class PortGroup : public sigc::trackable
 {
 public:
-	/** PortGroup constructor.
-	 * @param n Name.
-	 */
-	PortGroup (std::string const & n)
-		: name (n), _visible (true) {}
+	PortGroup (std::string const & n);
 
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	boost::shared_ptr<ARDOUR::Bundle> only_bundle ();
-	void add_port (std::string const &);
 	void clear ();
-	uint32_t total_ports () const;
+	uint32_t total_channels () const;
 
 	std::string name; ///< name for the group
-	std::vector<std::string> ports;
 
 	ARDOUR::BundleList const & bundles () const {
 		return _bundles;
@@ -73,14 +68,21 @@ public:
 	bool has_port (std::string const &) const;
 
 	sigc::signal<void> Modified;
+	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
 
-private:	
+private:
+	void bundle_changed (ARDOUR::Bundle::Change);
+	
 	ARDOUR::BundleList _bundles;
+
+	typedef std::map<boost::shared_ptr<ARDOUR::Bundle>, sigc::connection> ConnectionList;
+	ConnectionList _bundle_changed_connections;
+	
 	bool _visible; ///< true if the group is visible in the UI
 };
 
 /// A list of PortGroups
-class PortGroupList
+class PortGroupList : public sigc::trackable
 {
   public:
 	PortGroupList ();
@@ -90,13 +92,16 @@ class PortGroupList
 	void add_group (boost::shared_ptr<PortGroup>);
 	void set_type (ARDOUR::DataType);
 	void gather (ARDOUR::Session &, bool);
-	void set_offer_inputs (bool);
 	ARDOUR::BundleList const & bundles () const;
 	void clear ();
-	uint32_t total_visible_ports () const;
+	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	uint32_t total_visible_channels () const;
 	uint32_t size () const {
 		return _groups.size();
 	}
+
+	void suspend_signals ();
+	void resume_signals ();
 
 	List::const_iterator begin () const {
 		return _groups.begin();
@@ -105,18 +110,37 @@ class PortGroupList
 	List::const_iterator end () const {
 		return _groups.end();
 	}
-	
+
+	sigc::signal<void> Changed;
+
   private:
 	bool port_has_prefix (std::string const &, std::string const &) const;
 	std::string common_prefix (std::vector<std::string> const &) const;
-	void update_bundles () const;
-	void group_modified ();
+	std::string common_prefix_before (std::vector<std::string> const &, std::string const &) const;
+	void emit_changed ();
+	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, bool) const;
 	
 	ARDOUR::DataType _type;
-	bool _offer_inputs;
 	mutable ARDOUR::BundleList _bundles;
-	mutable bool _bundles_dirty;
 	List _groups;
+	std::vector<sigc::connection> _bundle_changed_connections;
+	bool _signals_suspended;
+	bool _pending_change;
+};
+
+
+class RouteBundle : public ARDOUR::Bundle
+{
+public:
+	RouteBundle (boost::shared_ptr<ARDOUR::Bundle>);
+
+	void add_processor_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+
+private:
+	void reread_component_bundles ();
+	
+	boost::shared_ptr<ARDOUR::Bundle> _route;
+	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _processor;
 };
 
 #endif /* __gtk_ardour_port_group_h__ */

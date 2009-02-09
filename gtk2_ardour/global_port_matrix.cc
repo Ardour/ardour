@@ -27,16 +27,15 @@
 GlobalPortMatrix::GlobalPortMatrix (ARDOUR::Session& s, ARDOUR::DataType t)
 	: PortMatrix (s, t)
 {
-	setup ();
+	setup_all_ports ();
 }
 
 void
-GlobalPortMatrix::setup ()
+GlobalPortMatrix::setup_ports (int dim)
 {
-	_ports[IN].gather (_session, true);
-	_ports[OUT].gather (_session, false);
-	
-	PortMatrix::setup ();
+	_ports[dim].suspend_signals ();
+	_ports[dim].gather (_session, dim == IN);
+	_ports[dim].resume_signals ();
 }
 
 void
@@ -70,12 +69,14 @@ GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 	}
 }
 
-
 PortMatrix::State
 GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 {
 	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
 	ARDOUR::Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
+	if (in_ports.empty() || out_ports.empty()) {
+		return NOT_ASSOCIATED;
+	}
 
 	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {

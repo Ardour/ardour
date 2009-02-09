@@ -205,7 +205,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Preferences"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (common_actions, X_("ToggleConnections"), _("Connections"), mem_fun(*this, &ARDOUR_UI::toggle_connection_editor));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleLocations"), _("Locations"), mem_fun(*this, &ARDOUR_UI::toggle_location_window));
 	ActionManager::session_sensitive_actions.push_back (act);

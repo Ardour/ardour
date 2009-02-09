@@ -104,16 +104,12 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	int g = 0;
 	for (PortGroupList::List::const_iterator i = _matrix->rows()->begin(); i != _matrix->rows()->end(); ++i) {
 
-		if (!(*i)->visible() || ((*i)->bundles().empty() && (*i)->ports.empty()) ) {
+		if (!(*i)->visible() || (*i)->bundles().empty()) {
 			continue;
 		}
 			
 		/* compute height of this group */
-		double h = 0;
-		for (ARDOUR::BundleList::const_iterator j = (*i)->bundles().begin(); j != (*i)->bundles().end(); ++j) {
-			h += (*j)->nchannels() * row_height();
-		}
-		h += (*i)->ports.size() * row_height();
+		double h = (*i)->total_channels () * row_height();
 
 		/* rectangle */
 		set_source_rgb (cr, get_a_group_colour (g));
@@ -202,11 +198,6 @@ PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 void
 PortMatrixRowLabels::maybe_popup_context_menu (double x, double y, uint32_t t)
 {
-	if (!_matrix->can_rename_channels (_matrix->row_index()) &&
-	    !_matrix->can_remove_channels (_matrix->row_index())) {
-		return;
-	}
-
 	if ( (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && x > (_longest_bundle_name + name_pad() * 2)) ||
 	     (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && x < (_longest_port_name + name_pad() * 2))
 		) {

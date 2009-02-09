@@ -37,15 +37,21 @@ BundleEditorMatrix::BundleEditorMatrix (
 	  _bundle (bundle)
 {
 	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
-	_port_group->add_bundle (bundle);
-	_ports[OURS].add_group (_port_group);
+	_port_group->add_bundle (_bundle);
 }
 
 void
-BundleEditorMatrix::setup ()
+BundleEditorMatrix::setup_ports (int dim)
 {
-	_ports[OTHER].gather (_session, _bundle->ports_are_inputs());
-	PortMatrix::setup ();
+	if (dim == OURS) {
+		_ports[OURS].clear ();
+		_ports[OURS].add_group (_port_group);
+	} else {
+		_ports[OTHER].suspend_signals ();
+		_ports[OTHER].gather (_session, _bundle->ports_are_inputs());
+		_ports[OTHER].remove_bundle (_bundle);
+		_ports[OTHER].resume_signals ();
+	}
 }
 
 void
@@ -85,14 +91,14 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 	}
 
 	_bundle->add_channel (d.get_name());
-	setup ();
+	setup_ports (OURS);
 }
 
 void
 BundleEditorMatrix::remove_channel (ARDOUR::BundleChannel bc)
 {
 	bc.bundle->remove_channel (bc.channel);
-	setup ();
+	setup_ports (OURS);
 }
 
 void
@@ -106,6 +112,12 @@ BundleEditorMatrix::rename_channel (ARDOUR::BundleChannel bc)
 	}
 
 	bc.bundle->set_channel_name (bc.channel, d.get_name ());
+}
+
+bool
+BundleEditorMatrix::list_is_global (int dim) const
+{
+	return (dim == OTHER);
 }
 
 BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::UserBundle> bundle, bool add)
@@ -133,9 +145,9 @@ BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::
 	_input_or_output.append_text (_("Output"));
 	
 	if (bundle->ports_are_inputs()) {
-		_input_or_output.set_active_text (_("Output"));
-	} else {
 		_input_or_output.set_active_text (_("Input"));
+	} else {
+		_input_or_output.set_active_text (_("Output"));
 	}
 
 	_input_or_output.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::input_or_output_changed));
@@ -174,10 +186,10 @@ BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::
 	add_channel_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (_matrix, &BundleEditorMatrix::add_channel), boost::shared_ptr<ARDOUR::Bundle> ()));
 
 	if (add) {
-		add_button (Gtk::Stock::CANCEL, 1);
-		add_button (Gtk::Stock::ADD, 0);
+		add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
 	} else {
-		add_button (Gtk::Stock::CLOSE, 0);
+		add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 	}
 
 	show_all ();
@@ -192,18 +204,22 @@ BundleEditor::name_changed ()
 void
 BundleEditor::input_or_output_changed ()
 {
+	_bundle->remove_ports_from_channels ();
+	
 	if (_input_or_output.get_active_text() == _("Output")) {
-		_bundle->set_ports_are_inputs ();
-	} else {
 		_bundle->set_ports_are_outputs ();
+	} else {
+		_bundle->set_ports_are_inputs ();
 	}
 
-	_matrix.setup ();
+	_matrix.setup_all_ports ();
 }
 
 void
 BundleEditor::type_changed ()
 {
+	_bundle->remove_ports_from_channels ();
+	
 	ARDOUR::DataType const t = _type.get_active_text() == _("Audio") ?
 		ARDOUR::DataType::AUDIO : ARDOUR::DataType::MIDI;
 
@@ -214,7 +230,7 @@ BundleEditor::type_changed ()
 void
 BundleEditor::on_map ()
 {
-	_matrix.setup ();
+	_matrix.setup_all_ports ();
 	Window::on_map ();
 }
 
@@ -284,7 +300,8 @@ BundleManager::new_clicked ()
 	b->add_channel ("");
 
 	BundleEditor e (_session, b, true);
-	if (e.run () == 0) {
+
+	if (e.run () == Gtk::RESPONSE_ACCEPT) {
 		_session.add_bundle (b);
 		add_bundle (b);
 	}
@@ -297,9 +314,10 @@ BundleManager::edit_clicked ()
 	if (i) {
 		boost::shared_ptr<ARDOUR::UserBundle> b = (*i)[_list_model_columns.bundle];
 		BundleEditor e (_session, b, false);
-		e.run ();
+		if (e.run () == Gtk::RESPONSE_ACCEPT) {
+			_session.set_dirty ();
+		}
 	}
-	
 }
 
 void
@@ -325,12 +343,16 @@ BundleManager::add_bundle (boost::shared_ptr<ARDOUR::Bundle> b)
 	(*i)[_list_model_columns.name] = u->name ();
 	(*i)[_list_model_columns.bundle] = u;
 
-	u->NameChanged.connect (sigc::bind (sigc::mem_fun (*this, &BundleManager::bundle_name_changed), u));
+	u->Changed.connect (sigc::bind (sigc::mem_fun (*this, &BundleManager::bundle_changed), u));
 }
 
 void
-BundleManager::bundle_name_changed (boost::shared_ptr<ARDOUR::UserBundle> b)
+BundleManager::bundle_changed (ARDOUR::Bundle::Change c, boost::shared_ptr<ARDOUR::UserBundle> b)
 {
+	if ((c & ARDOUR::Bundle::NameChanged) == 0) {
+		return;
+	}
+	
 	Gtk::TreeModel::iterator i = _list_model->children().begin ();
 	while (i != _list_model->children().end()) {
 		boost::shared_ptr<ARDOUR::UserBundle> t = (*i)[_list_model_columns.bundle];

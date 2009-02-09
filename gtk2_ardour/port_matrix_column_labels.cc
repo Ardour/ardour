@@ -134,16 +134,12 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	int g = 0;
 	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 
-		if (!(*i)->visible() || ((*i)->bundles().empty() && (*i)->ports.empty()) ) {
+		if (!(*i)->visible() || (*i)->bundles().empty()) {
 			continue;
 		}
 
 		/* compute width of this group */
-		uint32_t w = 0;
-		for (ARDOUR::BundleList::const_iterator j = (*i)->bundles().begin(); j != (*i)->bundles().end(); ++j) {
-			w += (*j)->nchannels() * column_width();
-		}
-		w += (*i)->ports.size() * column_width();
+		uint32_t w = (*i)->total_channels() * column_width();
 
 		/* rectangle */
 		set_source_rgb (cr, get_a_group_colour (g));
@@ -413,15 +409,14 @@ PortMatrixColumnLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 				);
 			
 		}
-			
-				
+		
 	}
 }
 
 void
 PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
 {
-	uint32_t N = _matrix->columns()->total_visible_ports ();
+	uint32_t N = _matrix->columns()->total_visible_channels ();
 	uint32_t i = 0;
 	for (; i < N; ++i) {
 		
@@ -453,19 +448,8 @@ PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
 		_body->highlight_associated_channels (_matrix->column_index(), i);
 		break;
 	case 3:
-		maybe_popup_context_menu (i, t);
+		_matrix->popup_channel_context_menu (_matrix->column_index(), i, t);
 		break;
 	}
 }
 
-
-void
-PortMatrixColumnLabels::maybe_popup_context_menu (int i, uint32_t t)
-{
-	if (!_matrix->can_rename_channels (_matrix->column_index()) &&
-	    !_matrix->can_remove_channels (_matrix->column_index())) {
-		return;
-	}
-
-	_matrix->popup_channel_context_menu (_matrix->column_index(), i, t);
-}

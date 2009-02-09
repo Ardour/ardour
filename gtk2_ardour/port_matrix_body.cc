@@ -59,7 +59,7 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	
 	Gdk::Rectangle r = exposure;
 	/* the get_pixmap call may cause things to be rerendered and sizes to change,
-	   so fetch the pixmaps before calculating where to put it */
+	   so fetch the pixmap before calculating where to put it */
 	GdkPixmap* p = _column_labels->get_pixmap (get_window()->gobj());
 	r.intersect (_column_labels->parent_rectangle(), intersects);
 
@@ -278,7 +278,7 @@ PortMatrixBody::setup ()
 	for (ARDOUR::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 		
 		_bundle_connections.push_back (
-			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels))
+			(*i)->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels)))
 			);
 		
 	}
@@ -286,7 +286,7 @@ PortMatrixBody::setup ()
 	ARDOUR::BundleList c = _matrix->columns()->bundles ();
 	for (ARDOUR::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
 		_bundle_connections.push_back (
-			(*i)->NameChanged.connect (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels))
+			(*i)->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
 			);
 	}
 	

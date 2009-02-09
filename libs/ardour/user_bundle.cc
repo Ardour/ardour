@@ -45,7 +45,12 @@ ARDOUR::UserBundle::set_state (XMLNode const & node)
 			return -1;
 		}
 
-		add_channel ("XXX");
+		if ((name = (*i)->property ("name")) == 0) {
+			PBD::error << _("Node for Channel has no \"name\" property") << endmsg;
+			return -1;
+		}
+		
+		add_channel (name->value ());
 
 		XMLNodeList const ports = (*i)->children ();
 

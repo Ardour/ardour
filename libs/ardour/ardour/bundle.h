@@ -57,24 +57,9 @@ class Bundle : public sigc::trackable
 		PortList ports;
 	};
 
-	/** Construct an audio bundle.
-	 *  @param i true if ports are inputs, otherwise false.
-	 */
-	Bundle (bool i = true) : _type (DataType::AUDIO), _ports_are_inputs (i) {}
-
-	/** Construct an audio bundle.
-	 *  @param n Name.
-	 *  @param i true if ports are inputs, otherwise false.
-	 */
-	Bundle (std::string const & n, bool i = true) : _name (n), _type (DataType::AUDIO), _ports_are_inputs (i) {}
-
-	/** Construct a bundle.
-	 *  @param n Name.
-	 *  @param t Type.
-	 *  @param i true if ports are inputs, otherwise false.
-	 */
-	Bundle (std::string const & n, DataType t, bool i = true) : _name (n), _type (t), _ports_are_inputs (i) {}
-
+	Bundle (bool i = true);
+	Bundle (std::string const &, bool i = true);
+	Bundle (std::string const &, DataType, bool i = true);
 	Bundle (boost::shared_ptr<Bundle>);
 	
 	virtual ~Bundle() {}
@@ -93,6 +78,8 @@ class Bundle : public sigc::trackable
 	void add_port_to_channel (uint32_t, std::string);
 	void set_port (uint32_t, std::string);
 	void remove_port_from_channel (uint32_t, std::string);
+	void remove_ports_from_channel (uint32_t);
+	void remove_ports_from_channels ();
 	bool port_attached_to_channel (uint32_t, std::string);
 	bool uses_port (std::string) const;
 	bool offers_port_alone (std::string) const;
@@ -107,7 +94,7 @@ class Bundle : public sigc::trackable
 	 */
 	void set_name (std::string const & n) {
 		_name = n;
-		NameChanged ();
+		Changed (NameChanged);
 	}
 
 	/** @return Bundle name */
@@ -126,14 +113,17 @@ class Bundle : public sigc::trackable
 	bool ports_are_inputs () const { return _ports_are_inputs; }
 	bool ports_are_outputs () const { return !_ports_are_inputs; }
 
-	bool operator== (Bundle const &) const;
+	void suspend_signals ();
+	void resume_signals ();
 
-	/** Emitted when the bundle name or a channel name has changed */
-	sigc::signal<void> NameChanged;
-	/** The number of channels has changed */
-	sigc::signal<void> ConfigurationChanged;
-	/** The port list associated with one of our channels has changed */
-	sigc::signal<void, int> PortsChanged;
+	/** Things that might change about this bundle */
+	enum Change {
+		NameChanged = 0x1, ///< the bundle name or a channel name has changed
+		ConfigurationChanged = 0x2, ///< the number of channels has changed
+		PortsChanged = 0x4 ///< the port list associated with one of our channels has changed
+	};
+
+	sigc::signal<void, Change> Changed;
 
   protected:
 	
@@ -145,10 +135,14 @@ class Bundle : public sigc::trackable
   private:
 	int set_channels (std::string const &);
 	int parse_io_string (std::string const &, std::vector<std::string> &);
+	void emit_changed (Change);
 	
 	std::string _name;
 	DataType _type;
 	bool _ports_are_inputs;
+
+	bool _signals_suspended;
+	Change _pending_change;
 };
 
 

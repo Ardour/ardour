@@ -89,7 +89,9 @@ public:
 		return &_ports[d];
 	}
 	
-	virtual void setup ();
+	void setup ();
+	virtual void setup_ports (int) = 0;
+	void setup_all_ports ();
 
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.
@@ -106,6 +108,7 @@ public:
 	 *  @return state
 	 */
 	virtual State get_state (ARDOUR::BundleChannel c[2]) const = 0;
+	virtual bool list_is_global (int) const = 0;
 
 	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>) = 0;
 	virtual bool can_remove_channels (int) const = 0;
@@ -141,6 +144,8 @@ private:
 	void select_arrangement ();
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
+	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
+	void setup_global_ports ();
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;

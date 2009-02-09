@@ -396,8 +396,7 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 		if (ok) {
 			new_list.push_back (*i);
 		} else {
-			i->configuration_changed.disconnect ();
-			i->ports_changed.disconnect ();
+			i->changed.disconnect ();
 		}
 	}
 
@@ -604,7 +603,7 @@ IO::remove_output_port (Port* port, void* src)
 	}
 
 	if (change == ConfigurationChanged) {
-		setup_bundles_for_inputs_and_outputs ();
+		setup_bundle_for_outputs ();
 	}
 
 	if (change != NoChange) {
@@ -666,7 +665,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 	
 	// pan_changed (src); /* EMIT SIGNAL */
 	output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-	setup_bundles_for_inputs_and_outputs ();
+	setup_bundle_for_outputs ();
 	_session.set_dirty ();
 
 	return 0;
@@ -708,7 +707,7 @@ IO::remove_input_port (Port* port, void* src)
 	}
 
 	if (change == ConfigurationChanged) {
-		setup_bundles_for_inputs_and_outputs ();
+		setup_bundle_for_inputs ();
 	}
 
 	if (change != NoChange) {
@@ -771,7 +770,7 @@ IO::add_input_port (string source, void* src, DataType type)
 
 	// pan_changed (src); /* EMIT SIGNAL */
 	input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-	setup_bundles_for_inputs_and_outputs ();
+	setup_bundle_for_inputs ();
 	_session.set_dirty ();
 	
 	return 0;
@@ -1013,16 +1012,17 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 	if (out_changed) {
 		check_bundles_connected_to_outputs ();
 		output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+		setup_bundle_for_outputs ();
 	}
 	
 	if (in_changed) {
 		check_bundles_connected_to_inputs ();
 		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+		setup_bundle_for_inputs ();
 	}
 
 	if (in_changed || out_changed) {
 		PortCountChanged (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
-		setup_bundles_for_inputs_and_outputs ();
 		_session.set_dirty ();
 	}
 
@@ -1050,7 +1050,7 @@ IO::ensure_inputs (ChanCount count, bool clear, bool lockit, void* src)
 
 	if (changed) {
 		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-		setup_bundles_for_inputs_and_outputs ();
+		setup_bundle_for_inputs ();
 		_session.set_dirty ();
 	}
 	return 0;
@@ -1142,7 +1142,7 @@ IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 
 	if (changed) {
 		 output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-		 setup_bundles_for_inputs_and_outputs ();
+		 setup_bundle_for_outputs ();
 	}
 
 	return 0;
@@ -2220,17 +2220,10 @@ IO::reset_panners ()
 }
 
 void
-IO::bundle_configuration_changed ()
+IO::bundle_changed (Bundle::Change c)
 {
 	//XXX
 //	connect_input_ports_to_bundle (_input_bundle, this);
-}
-
-void
-IO::bundle_ports_changed (int ignored)
-{
-	//XXX
-//	connect_output_ports_to_bundle (_output_bundle, this);
 }
 
 void
@@ -2615,18 +2608,24 @@ IO::update_port_total_latencies ()
 void
 IO::setup_bundles_for_inputs_and_outputs ()
 {
+	setup_bundle_for_inputs ();
+	setup_bundle_for_outputs ();
+}
+
+
+void
+IO::setup_bundle_for_inputs ()
+{
         char buf[32];
 
 	if (!_bundle_for_inputs) {
 		_bundle_for_inputs.reset (new Bundle (true));
 	}
-	if (!_bundle_for_outputs) {
-		_bundle_for_outputs.reset (new Bundle (false));
-	}
 
+	_bundle_for_inputs->suspend_signals ();
+	
 	_bundle_for_inputs->remove_channels ();
-	_bundle_for_outputs->remove_channels ();
-		
+
         snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
         _bundle_for_inputs->set_name (buf);
 	uint32_t const ni = inputs().num_ports();
@@ -2635,6 +2634,23 @@ IO::setup_bundles_for_inputs_and_outputs ()
 		_bundle_for_inputs->set_port (i, _session.engine().make_port_name_non_relative (inputs().port(i)->name()));
 	}
 
+	_bundle_for_inputs->resume_signals ();
+}
+
+
+void
+IO::setup_bundle_for_outputs ()
+{
+        char buf[32];
+
+	if (!_bundle_for_outputs) {
+		_bundle_for_outputs.reset (new Bundle (false));
+	}
+
+	_bundle_for_outputs->suspend_signals ();
+
+	_bundle_for_outputs->remove_channels ();
+
         snprintf(buf, sizeof (buf), _("%s out"), _name.c_str());
         _bundle_for_outputs->set_name (buf);
 	uint32_t const no = outputs().num_ports();
@@ -2642,7 +2658,10 @@ IO::setup_bundles_for_inputs_and_outputs ()
 		_bundle_for_outputs->add_channel (bundle_channel_name (i, no));
 		_bundle_for_outputs->set_port (i, _session.engine().make_port_name_non_relative (outputs().port(i)->name()));
 	}
+
+	_bundle_for_outputs->resume_signals ();
 }
+
 
 /** @return Bundles connected to our inputs */
 BundleList
@@ -2711,11 +2730,8 @@ IO::bundles_connected_to_outputs ()
 IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 {
 	bundle = b;
-	configuration_changed = b->ConfigurationChanged.connect (
-		sigc::mem_fun (*io, &IO::bundle_configuration_changed)
-		);
-	ports_changed = b->PortsChanged.connect (
-		sigc::mem_fun (*io, &IO::bundle_ports_changed)
+	changed = b->Changed.connect (
+		sigc::mem_fun (*io, &IO::bundle_changed)
 		);
 }
 

@@ -48,22 +48,29 @@ class IOSelector : public PortMatrix
 	uint32_t maximum_io_ports () const;
 	uint32_t minimum_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
-	void setup ();
+	void setup_ports (int);
+	bool list_is_global (int) const;
 
 	bool find_inputs_for_io_outputs () const {
 		return _find_inputs_for_io_outputs;
 	}
 
+	int ours () const {
+		return _ours;
+	}
+
+	int other () const {
+		return _other;
+	}
+
+
   private:
 	
 	int _other;
 	int _ours;
-	
 	boost::shared_ptr<ARDOUR::IO> _io;
 	boost::shared_ptr<PortGroup> _port_group;
 	bool _find_inputs_for_io_outputs;
-	
-	void ports_changed ();
 };
 
 class IOSelectorWindow : public ArdourDialog
@@ -89,7 +96,8 @@ class IOSelectorWindow : public ArdourDialog
 
 	void cancel ();
 	void accept ();
-
+	void rescan ();
+	
 	void ports_changed ();
 	void io_name_changed (void *src);
 };

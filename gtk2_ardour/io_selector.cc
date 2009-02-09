@@ -46,9 +46,6 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	, _io (io)
 	, _find_inputs_for_io_outputs (in)
 {
-	/* Listen for ports changing on the IO */
-	_io->PortCountChanged.connect (sigc::hide (mem_fun (*this, &IOSelector::ports_changed)));
-
 	/* signal flow from 0 to 1 */
 	if (_find_inputs_for_io_outputs) {
 		_other = 1;
@@ -61,54 +58,27 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
 	_ports[_ours].add_group (_port_group);
 	
-	setup ();
+	setup_all_ports ();
 }
 
 void
-IOSelector::setup ()
+IOSelector::setup_ports (int dim)
 {
-	_ports[_other].gather (_session, _find_inputs_for_io_outputs);
-		
-	_port_group->clear ();
-	_port_group->add_bundle (boost::shared_ptr<ARDOUR::Bundle> (new ARDOUR::Bundle));
-	_port_group->only_bundle()->set_name (_io->name());
+	_ports[dim].suspend_signals ();
 
-	if (_find_inputs_for_io_outputs) {
-		const PortSet& ps (_io->outputs());
+	if (dim == _other) {
 
-		int j = 0;
-		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
-			char buf[32];
-			snprintf (buf, sizeof(buf), _("out %d"), j + 1);
-			_port_group->only_bundle()->add_channel (buf);
-			_port_group->only_bundle()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
-			++j;
-		}
+		_ports[_other].gather (_session, _find_inputs_for_io_outputs);
 		
 	} else {
-		
-		const PortSet& ps (_io->inputs());
 
-		int j = 0;
-		for (PortSet::const_iterator i = ps.begin(); i != ps.end(); ++i) {
-			char buf[32];
-			snprintf (buf, sizeof(buf), _("in %d"), j + 1);
-			_port_group->only_bundle()->add_channel (buf);
-			_port_group->only_bundle()->add_port_to_channel (j, _session.engine().make_port_name_non_relative (i->name()));
-			++j;
-		}
-
+		_port_group->clear ();
+		_port_group->add_bundle (
+			_find_inputs_for_io_outputs ? _io->bundle_for_outputs() : _io->bundle_for_inputs()
+			);
 	}
 
-	PortMatrix::setup ();
-}
-
-void
-IOSelector::ports_changed ()
-{
-	ENSURE_GUI_THREAD (mem_fun (*this, &IOSelector::ports_changed));
-
-	setup ();
+	_ports[dim].resume_signals ();
 }
 
 void
@@ -245,6 +215,12 @@ IOSelector::remove_channel (ARDOUR::BundleChannel bc)
 	}
 }
 
+bool
+IOSelector::list_is_global (int dim) const
+{
+	return (dim == _other);
+}
+
 IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel)
 	: ArdourDialog ("I/O selector")
 	, _selector (session, io, !for_input)
@@ -277,7 +253,7 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	/* Rescan button */
  	rescan_button.set_name ("IOSelectorButton");
 	rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
-	rescan_button.signal_clicked().connect (sigc::mem_fun (_selector, &IOSelector::setup));
+	rescan_button.signal_clicked().connect (sigc::mem_fun (*this, &IOSelectorWindow::rescan));
 	get_action_area()->pack_start (rescan_button, false, false);
 
 	io->PortCountChanged.connect (sigc::hide (mem_fun (*this, &IOSelectorWindow::ports_changed)));
@@ -325,6 +301,12 @@ IOSelectorWindow::ports_changed ()
 }
 
 void
+IOSelectorWindow::rescan ()
+{
+	_selector.setup_ports (_selector.other());
+}
+
+void
 IOSelectorWindow::cancel ()
 {
 	_selector.Finished (IOSelector::Cancelled);
@@ -341,7 +323,7 @@ IOSelectorWindow::accept ()
 void
 IOSelectorWindow::on_map ()
 {
-	_selector.setup ();
+	_selector.setup_all_ports ();
 	Window::on_map ();
 }
 
@@ -372,8 +354,8 @@ PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::Por
 void
 PortInsertUI::redisplay ()
 {
-	input_selector.setup ();
-	output_selector.setup ();
+	input_selector.setup_ports (input_selector.other());
+	output_selector.setup_ports (output_selector.other());
 }
 
 void
@@ -454,3 +436,4 @@ PortInsertWindow::accept ()
 	_portinsertui.finished (IOSelector::Accepted);
 	hide ();
 }
+

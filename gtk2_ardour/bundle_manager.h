@@ -47,7 +47,8 @@ class BundleEditorMatrix : public PortMatrix
 		return d == OURS;
 	}
 	void rename_channel (ARDOUR::BundleChannel);
-	void setup ();
+	void setup_ports (int);
+	bool list_is_global (int) const;
 
   private:
 	enum {
@@ -90,7 +91,7 @@ class BundleManager : public ArdourDialog
 	void edit_clicked ();
 	void delete_clicked ();
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-	void bundle_name_changed (boost::shared_ptr<ARDOUR::UserBundle>);
+	void bundle_changed (ARDOUR::Bundle::Change, boost::shared_ptr<ARDOUR::UserBundle>);
 	void set_button_sensitivity ();
 
 	class ModelColumns : public Gtk::TreeModelColumnRecord

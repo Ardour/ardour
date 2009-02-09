@@ -48,9 +48,13 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	  _column_index (1)
 {
 	_body = new PortMatrixBody (this);
-	
-	_ports[0].set_type (type);
-	_ports[1].set_type (type);
+
+	for (int i = 0; i < 2; ++i) {
+		_ports[i].set_type (type);
+		
+		/* watch for the content of _ports[] changing */
+		_ports[i].Changed.connect (sigc::mem_fun (*this, &PortMatrix::setup));
+	}
 
 	_row_visibility_box.pack_start (_row_visibility_label, Gtk::PACK_SHRINK);
 	_column_visibility_box.pack_start (_column_visibility_label, Gtk::PACK_SHRINK);
@@ -60,6 +64,9 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 
 	/* watch for routes being added or removed */
 	_session.RouteAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::routes_changed)));
+
+	/* and also bundles */
+	_session.BundleAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::setup_global_ports)));
 	
 	reconnect_to_routes ();
 
@@ -93,7 +100,7 @@ PortMatrix::reconnect_to_routes ()
 	boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
 	for (ARDOUR::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		_route_connections.push_back (
-			(*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::setup))
+			(*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::setup_global_ports))
 			);
 	}
 }
@@ -103,10 +110,10 @@ void
 PortMatrix::routes_changed ()
 {
 	reconnect_to_routes ();
-	setup ();
+	setup_global_ports ();
 }
 
-/** Set up everything that changes about the matrix */
+/** Set up everything that depends on the content of _ports[] */
 void
 PortMatrix::setup ()
 {
@@ -235,7 +242,8 @@ PortMatrix::set_type (ARDOUR::DataType t)
 	_type = t;
 	_ports[0].set_type (_type);
 	_ports[1].set_type (_type);
-	setup ();
+	
+	setup_all_ports ();
 }
 
 void
@@ -300,11 +308,11 @@ void
 PortMatrix::select_arrangement ()
 {
 	uint32_t const N[2] = {
-		_ports[0].total_visible_ports (),
-		_ports[1].total_visible_ports ()
+		_ports[0].total_visible_channels (),
+		_ports[1].total_visible_channels ()
 	};
 
-	/* The list with the most ports goes on left or right, so that the most port
+	/* The list with the most channels goes on left or right, so that the most channel
 	   names are printed horizontally and hence more readable.  However we also
 	   maintain notional `signal flow' vaguely from left to right.  Subclasses
 	   should choose where to put ports based on signal flowing from _ports[0]
@@ -380,6 +388,7 @@ PortMatrix::popup_channel_context_menu (int dim, uint32_t N, uint32_t t)
 
 	if (bc.bundle) {
 		char buf [64];
+		bool have_one = false;
 
 		if (can_rename_channels (dim)) {
 			snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc.bundle->channel_name (bc.channel).c_str());
@@ -390,6 +399,8 @@ PortMatrix::popup_channel_context_menu (int dim, uint32_t N, uint32_t t)
 					sigc::bind (sigc::mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc.channel)
 					)
 				);
+
+			have_one = true;
 		}
 
 		if (can_remove_channels (dim)) {
@@ -401,7 +412,20 @@ PortMatrix::popup_channel_context_menu (int dim, uint32_t N, uint32_t t)
 					sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc.channel)
 					)
 				);
+
+			have_one = true;
 		}
+
+		if (have_one) {
+			items.push_back (Gtk::Menu_Helpers::SeparatorElem ());
+		}
+		
+		boost::weak_ptr<ARDOUR::Bundle> w (bc.bundle);
+		items.push_back (Gtk::Menu_Helpers::MenuElem (
+					 _("Disassociate all"),
+					 sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc.channel, dim)
+					 )
+			);
 			
 		_menu->popup (1, t);
 	}
@@ -430,4 +454,44 @@ PortMatrix::rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)
 	}
 
 	rename_channel (ARDOUR::BundleChannel (sb, c));
+}
+
+void
+PortMatrix::disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle> bundle, uint32_t channel, int dim)
+{
+	boost::shared_ptr<ARDOUR::Bundle> sb = bundle.lock ();
+	if (!sb) {
+		return;
+	}
+
+	ARDOUR::BundleList a = _ports[1-dim].bundles ();
+
+	for (ARDOUR::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
+		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
+
+			ARDOUR::BundleChannel c[2];
+			c[dim] = ARDOUR::BundleChannel (sb, channel);
+			c[1-dim] = ARDOUR::BundleChannel (*i, j);
+
+			set_state (c, false);
+		}
+	}
+}
+
+void
+PortMatrix::setup_global_ports ()
+{
+	for (int i = 0; i < 2; ++i) {
+		if (list_is_global (i)) {
+			setup_ports (i);
+		}
+	}
+}
+
+	
+void
+PortMatrix::setup_all_ports ()
+{
+	setup_ports (0);
+	setup_ports (1);
 }
