@@ -133,8 +133,8 @@ AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t len
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
 	, _automatable(other->session())
-	, _fade_in (new AutomationList(*other->_fade_in, offset, offset + length))
-	, _fade_out (new AutomationList(*other->_fade_out, offset, offset + length))
+	, _fade_in (new AutomationList(*other->_fade_in))
+	, _fade_out (new AutomationList(*other->_fade_out))
 	, _envelope (new AutomationList(*other->_envelope, offset, offset + length))
 {
 	set<boost::shared_ptr<Source> > unique_srcs;
