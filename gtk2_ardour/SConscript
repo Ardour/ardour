@@ -87,10 +87,6 @@ if gtkardour['RUBBERBAND']:
 else:
 	gtkardour.Merge ([ libraries['soundtouch'] ])
 
-skipped_files=Split("""
-connection_editor.cc
-""")
-
 audiounit_files=Split("""
 au_pluginui.mm
 """)
@@ -507,7 +503,7 @@ else:
 	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour3', ardoursh))
 
 if env['NLS']:
-	i18n (gtkardour, gtkardour_files+skipped_files, env)
+	i18n (gtkardour, gtkardour_files, env)
     
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_dark_theme))
@@ -598,7 +594,6 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      vst_files +
 				      pixmap_files +
 				      icon_files +
-				      skipped_files +
 				      audiounit_files + 
 				      lv2_files +
 				      gtkosx_files +
