@@ -87,6 +87,7 @@ public:
    	uint32_t assertLastEventTimeLessOrEqualEventTime(
    		Time time, EventType type, uint32_t size, const uint8_t* buf) {
    		assert(_last_event_time <= time);
+		return 0;
    	}
 	
 	Time last_event_time() const { return _last_event_time; }
