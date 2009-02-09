@@ -24,11 +24,12 @@ SequenceTest::preserveEventOrderingTest (void)
 	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
 		uint8_t buffer[2];
 		Event<Time>* event = new Event<Time>(
-				DummyTypeMap::CONTROL, (*i)->on_event().time(), 2, buffer, true
+				DummyTypeMap::CONTROL, (*i)->on_event().time(), 3, buffer, true
 		);
 		
 		event->buffer()[0] = MIDI_CMD_CONTROL;
 		event->buffer()[1] = event->time() / 100;
+		event->buffer()[2] = event->time() / 100;
 		
 		boost::shared_ptr<Event<Time> > event_ptr(event);
 
