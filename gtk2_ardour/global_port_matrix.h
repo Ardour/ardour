@@ -20,6 +20,7 @@
 #ifndef __ardour_gtk_global_port_matrix_h__
 #define __ardour_gtk_global_port_matrix_h__
 
+#include <gtkmm/button.h>
 #include "port_matrix.h"
 #include "port_group.h"
 #include "ardour_dialog.h"
@@ -62,7 +63,10 @@ public:
 	GlobalPortMatrixWindow (ARDOUR::Session&, ARDOUR::DataType);
 
 private:
+	void rescan ();
+	
 	GlobalPortMatrix _port_matrix;
+	Gtk::Button _rescan_button;
 
 };
 

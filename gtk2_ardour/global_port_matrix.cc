@@ -17,6 +17,8 @@
 
 */
 
+#include <gtkmm/image.h>
+#include <gtkmm/stock.h>
 #include "global_port_matrix.h"
 #include "i18n.h"
 #include "ardour/bundle.h"
@@ -113,9 +115,23 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::Data
 		set_title (_("MIDI Connections Manager"));
 		break;
 	}
+
+	Gtk::HBox* buttons_hbox = Gtk::manage (new Gtk::HBox);
+
+	_rescan_button.set_label (_("Rescan"));
+	_rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
+	_rescan_button.signal_clicked().connect (sigc::mem_fun (*this, &GlobalPortMatrixWindow::rescan));
+	buttons_hbox->pack_start (_rescan_button, Gtk::PACK_SHRINK);
 	
 	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox);
 	vbox->pack_start (_port_matrix);
+	vbox->pack_start (*buttons_hbox, Gtk::PACK_SHRINK);
 	add (*vbox);
 	show_all ();
+}
+
+void
+GlobalPortMatrixWindow::rescan ()
+{
+	_port_matrix.setup_all_ports ();
 }
