@@ -109,7 +109,6 @@ class SequenceTest : public CppUnit::TestFixture
        	typedef std::vector<boost::shared_ptr<Note<Time> > > Notes;
        	
         void setUp (void) { 
-        	std::cerr << "SetUp" << std::endl;
         	type_map = new DummyTypeMap();
            	assert(type_map);
            	seq = new MySequence<Time>(*type_map, 0);

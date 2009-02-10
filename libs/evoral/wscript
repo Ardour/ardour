@@ -64,6 +64,7 @@ def build(bld):
 	obj              = bld.new_task_gen('cxx', 'program')
 	obj.source       = '''
 		test/SequenceTest.cpp
+		test/SMFTest.cpp
 		test/testrunner.cpp
 	'''
 	obj.includes     = ['.', './src']
