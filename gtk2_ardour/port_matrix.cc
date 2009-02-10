@@ -475,9 +475,13 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle> bundle,
 			c[dim] = ARDOUR::BundleChannel (sb, channel);
 			c[1-dim] = ARDOUR::BundleChannel (*i, j);
 
-			set_state (c, false);
+			if (get_state (c) == ASSOCIATED) {
+				set_state (c, false);
+			}
 		}
 	}
+
+	_body->rebuild_and_draw_grid ();
 }
 
 void
