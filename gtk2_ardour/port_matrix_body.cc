@@ -146,8 +146,12 @@ PortMatrixBody::on_size_request (Gtk::Requisition *req)
 	/* don't ask for the maximum size of our contents, otherwise GTK won't
 	   let the containing window shrink below this size */
 
-	req->width = std::min (512, std::max (col.first, grid.first + row.first));
-	req->height = std::min (512, col.second + grid.second);
+	/* XXX these shouldn't be hard-coded */
+	int const min_width = 512;
+	int const min_height = 512;
+
+	req->width = std::min (min_width, std::max (col.first, grid.first + row.first));
+	req->height = std::min (min_height / _matrix->min_height_divisor(), col.second + grid.second);
 }
 
 void

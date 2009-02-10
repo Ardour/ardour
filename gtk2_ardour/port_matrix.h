@@ -61,6 +61,13 @@ public:
 	void setup_scrollbars ();
 	void popup_channel_context_menu (int, uint32_t, uint32_t);
 
+	int min_height_divisor () const {
+		return _min_height_divisor;
+	}
+	void set_min_height_divisor (int f) {
+		_min_height_divisor = f;
+	}
+
 	enum Arrangement {
 		TOP_TO_RIGHT,  ///< column labels on top, row labels to the right
 		LEFT_TO_BOTTOM ///< row labels to the left, column labels on the bottom
@@ -169,6 +176,7 @@ private:
 	Arrangement _arrangement;
 	int _row_index;
 	int _column_index;
+	int _min_height_divisor;
 };
 
 #endif

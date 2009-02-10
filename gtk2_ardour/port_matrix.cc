@@ -45,7 +45,8 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	  _setup_once (false),
 	  _arrangement (TOP_TO_RIGHT),
 	  _row_index (0),
-	  _column_index (1)
+	  _column_index (1),
+	  _min_height_divisor (1)
 {
 	_body = new PortMatrixBody (this);
 
@@ -494,7 +495,6 @@ PortMatrix::setup_global_ports ()
 	}
 }
 
-	
 void
 PortMatrix::setup_all_ports ()
 {

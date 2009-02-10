@@ -347,6 +347,9 @@ PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::Por
 	: input_selector (sess, pi->io(), true),
 	  output_selector (sess, pi->io(), false)
 {
+	output_selector.set_min_height_divisor (2);
+	input_selector.set_min_height_divisor (2);
+	
 	pack_start (output_selector, true, true);
 	pack_start (input_selector, true, true);
 }
