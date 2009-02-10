@@ -282,7 +282,7 @@ PortMatrix::disassociate_all ()
 {
 	ARDOUR::BundleList a = _ports[0].bundles ();
 	ARDOUR::BundleList b = _ports[1].bundles ();
-	
+
 	for (ARDOUR::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
 			for (ARDOUR::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
@@ -292,8 +292,10 @@ PortMatrix::disassociate_all ()
 						ARDOUR::BundleChannel (*i, j),
 						ARDOUR::BundleChannel (*k, l)
 							};
-					
-					set_state (c, false);
+
+					if (get_state (c) == ASSOCIATED) {
+						set_state (c, false);
+					}
 
 				}
 			}
