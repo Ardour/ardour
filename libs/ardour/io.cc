@@ -425,7 +425,7 @@ IO::disconnect_input (Port* our_port, string other_port, void* src)
 			
 			/* disconnect it from the source */
 			
-			if (_session.engine().disconnect (other_port, our_port->name())) {
+			if (our_port->disconnect (other_port)) {
 				error << string_compose(_("IO: cannot disconnect input port %1 from %2"), our_port->name(), other_port) << endmsg;
 				return -1;
 			}
@@ -461,7 +461,7 @@ IO::connect_input (Port* our_port, string other_port, void* src)
 			
 			/* connect it to the source */
 
-			if (_session.engine().connect (other_port, our_port->name())) {
+			if (our_port->connect (other_port)) {
 				return -1;
 			}
 		}
@@ -493,7 +493,7 @@ IO::disconnect_output (Port* our_port, string other_port, void* src)
 			
 			/* disconnect it from the destination */
 			
-			if (_session.engine().disconnect (our_port->name(), other_port)) {
+			if (our_port->disconnect (other_port)) {
 				error << string_compose(_("IO: cannot disconnect output port %1 from %2"), our_port->name(), other_port) << endmsg;
 				return -1;
 			}
@@ -529,7 +529,7 @@ IO::connect_output (Port* our_port, string other_port, void* src)
 			
 			/* connect it to the destination */
 			
-			if (_session.engine().connect (our_port->name(), other_port)) {
+			if (our_port->connect (other_port)) {
 				return -1;
 			}
 		}
@@ -658,7 +658,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 	}
 
 	if (destination.length()) {
-		if (_session.engine().connect (our_port->name(), destination)) {
+		if (our_port->connect (destination)) {
 			return -1;
 		}
 	}
@@ -763,7 +763,7 @@ IO::add_input_port (string source, void* src, DataType type)
 
 	if (source.length()) {
 
-		if (_session.engine().connect (source, our_port->name())) {
+		if (our_port->connect (source)) {
 			return -1;
 		}
 	} 
@@ -786,7 +786,7 @@ IO::disconnect_inputs (void* src)
 			Glib::Mutex::Lock lm (io_lock);
 			
 			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-				_session.engine().disconnect (*i);
+				i->disconnect_all ();
 			}
 
 			check_bundles_connected_to_inputs ();
@@ -808,7 +808,7 @@ IO::disconnect_outputs (void* src)
 			Glib::Mutex::Lock lm (io_lock);
 			
 			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-				_session.engine().disconnect (*i);
+				i->disconnect_all ();
 			}
 
 			check_bundles_connected_to_outputs ();
@@ -879,7 +879,7 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
 		for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-			_session.engine().disconnect (*i);
+			i->disconnect_all ();
 		}
 	}
 
@@ -995,11 +995,11 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 			/* disconnect all existing ports so that we get a fresh start */
 			
 			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-				_session.engine().disconnect (*i);
+				i->disconnect_all ();
 			}
 			
 			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-				_session.engine().disconnect (*i);
+				i->disconnect_all ();
 			}
 		}
 		
@@ -1111,7 +1111,7 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
 		for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-			_session.engine().disconnect (*i);
+			i->disconnect_all ();
 		}
 	}
 
