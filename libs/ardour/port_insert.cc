@@ -212,3 +212,9 @@ PortInsert::input_streams() const
 	return _io->n_outputs ();
 }
 
+bool
+PortInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+{
+	out = in;
+	return true;
+}

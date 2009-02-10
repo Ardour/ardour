@@ -1602,7 +1602,7 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 			plugin_insert->set_count (1);
 
 		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert>(*r)) != 0) {
-			
+
 			++insert_cnt;
 			proc_map[(*r)->placement()].push_back (ProcessorCount (*r));
 
@@ -1635,7 +1635,7 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 	if (!proc_map[PreFader].empty()) {
 		previous_initial_streams = n_inputs ();
 		for (list<ProcessorCount>::iterator i = proc_map[PreFader].begin(); i != proc_map[PreFader].end(); i++) {
-			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) < 0) {
+			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) == false) {
 				goto streamcount;
 			}
 			previous_initial_streams = initial_streams;
@@ -1650,7 +1650,7 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 
 	if (!proc_map[PostFader].empty()) {
 		for (list<ProcessorCount>::iterator i = proc_map[PostFader].begin(); i != proc_map[PostFader].end(); i++) {
-			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) < 0) {
+			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) == false) {
 				goto streamcount;
 			}
 			previous_initial_streams = initial_streams;
