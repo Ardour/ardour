@@ -251,27 +251,8 @@ SMF<T>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	
 	int event_size = midi_event_size((unsigned char)status);
 	if (event_size <= 0) {
-		// if sysex, determine the size of the event
-		if ((status & 0xF0) == MIDI_CMD_COMMON_SYSEX) {
-			fpos_t after_sysex_status_byte_position;
-			int success = fgetpos(_fd, &after_sysex_status_byte_position);
-			assert(success == 0);
-			event_size = 1;
-			
-			while(true) {
-				int byte = fgetc(_fd);
-				if (byte == EOF) {
-					// premature end
-					return -1;
-				}
-				++event_size;
-				if ((byte & 0xff) == MIDI_CMD_COMMON_SYSEX_END) {
-					break;
-				}
-			}
-			
-			success = fsetpos(_fd, &after_sysex_status_byte_position);
-			assert(success == 0);
+		if ((status & 0xff) == MIDI_CMD_COMMON_SYSEX) {
+		event_size = SMFReader::read_var_len(_fd) + 1;
 		} else {
 			*size = 0;
 			return 0;
@@ -303,9 +284,15 @@ SMF<T>::append_event_unlocked(uint32_t delta_t, const Event<T>& ev)
 {
 	if (ev.size() == 0)
 		return;
-
-	const size_t stamp_size = write_var_len(delta_t);
-	fwrite(ev.buffer(), 1, ev.size(), _fd);
+	
+	size_t stamp_size = write_var_len(delta_t);
+	if (ev.buffer()[0] == MIDI_CMD_COMMON_SYSEX) {
+		fputc(MIDI_CMD_COMMON_SYSEX, _fd);
+		stamp_size += write_var_len(ev.size() - 1);
+		fwrite(ev.buffer() + 1, 1, ev.size() - 1, _fd);
+	} else {
+		fwrite(ev.buffer(), 1, ev.size(), _fd);
+	}
 
 	_track_size += stamp_size + ev.size();
 	_last_ev_time = ev.time();
