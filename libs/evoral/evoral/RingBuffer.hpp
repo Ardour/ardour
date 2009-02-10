@@ -29,7 +29,7 @@ namespace Evoral {
  * Read/Write realtime safe.
  * Single-reader Single-writer thread safe.
  */
-template <typename T>
+template <typename Time>
 class RingBuffer {
 public:
 
@@ -37,7 +37,7 @@ public:
 	 */
 	RingBuffer(size_t size)
 		: _size(size)
-		, _buf(new T[size])
+		, _buf(new Time[size])
 	{
 		reset();
 		assert(read_space() == 0);
@@ -96,7 +96,7 @@ public:
 	 *            read-pointer---^
 	 * </pre>
 	 */
-	size_t peek(size_t size, T* dst);
+	size_t peek(size_t size, Time* dst);
 
 	/** Peek at the ringbuffer (read w/o advancing read pointer).
 	 * @return how much has been peeked (wraps around if read exceeds
@@ -106,32 +106,32 @@ public:
 	 *            read-pointer---^
 	 * </pre>
 	 */
-	bool   full_peek(size_t size, T* dst);
+	bool   full_peek(size_t size, Time* dst);
 
 	/** Read from the ringbuffer. (advances read pointer)
 	 * @return how much has been read (read cannot exceed the end 
 	 * of the buffer):
 	 */
-	size_t read(size_t size, T* dst);
+	size_t read(size_t size, Time* dst);
 
 	/** Read from the ringbuffer. (advances read pointer)
 	 * @return how much has been peeked (wraps around if read exceeds
 	 * the end of the buffer):
 	 */
-	bool   full_read(size_t size, T* dst);
+	bool   full_read(size_t size, Time* dst);
 
 	/** Advance read pointer by size
 	 */
 	bool   skip(size_t size);
 	
-	void   write(size_t size, const T* src);
+	void   write(size_t size, const Time* src);
 
 protected:
 	mutable int _write_ptr;
 	mutable int _read_ptr;
 	
 	size_t _size; ///< Size (capacity) in bytes
-	T*     _buf;  ///< size, event, size, event...
+	Time*  _buf;  ///< size, event, size, event...
 };
 
 
@@ -141,9 +141,9 @@ protected:
  * Caller must check return value and call again if necessary, or use the 
  * full_peek method which does this automatically.
  */
-template<typename T>
+template<typename Time>
 size_t
-RingBuffer<T>::peek(size_t size, T* dst)
+RingBuffer<Time>::peek(size_t size, Time* dst)
 {
 	const size_t priv_read_ptr = g_atomic_int_get(&_read_ptr);
 
@@ -157,9 +157,9 @@ RingBuffer<T>::peek(size_t size, T* dst)
 }
 
 
-template<typename T>
+template<typename Time>
 bool
-RingBuffer<T>::full_peek(size_t size, T* dst)
+RingBuffer<Time>::full_peek(size_t size, Time* dst)
 {
 	if (read_space() < size) {
 		return false;
@@ -181,9 +181,9 @@ RingBuffer<T>::full_peek(size_t size, T* dst)
  * Caller must check return value and call again if necessary, or use the 
  * full_read method which does this automatically.
  */
-template<typename T>
+template<typename Time>
 size_t
-RingBuffer<T>::read(size_t size, T* dst)
+RingBuffer<Time>::read(size_t size, Time* dst)
 {
 	const size_t priv_read_ptr = g_atomic_int_get(&_read_ptr);
 
@@ -199,9 +199,9 @@ RingBuffer<T>::read(size_t size, T* dst)
 }
 
 
-template<typename T>
+template<typename Time>
 bool
-RingBuffer<T>::full_read(size_t size, T* dst)
+RingBuffer<Time>::full_read(size_t size, Time* dst)
 {
 	if (read_space() < size) {
 		return false;
@@ -217,9 +217,9 @@ RingBuffer<T>::full_read(size_t size, T* dst)
 }
 
 
-template<typename T>
+template<typename Time>
 bool
-RingBuffer<T>::skip(size_t size)
+RingBuffer<Time>::skip(size_t size)
 {
 	if (read_space() < size) {
 		std::cerr << "WARNING: Attempt to skip past end of MIDI ring buffer" << std::endl;
@@ -233,9 +233,9 @@ RingBuffer<T>::skip(size_t size)
 }
 
 
-template<typename T>
+template<typename Time>
 inline void
-RingBuffer<T>::write(size_t size, const T* src)
+RingBuffer<Time>::write(size_t size, const Time* src)
 {
 	const size_t priv_write_ptr = g_atomic_int_get(&_write_ptr);
 	

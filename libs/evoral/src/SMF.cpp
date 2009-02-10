@@ -32,8 +32,8 @@ using namespace std;
 
 namespace Evoral {
 
-template<typename T>
-SMF<T>::SMF()
+template<typename Time>
+SMF<Time>::SMF()
 	: _fd(0)
 	, _last_ev_time(0)
 	, _track_size(4) // 4 bytes for the ever-present EOT event
@@ -42,8 +42,8 @@ SMF<T>::SMF()
 {
 }
 
-template<typename T>
-SMF<T>::~SMF()
+template<typename Time>
+SMF<Time>::~SMF()
 {
 }
 
@@ -55,9 +55,9 @@ SMF<T>::~SMF()
  *         -1 if the file can not be opened for reading,
  *         -2 if the file can not be opened for writing
  */
-template<typename T>
+template<typename Time>
 int
-SMF<T>::open(const std::string& path)
+SMF<Time>::open(const std::string& path)
 {
 	//cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
 	_fd = fopen(path.c_str(), "r+");
@@ -90,9 +90,9 @@ SMF<T>::open(const std::string& path)
 	return (_fd == 0) ? -1 : 0;
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::close()
+SMF<Time>::close()
 {
 	if (_fd) {
 		flush_header();
@@ -102,16 +102,16 @@ SMF<T>::close()
 	}
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::seek_to_start() const
+SMF<Time>::seek_to_start() const
 {
 	fseek(_fd, _header_size, SEEK_SET);
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::seek_to_footer_position()
+SMF<Time>::seek_to_footer_position()
 {
 	uint8_t buffer[4];
 	
@@ -132,16 +132,16 @@ SMF<T>::seek_to_footer_position()
 	}
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::flush()
+SMF<Time>::flush()
 {
 	fflush(_fd);
 }
 
-template<typename T>
+template<typename Time>
 int
-SMF<T>::flush_header()
+SMF<Time>::flush_header()
 {
 	// FIXME: write timeline position somehow?
 	
@@ -169,9 +169,9 @@ SMF<T>::flush_header()
 	return 0;
 }
 
-template<typename T>
+template<typename Time>
 int
-SMF<T>::flush_footer()
+SMF<Time>::flush_footer()
 {
 	//cerr << path() << " SMF Flushing footer\n";
 	seek_to_footer_position();
@@ -181,9 +181,9 @@ SMF<T>::flush_footer()
 	return 0;
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::write_footer()
+SMF<Time>::write_footer()
 {
 	write_var_len(0);
 	char eot[3] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
@@ -206,9 +206,9 @@ SMF<T>::write_footer()
  * Returns event length (including status byte) on success, 0 if event was
  * skipped (eg a meta event), or -1 on EOF (or end of track).
  */
-template<typename T>
+template<typename Time>
 int
-SMF<T>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
+SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 {
 	if (feof(_fd)) {
 		return -1;
@@ -278,9 +278,9 @@ SMF<T>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	return (int)*size;
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::append_event_unlocked(uint32_t delta_t, const Event<T>& ev)
+SMF<Time>::append_event_unlocked(uint32_t delta_t, const Event<Time>& ev)
 {
 	if (ev.size() == 0)
 		return;
@@ -301,25 +301,25 @@ SMF<T>::append_event_unlocked(uint32_t delta_t, const Event<T>& ev)
 		_empty = false;
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::begin_write(FrameTime start_frame)
+SMF<Time>::begin_write(FrameTime start_frame)
 {
 	_last_ev_time = 0;
 	fseek(_fd, _header_size, SEEK_SET);
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::end_write()
+SMF<Time>::end_write()
 {
 	flush_header();
 	flush_footer();
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::write_chunk_header(const char id[4], uint32_t length)
+SMF<Time>::write_chunk_header(const char id[4], uint32_t length)
 {
 	const uint32_t length_be = GUINT32_TO_BE(length);
 
@@ -327,9 +327,9 @@ SMF<T>::write_chunk_header(const char id[4], uint32_t length)
 	fwrite(&length_be, 4, 1, _fd);
 }
 
-template<typename T>
+template<typename Time>
 void
-SMF<T>::write_chunk(const char id[4], uint32_t length, void* data)
+SMF<Time>::write_chunk(const char id[4], uint32_t length, void* data)
 {
 	write_chunk_header(id, length);
 	
@@ -337,9 +337,9 @@ SMF<T>::write_chunk(const char id[4], uint32_t length, void* data)
 }
 
 /** Returns the size (in bytes) of the value written. */
-template<typename T>
+template<typename Time>
 size_t
-SMF<T>::write_var_len(uint32_t value)
+SMF<Time>::write_var_len(uint32_t value)
 {
 	size_t ret = 0;
 

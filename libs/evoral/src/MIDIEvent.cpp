@@ -28,9 +28,9 @@ namespace Evoral {
 
 #ifdef EVORAL_MIDI_XML
 
-template<typename Timestamp>
-MIDIEvent<Timestamp>::MIDIEvent(const XMLNode& event) 
-  : Event<Timestamp>()
+template<typename Time>
+MIDIEvent<Time>::MIDIEvent(const XMLNode& event) 
+  : Event<Time>()
 {
 	string name = event.name();
 	
@@ -51,9 +51,9 @@ MIDIEvent<Timestamp>::MIDIEvent(const XMLNode& event)
 }
 
 
-template<typename Timestamp>
+template<typename Time>
 boost::shared_ptr<XMLNode> 
-MIDIEvent<Timestamp>::to_xml() const
+MIDIEvent<Time>::to_xml() const
 {
 	XMLNode *result = 0;
 	

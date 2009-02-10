@@ -34,14 +34,14 @@ namespace Evoral {
  * but the application must make sure the event actually contains
  * valid MIDI data for these functions to make sense.
  */
-template<typename Timestamp>
-struct MIDIEvent : public Event<Timestamp> {
-	MIDIEvent(EventType type=0, Timestamp timestamp=0, uint32_t size=0, uint8_t* buffer=NULL, bool alloc=false)
-		: Event<Timestamp>(type, timestamp, size, buffer, alloc)
+template<typename Time>
+struct MIDIEvent : public Event<Time> {
+	MIDIEvent(EventType type=0, Time timestamp=0, uint32_t size=0, uint8_t* buffer=NULL, bool alloc=false)
+		: Event<Time>(type, timestamp, size, buffer, alloc)
 	{}
 	
-	MIDIEvent(const Event<Timestamp>& copy, bool alloc)
-		: Event<Timestamp>(copy, alloc)
+	MIDIEvent(const Event<Time>& copy, bool alloc)
+		: Event<Time>(copy, alloc)
 	{}
 
 #ifdef EVORAL_MIDI_XML

@@ -29,16 +29,16 @@ namespace Evoral {
  *
  * Currently a note is defined as (on event, length, off event).
  */
-template<typename T>
+template<typename Time>
 class Note {
 public:
-	Note(uint8_t chan=0, T time=0, EventLength len=0, uint8_t note=0, uint8_t vel=0x40);
-	Note(const Note<T>& copy);
+	Note(uint8_t chan=0, Time time=0, EventLength len=0, uint8_t note=0, uint8_t vel=0x40);
+	Note(const Note<Time>& copy);
 	~Note();
 
-	const Note<T>& operator=(const Note<T>& copy);
+	const Note<Time>& operator=(const Note<Time>& copy);
 
-	inline bool operator==(const Note<T>& other) {
+	inline bool operator==(const Note<Time>& other) {
 		return time() == other.time() && 
 	         note() == other.note() && 
 	         length() == other.length() &&
@@ -46,8 +46,8 @@ public:
 	         channel()  == other.channel();
 	}
 
-	inline T           time()     const { return _on_event.time(); }
-	inline T           end_time() const { return _off_event.time(); }
+	inline Time        time()     const { return _on_event.time(); }
+	inline Time        end_time() const { return _off_event.time(); }
 	inline uint8_t     note()     const { return _on_event.note(); }
 	inline uint8_t     velocity() const { return _on_event.velocity(); }
 	inline EventLength length()   const { return _off_event.time() - _on_event.time(); }
@@ -56,21 +56,21 @@ public:
 	    return _on_event.channel(); 
 	}
 
-	inline void set_time(T t)             { _off_event.time() = t + length(); _on_event.time() = t; }
+	inline void set_time(Time t)          { _off_event.time() = t + length(); _on_event.time() = t; }
 	inline void set_note(uint8_t n)       { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
 	inline void set_velocity(uint8_t n)   { _on_event.buffer()[2] = n; }
 	inline void set_length(EventLength l) { _off_event.time() = _on_event.time() + l; }
 	inline void set_channel(uint8_t c)    { _on_event.set_channel(c);  _off_event.set_channel(c); }
 
-	inline       Event<T>& on_event()        { return _on_event; }
-	inline const Event<T>& on_event()  const { return _on_event; }
-	inline       Event<T>& off_event()       { return _off_event; }
-	inline const Event<T>& off_event() const { return _off_event; }
+	inline       Event<Time>& on_event()        { return _on_event; }
+	inline const Event<Time>& on_event()  const { return _on_event; }
+	inline       Event<Time>& off_event()       { return _off_event; }
+	inline const Event<Time>& off_event() const { return _off_event; }
 
 private:
 	// Event buffers are self-contained
-	MIDIEvent<T> _on_event;
-	MIDIEvent<T> _off_event;
+	MIDIEvent<Time> _on_event;
+	MIDIEvent<Time> _off_event;
 };
 
 

@@ -35,9 +35,9 @@
 namespace Evoral {
 
 class TypeMap;
-template<typename T> class EventSink;
-template<typename T> class Note;
-template<typename T> class Event;
+template<typename Time> class EventSink;
+template<typename Time> class Note;
+template<typename Time> class Event;
 
 /** An iterator over (the x axis of) a 2-d double coordinate space.
  */
@@ -58,7 +58,7 @@ public:
 /** This is a higher level view of events, with separate representations for
  * notes (instead of just unassociated note on/off events) and controller data.
  * Controller data is represented as a list of time-stamped float values. */
-template<typename T> 
+template<typename Time> 
 class Sequence : virtual public ControlSet {
 public:
 	Sequence(const TypeMap& type_map, size_t size=0);
@@ -80,54 +80,54 @@ public:
 	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
-	size_t read(EventSink<T>& dst,
+	size_t read(EventSink<Time>& dst,
 	            timestamp_t   start,
 	            timedur_t     length,
 	            timestamp_t   stamp_offset) const;
 
 	/** Resizes vector if necessary (NOT realtime safe) */
-	void append(const Event<T>& ev);
+	void append(const Event<Time>& ev);
 	
-	inline const boost::shared_ptr< const Note<T> > note_at(unsigned i) const { return _notes[i]; }
-	inline const boost::shared_ptr< Note<T> >       note_at(unsigned i)       { return _notes[i]; }
+	inline const boost::shared_ptr< const Note<Time> > note_at(unsigned i) const { return _notes[i]; }
+	inline const boost::shared_ptr< Note<Time> >       note_at(unsigned i)       { return _notes[i]; }
 
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::empty(); }
 
-	inline static bool note_time_comparator(const boost::shared_ptr< const Note<T> >& a,
-	                                        const boost::shared_ptr< const Note<T> >& b) { 
+	inline static bool note_time_comparator(const boost::shared_ptr< const Note<Time> >& a,
+	                                        const boost::shared_ptr< const Note<Time> >& b) { 
 		return a->time() < b->time();
 	}
 
 	struct LaterNoteEndComparator {
-		typedef const Note<T>* value_type;
-		inline bool operator()(const boost::shared_ptr< const Note<T> > a,
-		                       const boost::shared_ptr< const Note<T> > b) const { 
+		typedef const Note<Time>* value_type;
+		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
+		                       const boost::shared_ptr< const Note<Time> > b) const { 
 			return a->end_time() > b->end_time();
 		}
 	};
 
-	typedef std::vector< boost::shared_ptr< Note<T> > > Notes;
+	typedef std::vector< boost::shared_ptr< Note<Time> > > Notes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
 	// useful for storing SysEx / Meta events
-	typedef std::vector< boost::shared_ptr< Event<T> > > SysExes;
+	typedef std::vector< boost::shared_ptr< Event<Time> > > SysExes;
 	inline       SysExes& sysexes()       { return _sysexes; }
 	inline const SysExes& sysexes() const { return _sysexes; }
 
 	/** Read iterator */
 	class const_iterator {
 	public:
-		const_iterator(const Sequence<T>& seq, T t);
+		const_iterator(const Sequence<Time>& seq, Time t);
 		~const_iterator();
 
 		inline bool valid() const { return !_is_end && _event; }
 		inline bool locked() const { return _locked; }
 
-		const Event<T>& operator*()  const { return *_event;  }
-		const boost::shared_ptr< Event<T> > operator->() const  { return _event; }
-		const boost::shared_ptr< Event<T> > get_event_pointer() { return _event; }
+		const Event<Time>& operator*()  const { return *_event;  }
+		const boost::shared_ptr< Event<Time> > operator->() const  { return _event; }
+		const boost::shared_ptr< Event<Time> > get_event_pointer() { return _event; }
 
 		const const_iterator& operator++(); // prefix only
 		bool operator==(const const_iterator& other) const;
@@ -136,15 +136,15 @@ public:
 		const_iterator& operator=(const const_iterator& other);
 
 	private:
-		friend class Sequence<T>;
+		friend class Sequence<Time>;
 		
 		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX };
 
-		const Sequence<T>*            _seq;
-		boost::shared_ptr< Event<T> > _event;
+		const Sequence<Time>*            _seq;
+		boost::shared_ptr< Event<Time> > _event;
 
-		typedef std::priority_queue< boost::shared_ptr< Note<T> >,
-		                             std::deque< boost::shared_ptr< Note<T> > >,
+		typedef std::priority_queue< boost::shared_ptr< Note<Time> >,
+		                             std::deque< boost::shared_ptr< Note<Time> > >,
 		                             LaterNoteEndComparator >
 			ActiveNotes;
 		
@@ -160,13 +160,13 @@ public:
 		ControlIterators::iterator       _control_iter;
 	};
 	
-	const_iterator        begin(T t=0) const { return const_iterator(*this, t); }
+	const_iterator        begin(Time t=0) const { return const_iterator(*this, t); }
 	const const_iterator& end()        const { return _end_iter; }
 	
-	void         read_seek(T t)    { _read_iter = begin(t); }
-	T    read_time() const { return _read_iter.valid() ? _read_iter->time() : 0.0; }
+	void         read_seek(Time t)    { _read_iter = begin(t); }
+	Time         read_time() const    { return _read_iter.valid() ? _read_iter->time() : 0.0; }
 
-	bool control_to_midi_event(boost::shared_ptr< Event<T> >& ev,
+	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
 	                           const ControlIterator&         iter) const;
 	
 	bool edited() const      { return _edited; }
@@ -176,8 +176,8 @@ public:
 	bool is_sorted() const;
 #endif
 	
-	void add_note_unlocked(const boost::shared_ptr< Note<T> > note);
-	void remove_note_unlocked(const boost::shared_ptr< const Note<T> > note);
+	void add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
+	void remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note);
 	
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
@@ -189,10 +189,10 @@ protected:
 private:
 	friend class const_iterator;
 	
-	void append_note_on_unlocked(uint8_t chan, T time, uint8_t note, uint8_t velocity);
-	void append_note_off_unlocked(uint8_t chan, T time, uint8_t note);
-	void append_control_unlocked(const Parameter& param, T time, double value);
-	void append_sysex_unlocked(const MIDIEvent<T>& ev);
+	void append_note_on_unlocked(uint8_t chan, Time time, uint8_t note, uint8_t velocity);
+	void append_note_off_unlocked(uint8_t chan, Time time, uint8_t note);
+	void append_control_unlocked(const Parameter& param, Time time, double value);
+	void append_sysex_unlocked(const MIDIEvent<Time>& ev);
 
 	mutable Glib::RWLock _lock;
 
@@ -217,7 +217,7 @@ private:
 	uint8_t _highest_note;
 
 	typedef std::priority_queue<
-			boost::shared_ptr< Note<T> >, std::deque< boost::shared_ptr< Note<T> > >,
+			boost::shared_ptr< Note<Time> >, std::deque< boost::shared_ptr< Note<Time> > >,
 			LaterNoteEndComparator>
 		ActiveNotes;
 };
