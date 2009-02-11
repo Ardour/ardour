@@ -127,7 +127,6 @@ class AudioEngine : public sigc::trackable
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);
 	int disconnect (Port &);
-	bool ports_connected (std::string const &, std::string const &);
 	
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
