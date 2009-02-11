@@ -1,23 +1,23 @@
 #include "SequenceTest.hpp"
 #include <cassert>
 
-CPPUNIT_TEST_SUITE_REGISTRATION( SequenceTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(SequenceTest);
 
 using namespace std;
 
 void 
 SequenceTest::createTest (void)
 {
-       	CPPUNIT_ASSERT_EQUAL(size_t(0), seq->sysexes().size());
-       	CPPUNIT_ASSERT_EQUAL(size_t(0), seq->notes().size());
-       	CPPUNIT_ASSERT(seq->notes().begin() == seq->notes().end());
+	CPPUNIT_ASSERT_EQUAL(size_t(0), seq->sysexes().size());
+	CPPUNIT_ASSERT_EQUAL(size_t(0), seq->notes().size());
+	CPPUNIT_ASSERT(seq->notes().begin() == seq->notes().end());
 }
 
 
 void 
 SequenceTest::preserveEventOrderingTest (void)
 {
-	vector<boost::shared_ptr<Event<Time> > > inserted_events;
+	vector< boost::shared_ptr< Event<Time> > > inserted_events;
 	
 	seq->start_write();
 	
@@ -52,7 +52,7 @@ SequenceTest::preserveEventOrderingTest (void)
 	seq->end_write();
 
 	TestSink<Time> sink;
-	sink.writing.connect(sigc::mem_fun(&sink, &TestSink<Time>::assertLastEventTimeLessOrEqualEventTime));
+	sink.writing.connect(sigc::mem_fun(&sink, &TestSink<Time>::assertLastEventTimeEarlier));
 
 	seq->read(sink, timestamp_t(0), timedur_t(1200), timestamp_t(0));
 	

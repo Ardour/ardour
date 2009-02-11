@@ -993,7 +993,8 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
 bool
 ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, double& x, double& y, bool inclusive) const
 {
-	cerr << "earliest_event(start: " << start << ", end: " << end << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
+	//cerr << "earliest_event(start: " << start << ", end: " << end
+	//<< ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
 
 	const_iterator length_check_iter = _events.begin();
 	if (_events.empty()) // 0 events

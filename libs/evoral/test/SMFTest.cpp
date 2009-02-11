@@ -28,7 +28,7 @@ SMFTest::takeFiveTest ()
 		time += delta_t;
 		
 		if (ret > 0) { // didn't skip (meta) event
-			cerr << "read smf event type " << hex << int(buf[0]) << endl;
+			//cerr << "read smf event type " << hex << int(buf[0]) << endl;
 			// make ev.time absolute time in frames
 			ev.time() = time * frames_per_beat / (double)smf.ppqn();
 			ev.set_event_type(type_map->midi_event_type(buf[0]));

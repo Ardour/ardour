@@ -78,13 +78,13 @@ public:
 	sigc::signal<uint32_t, Time, EventType, uint32_t, const uint8_t*> writing;
 	
 	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) {
-		std::cerr << "last event time: " << _last_event_time << " time: " << time << std::endl;
+		//std::cerr << "last event time: " << _last_event_time << " time: " << time << std::endl;
 		uint32_t result = writing(time, type, size, buf);
 		_last_event_time = time;
 		return result;
 	}
 	
-   	uint32_t assertLastEventTimeLessOrEqualEventTime(
+   	uint32_t assertLastEventTimeEarlier(
    		Time time, EventType type, uint32_t size, const uint8_t* buf) {
    		CPPUNIT_ASSERT(_last_event_time <= time);
 		return 0;
