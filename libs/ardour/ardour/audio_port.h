@@ -29,8 +29,8 @@ namespace ARDOUR {
 class AudioPort : public Port 
 {
    public:
-	~AudioPort();
-
+	~AudioPort ();
+	
 	DataType type () const {
 		return DataType::AUDIO;
 	}
@@ -44,23 +44,14 @@ class AudioPort : public Port
 	
 	AudioBuffer& get_audio_buffer (nframes_t, nframes_t);
 
-	void reset ();
-
   protected:
 	friend class AudioEngine;
 
-	AudioPort (std::string const &, Flags, bool, nframes_t);
+	AudioPort (std::string const &, Flags);
   
-	bool using_internal_data() const;
-	void use_internal_data ();
-	void use_external_data (); 
-
   private:
-	void mixdown (nframes_t, nframes_t, bool);
-
-	bool _has_been_mixed_down;
+	bool _buffer_data_set;
 	AudioBuffer* _buffer;
-	bool _internal_buffer;
 };
  
 } // namespace ARDOUR

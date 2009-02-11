@@ -102,13 +102,12 @@ static double direct_gain_to_control (gain_t gain) {
  */
 IO::IO (Session& s, const string& name,
 	int input_min, int input_max, int output_min, int output_max,
-	DataType default_type, bool public_ports)
+	DataType default_type)
 	: SessionObject(s, name),
 	  AutomatableControls (s),
   	  _output_buffers (new BufferSet()),
 	  _active(true),
 	  _default_type (default_type),
- 	  _public_ports (public_ports),
 	  _input_minimum (ChanCount::ZERO),
 	  _input_maximum (ChanCount::INFINITE),
 	  _output_minimum (ChanCount::ZERO),
@@ -166,7 +165,6 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	  _default_type (dt)
 {
 	_meter = new PeakMeter (_session);
-	_public_ports = true; // XXX get this from node
 	_panner = 0;
 	deferred_state = 0;
 	no_panner_reset = false;
@@ -644,7 +642,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 			
 			string portname = build_legal_port_name (type, false);
 			
-			if ((our_port = _session.engine().register_output_port (type, portname, _public_ports)) == 0) {
+			if ((our_port = _session.engine().register_output_port (type, portname)) == 0) {
 				error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
 				return -1;
 			}
@@ -748,7 +746,7 @@ IO::add_input_port (string source, void* src, DataType type)
 			
 			string portname = build_legal_port_name (type, true);
 
-			if ((our_port = _session.engine().register_input_port (type, portname, _public_ports)) == 0) {
+			if ((our_port = _session.engine().register_input_port (type, portname)) == 0) {
 				error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
 				return -1;
 			}
@@ -850,7 +848,7 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 
 			try {
 
-				if ((input_port = _session.engine().register_input_port (*t, portname, _public_ports)) == 0) {
+				if ((input_port = _session.engine().register_input_port (*t, portname)) == 0) {
 					error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
 					return -1;
 				}
@@ -948,7 +946,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 				string portname = build_legal_port_name (*t, true);
 
 				try {
-					if ((port = _session.engine().register_input_port (*t, portname, _public_ports)) == 0) {
+					if ((port = _session.engine().register_input_port (*t, portname)) == 0) {
 						error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
 						return -1;
 					}
@@ -972,7 +970,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 				string portname = build_legal_port_name (*t, false);
 				
 				try { 
-					if ((port = _session.engine().register_output_port (*t, portname, _public_ports)) == 0) {
+					if ((port = _session.engine().register_output_port (*t, portname)) == 0) {
 						error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
 						return -1;
 					}
@@ -1087,7 +1085,7 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 
 			string portname = build_legal_port_name (*t, false);
 
-			if ((output_port = _session.engine().register_output_port (*t, portname, _public_ports)) == 0) {
+			if ((output_port = _session.engine().register_output_port (*t, portname)) == 0) {
 				error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
 				return -1;
 			}

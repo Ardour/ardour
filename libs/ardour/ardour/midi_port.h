@@ -49,11 +49,10 @@ class MidiPort : public Port {
   protected:
 	friend class AudioEngine;
 
-	MidiPort (const std::string& name, Flags, bool external, nframes_t bufsize);
+	MidiPort (const std::string& name, Flags);
   
   private:
-	void mixdown (nframes_t, nframes_t, bool);
-	
+
 	MidiBuffer* _buffer;
 	bool _has_been_mixed_down;
 };

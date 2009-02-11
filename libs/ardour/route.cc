@@ -35,7 +35,6 @@
 #include <ardour/plugin_insert.h>
 #include <ardour/port_insert.h>
 #include <ardour/send.h>
-#include <ardour/internal_send.h>
 #include <ardour/session.h>
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
@@ -1608,8 +1607,6 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 
 		} else if (boost::dynamic_pointer_cast<Send> (*r) != 0) {
 			++send_cnt;
-		} else if (boost::dynamic_pointer_cast<InternalSend> (*r) != 0) {
-			++send_cnt;
 		}
 	}
 
@@ -1673,7 +1670,6 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 
 	for (r = _processors.begin(); r != _processors.end(); prev = r, ++r) {
 		boost::shared_ptr<Send> s;
-		boost::shared_ptr<InternalSend> is;
 
 		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
 
@@ -1685,16 +1681,6 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 				s->expect_inputs (n_inputs());
 			} else {
 				s->expect_inputs ((*prev)->output_streams());
-			}
-
-		} else if ((is = boost::dynamic_pointer_cast<InternalSend> (*r)) != 0) {
-
-			/* XXX ditto, but clean this inheritance pattern up someday soon */
-
-			if (r == _processors.begin()) {
-				is->expect_inputs (n_inputs());
-			} else {
-				is->expect_inputs ((*prev)->output_streams());
 			}
 
 		} else {

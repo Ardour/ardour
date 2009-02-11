@@ -46,10 +46,9 @@ using namespace PBD;
 IOProcessor::IOProcessor (Session& s, const string& name, Placement p,
 			  int input_min, int input_max,
 			  int output_min, int output_max, 
-			  DataType dtype,
-			  bool public_ports)
+			  DataType dtype)
 	: Processor(s, name, p)
-	, _io (new IO(s, name, input_min, input_max, output_min, output_max, dtype, public_ports))
+	, _io (new IO(s, name, input_min, input_max, output_min, output_max, dtype))
 {
 	_active = false;
 	_sort_key = 0;

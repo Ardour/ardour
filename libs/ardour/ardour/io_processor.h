@@ -47,8 +47,7 @@ class IOProcessor : public Processor
   public:
 	IOProcessor (Session&, const string& name, Placement,
 		     int input_min = -1, int input_max = -1, int output_min = -1, int output_max = -1,
-		     ARDOUR::DataType default_type = DataType::AUDIO,
-		     bool public_ports = true);
+		     ARDOUR::DataType default_type = DataType::AUDIO);
 	IOProcessor (const IOProcessor&);
 	virtual ~IOProcessor ();
 	

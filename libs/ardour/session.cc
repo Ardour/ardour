@@ -60,7 +60,6 @@
 #include <ardour/cycle_timer.h>
 #include <ardour/data_type.h>
 #include <ardour/filename_extensions.h>
-#include <ardour/internal_send.h>
 #include <ardour/io_processor.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/midi_playlist.h>
@@ -3717,8 +3716,6 @@ Session::add_processor (Processor* processor)
 		_plugin_inserts.insert (_plugin_inserts.begin(), plugin_insert);
 	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		_sends.insert (_sends.begin(), send);
-	} else if (dynamic_cast<InternalSend *> (processor) != 0) {
-		/* relax */
 	} else {
 		fatal << _("programming error: unknown type of Insert created!") << endmsg;
 		/*NOTREACHED*/
@@ -3744,8 +3741,6 @@ Session::remove_processor (Processor* processor)
 		}
 	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (processor)) != 0) {
 		_plugin_inserts.remove (plugin_insert);
-	} else if (dynamic_cast<InternalSend *> (processor) != 0) {
-		/* relax */
 	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		list<Send*>::iterator x = find (_sends.begin(), _sends.end(), send);
 		if (x != _sends.end()) {

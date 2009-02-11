@@ -73,10 +73,6 @@ class AudioTrack : public Track
 	int  deprecated_use_diskstream_connections ();
 	void set_state_part_two ();
 	void set_state_part_three ();
-
-	void catch_up_on_busses (ARDOUR::RouteList&);
-	void add_internal_send (boost::shared_ptr<ARDOUR::Route>);
-
 };
 
 } // namespace ARDOUR

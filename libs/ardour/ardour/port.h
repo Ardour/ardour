@@ -65,13 +65,7 @@ public:
 		return _flags & IsOutput;
 	}
 
-	/* @return true if this port is visible outside Ardour (via JACK) */
-	bool external () const {
-		return _jack_port != 0;
-	}
-
 	bool connected () const;
-	bool externally_connected () const;
 	int disconnect_all ();
 	int get_connections (std::vector<std::string> &) const;
 
@@ -90,9 +84,8 @@ public:
 	nframes_t total_latency () const;
 	int reestablish ();
 	int reconnect ();
-	void set_latency (nframes_t);
 	void request_monitor_input (bool);
-	void make_external ();
+	void set_latency (nframes_t);
 
 	virtual void reset ();
 
@@ -108,36 +101,26 @@ public:
 
 protected:
 	
-	Port (std::string const &, DataType, Flags, bool);
+	Port (std::string const &, DataType, Flags);
 
-	jack_port_t* _jack_port; ///< JACK port, or 0 if we don't have one
-	std::set<Port*> _connections; ///< internal Ports that we are connected to
+	jack_port_t* _jack_port; ///< JACK port
 
 	static AudioEngine* _engine; ///< the AudioEngine
 
-	virtual bool using_internal_data() const { return false; }
-	virtual void use_internal_data () {}
-	virtual void use_external_data () {} 
-
-	void check_buffer_status ();
-	
 private:
 	friend class AudioEngine;
 
 	void recompute_total_latency () const;
-	void do_make_external (DataType);
 	
 	/* XXX */
 	bool _last_monitor;
-	nframes_t _latency;
 
 	std::string _name; ///< port short name
 	Flags _flags; ///< flags
 
-	/// list of JACK ports that we are connected to; we only keep this around
-	/// so that we can implement ::reconnect ()
-	std::set<std::string> _named_connections;
-
+	/** ports that we are connected to, kept so that we can
+	    reconnect to JACK when required */
+	std::set<std::string> _connections;
 };
 
 }

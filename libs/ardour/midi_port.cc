@@ -25,13 +25,13 @@
 using namespace ARDOUR;
 using namespace std;
 
-MidiPort::MidiPort (const std::string& name, Flags flags, bool ext, nframes_t capacity)
-        : Port (name, DataType::MIDI, flags, ext)
+MidiPort::MidiPort (const std::string& name, Flags flags)
+        : Port (name, DataType::MIDI, flags)
 	, _has_been_mixed_down (false)
 {
 	// FIXME: size kludge (see BufferSet::ensure_buffers)
 	// Jack needs to tell us this
-	_buffer = new MidiBuffer (capacity * 32);
+	_buffer = new MidiBuffer (1024 * 32);
 }
 
 MidiPort::~MidiPort()
@@ -43,13 +43,11 @@ MidiPort::~MidiPort()
 void
 MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 {
-	if (external ()) {
-		_buffer->clear ();
-		assert (_buffer->size () == 0);
-
-		if (sends_output ()) {
-			jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, nframes));
-		}
+	_buffer->clear ();
+	assert (_buffer->size () == 0);
+	
+	if (sends_output ()) {
+		jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, nframes));
 	}
 }
 
@@ -62,41 +60,26 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 
 	if (receives_input ()) {
 			
-		if (external ()) {
+		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
+		const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
 		
-			void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
-			const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
-
-			assert (event_count < _buffer->capacity());
-
-			jack_midi_event_t ev;
-
-			for (nframes_t i = 0; i < event_count; ++i) {
-
-				jack_midi_event_get (&ev, jack_buffer, i);
-
-				// i guess this should do but i leave it off to test the rest first.
-				//if (ev.time > offset && ev.time < offset+nframes)
-				_buffer->push_back (ev);
-			}
-
-			if (nframes) {
-				_has_been_mixed_down = true;
-			}
-
-			if (!_connections.empty()) {
-				mixdown (nframes, offset, false);
-			}
-
-		} else {
+		assert (event_count < _buffer->capacity());
 		
-			if (_connections.empty()) {
-				_buffer->silence (nframes, offset);
-			} else {
-				mixdown (nframes, offset, true);
-			}
+		jack_midi_event_t ev;
+		
+		for (nframes_t i = 0; i < event_count; ++i) {
+			
+			jack_midi_event_get (&ev, jack_buffer, i);
+			
+			// i guess this should do but i leave it off to test the rest first.
+			//if (ev.time > offset && ev.time < offset+nframes)
+			_buffer->push_back (ev);
 		}
-
+		
+		if (nframes) {
+			_has_been_mixed_down = true;
+		}
+		
 	} else {
 		_buffer->silence (nframes, offset);
 	}
@@ -114,7 +97,7 @@ MidiPort::cycle_end (nframes_t nframes, nframes_t offset)
 {
 #if 0
 
-	if (external () && sends_output ()) {
+	if (sends_output ()) {
 		/* FIXME: offset */
 
 		// We're an output - copy events from source buffer to Jack buffer
@@ -142,7 +125,7 @@ MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 {
 	/* FIXME: offset */
 	
-	if (external () && sends_output ()) {
+	if (sends_output ()) {
 		
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 
@@ -155,23 +138,6 @@ MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 				jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
 			}
 		}
-	}
-}
-
-void
-MidiPort::mixdown (nframes_t cnt, nframes_t offset, bool first_overwrite)
-{
-	set<Port*>::const_iterator p = _connections.begin();
-
-	if (first_overwrite) {
-		_buffer->read_from ((dynamic_cast<MidiPort*>(*p))->get_midi_buffer (cnt, offset), cnt, offset);
-		++p;
-	}
-
-	// XXX DAVE: this is just a guess
-
-	for (; p != _connections.end(); ++p) {
-		_buffer->merge (*_buffer, (dynamic_cast<MidiPort*>(*p))->get_midi_buffer (cnt, offset));
 	}
 }
 

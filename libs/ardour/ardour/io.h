@@ -77,8 +77,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	IO (Session&, const string& name, 
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
-	    DataType default_type = DataType::AUDIO,
-	    bool public_ports = true);
+	    DataType default_type = DataType::AUDIO);
 	
 	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	
@@ -286,7 +285,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	bool                _denormal_protection;
 	XMLNode*             deferred_state;
 	DataType            _default_type;
-	bool                _public_ports;
 
 	virtual void prepare_inputs (nframes_t nframes, nframes_t offset);
 	virtual void flush_outputs (nframes_t nframes, nframes_t offset);
