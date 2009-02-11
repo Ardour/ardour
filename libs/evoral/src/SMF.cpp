@@ -281,7 +281,7 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 
 template<typename Time>
 void
-SMF<Time>::append_event_unlocked(uint32_t delta_t, const Event<Time>& ev)
+SMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
 {
 	if (ev.size() == 0)
 		return;
@@ -304,7 +304,7 @@ SMF<Time>::append_event_unlocked(uint32_t delta_t, const Event<Time>& ev)
 
 template<typename Time>
 void
-SMF<Time>::begin_write(FrameTime start_frame)
+SMF<Time>::begin_write()
 {
 	_last_ev_time = 0;
 	fseek(_fd, _header_size, SEEK_SET);

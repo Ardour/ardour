@@ -47,8 +47,8 @@ public:
 	
 	virtual Time last_event_time() const = 0;
 	
-	virtual void begin_write(FrameTime start_time) = 0;
-	virtual void append_event_unlocked(uint32_t delta_t, const Event<Time>& ev) = 0;
+	virtual void begin_write() = 0;
+	virtual void append_event_delta(uint32_t delta_t, const Event<Time>& ev) = 0;
 	virtual void end_write() throw(FileError) = 0;
 	
 	virtual void flush() = 0;
@@ -60,7 +60,6 @@ protected:
 	virtual void close() throw(FileError) = 0;
 	
 	virtual int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const = 0;
-
 };
 
 }; /* namespace Evoral */

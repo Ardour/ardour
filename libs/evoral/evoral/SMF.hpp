@@ -43,8 +43,8 @@ public:
 	
 	Time last_event_time() const { return _last_ev_time; }
 	
-	void begin_write(FrameTime start_time);
-	void append_event_unlocked(uint32_t delta_t, const Event<Time>& ev);
+	void begin_write();
+	void append_event_delta(uint32_t delta_t, const Event<Time>& ev);
 	void end_write() THROW_FILE_ERROR;
 	
 	void flush();

@@ -144,7 +144,7 @@ LibSMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 
 template<typename Time>
 void
-LibSMF<Time>::append_event_unlocked(uint32_t delta_t, const Event<Time>& ev)
+LibSMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
 {
 	assert(ev.size() > 0);
 	
@@ -166,7 +166,7 @@ LibSMF<Time>::append_event_unlocked(uint32_t delta_t, const Event<Time>& ev)
 
 template<typename Time>
 void
-LibSMF<Time>::begin_write(FrameTime start_frame)
+LibSMF<Time>::begin_write()
 {
 	assert(_smf_track);
 	smf_track_delete(_smf_track);

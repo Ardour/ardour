@@ -299,7 +299,7 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>
 		delta_time = (uint32_t)((ev.time() - last_event_time()) * ppqn());
 	}
 
-	Evoral::SMF<double>::append_event_unlocked(delta_time, ev);
+	Evoral::SMF<double>::append_event_delta(delta_time, ev);
 
 	_write_data_count += ev.size();
 }
@@ -354,7 +354,7 @@ void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
-	Evoral::SMF<double>::begin_write (start_frame);
+	Evoral::SMF<double>::begin_write ();
 }
 
 void
