@@ -77,16 +77,12 @@ Editor::region_hidden (boost::shared_ptr<Region> r)
 void
 Editor::add_regions_to_region_display (vector<boost::weak_ptr<Region> >& regions)
 {
-	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
-	
 	for (vector<boost::weak_ptr<Region> >::iterator x = regions.begin(); x != regions.end(); ++x) {
 		boost::shared_ptr<Region> region ((*x).lock());
 		if (region) {
 			add_region_to_region_display (region);
 		}
 	}
-	
-	region_list_display.set_model (region_list_model);
 }
 
 void
