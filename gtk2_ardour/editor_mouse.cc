@@ -4235,6 +4235,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	nframes64_t drag_delta;
 	bool changed_tracks, changed_position;
 	std::pair<TimeAxisView*, int> tvp;
+	std::map<RegionView*, RouteTimeAxisView*> final;
 
 	/* first_move is set to false if the regionview has been moved in the 
 	   motion handler. 
@@ -4297,16 +4298,22 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	track_canvas->update_now ();
 
-	for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
-			
-		RegionView* rv = (*i);	    	    
+	/* make a list of where each region ended up */
+	for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
+
 		double ix1, ix2, iy1, iy2;
-		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-		rv->get_canvas_frame()->i2w (ix1, iy1);
+		(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+		(*i)->get_canvas_frame()->i2w (ix1, iy1);
 		iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
-		std::pair<TimeAxisView*, int> const dest_tv = trackview_by_y_position (iy1);
-		RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (dest_tv.first);
+		std::pair<TimeAxisView*, int> tv = trackview_by_y_position (iy1);
+		final[*i] = dynamic_cast<RouteTimeAxisView*> (tv.first);
+	}
+
+	for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
+
+		RegionView* rv = (*i);
+		RouteTimeAxisView* dest_rtv = final[*i];
 
 		nframes64_t where;
 
