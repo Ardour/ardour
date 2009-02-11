@@ -88,6 +88,7 @@ class Bundle : public sigc::trackable
 	void add_channels_from_bundle (boost::shared_ptr<Bundle>);
 	void connect (boost::shared_ptr<Bundle>, AudioEngine &);
 	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
+	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &);
 
 	/** Set the name.
 	 *  @param n New name.

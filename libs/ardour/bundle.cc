@@ -23,6 +23,7 @@
 #include <ardour/ardour.h>
 #include <ardour/bundle.h>
 #include <ardour/audioengine.h>
+#include <ardour/port.h>
 #include <pbd/xml++.h>
 
 #include "i18n.h"
@@ -395,3 +396,38 @@ Bundle::emit_changed (Change c)
 	}
 }
 		
+bool
+Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
+{
+	if (_ports_are_inputs == other->_ports_are_inputs ||
+	    _type != other->_type ||
+	    nchannels() != other->nchannels ()) {
+
+		return false;
+	}
+
+	for (uint32_t i = 0; i < nchannels(); ++i) {
+		Bundle::PortList const & A = channel_ports (i);
+		Bundle::PortList const & B = other->channel_ports (i);
+		
+		for (uint32_t j = 0; j < A.size(); ++j) {
+			for (uint32_t k = 0; k < B.size(); ++k) {
+
+				Port* p = engine.get_port_by_name (A[j]);
+				Port* q = engine.get_port_by_name (B[k]);
+
+				if (!p && !q) {
+					return false;
+				}
+
+				if (p && !p->connected_to (B[k])) {
+					return false;
+				} else if (q && !q->connected_to (A[j])) {
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
