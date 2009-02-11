@@ -123,17 +123,20 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 			#ifdef DEBUG_SEQUENCE
 			debugout << "Iterator: CC " << i->first.id() << " (size " << i->second->list()->size()
 				<< ") has no events past " << t << endl;
+			#endif
 			continue;
 		}
 
 		assert(x >= 0);
 
+		/*
 		if (y < i->first.min() || y > i->first.max()) {
 			errorout << "ERROR: Controller " << i->first.symbol() << " value " << y
 				<< " out of range [" << i->first.min() << "," << i->first.max()
 				<< "], event ignored" << endl;
 			continue;
 		}
+		*/
 
 		const ControlIterator new_iter(i->second->list(), x, y);
 
