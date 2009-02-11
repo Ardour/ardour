@@ -270,11 +270,11 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	if (event_size > 1)
 		fread((*buf) + 1, 1, *size - 1, _fd);
 
-	printf("SMF read event: delta = %u, size = %u, data = ",  *delta_t, *size);
+	/*printf("SMF read event: delta = %u, size = %u, data = ",  *delta_t, *size);
 	for (size_t i=0; i < *size; ++i) {
 		printf("%X ", (*buf)[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 	
 	return (int)*size;
 }

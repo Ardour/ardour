@@ -41,7 +41,7 @@ MidiModel::MidiModel(MidiSource *s, size_t size)
 	: AutomatableSequence<TimeType>(s->session(), size)
 	, _midi_source(s)
 {
-	cerr << "MidiModel \"" << s->name() << "\" constructed: " << this << endl;
+	//cerr << "MidiModel \"" << s->name() << "\" constructed: " << this << endl;
 }
 
 /** Start a new command.

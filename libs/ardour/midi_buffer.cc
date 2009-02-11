@@ -129,10 +129,10 @@ bool
 MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 {
 	const size_t stamp_size = sizeof(TimeType);
-	cerr << "MidiBuffer: pushing event " << " size: " << _size 
-    << " event size: " << ev.size() 
-    << " capacity: " << _capacity 
-    << " stamp size: " << stamp_size << " \n";
+	/*cerr << "MidiBuffer: pushing event " << " size: " << _size 
+	    << " event size: " << ev.size() 
+	    << " capacity: " << _capacity 
+	    << " stamp size: " << stamp_size << " \n";*/
 	
 	if (_size + stamp_size + ev.size() >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" 
