@@ -21,7 +21,7 @@
 #define EVORAL_LIB_SMF_HPP
 
 #include <cassert>
-#include "evoral/StandardMIDIFile.hpp"
+#include "evoral/MIDIFile.hpp"
 
 struct smf_struct;
 struct smf_track_struct;
@@ -36,7 +36,7 @@ template<typename Time> class EventRingBuffer;
 /** Standard Midi File (Type 0)
  */
 template<typename Time>
-class LibSMF : public StandardMIDIFile<Time> {
+class LibSMF : public MIDIFile<Time> {
 public:
 	LibSMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
 	virtual ~LibSMF();

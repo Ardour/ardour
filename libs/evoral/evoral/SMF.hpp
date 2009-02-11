@@ -19,7 +19,7 @@
 #ifndef EVORAL_SMF_HPP
 #define EVORAL_SMF_HPP
 
-#include "evoral/StandardMIDIFile.hpp"
+#include "evoral/MIDIFile.hpp"
 
 namespace Evoral {
 	
@@ -30,7 +30,7 @@ template<typename Time> class EventRingBuffer;
 /** Standard Midi File (Type 0)
  */
 template<typename Time>
-class SMF : public StandardMIDIFile<Time> {
+class SMF : public MIDIFile<Time> {
 public:
 	SMF();
 	virtual ~SMF();

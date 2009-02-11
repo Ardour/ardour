@@ -56,7 +56,7 @@ LibSMF<Time>::open(const std::string& path) THROW_FILE_ERROR
 	if (!_smf) {
 		_smf = smf_new();
 		if (smf_set_ppqn(_smf, _ppqn) != 0) {
-			throw typename StandardMIDIFile<Time>::FileError();
+			throw typename MIDIFile<Time>::FileError();
 		}
 		
 		if(_smf == NULL) {
@@ -81,7 +81,7 @@ LibSMF<Time>::close() THROW_FILE_ERROR
 	assert(false);
 	if (_smf) {
 		if (smf_save(_smf, _path.c_str()) != 0) {
-			throw typename StandardMIDIFile<Time>::FileError();
+			throw typename MIDIFile<Time>::FileError();
 		}
 		smf_delete(_smf);
 		_smf = 0;
@@ -185,7 +185,7 @@ void
 LibSMF<Time>::end_write() THROW_FILE_ERROR
 {
 	if (smf_save(_smf, _path.c_str()) != 0)
-		throw typename StandardMIDIFile<Time>::FileError();
+		throw typename MIDIFile<Time>::FileError();
 }
 
 template class LibSMF<double>;

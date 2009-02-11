@@ -28,12 +28,12 @@ namespace Evoral {
 template<typename Time> class Event;
 template<typename Time> class EventRingBuffer;
 
-#define THROW_FILE_ERROR throw(typename StandardMIDIFile<Time>::FileError)
+#define THROW_FILE_ERROR throw(typename MIDIFile<Time>::FileError)
 
 /** Standard MIDI File interface
  */
 template<typename Time>
-class StandardMIDIFile {
+class MIDIFile {
 public:
 	class FileError : public std::exception {
 		const char* what() const throw() { return "libsmf error"; }
