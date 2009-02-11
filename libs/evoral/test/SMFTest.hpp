@@ -14,7 +14,7 @@ using namespace Evoral;
 template<typename Time>
 class TestSMF : public LibSMF<Time> {
 public:
-	int  open(const std::string& path) {
+	int open(const std::string& path) THROW_FILE_ERROR {
 		return LibSMF<Time>::open(path);
 	}
 	

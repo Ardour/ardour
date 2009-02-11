@@ -57,7 +57,8 @@ SMF<Time>::~SMF()
  */
 template<typename Time>
 int
-SMF<Time>::open(const std::string& path)
+SMF<Time>::open(const std::string& path) THROW_FILE_ERROR
+
 {
 	//cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
 	_fd = fopen(path.c_str(), "r+");
@@ -92,7 +93,7 @@ SMF<Time>::open(const std::string& path)
 
 template<typename Time>
 void
-SMF<Time>::close()
+SMF<Time>::close() THROW_FILE_ERROR
 {
 	if (_fd) {
 		flush_header();
@@ -311,7 +312,7 @@ SMF<Time>::begin_write(FrameTime start_frame)
 
 template<typename Time>
 void
-SMF<Time>::end_write()
+SMF<Time>::end_write() throw(typename StandardMIDIFile<Time>::FileError)
 {
 	flush_header();
 	flush_footer();

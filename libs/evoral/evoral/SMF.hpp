@@ -45,15 +45,15 @@ public:
 	
 	void begin_write(FrameTime start_time);
 	void append_event_unlocked(uint32_t delta_t, const Event<Time>& ev);
-	void end_write();
+	void end_write() THROW_FILE_ERROR;
 	
 	void flush();
 	int  flush_header();
 	int  flush_footer();
 
 protected:
-	int  open(const std::string& path);
-	void close();
+	int  open(const std::string& path) THROW_FILE_ERROR;
+	void close() THROW_FILE_ERROR;
 	
 	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
 

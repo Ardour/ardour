@@ -28,12 +28,17 @@ namespace Evoral {
 template<typename Time> class Event;
 template<typename Time> class EventRingBuffer;
 
+#define THROW_FILE_ERROR throw(typename StandardMIDIFile<Time>::FileError)
 
 /** Standard MIDI File interface
  */
 template<typename Time>
 class StandardMIDIFile {
 public:
+	class FileError : public std::exception {
+		const char* what() const throw() { return "libsmf error"; }
+	};
+
 	virtual void seek_to_start() const = 0;
 	
 	virtual uint16_t ppqn()     const = 0;
@@ -44,15 +49,15 @@ public:
 	
 	virtual void begin_write(FrameTime start_time) = 0;
 	virtual void append_event_unlocked(uint32_t delta_t, const Event<Time>& ev) = 0;
-	virtual void end_write() = 0;
+	virtual void end_write() throw(FileError) = 0;
 	
 	virtual void flush() = 0;
 	virtual int  flush_header() = 0;
 	virtual int  flush_footer() = 0;
 
 protected:
-	virtual int  open(const std::string& path) = 0;
-	virtual void close() = 0;
+	virtual int  open(const std::string& path) throw(FileError) = 0;
+	virtual void close() throw(FileError) = 0;
 	
 	virtual int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const = 0;
 
