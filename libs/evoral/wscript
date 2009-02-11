@@ -26,10 +26,10 @@ def set_options(opt):
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2', mandatory=True)
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0', mandatory=True)
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0', mandatory=True)
 	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
-	autowaf.check_pkg(conf, 'smf', uselib_store='SMF', atleast_version='1.2', mandatory=False)
 
 def build(bld):
 	# Headers
@@ -39,6 +39,22 @@ def build(bld):
 	# Pkgconfig file
 	#autowaf.build_pc(bld, 'EVORAL', EVORAL_VERSION, 'GLIBMM GTHREAD')
 	
+	libsmf = bld.new_task_gen('cc', 'shlib')
+	libsmf.source = '''
+		src/libsmf/smf.c
+		src/libsmf/smf_decode.c
+		src/libsmf/smf_load.c
+		src/libsmf/smf_save.c
+		src/libsmf/smf_tempo.c
+	'''
+	libsmf.export_incdirs = ['./src/libsmf']
+	libsmf.defines      = 'SMF_VERSION=\\\"1.2\\\"'
+	libsmf.includes     = ['./src']
+	libsmf.name         = 'libsmf'
+	libsmf.target       = 'smf'
+	libsmf.uselib       = 'GLIB'
+	libsmf.install_path = ''
+
 	# Library
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
@@ -59,6 +75,7 @@ def build(bld):
 	obj.name         = 'libevoral'
 	obj.target       = 'evoral'
 	obj.uselib       = 'GLIBMM GTHREAD SMF'
+	obj.uselib_local = 'libsmf'
 	obj.vnum         = EVORAL_LIB_VERSION
 	obj.install_path = ''
 	

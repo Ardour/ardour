@@ -20,10 +20,13 @@
 #ifndef EVORAL_LIB_SMF_HPP
 #define EVORAL_LIB_SMF_HPP
 
+#include <cassert>
 #include "evoral/StandardMIDIFile.hpp"
 
-#include <smf.h>
-#include <cassert>
+struct smf_struct;
+struct smf_track_struct;
+typedef smf_struct smf_t;
+typedef smf_track_struct smf_track_t;
 
 namespace Evoral {
 	
@@ -36,13 +39,7 @@ template<typename Time>
 class LibSMF : public StandardMIDIFile<Time> {
 public:
 	LibSMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
-	virtual ~LibSMF() {	
-		if (_smf) {
-			smf_delete(_smf);
-			_smf = 0;
-			_smf_track = 0;
-		} 
-	}
+	virtual ~LibSMF();
 
 	void seek_to_start() const;
 	
@@ -69,7 +66,7 @@ protected:
 private:
 	static const uint16_t _ppqn = 19200;
 	
-	Time     _last_ev_time; ///< last frame time written, relative to source start
+	Time _last_ev_time; ///< last frame time written, relative to source start
 	
 	std::string  _path;
 	smf_t*       _smf;
