@@ -23,6 +23,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/enumwriter.h>
+#include <pbd/replace_all.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -158,12 +159,14 @@ MixerStrip::init ()
 	input_button.add (input_label);
 	input_button.set_name ("MixerIOButton");
 	input_label.set_name ("MixerIOButtonLabel");
+	Gtkmm2ext::set_size_request_to_display_given_text (input_button, "longest label", 4, 4);
 
 	output_label.set_text (_("Output"));
 	ARDOUR_UI::instance()->set_tip (&output_button, _("Button 1 to choose outputs from a port matrix, button 3 to select inputs from a menu"), "");
 	output_button.add (output_label);
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
+	Gtkmm2ext::set_size_request_to_display_given_text (output_button, "longest label", 4, 4);
 
 	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Select metering point"), "");
 	meter_point_button.add (meter_point_label);
@@ -636,7 +639,17 @@ MixerStrip::output_press (GdkEventButton *ev)
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			add_bundle_to_output_menu (*i, current);
+			maybe_add_bundle_to_output_menu (*i, current);
+		}
+
+		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
+		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+			maybe_add_bundle_to_output_menu ((*i)->bundle_for_inputs(), current);
+		}
+
+		if (citems.size() == 2) {
+			/* no routes added; remove the separator */
+			citems.pop_back ();
 		}
 
 		output_menu.popup (1, ev->time);
@@ -707,7 +720,17 @@ MixerStrip::input_press (GdkEventButton *ev)
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			add_bundle_to_input_menu (*i, current);
+			maybe_add_bundle_to_input_menu (*i, current);
+		}
+
+		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
+		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+			maybe_add_bundle_to_input_menu ((*i)->bundle_for_outputs(), current);
+		}
+
+		if (citems.size() == 2) {
+			/* no routes added; remove the separator */
+			citems.pop_back ();
 		}
 
 		input_menu.popup (1, ev->time);
@@ -752,51 +775,54 @@ MixerStrip::bundle_output_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
 }
 
 void
-MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
+MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
 {
 	using namespace Menu_Helpers;
 
-	/* the input menu needs to contain only output bundles (that we
-	   can connect inputs to */
- 	if (b->ports_are_outputs() == false) {
+ 	if (b->ports_are_outputs() == false ||
+	    route()->default_type() != b->type() ||
+	    b->nchannels() != _route->n_inputs().get (b->type ())) {
+		
  		return;
  	}
 
 	MenuList& citems = input_menu.items();
 	
-	if (b->nchannels() == _route->n_inputs().get (b->type ())) {
-
-		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_toggled), b)));
-
-		if (std::find (current.begin(), current.end(), b) != current.end()) {
-			ignore_toggle = true;
-			dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
-			ignore_toggle = false;
-		}
+	std::string n = b->name ();
+	replace_all (n, "_", " ");
+	
+	citems.push_back (CheckMenuElem (n, bind (mem_fun(*this, &MixerStrip::bundle_input_toggled), b)));
+	
+	if (std::find (current.begin(), current.end(), b) != current.end()) {
+		ignore_toggle = true;
+		dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
+		ignore_toggle = false;
 	}
 }
 
 void
-MixerStrip::add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
+MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
 {
 	using namespace Menu_Helpers;
 
-	/* the output menu needs to contain only input bundles (that we
-	   can connect outputs to */
- 	if (b->ports_are_inputs() == false) {
+ 	if (b->ports_are_inputs() == false ||
+	    route()->default_type() != b->type() ||
+	    b->nchannels() != _route->n_outputs().get (b->type ())) {
+		
  		return;
  	}
 
-	if (b->nchannels() == _route->n_outputs().get (b->type ())) {
-
-		MenuList& citems = output_menu.items();
-		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_toggled), b)));
-		
-		if (std::find (current.begin(), current.end(), b) != current.end()) {
-			ignore_toggle = true;
-			dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
-			ignore_toggle = false;
-		}
+	MenuList& citems = output_menu.items();
+	
+	std::string n = b->name ();
+	replace_all (n, "_", " ");
+	
+	citems.push_back (CheckMenuElem (n, bind (mem_fun(*this, &MixerStrip::bundle_output_toggled), b)));
+	
+	if (std::find (current.begin(), current.end(), b) != current.end()) {
+		ignore_toggle = true;
+		dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
+		ignore_toggle = false;
 	}
 }
 
@@ -840,11 +866,12 @@ MixerStrip::connect_to_pan ()
 void
 MixerStrip::update_input_display ()
 {
-	ARDOUR::BundleList c = _route->bundles_connected_to_inputs ();
+	ARDOUR::BundleList const c = _route->bundles_connected_to_inputs ();
 
-	/* XXX: how do we represent >1 connected bundle? */
-	if (c.empty() == false) {
-		input_label.set_text (c[0]->name());
+	if (c.size() > 1) {
+		input_label.set_text (_("Inputs"));
+	} else if (c.size() == 1) {
+		input_label.set_text (c[0]->name ());
 	} else {
 		switch (_width) {
 		case Wide:
@@ -861,10 +888,12 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-	ARDOUR::BundleList c = _route->bundles_connected_to_outputs ();
+	ARDOUR::BundleList const c = _route->bundles_connected_to_outputs ();
 
 	/* XXX: how do we represent >1 connected bundle? */
-	if (c.empty() == false) {
+	if (c.size() > 1) {
+		output_label.set_text (_("Outputs"));
+	} else if (c.size() == 1) {
 		output_label.set_text (c[0]->name());
 	} else {
 		switch (_width) {

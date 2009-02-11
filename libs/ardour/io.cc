@@ -2621,7 +2621,9 @@ IO::setup_bundle_for_inputs ()
 	}
 
 	_bundle_for_inputs->suspend_signals ();
-	
+
+	_bundle_for_inputs->set_type (default_type ());
+
 	_bundle_for_inputs->remove_channels ();
 
         snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
@@ -2646,6 +2648,8 @@ IO::setup_bundle_for_outputs ()
 	}
 
 	_bundle_for_outputs->suspend_signals ();
+
+	_bundle_for_outputs->set_type (default_type ());
 
 	_bundle_for_outputs->remove_channels ();
 
@@ -2672,23 +2676,22 @@ IO::bundles_connected_to_inputs ()
 		bundles.push_back (i->bundle);
 	}
 
-	/* Normal bundles */
+	/* Session bundles */
 	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->ports_are_outputs() == false || (*i)->nchannels() != n_inputs().n_total()) {
-			continue;
-		}
-
-		for (uint32_t j = 0; j < n_inputs().n_total(); ++j) {
-
-			Bundle::PortList const& pl = (*i)->channel_ports (j);
-			if (!pl.empty() && input(j)->connected_to (pl[0])) {
-				bundles.push_back (*i);
-			}
-
+		if ((*i)->connected_to (_bundle_for_inputs, _session.engine())) {
+			bundles.push_back (*i);
 		}
 	}
 
+	/* Route bundles */
+	boost::shared_ptr<ARDOUR::RouteList> r = _session.get_routes ();
+	for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->bundle_for_outputs()->connected_to (_bundle_for_inputs, _session.engine())) {
+			bundles.push_back ((*i)->bundle_for_outputs());
+		}
+	}
+	  
 	return bundles;
 }
 
@@ -2704,20 +2707,19 @@ IO::bundles_connected_to_outputs ()
 		bundles.push_back (i->bundle);
 	}
 
-	/* Auto bundles */
+	/* Session bundles */
 	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->ports_are_inputs() == false || (*i)->nchannels() != n_outputs().n_total()) {
-			continue;
+		if ((*i)->connected_to (_bundle_for_outputs, _session.engine())) {
+			bundles.push_back (*i);
 		}
+	}
 
-		for (uint32_t j = 0; j < n_outputs().n_total(); ++j) {
-
-			Bundle::PortList const& pl = (*i)->channel_ports (j);
-
-			if (!pl.empty() && output(j)->connected_to (pl[0])) {
-				bundles.push_back (*i);
-			}
+	/* Route bundles */
+	boost::shared_ptr<ARDOUR::RouteList> r = _session.get_routes ();
+	for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->bundle_for_inputs()->connected_to (_bundle_for_outputs, _session.engine())) {
+			bundles.push_back ((*i)->bundle_for_inputs());
 		}
 	}
 
