@@ -1,6 +1,7 @@
 /* This file is part of Evoral.
  * Copyright(C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright(C) 2000-2008 Paul Davis
+ * Author: Hans Baier
  * 
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -16,30 +17,38 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef EVORAL_SMF_HPP
-#define EVORAL_SMF_HPP
+#ifndef EVORAL_LIB_SMF_HPP
+#define EVORAL_LIB_SMF_HPP
 
 #include "evoral/StandardMIDIFile.hpp"
+
+#include <smf.h>
+#include <cassert>
 
 namespace Evoral {
 	
 template<typename Time> class Event;
 template<typename Time> class EventRingBuffer;
 
-
 /** Standard Midi File (Type 0)
  */
 template<typename Time>
-class SMF : public StandardMIDIFile<Time> {
+class LibSMF : public StandardMIDIFile<Time> {
 public:
-	SMF();
-	virtual ~SMF();
+	LibSMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
+	virtual ~LibSMF() {	
+		if (_smf) {
+			smf_delete(_smf);
+			_smf = 0;
+			_smf_track = 0;
+		} 
+	}
 
 	void seek_to_start() const;
 	
 	uint16_t ppqn()     const { return _ppqn; }
 	bool     is_empty() const { return _empty; }
-	bool     eof()      const { return feof(_fd); }
+	bool     eof()      const { assert(false); return true; }
 	
 	Time last_event_time() const { return _last_ev_time; }
 	
@@ -47,9 +56,9 @@ public:
 	void append_event_unlocked(uint32_t delta_t, const Event<Time>& ev);
 	void end_write();
 	
-	void flush();
-	int  flush_header();
-	int  flush_footer();
+	void flush() {};
+	int  flush_header() { return 0; }
+	int  flush_footer() { return 0; }
 
 protected:
 	int  open(const std::string& path);
@@ -58,27 +67,18 @@ protected:
 	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
 
 private:
-	/** Used by flush_footer() to find the position to write the footer */
-	void seek_to_footer_position();
-	
-	/** Write the track footer at the current seek position */
-	void write_footer();
-
-	void     write_chunk_header(const char id[4], uint32_t length);
-	void     write_chunk(const char id[4], uint32_t length, void* data);
-	size_t   write_var_len(uint32_t val);
-	uint32_t read_var_len() const;
-
 	static const uint16_t _ppqn = 19200;
-
-	FILE*    _fd;
+	
 	Time     _last_ev_time; ///< last frame time written, relative to source start
-	uint32_t _track_size;
-	uint32_t _header_size; ///< size of SMF header, including MTrk chunk header
-	bool     _empty; ///< true iff file contains(non-empty) events
+	
+	std::string  _path;
+	smf_t*       _smf;
+	smf_track_t* _smf_track;
+
+	bool         _empty; ///< true iff file contains(non-empty) events
 };
 
 }; /* namespace Evoral */
 
-#endif /* EVORAL_SMF_HPP */
+#endif /* EVORAL_LIB_SMF_HPP */
 

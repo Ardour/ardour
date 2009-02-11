@@ -29,6 +29,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0', mandatory=True)
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0', mandatory=True)
 	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
+	autowaf.check_pkg(conf, 'smf', uselib_store='SMF', atleast_version='1.2', mandatory=False)
 
 def build(bld):
 	# Headers
@@ -50,13 +51,14 @@ def build(bld):
 		src/Note.cpp
 		src/SMF.cpp
 		src/SMFReader.cpp
+		src/LibSMF.cpp
 		src/Sequence.cpp
 	'''
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.', './src']
 	obj.name         = 'libevoral'
 	obj.target       = 'evoral'
-	obj.uselib       = 'GLIBMM GTHREAD'
+	obj.uselib       = 'GLIBMM GTHREAD SMF'
 	obj.vnum         = EVORAL_LIB_VERSION
 	obj.install_path = ''
 	

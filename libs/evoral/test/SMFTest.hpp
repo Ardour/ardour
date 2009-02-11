@@ -1,7 +1,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <evoral/SMF.hpp>
+#include <evoral/LibSMF.hpp>
 
 #include "SequenceTest.hpp"
 
@@ -12,14 +12,14 @@
 using namespace Evoral;
 
 template<typename Time>
-class TestSMF : public SMF<Time> {
+class TestSMF : public LibSMF<Time> {
 public:
 	int  open(const std::string& path) {
-		return SMF<Time>::open(path);
+		return LibSMF<Time>::open(path);
 	}
 	
 	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const {
-		return SMF<Time>::read_event(delta_t, size, buf);
+		return LibSMF<Time>::read_event(delta_t, size, buf);
 	}
 };
 
