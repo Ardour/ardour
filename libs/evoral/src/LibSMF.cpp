@@ -52,7 +52,10 @@ LibSMF<Time>::open(const std::string& path) THROW_FILE_ERROR
 		smf_delete(_smf);
 	}
 	
-	_smf = smf_load(path.c_str());
+	_path = path;
+	assert(_path != "");
+	
+	_smf = smf_load(_path.c_str());
 	if (!_smf) {
 		_smf = smf_new();
 		if (smf_set_ppqn(_smf, _ppqn) != 0) {
@@ -62,6 +65,11 @@ LibSMF<Time>::open(const std::string& path) THROW_FILE_ERROR
 		if(_smf == NULL) {
 			return -1;
 		}
+		
+		_smf_track = smf_track_new();
+		assert(_smf_track);
+
+		smf_add_track(_smf, _smf_track);
 	}
 		
 	_smf_track = smf_get_track_by_number(_smf, 1);
@@ -78,7 +86,6 @@ template<typename Time>
 void
 LibSMF<Time>::close() THROW_FILE_ERROR
 {
-	assert(false);
 	if (_smf) {
 		if (smf_save(_smf, _path.c_str()) != 0) {
 			throw typename MIDIFile<Time>::FileError();

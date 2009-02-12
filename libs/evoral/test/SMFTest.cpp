@@ -5,6 +5,16 @@ using namespace std;
 CPPUNIT_TEST_SUITE_REGISTRATION( SMFTest );
 
 void
+SMFTest::createNewFileTest ()
+{
+	TestSMF<Time> smf;
+	smf.open("NewFile.mid");
+	smf.close();
+	CPPUNIT_ASSERT(access(smf.path().c_str(), R_OK) == 0);
+	unlink(smf.path().c_str());
+}
+
+void
 SMFTest::takeFiveTest ()
 {
 	TestSMF<Time> smf;
