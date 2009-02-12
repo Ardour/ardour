@@ -266,10 +266,12 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	
 	void reset ();
 	void start (MIDI::Parser& parser, nframes_t timestamp);
-	void stop (MIDI::Parser& parser, nframes_t timestamp);
-	// we can't use continue because it is a C++ keyword
 	void contineu (MIDI::Parser& parser, nframes_t timestamp);
+	void stop (MIDI::Parser& parser, nframes_t timestamp);
+	void position (MIDI::Parser& parser, MIDI::byte* message, size_t size);
+	// we can't use continue because it is a C++ keyword
 	void calculate_one_ppqn_in_frames_at(nframes_t time);
+	nframes_t calculate_song_position(uint16_t song_position_in_sixteenth_notes);
 	void calculate_filter_coefficients();
 	void update_midi_clock (MIDI::Parser& parser, nframes_t timestamp);
 	void read_current (SafeTime *) const;

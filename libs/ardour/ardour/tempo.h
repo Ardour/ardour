@@ -137,7 +137,7 @@ class MetricSection {
 
   private:
 	BBT_Time       _start;
-	nframes_t _frame;
+	nframes_t      _frame;
 	bool           _movable;
 };
 

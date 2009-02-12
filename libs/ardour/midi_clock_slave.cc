@@ -72,6 +72,7 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 	connections.push_back (port->input()->start.connect    (mem_fun (*this, &MIDIClock_Slave::start)));
 	connections.push_back (port->input()->contineu.connect (mem_fun (*this, &MIDIClock_Slave::contineu)));
 	connections.push_back (port->input()->stop.connect     (mem_fun (*this, &MIDIClock_Slave::stop)));
+	connections.push_back (port->input()->position.connect (mem_fun (*this, &MIDIClock_Slave::position)));
 }
 
 void 
@@ -87,6 +88,19 @@ MIDIClock_Slave::calculate_one_ppqn_in_frames_at(nframes_t time)
 	double frames_per_quarter_note = frames_per_beat / quarter_notes_per_beat;
 
 	one_ppqn_in_frames = frames_per_quarter_note / double (ppqn);
+}
+
+ARDOUR::nframes_t 
+MIDIClock_Slave::calculate_song_position(uint16_t song_position_in_sixteenth_notes)
+{
+	nframes_t song_position_frames = 0;
+	for (uint16_t i = 1; i <= song_position_in_sixteenth_notes; ++i) {
+		// one quarter note contains ppqn pulses, so a sixteenth note is ppqn / 4 pulses
+		calculate_one_ppqn_in_frames_at(song_position_frames);
+		song_position_frames += one_ppqn_in_frames * nframes_t(ppqn / 4);
+	}
+	
+	return song_position_frames;
 }
 
 void 
@@ -108,13 +122,11 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	
 	nframes_t timestamp_relative_to_transport = timestamp - first_timestamp;
 	
-	if (_starting) {
+	if (_starting || last_timestamp == 0) {
 		midi_clock_count = 0;
-		assert(last_timestamp == 0);
-		assert(last_position == 0);
 		
 		first_timestamp = timestamp;
-		timestamp_relative_to_transport = 0;
+		timestamp_relative_to_transport = last_position;
 		
 		// calculate filter coefficients
 		calculate_filter_coefficients();
@@ -141,8 +153,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 		// update DLL
 		t0 = t1;
 		t1 += b * e + e2;
-		e2 += c * e;
-				
+		e2 += c * e;			
 	}	
 	
 	#ifdef DEBUG_MIDI_CLOCK		
@@ -171,11 +182,25 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " session time: " << session.engine().frame_time() << endl;
 	#endif
 	
-	last_position = 0;
+	if (!_started) {
+		reset();
+		
+		_started = true;
+		_starting = true;
+	}
+}
+
+void
+MIDIClock_Slave::reset ()
+{
+
+	last_position = 0;		
 	last_timestamp = 0;
 	
-	_started = true;
-	_starting = true;
+	_starting = false;
+	_started  = false;
+	
+	session.request_locate(0, false);
 }
 
 void
@@ -184,7 +209,10 @@ MIDIClock_Slave::contineu (Parser& parser, nframes_t timestamp)
 	#ifdef DEBUG_MIDI_CLOCK	
 		std::cerr << "MIDIClock_Slave got continue message" << endl;
 	#endif
-	start(parser, timestamp);
+	if (!_started) {
+		_starting = true;
+		_started  = true; 
+	}
 }
 
 
@@ -195,11 +223,36 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 		std::cerr << "MIDIClock_Slave got stop message" << endl;
 	#endif
 	
-	last_position = 0;
+	if (_started || _starting) {
+		_starting = false;
+		_started  = false;
+		// locate to last MIDI clock position
+		session.request_transport_speed(0.0);
+		session.request_locate(last_position, false);
+		last_timestamp = 0;
+	}
+}
+
+void
+MIDIClock_Slave::position (Parser& parser, byte* message, size_t size)
+{
+	// we are note supposed to get position messages while we are running
+	// so lets be robust and ignore those
+	if (_started || _starting) {
+		return;
+	}
+	
+	assert(size == 3);
+	byte lsb = message[0];
+	byte msb = message[1];
+	assert((lsb <= 0x7f) && (msb <= 0x7f));
+	
+	uint16_t position_in_sixteenth_notes = (uint16_t(msb) << 7) | uint16_t(lsb);
+	nframes_t position_in_frames = calculate_song_position(position_in_sixteenth_notes);
+	session.request_locate(position_in_frames, false);
+	last_position  = position_in_frames;
 	last_timestamp = 0;
 	
-	_started = false;
-	reset();
 }
 
 bool
@@ -231,10 +284,8 @@ MIDIClock_Slave::stop_if_no_more_clock_events(nframes_t& pos, nframes_t now)
 			cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
         #endif		
 		pos = last_position;
-		session.request_locate (pos, false);
 		session.request_transport_speed (0);
-		this->stop(*port->input(), now);
-		reset();
+		session.request_locate (last_position, false);
 		return true;
 	} else {
 		return false;
@@ -246,7 +297,7 @@ MIDIClock_Slave::speed_and_position (double& speed, nframes_t& pos)
 {
 	if (!_started || _starting) {
 		speed = 0.0;
-		pos = 0;
+		pos   = last_position;
 		return true;
 	}
 		
@@ -280,12 +331,3 @@ MIDIClock_Slave::resolution() const
 	return (nframes_t) one_ppqn_in_frames * ppqn;
 }
 
-void
-MIDIClock_Slave::reset ()
-{
-
-	last_position = 0;		
-	last_timestamp = 0;
-	
-	session.request_locate(0, false);
-}
