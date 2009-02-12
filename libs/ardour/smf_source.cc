@@ -271,12 +271,14 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>
 		return;
 	}
 
+	/*
 	printf("SMFSource: %s - append_event_unlocked time = %lf, size = %u, data = ",
 			name().c_str(), ev.time(), ev.size()); 
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
 	printf("\n");
+	*/
 	
 	assert(ev.time() >= 0);
 	
