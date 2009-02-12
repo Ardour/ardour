@@ -13,7 +13,8 @@ evoral.Merge([
 	libraries['glibmm2'],
 	libraries['xml'], 
 	libraries['pbd'],
-	libraries['boost']	
+	libraries['boost'],
+	libraries['smf']
 	])
 
 if evoral['IS_OSX']:
@@ -33,6 +34,7 @@ src/Event.cpp
 src/MIDIEvent.cpp
 src/Note.cpp
 src/SMF.cpp
+src/LibSMF.cpp
 src/SMFReader.cpp
 src/Sequence.cpp
 """)

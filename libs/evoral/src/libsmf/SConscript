@@ -1,0 +1,37 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env libraries install_prefix')
+
+subdirs = ['src/libsmf']
+
+smf = env.Clone()
+smf.Merge([
+		libraries['glib2']
+	 ])
+
+if smf['IS_OSX']:
+	smf.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
+domain = 'smf'
+
+smf.Append(DOMAIN=domain, MAJOR=1, MINOR=2, MICRO=0)
+
+sources = Split("""
+smf.c
+smf_decode.c
+smf_load.c
+smf_save.c
+smf_tempo.c
+""")
+
+smf.Append(CFLAGS = '-DSMF_VERSION=\\\"1.2\\\"')
+
+libsmf = smf.SharedLibrary('smf', [ sources ])
+
+Default(libsmf)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libsmf))

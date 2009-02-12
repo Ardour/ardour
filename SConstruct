@@ -650,10 +650,11 @@ libraries['ardour_cp'] = LibraryInfo (LIBS='ardour_cp', LIBPATH='#libs/surfaces/
 
 # The Ardour backend/engine
 
-libraries['ardour'] = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
-libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
-libraries['evoral'] = LibraryInfo (LIBS='evoral', LIBPATH='#libs/evoral', CPPPATH='#libs/evoral')
-libraries['pbd']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd', CPPPATH='#libs/pbd')
+libraries['ardour']    = LibraryInfo (LIBS='ardour', LIBPATH='#libs/ardour', CPPPATH='#libs/ardour')
+libraries['midi++2']   = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPPATH='#libs/midi++2')
+libraries['smf']       = LibraryInfo (LIBS='smf', LIBPATH='#libs/evoral/src/libsmf', CPPPATH='#libs/evoral/src/libsmf/')
+libraries['evoral']    = LibraryInfo (LIBS='evoral', LIBPATH='#libs/evoral', CPPPATH='#libs/evoral')
+libraries['pbd']       = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd', CPPPATH='#libs/pbd')
 libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
 
 
@@ -1156,6 +1157,7 @@ if env['SYSLIBS']:
     subdirs = [
         'libs/pbd',
         'libs/midi++2',
+        'libs/evoral/src/libsmf',
         'libs/evoral',
         'libs/ardour',
         'libs/vamp-sdk',
@@ -1236,6 +1238,7 @@ else:
         'libs/taglib',
         'libs/pbd',
         'libs/midi++2',
+        'libs/evoral/src/libsmf',
         'libs/evoral',
         'libs/ardour',
         'libs/vamp-sdk',

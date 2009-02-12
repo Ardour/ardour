@@ -25,7 +25,7 @@
 #include <time.h>
 
 #include <ardour/midi_source.h>
-#include <evoral/SMF.hpp>
+#include <evoral/LibSMF.hpp>
 
 namespace Evoral { template<typename T> class Event; }
 
@@ -34,7 +34,7 @@ namespace ARDOUR {
 template<typename T> class MidiRingBuffer;
 
 /** Standard Midi File (Type 0) Source */
-class SMFSource : public MidiSource, public Evoral::SMF<double> {
+class SMFSource : public MidiSource, public Evoral::LibSMF<double> {
   public:
 	enum Flag {
 		Writable = 0x1,

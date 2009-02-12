@@ -332,6 +332,7 @@ ardour.Merge ([
 	     libraries['lrdf'],
 	     libraries['midi++2'],
 	     libraries['evoral'],
+	     libraries['smf'],
 	     libraries['pbd'],
 	     libraries['raptor'],
 	     libraries['samplerate'],
