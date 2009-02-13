@@ -114,7 +114,12 @@ MIDIClock_Slave::calculate_filter_coefficients()
 
 void
 MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
-{					
+{	
+	// some pieces of hardware send MIDI Clock all the time				
+	if ( (!_starting) && (!_started) ) {
+		return;
+	}
+	
 	// the number of midi clock messages (zero-based)
 	static long midi_clock_count;
 	
