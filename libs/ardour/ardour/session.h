@@ -559,7 +559,7 @@ class Session : public PBD::StatefulDestructible
 	void smpte_duration_string (char *, nframes_t) const;
 
 	void           set_smpte_offset (nframes_t);
-	nframes_t smpte_offset () const { return _smpte_offset; }
+	nframes_t      smpte_offset () const { return _smpte_offset; }
 	void           set_smpte_offset_negative (bool);
 	bool           smpte_offset_negative () const { return _smpte_offset_negative; }
 
