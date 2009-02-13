@@ -240,9 +240,9 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	/// the timestamp of the first MIDI clock message
 	nframes_t   first_timestamp;
 	
-	/// the time stamp and transport position of the last inbound MIDI clock message
+	/// the time stamp and should-be transport position of the last inbound MIDI clock message
 	nframes_t   last_timestamp;
-	double      last_position;
+	double      should_be_position;
 	
 	//the delay locked loop (DLL), see www.kokkinizita.net/papers/usingdll.pdf
 	

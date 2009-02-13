@@ -123,37 +123,36 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	// the number of midi clock messages (zero-based)
 	static long midi_clock_count;
 	
-	calculate_one_ppqn_in_frames_at(last_position);
+	calculate_one_ppqn_in_frames_at(should_be_position);
 	
-	nframes_t timestamp_relative_to_transport = timestamp - first_timestamp;
+	nframes_t elapsed_since_start = timestamp - first_timestamp;
+	double error = 0;
 	
-	if (_starting || last_timestamp == 0) {
-		midi_clock_count = 0;
-		
+	if (_starting || last_timestamp == 0) {		
 		first_timestamp = timestamp;
-		timestamp_relative_to_transport = last_position;
+		elapsed_since_start = should_be_position;
 		
 		// calculate filter coefficients
 		calculate_filter_coefficients();
 		
 		// initialize DLL
 		e2 = double(one_ppqn_in_frames) / double(session.frame_rate());
-		t0 = double(timestamp_relative_to_transport) / double(session.frame_rate());
+		t0 = double(elapsed_since_start) / double(session.frame_rate());
 		t1 = t0 + e2;
 		
 		// let ardour go after first MIDI Clock Event
 		_starting = false;
 	} else {		
 		midi_clock_count++;
-		last_position  += one_ppqn_in_frames;
+		should_be_position  += one_ppqn_in_frames;
 		calculate_filter_coefficients();
 
 		// calculate loop error
 		// we use session.transport_frame() instead of t1 here
 		// because t1 is used to calculate the transport speed,
 		// so the loop will compensate for accumulating rounding errors
-		e = (double(last_position) - double(session.transport_frame())) 
-		    / double(session.frame_rate());
+		error = (double(should_be_position) - double(session.audible_frame())); 
+		e = error / double(session.frame_rate());
 		
 		// update DLL
 		t0 = t1;
@@ -162,19 +161,24 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	}	
 	
 	#ifdef DEBUG_MIDI_CLOCK		
-		std::cerr 
+		cerr 
 				  << "MIDI Clock #" << midi_clock_count
 				  //<< "@" << timestamp  
-				  << " (transport-relative: " << timestamp_relative_to_transport << " should be: " << last_position << ", delta: " << (double(last_position) - double(session.transport_frame())) <<" )"
-				  << " transport: " << session.transport_frame()
+				  << " arrived at: " << elapsed_since_start << " (elapsed time) " 
+				  << " should-be transport: " << should_be_position 
+				  << " audible: " << session.audible_frame()
+				  << " real transport: " << session.transport_frame()
+				  << " error: " << error
 				  //<< " engine: " << session.engine().frame_time() 
 				  << " real delta: " << timestamp - last_timestamp 
-				  << " reference: " << one_ppqn_in_frames
+				  << " should-be delta: " << one_ppqn_in_frames
 				  << " t1-t0: " << (t1 -t0) * session.frame_rate()
 				  << " t0: " << t0 * session.frame_rate()
 				  << " t1: " << t1 * session.frame_rate() 
 				  << " frame-rate: " << session.frame_rate() 
-				  << std::endl;
+				  << endl;
+		
+		cerr      << "frames since cycle start: " << session.engine().frames_since_cycle_start() << endl;
 	#endif // DEBUG_MIDI_CLOCK
 
 	last_timestamp = timestamp;
@@ -184,7 +188,7 @@ void
 MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 {	
 	#ifdef DEBUG_MIDI_CLOCK	
-		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " session time: " << session.engine().frame_time() << endl;
+		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " engine time: " << session.engine().frame_time() << endl;
 	#endif
 	
 	if (!_started) {
@@ -199,7 +203,7 @@ void
 MIDIClock_Slave::reset ()
 {
 
-	last_position = 0;		
+	should_be_position = 0;		
 	last_timestamp = 0;
 	
 	_starting = false;
@@ -233,7 +237,7 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 		_started  = false;
 		// locate to last MIDI clock position
 		session.request_transport_speed(0.0);
-		session.request_locate(last_position, false);
+		session.request_locate(should_be_position, false);
 		last_timestamp = 0;
 	}
 }
@@ -248,14 +252,19 @@ MIDIClock_Slave::position (Parser& parser, byte* message, size_t size)
 	}
 	
 	assert(size == 3);
-	byte lsb = message[0];
-	byte msb = message[1];
+	byte lsb = message[1];
+	byte msb = message[2];
 	assert((lsb <= 0x7f) && (msb <= 0x7f));
 	
 	uint16_t position_in_sixteenth_notes = (uint16_t(msb) << 7) | uint16_t(lsb);
 	nframes_t position_in_frames = calculate_song_position(position_in_sixteenth_notes);
+	
+	#ifdef DEBUG_MIDI_CLOCK
+	cerr << "Song Position: " << position_in_sixteenth_notes << " frames: " << position_in_frames << endl; 
+	#endif
+	
 	session.request_locate(position_in_frames, false);
-	last_position  = position_in_frames;
+	should_be_position  = position_in_frames;
 	last_timestamp = 0;
 	
 }
@@ -288,9 +297,9 @@ MIDIClock_Slave::stop_if_no_more_clock_events(nframes_t& pos, nframes_t now)
         #ifdef DEBUG_MIDI_CLOCK			
 			cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
         #endif		
-		pos = last_position;
+		pos = should_be_position;
 		session.request_transport_speed (0);
-		session.request_locate (last_position, false);
+		session.request_locate (should_be_position, false);
 		return true;
 	} else {
 		return false;
@@ -302,12 +311,12 @@ MIDIClock_Slave::speed_and_position (double& speed, nframes_t& pos)
 {
 	if (!_started || _starting) {
 		speed = 0.0;
-		pos   = last_position;
+		pos   = should_be_position;
 		return true;
 	}
 		
 	nframes_t engine_now = session.engine().frame_time();
-
+	
 	if (stop_if_no_more_clock_events(pos, engine_now)) {
 		return false;
 	}
@@ -320,12 +329,16 @@ MIDIClock_Slave::speed_and_position (double& speed, nframes_t& pos)
 		// we are in between MIDI clock messages
 		// so we interpolate position according to speed
 		nframes_t elapsed = engine_now - last_timestamp;
-		pos = nframes_t (last_position + double(elapsed) * speed);
+		pos = nframes_t (should_be_position + double(elapsed) * speed);
 	} else {
 		// A new MIDI clock message has arrived this cycle
-		pos = last_position;
+		pos = should_be_position;
 	}
-
+	
+	#ifdef DEBUG_MIDI_CLOCK			
+	cerr << "speed_and_position: " << speed << " & " << pos << " <-> " << session.transport_frame() << " (transport)" << endl;
+	#endif	
+	
 	return true;
 }
 
