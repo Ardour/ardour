@@ -130,6 +130,7 @@ canvas-note-event.cc
 canvas-note.cc
 canvas-flag.cc
 canvas-program-change.cc
+canvas-sysex.cc
 canvas-simpleline.c
 canvas-simplerect.c
 canvas-waveview.c
