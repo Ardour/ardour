@@ -312,7 +312,7 @@ SMF<Time>::begin_write()
 
 template<typename Time>
 void
-SMF<Time>::end_write() throw(typename MIDIFile<Time>::FileError)
+SMF<Time>::end_write()
 {
 	flush_header();
 	flush_footer();

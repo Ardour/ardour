@@ -21,7 +21,6 @@
 #define EVORAL_SMF_HPP
 
 #include <cassert>
-#include "evoral/MIDIFile.hpp"
 
 struct smf_struct;
 struct smf_track_struct;
@@ -33,11 +32,17 @@ namespace Evoral {
 template<typename Time> class Event;
 template<typename Time> class EventRingBuffer;
 
+#define THROW_FILE_ERROR throw(typename SMF<Time>::FileError)
+
 /** Standard Midi File (Type 0)
  */
 template<typename Time>
-class SMF : public MIDIFile<Time> {
+class SMF {
 public:
+	class FileError : public std::exception {
+		const char* what() const throw() { return "Unknown SMF error"; }
+	};
+
 	SMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
 	virtual ~SMF();
 
