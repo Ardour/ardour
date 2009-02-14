@@ -45,6 +45,9 @@ public:
 
 	SMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
 	virtual ~SMF();
+	
+	int  open(const std::string& path, bool create=true, int track=1) THROW_FILE_ERROR;
+	void close() THROW_FILE_ERROR;
 
 	void seek_to_start() const;
 	
@@ -63,9 +66,6 @@ public:
 	int  flush_footer() { return 0; }
 
 protected:
-	int  open(const std::string& path) THROW_FILE_ERROR;
-	void close() THROW_FILE_ERROR;
-	
 	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
 
 private:

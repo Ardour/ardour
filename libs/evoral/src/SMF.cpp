@@ -42,40 +42,46 @@ SMF<Time>::~SMF()
  * Currently SMF is always read/write.
  *
  * \return  0 on success
- *         -1 if the file can not be opened
+ *         -1 if the file can not be opened or created
+ *         -2 if the file exists but specified track does not
  */
 template<typename Time>
 int
-SMF<Time>::open(const std::string& path) THROW_FILE_ERROR
+SMF<Time>::open(const std::string& path, bool create, int track) THROW_FILE_ERROR
 {
 	if (_smf) { 
 		smf_delete(_smf);
 	}
 	
 	_path = path;
-	assert(_path != "");
 	
 	_smf = smf_load(_path.c_str());
 	if (!_smf) {
+		if (!create) {
+			return -1;
+		}
+
 		_smf = smf_new();
 		if (smf_set_ppqn(_smf, _ppqn) != 0) {
 			throw FileError();
 		}
 		
-		if(_smf == NULL) {
+		if (_smf == NULL) {
 			return -1;
 		}
 		
-		_smf_track = smf_track_new();
-		assert(_smf_track);
-
-		smf_add_track(_smf, _smf_track);
+		for (int i = 0; i < track; ++i) {
+			_smf_track = smf_track_new();
+			assert(_smf_track);
+			smf_add_track(_smf, _smf_track);
+		}
 	}
 		
-	_smf_track = smf_get_track_by_number(_smf, 1);
-	assert(_smf_track);
+	_smf_track = smf_get_track_by_number(_smf, track);
+	if (!_smf_track)
+		return -2;
 
-	cerr << "number of events: " << _smf_track->number_of_events << endl;
+	cerr << "Track " << track << " # events: " << _smf_track->number_of_events << endl;
 	
 	_empty = !(_smf_track->number_of_events > 0);
 	

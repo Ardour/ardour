@@ -55,7 +55,7 @@ uint64_t                              SMFSource::header_position_offset;
 
 SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	: MidiSource (s, region_name_from_path(path, false))
-	, Evoral::LibSMF<double> ()
+	, Evoral::SMF<double> ()
 	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
 	, _allow_remove_if_empty(true)
 {
@@ -146,7 +146,7 @@ SMFSource::read_unlocked (MidiRingBuffer<double>& dst, nframes_t start, nframes_
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
 	// FIXME: don't seek to start and search every read (brutal!)
-	Evoral::LibSMF<double>::seek_to_start();
+	Evoral::SMF<double>::seek_to_start();
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
@@ -155,7 +155,7 @@ SMFSource::read_unlocked (MidiRingBuffer<double>& dst, nframes_t start, nframes_
 	
 	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * ppqn());
 
-	while (!Evoral::LibSMF<double>::eof()) {
+	while (!Evoral::SMF<double>::eof()) {
 		int ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 		if (ret == -1) { // EOF
 			//cerr << "SMF - EOF\n";
@@ -251,7 +251,7 @@ SMFSource::write_unlocked (MidiRingBuffer<double>& src, nframes_t cnt)
 		make_sure_controls_have_the_right_interpolation();
 	}
 
-	Evoral::LibSMF<double>::flush();
+	Evoral::SMF<double>::flush();
 	free(buf);
 
 	const nframes_t oldlen = _length;
@@ -301,7 +301,7 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>
 		delta_time = (uint32_t)((ev.time() - last_event_time()) * ppqn());
 	}
 
-	Evoral::LibSMF<double>::append_event_delta(delta_time, ev);
+	Evoral::SMF<double>::append_event_delta(delta_time, ev);
 
 	_write_data_count += ev.size();
 }
@@ -356,7 +356,7 @@ void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
-	Evoral::LibSMF<double>::begin_write ();
+	Evoral::SMF<double>::begin_write ();
 }
 
 void
@@ -369,7 +369,7 @@ SMFSource::mark_streaming_write_completed ()
 	}
 	
 	_model->set_edited(false);
-	Evoral::LibSMF<double>::end_write ();
+	Evoral::SMF<double>::end_write ();
 }
 
 void
@@ -634,7 +634,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	_model->start_write();
-	Evoral::LibSMF<double>::seek_to_start();
+	Evoral::SMF<double>::seek_to_start();
 
 	uint64_t time = 0; /* in SMF ticks */
 	Evoral::Event<double> ev;
@@ -706,6 +706,6 @@ SMFSource::destroy_model()
 void
 SMFSource::flush_midi()
 {
-	Evoral::LibSMF<double>::end_write();
+	Evoral::SMF<double>::end_write();
 }
 
