@@ -31,6 +31,10 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0', mandatory=True)
 	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
 
+	# Boost headers
+	autowaf.check_header(conf, 'boost/shared_ptr.hpp', mandatory=True)
+	autowaf.check_header(conf, 'boost/weak_ptr.hpp', mandatory=True)
+
 def build(bld):
 	# Headers
 	#bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.h')
