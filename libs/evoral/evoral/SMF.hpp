@@ -47,7 +47,7 @@ public:
 	virtual ~SMF();
 	
 	int  open(const std::string& path, int track=1) THROW_FILE_ERROR;
-	int  create(const std::string& path, int track=1, int ppqn=19200) THROW_FILE_ERROR;
+	int  create(const std::string& path, int track=1, uint16_t ppqn=19200) THROW_FILE_ERROR;
 	void close() THROW_FILE_ERROR;
 	
 	const std::string& path() const { return _path; };

@@ -50,8 +50,7 @@ template<typename Time>
 uint16_t
 SMF<Time>::ppqn() const
 {
-	assert(_smf->ppqn >= 0 && _smf->ppqn <= UINT16_MAX);
-	return (uint16_t)_smf->ppqn;
+	return _smf->ppqn;
 }
 
 /** Seek to the specified track (1-based indexing)
@@ -63,7 +62,7 @@ SMF<Time>::seek_to_track(int track)
 {
 	_smf_track = smf_get_track_by_number(_smf, track);
 	if (_smf_track != NULL) {
-		_smf_track->next_event_number = (_smf_track->number_of_events == 0) ? -1 : 1;
+		_smf_track->next_event_number = (_smf_track->number_of_events == 0) ? 0 : 1;
 		return 0;
 	} else {
 		return -1;
@@ -97,7 +96,7 @@ SMF<Time>::open(const std::string& path, int track) THROW_FILE_ERROR
 
 	cerr << "Track " << track << " # events: " << _smf_track->number_of_events << endl;
 	if (_smf_track->number_of_events == 0) {
-		_smf_track->next_event_number = -1;
+		_smf_track->next_event_number = 0;
 		_empty = true;
 	} else {
 		_smf_track->next_event_number = 1;
@@ -116,7 +115,7 @@ SMF<Time>::open(const std::string& path, int track) THROW_FILE_ERROR
  */
 template<typename Time>
 int
-SMF<Time>::create(const std::string& path, int track, int ppqn) THROW_FILE_ERROR
+SMF<Time>::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 {
 	assert(track >= 1);
 	if (_smf) { 
@@ -144,7 +143,7 @@ SMF<Time>::create(const std::string& path, int track, int ppqn) THROW_FILE_ERROR
 	if (!_smf_track)
 		return -2;
 
-	_smf_track->next_event_number = -1;
+	_smf_track->next_event_number = 0;
 	_empty = true;
 	
 	return 0;
