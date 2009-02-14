@@ -54,7 +54,7 @@ SequenceTest::preserveEventOrderingTest (void)
 	TestSink<Time> sink;
 	sink.writing.connect(sigc::mem_fun(&sink, &TestSink<Time>::assertLastEventTimeEarlier));
 
-	seq->read(sink, timestamp_t(0), timedur_t(1200), timestamp_t(0));
+	seq->read(sink, 0, 1200, 0);
 	
 	CPPUNIT_ASSERT_EQUAL(size_t(12), test_notes.size());
 	

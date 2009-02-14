@@ -22,7 +22,7 @@
 namespace Evoral {
 
 template<typename Time>
-Note<Time>::Note(uint8_t chan, Time t, EventLength l, uint8_t n, uint8_t v)
+Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
 	// FIXME: types?
 	: _on_event(0xDE, t, 3, NULL, true)
 	, _off_event(0xAD, t + l, 3, NULL, true)

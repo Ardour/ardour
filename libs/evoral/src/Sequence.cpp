@@ -446,16 +446,16 @@ Sequence<Time>::Sequence(const TypeMap& type_map, size_t size)
 	assert( ! _end_iter._locked);
 }
 
-/** Read events in frame range \a start .. \a start+cnt into \a dst,
+/** Read events in frame range \a start .. \a (start + dur) into \a dst,
  * adding \a offset to each event's timestamp.
  * \return number of events written to \a dst
  */
 template<typename Time>
 size_t
-Sequence<Time>::read(EventSink<Time>& dst, timestamp_t start, timedur_t nframes, timestamp_t offset) const
+Sequence<Time>::read(EventSink<Time>& dst, Time start, Time dur, Time offset) const
 {
 	#ifdef DEBUG_SEQUENCE
-	debugout << this << " read @ " << start << " * " << nframes << " + " << offset << endl;
+	debugout << this << " read @ " << start << " * " << dur << " + " << offset << endl;
 	debugout << this << " # notes: " << n_notes() << endl;
 	debugout << this << " # controls: " << _controls.size() << endl;
 	#endif
@@ -466,16 +466,16 @@ Sequence<Time>::read(EventSink<Time>& dst, timestamp_t start, timedur_t nframes,
 		#ifdef DEBUG_SEQUENCE
 		debugout << "Repositioning iterator from " << _next_read << " to " << start << endl;
 		#endif
-		_read_iter = const_iterator(*this, (double)start);
+		_read_iter = const_iterator(*this, start);
 	} else {
 		#ifdef DEBUG_SEQUENCE
 		debugout << "Using cached iterator at " << _next_read << endl;
 		#endif
 	}
 
-	_next_read = (FrameTime) floor (start + nframes);
+	_next_read = start + dur;
 
-	while (_read_iter != end() && _read_iter->time() < start + nframes) {
+	while (_read_iter != end() && _read_iter->time() < start + dur) {
 		assert(_read_iter->size() > 0);
 		assert(_read_iter->buffer());
 		dst.write(_read_iter->time() + offset,

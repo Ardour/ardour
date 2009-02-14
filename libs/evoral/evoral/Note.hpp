@@ -32,7 +32,7 @@ namespace Evoral {
 template<typename Time>
 class Note {
 public:
-	Note(uint8_t chan=0, Time time=0, EventLength len=0, uint8_t note=0, uint8_t vel=0x40);
+	Note(uint8_t chan=0, Time time=0, Time len=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note<Time>& copy);
 	~Note();
 
@@ -50,17 +50,17 @@ public:
 	inline Time        end_time() const { return _off_event.time(); }
 	inline uint8_t     note()     const { return _on_event.note(); }
 	inline uint8_t     velocity() const { return _on_event.velocity(); }
-	inline EventLength length()   const { return _off_event.time() - _on_event.time(); }
+	inline Time        length()   const { return _off_event.time() - _on_event.time(); }
 	inline uint8_t     channel()  const {
 		assert(_on_event.channel() == _off_event.channel()); 
 	    return _on_event.channel(); 
 	}
 
-	inline void set_time(Time t)          { _off_event.time() = t + length(); _on_event.time() = t; }
-	inline void set_note(uint8_t n)       { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
-	inline void set_velocity(uint8_t n)   { _on_event.buffer()[2] = n; }
-	inline void set_length(EventLength l) { _off_event.time() = _on_event.time() + l; }
-	inline void set_channel(uint8_t c)    { _on_event.set_channel(c);  _off_event.set_channel(c); }
+	inline void set_time(Time t)        { _off_event.time() = t + length(); _on_event.time() = t; }
+	inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
+	inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
+	inline void set_length(Time l)      { _off_event.time() = _on_event.time() + l; }
+	inline void set_channel(uint8_t c)  { _on_event.set_channel(c);  _off_event.set_channel(c); }
 
 	inline       Event<Time>& on_event()        { return _on_event; }
 	inline const Event<Time>& on_event()  const { return _on_event; }

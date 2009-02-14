@@ -116,16 +116,12 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 		case MIDI_CTL_OMNI_OFF:
 		case MIDI_CTL_OMNI_ON:
 		case MIDI_CTL_MONO:
-		case MIDI_CTL_POLY:
-			
+		case MIDI_CTL_POLY:	
 			return Evoral::ControlList::Discrete;
 			break;
-
 		default: return Evoral::ControlList::Linear; break;
 		}
-		
 		break; 
-		
 	case MidiPgmChangeAutomation:       return Evoral::ControlList::Discrete; break; 
 	case MidiChannelPressureAutomation: return Evoral::ControlList::Linear; break; 
 	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break; 
@@ -166,6 +162,8 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 		Evoral::MIDI::controller_range(min, max, normal); break;
 	case MidiPitchBenderAutomation:
 		Evoral::MIDI::bender_range(min, max, normal); break;
+	case MidiSystemExclusiveAutomation:
+		return p;
 	}
 	
 	p.set_range(type, min, max, normal);

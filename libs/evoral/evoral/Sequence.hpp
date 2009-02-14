@@ -81,9 +81,9 @@ public:
 	void end_write(bool delete_stuck=false);
 
 	size_t read(EventSink<Time>& dst,
-	            timestamp_t   start,
-	            timedur_t     length,
-	            timestamp_t   stamp_offset) const;
+	            Time             start,
+	            Time             length,
+	            Time             stamp_offset) const;
 
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const Event<Time>& ev);
@@ -210,7 +210,7 @@ private:
 	ControlLists _dirty_controls;
 
 	const   const_iterator _end_iter;
-	mutable FrameTime      _next_read;
+	mutable Time           _next_read;
 	bool                   _percussive;
 
 	uint8_t _lowest_note;

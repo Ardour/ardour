@@ -27,15 +27,6 @@ namespace Evoral {
 /** Frame count (i.e. length of time in audio frames) */
 typedef uint32_t FrameTime;
 
-/** Time-stamp of an event */
-typedef double timestamp_t;
-
-/** Duration of time in timestamp_t units */
-typedef timestamp_t timedur_t;
-
-/** Time stamp of an event */
-typedef double EventLength;
-
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;
 
