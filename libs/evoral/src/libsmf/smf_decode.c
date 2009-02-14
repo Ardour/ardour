@@ -261,8 +261,8 @@ smf_event_decode_metadata(const smf_event_t *event)
 			} else {
 				int i = (flats - 248) & 255;
 
-				assert(i >= 0 && i < sizeof(minor_keys) / sizeof(*minor_keys));
-				assert(i >= 0 && i < sizeof(major_keys) / sizeof(*major_keys));
+				assert(i >= 0 && (size_t)i < sizeof(minor_keys) / sizeof(*minor_keys));
+				assert(i >= 0 && (size_t)i < sizeof(major_keys) / sizeof(*major_keys));
 
 				if (isminor)
 					off += snprintf(buf + off, BUFFER_SIZE - off, "%s", minor_keys[i]);
@@ -273,7 +273,7 @@ smf_event_decode_metadata(const smf_event_t *event)
 			break;
 
 		case 0x7F:
-			off += snprintf(buf + off, BUFFER_SIZE - off, "Proprietary (aka Sequencer) Event, length %d",
+			off += snprintf(buf + off, BUFFER_SIZE - off, "Proprietary (aka Sequencer) Event, length %zu",
 				event->midi_buffer_length);
 			break;
 

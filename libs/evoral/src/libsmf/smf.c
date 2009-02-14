@@ -112,7 +112,7 @@ smf_track_new(void)
 	}
 
 	memset(track, 0, sizeof(smf_track_t));
-	track->next_event_number = -1;
+	track->next_event_number = 0;
 
 	track->events_array = g_ptr_array_new();
 	assert(track->events_array);
@@ -173,7 +173,8 @@ smf_add_track(smf_t *smf, smf_track_t *track)
 void
 smf_track_remove_from_smf(smf_track_t *track)
 {
-	int i, j;
+	int i;
+	size_t j;
 	smf_track_t *tmp;
 	smf_event_t *ev;
 
@@ -236,7 +237,7 @@ smf_event_new(void)
  * \return Event containing MIDI data or NULL.
  */
 smf_event_t *
-smf_event_new_from_pointer(void *midi_data, int len)
+smf_event_new_from_pointer(void *midi_data, size_t len)
 {
 	smf_event_t *event;
 
@@ -277,7 +278,7 @@ smf_event_new_from_pointer(void *midi_data, int len)
 smf_event_t *
 smf_event_new_from_bytes(int first_byte, int second_byte, int third_byte)
 {
-	int len;
+	size_t len;
 
 	smf_event_t *event;
 
@@ -408,7 +409,7 @@ events_array_compare_function(gconstpointer aa, gconstpointer bb)
  * An assumption here is that if there is an EOT event, it will be at the end of the track.
  */
 static void
-remove_eot_if_before_pulses(smf_track_t *track, int pulses)
+remove_eot_if_before_pulses(smf_track_t *track, size_t pulses)
 {
 	smf_event_t *event;
 
@@ -436,12 +437,11 @@ remove_eot_if_before_pulses(smf_track_t *track, int pulses)
 void
 smf_track_add_event(smf_track_t *track, smf_event_t *event)
 {
-	int i, last_pulses = 0;
+	size_t i, last_pulses = 0;
 
 	assert(track->smf != NULL);
 	assert(event->track == NULL);
 	assert(event->delta_time_pulses == -1);
-	assert(event->time_pulses >= 0);
 	assert(event->time_seconds >= 0.0);
 
 	remove_eot_if_before_pulses(track, event->time_pulses);
@@ -450,7 +450,7 @@ smf_track_add_event(smf_track_t *track, smf_event_t *event)
 	event->track_number = track->track_number;
 
 	if (track->number_of_events == 0) {
-		assert(track->next_event_number == -1);
+		assert(track->next_event_number == 0);
 		track->next_event_number = 1;
 	}
 
@@ -517,7 +517,7 @@ smf_track_add_event(smf_track_t *track, smf_event_t *event)
  * \return 0 if everything went ok, nonzero otherwise.
  */
 int
-smf_track_add_eot_delta_pulses(smf_track_t *track, int delta)
+smf_track_add_eot_delta_pulses(smf_track_t *track, uint32_t delta)
 {
 	smf_event_t *event;
 
@@ -531,7 +531,7 @@ smf_track_add_eot_delta_pulses(smf_track_t *track, int delta)
 }
 
 int
-smf_track_add_eot_pulses(smf_track_t *track, int pulses)
+smf_track_add_eot_pulses(smf_track_t *track, size_t pulses)
 {
 	smf_event_t *event, *last_event;
 
@@ -576,7 +576,8 @@ smf_track_add_eot_seconds(smf_track_t *track, double seconds)
 void
 smf_event_remove_from_track(smf_event_t *event)
 {
-	int i, was_last;
+	size_t i;
+	int was_last;
 	smf_event_t *tmp;
 	smf_track_t *track;
 
@@ -597,7 +598,7 @@ smf_event_remove_from_track(smf_event_t *event)
 	g_ptr_array_remove(track->events_array, event);
 
 	if (track->number_of_events == 0)
-		track->next_event_number = -1;
+		track->next_event_number = 0;
 
 	/* Renumber the rest of the events, so they are consecutively numbered. */
 	for (i = event->event_number; i <= track->number_of_events; i++) {
@@ -614,9 +615,9 @@ smf_event_remove_from_track(smf_event_t *event)
 	}
 
 	event->track = NULL;
-	event->event_number = -1;
+	event->event_number = 0;
 	event->delta_time_pulses = -1;
-	event->time_pulses = -1;
+	event->time_pulses = 0;
 	event->time_seconds = -1.0;
 }
 
@@ -667,10 +668,8 @@ smf_set_format(smf_t *smf, int format)
   * \param ppqn New PPQN.
   */
 int
-smf_set_ppqn(smf_t *smf, int ppqn)
+smf_set_ppqn(smf_t *smf, uint16_t ppqn)
 {
-	assert(ppqn > 0);
-
 	smf->ppqn = ppqn;
 
 	return (0);
@@ -690,7 +689,7 @@ smf_track_get_next_event(smf_track_t *track)
 	smf_event_t *event, *next_event;
 
 	/* End of track? */
-	if (track->next_event_number == -1)
+	if (track->next_event_number == 0)
 		return (NULL);
 
 	assert(track->next_event_number >= 1);
@@ -708,7 +707,7 @@ smf_track_get_next_event(smf_track_t *track)
 		track->time_of_next_event = next_event->time_pulses;
 		track->next_event_number++;
 	} else {
-		track->next_event_number = -1;
+		track->next_event_number = 0;
 	}
 
 	return (event);
@@ -725,7 +724,7 @@ smf_peek_next_event_from_track(smf_track_t *track)
 	smf_event_t *event;
 
 	/* End of track? */
-	if (track->next_event_number == -1)
+	if (track->next_event_number == 0)
 		return (NULL);
 
 	assert(track->next_event_number >= 1);
@@ -762,7 +761,7 @@ smf_get_track_by_number(const smf_t *smf, int track_number)
  * Events are numbered consecutively starting from one.
  */
 smf_event_t *
-smf_track_get_event_by_number(const smf_track_t *track, int event_number)
+smf_track_get_event_by_number(const smf_track_t *track, size_t event_number)
 {
 	smf_event_t *event;
 
@@ -802,7 +801,8 @@ smf_track_get_last_event(const smf_track_t *track)
 smf_track_t *
 smf_find_track_with_next_event(smf_t *smf)
 {
-	int i, min_time = 0;
+	int i;
+	size_t min_time = 0;
 	smf_track_t *track = NULL, *min_time_track = NULL;
 
 	/* Find track with event that should be played next. */
@@ -812,7 +812,7 @@ smf_find_track_with_next_event(smf_t *smf)
 		assert(track);
 
 		/* No more events in this track? */
-		if (track->next_event_number == -1)
+		if (track->next_event_number == 0)
 			continue;
 
 		if (track->time_of_next_event < min_time || min_time_track == NULL) {
@@ -913,7 +913,7 @@ smf_rewind(smf_t *smf)
 			assert(event);
 			track->time_of_next_event = event->time_pulses;
 		} else {
-			track->next_event_number = -1;
+			track->next_event_number = 0;
 			track->time_of_next_event = 0;
 #if 0
 			g_warning("Warning: empty track.");
@@ -1002,11 +1002,9 @@ smf_seek_to_seconds(smf_t *smf, double seconds)
   * smf_get_next_event will return first event that happens after the first ten pulses.
   */
 int
-smf_seek_to_pulses(smf_t *smf, int pulses)
+smf_seek_to_pulses(smf_t *smf, size_t pulses)
 {
 	smf_event_t *event;
-
-	assert(pulses >= 0);
 
 	smf_rewind(smf);
 
@@ -1036,16 +1034,17 @@ smf_seek_to_pulses(smf_t *smf, int pulses)
 /**
   * \return Length of SMF, in pulses.
   */
-int
+size_t
 smf_get_length_pulses(const smf_t *smf)
 {
-	int pulses = 0, i;
+	int i;
+	size_t pulses;
 
 	for (i = 1; i <= smf->number_of_tracks; i++) {
 		smf_track_t *track;
 		smf_event_t *event;
 
-	       	track = smf_get_track_by_number(smf, i);
+		track = smf_get_track_by_number(smf, i);
 		assert(track);
 
 		event = smf_track_get_last_event(track);

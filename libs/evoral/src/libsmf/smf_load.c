@@ -56,7 +56,6 @@ next_chunk(smf_t *smf)
 
 	assert(smf->file_buffer != NULL);
 	assert(smf->file_buffer_length > 0);
-	assert(smf->next_chunk_offset >= 0);
 
 	if (smf->next_chunk_offset + sizeof(struct chunk_header_struct) >= smf->file_buffer_length) {
 		g_critical("SMF warning: no more chunks left.");
@@ -208,12 +207,10 @@ parse_mthd_chunk(smf_t *smf)
  * Returns 0 iff everything went OK, different value in case of error.
  */
 static int
-extract_vlq(const unsigned char *buf, const int buffer_length, int *value, int *len)
+extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *value, uint32_t *len)
 {
-	int val = 0;
+	uint32_t val = 0;
 	const unsigned char *c = buf;
-
-	assert(buffer_length > 0);
 
 	for (;;) {
 		if (c >= buf + buffer_length) {
@@ -229,6 +226,7 @@ extract_vlq(const unsigned char *buf, const int buffer_length, int *value, int *
 			break;
 	};
 
+	assert(c >= buf);
 	*value = val;
 	*len = c - buf + 1;
 
@@ -274,10 +272,10 @@ is_escape_byte(const unsigned char status)
  * contains VLQ telling how many bytes it takes, "on the wire" format does not have
  * this.
  */
-static int
-expected_sysex_length(const unsigned char status, const unsigned char *second_byte, const int buffer_length, int *consumed_bytes)
+static int32_t
+expected_sysex_length(const unsigned char status, const unsigned char *second_byte, const size_t buffer_length, int32_t *consumed_bytes)
 {
-	int sysex_length, len;
+	uint32_t sysex_length, len;
 
 	assert(status == 0xF0);
 
@@ -295,8 +293,8 @@ expected_sysex_length(const unsigned char status, const unsigned char *second_by
 	return (sysex_length + 1);
 }
 
-static int
-expected_escaped_length(const unsigned char status, const unsigned char *second_byte, const int buffer_length, int *consumed_bytes)
+static int32_t
+expected_escaped_length(const unsigned char status, const unsigned char *second_byte, const size_t buffer_length, int32_t *consumed_bytes)
 {
 	/* -1, because we do not want to account for 0x7F status. */
 	return (expected_sysex_length(status, second_byte, buffer_length, consumed_bytes) - 1);
@@ -307,8 +305,8 @@ expected_escaped_length(const unsigned char status, const unsigned char *second_
  * The "second_byte" points to the expected second byte of the MIDI message.  "buffer_length" is the buffer
  * length limit, counting from "second_byte".  Returns value < 0 iff there was an error.
  */
-static int
-expected_message_length(unsigned char status, const unsigned char *second_byte, const int buffer_length)
+static int32_t
+expected_message_length(unsigned char status, const unsigned char *second_byte, const size_t buffer_length)
 {
 	/* Make sure this really is a valid status byte. */
 	assert(is_status_byte(status));
@@ -318,9 +316,6 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 
 	/* We cannot use this routine for escaped events. */
 	assert(!is_escape_byte(status));
-
-	/* Buffer length may be zero, for e.g. realtime messages. */
-	assert(buffer_length >= 0);
 
 	/* Is this a metamessage? */
 	if (status == 0xFF) {
@@ -382,9 +377,10 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 }
 
 static int
-extract_sysex_event(const unsigned char *buf, const int buffer_length, smf_event_t *event, int *len, int last_status)
+extract_sysex_event(const unsigned char *buf, const size_t buffer_length, smf_event_t *event, uint32_t *len, int last_status)
 {
-	int status, message_length, vlq_length;
+	int status;
+	int32_t vlq_length, message_length;
 	const unsigned char *c = buf;
 
 	status = *buf;
@@ -400,7 +396,7 @@ extract_sysex_event(const unsigned char *buf, const int buffer_length, smf_event
 
 	c += vlq_length;
 
-	if (vlq_length + message_length >= buffer_length) {
+	if (vlq_length + (size_t)message_length >= buffer_length) {
 		g_critical("End of buffer in extract_sysex_event().");
 		return (-5);
 	}
@@ -421,9 +417,10 @@ extract_sysex_event(const unsigned char *buf, const int buffer_length, smf_event
 }
 
 static int
-extract_escaped_event(const unsigned char *buf, const int buffer_length, smf_event_t *event, int *len, int last_status)
+extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_event_t *event, uint32_t *len, int last_status)
 {
-	int status, message_length, vlq_length;
+	int status;
+	int32_t message_length, vlq_length;
 	const unsigned char *c = buf;
 
 	status = *buf;
@@ -439,7 +436,7 @@ extract_escaped_event(const unsigned char *buf, const int buffer_length, smf_eve
 
 	c += vlq_length;
 
-	if (vlq_length + message_length >= buffer_length) {
+	if (vlq_length + (size_t)message_length >= buffer_length) {
 		g_critical("End of buffer in extract_escaped_event().");
 		return (-5);
 	}
@@ -474,9 +471,10 @@ extract_escaped_event(const unsigned char *buf, const int buffer_length, smf_eve
  * Returns 0 iff everything went OK, value < 0 in case of error.
  */
 static int
-extract_midi_event(const unsigned char *buf, const int buffer_length, smf_event_t *event, int *len, int last_status)
+extract_midi_event(const unsigned char *buf, const size_t buffer_length, smf_event_t *event, uint32_t *len, int last_status)
 {
-	int status, message_length;
+	int status;
+	int32_t message_length;
 	const unsigned char *c = buf;
 
 	assert(buffer_length > 0);
@@ -508,7 +506,7 @@ extract_midi_event(const unsigned char *buf, const int buffer_length, smf_event_
 	if (message_length < 0)
 		return (-3);
 
-	if (message_length - 1 > buffer_length - (c - buf)) {
+	if ((size_t)message_length > buffer_length - (c - buf) + 1) {
 		g_critical("End of buffer in extract_midi_event().");
 		return (-5);
 	}
@@ -537,7 +535,9 @@ extract_midi_event(const unsigned char *buf, const int buffer_length, smf_event_
 static smf_event_t *
 parse_next_event(smf_track_t *track)
 {
-	int time = 0, len, buffer_length;
+	uint32_t time = 0;
+	uint32_t len;
+	size_t buffer_length;
 	unsigned char *c, *start;
 
 	smf_event_t *event = smf_event_new();
@@ -588,7 +588,7 @@ error:
  * and makes ordinary, zero-terminated string from it.  May return NULL if there was any problem.
  */ 
 static char *
-make_string(const unsigned char *buf, const int buffer_length, int len)
+make_string(const unsigned char *buf, const size_t buffer_length, uint32_t len)
 {
 	char *str;
 
@@ -641,7 +641,7 @@ smf_event_is_textual(const smf_event_t *event)
 char *
 smf_event_extract_text(const smf_event_t *event)
 {
-	int string_length = -1, length_length = -1;
+	uint32_t string_length, length_length;
 
 	if (!smf_event_is_textual(event))
 		return (NULL);
@@ -714,6 +714,8 @@ smf_event_length_is_valid(const smf_event_t *event)
 {
 	assert(event);
 	assert(event->midi_buffer);
+	
+	int32_t expected;
 
 	if (event->midi_buffer_length < 1)
 		return (0);
@@ -722,9 +724,10 @@ smf_event_length_is_valid(const smf_event_t *event)
 	if (smf_event_is_sysex(event))
 		return (1);
 
-	if (event->midi_buffer_length != expected_message_length(event->midi_buffer[0],
-		&(event->midi_buffer[1]), event->midi_buffer_length - 1)) {
 
+	expected = expected_message_length(event->midi_buffer[0],
+			&(event->midi_buffer[1]), event->midi_buffer_length - 1);
+	if (expected < 0 || event->midi_buffer_length != (size_t)expected) {
 		return (0);
 	}
 
@@ -790,9 +793,10 @@ parse_mtrk_chunk(smf_track_t *track)
  * Allocate buffer of proper size and read file contents into it.  Close file afterwards.
  */
 static int
-load_file_into_buffer(void **file_buffer, int *file_buffer_length, const char *file_name)
+load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, const char *file_name)
 {
 	FILE *stream = fopen(file_name, "r");
+	long offset;
 
 	if (stream == NULL) {
 		g_critical("Cannot open input file: %s", strerror(errno));
@@ -806,12 +810,13 @@ load_file_into_buffer(void **file_buffer, int *file_buffer_length, const char *f
 		return (-2);
 	}
 
-	*file_buffer_length = ftell(stream);
-	if (*file_buffer_length == -1) {
+	offset = ftell(stream);
+	if (offset < 0) {
 		g_critical("ftell(3) failed: %s", strerror(errno));
 
 		return (-3);
 	}
+	*file_buffer_length = (size_t)offset;
 
 	if (fseek(stream, 0, SEEK_SET)) {
 		g_critical("fseek(3) failed: %s", strerror(errno));
@@ -846,7 +851,7 @@ load_file_into_buffer(void **file_buffer, int *file_buffer_length, const char *f
  * \return SMF or NULL, if loading failed.
   */
 smf_t *
-smf_load_from_memory(const void *buffer, const int buffer_length)
+smf_load_from_memory(const void *buffer, const size_t buffer_length)
 {
 	int i;
 
@@ -886,7 +891,7 @@ smf_load_from_memory(const void *buffer, const int buffer_length)
 
 	smf->file_buffer = NULL;
 	smf->file_buffer_length = 0;
-	smf->next_chunk_offset = -1;
+	smf->next_chunk_offset = 0;
 
 	return (smf);
 }
@@ -900,7 +905,7 @@ smf_load_from_memory(const void *buffer, const int buffer_length)
 smf_t *
 smf_load(const char *file_name)
 {
-	int file_buffer_length;
+	size_t file_buffer_length;
 	void *file_buffer;
 	smf_t *smf;
 

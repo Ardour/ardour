@@ -487,7 +487,8 @@ smf_event_is_eot(const smf_event_t *event)
 static int
 smf_validate(smf_t *smf)
 {
-	int trackno, eventno, eot_found;
+	int trackno, eot_found;
+	size_t eventno;
 	smf_track_t *track;
 	smf_event_t *event;
 
@@ -522,7 +523,7 @@ smf_validate(smf_t *smf)
 			assert(event);
 
 			if (!smf_event_is_valid(event)) {
-				g_critical("Event #%d on track #%d is invalid.", eventno, trackno);
+				g_critical("Event #%zu on track #%d is invalid.", eventno, trackno);
 				return (-5);
 			}
 
@@ -565,7 +566,7 @@ assert_smf_event_is_identical(const smf_event_t *a, const smf_event_t *b)
 static void
 assert_smf_track_is_identical(const smf_track_t *a, const smf_track_t *b)
 {
-	int i;
+	size_t i;
 
 	assert(a->track_number == b->track_number);
 	assert(a->number_of_events == b->number_of_events);

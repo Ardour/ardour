@@ -39,7 +39,7 @@
 #include "smf.h"
 #include "smf_private.h"
 
-static double seconds_from_pulses(const smf_t *smf, int pulses);
+static double seconds_from_pulses(const smf_t *smf, size_t pulses);
 
 /**
  * If there is tempo starting at "pulses" already, return it.  Otherwise,
@@ -47,7 +47,7 @@ static double seconds_from_pulses(const smf_t *smf, int pulses);
  * if there is no previous one) and attach it to "smf".
  */
 static smf_tempo_t *
-new_tempo(smf_t *smf, int pulses)
+new_tempo(smf_t *smf, size_t pulses)
 {
 	smf_tempo_t *tempo, *previous_tempo = NULL;
 
@@ -170,7 +170,7 @@ maybe_add_to_tempo_map(smf_event_t *event)
  * after that one.
  */
 void
-remove_last_tempo_with_pulses(smf_t *smf, int pulses)
+remove_last_tempo_with_pulses(smf_t *smf, size_t pulses)
 {
 	smf_tempo_t *tempo;
 
@@ -194,7 +194,7 @@ remove_last_tempo_with_pulses(smf_t *smf, int pulses)
 }
 
 static double
-seconds_from_pulses(const smf_t *smf, int pulses)
+seconds_from_pulses(const smf_t *smf, size_t pulses)
 {
 	double seconds;
 	smf_tempo_t *tempo;
@@ -254,10 +254,8 @@ smf_create_tempo_map_and_compute_seconds(smf_t *smf)
 }
 
 smf_tempo_t *
-smf_get_tempo_by_number(const smf_t *smf, int number)
+smf_get_tempo_by_number(const smf_t *smf, size_t number)
 {
-	assert(number >= 0);
-
 	if (number >= smf->tempo_array->len)
 		return (NULL);
 
@@ -268,20 +266,18 @@ smf_get_tempo_by_number(const smf_t *smf, int number)
  * Return last tempo (i.e. tempo with greatest time_pulses) that happens before "pulses".
  */
 smf_tempo_t *
-smf_get_tempo_by_pulses(const smf_t *smf, int pulses)
+smf_get_tempo_by_pulses(const smf_t *smf, size_t pulses)
 {
-	int i;
+	size_t i;
 	smf_tempo_t *tempo;
-
-	assert(pulses >= 0);
 
 	if (pulses == 0)
 		return (smf_get_tempo_by_number(smf, 0));
 
 	assert(smf->tempo_array != NULL);
 	
-	for (i = smf->tempo_array->len - 1; i >= 0; i--) {
-		tempo = smf_get_tempo_by_number(smf, i);
+	for (i = smf->tempo_array->len; i > 0; i--) {
+		tempo = smf_get_tempo_by_number(smf, i - 1);
 
 		assert(tempo);
 		if (tempo->time_pulses < pulses)
@@ -297,7 +293,7 @@ smf_get_tempo_by_pulses(const smf_t *smf, int pulses)
 smf_tempo_t *
 smf_get_tempo_by_seconds(const smf_t *smf, double seconds)
 {
-	int i;
+	size_t i;
 	smf_tempo_t *tempo;
 
 	assert(seconds >= 0.0);
@@ -307,8 +303,8 @@ smf_get_tempo_by_seconds(const smf_t *smf, double seconds)
 
 	assert(smf->tempo_array != NULL);
 	
-	for (i = smf->tempo_array->len - 1; i >= 0; i--) {
-		tempo = smf_get_tempo_by_number(smf, i);
+	for (i = smf->tempo_array->len; i > 0; i--) {
+		tempo = smf_get_tempo_by_number(smf, i - 1);
 
 		assert(tempo);
 		if (tempo->time_seconds < seconds)
@@ -327,6 +323,7 @@ smf_get_last_tempo(const smf_t *smf)
 {
 	smf_tempo_t *tempo;
 
+	assert(smf->tempo_array->len > 0);
 	tempo = smf_get_tempo_by_number(smf, smf->tempo_array->len - 1);
 	assert(tempo);
 
@@ -371,8 +368,9 @@ smf_init_tempo(smf_t *smf)
 	smf_fini_tempo(smf);
 
 	tempo = new_tempo(smf, 0);
-	if (tempo == NULL)
+	if (tempo == NULL) {
 		g_error("tempo_init failed, sorry.");
+	}
 }
 
 /**
@@ -385,7 +383,6 @@ last_event_pulses(const smf_track_t *track)
 	if (track->number_of_events > 0) {
 		smf_event_t *previous_event = smf_track_get_last_event(track);
 		assert(previous_event);
-		assert(previous_event->time_pulses >= 0);
 
 		return (previous_event->time_pulses);
 	}
@@ -400,10 +397,8 @@ last_event_pulses(const smf_track_t *track)
  * not here.
  */
 void
-smf_track_add_event_delta_pulses(smf_track_t *track, smf_event_t *event, int delta)
+smf_track_add_event_delta_pulses(smf_track_t *track, smf_event_t *event, uint32_t delta)
 {
-	assert(delta >= 0);
-	assert(event->time_pulses == -1);
 	assert(event->time_seconds == -1.0);
 	assert(track->smf != NULL);
 
@@ -420,10 +415,8 @@ smf_track_add_event_delta_pulses(smf_track_t *track, smf_event_t *event, int del
  * and current tempo map.
  */
 void
-smf_track_add_event_pulses(smf_track_t *track, smf_event_t *event, int pulses)
+smf_track_add_event_pulses(smf_track_t *track, smf_event_t *event, size_t pulses)
 {
-	assert(pulses >= 0);
-	assert(event->time_pulses == -1);
 	assert(event->time_seconds == -1.0);
 	assert(track->smf != NULL);
 
@@ -441,7 +434,6 @@ void
 smf_track_add_event_seconds(smf_track_t *track, smf_event_t *event, double seconds)
 {
 	assert(seconds >= 0.0);
-	assert(event->time_pulses == -1);
 	assert(event->time_seconds == -1.0);
 	assert(track->smf != NULL);
 
