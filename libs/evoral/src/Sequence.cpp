@@ -17,18 +17,17 @@
  */
 
 #define __STDC_LIMIT_MACROS 1
-
-#include <iostream>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
 #include <stdexcept>
 #include <stdint.h>
-#include "evoral/Sequence.hpp"
-#include "evoral/ControlList.hpp"
 #include "evoral/Control.hpp"
+#include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"
 #include "evoral/EventSink.hpp"
 #include "evoral/MIDIParameters.hpp"
+#include "evoral/Sequence.hpp"
 #include "evoral/TypeMap.hpp"
 
 using namespace std;
@@ -676,8 +675,7 @@ Sequence<Time>::append(const Event<Time>& event)
 	assert(_writing);
 
 	if (ev.is_note_on()) {
-		append_note_on_unlocked(ev.channel(), ev.time(), ev.note(),
-				ev.velocity());
+		append_note_on_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
 	} else if (ev.is_note_off()) {
 		append_note_off_unlocked(ev.channel(), ev.time(), ev.note());
 	} else if (ev.is_sysex()) {
@@ -717,12 +715,18 @@ void
 Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_num, uint8_t velocity)
 {
 	#ifdef DEBUG_SEQUENCE
-	debugout << this << " c" << (int)chan << " note " << (int)note_num << " off @ " << time << endl;
+	debugout << this << " c=" << (int)chan << " note " << (int)note_num
+		<< " on @ " << time << " v=" << (int)velocity << endl;
 	#endif
 	assert(note_num <= 127);
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;
+
+	if (velocity == 0) {
+		append_note_off_unlocked(chan, time, note_num);
+		return;
+	}
 
 	if (note_num < _lowest_note)
 		_lowest_note = note_num;
@@ -733,7 +737,8 @@ Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_nu
 	_notes.push_back(new_note);
 	if (!_percussive) {
 		#ifdef DEBUG_SEQUENCE
-		debugout << "Sustained: Appending active note on " << (unsigned)(uint8_t)note_num << endl;
+		debugout << "Sustained: Appending active note on " << (unsigned)(uint8_t)note_num
+			<< " channel " << chan << endl;
 		#endif
 		_write_notes[chan].push_back(_notes.size() - 1);
 	} else {
@@ -748,7 +753,8 @@ void
 Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_num)
 {
 	#ifdef DEBUG_SEQUENCE
-	debugout << this << " c" << (int)chan << " note " << (int)note_num << " off @ " << time << endl;
+	debugout << this << " c=" << (int)chan << " note " << (int)note_num
+		<< " off @ " << time << endl;
 	#endif
 	assert(note_num <= 127);
 	assert(chan < 16);

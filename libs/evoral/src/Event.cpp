@@ -23,17 +23,17 @@ namespace Evoral {
 #ifdef EVORAL_EVENT_ALLOC
 
 template<typename Timestamp>
-Event<Timestamp>::Event(EventType type, Timestamp timestamp, uint32_t size, uint8_t* buffer, bool alloc)
+Event<Timestamp>::Event(EventType type, Timestamp time, uint32_t size, uint8_t* buf, bool alloc)
 	: _type(type)
-	, _time(timestamp)
+	, _time(time)
 	, _size(size)
-	, _buf(buffer)
+	, _buf(buf)
 	, _owns_buf(alloc)
 {
 	if (alloc) {
 		_buf = (uint8_t*)malloc(_size);
-		if (buffer) {
-			memcpy(_buf, buffer, _size);
+		if (buf) {
+			memcpy(_buf, buf, _size);
 		} else {
 			memset(_buf, 0, _size);
 		}

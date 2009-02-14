@@ -407,6 +407,10 @@ smf_track_add_event_delta_pulses(smf_track_t *track, smf_event_t *event, int del
 	assert(event->time_seconds == -1.0);
 	assert(track->smf != NULL);
 
+	if (!smf_event_is_valid(event)) {
+		g_critical("Added event is invalid");
+	}
+
 	smf_track_add_event_pulses(track, event, last_event_pulses(track) + delta);
 }
 

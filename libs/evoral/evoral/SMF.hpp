@@ -46,14 +46,21 @@ public:
 	SMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
 	virtual ~SMF();
 	
-	int  open(const std::string& path, bool create=true, int track=1) THROW_FILE_ERROR;
+	int  open(const std::string& path, int track=1) THROW_FILE_ERROR;
+	int  create(const std::string& path, int track=1, int ppqn=19200) THROW_FILE_ERROR;
 	void close() THROW_FILE_ERROR;
+	
+	const std::string& path() const { return _path; };
 
 	void seek_to_start() const;
+	int  seek_to_track(int track);
 	
-	uint16_t ppqn()     const { return _ppqn; }
-	bool     is_empty() const { return _empty; }
-	bool     eof()      const { assert(false); return true; }
+	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
+	
+	uint16_t num_tracks() const;
+	uint16_t ppqn()       const;
+	bool     is_empty()   const { return _empty; }
+	bool     eof()        const { assert(false); return true; }
 	
 	Time last_event_time() const { return _last_ev_time; }
 	
@@ -62,11 +69,6 @@ public:
 	void end_write() THROW_FILE_ERROR;
 	
 	void flush() {};
-	int  flush_header() { return 0; }
-	int  flush_footer() { return 0; }
-
-protected:
-	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
 
 private:
 	static const uint16_t _ppqn = 19200;

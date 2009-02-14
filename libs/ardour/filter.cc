@@ -100,7 +100,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(*si);
 		if (smfs) {
 			smfs->set_timeline_position (region->position());
-			smfs->flush_footer ();
+			smfs->flush ();
 		}
 		
 		/* now that there is data there, requeue the file for analysis */

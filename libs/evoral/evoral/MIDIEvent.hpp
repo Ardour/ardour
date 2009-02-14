@@ -36,8 +36,8 @@ namespace Evoral {
  */
 template<typename Time>
 struct MIDIEvent : public Event<Time> {
-	MIDIEvent(EventType type=0, Time timestamp=0, uint32_t size=0, uint8_t* buffer=NULL, bool alloc=false)
-		: Event<Time>(type, timestamp, size, buffer, alloc)
+	MIDIEvent(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false)
+		: Event<Time>(type, time, size, buf, alloc)
 	{}
 	
 	MIDIEvent(const Event<Time>& copy, bool alloc)
@@ -45,12 +45,10 @@ struct MIDIEvent : public Event<Time> {
 	{}
 
 #ifdef EVORAL_MIDI_XML
-	/** Event from XML ala http://www.midi.org/dtds/MIDIEvents10.dtd
-	 */
+	/** Event from XML ala http://www.midi.org/dtds/MIDIEvents10.dtd */
 	MIDIEvent(const XMLNode& event);
 	
-	/** Event to XML ala http://www.midi.org/dtds/MIDIEvents10.dtd
-	 */
+	/** Event to XML ala http://www.midi.org/dtds/MIDIEvents10.dtd */
 	boost::shared_ptr<XMLNode> to_xml() const;
 #endif
 

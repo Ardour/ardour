@@ -8,9 +8,9 @@ void
 SMFTest::createNewFileTest ()
 {
 	TestSMF<Time> smf;
-	smf.open("NewFile.mid");
+	smf.create("NewFile.mid");
 	smf.close();
-	CPPUNIT_ASSERT(access(smf.path().c_str(), R_OK) == 0);
+	CPPUNIT_ASSERT(access("NewFile.mid", R_OK) == 0);
 	unlink(smf.path().c_str());
 }
 

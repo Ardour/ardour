@@ -43,7 +43,7 @@ namespace Evoral {
 template<typename Time>
 struct Event {
 #ifdef EVORAL_EVENT_ALLOC
-	Event(EventType type=0, Time timestamp=0, uint32_t size=0, uint8_t* buffer=NULL, bool alloc=false);
+	Event(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
 	
 	/** Copy \a copy.
 	 * 

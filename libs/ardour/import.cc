@@ -37,7 +37,7 @@
 #include <pbd/basename.h>
 #include <pbd/convert.h>
 
-#include <evoral/SMFReader.hpp>
+#include <evoral/SMF.hpp>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -309,10 +309,11 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 }
 
 static void
-write_midi_data_to_new_files (Evoral::SMFReader* source, Session::import_status& status,
+write_midi_data_to_new_files (Evoral::SMF<double>* source, Session::import_status& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
-	Evoral::Event<double> ev(0, 0.0, 4, NULL, true);
+	uint32_t buf_size = 4;
+	uint8_t* buf      = (uint8_t*)malloc(buf_size);
 
 	status.progress = 0.0f;
 
@@ -329,15 +330,28 @@ write_midi_data_to_new_files (Evoral::SMFReader* source, Session::import_status&
 		uint32_t size    = 0;
 		
 		while (!status.cancel) {
+			size = buf_size;
 
-			if (source->read_event(4, ev.buffer(), &size, &delta_t) < 0)
+			int ret = source->read_event(&delta_t, &size, &buf);
+			if (size > buf_size)
+				buf_size = size;
+
+			if (ret < 0) { // EOT
 				break;
-
+			}
+			
 			t += delta_t;
-			ev.time() = (double)t / (double)source->ppqn();
-			ev.size() = size;
 
-			smfs->append_event_unlocked(Beats, ev);
+			if (ret == 0) { // Meta
+				continue;
+			}
+
+			smfs->append_event_unlocked(Beats, Evoral::Event<double>(
+						0,
+						(double)t / (double)source->ppqn(),
+						size,
+						buf));
+
 			if (status.progress < 0.99)
 				status.progress += 0.01;
 		}
@@ -358,7 +372,7 @@ write_midi_data_to_new_files (Evoral::SMFReader* source, Session::import_status&
 	}
 
 	} catch (...) {
-		error << "Corrupt MIDI file " << source->filename() << endl;
+		error << "Corrupt MIDI file " << source->path() << endl;
 	}
 }
 
@@ -388,8 +402,8 @@ Session::import_audiofiles (import_status& status)
 			p != status.paths.end() && !status.cancel;
 			++p, ++cnt)
 	{
-		boost::shared_ptr<ImportableSource> source;
-		std::auto_ptr<Evoral::SMFReader>    smf_reader;
+		boost::shared_ptr<ImportableSource>  source;
+		std::auto_ptr< Evoral::SMF<double> > smf_reader;
 		const DataType type = ((*p).rfind(".mid") != string::npos) ? 
 			DataType::MIDI : DataType::AUDIO;
 		
@@ -405,14 +419,11 @@ Session::import_audiofiles (import_status& status)
 
 		} else {
 			try {
-				smf_reader = std::auto_ptr<Evoral::SMFReader>(new Evoral::SMFReader(*p));
+				smf_reader = std::auto_ptr< Evoral::SMF<double> >(new Evoral::SMF<double>());
+				smf_reader->open(*p);
 				channels = smf_reader->num_tracks();
-			} catch (const Evoral::SMFReader::UnsupportedTime& err) {
-				error << _("Import: unsupported MIDI time stamp format") << endmsg;
-				status.done = status.cancel = true;
-				return;
 			} catch (...) {
-				error << _("Import: error reading MIDI file") << endmsg;
+				error << _("Import: error opening MIDI file") << endmsg;
 				status.done = status.cancel = true;
 				return;
 			}

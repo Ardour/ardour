@@ -65,7 +65,7 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 		throw failed_constructor ();
 	}
 	
-	if (open(path)) {
+	if (create(path)) {
 		throw failed_constructor ();
 	}
 
