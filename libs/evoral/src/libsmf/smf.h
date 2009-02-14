@@ -371,7 +371,7 @@ void smf_event_remove_from_track(smf_event_t *event);
 
 /* Routines for manipulating smf_event_t. */
 smf_event_t *smf_event_new(void) WARN_UNUSED_RESULT;
-smf_event_t *smf_event_new_from_pointer(void *midi_data, size_t len) WARN_UNUSED_RESULT;
+smf_event_t *smf_event_new_from_pointer(const void *midi_data, size_t len) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_from_bytes(int byte1, int byte2, int byte3) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_textual(int type, const char *text);
 void         smf_event_delete(smf_event_t *event);

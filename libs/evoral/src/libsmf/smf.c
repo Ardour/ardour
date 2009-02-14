@@ -237,7 +237,7 @@ smf_event_new(void)
  * \return Event containing MIDI data or NULL.
  */
 smf_event_t *
-smf_event_new_from_pointer(void *midi_data, size_t len)
+smf_event_new_from_pointer(const void *midi_data, size_t len)
 {
 	smf_event_t *event;
 
