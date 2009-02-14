@@ -114,7 +114,7 @@ class SMFSource : public MidiSource, public Evoral::SMF<double> {
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
 	
-	void make_sure_controls_have_the_right_interpolation();
+	void set_default_controls_interpolation();
 
 	Glib::ustring  _path;
 	Flag           _flags;

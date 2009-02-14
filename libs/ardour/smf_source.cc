@@ -248,7 +248,7 @@ SMFSource::write_unlocked (MidiRingBuffer<double>& src, nframes_t cnt)
 	}
 
 	if (_model) {
-		make_sure_controls_have_the_right_interpolation();
+		set_default_controls_interpolation();
 	}
 
 	Evoral::SMF<double>::flush();
@@ -669,7 +669,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 		}
 	}
 
-	make_sure_controls_have_the_right_interpolation();
+	set_default_controls_interpolation();
 	
 	_model->end_write(false);
 	_model->set_edited(false);
@@ -680,7 +680,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 #define LINEAR_INTERPOLATION_MODE_WORKS_PROPERLY 0
 
 void
-SMFSource::make_sure_controls_have_the_right_interpolation()
+SMFSource::set_default_controls_interpolation()
 {
 	// set interpolation style to defaults, can be changed by the GUI later
 	Evoral::ControlSet::Controls controls = _model->controls();
