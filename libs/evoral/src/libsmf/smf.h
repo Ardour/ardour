@@ -232,29 +232,29 @@ extern "C" {
 
 /** Represents a "song", that is, collection of one or more tracks. */
 struct smf_struct {
-	int		format;
+	int        format;
 
 	/** These fields are extracted from "division" field of MThd header.
 	 * Valid is _either_ ppqn or frames_per_second/resolution. */
-	uint16_t		ppqn;
-	int		frames_per_second;
-	int		resolution;
-	int		number_of_tracks;
+	uint16_t   ppqn;
+	int        frames_per_second;
+	int        resolution;
+	int        number_of_tracks;
 
 	/** These are private fields using only by loading and saving routines. */
-	FILE		*stream;
-	void		*file_buffer;
-	size_t		file_buffer_length;
-	size_t		next_chunk_offset;
-	int		expected_number_of_tracks;
+	FILE      *stream;
+	void      *file_buffer;
+	size_t     file_buffer_length;
+	size_t     next_chunk_offset;
+	int        expected_number_of_tracks;
 
 	/** Private, used by smf.c. */
-	GPtrArray	*tracks_array;
-	double		last_seek_position;
+	GPtrArray *tracks_array;
+	double     last_seek_position;
 
 	/** Private, used by smf_tempo.c. */
 	/** Array of pointers to smf_tempo_struct. */
-	GPtrArray	*tempo_array;
+	GPtrArray *tempo_array;
 };
 
 typedef struct smf_struct smf_t;
@@ -263,35 +263,35 @@ typedef struct smf_struct smf_t;
 struct smf_tempo_struct {
 	size_t time_pulses;
 	double time_seconds;
-	int microseconds_per_quarter_note;
-	int numerator;
-	int denominator;
-	int clocks_per_click;
-	int notes_per_note;
+	int    microseconds_per_quarter_note;
+	int    numerator;
+	int    denominator;
+	int    clocks_per_click;
+	int    notes_per_note;
 };
 
 typedef struct smf_tempo_struct smf_tempo_t;
 
 /** Represents a single track. */
 struct smf_track_struct {
-	smf_t		*smf;
+	smf_t     *smf;
 
-	int		track_number;
-	size_t		number_of_events;
+	int        track_number;
+	size_t     number_of_events;
 
 	/** These are private fields using only by loading and saving routines. */
-	void		*file_buffer;
-	size_t		file_buffer_length;
-	int		last_status; /* Used for "running status". */
+	void      *file_buffer;
+	size_t     file_buffer_length;
+	int        last_status; /* Used for "running status". */
 
 	/** Private, used by smf.c. */
 	/** Offset into buffer, used in parse_next_event(). */
-	size_t		next_event_offset;
-	size_t		next_event_number;
+	size_t     next_event_offset;
+	size_t     next_event_number;
 
 	/** Absolute time of next event on events_queue. */
-	size_t		time_of_next_event;
-	GPtrArray	*events_array;
+	size_t     time_of_next_event;
+	GPtrArray *events_array;
 };
 
 typedef struct smf_track_struct smf_track_t;
@@ -299,36 +299,36 @@ typedef struct smf_track_struct smf_track_t;
 /** Represents a single MIDI event or metaevent. */
 struct smf_event_struct {
 	/** Pointer to the track, or NULL if event is not attached. */
-	smf_track_t	*track;
+	smf_track_t *track;
 
 	/** Number of this event in the track.  Events are numbered consecutively, starting from 1. */
-	size_t		event_number;
+	size_t       event_number;
 
 	/** Note that the time fields are invalid, if event is not attached to a track. */
 	/** Time, in pulses, since the previous event on this track. */
-	int32_t		delta_time_pulses;
+	int32_t      delta_time_pulses;
 
 	/** Time, in pulses, since the start of the song. */
-	size_t		time_pulses;
+	size_t       time_pulses;
 
 	/** Time, in seconds, since the start of the song. */
-	double		time_seconds;
+	double       time_seconds;
 
 	/** Tracks are numbered consecutively, starting from 1. */
-	int		track_number;
+	int          track_number;
 
 	/** Pointer to the buffer containing MIDI message.  This is freed by smf_event_delete. */
-	uint8_t	*midi_buffer;
+	uint8_t     *midi_buffer;
 
 	/** Length of the MIDI message in the buffer, in bytes. */
-	size_t		midi_buffer_length; 
+	size_t       midi_buffer_length;
 };
 
 typedef struct smf_event_struct smf_event_t;
 
 /* Routines for manipulating smf_t. */
 smf_t *smf_new(void) WARN_UNUSED_RESULT;
-void smf_delete(smf_t *smf);
+void   smf_delete(smf_t *smf);
 
 int smf_set_format(smf_t *smf, int format) WARN_UNUSED_RESULT;
 int smf_set_ppqn(smf_t *smf, uint16_t ppqn) WARN_UNUSED_RESULT;
@@ -339,23 +339,23 @@ smf_track_t *smf_get_track_by_number(const smf_t *smf, int track_number) WARN_UN
 
 smf_event_t *smf_peek_next_event(smf_t *smf) WARN_UNUSED_RESULT;
 smf_event_t *smf_get_next_event(smf_t *smf) WARN_UNUSED_RESULT;
-void smf_skip_next_event(smf_t *smf);
+void         smf_skip_next_event(smf_t *smf);
 
 void smf_rewind(smf_t *smf);
-int smf_seek_to_seconds(smf_t *smf, double seconds) WARN_UNUSED_RESULT;
-int smf_seek_to_pulses(smf_t *smf, size_t pulses) WARN_UNUSED_RESULT;
-int smf_seek_to_event(smf_t *smf, const smf_event_t *event) WARN_UNUSED_RESULT;
+int  smf_seek_to_seconds(smf_t *smf, double seconds) WARN_UNUSED_RESULT;
+int  smf_seek_to_pulses(smf_t *smf, size_t pulses) WARN_UNUSED_RESULT;
+int  smf_seek_to_event(smf_t *smf, const smf_event_t *event) WARN_UNUSED_RESULT;
 
 size_t smf_get_length_pulses(const smf_t *smf) WARN_UNUSED_RESULT;
 double smf_get_length_seconds(const smf_t *smf) WARN_UNUSED_RESULT;
-int smf_event_is_last(const smf_event_t *event) WARN_UNUSED_RESULT;
+int    smf_event_is_last(const smf_event_t *event) WARN_UNUSED_RESULT;
 
 void smf_add_track(smf_t *smf, smf_track_t *track);
 void smf_track_remove_from_smf(smf_track_t *track);
 
 /* Routines for manipulating smf_track_t. */
 smf_track_t *smf_track_new(void) WARN_UNUSED_RESULT;
-void smf_track_delete(smf_track_t *track);
+void         smf_track_delete(smf_track_t *track);
 
 smf_event_t *smf_track_get_next_event(smf_track_t *track) WARN_UNUSED_RESULT;
 smf_event_t *smf_track_get_event_by_number(const smf_track_t *track, size_t num) WARN_UNUSED_RESULT;
@@ -364,9 +364,9 @@ smf_event_t *smf_track_get_last_event(const smf_track_t *track) WARN_UNUSED_RESU
 void smf_track_add_event_delta_pulses(smf_track_t *track, smf_event_t *event, uint32_t delta);
 void smf_track_add_event_pulses(smf_track_t *track, smf_event_t *event, size_t pulses);
 void smf_track_add_event_seconds(smf_track_t *track, smf_event_t *event, double seconds);
-int smf_track_add_eot_delta_pulses(smf_track_t *track, uint32_t delta) WARN_UNUSED_RESULT;
-int smf_track_add_eot_pulses(smf_track_t *track, size_t pulses) WARN_UNUSED_RESULT;
-int smf_track_add_eot_seconds(smf_track_t *track, double seconds) WARN_UNUSED_RESULT;
+int  smf_track_add_eot_delta_pulses(smf_track_t *track, uint32_t delta) WARN_UNUSED_RESULT;
+int  smf_track_add_eot_pulses(smf_track_t *track, size_t pulses) WARN_UNUSED_RESULT;
+int  smf_track_add_eot_seconds(smf_track_t *track, double seconds) WARN_UNUSED_RESULT;
 void smf_event_remove_from_track(smf_event_t *event);
 
 /* Routines for manipulating smf_event_t. */
@@ -374,15 +374,15 @@ smf_event_t *smf_event_new(void) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_from_pointer(void *midi_data, size_t len) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_from_bytes(int byte1, int byte2, int byte3) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_textual(int type, const char *text);
-void smf_event_delete(smf_event_t *event);
+void         smf_event_delete(smf_event_t *event);
 
-int smf_event_is_valid(const smf_event_t *event) WARN_UNUSED_RESULT;
-int smf_event_is_metadata(const smf_event_t *event) WARN_UNUSED_RESULT;
-int smf_event_is_system_realtime(const smf_event_t *event) WARN_UNUSED_RESULT;
-int smf_event_is_system_common(const smf_event_t *event) WARN_UNUSED_RESULT;
-int smf_event_is_sysex(const smf_event_t *event) WARN_UNUSED_RESULT;
-int smf_event_is_eot(const smf_event_t *event) WARN_UNUSED_RESULT;
-int smf_event_is_textual(const smf_event_t *event) WARN_UNUSED_RESULT;
+int   smf_event_is_valid(const smf_event_t *event) WARN_UNUSED_RESULT;
+int   smf_event_is_metadata(const smf_event_t *event) WARN_UNUSED_RESULT;
+int   smf_event_is_system_realtime(const smf_event_t *event) WARN_UNUSED_RESULT;
+int   smf_event_is_system_common(const smf_event_t *event) WARN_UNUSED_RESULT;
+int   smf_event_is_sysex(const smf_event_t *event) WARN_UNUSED_RESULT;
+int   smf_event_is_eot(const smf_event_t *event) WARN_UNUSED_RESULT;
+int   smf_event_is_textual(const smf_event_t *event) WARN_UNUSED_RESULT;
 char *smf_event_decode(const smf_event_t *event) WARN_UNUSED_RESULT;
 char *smf_event_extract_text(const smf_event_t *event) WARN_UNUSED_RESULT;
 
