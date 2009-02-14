@@ -93,6 +93,8 @@ class SMFSource : public MidiSource, public Evoral::SMF<double> {
 	void load_model(bool lock=true, bool force_reload=false);
 	void destroy_model();
 
+	double last_event_time() const { return _last_ev_time; }
+
 	void flush_midi();
 
   private:
@@ -120,6 +122,7 @@ class SMFSource : public MidiSource, public Evoral::SMF<double> {
 	Flag           _flags;
 	string         _take_id;
 	bool           _allow_remove_if_empty;
+	double         _last_ev_time;
 
 	static string _search_path;
 };

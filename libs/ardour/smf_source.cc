@@ -58,6 +58,7 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	, Evoral::SMF<double> ()
 	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
 	, _allow_remove_if_empty(true)
+	, _last_ev_time(0)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
@@ -76,6 +77,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 	: MidiSource (s, node)
 	, _flags (Flag (Writable|CanRename))
 	, _allow_remove_if_empty(true)
+	, _last_ev_time(0)
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -302,6 +304,7 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>
 	}
 
 	Evoral::SMF<double>::append_event_delta(delta_time, ev);
+	_last_ev_time = ev.time();
 
 	_write_data_count += ev.size();
 }
@@ -357,6 +360,7 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_fra
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
 	Evoral::SMF<double>::begin_write ();
+	_last_ev_time = 0;
 }
 
 void

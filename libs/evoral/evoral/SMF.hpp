@@ -34,7 +34,8 @@ template<typename Time> class EventRingBuffer;
 
 #define THROW_FILE_ERROR throw(typename SMF<Time>::FileError)
 
-/** Standard Midi File (Type 0)
+/** Standard Midi File.
+ * Currently only tempo-based time of a given PPQN is supported.
  */
 template<typename Time>
 class SMF {
@@ -43,7 +44,7 @@ public:
 		const char* what() const throw() { return "Unknown SMF error"; }
 	};
 
-	SMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
+	SMF() : _smf(0), _smf_track(0), _empty(true) {};
 	virtual ~SMF();
 	
 	int  open(const std::string& path, int track=1) THROW_FILE_ERROR;
@@ -62,8 +63,6 @@ public:
 	bool     is_empty()   const { return _empty; }
 	bool     eof()        const { assert(false); return true; }
 	
-	Time last_event_time() const { return _last_ev_time; }
-	
 	void begin_write();
 	void append_event_delta(uint32_t delta_t, const Event<Time>& ev);
 	void end_write() THROW_FILE_ERROR;
@@ -72,8 +71,6 @@ public:
 
 private:
 	static const uint16_t _ppqn = 19200;
-	
-	Time _last_ev_time; ///< last frame time written, relative to source start
 	
 	std::string  _path;
 	smf_t*       _smf;

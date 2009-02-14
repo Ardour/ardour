@@ -241,7 +241,6 @@ SMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
 	
 	assert(_smf_track);
 	smf_track_add_event_delta_pulses(_smf_track, event, int(delta_t));
-	_last_ev_time = ev.time();
 	
 	if (ev.size() > 0) {
 		_empty = false;
@@ -260,8 +259,6 @@ SMF<Time>::begin_write()
 	
 	smf_add_track(_smf, _smf_track);
 	assert(_smf->number_of_tracks == 1);
-	
-	_last_ev_time = 0;
 }
 
 template<typename Time>
