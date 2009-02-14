@@ -1340,7 +1340,7 @@ IO::set_state (const XMLNode& node)
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();
 		/* used to set panner name with this, but no more */
-	} 
+	}
 
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value ();

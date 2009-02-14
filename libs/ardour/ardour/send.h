@@ -62,6 +62,7 @@ class Send : public IOProcessor
 	bool configure_io (ChanCount in, ChanCount out);
 
 	static uint32_t how_many_sends();
+	static void make_unique (XMLNode &, Session &);
 
   private:
 	bool      _metering;

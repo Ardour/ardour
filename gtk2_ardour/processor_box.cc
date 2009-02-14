@@ -964,8 +964,16 @@ ProcessorBox::paste_processor_state (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		cerr << "try using " << (*niter)->name() << endl;
+		XMLProperty const * type = (*niter)->property ("type");
+		assert (type);
 		try {
-			copies.push_back (boost::shared_ptr<Processor> (new PluginInsert (_session, **niter)));
+			if (type->value() == "send") {
+				XMLNode n (**niter);
+				Send::make_unique (n, _session);
+				copies.push_back (boost::shared_ptr<Processor> (new Send (_session, n)));
+			} else {
+				copies.push_back (boost::shared_ptr<Processor> (new PluginInsert (_session, **niter)));
+			}
 		}
 		catch (...) {
 			cerr << "plugin insert constructor failed\n";

@@ -43,7 +43,7 @@ Send::Send (Session& s, Placement p)
 }
 
 Send::Send (Session& s, const XMLNode& node)
-	: IOProcessor (s,  "send", PreFader)
+	: IOProcessor (s, "send", PreFader)
 {
 	_metering = false;
 
@@ -61,37 +61,31 @@ Send::Send (const Send& other)
 
 	expected_inputs.set (DataType::AUDIO, 0);
 
-#ifdef THIS_NEEDS_FIXING_FOR_V3
-
 	/* set up the same outputs, and connect them to the same places */
 
-	_io->no_panner_reset = true;
+	_io->defer_pan_reset ();
 
-	for (uint32_t i = 0; i < other.n_outputs (); ++i) {
-		add_output_port ("", 0);
-		Port* p = other.output (i);
+	for (uint32_t i = 0; i < other._io->n_outputs().get (_io->default_type()); ++i) {
+		_io->add_output_port ("", 0);
+		Port* p = other._io->output (i);
 		if (p) {
 			/* this is what the other send's output is connected to */
-			const char **connections = p->get_connections ();
-			if (connections) {
-				for (uint32_t c = 0; connections[c]; ++c) {
-					connect_output (output (i), connections [c], 0);
-				}
+			std::vector<std::string> connections;
+			p->get_connections (connections);
+			for (uint32_t j = 0; j < connections.size(); ++j) {
+				_io->connect_output (_io->output (i), connections[j], 0);
 			}
 		}
 	}
 	
 	/* setup panner */
 
-	_io->no_panner_reset = false;
+	_io->allow_pan_reset ();
 
-	/* copy state */
-
-	XMLNode& other_state (const_cast<Send*>(&other)->_panner->get_state());
-	_panner->set_state (other_state);
+	XMLNode& other_state (other._io->panner().get_state ());
+	_io->panner().set_state (other_state);
 	
 	delete &other_state;
-#endif
 
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
@@ -263,5 +257,28 @@ Send::expect_inputs (const ChanCount& expected)
 	if (expected != expected_inputs) {
 		expected_inputs = expected;
 		_io->reset_panner ();
+	}
+}
+
+/** Set up the XML description of a send so that its name is unique.
+ *  @param state XML send state.
+ *  @param session Session.
+ */
+void
+Send::make_unique (XMLNode &state, Session &session)
+{
+	uint32_t const bitslot = session.next_send_id() + 1;
+
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
+	state.property("bitslot")->set_value (buf);
+
+	std::string const name = string_compose (_("send %1"), bitslot);
+	
+	state.property("name")->set_value (name);
+
+	XMLNode* io = state.child ("IO");
+	if (io) {
+		io->property("name")->set_value (name);
 	}
 }
