@@ -75,11 +75,9 @@ def check_header(conf, name, define='', mandatory=False):
 	if not name in checked:
 		checked[name] = True
 		if define != '':
-			conf.check(header_name=name, define_name=define)
+			conf.check(header_name=name, define_name=define, mandatory=mandatory)
 		else:
-			conf.check(header_name=name)
-		if mandatory and not conf.env['LIB_' + name.upper()]:
-			raise Configure.ConfigurationError("Required header not found")
+			conf.check(header_name=name, mandatory=mandatory)
 
 def check_tool(conf, name):
 	"Check for a tool iff it hasn't been checked for yet"
