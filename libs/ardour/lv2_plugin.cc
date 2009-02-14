@@ -119,8 +119,10 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	uint32_t latency_port = (latent ? slv2_plugin_get_latency_port_index(plugin) : 0);
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
+		SLV2Port port = slv2_plugin_get_port_by_index(plugin, i);
+		SLV2Value sym = slv2_port_get_symbol(_plugin, port);
+		_port_indices.insert(std::make_pair(slv2_value_as_string(sym), i));
 		if (parameter_is_control(i)) {
-			SLV2Port port = slv2_plugin_get_port_by_index(plugin, i);
 			SLV2Value def;
 			slv2_port_get_range(plugin, port, &def, NULL, NULL);
 			_defaults[i] = def ? slv2_value_as_float(def) : 0.0f;
@@ -274,10 +276,50 @@ LV2Plugin::get_state()
 	return *root;
 }
 
+vector<Plugin::PresetRecord>
+LV2Plugin::get_presets()
+{
+	vector<PresetRecord> result;
+	SLV2Results presets = slv2_plugin_query_sparql(_plugin,
+			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
+			"PREFIX dc:  <http://dublincore.org/documents/dcmi-namespace/>\n"
+			"SELECT ?p ?name WHERE { <> lv2p:hasPreset ?p . ?p dc:title ?name }\n");
+	for (; !slv2_results_finished(presets); slv2_results_next(presets)) {
+		SLV2Value uri  = slv2_results_get_binding_value(presets, 0);
+		SLV2Value name = slv2_results_get_binding_value(presets, 1);
+		PresetRecord rec(slv2_value_as_string(uri), slv2_value_as_string(name));
+		result.push_back(rec);
+		this->presets.insert(std::make_pair(slv2_value_as_string(uri), rec));
+	}
+	slv2_results_free(presets);
+	return result;
+}
+
+bool
+LV2Plugin::load_preset(const string uri)
+{
+	const string query = string(
+			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
+			"PREFIX dc:  <http://dublincore.org/documents/dcmi-namespace/>\n"
+			"SELECT ?sym ?val WHERE { <") + uri + "> lv2:port ?port . "
+				" ?port lv2:symbol ?sym ; lv2p:value ?val . }";
+	SLV2Results values = slv2_plugin_query_sparql(_plugin, query.c_str());
+	for (; !slv2_results_finished(values); slv2_results_next(values)) {
+		SLV2Value sym  = slv2_results_get_binding_value(values, 0);
+		SLV2Value val = slv2_results_get_binding_value(values, 1);
+		if (slv2_value_is_float(val)) {
+			uint32_t index = _port_indices[slv2_value_as_string(sym)];
+			set_parameter(index, slv2_value_as_float(val));
+		}
+	}
+	slv2_results_free(values);
+	return true;
+}
+
 bool
 LV2Plugin::save_preset (string name)
 {
-	return Plugin::save_preset (name, "lv2");
+	return false;
 }
 	
 bool

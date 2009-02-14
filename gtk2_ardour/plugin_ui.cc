@@ -342,8 +342,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	  bypass_button (_("Bypass")),
 	  latency_gui (*pi, pi->session().frame_rate(), pi->session().get_block_size())
 {
-        //preset_combo.set_use_arrows_always(true);
-	set_popdown_strings (preset_combo, plugin->get_presets());
+	//preset_combo.set_use_arrows_always(true);
+	update_presets();
 	preset_combo.set_size_request (100, -1);
 	preset_combo.set_active_text ("");
 	preset_combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
@@ -389,8 +389,12 @@ void
 PlugUIBase::setting_selected()
 {
 	if (preset_combo.get_active_text().length() > 0) {
-		if (!plugin->load_preset(preset_combo.get_active_text())) {
-			warning << string_compose(_("Plugin preset %1 not found"), preset_combo.get_active_text()) << endmsg;
+		const Plugin::PresetRecord* pr = plugin->preset_by_label(preset_combo.get_active_text());
+		if (pr) {
+			plugin->load_preset(pr->uri);
+		} else {
+			warning << string_compose(_("Plugin preset %1 not found"),
+					preset_combo.get_active_text()) << endmsg;
 		}
 	}
 }
@@ -408,14 +412,11 @@ PlugUIBase::save_plugin_setting ()
 
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
-
 		string name;
-
 		prompter.get_result(name);
-
 		if (name.length()) {
-			if(plugin->save_preset(name)){
-				set_popdown_strings (preset_combo, plugin->get_presets());
+			if (plugin->save_preset(name)) {
+				update_presets();
 				preset_combo.set_active_text (name);
 			}
 		}
@@ -460,5 +461,11 @@ PlugUIBase::focus_toggled (GdkEventButton* ev)
 void
 PlugUIBase::update_presets ()
 {
-	set_popdown_strings (preset_combo, plugin->get_presets());
+	vector<string> preset_labels;
+	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
+	for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = presets.begin();
+		   i != presets.end(); ++i) {
+		preset_labels.push_back(i->label);
+	}
+	set_popdown_strings (preset_combo, preset_labels);
 }

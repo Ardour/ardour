@@ -26,6 +26,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <cerrno>
+#include <utility>
 
 #include <lrdf.h>
 
@@ -70,10 +71,33 @@ Plugin::~Plugin ()
 {
 }
 
-vector<string>
+const Plugin::PresetRecord*
+Plugin::preset_by_label(const string& label)
+{
+	// FIXME: O(n)
+	for (map<string,PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
+		if (i->second.label == label) {
+			return &i->second;
+		}
+	}
+	return NULL;
+}
+
+const Plugin::PresetRecord*
+Plugin::preset_by_uri(const string& uri)
+{
+	map<string,PresetRecord>::const_iterator pr = presets.find(uri);
+	if (pr != presets.end()) {
+		return &pr->second;
+	} else {
+		return NULL;
+	}
+}
+
+vector<Plugin::PresetRecord>
 Plugin::get_presets()
 {
-	vector<string> labels;
+	vector<PresetRecord> result;
 	uint32_t id;
 	std::string unique (unique_id());
 
@@ -83,7 +107,7 @@ Plugin::get_presets()
 	*/
 
 	if (!isdigit (unique[0])) {
-		return labels;
+		return result;
 	}
 
 	id = atol (unique.c_str());
@@ -93,23 +117,21 @@ Plugin::get_presets()
 	if (set_uris) {
 		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
 			if (char* label = lrdf_get_label(set_uris->items[i])) {
-				labels.push_back(label);
-				presets[label] = set_uris->items[i];
+				PresetRecord rec(set_uris->items[i], label);
+				result.push_back(rec);
+				presets.insert(std::make_pair(set_uris->items[i], rec));
 			}
 		}
 		lrdf_free_uris(set_uris);
 	}
 
-	// GTK2FIX find an equivalent way to do this with a vector (needed by GUI apis)
-	// labels.unique();
-
-	return labels;
+	return result;
 }
 
 bool
-Plugin::load_preset(const string preset_label)
+Plugin::load_preset(const string preset_uri)
 {
-	lrdf_defaults* defs = lrdf_get_setting_values(presets[preset_label].c_str());
+	lrdf_defaults* defs = lrdf_get_setting_values(preset_uri.c_str());
 
 	if (defs) {
 		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
@@ -126,7 +148,7 @@ Plugin::load_preset(const string preset_label)
 }
 
 bool
-Plugin::save_preset (string name, string domain)
+Plugin::save_preset (string uri, string domain)
 {
 	lrdf_portvalue portvalues[parameter_count()];
 	lrdf_defaults defaults;
@@ -162,7 +184,12 @@ Plugin::save_preset (string name, string domain)
 	
 	string source(string_compose("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain));
 
-	free(lrdf_add_preset(source.c_str(), name.c_str(), id,  &defaults));
+	map<string,PresetRecord>::const_iterator pr = presets.find(uri);
+	if (pr == presets.end()) {
+		warning << _("Could not find preset ") << uri << endmsg;
+		return false;
+	}
+	free(lrdf_add_preset(source.c_str(), pr->second.label.c_str(), id,  &defaults));
 
 	string path = string_compose("%1/.%2", envvar, domain);
 	if (g_mkdir_with_parents (path.c_str(), 0775)) {

@@ -138,9 +138,19 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
-	virtual bool save_preset(string name) = 0;
-	virtual bool load_preset (const string preset_label);
-	virtual std::vector<std::string> get_presets();
+	virtual bool save_preset(string uri) = 0;
+	virtual bool load_preset (const string uri);
+
+	struct PresetRecord {
+		PresetRecord(const std::string& u, const std::string& l) : uri(u), label(l) {}
+		string uri;
+		string label;
+	};
+
+	virtual std::vector<PresetRecord> get_presets();
+
+	const PresetRecord* preset_by_label(const string& label);
+	const PresetRecord* preset_by_uri(const string& uri);
 
 	virtual bool has_editor() const = 0;
 
@@ -189,8 +199,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	ARDOUR::Session& _session;
 	PluginInfoPtr _info;
 	uint32_t _cycles;
-	map<string,string> 	 presets;
-	bool save_preset(string name, string domain /* vst, ladspa etc. */);
+	map<string,PresetRecord> presets;
+	bool save_preset(string uri, string domain /* vst, ladspa etc. */);
 };
 
 PluginPtr find_plugin(ARDOUR::Session&, string unique_id, ARDOUR::PluginType);

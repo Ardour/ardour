@@ -594,12 +594,12 @@ else:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 	
-	if conf.CheckPKGVersion('slv2', '0.6.2'):
+	if conf.CheckPKGVersion('slv2', '0.6.4'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
                 env.Append (CCFLAGS="-DHAVE_LV2")
 	else:
-		print 'LV2 support is not enabled (SLV2 not found or older than 0.6.0)'
+		print 'LV2 support is not enabled (SLV2 not found or older than 0.6.4 (svn))'
 		env['LV2'] = 0
 	conf.Finish()
 else:

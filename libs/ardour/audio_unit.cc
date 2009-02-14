@@ -806,10 +806,10 @@ AUPlugin::load_preset (const string preset_label)
 	return false;
 }
 
-vector<string>
+vector<Plugin::PresetRecord>
 AUPlugin::get_presets ()
 {
-	vector<string> presets;
+	vector<PresetRecord> presets;
 	
 	return presets;
 }
