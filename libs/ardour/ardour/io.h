@@ -216,6 +216,8 @@ class IO : public PBD::StatefulDestructible
 
 	
 	static void update_meters();
+	static std::string name_from_state (const XMLNode&);
+	static void set_name_in_state (XMLNode&, const std::string&);
 
   private: 
 

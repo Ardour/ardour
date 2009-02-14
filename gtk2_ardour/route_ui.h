@@ -89,6 +89,8 @@ class RouteUI : public virtual AxisView
 	void ensure_xml_node ();
 
 	XMLNode* get_child_xml_node (const string & childname);
+
+	void save_as_template ();
 	
 	bool mute_press(GdkEventButton*);
 	bool mute_release(GdkEventButton*);
@@ -170,6 +172,8 @@ class RouteUI : public virtual AxisView
 
 	void init ();
 	void reset ();
+
+	void save_template (const std::string&);
 };
 
 #endif /* __ardour_route_ui__ */

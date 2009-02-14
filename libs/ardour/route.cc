@@ -2664,3 +2664,15 @@ Route::shift (nframes64_t pos, nframes64_t frames)
 		}
 	}
 }
+
+int
+Route::save_as_template (const string& path, const string& name)
+{
+  XMLNode& node (state (false));
+  XMLTree tree;
+
+  IO::set_name_in_state (*node.children().front(), name);
+
+  tree.set_root (&node);
+  return tree.write (path.c_str());
+}

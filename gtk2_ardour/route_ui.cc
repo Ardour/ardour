@@ -23,6 +23,7 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/prompter.h>
 
 #include <ardour/route_group.h>
 #include <pbd/memento_command.h>
@@ -41,6 +42,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/profile.h>
+#include <ardour/utils.h>
 
 #include "i18n.h"
 using namespace sigc;
@@ -1168,5 +1170,40 @@ RouteUI::map_frozen ()
 			break;
 		}
 	}
+}
+
+void
+RouteUI::save_as_template ()
+{
+  Glib::ustring path;
+  Glib::ustring safe_name;
+  std::string name;
+
+  path = Session::route_template_dir();
+
+  if (g_mkdir_with_parents (path.c_str(), 0755)) {
+    error << string_compose (_("Cannot create route template directory %1"), path) << endmsg;
+    return;
+  }
+
+  Prompter p (true); // modal
+
+  p.set_prompt (_("Template name:"));
+  switch (p.run()) {
+  case RESPONSE_ACCEPT:
+    break;
+  default:
+    return;
+  }
+
+  p.hide ();
+  p.get_result (name, true);
+
+  safe_name = legalize_for_path (name);
+  safe_name += Session::template_suffix ();
+
+  path = Glib::build_filename (path, safe_name);
+
+  _route->save_as_template (path, name);
 }
 

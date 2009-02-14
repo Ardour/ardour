@@ -22,6 +22,8 @@
 #include <cfloat>
 #include <unistd.h>
 
+#include <pbd/id.h>
+
 #include <ardour/curve.h>
 
 using namespace std;
@@ -36,6 +38,11 @@ curvetest (string filename)
 	Curve c (-1.0, +1.0, 0, true);
 	double minx = DBL_MAX;
 	double maxx = DBL_MIN;
+
+	// needed to initialize ID objects/counter used
+	// by Curve et al.
+
+	PBD::ID::init ();
 
 	while (in) {
 		double x, y;

@@ -206,6 +206,8 @@ class Route : public IO
 	int set_state(const XMLNode& node);
 	virtual XMLNode& get_template();
 
+	int save_as_template (const std::string& path, const std::string& name);
+
 	sigc::signal<void,void*> SelectedChanged;
 
 	int set_control_outs (const vector<std::string>& ports);

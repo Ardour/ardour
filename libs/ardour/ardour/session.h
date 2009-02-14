@@ -267,8 +267,17 @@ class Session : public PBD::StatefulDestructible
 	static string suffixed_search_path (std::string suffix, bool data);
 	static string control_protocol_path ();
 	static string template_path ();
+	static string route_template_path ();
 	static string template_dir ();
-	static void get_template_list (list<string>&);
+	static string route_template_dir ();
+	static void get_template_list (std::list<std::string>&);
+
+	struct RouteTemplateInfo {
+	  std::string name;
+	  std::string path;
+	};
+
+	static void get_route_templates (std::vector<RouteTemplateInfo>&);
 	
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
@@ -438,7 +447,6 @@ class Session : public PBD::StatefulDestructible
 	void remove_pending_capture_state ();
 
 	static int rename_template (string old_name, string new_name);
-
 	static int delete_template (string name);
 	
 	sigc::signal<void,string> StateSaved;
@@ -495,7 +503,8 @@ class Session : public PBD::StatefulDestructible
 
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
 	RouteList new_audio_route (int input_channels, int output_channels, uint32_t how_many);
-
+	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
+	
 	void   remove_route (boost::shared_ptr<Route>);
 
 	void   resort_routes ();
@@ -1761,6 +1770,8 @@ class Session : public PBD::StatefulDestructible
 	/* used in ::audible_frame() */
 
 	mutable bool have_looped;
+
+	static void get_templates_from (const std::string& path, std::list<std::string> &template_names);
 };
 
 } // namespace ARDOUR

@@ -2058,6 +2058,12 @@ Session::template_dir ()
 }
 
 string
+Session::route_template_dir ()
+{
+	return Glib::build_filename (get_user_ardour_path(), "route_templates");
+}
+
+string
 Session::export_dir () const
 {
 	return Glib::build_filename (_path, export_dir_name);
@@ -2101,6 +2107,13 @@ string
 Session::template_path ()
 {
 	return suffixed_search_path (X_("templates"), true);
+}
+
+
+string
+Session::route_template_path ()
+{
+	return suffixed_search_path (X_("route_templates"), true);
 }
 
 string
@@ -2469,6 +2482,43 @@ Session::get_template_list (list<string> &template_names)
 		
 		template_names.push_back(fullpath.substr(start, (end-start)));
 	}
+}
+
+void
+Session::get_route_templates (vector<RouteTemplateInfo>& template_names)
+{
+	vector<string *> *templates;
+	PathScanner scanner;
+	string path;
+
+	path = route_template_path ();
+	
+	templates = scanner (path, template_filter, 0, false, true);
+	
+	if (!templates) {
+	  return;
+	}
+
+	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
+		string fullpath = *(*i);
+
+		XMLTree tree;
+
+		if (!tree.read (fullpath.c_str())) {
+		  continue;
+		}
+
+		XMLNode* root = tree.root();
+		
+		RouteTemplateInfo rti;
+
+		rti.name = IO::name_from_state (*root->children().front());
+		rti.path = fullpath;
+
+		template_names.push_back (rti);
+	}
+
+	free (templates);
 }
 
 int
