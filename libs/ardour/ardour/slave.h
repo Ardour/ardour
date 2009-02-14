@@ -244,6 +244,10 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	nframes_t   last_timestamp;
 	double      should_be_position;
 	
+	/// the number of midi clock messages received (zero-based)
+	/// since start
+	long midi_clock_count;
+	
 	//the delay locked loop (DLL), see www.kokkinizita.net/papers/usingdll.pdf
 	
 	/// time at the beginning of the MIDI clock frame

@@ -119,16 +119,15 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	if ( (!_starting) && (!_started) ) {
 		return;
 	}
-	
-	// the number of midi clock messages (zero-based)
-	static long midi_clock_count;
-	
+		
 	calculate_one_ppqn_in_frames_at(should_be_position);
 	
 	nframes_t elapsed_since_start = timestamp - first_timestamp;
 	double error = 0;
 	
-	if (_starting || last_timestamp == 0) {		
+	if (_starting || last_timestamp == 0) {	
+		midi_clock_count = 0;
+		
 		first_timestamp = timestamp;
 		elapsed_since_start = should_be_position;
 		
@@ -237,7 +236,21 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 		_started  = false;
 		// locate to last MIDI clock position
 		session.request_transport_speed(0.0);
-		session.request_locate(should_be_position, false);
+		
+		// we need to go back to the last MIDI beat (6 ppqn)
+		// and lets hope the tempo didnt change in the meantime :)
+		
+		// begin at the should be position, because
+		// that is the position of the last MIDI Clock
+		// message and that is probably what the master
+		// expects where we are right now
+		nframes_t stop_position = should_be_position;
+		
+		// find out the last MIDI beat: go back #midi_clocks mod 6
+		// and lets hope the tempo didnt change in those last 6 beats :)
+		stop_position -= (midi_clock_count % 6) * one_ppqn_in_frames; 
+		
+		session.request_locate(stop_position, false);
 		last_timestamp = 0;
 	}
 }
