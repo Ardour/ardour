@@ -171,7 +171,14 @@ ProcessorBox::route_going_away ()
 void
 ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs)
 {
-	paste_processor_list (procs);
+	for (std::list<boost::shared_ptr<Processor> >::const_iterator i = procs.begin(); i != procs.end(); ++i) {
+
+		XMLNode& state = (*i)->get_state ();
+		XMLNodeList nlist;
+		nlist.push_back (&state);
+		paste_processor_state (nlist);
+		delete &state;
+	}
 }
 
 void
@@ -920,41 +927,14 @@ ProcessorBox::paste_processors ()
 
 	cerr << "paste from node called " << _rr_selection.processors.get_node().name() << endl;
 
-	paste_processor_state (_rr_selection.processors.get_node());
+	paste_processor_state (_rr_selection.processors.get_node().children());
 }
 
 void
-ProcessorBox::paste_processor_list (const list<boost::shared_ptr<Processor> >& processors)
+ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 {
- 	list<boost::shared_ptr<Processor> > copies;
-	
-	for (list<boost::shared_ptr<Processor> >::const_iterator i = processors.begin(); i != processors.end(); ++i) {
-		
-		boost::shared_ptr<Processor> copy = Processor::clone (*i);
-		
-		copy->set_placement (_placement);
-		copies.push_back (copy);
- 	}
-
-	if (_route->add_processors (copies)) {
-
-		string msg = _(
-			"Copying the set of processors on the clipboard failed,\n\
-probably because the I/O configuration of the plugins\n\
-could not match the configuration of this track.");
-		MessageDialog am (msg);
-		am.run ();
-	}
-}
-
-void
-ProcessorBox::paste_processor_state (const XMLNode& node)
-{
-	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	list<boost::shared_ptr<Processor> > copies;
-
-	nlist = node.children();
 
 	cerr << "Pasting processor selection containing " << nlist.size() << endl;
 
@@ -966,14 +946,20 @@ ProcessorBox::paste_processor_state (const XMLNode& node)
 		cerr << "try using " << (*niter)->name() << endl;
 		XMLProperty const * type = (*niter)->property ("type");
 		assert (type);
+
+		boost::shared_ptr<Processor> p;
 		try {
 			if (type->value() == "send") {
 				XMLNode n (**niter);
 				Send::make_unique (n, _session);
-				copies.push_back (boost::shared_ptr<Processor> (new Send (_session, n)));
+				p.reset (new Send (_session, n));
+				
 			} else {
-				copies.push_back (boost::shared_ptr<Processor> (new PluginInsert (_session, **niter)));
+				p.reset (new PluginInsert (_session, **niter));
 			}
+
+			p->set_placement (_placement);
+			copies.push_back (p);
 		}
 		catch (...) {
 			cerr << "plugin insert constructor failed\n";
@@ -1021,23 +1007,6 @@ ProcessorBox::for_selected_processors (void (ProcessorBox::*method)(boost::share
 	for (vector<Gtk::TreeModel::Path>::iterator iter = pathlist.begin(); iter != pathlist.end(); ++iter) {
 		boost::shared_ptr<Processor> processor = (*(model->get_iter(*iter)))[columns.processor];
 		(this->*method)(processor);
-	}
-}
-
-void
-ProcessorBox::clone_processors ()
-{
-	RouteSelection& routes (_rr_selection.routes);
-
-	if (!routes.empty()) {
-		if (_route->copy_processors (*routes.front(), _placement)) {
-			string msg = _(
-"Copying the set of processors on the clipboard failed,\n\
-probably because the I/O configuration of the plugins\n\
-could not match the configuration of this track.");
-			MessageDialog am (msg);
-			am.run ();
-		}
 	}
 }
 

@@ -96,23 +96,6 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 	}
 }
 
-PluginInsert::PluginInsert (const PluginInsert& other)
-	: Processor (other._session, other._name, other.placement()),
-          _signal_analysis_collected_nframes(0),
-          _signal_analysis_collect_nframes_max(0)
-{
-	uint32_t count = other._plugins.size();
-
-	/* make as many copies as requested */
-	for (uint32_t n = 0; n < count; ++n) {
-		_plugins.push_back (plugin_factory (other.plugin (n)));
-	}
-
-	init ();
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
-}
-
 bool
 PluginInsert::set_count (uint32_t num)
 {

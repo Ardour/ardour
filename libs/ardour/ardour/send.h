@@ -36,7 +36,6 @@ class Send : public IOProcessor
   public:	
 	Send (Session&, Placement);
 	Send (Session&, const XMLNode&);
-	Send (const Send&);
 	virtual ~Send ();
 
 	uint32_t bit_slot() const { return bitslot; }
@@ -65,6 +64,9 @@ class Send : public IOProcessor
 	static void make_unique (XMLNode &, Session &);
 
   private:
+	/* disallow copy construction */
+	Send (const Send&);
+	
 	bool      _metering;
 	ChanCount expected_inputs;
 	uint32_t  bitslot;

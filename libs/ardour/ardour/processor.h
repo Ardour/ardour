@@ -53,8 +53,6 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	
 	virtual ~Processor() { }
 	
-	static boost::shared_ptr<Processor> clone (boost::shared_ptr<const Processor>);
-
 	uint32_t sort_key() const { return _sort_key; }
 	void set_sort_key (uint32_t key);
 
@@ -117,6 +115,10 @@ protected:
 	Placement _placement;
 	uint32_t  _sort_key;
 	void*     _gui;  /* generic, we don't know or care what this is */
+
+private:
+	/* disallow copy construction */
+	Processor (Processor const &);
 };
 
 } // namespace ARDOUR

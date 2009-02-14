@@ -46,7 +46,6 @@ class PluginInsert : public Processor
   public:
 	PluginInsert (Session&, boost::shared_ptr<Plugin>, Placement);
 	PluginInsert (Session&, const XMLNode&);
-	PluginInsert (const PluginInsert&);
 	~PluginInsert ();
 
 	static const string port_automation_node_name;
@@ -117,6 +116,8 @@ class PluginInsert : public Processor
 	}
 
   private:
+	/* disallow copy construction */
+	PluginInsert (const PluginInsert&);
 
 	void parameter_changed (Evoral::Parameter, float);
 	

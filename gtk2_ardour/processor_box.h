@@ -182,15 +182,13 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void paste_processors ();
 	void delete_processors ();
 	void clear_processors ();
-	void clone_processors ();
 	void rename_processors ();
 
 	void for_selected_processors (void (ProcessorBox::*pmf)(boost::shared_ptr<ARDOUR::Processor>));
 	void get_selected_processors (vector<boost::shared_ptr<ARDOUR::Processor> >&);
 
 	static Glib::RefPtr<Gtk::Action> paste_action;
-	void paste_processor_list (const std::list<boost::shared_ptr<ARDOUR::Processor> >& processors);
-	void paste_processor_state (const XMLNode&);
+	void paste_processor_state (const XMLNodeList&);
 	
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void deactivate_processor (boost::shared_ptr<ARDOUR::Processor>);

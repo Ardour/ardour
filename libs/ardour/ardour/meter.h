@@ -63,6 +63,8 @@ public:
 	}
 
 private:
+	/* disallow copy construction */
+	PeakMeter (PeakMeter const &);
 	
 	friend class IO;
 	void meter();

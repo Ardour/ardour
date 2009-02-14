@@ -48,7 +48,6 @@ class IOProcessor : public Processor
 	IOProcessor (Session&, const string& name, Placement,
 		     int input_min = -1, int input_max = -1, int output_min = -1, int output_max = -1,
 		     ARDOUR::DataType default_type = DataType::AUDIO);
-	IOProcessor (const IOProcessor&);
 	virtual ~IOProcessor ();
 	
 	virtual ChanCount output_streams() const;
@@ -74,6 +73,11 @@ class IOProcessor : public Processor
 	
   protected:
 	boost::shared_ptr<IO> _io;
+
+  private:
+	/* disallow copy construction */
+	IOProcessor (const IOProcessor&);
+
 };
 
 } // namespace ARDOUR

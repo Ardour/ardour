@@ -298,6 +298,9 @@ class Panner : public Processor
 	}
 
   private:
+	/* disallow copy construction */
+	Panner (Panner const &);
+	
 	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
 	std::vector<StreamPanner*> _streampanners;
 	uint32_t     current_outs;

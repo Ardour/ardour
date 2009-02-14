@@ -47,13 +47,6 @@ PortInsert::PortInsert (Session& s, Placement p)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-PortInsert::PortInsert (const PortInsert& other)
-	: IOProcessor (other._session, string_compose (_("insert %1"), (bitslot = other._session.next_insert_id()) + 1), other.placement(), 1, -1, 1, -1)
-{
-	init ();
-	ProcessorCreated (this); /* EMIT SIGNAL */
-}
-
 void
 PortInsert::init ()
 {

@@ -42,7 +42,6 @@ class PortInsert : public IOProcessor
   public:
 	PortInsert (Session&, Placement);
 	PortInsert (Session&, const XMLNode&);
-	PortInsert (const PortInsert&);
 	~PortInsert ();
 
 	XMLNode& state(bool full);
@@ -64,6 +63,9 @@ class PortInsert : public IOProcessor
 	uint32_t bit_slot() const { return bitslot; }
 
   private:
+	/* disallow copy construction */
+	PortInsert (const PortInsert&);
+	
 	uint32_t bitslot;
 };
 

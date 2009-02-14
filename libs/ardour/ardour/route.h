@@ -176,7 +176,6 @@ class Route : public IO
 	int add_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
 	int add_processors (const ProcessorList&, ProcessorStreams* err = 0);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
-	int copy_processors (const Route&, Placement, ProcessorStreams* err = 0);
 	int sort_processors (ProcessorStreams* err = 0);
 	void disable_processors (Placement);
 	void disable_processors ();

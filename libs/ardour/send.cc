@@ -54,42 +54,6 @@ Send::Send (Session& s, const XMLNode& node)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Send::Send (const Send& other)
-	: IOProcessor (other._session, string_compose (_("send %1"), (bitslot = other._session.next_send_id()) + 1), other.placement())
-{
-	_metering = false;
-
-	expected_inputs.set (DataType::AUDIO, 0);
-
-	/* set up the same outputs, and connect them to the same places */
-
-	_io->defer_pan_reset ();
-
-	for (uint32_t i = 0; i < other._io->n_outputs().get (_io->default_type()); ++i) {
-		_io->add_output_port ("", 0);
-		Port* p = other._io->output (i);
-		if (p) {
-			/* this is what the other send's output is connected to */
-			std::vector<std::string> connections;
-			p->get_connections (connections);
-			for (uint32_t j = 0; j < connections.size(); ++j) {
-				_io->connect_output (_io->output (i), connections[j], 0);
-			}
-		}
-	}
-	
-	/* setup panner */
-
-	_io->allow_pan_reset ();
-
-	XMLNode& other_state (other._io->panner().get_state ());
-	_io->panner().set_state (other_state);
-	
-	delete &other_state;
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
-}
-
 Send::~Send ()
 {
 	GoingAway ();
