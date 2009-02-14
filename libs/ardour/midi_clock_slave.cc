@@ -248,9 +248,10 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 		
 		// find out the last MIDI beat: go back #midi_clocks mod 6
 		// and lets hope the tempo didnt change in those last 6 beats :)
-		stop_position -= (midi_clock_count % 6) * one_ppqn_in_frames; 
+		stop_position -= (midi_clock_count % 6) * one_ppqn_in_frames;
 		
 		session.request_locate(stop_position, false);
+		should_be_position = stop_position;
 		last_timestamp = 0;
 	}
 }
