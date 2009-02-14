@@ -48,11 +48,6 @@ using namespace ARDOUR;
 
 string SMFSource::_search_path;
 
-/*sigc::signal<void,struct tm*, time_t> SMFSource::HeaderPositionOffsetChanged;
-bool                                  SMFSource::header_position_negative;
-uint64_t                              SMFSource::header_position_offset;
-*/
-
 SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	: MidiSource (s, region_name_from_path(path, false))
 	, Evoral::SMF<double> ()
@@ -106,8 +101,8 @@ SMFSource::~SMFSource ()
 bool
 SMFSource::removable () const
 {
-	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || 
-				      ((_flags & RemovableIfEmpty) && is_empty()));
+	return (_flags & Removable) && ((_flags & RemoveAtDestroy) ||
+			((_flags & RemovableIfEmpty) && is_empty()));
 }
 
 int
