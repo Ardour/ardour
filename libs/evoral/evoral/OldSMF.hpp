@@ -16,8 +16,8 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef EVORAL_SMF_HPP
-#define EVORAL_SMF_HPP
+#ifndef EVORAL_OLD_SMF_HPP
+#define EVORAL_OLD_SMF_HPP
 
 #include "evoral/MIDIFile.hpp"
 
@@ -80,5 +80,5 @@ private:
 
 }; /* namespace Evoral */
 
-#endif /* EVORAL_SMF_HPP */
+#endif /* EVORAL_OLD_SMF_HPP */
 

@@ -17,8 +17,8 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef EVORAL_LIB_SMF_HPP
-#define EVORAL_LIB_SMF_HPP
+#ifndef EVORAL_SMF_HPP
+#define EVORAL_SMF_HPP
 
 #include <cassert>
 #include "evoral/MIDIFile.hpp"
@@ -36,10 +36,10 @@ template<typename Time> class EventRingBuffer;
 /** Standard Midi File (Type 0)
  */
 template<typename Time>
-class LibSMF : public MIDIFile<Time> {
+class SMF : public MIDIFile<Time> {
 public:
-	LibSMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
-	virtual ~LibSMF();
+	SMF() : _last_ev_time(0), _smf(0), _smf_track(0), _empty(true) {};
+	virtual ~SMF();
 
 	void seek_to_start() const;
 	
@@ -77,5 +77,5 @@ private:
 
 }; /* namespace Evoral */
 
-#endif /* EVORAL_LIB_SMF_HPP */
+#endif /* EVORAL_SMF_HPP */
 

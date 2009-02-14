@@ -67,9 +67,9 @@ def build(bld):
 		src/ControlSet.cpp
 		src/Curve.cpp
 		src/Event.cpp
-		src/LibSMF.cpp
 		src/MIDIEvent.cpp
 		src/Note.cpp
+		src/SMF.cpp
 		src/Sequence.cpp
 	'''
 	obj.export_incdirs = ['.']

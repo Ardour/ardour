@@ -1,67 +1,79 @@
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-
-#include <evoral/LibSMF.hpp>
-
-#include "SequenceTest.hpp"
-
-#include <sigc++/sigc++.h>
+/* This file is part of Evoral.
+ * Copyright(C) 2000-2008 Paul Davis
+ * Author: Hans Baier
+ * 
+ * Evoral is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or(at your option) any later
+ * version.
+ * 
+ * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <cassert>
+#include <sigc++/sigc++.h>
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include "evoral/SMF.hpp"
+#include "SequenceTest.hpp"
 
 using namespace Evoral;
 
 template<typename Time>
-class TestSMF : public LibSMF<Time> {
+class TestSMF : public SMF<Time> {
 public:
 	std::string path() const { return _path; }
 	
 	int open(const std::string& path) THROW_FILE_ERROR {
 		_path = path;
-		return LibSMF<Time>::open(path);
+		return SMF<Time>::open(path);
 	}
 	
 	void close() THROW_FILE_ERROR {
-		return LibSMF<Time>::close();
+		return SMF<Time>::close();
 	}
 	
 	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const {
-		return LibSMF<Time>::read_event(delta_t, size, buf);
+		return SMF<Time>::read_event(delta_t, size, buf);
 	}
 
 private:
-	
 	std::string  _path;
-	
 };
 
 class SMFTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE (SMFTest);
-    CPPUNIT_TEST (createNewFileTest);
-    CPPUNIT_TEST (takeFiveTest);
-    CPPUNIT_TEST_SUITE_END ();
+    CPPUNIT_TEST_SUITE(SMFTest);
+    CPPUNIT_TEST(createNewFileTest);
+    CPPUNIT_TEST(takeFiveTest);
+    CPPUNIT_TEST_SUITE_END();
 
     public:
-    
     	typedef double Time;
        	
-        void setUp (void) { 
+        void setUp() { 
            type_map = new DummyTypeMap();
            assert(type_map);
            seq = new MySequence<Time>(*type_map, 0);
            assert(seq);
         }
         
-        void tearDown (void) {
+        void tearDown() {
         	delete seq;
         	delete type_map;
         }
 
-        void createNewFileTest(void);
-        void takeFiveTest (void);
+        void createNewFileTest();
+        void takeFiveTest();
 
     private:
-       	DummyTypeMap*       type_map;
-       	MySequence<Time>*   seq;
+       	DummyTypeMap*     type_map;
+       	MySequence<Time>* seq;
 };
+

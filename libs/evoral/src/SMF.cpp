@@ -20,7 +20,7 @@
 #include <cassert>
 #include <iostream>
 #include "evoral/Event.hpp"
-#include "evoral/LibSMF.hpp"
+#include "evoral/SMF.hpp"
 #include "libsmf/smf.h"
 
 using namespace std;
@@ -28,7 +28,7 @@ using namespace std;
 namespace Evoral {
 
 template<typename Time>
-LibSMF<Time>::~LibSMF()
+SMF<Time>::~SMF()
 {	
 	if (_smf) {
 		smf_delete(_smf);
@@ -46,7 +46,7 @@ LibSMF<Time>::~LibSMF()
  */
 template<typename Time>
 int
-LibSMF<Time>::open(const std::string& path) THROW_FILE_ERROR
+SMF<Time>::open(const std::string& path) THROW_FILE_ERROR
 {
 	if (_smf) { 
 		smf_delete(_smf);
@@ -84,7 +84,7 @@ LibSMF<Time>::open(const std::string& path) THROW_FILE_ERROR
 
 template<typename Time>
 void
-LibSMF<Time>::close() THROW_FILE_ERROR
+SMF<Time>::close() THROW_FILE_ERROR
 {
 	if (_smf) {
 		if (smf_save(_smf, _path.c_str()) != 0) {
@@ -98,7 +98,7 @@ LibSMF<Time>::close() THROW_FILE_ERROR
 
 template<typename Time>
 void
-LibSMF<Time>::seek_to_start() const
+SMF<Time>::seek_to_start() const
 {
 	smf_rewind(_smf);
 }
@@ -119,7 +119,7 @@ LibSMF<Time>::seek_to_start() const
  */
 template<typename Time>
 int
-LibSMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
+SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 {
 	smf_event_t *event;
 	
@@ -151,7 +151,7 @@ LibSMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 
 template<typename Time>
 void
-LibSMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
+SMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
 {
 	assert(ev.size() > 0);
 	
@@ -173,7 +173,7 @@ LibSMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
 
 template<typename Time>
 void
-LibSMF<Time>::begin_write()
+SMF<Time>::begin_write()
 {
 	assert(_smf_track);
 	smf_track_delete(_smf_track);
@@ -189,12 +189,12 @@ LibSMF<Time>::begin_write()
 
 template<typename Time>
 void
-LibSMF<Time>::end_write() THROW_FILE_ERROR
+SMF<Time>::end_write() THROW_FILE_ERROR
 {
 	if (smf_save(_smf, _path.c_str()) != 0)
 		throw typename MIDIFile<Time>::FileError();
 }
 
-template class LibSMF<double>;
+template class SMF<double>;
 
 } // namespace Evoral
