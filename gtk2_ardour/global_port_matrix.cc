@@ -77,9 +77,11 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
 	ARDOUR::Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 	if (in_ports.empty() || out_ports.empty()) {
-		return NOT_ASSOCIATED;
+		/* we're looking at a bundle with no parts associated with this channel,
+		   so nothing to connect */
+		return UNKNOWN;
 	}
-
+		
 	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
