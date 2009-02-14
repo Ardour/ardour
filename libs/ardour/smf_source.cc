@@ -303,7 +303,7 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>
 		delta_time = (uint32_t)((ev.time() - last_event_time()) * ppqn());
 	}
 
-	Evoral::SMF<double>::append_event_delta(delta_time, ev);
+	Evoral::SMF<double>::append_event_delta(delta_time, ev.size(), ev.buffer());
 	_last_ev_time = ev.time();
 
 	_write_data_count += ev.size();
@@ -619,7 +619,6 @@ SMFSource::load_model(bool lock, bool force_reload)
 		return;
 	}
 	
-
 	if (lock) {
 		Glib::Mutex::Lock lm (_lock);
 	}

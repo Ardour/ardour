@@ -64,14 +64,12 @@ public:
 	bool     eof()        const { assert(false); return true; }
 	
 	void begin_write();
-	void append_event_delta(uint32_t delta_t, const Event<Time>& ev);
+	void append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf);
 	void end_write() THROW_FILE_ERROR;
 	
 	void flush() {};
 
 private:
-	static const uint16_t _ppqn = 19200;
-	
 	std::string  _path;
 	smf_t*       _smf;
 	smf_track_t* _smf_track;

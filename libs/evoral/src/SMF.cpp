@@ -211,7 +211,7 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
     	*size = event_size;
 	
 		/*printf("SMF::read_event:\n");
-		for (size_t i=0; i < *size; ++i) {
+		for (size_t i = 0; i < *size; ++i) {
 			printf("%X ", (*buf)[i]);
 		} printf("\n");*/
     	
@@ -223,28 +223,25 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 
 template<typename Time>
 void
-SMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
+SMF<Time>::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 {
-	assert(ev.size() > 0);
+	if (size == 0) {
+		return;
+	}
 	
 	/*printf("SMF::append_event_delta:\n");
-	for (size_t i=0; i < ev.size(); ++i) {
-		printf("%X ", ev.buffer()[i]);
+	for (size_t i = 0; i < size; ++i) {
+		printf("%X ", buf[i]);
 	} printf("\n");*/
 
 	smf_event_t* event;
 
-	event = smf_event_new_from_pointer((void *) ev.buffer(), int(ev.size()));
+	event = smf_event_new_from_pointer(buf, size);
 	assert(event != NULL);
 	
-	memcpy(event->midi_buffer, ev.buffer(), ev.size());
-	
 	assert(_smf_track);
-	smf_track_add_event_delta_pulses(_smf_track, event, int(delta_t));
-	
-	if (ev.size() > 0) {
-		_empty = false;
-	}
+	smf_track_add_event_delta_pulses(_smf_track, event, delta_t);
+	_empty = false;
 }
 
 template<typename Time>
