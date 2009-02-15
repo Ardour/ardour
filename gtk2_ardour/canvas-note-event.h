@@ -92,8 +92,7 @@ public:
 
 	const boost::shared_ptr<NoteType> note() const { return _note; }
 	
-	inline static uint32_t meter_style_fill_color(uint8_t vel)
-	{
+	inline static uint32_t meter_style_fill_color(uint8_t vel) {
 		if (vel < 64) {
 			return UINT_INTERPOLATE(
 					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorBase.get(),
@@ -108,8 +107,7 @@ public:
 	}
 	
 	/// calculate outline colors from fill colors of notes
-	inline static uint32_t calculate_outline(uint32_t color) 
-	{
+	inline static uint32_t calculate_outline(uint32_t color) {
 		return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
 	}
 	

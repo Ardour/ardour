@@ -550,14 +550,17 @@ RouteTimeAxisView::build_display_menu ()
 
 		if (!Profile->get_sae()) {
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-			get_diskstream()->AlignmentStyleChanged.connect (mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+			get_diskstream()->AlignmentStyleChanged.connect (
+					mem_fun(*this, &RouteTimeAxisView::align_style_changed));
 			
 			RadioMenuItem::Group mode_group;
-			items.push_back (RadioMenuElem (mode_group, _("Normal mode"),
-							bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal)));
+			items.push_back (RadioMenuElem (mode_group, _("Normal mode"), bind (
+					mem_fun (*this, &RouteTimeAxisView::set_track_mode),
+					ARDOUR::Normal)));
 			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-			items.push_back (RadioMenuElem (mode_group, _("Tape mode"),
-							bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive)));
+			items.push_back (RadioMenuElem (mode_group, _("Tape mode"), bind (
+					mem_fun (*this, &RouteTimeAxisView::set_track_mode),
+					ARDOUR::Destructive)));
 			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 			
 			switch (track()->mode()) {
@@ -568,6 +571,7 @@ RouteTimeAxisView::build_display_menu ()
 				normal_track_mode_item->set_active ();
 				break;
 			}
+		}
 
 		get_diskstream()->AlignmentStyleChanged.connect (
 				mem_fun(*this, &RouteTimeAxisView::align_style_changed));
@@ -581,7 +585,6 @@ RouteTimeAxisView::build_display_menu ()
 			items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
 			
 		items.push_back (SeparatorElem());
-		}
 	}
 
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));

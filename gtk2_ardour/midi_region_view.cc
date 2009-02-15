@@ -743,8 +743,8 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 						note->property_y1() = y1;
 						note->property_y2() = y2;
 					} else if (CanvasHit* hit = dynamic_cast<CanvasHit*>(event)) {
-						double x = trackview.editor().frame_to_pixel((nframes64_t)
-								event->note()->time() - _region->start());
+						double x = trackview.editor().frame_to_pixel(
+								beats_to_frames(event->note()->time()) - _region->start());
 						const double diamond_size = midi_stream_view()->note_height() / 2.0;
 						double y = midi_stream_view()->note_to_y(event->note()->note()) 
 						                 + ((diamond_size-2.0) / 4.0);

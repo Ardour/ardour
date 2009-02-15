@@ -290,6 +290,8 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 			MidiStreamView::ContentsRange)));
 
 	items.push_back (MenuElem (_("Note range"), *range_menu));
+
+	items.push_back (MenuElem (_("Note mode"), *build_note_mode_menu()));
 }
 
 void
