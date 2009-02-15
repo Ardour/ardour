@@ -45,16 +45,6 @@ class Tempo {
   public:
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
 		: _beats_per_minute (bpm), _note_type(type) {} 
-	Tempo (const Tempo& other) {
-		_beats_per_minute = other._beats_per_minute;
-		_note_type = other._note_type;
-	}
-	void operator= (const Tempo& other) {
-		if (&other != this) {
-			_beats_per_minute = other._beats_per_minute;
-			_note_type = other._note_type;
-		}
-	}
 
 	double beats_per_minute () const { return _beats_per_minute;}
 	double note_type () const { return _note_type;}
@@ -71,16 +61,6 @@ class Meter {
 
 	Meter (double bpb, double bt) 
 		: _beats_per_bar (bpb), _note_type (bt) {}
-	Meter (const Meter& other) {
-		_beats_per_bar = other._beats_per_bar;
-		_note_type = other._note_type;
-	}
-	void operator= (const Meter& other) {
-		if (&other != this) {
-			_beats_per_bar = other._beats_per_bar;
-			_note_type = other._note_type;
-		}
-	}
 
 	double beats_per_bar () const { return _beats_per_bar; }
 	double note_divisor() const { return _note_type; }
@@ -88,20 +68,15 @@ class Meter {
 	double frames_per_bar (const Tempo&, nframes_t sr) const;
 
   protected:
-
-	/* this is the number of beats in a bar. it is a real value
-	   because there are musical traditions on our planet
-	   that do not limit themselves to integral numbers of beats
-	   per bar.
+	/** The number of beats in a bar.  This is a real value because
+	    there are musical traditions on our planet that do not limit
+	    themselves to integral numbers of beats per bar.
 	*/
-
 	double _beats_per_bar;
 
-	/* this is the type of "note" that a beat represents. for example,
-	   4.0 would be a quarter (crotchet) note, 8.0 would be an eighth 
-	   (quaver) note, etc.
+	/** The type of "note" that a beat represents.  For example, 4.0 is
+	    a quarter (crotchet) note, 8.0 is an eighth (quaver) note, etc.
 	*/
-
 	double _note_type;
 };
 
@@ -122,7 +97,7 @@ class MetricSection {
 
 	virtual void set_frame (nframes_t f) {
 		_frame = f;
-	};
+	}
 
 	virtual void set_start (const BBT_Time& w) {
 		_start = w;
@@ -132,7 +107,6 @@ class MetricSection {
 	   but we do want them to control their own
 	   XML state information.
 	*/
-
 	virtual XMLNode& get_state() const = 0;
 
   private:
@@ -190,7 +164,8 @@ class TempoMap : public PBD::StatefulDestructible
 	    uint32_t bar;
 	    uint32_t beat;
 	    
-	    BBTPoint (const Meter& m, const Tempo& t, nframes_t f, BBTPointType ty, uint32_t b, uint32_t e) 
+	    BBTPoint (const Meter& m, const Tempo& t, nframes_t f,
+				BBTPointType ty, uint32_t b, uint32_t e) 
 		    : type (ty), frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
 	};
 
@@ -230,13 +205,9 @@ class TempoMap : public PBD::StatefulDestructible
 	void replace_tempo (TempoSection& existing, const Tempo& replacement);
 	void replace_meter (MeterSection& existing, const Meter& replacement);
 
-
 	nframes_t round_to_bar  (nframes_t frame, int dir);
-
 	nframes_t round_to_beat (nframes_t frame, int dir);
-
 	nframes_t round_to_beat_subdivision (nframes_t fr, int sub_num);
-
 	nframes_t round_to_tick (nframes_t frame, int dir);
 
 	void set_length (nframes_t frames);
@@ -247,36 +218,33 @@ class TempoMap : public PBD::StatefulDestructible
 	void dump (std::ostream&) const;
 	void clear ();
 
-	/* this is a helper class that we use to be able to keep
-	   track of which meter *AND* tempo are in effect at
-	   a given point in time.
+	/** Helper class that we use to be able to keep track of which
+	    meter *AND* tempo are in effect at a given point in time.
 	*/
-
 	class Metric {
 	  public:
 		Metric (const Meter& m, const Tempo& t) : _meter (&m), _tempo (&t), _frame (0) {}
 		
 		void set_tempo (const Tempo& t)    { _tempo = &t; }
 		void set_meter (const Meter& m)    { _meter = &m; }
-		void set_frame (nframes_t f)  { _frame = f; }
+		void set_frame (nframes_t f)       { _frame = f; }
 		void set_start (const BBT_Time& t) { _start = t; }
 		
 		const Meter&    meter() const { return *_meter; }
 		const Tempo&    tempo() const { return *_tempo; }
-		nframes_t  frame() const { return _frame; }
+		nframes_t       frame() const { return _frame; }
 		const BBT_Time& start() const { return _start; }
 		
 	  private:
 		const Meter*   _meter;
 		const Tempo*   _tempo;
-		nframes_t _frame;
+		nframes_t      _frame;
 		BBT_Time       _start;
-		
 	};
 
 	Metric metric_at (BBT_Time bbt) const;
 	Metric metric_at (nframes_t) const;
-        void bbt_time_with_metric (nframes_t, BBT_Time&, const Metric&) const;
+	void bbt_time_with_metric (nframes_t, BBT_Time&, const Metric&) const;
 
 	void change_existing_tempo_at (nframes_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);
@@ -311,7 +279,8 @@ class TempoMap : public PBD::StatefulDestructible
 	const TempoSection& first_tempo() const;
 
 	nframes_t count_frames_between (const BBT_Time&, const BBT_Time&) const;
-	nframes_t count_frames_between_metrics (const Meter&, const Tempo&, const BBT_Time&, const BBT_Time&) const;
+	nframes_t count_frames_between_metrics (const Meter&, const Tempo&,
+			const BBT_Time&, const BBT_Time&) const;
 
 	int move_metric_section (MetricSection&, const BBT_Time& to);
 	void do_insert (MetricSection* section, bool with_bbt);
