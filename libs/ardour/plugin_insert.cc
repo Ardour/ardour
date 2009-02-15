@@ -24,14 +24,15 @@
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 
-#include <ardour/plugin_insert.h>
+#include <ardour/audio_buffer.h>
+#include <ardour/automation_list.h>
+#include <ardour/buffer_set.h>
+#include <ardour/event_type_map.h>
+#include <ardour/ladspa_plugin.h>
 #include <ardour/plugin.h>
+#include <ardour/plugin_insert.h>
 #include <ardour/port.h>
 #include <ardour/route.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/buffer_set.h>
-#include <ardour/automation_list.h>
-#include <ardour/audio_buffer.h>
 
 #ifdef HAVE_SLV2
 #include <ardour/lv2_plugin.h>

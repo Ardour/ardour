@@ -18,10 +18,11 @@
 */
 
 #include <utility>
-#include <ardour/route.h>
-#include <ardour/automation_control.h>
-#include <pbd/memento_command.h>
 #include <gtkmm2ext/barcontroller.h>
+#include <pbd/memento_command.h>
+#include <ardour/automation_control.h>
+#include <ardour/event_type_map.h>
+#include <ardour/route.h>
 
 #include "ardour_ui.h"
 #include "automation_time_axis.h"

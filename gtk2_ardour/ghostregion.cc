@@ -17,16 +17,17 @@
 
 */
 
-#include "simplerect.h"
-#include "waveview.h"
-#include "ghostregion.h"
-#include "midi_time_axis.h"
-#include "automation_time_axis.h"
-#include "midi_streamview.h"
-#include "rgb_macros.h"
+#include <evoral/Note.hpp>
 #include "ardour_ui.h"
+#include "automation_time_axis.h"
 #include "canvas-hit.h"
 #include "canvas-note.h"
+#include "ghostregion.h"
+#include "midi_streamview.h"
+#include "midi_time_axis.h"
+#include "rgb_macros.h"
+#include "simplerect.h"
+#include "waveview.h"
 
 using namespace Editing;
 using namespace ArdourCanvas;

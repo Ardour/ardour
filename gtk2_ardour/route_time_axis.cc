@@ -42,6 +42,7 @@
 
 #include <ardour/audioplaylist.h>
 #include <ardour/diskstream.h>
+#include <ardour/event_type_map.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/location.h>
 #include <ardour/panner.h>

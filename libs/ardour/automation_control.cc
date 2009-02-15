@@ -19,10 +19,10 @@
 */
 
 #include <iostream>
-#include <ardour/automation_control.h>
-#include <ardour/session.h>
 #include <ardour/automatable.h>
-#include <ardour/midi_track.h>
+#include <ardour/automation_control.h>
+#include <ardour/event_type_map.h>
+#include <ardour/session.h>
 
 using namespace std;
 using namespace ARDOUR;

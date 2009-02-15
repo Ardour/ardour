@@ -44,6 +44,7 @@
 #include "automation_time_axis.h"
 #include "public_editor.h"
 
+#include <ardour/event_type_map.h>
 #include <ardour/session.h>
 
 #include "i18n.h"

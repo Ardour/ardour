@@ -21,16 +21,17 @@
 #define __ardour_route_h__
 
 #include <cmath>
+#include <cstring>
 #include <list>
-#include <set>
 #include <map>
+#include <set>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include <pbd/fastlog.h>
 #include <glibmm/thread.h>
+#include <pbd/fastlog.h>
 #include <pbd/xml++.h>
 #include <pbd/undo.h>
 #include <pbd/stateful.h> 

@@ -34,16 +34,16 @@
 #include <pbd/controllable.h>
 
 #include <ardour/ardour.h>
-#include <ardour/automatable.h>
-#include <ardour/utils.h>
-#include <ardour/types.h>
-#include <ardour/data_type.h>
-#include <ardour/port_set.h>
-#include <ardour/chan_count.h>
-#include <ardour/latent.h>
+#include <ardour/automatable_controls.h>
 #include <ardour/automation_control.h>
-#include <ardour/session_object.h>
 #include <ardour/bundle.h>
+#include <ardour/chan_count.h>
+#include <ardour/data_type.h>
+#include <ardour/latent.h>
+#include <ardour/port_set.h>
+#include <ardour/session_object.h>
+#include <ardour/types.h>
+#include <ardour/utils.h>
 
 using std::string;
 using std::vector;

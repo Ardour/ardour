@@ -20,12 +20,14 @@
 #ifndef __ardour_automatable_h__
 #define __ardour_automatable_h__
 
-#include <set>
 #include <map>
+#include <set>
+#include <string>
 #include <boost/shared_ptr.hpp>
-#include <ardour/event_type_map.h>
 #include <evoral/ControlSet.hpp>
-#include <evoral/Sequence.hpp>
+#include <ardour/types.h>
+
+class XMLNode;
 
 namespace ARDOUR {
 
@@ -58,7 +60,7 @@ public:
 	virtual void automation_snapshot(nframes_t now, bool force);
 	virtual void transport_stopped(nframes_t now);
 
-	virtual string describe_parameter(Evoral::Parameter param);
+	virtual std::string describe_parameter(Evoral::Parameter param);
 	
 	AutoState get_parameter_automation_state (Evoral::Parameter param, bool lock = true);
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
@@ -110,25 +112,6 @@ public:
 	
 	nframes_t        _last_automation_snapshot;
 	static nframes_t _automation_interval;
-};
-
-
-/** Contains notes and controllers */
-template<typename T>
-class AutomatableSequence : public Automatable, public Evoral::Sequence<T> {
-public:
-	AutomatableSequence(Session& s, size_t size)
-		: Evoral::ControlSet()
-		, Automatable(s)
-		, Evoral::Sequence<T>(EventTypeMap::instance())
-	{}
-};
-
-
-/** Contains only controllers */
-class AutomatableControls : public Automatable {
-public:
-	AutomatableControls(Session& s) : Evoral::ControlSet(), Automatable(s) {}
 };
 
 

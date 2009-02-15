@@ -28,12 +28,12 @@
 
 #include <sigc++/signal.h>
 
-#include <ardour/types.h>
 #include <ardour/ardour.h>
+#include <ardour/automatable_controls.h>
 #include <ardour/buffer_set.h>
-#include <ardour/automatable.h>
 #include <ardour/latent.h>
 #include <ardour/session_object.h>
+#include <ardour/types.h>
 
 class XMLNode;
 
