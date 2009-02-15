@@ -177,6 +177,9 @@ class MidiRegionView : public RegionView
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_frames, uint8_t d_note);
 
+	/** Return true iff the note is within the currently visible range */
+	bool note_in_visible_range(const boost::shared_ptr<NoteType> note) const;
+
 	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();
 

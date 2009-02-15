@@ -20,11 +20,11 @@
 #ifndef __gtk_ardour_midi_util_h__
 #define __gtk_ardour_midi_util_h__
 
-inline static void clamp_0_to_127(uint8_t &val)
+inline static void clamp_to_0_127(uint8_t &val)
 {
-	if( (127 < val) && (val < 192) ) {
+	if ((127 < val) && (val < 192)) {
 		val = 127;
-	} else if( (192 <= val) && (val < 255) ) {
+	} else if ((192 <= val) && (val < 255)) {
 		val = 0;
 	} 
 }

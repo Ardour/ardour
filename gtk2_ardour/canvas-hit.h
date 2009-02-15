@@ -41,6 +41,9 @@ public:
 	{
 	}
 	
+	void show() { Diamond::show(); }
+	void hide() { Diamond::hide(); }
+
 	double x1() { double x1, y1, x2, y2; get_bounds(x1,y1,x2,y2); return x1; }
 	double y1() { double x1, y1, x2, y2; get_bounds(x1,y1,x2,y2); return y1; }
 	double x2() { double x1, y1, x2, y2; get_bounds(x1,y1,x2,y2); return x2; }

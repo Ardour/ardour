@@ -93,6 +93,7 @@ public:
 	void get_selectables (nframes_t start, nframes_t end, list<Selectable* >&);
 	void get_inverted_selectables (Selection&, list<Selectable* >& results);
 
+	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region> r) {}
 	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
 	void region_layered (RegionView*);
 	virtual void update_contents_height ();

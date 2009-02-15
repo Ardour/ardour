@@ -41,6 +41,9 @@ public:
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; hide(); show(); }
 	void set_fill_color(uint32_t c)    { property_fill_color_rgba()    = c; hide(); show(); }
 
+	void show() { SimpleRect::show(); }
+	void hide() { SimpleRect::hide(); }
+
 	bool on_event(GdkEvent* ev);
 
 	enum NoteEnd {
@@ -58,16 +61,12 @@ public:
 			MidiRegionView&                   region,
 			Group&                            group,
 			const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
-
 		: SimpleRect(group), CanvasNoteEvent(region, this, note), _note_state(None)
 	{
 	}
 
 protected:
 	NoteState _note_state;
-
-private:
-
 };
 
 } // namespace Gnome

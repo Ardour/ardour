@@ -33,6 +33,7 @@
 #include <pbd/basename.h>
 
 #include <ardour/audioengine.h>
+#include <ardour/midi_model.h>
 #include <ardour/midi_ring_buffer.h>
 #include <ardour/midi_source.h>
 #include <ardour/session.h>
@@ -51,9 +52,7 @@ sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 MidiSource::MidiSource (Session& s, string name)
 	: Source (s, name, DataType::MIDI)
 	, _timeline_position(0)
-	, _model(new MidiModel(this))
 	, _writing (false)
-	, _model_iter(*_model.get(), 0.0)
 	, _last_read_end(0)
 {
 	_read_data_count = 0;
@@ -63,9 +62,7 @@ MidiSource::MidiSource (Session& s, string name)
 MidiSource::MidiSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
 	, _timeline_position(0)
-	, _model(new MidiModel(this))
 	, _writing (false)
-	, _model_iter(*_model.get(), 0.0)
 	, _last_read_end(0)
 {
 	_read_data_count = 0;
@@ -234,6 +231,14 @@ MidiSource::session_saved()
 		newsrc->flush_midi();
 
 		Switched.emit(newsrc);
+	}
+}
+
+void
+MidiSource::set_note_mode(NoteMode mode)
+{
+	if (_model) {
+		_model->set_note_mode(mode);
 	}
 }
 

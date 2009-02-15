@@ -57,7 +57,6 @@ public:
 	uint16_t num_tracks() const;
 	uint16_t ppqn()       const;
 	bool     is_empty()   const { return _empty; }
-	bool     eof()        const { assert(false); return true; }
 	
 	void begin_write();
 	void append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf);
@@ -69,7 +68,6 @@ private:
 	std::string  _path;
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
-
 	bool         _empty; ///< true iff file contains(non-empty) events
 };
 

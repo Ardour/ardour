@@ -59,6 +59,8 @@ public:
 
 	virtual ~CanvasNoteEvent();
 
+	virtual void show() = 0;
+	virtual void hide() = 0;
 	virtual bool on_event(GdkEvent* ev);
 
 	bool selected() const { return _selected; }
@@ -71,10 +73,10 @@ public:
 	void show_velocity();
 	void hide_velocity();
 	
-	/**
-	 * This slot is called, when a new channel is selected for the single event
-	 * */
+	/** Channel changed for this specific event */
 	void on_channel_change(uint8_t channel);
+
+	/** Channel selection changed */
 	void on_channel_selection_change(uint16_t selection);
 	
 	void show_channel_selector();
@@ -111,7 +113,7 @@ public:
 		return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
 	}
 	
-	/// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
+	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms
 	static const uint32_t midi_channel_colors[16];
 
 protected:

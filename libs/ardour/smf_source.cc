@@ -35,12 +35,13 @@
 #include <evoral/SMFReader.hpp>
 #include <evoral/Control.hpp>
 
-#include <ardour/smf_source.h>
-#include <ardour/session.h>
-#include <ardour/midi_ring_buffer.h>
-#include <ardour/tempo.h>
 #include <ardour/audioengine.h>
 #include <ardour/event_type_map.h>
+#include <ardour/midi_model.h>
+#include <ardour/midi_ring_buffer.h>
+#include <ardour/session.h>
+#include <ardour/smf_source.h>
+#include <ardour/tempo.h>
 
 #include "i18n.h"
 
@@ -167,7 +168,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 	
 	_last_read_end = start + dur;
 
-	while (!Evoral::SMF::eof()) {
+	while (true) {
 		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 		if (ret == -1) { // EOF
 			break;
@@ -623,7 +624,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 		Glib::Mutex::Lock lm (_lock);
 	}
 
-	if (_model && !force_reload && !_model->empty()) {
+	if (_model && !force_reload) {
 		return;
 	}
 

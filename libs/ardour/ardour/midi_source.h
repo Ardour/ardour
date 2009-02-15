@@ -21,24 +21,21 @@
 #define __ardour_midi_source_h__
 
 #include <string>
-
 #include <time.h>
-
-#include <glibmm/thread.h>
-
 #include <sigc++/signal.h>
-
-#include <ardour/source.h>
-#include <ardour/ardour.h>
-#include <ardour/buffer.h>
-#include <ardour/midi_model.h>
+#include <glibmm/thread.h>
 #include <pbd/stateful.h>
 #include <pbd/xml++.h>
+#include <evoral/Sequence.hpp>
+#include <ardour/ardour.h>
+#include <ardour/buffer.h>
+#include <ardour/source.h>
 
 using std::string;
 
 namespace ARDOUR {
 
+class MidiModel;
 template<typename T> class MidiRingBuffer;
 
 /** Source for MIDI data */
@@ -93,7 +90,7 @@ class MidiSource : public Source
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
 
-	void set_note_mode(NoteMode mode) { if (_model) _model->set_note_mode(mode); }
+	void set_note_mode(NoteMode mode);
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }

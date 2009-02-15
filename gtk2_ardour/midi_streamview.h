@@ -121,8 +121,9 @@ class MidiStreamView : public StreamView
 	
 	void update_contents_height ();
 	void draw_note_lines();
-	void apply_note_range(uint8_t lowest, uint8_t highest);
+	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);
 	bool update_data_note_range(uint8_t min, uint8_t max);
+	void update_contents_metrics(boost::shared_ptr<ARDOUR::Region> r);
 
 	void color_handler ();
 

@@ -482,7 +482,6 @@ void
 MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
-
 	if (_enable_display) {
 		redisplay_model();
 	}
@@ -549,8 +548,9 @@ void
 MidiRegionView::redisplay_model()
 {
 	// Don't redisplay the model if we're currently recording and displaying that
-	if (_active_notes)
+	if (_active_notes) {
 		return;
+	}
 
 	if (_model) {
 		clear_events();
@@ -754,7 +754,8 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 			Item* item = dynamic_cast<Item*>(event);
 			assert(item);
 			if (event && event->note()) {
-				if (event->note()->note() < _current_range_min || event->note()->note() > _current_range_max) {
+				if (event->note()->note() < _current_range_min
+						|| event->note()->note() > _current_range_max) {
 					if (canvas_item_visible(item)) {
 						item->hide();
 					}
@@ -787,7 +788,6 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 				}
 			}
 		}
-
 	}
 }
 
@@ -917,6 +917,16 @@ MidiRegionView::play_midi_note_off(boost::shared_ptr<NoteType> note)
 	return false;
 }
 
+bool
+MidiRegionView::note_in_visible_range(const boost::shared_ptr<NoteType> note) const
+{
+	const nframes64_t note_start_frames = beats_to_frames(note->time());
+	bool outside = (note_start_frames - _region->start() >= _region->length())
+			|| (note_start_frames < _region->start())
+			|| (note->note() < midi_stream_view()->lowest_note())
+			|| (note->note() > midi_stream_view()->highest_note());
+	return !outside;
+}
 
 /** Add a MIDI note to the view (with length).
  *
@@ -933,14 +943,6 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 	const nframes64_t note_start_frames = beats_to_frames(note->time());
 	const nframes64_t note_end_frames   = beats_to_frames(note->end_time());
 
-	// dont display notes beyond the region bounds
-	if (note_start_frames - _region->start() >= _region->length() ||
-			note_start_frames <  _region->start() ||
-			note->note() < midi_stream_view()->lowest_note() ||
-			note->note() > midi_stream_view()->highest_note() ) {
-		return;
-	}
-	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 
 	CanvasNoteEvent* event = 0;
@@ -955,14 +957,14 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 		CanvasNote* ev_rect = new CanvasNote(*this, *group, note);
 		ev_rect->property_x1() = x;
 		ev_rect->property_y1() = y1;
-		if (note->length() > 0)
+		if (note->length() > 0) {
 			ev_rect->property_x2() = note_endpixel;
-		else
+		} else {
 			ev_rect->property_x2() = trackview.editor().frame_to_pixel(_region->length());
+		}
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 		if (note->length() == 0) {
-
 			if (_active_notes) {
 				assert(note->note() < 128);
 				// If this note is already active there's a stuck note,
@@ -985,12 +987,9 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 			ev_rect->property_outline_what() = (guint32) 0xF;
 		}
 
-		ev_rect->show();
-		_events.push_back(ev_rect);
 		event = ev_rect;
 
 		MidiGhostRegion* gr;
-
 		for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 			if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
 				gr->add_note(ev_rect);
@@ -1003,8 +1002,6 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size, note);
 		ev_diamond->move(x, y);
-		ev_diamond->show();
-		_events.push_back(ev_diamond);
 		event = ev_diamond;
 	} else {
 		event = 0;
@@ -1015,6 +1012,12 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 			note_selected(event, true);
 		}
 		event->on_channel_selection_change(_last_channel_selection);
+		_events.push_back(event);
+		if (note_in_visible_range(note)) {
+			event->show();
+		} else {
+			event->hide();
+		}
 	}
 }
 
@@ -1348,7 +1351,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 			uint8_t new_pitch = original_pitch + dnote - highest_note_difference;
 			
 			// keep notes in standard midi range
-			clamp_0_to_127(new_pitch);
+			clamp_to_0_127(new_pitch);
 			
 			// keep original pitch if note is dragged outside valid midi range
 			if ((original_pitch != 0 && new_pitch == 0)
@@ -1556,7 +1559,7 @@ MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bo
 
 	if (relative) {
 		uint8_t new_velocity = copy->velocity() + velocity;
-		clamp_0_to_127(new_velocity);
+		clamp_to_0_127(new_velocity);
 		copy->set_velocity(new_velocity);
 	} else {
 		copy->set_velocity(velocity);			

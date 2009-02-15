@@ -137,15 +137,16 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	case Normal:
 		if (recording) {
 			region_view = new AudioRegionView (canvas_group, _trackview, region, 
-						   _samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
+					_samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(
+							TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
 		} else {
 			region_view = new AudioRegionView (canvas_group, _trackview, region, 
-							   _samples_per_unit, region_color);
+					_samples_per_unit, region_color);
 		}
 		break;
 	case Destructive:
 		region_view = new TapeAudioRegionView (canvas_group, _trackview, region, 
-						       _samples_per_unit, region_color);
+				_samples_per_unit, region_color);
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1"), "illegal track mode in ::add_region_view_internal") << endmsg;
@@ -379,16 +380,19 @@ AudioStreamView::redisplay_diskstream ()
 	}
 
 	if (_trackview.is_audio_track()) {
-		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
+		_trackview.get_diskstream()->playlist()->foreach_region(
+				static_cast<StreamView*>(this),
+				&StreamView::add_region_view);
 
-		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(_trackview.get_diskstream()->playlist());
+		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(
+				_trackview.get_diskstream()->playlist());
 		if (apl)
 			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
 	}
 
 	RegionViewList copy;
 
-	/* Place regions */
+	// Build a list of region views sorted by layer, and remove invalids
 	for (i = region_views.begin(); i != region_views.end(); ) {
 		tmp = i;
 		tmp++;
@@ -401,9 +405,6 @@ AudioStreamView::redisplay_diskstream ()
 		} else {
 			(*i)->enable_display(true);
 		}
-
-		/* Sort regionviews by layer so that when we call region_layered ()
-		   the canvas layering works out (in non-stacked mode). */
 
 		if (copy.size() == 0) {
 			copy.push_front((*i));
@@ -447,8 +448,7 @@ AudioStreamView::redisplay_diskstream ()
 		xi = tmpx;
 	}
 	
-	/* now fix layering */
-
+	// Fix canvas layering by raising each in the sorted list order
 	for (RegionViewList::iterator i = copy.begin(); i != copy.end(); ++i) {
 		region_layered (*i);
 	}

@@ -403,7 +403,7 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 
 	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
 		PBD::error << string_compose (
-				_("cannot rename midi file source from %1 to %2 (%3)"),
+				_("cannot rename audio file source from %1 to %2 (%3)"),
 				_path, newpath, strerror (errno)) << endmsg;
 		return -1;
 	}

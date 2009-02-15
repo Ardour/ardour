@@ -24,28 +24,29 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
+#include <ardour/midi_diskstream.h>
 #include <ardour/midi_playlist.h>
 #include <ardour/midi_region.h>
 #include <ardour/midi_source.h>
-#include <ardour/midi_diskstream.h>
 #include <ardour/midi_track.h>
-#include <ardour/smf_source.h>
 #include <ardour/region_factory.h>
+#include <ardour/smf_source.h>
 
-#include "midi_streamview.h"
-#include "region_view.h"
-#include "midi_region_view.h"
-#include "midi_time_axis.h"
-#include "canvas-simplerect.h"
-#include "region_selection.h"
-#include "selection.h"
-#include "public_editor.h"
 #include "ardour_ui.h"
-#include "rgb_macros.h"
+#include "canvas-simplerect.h"
 #include "gui_thread.h"
-#include "utils.h"
-#include "simplerect.h"
 #include "lineset.h"
+#include "midi_region_view.h"
+#include "midi_streamview.h"
+#include "midi_time_axis.h"
+#include "midi_util.h"
+#include "public_editor.h"
+#include "region_selection.h"
+#include "region_view.h"
+#include "rgb_macros.h"
+#include "selection.h"
+#include "simplerect.h"
+#include "utils.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -62,10 +63,11 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _data_note_min(60)
 	, _data_note_max(71)
 {
-	if (tv.is_track())
+	if (tv.is_track()) {
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
-	else
+	} else {
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();
+	}
 
 	use_rec_regions = tv.editor().show_waveforms_recording ();
 
@@ -82,7 +84,10 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	_note_lines->property_x2() = trackview().editor().frame_to_pixel (max_frames);
 	_note_lines->property_y2() = 0;
 
-	_note_lines->signal_event().connect (bind (mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), _note_lines, &_trackview));
+	_note_lines->signal_event().connect(bind(
+			mem_fun(_trackview.editor(), &PublicEditor::canvas_stream_view_event),
+			_note_lines, &_trackview));
+
 	_note_lines->lower_to_bottom();
 
 	ColorsChanged.connect(mem_fun(*this, &MidiStreamView::draw_note_lines));
@@ -90,7 +95,8 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
 	
-	note_range_adjustment.signal_value_changed().connect (mem_fun (*this, &MidiStreamView::note_range_adjustment_changed));
+	note_range_adjustment.signal_value_changed().connect(
+			mem_fun(*this, &MidiStreamView::note_range_adjustment_changed));
 }
 
 MidiStreamView::~MidiStreamView ()
@@ -101,10 +107,8 @@ static void
 veto_note_range(uint8_t& min, uint8_t& max)
 {
 	/* Legal notes, thanks */
-	if (max > 127)
-		max = 127;
-	if (min > 127)
-		min = 127;
+	clamp_to_0_127(min);
+	clamp_to_0_127(max);
 	
 	/* Always display at least one octave in [0, 127] */
 	if (max == 127) {
@@ -172,7 +176,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 {
 	if ( ! region_view)
 		return;
-			
+
 	region_view->enable_display(true);
 
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
@@ -186,6 +190,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 			source->model()->highest_note());
 
 	// Display region contents
+	region_view->set_height(height);
 	region_view->display_model(source->model());
 }
 
@@ -197,6 +202,18 @@ MidiStreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 	NoteRangeChanged();
 }
 			
+void
+MidiStreamView::update_contents_metrics(boost::shared_ptr<Region> r)
+{
+	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(r);
+	if (mr) {
+		mr->midi_source(0)->load_model();
+		_range_dirty = update_data_note_range(
+				mr->model()->lowest_note(),
+				mr->model()->highest_note());
+	}
+}
+
 bool
 MidiStreamView::update_data_note_range(uint8_t min, uint8_t max)
 {
@@ -212,29 +229,22 @@ MidiStreamView::update_data_note_range(uint8_t min, uint8_t max)
 	return dirty;
 }
 
-// FIXME: code duplication with AudioStreamView
 void
 MidiStreamView::redisplay_diskstream ()
 {
-	list<RegionView *>::iterator i, tmp;
+	if (!_trackview.is_midi_track()) {
+		return;
+	}
 
+	list<RegionView*>::iterator i, tmp;
+
+	// Load models if necessary, and find note range of all our contents
 	_range_dirty = false;
 	_data_note_min = 127;
 	_data_note_max = 0;
-
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->set_valid (false);
-		(*i)->enable_display (false);
-		
-		// Load model if it isn't already, to get note range
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
-		if (mrv) {
-			mrv->midi_region()->midi_source(0)->load_model();
-			_range_dirty = update_data_note_range(
-					mrv->midi_region()->model()->lowest_note(),
-					mrv->midi_region()->model()->highest_note());
-		}
-	}
+	_trackview.get_diskstream()->playlist()->foreach_region(
+			static_cast<StreamView*>(this),
+			&StreamView::update_contents_metrics);
 
 	// No notes, use default range
 	if (!_range_dirty) {
@@ -242,28 +252,25 @@ MidiStreamView::redisplay_diskstream ()
 		_data_note_max = 71;
 	}
 	
-	bool range_changed = false;
-
 	// Extend visible range to show newly recorded data, if necessary
-	if (_data_note_min < _lowest_note) {
-		_lowest_note = _data_note_min;
-		range_changed = true;
-	}
-	if (_data_note_max > _highest_note) {
-		_highest_note = _data_note_max;
-		range_changed = true;
-	}
+	_lowest_note  = std::min(_lowest_note, _data_note_min);
+	_highest_note = std::max(_highest_note, _data_note_max);
 	
 	veto_note_range(_lowest_note, _highest_note);
 	
-	if (_trackview.is_midi_track()) {
-		_trackview.get_diskstream()->playlist()->foreach_region (
-				static_cast<StreamView*>(this), &StreamView::add_region_view);
+	// Flag region views as invalid and disable drawing
+	for (i = region_views.begin(); i != region_views.end(); ++i) {
+		(*i)->set_valid(false);
+		(*i)->enable_display(false);
 	}
 
+	// Add and display region views, and flag existing ones as valid
+	_trackview.get_diskstream()->playlist()->foreach_region(
+			static_cast<StreamView*>(this),
+			&StreamView::add_region_view);
+
+	// Build a list of region views sorted by layer, and remove invalids
 	RegionViewList copy;
-	
-	/* Place regions */
 	for (i = region_views.begin(); i != region_views.end(); ) {
 		tmp = i;
 		tmp++;
@@ -273,14 +280,8 @@ MidiStreamView::redisplay_diskstream ()
 			region_views.erase (i);
 			i = tmp;
 			continue;
-		} else {
-			(*i)->enable_display(true);
-			(*i)->set_height(height); // apply note range
 		}
 		
-		/* Sort regionviews by layer so that when we call region_layered ()
-		   the canvas layering works out (in non-stacked mode). */
-
 		if (copy.size() == 0) {
 			copy.push_front((*i));
 			i = tmp;
@@ -311,14 +312,13 @@ MidiStreamView::redisplay_diskstream ()
 		i = tmp;
 	}
 	
-	/* Fix canvas layering */
+	// Fix canvas layering by raising each in the sorted list order
 	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
 		region_layered (*j);
 	}
 	
-	/* Update note range and re-draw note lines if necessary */
-	apply_note_range(_lowest_note, _highest_note);
-	NoteRangeChanged();
+	// Update note range (not to regions which are already good) and draw note lines
+	apply_note_range(_lowest_note, _highest_note, false);
 }
 
 
@@ -378,11 +378,11 @@ MidiStreamView::set_note_range(VisibleNoteRange r)
 		_highest_note = _data_note_max;
 	}
 
-	apply_note_range(_lowest_note, _highest_note);
+	apply_note_range(_lowest_note, _highest_note, true);
 }
 
 void
-MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest)
+MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views)
 {
 	_highest_note = highest;
 	_lowest_note = lowest;
@@ -390,8 +390,10 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest)
 	note_range_adjustment.set_value(_lowest_note);
 	draw_note_lines();
 	
-	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		((MidiRegionView*)(*i))->apply_note_range(lowest, highest);
+	if (to_region_views) {
+		for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+			((MidiRegionView*)(*i))->apply_note_range(lowest, highest);
+		}
 	}
 
 	NoteRangeChanged();
@@ -716,6 +718,6 @@ MidiStreamView::note_range_adjustment_changed()
 
 	_lowest_note = lowest;
 	_highest_note = highest;
-	apply_note_range(lowest, highest);
+	apply_note_range(lowest, highest, true);
 }
 

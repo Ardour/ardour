@@ -27,10 +27,11 @@
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
-#include <ardour/region.h>
 #include <ardour/gain.h>
 #include <ardour/logcurve.h>
+#include <ardour/midi_model.h>
 #include <ardour/midi_source.h>
+#include <ardour/region.h>
 
 class XMLNode;
 
