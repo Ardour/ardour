@@ -197,8 +197,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 		if (ev_size > scratch_size) {
 			scratch_size = ev_size;
 		}
-		
-		ev_size = scratch_size; // minimize realloc in read_event
+		ev_size = scratch_size; // ensure read_event only allocates if necessary
 	}
 	
 	return dur;
@@ -642,7 +641,9 @@ SMFSource::load_model(bool lock, bool force_reload)
 	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
 	
 	// FIXME: assumes tempo never changes after start
-	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
+	const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
+	
+	const double frames_per_beat = tempo.frames_per_beat(
 			_session.engine().frame_rate(),
 			_session.tempo_map().meter_at(_timeline_position));
 	
@@ -651,7 +652,6 @@ SMFSource::load_model(bool lock, bool force_reload)
 	uint8_t* buf     = NULL;
 	int ret;
 	while ((ret = read_event(&delta_t, &size, &buf)) >= 0) {
-		
 		ev.set(buf, size, 0.0);
 		time += delta_t;
 		
@@ -664,9 +664,8 @@ SMFSource::load_model(bool lock, bool force_reload)
 
 		if (ev.size() > scratch_size) {
 			scratch_size = ev.size();
-		} else {
-			ev.size() = scratch_size;
 		}
+		ev.size() = scratch_size; // ensure read_event only allocates if necessary
 	}
 
 	set_default_controls_interpolation();
