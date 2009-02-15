@@ -108,7 +108,6 @@ class RegionView : public TimeAxisViewItem
     virtual void region_muted ();
     void         region_locked ();
     void         region_opacity ();
-    void         region_layered ();
     virtual void region_renamed ();
     void         region_sync_changed ();
 
@@ -150,9 +149,6 @@ class RegionView : public TimeAxisViewItem
 	    that will be played at any given time.
 	*/
 	std::list<ArdourCanvas::SimpleRect*> _coverage_frames;
-	
-	typedef std::map<const Evoral::Parameter, boost::shared_ptr<AutomationRegionView> > AutomationChildren;
-	AutomationChildren _automation_children;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

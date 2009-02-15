@@ -575,35 +575,6 @@ MidiRegionView::redisplay_model()
 		
 		display_program_change_flags();
 
-		// Is this necessary?
-		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
-				i != _model->controls().end(); ++i) {
-
-			assert(i->second);
-
-			boost::shared_ptr<AutomationTimeAxisView> at
-				= midi_view()->automation_child(i->second->parameter());
-			if (!at)
-				continue;
-
-			Gdk::Color col = midi_stream_view()->get_region_color();
-
-			boost::shared_ptr<AutomationRegionView> arv;
-
-			{
-				Glib::Mutex::Lock list_lock (i->second->list()->lock());
-
-				arv = boost::shared_ptr<AutomationRegionView>(
-						new AutomationRegionView(at->canvas_display,
-							*at.get(), _region, i->second->list(),
-							midi_stream_view()->get_samples_per_unit(), col));
-			}
-
-			arv->set_duration(_region->length(), this);
-			arv->init(col, true);
-
-			_automation_children.insert(std::make_pair(i->second->parameter(), arv));
-		}*/
 		_model->read_unlock();
 
 	} else {

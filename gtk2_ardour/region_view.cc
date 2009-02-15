@@ -227,15 +227,6 @@ RegionView::region_changed (Change what_changed)
 	if (what_changed & Region::SyncOffsetChanged) {
 		region_sync_changed ();
 	}
-	/* 
-	   this should not be needed now that only playlist can change layering
-	*/
-	/*
-	if (what_changed & Region::LayerChanged) {
-		// this is handled by the playlist i believe
-		//region_layered ();
-	}
-	*/
 	if (what_changed & Region::LockChanged) {
 		region_locked ();
 	}
@@ -276,21 +267,8 @@ RegionView::reset_width_dependent_items (double pixel_width)
 {
 	TimeAxisViewItem::reset_width_dependent_items (pixel_width);
 	_pixel_width = pixel_width;
-
-	/*for (AutomationChildren::iterator i = _automation_children.begin();
-			i != _automation_children.end(); ++i) {
-		i->second->reset_width_dependent_items(pixel_width);
-	}*/
 }
 
-void
-RegionView::region_layered ()
-{
-	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*>(&get_time_axis_view());
-	assert(rtv);
-	//rtv->view()->region_layered (this);
-}
-	
 void
 RegionView::region_muted ()
 {
@@ -333,11 +311,6 @@ RegionView::set_position (nframes_t pos, void* src, double* ignored)
 	if (delta) {
 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 			(*i)->group->move (delta, 0.0);
-		}
-	
-		for (AutomationChildren::iterator i = _automation_children.begin();
-				i != _automation_children.end(); ++i) {
-			i->second->get_canvas_group()->move(delta, 0.0);
 		}
 	}
 
@@ -544,11 +517,6 @@ RegionView::move (double x_delta, double y_delta)
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->group->move (x_delta, 0.0);
-	}
-		
-	for (AutomationChildren::iterator i = _automation_children.begin();
-			i != _automation_children.end(); ++i) {
-		i->second->get_canvas_group()->move(x_delta, 0.0);
 	}
 }
 
