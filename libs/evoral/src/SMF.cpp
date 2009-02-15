@@ -89,7 +89,7 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 	if (!_smf_track)
 		return -2;
 
-	cerr << "Track " << track << " # events: " << _smf_track->number_of_events << endl;
+	//cerr << "Track " << track << " # events: " << _smf_track->number_of_events << endl;
 	if (_smf_track->number_of_events == 0) {
 		_smf_track->next_event_number = 0;
 		_empty = true;

@@ -2333,7 +2333,7 @@ IO::set_gain (gain_t val, void *src)
 		val = 1.99526231f;
 	}
 
-	cerr << "set desired gain to " << val << " when curgain = " << _gain_control->get_value () << endl;
+	//cerr << "set desired gain to " << val << " when curgain = " << _gain_control->get_value () << endl;
 
 	if (src != _gain_control.get()) {
 		_gain_control->set_value(val);

@@ -161,8 +161,6 @@ GainMeterBase::~GainMeterBase ()
 void
 GainMeterBase::set_io (boost::shared_ptr<IO> io)
 {
-	cerr << this << " Clear all connections\n";
-
  	connections.clear ();
 	
  	_io = io;
@@ -203,7 +201,7 @@ GainMeterBase::set_io (boost::shared_ptr<IO> io)
 		}
 	}
 
-	cerr << "Connect " << this << " to gain change for " << _io->name() << endl;
+	//cerr << "Connect " << this << " to gain change for " << _io->name() << endl;
 
 	connections.push_back (_io->gain_control()->Changed.connect (mem_fun(*this, &GainMeterBase::gain_changed)));
 
@@ -376,11 +374,11 @@ GainMeterBase::show_gain ()
 void
 GainMeterBase::gain_adjusted ()
 {
-	cerr << this << " for " << _io->name() << " GAIN ADJUSTED\n";
+	//cerr << this << " for " << _io->name() << " GAIN ADJUSTED\n";
 	if (!ignore_toggle) {
-		cerr << "Set GC\n";
+		//cerr << "Set GC\n";
 		_io->gain_control()->set_value (slider_position_to_gain (gain_adjustment.get_value()));
-		cerr << "Set GC OUT\n";
+		//cerr << "Set GC OUT\n";
 	}
 	show_gain ();
 }
@@ -390,7 +388,8 @@ GainMeterBase::effective_gain_display ()
 {
 	gfloat value = gain_to_slider_position (_io->effective_gain());
 	
-	cerr << this << " for " << _io->name() << " EGAIN = " << value << " AGAIN = " << gain_adjustment.get_value () << endl;
+	//cerr << this << " for " << _io->name() << " EGAIN = " << value
+	//		<< " AGAIN = " << gain_adjustment.get_value () << endl;
 	// stacktrace (cerr, 20);
 
 	if (gain_adjustment.get_value() != value) {
