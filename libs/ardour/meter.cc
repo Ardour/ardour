@@ -44,7 +44,6 @@ PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_f
 
 	// Meter what we have (midi)
 	for ( ; n < limit; ++n) {
-	
 		float val = 0;
 		
 		// GUI needs a better MIDI meter, not much information can be

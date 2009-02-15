@@ -131,11 +131,10 @@ CanvasNoteEvent::show_channel_selector(void)
 		_channel_selector->channel_selected.connect(
 			sigc::mem_fun(this, &CanvasNoteEvent::on_channel_change));
 
-		_channel_selector_widget = 
-			new Widget(*(_item->property_parent()), 
-			           x1(), 
-			           y2() + 2, 
-			           (Gtk::Widget &) *_channel_selector);
+		_channel_selector_widget = new Widget(*(_item->property_parent()), 
+				x1(), 
+				y2() + 2, 
+				(Gtk::Widget &) *_channel_selector);
 		
 		_channel_selector_widget->hide();
 		_channel_selector_widget->property_height() = 100;
@@ -186,8 +185,8 @@ CanvasNoteEvent::base_color()
 	
 	ColorMode mode = _region.color_mode();
 	
-	const uint8_t minimal_opaqueness = 15;
-	uint8_t       opaqueness = std::max(minimal_opaqueness, uint8_t(_note->velocity() + _note->velocity()));
+	const uint8_t min_opacity = 15;
+	uint8_t       opacity = std::max(min_opacity, uint8_t(_note->velocity() + _note->velocity()));
 	
 	switch (mode) {
 	case TrackColor:
@@ -197,12 +196,12 @@ CanvasNoteEvent::base_color()
 					SCALE_USHORT_TO_UINT8_T(color.get_red()), 
 					SCALE_USHORT_TO_UINT8_T(color.get_green()), 
 					SCALE_USHORT_TO_UINT8_T(color.get_blue()), 
-					opaqueness);
+					opacity);
 		}
 		
 	case ChannelColors:
 		return UINT_RGBA_CHANGE_A(CanvasNoteEvent::midi_channel_colors[_note->channel()], 
-				                  opaqueness);
+				                  opacity);
 		
 	default:
 		return meter_style_fill_color(_note->velocity());
@@ -221,9 +220,13 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	double event_x, event_y, dx, dy;
 	bool select_mod;
 	uint8_t d_velocity = 10;
-	
-	if (_region.get_time_axis_view().editor().current_mouse_mode() != Editing::MouseNote)
+
+	if (_region.get_time_axis_view().editor().current_mouse_mode() != Editing::MouseNote) {
 		return false;
+	}
+	
+	const Editing::MidiEditMode midi_edit_mode
+			= _region.midi_view()->editor().current_midi_edit_mode();
 
 	switch (ev->type) {
 	case GDK_SCROLL:
@@ -284,7 +287,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Drag begin
-			if (_region.midi_view()->editor().current_midi_edit_mode() == Editing::MidiEditSelect
+			if (midi_edit_mode == Editing::MidiEditSelect
 					&& _region.mouse_state() != MidiRegionView::SelectTouchDragging
 					&& _region.mouse_state() != MidiRegionView::EraseTouchDragging) {
 				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
@@ -311,12 +314,10 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 			}
 			_item->property_parent().get_value()->w2i(event_x, event_y);
 			
-			// Snap
 			event_x = _region.snap_to_pixel(event_x); 
 
-			dx = event_x - last_x;
-			dy = event_y - last_y;
-
+			dx     = event_x - last_x;
+			dy     = event_y - last_y;
 			last_x = event_x;
 
 			drag_delta_x += dx;
@@ -356,16 +357,16 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		
 		switch (_state) {
 		case Pressed: // Clicked
-			if (_region.midi_view()->editor().current_midi_edit_mode() == Editing::MidiEditSelect) {
+			if (midi_edit_mode == Editing::MidiEditSelect) {
 				_state = None;
-
-				if (_selected && !select_mod && _region.selection_size() > 1)
+				if (_selected && !select_mod && _region.selection_size() > 1) {
 					_region.unique_select(this);
-				else if (_selected)
+				} else if (_selected) {
 					_region.note_deselected(this, select_mod);
-				else
+				} else {
 					_region.note_selected(this, select_mod);
-			} else if (_region.midi_view()->editor().current_midi_edit_mode() == Editing::MidiEditErase) {
+				}
+			} else if (midi_edit_mode == Editing::MidiEditErase) {
 				_region.start_delta_command();
 				_region.command_remove_note(this);
 				_region.apply_command();
@@ -375,12 +376,9 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		case Dragging: // Dropped
 			_item->ungrab(ev->button.time);
 			_state = None;
-
-			if (_note)
-				_region.note_dropped(this,
-						     _region.midi_view()->editor().pixel_to_frame(abs(drag_delta_x))
-								* ((drag_delta_x < 0.0) ? -1 : 1),
-						drag_delta_note);
+			if (_note) {
+				_region.note_dropped(this, drag_delta_x, drag_delta_note);
+			}
 			return true;
 		default:
 			break;

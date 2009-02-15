@@ -12,18 +12,17 @@ using namespace MIDI::Name;
 using namespace std;
 
 CanvasProgramChange::CanvasProgramChange(
-		MidiRegionView&                       region,
-		Group&                                parent,
-		string&                               text,
-		double                                height,
-		double                                x,
-		double                                y,
-		string&                               model_name,
-		string&                               custom_device_mode,
-		nframes_t                             event_time,
-		uint8_t                               channel,
-		uint8_t                               program
-		)
+		MidiRegionView& region,
+		Group&          parent,
+		string&         text,
+		double          height,
+		double          x,
+		double          y,
+		string&         model_name,
+		string&         custom_device_mode,
+		nframes_t       event_time,
+		uint8_t         channel,
+		uint8_t         program)
 	: CanvasFlag(
 			region, 
 			parent, 
@@ -31,8 +30,7 @@ CanvasProgramChange::CanvasProgramChange(
 			ARDOUR_UI::config()->canvasvar_MidiProgramChangeOutline.get(), 
 			ARDOUR_UI::config()->canvasvar_MidiProgramChangeFill.get(),
 			x,
-			y
-		)
+			y)
 	 , _model_name(model_name)
 	 , _custom_device_mode(custom_device_mode)
 	 , _event_time(event_time)

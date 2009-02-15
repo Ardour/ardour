@@ -63,8 +63,9 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
-
-	void append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>& ev);
+	
+	void append_event_unlocked_beats(const Evoral::Event<double>& ev);
+	void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev);
 
 	int move_to_trash (const string trash_dir_name);
 
@@ -82,8 +83,6 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 
 	void load_model(bool lock=true, bool force_reload=false);
 	void destroy_model();
-
-	double last_event_time() const { return _last_ev_time; }
 
 	void flush_midi();
 
@@ -111,7 +110,8 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 	Flag           _flags;
 	string         _take_id;
 	bool           _allow_remove_if_empty;
-	double         _last_ev_time;
+	double         _last_ev_time_beats;
+	nframes_t      _last_ev_time_frames;
 
 	static string _search_path;
 };

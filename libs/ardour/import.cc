@@ -320,8 +320,8 @@ write_midi_data_to_new_files (Evoral::SMF* source, Session::import_status& statu
 	try {
 
 	for (unsigned i = 1; i <= source->num_tracks(); ++i) {
-	
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(newfiles[i-1]);
+		smfs->drop_model();
 		
 		source->seek_to_track(i);
 	
@@ -346,11 +346,10 @@ write_midi_data_to_new_files (Evoral::SMF* source, Session::import_status& statu
 				continue;
 			}
 
-			smfs->append_event_unlocked(Beats, Evoral::Event<double>(
-						0,
-						(double)t / (double)source->ppqn(),
-						size,
-						buf));
+			smfs->append_event_unlocked_beats(Evoral::Event<double>(0,
+					(double)t / (double)source->ppqn(),
+					size,
+					buf));
 
 			if (status.progress < 0.99)
 				status.progress += 0.01;

@@ -86,11 +86,11 @@ struct SizedSampleBuffer {
 
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
+/** Constructor used for existing internal-to-session files.  File must exist. */
 AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 	: AudioSource (s, path), _flags (flags),
 	  _channel (0)
 {
-	/* constructor used for existing external to session files. file must exist already */
 	_is_embedded = AudioFileSource::determine_embeddedness (path);
 
 	if (init (path, true)) {
@@ -99,11 +99,11 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 
 }
 
+/** Constructor used for new internal-to-session files.  File cannot exist. */
 AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
 	: AudioSource (s, path), _flags (flags),
 	  _channel (0)
 {
-	/* constructor used for new internal-to-session files. file cannot exist */
 	_is_embedded = false;
 
 	if (init (path, false)) {
@@ -111,12 +111,11 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFo
 	}
 }
 
+/** Constructor used for existing internal-to-session files.  File must exist. */
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: AudioSource (s, node), _flags (Flag (Writable|CanRename))
-          /* _channel is set in set_state() or init() */
+	/* _channel is set in set_state() or init() */
 {
-	/* constructor used for existing internal-to-session files. file must exist */
-
 	if (set_state (node)) {
 		throw failed_constructor ();
 	}
@@ -363,31 +362,23 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 		return -1;
 	}
 
-	ustring newpath;
-
 	if (!writable()) {
 		return -1;
 	}
 
-	/* don't move the file across filesystems, just
-	   stick it in the `trash_dir_name' directory
-	   on whichever filesystem it was already on.
+	/* don't move the file across filesystems, just stick it in the
+	   trash_dir_name directory on whichever filesystem it was already on
 	*/
 	
+	ustring newpath;
 	newpath = Glib::path_get_dirname (_path);
 	newpath = Glib::path_get_dirname (newpath); 
 
-	cerr << "from " << _path << " dead dir looks like " << newpath << endl;
-
-	newpath += '/';
-	newpath += trash_dir_name;
-	newpath += '/';
+	newpath += string("/") + trash_dir_name + "/";
 	newpath += Glib::path_get_basename (_path);
 
+	/* the new path already exists, try versioning */
 	if (access (newpath.c_str(), F_OK) == 0) {
-
-		/* the new path already exists, try versioning */
-		
 		char buf[PATH_MAX+1];
 		int version = 1;
 		ustring newpath_v;
@@ -401,23 +392,19 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 		}
 		
 		if (version == 999) {
-			error << string_compose (_("there are already 1000 files with names like %1; versioning discontinued"),
-					  newpath)
-			      << endmsg;
+			PBD::error << string_compose (
+					_("there are already 1000 files with names like %1; versioning discontinued"),
+					newpath)
+				<< endmsg;
 		} else {
 			newpath = newpath_v;
 		}
-
-	} else {
-
-		/* it doesn't exist, or we can't read it or something */
-
 	}
 
 	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-		error << string_compose (_("cannot rename audio file source from %1 to %2 (%3)"),
-				  _path, newpath, strerror (errno))
-		      << endmsg;
+		PBD::error << string_compose (
+				_("cannot rename midi file source from %1 to %2 (%3)"),
+				_path, newpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -434,7 +421,6 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 	peakpath = "";
 	
 	/* file can not be removed twice, since the operation is not idempotent */
-
 	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
 
 	return 0;
@@ -467,7 +453,6 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 		cnt = 0;
 		
 		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-
 			fullpath = *i;
 			if (fullpath[fullpath.length()-1] != '/') {
 				fullpath += '/';
@@ -544,15 +529,14 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 		}
 
 		/* Current find() is unable to parse relative path names to yet non-existant
-                   sources. QuickFix(tm) */
-                if (keeppath == "") {
-                        if (must_exist) {
-                                error << "AudioFileSource::find(), keeppath = \"\", but the file must exist" << endl;
-                        } else {
-                                keeppath = pathstr;
-                        }
-                        
-                }
+		   sources. QuickFix(tm) */
+		if (keeppath == "") {
+			if (must_exist) {
+				error << "AudioFileSource::find(), keeppath = \"\", but the file must exist" << endl;
+			} else {
+				keeppath = pathstr;
+			}
+		}
 
 		_name = pathstr;
 		_path = keeppath;

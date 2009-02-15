@@ -32,11 +32,13 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/basename.h>
 
-#include <ardour/midi_source.h>
+#include <ardour/audioengine.h>
 #include <ardour/midi_ring_buffer.h>
+#include <ardour/midi_source.h>
 #include <ardour/session.h>
 #include <ardour/session_directory.h>
 #include <ardour/source_factory.h>
+#include <ardour/tempo.h>
 
 #include "i18n.h"
 
@@ -105,28 +107,39 @@ MidiSource::set_state (const XMLNode& node)
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
+		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
+
 	Glib::Mutex::Lock lm (_lock);
 	if (_model) {
+		// FIXME: assumes tempo never changes after start
+		const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
+		const double frames_per_beat = tempo.frames_per_beat(
+				_session.engine().frame_rate(),
+				_session.tempo_map().meter_at(_timeline_position));
+#define BEATS_TO_FRAMES(t) (((t) * frames_per_beat) + stamp_offset - negative_stamp_offset)
+
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 		
 		if (_last_read_end == 0 || start != _last_read_end) {
-			i = _model->begin();
-			cerr << "MidiSource::midi_read seeking to " << start << endl;
-			while (i != _model->end() && i->time() < start)
-				++i;
+			cerr << "MidiSource::midi_read seeking to frame " << start << endl;
+			for (i = _model->begin(); i != _model->end(); ++i) {
+				if (BEATS_TO_FRAMES(i->time()) >= start) {
+					break;
+				}
+			}
 		}
 		
 		_last_read_end = start + cnt;
 
-		if (i == _model->end()) {
-			return cnt;
-		}
-
-		while (i->time() < start + cnt && i != _model->end()) {
-			dst.write(i->time(), i->event_type(), i->size(), i->buffer());
-			++i;
+		for (; i != _model->end(); ++i) {
+			const nframes_t time_frames = BEATS_TO_FRAMES(i->time());
+			if (time_frames < start + cnt) {
+				dst.write(time_frames, i->event_type(), i->size(), i->buffer());
+			} else {
+				break;
+			}
 		}
 		return cnt;
 	} else {
@@ -148,7 +161,7 @@ MidiSource::file_changed (string path)
 
 	int e1 = stat (path.c_str(), &stat_file);
 	
-	return ( !e1 );
+	return !e1;
 }
 
 void

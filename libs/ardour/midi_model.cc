@@ -295,9 +295,11 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 
 	const bool old_percussive = percussive();
 	set_percussive(false);
+
+	source->drop_model();
 	
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
-		source->append_event_unlocked(Frames, *i);
+		source->append_event_unlocked_beats(*i);
 	}
 		
 	set_percussive(old_percussive);

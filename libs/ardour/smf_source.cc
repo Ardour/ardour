@@ -48,15 +48,15 @@ using namespace ARDOUR;
 
 string SMFSource::_search_path;
 
+/** Constructor used for new internal-to-session files.  File cannot exist. */
 SMFSource::SMFSource(Session& s, std::string path, Flag flags)
 	: MidiSource(s, region_name_from_path(path, false))
 	, Evoral::SMF()
 	, _flags(flags)
 	, _allow_remove_if_empty(true)
-	, _last_ev_time(0)
+	, _last_ev_time_beats(0.0)
+	, _last_ev_time_frames(0)
 {
-	/* Constructor used for new internal-to-session files.  File cannot exist. */
-
 	if (init(path, false)) {
 		throw failed_constructor ();
 	}
@@ -68,14 +68,14 @@ SMFSource::SMFSource(Session& s, std::string path, Flag flags)
 	assert(_name.find("/") == string::npos);
 }
 
+/** Constructor used for existing internal-to-session files.  File must exist. */
 SMFSource::SMFSource(Session& s, const XMLNode& node)
 	: MidiSource(s, node)
 	, _flags(Flag(Writable|CanRename))
 	, _allow_remove_if_empty(true)
-	, _last_ev_time(0)
+	, _last_ev_time_beats(0.0)
+	, _last_ev_time_frames(0)
 {
-	/* Constructor used for existing internal-to-session files.  File must exist. */
-
 	if (set_state(node)) {
 		throw failed_constructor ();
 	}
@@ -146,7 +146,6 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 
 	// FIXME: assumes tempo never changes after start
 	const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
-	
 	const double frames_per_beat = tempo.frames_per_beat(
 			_session.engine().frame_rate(),
 			_session.tempo_map().meter_at(_timeline_position));
@@ -205,7 +204,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
+SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t dur)
 {
 	_write_data_count = 0;
 		
@@ -220,11 +219,11 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
 		_model->start_write();
 	}
 
-	Evoral::MIDIEvent<double> ev(0, 0.0, 4, NULL, true);
+	Evoral::MIDIEvent<nframes_t> ev(0, 0.0, 4, NULL, true);
 
 	while (true) {
 		bool ret = src.peek_time(&time);
-		if (!ret || time - _timeline_position > _length + cnt) {
+		if (!ret || time - _timeline_position > _length + dur) {
 			break;
 		}
 
@@ -255,11 +254,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
 			continue;
 		}
 		
-		append_event_unlocked(Frames, ev);
-
-		if (_model) {
-			_model->append(ev);
-		}
+		append_event_unlocked_frames(ev);
 	}
 
 	if (_model) {
@@ -270,55 +265,83 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
 	free(buf);
 
 	const nframes_t oldlen = _length;
-	update_length(oldlen, cnt);
+	update_length(oldlen, dur);
 
-	ViewDataRangeReady(_timeline_position + oldlen, cnt); /* EMIT SIGNAL */
-	
-	return cnt;
+	ViewDataRangeReady(_timeline_position + oldlen, dur); /* EMIT SIGNAL */
+
+	return dur;
 }
 		
 
+/** Append an event with a timestamp in beats (double) */
 void
-SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>& ev)
+SMFSource::append_event_unlocked_beats(const Evoral::Event<double>& ev)
 {
 	if (ev.size() == 0)  {
-		cerr << "SMFSource: Warning: skipping empty event" << endl;
 		return;
 	}
 
-	/*
-	printf("SMFSource: %s - append_event_unlocked time = %lf, size = %u, data = ",
+	/*printf("SMFSource: %s - append_event_unlocked_beats time = %lf, size = %u, data = ",
 			name().c_str(), ev.time(), ev.size()); 
-	for (size_t i=0; i < ev.size(); ++i) {
-		printf("%X ", ev.buffer()[i]);
-	} printf("\n");
-	*/
+	for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 	
 	assert(ev.time() >= 0);
-	
-	if (ev.time() < last_event_time()) {
-		cerr << "SMFSource: Warning: Skipping event with ev.time() < last.time()" << endl;
+	if (ev.time() < _last_ev_time_beats) {
+		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
 		return;
 	}
 	
-	uint32_t delta_time = 0;
-	
-	if (unit == Frames) {
-		// FIXME: assumes tempo never changes after start
-		const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
-				_session.engine().frame_rate(),
-				_session.tempo_map().meter_at(_timeline_position));
+	const double delta_time_beats   = ev.time() - _last_ev_time_beats;
+	const uint32_t delta_time_ticks = (uint32_t)lrint(delta_time_beats * (double)ppqn());
 
-		delta_time = (uint32_t)((ev.time() - last_event_time()) / frames_per_beat * ppqn());
-	} else {
-		assert(unit == Beats);
-		delta_time = (uint32_t)((ev.time() - last_event_time()) * ppqn());
-	}
-
-	Evoral::SMF::append_event_delta(delta_time, ev.size(), ev.buffer());
-	_last_ev_time = ev.time();
+	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer());
+	_last_ev_time_beats = ev.time();
 
 	_write_data_count += ev.size();
+
+	if (_model) {
+		_model->append(ev);
+	}
+}
+
+/** Append an event with a timestamp in frames (nframes_t) */
+void
+SMFSource::append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev)
+{
+	if (ev.size() == 0)  {
+		return;
+	}
+
+	/*printf("SMFSource: %s - append_event_unlocked_frames time = %u, size = %u, data = ",
+			name().c_str(), ev.time(), ev.size()); 
+	for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
+	
+	assert(ev.time() >= 0);
+	if (ev.time() < _last_ev_time_frames) {
+		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
+		return;
+	}
+	
+	// FIXME: assumes tempo never changes after start
+	const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
+	const double frames_per_beat = tempo.frames_per_beat(
+			_session.engine().frame_rate(),
+			_session.tempo_map().meter_at(_timeline_position));
+
+	uint32_t delta_time = (uint32_t)((ev.time() - _last_ev_time_frames)
+			/ frames_per_beat * (double)ppqn());
+
+	Evoral::SMF::append_event_delta(delta_time, ev.size(), ev.buffer());
+	_last_ev_time_frames = ev.time();
+
+	_write_data_count += ev.size();
+
+	if (_model) {
+		double beat_time = ev.time() / frames_per_beat;
+		const Evoral::Event<double> beat_ev(
+				ev.event_type(), beat_time, ev.size(), (uint8_t*)ev.buffer());
+		_model->append(beat_ev);
+	}
 }
 
 
@@ -368,7 +391,8 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_fra
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
 	Evoral::SMF::begin_write ();
-	_last_ev_time = 0;
+	_last_ev_time_beats = 0.0;
+	_last_ev_time_frames = 0;
 }
 
 void
@@ -395,29 +419,23 @@ SMFSource::mark_take (string id)
 int
 SMFSource::move_to_trash (const string trash_dir_name)
 {
-	string newpath;
-
 	if (!writable()) {
 		return -1;
 	}
 
-	/* don't move the file across filesystems, just
-	   stick it in the 'trash_dir_name' directory
-	   on whichever filesystem it was already on.
+	/* don't move the file across filesystems, just stick it in the
+	   trash_dir_name directory on whichever filesystem it was already on
 	*/
-
+	
+	Glib::ustring newpath;
 	newpath = Glib::path_get_dirname (_path);
-	newpath = Glib::path_get_dirname (newpath);
+	newpath = Glib::path_get_dirname (newpath); 
 
-	newpath += '/';
-	newpath += trash_dir_name;
-	newpath += '/';
+	newpath += string("/") + trash_dir_name + "/";
 	newpath += Glib::path_get_basename (_path);
 
+	/* the new path already exists, try versioning */
 	if (access (newpath.c_str(), F_OK) == 0) {
-
-		/* the new path already exists, try versioning */
-		
 		char buf[PATH_MAX+1];
 		int version = 1;
 		string newpath_v;
@@ -431,28 +449,24 @@ SMFSource::move_to_trash (const string trash_dir_name)
 		}
 		
 		if (version == 999) {
-			PBD::error << string_compose (_("there are already 1000 files with names like %1; versioning discontinued"),
-					  newpath)
-			      << endmsg;
+			PBD::error << string_compose (
+					_("there are already 1000 files with names like %1; versioning discontinued"),
+					newpath) << endmsg;
 		} else {
 			newpath = newpath_v;
 		}
-
-	} else {
-
-		/* it doesn't exist, or we can't read it or something */
-
 	}
 
 	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-		PBD::error << string_compose (_("cannot rename midi file source from %1 to %2 (%3)"),
-				  _path, newpath, strerror (errno))
-		      << endmsg;
+		PBD::error << string_compose (
+				_("cannot rename midi file source from %1 to %2 (%3)"),
+				_path, newpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 	
+	_path = newpath;
+	
 	/* file can not be removed twice, since the operation is not idempotent */
-
 	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
 
 	return 0;
@@ -468,18 +482,9 @@ SMFSource::safe_file_extension(const Glib::ustring& file)
 bool
 SMFSource::find (string pathstr, bool must_exist, bool& isnew)
 {
-	string::size_type pos;
 	bool ret = false;
 
 	isnew = false;
-
-	/* clean up PATH:CHANNEL notation so that we are looking for the correct path */
-
-	if ((pos = pathstr.find_last_of (':')) == string::npos) {
-		pathstr = pathstr;
-	} else {
-		pathstr = pathstr.substr (0, pos);
-	}
 
 	if (pathstr[0] != '/') {
 
@@ -500,7 +505,6 @@ SMFSource::find (string pathstr, bool must_exist, bool& isnew)
 		cnt = 0;
 		
 		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-
 			fullpath = *i;
 			if (fullpath[fullpath.length()-1] != '/') {
 				fullpath += '/';
@@ -640,24 +644,15 @@ SMFSource::load_model(bool lock, bool force_reload)
 	
 	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
 	
-	// FIXME: assumes tempo never changes after start
-	const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
-	
-	const double frames_per_beat = tempo.frames_per_beat(
-			_session.engine().frame_rate(),
-			_session.tempo_map().meter_at(_timeline_position));
-	
 	uint32_t delta_t = 0;
 	uint32_t size    = 0;
 	uint8_t* buf     = NULL;
 	int ret;
 	while ((ret = read_event(&delta_t, &size, &buf)) >= 0) {
-		ev.set(buf, size, 0.0);
 		time += delta_t;
+		ev.set(buf, size, time / (double)ppqn());
 		
 		if (ret > 0) { // didn't skip (meta) event
-			// make ev.time absolute time in frames
-			ev.time() = time * frames_per_beat / (double)ppqn();
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 			_model->append(ev);
 		}

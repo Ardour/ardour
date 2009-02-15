@@ -508,7 +508,7 @@ Editor::popup_ruler_menu (nframes64_t where, ItemType t)
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
 
-        editor_ruler_menu->popup (1, gtk_get_current_event_time());
+	editor_ruler_menu->popup (1, gtk_get_current_event_time());
 
 	no_ruler_shown_update = false;
 }

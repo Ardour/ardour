@@ -150,13 +150,13 @@ class MidiRegionView : public RegionView
 	
 	/** Displays all program changed events in the region as flags on the canvas.
 	 */
-	void find_and_insert_program_change_flags();
+	void display_program_change_flags();
 
 	void begin_write();
 	void end_write();
 	void extend_active_notes();
 
-	void create_note_at(double x, double y, double duration);
+	void create_note_at(double x, double y, double length);
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
@@ -175,19 +175,16 @@ class MidiRegionView : public RegionView
 	size_t selection_size() { return _selection.size(); }
 
 	void move_selection(double dx, double dy);
-	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double dt, uint8_t dnote);
+	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_frames, uint8_t d_note);
 
-	/** Get the region position in pixels.
-	 * This function is needed to subtract the region start in pixels
-	 * from world coordinates submitted by the mouse
-	 */
+	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();
 
 	/** Begin resizing of some notes.
 	 * Called by CanvasMidiNote when resizing starts.
 	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
 	 */
-	void  begin_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end);
+	void begin_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end);
 
 	/** Update resizing notes while user drags.
 	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
@@ -215,7 +212,15 @@ class MidiRegionView : public RegionView
 	 */
 	void change_channel(uint8_t channel);
 
-	enum MouseState { None, Pressed, SelectTouchDragging, SelectRectDragging, AddDragging, EraseTouchDragging };
+	enum MouseState {
+		None,
+		Pressed,
+		SelectTouchDragging,
+		SelectRectDragging,
+		AddDragging,
+		EraseTouchDragging
+	};
+
 	MouseState mouse_state() const { return _mouse_state; }
 
 	struct NoteResizeData {
@@ -243,8 +248,13 @@ class MidiRegionView : public RegionView
 	 */
 	nframes64_t snap_to_frame(nframes64_t x);
 	
+	/** Convert a timestamp in beats to frames (both relative to region start) */
+	nframes64_t beats_to_frames(double beats) const;
+	
+	/** Convert a timestamp in frames to beats (both relative to region start) */
+	double frames_to_beats(nframes64_t beats) const;
+	
   protected:
-
     /** Allows derived types to specify their visibility requirements
      * to the TimeAxisViewItem parent class.
      */
@@ -272,7 +282,7 @@ class MidiRegionView : public RegionView
 	 * (scheduled by @ref play_midi_note()).
 	 */
 	bool play_midi_note_off(boost::shared_ptr<NoteType> note);
-	  
+
 	void clear_events();
 	void switch_source(boost::shared_ptr<ARDOUR::Source> src);
 
@@ -282,7 +292,7 @@ class MidiRegionView : public RegionView
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
 	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
 	
-	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t velocity, bool relative=false);
+	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
 
 	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
