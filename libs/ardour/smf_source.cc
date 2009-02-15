@@ -174,13 +174,13 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 			break;
 		}
 		
-		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
-		
 		time += ev_delta_t; // accumulate delta time
 
 		if (ret == 0) { // meta-event (skipped, just accumulate time)
 			continue;
 		}
+		
+		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
 
 		assert(time >= start_ticks);
 		const nframes_t ev_frame_time = (nframes_t)(

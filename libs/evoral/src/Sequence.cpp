@@ -358,7 +358,7 @@ Sequence<Time>::const_iterator::operator++()
 		#ifdef DEBUG_SEQUENCE
 		cerr << "Iterator = SysEx" << endl;
 		#endif
-		*_event =*(*_sysex_iter);
+		*_event = *(*_sysex_iter);
 		++_sysex_iter;
 	} else {
 		#ifdef DEBUG_SEQUENCE
