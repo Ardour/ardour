@@ -688,12 +688,15 @@ smf_track_get_next_event(smf_track_t *track)
 {
 	smf_event_t *event, *next_event;
 
+	/* Track is empty? */
+	if (track->number_of_events == 0)
+		return (NULL);
+
 	/* End of track? */
 	if (track->next_event_number == 0)
 		return (NULL);
 
 	assert(track->next_event_number >= 1);
-	assert(track->number_of_events > 0);
 
 	event = smf_track_get_event_by_number(track, track->next_event_number);
 
