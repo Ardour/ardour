@@ -25,22 +25,21 @@
 
 using namespace Evoral;
 
-template<typename Time>
-class TestSMF : public SMF<Time> {
+class TestSMF : public SMF {
 public:
 	std::string path() const { return _path; }
 	
 	int open(const std::string& path) THROW_FILE_ERROR {
 		_path = path;
-		return SMF<Time>::open(path);
+		return SMF::open(path);
 	}
 	
 	void close() THROW_FILE_ERROR {
-		return SMF<Time>::close();
+		return SMF::close();
 	}
 	
 	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const {
-		return SMF<Time>::read_event(delta_t, size, buf);
+		return SMF::read_event(delta_t, size, buf);
 	}
 
 private:

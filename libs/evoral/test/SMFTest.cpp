@@ -7,7 +7,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( SMFTest );
 void
 SMFTest::createNewFileTest ()
 {
-	TestSMF<Time> smf;
+	TestSMF smf;
 	smf.create("NewFile.mid");
 	smf.close();
 	CPPUNIT_ASSERT(access("NewFile.mid", R_OK) == 0);
@@ -17,7 +17,7 @@ SMFTest::createNewFileTest ()
 void
 SMFTest::takeFiveTest ()
 {
-	TestSMF<Time> smf;
+	TestSMF smf;
 	smf.open("./test/testdata/TakeFive.mid");
 	CPPUNIT_ASSERT(!smf.is_empty());
 	

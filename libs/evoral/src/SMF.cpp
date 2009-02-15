@@ -29,8 +29,7 @@ using namespace std;
 
 namespace Evoral {
 
-template<typename Time>
-SMF<Time>::~SMF()
+SMF::~SMF()
 {	
 	if (_smf) {
 		smf_delete(_smf);
@@ -39,16 +38,14 @@ SMF<Time>::~SMF()
 	} 
 }
 
-template<typename Time>
 uint16_t
-SMF<Time>::num_tracks() const
+SMF::num_tracks() const
 {
 	return _smf->number_of_tracks;
 }
 
-template<typename Time>
 uint16_t
-SMF<Time>::ppqn() const
+SMF::ppqn() const
 {
 	return _smf->ppqn;
 }
@@ -56,9 +53,8 @@ SMF<Time>::ppqn() const
 /** Seek to the specified track (1-based indexing)
  * \return 0 on success
  */
-template<typename Time>
 int
-SMF<Time>::seek_to_track(int track)
+SMF::seek_to_track(int track)
 {
 	_smf_track = smf_get_track_by_number(_smf, track);
 	if (_smf_track != NULL) {
@@ -75,9 +71,8 @@ SMF<Time>::seek_to_track(int track)
  *         -1 if the file can not be opened or created
  *         -2 if the file exists but specified track does not exist
  */
-template<typename Time>
 int
-SMF<Time>::open(const std::string& path, int track) THROW_FILE_ERROR
+SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 {
 	assert(track >= 1);
 	if (_smf) { 
@@ -113,9 +108,8 @@ SMF<Time>::open(const std::string& path, int track) THROW_FILE_ERROR
  *         -1 if the file can not be created
  *         -2 if the track can not be created
  */
-template<typename Time>
 int
-SMF<Time>::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
+SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 {
 	assert(track >= 1);
 	if (_smf) { 
@@ -149,9 +143,8 @@ SMF<Time>::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_
 	return 0;
 }
 
-template<typename Time>
 void
-SMF<Time>::close() THROW_FILE_ERROR
+SMF::close() THROW_FILE_ERROR
 {
 	if (_smf) {
 		if (smf_save(_smf, _path.c_str()) != 0) {
@@ -163,9 +156,8 @@ SMF<Time>::close() THROW_FILE_ERROR
 	}
 }
 
-template<typename Time>
 void
-SMF<Time>::seek_to_start() const
+SMF::seek_to_start() const
 {
 	_smf_track->next_event_number = 1;
 }
@@ -184,9 +176,8 @@ SMF<Time>::seek_to_start() const
  * \return event length (including status byte) on success, 0 if event was
  * skipped (e.g. a meta event), or -1 on EOF (or end of track).
  */
-template<typename Time>
 int
-SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
+SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 {
 	smf_event_t* event;
 	
@@ -221,9 +212,8 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
     }
 }
 
-template<typename Time>
 void
-SMF<Time>::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
+SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 {
 	if (size == 0) {
 		return;
@@ -244,9 +234,8 @@ SMF<Time>::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* bu
 	_empty = false;
 }
 
-template<typename Time>
 void
-SMF<Time>::begin_write()
+SMF::begin_write()
 {
 	assert(_smf_track);
 	smf_track_delete(_smf_track);
@@ -258,14 +247,12 @@ SMF<Time>::begin_write()
 	assert(_smf->number_of_tracks == 1);
 }
 
-template<typename Time>
 void
-SMF<Time>::end_write() THROW_FILE_ERROR
+SMF::end_write() THROW_FILE_ERROR
 {
 	if (smf_save(_smf, _path.c_str()) != 0)
 		throw FileError();
 }
 
-template class SMF<double>;
 
 } // namespace Evoral

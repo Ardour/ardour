@@ -29,15 +29,11 @@ typedef smf_track_struct smf_track_t;
 
 namespace Evoral {
 	
-template<typename Time> class Event;
-template<typename Time> class EventRingBuffer;
-
-#define THROW_FILE_ERROR throw(typename SMF<Time>::FileError)
+#define THROW_FILE_ERROR throw(FileError)
 
 /** Standard Midi File.
  * Currently only tempo-based time of a given PPQN is supported.
  */
-template<typename Time>
 class SMF {
 public:
 	class FileError : public std::exception {

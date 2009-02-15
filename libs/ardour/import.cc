@@ -309,7 +309,7 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 }
 
 static void
-write_midi_data_to_new_files (Evoral::SMF<double>* source, Session::import_status& status,
+write_midi_data_to_new_files (Evoral::SMF* source, Session::import_status& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
 	uint32_t buf_size = 4;
@@ -402,8 +402,8 @@ Session::import_audiofiles (import_status& status)
 			p != status.paths.end() && !status.cancel;
 			++p, ++cnt)
 	{
-		boost::shared_ptr<ImportableSource>  source;
-		std::auto_ptr< Evoral::SMF<double> > smf_reader;
+		boost::shared_ptr<ImportableSource> source;
+		std::auto_ptr<Evoral::SMF>          smf_reader;
 		const DataType type = ((*p).rfind(".mid") != string::npos) ? 
 			DataType::MIDI : DataType::AUDIO;
 		
@@ -419,7 +419,7 @@ Session::import_audiofiles (import_status& status)
 
 		} else {
 			try {
-				smf_reader = std::auto_ptr< Evoral::SMF<double> >(new Evoral::SMF<double>());
+				smf_reader = std::auto_ptr<Evoral::SMF>(new Evoral::SMF());
 				smf_reader->open(*p);
 				channels = smf_reader->num_tracks();
 			} catch (...) {

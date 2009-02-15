@@ -34,7 +34,7 @@ namespace ARDOUR {
 template<typename T> class MidiRingBuffer;
 
 /** Standard Midi File (Type 0) Source */
-class SMFSource : public MidiSource, public Evoral::SMF<double> {
+class SMFSource : public MidiSource, public Evoral::SMF {
   public:
 	enum Flag {
 		Writable = 0x1,
