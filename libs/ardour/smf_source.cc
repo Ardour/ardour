@@ -125,13 +125,13 @@ SMFSource::init (string pathstr, bool must_exist)
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
+SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t dur,
 		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	//cerr << "SMF read_unlocked " << name() << " read "
-	//<< start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
+	//<< start << ", count=" << dur << ", offset=" << stamp_offset << endl;
 
-	// 64 bits ought to be enough for anybody
+	int ret;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
 
 	_read_data_count = 0;
@@ -144,20 +144,33 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
-	// FIXME: don't seek to start and search every read (brutal!)
-	Evoral::SMF::seek_to_start();
-	
 	// FIXME: assumes tempo never changes after start
-	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
+	const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
+	
+	const double frames_per_beat = tempo.frames_per_beat(
 			_session.engine().frame_rate(),
 			_session.tempo_map().meter_at(_timeline_position));
 	
 	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * ppqn());
 
+	if (_last_read_end == 0 || start != _last_read_end) {
+		cerr << "SMFSource::read_unlocked seeking to " << start << endl;
+		Evoral::SMF::seek_to_start();
+		while (time < start_ticks) {
+			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
+			if (ret == -1) { // EOF
+				_last_read_end = start + dur;
+				return dur;
+			}
+			time += ev_delta_t; // accumulate delta time
+		}
+	}
+	
+	_last_read_end = start + dur;
+
 	while (!Evoral::SMF::eof()) {
-		int ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
+		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 		if (ret == -1) { // EOF
-			//cerr << "SMF - EOF\n";
 			break;
 		}
 		
@@ -166,31 +179,29 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 		time += ev_delta_t; // accumulate delta time
 
 		if (ret == 0) { // meta-event (skipped, just accumulate time)
-			//cerr << "SMF - META\n";
 			continue;
 		}
 
-		if (time >= start_ticks) {
-			const nframes_t ev_frame_time = (nframes_t)(
-					((time / (double)ppqn()) * frames_per_beat)) + stamp_offset;
+		assert(time >= start_ticks);
+		const nframes_t ev_frame_time = (nframes_t)(
+				((time / (double)ppqn()) * frames_per_beat)) + stamp_offset;
 
-			if (ev_frame_time <= start + cnt) {
-				dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
-			} else {
-				break;
-			}
+		if (ev_frame_time < start + dur) {
+			dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
+		} else {
+			break;
 		}
 
 		_read_data_count += ev_size;
 
 		if (ev_size > scratch_size) {
 			scratch_size = ev_size;
-		} else {
-			ev_size = scratch_size; // minimize realloc in read_event
 		}
+		
+		ev_size = scratch_size; // minimize realloc in read_event
 	}
 	
-	return cnt;
+	return dur;
 }
 
 /** All stamps in audio frames */
