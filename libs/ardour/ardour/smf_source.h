@@ -54,16 +54,6 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 
 	virtual ~SMFSource ();
 
-	/* this block of methods do nothing for regular file sources, but are significant
-	   for files used in destructive recording.
-	*/
-	// FIXME and thus are useless for MIDI.. but make MidiDiskstream compile easier! :)
-
-	virtual nframes_t last_capture_start_frame() const { return 0; }
-	virtual void      mark_capture_start (nframes_t) {}
-	virtual void      mark_capture_end () {}
-	virtual void      clear_capture_marks() {}
-
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 	int set_source_name (string newname, bool destructive);
 	
@@ -98,7 +88,6 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 	void flush_midi();
 
   private:
-
 	int init (string idstr, bool must_exist);
 
 	nframes_t read_unlocked (

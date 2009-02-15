@@ -1642,9 +1642,10 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		*/
 		
 		try {
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, c->front()->write_source->last_capture_start_frame(), total_capture, 
-									     whole_file_region_name,
-									     0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs,
+						c->front()->write_source->last_capture_start_frame(), total_capture, 
+						whole_file_region_name, 0,
+						Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
 
 			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			region->special_set_position (capture_info.front()->start);

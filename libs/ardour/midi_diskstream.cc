@@ -990,9 +990,9 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 		   */
 
 		try {
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, _write_source->last_capture_start_frame(), total_capture, 
-									     whole_file_region_name, 
-									     0, Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, 0,
+					total_capture, whole_file_region_name, 0,
+					Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
 
 			region = boost::dynamic_pointer_cast<MidiRegion> (rx);
 			region->special_set_position (capture_info.front()->start);
@@ -1011,7 +1011,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 		XMLNode &before = _playlist->get_state();
 		_playlist->freeze ();
 
-		for (buffer_position = _write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+		for (buffer_position = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 			string region_name;
 

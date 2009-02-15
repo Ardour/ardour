@@ -48,16 +48,16 @@ using namespace ARDOUR;
 
 string SMFSource::_search_path;
 
-SMFSource::SMFSource (Session& s, std::string path, Flag flags)
-	: MidiSource (s, region_name_from_path(path, false))
-	, Evoral::SMF ()
-	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
+SMFSource::SMFSource(Session& s, std::string path, Flag flags)
+	: MidiSource(s, region_name_from_path(path, false))
+	, Evoral::SMF()
+	, _flags(flags)
 	, _allow_remove_if_empty(true)
 	, _last_ev_time(0)
 {
-	/* constructor used for new internal-to-session files. file cannot exist */
+	/* Constructor used for new internal-to-session files.  File cannot exist. */
 
-	if (init (path, false)) {
+	if (init(path, false)) {
 		throw failed_constructor ();
 	}
 	
@@ -68,19 +68,19 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	assert(_name.find("/") == string::npos);
 }
 
-SMFSource::SMFSource (Session& s, const XMLNode& node)
-	: MidiSource (s, node)
-	, _flags (Flag (Writable|CanRename))
+SMFSource::SMFSource(Session& s, const XMLNode& node)
+	: MidiSource(s, node)
+	, _flags(Flag(Writable|CanRename))
 	, _allow_remove_if_empty(true)
 	, _last_ev_time(0)
 {
-	/* constructor used for existing internal-to-session files. file must exist */
+	/* Constructor used for existing internal-to-session files.  File must exist. */
 
-	if (set_state (node)) {
+	if (set_state(node)) {
 		throw failed_constructor ();
 	}
 	
-	if (init (_name, true)) {
+	if (init(_name, true)) {
 		throw failed_constructor ();
 	}
 	
@@ -125,7 +125,8 @@ SMFSource::init (string pathstr, bool must_exist)
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
+		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	//cerr << "SMF read_unlocked " << name() << " read "
 	//<< start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
@@ -137,9 +138,9 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 
 	// Output parameters for read_event (which will allocate scratch in buffer as needed)
 	uint32_t ev_delta_t = 0;
-	uint32_t ev_type = 0;
-	uint32_t ev_size = 0;
-	uint8_t* ev_buffer = 0;
+	uint32_t ev_type    = 0;
+	uint32_t ev_size    = 0;
+	uint8_t* ev_buffer  = 0;
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
@@ -173,18 +174,20 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 			const nframes_t ev_frame_time = (nframes_t)(
 					((time / (double)ppqn()) * frames_per_beat)) + stamp_offset;
 
-			if (ev_frame_time <= start + cnt)
+			if (ev_frame_time <= start + cnt) {
 				dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
-			else
+			} else {
 				break;
+			}
 		}
 
 		_read_data_count += ev_size;
 
-		if (ev_size > scratch_size)
+		if (ev_size > scratch_size) {
 			scratch_size = ev_size;
-		else
+		} else {
 			ev_size = scratch_size; // minimize realloc in read_event
+		}
 	}
 	
 	return cnt;
@@ -200,22 +203,25 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
 	Evoral::EventType type;
 	uint32_t          size;
 
-	size_t buf_capacity = 4;
-	uint8_t* buf = (uint8_t*)malloc(buf_capacity);
+	size_t   buf_capacity = 4;
+	uint8_t* buf          = (uint8_t*)malloc(buf_capacity);
 	
-	if (_model && ! _model->writing())
+	if (_model && ! _model->writing()) {
 		_model->start_write();
+	}
 
 	Evoral::MIDIEvent<double> ev(0, 0.0, 4, NULL, true);
 
 	while (true) {
 		bool ret = src.peek_time(&time);
-		if (!ret || time - _timeline_position > _length + cnt)
+		if (!ret || time - _timeline_position > _length + cnt) {
 			break;
+		}
 
 		ret = src.read_prefix(&time, &type, &size);
-		if (!ret)
+		if (!ret) {
 			break;
+		}
 
 		if (size > buf_capacity) {
 			buf_capacity = size;
@@ -233,7 +239,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
 		
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
-		if (! (ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex()) ) {
+		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
 			cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
 					<< std::hex << int(ev.buffer()[0]) << endl;
 			continue;
@@ -256,7 +262,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
 	const nframes_t oldlen = _length;
 	update_length(oldlen, cnt);
 
-	ViewDataRangeReady (_timeline_position + oldlen, cnt); /* EMIT SIGNAL */
+	ViewDataRangeReady(_timeline_position + oldlen, cnt); /* EMIT SIGNAL */
 	
 	return cnt;
 }
@@ -275,8 +281,7 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event<double>
 			name().c_str(), ev.time(), ev.size()); 
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
-	}
-	printf("\n");
+	} printf("\n");
 	*/
 	
 	assert(ev.time() >= 0);
@@ -327,15 +332,11 @@ SMFSource::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("flags"))) != 0) {
-
 		int ival;
 		sscanf (prop->value().c_str(), "0x%x", &ival);
 		_flags = Flag (ival);
-
 	} else {
-
 		_flags = Flag (0);
-
 	}
 
 	assert(_name.find("/") == string::npos);
@@ -439,19 +440,7 @@ SMFSource::move_to_trash (const string trash_dir_name)
 		      << endmsg;
 		return -1;
 	}
-#if 0
-	if (::unlink (peakpath.c_str()) != 0) {
-		PBD::error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
-				  peakpath, _path, strerror (errno))
-		      << endmsg;
-		/* try to back out */
-		rename (newpath.c_str(), _path.c_str());
-		return -1;
-	}
-	    
-	_path = newpath;
-	peakpath = "";
-#endif	
+	
 	/* file can not be removed twice, since the operation is not idempotent */
 
 	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
@@ -606,7 +595,7 @@ SMFSource::set_source_name (string newname, bool destructive)
 	_name = Glib::path_get_basename (newpath);
 	_path = newpath;
 
-	return 0;//rename_peakfile (peak_path (_path));
+	return 0;
 }
 
 void
