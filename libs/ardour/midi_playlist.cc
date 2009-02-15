@@ -124,8 +124,7 @@ struct RegionSortByLayer {
 
 /** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
 nframes_t
-MidiPlaylist::read (MidiRingBuffer<MidiBuffer::TimeType>& dst, nframes_t start,
-                     nframes_t dur, unsigned chan_n)
+MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t dur, unsigned chan_n)
 {
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).

@@ -80,10 +80,12 @@ public:
 	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
+#if 0
 	size_t read(EventSink<Time>& dst,
 	            Time             start,
 	            Time             length,
 	            Time             stamp_offset) const;
+#endif
 
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const Event<Time>& ev);
@@ -119,9 +121,10 @@ public:
 	/** Read iterator */
 	class const_iterator {
 	public:
+		const_iterator();
 		const_iterator(const Sequence<Time>& seq, Time t);
 		~const_iterator();
-
+		
 		inline bool valid() const { return !_is_end && _event; }
 		inline bool locked() const { return _locked; }
 
@@ -130,6 +133,7 @@ public:
 		const boost::shared_ptr< Event<Time> > get_event_pointer() { return _event; }
 
 		const const_iterator& operator++(); // prefix only
+
 		bool operator==(const const_iterator& other) const;
 		bool operator!=(const const_iterator& other) const { return ! operator==(other); }
 		
@@ -210,7 +214,7 @@ private:
 	ControlLists _dirty_controls;
 
 	const   const_iterator _end_iter;
-	mutable Time           _next_read;
+//	mutable Time           _next_read;
 	bool                   _percussive;
 
 	uint8_t _lowest_note;

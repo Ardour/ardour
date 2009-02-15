@@ -57,8 +57,8 @@ class MidiSource : public Source
 	virtual uint32_t    n_channels () const { return 1; }
 	
 	// FIXME: integrate this with the Readable::read interface somehow
-	virtual nframes_t midi_read (MidiRingBuffer<TimeType>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
-	virtual nframes_t midi_write (MidiRingBuffer<TimeType>& src, nframes_t cnt);
+	virtual nframes_t midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
+	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src, nframes_t cnt);
 
 	virtual void append_event_unlocked(EventTimeUnit unit, const Evoral::Event<TimeType>& ev) = 0;
 
@@ -98,11 +98,9 @@ class MidiSource : public Source
 
   protected:
 	virtual void flush_midi() = 0;
-	//virtual int flush_header() = 0;
-	//virtual int flush_footer() = 0;
 	
-	virtual nframes_t read_unlocked (MidiRingBuffer<TimeType>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
-	virtual nframes_t write_unlocked (MidiRingBuffer<TimeType>& dst, nframes_t cnt) = 0;
+	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
+	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;
 	string              _captured_for;
@@ -112,6 +110,9 @@ class MidiSource : public Source
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
+	
+	mutable Evoral::Sequence<double>::const_iterator _model_iter;
+	mutable nframes_t                                _last_read_end;
 
   private:
 	bool file_changed (string path);

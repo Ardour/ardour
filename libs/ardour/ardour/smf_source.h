@@ -102,14 +102,14 @@ class SMFSource : public MidiSource, public Evoral::SMF<double> {
 	int init (string idstr, bool must_exist);
 
 	nframes_t read_unlocked (
-			MidiRingBuffer<double>& dst,
+			MidiRingBuffer<nframes_t>& dst,
 			nframes_t start,
 			nframes_t cn,
 			nframes_t stamp_offset,
 			nframes_t negative_stamp_offset) const;
 
 	nframes_t write_unlocked (
-			MidiRingBuffer<double>& src,
+			MidiRingBuffer<nframes_t>& src,
 			nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);

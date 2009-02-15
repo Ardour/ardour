@@ -70,6 +70,15 @@ static ostream& errorout = cerr;
 // Read iterator (const_iterator)
 
 template<typename Time>
+Sequence<Time>::const_iterator::const_iterator()
+	: _seq(NULL)
+	, _is_end(true)
+	, _locked(false)
+{
+	_event = boost::shared_ptr< Event<Time> >(new Event<Time>());
+}
+
+template<typename Time>
 Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t)
 	: _seq(&seq)
 	, _is_end( (t == DBL_MAX) || seq.empty() )
@@ -395,8 +404,13 @@ template<typename Time>
 typename Sequence<Time>::const_iterator&
 Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 {
-	if (_locked && _seq != other._seq) {
-		_seq->read_unlock();
+	if (_seq != other._seq) {
+		if (_locked) {
+			_seq->read_unlock();
+		}
+		if (other._locked) {
+		   other._seq->read_lock();
+		}
 	}
 
 	_seq           = other._seq;
@@ -434,7 +448,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map, size_t size)
 	, _notes(size)
 	, _writing(false)
 	, _end_iter(*this, DBL_MAX)
-	, _next_read(UINT32_MAX)
+//	, _next_read(UINT32_MAX)
 	, _percussive(false)
 	, _lowest_note(127)
 	, _highest_note(0)
@@ -446,6 +460,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map, size_t size)
 	assert( ! _end_iter._locked);
 }
 
+#if 0
 /** Read events in frame range \a start .. \a (start + dur) into \a dst,
  * adding \a offset to each event's timestamp.
  * \return number of events written to \a dst
@@ -497,6 +512,7 @@ Sequence<Time>::read(EventSink<Time>& dst, Time start, Time dur, Time offset) co
 
 	return read_events;
 }
+#endif
 
 /** Write the controller event pointed to by \a iter to \a ev.
  * The buffer of \a ev will be allocated or resized as necessary.
@@ -582,7 +598,7 @@ Sequence<Time>::clear()
 	_notes.clear();
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();
-	_next_read = 0;
+//	_next_read = 0;
 	_read_iter = end();
 	_lock.writer_unlock();
 }

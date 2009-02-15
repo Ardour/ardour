@@ -47,7 +47,7 @@ public:
 
 	~MidiPlaylist ();
 
-	nframes_t read (MidiRingBuffer<double>& buf,
+	nframes_t read (MidiRingBuffer<nframes_t>& buf,
 			nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);

@@ -51,6 +51,8 @@ MidiSource::MidiSource (Session& s, string name)
 	, _timeline_position(0)
 	, _model(new MidiModel(this))
 	, _writing (false)
+	, _model_iter(*_model.get(), 0.0)
+	, _last_read_end(0)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -61,6 +63,8 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	, _timeline_position(0)
 	, _model(new MidiModel(this))
 	, _writing (false)
+	, _model_iter(*_model.get(), 0.0)
+	, _last_read_end(0)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -101,13 +105,29 @@ MidiSource::set_state (const XMLNode& node)
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer<MidiBuffer::TimeType>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	if (_model) {
-		//const size_t n_events =
-		_model->read(dst, start, cnt, stamp_offset - negative_stamp_offset);
-		//cout << "Read " << n_events << " events from model." << endl;
+		Evoral::Sequence<double>::const_iterator& i = _model_iter;
+		
+		if (_last_read_end == 0 || start != _last_read_end) {
+			i = _model->begin();
+			cerr << "MidiSource::midi_read seeking to " << start << endl;
+			while (i != _model->end() && i->time() < start)
+				++i;
+		}
+		
+		_last_read_end = start + cnt;
+
+		if (i == _model->end()) {
+			return cnt;
+		}
+
+		while (i->time() < start + cnt && i != _model->end()) {
+			dst.write(i->time(), i->event_type(), i->size(), i->buffer());
+			++i;
+		}
 		return cnt;
 	} else {
 		return read_unlocked (dst, start, cnt, stamp_offset, negative_stamp_offset);
@@ -115,7 +135,7 @@ MidiSource::midi_read (MidiRingBuffer<MidiBuffer::TimeType>& dst, nframes_t star
 }
 
 nframes_t
-MidiSource::midi_write (MidiRingBuffer<MidiBuffer::TimeType>& dst, nframes_t cnt)
+MidiSource::midi_write (MidiRingBuffer<nframes_t>& dst, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
 	return write_unlocked (dst, cnt);

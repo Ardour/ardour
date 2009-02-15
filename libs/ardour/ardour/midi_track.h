@@ -90,7 +90,6 @@ public:
 	void set_note_mode (NoteMode m);
 	
 protected:
-
 	XMLNode& state (bool full);
 	
 	int _set_state (const XMLNode&, bool call_base);
@@ -104,8 +103,8 @@ private:
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	MidiRingBuffer<double> _immediate_events;
-	NoteMode               _note_mode;
+	MidiRingBuffer<nframes_t> _immediate_events;
+	NoteMode                  _note_mode;
 };
 
 } /* namespace ARDOUR*/

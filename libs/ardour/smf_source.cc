@@ -125,9 +125,10 @@ SMFSource::init (string pathstr, bool must_exist)
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<double>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
-	//cerr << "SMF read_unlocked " << name() << " read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
+	//cerr << "SMF read_unlocked " << name() << " read "
+	//<< start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
 	// 64 bits ought to be enough for anybody
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
@@ -191,11 +192,11 @@ SMFSource::read_unlocked (MidiRingBuffer<double>& dst, nframes_t start, nframes_
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::write_unlocked (MidiRingBuffer<double>& src, nframes_t cnt)
+SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t cnt)
 {
 	_write_data_count = 0;
 		
-	double            time;
+	nframes_t         time;
 	Evoral::EventType type;
 	uint32_t          size;
 
@@ -233,7 +234,8 @@ SMFSource::write_unlocked (MidiRingBuffer<double>& src, nframes_t cnt)
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
 		if (! (ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex()) ) {
-			cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type " << std::hex << int(ev.buffer()[0]) << endl;
+			cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
+					<< std::hex << int(ev.buffer()[0]) << endl;
 			continue;
 		}
 		

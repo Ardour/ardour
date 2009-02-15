@@ -117,19 +117,19 @@ MidiRegion::~MidiRegion ()
 }
 
 nframes_t
-MidiRegion::read_at (MidiRingBuffer<TimeType>& out, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::read_at (MidiRingBuffer<nframes_t>& out, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
 	return _read_at (_sources, out, position, dur, chan_n, mode);
 }
 
 nframes_t
-MidiRegion::master_read_at (MidiRingBuffer<TimeType>& out, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
 	return _read_at (_master_sources, out, position, dur, chan_n, mode);
 }
 
 nframes_t
-MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer<TimeType>& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer<nframes_t>& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
 	/*cerr << "MidiRegion " << _name << "._read_at(" << position << ") - "
 		<< position << " duration: " << dur << endl;*/

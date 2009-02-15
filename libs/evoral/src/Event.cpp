@@ -68,6 +68,7 @@ Event<Timestamp>::~Event() {
 #endif // EVORAL_EVENT_ALLOC
 
 template class Event<double>;
+template class Event<uint32_t>;
 
 } // namespace Evoral
 

@@ -122,8 +122,8 @@ MidiDiskstream::init (Diskstream::Flag f)
 	allocate_temporary_buffers ();
 
 	const size_t size = _session.midi_diskstream_buffer_size();
-	_playback_buf = new MidiRingBuffer<MidiBuffer::TimeType> (size);
-	_capture_buf = new MidiRingBuffer<MidiBuffer::TimeType> (size);
+	_playback_buf = new MidiRingBuffer<nframes_t>(size);
+	_capture_buf = new MidiRingBuffer<nframes_t>(size);
 	
 	_n_channels = ChanCount(DataType::MIDI, 1);
 

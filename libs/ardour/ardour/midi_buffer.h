@@ -32,7 +32,7 @@ namespace ARDOUR {
 class MidiBuffer : public Buffer
 {
 public:
-	typedef double TimeType;
+	typedef nframes_t TimeType;
 
 	MidiBuffer(size_t capacity);
 	~MidiBuffer();
@@ -45,7 +45,7 @@ public:
 
 	bool     push_back(const Evoral::MIDIEvent<TimeType>& event);
 	bool     push_back(const jack_midi_event_t& event);
-	uint8_t* reserve(double time, size_t size);
+	uint8_t* reserve(TimeType time, size_t size);
 
 	void resize(size_t);
 

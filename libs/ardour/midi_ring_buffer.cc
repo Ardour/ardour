@@ -130,7 +130,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 	return count;
 }
 
-template class MidiRingBuffer<double>;
+template class MidiRingBuffer<nframes_t>;
 
 } // namespace ARDOUR
 
