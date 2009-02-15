@@ -80,13 +80,6 @@ public:
 	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
-#if 0
-	size_t read(EventSink<Time>& dst,
-	            Time             start,
-	            Time             length,
-	            Time             stamp_offset) const;
-#endif
-
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const Event<Time>& ev);
 	
@@ -113,10 +106,16 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
-	// useful for storing SysEx / Meta events
 	typedef std::vector< boost::shared_ptr< Event<Time> > > SysExes;
 	inline       SysExes& sysexes()       { return _sysexes; }
 	inline const SysExes& sysexes() const { return _sysexes; }
+
+private:
+	typedef std::priority_queue< boost::shared_ptr< Note<Time> >,
+	                             std::deque< boost::shared_ptr< Note<Time> > >,
+	                             LaterNoteEndComparator >
+	        ActiveNotes;
+public:
 
 	/** Read iterator */
 	class const_iterator {
@@ -146,13 +145,7 @@ public:
 
 		const Sequence<Time>*            _seq;
 		boost::shared_ptr< Event<Time> > _event;
-
-		typedef std::priority_queue< boost::shared_ptr< Note<Time> >,
-		                             std::deque< boost::shared_ptr< Note<Time> > >,
-		                             LaterNoteEndComparator >
-			ActiveNotes;
-		
-		mutable ActiveNotes _active_notes;
+		mutable ActiveNotes              _active_notes;
 
 		typedef std::vector<ControlIterator> ControlIterators;
 
@@ -165,21 +158,17 @@ public:
 	};
 	
 	const_iterator        begin(Time t=0) const { return const_iterator(*this, t); }
-	const const_iterator& end()        const { return _end_iter; }
+	const const_iterator& end()           const { return _end_iter; }
 	
-	void         read_seek(Time t)    { _read_iter = begin(t); }
-	Time         read_time() const    { return _read_iter.valid() ? _read_iter->time() : 0.0; }
+	void read_seek(Time t) { _read_iter = begin(t); }
+	Time read_time() const { return _read_iter.valid() ? _read_iter->time() : 0.0; }
 
 	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
-	                           const ControlIterator&         iter) const;
+	                           const ControlIterator&            iter) const;
 	
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-#ifndef NDEBUG
-	bool is_sorted() const;
-#endif
-	
 	void add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
 	void remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note);
 	
@@ -202,8 +191,7 @@ private:
 
 	const TypeMap& _type_map;
 	
-	Notes _notes;
-	
+	Notes   _notes;
 	SysExes _sysexes;
 	
 	typedef std::vector<size_t> WriteNotes;
@@ -214,16 +202,10 @@ private:
 	ControlLists _dirty_controls;
 
 	const   const_iterator _end_iter;
-//	mutable Time           _next_read;
 	bool                   _percussive;
 
 	uint8_t _lowest_note;
 	uint8_t _highest_note;
-
-	typedef std::priority_queue<
-			boost::shared_ptr< Note<Time> >, std::deque< boost::shared_ptr< Note<Time> > >,
-			LaterNoteEndComparator>
-		ActiveNotes;
 };
 
 

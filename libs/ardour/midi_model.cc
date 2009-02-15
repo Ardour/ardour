@@ -66,7 +66,6 @@ MidiModel::apply_command(Session& session, Command* cmd)
 {
 	session.begin_reversible_command(cmd->name());
 	(*cmd)();
-	assert(is_sorted());
 	session.commit_reversible_command(cmd);
 	set_edited(true);
 }
