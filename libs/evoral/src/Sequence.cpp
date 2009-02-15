@@ -30,6 +30,14 @@
 #include "evoral/Sequence.hpp"
 #include "evoral/TypeMap.hpp"
 
+#ifdef DEBUG_SEQUENCE
+	#include <boost/format.hpp>
+	using boost::format;
+	#define DUMP(x) cerr << (x);
+#else
+	#define DUMP(x)
+#endif
+
 using namespace std;
 
 namespace Evoral {
@@ -74,9 +82,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	, _is_end((t == DBL_MAX) || seq.empty())
 	, _locked(!_is_end)
 {
-	#ifdef DEBUG_SEQUENCE
-	cerr << "Created Iterator @ " << t << " (is end: " << _is_end << ")" << endl;
-	#endif
+	DUMP(format("Created Iterator @ %1% (is end: %2%)\n)") % t % _is_end);
 	
 	if (_is_end) {
 		return;
@@ -84,7 +90,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 
 	seq.read_lock();
 
-	// find first note which begins after t
+	// Find first note which begins after t
 	_note_iter = seq.notes().end();
 	for (typename Sequence<Time>::Notes::const_iterator i = seq.notes().begin();
 			i != seq.notes().end(); ++i) {
@@ -95,7 +101,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	}
 	assert(_note_iter == seq.notes().end() || (*_note_iter)->time() >= t);
 	
-	// find first sysex which begins after t
+	// Find first sysex which begins after t
 	_sysex_iter = seq.sysexes().end();
 	for (typename Sequence<Time>::SysExes::const_iterator i = seq.sysexes().begin();
 			i != seq.sysexes().end(); ++i) {
@@ -112,35 +118,27 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	
 	// find the earliest control event available
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
-		#ifdef DEBUG_SEQUENCE		
-		cerr << "Iterator: control: " << seq._type_map.to_symbol(i->first) << endl;
-		#endif
+		DUMP(format("Iterator: control: %1%\n") % seq._type_map.to_symbol(i->first));
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y);
 		if (!ret) {
-			#ifdef DEBUG_SEQUENCE
-			cerr << "Iterator: CC " << i->first.id() << " (size " << i->second->list()->size()
-				<< ") has no events past " << t << endl;
-			#endif
+			DUMP(format("Iterator: CC %1% (size %2%) has no events past %3%\n")
+					% i->first.id() % i->second->list()->size() % t);
 			continue;
 		}
 
 		assert(x >= 0);
 
-		#ifdef DEBUG_SEQUENCE
 		if (y < i->first.min() || y > i->first.max()) {
-			cerr << "ERROR: Controller " << i->first.symbol() << " value " << y
+			cerr << "ERROR: Controller value " << y
 				<< " out of range [" << i->first.min() << "," << i->first.max()
 				<< "], event ignored" << endl;
 			continue;
 		}
-		#endif
+		
+		DUMP(format("Iterator: CC %1% added (%2%, %3%)\n") % i->first.id() % x % y);
 
 		const ControlIterator new_iter(i->second->list(), x, y);
-
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Iterator: CC " << i->first.id() << " added (" << x << ", " << y << ")" << endl;
-		#endif
 		_control_iters.push_back(new_iter);
 
 		// if the x of the current control is less than earliest_control
@@ -195,31 +193,23 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 #endif
 	
 	if (type == NOTE_ON) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Reading note on event @ " << earliest_t << endl;
-		#endif
+		DUMP(format("Reading note on event @ %1%\n") % earliest_t);
 		_event = boost::shared_ptr< Event<Time> >(new Event<Time>((*_note_iter)->on_event(), true));
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 		_control_iter = _control_iters.end();
 	} else if (type == CONTROL) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Reading control event @ " << earliest_t << endl;
-		#endif
+		DUMP(format("Reading control event @ %1%\n") % earliest_t);
 		seq.control_to_midi_event(_event, earliest_control);
 	} else if (type == SYSEX) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Reading system exclusive event @ " << earliest_t << endl;
-		#endif
+		DUMP(format("Reading sysex event @ %1%\n") % earliest_t);
 		_event = boost::shared_ptr< Event<Time> >(new Event<Time>(*(*_sysex_iter), true));
 		++_sysex_iter;
 		_control_iter = _control_iters.end();		
 	}
 
 	if ( (! _event.get()) || _event->size() == 0) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "New iterator @ " << t << " is at end." << endl;
-		#endif
+		DUMP(format("New iterator @ %1% is at end\n") % t);
 		_is_end = true;
 
 		// eliminate possible race condition here (ugly)
@@ -230,11 +220,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 			_locked = false;
 		}
 	} else {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "New Iterator = " << _event->event_type();
-		cerr << " : " << hex << (int)((MIDIEvent<Time>*)_event.get())->type();
-		cerr << " @ " <<  _event->time() << endl;
-		#endif
+		DUMP(format("New iterator = %1% : %2% @ %3%\n")
+				% _event->event_type()
+				% (int)((MIDIEvent<Time>*)_event.get())->type()
+				% _event->time());
 	}
 	
 	assert(_event && _event->size() > 0);
@@ -256,16 +245,15 @@ Sequence<Time>::const_iterator::operator++()
 		throw std::logic_error("Attempt to iterate past end of Sequence");
 	}
 	
-	#ifdef DEBUG_SEQUENCE
-	cerr << "Iterator ++" << endl;
-	#endif
+	DUMP("Sequence::const_iterator++\n");
 	assert(_event && _event->buffer() && _event->size() > 0);
 	
 	const MIDIEvent<Time>& ev = *((MIDIEvent<Time>*)_event.get());
 
 	if (! (ev.is_note() || ev.is_cc() || ev.is_pgm_change()
 				|| ev.is_pitch_bender() || ev.is_channel_pressure() || ev.is_sysex()) ) {
-		cerr << "WARNING: Unknown event type: " << hex << int(ev.buffer()[0])
+		cerr << "WARNING: Unknown event buf: " << (void*)ev.buffer()
+			<< " data: " << hex << int(ev.buffer()[0])
 			<< int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
 	
@@ -337,33 +325,23 @@ Sequence<Time>::const_iterator::operator++()
 	}
 
 	if (type == NOTE_ON) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Iterator = note on" << endl;
-		#endif
+		DUMP("iterator = note on\n");
 		*_event = (*_note_iter)->on_event();
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Iterator = note off" << endl;
-		#endif
+		DUMP("iterator = note off\n");
 		*_event = _active_notes.top()->off_event();
 		_active_notes.pop();
 	} else if (type == CONTROL) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Iterator = control" << endl;
-		#endif
+		DUMP("iterator = control\n");
 		_seq->control_to_midi_event(_event, *_control_iter);
 	} else if (type == SYSEX) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Iterator = SysEx" << endl;
-		#endif
+		DUMP("iterator = sysex\n");
 		*_event = *(*_sysex_iter);
 		++_sysex_iter;
 	} else {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Iterator = End" << endl;
-		#endif
+		DUMP("iterator = end\n");
 		_is_end = true;
 	}
 
@@ -435,9 +413,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map, size_t size)
 	, _lowest_note(127)
 	, _highest_note(0)
 {
-	#ifdef DEBUG_SEQUENCE
-	cerr << "Sequence (size " << size << ") constructed: " << this << endl;
-	#endif
+	DUMP(format("Sequence (size %1%) constructed: %2%\n") % size % this);
 	assert(_end_iter._is_end);
 	assert( ! _end_iter._locked);
 }
@@ -541,9 +517,7 @@ template<typename Time>
 void
 Sequence<Time>::start_write()
 {
-	#ifdef DEBUG_SEQUENCE
-	cerr << this << " START WRITE, PERCUSSIVE = " << _percussive << endl;
-	#endif
+	DUMP(format("%1% : start_write (percussive = %2%)\n") % this % _percussive);
 	write_lock();
 	_writing = true;
 	for (int i = 0; i < 16; ++i)
@@ -566,9 +540,7 @@ Sequence<Time>::end_write(bool delete_stuck)
 	write_lock();
 	assert(_writing);
 
-	#ifdef DEBUG_SEQUENCE
-	cerr << this << " END WRITE: " << _notes.size() << " NOTES\n";
-	#endif
+	DUMP(format("%1% : end_write (%2% notes)\n") % this % _notes.size());
 
 	if (!_percussive && delete_stuck) {
 		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
@@ -657,10 +629,8 @@ template<typename Time>
 void
 Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_num, uint8_t velocity)
 {
-	#ifdef DEBUG_SEQUENCE
-	cerr << this << " c=" << (int)chan << " note " << (int)note_num
-		<< " on @ " << time << " v=" << (int)velocity << endl;
-	#endif
+	DUMP(format("%1% c=%2% note %3% on @ %4% v=%5%\n")
+			% this % (int)chan % (int)note_num % time % (int)velocity);
 	assert(note_num <= 127);
 	assert(chan < 16);
 	assert(_writing);
@@ -679,15 +649,11 @@ Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_nu
 	boost::shared_ptr< Note<Time> > new_note(new Note<Time>(chan, time, 0, note_num, velocity));
 	_notes.push_back(new_note);
 	if (!_percussive) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Sustained: Appending active note on " << (unsigned)(uint8_t)note_num
-			<< " channel " << chan << endl;
-		#endif
+		DUMP(format("Sustained: Appending active note on %1% channel %2%\n")
+				% (unsigned)(uint8_t)note_num % chan);
 		_write_notes[chan].push_back(_notes.size() - 1);
 	} else {
-	 	#ifdef DEBUG_SEQUENCE
-	 	cerr << "Percussive: NOT appending active note on" << endl;
-		#endif
+	 	DUMP("Percussive: NOT appending active note on\n");
 	 }
 }
 
@@ -695,19 +661,15 @@ template<typename Time>
 void
 Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_num)
 {
-	#ifdef DEBUG_SEQUENCE
-	cerr << this << " c=" << (int)chan << " note " << (int)note_num
-		<< " off @ " << time << endl;
-	#endif
+	DUMP(format("%1% c=%2% note %3% off @ %4%\n")
+			% this % (int)chan % (int)note_num % time);
 	assert(note_num <= 127);
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;
 
 	if (_percussive) {
-		#ifdef DEBUG_SEQUENCE
-		cerr << "Sequence Ignoring note off (percussive mode)" << endl;
-		#endif
+		DUMP("Sequence Ignoring note off (percussive mode)\n");
 		return;
 	}
 
@@ -725,9 +687,7 @@ Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_n
 			assert(time >= note.time());
 			note.set_length(time - note.time());
 			_write_notes[chan].erase(n);
-			#ifdef DEBUG_SEQUENCE
-			cerr << "resolved note, length: " << note.length() << endl;
-			#endif
+			DUMP(format("resolved note, length: %1%\n") % note.length());
 			resolved = true;
 			break;
 		}
@@ -743,10 +703,8 @@ template<typename Time>
 void
 Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, double value)
 {
-	#ifdef DEBUG_SEQUENCE
-	cerr << this << " " << _type_map.to_symbol(param) << " @ " << time << " \t= \t" << value
-			<< " # controls: " << _controls.size() << endl;
-	#endif
+	DUMP(format("%1% %2% @ %3%\t=\t%4% # controls: %5%\n")
+			% this % _type_map.to_symbol(param) % time % value % _controls.size());
 	boost::shared_ptr<Control> c = control(param, true);
 	c->list()->rt_add(time, value);
 }
@@ -759,8 +717,7 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev)
 	cerr << this << " SysEx @ " << ev.time() << " \t= \t [ " << hex;
 	for (size_t i=0; i < ev.size(); ++i) {
 		cerr << int(ev.buffer()[i]) << " ";
-	}
-	cerr << "]" << endl;
+	} cerr << "]" << endl;
 	#endif
 
 	boost::shared_ptr<MIDIEvent<Time> > event(new MIDIEvent<Time>(ev, true));
@@ -771,9 +728,7 @@ template<typename Time>
 void
 Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
 {
-	#ifdef DEBUG_SEQUENCE
-	cerr << this << " add note " << (int)note->note() << " @ " << note->time() << endl;
-	#endif
+	DUMP(format("%1% add note %2% @ %3%\n") % this % (int)note->note() % note->time());
 	_edited = true;
 	typename Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note,
 			note_time_comparator);
@@ -785,9 +740,7 @@ void
 Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note)
 {
 	_edited = true;
-	#ifdef DEBUG_SEQUENCE
-	cerr << this << " remove note " << (int)note->note() << " @ " << note->time() << endl;
-	#endif
+	DUMP(format("%1% remove note %2% @ %3%\n") % this % (int)note->note() % note->time());
 	for (typename Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
 		if (*(*n) == *note) {
 			_notes.erase(n);
