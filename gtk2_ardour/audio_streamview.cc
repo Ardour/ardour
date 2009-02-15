@@ -365,13 +365,16 @@ AudioStreamView::remove_crossfade (boost::shared_ptr<Region> r)
 void
 AudioStreamView::redisplay_diskstream ()
 {
-	list<RegionView *>::iterator i, tmp;
+	list<RegionView *>::iterator i;
 	list<CrossfadeView*>::iterator xi, tmpx;
 
+	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
+		(*i)->enable_display (false);
 	}
 
+	// Flag crossfade views as invalid
 	for (xi = crossfade_views.begin(); xi != crossfade_views.end(); ++xi) {
 		(*xi)->set_valid (false);
 		if ((*xi)->visible() && _layer_display != Stacked) {
@@ -379,6 +382,7 @@ AudioStreamView::redisplay_diskstream ()
 		}
 	}
 
+	// Add and display region and crossfade views, and flag them as valid
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region(
 				static_cast<StreamView*>(this),
@@ -389,53 +393,8 @@ AudioStreamView::redisplay_diskstream ()
 		if (apl)
 			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
 	}
-
-	RegionViewList copy;
-
-	// Build a list of region views sorted by layer, and remove invalids
-	for (i = region_views.begin(); i != region_views.end(); ) {
-		tmp = i;
-		tmp++;
-
-		if (!(*i)->is_valid()) {
-			delete *i;
-			region_views.erase (i);
-			i = tmp;
-			continue;
-		} else {
-			(*i)->enable_display(true);
-		}
-
-		if (copy.size() == 0) {
-			copy.push_front((*i));
-			i = tmp;
-			continue;
-		}
-
-		RegionViewList::iterator k = copy.begin();
-		RegionViewList::iterator l = copy.end();
-		l--;
-
-		if ((*i)->region()->layer() <= (*k)->region()->layer()) {
-			copy.push_front((*i));
-			i = tmp;
-			continue;
-		} else if ((*i)->region()->layer() >= (*l)->region()->layer()) {
-			copy.push_back((*i));
-			i = tmp;
-			continue;
-		}
-
-		for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-			if ((*j)->region()->layer() >= (*i)->region()->layer()) {
-				copy.insert(j, (*i));
-				break;
-			}
-		}
-
-		i = tmp;
-	}
-
+	
+	// Remove invalid crossfade views
 	for (xi = crossfade_views.begin(); xi != crossfade_views.end();) {
 		tmpx = xi;
 		tmpx++;
@@ -447,11 +406,9 @@ AudioStreamView::redisplay_diskstream ()
 
 		xi = tmpx;
 	}
-	
-	// Fix canvas layering by raising each in the sorted list order
-	for (RegionViewList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		region_layered (*i);
-	}
+
+	// Stack regions by layer, and remove invalid regions
+	layer_regions();
 }
 
 void

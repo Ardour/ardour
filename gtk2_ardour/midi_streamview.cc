@@ -236,7 +236,7 @@ MidiStreamView::redisplay_diskstream ()
 		return;
 	}
 
-	list<RegionView*>::iterator i, tmp;
+	list<RegionView*>::iterator i;
 
 	// Load models if necessary, and find note range of all our contents
 	_range_dirty = false;
@@ -264,60 +264,15 @@ MidiStreamView::redisplay_diskstream ()
 		(*i)->enable_display(false);
 	}
 
-	// Add and display region views, and flag existing ones as valid
+	// Add and display region views, and flag them as valid
 	_trackview.get_diskstream()->playlist()->foreach_region(
 			static_cast<StreamView*>(this),
 			&StreamView::add_region_view);
 
-	// Build a list of region views sorted by layer, and remove invalids
-	RegionViewList copy;
-	for (i = region_views.begin(); i != region_views.end(); ) {
-		tmp = i;
-		tmp++;
+	// Stack regions by layer, and remove invalid regions
+	layer_regions();
 
-		if (!(*i)->is_valid()) {
-			delete *i;
-			region_views.erase (i);
-			i = tmp;
-			continue;
-		}
-		
-		if (copy.size() == 0) {
-			copy.push_front((*i));
-			i = tmp;
-			continue;
-		}
-
-		RegionViewList::iterator k = copy.begin();
-		RegionViewList::iterator l = copy.end();
-		l--;
-
-		if ((*i)->region()->layer() <= (*k)->region()->layer()) {
-			copy.push_front((*i));
-			i = tmp;
-			continue;
-		} else if ((*i)->region()->layer() >= (*l)->region()->layer()) {
-			copy.push_back((*i));
-			i = tmp;
-			continue;
-		}
-
-		for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-			if ((*j)->region()->layer() >= (*i)->region()->layer()) {
-				copy.insert(j, (*i));
-				break;
-			}
-		}
-
-		i = tmp;
-	}
-	
-	// Fix canvas layering by raising each in the sorted list order
-	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-		region_layered (*j);
-	}
-	
-	// Update note range (not to regions which are already good) and draw note lines
+	// Update note range (not regions which are correct) and draw note lines
 	apply_note_range(_lowest_note, _highest_note, false);
 }
 

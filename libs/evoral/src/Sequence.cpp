@@ -134,7 +134,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 				<< "], event ignored" << endl;
 			continue;
 		}
-#endif
+		#endif
 
 		const ControlIterator new_iter(i->second->list(), x, y);
 
@@ -265,7 +265,7 @@ Sequence<Time>::const_iterator::operator++()
 
 	if (! (ev.is_note() || ev.is_cc() || ev.is_pgm_change()
 				|| ev.is_pitch_bender() || ev.is_channel_pressure() || ev.is_sysex()) ) {
-		cerr << "Unknown event type: " << hex << int(ev.buffer()[0])
+		cerr << "WARNING: Unknown event type: " << hex << int(ev.buffer()[0])
 			<< int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
 	

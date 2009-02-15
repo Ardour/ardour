@@ -158,35 +158,20 @@ AutomationStreamView::redisplay_diskstream ()
 {
 	list<RegionView *>::iterator i, tmp;
 
+	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
+		(*i)->enable_display(false);
 	}
-	
+
+	// Add and display region views, and flag them as valid
 	if (_trackview.is_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (
 			static_cast<StreamView*>(this), &StreamView::add_region_view);
 	}
-
-	for (i = region_views.begin(); i != region_views.end(); ) {
-		tmp = i;
-		tmp++;
-
-		if (!(*i)->is_valid()) {
-			delete *i;
-			region_views.erase (i);
-		} else {
-			(*i)->enable_display(true);
-			(*i)->set_height(height);
-		}
-
-		i = tmp;
-	}
 	
-	/* now fix layering */
-
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		region_layered (*i);
-	}
+	// Stack regions by layer, and remove invalid regions
+	layer_regions();
 }
 
 

@@ -26,7 +26,7 @@
 namespace Evoral {
 
 /** Return the size of the given event including the status byte,
- * or -1 if unknown (eg sysex)
+ * or -1 if unknown (e.g. sysex)
  */
 static inline int
 midi_event_size(unsigned char status)

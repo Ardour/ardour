@@ -70,11 +70,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	canvas_rect->property_y2() = (double) tv.current_height();
 	canvas_rect->raise(1); // raise above tempo lines
 
-	// DR-way
 	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
-	// 2.0 way
-	//canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
-	// (Fill/Outline colours set in derived classes)
 
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
 
@@ -223,6 +219,63 @@ StreamView::playlist_modified_weak (boost::weak_ptr<Diskstream> ds)
 	}
 
 	playlist_modified (sp);
+}
+
+void
+StreamView::layer_regions()
+{
+	// In one traversal of the region view list:
+	// - Build a list of region views sorted by layer
+	// - Remove invalid views from the actual region view list
+	RegionViewList copy;
+	list<RegionView*>::iterator i, tmp;
+	for (i = region_views.begin(); i != region_views.end(); ) {
+		tmp = i;
+		tmp++;
+
+		if (!(*i)->is_valid()) {
+			delete *i;
+			region_views.erase (i);
+			i = tmp;
+			continue;
+		} else {
+			(*i)->enable_display(true);
+		}
+
+		if (copy.size() == 0) {
+			copy.push_front((*i));
+			i = tmp;
+			continue;
+		}
+
+		RegionViewList::iterator k = copy.begin();
+		RegionViewList::iterator l = copy.end();
+		l--;
+
+		if ((*i)->region()->layer() <= (*k)->region()->layer()) {
+			copy.push_front((*i));
+			i = tmp;
+			continue;
+		} else if ((*i)->region()->layer() >= (*l)->region()->layer()) {
+			copy.push_back((*i));
+			i = tmp;
+			continue;
+		}
+
+		for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
+			if ((*j)->region()->layer() >= (*i)->region()->layer()) {
+				copy.insert(j, (*i));
+				break;
+			}
+		}
+
+		i = tmp;
+	}
+
+	// Fix canvas layering by raising each in the sorted list order
+	for (RegionViewList::iterator i = copy.begin(); i != copy.end(); ++i) {
+		region_layered (*i);
+	}
 }
 
 void

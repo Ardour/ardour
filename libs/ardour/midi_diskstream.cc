@@ -1508,3 +1508,4 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nf
 		_midi_state_tracker.resolve_notes(dst, end-start - 1 + offset);
 	}
 }
+
