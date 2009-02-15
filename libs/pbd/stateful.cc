@@ -47,7 +47,7 @@ void
 Stateful::add_extra_xml (XMLNode& node)
 {
 	if (_extra_xml == 0) {
-		_extra_xml = new XMLNode ("extra");
+		_extra_xml = new XMLNode ("Extra");
 	}
 
 	_extra_xml->remove_nodes (node.name());

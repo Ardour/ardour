@@ -94,7 +94,7 @@ Controllable::by_name (const std::string& str)
 XMLNode&
 Controllable::get_state ()
 {
-	XMLNode* node = new XMLNode (X_("controllable"));
+	XMLNode* node = new XMLNode (X_("Controllable"));
 	char buf[64];
 
 	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at

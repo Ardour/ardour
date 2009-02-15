@@ -237,7 +237,7 @@ UIConfiguration::set_state (const XMLNode& root)
 		if (node->name() == "Canvas" ||  node->name() == "UI") {
 			set_variables (*node);
 
-		} else if (node->name() == "extra") {
+		} else if (node->name() == "Extra") {
 			_extra_xml = new XMLNode (*node);
 
 		}

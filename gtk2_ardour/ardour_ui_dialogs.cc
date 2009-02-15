@@ -141,7 +141,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	/* listen to clock mode changes. don't do this earlier because otherwise as the clocks
 	   restore their modes or are explicitly set, we will cause the "new" mode to be saved
-	   back to the session XML ("extra") state.
+	   back to the session XML ("Extra") state.
 	 */
 
 	AudioClock::ModeChanged.connect (mem_fun (*this, &ARDOUR_UI::store_clock_modes));
