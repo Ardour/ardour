@@ -259,7 +259,7 @@ LV2Plugin::get_state()
 	for (uint32_t i = 0; i < parameter_count(); ++i){
 
 		if (parameter_is_input(i) && parameter_is_control(i)) {
-			child = new XMLNode("port");
+			child = new XMLNode("Port");
 			snprintf(buf, sizeof(buf), "%u", i);
 			child->add_property("number", string(buf));
 			child->add_property("symbol", port_symbol(i));
@@ -345,7 +345,7 @@ LV2Plugin::set_state(const XMLNode& node)
 		return -1;
 	}
 
-	nodes = node.children ("port");
+	nodes = node.children ("Port");
 
 	for(iter = nodes.begin(); iter != nodes.end(); ++iter){
 

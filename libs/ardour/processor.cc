@@ -190,7 +190,7 @@ Processor::set_state (const XMLNode& node)
 				}
 			}
 
-		} else if ((*niter)->name() == "extra") {
+		} else if ((*niter)->name() == "Extra") {
 			_extra_xml = new XMLNode (*(*niter));
 		} else if ((*niter)->name() == "Redirect") {
 			if ( !(legacy_active = (*niter)->property("active"))) {

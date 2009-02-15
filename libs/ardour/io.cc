@@ -1417,7 +1417,7 @@ IO::set_state (const XMLNode& node)
 			set_automation_state (*(*iter), Evoral::Parameter(GainAutomation));
 		}
 
-		if ((*iter)->name() == X_("controllable")) {
+		if ((*iter)->name() == X_("Controllable")) {
 			if ((prop = (*iter)->property("name")) != 0 && prop->value() == "gaincontrol") {
 				_gain_control->set_state (**iter);
 			}

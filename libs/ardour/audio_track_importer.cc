@@ -90,18 +90,18 @@ AudioTrackImporter::AudioTrackImporter (XMLTree const & source,
 		throw failed_constructor();
 	}
 	
-	XMLNodeList const & controllables = node.children ("controllable");
+	XMLNodeList const & controllables = node.children ("Controllable");
 	for (XMLNodeList::const_iterator it = controllables.begin(); it != controllables.end(); ++it) {
 		parse_controllable (**it);
 	}
 	
-	XMLNode * remote_control = xml_track.child ("remote_control");
+	XMLNode * remote_control = xml_track.child ("RemoteControl");
 	if (remote_control && (prop = remote_control->property ("id"))) {
 		uint32_t control_id = session.ntracks() + session.nbusses() + 1;
 		prop->set_value (to_string (control_id, std::dec));
 	}
 	
-	xml_track.remove_nodes_and_delete ("extra");
+	xml_track.remove_nodes_and_delete ("Extra");
 }
 
 AudioTrackImporter::~AudioTrackImporter ()
@@ -196,7 +196,7 @@ AudioTrackImporter::parse_io ()
 		return false;
 	}
 	
-	XMLNodeList const & controllables = io->children ("controllable");
+	XMLNodeList const & controllables = io->children ("Controllable");
 	for (XMLNodeList::const_iterator it = controllables.begin(); it != controllables.end(); ++it) {
 		parse_controllable (**it);
 	}

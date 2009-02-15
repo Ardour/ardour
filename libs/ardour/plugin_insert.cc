@@ -670,7 +670,7 @@ PluginInsert::state (bool full)
 {
 	XMLNode& node = Processor::state (full);
 
-	node.add_property ("type", _plugins[0]->state_node_name());
+	node.add_property("type", _plugins[0]->state_node_name());
 	node.add_property("unique-id", _plugins[0]->unique_id());
 	node.add_property("count", string_compose("%1", _plugins.size()));
 	node.add_child_nocopy (_plugins[0]->get_state());
@@ -791,7 +791,7 @@ PluginInsert::set_state(const XMLNode& node)
 		const char *port;
 		uint32_t port_id;
 		
-		cnodes = (*niter)->children ("port");
+		cnodes = (*niter)->children ("Port");
 		
 		for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
 			

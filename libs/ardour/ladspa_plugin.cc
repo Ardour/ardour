@@ -349,7 +349,7 @@ LadspaPlugin::get_state()
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
 		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
 
-			child = new XMLNode("port");
+			child = new XMLNode("Port");
 			snprintf(buf, sizeof(buf), "%u", i);
 			child->add_property("number", string(buf));
 			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
@@ -384,7 +384,7 @@ LadspaPlugin::set_state(const XMLNode& node)
 		return -1;
 	}
 
-	nodes = node.children ("port");
+	nodes = node.children ("Port");
 
 	for(iter = nodes.begin(); iter != nodes.end(); ++iter){
 

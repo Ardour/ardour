@@ -114,7 +114,7 @@ MidiModel::DeltaCommand::operator()()
 
 	// Store the current seek position so we can restore the read iterator
 	// after modifying the contents of the model
-	const double read_time = _model->read_time();
+	const TimeType read_time = _model->read_time();
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model->add_note_unlocked(*i);
@@ -139,7 +139,7 @@ MidiModel::DeltaCommand::undo()
 
 	// Store the current seek position so we can restore the read iterator
 	// after modifying the contents of the model
-	const double read_time = _model->read_time();
+	const TimeType read_time = _model->read_time();
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model->remove_note_unlocked(*i);
@@ -181,7 +181,7 @@ MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr< Evoral::Note<Time
 	return *xml_note;
 }
 
-boost::shared_ptr< Evoral::Note<double> >
+boost::shared_ptr< Evoral::Note<MidiModel::TimeType> >
 MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 {
 	unsigned int note;

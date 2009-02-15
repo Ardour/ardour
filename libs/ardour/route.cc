@@ -1909,7 +1909,7 @@ Route::state(bool full_state)
 	node->add_child_nocopy (_solo_control->get_state ());
 	node->add_child_nocopy (_mute_control->get_state ());
 
-	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
+	XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
 	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
 	remote_control_node->add_property (X_("id"), buf);
 	node->add_child_nocopy (*remote_control_node);
@@ -2270,22 +2270,21 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			XMLNode *cmt = *(child->children().begin());
 			_comment = cmt->content();
 
-		} else if (child->name() == X_("extra")) {
+		} else if (child->name() == X_("Extra")) {
 
 			_extra_xml = new XMLNode (*child);
 
-		} else if (child->name() == X_("controllable") && (prop = child->property("name")) != 0) {
+		} else if (child->name() == X_("Controllable") && (prop = child->property("name")) != 0) {
 			
 			if (prop->value() == "solo") {
 				_solo_control->set_state (*child);
 				_session.add_controllable (_solo_control);
-			}
-			else if (prop->value() == "mute") {
+			} else if (prop->value() == "mute") {
 				_mute_control->set_state (*child);
 				_session.add_controllable (_mute_control);
 			}
 		}
-		else if (child->name() == X_("remote_control")) {
+		else if (child->name() == X_("RemoteControl")) {
 			if ((prop = child->property (X_("id"))) != 0) {
 				int32_t x;
 				sscanf (prop->value().c_str(), "%d", &x);

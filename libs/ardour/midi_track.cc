@@ -246,7 +246,7 @@ MidiTrack::state(bool full_state)
 
 	/* Alignment: act as a proxy for the diskstream */
 	
-	XMLNode* align_node = new XMLNode (X_("alignment"));
+	XMLNode* align_node = new XMLNode (X_("Alignment"));
 	AlignStyle as = _diskstream->alignment_style ();
 	align_node->add_property (X_("style"), enum_2_string (as));
 	root.add_child_nocopy (*align_node);
@@ -329,7 +329,7 @@ MidiTrack::set_state_part_two ()
 
 	/* Alignment: act as a proxy for the diskstream */
 
-	if ((fnode = find_named_node (*pending_state, X_("alignment"))) != 0) {
+	if ((fnode = find_named_node (*pending_state, X_("Alignment"))) != 0) {
 
 		if ((prop = fnode->property (X_("style"))) != 0) {
 

@@ -1212,7 +1212,7 @@ Session::set_state (const XMLNode& node)
 	/* Object loading order:
 
 	Path
-	extra
+	Extra
 	Options/Config
 	MIDI Control // relies on data from Options/Config
 	Metadata
@@ -1228,7 +1228,7 @@ Session::set_state (const XMLNode& node)
 	ControlProtocols
 	*/
 
-	if ((child = find_named_node (node, "extra")) != 0) {
+	if ((child = find_named_node (node, "Extra")) != 0) {
 		_extra_xml = new XMLNode (*child);
 	}
 

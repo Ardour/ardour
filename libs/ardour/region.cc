@@ -1347,7 +1347,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		
 		child = (*niter);
 		
-		if (child->name () == "extra") {
+		if (child->name () == "Extra") {
 			_extra_xml = new XMLNode (*child);
 			break;
 		}

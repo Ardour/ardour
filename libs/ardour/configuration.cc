@@ -297,7 +297,7 @@ Configuration::set_state (const XMLNode& root)
 			
 			set_variables (*node, ConfigVariableBase::Config);
 			
-		} else if (node->name() == "extra") {
+		} else if (node->name() == "Extra") {
 			_extra_xml = new XMLNode (*node);
 
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
