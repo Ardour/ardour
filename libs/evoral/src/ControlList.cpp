@@ -108,6 +108,8 @@ ControlList::~ControlList()
 	for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
 		delete (*x);
 	}
+
+	delete _curve;
 }
 
 boost::shared_ptr<ControlList>
