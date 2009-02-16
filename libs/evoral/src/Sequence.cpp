@@ -191,12 +191,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 
 	if (!_event || _event->size() == 0) {
 		DUMP(format("Starting at end @ %1%\n") % t);
-		_is_end = true;
 		_type   = NIL;
-		if (_locked) {
-			_seq->read_unlock();
-			_locked = false;
-		}
+		_is_end = true;
+		_locked = false;
+		_seq->read_unlock();
 	} else {
 		DUMP(format("New iterator = %1% : %2% @ %3%\n")
 				% (int)_event->event_type()
@@ -371,6 +369,8 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 		if (other._locked) {
 		   other._seq->read_lock();
 		}
+	} else if (!_locked && other._locked) {
+		_seq->read_lock();
 	}
 
 	_seq           = other._seq;
@@ -582,6 +582,7 @@ Sequence<Time>::append(const Event<Time>& event)
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
 		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
+		write_unlock();
 		return;
 	}
 

@@ -38,6 +38,15 @@ public:
 	virtual A from(B b) const = 0;
 };
 
+
+/** A stub TimeConverter that simple statically casts between types. */
+template<typename A, typename B>
+class IdentityConverter : public TimeConverter<A,B> {
+	B to(A a)   const { return static_cast<B>(a); }
+	A from(B b) const { return static_cast<A>(b); }
+};
+
+
 } // namespace Evoral
 
 #endif // EVORAL_TIME_CONVERTER_HPP
