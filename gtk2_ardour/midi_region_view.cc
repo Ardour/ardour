@@ -602,7 +602,7 @@ MidiRegionView::display_program_change_flags()
 				
 				// find bank select msb and lsb for the program change				
 				Evoral::Parameter bank_select_msb(MidiCCAutomation, channel, MIDI_CTL_MSB_BANK);
-				boost::shared_ptr<Evoral::Control>  msb_control = _model->control(bank_select_msb);
+				boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
 				uint8_t msb = 0;
 				if (msb_control != 0) {
 					msb = uint8_t(floor(msb_control->get_float(true, event_time) + 0.5));
@@ -627,7 +627,8 @@ MidiRegionView::display_program_change_flags()
 							channel, 
 							patch_key);
 				
-				ControlEvent program_change(nframes_t(event_time), uint8_t(program_number), channel);
+				ControlEvent program_change(beats_to_frames(event_time),
+						uint8_t(program_number), channel);
 				
 				if (patch != 0) {
 					//cerr << " got patch with name " << patch->name()
