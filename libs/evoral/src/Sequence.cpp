@@ -186,10 +186,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		seq.control_to_midi_event(_event, earliest_control);
 		break;
 	default:
-		assert(false);
+		break;
 	}
 
-	if (!_event || _event->size() == 0) {
+	if (_type == NIL || !_event || _event->size() == 0) {
 		DUMP(format("Starting at end @ %1%\n") % t);
 		_type   = NIL;
 		_is_end = true;
@@ -200,10 +200,8 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 				% (int)_event->event_type()
 				% (int)((MIDIEvent<Time>*)_event.get())->type()
 				% _event->time());
+		assert(midi_event_is_valid(_event->buffer(), _event->size()));
 	}
-	
-	assert(_event && _event->size() > 0 && _event->time() >= t);
-	assert(midi_event_is_valid(_event->buffer(), _event->size()));
 }
 
 template<typename Time>
