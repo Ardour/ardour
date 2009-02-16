@@ -38,6 +38,7 @@ audio_library.cc
 audio_playlist.cc
 audio_playlist_importer.cc
 audio_port.cc
+audio_region_importer.cc
 audio_track.cc
 audio_track_importer.cc
 audioanalyser.cc
@@ -45,13 +46,13 @@ audioengine.cc
 audiofile_tagger.cc
 audiofilesource.cc
 audioregion.cc
-audio_region_importer.cc
 audiosource.cc
 auditioner.cc
 automatable.cc
 automation.cc
 automation_control.cc
 automation_list.cc
+beats_frames_converter.cc
 broadcast_info.cc
 buffer.cc
 buffer_set.cc
@@ -65,8 +66,8 @@ cycle_timer.cc
 default_click.cc
 directory_names.cc
 diskstream.cc
-element_importer.cc
 element_import_handler.cc
+element_importer.cc
 enums.cc
 event_type_map.cc
 export_channel.cc
@@ -162,8 +163,8 @@ svn_revision.cc
 tape_file_matcher.cc
 template_utils.cc
 tempo.cc
-ticker.cc
 tempo_map_importer.cc
+ticker.cc
 track.cc
 transient_detector.cc
 user_bundle.cc

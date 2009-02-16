@@ -336,7 +336,7 @@ AudioRegionImporter::prepare_sources ()
 		return;
 	}
 	
-	Session::import_status status;
+	Session::ImportStatus status;
 	
 	// Get sources that still need to be imported
 	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {

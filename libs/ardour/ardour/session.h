@@ -610,7 +610,7 @@ class Session : public PBD::StatefulDestructible
 
 	/* source management */
 
-	struct import_status : public InterThreadInfo {
+	struct ImportStatus : public InterThreadInfo {
 		string doing_what;
 
 		/* control info */
@@ -624,8 +624,8 @@ class Session : public PBD::StatefulDestructible
 		SourceList sources;
 	};
 
-	void import_audiofiles (import_status&);
-	bool sample_rate_convert (import_status&, string infile, string& outfile);
+	void import_audiofiles (ImportStatus&);
+	bool sample_rate_convert (ImportStatus&, string infile, string& outfile);
 	string build_tmp_convert_name (string file);
 
 	boost::shared_ptr<ExportHandler> get_export_handler ();

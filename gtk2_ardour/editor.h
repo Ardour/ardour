@@ -1305,7 +1305,7 @@ class Editor : public PublicEditor
 
 	/* import specific info */
 
-	struct EditorImportStatus : public ARDOUR::Session::import_status {
+	struct EditorImportStatus : public ARDOUR::Session::ImportStatus {
 	    Editing::ImportMode mode;
 	    nframes64_t pos;
 	    int target_tracks;

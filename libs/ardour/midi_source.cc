@@ -52,16 +52,20 @@ sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 MidiSource::MidiSource (Session& s, string name)
 	: Source (s, name, DataType::MIDI)
 	, _timeline_position(0)
+	, _read_data_count(0)
+	, _write_data_count(0)
+	, _converter(s, _timeline_position)
 	, _writing (false)
 	, _last_read_end(0)
 {
-	_read_data_count = 0;
-	_write_data_count = 0;
 }
 
 MidiSource::MidiSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
 	, _timeline_position(0)
+	, _read_data_count(0)
+	, _write_data_count(0)
+	, _converter(s, _timeline_position)
 	, _writing (false)
 	, _last_read_end(0)
 {
@@ -110,12 +114,7 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_
 
 	Glib::Mutex::Lock lm (_lock);
 	if (_model) {
-		// FIXME: assumes tempo never changes after start
-		const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
-		const double frames_per_beat = tempo.frames_per_beat(
-				_session.engine().frame_rate(),
-				_session.tempo_map().meter_at(_timeline_position));
-#define BEATS_TO_FRAMES(t) (((t) * frames_per_beat) + stamp_offset - negative_stamp_offset)
+#define BEATS_TO_FRAMES(t) (_converter.to(t) + stamp_offset - negative_stamp_offset)
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 		
@@ -159,6 +158,13 @@ MidiSource::file_changed (string path)
 	int e1 = stat (path.c_str(), &stat_file);
 	
 	return !e1;
+}
+
+void
+MidiSource::set_timeline_position (nframes_t when)
+{
+	_timeline_position = when;
+	_converter.set_origin(when);
 }
 
 void

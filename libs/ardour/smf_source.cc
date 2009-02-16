@@ -41,7 +41,6 @@
 #include <ardour/midi_ring_buffer.h>
 #include <ardour/session.h>
 #include <ardour/smf_source.h>
-#include <ardour/tempo.h>
 
 #include "i18n.h"
 
@@ -145,13 +144,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
-	// FIXME: assumes tempo never changes after start
-	const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
-	const double frames_per_beat = tempo.frames_per_beat(
-			_session.engine().frame_rate(),
-			_session.tempo_map().meter_at(_timeline_position));
-	
-	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * ppqn());
+	const uint64_t start_ticks = (uint64_t)(_converter.from(start) * ppqn());
 
 	if (_last_read_end == 0 || start != _last_read_end) {
 		cerr << "SMFSource::read_unlocked seeking to " << start << endl;
@@ -183,8 +176,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
 
 		assert(time >= start_ticks);
-		const nframes_t ev_frame_time = (nframes_t)(
-				((time / (double)ppqn()) * frames_per_beat)) + stamp_offset;
+		const nframes_t ev_frame_time = _converter.to(time / (double)ppqn()) + stamp_offset;
 
 		if (ev_frame_time < start + dur) {
 			dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
@@ -323,24 +315,19 @@ SMFSource::append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev)
 		return;
 	}
 	
-	// FIXME: assumes tempo never changes after start
-	const Tempo& tempo = _session.tempo_map().tempo_at(_timeline_position);
-	const double frames_per_beat = tempo.frames_per_beat(
-			_session.engine().frame_rate(),
-			_session.tempo_map().meter_at(_timeline_position));
+	const nframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
+	const double    delta_time_beats  = _converter.from(delta_time_frames);
+	const uint32_t  delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
 
-	uint32_t delta_time = (uint32_t)((ev.time() - _last_ev_time_frames)
-			/ frames_per_beat * (double)ppqn());
-
-	Evoral::SMF::append_event_delta(delta_time, ev.size(), ev.buffer());
+	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer());
 	_last_ev_time_frames = ev.time();
 
 	_write_data_count += ev.size();
 
 	if (_model) {
-		double beat_time = ev.time() / frames_per_beat;
+		const double ev_time_beats = _converter.from(ev.time());
 		const Evoral::Event<double> beat_ev(
-				ev.event_type(), beat_time, ev.size(), (uint8_t*)ev.buffer());
+				ev.event_type(), ev_time_beats, ev.size(), (uint8_t*)ev.buffer());
 		_model->append(beat_ev);
 	}
 }

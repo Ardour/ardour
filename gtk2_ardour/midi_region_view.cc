@@ -641,9 +641,6 @@ MidiRegionView::display_program_change_flags()
 				}
 			}
 			break;
-		} else if (control->first.type() == MidiCCAutomation) {
-			//cerr << " found CC Automation of channel " << int(control->first.channel())
-			//		<< " and id " << control->first.id() << endl;
 		}
 	}	
 }
@@ -1391,17 +1388,13 @@ MidiRegionView::get_position_pixels()
 nframes64_t
 MidiRegionView::beats_to_frames(double beats) const
 {
-	const Meter& m = trackview.session().tempo_map().meter_at(_region->position());
-	const Tempo& t = trackview.session().tempo_map().tempo_at(_region->position());
-	return lrint(beats * m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar());
+	return midi_region()->midi_source()->converter().to(beats);
 }
 
 double
 MidiRegionView::frames_to_beats(nframes64_t frames) const
 {
-	const Meter& m = trackview.session().tempo_map().meter_at(_region->position());
-	const Tempo& t = trackview.session().tempo_map().tempo_at(_region->position());
-	return frames / m.frames_per_bar(t, trackview.session().frame_rate()) * m.beats_per_bar();
+	return midi_region()->midi_source()->converter().from(frames);
 }
 
 void

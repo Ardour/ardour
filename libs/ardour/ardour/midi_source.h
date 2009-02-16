@@ -30,8 +30,7 @@
 #include <ardour/ardour.h>
 #include <ardour/buffer.h>
 #include <ardour/source.h>
-
-using std::string;
+#include <ardour/beats_frames_converter.h>
 
 namespace ARDOUR {
 
@@ -44,7 +43,7 @@ class MidiSource : public Source
   public:
 	typedef double TimeType;
 
-	MidiSource (Session& session, string name);
+	MidiSource (Session& session, std::string name);
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 	
@@ -66,13 +65,13 @@ class MidiSource : public Source
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
 	
-	uint64_t timeline_position ()                   { return _timeline_position; }
-	void     set_timeline_position (nframes_t when) { _timeline_position = when; }
+	uint64_t timeline_position () { return _timeline_position; }
+	void     set_timeline_position (nframes_t when);
 	
 	virtual void session_saved();
 
-	string captured_for() const { return _captured_for; }
-	void   set_captured_for (string str) { _captured_for = str; }
+	std::string captured_for() const               { return _captured_for; }
+	void        set_captured_for (std::string str) { _captured_for = str; }
 
 	uint32_t read_data_count()  const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
@@ -96,6 +95,8 @@ class MidiSource : public Source
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
 	void drop_model() { _model.reset(); }
 
+	BeatsFramesConverter& converter() { return _converter; }
+
   protected:
 	virtual void flush_midi() = 0;
 	
@@ -104,10 +105,12 @@ class MidiSource : public Source
 	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;
-	string              _captured_for;
+	std::string         _captured_for;
 	uint64_t            _timeline_position;
 	mutable uint32_t    _read_data_count;  ///< modified in read()
 	mutable uint32_t    _write_data_count; ///< modified in write()
+	
+	BeatsFramesConverter _converter;
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
@@ -116,7 +119,7 @@ class MidiSource : public Source
 	mutable nframes_t                                _last_read_end;
 
   private:
-	bool file_changed (string path);
+	bool file_changed (std::string path);
 };
 
 }

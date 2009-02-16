@@ -257,7 +257,7 @@ compose_status_message (const string& path,
 }
 
 static void
-write_audio_data_to_new_files (ImportableSource* source, Session::import_status& status,
+write_audio_data_to_new_files (ImportableSource* source, Session::ImportStatus& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
 	const nframes_t nframes = ResampledImportableSource::blocksize;
@@ -309,8 +309,8 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 }
 
 static void
-write_midi_data_to_new_files (Evoral::SMF* source, Session::import_status& status,
-			       vector<boost::shared_ptr<Source> >& newfiles)
+write_midi_data_to_new_files (Evoral::SMF* source, Session::ImportStatus& status,
+		vector<boost::shared_ptr<Source> >& newfiles)
 {
 	uint32_t buf_size = 4;
 	uint8_t* buf      = (uint8_t*)malloc(buf_size);
@@ -354,20 +354,14 @@ write_midi_data_to_new_files (Evoral::SMF* source, Session::import_status& statu
 			if (status.progress < 0.99)
 				status.progress += 0.01;
 		}
-			
-		nframes_t timeline_position = 0; // FIXME: ?
 
-		// FIXME: kluuuuudge: assumes tempo never changes after start
-		const double frames_per_beat = smfs->session().tempo_map().tempo_at(
-				timeline_position).frames_per_beat(
-					smfs->session().engine().frame_rate(),
-					smfs->session().tempo_map().meter_at(timeline_position));
-
-		smfs->update_length(0, (nframes_t) ceil ((t / (double)source->ppqn()) * frames_per_beat));
+		const double length_beats = ceil(t / (double)source->ppqn());
+		smfs->update_length(0, smfs->converter().to(length_beats));
 		smfs->end_write();
 
-		if (status.cancel)
+		if (status.cancel) {
 			break;
+		}
 	}
 
 	} catch (...) {
@@ -382,11 +376,11 @@ remove_file_source (boost::shared_ptr<Source> source)
 }
 
 // This function is still unable to cleanly update an existing source, even though
-// it is possible to set the import_status flag accordingly. The functinality
+// it is possible to set the ImportStatus flag accordingly. The functinality
 // is disabled at the GUI until the Source implementations are able to provide
 // the necessary API.
 void
-Session::import_audiofiles (import_status& status)
+Session::import_audiofiles (ImportStatus& status)
 {
 	uint32_t cnt = 1;
 	typedef vector<boost::shared_ptr<Source> > Sources;

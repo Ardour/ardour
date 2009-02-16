@@ -62,19 +62,12 @@ Quantize::run (boost::shared_ptr<Region> r)
 
 	boost::shared_ptr<MidiModel> model = src->model();
 	
-	// FIXME: Model really needs to be switched to beat time (double) ASAP
-	
-	const Tempo& t = session.tempo_map().tempo_at(r->start());
-	const Meter& m = session.tempo_map().meter_at(r->start());
-
-	double q_frames = _q * (m.frames_per_bar(t, session.frame_rate()) / (double)m.beats_per_bar());
-
 	for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = model->notes().begin();
 			i != model->notes().end(); ++i) {
-		const double new_time = lrint((*i)->time() / q_frames) * q_frames;
-		double new_dur = lrint((*i)->length() / q_frames) * q_frames;
+		const double new_time = lrint((*i)->time() / _q) * _q;
+		double new_dur = lrint((*i)->length() / _q) * _q;
 		if (new_dur == 0.0)
-			new_dur = q_frames;
+			new_dur = _q;
 		
 		(*i)->set_time(new_time);
 		(*i)->set_length(new_dur);
