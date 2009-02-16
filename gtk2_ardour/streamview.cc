@@ -57,8 +57,8 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	, region_color(_trackview.color())
 	, stream_base_color(0xFFFFFFFF)
 	, _layers (1)
-	, height(tv.height)
 	, _layer_display (Overlaid)
+	, height(tv.height)
 	, last_rec_data_frame(0)
 {
 	/* set_position() will position the group */

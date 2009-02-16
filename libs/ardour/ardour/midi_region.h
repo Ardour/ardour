@@ -72,7 +72,7 @@ class MidiRegion : public Region
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
 
-	int separate_by_channel (ARDOUR::Session&, vector<MidiRegion*>&) const;
+	int separate_by_channel (ARDOUR::Session&, vector< boost::shared_ptr<Region> >&) const;
 	
 	/* automation */
 	

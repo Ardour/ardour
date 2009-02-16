@@ -254,6 +254,11 @@ class Region
 		// no transients, but its OK
 		return 0;
 	}
+	
+	virtual int separate_by_channel (ARDOUR::Session&,
+			std::vector< boost::shared_ptr<Region> >&) const {
+		return 0;
+	}
 
 	void invalidate_transients ();	
 

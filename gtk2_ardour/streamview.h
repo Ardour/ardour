@@ -42,8 +42,8 @@ namespace ARDOUR {
 
 struct RecBoxInfo {
 	ArdourCanvas::SimpleRect* rectangle;
-	nframes_t            start;
-	nframes_t            length;
+	nframes_t                 start;
+	nframes_t                 length;
 };
 
 class PublicEditor;
@@ -107,19 +107,16 @@ public:
 protected:
 	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* group = NULL);
 	
-//private: (FIXME?)
-
 	void         transport_changed();
 	void         transport_looped();
 	void         rec_enable_changed();
 	void         sess_rec_enable_changed();
 	virtual void setup_rec_box () = 0;
 	void         update_rec_box ();
-	//virtual void update_rec_regions () = 0;
 	
-	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false) = 0;
+	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>,
+			bool wait_for_waves, bool recording = false) = 0;
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
-	//void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>); (unused)
 
 	void         display_diskstream (boost::shared_ptr<ARDOUR::Diskstream>);
 	virtual void undisplay_diskstream ();
@@ -158,14 +155,14 @@ protected:
 	sigc::connection         playlist_change_connection;
 
 	ARDOUR::layer_t _layers;
+	LayerDisplay    _layer_display;
+	
 	double height;
-	LayerDisplay _layer_display;
 
 	list<sigc::connection> rec_data_ready_connections;
 	jack_nframes_t         last_rec_data_frame;
 
 private:
-
 	void update_coverage_frames ();
 };
 

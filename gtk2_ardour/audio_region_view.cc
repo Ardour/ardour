@@ -200,12 +200,11 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
  		set_fade_visibility (false);
  	}
 
-	string line_name = _region->name();
-	line_name += ':';
-	line_name += "gain";
+	const string line_name = _region->name() + ":gain";
 
 	if (!Profile->get_sae()) {
-		gain_line = new AudioRegionGainLine (line_name, trackview.session(), *this, *group, audio_region()->envelope());
+		gain_line = new AudioRegionGainLine (line_name, trackview.session(), *this, *group,
+				audio_region()->envelope());
 	}
 
 	if (!(_flags & EnvelopeVisible)) {

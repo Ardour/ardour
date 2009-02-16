@@ -303,33 +303,9 @@ MidiRegion::recompute_at_start ()
 }
 
 int
-MidiRegion::separate_by_channel (Session& session, vector<MidiRegion*>& v) const
+MidiRegion::separate_by_channel (ARDOUR::Session&, vector< boost::shared_ptr<Region> >&) const
 {
-	// Separate by MIDI channel?  bit different from audio since this is separating based
-	// on the actual contained data and destructively modifies and creates new sources..
-	
-#if 0
-	SourceList srcs;
-	string new_name;
-
-	for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-
-		srcs.clear ();
-		srcs.push_back (*i);
-
-		/* generate a new name */
-		
-		if (session.region_name (new_name, _name)) {
-			return -1;
-		}
-
-		/* create a copy with just one source */
-
-		v.push_back (new MidiRegion (srcs, _start, _length, new_name, _layer, _flags));
-	}
-#endif
-
-	// Actually, I would prefer not if that's alright
+	// TODO
 	return -1;
 }
 

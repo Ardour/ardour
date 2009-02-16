@@ -142,10 +142,7 @@ AutomationRegionView::set_height (double h)
 bool
 AutomationRegionView::set_position (nframes_t pos, void* src, double* ignored)
 {
-	// Do nothing, region parent will move us
-	//return false;
-	
-	return RegionView::set_position(pos, src, ignored); // FIXME: eventually...
+	return RegionView::set_position(pos, src, ignored);
 }
 
 

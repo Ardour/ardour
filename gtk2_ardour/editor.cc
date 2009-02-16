@@ -4966,21 +4966,18 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelec
 	}
 
 	for (TrackSelection::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
-	
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*t);
-
-		if (atv) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
+		if (rtv) {
 			boost::shared_ptr<Diskstream> ds;
 			boost::shared_ptr<Playlist> pl;
 			
-			if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
+			if ((ds = rtv->get_diskstream()) && ((pl = ds->playlist()))) {
 
-				Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)where * ds->speed()));
+				Playlist::RegionList* regions = pl->regions_at (
+						(nframes64_t) floor ( (double)where * ds->speed()));
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
-
-					RegionView* rv = atv->audio_view()->find_view (*i);
-
+					RegionView* rv = rtv->view()->find_view (*i);
 					if (rv) {
 						rs.add (rv);
 					}
@@ -5004,20 +5001,19 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSe
 	}
 
 	for (TrackSelection::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
-	
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*t);
-
-		if (atv) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
+		if (rtv) {
 			boost::shared_ptr<Diskstream> ds;
 			boost::shared_ptr<Playlist> pl;
 			
-			if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
+			if ((ds = rtv->get_diskstream()) && ((pl = ds->playlist()))) {
 
-				Playlist::RegionList* regions = pl->regions_touched ((nframes64_t) floor ( (double)where * ds->speed()), max_frames);
+				Playlist::RegionList* regions = pl->regions_touched (
+						(nframes64_t) floor ( (double)where * ds->speed()), max_frames);
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 
-					RegionView* rv = atv->audio_view()->find_view (*i);
+					RegionView* rv = rtv->view()->find_view (*i);
 
 					if (rv) {
 						rs.push_back (rv);

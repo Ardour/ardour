@@ -1014,20 +1014,17 @@ AudioRegion::recompute_at_start ()
 }
 
 int
-AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<AudioRegion> >& v) const
+AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Region> >& v) const
 {
 	SourceList srcs;
 	string new_name;
-	int n;
+	int n = 0;
 
 	if (_sources.size() < 2) {
 		return 0;
 	}
 
-	n = 0;
-
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-
 		srcs.clear ();
 		srcs.push_back (*i);
 
@@ -1044,16 +1041,13 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Aud
 			new_name += ('0' + n + 1);
 		}
 
-		/* create a copy with just one source. prevent if from being thought of as "whole file" even if 
-		   it covers the entire source file(s).
+		/* create a copy with just one source. prevent if from being thought of as
+		   "whole file" even if it covers the entire source file(s).
 		 */
 
 		Flag f = Flag (_flags & ~WholeFile);
 
-		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, f);
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-
-		v.push_back (ar);
+		v.push_back(RegionFactory::create (srcs, _start, _length, new_name, _layer, f));
 		
 		++n;
 	}
