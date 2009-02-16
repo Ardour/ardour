@@ -23,6 +23,7 @@
 
 #include <pbd/enumwriter.h>
 #include <midi++/events.h>
+#include <evoral/midi_util.h>
 
 #include <ardour/midi_track.h>
 #include <ardour/midi_diskstream.h>
@@ -662,11 +663,10 @@ MidiTrack::midi_panic()
 bool
 MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 {
-	/*printf("Write immediate event: ");
-	for (size_t i=0; i < size; ++i) {
-		printf("%X ", buf[i]);
+	if (!Evoral::midi_event_is_valid(buf, size)) {
+		cerr << "WARNING: Ignoring illegal immediate MIDI event" << endl;
+		return false;
 	}
-	printf("\n");*/
 	const uint32_t type = EventTypeMap::instance().midi_event_type(buf[0]);
 	return (_immediate_events.write(0, type, size, buf) == size);
 }

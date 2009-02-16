@@ -581,7 +581,7 @@ Sequence<Time>::append(const Event<Time>& event)
 	assert(_writing);
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
-		cerr << "WARNING: Ignoring illegal MIDI event" << endl;
+		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
 		return;
 	}
 

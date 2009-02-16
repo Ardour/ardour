@@ -99,7 +99,8 @@ class MidiSource : public Source
   protected:
 	virtual void flush_midi() = 0;
 	
-	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
+	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
+			nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
 	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;

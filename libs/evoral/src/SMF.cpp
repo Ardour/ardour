@@ -228,7 +228,7 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 	} printf("\n");*/
 
 	if (!midi_event_is_valid(buf, size)) {
-		cerr << "WARNING: Ignoring illegal MIDI event" << endl;
+		cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
 		return;
 	}
 

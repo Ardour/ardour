@@ -135,8 +135,12 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 	    << " stamp size: " << stamp_size << " \n";*/
 	
 	if (_size + stamp_size + ev.size() >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" 
-		     << endl;
+		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		return false;
+	}
+
+	if (!Evoral::midi_event_is_valid(ev.buffer(), ev.size())) {
+		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
 		return false;
 	}
 
@@ -164,6 +168,11 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 	const size_t stamp_size = sizeof(TimeType);
 	if (_size + stamp_size + ev.size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		return false;
+	}
+	
+	if (!Evoral::midi_event_is_valid(ev.buffer, ev.size)) {
+		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
 		return false;
 	}
 

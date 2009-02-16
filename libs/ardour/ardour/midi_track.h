@@ -95,7 +95,6 @@ protected:
 	int _set_state (const XMLNode&, bool call_base);
 
 private:
-
 	void write_controller_messages(MidiBuffer& buf,
 			nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 
