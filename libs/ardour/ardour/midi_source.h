@@ -43,7 +43,7 @@ class MidiSource : public Source
   public:
 	typedef double TimeType;
 
-	MidiSource (Session& session, std::string name);
+	MidiSource (Session& session, std::string name, Source::Flag flags = Source::Flag(0));
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 	

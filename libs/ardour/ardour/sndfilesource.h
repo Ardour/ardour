@@ -60,7 +60,7 @@ class SndFileSource : public AudioFileSource {
 	bool one_of_several_channels () const;
 
 	static void setup_standard_crossfades (nframes_t sample_rate);
-	static const AudioFileSource::Flag default_writable_flags;
+	static const Source::Flag default_writable_flags;
 
 	static int get_soundfile_info (const Glib::ustring& path, SoundFileInfo& _info, string& error_msg);
 

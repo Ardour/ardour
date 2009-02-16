@@ -87,9 +87,9 @@ struct SizedSampleBuffer {
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
 /** Constructor used for existing internal-to-session files.  File must exist. */
-AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
-	: AudioSource (s, path), _flags (flags),
-	  _channel (0)
+AudioFileSource::AudioFileSource (Session& s, ustring path, Source::Flag flags)
+	: AudioSource (s, path)
+	, _channel (0)
 {
 	_is_embedded = AudioFileSource::determine_embeddedness (path);
 
@@ -100,9 +100,10 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 }
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
-AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
-	: AudioSource (s, path), _flags (flags),
-	  _channel (0)
+AudioFileSource::AudioFileSource (Session& s, ustring path, Source::Flag flags,
+		SampleFormat samp_format, HeaderFormat hdr_format)
+	: AudioSource (s, path)
+	,  _channel (0)
 {
 	_is_embedded = false;
 
@@ -113,7 +114,7 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFo
 
 /** Constructor used for existing internal-to-session files.  File must exist. */
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
-	: AudioSource (s, node), _flags (Flag (Writable|CanRename))
+	: AudioSource (s, node)
 	/* _channel is set in set_state() or init() */
 {
 	if (set_state (node)) {
@@ -151,14 +152,14 @@ int
 AudioFileSource::init (ustring pathstr, bool must_exist)
 {
 	_length = 0;
-	timeline_position = 0;
+	_timeline_position = 0;
 	_peaks_built = false;
 
-	if (!find (pathstr, must_exist, file_is_new, _channel)) {
+	if (!find (pathstr, must_exist, _file_is_new, _channel)) {
 		throw non_existent_source ();
 	}
 
-	if (file_is_new && must_exist) {
+	if (_file_is_new && must_exist) {
 		return -1;
 	}
 
@@ -273,7 +274,6 @@ AudioFileSource::get_state ()
 {
 	XMLNode& root (AudioSource::get_state());
 	char buf[32];
-	root.add_property (X_("flags"), enum_2_string (_flags));
 	snprintf (buf, sizeof (buf), "%u", _channel);
 	root.add_property (X_("channel"), buf);
 	return root;
@@ -286,13 +286,6 @@ AudioFileSource::set_state (const XMLNode& node)
 
 	if (AudioSource::set_state (node)) {
 		return -1;
-	}
-
-	if ((prop = node.property (X_("flags"))) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	} else {
-		_flags = Flag (0);
-
 	}
 
 	if ((prop = node.property (X_("channel"))) != 0) {
@@ -614,7 +607,7 @@ AudioFileSource::set_header_position_offset (nframes_t offset)
 void
 AudioFileSource::set_timeline_position (int64_t pos)
 {
-	timeline_position = pos;
+	_timeline_position = pos;
 }
 
 void
@@ -678,7 +671,7 @@ int
 AudioFileSource::setup_peakfile ()
 {
 	if (!(_flags & NoPeakFile)) {
-		return initialize_peakfile (file_is_new, _path);
+		return initialize_peakfile (_file_is_new, _path);
 	} else {
 		return 0;
 	}

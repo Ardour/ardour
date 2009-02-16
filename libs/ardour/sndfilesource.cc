@@ -43,10 +43,11 @@ using Glib::ustring;
 gain_t* SndFileSource::out_coefficient = 0;
 gain_t* SndFileSource::in_coefficient = 0;
 nframes_t SndFileSource::xfade_frames = 64;
-const AudioFileSource::Flag SndFileSource::default_writable_flags = AudioFileSource::Flag (AudioFileSource::Writable|
-											   AudioFileSource::Removable|
-											   AudioFileSource::RemovableIfEmpty|
-											   AudioFileSource::CanRename);
+const Source::Flag SndFileSource::default_writable_flags = Source::Flag (
+		Source::Writable |
+		Source::Removable |
+		Source::RemovableIfEmpty |
+		Source::CanRename );
 
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	: AudioFileSource (s, node)
@@ -82,7 +83,7 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 	   existing ones.
 	*/
 
-	file_is_new = true;
+	_file_is_new = true;
 
 	switch (hf) {
 	case CAF:
@@ -187,7 +188,7 @@ SndFileSource::init ()
 
 	if (destructive()) {	
 		xfade_buf = new Sample[xfade_frames];
-		timeline_position = header_position_offset;
+		_timeline_position = header_position_offset;
 	}
 
 	AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &SndFileSource::handle_header_position_change));
@@ -405,7 +406,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 		_capture_end = false;
 		
 		/* move to the correct location place */
-		file_pos = capture_start_frame - timeline_position;
+		file_pos = capture_start_frame - _timeline_position;
 		
 		// split cnt in half
 		nframes_t subcnt = cnt / 2;
@@ -437,7 +438,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 		_capture_end = false;
 		
 		/* move to the correct location place */
-		file_pos = capture_start_frame - timeline_position;
+		file_pos = capture_start_frame - _timeline_position;
 
 		if (crossfade (data, cnt, 1) != cnt) {
 			return 0;
@@ -539,7 +540,7 @@ SndFileSource::set_header_timeline_position ()
 		return;
 	}
 
-	_broadcast_info->set_time_reference (timeline_position);
+	_broadcast_info->set_time_reference (_timeline_position);
 
 	if (!_broadcast_info->write_to_file (sf)) {
 		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
@@ -571,7 +572,7 @@ SndFileSource::write_float (Sample* data, nframes_t frame_pos, nframes_t cnt)
 nframes_t
 SndFileSource::natural_position() const
 {
-	return timeline_position;
+	return _timeline_position;
 }
 
 bool
@@ -583,10 +584,10 @@ SndFileSource::set_destructive (bool yn)
 			xfade_buf = new Sample[xfade_frames];
 		}
 		clear_capture_marks ();
-		timeline_position = header_position_offset;
+		_timeline_position = header_position_offset;
 	} else {
 		_flags = Flag (_flags & ~Destructive);
-		timeline_position = 0;
+		_timeline_position = 0;
 		/* leave xfade buf alone in case we need it again later */
 	}
 
@@ -604,7 +605,7 @@ void
 SndFileSource::mark_capture_start (nframes_t pos)
 {
 	if (destructive()) {
-		if (pos < timeline_position) {
+		if (pos < _timeline_position) {
 			_capture_start = false;
 		} else {
 			_capture_start = true;
@@ -762,7 +763,7 @@ SndFileSource::handle_header_position_change ()
 			error << string_compose(_("Filesource: start time is already set for existing file (%1): Cannot change start time."), _path ) << endmsg;
 			//in the future, pop up a dialog here that allows user to regenerate file with new start offset
 		} else if (writable()) {
-			timeline_position = header_position_offset;
+			_timeline_position = header_position_offset;
 			set_header_timeline_position ();  //this will get flushed if/when the file is recorded to
 		}
 	}

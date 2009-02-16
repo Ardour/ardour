@@ -83,7 +83,7 @@ setup_enum_writer ()
 	AutoConnectOption _AutoConnectOption;
 	Session::StateOfTheState _Session_StateOfTheState;
 	Route::Flag _Route_Flag;
-	AudioFileSource::Flag _AudioFileSource_Flag;
+	Source::Flag _Source_Flag;
 	Diskstream::Flag _Diskstream_Flag;
 	Location::Flags _Location_Flags;
 	RouteGroup::Flag _RouteGroup_Flag;
@@ -336,15 +336,15 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Route, ControlOut);
 	REGISTER_BITS (_Route_Flag);
 
-	REGISTER_CLASS_ENUM (AudioFileSource, Writable);
-	REGISTER_CLASS_ENUM (AudioFileSource, CanRename);
-	REGISTER_CLASS_ENUM (AudioFileSource, Broadcast);
-	REGISTER_CLASS_ENUM (AudioFileSource, Removable);
-	REGISTER_CLASS_ENUM (AudioFileSource, RemovableIfEmpty);
-	REGISTER_CLASS_ENUM (AudioFileSource, RemoveAtDestroy);
-	REGISTER_CLASS_ENUM (AudioFileSource, NoPeakFile);
-	REGISTER_CLASS_ENUM (AudioFileSource, Destructive);
-	REGISTER_BITS (_AudioFileSource_Flag);
+	REGISTER_CLASS_ENUM (Source, Writable);
+	REGISTER_CLASS_ENUM (Source, CanRename);
+	REGISTER_CLASS_ENUM (Source, Broadcast);
+	REGISTER_CLASS_ENUM (Source, Removable);
+	REGISTER_CLASS_ENUM (Source, RemovableIfEmpty);
+	REGISTER_CLASS_ENUM (Source, RemoveAtDestroy);
+	REGISTER_CLASS_ENUM (Source, NoPeakFile);
+	REGISTER_CLASS_ENUM (Source, Destructive);
+	REGISTER_BITS (_Source_Flag);
 
 	REGISTER_CLASS_ENUM (AudioRegion, Linear);
 	REGISTER_CLASS_ENUM (AudioRegion, Fast);

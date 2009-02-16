@@ -51,12 +51,11 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	virtual ~AudioSource ();
 
 	nframes64_t readable_length() const { return _length; }
-	uint32_t    n_channels() const { return 1; }
+	uint32_t    n_channels()      const { return 1; }
 
 	virtual nframes_t available_peaks (double zoom) const;
 
-	/* stopgap until nframes_t becomes nframes64_t. this function is needed by the Readable interface */
-
+	/** Stopgap for Readable until nframes_t becomes nframes64_t. */
 	virtual nframes64_t read (Sample *dst, nframes64_t start, nframes64_t cnt, int channel) const {
 		/* XXX currently ignores channel, assuming that source is always mono, which
 		   historically has been true.
@@ -80,7 +79,8 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
- 	int read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
+ 	int read_peaks (PeakData *peaks, nframes_t npeaks,
+			nframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
 
  	int  build_peaks ();
 	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
@@ -126,7 +126,8 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 
 	int initialize_peakfile (bool newfile, Glib::ustring path);
 	int build_peaks_from_scratch ();
-	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready_signal);
+	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt,
+			bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
 	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()
@@ -134,21 +135,23 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	virtual nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const = 0;
 	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
 	virtual Glib::ustring peak_path(Glib::ustring audio_path) = 0;
-	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path, Glib::ustring audio_path) = 0;
+	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
+	                                            Glib::ustring audio_path) = 0;
 	
 	void update_length (nframes_t pos, nframes_t cnt);
 
- 	virtual int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, 
-					 double samples_per_visual_peak, nframes_t fpp) const;
+ 	virtual int read_peaks_with_fpp (PeakData *peaks,
+			nframes_t npeaks, nframes_t start, nframes_t cnt, 
+			double samples_per_visual_peak, nframes_t fpp) const;
 
-	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, 
-				     bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);	
+	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt,
+			bool force, bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);	
 
   private:
-	int peakfile;
+	int       peakfile;
 	nframes_t peak_leftover_cnt;
 	nframes_t peak_leftover_size;
-	Sample* peak_leftovers;
+	Sample*   peak_leftovers;
 	nframes_t peak_leftover_frame;
 
 	bool file_changed (Glib::ustring path);

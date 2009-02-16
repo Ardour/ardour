@@ -40,7 +40,18 @@ class Playlist;
 class Source : public SessionObject, public ARDOUR::Readable
 {
   public:
-	Source (Session&, const std::string& name, DataType type);
+	enum Flag {
+		Writable = 0x1,
+		CanRename = 0x2,
+		Broadcast = 0x4,
+		Removable = 0x8,
+		RemovableIfEmpty = 0x10,
+		RemoveAtDestroy = 0x20,
+		NoPeakFile = 0x40,
+		Destructive = 0x80
+	};
+
+	Source (Session&, const std::string& name, DataType type, Flag flags=Flag(0));
 	Source (Session&, const XMLNode&);
 	
 	virtual ~Source ();
@@ -68,7 +79,7 @@ class Source : public SessionObject, public ARDOUR::Readable
 	virtual bool destructive()    const { return false; }
 	virtual bool length_mutable() const { return false; }
 	
-	void use () { _in_use++; }
+	void use ()    { _in_use++; }
 	void disuse () { if (_in_use) { _in_use--; } }
 	
 	void add_playlist (boost::shared_ptr<ARDOUR::Playlist>);
@@ -95,9 +106,12 @@ class Source : public SessionObject, public ARDOUR::Readable
 	virtual const Evoral::TimeConverter<double, nframes_t>& time_converter() const {
 		return Evoral::IdentityConverter<double, nframes_t>();
 	}
+	
+	Flag flags() const { return _flags; }
 
   protected:
 	DataType            _type;
+	Flag                _flags;
 	time_t              _timestamp;
 	nframes_t           _length;
 	bool                _analysed;

@@ -45,7 +45,8 @@ CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
 
 CoreAudioSource::CoreAudioSource (Session& s, const string& path, int chn, Flag flags)
 	/* files created this way are never writable or removable */
-	: AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
+	: AudioFileSource (s, path,
+			Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	_channel = chn;
 	init ();

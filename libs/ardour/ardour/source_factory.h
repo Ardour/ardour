@@ -26,13 +26,13 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ardour/source.h>
-#include <ardour/audiofilesource.h>
 
 class XMLNode;
 
 namespace ARDOUR {
 
 class Session;
+class AudioSource;
 
 class SourceFactory {
   public:
@@ -41,16 +41,18 @@ class SourceFactory {
 	static sigc::signal<void,boost::shared_ptr<Source> > SourceCreated;
 
 	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
-	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node, nframes_t nframes, float sample_rate);
+	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,
+			nframes_t nframes, float sample_rate);
 
-	static boost::shared_ptr<Source> createReadable (DataType type, Session&, std::string path, int chn, AudioFileSource::Flag flags,
-							 bool announce = true, bool async = false);
-	static boost::shared_ptr<Source> createWritable (DataType type, Session&, std::string name, bool destructive, nframes_t rate, 
-							 bool announce = true, bool async = false);
+	static boost::shared_ptr<Source> createReadable (DataType type, Session&, std::string path,
+			int chn, Source::Flag flags, bool announce = true, bool async = false);
 
-	static Glib::Cond*                              PeaksToBuild;
-	static Glib::StaticMutex                        peak_building_lock;
-	static std::list<boost::weak_ptr<AudioSource> > files_with_peaks;
+	static boost::shared_ptr<Source> createWritable (DataType type, Session&, std::string name,
+			bool destructive, nframes_t rate, bool announce = true, bool async = false);
+
+	static Glib::Cond*                               PeaksToBuild;
+	static Glib::StaticMutex                         peak_building_lock;
+	static std::list< boost::weak_ptr<AudioSource> > files_with_peaks;
 
 	static int setup_peakfile (boost::shared_ptr<Source>, bool async);
 };

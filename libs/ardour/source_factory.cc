@@ -179,7 +179,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (DataType type, Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool defer_peaks)
+SourceFactory::createReadable (DataType type, Session& s, string path, int chn, Source::Flag flags, bool announce, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
 
@@ -244,13 +244,13 @@ SourceFactory::createWritable (DataType type, Session& s, std::string path, bool
 	/* this might throw failed_constructor(), which is OK */
 	
 	if (type == DataType::AUDIO) {
-		boost::shared_ptr<Source> ret (new SndFileSource 
-					       (s, path, 
-						Config->get_native_file_data_format(),
-						Config->get_native_file_header_format(),
-						rate,
-						(destructive ? AudioFileSource::Flag (SndFileSource::default_writable_flags | AudioFileSource::Destructive) :
-						 SndFileSource::default_writable_flags)));	
+		boost::shared_ptr<Source> ret (new SndFileSource (s, path, 
+				Config->get_native_file_data_format(),
+				Config->get_native_file_header_format(),
+				rate,
+				(destructive
+				 	? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)
+					: SndFileSource::default_writable_flags)));	
 
 		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();

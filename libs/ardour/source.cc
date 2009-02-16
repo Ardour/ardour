@@ -34,10 +34,11 @@
 #include <glibmm/fileutils.h>
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/enumwriter.h>
 
-#include <ardour/source.h>
 #include <ardour/playlist.h>
 #include <ardour/session.h>
+#include <ardour/source.h>
 #include <ardour/transient_detector.h>
 
 #include "i18n.h"
@@ -45,13 +46,11 @@
 using namespace std;
 using namespace ARDOUR;
 
-Source::Source (Session& s, const string& name, DataType type)
+Source::Source (Session& s, const string& name, DataType type, Flag flags)
 	: SessionObject(s, name)
 	, _type(type)
+	, _flags(flags)
 {
-	// not true.. is this supposed to be an assertion?
-	//assert(_name.find("/") == string::npos);
-
 	_analysed = false;
 	_timestamp = 0;
 	_length = 0;
@@ -61,6 +60,7 @@ Source::Source (Session& s, const string& name, DataType type)
 Source::Source (Session& s, const XMLNode& node) 
 	: SessionObject(s, "unnamed source")
 	, _type(DataType::AUDIO)
+	, _flags (Flag (Writable|CanRename))
 {
 	_timestamp = 0;
 	_length = 0;
@@ -85,6 +85,7 @@ Source::get_state ()
 
 	node->add_property ("name", _name);
 	node->add_property ("type", _type.to_string());
+	node->add_property (X_("flags"), enum_2_string (_flags));
 	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 
@@ -121,8 +122,12 @@ Source::set_state (const XMLNode& node)
 		sscanf (prop->value().c_str(), "%ld", &_timestamp);
 	}
 	
-	// Don't think this is valid, absolute paths fail
-	//assert(_name.find("/") == string::npos);
+	if ((prop = node.property (X_("flags"))) != 0) {
+		_flags = Flag (string_2_enum (prop->value(), _flags));
+	} else {
+		_flags = Flag (0);
+
+	}
 
 	return 0;
 }

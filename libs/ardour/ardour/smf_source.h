@@ -36,18 +36,8 @@ template<typename T> class MidiRingBuffer;
 /** Standard Midi File (Type 0) Source */
 class SMFSource : public MidiSource, public Evoral::SMF {
   public:
-	enum Flag {
-		Writable = 0x1,
-		CanRename = 0x2,
-		Broadcast = 0x4,
-		Removable = 0x8,
-		RemovableIfEmpty = 0x10,
-		RemoveAtDestroy = 0x20,
-		BuildPeaks = 0x40
-	};
-	
 	/** Constructor for existing external-to-session files */
-	SMFSource (Session& session, std::string path, Flag flags = Flag(0));
+	SMFSource (Session& session, std::string path, Source::Flag flags = Source::Flag(0));
 
 	/* Constructor for existing in-session files */
 	SMFSource (Session& session, const XMLNode&);
@@ -107,7 +97,6 @@ class SMFSource : public MidiSource, public Evoral::SMF {
 	void set_default_controls_interpolation();
 
 	Glib::ustring  _path;
-	Flag           _flags;
 	string         _take_id;
 	bool           _allow_remove_if_empty;
 	double         _last_ev_time_beats;

@@ -49,10 +49,9 @@ using namespace ARDOUR;
 string SMFSource::_search_path;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
-SMFSource::SMFSource(Session& s, std::string path, Flag flags)
+SMFSource::SMFSource(Session& s, std::string path, Source::Flag flags)
 	: MidiSource(s, region_name_from_path(path, false))
 	, Evoral::SMF()
-	, _flags(flags)
 	, _allow_remove_if_empty(true)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
@@ -71,7 +70,6 @@ SMFSource::SMFSource(Session& s, std::string path, Flag flags)
 /** Constructor used for existing internal-to-session files.  File must exist. */
 SMFSource::SMFSource(Session& s, const XMLNode& node)
 	: MidiSource(s, node)
-	, _flags(Flag(Writable|CanRename))
 	, _allow_remove_if_empty(true)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)

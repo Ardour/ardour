@@ -43,20 +43,11 @@ struct SoundFileInfo {
 
 class AudioFileSource : public AudioSource {
   public:
-	enum Flag {
-		Writable = 0x1,
-		CanRename = 0x2,
-		Broadcast = 0x4,
-		Removable = 0x8,
-		RemovableIfEmpty = 0x10,
-		RemoveAtDestroy = 0x20,
-		NoPeakFile = 0x40,
-		Destructive = 0x80
-	};
-
 	virtual ~AudioFileSource ();
 
-	bool set_name (const std::string& newname) { return (set_source_name(newname, destructive()) == 0); }
+	bool set_name (const std::string& newname) {
+		return (set_source_name(newname, destructive()) == 0);
+	}
 	int set_source_name (Glib::ustring newname, bool destructive);
 	
 	Glib::ustring path() const { return _path; }
@@ -78,7 +69,6 @@ class AudioFileSource : public AudioSource {
 	/* this block of methods do nothing for regular file sources, but are significant
 	   for files used in destructive recording.
 	*/
-
 	virtual nframes_t last_capture_start_frame() const { return 0; }
 	virtual void           mark_capture_start (nframes_t) {}
 	virtual void           mark_capture_end () {}
@@ -93,7 +83,7 @@ class AudioFileSource : public AudioSource {
 	static bool is_empty (Session&, Glib::ustring path);
 	void mark_streaming_write_completed ();
 
-	void   mark_take (Glib::ustring);
+	void mark_take (Glib::ustring);
 	Glib::ustring take_id() const { return _take_id; }
 
 	bool is_embedded() const { return _is_embedded; }
@@ -105,54 +95,50 @@ class AudioFileSource : public AudioSource {
 
 	int setup_peakfile ();
 
-	static sigc::signal<void> HeaderPositionOffsetChanged;
-
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	bool destructive() const { return (_flags & Destructive); }
-	virtual bool set_destructive (bool yn) { return false; }
-	bool can_truncate_peaks() const { return !destructive(); }
-
-	Flag flags() const { return _flags; }
+	bool         destructive() const        { return (_flags & Destructive); }
+	virtual bool set_destructive (bool yn)  { return false; }
+	bool         can_truncate_peaks() const { return !destructive(); }
+	bool         can_be_analysed() const    { return _length > 0; } 
 
 	void mark_immutable ();
-
-	/* this should really be protected, but C++ is getting stricter
-	   and creating slots from protected member functions is starting
-	   to cause issues.
-	*/
-
-	virtual void handle_header_position_change () {}
-
-	bool can_be_analysed() const { return _length > 0; } 
+	
+	static sigc::signal<void> HeaderPositionOffsetChanged;
 
   protected:
 	
-	/* constructor to be called for existing external-to-session files */
+	/** Constructor to be called for existing external-to-session files */
+	AudioFileSource (Session&, Glib::ustring path, Source::Flag flags);
 
-	AudioFileSource (Session&, Glib::ustring path, Flag flags);
-
-	/* constructor to be called for new in-session files */
-
-	AudioFileSource (Session&, Glib::ustring path, Flag flags,
+	/** Constructor to be called for new in-session files */
+	AudioFileSource (Session&, Glib::ustring path, Source::Flag flags,
 			 SampleFormat samp_format, HeaderFormat hdr_format);
 
-	/* constructor to be called for existing in-session files */
-
+	/** Constructor to be called for existing in-session files */
 	AudioFileSource (Session&, const XMLNode&, bool must_exit = true);
 
 	int init (Glib::ustring idstr, bool must_exist);
+	
+	static bool determine_embeddedness (Glib::ustring path);
+	
+	virtual void set_timeline_position (int64_t pos);
+	virtual void set_header_timeline_position () = 0;
+	virtual void handle_header_position_change () {}
+
+	bool find (Glib::ustring& path, bool must_exist, bool& is_new, uint16_t& chan);
+	bool removable() const;
+	bool writable() const { return _flags & Writable; }
+
+	static Sample* get_interleave_buffer (nframes_t size);
 
 	Glib::ustring _path;
-	Flag          _flags;
 	Glib::ustring _take_id;
-	int64_t       timeline_position;
-	bool           file_is_new;
+	int64_t       _timeline_position;
+	bool          _file_is_new;
 	uint16_t      _channel;
-
 	bool          _is_embedded;
-	static bool determine_embeddedness(Glib::ustring path);
 
 	static Glib::ustring peak_dir;
 	static Glib::ustring search_path;
@@ -162,15 +148,6 @@ class AudioFileSource : public AudioSource {
 	static char bwf_serial_number[13];
 
 	static uint64_t header_position_offset;
-
-	virtual void set_timeline_position (int64_t pos);
-	virtual void set_header_timeline_position () = 0;
-
-	bool find (Glib::ustring& path, bool must_exist, bool& is_new, uint16_t& chan);
-	bool removable() const;
-	bool writable() const { return _flags & Writable; }
-
-	static Sample* get_interleave_buffer (nframes_t size);
 
   private:
 	Glib::ustring old_peak_path (Glib::ustring audio_path);

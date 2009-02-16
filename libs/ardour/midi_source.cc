@@ -49,8 +49,8 @@ using namespace PBD;
 
 sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 
-MidiSource::MidiSource (Session& s, string name)
-	: Source (s, name, DataType::MIDI)
+MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
+	: Source (s, name, DataType::MIDI, flags)
 	, _timeline_position(0)
 	, _read_data_count(0)
 	, _write_data_count(0)

@@ -47,7 +47,6 @@
 #include <ardour/location.h>
 #include <ardour/named_selection.h>
 #include <ardour/audio_track.h>
-#include <ardour/audiofilesource.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/region_factory.h>
 #include <ardour/playlist_factory.h>
