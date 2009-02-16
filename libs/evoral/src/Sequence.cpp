@@ -75,6 +75,7 @@ Sequence<Time>::const_iterator::const_iterator()
 	: _seq(NULL)
 	, _is_end(true)
 	, _locked(false)
+	, _control_iter(_control_iters.end())
 {
 	_event = boost::shared_ptr< Event<Time> >(new Event<Time>());
 }
@@ -85,6 +86,9 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	, _type(NIL)
 	, _is_end((t == DBL_MAX) || seq.empty())
 	, _locked(!_is_end)
+	, _note_iter(seq.notes().end())
+	, _sysex_iter(seq.sysexes().end())
+	, _control_iter(_control_iters.end())
 {
 	DUMP(format("Created Iterator @ %1% (is end: %2%)\n)") % t % _is_end);
 	
@@ -95,7 +99,6 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	seq.read_lock();
 
 	// Find first note which begins after t
-	_note_iter = seq.notes().end();
 	for (typename Sequence<Time>::Notes::const_iterator i = seq.notes().begin();
 			i != seq.notes().end(); ++i) {
 		if ((*i)->time() >= t) {
@@ -106,7 +109,6 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	assert(_note_iter == seq.notes().end() || (*_note_iter)->time() >= t);
 	
 	// Find first sysex event after t
-	_sysex_iter = seq.sysexes().end();
 	for (typename Sequence<Time>::SysExes::const_iterator i = seq.sysexes().begin();
 			i != seq.sysexes().end(); ++i) {
 		if ((*i)->time() >= t) {
@@ -119,6 +121,8 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	// Find first control event after t
 	ControlIterator earliest_control(boost::shared_ptr<ControlList>(), DBL_MAX, 0.0);
 	_control_iters.reserve(seq._controls.size());
+	bool   found                  = false;
+	size_t earliest_control_index = 0;
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
 		DUMP(format("Iterator: control: %1%\n") % seq._type_map.to_symbol(i->first));
 		double x, y;
@@ -146,9 +150,15 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		// Found a new earliest_control
 		if (x < earliest_control.x) {
 			earliest_control = new_iter;
-			_control_iter = _control_iters.end();
-			--_control_iter; // now points to the last element in _control_iters
+			earliest_control_index = _control_iters.size() - 1;
+			found = true;
 		}
+	}
+
+	if (found) {
+		_control_iter = _control_iters.begin() + earliest_control_index;
+	} else {
+		_control_iter = _control_iters.end();
 	}
 	
 	// Now find the earliest event overall and point to it
@@ -164,7 +174,9 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		earliest_t = (*_sysex_iter)->time();
 	}
 
-	if (earliest_control.list && earliest_control.x >= t && earliest_control.x < earliest_t) {
+	if (_control_iter != _control_iters.end()
+			&& earliest_control.list && earliest_control.x >= t
+			&& earliest_control.x < earliest_t) {
 		_type = CONTROL;
 		earliest_t = earliest_control.x;
 	}
@@ -380,8 +392,13 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	_note_iter     = other._note_iter;
 	_sysex_iter    = other._sysex_iter;
 	_control_iters = other._control_iters;
-	size_t index   = other._control_iter - other._control_iters.begin();
-	_control_iter  = _control_iters.begin() + index;
+	
+	if (other._control_iter == other._control_iters.end()) {
+		_control_iter = _control_iters.end();
+	} else {
+		const size_t index = other._control_iter - other._control_iters.begin();
+		_control_iter  = _control_iters.begin() + index;
+	}
 
 	return *this;
 }
