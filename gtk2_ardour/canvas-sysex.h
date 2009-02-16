@@ -19,9 +19,7 @@ public:
 		string&                               text,
 		double                                height,
 		double                                x,
-		double                                y,
-		boost::shared_ptr<Evoral::MIDIEvent<Time> > event
-	);
+		double                                y);
 	
 	virtual ~CanvasSysEx();
 	

@@ -20,6 +20,7 @@
 #include <cmath>
 #include <cassert>
 #include <algorithm>
+#include <ostream>
 
 #include <gtkmm.h>
 
@@ -474,6 +475,7 @@ MidiRegionView::clear_events()
 
 	_events.clear();
 	_pgm_changes.clear();
+	_sys_exes.clear();
 }
 
 
@@ -561,7 +563,9 @@ MidiRegionView::redisplay_model()
 			add_note(_model->note_at(i));
 		}
 		
-		display_program_change_flags();
+		display_sysexes();
+
+		display_program_changes();
 
 		_model->read_unlock();
 
@@ -571,7 +575,7 @@ MidiRegionView::redisplay_model()
 }
 
 void
-MidiRegionView::display_program_change_flags()
+MidiRegionView::display_program_changes()
 {
 	boost::shared_ptr<Evoral::Control> control = _model->control(MidiPgmChangeAutomation);
 	if (!control) {
@@ -618,6 +622,46 @@ MidiRegionView::display_program_change_flags()
 			snprintf(buf, 4, "%d", int(program_number));
 			add_pgm_change(program_change, buf);
 		}
+	}
+}
+
+void 
+MidiRegionView::display_sysexes()
+{
+	for(MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
+		ARDOUR::MidiModel::TimeType time = (*i)->time();
+		assert(time >= 0);
+		
+		ostringstream str;
+		str << hex;
+		for (uint32_t b = 0; b < (*i)->size(); ++b) {
+			str << int((*i)->buffer()[b]);
+			if (b != (*i)->size() -1) {
+				str << " ";
+			}
+		}
+		string text = str.str();
+		
+		ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
+		const double x = trackview.editor().frame_to_pixel(beats_to_frames(time));
+		
+		double height = midi_stream_view()->contents_height();
+		
+		boost::shared_ptr<CanvasSysEx<ARDOUR::MidiModel::TimeType> > sysex = 
+				boost::shared_ptr<CanvasSysEx<ARDOUR::MidiModel::TimeType> >(
+				new CanvasSysEx<ARDOUR::MidiModel::TimeType>(*this, *group,
+						text, 
+						height, 
+						x, 1.0));
+		
+		// Show unless program change is beyond the region bounds
+		if (time - _region->start() >= _region->length() || time < _region->start()) {
+			sysex->hide();
+		} else {
+			sysex->show();
+		}
+		
+		_sys_exes.push_back(sysex);
 	}
 }
 

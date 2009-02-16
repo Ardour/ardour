@@ -14,8 +14,7 @@ CanvasSysEx<Time>::CanvasSysEx(
 		string&                               text,
 		double                                height,
 		double                                x,
-		double                                y,
-		boost::shared_ptr<Evoral::MIDIEvent<Time> > event
+		double                                y
 		)
 	: CanvasFlag(
 			region, 
@@ -61,4 +60,4 @@ CanvasSysEx<Time>::on_event(GdkEvent* ev)
 	return false;
 }
 
-template class CanvasSysEx<nframes_t>;
+template class CanvasSysEx<double>;

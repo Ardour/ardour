@@ -39,6 +39,7 @@
 #include "canvas-note.h"
 #include "canvas-note-event.h"
 #include "canvas-program-change.h"
+#include "canvas-sysex.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -141,9 +142,13 @@ class MidiRegionView : public RegionView
 	 */
 	void next_program(ArdourCanvas::CanvasProgramChange& program);
 	
-	/** Displays all program changed events in the region as flags on the canvas.
+	/** Displays all program change events in the region as flags on the canvas.
 	 */
-	void display_program_change_flags();
+	void display_program_changes();
+	
+	/** Displays all system exclusive events in the region as flags on the canvas.
+	 */
+	void display_sysexes();
 
 	void begin_write();
 	void end_write();
@@ -308,10 +313,12 @@ class MidiRegionView : public RegionView
 
 	typedef std::vector<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;
+	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx<ARDOUR::MidiModel::TimeType> > > SysExes;
 	
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
 	PgmChanges                           _pgm_changes;
+	SysExes                              _sys_exes;
 	ArdourCanvas::CanvasNote**           _active_notes;
 	ArdourCanvas::Group*                 _note_group;
 	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
