@@ -5,7 +5,6 @@
 using namespace Gnome::Canvas;
 using namespace std;
 
-
 void 
 CanvasFlag::delete_allocated_objects()
 {
@@ -20,7 +19,7 @@ CanvasFlag::delete_allocated_objects()
 }
 
 void 
-CanvasFlag::set_text(string& a_text)
+CanvasFlag::set_text(const string& a_text)
 {
 	delete_allocated_objects();
 	

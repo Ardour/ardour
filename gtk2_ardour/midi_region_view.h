@@ -19,6 +19,7 @@
 #ifndef __gtk_ardour_midi_region_view_h__
 #define __gtk_ardour_midi_region_view_h__
 
+#include <string>
 #include <vector>
 
 #include <libgnomecanvasmm.h>
@@ -96,28 +97,20 @@ class MidiRegionView : public RegionView
 	void add_note(const boost::shared_ptr<NoteType> note);
 	void resolve_note(uint8_t note_num, double end_time);
 	
-	struct ControlEvent
-	{
-		nframes_t time;
-		uint8_t   value;
-		uint8_t   channel;
-		
-		ControlEvent(nframes_t a_time, uint8_t a_value, uint8_t a_channel) 
+	struct PCEvent {
+		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel) 
 			: time(a_time), value(a_value), channel(a_channel) {}
-		
-		ControlEvent& operator=(const ControlEvent& other) {
-			time = other.time;
-			value = other.value;
-			channel = other.channel;
-			return *this;
-		}
+
+		double  time;
+		uint8_t value;
+		uint8_t channel;
 	};
 	
 	/** Add a new program change flag to the canvas.
-	 * @param program the MidiRegionView::ControlEvent to add
+	 * @param program the MidiRegionView::PCEvent to add
 	 * @param the text to display in the flag
 	 */
-	void add_pgm_change(ControlEvent& program, string displaytext);
+	void add_pgm_change(PCEvent& program, const std::string& displaytext);
 	
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the program change event
@@ -128,10 +121,10 @@ class MidiRegionView : public RegionView
 	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
 	
 	/** Change the 'automation' data of old_program to new values which correspond to new_patch.
-	 * @param old_program identifies the program change event which is to be altered
-	 * @param new_patch defines the new lsb, msb and program number which are to be set in the automation list data
+	 * @param old_program the program change event which is to be altered
+	 * @param new_patch the new lsb, msb and program number which are to be set
 	 */
-	void alter_program_change(ControlEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
+	void alter_program_change(PCEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
 	
 	/** Alter a given program to the new given one.
 	 * (Called on context menu select on CanvasProgramChange)
@@ -160,7 +153,7 @@ class MidiRegionView : public RegionView
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
-	void start_delta_command(string name = "midi edit");
+	void start_delta_command(std::string name = "midi edit");
 	void command_add_note(const boost::shared_ptr<NoteType> note, bool selected);
 	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
 
@@ -308,10 +301,10 @@ class MidiRegionView : public RegionView
 	uint8_t  _current_range_max;
 	
 	/// MIDNAM information of the current track: Model name of MIDNAM file
-	string   _model_name;
+	std::string _model_name;
 	
 	/// MIDNAM information of the current track: CustomDeviceMode
-	string   _custom_device_mode;   
+	std::string _custom_device_mode;   
 
 	typedef std::vector<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;

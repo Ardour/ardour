@@ -609,8 +609,7 @@ MidiRegionView::display_program_change_flags()
 			MIDI::Name::MidiPatchManager::instance().find_patch(
 					_model_name, _custom_device_mode, channel, patch_key);
 
-		ControlEvent program_change(beats_to_frames(event_time),
-				uint8_t(program_number), channel);
+		PCEvent program_change(event_time, uint8_t(program_number), channel);
 
 		if (patch != 0) {
 			add_pgm_change(program_change, patch->name());
@@ -753,7 +752,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 
 	if (mtv && mtv->midi_view()) {
 		/* if ghost is inserted into midi track, use a dedicated midi ghost canvas group
-		   to allow having midi notes on top of note lines and waveforms under it.
+		   to allow having midi notes on top of note lines and waveforms.
 		 */
 		ghost = new MidiGhostRegion (*mtv->midi_view(), trackview, unit_position);
 	} else {
@@ -921,10 +920,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 				if (_active_notes[note->note()]) {
 					CanvasNote* const old_rect = _active_notes[note->note()];
 					boost::shared_ptr<NoteType> old_note = old_rect->note();
-					cerr << "MidiModel: WARNING: Note has length 0: chan " << old_note->channel()
-						<< "note " << (int)old_note->note() << " @ " << old_note->time() << endl;
-					/* FIXME: How large to make it?  Make it a diamond? */
-					old_rect->property_x2() = old_rect->property_x1() + 2.0;
+					old_rect->property_x2() = x;
 					old_rect->property_outline_what() = (guint32) 0xF;
 				}
 				_active_notes[note->note()] = ev_rect;
@@ -971,16 +967,12 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 }
 
 void
-MidiRegionView::add_pgm_change(ControlEvent& program, string displaytext)
+MidiRegionView::add_pgm_change(PCEvent& program, const string& displaytext)
 {
 	assert(program.time >= 0);
 	
-	// dont display program changes beyond the region bounds
-	if (program.time - _region->start() >= _region->length() || program.time <  _region->start()) 
-		return;
-	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
-	const double x = trackview.editor().frame_to_pixel((nframes64_t)program.time - _region->start());
+	const double x = trackview.editor().frame_to_pixel(beats_to_frames(program.time));
 	
 	double height = midi_stream_view()->contents_height();
 	
@@ -993,6 +985,13 @@ MidiRegionView::add_pgm_change(ControlEvent& program, string displaytext)
 					_custom_device_mode, 
 					program.time, program.channel, program.value));
 	
+	// Show unless program change is beyond the region bounds
+	if (program.time - _region->start() >= _region->length() || program.time < _region->start()) {
+		pgm_change->hide();
+	} else {
+		pgm_change->show();
+	}
+	
 	_pgm_changes.push_back(pgm_change);
 }
 
@@ -1001,7 +1000,7 @@ MidiRegionView::get_patch_key_at(double time, uint8_t channel, MIDI::Name::Patch
 {
 	cerr << "getting patch key at " << time << " for channel " << channel << endl;
 	Evoral::Parameter bank_select_msb(MidiCCAutomation, channel, MIDI_CTL_MSB_BANK);
-	boost::shared_ptr<Evoral::Control>  msb_control = _model->control(bank_select_msb);
+	boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
 	float msb = -1.0;
 	if (msb_control != 0) {
 		msb = int(msb_control->get_float(true, time));
@@ -1009,7 +1008,7 @@ MidiRegionView::get_patch_key_at(double time, uint8_t channel, MIDI::Name::Patch
 	}
 
 	Evoral::Parameter bank_select_lsb(MidiCCAutomation, channel, MIDI_CTL_LSB_BANK);
-	boost::shared_ptr<Evoral::Control>  lsb_control = _model->control(bank_select_lsb);
+	boost::shared_ptr<Evoral::Control> lsb_control = _model->control(bank_select_lsb);
 	float lsb = -1.0;
 	if (lsb_control != 0) {
 		lsb = lsb_control->get_float(true, time);
@@ -1017,7 +1016,7 @@ MidiRegionView::get_patch_key_at(double time, uint8_t channel, MIDI::Name::Patch
 	}
 	
 	Evoral::Parameter program_change(MidiPgmChangeAutomation, channel, 0);
-	boost::shared_ptr<Evoral::Control>  program_control = _model->control(program_change);
+	boost::shared_ptr<Evoral::Control> program_control = _model->control(program_change);
 	float program_number = -1.0;
 	if (program_control != 0) {
 		program_number = program_control->get_float(true, time);
@@ -1032,24 +1031,24 @@ MidiRegionView::get_patch_key_at(double time, uint8_t channel, MIDI::Name::Patch
 
 
 void 
-MidiRegionView::alter_program_change(ControlEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch)
+MidiRegionView::alter_program_change(PCEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch)
 {
 	// TODO: Get the real event here and alter them at the original times
 	Evoral::Parameter bank_select_msb(MidiCCAutomation, old_program.channel, MIDI_CTL_MSB_BANK);
-	boost::shared_ptr<Evoral::Control>  msb_control = _model->control(bank_select_msb);
+	boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
 	if (msb_control != 0) {
 		msb_control->set_float(float(new_patch.msb), true, old_program.time);
 	}
 
 	// TODO: Get the real event here and alter them at the original times
 	Evoral::Parameter bank_select_lsb(MidiCCAutomation, old_program.channel, MIDI_CTL_LSB_BANK);
-	boost::shared_ptr<Evoral::Control>  lsb_control = _model->control(bank_select_lsb);
+	boost::shared_ptr<Evoral::Control> lsb_control = _model->control(bank_select_lsb);
 	if (lsb_control != 0) {
 		lsb_control->set_float(float(new_patch.lsb), true, old_program.time);
 	}
 	
 	Evoral::Parameter program_change(MidiPgmChangeAutomation, old_program.channel, 0);
-	boost::shared_ptr<Evoral::Control>  program_control = _model->control(program_change);
+	boost::shared_ptr<Evoral::Control> program_control = _model->control(program_change);
 	
 	assert(program_control != 0);
 	program_control->set_float(float(new_patch.program_number), true, old_program.time);
@@ -1060,7 +1059,7 @@ MidiRegionView::alter_program_change(ControlEvent& old_program, const MIDI::Name
 void
 MidiRegionView::program_selected(CanvasProgramChange& program, const MIDI::Name::PatchPrimaryKey& new_patch)
 {
-	ControlEvent program_change_event(program.event_time(), program.program(), program.channel());
+	PCEvent program_change_event(program.event_time(), program.program(), program.channel());
 	alter_program_change(program_change_event, new_patch);
 }
 
@@ -1077,7 +1076,7 @@ MidiRegionView::previous_program(CanvasProgramChange& program)
 				program.channel(), 
 				key);
 	
-	ControlEvent program_change_event(program.event_time(), program.program(), program.channel());
+	PCEvent program_change_event(program.event_time(), program.program(), program.channel());
 	if (patch) {
 		alter_program_change(program_change_event, patch->patch_primary_key());
 	}
@@ -1095,7 +1094,8 @@ MidiRegionView::next_program(CanvasProgramChange& program)
 				_custom_device_mode, 
 				program.channel(), 
 				key);	
-	ControlEvent program_change_event(program.event_time(), program.program(), program.channel());
+
+	PCEvent program_change_event(program.event_time(), program.program(), program.channel());
 	if (patch) {
 		alter_program_change(program_change_event, patch->patch_primary_key());
 	}
@@ -1246,81 +1246,83 @@ void
 MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 {
 	// TODO: This would be faster/nicer with a MoveCommand that doesn't need to copy...
-	if (_selection.find(ev) != _selection.end()) {
-		uint8_t lowest_note_in_selection  = midi_stream_view()->lowest_note();
-		uint8_t highest_note_in_selection = midi_stream_view()->highest_note();
-		uint8_t highest_note_difference = 0;
+	if (_selection.find(ev) == _selection.end()) {
+		return;
+	}
 
-		// find highest and lowest notes first
-		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-			uint8_t pitch = (*i)->note()->note();
-			lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
-			highest_note_in_selection = std::max(highest_note_in_selection, pitch);
+	uint8_t lowest_note_in_selection  = midi_stream_view()->lowest_note();
+	uint8_t highest_note_in_selection = midi_stream_view()->highest_note();
+	uint8_t highest_note_difference = 0;
+
+	// find highest and lowest notes first
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		uint8_t pitch = (*i)->note()->note();
+		lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
+		highest_note_in_selection = std::max(highest_note_in_selection, pitch);
+	}
+	
+	/*
+	cerr << "dnote: " << (int) dnote << endl;
+	cerr << "lowest note (streamview): " << int(midi_stream_view()->lowest_note()) 
+	     << " highest note (streamview): " << int(midi_stream_view()->highest_note()) << endl;
+	cerr << "lowest note (selection): " << int(lowest_note_in_selection) << " highest note(selection): " 
+	     << int(highest_note_in_selection) << endl;
+	cerr << "selection size: " << _selection.size() << endl;
+	cerr << "Highest note in selection: " << (int) highest_note_in_selection << endl;
+	*/
+	
+	// Make sure the note pitch does not exceed the MIDI standard range
+	if (dnote <= 127 && (highest_note_in_selection + dnote > 127)) {
+		highest_note_difference = highest_note_in_selection - 127;
+	}
+	
+	start_delta_command(_("move notes"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
+		Selection::iterator next = i;
+		++next;
+
+		const boost::shared_ptr<NoteType> copy(new NoteType(*(*i)->note().get()));
+
+		// we need to snap here again in nframes64_t in order to be sample accurate 
+		double start_frames = snap_to_frame(beats_to_frames((*i)->note()->time()) + dt);
+
+		// keep notes inside region if dragged beyond left region bound
+		if (start_frames < _region->start()) {				
+			start_frames = _region->start();
 		}
 		
-		/*
-		cerr << "dnote: " << (int) dnote << endl;
-		cerr << "lowest note (streamview): " << int(midi_stream_view()->lowest_note()) 
-		     << " highest note (streamview): " << int(midi_stream_view()->highest_note()) << endl;
-		cerr << "lowest note (selection): " << int(lowest_note_in_selection) << " highest note(selection): " 
-		     << int(highest_note_in_selection) << endl;
-		cerr << "selection size: " << _selection.size() << endl;
-		cerr << "Highest note in selection: " << (int) highest_note_in_selection << endl;
-		*/
+		copy->set_time(frames_to_beats(start_frames));
+
+		uint8_t original_pitch = (*i)->note()->note();
+		uint8_t new_pitch = original_pitch + dnote - highest_note_difference;
 		
-		// Make sure the note pitch does not exceed the MIDI standard range
-		if (dnote <= 127 && (highest_note_in_selection + dnote > 127)) {
-			highest_note_difference = highest_note_in_selection - 127;
-		}
+		// keep notes in standard midi range
+		clamp_to_0_127(new_pitch);
 		
-		start_delta_command(_("move notes"));
-
-		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
-			Selection::iterator next = i;
-			++next;
-
-			const boost::shared_ptr<NoteType> copy(new NoteType(*(*i)->note().get()));
-
-			// we need to snap here again in nframes64_t in order to be sample accurate 
-			double start_frames = snap_to_frame(beats_to_frames((*i)->note()->time()) + dt);
-
-			// keep notes inside region if dragged beyond left region bound
-			if (start_frames < _region->start()) {				
-				start_frames = _region->start();
-			}
-			
-			copy->set_time(frames_to_beats(start_frames));
-
-			uint8_t original_pitch = (*i)->note()->note();
-			uint8_t new_pitch = original_pitch + dnote - highest_note_difference;
-			
-			// keep notes in standard midi range
-			clamp_to_0_127(new_pitch);
-			
-			// keep original pitch if note is dragged outside valid midi range
-			if ((original_pitch != 0 && new_pitch == 0)
-					|| (original_pitch != 127 && new_pitch == 127)) {
-				new_pitch = original_pitch;
-			}
-
-			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
-			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
-
-			copy->set_note(new_pitch);
-			
-			command_remove_note(*i);
-			command_add_note(copy, (*i)->selected());
-
-			i = next;
+		// keep original pitch if note is dragged outside valid midi range
+		if ((original_pitch != 0 && new_pitch == 0)
+				|| (original_pitch != 127 && new_pitch == 127)) {
+			new_pitch = original_pitch;
 		}
 
-		apply_command();
+		lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
+		highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+
+		copy->set_note(new_pitch);
 		
-		// care about notes being moved beyond the upper/lower bounds on the canvas
-		if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
-				highest_note_in_selection > midi_stream_view()->highest_note()) {
-			midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
-		}
+		command_remove_note(*i);
+		command_add_note(copy, (*i)->selected());
+
+		i = next;
+	}
+
+	apply_command();
+	
+	// care about notes being moved beyond the upper/lower bounds on the canvas
+	if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
+			highest_note_in_selection > midi_stream_view()->highest_note()) {
+		midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
 	}
 }
 

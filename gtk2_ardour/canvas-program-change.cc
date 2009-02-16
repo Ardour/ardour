@@ -14,7 +14,7 @@ using namespace std;
 CanvasProgramChange::CanvasProgramChange(
 		MidiRegionView& region,
 		Group&          parent,
-		string&         text,
+		const string&   text,
 		double          height,
 		double          x,
 		double          y,
