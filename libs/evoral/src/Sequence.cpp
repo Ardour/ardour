@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <stdint.h>
 #include "evoral/Control.hpp"
@@ -29,7 +30,9 @@
 #include "evoral/MIDIParameters.hpp"
 #include "evoral/Sequence.hpp"
 #include "evoral/TypeMap.hpp"
+#include "evoral/midi_util.h"
 
+//#define DEBUG_SEQUENCE 1
 #ifdef DEBUG_SEQUENCE
 	#include <boost/format.hpp>
 	using boost::format;
@@ -79,6 +82,7 @@ Sequence<Time>::const_iterator::const_iterator()
 template<typename Time>
 Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t)
 	: _seq(&seq)
+	, _type(NIL)
 	, _is_end((t == DBL_MAX) || seq.empty())
 	, _locked(!_is_end)
 {
@@ -101,7 +105,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	}
 	assert(_note_iter == seq.notes().end() || (*_note_iter)->time() >= t);
 	
-	// Find first sysex which begins after t
+	// Find first sysex event after t
 	_sysex_iter = seq.sysexes().end();
 	for (typename Sequence<Time>::SysExes::const_iterator i = seq.sysexes().begin();
 			i != seq.sysexes().end(); ++i) {
@@ -112,11 +116,9 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	}
 	assert(_sysex_iter == seq.sysexes().end() || (*_sysex_iter)->time() >= t);
 
+	// Find first control event after t
 	ControlIterator earliest_control(boost::shared_ptr<ControlList>(), DBL_MAX, 0.0);
-
 	_control_iters.reserve(seq._controls.size());
-	
-	// find the earliest control event available
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
 		DUMP(format("Iterator: control: %1%\n") % seq._type_map.to_symbol(i->first));
 		double x, y;
@@ -141,92 +143,69 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		const ControlIterator new_iter(i->second->list(), x, y);
 		_control_iters.push_back(new_iter);
 
-		// if the x of the current control is less than earliest_control
-		// we have a new earliest_control
+		// Found a new earliest_control
 		if (x < earliest_control.x) {
 			earliest_control = new_iter;
 			_control_iter = _control_iters.end();
-			--_control_iter;
-			// now _control_iter points to the last Element in _control_iters
+			--_control_iter; // now points to the last element in _control_iters
 		}
 	}
 	
-#define ENSURE_SYSEX_SANITY 1
-#if ENSURE_SYSEX_SANITY
-	MIDIMessageType original_type = NIL;
-	assert(!earliest_control.list || earliest_control.x >= t);
-	if (_note_iter != seq.notes().end()
-			&& (*_note_iter)->on_event().time() >= t
-			&& (!earliest_control.list
-				|| (*_note_iter)->on_event().time() < earliest_control.x)) {
-	    original_type = NOTE_ON;
-	} else {
-	    original_type = CONTROL;
-	}
-#endif
-	
-	MIDIMessageType type       = NIL;
-	Time            earliest_t = t;
+	// Now find the earliest event overall and point to it
+	Time earliest_t = t;
 
-	// if the note comes before anything else set the iterator to the note
-	if (_note_iter != seq.notes().end() && (*_note_iter)->on_event().time() >= t) {
-		type = NOTE_ON;
-		earliest_t = (*_note_iter)->on_event().time();
+	if (_note_iter != seq.notes().end()) {
+		_type = NOTE_ON;
+		earliest_t = (*_note_iter)->time();
 	}
-	     
-	if (earliest_control.list && 
-	    earliest_control.x >= t &&
-	    earliest_control.x <= earliest_t) {
-		type = CONTROL;
+	
+	if (_sysex_iter != seq.sysexes().end() && (*_sysex_iter)->time() < earliest_t) {
+		_type = SYSEX;
+		earliest_t = (*_sysex_iter)->time();
+	}
+
+	if (earliest_control.list && earliest_control.x >= t && earliest_control.x < earliest_t) {
+		_type = CONTROL;
 		earliest_t = earliest_control.x;
 	}
 	
-	if (_sysex_iter != seq.sysexes().end() &&
-	    (*_sysex_iter)->time() >= t &&
-	    (*_sysex_iter)->time() <= earliest_t) {
-		type = SYSEX;
-		earliest_t = (*_sysex_iter)->time();
-	}
-	
-#if ENSURE_SYSEX_SANITY
-	assert (type == original_type || type == SYSEX);
-#endif
-	
-	if (type == NOTE_ON) {
-		DUMP(format("Reading note on event @ %1%\n") % earliest_t);
-		_event = boost::shared_ptr< Event<Time> >(new Event<Time>((*_note_iter)->on_event(), true));
+	switch (_type) {
+	case NOTE_ON:
+		DUMP(format("Starting at note on event @ %1%\n") % earliest_t);
+		_event = boost::shared_ptr< Event<Time> >(
+				new Event<Time>((*_note_iter)->on_event(), true));
 		_active_notes.push(*_note_iter);
-		++_note_iter;
-		_control_iter = _control_iters.end();
-	} else if (type == CONTROL) {
-		DUMP(format("Reading control event @ %1%\n") % earliest_t);
+		break;
+	case SYSEX:
+		DUMP(format("Starting at sysex event @ %1%\n") % earliest_t);
+		_event = boost::shared_ptr< Event<Time> >(
+				new Event<Time>(*(*_sysex_iter), true));
+		break;
+	case CONTROL:
+		DUMP(format("Starting at control event @ %1%\n") % earliest_t);
 		seq.control_to_midi_event(_event, earliest_control);
-	} else if (type == SYSEX) {
-		DUMP(format("Reading sysex event @ %1%\n") % earliest_t);
-		_event = boost::shared_ptr< Event<Time> >(new Event<Time>(*(*_sysex_iter), true));
-		++_sysex_iter;
-		_control_iter = _control_iters.end();		
+		break;
+	default:
+		assert(false);
 	}
 
-	if ( (! _event.get()) || _event->size() == 0) {
-		DUMP(format("New iterator @ %1% is at end\n") % t);
+	if (!_event || _event->size() == 0) {
+		DUMP(format("Starting at end @ %1%\n") % t);
 		_is_end = true;
-
-		// eliminate possible race condition here (ugly)
-		static Glib::Mutex mutex;
-		Glib::Mutex::Lock lock(mutex);
+		_type   = NIL;
 		if (_locked) {
 			_seq->read_unlock();
 			_locked = false;
 		}
 	} else {
 		DUMP(format("New iterator = %1% : %2% @ %3%\n")
-				% _event->event_type()
+				% (int)_event->event_type()
 				% (int)((MIDIEvent<Time>*)_event.get())->type()
 				% _event->time());
 	}
 	
-	assert(_event && _event->size() > 0);
+	assert(_event && _event->size() > 0 && _event->time() >= t);
+	assert(midi_event_is_valid(_event->buffer(), _event->size()));
 }
 
 template<typename Time>
@@ -250,28 +229,32 @@ Sequence<Time>::const_iterator::operator++()
 	
 	const MIDIEvent<Time>& ev = *((MIDIEvent<Time>*)_event.get());
 
-	if (! (ev.is_note() || ev.is_cc() || ev.is_pgm_change()
-				|| ev.is_pitch_bender() || ev.is_channel_pressure() || ev.is_sysex()) ) {
-		cerr << "WARNING: Unknown event buf: " << (void*)ev.buffer()
-			<< " data: " << hex << int(ev.buffer()[0])
-			<< int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
-	}
-	
-	assert(    ev.is_note()
+	if (!(     ev.is_note()
 			|| ev.is_cc()
 			|| ev.is_pgm_change()
 			|| ev.is_pitch_bender()
 			|| ev.is_channel_pressure()
-			|| ev.is_sysex());
-
-	// Increment past current control event
-	if (!ev.is_note() && _control_iter != _control_iters.end() && _control_iter->list.get()) {
-		double x = 0.0, y = 0.0;
-		const bool ret = _control_iter->list->rt_safe_earliest_event_unlocked(
+			|| ev.is_sysex()) ) {
+		cerr << "WARNING: Unknown event (type " << _type << "): " << hex
+			<< int(ev.buffer()[0]) << int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
+	}
+	
+	double x   = 0.0;
+	double y   = 0.0;
+	bool   ret = false;
+	
+	// Increment past current event
+	switch (_type) {
+	case NOTE_ON:
+		++_note_iter;
+		break;
+	case NOTE_OFF:
+		break;
+	case CONTROL:
+		// Increment current controller iterator
+		ret = _control_iter->list->rt_safe_earliest_event_unlocked(
 				_control_iter->x, DBL_MAX, x, y, false);
-
 		assert(!ret || x > _control_iter->x);
-
 		if (ret) {
 			_control_iter->x = x;
 			_control_iter->y = y;
@@ -280,67 +263,79 @@ Sequence<Time>::const_iterator::operator++()
 			_control_iter->x = DBL_MAX;
 			_control_iter->y = DBL_MAX;
 		}
-	}
-
-	_control_iter = _control_iters.begin();
-
-	// find the _control_iter with the earliest event time
-	for (ControlIterators::iterator i = _control_iters.begin(); i != _control_iters.end(); ++i) {
-		if (i->x < _control_iter->x) {
-			_control_iter = i;
+	
+		// Find the controller with the next earliest event time
+		_control_iter = _control_iters.begin();
+		for (ControlIterators::iterator i = _control_iters.begin();
+				i != _control_iters.end(); ++i) {
+			if (i->x < _control_iter->x) {
+				_control_iter = i;
+			}
 		}
+		break;
+	case SYSEX:
+		++_sysex_iter;
+		break;
+	default:
+		assert(false);
 	}
 
-	MIDIMessageType type       = NIL;
-	Time            earliest_t = 0;
+	// Now find the earliest event overall and point to it
+	_type = NIL;
+	Time earliest_t = std::numeric_limits<Time>::max();
 
 	// Next earliest note on
 	if (_note_iter != _seq->notes().end()) {
-		type = NOTE_ON;
+		_type = NOTE_ON;
 		earliest_t = (*_note_iter)->time();
 	}
 
-	// Use the next earliest note off iff it's earlier than the note on
-	if (!_seq->percussive() && (! _active_notes.empty())) {
-		if (type == NIL || _active_notes.top()->end_time() <= earliest_t) {
-			type = NOTE_OFF;
+	// Use the next note off iff it's earlier or the same time as the note on
+	if (!_seq->percussive() && (!_active_notes.empty())) {
+		if (_type == NIL || _active_notes.top()->end_time() <= earliest_t) {
+			_type = NOTE_OFF;
 			earliest_t = _active_notes.top()->end_time();
 		}
 	}
 
 	// Use the next earliest controller iff it's earlier than the note event
 	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX) {
-		if (type == NIL || _control_iter->x <= earliest_t) {
-			type = CONTROL;
+		if (_type == NIL || _control_iter->x < earliest_t) {
+			_type = CONTROL;
 			earliest_t = _control_iter->x;
 		}
 	}
 	
 	// Use the next earliest SysEx iff it's earlier than the controller
 	if (_sysex_iter != _seq->sysexes().end()) {
-		if (type == NIL || (*_sysex_iter)->time() <= earliest_t) {
-			type = SYSEX;
+		if (_type == NIL || (*_sysex_iter)->time() < earliest_t) {
+			_type = SYSEX;
 			earliest_t = (*_sysex_iter)->time();
 		}
 	}
 
-	if (type == NOTE_ON) {
+	// Set event to reflect new position
+	switch (_type) {
+	case NOTE_ON:
 		DUMP("iterator = note on\n");
 		*_event = (*_note_iter)->on_event();
 		_active_notes.push(*_note_iter);
-		++_note_iter;
-	} else if (type == NOTE_OFF) {
+		break;
+	case NOTE_OFF:
 		DUMP("iterator = note off\n");
+		assert(!_active_notes.empty());
 		*_event = _active_notes.top()->off_event();
 		_active_notes.pop();
-	} else if (type == CONTROL) {
+		break;
+	case CONTROL:
 		DUMP("iterator = control\n");
 		_seq->control_to_midi_event(_event, *_control_iter);
-	} else if (type == SYSEX) {
+		break;
+	case SYSEX:
 		DUMP("iterator = sysex\n");
 		*_event = *(*_sysex_iter);
-		++_sysex_iter;
-	} else {
+		break;
+	default:
 		DUMP("iterator = end\n");
 		_is_end = true;
 	}
@@ -354,8 +349,12 @@ template<typename Time>
 bool
 Sequence<Time>::const_iterator::operator==(const const_iterator& other) const
 {
-	if (_is_end || other._is_end) {
+	if (_seq != other._seq) {
+		return false;
+	} else if (_is_end || other._is_end) {
 		return (_is_end == other._is_end);
+	} else if (_type != other._type) {
+		return false;
 	} else {
 		return (_event == other._event);
 	}
@@ -375,7 +374,9 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	}
 
 	_seq           = other._seq;
+	_event         = other._event;
 	_active_notes  = other._active_notes;
+	_type          = other._type;
 	_is_end        = other._is_end;
 	_locked        = other._locked;
 	_note_iter     = other._note_iter;
@@ -383,18 +384,6 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	_control_iters = other._control_iters;
 	size_t index   = other._control_iter - other._control_iters.begin();
 	_control_iter  = _control_iters.begin() + index;
-	
-	if (!_is_end && other._event) {
-		if (_event) {
-			*_event = *other._event.get();
-		} else {
-			_event = boost::shared_ptr< Event<Time> >(new Event<Time>(*other._event, true));
-		}
-	} else {
-		if (_event) {
-			_event->clear();
-		}
-	}
 
 	return *this;
 }
@@ -425,7 +414,9 @@ Sequence<Time>::Sequence(const TypeMap& type_map, size_t size)
  */
 template<typename Time>
 bool
-Sequence<Time>::control_to_midi_event(boost::shared_ptr< Event<Time> >& ev, const ControlIterator& iter) const
+Sequence<Time>::control_to_midi_event(
+		boost::shared_ptr< Event<Time> >& ev,
+		const ControlIterator&            iter) const
 {
 	assert(iter.list.get());
 	const uint32_t event_type = iter.list->parameter().type();
@@ -520,9 +511,9 @@ Sequence<Time>::start_write()
 	DUMP(format("%1% : start_write (percussive = %2%)\n") % this % _percussive);
 	write_lock();
 	_writing = true;
-	for (int i = 0; i < 16; ++i)
+	for (int i = 0; i < 16; ++i) {
 		_write_notes[i].clear();
-	
+	}
 	_dirty_controls.clear();
 	write_unlock();
 }

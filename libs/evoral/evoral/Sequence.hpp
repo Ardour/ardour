@@ -83,8 +83,8 @@ public:
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const Event<Time>& ev);
 	
-	inline const boost::shared_ptr< const Note<Time> > note_at(unsigned i) const { return _notes[i]; }
-	inline const boost::shared_ptr< Note<Time> >       note_at(unsigned i)       { return _notes[i]; }
+	inline const boost::shared_ptr< const Note<Time> > note_at(size_t i) const { return _notes[i]; }
+	inline const boost::shared_ptr< Note<Time> >       note_at(size_t i)       { return _notes[i]; }
 
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::empty(); }
@@ -141,14 +141,13 @@ public:
 	private:
 		friend class Sequence<Time>;
 		
+		typedef std::vector<ControlIterator> ControlIterators;
 		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX };
 
 		const Sequence<Time>*            _seq;
 		boost::shared_ptr< Event<Time> > _event;
 		mutable ActiveNotes              _active_notes;
-
-		typedef std::vector<ControlIterator> ControlIterators;
-
+		MIDIMessageType                  _type;
 		bool                             _is_end;
 		bool                             _locked;
 		typename Notes::const_iterator   _note_iter;

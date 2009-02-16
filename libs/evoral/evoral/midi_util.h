@@ -19,17 +19,19 @@
 #ifndef EVORAL_MIDI_UTIL_H
 #define EVORAL_MIDI_UTIL_H
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
-
 #include "evoral/midi_events.h"
 
 namespace Evoral {
+
 
 /** Return the size of the given event including the status byte,
  * or -1 if unknown (e.g. sysex)
  */
 static inline int
-midi_event_size(unsigned char status)
+midi_event_size(uint8_t status)
 {
 	// if we have a channel event
 	if (status >= 0x80 && status < 0xF0) {
@@ -91,6 +93,18 @@ midi_event_size(uint8_t* buffer)
 		return midi_event_size(status);
 	}
 }
+
+/** Return true iff the given buffer is a valid MIDI event */
+static inline bool
+midi_event_is_valid(uint8_t* buffer, size_t len)
+{
+	uint8_t status = buffer[0];
+	if (status < 0x80) {
+		return false;
+	}
+	return true;
+}
+
 
 } // namespace Evoral
 
