@@ -18,17 +18,17 @@ class CanvasProgramChange : public CanvasFlag
 {
 public:
 	CanvasProgramChange(
-		MidiRegionView&                       region,
-		Group&                                parent,
-		string&                               text,
-		double                                height,
-		double                                x,
-		double                                y,
-		string&                               model_name,
-		string&                               custom_device_mode,
-		nframes_t                             event_time,
-		uint8_t                               channel,
-		uint8_t                               program
+		MidiRegionView& region,
+		Group&          parent,
+		string&         text,
+		double          height,
+		double          x,
+		double          y,
+		string&         model_name,
+		string&         custom_device_mode,
+		nframes_t       event_time,
+		uint8_t         channel,
+		uint8_t         program
 	);
 	
 	virtual ~CanvasProgramChange();

@@ -169,7 +169,6 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 	region_locked ();
 	
 	reset_width_dependent_items (_pixel_width);
-	//reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	set_colors ();
 
@@ -557,17 +556,6 @@ MidiRegionView::redisplay_model()
 		_model->read_lock();
 		
 		MidiModel::Notes notes = _model->notes();
-		/*
-		cerr << _model->midi_source()->name() << " : redisplaying " << notes.size() << endl;
-		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-			cerr << "NOTE  time: " << (*i)->time()
-				 << "  pitch: " << int((*i)->note()) 
-			     << "  length: " << (*i)->length() 
-			     << "  end-time: " << (*i)->end_time() 
-			     << "  velocity: " << int((*i)->velocity()) 
-			     << endl;
-		}
-		*/
 		
 		for (size_t i = 0; i < _model->n_notes(); ++i) {
 			add_note(_model->note_at(i));
@@ -585,64 +573,53 @@ MidiRegionView::redisplay_model()
 void
 MidiRegionView::display_program_change_flags()
 {
-	for (Automatable::Controls::iterator control = _model->controls().begin();
-			control != _model->controls().end(); ++control) {
-		if (control->first.type() == MidiPgmChangeAutomation) {
-			Glib::Mutex::Lock list_lock (control->second->list()->lock());
+	boost::shared_ptr<Evoral::Control> control = _model->control(MidiPgmChangeAutomation);
+	if (!control) {
+		return;
+	}
 
-			uint8_t channel = control->first.channel();
-			
-			for (AutomationList::const_iterator event = control->second->list()->begin();
-					event != control->second->list()->end(); ++event) {
-				double event_time     = (*event)->when;
-				double program_number = floor((*event)->value + 0.5);
+	Glib::Mutex::Lock lock (control->list()->lock());
 
-				//cerr << " got program change on channel " << int(channel)
-				//		<< " time: " << event_time << " number: " << program_number << endl;
-				
-				// find bank select msb and lsb for the program change				
-				Evoral::Parameter bank_select_msb(MidiCCAutomation, channel, MIDI_CTL_MSB_BANK);
-				boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
-				uint8_t msb = 0;
-				if (msb_control != 0) {
-					msb = uint8_t(floor(msb_control->get_float(true, event_time) + 0.5));
-				}
+	uint8_t channel = control->parameter().channel();
 
-				Evoral::Parameter bank_select_lsb(MidiCCAutomation, channel, MIDI_CTL_LSB_BANK);
-				boost::shared_ptr<Evoral::Control>  lsb_control = _model->control(bank_select_lsb);
-				uint8_t lsb = 0;
-				if (lsb_control != 0) {
-					lsb = uint8_t(floor(lsb_control->get_float(true, event_time) + 0.5));
-				}
-					
-				//cerr << " got msb " << int(msb) << " and lsb " << int(lsb)
-				//		<< " thread_id: " << pthread_self() << endl;
-					
-				MIDI::Name::PatchPrimaryKey patch_key(msb, lsb, program_number);
-				
-				boost::shared_ptr<MIDI::Name::Patch> patch = 
-					MIDI::Name::MidiPatchManager::instance().find_patch(
-							_model_name,
-							_custom_device_mode, 
-							channel, 
-							patch_key);
-				
-				ControlEvent program_change(beats_to_frames(event_time),
-						uint8_t(program_number), channel);
-				
-				if (patch != 0) {
-					//cerr << " got patch with name " << patch->name()
-					//		<< " number " << patch->number() << endl;
-					add_pgm_change(program_change, patch->name());
-				} else {
-					char buf[4];
-					snprintf(buf, 4, "%d", int(program_number));
-					add_pgm_change(program_change, buf);
-				}
-			}
-			break;
+	for (AutomationList::const_iterator event = control->list()->begin();
+			event != control->list()->end(); ++event) {
+		double event_time     = (*event)->when;
+		double program_number = floor((*event)->value + 0.5);
+
+		// Get current value of bank select MSB at time of the program change
+		Evoral::Parameter bank_select_msb(MidiCCAutomation, channel, MIDI_CTL_MSB_BANK);
+		boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
+		uint8_t msb = 0;
+		if (msb_control != 0) {
+			msb = uint8_t(floor(msb_control->get_float(true, event_time) + 0.5));
 		}
-	}	
+
+		// Get current value of bank select LSB at time of the program change
+		Evoral::Parameter bank_select_lsb(MidiCCAutomation, channel, MIDI_CTL_LSB_BANK);
+		boost::shared_ptr<Evoral::Control> lsb_control = _model->control(bank_select_lsb);
+		uint8_t lsb = 0;
+		if (lsb_control != 0) {
+			lsb = uint8_t(floor(lsb_control->get_float(true, event_time) + 0.5));
+		}
+
+		MIDI::Name::PatchPrimaryKey patch_key(msb, lsb, program_number);
+
+		boost::shared_ptr<MIDI::Name::Patch> patch = 
+			MIDI::Name::MidiPatchManager::instance().find_patch(
+					_model_name, _custom_device_mode, channel, patch_key);
+
+		ControlEvent program_change(beats_to_frames(event_time),
+				uint8_t(program_number), channel);
+
+		if (patch != 0) {
+			add_pgm_change(program_change, patch->name());
+		} else {
+			char buf[4];
+			snprintf(buf, 4, "%d", int(program_number));
+			add_pgm_change(program_change, buf);
+		}
+	}
 }
 
 
@@ -710,54 +687,57 @@ MidiRegionView::set_height (double height)
 void
 MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 {
-	if (_enable_display) {
-		if (!force && _current_range_min == min && _current_range_max == max) {
-			return;
-		}
-		
-		_current_range_min = min;
-		_current_range_max = max;
+	if (!_enable_display) {
+		return;
+	}
 
-		for (Events::const_iterator i = _events.begin(); i != _events.end(); ++i) {
-			CanvasNoteEvent* event = *i;
-			Item* item = dynamic_cast<Item*>(event);
-			assert(item);
-			if (event && event->note()) {
-				if (event->note()->note() < _current_range_min
-						|| event->note()->note() > _current_range_max) {
-					if (canvas_item_visible(item)) {
-						item->hide();
-					}
-				} else {
-					if (!canvas_item_visible(item)) {
-						item->show();
-					}
+	if (!force && _current_range_min == min && _current_range_max == max) {
+		return;
+	}
+	
+	_current_range_min = min;
+	_current_range_max = max;
 
-					event->hide_velocity();
-					if (CanvasNote* note = dynamic_cast<CanvasNote*>(event)) {
-						const double y1 = midi_stream_view()->note_to_y(event->note()->note());
-						const double y2 = y1 + floor(midi_stream_view()->note_height());
+	for (Events::const_iterator i = _events.begin(); i != _events.end(); ++i) {
+		CanvasNoteEvent* event = *i;
+		Item* item = dynamic_cast<Item*>(event);
+		assert(item);
+		if (event && event->note()) {
+			if (event->note()->note() < _current_range_min
+					|| event->note()->note() > _current_range_max) {
+				if (canvas_item_visible(item)) {
+					item->hide();
+				}
+			} else {
+				if (!canvas_item_visible(item)) {
+					item->show();
+				}
 
-						note->property_y1() = y1;
-						note->property_y2() = y2;
-					} else if (CanvasHit* hit = dynamic_cast<CanvasHit*>(event)) {
-						double x = trackview.editor().frame_to_pixel(
-								beats_to_frames(event->note()->time()) - _region->start());
-						const double diamond_size = midi_stream_view()->note_height() / 2.0;
-						double y = midi_stream_view()->note_to_y(event->note()->note()) 
-						                 + ((diamond_size-2.0) / 4.0);
-						
-						hit->set_height(diamond_size);
-						hit->move(x-hit->x1(), y-hit->y1());
-						hit->show();
-					}
-					if (event->selected()) {
-						event->show_velocity();
-					}
+				event->hide_velocity();
+				if (CanvasNote* note = dynamic_cast<CanvasNote*>(event)) {
+					const double y1 = midi_stream_view()->note_to_y(event->note()->note());
+					const double y2 = y1 + floor(midi_stream_view()->note_height());
+
+					note->property_y1() = y1;
+					note->property_y2() = y2;
+				} else if (CanvasHit* hit = dynamic_cast<CanvasHit*>(event)) {
+					double x = trackview.editor().frame_to_pixel(
+							beats_to_frames(event->note()->time()) - _region->start());
+					const double diamond_size = midi_stream_view()->note_height() / 2.0;
+					double y = midi_stream_view()->note_to_y(event->note()->note()) 
+					                 + ((diamond_size-2.0) / 4.0);
+					
+					hit->set_height(diamond_size);
+					hit->move(x-hit->x1(), y-hit->y1());
+					hit->show();
+				}
+				if (event->selected()) {
+					event->show_velocity();
 				}
 			}
 		}
 	}
+	
 }
 
 GhostRegion*
@@ -772,9 +752,8 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	MidiGhostRegion* ghost;
 
 	if (mtv && mtv->midi_view()) {
-		/* if ghost is inserted into midi track, use a dedicated midi ghost canvas group.
-		   this is because it's nice to have midi notes on top of the note lines and
-		   audio waveforms under it.
+		/* if ghost is inserted into midi track, use a dedicated midi ghost canvas group
+		   to allow having midi notes on top of note lines and waveforms under it.
 		 */
 		ghost = new MidiGhostRegion (*mtv->midi_view(), trackview, unit_position);
 	} else {
@@ -831,7 +810,8 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 	}
 
 	if (_active_notes && _active_notes[note]) {
-		_active_notes[note]->property_x2() = trackview.editor().frame_to_pixel((nframes64_t)end_time);
+		const nframes64_t end_time_frames = beats_to_frames(end_time);
+		_active_notes[note]->property_x2() = trackview.editor().frame_to_pixel(end_time_frames);
 		_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
 		_active_notes[note] = NULL;
 	}
@@ -1005,18 +985,13 @@ MidiRegionView::add_pgm_change(ControlEvent& program, string displaytext)
 	double height = midi_stream_view()->contents_height();
 	
 	boost::shared_ptr<CanvasProgramChange> pgm_change = boost::shared_ptr<CanvasProgramChange>(
-			new CanvasProgramChange(
-					*this, 
-					*group, 
+			new CanvasProgramChange(*this, *group,
 					displaytext, 
 					height, 
-					x, 
-					1.0, 
+					x, 1.0, 
 					_model_name, 
 					_custom_device_mode, 
-					program.time, 
-					program.channel, 
-					program.value));
+					program.time, program.channel, program.value));
 	
 	_pgm_changes.push_back(pgm_change);
 }
