@@ -21,6 +21,7 @@
 #include <ardour/automation_control.h>
 #include <ardour/event_type_map.h>
 #include <ardour/session.h>
+#include <ardour/source.h>
 #include "automation_region_view.h"
 #include "public_editor.h"
 
@@ -69,7 +70,8 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 {
 	_line = boost::shared_ptr<AutomationLine>(new AutomationLine(
 				ARDOUR::EventTypeMap::instance().to_symbol(list->parameter()),
-				trackview, *get_canvas_group(), list));
+				trackview, *get_canvas_group(), list,
+				_region->source(0)->time_converter()));
 	_line->set_colors();
 	_line->set_interpolation(list->interpolation());
 	_line->show();
@@ -114,7 +116,7 @@ AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, dou
 
 	/* map using line */
 
-	_line->view_to_model_y (y);
+	_line->view_to_model_coord (x, y);
 
 	view->session().begin_reversible_command (_("add automation event"));
 	XMLNode& before = _line->the_list()->get_state();

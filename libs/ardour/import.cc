@@ -356,7 +356,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, Session::ImportStatus& status
 		}
 
 		const double length_beats = ceil(t / (double)source->ppqn());
-		smfs->update_length(0, smfs->converter().to(length_beats));
+		smfs->update_length(0, smfs->time_converter().to(length_beats));
 		smfs->end_write();
 
 		if (status.cancel) {

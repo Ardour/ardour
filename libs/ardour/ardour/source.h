@@ -24,8 +24,8 @@
 #include <set>
 
 #include <sigc++/signal.h>
-
 #include <pbd/statefuldestructible.h> 
+#include <evoral/TimeConverter.hpp>
 
 #include <ardour/ardour.h>
 #include <ardour/session_object.h>
@@ -91,6 +91,10 @@ class Source : public SessionObject, public ARDOUR::Readable
 	int load_transients (const std::string&);
 	
 	void update_length (nframes_t pos, nframes_t cnt);
+	
+	virtual const Evoral::TimeConverter<double, nframes_t>& time_converter() const {
+		return Evoral::IdentityConverter<double, nframes_t>();
+	}
 
   protected:
 	DataType            _type;

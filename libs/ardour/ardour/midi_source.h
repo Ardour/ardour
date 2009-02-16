@@ -95,7 +95,9 @@ class MidiSource : public Source
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
 	void drop_model() { _model.reset(); }
 
-	BeatsFramesConverter& converter() { return _converter; }
+	const Evoral::TimeConverter<double, nframes_t>& time_converter() const {
+		return _converter;
+	}
 
   protected:
 	virtual void flush_midi() = 0;

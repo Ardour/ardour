@@ -1388,13 +1388,13 @@ MidiRegionView::get_position_pixels()
 nframes64_t
 MidiRegionView::beats_to_frames(double beats) const
 {
-	return midi_region()->midi_source()->converter().to(beats);
+	return midi_region()->midi_source()->time_converter().to(beats);
 }
 
 double
 MidiRegionView::frames_to_beats(nframes64_t frames) const
 {
-	return midi_region()->midi_source()->converter().from(frames);
+	return midi_region()->midi_source()->time_converter().from(frames);
 }
 
 void

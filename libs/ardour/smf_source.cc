@@ -612,6 +612,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	if (_model && !force_reload) {
+		cerr << _name << " not reloading model " << _model.get() << endl;
 		return;
 	}
 

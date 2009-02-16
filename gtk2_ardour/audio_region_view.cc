@@ -1008,7 +1008,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	/* map using gain line */
 
-	gain_line->view_to_model_y (y);
+	gain_line->view_to_model_coord (x, y);
 
 	trackview.session().begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope()->get_state();

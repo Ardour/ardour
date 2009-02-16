@@ -39,7 +39,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
-  : AutomationLine (name, r.get_time_axis_view(), parent, l),
+  : AutomationLine (name, r.get_time_axis_view(), parent, l,
+		  Evoral::IdentityConverter<double, nframes_t>()),
 	  session (s),
 	  rv (r)
 {

@@ -56,11 +56,14 @@ using namespace PBD;
 using namespace Editing;
 using namespace Gnome; // for Canvas
 
-AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> al)
-	: trackview (tv),
-	  _name (name),
-	  alist (al),
-	  _parent_group (parent)
+AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent,
+		boost::shared_ptr<AutomationList> al,
+		const Evoral::TimeConverter<double, nframes_t>& converter)
+	: trackview (tv)
+	, _name (name)
+	, alist (al)
+	, _parent_group (parent)
+	, _time_converter (converter)
 {
 	_interpolation = al->interpolation();
 	points_visible = false;
@@ -209,7 +212,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().frame_to_unit ((*cp.model())->when);
+	double const x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when));
 
 	trackview.editor().current_session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
@@ -311,7 +314,7 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 
 		/* leave the x-coordinate alone */
 
-		x = trackview.editor().frame_to_unit ((*cp.model())->when);
+		x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when));
 
 	}
 
@@ -359,7 +362,6 @@ AutomationLine::reset_line_coords (ControlPoint& cp)
 void
 AutomationLine::sync_model_with_view_line (uint32_t start, uint32_t end)
 {
-
 	ControlPoint *p;
 
 	update_pending = true;
@@ -378,27 +380,26 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	   line to convert them to something relevant.
 	*/
 	
-	mr.xval = (nframes_t) floor (cp.get_x());
+	mr.xval = cp.get_x();
 	mr.yval = 1.0 - (cp.get_y() / _height);
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (mr.xval == trackview.editor().frame_to_unit((*cp.model())->when)) {
-		mr.xval = (nframes_t) (*cp.model())->when;
+	if (mr.xval == trackview.editor().frame_to_unit(_time_converter.to((*cp.model())->when))) {
+		mr.xval = (*cp.model())->when;
 	} else {
 		mr.xval = trackview.editor().unit_to_frame (mr.xval);
 	}
 
-	/* virtual call: this will do the right thing
-	   for whatever particular type of line we are.
+	/* convert to model units
 	*/
 	
-	view_to_model_y (mr.yval);
+	view_to_model_coord (mr.xval, mr.yval);
 
 	/* part 2: find out where the model point is now
 	 */
 
-	mr.xpos = (nframes_t) (*cp.model())->when;
+	mr.xpos = (*cp.model())->when;
 	mr.ypos = (*cp.model())->value;
 
 	/* part 3: get the position of the visual control
@@ -417,7 +418,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	after = nth (cp.view_index() + 1);
 
 	if (before) {
-		mr.xmin = (nframes_t) (*before->model())->when;
+		mr.xmin = (*before->model())->when;
 		mr.ymin = (*before->model())->value;
 		mr.start = before->model();
 		++mr.start;
@@ -656,7 +657,6 @@ AutomationLine::get_verbose_cursor_string (double fraction) const
  *  @param fraction y fraction
  *  @return string representation of this value, using dB if appropriate.
  */
-
 string
 AutomationLine::fraction_to_string (double fraction) const
 {
@@ -669,7 +669,8 @@ AutomationLine::fraction_to_string (double fraction) const
 			snprintf (buf, sizeof (buf), "%.1f", coefficient_to_dB (slider_position_to_gain (fraction)));
 		}
 	} else {
-		view_to_model_y (fraction);
+		double dummy = 0.0;
+		view_to_model_coord (dummy, fraction);
 		if (EventTypeMap::instance().is_integer (alist->parameter())) {
 			snprintf (buf, sizeof (buf), "%d", (int)fraction);
 		} else {
@@ -685,7 +686,6 @@ AutomationLine::fraction_to_string (double fraction) const
  *  @param s Value string in the form as returned by fraction_to_string.
  *  @return Corresponding y fraction.
  */
-
 double
 AutomationLine::string_to_fraction (string const & s) const
 {
@@ -699,7 +699,8 @@ AutomationLine::string_to_fraction (string const & s) const
 	if (_uses_gain_mapping) {
 		v = gain_to_slider_position (dB_to_coefficient (v));
 	} else {
-		model_to_view_y (v);
+		double dummy = 0.0;
+		model_to_view_coord (dummy, v);
 	}
 
 	return v;
@@ -781,7 +782,9 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 
 	for (uint32_t i = i1 ; i <= i2; i++) {
 		cp = nth (i);
-		modify_view_point (*cp, trackview.editor().unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
+		modify_view_point (*cp,
+				trackview.editor().unit_to_frame (_time_converter.to(cp->get_x())),
+				((_height - cp->get_y()) /_height) + ydelta, with_push);
 	}
 
 	if (line_points.size() > 1) {
@@ -892,8 +895,6 @@ AutomationLine::control_points_adjacent (double xval, uint32_t & before, uint32_
 	ControlPoint *acp = 0;
 	double unit_xval;
 
-	/* xval is in frames */
-
 	unit_xval = trackview.editor().frame_to_unit (xval);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
@@ -968,13 +969,13 @@ AutomationLine::remove_point (ControlPoint& cp)
 
 void
 AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
-				 double botfrac, double topfrac, list<Selectable*>& results)
+		double botfrac, double topfrac, list<Selectable*>& results)
 {
 
 	double top;
 	double bot;
-	nframes_t nstart;
-	nframes_t nend;
+	double nstart;
+	double nend;
 	bool collecting = false;
 
 	/* Curse X11 and its inverted coordinate system! */
@@ -986,8 +987,7 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 	nend = 0;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		
-		nframes_t when = (nframes_t) (*(*i)->model())->when;
+		double when = (*(*i)->model())->when;
 
 		if (when >= start && when <= end) {
 			
@@ -1137,8 +1137,9 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 	for (ai = events.begin(); ai != events.end(); ++ai) {
 		
+		double translated_x = (*ai)->when;
 		double translated_y = (*ai)->value;
-		model_to_view_y (translated_y);
+		model_to_view_coord (translated_x, translated_y);
 
 		add_model_point (tmp_points, (*ai)->when, translated_y);
 	}
@@ -1150,7 +1151,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 void
 AutomationLine::add_model_point (ALPoints& tmp_points, double frame, double yfract)
 {
-	tmp_points.push_back (ALPoint (trackview.editor().frame_to_unit (frame),
+	tmp_points.push_back (ALPoint (trackview.editor().frame_to_unit (_time_converter.to(frame)),
 				       _height - (yfract * _height)));
 }
 
@@ -1172,7 +1173,8 @@ AutomationLine::clear ()
 	/* parent must create command */
 	XMLNode &before = get_state();
 	alist->clear();
-	trackview.editor().current_session()->add_command (new MementoCommand<AutomationLine>(*this, &before, &get_state()));
+	trackview.editor().current_session()->add_command (
+			new MementoCommand<AutomationLine>(*this, &before, &get_state()));
 	trackview.editor().current_session()->commit_reversible_command ();
 	trackview.editor().current_session()->set_dirty ();
 }
@@ -1248,7 +1250,7 @@ AutomationLine::set_state (const XMLNode &node)
 }
 
 void
-AutomationLine::view_to_model_y (double& y) const
+AutomationLine::view_to_model_coord (double& x, double& y) const
 {
 	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation ||
@@ -1264,10 +1266,12 @@ AutomationLine::view_to_model_y (double& y) const
 	} else {
 		y = (int)(y * alist->parameter().max());
 	}
+
+	x = _time_converter.from(x);
 }
 
 void
-AutomationLine::model_to_view_y (double& y) const
+AutomationLine::model_to_view_coord (double& x, double& y) const
 {
 	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation ||
@@ -1281,6 +1285,8 @@ AutomationLine::model_to_view_y (double& y) const
 	} else {
 		y = y / (double)alist->parameter().max(); /* ... like this */
 	}
+	
+	x = _time_converter.to(x);
 }
 
 	

@@ -211,12 +211,14 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	
 	/* no regions, just a single line for the entire track (e.g. bus gain) */
 	} else {
+		static const Evoral::IdentityConverter<double,nframes_t> null_converter;
 	
 		boost::shared_ptr<AutomationLine> line(new AutomationLine (
 					ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
 					*this,
 					*_canvas_display,
-					_control->alist()));
+					_control->alist(),
+					null_converter));
 
 		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
 		line->queue_reset ();
@@ -581,7 +583,7 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent
 
 	/* map using line */
 
-	_line->view_to_model_y (y);
+	_line->view_to_model_coord (x, y);
 
 	_session.begin_reversible_command (_("add automation event"));
 	XMLNode& before = _control->alist()->get_state();
@@ -634,9 +636,11 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 
 	if (what_we_got) {
 		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
-			double foo = (*x)->value;
-			line.model_to_view_y (foo);
-			(*x)->value = foo;
+			double when = (*x)->when;
+			double val  = (*x)->value;
+			line.model_to_view_coord (when, val);
+			(*x)->when = when;
+			(*x)->value = val;
 		}
 	}
 
@@ -714,9 +718,11 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 
 	if (what_we_got) {
 		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
-			double foo = (*x)->value;
-			line.model_to_view_y (foo);
-			(*x)->value = foo;
+			double when = (*x)->when;
+			double val  = (*x)->value;
+			line.model_to_view_coord (when, val);
+			(*x)->when = when;
+			(*x)->value = val;
 		}
 	}
 
@@ -749,9 +755,11 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 	AutomationList copy (**p);
 
 	for (AutomationList::iterator x = copy.begin(); x != copy.end(); ++x) {
-		double foo = (*x)->value;
-		line.view_to_model_y (foo);
-		(*x)->value = foo;
+		double when = (*x)->when;
+		double val  = (*x)->value;
+		line.view_to_model_coord (when, val);
+		(*x)->when = when;
+		(*x)->value = val;
 	}
 
 	XMLNode &before = alist->get_state();

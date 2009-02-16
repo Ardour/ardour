@@ -30,11 +30,12 @@
 #include "canvas.h"
 #include "simplerect.h"
 
+#include <evoral/TimeConverter.hpp>
+
 #include <pbd/undo.h>
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/automation_list.h>
-
 
 class AutomationLine;
 class ControlPoint;
@@ -53,7 +54,9 @@ namespace Gnome {
 class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
-	AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, boost::shared_ptr<ARDOUR::AutomationList>);
+	AutomationLine (const string& name, TimeAxisView&, ArdourCanvas::Group&,
+			boost::shared_ptr<ARDOUR::AutomationList>,
+			const Evoral::TimeConverter<double, nframes_t>& converter);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -70,7 +73,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	bool control_points_adjacent (double xval, uint32_t& before, uint32_t& after);
 	
 	/* dragging API */
-
 	virtual void start_drag (ControlPoint*, nframes_t x, float fraction);
 	virtual void point_drag(ControlPoint&, nframes_t x, float, bool with_push);
 	virtual void end_drag (ControlPoint*);
@@ -79,9 +81,9 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	ControlPoint* nth (uint32_t);
 	uint32_t npoints() const { return control_points.size(); }
 
-	string  name() const { return _name; }
+	string  name()    const { return _name; }
 	bool    visible() const { return _visible; }
-	guint32 height() const { return _height; }
+	guint32 height()  const { return _height; }
 
 	void     set_line_color (uint32_t);
 	uint32_t get_line_color() const { return _line_color; }
@@ -106,8 +108,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	string get_verbose_cursor_string (double) const;
 	string fraction_to_string (double) const;
 	double string_to_fraction (string const &) const;
-	void   view_to_model_y (double&) const;
-	void   model_to_view_y (double&) const;
+	void   view_to_model_coord (double& x, double& y) const;
+	void   model_to_view_coord (double& x, double& y) const;
 
 	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
@@ -180,8 +182,9 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	uint32_t line_drag_cp2;
 	int64_t  drag_x;
 	int64_t  drag_distance;
-	
-	ARDOUR::AutomationList::InterpolationStyle _interpolation;
+
+	const Evoral::TimeConverter<double, nframes_t>& _time_converter;
+	ARDOUR::AutomationList::InterpolationStyle      _interpolation;
 
 	void modify_view_point (ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);
@@ -191,13 +194,13 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	struct ModelRepresentation {
 	    ARDOUR::AutomationList::iterator start;
 	    ARDOUR::AutomationList::iterator end;
-	    nframes_t xpos;
+	    double xpos;
 	    double ypos;
-	    nframes_t xmin;
+	    double xmin;
 	    double ymin;
-	    nframes_t xmax;
+	    double xmax;
 	    double ymax;
-	    nframes_t xval;
+	    double xval;
 	    double yval;
 	};
 
