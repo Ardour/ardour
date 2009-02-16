@@ -21,9 +21,10 @@
 #include <cassert>
 #include <iostream>
 #include <stdint.h>
+#include "libsmf/smf.h"
 #include "evoral/Event.hpp"
 #include "evoral/SMF.hpp"
-#include "libsmf/smf.h"
+#include "evoral/midi_util.h"
 
 using namespace std;
 
@@ -201,6 +202,8 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
     	memcpy(*buf, event->midi_buffer, size_t(event_size));
     	*size = event_size;
 	
+		assert(midi_event_is_valid(*buf, *size));
+
 		/*printf("SMF::read_event:\n");
 		for (size_t i = 0; i < *size; ++i) {
 			printf("%X ", (*buf)[i]);
@@ -223,6 +226,11 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 	for (size_t i = 0; i < size; ++i) {
 		printf("%X ", buf[i]);
 	} printf("\n");*/
+
+	if (!midi_event_is_valid(buf, size)) {
+		cerr << "WARNING: Ignoring illegal MIDI event" << endl;
+		return;
+	}
 
 	smf_event_t* event;
 

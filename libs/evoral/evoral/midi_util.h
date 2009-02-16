@@ -70,20 +70,22 @@ midi_event_size(uint8_t status)
 	return -1;
 }
 
-/** Return the size of the given event including the status byte
- * (which must be the first byte in \a buffer),
- * or -1 if unknown (eg sysex)
+/** Return the size of the given event including the status byte,
+ * or -1 if event is illegal.
  */
 static inline int
-midi_event_size(uint8_t* buffer)
+midi_event_size(const uint8_t* buffer)
 {
 	uint8_t status = buffer[0];
 	
-	// if we have a channel event
+	// Mask off channel if applicable
 	if (status >= 0x80 && status < 0xF0) {
-		status &= 0xF0; // mask off the channel
+		status &= 0xF0;
 	}
 	
+	// FIXME: This is not correct, read the size and verify
+	// A sysex can contain the byte MIDI_CMD_COMMON_SYSEX_END, so this
+	// is likely to result in corrupt buffers and catastrophic failure
 	if (status == MIDI_CMD_COMMON_SYSEX) {
 		int end;
 		for (end = 1; buffer[end] != MIDI_CMD_COMMON_SYSEX_END; end++) {}
@@ -94,12 +96,18 @@ midi_event_size(uint8_t* buffer)
 	}
 }
 
-/** Return true iff the given buffer is a valid MIDI event */
+/** Return true iff the given buffer is a valid MIDI event.
+ * \a len must be exactly correct for the contents of \a buffer
+ */
 static inline bool
-midi_event_is_valid(uint8_t* buffer, size_t len)
+midi_event_is_valid(const uint8_t* buffer, size_t len)
 {
 	uint8_t status = buffer[0];
 	if (status < 0x80) {
+		return false;
+	}
+	const int size = midi_event_size(buffer);
+	if (size < 0 || (size_t)size != len) {
 		return false;
 	}
 	return true;

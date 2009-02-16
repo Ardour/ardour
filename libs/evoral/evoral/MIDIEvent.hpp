@@ -80,7 +80,7 @@ struct MIDIEvent : public Event<Time> {
 	inline void     set_pgm_number(uint8_t number){ this->_buf[1] = number; }
 	inline uint8_t  aftertouch()            const { return (this->_buf[1]); }
 	inline uint8_t  channel_pressure()      const { return (this->_buf[1]); }
-	inline bool     is_channel_event()      const { return (0x80 <= type()) && (type() <= 0xE0);	}
+	inline bool     is_channel_event()      const { return (0x80 <= type()) && (type() <= 0xE0); }
 	inline bool     is_smf_meta_event()     const { return this->_buf[0] == 0xFF; }
 	inline bool     is_sysex()              const { return this->_buf[0] == 0xF0
 	                                                    || this->_buf[0] == 0xF7; }

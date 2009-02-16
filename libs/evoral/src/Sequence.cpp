@@ -580,6 +580,11 @@ Sequence<Time>::append(const Event<Time>& event)
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
 
+	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
+		cerr << "WARNING: Ignoring illegal MIDI event" << endl;
+		return;
+	}
+
 	if (ev.is_note_on()) {
 		append_note_on_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
 	} else if (ev.is_note_off()) {
