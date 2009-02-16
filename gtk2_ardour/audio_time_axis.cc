@@ -387,9 +387,7 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 							    *this,
 							    false,
 							    parent_canvas,
-							    name)
-				
-				);
+							    name));
 			
 			add_automation_child (*p, pan_track, show);
 		}

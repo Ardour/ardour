@@ -494,6 +494,11 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	/* These controllers are region "automation", so we do not create
 	 * an AutomationList/Line for the track */
 
+	if (param.type() == NullAutomation) {
+		cerr << "WARNING: Attempt to create NullAutomation child, ignoring" << endl;
+		return;
+	}
+
 	AutomationTracks::iterator existing = _automation_tracks.find(param);
 	if (existing != _automation_tracks.end())
 		return;
