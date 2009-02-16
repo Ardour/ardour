@@ -28,13 +28,14 @@ using namespace Gtk;
 using namespace sigc;
 using namespace ARDOUR;
 
-MidiChannelSelector::MidiChannelSelector(int no_rows, int no_columns, int start_row, int start_column) : Table(no_rows, no_columns, true)
-	 , _recursion_counter(0)
+MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_row, int start_column)
+	: Table(n_rows, n_columns, true)
+	, _recursion_counter(0)
 {	
-	assert(no_rows >= 4);
-	assert(no_rows >= start_row + 4);
-	assert(no_columns >=4);
-	assert(no_columns >= start_column + 4);
+	assert(n_rows >= 4);
+	assert(n_rows >= start_row + 4);
+	assert(n_columns >=4);
+	assert(n_columns >= start_column + 4);
 	
 	property_column_spacing() = 0;
 	property_row_spacing() = 0;

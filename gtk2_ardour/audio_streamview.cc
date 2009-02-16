@@ -248,11 +248,9 @@ void
 AudioStreamView::playlist_modified_weak (boost::weak_ptr<Diskstream> ds)
 {
 	boost::shared_ptr<Diskstream> sp (ds.lock());
-	if (!sp) {
-		return;
+	if (sp) {
+		playlist_modified (sp);
 	}
-
-	playlist_modified (sp);
 }
 
 void
@@ -271,15 +269,28 @@ AudioStreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 }
 
 void
+AudioStreamView::playlist_changed_weak (boost::weak_ptr<Diskstream> ds)
+{
+	boost::shared_ptr<Diskstream> sp (ds.lock());
+	if (sp) {
+		playlist_changed (sp);
+	}
+}
+
+void
 AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::playlist_changed), ds));
+	ENSURE_GUI_THREAD (bind (
+			mem_fun (*this, &AudioStreamView::playlist_changed_weak),
+			boost::weak_ptr<Diskstream> (ds)));
 
 	StreamView::playlist_changed(ds);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
-	if (apl)
-		playlist_connections.push_back (apl->NewCrossfade.connect (mem_fun (*this, &AudioStreamView::add_crossfade)));
+	if (apl) {
+		playlist_connections.push_back (apl->NewCrossfade.connect (
+				mem_fun (*this, &AudioStreamView::add_crossfade)));
+	}
 }
 
 void

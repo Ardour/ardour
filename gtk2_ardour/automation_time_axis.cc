@@ -381,10 +381,8 @@ AutomationTimeAxisView::set_height (uint32_t h)
 {
 	bool changed = (height != (uint32_t) h) || first_call_to_set_height;
 	bool changed_between_small_and_normal = ( 
-		(height < hNormal && h >= hNormal) || 
-		(height >= hNormal || 
-		h < hNormal)
-	);
+		   (height < hNormal && h >= hNormal)
+		|| (height >= hNormal || h < hNormal) );
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
@@ -515,20 +513,24 @@ AutomationTimeAxisView::build_display_menu ()
 	auto_state_menu->set_name ("ArdourContextMenu");
 	MenuList& as_items = auto_state_menu->items();
 	
-	as_items.push_back (CheckMenuElem (_("Manual"), 
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
+	as_items.push_back (CheckMenuElem (_("Manual"), bind (
+			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+			(AutoState) Off)));
 	auto_off_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("Play"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
+	as_items.push_back (CheckMenuElem (_("Play"), bind (
+			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+			(AutoState) Play)));
 	auto_play_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("Write"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+	as_items.push_back (CheckMenuElem (_("Write"), bind (
+			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+			(AutoState) Write)));
 	auto_write_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("Touch"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+	as_items.push_back (CheckMenuElem (_("Touch"), bind (
+			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+			(AutoState) Touch)));
 	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
@@ -859,17 +861,6 @@ AutomationTimeAxisView::exited ()
 	if (_line)
 		_line->track_exited();
 }
-
-/*void
-AutomationTimeAxisView::set_colors ()
-{
-    for (list<GhostRegion*>::iterator i=ghosts.begin(); i != ghosts.end(); i++ ) {
-		(*i)->set_colors();
-    }
-    
-	if (_line)
-		_line->set_colors();
-		}*/
 
 void
 AutomationTimeAxisView::color_handler () 

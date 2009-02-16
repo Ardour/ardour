@@ -126,6 +126,7 @@ protected:
 	void         diskstream_changed ();
 	void         layer_regions ();
 	
+	virtual void playlist_changed_weak (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified_weak (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);

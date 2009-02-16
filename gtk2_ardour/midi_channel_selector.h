@@ -33,7 +33,7 @@
 class MidiChannelSelector : public Gtk::Table
 {
 public:
-	MidiChannelSelector(int no_rows = 4, int no_columns = 4, int start_row = 0, int start_column = 0);
+	MidiChannelSelector(int n_rows = 4, int n_columns = 4, int start_row = 0, int start_column = 0);
 	virtual ~MidiChannelSelector() = 0;
 	
 	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;

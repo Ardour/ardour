@@ -166,8 +166,6 @@ MidiScroomer::on_size_request(Gtk::Requisition* r)
 {
 	r->width = 12;
 	r->height = 100;
-	//r->width = 32;
-	//r->height = 512;
 }
 
 void

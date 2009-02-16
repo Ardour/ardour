@@ -88,7 +88,8 @@ using namespace Editing;
 static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 162;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 140;
 
-MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
+MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
+		boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess) // virtually inherited
 	, RouteTimeAxisView(ed, sess, rt, canvas)
 	, _ignore_signals(false)  
@@ -150,10 +151,9 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
 
-	for (MIDI::Name::MasterDeviceNames::Models::const_iterator model = patch_manager.all_models().begin();
-	     model != patch_manager.all_models().end();
-	     ++model) {
-		_model_selector.append_text(model->c_str());
+	MIDI::Name::MasterDeviceNames::Models::const_iterator m = patch_manager.all_models().begin();
+	for (; m != patch_manager.all_models().end(); ++m) {
+		_model_selector.append_text(m->c_str());
 	}
 	
 	_model_selector.signal_changed().connect(mem_fun(*this, &MidiTimeAxisView::model_changed));
@@ -178,7 +178,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_track()->midi_diskstream();
 
 	// restore channel selector settings
-	_channel_selector.set_channel_mode(diskstream->get_channel_mode(), diskstream->get_channel_mask());
+	_channel_selector.set_channel_mode(diskstream->get_channel_mode(),
+			diskstream->get_channel_mask());
 	_channel_selector.mode_changed.connect(
 		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mode));
 
@@ -207,7 +208,8 @@ void MidiTimeAxisView::model_changed()
 	
 	_custom_device_mode_selector.clear_items();
 	
-	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
+	for (std::list<std::string>::const_iterator i = device_modes.begin();
+			i != device_modes.end(); ++i) {
 		cerr << "found custom device mode " << *i << " thread_id: " << pthread_self() << endl;
 		_custom_device_mode_selector.append_text(*i);
 	}
@@ -217,7 +219,8 @@ void MidiTimeAxisView::model_changed()
 
 void MidiTimeAxisView::custom_device_mode_changed()
 {
-	_midi_patch_settings_changed.emit(_model_selector.get_active_text(), _custom_device_mode_selector.get_active_text());	
+	_midi_patch_settings_changed.emit(_model_selector.get_active_text(),
+			_custom_device_mode_selector.get_active_text());	
 }
 
 MidiStreamView*
@@ -555,7 +558,4 @@ MidiTimeAxisView::route_active_changed ()
 		}
 	}
 }
-
-
-
 

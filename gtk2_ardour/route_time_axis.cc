@@ -350,7 +350,6 @@ RouteTimeAxisView::set_edit_group_from_menu (RouteGroup *eg)
 
 void
 RouteTimeAxisView::playlist_changed ()
-
 {
 	label_view ();
 
