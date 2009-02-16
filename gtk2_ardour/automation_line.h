@@ -56,7 +56,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
   public:
 	AutomationLine (const string& name, TimeAxisView&, ArdourCanvas::Group&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
-			const Evoral::TimeConverter<double, nframes_t>& converter);
+			const Evoral::TimeConverter<double, nframes_t>* converter = 0);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -128,7 +128,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void set_colors();
 
 	void modify_point_y (ControlPoint&, double);
-
+	
   protected:
 
 	string    _name;

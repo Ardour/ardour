@@ -30,19 +30,16 @@
 
 #include <ardour/session.h>
 
-
 #include "i18n.h"
-
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
 AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
-  : AutomationLine (name, r.get_time_axis_view(), parent, l,
-		  Evoral::IdentityConverter<double, nframes_t>()),
-	  session (s),
-	  rv (r)
+	: AutomationLine (name, r.get_time_axis_view(), parent, l)
+	, session (s)
+	, rv (r)
 {
 	// If this isn't true something is horribly wrong, and we'll get catastrophic gain values
 	assert(l->parameter().type() == EnvelopeAutomation);

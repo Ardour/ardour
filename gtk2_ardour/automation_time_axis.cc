@@ -211,14 +211,11 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	
 	/* no regions, just a single line for the entire track (e.g. bus gain) */
 	} else {
-		static const Evoral::IdentityConverter<double,nframes_t> null_converter;
-	
 		boost::shared_ptr<AutomationLine> line(new AutomationLine (
 					ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
 					*this,
 					*_canvas_display,
-					_control->alist(),
-					null_converter));
+					_control->alist()));
 
 		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
 		line->queue_reset ();
