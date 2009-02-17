@@ -43,7 +43,7 @@ using std::vector;
 
 namespace ARDOUR {
 
-class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
+class AudioSource : virtual public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
 	AudioSource (Session&, Glib::ustring name);
@@ -68,7 +68,6 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 
 	virtual float sample_rate () const = 0;
 
-	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_completed () {}
 
 	virtual bool can_truncate_peaks() const { return true; }
@@ -116,7 +115,6 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	static bool _build_peakfiles;
 
 	bool                 _peaks_built;
-	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	Glib::ustring         peakpath;
 	Glib::ustring        _captured_for;
@@ -138,8 +136,6 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
 	                                            Glib::ustring audio_path) = 0;
 	
-	void update_length (nframes_t pos, nframes_t cnt);
-
  	virtual int read_peaks_with_fpp (PeakData *peaks,
 			nframes_t npeaks, nframes_t start, nframes_t cnt, 
 			double samples_per_visual_peak, nframes_t fpp) const;

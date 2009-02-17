@@ -47,7 +47,7 @@ public:
 	int  create(const std::string& path, int track=1, uint16_t ppqn=19200) THROW_FILE_ERROR;
 	void close() THROW_FILE_ERROR;
 	
-	const std::string& path() const { return _path; };
+	const std::string& file_path() const { return _file_path; };
 
 	void seek_to_start() const;
 	int  seek_to_track(int track);
@@ -65,7 +65,7 @@ public:
 	void flush() {};
 
 private:
-	std::string  _path;
+	std::string  _file_path;
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events

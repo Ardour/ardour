@@ -45,32 +45,31 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-
-string SMFSource::_search_path;
+using namespace Glib;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
-SMFSource::SMFSource(Session& s, std::string path, Source::Flag flags)
-	: MidiSource(s, region_name_from_path(path, false))
+SMFSource::SMFSource (Session& s, const ustring& path, bool embedded, Source::Flag flags)
+	: Source(s, DataType::MIDI, path, flags)
+	, MidiSource(s, path)
+	, FileSource(s, DataType::MIDI, path, embedded, flags)
 	, Evoral::SMF()
-	, _allow_remove_if_empty(true)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 {
-	if (init(path, false)) {
+	if (init(_name, false)) {
 		throw failed_constructor ();
 	}
 	
 	if (create(path)) {
 		throw failed_constructor ();
 	}
-
-	assert(_name.find("/") == string::npos);
 }
 
-/** Constructor used for existing internal-to-session files.  File must exist. */
-SMFSource::SMFSource(Session& s, const XMLNode& node)
-	: MidiSource(s, node)
-	, _allow_remove_if_empty(true)
+/** Constructor used for existing internal-to-session files. */
+SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
+	: Source(s, node)
+	, MidiSource(s, node)
+	, FileSource(s, node, must_exist)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 {
@@ -85,8 +84,6 @@ SMFSource::SMFSource(Session& s, const XMLNode& node)
 	if (open(_path)) {
 		throw failed_constructor ();
 	}
-	
-	assert(_name.find("/") == string::npos);
 }
 
 SMFSource::~SMFSource ()
@@ -96,40 +93,12 @@ SMFSource::~SMFSource ()
 	}
 }
 
-bool
-SMFSource::removable () const
-{
-	return (_flags & Removable) && ((_flags & RemoveAtDestroy) ||
-			((_flags & RemovableIfEmpty) && is_empty()));
-}
-
-int
-SMFSource::init (string pathstr, bool must_exist)
-{
-	bool is_new = false;
-
-	if (!find (pathstr, must_exist, is_new)) {
-		cerr << "cannot find " << pathstr << " with me = " << must_exist << endl;
-		return -1;
-	}
-
-	if (is_new && must_exist) {
-		return -1;
-	}
-
-	assert(_name.find("/") == string::npos);
-	return 0;
-}
-
 /** All stamps in audio frames */
 nframes_t
 SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t dur,
 		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
-	//cerr << "SMF read_unlocked " << name() << " read "
-	//<< start << ", count=" << dur << ", offset=" << stamp_offset << endl;
-
-	int ret;
+	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
 
 	_read_data_count = 0;
@@ -266,7 +235,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t dur)
 
 /** Append an event with a timestamp in beats (double) */
 void
-SMFSource::append_event_unlocked_beats(const Evoral::Event<double>& ev)
+SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 {
 	if (ev.size() == 0)  {
 		return;
@@ -297,7 +266,7 @@ SMFSource::append_event_unlocked_beats(const Evoral::Event<double>& ev)
 
 /** Append an event with a timestamp in frames (nframes_t) */
 void
-SMFSource::append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev)
+SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev)
 {
 	if (ev.size() == 0)  {
 		return;
@@ -330,46 +299,28 @@ SMFSource::append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev)
 	}
 }
 
-
 XMLNode&
 SMFSource::get_state ()
 {
-	XMLNode& root (MidiSource::get_state());
-	char buf[16];
-	snprintf (buf, sizeof (buf), "0x%x", (int)_flags);
-	root.add_property ("flags", buf);
-	return root;
+	return MidiSource::get_state();
 }
 
 int
 SMFSource::set_state (const XMLNode& node)
 {
-	const XMLProperty* prop;
+	if (Source::set_state (node)) {
+		return -1;
+	}
 
 	if (MidiSource::set_state (node)) {
 		return -1;
 	}
-
-	if ((prop = node.property (X_("flags"))) != 0) {
-		int ival;
-		sscanf (prop->value().c_str(), "0x%x", &ival);
-		_flags = Flag (ival);
-	} else {
-		_flags = Flag (0);
+	
+	if (FileSource::set_state (node)) {
+		return -1;
 	}
-
-	assert(_name.find("/") == string::npos);
 
 	return 0;
-}
-
-void
-SMFSource::mark_for_remove ()
-{
-	if (!writable()) {
-		return;
-	}
-	_flags = Flag (_flags | RemoveAtDestroy);
 }
 
 void
@@ -394,212 +345,14 @@ SMFSource::mark_streaming_write_completed ()
 	Evoral::SMF::end_write ();
 }
 
-void
-SMFSource::mark_take (string id)
-{
-	if (writable()) {
-		_take_id = id;
-	}
-}
-
-int
-SMFSource::move_to_trash (const string trash_dir_name)
-{
-	if (!writable()) {
-		return -1;
-	}
-
-	/* don't move the file across filesystems, just stick it in the
-	   trash_dir_name directory on whichever filesystem it was already on
-	*/
-	
-	Glib::ustring newpath;
-	newpath = Glib::path_get_dirname (_path);
-	newpath = Glib::path_get_dirname (newpath); 
-
-	newpath += string("/") + trash_dir_name + "/";
-	newpath += Glib::path_get_basename (_path);
-
-	/* the new path already exists, try versioning */
-	if (access (newpath.c_str(), F_OK) == 0) {
-		char buf[PATH_MAX+1];
-		int version = 1;
-		string newpath_v;
-
-		snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
-		newpath_v = buf;
-
-		while (access (newpath_v.c_str(), F_OK) == 0 && version < 999) {
-			snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), ++version);
-			newpath_v = buf;
-		}
-		
-		if (version == 999) {
-			PBD::error << string_compose (
-					_("there are already 1000 files with names like %1; versioning discontinued"),
-					newpath) << endmsg;
-		} else {
-			newpath = newpath_v;
-		}
-	}
-
-	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-		PBD::error << string_compose (
-				_("cannot rename midi file source from %1 to %2 (%3)"),
-				_path, newpath, strerror (errno)) << endmsg;
-		return -1;
-	}
-	
-	_path = newpath;
-	
-	/* file can not be removed twice, since the operation is not idempotent */
-	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
-
-	return 0;
-}
-
 bool
-SMFSource::safe_file_extension(const Glib::ustring& file)
+SMFSource::safe_midi_file_extension (const Glib::ustring& file)
 {
 	return (file.rfind(".mid") != Glib::ustring::npos);
 }
 
-// FIXME: Merge this with audiofilesource somehow (make a generic filesource?)
-bool
-SMFSource::find (string pathstr, bool must_exist, bool& isnew)
-{
-	bool ret = false;
-
-	isnew = false;
-
-	if (pathstr[0] != '/') {
-
-		/* non-absolute pathname: find pathstr in search path */
-
-		vector<string> dirs;
-		int cnt;
-		string fullpath;
-		string keeppath;
-
-		if (_search_path.length() == 0) {
-			PBD::error << _("FileSource: search path not set") << endmsg;
-			goto out;
-		}
-
-		split (_search_path, dirs, ':');
-
-		cnt = 0;
-		
-		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-			fullpath = *i;
-			if (fullpath[fullpath.length()-1] != '/') {
-				fullpath += '/';
-			}
-			fullpath += pathstr;
-			
-			if (access (fullpath.c_str(), R_OK) == 0) {
-				keeppath = fullpath;
-				++cnt;
-			} 
-		}
-
-		if (cnt > 1) {
-
-			PBD::error << string_compose (_("FileSource: \"%1\" is ambigous when searching %2\n\t"), pathstr, _search_path) << endmsg;
-			goto out;
-
-		} else if (cnt == 0) {
-
-			if (must_exist) {
-				PBD::error << string_compose(_("Filesource: cannot find required file (%1): while searching %2"), pathstr, _search_path) << endmsg;
-				goto out;
-			} else {
-				isnew = true;
-			}
-		}
-		
-		_name = pathstr;
-		_path = keeppath;
-		ret = true;
-
-	} else {
-		
-		/* external files and/or very very old style sessions include full paths */
-		
-		_path = pathstr;
-		_name = pathstr.substr (pathstr.find_last_of ('/') + 1);
-		
-		if (access (_path.c_str(), R_OK) != 0) {
-
-			/* file does not exist or we cannot read it */
-
-			if (must_exist) {
-				PBD::error << string_compose(_("Filesource: cannot find required file (%1): %2"), _path, strerror (errno)) << endmsg;
-				goto out;
-			}
-			
-			if (errno != ENOENT) {
-				PBD::error << string_compose(_("Filesource: cannot check for existing file (%1): %2"), _path, strerror (errno)) << endmsg;
-				goto out;
-			}
-			
-			/* a new file */
-
-			isnew = true;
-			ret = true;
-
-		} else {
-			
-			/* already exists */
-
-			ret = true;
-		}
-	}
-	
-  out:
-	return ret;
-}
-
 void
-SMFSource::set_search_path (string p)
-{
-	_search_path = p;
-}
-
-
-void
-SMFSource::set_allow_remove_if_empty (bool yn)
-{
-	if (writable()) {
-		_allow_remove_if_empty = yn;
-	}
-}
-
-int
-SMFSource::set_source_name (string newname, bool destructive)
-{
-	//Glib::Mutex::Lock lm (_lock); FIXME
-	string oldpath = _path;
-	string newpath = Session::change_midi_path_by_name (oldpath, _name, newname, destructive);
-
-	if (newpath.empty()) {
-		PBD::error << string_compose (_("programming error: %1"), "cannot generate a changed midi path") << endmsg;
-		return -1;
-	}
-
-	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
-		PBD::error << string_compose (_("cannot rename midi file for %1 to %2"), _name, newpath) << endmsg;
-		return -1;
-	}
-
-	_name = Glib::path_get_basename (newpath);
-	_path = newpath;
-
-	return 0;
-}
-
-void
-SMFSource::load_model(bool lock, bool force_reload)
+SMFSource::load_model (bool lock, bool force_reload)
 {
 	if (_writing) {
 		return;
@@ -662,7 +415,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 #define LINEAR_INTERPOLATION_MODE_WORKS_PROPERLY 0
 
 void
-SMFSource::set_default_controls_interpolation()
+SMFSource::set_default_controls_interpolation ()
 {
 	// set interpolation style to defaults, can be changed by the GUI later
 	Evoral::ControlSet::Controls controls = _model->controls();
@@ -679,14 +432,14 @@ SMFSource::set_default_controls_interpolation()
 
 
 void
-SMFSource::destroy_model()
+SMFSource::destroy_model ()
 {
 	//cerr << _name << " destroying model " << _model.get() << endl;
 	_model.reset();
 }
 
 void
-SMFSource::flush_midi()
+SMFSource::flush_midi ()
 {
 	Evoral::SMF::end_write();
 }

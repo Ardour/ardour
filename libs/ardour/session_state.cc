@@ -414,12 +414,7 @@ Session::setup_raid_path (string path)
 	SearchPath sound_search_path;
 	SearchPath midi_search_path;
 
-	for (
-			SearchPath::const_iterator i = search_path.begin();
-			i != search_path.end();
-			++i
-		)
-	{
+	for (SearchPath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
 		sp.path = (*i).to_string ();
 		sp.blocks = 0; // not needed
 		session_dirs.push_back (sp);
@@ -430,14 +425,11 @@ Session::setup_raid_path (string path)
 		midi_search_path += sdir.midi_path ();
 	}
 
-	// set the AudioFileSource and SMFSource search path
-
-	AudioFileSource::set_search_path (sound_search_path.to_string ());
-	SMFSource::set_search_path (midi_search_path.to_string ());
-
+	// set the search path for each data type
+	FileSource::set_search_path (DataType::AUDIO, sound_search_path.to_string ());
+	SMFSource::set_search_path (DataType::MIDI, midi_search_path.to_string ());
 
 	// reset the round-robin soundfile path thingie
-
 	last_rr_session_dir = session_dirs.begin();
 }
 
@@ -997,16 +989,11 @@ Session::state(bool full_state)
 
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 			
-			/* Don't save information about AudioFileSources that are empty */
+			/* Don't save information about non-destructive file sources that are empty */
+			/* FIXME: MIDI breaks if this is made FileSource like it should be... */
 			
 			boost::shared_ptr<AudioFileSource> fs;
-
 			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
-
-				/* Don't save sources that are empty, unless they're destructive (which are OK
-				   if they are empty, because we will re-use them every time.)
-				*/
-
 				if (!fs->destructive()) {
 					if (fs->length() == 0) {
 						continue;
@@ -1739,14 +1726,11 @@ Session::load_sources (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
 		try {
 			if ((source = XMLSourceFactory (**niter)) == 0) {
 				error << _("Session: cannot create Source from XML description.") << endmsg;
 			}
-		}
-
-		catch (non_existent_source& err) {
+		} catch (MissingSource& err) {
 			warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
 			source = SourceFactory::createSilent (*this, **niter, max_frames, _current_frame_rate);
 		}
@@ -2622,9 +2606,9 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	 */
 	
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-		boost::shared_ptr<AudioFileSource> fs;
+		boost::shared_ptr<FileSource> fs;
 		
-		if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (i->second)) != 0) {
+		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
 			all_sources.insert (fs->path());
 		} 
 	}

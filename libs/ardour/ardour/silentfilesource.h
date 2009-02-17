@@ -26,25 +26,26 @@
 namespace ARDOUR {
 
 class SilentFileSource : public AudioFileSource {
-  public:
-	virtual ~SilentFileSource ();
-
+public:
 	int update_header (nframes_t when, struct tm&, time_t) { return 0; }
 	int flush_header () { return 0; }
 	float sample_rate () const { return _sample_rate; }
 
-	void set_length (nframes_t len);
+	void set_length (nframes_t len) { _length = len; }
 	
 	bool destructive() const { return false; }
 	bool can_be_analysed() const { return false; } 
 
-  protected:
-
-	float         _sample_rate;
-
-	SilentFileSource (Session&, const XMLNode&, nframes_t nframes, float sample_rate);
-
+protected:
 	friend class SourceFactory;
+
+	SilentFileSource (Session& s, const XMLNode& x, nframes_t len, float srate)
+		: Source (s, x)
+		, AudioFileSource (s, x, false)
+		, _sample_rate(srate)
+	{
+		_length = len;
+	}
 
 	nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const {
 		memset (dst, 0, sizeof (Sample) * cnt);
@@ -55,11 +56,13 @@ class SilentFileSource : public AudioFileSource {
 
 	void set_header_timeline_position () {}
 
- 	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit, nframes_t fpp) const {
+ 	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt,
+			double samples_per_unit, nframes_t fpp) const {
 		memset (peaks, 0, sizeof (PeakData) * npeaks);
 		return 0;
 	}
-
+	
+	float _sample_rate;
 };
 
 } // namespace ARDOUR

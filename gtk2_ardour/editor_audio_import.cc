@@ -672,9 +672,10 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
-							SourceFactory::createReadable (DataType::AUDIO, *session, path,  n,
+							SourceFactory::createReadable (DataType::AUDIO, *session,
+									path, false, n,
 									(mode == ImportAsTapeTrack
-									 	? Source::Destructive
+										? Source::Destructive
 										: Source::Flag (0)),
 									true, true));
 				} else {

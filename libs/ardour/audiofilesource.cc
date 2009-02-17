@@ -63,13 +63,12 @@ using namespace PBD;
 using namespace Glib;
 
 ustring AudioFileSource::peak_dir = "";
-ustring AudioFileSource::search_path;
 
 sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
 uint64_t           AudioFileSource::header_position_offset = 0;
 
 /* XXX maybe this too */
-char   AudioFileSource::bwf_serial_number[13] = "000000000000";
+char AudioFileSource::bwf_serial_number[13] = "000000000000";
 
 struct SizedSampleBuffer {
     nframes_t size;
@@ -86,24 +85,23 @@ struct SizedSampleBuffer {
 
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
-/** Constructor used for existing internal-to-session files.  File must exist. */
-AudioFileSource::AudioFileSource (Session& s, ustring path, Source::Flag flags)
-	: AudioSource (s, path)
-	, _channel (0)
+/** Constructor used for existing internal-to-session files. */
+AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded, Source::Flag flags)
+	: Source (s, DataType::AUDIO, path, flags)
+	, AudioSource (s, path)
+	, FileSource (s, DataType::AUDIO, path, embedded, flags)
 {
-	_is_embedded = AudioFileSource::determine_embeddedness (path);
-
 	if (init (path, true)) {
 		throw failed_constructor ();
 	}
-
 }
 
-/** Constructor used for new internal-to-session files.  File cannot exist. */
-AudioFileSource::AudioFileSource (Session& s, ustring path, Source::Flag flags,
+/** Constructor used for new internal-to-session files. */
+AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded, Source::Flag flags,
 		SampleFormat samp_format, HeaderFormat hdr_format)
-	: AudioSource (s, path)
-	,  _channel (0)
+	: Source (s, DataType::AUDIO, path, flags)
+	, AudioSource (s, path)
+	, FileSource (s, DataType::AUDIO, path, embedded, flags)
 {
 	_is_embedded = false;
 
@@ -114,16 +112,15 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Source::Flag flags,
 
 /** Constructor used for existing internal-to-session files.  File must exist. */
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
-	: AudioSource (s, node)
-	/* _channel is set in set_state() or init() */
+	: Source (s, node)
+	, AudioSource (s, node)
+	, FileSource (s, node, must_exist)
 {
 	if (set_state (node)) {
 		throw failed_constructor ();
 	}
 
-	string foo = _name;
-	
-	if (init (foo, must_exist)) {
+	if (init (_name, must_exist)) {
 		throw failed_constructor ();
 	}
 }
@@ -136,36 +133,12 @@ AudioFileSource::~AudioFileSource ()
 	}
 }
 
-bool
-AudioFileSource::determine_embeddedness (ustring path)
-{
-	return (path.find("/") == 0);
-}
-
-bool
-AudioFileSource::removable () const
-{
-	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || ((_flags & RemovableIfEmpty) && length() == 0));
-}
-
 int
-AudioFileSource::init (ustring pathstr, bool must_exist)
+AudioFileSource::init (const ustring& pathstr, bool must_exist)
 {
-	_length = 0;
-	_timeline_position = 0;
 	_peaks_built = false;
-
-	if (!find (pathstr, must_exist, _file_is_new, _channel)) {
-		throw non_existent_source ();
-	}
-
-	if (_file_is_new && must_exist) {
-		return -1;
-	}
-
-	return 0;
+	return FileSource::init (pathstr, must_exist);
 }
-
 
 ustring
 AudioFileSource::peak_path (ustring audio_path)
@@ -282,43 +255,19 @@ AudioFileSource::get_state ()
 int
 AudioFileSource::set_state (const XMLNode& node)
 {
-	const XMLProperty* prop;
+	if (Source::set_state (node)) {
+		return -1;
+	}
 
 	if (AudioSource::set_state (node)) {
 		return -1;
 	}
-
-	if ((prop = node.property (X_("channel"))) != 0) {
-		_channel = atoi (prop->value());
-	} else {
-		_channel = 0;
-	}
-
-	if ((prop = node.property (X_("name"))) != 0) {
-		_is_embedded = AudioFileSource::determine_embeddedness (prop->value());
-	} else {
-		_is_embedded = false;
-	}
-
-	if ((prop = node.property (X_("destructive"))) != 0) {
-		/* old style, from the period when we had DestructiveFileSource */
-		_flags = Flag (_flags | Destructive);
+	
+	if (FileSource::set_state (node)) {
+		return -1;
 	}
 
 	return 0;
-}
-
-void
-AudioFileSource::mark_for_remove ()
-{
-	// This operation is not allowed for sources for destructive tracks or embedded files.
-	// Fortunately mark_for_remove() is never called for embedded files. This function
-	// must be fixed if that ever happens.
-	if (_flags & Destructive) {
-		return;
-	}
-
-	_flags = Flag (_flags | Removable | RemoveAtDestroy);
 }
 
 void
@@ -339,262 +288,10 @@ AudioFileSource::mark_streaming_write_completed ()
 	}
 }
 
-void
-AudioFileSource::mark_take (ustring id)
-{
-	if (writable()) {
-		_take_id = id;
-	}
-}
-
 int
-AudioFileSource::move_to_trash (const ustring& trash_dir_name)
+AudioFileSource::move_dependents_to_trash()
 {
-	if (is_embedded()) {
-		cerr << "tried to move an embedded region to trash" << endl;
-		return -1;
-	}
-
-	if (!writable()) {
-		return -1;
-	}
-
-	/* don't move the file across filesystems, just stick it in the
-	   trash_dir_name directory on whichever filesystem it was already on
-	*/
-	
-	ustring newpath;
-	newpath = Glib::path_get_dirname (_path);
-	newpath = Glib::path_get_dirname (newpath); 
-
-	newpath += string("/") + trash_dir_name + "/";
-	newpath += Glib::path_get_basename (_path);
-
-	/* the new path already exists, try versioning */
-	if (access (newpath.c_str(), F_OK) == 0) {
-		char buf[PATH_MAX+1];
-		int version = 1;
-		ustring newpath_v;
-
-		snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
-		newpath_v = buf;
-
-		while (access (newpath_v.c_str(), F_OK) == 0 && version < 999) {
-			snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), ++version);
-			newpath_v = buf;
-		}
-		
-		if (version == 999) {
-			PBD::error << string_compose (
-					_("there are already 1000 files with names like %1; versioning discontinued"),
-					newpath)
-				<< endmsg;
-		} else {
-			newpath = newpath_v;
-		}
-	}
-
-	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-		PBD::error << string_compose (
-				_("cannot rename audio file source from %1 to %2 (%3)"),
-				_path, newpath, strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (::unlink (peakpath.c_str()) != 0) {
-		error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
-				  peakpath, _path, strerror (errno))
-		      << endmsg;
-		/* try to back out */
-		rename (newpath.c_str(), _path.c_str());
-		return -1;
-	}
-	    
-	_path = newpath;
-	peakpath = "";
-	
-	/* file can not be removed twice, since the operation is not idempotent */
-	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
-
-	return 0;
-}
-
-bool
-AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t& chan)
-{
-	ustring::size_type pos;
-	bool ret = false;
-
-	isnew = false;
-
-	if (pathstr[0] != '/') {
-
-		/* non-absolute pathname: find pathstr in search path */
-
-		vector<ustring> dirs;
-		int cnt;
-		ustring fullpath;
-		ustring keeppath;
-
-		if (search_path.length() == 0) {
-			error << _("FileSource: search path not set") << endmsg;
-			goto out;
-		}
-
-		split (search_path, dirs, ':');
-
-		cnt = 0;
-		
-		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-			fullpath = *i;
-			if (fullpath[fullpath.length()-1] != '/') {
-				fullpath += '/';
-			}
-
-			fullpath += pathstr;
-
-			/* i (paul) made a nasty design error by using ':' as a special character in
-			   Ardour 0.99 .. this hack tries to make things sort of work.
-			*/
-			
-			if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
-				
-				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-
-					/* its a real file, no problem */
-					
-					keeppath = fullpath;
-					++cnt;
-
-				} else {
-					
-					if (must_exist) {
-						
-						/* might be an older session using file:channel syntax. see if the version
-						   without the :suffix exists
-						 */
-						
-						ustring shorter = pathstr.substr (0, pos);
-						fullpath = *i;
-
-						if (fullpath[fullpath.length()-1] != '/') {
-							fullpath += '/';
-						}
-
-						fullpath += shorter;
-
-						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-							chan = atoi (pathstr.substr (pos+1));
-							pathstr = shorter;
-							keeppath = fullpath;
-							++cnt;
-						} 
-						
-					} else {
-						
-						/* new derived file (e.g. for timefx) being created in a newer session */
-						
-					}
-				}
-
-			} else {
-
-				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-					keeppath = fullpath;
-					++cnt;
-				} 
-			}
-		}
-
-		if (cnt > 1) {
-
-			error << string_compose (_("FileSource: \"%1\" is ambigous when searching %2\n\t"), pathstr, search_path) << endmsg;
-			goto out;
-
-		} else if (cnt == 0) {
-
-			if (must_exist) {
-				error << string_compose(_("Filesource: cannot find required file (%1): while searching %2"), pathstr, search_path) << endmsg;
-				goto out;
-			} else {
-				isnew = true;
-			}
-		}
-
-		/* Current find() is unable to parse relative path names to yet non-existant
-		   sources. QuickFix(tm) */
-		if (keeppath == "") {
-			if (must_exist) {
-				error << "AudioFileSource::find(), keeppath = \"\", but the file must exist" << endl;
-			} else {
-				keeppath = pathstr;
-			}
-		}
-
-		_name = pathstr;
-		_path = keeppath;
-		ret = true;
-
-	} else {
-		
-		/* external files and/or very very old style sessions include full paths */
-
-		/* ugh, handle ':' situation */
-
-		if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
-			
-			ustring shorter = pathstr.substr (0, pos);
-
-			if (Glib::file_test (shorter, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-				chan = atoi (pathstr.substr (pos+1));
-				pathstr = shorter;
-			}
-		}
-		
-		_path = pathstr;
-
-		if (is_embedded()) {
-			_name = pathstr;
-		} else {
-			_name = pathstr.substr (pathstr.find_last_of ('/') + 1);
-		}
-
-		if (!Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-
-			/* file does not exist or we cannot read it */
-			
-			if (must_exist) {
-				error << string_compose(_("Filesource: cannot find required file (%1): %2"), _path, strerror (errno)) << endmsg;
-				goto out;
-			}
-			
-			if (errno != ENOENT) {
-				error << string_compose(_("Filesource: cannot check for existing file (%1): %2"), _path, strerror (errno)) << endmsg;
-				goto out;
-			}
-			
-			/* a new file */
-
-			isnew = true;
-			ret = true;
-
-		} else {
-			
-			/* already exists */
-
-			ret = true;
-
-		}
-	}
-	
-  out:
-	return ret;
-}
-
-void
-AudioFileSource::set_search_path (ustring p)
-{
-	search_path = p;
+	return ::unlink (peakpath.c_str());
 }
 
 void
@@ -602,55 +299,6 @@ AudioFileSource::set_header_position_offset (nframes_t offset)
 {
 	header_position_offset = offset;
 	HeaderPositionOffsetChanged ();
-}
-
-void
-AudioFileSource::set_timeline_position (int64_t pos)
-{
-	_timeline_position = pos;
-}
-
-void
-AudioFileSource::set_allow_remove_if_empty (bool yn)
-{
-	if (!writable()) {
-		return;
-	}
-
-	if (yn) {
-		_flags = Flag (_flags | RemovableIfEmpty);
-	} else {
-		_flags = Flag (_flags & ~RemovableIfEmpty);
-	}
-}
-
-int
-AudioFileSource::set_source_name (ustring newname, bool destructive)
-{
-	Glib::Mutex::Lock lm (_lock);
-	ustring oldpath = _path;
-	ustring newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
-
-	if (newpath.empty()) {
-		error << string_compose (_("programming error: %1"), "cannot generate a changed audio path") << endmsg;
-		return -1;
-	}
-
-	// Test whether newpath exists, if yes notify the user but continue. 
-	if (access(newpath.c_str(),F_OK) == 0) {
-		error << _("Programming error! Ardour tried to rename a file over another file! It's safe to continue working, but please report this to the developers.") << endmsg;
-		return -1;
-	}
-
-	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
-		error << string_compose (_("cannot rename audio file %1 to %2"), _name, newpath) << endmsg;
-		return -1;
-	}
-
-	_name = Glib::path_get_basename (newpath);
-	_path = newpath;
-
-	return rename_peakfile (peak_path (_path));
 }
 
 bool
@@ -678,7 +326,7 @@ AudioFileSource::setup_peakfile ()
 }
 
 bool
-AudioFileSource::safe_file_extension(ustring file)
+AudioFileSource::safe_audio_file_extension(const ustring& file)
 {
 	const char* suffixes[] = {
 		".wav", ".WAV",
@@ -714,19 +362,6 @@ AudioFileSource::safe_file_extension(ustring file)
 
 	return false;
 }
-
-void
-AudioFileSource::mark_immutable ()
-{
-	/* destructive sources stay writable, and their other flags don't
-	   change.
-	*/
-
-	if (!(_flags & Destructive)) {
-		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
-	}
-}
-
 
 Sample*
 AudioFileSource::get_interleave_buffer (nframes_t size)

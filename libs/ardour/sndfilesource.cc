@@ -50,38 +50,40 @@ const Source::Flag SndFileSource::default_writable_flags = Source::Flag (
 		Source::CanRename );
 
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
-	: AudioFileSource (s, node)
+	: Source(s, node)
+	, AudioFileSource (s, node)
 {
-	init ();
+	init_sndfile ();
 
 	if (open()) {
 		throw failed_constructor ();
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, ustring path, int chn, Flag flags)
-          /* files created this way are never writable or removable */
-	: AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
+/** Files created this way are never writable or removable */
+SndFileSource::SndFileSource (Session& s, const ustring& path, bool embedded, int chn, Flag flags)
+	: Source(s, DataType::AUDIO, path, flags)
+	, AudioFileSource (s, path, embedded,
+			Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	_channel = chn;
 
-	init ();
+	init_sndfile ();
 
 	if (open()) {
 		throw failed_constructor ();
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
-	: AudioFileSource (s, path, flags, sfmt, hf)
+/** This constructor is used to construct new files, not open existing ones. */
+SndFileSource::SndFileSource (Session& s, const ustring& path, bool embedded,
+		SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
+	: Source(s, DataType::AUDIO, path, flags)
+	, AudioFileSource (s, path, embedded, flags, sfmt, hf)
 {
 	int fmt = 0;
 
-	init ();
-
-	/* this constructor is used to construct new files, not open
-	   existing ones.
-	*/
+	init_sndfile ();
 
 	_file_is_new = true;
 
@@ -161,7 +163,7 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 }
 
 void 
-SndFileSource::init ()
+SndFileSource::init_sndfile ()
 {
 	ustring file;
 
@@ -191,7 +193,8 @@ SndFileSource::init ()
 		_timeline_position = header_position_offset;
 	}
 
-	AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &SndFileSource::handle_header_position_change));
+	AudioFileSource::HeaderPositionOffsetChanged.connect (
+			mem_fun (*this, &SndFileSource::handle_header_position_change));
 }
 
 int

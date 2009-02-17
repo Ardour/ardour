@@ -179,7 +179,8 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (DataType type, Session& s, string path, int chn, Source::Flag flags, bool announce, bool defer_peaks)
+SourceFactory::createReadable (DataType type, Session& s, const string& path, bool embedded,
+		int chn, Source::Flag flags, bool announce, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
 
@@ -187,7 +188,7 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 			
 			try {
 				
-				boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
+				boost::shared_ptr<Source> ret (new SndFileSource (s, path, embedded, chn, flags));
 				
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
@@ -203,7 +204,7 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 			catch (failed_constructor& err) {
 #ifdef USE_COREAUDIO_FOR_FILES
 				
-				boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
+				boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, embedded, chn, flags));
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
@@ -224,8 +225,7 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 	
 	} else if (type == DataType::MIDI) {
 		
-		// FIXME: flags?
-		boost::shared_ptr<Source> ret (new SMFSource (s, path, SMFSource::Flag(0)));
+		boost::shared_ptr<Source> ret (new SMFSource (s, path, embedded, SMFSource::Flag(0)));
 		
 		if (announce) {
 			SourceCreated (ret);
@@ -239,12 +239,13 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (DataType type, Session& s, std::string path, bool destructive, nframes_t rate, bool announce, bool defer_peaks)
+SourceFactory::createWritable (DataType type, Session& s, const std::string& path, bool embedded,
+		bool destructive, nframes_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 	
 	if (type == DataType::AUDIO) {
-		boost::shared_ptr<Source> ret (new SndFileSource (s, path, 
+		boost::shared_ptr<Source> ret (new SndFileSource (s, path, embedded,
 				Config->get_native_file_data_format(),
 				Config->get_native_file_header_format(),
 				rate,
@@ -265,7 +266,7 @@ SourceFactory::createWritable (DataType type, Session& s, std::string path, bool
 
 	} else if (type == DataType::MIDI) {
 
-		boost::shared_ptr<Source> ret (new SMFSource (s, path));
+		boost::shared_ptr<Source> ret (new SMFSource (s, path, embedded, Source::Flag(0)));
 	
 		// no analysis data - this is a new file
 		
@@ -278,3 +279,4 @@ SourceFactory::createWritable (DataType type, Session& s, std::string path, bool
 
 	return boost::shared_ptr<Source> ();
 }
+

@@ -2336,7 +2336,9 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 
 			try {
 				fs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createWritable (DataType::AUDIO, _session, prop->value(), false, _session.frame_rate()));
+						SourceFactory::createWritable (DataType::AUDIO, _session,
+								prop->value(), true,
+								false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {
@@ -2370,22 +2372,25 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	boost::shared_ptr<AudioRegion> region;
 	
 	try {
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(),
-											  region_name_from_path (first_fs->name(), true), 
-											  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (
+				pending_sources, 0, first_fs->length(),
+			  region_name_from_path (first_fs->name(), true), 0,
+			  Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
 		region->special_set_position (0);
 	}
 
 	catch (failed_constructor& err) {
-		error << string_compose (_("%1: cannot create whole-file region from pending capture sources"),
-				  _name)
-		      << endmsg;
+		error << string_compose (
+				_("%1: cannot create whole-file region from pending capture sources"),
+				_name) << endmsg;
 		
 		return -1;
 	}
 
 	try {
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name(), true)));
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (
+				pending_sources, 0, first_fs->length(),
+				region_name_from_path (first_fs->name(), true)));
 	}
 
 	catch (failed_constructor& err) {

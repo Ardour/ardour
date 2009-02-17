@@ -51,7 +51,7 @@ class Source : public SessionObject, public ARDOUR::Readable
 		Destructive = 0x80
 	};
 
-	Source (Session&, const std::string& name, DataType type, Flag flags=Flag(0));
+	Source (Session&, DataType type, const std::string& name, Flag flags=Flag(0));
 	Source (Session&, const XMLNode&);
 	
 	virtual ~Source ();
@@ -63,11 +63,12 @@ class Source : public SessionObject, public ARDOUR::Readable
 	
 	nframes_t length() const { return _length; }
 	
-	virtual Glib::ustring path() const = 0;
+	virtual const Glib::ustring& path() const = 0;
 
 	virtual nframes_t natural_position() const { return 0; }
 
-	virtual void mark_for_remove() = 0;
+	void mark_for_remove();
+	
 	virtual void mark_streaming_write_started () {}
 	virtual void mark_streaming_write_completed () = 0;
 
@@ -76,8 +77,10 @@ class Source : public SessionObject, public ARDOUR::Readable
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 	
-	virtual bool destructive()    const { return false; }
-	virtual bool length_mutable() const { return false; }
+	bool         destructive() const       { return (_flags & Destructive); }
+	bool         writable () const         { return _flags & Writable; }
+	virtual bool set_destructive (bool yn) { return false; }
+	virtual bool length_mutable() const    { return false; }
 	
 	void use ()    { _in_use++; }
 	void disuse () { if (_in_use) { _in_use--; } }
@@ -103,6 +106,11 @@ class Source : public SessionObject, public ARDOUR::Readable
 	
 	void update_length (nframes_t pos, nframes_t cnt);
 	
+	int64_t timeline_position() const { return _timeline_position; }
+	virtual void set_timeline_position (int64_t pos);
+	
+	void set_allow_remove_if_empty (bool yn);
+	
 	virtual const Evoral::TimeConverter<double, nframes_t>& time_converter() const {
 		return Evoral::IdentityConverter<double, nframes_t>();
 	}
@@ -114,7 +122,9 @@ class Source : public SessionObject, public ARDOUR::Readable
 	Flag                _flags;
 	time_t              _timestamp;
 	nframes_t           _length;
+	int64_t             _timeline_position;
 	bool                _analysed;
+	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;
 	Glib::Mutex         _playlist_lock;
 	

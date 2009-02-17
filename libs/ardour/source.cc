@@ -46,10 +46,11 @@
 using namespace std;
 using namespace ARDOUR;
 
-Source::Source (Session& s, const string& name, DataType type, Flag flags)
+Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	: SessionObject(s, name)
 	, _type(type)
 	, _flags(flags)
+	, _timeline_position(0)
 {
 	_analysed = false;
 	_timestamp = 0;
@@ -61,6 +62,7 @@ Source::Source (Session& s, const XMLNode& node)
 	: SessionObject(s, "unnamed source")
 	, _type(DataType::AUDIO)
 	, _flags (Flag (Writable|CanRename))
+	, _timeline_position(0)
 {
 	_timestamp = 0;
 	_length = 0;
@@ -83,7 +85,7 @@ Source::get_state ()
 	XMLNode *node = new XMLNode ("Source");
 	char buf[64];
 
-	node->add_property ("name", _name);
+	node->add_property ("name", name());
 	node->add_property ("type", _type.to_string());
 	node->add_property (X_("flags"), enum_2_string (_flags));
 	_id.print (buf, sizeof (buf));
@@ -128,6 +130,11 @@ Source::set_state (const XMLNode& node)
 		_flags = Flag (0);
 
 	}
+	
+	/* old style, from the period when we had DestructiveFileSource */
+	if ((prop = node.property (X_("destructive"))) != 0) {
+		_flags = Flag (_flags | Destructive);
+	}
 
 	return 0;
 }
@@ -136,7 +143,7 @@ void
 Source::update_length (nframes_t pos, nframes_t cnt)
 {
 	if (pos + cnt > _length) {
-		_length = pos+cnt;
+		_length = pos + cnt;
 	}
 }
 
@@ -270,5 +277,38 @@ Source::check_for_analysis_data_on_disk ()
 
 	set_been_analysed (ok);
 	return ok;
+}
+
+void
+Source::mark_for_remove ()
+{
+	// This operation is not allowed for sources for destructive tracks or embedded files.
+	// Fortunately mark_for_remove() is never called for embedded files. This function
+	// must be fixed if that ever happens.
+	if (_flags & Destructive) {
+		return;
+	}
+
+	_flags = Flag (_flags | Removable | RemoveAtDestroy);
+}
+
+void
+Source::set_timeline_position (int64_t pos)
+{
+	_timeline_position = pos;
+}
+
+void
+Source::set_allow_remove_if_empty (bool yn)
+{
+	if (!writable()) {
+		return;
+	}
+
+	if (yn) {
+		_flags = Flag (_flags | RemovableIfEmpty);
+	} else {
+		_flags = Flag (_flags & ~RemovableIfEmpty);
+	}
 }
 

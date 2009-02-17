@@ -29,17 +29,15 @@ namespace ARDOUR {
 
 class SndFileSource : public AudioFileSource {
   public:
-	/* constructor to be called for existing external-to-session files */
+	/** Constructor to be called for existing external-to-session files */
+	SndFileSource (Session&, const Glib::ustring& path, bool embedded, int chn, Flag flags);
 
-        SndFileSource (Session&, Glib::ustring path, int chn, Flag flags);
-
-	/* constructor to be called for new in-session files */
-
-	SndFileSource (Session&, Glib::ustring path, SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, 
-		       Flag flags = SndFileSource::default_writable_flags);
+	/* Constructor to be called for new in-session files */
+	SndFileSource (Session&, const Glib::ustring& path, bool embedded,
+			SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, 
+			Flag flags = SndFileSource::default_writable_flags);
 		       
-	/* constructor to be called for existing in-session files */
-	
+	/** Constructor to be called for existing in-session files */
 	SndFileSource (Session&, const XMLNode&);
 
 	~SndFileSource ();
@@ -77,7 +75,7 @@ class SndFileSource : public AudioFileSource {
 	SF_INFO _info;
 	BroadcastInfo *_broadcast_info;
 
-	void init ();
+	void init_sndfile ();
 	int open();
 	int setup_broadcast_info (nframes_t when, struct tm&, time_t);
 

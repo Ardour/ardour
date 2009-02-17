@@ -80,8 +80,8 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 		smf_delete(_smf);
 	}
 	
-	_path = path;
-	_smf = smf_load(_path.c_str());
+	_file_path = path;
+	_smf = smf_load(_file_path.c_str());
 	if (_smf == NULL) {
 		return -1;
 	}
@@ -117,7 +117,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 		smf_delete(_smf);
 	}
 	
-	_path = path;
+	_file_path = path;
 
 	_smf = smf_new();
 	if (smf_set_ppqn(_smf, ppqn) != 0) {
@@ -148,7 +148,7 @@ void
 SMF::close() THROW_FILE_ERROR
 {
 	if (_smf) {
-		if (smf_save(_smf, _path.c_str()) != 0) {
+		if (smf_save(_smf, _file_path.c_str()) != 0) {
 			throw FileError();
 		}
 		smf_delete(_smf);
@@ -258,7 +258,7 @@ SMF::begin_write()
 void
 SMF::end_write() THROW_FILE_ERROR
 {
-	if (smf_save(_smf, _path.c_str()) != 0)
+	if (smf_save(_smf, _file_path.c_str()) != 0)
 		throw FileError();
 }
 

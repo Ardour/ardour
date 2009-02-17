@@ -21,17 +21,11 @@
 #define __ardour_audiofilesource_h__
 
 #include <exception>
-
 #include <time.h>
-
 #include <ardour/audiosource.h>
+#include <ardour/file_source.h>
 
 namespace ARDOUR {
-
-class non_existent_source : public std::exception {
-  public:
-	virtual const char *what() const throw() { return "audio file does not exist"; }
-};
 
 struct SoundFileInfo {
     float       samplerate;
@@ -41,107 +35,78 @@ struct SoundFileInfo {
     int64_t     timecode;
 };
 
-class AudioFileSource : public AudioSource {
-  public:
+class AudioFileSource : public AudioSource, public FileSource {
+public:
 	virtual ~AudioFileSource ();
 
 	bool set_name (const std::string& newname) {
 		return (set_source_name(newname, destructive()) == 0);
 	}
-	int set_source_name (Glib::ustring newname, bool destructive);
 	
-	Glib::ustring path() const { return _path; }
 	Glib::ustring peak_path (Glib::ustring audio_path);
 	Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
 					     Glib::ustring audio_path);
-
-	uint16_t channel() const { return _channel; }
 
 	static void set_peak_dir (Glib::ustring dir) { peak_dir = dir; }
 
 	static bool get_soundfile_info (Glib::ustring path, SoundFileInfo& _info, std::string& error);
 
-	static bool safe_file_extension (Glib::ustring path);
-
-	void set_allow_remove_if_empty (bool yn);
-	void mark_for_remove();
+	bool safe_file_extension (const Glib::ustring& path) const {
+		return safe_audio_file_extension(path);
+	}
 
 	/* this block of methods do nothing for regular file sources, but are significant
 	   for files used in destructive recording.
 	*/
 	virtual nframes_t last_capture_start_frame() const { return 0; }
-	virtual void           mark_capture_start (nframes_t) {}
-	virtual void           mark_capture_end () {}
-	virtual void           clear_capture_marks() {}
-	virtual bool           one_of_several_channels () const { return false; }
+	virtual void      mark_capture_start (nframes_t) {}
+	virtual void      mark_capture_end () {}
+	virtual void      clear_capture_marks() {}
+	virtual bool      one_of_several_channels () const { return false; }
 
 	virtual int update_header (nframes_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
 
-	int move_to_trash (const Glib::ustring& trash_dir_name);
-
-	static bool is_empty (Session&, Glib::ustring path);
 	void mark_streaming_write_completed ();
-
-	void mark_take (Glib::ustring);
-	Glib::ustring take_id() const { return _take_id; }
-
-	bool is_embedded() const { return _is_embedded; }
-
-	static void set_bwf_serial_number (int);
-	
-	static void set_search_path (Glib::ustring string);
-	static void set_header_position_offset (nframes_t offset );
 
 	int setup_peakfile ();
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	bool         destructive() const        { return (_flags & Destructive); }
-	virtual bool set_destructive (bool yn)  { return false; }
-	bool         can_truncate_peaks() const { return !destructive(); }
-	bool         can_be_analysed() const    { return _length > 0; } 
-
-	void mark_immutable ();
+	bool can_truncate_peaks() const { return !destructive(); }
+	bool can_be_analysed() const    { return _length > 0; } 
 	
+	static bool safe_audio_file_extension (const Glib::ustring& path);
+	
+	static bool is_empty (Session&, Glib::ustring path);
+	
+	static void set_bwf_serial_number (int);
+	static void set_header_position_offset (nframes_t offset );
+
 	static sigc::signal<void> HeaderPositionOffsetChanged;
 
-  protected:
-	
+protected:
 	/** Constructor to be called for existing external-to-session files */
-	AudioFileSource (Session&, Glib::ustring path, Source::Flag flags);
+	AudioFileSource (Session&, const Glib::ustring& path, bool embedded, Source::Flag flags);
 
 	/** Constructor to be called for new in-session files */
-	AudioFileSource (Session&, Glib::ustring path, Source::Flag flags,
+	AudioFileSource (Session&, const Glib::ustring& path, bool embedded, Source::Flag flags,
 			 SampleFormat samp_format, HeaderFormat hdr_format);
 
 	/** Constructor to be called for existing in-session files */
-	AudioFileSource (Session&, const XMLNode&, bool must_exit = true);
+	AudioFileSource (Session&, const XMLNode&, bool must_exist = true);
 
-	int init (Glib::ustring idstr, bool must_exist);
+	int init (const Glib::ustring& idstr, bool must_exist);
 	
-	static bool determine_embeddedness (Glib::ustring path);
-	
-	virtual void set_timeline_position (int64_t pos);
 	virtual void set_header_timeline_position () = 0;
 	virtual void handle_header_position_change () {}
-
-	bool find (Glib::ustring& path, bool must_exist, bool& is_new, uint16_t& chan);
-	bool removable() const;
-	bool writable() const { return _flags & Writable; }
+	
+	int move_dependents_to_trash();
 
 	static Sample* get_interleave_buffer (nframes_t size);
 
-	Glib::ustring _path;
-	Glib::ustring _take_id;
-	int64_t       _timeline_position;
-	bool          _file_is_new;
-	uint16_t      _channel;
-	bool          _is_embedded;
-
 	static Glib::ustring peak_dir;
-	static Glib::ustring search_path;
 
 	static char bwf_country_code[3];
 	static char bwf_organization_code[4];

@@ -88,7 +88,7 @@ Configuration::load_state ()
 
 	/* load system configuration first */
 	
-	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(),
 			"ardour_system.rc", system_rc_file) )
 	{
 		XMLTree tree;

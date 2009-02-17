@@ -86,6 +86,7 @@ export_status.cc
 export_timespan.cc
 export_utilities.cc
 filename_extensions.cc
+file_source.cc
 filesystem_paths.cc
 filter.cc
 find_session.cc
@@ -152,7 +153,6 @@ session_state_utils.cc
 session_time.cc
 session_transport.cc
 session_utils.cc
-silentfilesource.cc
 smf_source.cc
 sndfile_helpers.cc
 sndfileimportable.cc

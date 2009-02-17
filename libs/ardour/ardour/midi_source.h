@@ -38,7 +38,7 @@ class MidiModel;
 template<typename T> class MidiRingBuffer;
 
 /** Source for MIDI data */
-class MidiSource : public Source
+class MidiSource : virtual public Source
 {
   public:
 	typedef double TimeType;
@@ -60,13 +60,9 @@ class MidiSource : public Source
 	virtual void append_event_unlocked_beats(const Evoral::Event<double>& ev) = 0;
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev) = 0;
 
-	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
-	
-	uint64_t timeline_position () { return _timeline_position; }
-	void     set_timeline_position (nframes_t when);
 	
 	virtual void session_saved();
 
@@ -90,6 +86,8 @@ class MidiSource : public Source
 	virtual void destroy_model() = 0;
 
 	void set_note_mode(NoteMode mode);
+	
+	void set_timeline_position (int64_t pos);
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
@@ -106,9 +104,7 @@ class MidiSource : public Source
 			nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
 	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t cnt) = 0;
 	
-	mutable Glib::Mutex _lock;
 	std::string         _captured_for;
-	uint64_t            _timeline_position;
 	mutable uint32_t    _read_data_count;  ///< modified in read()
 	mutable uint32_t    _write_data_count; ///< modified in write()
 	

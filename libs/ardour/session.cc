@@ -2534,7 +2534,9 @@ Session::region_name (string& result, string base, bool newlevel)
 	char buf[16];
 	string subbase;
 
-	assert(base.find("/") == string::npos);
+	if (base.find("/") != string::npos) {
+		base = base.substr(base.find_last_of("/") + 1);
+	}
 
 	if (base == "") {
 
@@ -2842,6 +2844,7 @@ Session::remove_region_from_region_list (boost::shared_ptr<Region> r)
 }
 
 /* Source Management */
+
 void
 Session::add_source (boost::shared_ptr<Source> source)
 {
@@ -2912,7 +2915,6 @@ Session::source_by_id (const PBD::ID& id)
 	return source;
 }
 
-
 boost::shared_ptr<Source>
 Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 {
@@ -2920,26 +2922,19 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		cerr << "comparing " << path << " with " << i->second->name() << endl;
-		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(i->second);
+		boost::shared_ptr<AudioFileSource> afs
+			= boost::dynamic_pointer_cast<AudioFileSource>(i->second);
 
 		if (afs && afs->path() == path && chn == afs->channel()) {
 			return afs;
 		}
-
 	}
 	return boost::shared_ptr<Source>();
 }
 
-Glib::ustring
-Session::peak_path (Glib::ustring base) const
-{
-	sys::path peakfile_path(_session_dir->peak_path());
-	peakfile_path /= basename_nosuffix (base) + peakfile_suffix;
-	return peakfile_path.to_string();
-}
 
 string
-Session::change_audio_path_by_name (string path, string oldname, string newname, bool destructive)
+Session::change_source_path_by_name (string path, string oldname, string newname, bool destructive)
 {
 	string look_for;
 	string old_basename = PBD::basename_nosuffix (oldname);
@@ -2987,7 +2982,7 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 
 		/* non-destructive file sources have a name of the form:
 
-		    /path/to/NAME-nnnnn(%[LR])?.wav
+		    /path/to/NAME-nnnnn(%[LR])?.ext
 
 		    the task here is to replace NAME with the new name.
 		*/
@@ -3025,7 +3020,7 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 		if (postfix != string::npos) {
 			suffix = suffix.substr (postfix);
 		} else {
-			error << "Logic error in Session::change_audio_path_by_name(), please report to the developers" << endl;
+			error << "Logic error in Session::change_source_path_by_name(), please report" << endl;
 			return "";
 		}
 
@@ -3052,8 +3047,42 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 	return path;
 }
 
+/** Return the full path (in some session directory) for a new embedded source.
+ * \a name must be a session-unique name that does not contain slashes
+ *         (e.g. as returned by new_*_source_name)
+ */
 string
-Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool destructive)
+Session::new_source_path_from_name (DataType type, const string& name)
+{
+	assert(name.find("/") == string::npos);
+
+	SessionDirectory sdir(get_best_session_directory_for_new_source());
+
+	sys::path p;
+	if (type == DataType::AUDIO) {
+		p = sdir.sound_path();
+	} else if (type == DataType::MIDI) {
+		p = sdir.midi_path();
+	} else {
+		error << "Unknown source type, unable to create file path" << endmsg;
+		return "";
+	}
+
+	p /= name;
+	return p.to_string();
+}
+
+Glib::ustring
+Session::peak_path (Glib::ustring base) const
+{
+	sys::path peakfile_path(_session_dir->peak_path());
+	peakfile_path /= basename_nosuffix (base) + peakfile_suffix;
+	return peakfile_path.to_string();
+}
+
+/** Return a unique name based on \a base for a new internal audio source */
+string
+Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t chan, bool destructive)
 {
 	string spath;
 	uint32_t cnt;
@@ -3062,12 +3091,9 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	string legalized;
 
 	buf[0] = '\0';
-	legalized = legalize_for_path (name);
+	legalized = legalize_for_path (base);
 
-	/* find a "version" of the file name that doesn't exist in
-	   any of the possible directories.
-	*/
-
+	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
 
 		vector<space_and_path>::iterator i;
@@ -3080,18 +3106,24 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 			spath = sdir.sound_path().to_string();
 
 			if (destructive) {
+
 				if (nchan < 2) {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav",
+							spath.c_str(), cnt, legalized.c_str());
 				} else if (nchan == 2) {
 					if (chan == 0) {
-						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%L.wav", spath.c_str(), cnt, legalized.c_str());
+						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%L.wav",
+								spath.c_str(), cnt, legalized.c_str());
 					} else {
-						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%R.wav", spath.c_str(), cnt, legalized.c_str());
+						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%R.wav",
+								spath.c_str(), cnt, legalized.c_str());
 					}
 				} else if (nchan < 26) {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s%%%c.wav", spath.c_str(), cnt, legalized.c_str(), 'a' + chan);
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s%%%c.wav",
+							spath.c_str(), cnt, legalized.c_str(), 'a' + chan);
 				} else {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav",
+							spath.c_str(), cnt, legalized.c_str());
 				}
 
 			} else {
@@ -3125,173 +3157,42 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 		}
 
 		if (cnt > limit) {
-			error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, name) << endmsg;
+			error << string_compose(
+					_("There are already %1 recordings for %2, which I consider too many."),
+					limit, base) << endmsg;
 			destroy ();
 			throw failed_constructor();
 		}
 	}
 
-	/* we now have a unique name for the file, but figure out where to
-	   actually put it.
-	*/
-
-	string foo = buf;
-
-	SessionDirectory sdir(get_best_session_directory_for_new_source ());
-
-	spath = sdir.sound_path().to_string();
-	spath += '/';
-
-	string::size_type pos = foo.find_last_of ('/');
-
-	if (pos == string::npos) {
-		spath += foo;
-	} else {
-		spath += foo.substr (pos + 1);
-	}
-
-	return spath;
+	return Glib::path_get_basename(buf);
 }
 
+/** Create a new embedded audio source */
 boost::shared_ptr<AudioFileSource>
 Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
-	string spath = audio_path_from_name (ds.name(), ds.n_channels().n_audio(), chan, destructive);
+	const size_t n_chans = ds.n_channels().n_audio();
+	const string name    = new_audio_source_name (ds.name(), n_chans, chan, destructive);
+	const string path    = new_source_path_from_name(DataType::AUDIO, name);
 	return boost::dynamic_pointer_cast<AudioFileSource> (
-		SourceFactory::createWritable (DataType::AUDIO, *this, spath, destructive, frame_rate()));
+			SourceFactory::createWritable (
+					DataType::AUDIO, *this, path, true, destructive, frame_rate()));
 }
 
-// FIXME: _terrible_ code duplication
+/** Return a unique name based on \a base for a new internal MIDI source */
 string
-Session::change_midi_path_by_name (string path, string oldname, string newname, bool destructive)
+Session::new_midi_source_name (const string& base)
 {
-	string look_for;
-	string old_basename = PBD::basename_nosuffix (oldname);
-	string new_legalized = legalize_for_path (newname);
-
-	/* note: we know (or assume) the old path is already valid */
-
-	if (destructive) {
-
-		/* destructive file sources have a name of the form:
-
-		    /path/to/Tnnnn-NAME(%[LR])?.wav
-
-		    the task here is to replace NAME with the new name.
-		*/
-
-		/* find last slash */
-
-		string dir;
-		string prefix;
-		string::size_type slash;
-		string::size_type dash;
-
-		if ((slash = path.find_last_of ('/')) == string::npos) {
-			return "";
-		}
-
-		dir = path.substr (0, slash+1);
-
-		/* '-' is not a legal character for the NAME part of the path */
-
-		if ((dash = path.find_last_of ('-')) == string::npos) {
-			return "";
-		}
-
-		prefix = path.substr (slash+1, dash-(slash+1));
-
-		path = dir;
-		path += prefix;
-		path += '-';
-		path += new_legalized;
-		path += ".mid";  /* XXX gag me with a spoon */
-
-	} else {
-
-		/* non-destructive file sources have a name of the form:
-
-		    /path/to/NAME-nnnnn(%[LR])?.wav
-
-		    the task here is to replace NAME with the new name.
-		*/
-
-		string dir;
-		string suffix;
-		string::size_type slash;
-		string::size_type dash;
-		string::size_type postfix;
-
-		/* find last slash */
-
-		if ((slash = path.find_last_of ('/')) == string::npos) {
-			return "";
-		}
-
-		dir = path.substr (0, slash+1);
-
-		/* '-' is not a legal character for the NAME part of the path */
-
-		if ((dash = path.find_last_of ('-')) == string::npos) {
-			return "";
-		}
-
-		suffix = path.substr (dash+1);
-
-		// Suffix is now everything after the dash. Now we need to eliminate
-		// the nnnnn part, which is done by either finding a '%' or a '.'
-
-		postfix = suffix.find_last_of ("%");
-		if (postfix == string::npos) {
-			postfix = suffix.find_last_of ('.');
-		}
-
-		if (postfix != string::npos) {
-			suffix = suffix.substr (postfix);
-		} else {
-			error << "Logic error in Session::change_midi_path_by_name(), please report to the developers" << endl;
-			return "";
-		}
-
-		const uint32_t limit = 10000;
-		char buf[PATH_MAX+1];
-
-		for (uint32_t cnt = 1; cnt <= limit; ++cnt) {
-
-			snprintf (buf, sizeof(buf), "%s%s-%u%s", dir.c_str(), newname.c_str(), cnt, suffix.c_str());
-
-			if (access (buf, F_OK) != 0) {
-				path = buf;
-				break;
-			}
-			path = "";
-		}
-
-		if (path == "") {
-			error << "FATAL ERROR! Could not find a " << endl;
-		}
-
-	}
-
-	return path;
-}
-
-string
-Session::midi_path_from_name (string name)
-{
-	string spath;
 	uint32_t cnt;
 	char buf[PATH_MAX+1];
 	const uint32_t limit = 10000;
 	string legalized;
 
 	buf[0] = '\0';
-	legalized = legalize_for_path (name);
+	legalized = legalize_for_path (base);
 
-	/* find a "version" of the file name that doesn't exist in
-	   any of the possible directories.
-	*/
-
+	// Find a "version" of the file name that doesn't exist in any of the possible directories.
 	for (cnt = 1; cnt <= limit; ++cnt) {
 
 		vector<space_and_path>::iterator i;
@@ -3302,12 +3203,9 @@ Session::midi_path_from_name (string name)
 			SessionDirectory sdir((*i).path);
 
 			sys::path p = sdir.midi_path();
-
 			p /= legalized;
 
-			spath = p.to_string();
-
-			snprintf (buf, sizeof(buf), "%s-%u.mid", spath.c_str(), cnt);
+			snprintf (buf, sizeof(buf), "%s-%u.mid", p.to_string().c_str(), cnt);
 
 			if (sys::exists (buf)) {
 				existing++;
@@ -3319,39 +3217,28 @@ Session::midi_path_from_name (string name)
 		}
 
 		if (cnt > limit) {
-			error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, name) << endmsg;
+			error << string_compose(
+					_("There are already %1 recordings for %2, which I consider too many."),
+					limit, base) << endmsg;
+			destroy ();
 			throw failed_constructor();
 		}
 	}
 
-	/* we now have a unique name for the file, but figure out where to
-	   actually put it.
-	*/
-
-	string foo = buf;
-
-	SessionDirectory sdir(get_best_session_directory_for_new_source ());
-
-	spath = sdir.midi_path().to_string();
-	spath += '/';
-
-	string::size_type pos = foo.find_last_of ('/');
-
-	if (pos == string::npos) {
-		spath += foo;
-	} else {
-		spath += foo.substr (pos + 1);
-	}
-
-	return spath;
+	return Glib::path_get_basename(buf);
 }
 
+
+/** Create a new embedded MIDI source */
 boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (MidiDiskstream& ds)
 {
-	string mpath = midi_path_from_name (ds.name());
+	const string name = new_midi_source_name (ds.name());
+	const string path = new_source_path_from_name (DataType::MIDI, name);
 
-	return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, mpath, false, frame_rate()));
+	return boost::dynamic_pointer_cast<SMFSource> (
+			SourceFactory::createWritable (
+					DataType::MIDI, *this, path, true, false, frame_rate()));
 }
 
 
@@ -4130,7 +4017,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 
 		try {
 			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
+				SourceFactory::createWritable (DataType::AUDIO, *this, buf, true, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {

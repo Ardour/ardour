@@ -150,9 +150,7 @@ class Session : public PBD::StatefulDestructible
 			SetAudioRange,
 			SetPlayRange,
 
-			/* only one of each of these events
-			   can be queued at any one time
-			   */
+			/* only one of each of these events can be queued at any one time */
 
 			StopOnce,
 			AutoLoop
@@ -165,32 +163,33 @@ class Session : public PBD::StatefulDestructible
 			Clear
 		};
 
-		Type           type;
-		Action         action;
-		nframes_t      action_frame;
-		nframes_t      target_frame;
-		double         speed;
+		Type             type;
+		Action           action;
+		nframes_t        action_frame;
+		nframes_t        target_frame;
+		double           speed;
 
 		union {
-			void*                ptr;
-			bool                 yes_or_no;
-			nframes_t            target2_frame;
-			SlaveSource slave;
-			Route*               route;
+			void*        ptr;
+			bool         yes_or_no;
+			nframes_t    target2_frame;
+			SlaveSource  slave;
+			Route*       route;
 		};
 
-		boost::shared_ptr<Region>     region;
-
-		list<AudioRange>     audio_range;
-		list<MusicRange>     music_range;
+		list<AudioRange> audio_range;
+		list<MusicRange> music_range;
+		
+		boost::shared_ptr<Region> region;
 
 		Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false)
-			: type (t),
-			action (a),
-			action_frame (when),
-			target_frame (where),
-			speed (spd),
-			yes_or_no (yn) {}
+			: type (t)
+			, action (a)
+			, action_frame (when)
+			, target_frame (where)
+			, speed (spd)
+			, yes_or_no (yn)
+		{}
 
 		void set_ptr (void* p) {
 			ptr = p;
@@ -275,12 +274,12 @@ class Session : public PBD::StatefulDestructible
 
 	Glib::ustring peak_path (Glib::ustring) const;
 
-	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
-	static string change_midi_path_by_name (string oldpath, string oldname, string newname, bool destructive);
+	static string change_source_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 
 	string peak_path_from_audio_path (string) const;
-	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
-	string midi_path_from_name (string);
+	string new_audio_source_name (const string&, uint32_t nchans, uint32_t chan, bool destructive);
+	string new_midi_source_name (const string&);
+	string new_source_path_from_name (DataType type, const string&);
 
 	void process (nframes_t nframes);
 
@@ -400,16 +399,15 @@ class Session : public PBD::StatefulDestructible
 	bool transport_locked () const;
 
 	int wipe ();
-	//int wipe_diskstream (AudioDiskstream *);
 
 	int remove_region_from_region_list (boost::shared_ptr<Region>);
 
 	nframes_t get_maximum_extent () const;
 	nframes_t current_end_frame() const { return end_location->start(); }
 	nframes_t current_start_frame() const { return start_location->start(); }
-	// "actual" sample rate of session, set by current audioengine rate, pullup/down etc.
+	/// "actual" sample rate of session, set by current audioengine rate, pullup/down etc.
 	nframes_t frame_rate() const   { return _current_frame_rate; }
-	// "native" sample rate of session, regardless of current audioengine rate, pullup/down etc
+	/// "native" sample rate of session, regardless of current audioengine rate, pullup/down etc
 	nframes_t nominal_frame_rate() const   { return _nominal_frame_rate; }
 	nframes_t frames_per_hour() const { return _frames_per_hour; }
 
@@ -441,10 +439,10 @@ class Session : public PBD::StatefulDestructible
 	void remove_event (nframes_t frame, Event::Type type);
 	void clear_events (Event::Type type);
 
-	nframes_t get_block_size() const { return current_block_size; }
+	nframes_t get_block_size()        const { return current_block_size; }
 	nframes_t worst_output_latency () const { return _worst_output_latency; }
-	nframes_t worst_input_latency () const { return _worst_input_latency; }
-	nframes_t worst_track_latency () const { return _worst_track_latency; }
+	nframes_t worst_input_latency ()  const { return _worst_input_latency; }
+	nframes_t worst_track_latency ()  const { return _worst_track_latency; }
 
 	int save_state (std::string snapshot_name, bool pending = false);
 	int restore_state (std::string snapshot_name);
@@ -470,7 +468,7 @@ class Session : public PBD::StatefulDestructible
 
 	/// The instant xml file is written to the session directory
 	void add_instant_xml (XMLNode&, bool write_to_config = true);
-	XMLNode * instant_xml (const std::string& str);
+	XMLNode* instant_xml (const std::string& str);
 
 	enum StateOfTheState {
 		Clean = 0x0,
@@ -495,8 +493,8 @@ class Session : public PBD::StatefulDestructible
 
 	sigc::signal<void,RouteGroup*> edit_group_added;
 	sigc::signal<void,RouteGroup*> mix_group_added;
-	sigc::signal<void> edit_group_removed;
-	sigc::signal<void> mix_group_removed;
+	sigc::signal<void>             edit_group_removed;
+	sigc::signal<void>             mix_group_removed;
 
 	void foreach_edit_group (sigc::slot<void,RouteGroup*> sl) {
 		for (list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); i++) {
@@ -512,11 +510,13 @@ class Session : public PBD::StatefulDestructible
 
 	/* fundamental operations. duh. */
 
-	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
+	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (
+			int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
+	
 	RouteList new_audio_route (int input_channels, int output_channels, uint32_t how_many);
 
-	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (TrackMode mode = Normal, uint32_t how_many = 1);
-	//boost::shared_ptr<Route>     new_midi_route (uint32_t how_many = 1);
+	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
+			TrackMode mode = Normal, uint32_t how_many = 1);
 
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();
@@ -552,8 +552,8 @@ class Session : public PBD::StatefulDestructible
 	void sync_time_vars();
 
 	void bbt_time (nframes_t when, BBT_Time&);
-	void smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes ) const;
-	void sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const;
+	void smpte_to_sample(SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes) const;
+	void sample_to_smpte(nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes) const;
 	void smpte_time (SMPTE::Time &);
 	void smpte_time (nframes_t when, SMPTE::Time&);
 	void smpte_time_subframes (nframes_t when, SMPTE::Time&);
@@ -656,23 +656,19 @@ class Session : public PBD::StatefulDestructible
 
 	int remove_last_capture ();
 
-	/* handlers should return -1 for "stop cleanup", 0 for
-	   "yes, delete this playlist" and 1 for "no, don't delete
-	   this playlist.
+	/** handlers should return -1 for "stop cleanup",
+	    0 for "yes, delete this playlist",
+	    1 for "no, don't delete this playlist".
 	*/
-
 	sigc::signal<int,boost::shared_ptr<ARDOUR::Playlist> > AskAboutPlaylistDeletion;
 
-	/* handlers should return 0 for "ignore the rate mismatch"
-	   and !0 for "do not use this session"
+	/** handlers should return 0 for "ignore the rate mismatch",
+	    !0 for "do not use this session"
 	*/
-
 	static sigc::signal<int,nframes_t, nframes_t> AskAboutSampleRateMismatch;
 
-	/* handlers should return !0 for use pending state, 0 for
-	   ignore it.
+	/** handlers should return !0 for use pending state, 0 for ignore it.
 	*/
-
 	static sigc::signal<int> AskAboutPendingState;
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
@@ -780,7 +776,7 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void,boost::shared_ptr<Bundle> > BundleAdded;
 	sigc::signal<void,boost::shared_ptr<Bundle> > BundleRemoved;
 
-	/* MIDI */
+	/* MIDI control */
 
 	void midi_panic(void);
 	int set_mtc_port (string port_tag);
@@ -917,7 +913,7 @@ class Session : public PBD::StatefulDestructible
 
 	/* clicking */
 
-	boost::shared_ptr<IO>  click_io() { return _click_io; }
+	boost::shared_ptr<IO> click_io() { return _click_io; }
 
 	/* disk, buffer loads */
 
@@ -1078,10 +1074,10 @@ class Session : public PBD::StatefulDestructible
 	bool follow_slave (nframes_t, nframes_t);
 	void calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta);
 	void track_slave_state(
-			float slave_speed, 
+			float     slave_speed, 
 			nframes_t slave_transport_frame, 
 			nframes_t this_delta,
-			bool starting);
+			bool      starting);
 	void follow_slave_silently(nframes_t nframes, nframes_t offset, float slave_speed);
 	
 	void set_slave_source (SlaveSource);
@@ -1119,7 +1115,6 @@ class Session : public PBD::StatefulDestructible
 	}
 
 	int get_transport_declick_required () {
-
 		if (transport_sub_state & PendingDeclickIn) {
 			transport_sub_state &= ~PendingDeclickIn;
 			return 1;
@@ -1131,7 +1126,8 @@ class Session : public PBD::StatefulDestructible
 	}
 
 	bool maybe_stop (nframes_t limit) {
-		if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
+		if (   (_transport_speed > 0.0f && _transport_frame >= limit)
+		    || (_transport_speed < 0.0f && _transport_frame == 0)    ) {
 			stop_transport ();
 			return true;
 		}
@@ -1194,7 +1190,9 @@ class Session : public PBD::StatefulDestructible
 	mutable gint      butler_should_do_transport_work;
 	int               butler_request_pipe[2];
 
-	inline bool transport_work_requested() const { return g_atomic_int_get(&butler_should_do_transport_work); }
+	inline bool transport_work_requested() const {
+		return g_atomic_int_get(&butler_should_do_transport_work);
+	}
 
 	struct ButlerRequest {
 		enum Type {
@@ -1498,8 +1496,6 @@ class Session : public PBD::StatefulDestructible
 	SourceMap get_sources() { return sources; }
 
   private:
-
-
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();
 

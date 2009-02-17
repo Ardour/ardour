@@ -136,7 +136,6 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string> 
 	if (*head != 0) {
 		lrdf_uris* ulist = lrdf_match_multi(*head);
 		for (uint32_t j = 0; ulist && j < ulist->count; ++j) {
-//			cerr << "AND: " << Glib::filename_from_uri(ulist->items[j]) << endl;
 			members.push_back(Glib::filename_from_uri(ulist->items[j]));
 		}
 		lrdf_free_uris(ulist);

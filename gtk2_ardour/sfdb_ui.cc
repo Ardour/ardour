@@ -332,8 +332,8 @@ SoundFileBox::audition ()
 	for (int n = 0; n < sf_info.channels; ++n) {
 		try {
 			afs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createReadable (DataType::AUDIO, *_session, path, 
-							n, Source::Flag (0), false));
+					SourceFactory::createReadable (DataType::AUDIO, *_session,
+							path, false, n, Source::Flag (0), false));
 			
 			srclist.push_back(afs);
 			
@@ -639,13 +639,13 @@ SoundFileBrowser::meter ()
 bool
 SoundFileBrowser::on_audio_filter (const FileFilter::Info& filter_info)
 {
-	return AudioFileSource::safe_file_extension (filter_info.filename);
+	return AudioFileSource::safe_audio_file_extension (filter_info.filename);
 }
 
 bool
 SoundFileBrowser::on_midi_filter (const FileFilter::Info& filter_info)
 {
-	return SMFSource::safe_file_extension (filter_info.filename);
+	return SMFSource::safe_midi_file_extension (filter_info.filename);
 }
 
 void
@@ -1096,7 +1096,7 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 				src_needed = true;
 			}
 
-		} else if (SMFSource::safe_file_extension (*i)) {
+		} else if (SMFSource::safe_midi_file_extension (*i)) {
 
 			Evoral::SMFReader reader(*i);
 			if (reader.num_tracks() > 1) {

@@ -50,8 +50,7 @@ using namespace PBD;
 sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
-	: Source (s, name, DataType::MIDI, flags)
-	, _timeline_position(0)
+	: Source (s, DataType::MIDI, name, flags)
 	, _read_data_count(0)
 	, _write_data_count(0)
 	, _converter(s, _timeline_position)
@@ -62,7 +61,6 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 
 MidiSource::MidiSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
-	, _timeline_position(0)
 	, _read_data_count(0)
 	, _write_data_count(0)
 	, _converter(s, _timeline_position)
@@ -97,8 +95,6 @@ int
 MidiSource::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
-
-	Source::set_state (node);
 
 	if ((prop = node.property ("captured-for")) != 0) {
 		_captured_for = prop->value();
@@ -161,10 +157,10 @@ MidiSource::file_changed (string path)
 }
 
 void
-MidiSource::set_timeline_position (nframes_t when)
+MidiSource::set_timeline_position (int64_t pos)
 {
-	_timeline_position = when;
-	_converter.set_origin(when);
+	Source::set_timeline_position(pos);
+	_converter.set_origin(pos);
 }
 
 void
@@ -225,7 +221,8 @@ MidiSource::session_saved()
 		string newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
 
 		boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
-				SourceFactory::createWritable(DataType::MIDI, _session, newpath, 1, 0, true));
+				SourceFactory::createWritable(DataType::MIDI, _session,
+						newpath, true, false, _session.frame_rate()));
 
 		newsrc->set_timeline_position(_timeline_position);
 		_model->write_to(newsrc);

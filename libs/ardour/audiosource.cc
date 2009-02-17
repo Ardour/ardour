@@ -56,7 +56,7 @@ bool AudioSource::_build_peakfiles = false;
 #define _FPP 256
 
 AudioSource::AudioSource (Session& s, ustring name)
-	: Source (s, name, DataType::AUDIO)
+	: Source (s, DataType::AUDIO, name)
 {
 	_peaks_built = false;
 	_peak_byte_max = 0;
@@ -117,8 +117,6 @@ int
 AudioSource::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
-
-	Source::set_state (node);
 
 	if ((prop = node.property ("captured-for")) != 0) {
 		_captured_for = prop->value();
@@ -911,13 +909,5 @@ AudioSource::available_peaks (double zoom_factor) const
 	end = _peak_byte_max;
 
 	return (end/sizeof(PeakData)) * _FPP;
-}
-
-void
-AudioSource::update_length (nframes_t pos, nframes_t cnt)
-{
-	if (pos + cnt > _length) {
-		_length = pos+cnt;
-	}
 }
 

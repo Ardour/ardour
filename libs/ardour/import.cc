@@ -217,13 +217,10 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 			const DataType type = ((*i).rfind(".mid") != string::npos)
 				? DataType::MIDI : DataType::AUDIO;
 				
-			source = SourceFactory::createWritable (
-					type,
-					sess,
-					i->c_str(),
+			source = SourceFactory::createWritable (type, sess,
+					i->c_str(), true,
 					false, // destructive
-					samplerate
-					);
+					samplerate);
 		}
 		catch (const failed_constructor& err)
 		{
@@ -365,7 +362,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, Session::ImportStatus& status
 	}
 
 	} catch (...) {
-		error << "Corrupt MIDI file " << source->path() << endl;
+		error << "Corrupt MIDI file " << source->file_path() << endl;
 	}
 }
 

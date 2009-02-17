@@ -70,7 +70,6 @@ class Route : public IO
 		ControlOut = 0x4
 	};
 
-
 	Route (Session&, std::string name, int input_min, int input_max, int output_min, int output_max,
 	       Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
 	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
@@ -91,14 +90,15 @@ class Route : public IO
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 
-	virtual int  roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			   nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+	virtual int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+			nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
 
-	virtual int  no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			      nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+	virtual int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+			nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
 
-	virtual int  silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-				  nframes_t offset, bool can_record, bool rec_monitors_input);
+	virtual int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+			nframes_t offset, bool can_record, bool rec_monitors_input);
+
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
 	virtual void set_record_enable (bool yn, void *src) {}
@@ -136,8 +136,8 @@ class Route : public IO
 	void       drop_mix_group (void *);
 	RouteGroup *mix_group () { return _mix_group; }
 
-	virtual void  set_meter_point (MeterPoint, void *src);
-	MeterPoint  meter_point() const { return _meter_point; }
+	virtual void set_meter_point (MeterPoint, void *src);
+	MeterPoint   meter_point() const { return _meter_point; }
 
 	/* Processors */
 
@@ -271,56 +271,53 @@ class Route : public IO
 	void curve_reallocate ();
 
   protected:
-	Flag _flags;
-
-	/* tight cache-line access here is more important than sheer speed of
-	   access.
-	*/
-
-	bool                     _muted : 1;
-	bool                     _soloed : 1;
-	bool                     _solo_safe : 1;
-	bool                     _recordable : 1;
-	bool                     _mute_affects_pre_fader : 1;
-	bool                     _mute_affects_post_fader : 1;
-	bool                     _mute_affects_control_outs : 1;
-	bool                     _mute_affects_main_outs : 1;
-	bool                     _silent : 1;
-	bool                     _declickable : 1;
-	int                      _pending_declick;
-	
-	MeterPoint               _meter_point;
-
-	gain_t                    solo_gain;
-	gain_t                    mute_gain;
-	gain_t                    desired_solo_gain;
-	gain_t                    desired_mute_gain;
-
-
-
-	nframes_t           _initial_delay;
-	nframes_t           _roll_delay;
-	ProcessorList       _processors;
-	Glib::RWLock        _processor_lock;
-	IO                 *_control_outs;
-	Glib::Mutex         _control_outs_lock;
-	RouteGroup         *_edit_group;
-	RouteGroup         *_mix_group;
-	std::string         _comment;
-	bool                _have_internal_generator;
-
-	boost::shared_ptr<ToggleControllable> _solo_control;
-	boost::shared_ptr<ToggleControllable> _mute_control;
-	
 	nframes_t check_initial_delay (nframes_t, nframes_t&, nframes_t&);
 	
-	void passthru (nframes_t start_frame, nframes_t end_frame, 
-		       nframes_t nframes, nframes_t offset, int declick, bool meter_inputs);
+	void passthru (nframes_t start_frame, nframes_t end_frame,
+			nframes_t nframes, nframes_t offset, int declick, bool meter_inputs);
 
 	virtual void process_output_buffers (BufferSet& bufs,
-				     nframes_t start_frame, nframes_t end_frame,
-				     nframes_t nframes, nframes_t offset, bool with_processors, int declick,
-				     bool meter);
+			nframes_t start_frame, nframes_t end_frame,
+			nframes_t nframes, nframes_t offset, bool with_processors, int declick,
+			bool meter);
+
+	Flag           _flags;
+	int            _pending_declick;
+	MeterPoint     _meter_point;
+
+	gain_t          solo_gain;
+	gain_t          mute_gain;
+	gain_t          desired_solo_gain;
+	gain_t          desired_mute_gain;
+	
+	nframes_t      _initial_delay;
+	nframes_t      _roll_delay;
+	ProcessorList  _processors;
+	Glib::RWLock   _processor_lock;
+	IO            *_control_outs;
+	Glib::Mutex    _control_outs_lock;
+	RouteGroup    *_edit_group;
+	RouteGroup    *_mix_group;
+	std::string    _comment;
+	bool           _have_internal_generator;
+	
+	boost::shared_ptr<ToggleControllable> _solo_control;
+	boost::shared_ptr<ToggleControllable> _mute_control;
+
+	/* tight cache-line access here is more important than sheer speed of access.
+	   keep these after things that should be aligned
+	*/
+
+	bool _muted : 1;
+	bool _soloed : 1;
+	bool _solo_safe : 1;
+	bool _recordable : 1;
+	bool _mute_affects_pre_fader : 1;
+	bool _mute_affects_post_fader : 1;
+	bool _mute_affects_control_outs : 1;
+	bool _mute_affects_main_outs : 1;
+	bool _silent : 1;
+	bool _declickable : 1;
 
   protected:
 
@@ -348,10 +345,8 @@ class Route : public IO
 
 	static uint32_t order_key_cnt;
 
-	struct ltstr
-	{
-	    bool operator()(const char* s1, const char* s2) const
-	    {
+	struct ltstr {
+	    bool operator()(const char* s1, const char* s2) const {
 		    return strcmp(s1, s2) < 0;
 	    }
 	};
@@ -365,8 +360,7 @@ class Route : public IO
 	int reset_processor_counts (ProcessorStreams*); /* locked */
 	int _reset_processor_counts (ProcessorStreams*); /* unlocked */
 
-	/* processor I/O channels and plugin count handling */
-
+	/** processor I/O channels and plugin count handling */
 	struct ProcessorCount {
 	    boost::shared_ptr<ARDOUR::Processor> processor;
 	    ChanCount in;
@@ -376,7 +370,8 @@ class Route : public IO
 	};
 	
 	int32_t apply_some_processor_counts (std::list<ProcessorCount>& iclist);
-	bool    check_some_processor_counts (std::list<ProcessorCount>& iclist, ChanCount required_inputs, ProcessorStreams* err_streams);
+	bool    check_some_processor_counts (std::list<ProcessorCount>& iclist,
+				ChanCount required_inputs, ProcessorStreams* err_streams);
 
 	void set_deferred_state ();
 	void add_processor_from_xml (const XMLNode&);
