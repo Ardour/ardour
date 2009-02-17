@@ -12,6 +12,7 @@ Makefile
 .scache
 .deps
 *.so
+*.pyc
 
 .sconf_temp/
 .sconsign.dblite
@@ -100,3 +101,10 @@ libs/sigc++2/scripts/ltoptions.m4
 libs/sigc++2/scripts/ltsugar.m4
 libs/sigc++2/scripts/ltversion.m4
 libs/sigc++2/scripts/lt~obsolete.m4
+libs/evoral/build
+libs/evoral/.waf*
+libs/evoral/.lock-wscript
+libs/glibmm2/autom4te.cache
+libs/sigc++2/autom4te.cache
+.sconf_temp
+libs/taglib/headers/taglib
