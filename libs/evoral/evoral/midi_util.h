@@ -82,13 +82,13 @@ midi_event_size(const uint8_t* buffer)
 	if (status >= 0x80 && status < 0xF0) {
 		status &= 0xF0;
 	}
-	
-	// FIXME: This is not correct, read the size and verify
-	// A sysex can contain the byte MIDI_CMD_COMMON_SYSEX_END, so this
-	// is likely to result in corrupt buffers and catastrophic failure
+
+	// see http://www.midi.org/techspecs/midimessages.php
 	if (status == MIDI_CMD_COMMON_SYSEX) {
 		int end;
-		for (end = 1; buffer[end] != MIDI_CMD_COMMON_SYSEX_END; end++) {}
+		for (end = 1; buffer[end] != MIDI_CMD_COMMON_SYSEX_END; end++) {
+			assert((buffer[end] & 0x80) == 0);
+		}
 		assert(buffer[end] == MIDI_CMD_COMMON_SYSEX_END);
 		return end + 1;
 	} else {
