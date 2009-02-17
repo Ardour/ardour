@@ -846,13 +846,29 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 	line_drag_cp1 = i1;
 	line_drag_cp2 = i2;
 	
+	//check if one of the control points on the line is in a selected range
+	bool range_found = false;
 	ControlPoint *cp;
-
 	for (uint32_t i = i1 ; i <= i2; i++) {
 		cp = nth (i);
-		modify_view_point (*cp, trackview.editor.unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
+		if ( cp->selected )
+			range_found = true;
 	}
-
+	
+	if (range_found) {
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			if ( (*i)->selected ) {
+				modify_view_point (*(*i), trackview.editor.unit_to_frame ((*i)->get_x()), ((_height - (*i)->get_y()) /_height) + ydelta, with_push);
+			}
+		}
+	} else {
+		ControlPoint *cp;
+		for (uint32_t i = i1 ; i <= i2; i++) {
+			cp = nth (i);
+			modify_view_point (*cp, trackview.editor.unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
+		}
+	}
+	
 	if (line_points.size() > 1) {
 		line->property_points() = line_points;
 	}
