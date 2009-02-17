@@ -628,7 +628,7 @@ MidiRegionView::display_program_changes()
 void 
 MidiRegionView::display_sysexes()
 {
-	for(MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
+	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 		ARDOUR::MidiModel::TimeType time = (*i)->time();
 		assert(time >= 0);
 		
@@ -647,12 +647,8 @@ MidiRegionView::display_sysexes()
 		
 		double height = midi_stream_view()->contents_height();
 		
-		boost::shared_ptr<CanvasSysEx<ARDOUR::MidiModel::TimeType> > sysex = 
-				boost::shared_ptr<CanvasSysEx<ARDOUR::MidiModel::TimeType> >(
-				new CanvasSysEx<ARDOUR::MidiModel::TimeType>(*this, *group,
-						text, 
-						height, 
-						x, 1.0));
+		boost::shared_ptr<CanvasSysEx> sysex = boost::shared_ptr<CanvasSysEx>(
+				new CanvasSysEx(*this, *group, text, height, x, 1.0));
 		
 		// Show unless program change is beyond the region bounds
 		if (time - _region->start() >= _region->length() || time < _region->start()) {

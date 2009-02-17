@@ -313,7 +313,7 @@ class MidiRegionView : public RegionView
 
 	typedef std::vector<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;
-	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx<ARDOUR::MidiModel::TimeType> > > SysExes;
+	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx> > SysExes;
 	
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;

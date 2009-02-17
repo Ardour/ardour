@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2009 Paul Davis
+    Author: Hans Baier
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #include <iostream>
 
 #include "ardour_ui.h"
@@ -7,15 +26,13 @@
 using namespace Gnome::Canvas;
 using namespace std;
 
-template<typename Time>
-CanvasSysEx<Time>::CanvasSysEx(
-		MidiRegionView&                       region,
-		Group&                                parent,
-		string&                               text,
-		double                                height,
-		double                                x,
-		double                                y
-		)
+CanvasSysEx::CanvasSysEx(
+		MidiRegionView& region,
+		Group&          parent,
+		string&         text,
+		double          height,
+		double          x,
+		double          y)
 	: CanvasFlag(
 			region, 
 			parent, 
@@ -23,20 +40,17 @@ CanvasSysEx<Time>::CanvasSysEx(
 			ARDOUR_UI::config()->canvasvar_MidiSysExOutline.get(), 
 			ARDOUR_UI::config()->canvasvar_MidiSysExFill.get(),
 			x,
-			y
-		)
+			y)
 {
 	set_text(text);
 }
 
-template<typename Time>
-CanvasSysEx<Time>::~CanvasSysEx()
+CanvasSysEx::~CanvasSysEx()
 {
 }
 
-template<typename Time>
 bool
-CanvasSysEx<Time>::on_event(GdkEvent* ev)
+CanvasSysEx::on_event(GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
@@ -60,4 +74,3 @@ CanvasSysEx<Time>::on_event(GdkEvent* ev)
 	return false;
 }
 
-template class CanvasSysEx<double>;
