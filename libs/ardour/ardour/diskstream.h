@@ -29,6 +29,8 @@
 
 #include <sigc++/signal.h>
 
+#include <boost/utility.hpp>
+
 #include <evoral/types.hpp>
 
 #include <pbd/fastlog.h>
@@ -56,12 +58,12 @@ class Region;
 class Send;
 class Session;
 
-class Diskstream : public SessionObject
+class Diskstream : public SessionObject, public boost::noncopyable
 {	
   public:
 	enum Flag {
-		Recordable = 0x1,
-		Hidden = 0x2,
+		Recordable  = 0x1,
+		Hidden      = 0x2,
 		Destructive = 0x4
 	};
 
@@ -246,62 +248,62 @@ class Diskstream : public SessionObject
 
 	uint32_t i_am_the_modifier;
 
-	ARDOUR::IO*       _io;
-	ChanCount         _n_channels;
+	ARDOUR::IO*  _io;
+	ChanCount    _n_channels;
 
 	boost::shared_ptr<Playlist> _playlist;
 
-	mutable gint             _record_enabled;
-	double                   _visible_speed;
-	double                   _actual_speed;
+	mutable gint _record_enabled;
+	double       _visible_speed;
+	double       _actual_speed;
 	/* items needed for speed change logic */
-	bool                     _buffer_reallocation_required;
-	bool                     _seek_required;
+	bool         _buffer_reallocation_required;
+	bool         _seek_required;
 	
-	bool                      force_refill;
-	nframes_t            capture_start_frame;
-	nframes_t            capture_captured;
-	bool                      was_recording;
-	nframes_t            adjust_capture_position;
-	nframes_t           _capture_offset;
-	nframes_t           _roll_delay;
-	nframes_t            first_recordable_frame;
-	nframes_t            last_recordable_frame;
-	int                       last_possibly_recording;
-	AlignStyle               _alignment_style;
-	bool                     _scrubbing;
-	bool                     _slaved;
-	bool                     _processed;
-	Location*                 loop_location;
-	nframes_t            overwrite_frame;
-	off_t                     overwrite_offset;
-	bool                      pending_overwrite;
-	bool                      overwrite_queued;
-	IOChange                  input_change_pending;
-	nframes_t            wrap_buffer_size;
-	nframes_t            speed_buffer_size;
+	bool          force_refill;
+	nframes_t     capture_start_frame;
+	nframes_t     capture_captured;
+	bool          was_recording;
+	nframes_t     adjust_capture_position;
+	nframes_t    _capture_offset;
+	nframes_t    _roll_delay;
+	nframes_t     first_recordable_frame;
+	nframes_t     last_recordable_frame;
+	int           last_possibly_recording;
+	AlignStyle   _alignment_style;
+	bool         _scrubbing;
+	bool         _slaved;
+	bool         _processed;
+	Location*     loop_location;
+	nframes_t     overwrite_frame;
+	off_t         overwrite_offset;
+	bool          pending_overwrite;
+	bool          overwrite_queued;
+	IOChange      input_change_pending;
+	nframes_t     wrap_buffer_size;
+	nframes_t     speed_buffer_size;
 
-	uint64_t             last_phase;
+	uint64_t      last_phase;
 	
 	/// diskstream speed in 40.24 fixed point math
-	uint64_t             phi;
+	uint64_t      phi;
 	
 	/// target diskstream speed in 40.24 fixed point math
-	uint64_t             target_phi;
+	uint64_t      target_phi;
 	
-	nframes_t            file_frame;		
-	nframes_t            playback_sample;
-	nframes_t            playback_distance;
-	bool                 commit_should_unlock;
+	nframes_t     file_frame;		
+	nframes_t     playback_sample;
+	nframes_t     playback_distance;
+	bool          commit_should_unlock;
 
-	uint32_t                 _read_data_count;
-	uint32_t                 _write_data_count;
+	uint32_t     _read_data_count;
+	uint32_t     _write_data_count;
 
-	bool                      in_set_state;
-	AlignStyle               _persistent_alignment_style;
-	bool                      first_input_change;
+	bool          in_set_state;
+	AlignStyle   _persistent_alignment_style;
+	bool          first_input_change;
 
-	Glib::Mutex  state_lock;
+	Glib::Mutex state_lock;
 
 	nframes_t scrub_start;
 	nframes_t scrub_buffer_size;

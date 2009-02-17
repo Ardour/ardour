@@ -23,6 +23,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/utility.hpp>
 
 #include <pbd/undo.h>
 
@@ -48,6 +49,7 @@ enum RegionEditState {
 
 class Region
 		: public SessionObject
+		, public boost::noncopyable
 		, public boost::enable_shared_from_this<Region>
 		, public Readable
 {

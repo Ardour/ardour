@@ -21,6 +21,7 @@
 #define __ardour_plugin_h__
 
 #include <boost/shared_ptr.hpp>
+#include <boost/utility.hpp>
 #include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 
@@ -28,11 +29,11 @@
 #include <pbd/controllable.h>
 
 #include <jack/types.h>
-#include <ardour/types.h>
 #include <ardour/chan_count.h>
 #include <ardour/cycles.h>
 #include <ardour/latent.h>
 #include <ardour/plugin_insert.h>
+#include <ardour/types.h>
 
 #include <vector>
 #include <set>
@@ -87,7 +88,7 @@ class PluginInfo {
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
-class Plugin : public PBD::StatefulDestructible, public Latent
+class Plugin : public PBD::StatefulDestructible, public Latent, public boost::noncopyable
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);

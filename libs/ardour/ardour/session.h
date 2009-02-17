@@ -31,6 +31,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/utility.hpp>
 
 #include <sndfile.h>
 
@@ -116,7 +117,7 @@ using std::string;
 using std::map;
 using std::set;
 
-class Session : public PBD::StatefulDestructible
+class Session : public PBD::StatefulDestructible, public boost::noncopyable
 {
   private:
 	typedef std::pair<boost::weak_ptr<Route>,bool> RouteBooleanState;

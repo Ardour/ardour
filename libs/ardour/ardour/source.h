@@ -23,6 +23,7 @@
 #include <string>
 #include <set>
 
+#include <boost/utility.hpp>
 #include <sigc++/signal.h>
 #include <pbd/statefuldestructible.h> 
 #include <evoral/TimeConverter.hpp>
@@ -37,7 +38,7 @@ namespace ARDOUR {
 class Session;
 class Playlist;
 
-class Source : public SessionObject, public ARDOUR::Readable
+class Source : public SessionObject, public ARDOUR::Readable, public boost::noncopyable
 {
   public:
 	enum Flag {

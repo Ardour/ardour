@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include <set>
+#include <boost/utility.hpp>
 
 #include <ardour/types.h>
 #include <ardour/plugin.h>
@@ -36,7 +37,7 @@ namespace ARDOUR {
 
 class Plugin;
 
-class PluginManager {
+class PluginManager : public boost::noncopyable {
   public:
 	PluginManager ();
 	~PluginManager ();

@@ -25,6 +25,7 @@
 #include <ostream>
 #include <fstream>
 #include <vamp-sdk/Plugin.h>
+#include <boost/utility.hpp>
 #include <ardour/audioregion.h>
 
 namespace ARDOUR {
@@ -32,7 +33,7 @@ namespace ARDOUR {
 class Readable;
 class Session;
 
-class AudioAnalyser {
+class AudioAnalyser : public boost::noncopyable {
 
   public:
 	typedef Vamp::Plugin AnalysisPlugin;

@@ -32,7 +32,6 @@ class AudioBuffer;
 class MidiBuffer;
 class PortSet;
 
-
 /** A set of buffers of various types.
  *
  * These are mainly accessed from Session and passed around as scratch buffers
@@ -69,32 +68,26 @@ public:
 	
 	size_t buffer_capacity(DataType type) const;
 
-	Buffer& get(DataType type, size_t i)
-	{
+	Buffer& get(DataType type, size_t i) {
 		assert(i <= _count.get(type));
 		return *_buffers[type][i];
 	}
 
-	AudioBuffer& get_audio(size_t i)
-	{
+	AudioBuffer& get_audio(size_t i) {
 		return (AudioBuffer&)get(DataType::AUDIO, i);
 	}
 	
-	MidiBuffer& get_midi(size_t i)
-	{
+	MidiBuffer& get_midi(size_t i) {
 		return (MidiBuffer&)get(DataType::MIDI, i);
 	}
 
 	void read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset=0);
 
 	// ITERATORS
-	
-	// FIXME: this is a filthy copy-and-paste mess
-	// FIXME: litter these with assertions
+	// FIXME: possible to combine these?  templates?
 	
 	class audio_iterator {
 	public:
-
 		AudioBuffer& operator*()  { return _set.get_audio(_index); }
 		AudioBuffer* operator->() { return &_set.get_audio(_index); }
 		audio_iterator& operator++() { ++_index; return *this; } // yes, prefix only
@@ -113,15 +106,17 @@ public:
 	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
 	audio_iterator audio_end()   { return audio_iterator(*this, _count.n_audio()); }
 
+
 	class iterator {
 	public:
-
 		Buffer& operator*()  { return _set.get(_type, _index); }
 		Buffer* operator->() { return &_set.get(_type, _index); }
 		iterator& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const iterator& other) { return (_index == other._index); }
 		bool operator!=(const iterator& other) { return (_index != other._index); }
-		iterator operator=(const iterator& other) { _set = other._set; _type = other._type; _index = other._index; return *this; }
+		iterator operator=(const iterator& other) {
+			_set = other._set; _type = other._type; _index = other._index; return *this;
+		}
 
 	private:
 		friend class BufferSet;
@@ -136,7 +131,6 @@ public:
 
 	iterator begin(DataType type) { return iterator(*this, type, 0); }
 	iterator end(DataType type)   { return iterator(*this, type, _count.get(type)); }
-
 	
 private:
 	typedef std::vector<Buffer*> BufferVec;

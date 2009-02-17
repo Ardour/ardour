@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <ardour/chan_count.h>
+#include <boost/utility.hpp>
 
 namespace ARDOUR {
 
@@ -34,7 +35,7 @@ class MidiPort;
  * the nth port of a given type.  Note that port(n) and nth_audio_port(n) may
  * NOT return the same port.
  */
-class PortSet {
+class PortSet : public boost::noncopyable {
 public:
 	PortSet();
 
@@ -66,12 +67,10 @@ public:
 	bool empty() const { return (_count.n_total() == 0); }
 
 	// ITERATORS
-	
-	// FIXME: this is a filthy copy-and-paste mess
+	// FIXME: possible to combine these?  templates?
 	
 	class iterator {
 	public:
-
 		Port& operator*()  { return *_set.port(_type, _index); }
 		Port* operator->() { return _set.port(_type, _index); }
 		iterator& operator++() { ++_index; return *this; } // yes, prefix only
@@ -89,19 +88,18 @@ public:
 		size_t   _index;
 	};
 
-	iterator begin(DataType type = DataType::NIL)
-		{ return iterator(*this, type, 0); }
+	iterator begin(DataType type = DataType::NIL) {
+		return iterator(*this, type, 0);
+	}
 	
-	iterator end(DataType type = DataType::NIL)
-	{
+	iterator end(DataType type = DataType::NIL) {
 		return iterator(*this, type,
 			(type == DataType::NIL) ? _count.n_total() : _count.get(type));
 	}
 	
-	// FIXME: typeify
+
 	class const_iterator {
 	public:
-
 		const Port& operator*()  { return *_set.port(_index); }
 		const Port* operator->() { return _set.port(_index); }
 		const_iterator& operator++() { ++_index; return *this; } // yes, prefix only
@@ -114,7 +112,7 @@ public:
 		const_iterator(const PortSet& list, size_t index) : _set(list), _index(index) {}
 
 		const PortSet& _set;
-		size_t          _index;
+		size_t         _index;
 	};
 
 	const_iterator begin() const { return const_iterator(*this, 0); }
@@ -123,7 +121,6 @@ public:
 
 	class audio_iterator {
 	public:
-
 		AudioPort& operator*()  { return *_set.nth_audio_port(_index); }
 		AudioPort* operator->()  { return _set.nth_audio_port(_index); }
 		audio_iterator& operator++() { ++_index; return *this; } // yes, prefix only
@@ -136,17 +133,13 @@ public:
 		audio_iterator(PortSet& list, size_t index) : _set(list), _index(index) {}
 
 		PortSet& _set;
-		size_t    _index;
+		size_t   _index;
 	};
 
 	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
 	audio_iterator audio_end()   { return audio_iterator(*this, _count.n_audio()); }
 
 private:	
-	// Prevent copies (undefined)
-	PortSet(const PortSet& copy);
-	void operator=(const PortSet& other);
-
 	typedef std::vector<Port*> PortVec;
 	
 	// Vector of vectors, indexed by DataType::to_index()

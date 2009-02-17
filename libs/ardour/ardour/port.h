@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <jack/jack.h>
+#include <boost/utility.hpp>
 #include <sigc++/trackable.h>
 #include "ardour/data_type.h"
 #include "ardour/types.h"
@@ -33,7 +34,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Buffer;	
 
-class Port : public sigc::trackable
+class Port : public sigc::trackable, public boost::noncopyable
 {
 public:
 	enum Flags {
@@ -115,8 +116,8 @@ private:
 	/* XXX */
 	bool _last_monitor;
 
-	std::string _name; ///< port short name
-	Flags _flags; ///< flags
+	std::string _name;  ///< port short name
+	Flags       _flags; ///< flags
 
 	/** ports that we are connected to, kept so that we can
 	    reconnect to JACK when required */
@@ -125,4 +126,4 @@ private:
 
 }
 
-#endif
+#endif /* __ardour_port_h__ */

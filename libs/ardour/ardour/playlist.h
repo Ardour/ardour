@@ -26,6 +26,7 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/utility.hpp>
 
 #include <sys/stat.h>
 
@@ -50,7 +51,9 @@ namespace ARDOUR  {
 class Session;
 class Region;
 
-class Playlist : public SessionObject, public boost::enable_shared_from_this<Playlist> {
+class Playlist : public SessionObject,
+                 public boost::noncopyable,
+                 public boost::enable_shared_from_this<Playlist> {
   public:
 	typedef list<boost::shared_ptr<Region> >    RegionList;
 
@@ -216,11 +219,6 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 		return g_atomic_int_get (&block_notifications) != 0 ||
 			g_atomic_int_get (&ignore_state_changes) != 0;
 	}
-
-	/* prevent the compiler from ever generating these */
-
-	Playlist (const Playlist&);
-	Playlist (Playlist&);
 
 	void delay_notifications ();
 	void release_notifications ();

@@ -49,7 +49,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
   public:
 	static const string state_node_name;
 
-	Processor(Session&, const string& name, Placement p); // TODO: remove placement in favour of sort key
+	Processor(Session&, const string& name, Placement p); // TODO: remove placement (use sort key)
 	
 	virtual ~Processor() { }
 	
@@ -70,13 +70,17 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	
 	virtual void set_block_size (nframes_t nframes) {}
 
-	virtual void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) { assert(is_in_place()); }
+	virtual void run_in_place (BufferSet& bufs,
+			nframes_t start_frame, nframes_t end_frame,
+			nframes_t nframes, nframes_t offset) { assert(is_in_place()); }
 	
-	virtual void run_out_of_place (BufferSet& input, BufferSet& output, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) { assert(is_out_of_place()); }
+	virtual void run_out_of_place (BufferSet& input, BufferSet& output,
+			nframes_t start_frame, nframes_t end_frame,
+			nframes_t nframes, nframes_t offset) { assert(is_out_of_place()); }
 	
 	virtual void silence (nframes_t nframes, nframes_t offset) {}
 	
-	void activate () { _active = true; ActiveChanged(); }
+	void activate ()   { _active = true; ActiveChanged(); }
 	void deactivate () { _active = false; ActiveChanged(); }
 	
 	virtual bool configure_io (ChanCount in, ChanCount out);
@@ -115,10 +119,6 @@ protected:
 	Placement _placement;
 	uint32_t  _sort_key;
 	void*     _gui;  /* generic, we don't know or care what this is */
-
-private:
-	/* disallow copy construction */
-	Processor (Processor const &);
 };
 
 } // namespace ARDOUR

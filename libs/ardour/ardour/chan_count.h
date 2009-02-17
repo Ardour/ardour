@@ -36,14 +36,12 @@ public:
 	ChanCount() { reset(); }
 	
 	// Convenience constructor for making single-typed streams (stereo, mono, etc)
-	ChanCount(DataType type, uint32_t channels)
-	{
+	ChanCount(DataType type, uint32_t channels) {
 		reset();
 		set(type, channels);
 	}
 
-	void reset()
-	{
+	void reset() {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			_counts[*t] = 0;
 		}
@@ -58,8 +56,7 @@ public:
 	inline uint32_t n_midi()  const { return _counts[DataType::MIDI]; }
 	inline void set_midi(uint32_t m) { _counts[DataType::MIDI] = m; }
 	
-	uint32_t n_total() const
-	{
+	uint32_t n_total() const {
 		uint32_t ret = 0;
 		for (uint32_t i=0; i < DataType::num_types; ++i)
 			ret += _counts[i];
@@ -67,8 +64,7 @@ public:
 		return ret;
 	}
 
-	bool operator==(const ChanCount& other) const
-	{
+	bool operator==(const ChanCount& other) const {
 		for (uint32_t i=0; i < DataType::num_types; ++i)
 			if (_counts[i] != other._counts[i])
 				return false;
@@ -76,13 +72,11 @@ public:
 		return true;
 	}
 	
-	bool operator!=(const ChanCount& other) const
-	{
+	bool operator!=(const ChanCount& other) const {
 		return ! (*this == other);
 	}
 
-	bool operator<(const ChanCount& other) const
-	{
+	bool operator<(const ChanCount& other) const {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (_counts[*t] > other._counts[*t]) {
 				return false;
@@ -91,13 +85,11 @@ public:
 		return (*this != other);
 	}
 
-	bool operator<=(const ChanCount& other) const
-	{
+	bool operator<=(const ChanCount& other) const {
 		return ( (*this < other) || (*this == other) );
 	}
 	
-	bool operator>(const ChanCount& other) const
-	{
+	bool operator>(const ChanCount& other) const {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (_counts[*t] < other._counts[*t]) {
 				return false;
@@ -106,8 +98,7 @@ public:
 		return (*this != other);
 	}
 
-	bool operator>=(const ChanCount& other) const
-	{
+	bool operator>=(const ChanCount& other) const {
 		return ( (*this > other) || (*this == other) );
 	}
 
@@ -115,7 +106,6 @@ public:
 	static const ChanCount ZERO;
 
 private:
-	
 	uint32_t _counts[DataType::num_types];
 };
 

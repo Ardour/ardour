@@ -250,20 +250,6 @@ Playlist::init (bool hide)
 	Modified.connect (mem_fun (*this, &Playlist::mark_session_dirty));
 }
 
-Playlist::Playlist (const Playlist& pl)
-	: SessionObject(pl._session, pl._name)
-	, _type(pl.data_type())
-{
-	fatal << _("playlist const copy constructor called") << endmsg;
-}
-
-Playlist::Playlist (Playlist& pl)
-	: SessionObject(pl._session, pl._name)
-	, _type(pl.data_type())
-{
-	fatal << _("playlist non-const copy constructor called") << endmsg;
-}
-
 Playlist::~Playlist ()
 {
 	{

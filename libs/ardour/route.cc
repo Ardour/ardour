@@ -1292,7 +1292,6 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 /** Turn off all processors with a given placement
  * @param p Placement of processors to disable
  */
-
 void
 Route::disable_processors (Placement p)
 {
@@ -1309,7 +1308,6 @@ Route::disable_processors (Placement p)
 
 /** Turn off all redirects 
  */
-
 void
 Route::disable_processors ()
 {
@@ -1325,7 +1323,6 @@ Route::disable_processors ()
 /** Turn off all redirects with a given placement
  * @param p Placement of redirects to disable
  */
-
 void
 Route::disable_plugins (Placement p)
 {
@@ -1342,7 +1339,6 @@ Route::disable_plugins (Placement p)
 
 /** Turn off all plugins
  */
-
 void
 Route::disable_plugins ()
 {

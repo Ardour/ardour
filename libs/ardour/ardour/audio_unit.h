@@ -63,7 +63,7 @@ class AUPlugin : public ARDOUR::Plugin
 	AUPlugin (const AUPlugin& other);
 	virtual ~AUPlugin ();
 	
-        std::string unique_id () const;
+	std::string unique_id () const;
 	const char * label () const;
 	const char * name () const { return _info->name.c_str(); }
 	const char * maker () const { return _info->creator.c_str(); }
