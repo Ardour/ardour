@@ -60,19 +60,21 @@ using namespace PBD;
 uint32_t Route::order_key_cnt = 0;
 sigc::signal<void,const char*> Route::SyncOrderKeys;
 
-Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
-	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
-	  _flags (flg),
-	  _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl)),
-	  _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
+Route::Route (Session& sess, string name,
+		int in_min, int in_max, int out_min, int out_max,
+		Flag flg, DataType default_type)
+	: IO (sess, name, in_min, in_max, out_min, out_max, default_type)
+	, _flags (flg)
+	, _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl))
+	, _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
 {
 	init ();
 }
 
 Route::Route (Session& sess, const XMLNode& node, DataType default_type)
-	: IO (sess, *node.child ("IO"), default_type),
-	  _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl)),
-	  _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
+	: IO (sess, *node.child ("IO"), default_type)
+	,  _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl))
+	,  _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
 {
 	init ();
 	_set_state (node, false);
@@ -186,16 +188,12 @@ Route::sync_order_keys (const char* base)
 	uint32_t key;
 
 	if ((i = order_keys.find (base)) == order_keys.end()) {
-		/* key doesn't exist, use the first existing
-		   key (this is done during session initialization)
-		*/
+		/* key doesn't exist, use the first existing key (during session initialization) */
 		i = order_keys.begin();
 		key = i->second;
 		++i;
 	} else {
-		/* key exists - use it and reset all others
-		   (actually, itself included)
-		*/
+		/* key exists - use it and reset all others (actually, itself included) */
 		i = order_keys.begin();
 		key = i->second;
 	}
@@ -210,8 +208,7 @@ Route::ensure_track_or_route_name(string name, Session &session)
 {
 	string newname = name;
 
-	while (session.route_by_name (newname)!=NULL)
-	{
+	while (session.route_by_name (newname) != NULL) {
 		newname = bump_name_once (newname);
 	}
 
@@ -293,9 +290,8 @@ Route::set_gain (gain_t val, void *src)
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_processors, int declick,
-			       bool meter)
+		nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset,
+		bool with_processors, int declick, bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
@@ -345,9 +341,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   GLOBAL DECLICK (for transport changes etc.)
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
 		Amp::run_in_place (bufs, nframes, 0.0, 1.0, false);
@@ -366,9 +362,9 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   INPUT METERING & MONITORING
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
 		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
@@ -397,7 +393,8 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			// TODO: this is probably wrong
 
-			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
+			( no_monitor && record_enabled()
+			 	&& (!Config->get_auto_input() || _session.actively_recording()) )
 
 			) {
 			
@@ -410,9 +407,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	} 
 
-	/* -----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   DENORMAL CONTROL
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if (_denormal_protection || Config->get_denormal_protection()) {
 
@@ -425,9 +422,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   PRE-FADER REDIRECTS
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if (with_processors) {
 		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
@@ -459,7 +456,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	/* When we entered this method, the number of bufs was set by n_process_buffers(), so
-	 * it may be larger than required.  Consider, for example, a mono track with two redirects A and B.
+	 * it may be larger than required.  Consider e.g a mono track with two redirects A and B.
 	 * If A has one input and three outputs, and B three inputs and one output, n_process_buffers()
 	 * will be 3.  In this case, now we've done pre-fader redirects, we can reset the number of bufs.
 	 */
@@ -471,9 +468,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		mute_declick_applied = true;
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   PRE-FADER METERING & MONITORING
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPreFader)) {
 		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
@@ -495,7 +492,8 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			// rec-enabled but not s/w monitoring 
 			
-			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
+			( no_monitor && record_enabled()
+			 	&& (!Config->get_auto_input() || _session.actively_recording()) )
 
 			) {
 			
@@ -507,9 +505,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	} 
 	
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   GAIN STAGE
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	/* if not recording or recording and requiring any monitor signal, then apply gain */
 
@@ -517,9 +515,9 @@ Route::process_output_buffers (BufferSet& bufs,
 
 		!(record_enabled() && _session.actively_recording()) || 
 		
-	    // OR recording 
+		// OR recording 
 		
-		 // AND software monitoring required
+		// AND software monitoring required
 
 		Config->get_monitoring_model() == SoftwareMonitoring) { 
 		
@@ -590,11 +588,13 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   POST-FADER REDIRECTS
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
-	/* note that post_fader_work cannot be true unless with_processors was also true, so don't test both */
+	/* note that post_fader_work cannot be true unless with_processors was also true,
+	   so don't test both
+	*/
 
 	if (post_fader_work) {
 
@@ -630,9 +630,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		mute_declick_applied = true;
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   CONTROL OUTPUT STAGE
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if ((_meter_point == MeterPostFader) && co) {
 		
@@ -641,19 +641,20 @@ Route::process_output_buffers (BufferSet& bufs,
 
 		if ( // silent anyway
 
-			(_gain == 0 && !apply_gain_automation) || 
-		    
-                     // muted by solo of another track
+			(_gain == 0 && !apply_gain_automation) ||
+
+			// muted by solo of another track
 
 			!solo_audible || 
-		    
-                     // muted by mute of this track 
+
+			// muted by mute of this track 
 
 			!mute_audible ||
 
-		    // recording but not s/w monitoring 
+			// recording but not s/w monitoring 
 			
-			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
+			( no_monitor && record_enabled()
+			 	&& (!Config->get_auto_input() || _session.actively_recording()) )
 
 			) {
 			
@@ -665,9 +666,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	} 
 
-	/* ----------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   GLOBAL MUTE 
-	   ----------------------------------------------------------------------*/
+	   ----------------------------------------------------------------------------------------- */
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
 		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
@@ -675,9 +676,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		mute_declick_applied = true;
 	}
 	
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   MAIN OUTPUT STAGE
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	solo_audible = dsg > 0;
 	mute_audible = dmg > 0 || !_mute_affects_main_outs;
@@ -686,7 +687,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	    
 	    /* relax */
 
-	} else if (no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording())) {
+	} else if (no_monitor && record_enabled()
+			&& (!Config->get_auto_input() || _session.actively_recording())) {
 		
 		IO::silence (nframes, offset);
 		
@@ -694,15 +696,15 @@ Route::process_output_buffers (BufferSet& bufs,
 
 		if ( // silent anyway
 
-		    (_gain == 0 && !apply_gain_automation) ||
-		    
-		    // muted by solo of another track, but not using control outs for solo
+			(_gain == 0 && !apply_gain_automation) ||
+			
+			// muted by solo of another track, but not using control outs for solo
 
-		    (!solo_audible && (Config->get_solo_model() != SoloBus)) ||
-		    
-		    // muted by mute of this track
+			(!solo_audible && (Config->get_solo_model() != SoloBus)) ||
+			
+			// muted by mute of this track
 
-		    !mute_audible
+			!mute_audible
 
 			) {
 
@@ -724,9 +726,9 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   POST-FADER METERING
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPostFader)) {
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
@@ -751,9 +753,8 @@ Route::process_output_buffers (BufferSet& bufs,
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_processors, int declick,
-			       bool meter)
+		nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset,
+		bool with_processors, int declick, bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
@@ -803,7 +804,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   GLOBAL DECLICK (for transport changes etc.)
 	   input metering & monitoring (control outs)
 	   denormal control
@@ -814,7 +815,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   global mute
 	   main output
 	   post-fader metering & monitoring (control outs)
-	*/
+	   ----------------------------------------------------------------------------------------- */
 
 	{
 		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
@@ -823,9 +824,10 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	
+	/* -------------------------------------------------------------------------------------------
 	   INPUT METERING & MONITORING
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
 		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
@@ -837,9 +839,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		mute_declick_applied = true;
 	}
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   PRE-FADER REDIRECTS
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	// This really should already be true...
 	bufs.set_count(pre_fader_streams());
@@ -860,7 +862,8 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			// rec-enabled but not s/w monitoring 
 			
-			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
+			( no_monitor && record_enabled()
+				&& (!Config->get_auto_input() || _session.actively_recording()) )
 
 			) {
 			
@@ -872,9 +875,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	} 
 	
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   GAIN STAGE
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	/* if not recording or recording and requiring any monitor signal, then apply gain */
 
@@ -882,9 +885,9 @@ Route::process_output_buffers (BufferSet& bufs,
 
 		!(record_enabled() && _session.actively_recording()) || 
 		
-	    // OR recording 
+		// OR recording 
 		
-		 // AND software monitoring required
+		// AND software monitoring required
 
 		Config->get_monitoring_model() == SoftwareMonitoring) { 
 		
@@ -955,10 +958,9 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	}
 
-
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   CONTROL OUTPUT STAGE
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	if ((_meter_point == MeterPostFader) && co) {
 		
@@ -968,17 +970,17 @@ Route::process_output_buffers (BufferSet& bufs,
 		if ( // silent anyway
 
 			(_gain == 0 && !apply_gain_automation) || 
-		    
-                     // muted by solo of another track
+
+			// muted by solo of another track
 
 			!solo_audible || 
-		    
-                     // muted by mute of this track 
+
+			// muted by mute of this track 
 
 			!mute_audible ||
 
-		    // recording but not s/w monitoring 
-			
+			// recording but not s/w monitoring 
+
 			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
@@ -991,9 +993,9 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	} 
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* -------------------------------------------------------------------------------------------
 	   MAIN OUTPUT STAGE
-	   -------------------------------------------------------------------------------------------------- */
+	   ----------------------------------------------------------------------------------------- */
 
 	solo_audible = dsg > 0;
 	mute_audible = dmg > 0 || !_mute_affects_main_outs;
@@ -1002,7 +1004,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	    
 	    /* relax */
 
-	} else if (no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording())) {
+	} else if (no_monitor && record_enabled()
+			&& (!Config->get_auto_input() || _session.actively_recording())) {
 		
 		IO::silence (nframes, offset);
 		
@@ -1010,22 +1013,22 @@ Route::process_output_buffers (BufferSet& bufs,
 
 		if ( // silent anyway
 
-		    (_gain == 0 && !apply_gain_automation) ||
-		    
-		    // muted by solo of another track, but not using control outs for solo
+			(_gain == 0 && !apply_gain_automation) ||
 
-		    (!solo_audible && (Config->get_solo_model() != SoloBus)) ||
-		    
-		    // muted by mute of this track
+			// muted by solo of another track, but not using control outs for solo
 
-		    !mute_audible
+			(!solo_audible && (Config->get_solo_model() != SoloBus)) ||
+
+			// muted by mute of this track
+
+			!mute_audible
 
 			) {
 
 			/* don't use Route::silence() here, because that causes
 			   all outputs (sends, port processors, etc. to be silent).
 			*/
-			
+
 			if (_meter_point == MeterPostFader) {
 				peak_meter().reset();
 			}
