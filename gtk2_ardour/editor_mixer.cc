@@ -232,6 +232,14 @@ double current = 0.0;
 void
 Editor::update_current_screen ()
 {
+	if (_pending_locate_request) {
+		/* we don't update things when there's a pending locate request, otherwise
+		   when the editor requests a locate there is a chance that this method
+		   will move the playhead before the locate request is processed, causing
+		   a visual glitch. */
+		return;
+	}
+	
 	if (session && session->engine().running()) {
 
 		nframes64_t const frame = session->audible_frame();

@@ -2429,6 +2429,7 @@ Editor::cursor_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	if (item == &playhead_cursor->canvas_item) {
 		if (session) {
 			session->request_locate (playhead_cursor->current_frame, drag_info.was_rolling);
+			_pending_locate_request = true;
 		}
 	} 
 }
@@ -2443,6 +2444,7 @@ Editor::cursor_drag_finished_ensure_locate_callback (ArdourCanvas::Item* item, G
 	if (item == &playhead_cursor->canvas_item) {
 		if (session) {
 			session->request_locate (playhead_cursor->current_frame, drag_info.was_rolling);
+			_pending_locate_request = true;
 		}
 	} 
 }

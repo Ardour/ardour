@@ -2376,6 +2376,9 @@ public:
 
 	void visible_order_range (int*, int*) const;
 	bool y_movement_disallowed (int, int, int, int, int, std::bitset<512> const &, std::vector<int32_t> const &) const;
+
+	void located ();
+	bool _pending_locate_request;
 };
 
 #endif /* __ardour_editor_h__ */

@@ -248,7 +248,8 @@ Editor::Editor ()
 	  /* nudge */
 
 	  nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, true),
-	  meters_running(false)
+	  meters_running(false),
+	  _pending_locate_request (false)
 
 {
 	constructed = false;
@@ -1279,6 +1280,8 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
+
+	session_connections.push_back (session->Located.connect (mem_fun (*this, &Editor::located)));
 
 	edit_groups_changed ();
 
@@ -5345,4 +5348,12 @@ Editor::idle_resize ()
 	flush_canvas ();
 	resize_idle_id = -1;
 	return false;
+}
+
+void
+Editor::located ()
+{
+	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::located));
+
+	_pending_locate_request = false;
 }

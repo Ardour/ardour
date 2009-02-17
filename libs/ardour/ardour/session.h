@@ -371,6 +371,9 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void,nframes_t> Xrun;
 	sigc::signal<void> TransportLooped;
 
+	/** emitted when a locate has occurred */
+	sigc::signal<void> Located;
+
 	sigc::signal<void,RouteList&> RouteAdded;
 
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
