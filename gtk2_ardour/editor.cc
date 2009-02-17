@@ -2139,42 +2139,39 @@ void
 Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
-	Menu     *selection_menu = manage (new Menu);
-	MenuList& items       = selection_menu->items();
-	selection_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
-	items.push_back (MenuElem (_("Loop range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
+	edit_items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
+	edit_items.push_back (MenuElem (_("Loop range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
 
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_range_selection)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_range_selection)));
 	
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));
-	items.push_back (MenuElem (_("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));
+	edit_items.push_back (MenuElem (_("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false)));
 
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Convert to region in-place"), mem_fun(*this, &Editor::separate_region_from_selection)));
-	items.push_back (MenuElem (_("Convert to region in region list"), mem_fun(*this, &Editor::new_region_from_selection)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Convert to region in-place"), mem_fun(*this, &Editor::separate_region_from_selection)));
+	edit_items.push_back (MenuElem (_("Convert to region in region list"), mem_fun(*this, &Editor::new_region_from_selection)));
 	
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
 
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Set loop from selection"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
-	items.push_back (MenuElem (_("Set punch from selection"), mem_fun(*this, &Editor::set_punch_from_selection)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Set loop from selection"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
+	edit_items.push_back (MenuElem (_("Set punch from selection"), mem_fun(*this, &Editor::set_punch_from_selection)));
 	
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_selection)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Crop region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
-	items.push_back (MenuElem (_("Fill range with region"), mem_fun(*this, &Editor::region_fill_selection)));
-	items.push_back (MenuElem (_("Duplicate range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
-	items.push_back (MenuElem (_("Create chunk from range"), mem_fun(*this, &Editor::create_named_selection)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Consolidate range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true)));
-	items.push_back (MenuElem (_("Bounce range to region list"), bind (mem_fun(*this, &Editor::bounce_range_selection), false)));
-	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_range)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_selection)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Crop region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
+	edit_items.push_back (MenuElem (_("Fill range with region"), mem_fun(*this, &Editor::region_fill_selection)));
+	edit_items.push_back (MenuElem (_("Duplicate range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
+	edit_items.push_back (MenuElem (_("Create chunk from range"), mem_fun(*this, &Editor::create_named_selection)));
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Consolidate range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true)));
+	edit_items.push_back (MenuElem (_("Bounce range to region list"), bind (mem_fun(*this, &Editor::bounce_range_selection), false)));
+	edit_items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_range)));
 }
 
 	
