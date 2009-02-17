@@ -1,22 +1,22 @@
 /*
- Copyright (C) 2007 Paul Davis 
- Written by Dave Robillard, 2007
+    Copyright (C) 2007 Paul Davis
+    Author: Dave Robillard
 
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
- */
+*/
 
 #define __STDC_LIMIT_MACROS 1
 
@@ -37,11 +37,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MidiModel::MidiModel(MidiSource *s, size_t size)
+MidiModel::MidiModel(MidiSource* s, size_t size)
 	: AutomatableSequence<TimeType>(s->session(), size)
 	, _midi_source(s)
 {
-	//cerr << "MidiModel \"" << s->name() << "\" constructed: " << this << endl;
 }
 
 /** Start a new command.
@@ -50,7 +49,8 @@ MidiModel::MidiModel(MidiSource *s, size_t size)
  * can be held on to for as long as the caller wishes, or discarded without
  * formality, until apply_command is called and ownership is taken.
  */
-MidiModel::DeltaCommand* MidiModel::new_delta_command(const string name)
+MidiModel::DeltaCommand*
+MidiModel::new_delta_command(const string name)
 {
 	DeltaCommand* cmd = new DeltaCommand(_midi_source->model(), name);
 	return cmd;
@@ -73,16 +73,14 @@ MidiModel::apply_command(Session& session, Command* cmd)
 
 // DeltaCommand
 
-MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m,
-		const std::string& name)
+MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
 	: Command(name)
 	, _model(m)
 	, _name(name)
 {
 }
 
-MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m,
-		const XMLNode& node)
+MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
 	: _model(m)
 {
 	set_state(node);
@@ -91,7 +89,6 @@ MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m,
 void
 MidiModel::DeltaCommand::add(const boost::shared_ptr< Evoral::Note<TimeType> > note)
 {
-	//cerr << "MEC: apply" << endl;
 	_removed_notes.remove(note);
 	_added_notes.push_back(note);
 }
@@ -99,7 +96,6 @@ MidiModel::DeltaCommand::add(const boost::shared_ptr< Evoral::Note<TimeType> > n
 void
 MidiModel::DeltaCommand::remove(const boost::shared_ptr< Evoral::Note<TimeType> > note)
 {
-	//cerr << "MEC: remove" << endl;
 	_added_notes.remove(note);
 	_removed_notes.push_back(note);
 }
@@ -110,11 +106,9 @@ MidiModel::DeltaCommand::operator()()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 	
+	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
+	_model->_midi_source->invalidate(); // release model read lock
 	_model->write_lock();
-
-	// Store the current seek position so we can restore the read iterator
-	// after modifying the contents of the model
-	const TimeType read_time = _model->read_time();
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model->add_note_unlocked(*i);
@@ -123,9 +117,6 @@ MidiModel::DeltaCommand::operator()()
 		_model->remove_note_unlocked(*i);
 
 	_model->write_unlock();
-	// FIXME: race?
-	_model->read_seek(read_time); // restore read position
-
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
@@ -135,11 +126,9 @@ MidiModel::DeltaCommand::undo()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 	
+	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
+	_model->_midi_source->invalidate(); // release model read lock
 	_model->write_lock();
-
-	// Store the current seek position so we can restore the read iterator
-	// after modifying the contents of the model
-	const TimeType read_time = _model->read_time();
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model->remove_note_unlocked(*i);
@@ -148,16 +137,13 @@ MidiModel::DeltaCommand::undo()
 		_model->add_note_unlocked(*i);
 
 	_model->write_unlock();
-	// FIXME: race?
-	_model->read_seek(read_time); // restore read position
-
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 XMLNode&
 MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr< Evoral::Note<TimeType> > note)
 {
-	XMLNode *xml_note = new XMLNode("note");
+	XMLNode* xml_note = new XMLNode("note");
 	ostringstream note_str(ios::ate);
 	note_str << int(note->note());
 	xml_note->add_property("note", note_str.str());
@@ -248,13 +234,13 @@ MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
 	}
 
 	_added_notes.clear();
-	XMLNode *added_notes = delta_command.child(ADDED_NOTES_ELEMENT);
+	XMLNode* added_notes = delta_command.child(ADDED_NOTES_ELEMENT);
 	XMLNodeList notes = added_notes->children();
 	transform(notes.begin(), notes.end(), back_inserter(_added_notes),
 			sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
 
 	_removed_notes.clear();
-	XMLNode *removed_notes = delta_command.child(REMOVED_NOTES_ELEMENT);
+	XMLNode* removed_notes = delta_command.child(REMOVED_NOTES_ELEMENT);
 	notes = removed_notes->children();
 	transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
 			sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
@@ -265,15 +251,15 @@ MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
 XMLNode&
 MidiModel::DeltaCommand::get_state()
 {
-	XMLNode *delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
+	XMLNode* delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
 	delta_command->add_property("midi-source", _model->midi_source()->id().to_s());
 
-	XMLNode *added_notes = delta_command->add_child(ADDED_NOTES_ELEMENT);
+	XMLNode* added_notes = delta_command->add_child(ADDED_NOTES_ELEMENT);
 	for_each(_added_notes.begin(), _added_notes.end(), sigc::compose(
 			sigc::mem_fun(*added_notes, &XMLNode::add_child_nocopy),
 			sigc::mem_fun(*this, &DeltaCommand::marshal_note)));
 
-	XMLNode *removed_notes = delta_command->add_child(REMOVED_NOTES_ELEMENT);
+	XMLNode* removed_notes = delta_command->add_child(REMOVED_NOTES_ELEMENT);
 	for_each(_removed_notes.begin(), _removed_notes.end(), sigc::compose(
 			sigc::mem_fun(*removed_notes, &XMLNode::add_child_nocopy),
 			sigc::mem_fun(*this, &DeltaCommand::marshal_note)));

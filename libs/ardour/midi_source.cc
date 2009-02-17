@@ -103,6 +103,12 @@ MidiSource::set_state (const XMLNode& node)
 	return 0;
 }
 
+void
+MidiSource::invalidate ()
+{
+	_model_iter.invalidate();
+}
+
 nframes_t
 MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
 		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
@@ -114,7 +120,7 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 		
-		if (_last_read_end == 0 || start != _last_read_end) {
+		if (_last_read_end == 0 || start != _last_read_end || !i.valid()) {
 			cerr << "MidiSource::midi_read seeking to frame " << start << endl;
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (BEATS_TO_FRAMES(i->time()) >= start) {

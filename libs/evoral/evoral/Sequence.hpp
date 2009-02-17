@@ -63,8 +63,6 @@ class Sequence : virtual public ControlSet {
 public:
 	Sequence(const TypeMap& type_map, size_t size=0);
 	
-	bool read_locked() { return _read_iter.locked(); }
-
 	void write_lock();
 	void write_unlock();
 
@@ -126,6 +124,8 @@ public:
 		
 		inline bool valid() const { return !_is_end && _event; }
 		inline bool locked() const { return _locked; }
+		
+		void invalidate();
 
 		const Event<Time>& operator*()  const { return *_event;  }
 		const boost::shared_ptr< Event<Time> > operator->() const  { return _event; }
@@ -159,9 +159,6 @@ public:
 	const_iterator        begin(Time t=0) const { return const_iterator(*this, t); }
 	const const_iterator& end()           const { return _end_iter; }
 	
-	void read_seek(Time t) { _read_iter = begin(t); }
-	Time read_time() const { return _read_iter.valid() ? _read_iter->time() : 0.0; }
-
 	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
 	                           const ControlIterator&            iter) const;
 	
@@ -175,8 +172,7 @@ public:
 	uint8_t highest_note() const { return _highest_note; }
 	
 protected:
-	mutable const_iterator _read_iter;
-	bool                   _edited;
+	bool _edited;
 
 private:
 	friend class const_iterator;

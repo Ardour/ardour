@@ -115,8 +115,9 @@ class Source : public SessionObject, public ARDOUR::Readable, public boost::nonc
 	virtual const Evoral::TimeConverter<double, nframes_t>& time_converter() const {
 		return Evoral::IdentityConverter<double, nframes_t>();
 	}
-	
-	Flag flags() const { return _flags; }
+
+	Glib::Mutex& mutex()       { return _lock; }
+	Flag         flags() const { return _flags; }
 
   protected:
 	DataType            _type;

@@ -85,6 +85,11 @@ class MidiSource : virtual public Source
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
 
+	/** This must be called with the source lock held whenever the
+	 *  source/model contents have been changed (reset iterators/cache/etc).
+	 */
+	void invalidate();
+
 	void set_note_mode(NoteMode mode);
 	
 	void set_timeline_position (int64_t pos);

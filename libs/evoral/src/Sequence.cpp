@@ -225,6 +225,26 @@ Sequence<Time>::const_iterator::~const_iterator()
 }
 
 template<typename Time>
+void
+Sequence<Time>::const_iterator::invalidate()
+{
+	while (!_active_notes.empty()) {
+		_active_notes.pop();
+	}
+	_type = NIL;
+	_is_end = true;
+	if (_seq) {
+		_note_iter = _seq->notes().end();
+		_sysex_iter = _seq->sysexes().end();
+	}
+	_control_iter = _control_iters.end();
+	if (_locked) {
+		_seq->read_unlock();
+		_locked = false;
+	}
+}
+
+template<typename Time>
 const typename Sequence<Time>::const_iterator&
 Sequence<Time>::const_iterator::operator++()
 {
@@ -407,8 +427,7 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 
 template<typename Time>
 Sequence<Time>::Sequence(const TypeMap& type_map, size_t size)
-	: _read_iter(*this, DBL_MAX)
-	, _edited(false)
+	: _edited(false)
 	, _type_map(type_map)
 	, _notes(size)
 	, _writing(false)
@@ -508,7 +527,6 @@ Sequence<Time>::clear()
 	_notes.clear();
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();
-	_read_iter = end();
 	_lock.writer_unlock();
 }
 
