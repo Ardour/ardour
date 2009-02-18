@@ -59,7 +59,7 @@
           of the transport bar.
           <note>
             <para>
-              In Ardour2, there is no <guibutton>Editor Mixer</guibutton>
+              In Ardour3, there is no <guibutton>Editor Mixer</guibutton>
               button, but you can make the mixer strip visible by selecting
               <menuchoice> <guimenu>View</guimenu> <guisubmenu>Show Editor
               Mixer</guisubmenu> </menuchoice>, or by pressing

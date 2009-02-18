@@ -10,8 +10,8 @@ NOTES:
 
 * support for alsa/sequencer ports is currently broken. We're working on it.
 
-* you'll need to make port changes in etc/ardour2/ardour_system.rc and
-etc/ardour2/ardour.rc, otherwise they don't stay changed in ~/.ardour2/ardour.rc
+* you'll need to make port changes in etc/ardour3/ardour_system.rc and
+etc/ardour3/ardour.rc, otherwise they don't stay changed in ~/.ardour3/ardour.rc
 
 
 John Anderson

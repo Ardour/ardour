@@ -18,11 +18,11 @@ export "GS_LIB=$TOP/share/ghostscript/8.51/lib:$TOP/share/ghostscript/fonts"
 export LANG=`grep '\b'\`defaults read .GlobalPreferences AppleCollationOrder\`_\
        /usr/share/locale/locale.alias | sed -n 's/.*\(.._..\)\..*/\1/p;1q'`
 
-export ARDOUR2_UI_RC=ardour2_ui.rc
+export ARDOUR3_UI_RC=ardour3_ui.rc
 export ARDOUR_CONFIG_PATH="$TOP/etc"
 export ARDOUR_MODULE_PATH="$TOP/lib/"
 export ARDOUR_DATA_PATH="$TOP/share"
-export ARDOUR_GLADE_PATH="$TOP/share/ardour2/glade"
+export ARDOUR_GLADE_PATH="$TOP/share/ardour3/glade"
 
 export ARDOUR_PATH="$TOP/share/ardour/icons:$TOP/share/ardour/pixmaps"
 
@@ -41,6 +41,6 @@ sed 's|${CWD}|'"$TOP|g" "$TOP/etc/gtk-2.0/gdk-pixbuf.loaders" \
     > "$ETC/gdk-pixbuf.loaders"
 
 # to prevent complaining
-mkdir -p "$HOME/.ardour2/templates"
+mkdir -p "$HOME/.ardour3/templates"
 
 exec "$CWD/ardour" "$@"

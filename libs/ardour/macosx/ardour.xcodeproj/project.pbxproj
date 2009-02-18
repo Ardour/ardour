@@ -1080,7 +1080,7 @@
 					/Library/Frameworks/SampleRate.framework/Headers,
 					/Library/Frameworks/Raptor.framework/Headers,
 					/Library/Frameworks/LRdf.framework/Headers,
-					/opt/ardour/src/ardour2/libs/surfaces/control_protocol,
+					/opt/ardour/src/ardour3/libs/surfaces/control_protocol,
 				);
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = "";
@@ -1138,7 +1138,7 @@
 					/Library/Frameworks/SampleRate.framework/Headers,
 					/Library/Frameworks/Raptor.framework/Headers,
 					/Library/Frameworks/LRdf.framework/Headers,
-					/opt/ardour/src/ardour2/libs/surfaces/control_protocol,
+					/opt/ardour/src/ardour3/libs/surfaces/control_protocol,
 				);
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = "";

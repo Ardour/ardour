@@ -11,7 +11,7 @@
     <para>
       Note that all keyboard bindings can be changed in either the system or
       the user's Ardour key bindings file
-      (<filename>$HOME/.ardour2/ardour.bindings</filename>).
+      (<filename>$HOME/.ardour3/ardour.bindings</filename>).
     </para>
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="general_key_bindings.xml" />

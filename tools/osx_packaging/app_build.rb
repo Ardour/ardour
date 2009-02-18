@@ -191,56 +191,56 @@ if File.exist?(ppc_libdir) and File.exist?(i386_libdir) then
   lipo_platforms_recurse(i386_libdir, ppc_libdir, "lib")
   lipo_platforms_recurse(i386_bindir+'/ardour', ppc_bindir+'/ardour', "bin/ardour")
 
-  # remove existing Ardour2.app
-  `rm -rf Ardour2.app`
+  # remove existing Ardour3.app
+  `rm -rf Ardour3.app`
 
-  $stdout.print("\nRunning Playtpus to create Ardour2.app  ...\n");
+  $stdout.print("\nRunning Playtpus to create Ardour3.app  ...\n");
 
-  `/usr/local/bin/platypus -D -X 'ardour' -a 'Ardour2' -t 'shell' -o 'None' -u 'Paul Davis' -i '/bin/sh' -V "#{version}" -s 'ArDr' -I 'org.ardour.Ardour2' -f 'bin' -f 'lib' -i 'Ardour2.icns' -f 'MenuBar.nib' -f 'ProgressWindow.nib' -f 'init' -f 'openDoc' 'script' 'Ardour2.app'`
+  `/usr/local/bin/platypus -D -X 'ardour' -a 'Ardour3' -t 'shell' -o 'None' -u 'Paul Davis' -i '/bin/sh' -V "#{version}" -s 'ArDr' -I 'org.ardour.Ardour3' -f 'bin' -f 'lib' -i 'Ardour3.icns' -f 'MenuBar.nib' -f 'ProgressWindow.nib' -f 'init' -f 'openDoc' 'script' 'Ardour3.app'`
 
-  $stdout.print("\nCopying other stuff to Ardour2.app  ...\n");
+  $stdout.print("\nCopying other stuff to Ardour3.app  ...\n");
 
-  if not File.exist?("Ardour2.app/Contents/Resources/etc") then
-    Dir.mkdir "Ardour2.app/Contents/Resources/etc" 
+  if not File.exist?("Ardour3.app/Contents/Resources/etc") then
+    Dir.mkdir "Ardour3.app/Contents/Resources/etc" 
   end
 
-  if not File.exist?("Ardour2.app/Contents/Resources/etc/ardour2") then
-    Dir.mkdir "Ardour2.app/Contents/Resources/etc/ardour2" 
+  if not File.exist?("Ardour3.app/Contents/Resources/etc/ardour3") then
+    Dir.mkdir "Ardour3.app/Contents/Resources/etc/ardour3" 
   end
-  `cp ../../gtk2_ardour/ardour.bindings ../../gtk2_ardour/ardour.colors ../../gtk2_ardour/ardour.menus Ardour2.app/Contents/Resources/etc/ardour2/`
-  `cp ../../ardour.rc ../../ardour_system.rc Ardour2.app/Contents/Resources/etc/ardour2/`
-  `cp ardour2_mac_ui.rc Ardour2.app/Contents/Resources/etc/ardour2/ardour2_ui.rc`
+  `cp ../../gtk2_ardour/ardour.bindings ../../gtk2_ardour/ardour.colors ../../gtk2_ardour/ardour.menus Ardour3.app/Contents/Resources/etc/ardour3/`
+  `cp ../../ardour.rc ../../ardour_system.rc Ardour3.app/Contents/Resources/etc/ardour3/`
+  `cp ardour3_mac_ui.rc Ardour3.app/Contents/Resources/etc/ardour3/ardour3_ui.rc`
 
   # copy other etc stuff
-  if not File.exist?("Ardour2.app/Contents/Resources/etc/gtk-2.0") then
-    `cp -R etc/gtk-2.0 Ardour2.app/Contents/Resources/etc/`
+  if not File.exist?("Ardour3.app/Contents/Resources/etc/gtk-2.0") then
+    `cp -R etc/gtk-2.0 Ardour3.app/Contents/Resources/etc/`
   end
-  if not File.exist?("Ardour2.app/Contents/Resources/etc/pango") then
-    `cp -R etc/pango Ardour2.app/Contents/Resources/etc/`
+  if not File.exist?("Ardour3.app/Contents/Resources/etc/pango") then
+    `cp -R etc/pango Ardour3.app/Contents/Resources/etc/`
   end
-  if not File.exist?("Ardour2.app/Contents/Resources/etc/fonts") then
-    `cp -R /opt/local/etc/fonts Ardour2.app/Contents/Resources/etc/`
+  if not File.exist?("Ardour3.app/Contents/Resources/etc/fonts") then
+    `cp -R /opt/local/etc/fonts Ardour3.app/Contents/Resources/etc/`
   end
 
-  if not File.exist?("Ardour2.app/Contents/Resources/etc/profile.d") then
-    `cp -R etc/profile.d Ardour2.app/Contents/Resources/etc/`
+  if not File.exist?("Ardour3.app/Contents/Resources/etc/profile.d") then
+    `cp -R etc/profile.d Ardour3.app/Contents/Resources/etc/`
   end
 
   # share stuff
 
-  if not File.exist?("Ardour2.app/Contents/Resources/share") then
-    Dir.mkdir "Ardour2.app/Contents/Resources/share"
+  if not File.exist?("Ardour3.app/Contents/Resources/share") then
+    Dir.mkdir "Ardour3.app/Contents/Resources/share"
   end
 
-  if not File.exist?("Ardour2.app/Contents/Resources/share/ardour2") then
-    Dir.mkdir "Ardour2.app/Contents/Resources/share/ardour2"
-    Dir.mkdir "Ardour2.app/Contents/Resources/share/ardour2/templates"
-    `cp -R  ../../gtk2_ardour/icons ../../gtk2_ardour/pixmaps ../../gtk2_ardour/splash.png Ardour2.app/Contents/Resources/share/ardour2/`
-    `cp ../../templates/*.template Ardour2.app/Contents/Resources/share/ardour2/templates/` 
+  if not File.exist?("Ardour3.app/Contents/Resources/share/ardour3") then
+    Dir.mkdir "Ardour3.app/Contents/Resources/share/ardour3"
+    Dir.mkdir "Ardour3.app/Contents/Resources/share/ardour3/templates"
+    `cp -R  ../../gtk2_ardour/icons ../../gtk2_ardour/pixmaps ../../gtk2_ardour/splash.png Ardour3.app/Contents/Resources/share/ardour3/`
+    `cp ../../templates/*.template Ardour3.app/Contents/Resources/share/ardour3/templates/` 
   end
 
   # go through and recursively remove any .svn dirs in the bundle
-  svndirs = `find Ardour2.app -name .svn -type dir`.split("\n")
+  svndirs = `find Ardour3.app -name .svn -type dir`.split("\n")
   svndirs.each do |svndir|
     `rm -rf #{svndir}`
   end
@@ -248,7 +248,7 @@ if File.exist?(ppc_libdir) and File.exist?(i386_libdir) then
   # make DMG
   `rm -rf macdist`
   Dir.mkdir("macdist")
-  `cp -r README.rtf COPYING Ardour2.app macdist/`
+  `cp -r README.rtf COPYING Ardour3.app macdist/`
   dmgname = "Ardour-#{version}"
   `rm -f #{dmgname}.dmg`
   $stdout.print("\nCreating DMG\n")

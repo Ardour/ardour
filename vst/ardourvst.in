@@ -4,7 +4,7 @@
 # but somehow scons puts leading /'s on INSTALL_PREFIX and that causes
 # wine to be unable to find the .exe.so file
 
-export GTK_PATH=%PREFIX%/lib/ardour2:$GTK_PATH
+export GTK_PATH=%PREFIX%/lib/ardour3:$GTK_PATH
 
-LD_LIBRARY_PATH=%PREFIX%/lib/ardour2:$LD_LIBRARY_PATH exec wine %PREFIX%/lib/ardour2/ardour_vst.exe.so "$@"
+LD_LIBRARY_PATH=%PREFIX%/lib/ardour3:$LD_LIBRARY_PATH exec wine %PREFIX%/lib/ardour3/ardour_vst.exe.so "$@"
 

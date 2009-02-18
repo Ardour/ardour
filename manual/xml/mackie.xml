@@ -39,7 +39,7 @@
 
     <para>
       While ardour is not running, edit your
-      <filename>.ardour2/ardour.rc</filename> and add at the top, with the
+      <filename>.ardour3/ardour.rc</filename> and add at the top, with the
       other ports:
 <programlisting>
 &lt;MIDI-port tag="mcu" device="/dev/snd/midiC2D0" type="alsa/raw" mode="duplex"/&gt;
@@ -55,7 +55,7 @@
     <para>
       It is also possible to add MCU extenders, although this is untested
       because nobody we know has access to one right now. To do this, add
-      the following lines to <filename>~/.ardour2/ardour.rc</filename>
+      the following lines to <filename>~/.ardour3/ardour.rc</filename>
 <programlisting>
 &lt;MIDI-port tag="mcu_xt_1" device="/dev/snd/midiC3D0" type="alsa/raw" mode="duplex"/&gt;
 &lt;MIDI-port tag="mcu_xt_2" device="/dev/snd/midiC4D0" type="alsa/raw" mode="duplex"/&gt;

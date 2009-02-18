@@ -161,7 +161,9 @@ Source::add_playlist (boost::shared_ptr<Playlist> pl)
 		res.first->second++;
 	}
 		
-	pl->GoingAway.connect (bind (mem_fun (*this, &Source::remove_playlist), boost::weak_ptr<Playlist> (pl)));
+	pl->GoingAway.connect (bind (
+			mem_fun (*this, &Source::remove_playlist),
+			boost::weak_ptr<Playlist> (pl)));
 }
 
 void

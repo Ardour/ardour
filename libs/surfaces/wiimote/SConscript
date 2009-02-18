@@ -50,7 +50,7 @@ libardour_wiimote = wiimote.SharedLibrary('ardour_wiimote', wiimote_files)
 
 if wiimote['WIIMOTE']:
 	Default(libardour_wiimote)
-	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_wiimote))
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3', 'surfaces'), libardour_wiimote))
 
 if env['NLS']:
 	i18n (wiimote, wiimote_files, env)

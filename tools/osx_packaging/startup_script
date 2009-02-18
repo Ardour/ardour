@@ -21,4 +21,4 @@ fi
 # in folders likes /home/user/Frank's Wild Years
 
 CWD="`/usr/bin/dirname \"$0\"`"
-exec "$CWD/Ardour2.bin" "$*"
+exec "$CWD/Ardour3.bin" "$*"

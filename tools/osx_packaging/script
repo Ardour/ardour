@@ -4,12 +4,12 @@
 
 if [ ! -x /Applications/Utilities/X11.app ] ; then
     if [ -f /usr/include/X11/X.h ] ; then
-	osascript -e 'tell application "Ardour2"
+	osascript -e 'tell application "Ardour3"
 display dialog "You have installed the X11 SDK, but not X11 itself.\
 Please install X11 before running Ardour" buttons["OK"]
 end tell'
     else
-	osascript -e 'tell application "Ardour2"
+	osascript -e 'tell application "Ardour3"
 display dialog "Please install X11 before running Ardour" buttons["OK"]
 end tell'
     fi
@@ -17,7 +17,7 @@ end tell'
 fi
 
 if [ ! -x /usr/local/bin/jackd -a ! -x /usr/bin/jackd ] ; then
-    osascript -e 'tell application "Ardour2"
+    osascript -e 'tell application "Ardour3"
 display dialog "You do not appear to have JACK installed.\nPlease install it before running Ardour" buttons["OK"]
 end tell'
     exit 1

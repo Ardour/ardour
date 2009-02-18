@@ -275,7 +275,7 @@ ThemeManager::setup_theme ()
 	ColorsChanged.emit();
 
 	bool env_defined = false;
-	string rcfile = Glib::getenv("ARDOUR2_UI_RC", env_defined);
+	string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
 
 	if(!env_defined) {
 		rcfile = ARDOUR_UI::config()->ui_rc_file.get();
