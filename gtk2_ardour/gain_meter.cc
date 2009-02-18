@@ -569,14 +569,14 @@ GainMeterBase::meter_point_clicked ()
 gint
 GainMeterBase::start_gain_touch (GdkEventButton* ev)
 {
-	_io->gain_control()->alist()->start_touch ();
+	_io->gain_control()->start_touch ();
 	return FALSE;
 }
 
 gint
 GainMeterBase::end_gain_touch (GdkEventButton* ev)
 {
-	_io->gain_control()->alist()->stop_touch ();
+	_io->gain_control()->stop_touch ();
 	return FALSE;
 }
 

@@ -54,13 +54,17 @@ class Controllable : public PBD::StatefulDestructible {
 	int set_state (const XMLNode&);
 	XMLNode& get_state ();
 
-	std::string name() const { return _name; }
+	std::string name()      const { return _name; }
+	bool        touching () const { return _touching; }
+	
+	void set_touching (bool yn) { _touching = yn; }
 
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);
 
   private:
 	std::string _name;
+	bool        _touching;
 
 	void add ();
 	void remove ();

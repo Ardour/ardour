@@ -182,6 +182,10 @@ MIDIControllable::midi_sense_note (Parser &p, EventTwoBytes *msg, bool is_on)
 void
 MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
+	if (controllable.touching()) {
+		return; // to prevent feedback fights when e.g. dragging a UI slider
+	}
+
 	if (control_additional == msg->controller_number) {
 		if (!bistate) {
 			controllable.set_value (midi_to_control(msg->value));

@@ -36,6 +36,7 @@ Controllable::Controllables Controllable::registry;
 
 Controllable::Controllable (std::string name)
 	: _name (name)
+	, _touching (false)
 {
 	if (registry_lock == 0) {
 		registry_lock = new Glib::Mutex;

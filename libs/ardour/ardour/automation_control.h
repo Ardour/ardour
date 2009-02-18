@@ -65,10 +65,12 @@ public:
 	}
 	
 	inline void start_touch() {
+		set_touching (true);
 		return ((ARDOUR::AutomationList*)_list.get())->start_touch();
 	}
 	
 	inline void stop_touch() {
+		set_touching (false);
 		return ((ARDOUR::AutomationList*)_list.get())->stop_touch();
 	}
 
