@@ -42,7 +42,9 @@ public:
 			boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
 			const string& name="");
 	
-	boost::shared_ptr<AutomationList> alist() const { return boost::dynamic_pointer_cast<AutomationList>(_list); }
+	boost::shared_ptr<AutomationList> alist() const {
+		return boost::dynamic_pointer_cast<AutomationList>(_list);
+	}
 
 	void set_list(boost::shared_ptr<Evoral::ControlList>);
 

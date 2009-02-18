@@ -23,6 +23,7 @@
 #include <pbd/xml++.h>
 #include <midi++/port.h>
 #include <midi++/channel.h>
+#include <ardour/automation_control.h>
 
 #include "midicontrollable.h"
 
@@ -112,6 +113,40 @@ MIDIControllable::drop_external_control ()
 	control_additional = (byte) -1;
 }
 
+float
+MIDIControllable::control_to_midi(float val)
+{
+	float control_min = 0.0f;
+	float control_max = 1.0f;
+	ARDOUR::AutomationControl* ac = dynamic_cast<ARDOUR::AutomationControl*>(&controllable);
+	if (ac) {
+		control_min = ac->parameter().min();
+		control_max = ac->parameter().max();
+	}
+
+	const float control_range = control_max - control_min;
+	const float midi_range    = 127.0f; // TODO: NRPN etc.
+
+	return (val - control_min) / control_range * midi_range;
+}
+
+float
+MIDIControllable::midi_to_control(float val)
+{
+	float control_min = 0.0f;
+	float control_max = 1.0f;
+	ARDOUR::AutomationControl* ac = dynamic_cast<ARDOUR::AutomationControl*>(&controllable);
+	if (ac) {
+		control_min = ac->parameter().min();
+		control_max = ac->parameter().max();
+	}
+
+	const float control_range = control_max - control_min;
+	const float midi_range    = 127.0f; // TODO: NRPN etc.
+
+	return val / midi_range * control_range + control_min;
+}
+
 void 
 MIDIControllable::midi_sense_note_on (Parser &p, EventTwoBytes *tb) 
 {
@@ -149,7 +184,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
 	if (control_additional == msg->controller_number) {
 		if (!bistate) {
-			controllable.set_value (msg->value/127.0);
+			controllable.set_value (midi_to_control(msg->value));
 		} else {
 			if (msg->value > 64.0) {
 				controllable.set_value (1);
@@ -158,7 +193,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			}
 		}
 
-		last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+		last_value = (MIDI::byte) (control_to_midi(controllable.get_value())); // to prevent feedback fights
 	}
 }
 
@@ -297,7 +332,7 @@ MIDIControllable::send_feedback ()
 
 	msg[0] = (control_type & 0xF0) | (control_channel & 0xF); 
 	msg[1] = control_additional;
-	msg[2] = (byte) (controllable.get_value() * 127.0f);
+	msg[2] = (byte) (control_to_midi(controllable.get_value()));
 
 	_port.write (msg, 3, 0);
 }
@@ -306,8 +341,8 @@ MIDI::byte*
 MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force)
 {
 	if (control_type != none && feedback && bufsize > 2) {
-
-		MIDI::byte gm = (MIDI::byte) (controllable.get_value() * 127.0);
+		
+		MIDI::byte gm = (MIDI::byte) (control_to_midi(controllable.get_value()));
 		
 		if (gm != last_value) {
 			*buf++ = (0xF0 & control_type) | (0xF & control_channel);

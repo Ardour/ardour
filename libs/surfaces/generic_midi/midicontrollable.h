@@ -55,6 +55,9 @@ class MIDIControllable : public PBD::Stateful
 	bool get_midi_feedback () { return feedback; }
 	void set_midi_feedback (bool val) { feedback = val; }
 
+	float control_to_midi(float val);
+	float midi_to_control(float val);
+
 	MIDI::Port& get_port() const { return _port; }
 	PBD::Controllable& get_controllable() const { return controllable; }
 
