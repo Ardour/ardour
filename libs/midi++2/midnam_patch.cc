@@ -39,6 +39,7 @@ Patch::get_state (void)
 	node->add_property("Number", _number);
 	node->add_property("Name",   _name);
 	/*
+	typedef std::list< boost::shared_ptr< Evoral::MIDIEvent<double> > > PatchMidiCommands;
 	XMLNode* commands = node->add_child("PatchMIDICommands");
 	for (PatchMidiCommands::const_iterator event = _patch_midi_commands.begin();
 	    event != _patch_midi_commands.end();
