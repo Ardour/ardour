@@ -65,7 +65,13 @@ class AddRouteDialog : public Gtk::Dialog
 	void track_type_chosen ();
 	void refill_track_templates ();
 
-	bool on_map_event (GdkEventAny*);
+	Gtk::HBox* hbox3;
+	Gtk::HBox* hbox9;
+	Gtk::HBox* hbox4;
+	
+	void reset_template_option_visibility ();
+	
+	void on_show ();
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

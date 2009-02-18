@@ -94,8 +94,6 @@ AddRouteDialog::AddRouteDialog ()
 		}
 	}
 	
-	refill_track_templates ();
-
 	set_name ("AddRouteDialog");
 	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -127,25 +125,31 @@ AddRouteDialog::AddRouteDialog ()
 
 	/* templates */
 
-	HBox* hbox3 = manage (new HBox);
+	hbox3 = new HBox;
 	hbox3->set_spacing (6);
 	hbox3->set_border_width (6);
 	hbox3->pack_start (template_button, PACK_SHRINK);
 
-	HBox* hbox9 = manage (new HBox);
+	hbox9 = new HBox;
 	hbox9->set_spacing (6);
 	hbox9->set_border_width (6);
 	hbox9->pack_start (track_template_combo, PACK_EXPAND_WIDGET);
 	
 	/* separator */
 
-	HBox* hbox4 = manage (new HBox);
+	hbox4 = new HBox;
 	hbox4->set_spacing (6);
 	Label* label2 = manage (new Label (_("OR")));
 	hbox4->pack_start (*(manage (new HSeparator)), PACK_EXPAND_WIDGET);
 	hbox4->pack_start (*label2, false, false);
 	hbox4->pack_start (*(manage (new HSeparator)), PACK_EXPAND_WIDGET);
 
+	/* we need more control over the visibility of these boxes */
+	/*
+	hbox3->set_no_show_all (true);
+	hbox9->set_no_show_all (true);
+	hbox4->set_no_show_all (true);
+	*/
 	/* track/bus choice & modes */
 
 	HBox* hbox5 = manage (new HBox);
@@ -185,14 +189,16 @@ AddRouteDialog::AddRouteDialog ()
 	get_vbox()->set_border_width (6);
 
 	get_vbox()->pack_start (*hbox2, PACK_SHRINK);
-	if (!route_templates.empty()) {
-	  get_vbox()->pack_start (*hbox3, PACK_SHRINK);
-	  get_vbox()->pack_start (*hbox9, PACK_SHRINK);
-	  get_vbox()->pack_start (*hbox4, PACK_SHRINK);
-	}
+	get_vbox()->pack_start (*hbox3, PACK_SHRINK);
+	get_vbox()->pack_start (*hbox9, PACK_SHRINK);
+	get_vbox()->pack_start (*hbox4, PACK_SHRINK);
 	get_vbox()->pack_start (*vbox1, PACK_SHRINK);
 
 	get_vbox()->show_all ();
+
+	/* track template info will be managed whenever
+	   this dialog is shown, via ::on_show()
+	*/
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);
@@ -296,11 +302,11 @@ AddRouteDialog::track_template ()
   return string();
 }
 
-bool
-AddRouteDialog::on_map_event (GdkEventAny *ev)
+void
+AddRouteDialog::on_show ()
 {
   refill_track_templates ();
-  return Dialog::on_map_event (ev);
+  Dialog::on_show ();
 }
 
 void
@@ -308,7 +314,6 @@ AddRouteDialog::refill_track_templates ()
 {
   route_templates.clear ();
   Session::get_route_templates (route_templates);
-  
   
   if (!route_templates.empty()) {
     vector<string> v;
@@ -318,4 +323,20 @@ AddRouteDialog::refill_track_templates ()
     set_popdown_strings (track_template_combo, v);
     track_template_combo.set_active_text (v.front());
   } 
+
+  reset_template_option_visibility ();
+}
+
+void
+AddRouteDialog::reset_template_option_visibility ()
+{
+  if (route_templates.empty()) {
+    hbox3->hide ();
+    hbox9->hide ();
+    hbox4->hide ();
+  } else {
+    hbox3->show_all ();
+    hbox9->show_all ();
+    hbox4->show_all ();
+  }
 }
