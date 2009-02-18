@@ -4713,7 +4713,7 @@ msgstr "cannot set default signal mask (%1)"
 #: gtk2_ardour/main.cc:247
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
-" Please set ARDOUR2_UI_RC to point to a valid UI style file"
+" Please set ARDOUR3_UI_RC to point to a valid UI style file"
 msgstr ""
 "Графический интерфейс Ardour будет выглядеть необычно\n"
 "без файла, определяющего стиль оформления.\n"
@@ -5205,7 +5205,7 @@ msgstr ""
 #: gtk2_ardour/opts.cc:60
 msgid ""
 "  -k, --keybindings filename       Name of key bindings to load (default is "
-"~/.ardour2/ardour.bindings)\n"
+"~/.ardour3/ardour.bindings)\n"
 msgstr ""
 
 #: gtk2_ardour/pan_automation_time_axis.cc:70

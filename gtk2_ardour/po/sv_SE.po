@@ -4734,10 +4734,10 @@ msgstr "kan inte ställa in standardsignalmask (%1)"
 #: ../main.cc:253
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
-" Please set ARDOUR2_UI_RC to point to a valid UI style file"
+" Please set ARDOUR3_UI_RC to point to a valid UI style file"
 msgstr ""
 "Utan en UI-stilfil kommer Ardour att se underligt ut.\n"
-" Ställ in ARDOUR2_UI_RC så att det pekar till en giltig UI-stilfil"
+" Ställ in ARDOUR3_UI_RC så att det pekar till en giltig UI-stilfil"
 
 #: ../main.cc:275
 msgid "Ardour could not connect to JACK."

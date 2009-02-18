@@ -6686,8 +6686,8 @@ msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
 msgstr "  -C, --curvetest nazwa-pliku      Algorytm krzywej debugera\n"
 
 #: gtk2_ardour/opts.cc:66
-msgid "  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour2/ardour.bindings)\n"
-msgstr "  -k, --keybindings nazwa-pliku    Nazwa pliku skrótów klawiaturowych do wczytania (domyślna to~/.ardour2/ardour.bindings)\n"
+msgid "  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n"
+msgstr "  -k, --keybindings nazwa-pliku    Nazwa pliku skrótów klawiaturowych do wczytania (domyślna to~/.ardour3/ardour.bindings)\n"
 
 #: gtk2_ardour/pan_automation_time_axis.cc:69
 msgid "You need to select which line to edit"

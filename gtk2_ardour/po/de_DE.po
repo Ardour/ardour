@@ -2015,8 +2015,8 @@ msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
 msgstr "  -C, --curvetest filename         Kurvenalgorithmus debuggen\n"
 
 #: gtk2_ardour/opts.cc:66
-msgid "  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour2/ardour.bindings)\n"
-msgstr "  -k, --keybindings filename       Dateiname für die Tastaturbelegungen (Standard: ~/.ardour2/ardour.bindings)\n"
+msgid "  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n"
+msgstr "  -k, --keybindings filename       Dateiname für die Tastaturbelegungen (Standard: ~/.ardour3/ardour.bindings)\n"
 
 #: gtk2_ardour/ardour_ui_options.cc:228
 msgid "programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"

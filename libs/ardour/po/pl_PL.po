@@ -1,11 +1,11 @@
-# translation of libardour2.po to Polish
+# translation of libardour3.po to Polish
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Piotr Zaryk <pzaryk@gmail.com>, 2008.
 msgid ""
 msgstr ""
-"Project-Id-Version: libardour2\n"
+"Project-Id-Version: libardour3\n"
 "Report-Msgid-Bugs-To: Piotr Zaryk <pzaryk@gmail.com>\n"
 "POT-Creation-Date: 2008-04-03 16:16+0200\n"
 "PO-Revision-Date: 2008-04-10 10:51+0100\n"

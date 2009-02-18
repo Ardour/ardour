@@ -4743,7 +4743,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
-" Please set ARDOUR2_UI_RC to point to a valid UI style file"
+" Please set ARDOUR3_UI_RC to point to a valid UI style file"
 msgstr ""
 "Senza uno Stile per l'Interfaccia, ardour apparirà strano\n"
 "Impostare la variabile ARDOUR_UI_RC per puntare ad uno Stile"

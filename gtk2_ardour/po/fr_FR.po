@@ -6074,10 +6074,10 @@ msgstr "  -C, --curvetest nomfichier       Débogueur d'algorithme de courbe\n"
 #: gtk2_ardour/opts.cc:66
 msgid ""
 "  -k, --keybindings filename       Name of key bindings to load (default is "
-"~/.ardour2/ardour.bindings)\n"
+"~/.ardour3/ardour.bindings)\n"
 msgstr ""
 "  -k, --keybindings nomfichier       Nom du fichier des raccourcis claviers "
-"à charger (par défaut ~/.ardour2/ardour.bindings)\n"
+"à charger (par défaut ~/.ardour3/ardour.bindings)\n"
 
 #: gtk2_ardour/pan_automation_time_axis.cc:69
 msgid "You need to select which line to edit"
@@ -7363,11 +7363,11 @@ msgstr "analyser les données"
 
 #~ msgid ""
 #~ "Without a UI style file, ardour will look strange.\n"
-#~ " Please set ARDOUR2_UI_RC to point to a valid UI style file"
+#~ " Please set ARDOUR3_UI_RC to point to a valid UI style file"
 #~ msgstr ""
 #~ "Sans fichier de style pour son interface, Ardour aura une apparence "
 #~ "bizarre.\n"
-#~ "Veuillez faire pointer ARDOUR2_UI_RC vers un fichier de style valide"
+#~ "Veuillez faire pointer ARDOUR3_UI_RC vers un fichier de style valide"
 
 #~ msgid "unknown strip width \"%1\" in XML GUI information"
 #~ msgstr ""

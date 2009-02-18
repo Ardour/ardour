@@ -4867,7 +4867,7 @@ msgstr "δεν γίνεται να διαμορφώθεί η προκαθορι�
 #: main.cc:248
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
-" Please set ARDOUR2_UI_RC to point to a valid UI style file"
+" Please set ARDOUR3_UI_RC to point to a valid UI style file"
 msgstr ""
 "Δίχως αρχείο εμφάνισεως UI, ο ardour θα φαίνεται παράξενα.\n"
 "Παρακαλώ θέστε το ARDOUR_UI_RC να δείχνει σε ενεργό αρχείο εμφανίσεως UI."
