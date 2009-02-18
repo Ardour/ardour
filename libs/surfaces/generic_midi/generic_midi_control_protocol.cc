@@ -125,8 +125,7 @@ GenericMidiControlProtocol::_send_feedback ()
 		return;
 	} 
 
-	// FIXME
-	//_port->write (buf, (int32_t) (end - buf));
+	_port->write (buf, (int32_t) (end - buf), 0);
 }
 
 bool

@@ -777,7 +777,6 @@ Session::change_midi_ports ()
  * This resets the MTC code, the next quarter frame message that is sent will be
  * the first one with the beginning of this cycle as the new start point.
  */
-
 int
 Session::send_full_time_code(nframes_t nframes)
 {
@@ -835,8 +834,7 @@ Session::send_full_time_code(nframes_t nframes)
 	return 0;
 }
 
-
-/** Sends MTC (quarter-frame) messages for this cycle.
+/** Send MTC (quarter-frame) messages for this cycle.
  * Must be called exactly once per cycle from the audio thread.  Realtime safe.
  * This function assumes the state of full SMPTE is sane, eg. the slave is
  * expecting quarter frame messages and has the right frame of reference (any

@@ -89,6 +89,12 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 	}
 }
 
+void
+JACK_MidiPort::cycle_end ()
+{
+	flush(jack_port_get_buffer(_jack_output_port, _nframes_this_cycle));
+}
+
 int
 JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 {
@@ -102,8 +108,7 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 		non_process_thread_fifo.get_write_vector (&vec);
 
 		if (vec.len[0] + vec.len[1] < 1) {
-			error << "no space in FIFO for non-process thread MIDI write"
-			      << endmsg;
+			error << "no space in FIFO for non-process thread MIDI write" << endmsg;
 			return 0;
 		}
 

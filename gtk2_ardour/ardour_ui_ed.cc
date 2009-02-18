@@ -715,11 +715,16 @@ ARDOUR_UI::build_control_surface_menu ()
 
 	/* !!! this has to match the top level entry from ardour.menus */
 
-	string ui = "<menubar name='Main' action='MainMenu'>\n<menu name='Options' action='Options'>\n<menu action='ControlSurfaces'><separator/>\n";
+	string ui = "<menubar name='Main' action='MainMenu'>\n"
+		"<menu name='Options' action='Options'>\n"
+		"<menu action='ControlSurfaces'><separator/>\n";
 
-	for (i = ControlProtocolManager::instance().control_protocol_info.begin(); i != ControlProtocolManager::instance().control_protocol_info.end(); ++i) {
+	for (i = ControlProtocolManager::instance().control_protocol_info.begin();
+			i != ControlProtocolManager::instance().control_protocol_info.end(); ++i) {
 
 		if (!(*i)->mandatory) {
+
+			// Enable surface
 
 			string action_name = "Toggle";
 			action_name += legalize_for_path ((*i)->name);
@@ -727,8 +732,10 @@ ARDOUR_UI::build_control_surface_menu ()
 
 			string action_label = (*i)->name;
 
-			Glib::RefPtr<Action> act = ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), action_label.c_str(),
-											  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol), *i)));
+			Glib::RefPtr<Action> act = ActionManager::register_toggle_action (
+					editor->editor_actions, action_name.c_str(), action_label.c_str(), (bind (
+							mem_fun (*this, &ARDOUR_UI::toggle_control_protocol),
+							*i)));
 
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
@@ -742,27 +749,21 @@ ARDOUR_UI::build_control_surface_menu ()
 			ui += action_name;
 			ui += "'/>\n";
 
+			// Enable feedback
+
 			if ((*i)->supports_feedback) {
 
-				string submenu_name = action_name;
-
-				submenu_name += "SubMenu";
-
-				ActionManager::register_action (editor->editor_actions, submenu_name.c_str(), _("Controls"));
-
 				action_name += "Feedback";
+				string feedback_label = action_label + " " + _("Feedback");
 
-				Glib::RefPtr<Action> act = ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), _("Feedback"),
-												  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback),
-													 *i,
-													 "Editor",
-													 action_name)));
-
-				ui += "<menu action='";
-				ui += submenu_name;
-				ui += "'>\n<menuitem action='";
+				Glib::RefPtr<Action> act = ActionManager::register_toggle_action (
+						editor->editor_actions, action_name.c_str(), feedback_label.c_str(), (bind (
+								mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback),
+								*i, "Editor", action_name)));
+			
+				ui += "<menuitem action='";
 				ui += action_name;
-				ui += "'/>\n</menu>\n";
+				ui += "'/>\n";
 
 				if ((*i)->protocol) {
 					Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);

@@ -98,8 +98,6 @@ MIDIControllable::stop_learning ()
 void
 MIDIControllable::drop_external_control ()
 {
-	cerr << "Dropping existing control using " << connections << " connections\n";
-
 	if (connections > 0) {
 		midi_sense_connection[0].disconnect ();
 	} 
@@ -286,8 +284,6 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	default:
 		break;
 	}
-
-	cerr << "MIDI bound with " << connections << endl;
 }
 
 void
@@ -303,7 +299,7 @@ MIDIControllable::send_feedback ()
 	msg[1] = control_additional;
 	msg[2] = (byte) (controllable.get_value() * 127.0f);
 
-	//_port.write (msg, 3);
+	_port.write (msg, 3, 0);
 }
 
 MIDI::byte*

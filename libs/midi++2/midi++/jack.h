@@ -53,6 +53,7 @@ public:
 	virtual int selectable() const { return -1; }
 	
 	virtual void cycle_start(nframes_t nframes);
+	virtual void cycle_end();
 
 	static std::string typestring;
 
