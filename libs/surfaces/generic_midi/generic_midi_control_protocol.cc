@@ -40,7 +40,7 @@ using namespace PBD;
 #include "i18n.h"
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
-	: ControlProtocol  (s, _("Generic MIDI"))
+	: ControlProtocol (s, _("Generic MIDI"))
 {
 	MIDI::Manager* mm = MIDI::Manager::instance();
 
@@ -235,56 +235,56 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 }
 
 void
-GenericMidiControlProtocol::delete_binding ( PBD::Controllable* control )
+GenericMidiControlProtocol::delete_binding (PBD::Controllable* control)
 {
-	if( control != 0 ) {
+	if (control != 0) {
 		Glib::Mutex::Lock lm2 (controllables_lock);
 		
-		for( MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
 			MIDIControllable* existingBinding = (*iter);
 			
-			if( control == &(existingBinding->get_controllable()) ) {
+			if (control == &(existingBinding->get_controllable())) {
 				delete existingBinding;
 				controllables.erase (iter);
 			}
 			
-		} // end for midi controllables
-	} // end null check
+		}
+	}
 }
+
 void
 GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos, int control_number)
 {
-	if( control != NULL ) {
+	if (control != NULL) {
 		Glib::Mutex::Lock lm2 (controllables_lock);
 		
 		MIDI::channel_t channel = (pos & 0xf);
 		MIDI::byte value = control_number;
 		
-		// Create a MIDIControllable::
+		// Create a MIDIControllable
 		MIDIControllable* mc = new MIDIControllable (*_port, *control);
 		
 		// Remove any old binding for this midi channel/type/value pair
 		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
-		for( MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
 			MIDIControllable* existingBinding = (*iter);
 			
-			if( (existingBinding->get_control_channel() & 0xf ) == channel &&
+			if ((existingBinding->get_control_channel() & 0xf ) == channel &&
 			    existingBinding->get_control_additional() == value &&
-			    (existingBinding->get_control_type() & 0xf0 ) == MIDI::controller ) {
+			    (existingBinding->get_control_type() & 0xf0 ) == MIDI::controller) {
 				
 				delete existingBinding;
 				controllables.erase (iter);
 			}
 			
-		} // end for midi controllables
-		
+		}
 		
 		// Update the MIDI Controllable based on the the pos param
 		// Here is where a table lookup for user mappings could go; for now we'll just wing it...
-		mc->bind_midi( channel, MIDI::controller, value );
+		mc->bind_midi(channel, MIDI::controller, value);
 		
 		controllables.insert (mc);
-	} // end null test
+	}
 }
 
 void
@@ -343,7 +343,6 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 		_feedback_interval = 10000;
 	}
 
-	// Are we using the autobinding feature?  If so skip this part
 	if ( !auto_binding ) {
 		
 		boost::shared_ptr<Controllable> c;
@@ -377,13 +376,13 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 					}
 					
 				} else {
-					warning << string_compose (_("Generic MIDI control: controllable %1 not found in session (ignored)"),
-								   id)
-						<< endmsg;
+					warning << string_compose (
+							_("Generic MIDI control: controllable %1 not found in session (ignored)"),
+							id) << endmsg;
 				}
 			}
 		}
-	} // end autobinding check
+	}
 	return 0;
 }
 
@@ -400,3 +399,4 @@ GenericMidiControlProtocol::get_feedback () const
 {
 	return do_feedback;
 }
+
