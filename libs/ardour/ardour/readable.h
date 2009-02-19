@@ -10,9 +10,9 @@ class Readable {
 	Readable () {}
 	virtual ~Readable() {}
 
-	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const = 0;
-	virtual nframes64_t readable_length() const = 0;
-	virtual uint32_t    n_channels () const = 0;
+	virtual nframes_t read (Sample*, sframes_t pos, nframes_t cnt, int channel) const = 0;
+	virtual sframes_t readable_length() const = 0;
+	virtual uint32_t  n_channels () const = 0;
 };
 
 }

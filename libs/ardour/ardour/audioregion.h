@@ -92,21 +92,21 @@ class AudioRegion : public Region
 		ReadOpsFades = 0x8
 	};
 	
-	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const;
-	virtual nframes64_t read_with_ops (Sample*, nframes64_t pos, nframes64_t cnt, int channel, ReadOps rops) const;
+	virtual nframes_t read (Sample*, sframes_t pos, nframes_t cnt, int channel) const;
+	virtual nframes_t read_with_ops (Sample*, sframes_t pos, nframes_t cnt, int channel, ReadOps rops) const;
 	virtual nframes64_t readable_length() const { return length(); }
 
-	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,
-			float *gain_buf, nframes_t position, nframes_t cnt, 
+	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
+			sframes_t position,
+			nframes_t cnt,
 			uint32_t  chan_n      = 0,
 			nframes_t read_frames = 0,
 			nframes_t skip_frames = 0) const;
 	
-	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
-					  float *gain_buf,
-					  nframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
+	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
+			sframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
 	
-	virtual nframes_t read_raw_internal (Sample*, nframes_t, nframes_t) const;
+	virtual nframes_t read_raw_internal (Sample*, sframes_t, nframes_t) const;
 
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
@@ -186,8 +186,8 @@ class AudioRegion : public Region
 	void recompute_gain_at_start ();
 
 	nframes_t _read_at (const SourceList&, nframes_t limit,
-			    Sample *buf, Sample *mixdown_buffer, 
-			    float *gain_buffer, nframes_t position, nframes_t cnt, 
+			    Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+				sframes_t position, nframes_t cnt, 
 			    uint32_t chan_n = 0,
 			    nframes_t read_frames = 0,
 			    nframes_t skip_frames = 0,

@@ -57,15 +57,7 @@ class AudioSource : virtual public Source,
 
 	virtual nframes_t available_peaks (double zoom) const;
 
-	/** Stopgap for Readable until nframes_t becomes nframes64_t. */
-	virtual nframes64_t read (Sample *dst, nframes64_t start, nframes64_t cnt, int channel) const {
-		/* XXX currently ignores channel, assuming that source is always mono, which
-		   historically has been true.
-		*/
-		return read (dst, (nframes_t) start, (nframes_t) cnt);
-	}
-
-	virtual nframes_t read (Sample *dst, sframes_t start, nframes_t cnt) const;
+	virtual nframes_t read (Sample *dst, sframes_t start, nframes_t cnt, int channel=0) const;
 	virtual nframes_t write (Sample *src, nframes_t cnt);
 
 	virtual float sample_rate () const = 0;

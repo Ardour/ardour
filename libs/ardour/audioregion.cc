@@ -76,7 +76,7 @@ AudioRegion::init ()
 	listen_to_my_sources ();
 }
 
-/* constructor for use by derived types only */
+/** Constructor for use by derived types only */
 AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string name)
 	: Region (s, start, length, name, DataType::AUDIO)
 	, _automatable(s)
@@ -119,7 +119,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	init ();
 }
 
-/* Basic AudioRegion constructor (many channels) */
+/** Basic AudioRegion constructor (many channels) */
 AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
 	, _automatable(srcs[0]->session())
@@ -329,43 +329,43 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 	}
 }
 
-nframes64_t
-AudioRegion::read (Sample* buf, nframes64_t timeline_position, nframes64_t cnt, int channel) const
+nframes_t
+AudioRegion::read (Sample* buf, sframes_t timeline_position, nframes_t cnt, int channel) const
 {
 	/* raw read, no fades, no gain, nada */
 	return _read_at (_sources, _length, buf, 0, 0, _position + timeline_position, cnt, channel, 0, 0, ReadOps (0));
 }
 
-nframes64_t
-AudioRegion::read_with_ops (Sample* buf, nframes64_t file_position, nframes64_t cnt, int channel, ReadOps rops) const
+nframes_t
+AudioRegion::read_with_ops (Sample* buf, sframes_t file_position, nframes_t cnt, int channel, ReadOps rops) const
 {
 	return _read_at (_sources, _length, buf, 0, 0, file_position, cnt, channel, 0, 0, rops);
 }
 
 nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t file_position, 
-		      nframes_t cnt, 
-		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+		sframes_t file_position, nframes_t cnt, uint32_t chan_n,
+		nframes_t read_frames, nframes_t skip_frames) const
 {
 	/* regular diskstream/butler read complete with fades etc */
 	return _read_at (_sources, _length, buf, mixdown_buffer, gain_buffer, file_position, cnt, chan_n, read_frames, skip_frames, ReadOps (~0));
 }
 
 nframes_t
-AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
-			     nframes_t cnt, uint32_t chan_n) const
+AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+		sframes_t position, nframes_t cnt, uint32_t chan_n) const
 {
 	return _read_at (_master_sources, _master_sources.front()->length(), buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
 }
 
 nframes_t
 AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
-		       Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		       nframes_t position, nframes_t cnt, 
-		       uint32_t chan_n, 
-		       nframes_t read_frames, 
-		       nframes_t skip_frames,
-		       ReadOps rops) const
+		Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+		sframes_t position, nframes_t cnt, 
+		uint32_t chan_n, 
+		nframes_t read_frames, 
+		nframes_t skip_frames,
+		ReadOps rops) const
 {
 	nframes_t internal_offset;
 	nframes_t buf_offset;
@@ -1058,7 +1058,7 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Reg
 }
 
 nframes_t
-AudioRegion::read_raw_internal (Sample* buf, nframes_t pos, nframes_t cnt) const
+AudioRegion::read_raw_internal (Sample* buf, sframes_t pos, nframes_t cnt) const
 {
 	return audio_source()->read  (buf, pos, cnt);
 }

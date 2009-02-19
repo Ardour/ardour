@@ -81,7 +81,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }
 	
 	nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-				float *gain_buffer, nframes_t position, nframes_t cnt, 
+				float *gain_buffer, sframes_t position, nframes_t cnt, 
 				uint32_t chan_n,
 				nframes_t read_frames = 0,
 				nframes_t skip_frames = 0) const;
@@ -170,7 +170,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool update ();
 
   protected:
-	nframes_t read_raw_internal (Sample*, nframes_t, nframes_t) const;	
+	nframes_t read_raw_internal (Sample*, sframes_t, nframes_t) const;	
 };
 
 

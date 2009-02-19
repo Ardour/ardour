@@ -271,8 +271,9 @@ Crossfade::initialize ()
 }	
 
 nframes_t 
-Crossfade::read_raw_internal (Sample* buf, nframes_t start, nframes_t cnt) const
+Crossfade::read_raw_internal (Sample* buf, sframes_t start, nframes_t cnt) const
 {
+	// FIXME: Why is this disabled?
 #if 0
 	Sample* mixdown = new Sample[cnt];
 	float* gain = new float[cnt];
@@ -290,7 +291,7 @@ Crossfade::read_raw_internal (Sample* buf, nframes_t start, nframes_t cnt) const
 
 nframes_t 
 Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
-		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n,
+		    float *gain_buffer, sframes_t start, nframes_t cnt, uint32_t chan_n,
 		    nframes_t read_frames, nframes_t skip_frames) const
 {
 	nframes_t offset;
@@ -320,7 +321,7 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 
 	} else {
 		
-		to_write = min (_length - (start - _position), cnt);
+		to_write = min (nframes_t(_length - (start - _position)), cnt);
 		
 	}
 

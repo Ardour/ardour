@@ -247,7 +247,7 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 }
 
 nframes_t
-AudioSource::read (Sample *dst, sframes_t start, nframes_t cnt) const
+AudioSource::read (Sample *dst, sframes_t start, nframes_t cnt, int channel) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
