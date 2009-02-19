@@ -1447,13 +1447,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	uint32_t audio_dstream_buffer_size;
 	uint32_t midi_dstream_buffer_size;
-	int  load_diskstreams (const XMLNode&);
+	int load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void   add_routes (RouteList&, bool save);
+	void add_routes (RouteList&, bool save);
 	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&);
@@ -1532,7 +1532,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
 
 	/* CURVES and AUTOMATION LISTS */
-	std::map<PBD::ID, Evoral::Curve*> curves;
 	std::map<PBD::ID, AutomationList*> automation_lists;
 
 	/* DEFAULT FADE CURVES */

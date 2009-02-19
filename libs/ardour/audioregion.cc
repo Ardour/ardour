@@ -493,7 +493,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 		}
 	}
 		
-        /* Regular gain curves and scaling */
+	/* Regular gain curves and scaling */
 	
 	if ((rops & ReadOpsOwnAutomation) && envelope_active())  {
 		_envelope->curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);

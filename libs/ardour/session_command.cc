@@ -74,8 +74,7 @@ Session::memento_command_factory(XMLNode *n)
 	    child = before;
     } 
 		    
-    if (!child)
-    {
+    if (!child) {
 	error << _("Tried to reconstitute a MementoCommand with no contents, failing. id=") << id.to_s() << endmsg;
 	return 0;
     }
@@ -105,8 +104,10 @@ Session::memento_command_factory(XMLNode *n)
     } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name() || obj_T == typeid(MidiTrack).name()) { 
 	    return new MementoCommand<Route>(*route_by_id(id), before, after);
     } else if (obj_T == typeid (Evoral::Curve).name() || obj_T == typeid (AutomationList).name()) {
-	    if (automation_lists.count(id))
-		    return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
+		std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);
+		if (i != automation_lists.end()) {
+		    return new MementoCommand<AutomationList>(*i->second, before, after);
+		}
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits here
 	    return new MementoCommand<PBD::StatefulThingWithGoingAway>(*registry[id], before, after);
     }
