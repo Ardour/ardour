@@ -43,7 +43,9 @@ using std::vector;
 
 namespace ARDOUR {
 
-class AudioSource : virtual public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
+class AudioSource : virtual public Source,
+		public ARDOUR::Readable,
+		public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
 	AudioSource (Session&, Glib::ustring name);

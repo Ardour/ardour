@@ -38,7 +38,7 @@ namespace ARDOUR {
 class Session;
 class Playlist;
 
-class Source : public SessionObject, public ARDOUR::Readable, public boost::noncopyable
+class Source : public SessionObject, public boost::noncopyable
 {
   public:
 	enum Flag {
