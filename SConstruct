@@ -1054,7 +1054,7 @@ conf = Configure(env)
 libraries['asound'] = LibraryInfo ()
 
 if conf.CheckCHeader('alsa/asoundlib.h'):
-    libraries['asound'] = LibraryInfo (LIBS='asound')
+    libraries['asound'].ParseConfig('pkg-config --cflags --libs alsa')
 
 if conf.CheckCHeader('jack/midiport.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='jack')
@@ -1064,7 +1064,8 @@ if conf.CheckCHeader('jack/midiport.h'):
     env.Append(CCFLAGS=" -DWITH_JACK_MIDI")
     print "Using JACK MIDI"
 elif conf.CheckCHeader('alsa/asoundlib.h'):
-    libraries['sysmidi'] = LibraryInfo (LIBS='asound')
+    libraries['sysmidi'] = LibraryInfo ()
+    libraries['sysmidi'].ParseConfig('pkg-config --cflags --libs alsa')
     env['SYSMIDI'] = 'ALSA Sequencer'
     subst_dict['%MIDITAG%'] = "seq"
     subst_dict['%MIDITYPE%'] = "alsa/sequencer"
