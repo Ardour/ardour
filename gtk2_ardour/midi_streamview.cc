@@ -125,8 +125,8 @@ veto_note_range(uint8_t& min, uint8_t& max)
 		}
 	}
 	assert(max - min >= 11);
-	assert(max < 127);
-	assert(min < 127);
+	assert(max <= 127);
+	assert(min <= 127);
 }
 
 RegionView*
