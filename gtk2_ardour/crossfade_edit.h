@@ -96,8 +96,7 @@ class CrossfadeEditor : public ArdourDialog
 	    void move_to (double x, double y, double xfract, double yfract);
 	};
 	
-	struct PointSorter 
-	{
+	struct PointSorter {
 	    bool operator() (const CrossfadeEditor::Point* a, const CrossfadeEditor::Point *b) {
 		    return a->x < b->x;
 	    }

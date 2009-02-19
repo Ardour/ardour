@@ -21,6 +21,7 @@
 #include <utility>
 #include <iostream>
 #include "evoral/ControlList.hpp"
+#include "evoral/Curve.hpp"
 
 using namespace std;
 
@@ -36,7 +37,7 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 ControlList::ControlList (const Parameter& id)
 	: _parameter(id)
 	, _interpolation(Linear)
-	, _curve(new Curve(*this))
+	, _curve(0)
 {	
 	_frozen = 0;
 	_changed_when_thawed = false;
@@ -54,7 +55,7 @@ ControlList::ControlList (const Parameter& id)
 ControlList::ControlList (const ControlList& other)
 	: _parameter(other._parameter)
 	, _interpolation(Linear)
-	, _curve(new Curve(*this))
+	, _curve(0)
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
@@ -70,14 +71,14 @@ ControlList::ControlList (const ControlList& other)
 	for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
 		_events.push_back (new ControlEvent (**i));
 	}
-
+	
 	mark_dirty ();
 }
 
 ControlList::ControlList (const ControlList& other, double start, double end)
 	: _parameter(other._parameter)
 	, _interpolation(Linear)
-	, _curve(new Curve(*this))
+	, _curve(0)
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
@@ -99,7 +100,7 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
 		}
 	}
-
+	
 	mark_dirty ();
 }
 
@@ -145,6 +146,19 @@ ControlList::operator= (const ControlList& other)
 	}
 
 	return *this;
+}
+
+void
+ControlList::create_curve()
+{
+	_curve = new Curve(*this);
+}
+
+void
+ControlList::destroy_curve()
+{
+	delete _curve;
+	_curve = NULL;
 }
 
 void

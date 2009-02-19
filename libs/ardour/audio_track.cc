@@ -24,6 +24,8 @@
 #include <pbd/error.h>
 #include <pbd/enumwriter.h>
 
+#include <evoral/Curve.hpp>
+
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/session.h>

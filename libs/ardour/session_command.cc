@@ -35,6 +35,7 @@
 #include <pbd/id.h>
 #include <pbd/statefuldestructible.h>
 #include <pbd/failed_constructor.h>
+#include <evoral/Curve.hpp>
 
 using namespace PBD;
 using namespace ARDOUR;

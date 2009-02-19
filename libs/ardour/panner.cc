@@ -37,6 +37,8 @@
 #include <pbd/xml++.h>
 #include <pbd/enumwriter.h>
 
+#include <evoral/Curve.hpp>
+
 #include <ardour/session.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>

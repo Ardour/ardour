@@ -703,7 +703,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	sigc::signal<void> NamedSelectionRemoved;
 
 	/* Curves and AutomationLists (TODO when they go away) */
-	void add_curve(Evoral::Curve*);
 	void add_automation_list(AutomationList*);
 
 	/* fade curves */

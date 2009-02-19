@@ -27,6 +27,8 @@
 #include <pbd/stacktrace.h>
 #include <pbd/memento_command.h>
 
+#include <evoral/Curve.hpp>
+
 #include <ardour/timestamps.h>
 #include <ardour/audioengine.h>
 #include <ardour/route.h>

@@ -33,6 +33,8 @@
 #include <pbd/memento_command.h>
 #include <pbd/stacktrace.h>
 
+#include <evoral/Curve.hpp>
+
 #include "streamview.h"
 #include "audio_region_view.h"
 #include "audio_time_axis.h"

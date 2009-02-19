@@ -35,6 +35,8 @@
 #include <pbd/enumwriter.h>
 #include <pbd/convert.h>
 
+#include <evoral/Curve.hpp>
+
 #include <ardour/audioregion.h>
 #include <ardour/session.h>
 #include <ardour/gain.h>

@@ -50,13 +50,14 @@ static void dumpit (const AutomationList& al, string prefix = "")
 }
 #endif
 
-/* XXX: min_val max_val redundant? (param.min() param.max()) */
 AutomationList::AutomationList (Evoral::Parameter id)
 	: ControlList(id)
 {
 	_state = Off;
 	_style = Absolute;
 	_touching = false;
+
+	create_curve_if_necessary();
 
 	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
@@ -69,6 +70,8 @@ AutomationList::AutomationList (const AutomationList& other)
 	_state = other._state;
 	_touching = other._touching;
 	
+	create_curve_if_necessary();
+	
 	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
 }
@@ -79,6 +82,8 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	_style = other._style;
 	_state = other._state;
 	_touching = other._touching;
+	
+	create_curve_if_necessary();
 
 	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
@@ -96,8 +101,11 @@ AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	
 	set_state (node);
 
-	if (id)
+	if (id) {
 		_parameter = id;
+	}
+	
+	create_curve_if_necessary();
 
 	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
@@ -112,6 +120,22 @@ boost::shared_ptr<Evoral::ControlList>
 AutomationList::create(Evoral::Parameter id)
 {
 	return boost::shared_ptr<Evoral::ControlList>(new AutomationList(id));
+}
+
+void
+AutomationList::create_curve_if_necessary()
+{
+	switch (_parameter.type()) {
+	case GainAutomation:
+	case PanAutomation:
+	case FadeInAutomation:
+	case FadeOutAutomation:
+	case EnvelopeAutomation:
+		create_curve();
+		break;
+	default:
+		break;
+	}
 }
 
 bool

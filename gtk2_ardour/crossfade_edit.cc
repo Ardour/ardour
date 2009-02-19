@@ -66,10 +66,9 @@ CrossfadeEditor::Presets* CrossfadeEditor::fade_in_presets = 0;
 CrossfadeEditor::Presets* CrossfadeEditor::fade_out_presets = 0;
 
 CrossfadeEditor::Half::Half ()
-	: line (0), 
-	  //normative_curve (Evoral::Parameter(GainAutomation, 0.0, 1.0, 1.0)), // FIXME: GainAutomation?
-	  normative_curve (Evoral::Parameter(GainAutomation)),
-	  gain_curve (Evoral::Parameter(GainAutomation))
+	: line (0)
+	, normative_curve (Evoral::Parameter(GainAutomation))
+	, gain_curve (Evoral::Parameter(GainAutomation))
 {
 }
 
@@ -726,7 +725,7 @@ CrossfadeEditor::redraw ()
 	fade[current].shading->property_points() = spts;
 
 	for (vector<ArdourCanvas::WaveView*>::iterator i = fade[current].waves.begin(); i != fade[current].waves.end(); ++i) {
-		(*i)->property_gain_src() = &fade[current].gain_curve;
+		(*i)->property_gain_src() = static_cast<Evoral::Curve*>(&fade[current].gain_curve.curve());
 	}
 }
 
@@ -1124,7 +1123,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 			waveview->property_sourcefile_length_function() = (void*) sourcefile_length_from_c;
 			waveview->property_peak_function() = (void*) region_read_peaks_from_c;
 			waveview->property_gain_function() = (void*) curve_get_vector_from_c;
-			waveview->property_gain_src() = &fade[which].gain_curve;
+			waveview->property_gain_src() = static_cast<Evoral::Curve*>(&fade[which].gain_curve.curve());
 			waveview->property_x() = canvas_border;
 			waveview->property_y() = yoff;
 			waveview->property_height() = ht;

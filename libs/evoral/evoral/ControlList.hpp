@@ -25,10 +25,10 @@
 #include <glibmm/thread.h>
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
-#include "evoral/Curve.hpp"
 
 namespace Evoral {
 
+class Curve;
 
 /** A single event (time-stamped value) for a control
  */
@@ -216,8 +216,11 @@ public:
 	bool rt_safe_earliest_event (double start, double end, double& x, double& y, bool start_inclusive=false) const;
 	bool rt_safe_earliest_event_unlocked (double start, double end, double& x, double& y, bool start_inclusive=false) const;
 
-	Curve&       curve()       { return *_curve; }
-	const Curve& curve() const { return *_curve; }
+	void create_curve();
+	void destroy_curve();
+
+	Curve&       curve()       { assert(_curve); return *_curve; }
+	const Curve& curve() const { assert(_curve); return *_curve; }
 	
 	virtual void mark_dirty () const;
 

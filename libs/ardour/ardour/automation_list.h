@@ -85,6 +85,7 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	XMLNode& serialize_events ();
 
   private:
+	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);
 	
 	void maybe_signal_changed ();
