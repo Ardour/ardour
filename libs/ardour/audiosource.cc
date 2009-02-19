@@ -247,7 +247,7 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 }
 
 nframes_t
-AudioSource::read (Sample *dst, nframes_t start, nframes_t cnt) const
+AudioSource::read (Sample *dst, sframes_t start, nframes_t cnt) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
@@ -261,13 +261,13 @@ AudioSource::write (Sample *dst, nframes_t cnt)
 }
 
 int
-AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const
+AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, sframes_t start, nframes_t cnt, double samples_per_visual_peak) const
 {
 	return read_peaks_with_fpp (peaks, npeaks, start, cnt, samples_per_visual_peak, _FPP);
 }
 
 int 
-AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, 
+AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t start, nframes_t cnt, 
 				  double samples_per_visual_peak, nframes_t samples_per_file_peak) const
 {
 	Glib::Mutex::Lock lm (_lock);
@@ -426,7 +426,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t s
 			if (i == stored_peaks_read) {
 
 				uint32_t       start_byte = current_stored_peak * sizeof(PeakData);
-				tnp = min ((_length/samples_per_file_peak - current_stored_peak), (nframes_t) expected_peaks);
+				tnp = min ((nframes_t)(_length/samples_per_file_peak - current_stored_peak), (nframes_t) expected_peaks);
 				to_read = min (chunksize, tnp);
 				
 #ifdef DEBUG_READ_PEAKS
@@ -520,7 +520,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t s
 
 			if (i == frames_read) {
 				
-				to_read = min (chunksize, (_length - current_frame));
+				to_read = min (chunksize, nframes_t(_length - current_frame));
 
 				if (to_read == 0) {
 					/* XXX ARGH .. out by one error ... need to figure out why this happens
@@ -681,14 +681,15 @@ AudioSource::done_with_peakfile_writes (bool done)
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready)
+AudioSource::compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
+		bool force, bool intermediate_peaks_ready)
 {
 	return compute_and_write_peaks (buf, first_frame, cnt, force, intermediate_peaks_ready, _FPP);
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, 
-				      bool intermediate_peaks_ready, nframes_t fpp)
+AudioSource::compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
+		bool force, bool intermediate_peaks_ready, nframes_t fpp)
 {
 	Sample* buf2 = 0;
 	nframes_t to_do;

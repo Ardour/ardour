@@ -57,20 +57,20 @@ class MidiSource : virtual public Source
 	 * \param negative_stamp_offset Offset to subtract from event times written to dst
 	 */
 	virtual nframes_t midi_read (MidiRingBuffer<nframes_t>& dst,
-			nframes_t position,
-			nframes_t start, nframes_t cnt,
-			nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
+			sframes_t position,
+			sframes_t start, nframes_t cnt,
+			sframes_t stamp_offset, sframes_t negative_stamp_offset) const;
 
 	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
-			nframes_t position,
+			sframes_t position,
 			nframes_t cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<double>& ev) = 0;
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
-			nframes_t position) = 0;
+			sframes_t position) = 0;
 
-	virtual void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
+	virtual void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
 	
@@ -85,7 +85,7 @@ class MidiSource : virtual public Source
 	static sigc::signal<void,MidiSource*> MidiSourceCreated;
 	       
 	// Signal a range of recorded data is available for reading from model()
-	mutable sigc::signal<void,nframes_t,nframes_t> ViewDataRangeReady;
+	mutable sigc::signal<void,sframes_t,nframes_t> ViewDataRangeReady;
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
@@ -110,12 +110,12 @@ class MidiSource : virtual public Source
 	virtual void flush_midi() = 0;
 	
 	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
-			nframes_t position,
-			nframes_t start, nframes_t cnt,
-			nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
+			sframes_t position,
+			sframes_t start, nframes_t cnt,
+			sframes_t stamp_offset, sframes_t negative_stamp_offset) const = 0;
 
 	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst,
-			nframes_t position,
+			sframes_t position,
 			nframes_t cnt) = 0;
 	
 	std::string         _captured_for;
@@ -126,7 +126,7 @@ class MidiSource : virtual public Source
 	bool                         _writing;
 	
 	mutable Evoral::Sequence<double>::const_iterator _model_iter;
-	mutable nframes_t                                _last_read_end;
+	mutable sframes_t                                _last_read_end;
 
   private:
 	bool file_changed (std::string path);

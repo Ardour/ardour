@@ -140,7 +140,7 @@ Source::set_state (const XMLNode& node)
 }
 
 void
-Source::update_length (nframes_t pos, nframes_t cnt)
+Source::update_length (sframes_t pos, sframes_t cnt)
 {
 	if (pos + cnt > _length) {
 		_length = pos + cnt;

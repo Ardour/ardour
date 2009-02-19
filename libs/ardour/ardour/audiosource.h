@@ -65,7 +65,7 @@ class AudioSource : virtual public Source,
 		return read (dst, (nframes_t) start, (nframes_t) cnt);
 	}
 
-	virtual nframes_t read (Sample *dst, nframes_t start, nframes_t cnt) const;
+	virtual nframes_t read (Sample *dst, sframes_t start, nframes_t cnt) const;
 	virtual nframes_t write (Sample *src, nframes_t cnt);
 
 	virtual float sample_rate () const = 0;
@@ -81,7 +81,7 @@ class AudioSource : virtual public Source,
 	uint32_t write_data_count() const { return _write_data_count; }
 
  	int read_peaks (PeakData *peaks, nframes_t npeaks,
-			nframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
+			sframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
 
  	int  build_peaks ();
 	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
@@ -126,23 +126,23 @@ class AudioSource : virtual public Source,
 
 	int initialize_peakfile (bool newfile, Glib::ustring path);
 	int build_peaks_from_scratch ();
-	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt,
+	int compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
 			bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
 	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()
 
-	virtual nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const = 0;
+	virtual nframes_t read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const = 0;
 	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
 	virtual Glib::ustring peak_path(Glib::ustring audio_path) = 0;
 	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
 	                                            Glib::ustring audio_path) = 0;
 	
  	virtual int read_peaks_with_fpp (PeakData *peaks,
-			nframes_t npeaks, nframes_t start, nframes_t cnt, 
+			nframes_t npeaks, sframes_t start, nframes_t cnt, 
 			double samples_per_visual_peak, nframes_t fpp) const;
 
-	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt,
+	int compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
 			bool force, bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);	
 
   private:

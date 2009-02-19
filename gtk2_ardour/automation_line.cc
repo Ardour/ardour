@@ -56,11 +56,11 @@ using namespace PBD;
 using namespace Editing;
 using namespace Gnome; // for Canvas
 
-static const Evoral::IdentityConverter<double, nframes_t> default_converter;
+static const Evoral::IdentityConverter<double, sframes_t> default_converter;
 
 AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent,
 		boost::shared_ptr<AutomationList> al,
-		const Evoral::TimeConverter<double, nframes_t>* converter)
+		const Evoral::TimeConverter<double, sframes_t>* converter)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)

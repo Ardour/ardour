@@ -60,6 +60,13 @@ namespace ARDOUR {
 	typedef uint64_t                    microseconds_t;
 	typedef uint32_t                    nframes_t;
 
+	/** "Session frames", frames relative to the session timeline.
+	 * Everything related to transport position etc. should be of this type.
+	 * We might want to make this a compile time option for 32-bitters who
+	 * don't want to pay for extremely long session times they don't need...
+	 */
+	typedef int64_t sframes_t;
+
 	enum IOChange {
 		NoChange = 0,
 		ConfigurationChanged = 0x1,
@@ -75,7 +82,7 @@ namespace ARDOUR {
 	};
 
 	OverlapType coverage (nframes_t start_a, nframes_t end_a,
-			      nframes_t start_b, nframes_t end_b);
+	                      nframes_t start_b, nframes_t end_b);
 
 	/** See parameter.h
 	 * XXX: I don't think/hope these hex values matter anymore.

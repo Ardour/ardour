@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 
-nframes_t
+sframes_t
 BeatsFramesConverter::to(double beats) const
 {
 	// FIXME: assumes tempo never changes after origin
@@ -39,7 +39,7 @@ BeatsFramesConverter::to(double beats) const
 }
 
 double
-BeatsFramesConverter::from(nframes_t frames) const
+BeatsFramesConverter::from(sframes_t frames) const
 {
 	// FIXME: assumes tempo never changes after origin
 	const Tempo& tempo = _session.tempo_map().tempo_at(_origin);

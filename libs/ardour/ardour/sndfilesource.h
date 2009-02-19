@@ -43,13 +43,13 @@ class SndFileSource : public AudioFileSource {
 	~SndFileSource ();
 
 	float sample_rate () const;
-	int update_header (nframes_t when, struct tm&, time_t);
+	int update_header (sframes_t when, struct tm&, time_t);
 	int flush_header ();
 
-	nframes_t natural_position () const;
+	sframes_t natural_position () const;
 
-	nframes_t last_capture_start_frame() const;
-	void mark_capture_start (nframes_t);
+	sframes_t last_capture_start_frame() const;
+	void mark_capture_start (sframes_t);
 	void mark_capture_end ();
 	void clear_capture_marks();
 
@@ -65,10 +65,10 @@ class SndFileSource : public AudioFileSource {
   protected:
 	void set_header_timeline_position ();
 
-	nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const;
+	nframes_t read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const;
 	nframes_t write_unlocked (Sample *dst, nframes_t cnt);
 
-	nframes_t write_float (Sample* data, nframes_t pos, nframes_t cnt);
+	nframes_t write_float (Sample* data, sframes_t pos, nframes_t cnt);
 
   private:
 	SNDFILE *sf;
@@ -77,7 +77,7 @@ class SndFileSource : public AudioFileSource {
 
 	void init_sndfile ();
 	int open();
-	int setup_broadcast_info (nframes_t when, struct tm&, time_t);
+	int setup_broadcast_info (sframes_t when, struct tm&, time_t);
 
 	/* destructive */
 
@@ -87,8 +87,8 @@ class SndFileSource : public AudioFileSource {
 
 	bool          _capture_start;
 	bool          _capture_end;
-	nframes_t      capture_start_frame;
-	nframes_t      file_pos; // unit is frames
+	sframes_t      capture_start_frame;
+	sframes_t      file_pos; // unit is frames
 	nframes_t      xfade_out_count;
 	nframes_t      xfade_in_count;
 	Sample*        xfade_buf;

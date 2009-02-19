@@ -274,7 +274,7 @@ SndFileSource::sample_rate () const
 }
 
 nframes_t
-SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
+SndFileSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
 {
 	int32_t nread;
 	float *ptr;
@@ -482,7 +482,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 }
 
 int
-SndFileSource::update_header (nframes_t when, struct tm& now, time_t tnow)
+SndFileSource::update_header (sframes_t when, struct tm& now, time_t tnow)
 {	
 	set_timeline_position (when);
 
@@ -506,7 +506,7 @@ SndFileSource::flush_header ()
 }
 
 int
-SndFileSource::setup_broadcast_info (nframes_t when, struct tm& now, time_t tnow)
+SndFileSource::setup_broadcast_info (sframes_t when, struct tm& now, time_t tnow)
 {
 	if (!writable()) {
 		warning << string_compose (_("attempt to store broadcast info in a non-writable audio file source (%1)"), _path) << endmsg;
@@ -556,7 +556,7 @@ SndFileSource::set_header_timeline_position ()
 }
 
 nframes_t
-SndFileSource::write_float (Sample* data, nframes_t frame_pos, nframes_t cnt)
+SndFileSource::write_float (Sample* data, sframes_t frame_pos, nframes_t cnt)
 {
 	if (sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
 		char errbuf[256];
@@ -572,7 +572,7 @@ SndFileSource::write_float (Sample* data, nframes_t frame_pos, nframes_t cnt)
 	return cnt;
 }
 
-nframes_t
+sframes_t
 SndFileSource::natural_position() const
 {
 	return _timeline_position;
@@ -605,7 +605,7 @@ SndFileSource::clear_capture_marks ()
 }	
 
 void
-SndFileSource::mark_capture_start (nframes_t pos)
+SndFileSource::mark_capture_start (sframes_t pos)
 {
 	if (destructive()) {
 		if (pos < _timeline_position) {
@@ -748,7 +748,7 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 	return cnt;
 }
 
-nframes_t
+sframes_t
 SndFileSource::last_capture_start_frame () const
 {
 	if (destructive()) {

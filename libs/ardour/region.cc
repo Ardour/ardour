@@ -1544,7 +1544,7 @@ Region::verify_length (nframes_t len)
 	nframes_t maxlen = 0;
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
-		maxlen = max (maxlen, _sources[n]->length() - _start);
+		maxlen = max (maxlen, (nframes_t)_sources[n]->length() - _start);
 	}
 	
 	len = min (len, maxlen);
@@ -1562,7 +1562,7 @@ Region::verify_start_and_length (nframes_t new_start, nframes_t& new_length)
 	nframes_t maxlen = 0;
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
-		maxlen = max (maxlen, _sources[n]->length() - new_start);
+		maxlen = max (maxlen, (nframes_t)_sources[n]->length() - new_start);
 	}
 
 	new_length = min (new_length, maxlen);

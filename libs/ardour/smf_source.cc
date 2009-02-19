@@ -95,9 +95,9 @@ SMFSource::~SMFSource ()
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t position,
-		nframes_t start, nframes_t dur,
-		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, sframes_t position,
+		sframes_t start, nframes_t dur,
+		sframes_t stamp_offset, sframes_t negative_stamp_offset) const
 {
 	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
@@ -146,7 +146,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t position,
 		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
 
 		assert(time >= start_ticks);
-		const nframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
+		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
 
 		if (ev_frame_time < start + dur) {
 			dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
@@ -167,7 +167,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t position,
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t position, nframes_t dur)
+SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, sframes_t position, nframes_t dur)
 {
 	_write_data_count = 0;
 		
@@ -227,7 +227,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t position, n
 	Evoral::SMF::flush();
 	free(buf);
 
-	const nframes_t oldlen = _length;
+	const sframes_t oldlen = _length;
 	update_length(oldlen, dur);
 
 	ViewDataRangeReady(position + oldlen, dur); /* EMIT SIGNAL */
@@ -269,7 +269,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 
 /** Append an event with a timestamp in frames (nframes_t) */
 void
-SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, nframes_t position)
+SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t position)
 {
 	if (ev.size() == 0)  {
 		return;
@@ -287,7 +287,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, nfr
 	
 	BeatsFramesConverter converter(_session, position);
 	
-	const nframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
+	const sframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
 	const double    delta_time_beats  = converter.from(delta_time_frames);
 	const uint32_t  delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
 
@@ -329,7 +329,7 @@ SMFSource::set_state (const XMLNode& node)
 }
 
 void
-SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
+SMFSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_frame)
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
 	Evoral::SMF::begin_write ();

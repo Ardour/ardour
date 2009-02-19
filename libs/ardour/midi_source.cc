@@ -108,9 +108,9 @@ MidiSource::invalidate ()
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t position,
-		nframes_t start, nframes_t cnt,
-		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t position,
+		sframes_t start, nframes_t cnt,
+		sframes_t stamp_offset, sframes_t negative_stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
 
@@ -147,7 +147,7 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t position,
 }
 
 nframes_t
-MidiSource::midi_write (MidiRingBuffer<nframes_t>& dst, nframes_t position, nframes_t cnt)
+MidiSource::midi_write (MidiRingBuffer<nframes_t>& dst, sframes_t position, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
 	return write_unlocked (dst, position, cnt);
@@ -164,7 +164,7 @@ MidiSource::file_changed (string path)
 }
 
 void
-MidiSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
+MidiSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_frame)
 {
 	set_timeline_position(start_frame);
 

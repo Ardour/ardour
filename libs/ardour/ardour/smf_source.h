@@ -52,9 +52,9 @@ public:
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 	
 	void append_event_unlocked_beats (const Evoral::Event<double>& ev);
-	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, nframes_t position);
+	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t position);
 
-	void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
+	void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
 	void mark_streaming_write_completed ();
 
 	XMLNode& get_state ();
@@ -71,20 +71,20 @@ public:
 
 private:
 	nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
-			nframes_t position,
-			nframes_t start,
+			sframes_t position,
+			sframes_t start,
 			nframes_t cnt,
-			nframes_t stamp_offset,
-			nframes_t negative_stamp_offset) const;
+			sframes_t stamp_offset,
+			sframes_t negative_stamp_offset) const;
 
 	nframes_t write_unlocked (MidiRingBuffer<nframes_t>& src,
-			nframes_t position,
+			sframes_t position,
 			nframes_t cnt);
 
 	void set_default_controls_interpolation ();
 
 	double    _last_ev_time_beats;
-	nframes_t _last_ev_time_frames;
+	sframes_t _last_ev_time_frames;
 };
 
 }; /* namespace ARDOUR */

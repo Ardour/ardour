@@ -29,22 +29,22 @@ namespace ARDOUR {
 
 class Session;
 
-class BeatsFramesConverter : public Evoral::TimeConverter<double,nframes_t> {
+class BeatsFramesConverter : public Evoral::TimeConverter<double,sframes_t> {
 public:
-	BeatsFramesConverter(Session& session, nframes_t origin)
+	BeatsFramesConverter(Session& session, sframes_t origin)
 		: _session(session)
 		, _origin(origin)
 	{}
 	
-	nframes_t to(double beats)       const;
-	double    from(nframes_t frames) const;
+	sframes_t to(double beats)       const;
+	double    from(sframes_t frames) const;
 
-	nframes_t origin() const              { return _origin; }
-	void     set_origin(nframes_t origin) { _origin = origin; }
+	sframes_t origin() const              { return _origin; }
+	void     set_origin(sframes_t origin) { _origin = origin; }
 
 private:
 	Session&  _session;
-	nframes_t _origin;
+	sframes_t _origin;
 };
 
 } /* namespace ARDOUR */

@@ -36,6 +36,7 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/automation_list.h>
+#include <ardour/types.h>
 
 class AutomationLine;
 class ControlPoint;
@@ -56,7 +57,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
   public:
 	AutomationLine (const string& name, TimeAxisView&, ArdourCanvas::Group&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
-			const Evoral::TimeConverter<double, nframes_t>* converter = 0);
+			const Evoral::TimeConverter<double, ARDOUR::sframes_t>* converter = 0);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -183,8 +184,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	int64_t  drag_x;
 	int64_t  drag_distance;
 
-	const Evoral::TimeConverter<double, nframes_t>& _time_converter;
-	ARDOUR::AutomationList::InterpolationStyle      _interpolation;
+	const Evoral::TimeConverter<double, ARDOUR::sframes_t>& _time_converter;
+	ARDOUR::AutomationList::InterpolationStyle              _interpolation;
 
 	void modify_view_point (ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);
