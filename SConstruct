@@ -715,6 +715,14 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
     if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
         opt_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
         debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
+
+    if (env['VST']):
+        #
+        # everything must be 32 bit for VST (we're not replicating Cakewalk's hack, yet ...)
+        # 
+        opt_flags.extend(["-m32"])
+        debug_flags.extend(["-m32"])
+
 # end of processor-specific section
 
 # optimization section
