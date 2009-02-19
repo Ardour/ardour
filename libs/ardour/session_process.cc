@@ -54,8 +54,11 @@ Session::process (nframes_t nframes)
 	} 
 	
 	(this->*process_function) (nframes);
-
-	SendFeedback (); /* EMIT SIGNAL */
+	
+	{
+		Glib::Mutex::Lock lm (midi_lock, Glib::TRY_LOCK);
+		SendFeedback (); /* EMIT SIGNAL */
+	}
 }
 
 void
