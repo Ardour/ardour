@@ -95,7 +95,8 @@ SMFSource::~SMFSource ()
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t dur,
+SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t position,
+		nframes_t start, nframes_t dur,
 		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	int      ret  = 0;
@@ -110,8 +111,10 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 	uint8_t* ev_buffer  = 0;
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
+	
+	BeatsFramesConverter converter(_session, position);
 
-	const uint64_t start_ticks = (uint64_t)(_converter.from(start) * ppqn());
+	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
 
 	if (_last_read_end == 0 || start != _last_read_end) {
 		cerr << "SMFSource::read_unlocked seeking to " << start << endl;
@@ -143,7 +146,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
 
 		assert(time >= start_ticks);
-		const nframes_t ev_frame_time = _converter.to(time / (double)ppqn()) + stamp_offset;
+		const nframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
 
 		if (ev_frame_time < start + dur) {
 			dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
@@ -164,7 +167,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nfram
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t dur)
+SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t position, nframes_t dur)
 {
 	_write_data_count = 0;
 		
@@ -183,7 +186,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t dur)
 
 	while (true) {
 		bool ret = src.peek_time(&time);
-		if (!ret || time - _timeline_position > _length + dur) {
+		if (!ret || time - position > _length + dur) {
 			break;
 		}
 
@@ -203,8 +206,8 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t dur)
 			break;
 		}
 		
-		assert(time >= _timeline_position);
-		time -= _timeline_position;
+		assert(time >= position);
+		time -= position;
 		
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
@@ -214,7 +217,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t dur)
 			continue;
 		}
 		
-		append_event_unlocked_frames(ev);
+		append_event_unlocked_frames(ev, position);
 	}
 
 	if (_model) {
@@ -227,7 +230,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, nframes_t dur)
 	const nframes_t oldlen = _length;
 	update_length(oldlen, dur);
 
-	ViewDataRangeReady(_timeline_position + oldlen, dur); /* EMIT SIGNAL */
+	ViewDataRangeReady(position + oldlen, dur); /* EMIT SIGNAL */
 
 	return dur;
 }
@@ -266,7 +269,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 
 /** Append an event with a timestamp in frames (nframes_t) */
 void
-SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev)
+SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, nframes_t position)
 {
 	if (ev.size() == 0)  {
 		return;
@@ -282,8 +285,10 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev)
 		return;
 	}
 	
+	BeatsFramesConverter converter(_session, position);
+	
 	const nframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
-	const double    delta_time_beats  = _converter.from(delta_time_frames);
+	const double    delta_time_beats  = converter.from(delta_time_frames);
 	const uint32_t  delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer());
@@ -292,7 +297,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev)
 	_write_data_count += ev.size();
 
 	if (_model) {
-		const double ev_time_beats = _converter.from(ev.time());
+		const double ev_time_beats = converter.from(ev.time());
 		const Evoral::Event<double> beat_ev(
 				ev.event_type(), ev_time_beats, ev.size(), (uint8_t*)ev.buffer());
 		_model->append(beat_ev);

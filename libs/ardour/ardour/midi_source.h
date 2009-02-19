@@ -47,12 +47,28 @@ class MidiSource : virtual public Source
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 	
-	virtual nframes_t midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
+	/** Read the data in a given time range from the MIDI source.
+	 * All time stamps in parameters are in audio frames (even if the source has tempo time).
+	 * \param dst Ring buffer where read events are written
+	 * \param position Start position of the SOURCE in this read context
+	 * \param start Start of range to be read
+	 * \param cnt Length of range to be read (in audio frames)
+	 * \param stamp_offset Offset to add to event times written to dst
+	 * \param negative_stamp_offset Offset to subtract from event times written to dst
+	 */
+	virtual nframes_t midi_read (MidiRingBuffer<nframes_t>& dst,
+			nframes_t position,
+			nframes_t start, nframes_t cnt,
 			nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
-	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src, nframes_t cnt);
+
+	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
+			nframes_t position,
+			nframes_t cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<double>& ev) = 0;
-	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev) = 0;
+
+	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
+			nframes_t position) = 0;
 
 	virtual void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
 	virtual void mark_streaming_write_started ();
@@ -86,29 +102,26 @@ class MidiSource : virtual public Source
 
 	void set_note_mode(NoteMode mode);
 	
-	void set_timeline_position (int64_t pos);
-
 	boost::shared_ptr<MidiModel> model() { return _model; }
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
 	void drop_model() { _model.reset(); }
 
-	const Evoral::TimeConverter<double, nframes_t>& time_converter() const {
-		return _converter;
-	}
-
   protected:
 	virtual void flush_midi() = 0;
 	
-	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
+	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
+			nframes_t position,
+			nframes_t start, nframes_t cnt,
 			nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
-	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst, nframes_t cnt) = 0;
+
+	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst,
+			nframes_t position,
+			nframes_t cnt) = 0;
 	
 	std::string         _captured_for;
 	mutable uint32_t    _read_data_count;  ///< modified in read()
 	mutable uint32_t    _write_data_count; ///< modified in write()
 	
-	BeatsFramesConverter _converter;
-
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 	

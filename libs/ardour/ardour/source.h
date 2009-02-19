@@ -26,7 +26,6 @@
 #include <boost/utility.hpp>
 #include <sigc++/signal.h>
 #include <pbd/statefuldestructible.h> 
-#include <evoral/TimeConverter.hpp>
 
 #include <ardour/ardour.h>
 #include <ardour/session_object.h>
@@ -112,10 +111,6 @@ class Source : public SessionObject, public boost::noncopyable
 	
 	void set_allow_remove_if_empty (bool yn);
 	
-	virtual const Evoral::TimeConverter<double, nframes_t>& time_converter() const {
-		return Evoral::IdentityConverter<double, nframes_t>();
-	}
-
 	Glib::Mutex& mutex()       { return _lock; }
 	Flag         flags() const { return _flags; }
 

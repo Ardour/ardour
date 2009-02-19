@@ -352,8 +352,10 @@ write_midi_data_to_new_files (Evoral::SMF* source, Session::ImportStatus& status
 				status.progress += 0.01;
 		}
 
+		const nframes64_t pos = 0;
 		const double length_beats = ceil(t / (double)source->ppqn());
-		smfs->update_length(0, smfs->time_converter().to(length_beats));
+		BeatsFramesConverter converter(smfs->session(), pos);
+		smfs->update_length(pos, converter.to(length_beats));
 		smfs->end_write();
 
 		if (status.cancel) {

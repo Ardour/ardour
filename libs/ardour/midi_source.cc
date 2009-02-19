@@ -53,7 +53,6 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source (s, DataType::MIDI, name, flags)
 	, _read_data_count(0)
 	, _write_data_count(0)
-	, _converter(s, _timeline_position)
 	, _writing (false)
 	, _last_read_end(0)
 {
@@ -63,7 +62,6 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source (s, node)
 	, _read_data_count(0)
 	, _write_data_count(0)
-	, _converter(s, _timeline_position)
 	, _writing (false)
 	, _last_read_end(0)
 {
@@ -110,13 +108,16 @@ MidiSource::invalidate ()
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t cnt,
+MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t position,
+		nframes_t start, nframes_t cnt,
 		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
-
 	Glib::Mutex::Lock lm (_lock);
+
+	BeatsFramesConverter converter(_session, position);
+
 	if (_model) {
-#define BEATS_TO_FRAMES(t) (_converter.to(t) + stamp_offset - negative_stamp_offset)
+#define BEATS_TO_FRAMES(t) (converter.to(t) + stamp_offset - negative_stamp_offset)
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 		
@@ -141,15 +142,15 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_
 		}
 		return cnt;
 	} else {
-		return read_unlocked (dst, start, cnt, stamp_offset, negative_stamp_offset);
+		return read_unlocked (dst, position, start, cnt, stamp_offset, negative_stamp_offset);
 	}
 }
 
 nframes_t
-MidiSource::midi_write (MidiRingBuffer<nframes_t>& dst, nframes_t cnt)
+MidiSource::midi_write (MidiRingBuffer<nframes_t>& dst, nframes_t position, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
-	return write_unlocked (dst, cnt);
+	return write_unlocked (dst, position, cnt);
 }
 
 bool
@@ -163,16 +164,9 @@ MidiSource::file_changed (string path)
 }
 
 void
-MidiSource::set_timeline_position (int64_t pos)
-{
-	Source::set_timeline_position(pos);
-	_converter.set_origin(pos);
-}
-
-void
 MidiSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
 {
-	set_timeline_position(start_frame); // why do I have a feeling this can break somehow...
+	set_timeline_position(start_frame);
 
 	if (_model) {
 		_model->set_note_mode(mode);

@@ -184,16 +184,12 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer<nframes_t>& dst, nf
 	}
 	
 	if (src->midi_read (
-			// the destination buffer
-			dst,  
-			// where to start reading in the region
-			_start + internal_offset, 
-			// how many bytes
-			to_read, 
-			// the offset in the output buffer
-			output_buffer_position,
-			// what to substract from note times written in the output buffer
-			negative_output_buffer_position
+			dst, // destination buffer
+			_position - _start, // start position of the source in this read context
+			_start + internal_offset, // where to start reading in the region
+			to_read, // read duration in frames
+			output_buffer_position, // the offset in the output buffer
+			negative_output_buffer_position // amount to substract from note times
 		) != to_read) {
 		return 0; /* "read nothing" */
 	}

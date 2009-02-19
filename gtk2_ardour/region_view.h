@@ -25,6 +25,7 @@
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
 #include <ardour/region.h>
+#include <ardour/beats_frames_converter.h>
 
 #include "time_axis_view_item.h"
 #include "automation_line.h"
@@ -149,6 +150,8 @@ class RegionView : public TimeAxisViewItem
 	    that will be played at any given time.
 	*/
 	std::list<ArdourCanvas::SimpleRect*> _coverage_frames;
+
+	ARDOUR::BeatsFramesConverter _time_converter;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

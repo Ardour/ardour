@@ -65,25 +65,25 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
                         double                            spu,
                         Gdk::Color&                       basic_color)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false,
-
-			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
-							  TimeAxisViewItem::ShowNameHighlight|
-							  TimeAxisViewItem::ShowFrame))
-	  , _region (r)
-	  , sync_mark(0)
-	  , sync_line(0)
-	  , editor(0)
-	  , current_visible_sync_position(0.0)
-	  , valid(false)
-	  , _enable_display(false)
-	  , _pixel_width(1.0)
-	  , in_destructor(false)
-	  , wait_for_data(false)
+			TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
+				TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame))
+	, _region (r)
+	, sync_mark(0)
+	, sync_line(0)
+	, editor(0)
+	, current_visible_sync_position(0.0)
+	, valid(false)
+	, _enable_display(false)
+	, _pixel_width(1.0)
+	, in_destructor(false)
+	, wait_for_data(false)
+	, _time_converter(r->session(), r->position())
 {
 }
 
 RegionView::RegionView (const RegionView& other)
 	: TimeAxisViewItem (other)
+	, _time_converter(other._time_converter)
 {
 	/* derived concrete type will call init () */
 
@@ -96,6 +96,7 @@ RegionView::RegionView (const RegionView& other)
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
 	: TimeAxisViewItem (other)
+	, _time_converter(other._time_converter)
 {
 	/* this is a pseudo-copy constructor used when dragging regions 
 	   around on the canvas.
@@ -128,6 +129,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
+	, _time_converter(r->session(), r->position())
 {
 }
 
@@ -246,6 +248,7 @@ RegionView::region_resized (Change what_changed)
 
 	if (what_changed & ARDOUR::PositionChanged) {
 		set_position (_region->position(), 0);
+		_time_converter.set_origin(_region->position());
 	}
 
 	if (what_changed & Change (StartChanged|LengthChanged)) {

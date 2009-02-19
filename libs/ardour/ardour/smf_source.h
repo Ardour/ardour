@@ -52,7 +52,7 @@ public:
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 	
 	void append_event_unlocked_beats (const Evoral::Event<double>& ev);
-	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev);
+	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, nframes_t position);
 
 	void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
 	void mark_streaming_write_completed ();
@@ -70,15 +70,15 @@ public:
 	static bool safe_midi_file_extension (const Glib::ustring& path);
 
 private:
-	nframes_t read_unlocked (
-			MidiRingBuffer<nframes_t>& dst,
+	nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
+			nframes_t position,
 			nframes_t start,
-			nframes_t cn,
+			nframes_t cnt,
 			nframes_t stamp_offset,
 			nframes_t negative_stamp_offset) const;
 
-	nframes_t write_unlocked (
-			MidiRingBuffer<nframes_t>& src,
+	nframes_t write_unlocked (MidiRingBuffer<nframes_t>& src,
+			nframes_t position,
 			nframes_t cnt);
 
 	void set_default_controls_interpolation ();
