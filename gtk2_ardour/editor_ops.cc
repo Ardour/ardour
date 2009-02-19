@@ -5867,37 +5867,6 @@ Editor::set_track_height (uint32_t h)
 }
 
 void
-Editor::set_track_height_largest ()
-{
-	set_track_height (TimeAxisView::hLargest);
-}
-void
-Editor::set_track_height_large ()
-{
-	set_track_height (TimeAxisView::hLarge);
-}
-void
-Editor::set_track_height_larger ()
-{
-	set_track_height (TimeAxisView::hLarger);
-}
-void
-Editor::set_track_height_normal ()
-{
-	set_track_height (TimeAxisView::hNormal);
-}
-void
-Editor::set_track_height_smaller ()
-{
-	set_track_height (TimeAxisView::hSmaller);
-}
-void
-Editor::set_track_height_small ()
-{
-	set_track_height (TimeAxisView::hSmall);
-}
-
-void
 Editor::toggle_tracks_active ()
 {
 	TrackSelection& ts (selection->tracks);

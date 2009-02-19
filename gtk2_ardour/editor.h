@@ -2356,12 +2356,6 @@ public:
 
 	void fit_tracks ();
 	void set_track_height (uint32_t h);
-	void set_track_height_largest ();
-	void set_track_height_large ();
-	void set_track_height_larger ();
-	void set_track_height_normal ();
-	void set_track_height_smaller ();
-	void set_track_height_small ();
 
 	void remove_tracks ();
 	void toggle_tracks_active ();

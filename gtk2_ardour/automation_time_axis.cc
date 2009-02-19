@@ -100,8 +100,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	
 	_base_rect->set_data ("trackview", this);
 
-	_base_rect->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
-						 _base_rect, this));
+	_base_rect->signal_event().connect (bind (
+			mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
+			_base_rect, this));
 
 	_base_rect->lower_to_bottom();
 
