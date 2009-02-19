@@ -21,7 +21,7 @@
 #include <cstdio>
 
 #include <fst.h>
-#include <vst/aeffectx.h>
+#include <fst/vestige/aeffectx.h>
 
 #include <ardour/session.h>
 #include <ardour/vst_plugin.h>
@@ -52,7 +52,7 @@ long Session::vst_callback (AEffect* effect,
 	SHOW_CALLBACK ("am callback, opcode = %d", opcode);
 	
 	if (effect && effect->user) {
-		plug = static_cast<VSTPlugin*> (effect->user);
+	        plug = (VSTPlugin*) (effect->user);
 		session = &plug->session();
 	} else {
 		plug = 0;

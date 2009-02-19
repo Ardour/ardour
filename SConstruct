@@ -394,28 +394,6 @@ tarball_bld = Builder (action = tarballer,
 env.Append (BUILDERS = {'Distribute' : dist_bld})
 env.Append (BUILDERS = {'Tarball' : tarball_bld})
 
-#
-# Make sure they know what they are doing
-#
-
-if env['VST']:
-    if os.path.isfile('.personal_use_only'):
-        print "Enabling VST support. Note that distributing a VST-enabled ardour\nis a violation of several different licences.\nBuild with VST=false if you intend to distribute ardour to others."
-    else:
-        sys.stdout.write ("Are you building Ardour for personal use (rather than distribution to others)? [no]: ")
-        answer = sys.stdin.readline ()
-        answer = answer.rstrip().strip()
-        if answer == "yes" or answer == "y":
-            fh = open('.personal_use_only', 'w')
-            fh.close()
-            print "OK, VST support will be enabled"
-        else:
-            print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. Build with VST=false.'
-            sys.exit (-1);
-else:
-    if os.path.isfile('.personal_use_only'):
-        os.remove('.personal_use_only')
-
 ####################
 # push environment
 ####################

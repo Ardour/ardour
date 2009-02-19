@@ -522,7 +522,7 @@ PluginManager::vst_discover (string path)
 	info->unique_id = buf;
 	info->category = "VST";
 	info->path = path;
-	// need to set info->creator but FST doesn't provide it
+	info->creator = finfo->creator;
 	info->index = 0;
 	info->n_inputs = finfo->numInputs;
 	info->n_outputs = finfo->numOutputs;

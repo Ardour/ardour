@@ -248,10 +248,14 @@ sigpipe_handler (int sig)
 }
 
 #ifdef VST_SUPPORT
+
+extern int gui_init (int* argc, char** argv[]);
+
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
    as a shared library.
 */
+
 extern "C" {
 int ardour_main (int argc, char *argv[])
 #else
@@ -266,6 +270,13 @@ int main (int argc, char* argv[])
 
         Glib::thread_init();
 	gtk_set_locale ();
+
+#ifdef VST_SUPPORT
+	/* this does some magic that is needed to make GTK and Wine's own
+	   X11 client interact properly.
+	*/
+	gui_init (&argc, &argv);
+#endif
 
 	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure

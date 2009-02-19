@@ -18,6 +18,7 @@
 */
 
 #include <fst.h>
+#include <gtk/gtk.h>
 #include <gtk/gtksocket.h>
 #include <ardour/insert.h>
 #include <ardour/vst_plugin.h>
@@ -76,6 +77,8 @@ VSTPluginUI::package (Gtk::Window& win)
 	
 	socket.add_id (fst_get_XID (vst->fst()));
 
+	fst_move_window_into_view (vst->fst());
+
 	return 0;
 }
 
@@ -118,3 +121,28 @@ VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 	return false;
 }
 
+typedef int (*error_handler_t)( Display *, XErrorEvent *);
+static Display *the_gtk_display;
+static error_handler_t wine_error_handler;
+static error_handler_t gtk_error_handler;
+
+static int 
+fst_xerror_handler( Display *disp, XErrorEvent *ev )
+{
+	if (disp == the_gtk_display) {
+		printf ("relaying error to gtk\n");
+		return gtk_error_handler (disp, ev);
+	} else {
+		printf( "relaying error to wine\n" );
+		return wine_error_handler (disp, ev);
+	}
+}
+
+void
+gui_init (int *argc, char **argv[])
+{
+	wine_error_handler = XSetErrorHandler (NULL);
+	gtk_init (argc, argv);
+	the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
+	gtk_error_handler = XSetErrorHandler( fst_xerror_handler );
+}

@@ -330,15 +330,15 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 #endif
 
 #ifdef VST_SUPPORT
-	if (Config->get_use_vst() && fst_init ()) {
-		return -1;
+	if (Config->get_use_vst() && fst_init (0)) {
+	        return -1;
 	}
 #endif
 
 #ifdef HAVE_AUDIOUNITS
 	AUPluginInfo::load_cached_info ();
 #endif
-	
+
 	/* Make VAMP look in our library ahead of anything else */
 
 	char *p = getenv ("VAMP_PATH");

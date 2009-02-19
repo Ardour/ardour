@@ -32,9 +32,6 @@
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
-#ifdef VST_SUPPORT
-#include <fst.h>
-#endif
 
 #include <ardour/timestamps.h>
 
