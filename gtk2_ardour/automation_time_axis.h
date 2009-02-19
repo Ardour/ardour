@@ -123,7 +123,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool    first_call_to_set_height;
 
 	Gtk::Button        hide_button;
-	Gtk::Button        clear_button;
 	Gtk::Button        auto_button; 
 	Gtk::Menu*         automation_menu;
 	Gtk::Label*        plugname;
