@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+  Copyright (C) 2003 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -146,9 +146,9 @@ AddRouteDialog::AddRouteDialog ()
 
 	/* we need more control over the visibility of these boxes */
 	/*
-	hbox3->set_no_show_all (true);
-	hbox9->set_no_show_all (true);
-	hbox4->set_no_show_all (true);
+	  hbox3->set_no_show_all (true);
+	  hbox9->set_no_show_all (true);
+	  hbox4->set_no_show_all (true);
 	*/
 	/* track/bus choice & modes */
 
@@ -182,7 +182,7 @@ AddRouteDialog::AddRouteDialog ()
 	vbox1->pack_start (*frame1, PACK_SHRINK);
 
 	if (!ARDOUR::Profile->get_sae()) {
-	  vbox1->pack_start (*frame2, PACK_SHRINK);
+		vbox1->pack_start (*frame2, PACK_SHRINK);
 	}
 
 	get_vbox()->set_spacing (6);
@@ -213,19 +213,19 @@ AddRouteDialog::~AddRouteDialog ()
 void
 AddRouteDialog::track_type_chosen ()
 {
-  if (template_button.get_active()) {
-    track_mode_combo.set_sensitive (false);
-    channel_combo.set_sensitive (false);
-    track_template_combo.set_sensitive (true);
-  } else {
-    track_template_combo.set_sensitive (false);
-    channel_combo.set_sensitive (true);
-    if (track_button.get_active()) {
-      track_mode_combo.set_sensitive (true);
-    } else {
-      track_mode_combo.set_sensitive (false);
-    }
-  }
+	if (template_button.get_active()) {
+		track_mode_combo.set_sensitive (false);
+		channel_combo.set_sensitive (false);
+		track_template_combo.set_sensitive (true);
+	} else {
+		track_template_combo.set_sensitive (false);
+		channel_combo.set_sensitive (true);
+		if (track_button.get_active()) {
+			track_mode_combo.set_sensitive (true);
+		} else {
+			track_mode_combo.set_sensitive (false);
+		}
+	}
 }
 
 bool
@@ -287,56 +287,56 @@ AddRouteDialog::channels ()
 string
 AddRouteDialog::track_template ()
 {
-  if (!template_button.get_active()) {
-    return string ();
-  }
+	if (!template_button.get_active()) {
+		return string ();
+	}
 
-  string str = track_template_combo.get_active_text();
+	string str = track_template_combo.get_active_text();
 
-  for (vector<Session::RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
-    if ((*x).name == str) {
-      return (*x).path;
-    }
-  }
+	for (vector<Session::RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
+		if ((*x).name == str) {
+			return (*x).path;
+		}
+	}
 
-  return string();
+	return string();
 }
 
 void
 AddRouteDialog::on_show ()
 {
-  refill_track_templates ();
-  Dialog::on_show ();
+	refill_track_templates ();
+	Dialog::on_show ();
 }
 
 void
 AddRouteDialog::refill_track_templates ()
 {
-  route_templates.clear ();
-  Session::get_route_templates (route_templates);
+	route_templates.clear ();
+	Session::get_route_templates (route_templates);
   
-  if (!route_templates.empty()) {
-    vector<string> v;
-    for (vector<Session::RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
-      v.push_back ((*x).name);
-    }
-    set_popdown_strings (track_template_combo, v);
-    track_template_combo.set_active_text (v.front());
-  } 
+	if (!route_templates.empty()) {
+		vector<string> v;
+		for (vector<Session::RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
+			v.push_back ((*x).name);
+		}
+		set_popdown_strings (track_template_combo, v);
+		track_template_combo.set_active_text (v.front());
+	} 
 
-  reset_template_option_visibility ();
+	reset_template_option_visibility ();
 }
 
 void
 AddRouteDialog::reset_template_option_visibility ()
 {
-  if (route_templates.empty()) {
-    hbox3->hide ();
-    hbox9->hide ();
-    hbox4->hide ();
-  } else {
-    hbox3->show_all ();
-    hbox9->show_all ();
-    hbox4->show_all ();
-  }
+	if (route_templates.empty()) {
+		hbox3->hide ();
+		hbox9->hide ();
+		hbox4->hide ();
+	} else {
+		hbox3->show_all ();
+		hbox9->show_all ();
+		hbox4->show_all ();
+	}
 }

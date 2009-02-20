@@ -1175,35 +1175,35 @@ RouteUI::map_frozen ()
 void
 RouteUI::save_as_template ()
 {
-  Glib::ustring path;
-  Glib::ustring safe_name;
-  std::string name;
-
-  path = Session::route_template_dir();
-
-  if (g_mkdir_with_parents (path.c_str(), 0755)) {
-    error << string_compose (_("Cannot create route template directory %1"), path) << endmsg;
-    return;
-  }
-
-  Prompter p (true); // modal
-
-  p.set_prompt (_("Template name:"));
-  switch (p.run()) {
-  case RESPONSE_ACCEPT:
-    break;
-  default:
-    return;
-  }
-
-  p.hide ();
-  p.get_result (name, true);
-
-  safe_name = legalize_for_path (name);
-  safe_name += Session::template_suffix ();
-
-  path = Glib::build_filename (path, safe_name);
-
-  _route->save_as_template (path, name);
+	Glib::ustring path;
+	Glib::ustring safe_name;
+	std::string name;
+	
+	path = Session::route_template_dir();
+	
+	if (g_mkdir_with_parents (path.c_str(), 0755)) {
+		error << string_compose (_("Cannot create route template directory %1"), path) << endmsg;
+		return;
+	}
+	
+	Prompter p (true); // modal
+	
+	p.set_prompt (_("Template name:"));
+	switch (p.run()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
+	}
+	
+	p.hide ();
+	p.get_result (name, true);
+	
+	safe_name = legalize_for_path (name);
+	safe_name += Session::template_suffix ();
+	
+	path = Glib::build_filename (path, safe_name);
+	
+	_route->save_as_template (path, name);
 }
 
