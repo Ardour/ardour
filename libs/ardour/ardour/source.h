@@ -61,7 +61,8 @@ class Source : public SessionObject, public boost::noncopyable
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 	
-	sframes_t length() const { return _length; }
+	virtual sframes_t length (sframes_t pos) const = 0;
+	virtual void      update_length (sframes_t pos, sframes_t cnt) = 0;
 	
 	virtual const Glib::ustring& path() const = 0;
 
@@ -104,10 +105,8 @@ class Source : public SessionObject, public boost::noncopyable
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
 	
-	void update_length (sframes_t pos, sframes_t cnt);
-	
-	int64_t timeline_position() const { return _timeline_position; }
-	virtual void set_timeline_position (int64_t pos);
+	sframes_t    timeline_position() const { return _timeline_position; }
+	virtual void set_timeline_position (sframes_t pos);
 	
 	void set_allow_remove_if_empty (bool yn);
 	
@@ -118,8 +117,7 @@ class Source : public SessionObject, public boost::noncopyable
 	DataType            _type;
 	Flag                _flags;
 	time_t              _timestamp;
-	sframes_t           _length;
-	int64_t             _timeline_position;
+	sframes_t           _timeline_position;
 	bool                _analysed;
 	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;

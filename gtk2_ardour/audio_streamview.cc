@@ -699,7 +699,7 @@ AudioStreamView::update_rec_regions ()
 
 				if (nlen != region->length()) {
 
-					if (region->source(0)->length() >= region->start() + nlen) {
+					if (region->source_length(0) >= region->start() + nlen) {
 
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);

@@ -77,13 +77,12 @@ FileSource::removable () const
 {
 	return (_flags & Removable)
 		&& (   (_flags & RemoveAtDestroy)
-			|| ((_flags & RemovableIfEmpty) && length() == 0));
+			|| ((_flags & RemovableIfEmpty) && length(timeline_position()) == 0));
 }
 
 int
 FileSource::init (const ustring& pathstr, bool must_exist)
 {
-	_length = 0;
 	_timeline_position = 0;
 
 	if (!find (_type, pathstr, must_exist, _file_is_new, _channel)) {

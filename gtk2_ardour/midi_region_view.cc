@@ -685,6 +685,7 @@ MidiRegionView::region_resized (Change what_changed)
 	RegionView::region_resized(what_changed);
 	
 	if (what_changed & ARDOUR::PositionChanged) {
+		set_duration(_region->length(), 0);
 		if (_enable_display) {
 			redisplay_model();
 		}

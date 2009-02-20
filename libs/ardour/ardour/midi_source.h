@@ -69,6 +69,9 @@ class MidiSource : virtual public Source
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
 			sframes_t position) = 0;
+	
+	virtual sframes_t length (sframes_t pos) const;
+	virtual void      update_length (sframes_t pos, sframes_t cnt);
 
 	virtual void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
 	virtual void mark_streaming_write_started ();
@@ -118,15 +121,18 @@ class MidiSource : virtual public Source
 			sframes_t position,
 			nframes_t cnt) = 0;
 	
-	std::string         _captured_for;
-	mutable uint32_t    _read_data_count;  ///< modified in read()
-	mutable uint32_t    _write_data_count; ///< modified in write()
+	std::string      _captured_for;
+	mutable uint32_t _read_data_count;  ///< modified in read()
+	mutable uint32_t _write_data_count; ///< modified in write()
 	
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 	
 	mutable Evoral::Sequence<double>::const_iterator _model_iter;
-	mutable sframes_t                                _last_read_end;
+	
+	mutable double    _length_beats;
+	mutable sframes_t _last_read_end;
+	sframes_t         _last_write_end;
 
   private:
 	bool file_changed (std::string path);

@@ -54,6 +54,9 @@ class AudioSource : virtual public Source,
 
 	nframes64_t readable_length() const { return _length; }
 	uint32_t    n_channels()      const { return 1; }
+	
+	sframes_t length (sframes_t pos) const;
+	void      update_length (sframes_t pos, sframes_t cnt);
 
 	virtual nframes_t available_peaks (double zoom) const;
 
@@ -108,6 +111,7 @@ class AudioSource : virtual public Source,
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
 
+	sframes_t            _length;
 	bool                 _peaks_built;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	Glib::ustring         peakpath;

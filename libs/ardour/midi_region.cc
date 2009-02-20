@@ -116,6 +116,19 @@ MidiRegion::~MidiRegion ()
 {
 }
 
+void
+MidiRegion::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
+{
+	BeatsFramesConverter old_converter(_session, _position - _start);
+	double length_beats = old_converter.from(_length);
+
+	Region::set_position_internal(pos, allow_bbt_recompute);
+	
+	BeatsFramesConverter new_converter(_session, pos - _start);
+
+	set_length(new_converter.to(length_beats), 0);
+}
+
 nframes_t
 MidiRegion::read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {

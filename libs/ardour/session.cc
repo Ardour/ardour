@@ -4087,8 +4087,9 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 
 		/* construct a region to represent the bounced material */
 
-		result = RegionFactory::create (srcs, 0, srcs.front()->length(), 
-						region_name_from_path (srcs.front()->name(), true));
+		result = RegionFactory::create (srcs, 0,
+				srcs.front()->length(srcs.front()->timeline_position()), 
+				region_name_from_path (srcs.front()->name(), true));
 	}
 
   out:

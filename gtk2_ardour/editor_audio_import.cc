@@ -732,8 +732,8 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 		region_name = region_name_from_path (paths.front(), (sources.size() > 1), false);
 		
-		regions.push_back (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
-							   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
+		regions.push_back (RegionFactory::create (sources, 0, sources[0]->length(pos), region_name, 0,
+				Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 		
 	} else if (target_regions == -1 || target_regions > 1) {
 
@@ -750,8 +750,8 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 			
 			region_name = region_name_from_path ((*x)->path(), false, false, sources.size(), n);
 
-			regions.push_back (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
-								   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
+			regions.push_back (RegionFactory::create (just_one, 0, (*x)->length(pos), region_name, 0,
+					Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 
 		}
 	}

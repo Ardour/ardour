@@ -54,7 +54,9 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	, _read_data_count(0)
 	, _write_data_count(0)
 	, _writing (false)
+	, _length_beats(0.0)
 	, _last_read_end(0)
+	, _last_write_end(0)
 {
 }
 
@@ -63,7 +65,9 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	, _read_data_count(0)
 	, _write_data_count(0)
 	, _writing (false)
+	, _length_beats(0.0)
 	, _last_read_end(0)
+	, _last_write_end(0)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -99,6 +103,19 @@ MidiSource::set_state (const XMLNode& node)
 	}
 
 	return 0;
+}
+
+sframes_t
+MidiSource::length (sframes_t pos) const
+{
+	BeatsFramesConverter converter(_session, pos);
+	return converter.to(_length_beats);
+}
+
+void
+MidiSource::update_length (sframes_t pos, sframes_t cnt)
+{
+	// You're not the boss of me!
 }
 
 void
@@ -150,7 +167,9 @@ nframes_t
 MidiSource::midi_write (MidiRingBuffer<nframes_t>& dst, sframes_t position, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
-	return write_unlocked (dst, position, cnt);
+	const nframes_t ret = write_unlocked (dst, position, cnt);
+	_last_write_end = position + cnt;
+	return ret;
 }
 
 bool
@@ -172,17 +191,21 @@ MidiSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_fr
 		_model->set_note_mode(mode);
 		_model->start_write();
 	}
-	
+
+	_last_write_end = start_frame;
 	_writing = true;
 }
 
 void
 MidiSource::mark_streaming_write_started ()
 {
+	sframes_t start_frame = _session.transport_frame();
+
 	if (_model) {
 		_model->start_write();
 	}
 
+	_last_write_end = start_frame;
 	_writing = true;
 }
 
@@ -190,7 +213,7 @@ void
 MidiSource::mark_streaming_write_completed ()
 {
 	if (_model) {
-		_model->end_write(false); // FIXME: param?
+		_model->end_write(false);
 	}
 
 	_writing = false;

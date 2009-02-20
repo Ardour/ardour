@@ -995,7 +995,7 @@ Session::state(bool full_state)
 			boost::shared_ptr<AudioFileSource> fs;
 			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
 				if (!fs->destructive()) {
-					if (fs->length() == 0) {
+					if (fs->length(fs->timeline_position()) == 0) {
 						continue;
 					}
 				}
@@ -2560,7 +2560,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
- 		if (!i->second->used() && i->second->length() > 0) {
+ 		if (!i->second->used() && i->second->length(i->second->timeline_position()) > 0) {
 			dead_sources.push_back (i->second);
 			i->second->GoingAway();
 		} 

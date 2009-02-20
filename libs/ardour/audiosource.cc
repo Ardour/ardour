@@ -57,6 +57,7 @@ bool AudioSource::_build_peakfiles = false;
 
 AudioSource::AudioSource (Session& s, ustring name)
 	: Source (s, DataType::AUDIO, name)
+	, _length (0)
 {
 	_peaks_built = false;
 	_peak_byte_max = 0;
@@ -70,6 +71,7 @@ AudioSource::AudioSource (Session& s, ustring name)
 
 AudioSource::AudioSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
+	, _length (0)
 {
 	
 	_peaks_built = false;
@@ -124,6 +126,21 @@ AudioSource::set_state (const XMLNode& node)
 
 	return 0;
 }
+
+sframes_t
+AudioSource::length (sframes_t pos) const
+{
+	return _length;
+}
+
+void
+AudioSource::update_length (sframes_t pos, sframes_t cnt)
+{
+	if (pos + cnt > _length) {
+		_length = pos + cnt;
+	}
+}
+
 
 /***********************************************************************
   PEAK FILE STUFF
@@ -211,7 +228,7 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 		
 		/* we found it in the peaks dir, so check it out */
 		
-		if (statbuf.st_size == 0 || ((nframes_t) statbuf.st_size < ((length() / _FPP) * sizeof (PeakData)))) {
+		if (statbuf.st_size == 0 || ((nframes_t) statbuf.st_size < ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
 			// empty
 			_peaks_built = false;
 		} else {
@@ -895,10 +912,8 @@ AudioSource::file_changed (ustring path)
 nframes_t
 AudioSource::available_peaks (double zoom_factor) const
 {
-	off_t end;
-
 	if (zoom_factor < _FPP) {
-		return length(); // peak data will come from the audio file
+		return length(_timeline_position); // peak data will come from the audio file
 	} 
 	
 	/* peak data comes from peakfile, but the filesize might not represent
@@ -907,7 +922,7 @@ AudioSource::available_peaks (double zoom_factor) const
 	   but _peak_byte_max only monotonically increases after initialization.
 	*/
 
-	end = _peak_byte_max;
+	off_t end = _peak_byte_max;
 
 	return (end/sizeof(PeakData)) * _FPP;
 }

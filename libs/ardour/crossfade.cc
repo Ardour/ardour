@@ -187,7 +187,7 @@ Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<Audio
 	layer_relation = (int32_t) (_in->layer() - _out->layer());
 
 	// Let's make sure the fade isn't too long
-	set_length(_length);
+	set_xfade_length(_length);
 }
 
 
@@ -869,16 +869,16 @@ Crossfade::set_follow_overlap (bool yn)
 	_follow_overlap = yn;
 
 	if (!yn) {
-		set_length (_short_xfade_length);
+		set_xfade_length (_short_xfade_length);
 	} else {
-		set_length (_out->first_frame() + _out->length() - _in->first_frame());
+		set_xfade_length (_out->first_frame() + _out->length() - _in->first_frame());
 	}
 
 	StateChanged (FollowOverlapChanged);
 }
 
 nframes_t
-Crossfade::set_length (nframes_t len)
+Crossfade::set_xfade_length (nframes_t len)
 {
 	nframes_t limit = 0;
 

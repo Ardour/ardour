@@ -897,10 +897,11 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	/* create a new region from all filesources, keep it private */
 
-	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, srcs[0]->length(), 
-								 region_name, 0, 
-								 (Region::Flag) (Region::WholeFile|Region::DefaultFlags),
-								 false));
+	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0,
+			srcs[0]->length(srcs[0]->timeline_position()), 
+			region_name, 0,
+			(Region::Flag) (Region::WholeFile|Region::DefaultFlags),
+			false));
 
 	new_playlist->set_orig_diskstream_id (diskstream->id());
 	new_playlist->add_region (region, _session.current_start_frame());

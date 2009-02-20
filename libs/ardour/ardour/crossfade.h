@@ -129,7 +129,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	AutomationList& fade_in() { return _fade_in; } 
 	AutomationList& fade_out() { return _fade_out; }
 
-	nframes_t set_length (nframes_t);
+	nframes_t set_xfade_length (nframes_t);
 
 	bool is_dependent() const { return true; }
 	bool depends_on (boost::shared_ptr<Region> other) const { 

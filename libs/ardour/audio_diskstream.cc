@@ -2373,9 +2373,9 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	
 	try {
 		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (
-				pending_sources, 0, first_fs->length(),
-			  region_name_from_path (first_fs->name(), true), 0,
-			  Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
+				pending_sources, 0, first_fs->length(first_fs->timeline_position()),
+				region_name_from_path (first_fs->name(), true), 0,
+				Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
 		region->special_set_position (0);
 	}
 
@@ -2389,7 +2389,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 
 	try {
 		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (
-				pending_sources, 0, first_fs->length(),
+				pending_sources, 0, first_fs->length(first_fs->timeline_position()),
 				region_name_from_path (first_fs->name(), true)));
 	}
 

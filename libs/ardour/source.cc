@@ -54,7 +54,6 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 {
 	_analysed = false;
 	_timestamp = 0;
-	_length = 0;
 	_in_use = 0;
 }
 
@@ -65,7 +64,6 @@ Source::Source (Session& s, const XMLNode& node)
 	, _timeline_position(0)
 {
 	_timestamp = 0;
-	_length = 0;
 	_analysed = false;
 	_in_use = 0;
 
@@ -137,14 +135,6 @@ Source::set_state (const XMLNode& node)
 	}
 
 	return 0;
-}
-
-void
-Source::update_length (sframes_t pos, sframes_t cnt)
-{
-	if (pos + cnt > _length) {
-		_length = pos + cnt;
-	}
 }
 
 void

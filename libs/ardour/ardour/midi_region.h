@@ -115,6 +115,8 @@ class MidiRegion : public Region
 
 	void recompute_at_start ();
 	void recompute_at_end ();
+	
+	void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
 
 	void switch_source(boost::shared_ptr<Source> source);
 

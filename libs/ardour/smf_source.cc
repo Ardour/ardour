@@ -182,16 +182,17 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, sframes_t position, n
 		_model->start_write();
 	}
 
-	Evoral::MIDIEvent<nframes_t> ev(0, 0.0, 4, NULL, true);
+	Evoral::MIDIEvent<nframes_t> ev;
 
 	while (true) {
 		bool ret = src.peek_time(&time);
-		if (!ret || time - position > _length + dur) {
+		if (!ret || time > _last_write_end + dur) {
 			break;
 		}
 
 		ret = src.read_prefix(&time, &type, &size);
 		if (!ret) {
+			cerr << "ERROR: Unable to read event prefix, corrupt MIDI ring buffer" << endl;
 			break;
 		}
 
@@ -227,10 +228,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, sframes_t position, n
 	Evoral::SMF::flush();
 	free(buf);
 
-	const sframes_t oldlen = _length;
-	update_length(oldlen, dur);
-
-	ViewDataRangeReady(position + oldlen, dur); /* EMIT SIGNAL */
+	ViewDataRangeReady(position + _last_write_end, dur); /* EMIT SIGNAL */
 
 	return dur;
 }
@@ -253,6 +251,8 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
 		return;
 	}
+	
+	_length_beats = max(_length_beats, ev.time());
 	
 	const double delta_time_beats   = ev.time() - _last_ev_time_beats;
 	const uint32_t delta_time_ticks = (uint32_t)lrint(delta_time_beats * (double)ppqn());
@@ -286,6 +286,8 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sfr
 	}
 	
 	BeatsFramesConverter converter(_session, position);
+	
+	_length_beats = max(_length_beats, converter.from(ev.time()));
 	
 	const sframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
 	const double    delta_time_beats  = converter.from(delta_time_frames);
@@ -405,6 +407,8 @@ SMFSource::load_model (bool lock, bool force_reload)
 			scratch_size = ev.size();
 		}
 		ev.size() = scratch_size; // ensure read_event only allocates if necessary
+		
+		_length_beats = max(_length_beats, ev.time());
 	}
 
 	set_default_controls_interpolation();

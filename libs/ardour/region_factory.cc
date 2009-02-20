@@ -109,7 +109,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	*/
 
 	if ((other = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
-		AudioRegion* ar = new AudioRegion (other, srcs, srcs.front()->length(), name, layer, flags);
+		AudioRegion* ar = new AudioRegion (other, srcs, srcs.front()->length(srcs.front()->timeline_position()), name, layer, flags);
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		if (announce) {

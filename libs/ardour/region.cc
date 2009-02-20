@@ -1534,6 +1534,12 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 	return true;
 }
 
+sframes_t
+Region::source_length(uint32_t n) const
+{
+	return _sources[n]->length(_position - _start);
+}
+
 bool
 Region::verify_length (nframes_t len)
 {
@@ -1544,7 +1550,7 @@ Region::verify_length (nframes_t len)
 	nframes_t maxlen = 0;
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
-		maxlen = max (maxlen, (nframes_t)_sources[n]->length() - _start);
+		maxlen = max (maxlen, (nframes_t)source_length(n) - _start);
 	}
 	
 	len = min (len, maxlen);
@@ -1562,7 +1568,7 @@ Region::verify_start_and_length (nframes_t new_start, nframes_t& new_length)
 	nframes_t maxlen = 0;
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
-		maxlen = max (maxlen, (nframes_t)_sources[n]->length() - new_start);
+		maxlen = max (maxlen, (nframes_t)source_length(n) - new_start);
 	}
 
 	new_length = min (new_length, maxlen);
@@ -1578,7 +1584,7 @@ Region::verify_start (nframes_t pos)
 	}
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
-		if (pos > _sources[n]->length() - _length) {
+		if (pos > source_length(n) - _length) {
 			return false;
 		}
 	}
@@ -1593,8 +1599,8 @@ Region::verify_start_mutable (nframes_t& new_start)
 	}
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
-		if (new_start > _sources[n]->length() - _length) {
-			new_start = _sources[n]->length() - _length;
+		if (new_start > source_length(n) - _length) {
+			new_start = source_length(n) - _length;
 		}
 	}
 	return true;

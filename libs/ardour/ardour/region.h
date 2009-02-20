@@ -120,6 +120,8 @@ class Region
 	nframes_t length()    const { return _length; }
 	layer_t   layer ()    const { return _layer; }
 
+	sframes_t source_length(uint32_t n) const;
+
 	/* these two are valid ONLY during a StateChanged signal handler */
 
 	nframes_t last_position() const { return _last_position; }
@@ -288,7 +290,7 @@ class Region
 	void send_change (Change);
 
 	void trim_to_internal (nframes_t position, nframes_t length, void *src);
-	void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
+	virtual void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
 
 	bool copied() const { return _flags & Copied; }
 	void maybe_uncopy ();

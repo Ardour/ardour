@@ -989,7 +989,7 @@ Editor::region_list_sorter (TreeModel::iterator a, TreeModel::iterator b)
 		break;
 
 	case BySourceFileLength:
-		cmp = region1->source()->length() - region2->source()->length();
+		cmp = region1->source_length(0) - region2->source_length(0);
 		break;
 		
 	case BySourceFileCreationDate:
