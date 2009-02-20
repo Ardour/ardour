@@ -2042,7 +2042,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 	XMLTree tree;
 
 	if (!tree.read (template_path.c_str())) {
-	  return ret;
+		return ret;
 	}
 
 	XMLNode* node = tree.root();
@@ -2051,60 +2051,60 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 
 	while (how_many) {
 
-	  XMLNode node_copy (*node); // make a copy so we can change the name if we need to
+		XMLNode node_copy (*node); // make a copy so we can change the name if we need to
 	  
-	  std::string node_name = IO::name_from_state (*node_copy.children().front());
+		std::string node_name = IO::name_from_state (*node_copy.children().front());
 
-	  if (route_by_name (node_name) != 0) {
+		if (route_by_name (node_name) != 0) {
 
-	    /* generate a new name by adding a number to the end of the template name */
+			/* generate a new name by adding a number to the end of the template name */
 
-	    uint32_t number = 1;
+			uint32_t number = 1;
 
-	    do {
-	      snprintf (name, sizeof (name), "%s %" PRIu32, node_name.c_str(), number);
+			do {
+				snprintf (name, sizeof (name), "%s %" PRIu32, node_name.c_str(), number);
 	      
-	      number++;
+				number++;
 	      
-	      if (route_by_name (name) == 0) {
-		break;
-	      }
+				if (route_by_name (name) == 0) {
+					break;
+				}
 	      
-	    } while (number < UINT_MAX);
+			} while (number < UINT_MAX);
 
-	    if (number == UINT_MAX) {
-	      fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
-	      /*NOTREACHED*/
-	    }
+			if (number == UINT_MAX) {
+				fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+				/*NOTREACHED*/
+			}
 
-	    IO::set_name_in_state (node_copy, name);
-	  }
+			IO::set_name_in_state (node_copy, name);
+		}
 
-	  try {
-	    shared_ptr<Route> route (XMLRouteFactory (node_copy));
+		try {
+			shared_ptr<Route> route (XMLRouteFactory (node_copy));
 	    
-	    if (route == 0) {
-	      error << _("Session: cannot create track/bus from template description") << endmsg;
-	      goto out;
-	    }
+			if (route == 0) {
+				error << _("Session: cannot create track/bus from template description") << endmsg;
+				goto out;
+			}
 
-	    route->set_remote_control_id (control_id);
-	    ++control_id;
+			route->set_remote_control_id (control_id);
+			++control_id;
 	    
-	    ret.push_back (route);
-	  }
+			ret.push_back (route);
+		}
 	  
-	  catch (failed_constructor &err) {
-	    error << _("Session: could not create new route from template") << endmsg;
-	    goto out;
-	  }
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new route from template") << endmsg;
+			goto out;
+		}
 	  
-	  catch (AudioEngine::PortRegistrationFailure& pfe) {
-	    error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
-	    goto out;
-	  }
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			goto out;
+		}
 	  
-	  --how_many;
+		--how_many;
 	}
 
   out:
