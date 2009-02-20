@@ -873,14 +873,15 @@ MidiDiskstream::do_flush (RunContext context, bool force_flush)
 
 	_write_data_count = 0;
 
+	total = _session.transport_frame() - _last_flush_frame;
+	
 	if (_last_flush_frame > _session.transport_frame()
 			|| _last_flush_frame < capture_start_frame) {
 		_last_flush_frame = _session.transport_frame();
 	}
 
-	total = _session.transport_frame() - _last_flush_frame;
-
-	if (total == 0 || (_capture_buf->read_space() == 0  && _session.transport_speed() == 0) || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
+	if (total == 0 || _capture_buf->read_space() == 0
+			|| (!force_flush && (total < disk_io_chunk_frames && was_recording))) {
 		goto out;
 	}
 
@@ -903,7 +904,9 @@ MidiDiskstream::do_flush (RunContext context, bool force_flush)
 
 	assert(!destructive());
 
-	if (record_enabled() && _session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) {
+	if (record_enabled()
+			&& (   (_session.transport_frame() - _last_flush_frame > disk_io_chunk_frames)
+				|| force_flush)) {
 		if ((!_write_source) || _write_source->midi_write (*_capture_buf, capture_start_frame, to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
