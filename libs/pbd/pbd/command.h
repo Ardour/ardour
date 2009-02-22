@@ -22,8 +22,9 @@
 #define __lib_pbd_command_h__
 
 #include <pbd/statefuldestructible.h>
+#include <boost/utility.hpp>
 
-class Command : public PBD::StatefulDestructible
+class Command : public PBD::StatefulDestructible, public boost::noncopyable
 {
 public:
 	virtual ~Command() { /* NOTE: derived classes must call drop_references() */ }

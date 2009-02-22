@@ -39,63 +39,61 @@ template <class obj_T>
 class MementoCommand : public Command
 {
 public:
-	MementoCommand(obj_T &object, XMLNode *before, XMLNode *after) 
-		: obj(object), before(before), after(after)
+	MementoCommand(obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 
+		: obj(a_object), before(a_before), after(a_after)
 	{
 		/* catch destruction of the object */
-		new PBD::PairedShiva<obj_T,MementoCommand<obj_T> > (object, *this);
+		new PBD::PairedShiva< obj_T,MementoCommand<obj_T> > (obj, *this);
 	}
 
-	~MementoCommand ()
-	{
+	~MementoCommand () {
 		GoingAway(); /* EMIT SIGNAL */
-		
-		if (before)
-			delete before;
-		
-		if (after)
-			delete after;
+		delete before;
+		delete after;
 	}
 
-	void operator() () 
-	{
-		if (after)
+	void operator() () {
+		if (after) {
 			obj.set_state(*after); 
+		}
 	}
 
-	void undo() 
-	{ 
-		if (before)
+	void undo() { 
+		if (before) {
 			obj.set_state(*before); 
+		}
 	}
 
-	virtual XMLNode &get_state() 
-	{
+	virtual XMLNode &get_state() {
 		string name;
-		if (before && after)
+		if (before && after) {
 			name = "MementoCommand";
-		else if (before)
+		} else if (before) {
 			name = "MementoUndoCommand";
-		else
+		} else {
 			name = "MementoRedoCommand";
+		}
 
-		XMLNode *node = new XMLNode(name);
+		XMLNode* node = new XMLNode(name);
 
 		node->add_property("obj_id", obj.id().to_s());
 		node->add_property("type_name", typeid(obj).name());
 
-		if (before)
+		if (before) {
 			node->add_child_copy(*before);
+		}
 		
-		if (after)
+		if (after) {
 			node->add_child_copy(*after);
+		}
 
 		return *node;
 	}
 
 protected:
-	obj_T &obj;
-	XMLNode *before, *after;
+	obj_T&   obj;
+	XMLNode* before;
+	XMLNode* after;
 };
 
 #endif // __lib_pbd_memento_h__
