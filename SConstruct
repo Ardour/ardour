@@ -734,7 +734,7 @@ if env['FPU_OPTIMIZATION']:
     elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-        if env['DIST_TARGET'] == 'x86_64':
+        if env['DIST_TARGET'] == 'x86_64' and not env['VST']:
             opt_flags.append ("-DUSE_X86_64_ASM")
             debug_flags.append ("-DUSE_X86_64_ASM")
         if build_host_supports_sse != 1:
