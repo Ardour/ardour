@@ -89,9 +89,12 @@ def check_tool(conf, name):
 		conf.check_tool(name)
 		checked[name] = True
 
+def nameify(name):
+	return name.replace('/', '_').replace('++', 'PP').replace('-', '_')
+
 def check_pkg(conf, name, **args):
 	"Check for a package iff it hasn't been checked for yet"
-	var_name = 'HAVE_' + args['uselib_store'].replace('/', '_').replace('++', 'PP')
+	var_name = 'HAVE_' + nameify(args['uselib_store'])
 	check = not var_name in conf.env
 	if not check and 'atleast_version' in args:
 		# Re-check if version is newer than previous check
@@ -198,7 +201,7 @@ def configure(conf):
 	g_step = 2
 	
 def set_local_lib(conf, name, has_objects):
-	conf.define('HAVE_' + name.upper().replace('/', '_').replace('++', 'PP'), 1)
+	conf.define('HAVE_' + nameify(name.upper()), 1)
 	if has_objects:
 		if type(conf.env['AUTOWAF_LOCAL_LIBS']) != dict:
 			conf.env['AUTOWAF_LOCAL_LIBS'] = {}

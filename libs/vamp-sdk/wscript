@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+import autowaf
+
+# Version of this package (even if built as a child)
+LIBVAMP_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBVAMP_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libvamp'
+VERSION = LIBVAMP_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'fftw3', uselib_store='FFTW3', mandatory=True)
+	autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
+	conf.env.append_value('CXXFLAGS', '-DHAVE_FFTW3')
+
+def build(bld):
+	# Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		vamp-sdk/PluginHostAdapter.cpp
+		vamp-sdk/hostext/PluginBufferingAdapter.cpp
+		vamp-sdk/hostext/PluginChannelAdapter.cpp
+		vamp-sdk/hostext/PluginInputDomainAdapter.cpp
+		vamp-sdk/hostext/PluginLoader.cpp
+		vamp-sdk/hostext/PluginWrapper.cpp
+		vamp-sdk/RealTime.cpp
+	'''
+	obj.export_incdirs = ['.']
+	obj.includes     = ['.']
+	obj.name         = 'libvamp'
+	obj.target       = 'vamp'
+	obj.uselib       = 'FFTW3 FFTW3F'
+	obj.vnum         = LIBVAMP_LIB_VERSION
+	obj.install_path = ''
+	
+def shutdown():
+	autowaf.shutdown()
+

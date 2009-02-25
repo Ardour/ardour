@@ -9,7 +9,15 @@ APPNAME = 'ardour'
 srcdir = '.'
 blddir = 'build'
 
-children = [ 'libs/pbd', 'libs/midi++2', 'libs/evoral' ]
+children = [
+	'libs/pbd',
+	'libs/midi++2',
+	'libs/evoral',
+	'libs/vamp-sdk',
+	'libs/taglib',
+#	'libs/surfaces',
+#	'libs/ardour'
+]
 
 def set_options(opt):
 	autowaf.set_options(opt)
