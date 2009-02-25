@@ -62,7 +62,7 @@ namespace TagLib {
       /*!
        * Returns the size of the footer.  Presently this is always 10 bytes.
        */
-      static const unsigned int size();
+      static unsigned int size();
 
       /*!
        * Renders the footer based on the data in \a header.

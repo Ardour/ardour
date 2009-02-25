@@ -35,7 +35,7 @@ namespace TagLib {
 
   inline unsigned short byteSwap(unsigned short x)
   {
-    return ((x) >> 8) & 0xff | ((x) & 0xff) << 8;
+    return (((x) >> 8) & 0xff) | (((x) & 0xff) << 8);
   }
 
   inline unsigned short combine(unsigned char c1, unsigned char c2)

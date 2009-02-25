@@ -45,7 +45,7 @@ Footer::~Footer()
 
 }
 
-const unsigned int Footer::size()
+unsigned int Footer::size()
 {
   return FooterPrivate::size;
 }

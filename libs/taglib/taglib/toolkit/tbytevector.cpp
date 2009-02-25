@@ -147,12 +147,12 @@ namespace TagLib {
   public:
     ByteVectorMirror(const ByteVector &source) : v(source) {}
 
-    const char operator[](int index) const
+    char operator[](int index) const
     {
       return v[v.size() - index - 1];
     }
 
-    const char at(int index) const
+    char at(int index) const
     {
       return v.at(v.size() - index - 1);
     }
