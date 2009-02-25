@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+import autowaf
+import os
+
+# Version of this package (even if built as a child)
+GTKMM2EXT_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+GTKMM2EXT_LIB_VERSION = '0.8.3'
+
+# Variables for 'waf dist'
+APPNAME = 'gtkmm2ext'
+VERSION = GTKMM2EXT_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
+
+def build(bld):
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		auto_spin.cc
+		barcontroller.cc
+		binding_proxy.cc
+		choice.cc
+		click_box.cc
+		dndtreeview.cc
+		fastmeter.cc
+		focus_entry.cc
+		grouped_buttons.cc
+		gtk_ui.cc
+		idle_adjustment.cc
+		pixfader.cc
+		pixscroller.cc
+		popup.cc
+		prompter.cc
+		scroomer.cc
+		selector.cc
+		slider_controller.cc
+		stateful_button.cc
+		tearoff.cc
+		textviewer.cc
+		utils.cc
+		version.cc
+		window_title.cc
+	'''
+	obj.export_incdirs = ['.']
+	obj.includes     = ['.']
+	obj.name         = 'libgtkmm2ext'
+	obj.target       = 'gtkmm2ext'
+	obj.uselib       = 'GTKMM'
+	obj.uselib_local = 'libpbd'
+	obj.vnum         = GTKMM2EXT_LIB_VERSION
+	obj.install_path = ''
+	obj.cxxflags     = '-DPACKAGE=\\\"libgtkmm2ext\\\"'
+	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
+			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
+
+def shutdown():
+	autowaf.shutdown()
+
