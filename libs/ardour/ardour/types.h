@@ -31,7 +31,7 @@
 #include <inttypes.h>
 #include <jack/types.h>
 #include <jack/midiport.h>
-#include <control_protocol/smpte.h>
+#include "control_protocol/smpte.h"
 #include "pbd/id.h"
 
 #include <map>

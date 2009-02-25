@@ -37,7 +37,7 @@
 #include "ardour/session.h"
 #include "ardour/audio_track.h"
 #include "ardour/audio_diskstream.h"
-#include <control_protocol/control_protocol.h>
+#include "control_protocol/control_protocol.h"
 
 #include "i18n.h"
 

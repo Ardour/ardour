@@ -105,7 +105,7 @@
 #include "ardour/ticker.h"
 #include "ardour/route_group.h"
 
-#include <control_protocol/control_protocol.h>
+#include "control_protocol/control_protocol.h"
 
 #include "i18n.h"
 #include <locale.h>
