@@ -125,6 +125,7 @@ def configure(conf):
 	def append_cxx_flags(val):
 		conf.env.append_value('CCFLAGS', val)
 		conf.env.append_value('CXXFLAGS', val)
+	conf.line_just = 42
 	check_tool(conf, 'misc')
 	check_tool(conf, 'compiler_cc')
 	check_tool(conf, 'compiler_cxx')
@@ -240,7 +241,7 @@ def display_msg(conf, msg, status = None, color = None):
 		color = 'GREEN'
 	elif type(status) == bool and not status or status == "False":
 		color = 'YELLOW'
-	print "%s : " % msg.ljust(conf.line_just),
+	Utils.pprint('NORMAL', "%s :" % msg.ljust(conf.line_just), sep='')
 	Utils.pprint(color, status)
 
 def print_summary(conf):
