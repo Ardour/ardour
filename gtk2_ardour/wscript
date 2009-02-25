@@ -1,0 +1,262 @@
+#!/usr/bin/env python
+import autowaf
+import os
+
+# Version of this package (even if built as a child)
+GTK2_ARDOUR_VERSION = '3.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'gtk2_ardour'
+VERSION = GTK2_ARDOUR_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def check_header_and_define(conf, header, define):
+	conf.check(header_name=header, define_name=define)
+	if conf.env[define]:
+		conf.env.append_value('CCFLAGS', '-D' + define)
+		conf.env.append_value('CXXFLAGS', '-D' + define)
+	
+def configure(conf):
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	
+	autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+	autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
+	autowaf.check_pkg(conf, 'gthread', uselib_store='GTHREAD', atleast_version='2.10.1')
+	autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
+	autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
+	autowaf.check_pkg(conf, 'libgnomecanvas-2.0', uselib_store='GNOMECANVAS', atleast_version='2.0')
+	autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6', uselib_store='GNOMECANVASMM', atleast_version='2.12.0')
+	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
+	
+	conf.check_tool('misc') # subst tool
+
+	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
+	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
+
+	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
+	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
+	
+	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
+	conf.write_config_header('wafconfig.h')
+
+	# Boost headers
+	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
+	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+
+def build(bld):
+	# Canvas library (plain C)
+	obj = bld.new_task_gen('cc', 'staticlib')
+	obj.source = '''
+		canvas-simpleline.c
+		canvas-simplerect.c
+		canvas-waveview.c
+		gtk-custom-hruler.c
+		gtk-custom-ruler.c
+	'''
+	obj.includes     = ['.']
+	obj.name         = 'libgtk2_ardour_c'
+	obj.target       = 'gtk2_ardour_c'
+	obj.uselib       = 'GNOMECANVAS'
+	obj.uselib_local = 'libardour'
+	obj.install_path = ''
+	obj.cxxflags     = '-DVERSIONSTRING=\\\"' + GTK2_ARDOUR_VERSION + '\\\"'
+	obj.cxxflags     += ' -DPACKAGE=\\\"gtk2_ardour\\\"'
+	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
+			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
+
+	# Program
+	obj = bld.new_task_gen('cxx', 'program')
+	obj.source = '''
+		about.cc
+		actions.cc
+		add_midi_cc_track_dialog.cc
+		add_route_dialog.cc
+		analysis_window.cc
+		ardour_dialog.cc
+		ardour_ui.cc
+		ardour_ui2.cc
+		ardour_ui_dependents.cc
+		ardour_ui_dialogs.cc
+		ardour_ui_ed.cc
+		ardour_ui_mixer.cc
+		ardour_ui_options.cc
+		audio_clock.cc
+		audio_region_editor.cc
+		audio_region_view.cc
+		audio_streamview.cc
+		audio_time_axis.cc
+		automation_controller.cc
+		automation_line.cc
+		automation_region_view.cc
+		automation_streamview.cc
+		automation_time_axis.cc
+		axis_view.cc
+		bundle_manager.cc
+		canvas-note-event.cc
+		canvas-note.cc
+		canvas-flag.cc
+		canvas-program-change.cc
+		canvas-sysex.cc
+		control_point.cc
+		control_point_dialog.cc
+		crossfade_edit.cc
+		crossfade_view.cc
+		curvetest.cc
+		diamond.cc
+		editing.cc
+		editor.cc
+		editor_actions.cc
+		editor_audio_import.cc
+		editor_audiotrack.cc
+		editor_canvas.cc
+		editor_canvas_events.cc
+		editor_cursors.cc
+		editor_edit_groups.cc
+		editor_export_audio.cc
+		editor_hscroller.cc
+		editor_keyboard.cc
+		editor_keys.cc
+		editor_markers.cc
+		editor_mixer.cc
+		editor_mouse.cc
+		editor_nudge.cc
+		editor_ops.cc
+		editor_region_list.cc
+		editor_route_list.cc
+		editor_rulers.cc
+		editor_scrub.cc
+		editor_selection.cc
+		editor_selection_list.cc
+		editor_tempodisplay.cc
+		editor_timefx.cc
+		engine_dialog.cc
+		enums.cc
+		export_channel_selector.cc
+		export_dialog.cc
+		export_filename_selector.cc
+		export_file_notebook.cc
+		export_format_dialog.cc
+		export_format_selector.cc
+		export_preset_selector.cc
+		export_timespan_selector.cc
+		fft.cc
+		fft_graph.cc
+		fft_result.cc
+		plugin_eq_gui.cc
+		gain_meter.cc
+		generic_pluginui.cc
+		ghostregion.cc
+		global_port_matrix.cc
+		io_selector.cc
+		keyboard.cc
+		keyeditor.cc
+		latency_gui.cc
+		level_meter.cc
+		lineset.cc
+		location_ui.cc
+		main.cc
+		marker.cc
+		midi_channel_selector.cc
+		midi_port_dialog.cc
+		midi_region_view.cc
+		midi_scroomer.cc
+		midi_streamview.cc
+		midi_time_axis.cc
+		mixer_strip.cc
+		mixer_ui.cc
+		nag.cc
+		new_session_dialog.cc
+		option_editor.cc
+		opts.cc
+		panner.cc
+		panner2d.cc
+		panner_ui.cc
+		piano_roll_header.cc
+		playlist_selector.cc
+		plugin_selector.cc
+		plugin_ui.cc
+		port_group.cc
+		port_matrix.cc
+		port_matrix_body.cc
+		port_matrix_column_labels.cc
+		port_matrix_component.cc
+		port_matrix_grid.cc
+		port_matrix_labels.cc
+		port_matrix_row_labels.cc
+		processor_box.cc
+		prompter.cc
+		public_editor.cc
+		region_gain_line.cc
+		region_selection.cc
+		region_view.cc
+		rhythm_ferret.cc
+		route_params_ui.cc
+		route_processor_selection.cc
+		route_time_axis.cc
+		route_ui.cc
+		selection.cc
+		send_ui.cc
+		session_import_dialog.cc
+		session_metadata_dialog.cc
+		sfdb_ui.cc
+		simpleline.cc
+		simplerect.cc
+		splash.cc
+		streamview.cc
+		tape_region_view.cc
+		tempo_dialog.cc
+		tempo_lines.cc
+		theme_manager.cc
+		time_axis_view.cc
+		time_axis_view_item.cc
+		time_selection.cc
+		ui_config.cc
+		utils.cc
+		version.cc
+		waveview.cc
+	'''
+	obj.source += 'x11.cc'
+	obj.includes     = ['.']
+	obj.name         = 'gtk2_ardour'
+	obj.target       = 'ardour-3.0'
+	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA'
+	obj.uselib       += ' GTKMM GNOMECANVASMM'
+	obj.uselib_local = '''libpbd libmidipp libevoral libvamp libtaglib libardour libsurfaces
+	                      libgtkmm2ext libgtk2_ardour_c libtaglib'''
+	obj.install_path = ''
+	obj.cxxflags     = '-DVERSIONSTRING=\\\"' + GTK2_ARDOUR_VERSION + '\\\"'
+	obj.cxxflags     += ' -DPACKAGE=\\\"gtk2_ardour\\\"'
+	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
+			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
+	
+	# Wrappers
+
+	wrapper_subst_dict = {
+		'INSTALL_PREFIX' : bld.env['PREFIX'],
+		'LIBDIR'         : os.path.normpath(bld.env['LIBDIRNAME']),
+		'VERSION'        : '3.0',
+		'EXECUTABLE'     : 'build/default/gtk2_ardour/ardour-3.0'
+	}
+
+	obj = bld.new_task_gen('subst')
+	obj.source = 'ardev-common-waf.sh.in'
+	obj.target = 'ardev-common-waf.sh'
+	obj.chmod  = 0755
+	obj.dict   = wrapper_subst_dict
+	
+def shutdown():
+	autowaf.shutdown()
+

@@ -31,6 +31,7 @@ def check_header_and_define(conf, header, define):
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
 	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
 	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.109.0')
@@ -39,6 +40,8 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
 	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
 	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH')
+	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
+	autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
 	
 	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
 	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
@@ -202,7 +205,7 @@ def build(bld):
 	obj.includes     = ['.', '../surfaces/control_protocol']
 	obj.name         = 'libardour'
 	obj.target       = 'ardour'
-	obj.uselib       = 'GLIBMM SIGCPP XML UUID JACK SNDFILE'
+	obj.uselib       = 'GLIBMM AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF'
 	obj.uselib_local = 'libpbd libmidipp libevoral libvamp libtaglib'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = ''
