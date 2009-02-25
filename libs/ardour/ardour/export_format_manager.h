@@ -29,7 +29,7 @@
 #include <sigc++/signal.h>
 #include <sigc++/trackable.h>
 
-#include <ardour/export_formats.h>
+#include "ardour/export_formats.h"
 
 using std::string;
 

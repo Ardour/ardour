@@ -16,13 +16,13 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <pbd/error.h>
-#include <pbd/compose.h>
-#include <pbd/filesystem.h>
+#include "pbd/error.h"
+#include "pbd/compose.h"
+#include "pbd/filesystem.h"
 
-#include <ardour/directory_names.h>
-#include <ardour/session_directory.h>
-#include <ardour/utils.h>
+#include "ardour/directory_names.h"
+#include "ardour/session_directory.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 

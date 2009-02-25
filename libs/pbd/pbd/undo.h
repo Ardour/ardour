@@ -26,8 +26,8 @@
 #include <sigc++/slot.h>
 #include <sigc++/bind.h>
 #include <sys/time.h>
-#include <pbd/command.h>
-#include <pbd/shiva.h>
+#include "pbd/command.h"
+#include "pbd/shiva.h"
 
 typedef sigc::slot<void> UndoAction;
 

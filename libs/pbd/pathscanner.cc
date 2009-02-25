@@ -25,9 +25,9 @@
 #include <vector>
 #include <dirent.h>
 
-#include <pbd/error.h>
-#include <pbd/pathscanner.h>
-#include <pbd/stl_delete.h>
+#include "pbd/error.h"
+#include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
 
 using namespace PBD;
 

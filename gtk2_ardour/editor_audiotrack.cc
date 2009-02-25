@@ -17,8 +17,8 @@
 
 */
 
-#include <ardour/location.h>
-#include <ardour/audio_diskstream.h>
+#include "ardour/location.h"
+#include "ardour/audio_diskstream.h"
 
 #include "ardour_ui.h"
 #include "editor.h"

@@ -23,8 +23,8 @@
 #include <fst.h>
 #include <vst/aeffectx.h>
 
-#include <ardour/session.h>
-#include <ardour/vst_plugin.h>
+#include "ardour/session.h"
+#include "ardour/vst_plugin.h"
 
 #include "i18n.h"
 

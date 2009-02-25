@@ -20,9 +20,9 @@
 #ifndef __ardour_ca_importable_source_h__
 #define __ardour_ca_importable_source_h__
 
-#include <pbd/failed_constructor.h>
-#include <ardour/types.h>
-#include <ardour/importable_source.h>
+#include "pbd/failed_constructor.h"
+#include "ardour/types.h"
+#include "ardour/importable_source.h"
 
 #include <appleutility/CAAudioFile.h>
 

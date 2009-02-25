@@ -22,10 +22,10 @@
 
 #include <sigc++/bind.h>
 #include <gtkmm/stock.h>
-#include <pbd/error.h>
-#include <pbd/convert.h>
+#include "pbd/error.h"
+#include "pbd/convert.h"
 #include <gtkmm2ext/utils.h>
-#include <ardour/profile.h>
+#include "ardour/profile.h"
 
 #include "utils.h"
 #include "add_route_dialog.h"

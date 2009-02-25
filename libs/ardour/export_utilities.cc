@@ -35,14 +35,14 @@
 
 /* ...*/
 
-#include <ardour/export_utilities.h>
+#include "ardour/export_utilities.h"
 
 #include <string.h>
 
-#include <ardour/export_failed.h>
-#include <ardour/gdither.h>
-#include <ardour/dB.h>
-#include <pbd/failed_constructor.h>
+#include "ardour/export_failed.h"
+#include "ardour/gdither.h"
+#include "ardour/dB.h"
+#include "pbd/failed_constructor.h"
 
 #include "i18n.h"
 

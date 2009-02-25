@@ -25,14 +25,14 @@
 
 #include <sigc++/bind.h>
 
-#include <ardour/types.h>
-#include <ardour/configuration.h>
-#include <ardour/midi_playlist.h>
-#include <ardour/midi_region.h>
-#include <ardour/session.h>
-#include <ardour/midi_ring_buffer.h>
+#include "ardour/types.h"
+#include "ardour/configuration.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/midi_region.h"
+#include "ardour/session.h"
+#include "ardour/midi_ring_buffer.h"
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include "i18n.h"
 

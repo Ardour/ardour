@@ -20,10 +20,10 @@
 #ifndef __ardour_midi_buffer_h__
 #define __ardour_midi_buffer_h__
 
-#include <evoral/midi_util.h>
-#include <midi++/event.h>
-#include <ardour/buffer.h>
-#include <ardour/event_type_map.h>
+#include "evoral/midi_util.h"
+#include "midi++/event.h"
+#include "ardour/buffer.h"
+#include "ardour/event_type_map.h"
 
 namespace ARDOUR {
 

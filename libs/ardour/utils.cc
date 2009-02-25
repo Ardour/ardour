@@ -37,11 +37,11 @@
 #include <wordexp.h>
 #endif
 
-#include <pbd/error.h>
-#include <pbd/stacktrace.h>
-#include <pbd/xml++.h>
-#include <pbd/basename.h>
-#include <ardour/utils.h>
+#include "pbd/error.h"
+#include "pbd/stacktrace.h"
+#include "pbd/xml++.h"
+#include "pbd/basename.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 

@@ -19,8 +19,8 @@
     $Id: midiregion.h 733 2006-08-01 17:19:38Z drobilla $
 */
 
-#include <evoral/TimeConverter.hpp>
-#include <ardour/types.h>
+#include "evoral/TimeConverter.hpp"
+#include "ardour/types.h"
 
 #ifndef __ardour_beats_frames_converter_h__
 #define __ardour_beats_frames_converter_h__

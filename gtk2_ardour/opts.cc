@@ -21,7 +21,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
 #include "opts.h"
 

@@ -22,9 +22,9 @@
 #define __ardour_automation_control_h__
 
 #include <boost/shared_ptr.hpp>
-#include <pbd/controllable.h>
-#include <evoral/Control.hpp>
-#include <ardour/automation_list.h>
+#include "pbd/controllable.h"
+#include "evoral/Control.hpp"
+#include "ardour/automation_list.h"
 
 namespace ARDOUR {
 

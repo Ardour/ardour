@@ -29,8 +29,8 @@
 #include <sndfile.h>
 #include <samplerate.h>
 
-#include <ardour/ardour.h>
-#include <ardour/gdither.h>
+#include "ardour/ardour.h"
+#include "ardour/gdither.h"
 
 using std::map;
 using std::vector;

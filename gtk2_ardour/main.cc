@@ -23,20 +23,20 @@
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
 
-#include <pbd/error.h>
-#include <pbd/file_utils.h>
-#include <pbd/textreceiver.h>
-#include <pbd/failed_constructor.h>
-#include <pbd/pthread_utils.h>
+#include "pbd/error.h"
+#include "pbd/file_utils.h"
+#include "pbd/textreceiver.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/pthread_utils.h"
 
 #include <jack/jack.h>
 
-#include <ardour/svn_revision.h>
-#include <ardour/version.h>
-#include <ardour/ardour.h>
-#include <ardour/audioengine.h>
-#include <ardour/session_utils.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/svn_revision.h"
+#include "ardour/version.h"
+#include "ardour/ardour.h"
+#include "ardour/audioengine.h"
+#include "ardour/session_utils.h"
+#include "ardour/filesystem_paths.h"
 
 #include <gtkmm/main.h>
 #include <gtkmm2ext/popup.h>

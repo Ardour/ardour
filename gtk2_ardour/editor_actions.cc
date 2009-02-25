@@ -17,8 +17,8 @@
 
 */
 
-#include <ardour/ardour.h>
-#include <ardour/profile.h>
+#include "ardour/ardour.h"
+#include "ardour/profile.h"
 
 #include "actions.h"
 #include "ardour_ui.h"

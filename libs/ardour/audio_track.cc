@@ -21,27 +21,27 @@
 #include <sigc++/retype_return.h>
 #include <sigc++/bind.h>
 
-#include <pbd/error.h>
-#include <pbd/enumwriter.h>
+#include "pbd/error.h"
+#include "pbd/enumwriter.h"
 
-#include <evoral/Curve.hpp>
+#include "evoral/Curve.hpp"
 
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/session.h>
-#include <ardour/io_processor.h>
-#include <ardour/audioregion.h>
-#include <ardour/audiosource.h>
-#include <ardour/region_factory.h>
-#include <ardour/route_group_specialized.h>
-#include <ardour/processor.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/playlist_factory.h>
-#include <ardour/panner.h>
-#include <ardour/utils.h>
-#include <ardour/buffer_set.h>
-#include <ardour/audio_buffer.h>
+#include "ardour/audio_track.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/session.h"
+#include "ardour/io_processor.h"
+#include "ardour/audioregion.h"
+#include "ardour/audiosource.h"
+#include "ardour/region_factory.h"
+#include "ardour/route_group_specialized.h"
+#include "ardour/processor.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/panner.h"
+#include "ardour/utils.h"
+#include "ardour/buffer_set.h"
+#include "ardour/audio_buffer.h"
 #include "i18n.h"
 
 using namespace std;

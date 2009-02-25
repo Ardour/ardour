@@ -16,8 +16,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/audio_buffer.h>
-#include <pbd/error.h>
+#include "ardour/audio_buffer.h"
+#include "pbd/error.h"
 #include <errno.h>
 
 #include "i18n.h"

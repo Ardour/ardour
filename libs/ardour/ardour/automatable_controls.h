@@ -20,8 +20,8 @@
 #ifndef __ardour_automatable_controls_h__
 #define __ardour_automatable_controls_h__
 
-#include <evoral/ControlSet.hpp>
-#include <ardour/automatable.h>
+#include "evoral/ControlSet.hpp"
+#include "ardour/automatable.h"
 
 namespace ARDOUR {
 

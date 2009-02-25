@@ -21,8 +21,8 @@
 #ifndef __ardour_export_channel_h__
 #define __ardour_export_channel_h__
 
-#include <ardour/audioregion.h>
-#include <ardour/buffer_set.h>
+#include "ardour/audioregion.h"
+#include "ardour/buffer_set.h"
 
 #include <set>
 

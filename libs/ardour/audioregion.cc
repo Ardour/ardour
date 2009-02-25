@@ -29,23 +29,23 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/basename.h>
-#include <pbd/xml++.h>
-#include <pbd/stacktrace.h>
-#include <pbd/enumwriter.h>
-#include <pbd/convert.h>
+#include "pbd/basename.h"
+#include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
+#include "pbd/enumwriter.h"
+#include "pbd/convert.h"
 
-#include <evoral/Curve.hpp>
+#include "evoral/Curve.hpp"
 
-#include <ardour/audioregion.h>
-#include <ardour/session.h>
-#include <ardour/gain.h>
-#include <ardour/dB.h>
-#include <ardour/playlist.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/region_factory.h>
-#include <ardour/runtime_functions.h>
-#include <ardour/transient_detector.h>
+#include "ardour/audioregion.h"
+#include "ardour/session.h"
+#include "ardour/gain.h"
+#include "ardour/dB.h"
+#include "ardour/playlist.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/region_factory.h"
+#include "ardour/runtime_functions.h"
+#include "ardour/transient_detector.h"
 
 #include "i18n.h"
 #include <locale.h>

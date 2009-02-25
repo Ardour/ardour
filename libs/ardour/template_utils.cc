@@ -1,10 +1,10 @@
 #include <algorithm>
 
-#include <pbd/filesystem.h>
+#include "pbd/filesystem.h"
 
-#include <ardour/template_utils.h>
-#include <ardour/directory_names.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/template_utils.h"
+#include "ardour/directory_names.h"
+#include "ardour/filesystem_paths.h"
 
 namespace ARDOUR {
 

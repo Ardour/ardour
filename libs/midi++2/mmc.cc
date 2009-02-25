@@ -20,10 +20,10 @@
 
 #include <map>
 
-#include <pbd/error.h>
-#include <midi++/mmc.h>
-#include <midi++/port.h>
-#include <midi++/parser.h>
+#include "pbd/error.h"
+#include "midi++/mmc.h"
+#include "midi++/port.h"
+#include "midi++/parser.h"
 
 using namespace std;
 using namespace MIDI;

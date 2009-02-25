@@ -27,18 +27,18 @@
 #include <sigc++/class_slot.h>
 
 #include <glibmm/thread.h>
-#include <pbd/xml++.h>
-#include <pbd/stacktrace.h>
-#include <pbd/enumwriter.h>
+#include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
+#include "pbd/enumwriter.h"
 
-#include <ardour/region.h>
-#include <ardour/playlist.h>
-#include <ardour/session.h>
-#include <ardour/source.h>
-#include <ardour/tempo.h>
-#include <ardour/region_factory.h>
-#include <ardour/filter.h>
-#include <ardour/profile.h>
+#include "ardour/region.h"
+#include "ardour/playlist.h"
+#include "ardour/session.h"
+#include "ardour/source.h"
+#include "ardour/tempo.h"
+#include "ardour/region_factory.h"
+#include "ardour/filter.h"
+#include "ardour/profile.h"
 
 #include "i18n.h"
 

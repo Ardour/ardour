@@ -21,7 +21,7 @@
 #define __midipp_mmc_h_h__
 
 #include <sigc++/sigc++.h>
-#include <midi++/types.h>
+#include "midi++/types.h"
 
 namespace MIDI {
 

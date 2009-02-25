@@ -25,10 +25,10 @@
 #include <string>
 #include <map>
 
-#include <pbd/xml++.h>
-#include <pbd/shiva.h>
-#include <pbd/command.h>
-#include <pbd/failed_constructor.h>
+#include "pbd/xml++.h"
+#include "pbd/shiva.h"
+#include "pbd/command.h"
+#include "pbd/failed_constructor.h"
 
 /** This command class is initialized 
  */

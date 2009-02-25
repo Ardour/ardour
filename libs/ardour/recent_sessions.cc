@@ -25,12 +25,12 @@
 
 #include <glibmm/miscutils.h>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/configuration.h>
-#include <ardour/filesystem_paths.h>
-#include <ardour/recent_sessions.h>
-#include <ardour/utils.h>
+#include "ardour/configuration.h"
+#include "ardour/filesystem_paths.h"
+#include "ardour/recent_sessions.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 

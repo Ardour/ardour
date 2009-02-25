@@ -21,8 +21,8 @@
 #ifndef __ardour_audio_port_h__
 #define __ardour_audio_port_h__
 
-#include <ardour/port.h>
-#include <ardour/audio_buffer.h>
+#include "ardour/port.h"
+#include "ardour/audio_buffer.h"
 
 namespace ARDOUR {
 

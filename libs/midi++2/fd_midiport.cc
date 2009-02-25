@@ -22,11 +22,11 @@
 #include <cerrno>
 #include <cstring>
 
-#include <pbd/error.h>
-#include <pbd/pathscanner.h>
+#include "pbd/error.h"
+#include "pbd/pathscanner.h"
 
-#include <midi++/types.h>
-#include <midi++/fd_midiport.h>
+#include "midi++/types.h"
+#include "midi++/fd_midiport.h"
 
 using namespace std;
 using namespace MIDI;

@@ -25,14 +25,14 @@
 
 #include <list>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/session.h>
-#include <ardour/utils.h>
+#include "ardour/session.h"
+#include "ardour/utils.h"
 
 #include "public_editor.h"
 #include "axis_view.h"

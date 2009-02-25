@@ -30,13 +30,13 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/rcu.h>
+#include "pbd/rcu.h"
 
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 #include <jack/jack.h>
 #include <jack/transport.h>
-#include <ardour/types.h>
-#include <ardour/data_type.h>
+#include "ardour/types.h"
+#include "ardour/data_type.h"
 
 namespace ARDOUR {
 

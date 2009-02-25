@@ -20,8 +20,8 @@
 #ifndef __ardour_session_playlist_h__
 #define __ardour_session_playlist_h__
 
-#include <ardour/session.h>
-#include <ardour/playlist.h>
+#include "ardour/session.h"
+#include "ardour/playlist.h"
 
 namespace ARDOUR {
 

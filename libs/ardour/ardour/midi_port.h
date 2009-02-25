@@ -21,8 +21,8 @@
 #ifndef __ardour_midi_port_h__
 #define __ardour_midi_port_h__
 
-#include <ardour/port.h>
-#include <ardour/midi_buffer.h>
+#include "ardour/port.h"
+#include "ardour/midi_buffer.h"
 
 namespace ARDOUR {
 

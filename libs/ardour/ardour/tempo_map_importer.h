@@ -23,12 +23,12 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
-#include <ardour/element_importer.h>
-#include <ardour/element_import_handler.h>
-#include <ardour/tempo.h>
-#include <ardour/types.h>
+#include "ardour/element_importer.h"
+#include "ardour/element_import_handler.h"
+#include "ardour/tempo.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

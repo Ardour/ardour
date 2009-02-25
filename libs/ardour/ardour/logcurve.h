@@ -20,7 +20,7 @@
 #ifndef __ardour_logcurve_h__
 #define __ardour_logcurve_h__
 
-#include <pbd/fastlog.h>
+#include "pbd/fastlog.h"
 #include <glibmm/thread.h>
 
 namespace ARDOUR {

@@ -17,9 +17,9 @@
 
 */
 
-#include <evoral/Curve.hpp>
-#include <ardour/audioregion.h>
-#include <pbd/memento_command.h>
+#include "evoral/Curve.hpp"
+#include "ardour/audioregion.h"
+#include "pbd/memento_command.h"
 
 #include "region_gain_line.h"
 #include "audio_region_view.h"
@@ -28,7 +28,7 @@
 #include "time_axis_view.h"
 #include "editor.h"
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
 #include "i18n.h"
 

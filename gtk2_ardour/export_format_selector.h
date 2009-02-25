@@ -21,7 +21,7 @@
 #ifndef __export_format_selector_h__
 #define __export_format_selector_h__
 
-#include <ardour/export_profile_manager.h>
+#include "ardour/export_profile_manager.h"
 
 #include <gtkmm.h>
 #include <sigc++/signal.h>

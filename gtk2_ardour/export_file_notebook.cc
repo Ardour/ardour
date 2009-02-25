@@ -20,7 +20,7 @@
 
 #include "export_file_notebook.h"
 
-#include <ardour/export_format_specification.h>
+#include "ardour/export_format_specification.h"
 
 #include "utils.h"
 #include "i18n.h"

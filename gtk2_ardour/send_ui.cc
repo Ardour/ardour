@@ -19,8 +19,8 @@
 
 #include <gtkmm2ext/doi.h>
 
-#include <ardour/io.h>
-#include <ardour/send.h>
+#include "ardour/io.h"
+#include "ardour/send.h"
 
 #include "utils.h"
 #include "send_ui.h"

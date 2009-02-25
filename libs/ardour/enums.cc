@@ -17,21 +17,21 @@
 
 */
 
-#include <pbd/enumwriter.h>
+#include "pbd/enumwriter.h"
 
-#include <ardour/types.h>
-#include <ardour/session.h>
-#include <ardour/location.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/diskstream.h>
-#include <ardour/audioregion.h>
-#include <ardour/route_group.h>
-#include <ardour/panner.h>
-#include <ardour/track.h>
-#include <ardour/midi_track.h>
-#include <ardour/export_filename.h>
-#include <ardour/export_format_base.h>
-#include <ardour/export_profile_manager.h>
+#include "ardour/types.h"
+#include "ardour/session.h"
+#include "ardour/location.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/diskstream.h"
+#include "ardour/audioregion.h"
+#include "ardour/route_group.h"
+#include "ardour/panner.h"
+#include "ardour/track.h"
+#include "ardour/midi_track.h"
+#include "ardour/export_filename.h"
+#include "ardour/export_format_base.h"
+#include "ardour/export_profile_manager.h"
 
 using namespace std;
 using namespace PBD;

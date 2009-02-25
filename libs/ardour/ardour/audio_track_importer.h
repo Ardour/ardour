@@ -23,11 +23,11 @@
 
 #include <list>
 
-#include <pbd/xml++.h>
-#include <pbd/id.h>
+#include "pbd/xml++.h"
+#include "pbd/id.h"
 
-#include <ardour/element_importer.h>
-#include <ardour/element_import_handler.h>
+#include "ardour/element_importer.h"
+#include "ardour/element_import_handler.h"
 
 namespace ARDOUR {
 

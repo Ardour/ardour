@@ -23,8 +23,8 @@
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
-#include <ardour/audio_buffer.h>
-#include <ardour/data_type.h>
+#include "ardour/audio_buffer.h"
+#include "ardour/data_type.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

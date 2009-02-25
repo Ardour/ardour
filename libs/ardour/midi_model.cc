@@ -24,14 +24,14 @@
 #include <algorithm>
 #include <stdexcept>
 #include <stdint.h>
-#include <pbd/error.h>
-#include <pbd/enumwriter.h>
-#include <midi++/events.h>
+#include "pbd/error.h"
+#include "pbd/enumwriter.h"
+#include "midi++/events.h"
 
-#include <ardour/midi_model.h>
-#include <ardour/midi_source.h>
-#include <ardour/types.h>
-#include <ardour/session.h>
+#include "ardour/midi_model.h"
+#include "ardour/midi_source.h"
+#include "ardour/types.h"
+#include "ardour/session.h"
 
 using namespace std;
 using namespace ARDOUR;

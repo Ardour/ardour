@@ -22,7 +22,7 @@
 
 #include <exception>
 #include <time.h>
-#include <ardour/source.h>
+#include "ardour/source.h"
 
 namespace ARDOUR {
 

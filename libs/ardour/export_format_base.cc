@@ -18,7 +18,7 @@
 
 */
 
-#include <ardour/export_format_base.h>
+#include "ardour/export_format_base.h"
 
 namespace ARDOUR
 {

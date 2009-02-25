@@ -24,7 +24,7 @@
 #include <sigc++/signal.h>
 #include <gtkmm.h>
 
-#include <ardour/export_profile_manager.h>
+#include "ardour/export_profile_manager.h"
 
 class ExportPresetSelector : public Gtk::HBox
 {

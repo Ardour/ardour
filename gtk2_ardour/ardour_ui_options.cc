@@ -17,17 +17,17 @@
 
 */
 
-#include <pbd/convert.h>
-#include <pbd/stacktrace.h>
+#include "pbd/convert.h"
+#include "pbd/stacktrace.h"
 
 #include <gtkmm2ext/utils.h>
 
-#include <ardour/configuration.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
+#include "ardour/configuration.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
 
 #ifdef HAVE_LIBLO
-#include <ardour/osc.h>
+#include "ardour/osc.h"
 #endif
 
 #include "ardour_ui.h"

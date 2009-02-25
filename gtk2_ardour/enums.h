@@ -20,7 +20,7 @@
 #ifndef __ardour_gtk_enums_h__
 #define __ardour_gtk_enums_h__
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 enum Width {
 	Wide,

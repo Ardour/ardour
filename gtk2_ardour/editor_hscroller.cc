@@ -19,7 +19,7 @@
 
 #include "editor.h"
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
 using namespace std;
 using namespace ARDOUR;

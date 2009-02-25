@@ -21,9 +21,9 @@
 
 #include <cassert>
 #include <vector>
-#include <ardour/chan_count.h>
-#include <ardour/data_type.h>
-#include <ardour/types.h>
+#include "ardour/chan_count.h"
+#include "ardour/data_type.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

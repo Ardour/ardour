@@ -27,9 +27,9 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/error.h>
-#include <pbd/stl_delete.h>
-#include <pbd/memento_command.h>
+#include "pbd/error.h"
+#include "pbd/stl_delete.h"
+#include "pbd/memento_command.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>
@@ -37,17 +37,17 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
-#include <ardour/audio_diskstream.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/event_type_map.h>
-#include <ardour/location.h>
-#include <ardour/panner.h>
-#include <ardour/playlist.h>
-#include <ardour/processor.h>
-#include <ardour/profile.h>
-#include <ardour/session.h>
-#include <ardour/session_playlist.h>
-#include <ardour/utils.h>
+#include "ardour/audio_diskstream.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/event_type_map.h"
+#include "ardour/location.h"
+#include "ardour/panner.h"
+#include "ardour/playlist.h"
+#include "ardour/processor.h"
+#include "ardour/profile.h"
+#include "ardour/session.h"
+#include "ardour/session_playlist.h"
+#include "ardour/utils.h"
 
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
@@ -65,7 +65,7 @@
 #include "audio_streamview.h"
 #include "utils.h"
 
-#include <ardour/audio_track.h>
+#include "ardour/audio_track.h"
 
 #include "i18n.h"
 

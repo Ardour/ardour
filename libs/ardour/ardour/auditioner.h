@@ -24,8 +24,8 @@
 
 #include <glibmm/thread.h>
 
-#include <ardour/ardour.h>
-#include <ardour/audio_track.h>
+#include "ardour/ardour.h"
+#include "ardour/audio_track.h"
 
 namespace ARDOUR {
 

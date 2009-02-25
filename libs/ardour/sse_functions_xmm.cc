@@ -19,7 +19,7 @@
 */
 
 #include <xmmintrin.h>
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 void
 x86_sse_find_peaks(const ARDOUR::Sample* buf, nframes_t nframes, float *min, float *max)

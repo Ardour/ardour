@@ -18,7 +18,7 @@
 */
 
 #include <sigc++/bind.h>
-#include <ardour/tempo.h>
+#include "ardour/tempo.h"
 
 #include "marker.h"
 #include "public_editor.h"

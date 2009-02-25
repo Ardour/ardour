@@ -20,8 +20,8 @@
 #ifndef __ardour_automatable_sequence_h__
 #define __ardour_automatable_sequence_h__
 
-#include <evoral/Sequence.hpp>
-#include <ardour/automatable.h>
+#include "evoral/Sequence.hpp"
+#include "ardour/automatable.h"
 
 namespace ARDOUR {
 

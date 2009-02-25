@@ -23,8 +23,8 @@
 #include <vector>
 #include <list>
 
-#include <ardour/ardour.h>
-#include <ardour/playlist.h>
+#include "ardour/ardour.h"
+#include "ardour/playlist.h"
 
 namespace ARDOUR  {
 

@@ -17,7 +17,7 @@
 
 */
 
-#include <ardour/pcm_utils.h>
+#include "ardour/pcm_utils.h"
 
 #include <cmath>
 

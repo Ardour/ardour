@@ -20,7 +20,7 @@
 #ifndef __ardour_click_h__
 #define __ardour_click_h__
 
-#include <ardour/io.h>
+#include "ardour/io.h"
 
 namespace ARDOUR {
 

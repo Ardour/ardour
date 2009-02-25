@@ -18,7 +18,7 @@
 */
 
 #include <vector>
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 
 #include "ardour_ui.h"
 
@@ -31,10 +31,10 @@
 #include <gtkmm/accelmap.h>
 
 #include <gdk/gdkkeysyms.h>
-#include <pbd/error.h>
-#include <pbd/file_utils.h>
+#include "pbd/error.h"
+#include "pbd/file_utils.h"
 
-#include <ardour/filesystem_paths.h>
+#include "ardour/filesystem_paths.h"
 
 #include "keyboard.h"
 #include "gui_thread.h"

@@ -21,7 +21,7 @@
 #define __pbd_stateful_h__
 
 #include <string>
-#include <pbd/id.h>
+#include "pbd/id.h"
 
 class XMLNode;
 

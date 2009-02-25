@@ -19,16 +19,16 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/stacktrace.h>
+#include "pbd/stacktrace.h"
 
-#include <ardour/types.h>
-#include <ardour/crossfade.h>
-#include <ardour/crossfade_compare.h>
-#include <ardour/audioregion.h>
-#include <ardour/playlist.h>
-#include <ardour/utils.h>
-#include <ardour/session.h>
-#include <ardour/source.h>
+#include "ardour/types.h"
+#include "ardour/crossfade.h"
+#include "ardour/crossfade_compare.h"
+#include "ardour/audioregion.h"
+#include "ardour/playlist.h"
+#include "ardour/utils.h"
+#include "ardour/session.h"
+#include "ardour/source.h"
 
 #include "i18n.h"
 #include <locale.h>

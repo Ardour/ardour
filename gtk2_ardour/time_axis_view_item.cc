@@ -17,11 +17,11 @@
 
 */
 
-#include <pbd/error.h>
-#include <pbd/stacktrace.h>
+#include "pbd/error.h"
+#include "pbd/stacktrace.h"
 
-#include <ardour/types.h>
-#include <ardour/ardour.h>
+#include "ardour/types.h"
+#include "ardour/ardour.h"
 
 #include <gtkmm2ext/utils.h>
 

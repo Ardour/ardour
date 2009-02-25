@@ -17,25 +17,25 @@
 
 */
 
-#include <ardour/session.h>
-#include <ardour/route.h>
-#include <pbd/memento_command.h>
-#include <ardour/diskstream.h>
-#include <ardour/playlist.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/audio_track.h>
-#include <ardour/midi_playlist.h>
-#include <ardour/midi_track.h>
-#include <ardour/tempo.h>
-#include <ardour/audiosource.h>
-#include <ardour/audioregion.h>
-#include <ardour/midi_source.h>
-#include <ardour/midi_region.h>
-#include <pbd/error.h>
-#include <pbd/id.h>
-#include <pbd/statefuldestructible.h>
-#include <pbd/failed_constructor.h>
-#include <evoral/Curve.hpp>
+#include "ardour/session.h"
+#include "ardour/route.h"
+#include "pbd/memento_command.h"
+#include "ardour/diskstream.h"
+#include "ardour/playlist.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audio_track.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/midi_track.h"
+#include "ardour/tempo.h"
+#include "ardour/audiosource.h"
+#include "ardour/audioregion.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_region.h"
+#include "pbd/error.h"
+#include "pbd/id.h"
+#include "pbd/statefuldestructible.h"
+#include "pbd/failed_constructor.h"
+#include "evoral/Curve.hpp"
 
 using namespace PBD;
 using namespace ARDOUR;

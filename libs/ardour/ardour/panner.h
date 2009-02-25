@@ -27,12 +27,12 @@
 #include <iostream>
 #include <sigc++/signal.h>
 
-#include <pbd/stateful.h> 
-#include <pbd/controllable.h>
+#include "pbd/stateful.h" 
+#include "pbd/controllable.h"
 
-#include <ardour/types.h>
-#include <ardour/automation_control.h>
-#include <ardour/processor.h>
+#include "ardour/types.h"
+#include "ardour/automation_control.h"
+#include "ardour/processor.h"
 
 using std::istream;
 using std::ostream;

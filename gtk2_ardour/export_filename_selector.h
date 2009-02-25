@@ -23,8 +23,8 @@
 
 #include <gtkmm.h>
 
-#include <ardour/export_profile_manager.h>
-#include <ardour/export_filename.h>
+#include "ardour/export_profile_manager.h"
+#include "ardour/export_filename.h"
 
 namespace ARDOUR {
 	class Session;

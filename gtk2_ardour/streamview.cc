@@ -22,11 +22,11 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/playlist.h>
-#include <ardour/region.h>
-#include <ardour/source.h>
-#include <ardour/diskstream.h>
-#include <ardour/track.h>
+#include "ardour/playlist.h"
+#include "ardour/region.h"
+#include "ardour/source.h"
+#include "ardour/diskstream.h"
+#include "ardour/track.h"
 
 #include "streamview.h"
 #include "region_view.h"

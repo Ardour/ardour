@@ -26,7 +26,7 @@
 #include <sigc++/trackable.h>
 #include <sigc++/signal.h>
 
-#include <pbd/statefuldestructible.h>
+#include "pbd/statefuldestructible.h"
 
 class XMLNode;
 

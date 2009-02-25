@@ -26,10 +26,10 @@
 #include <boost/weak_ptr.hpp>
 
 #include <sigc++/signal.h>
-#include <ardour/ardour.h>
-#include <ardour/types.h>
-#include <ardour/processor.h>
-#include <ardour/automation_control.h>
+#include "ardour/ardour.h"
+#include "ardour/types.h"
+#include "ardour/processor.h"
+#include "ardour/automation_control.h"
 
 class XMLNode;
 

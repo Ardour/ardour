@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <pbd/uuid.h>
-#include <pbd/xml++.h>
+#include "pbd/uuid.h"
+#include "pbd/xml++.h"
 
 using std::string;
 

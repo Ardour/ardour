@@ -20,8 +20,8 @@
 #ifndef __ardour_region_factory_h__
 #define __ardour_region_factory_h__
 
-#include <ardour/types.h>
-#include <ardour/region.h>
+#include "ardour/types.h"
+#include "ardour/region.h"
 
 class XMLNode;
 

@@ -23,7 +23,7 @@
 
 #include <cstdio>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"

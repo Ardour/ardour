@@ -20,8 +20,8 @@
 #ifndef __ardour_route_group_specialized_h__
 #define __ardour_route_group_specialized_h__
 
-#include <ardour/route_group.h>
-#include <ardour/track.h>
+#include "ardour/route_group.h"
+#include "ardour/track.h"
 
 namespace ARDOUR {
 

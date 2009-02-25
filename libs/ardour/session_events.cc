@@ -20,14 +20,14 @@
 #include <cmath>
 #include <unistd.h>
 
-#include <ardour/timestamps.h>
+#include "ardour/timestamps.h"
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 #include <glibmm/thread.h>
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/audio_diskstream.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/audio_diskstream.h"
 
 #include "i18n.h"
 

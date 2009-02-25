@@ -17,7 +17,7 @@
 
 */
 
-#include <evoral/Note.hpp>
+#include "evoral/Note.hpp"
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "canvas-hit.h"

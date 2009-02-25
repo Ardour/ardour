@@ -38,13 +38,13 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/slider_controller.h>
 
-#include <pbd/stateful.h>
+#include "pbd/stateful.h"
 
-#include <ardour/types.h>
-#include <ardour/ardour.h>
-#include <ardour/processor.h>
+#include "ardour/types.h"
+#include "ardour/ardour.h"
+#include "ardour/processor.h"
 
-#include <pbd/fastlog.h>
+#include "pbd/fastlog.h"
 
 #include "route_ui.h"
 #include "gain_meter.h"

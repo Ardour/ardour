@@ -23,9 +23,9 @@
 #include <cstring>
 #include <cstdlib>
 
-#include <pbd/enumwriter.h>
-#include <pbd/error.h>
-#include <pbd/compose.h>
+#include "pbd/enumwriter.h"
+#include "pbd/error.h"
+#include "pbd/compose.h"
 
 using namespace std;
 using namespace PBD;

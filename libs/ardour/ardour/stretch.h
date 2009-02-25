@@ -20,11 +20,11 @@
 #ifndef __ardour_stretch_h__
 #define __ardour_stretch_h__
 
-#include <ardour/filter.h>
+#include "ardour/filter.h"
 
 #ifdef USE_RUBBERBAND
 
-#include <ardour/rb_effect.h>
+#include "ardour/rb_effect.h"
 
 namespace ARDOUR {
 

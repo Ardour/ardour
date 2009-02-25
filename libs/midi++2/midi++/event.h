@@ -26,9 +26,9 @@
 #include <sstream>
 #include <assert.h>
 
-#include <midi++/types.h>
-#include <midi++/events.h>
-#include <pbd/xml++.h>
+#include "midi++/types.h"
+#include "midi++/events.h"
+#include "pbd/xml++.h"
 
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
@@ -39,7 +39,7 @@
 /** Support serialisation of MIDI events to/from XML */
 #define EVORAL_MIDI_XML 1
 
-#include <evoral/Event.hpp>
-#include <evoral/MIDIEvent.hpp>
+#include "evoral/Event.hpp"
+#include "evoral/MIDIEvent.hpp"
 
 #endif /* __libmidipp_midi_event_h__ */

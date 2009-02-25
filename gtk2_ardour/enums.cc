@@ -17,7 +17,7 @@
 
 */
 
-#include <pbd/enumwriter.h>
+#include "pbd/enumwriter.h"
 
 #include "audio_clock.h"
 #include "editing.h"

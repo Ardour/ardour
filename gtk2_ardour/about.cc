@@ -25,12 +25,12 @@
 #include <ctime>
 #include <cstdlib>
 
-#include <pbd/file_utils.h>
+#include "pbd/file_utils.h"
 
-#include <ardour/svn_revision.h>
-#include <ardour/ardour.h>
-#include <ardour/version.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/svn_revision.h"
+#include "ardour/ardour.h"
+#include "ardour/version.h"
+#include "ardour/filesystem_paths.h"
 
 #include "utils.h"
 #include "version.h"

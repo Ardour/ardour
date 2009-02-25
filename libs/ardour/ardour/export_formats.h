@@ -21,12 +21,12 @@
 #ifndef __ardour_export_formats_h__
 #define __ardour_export_formats_h__
 
-#include <ardour/export_format_base.h>
-#include <ardour/export_format_compatibility.h>
+#include "ardour/export_format_base.h"
+#include "ardour/export_format_compatibility.h"
 
 #include <list>
 #include <boost/weak_ptr.hpp>
-#include <pbd/failed_constructor.h>
+#include "pbd/failed_constructor.h"
 
 namespace ARDOUR
 {

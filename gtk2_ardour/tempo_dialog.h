@@ -30,8 +30,8 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
 
-#include <ardour/types.h>
-#include <ardour/tempo.h>
+#include "ardour/types.h"
+#include "ardour/tempo.h"
 
 #include "ardour_dialog.h"
 

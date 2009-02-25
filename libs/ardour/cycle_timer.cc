@@ -18,8 +18,8 @@
 */
 
 #include <cstdio>
-#include <pbd/error.h>
-#include <ardour/cycle_timer.h>
+#include "pbd/error.h"
+#include "ardour/cycle_timer.h"
 
 #include "i18n.h"
 

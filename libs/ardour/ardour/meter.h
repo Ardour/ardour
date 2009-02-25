@@ -20,9 +20,9 @@
 #define __ardour_meter_h__
 
 #include <vector>
-#include <ardour/types.h>
-#include <ardour/processor.h>
-#include <pbd/fastlog.h>
+#include "ardour/types.h"
+#include "ardour/processor.h"
+#include "pbd/fastlog.h"
 
 namespace ARDOUR {
 

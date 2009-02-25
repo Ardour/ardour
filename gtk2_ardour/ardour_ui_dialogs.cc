@@ -23,7 +23,7 @@
    This is to cut down on the compile times.  It also helps with my sanity.
 */
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
 #include "actions.h"
 #include "ardour_ui.h"

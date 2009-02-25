@@ -25,7 +25,7 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/ringbuffer.h>
+#include "pbd/ringbuffer.h"
 
 class Pool 
 {

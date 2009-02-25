@@ -1,9 +1,9 @@
 #include <string>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/file_utils.h>
-#include <ardour/ardour.h>
-#include <ardour/filesystem_paths.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/file_utils.h"
+#include "ardour/ardour.h"
+#include "ardour/filesystem_paths.h"
 
 #include "gui_thread.h"
 #include "splash.h"

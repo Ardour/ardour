@@ -26,11 +26,11 @@
 #include <set>
 #include <boost/utility.hpp>
 
-#include <ardour/types.h>
-#include <ardour/plugin.h>
+#include "ardour/types.h"
+#include "ardour/plugin.h"
 
 #ifdef HAVE_SLV2
-#include <ardour/lv2_plugin.h>
+#include "ardour/lv2_plugin.h"
 #endif
 
 namespace ARDOUR {

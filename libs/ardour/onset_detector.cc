@@ -1,4 +1,4 @@
-#include <ardour/onset_detector.h>
+#include "ardour/onset_detector.h"
 
 #include "i18n.h"
 

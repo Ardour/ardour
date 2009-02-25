@@ -27,7 +27,7 @@
 #include "gtkmm/button.h"
 #include "gtkmm/togglebutton.h"
 #include "gtkmm/label.h"
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 
 class MidiChannelSelector : public Gtk::Table

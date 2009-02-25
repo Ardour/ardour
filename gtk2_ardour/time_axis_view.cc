@@ -27,17 +27,17 @@
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/item.h>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/stop_signal.h>
 
-#include <ardour/session.h>
-#include <ardour/utils.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/processor.h>
-#include <ardour/location.h>
+#include "ardour/session.h"
+#include "ardour/utils.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/processor.h"
+#include "ardour/location.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"

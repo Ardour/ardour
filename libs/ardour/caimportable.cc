@@ -1,6 +1,6 @@
-#include <ardour/caimportable.h>
+#include "ardour/caimportable.h"
 #include <sndfile.h>
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include "i18n.h"
 

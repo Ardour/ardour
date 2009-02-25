@@ -25,13 +25,13 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/utility.hpp>
 
-#include <pbd/undo.h>
+#include "pbd/undo.h"
 
-#include <ardour/ardour.h>
-#include <ardour/data_type.h>
-#include <ardour/automatable.h>
-#include <ardour/readable.h>
-#include <ardour/session_object.h>
+#include "ardour/ardour.h"
+#include "ardour/data_type.h"
+#include "ardour/automatable.h"
+#include "ardour/readable.h"
+#include "ardour/session_object.h"
 
 class XMLNode;
 

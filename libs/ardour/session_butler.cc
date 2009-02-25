@@ -27,18 +27,18 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/error.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/stacktrace.h>
+#include "pbd/error.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/stacktrace.h"
 
-#include <ardour/audio_diskstream.h>
-#include <ardour/audioengine.h>
-#include <ardour/configuration.h>
-#include <ardour/crossfade.h>
-#include <ardour/io.h>
-#include <ardour/midi_diskstream.h>
-#include <ardour/session.h>
-#include <ardour/timestamps.h>
+#include "ardour/audio_diskstream.h"
+#include "ardour/audioengine.h"
+#include "ardour/configuration.h"
+#include "ardour/crossfade.h"
+#include "ardour/io.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/session.h"
+#include "ardour/timestamps.h"
 
 #include "i18n.h"
 

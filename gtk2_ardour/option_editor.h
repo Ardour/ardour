@@ -34,7 +34,7 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/comboboxtext.h>
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
 #include "ardour_dialog.h"
 #include "editing.h"

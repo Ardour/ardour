@@ -25,7 +25,7 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm2ext/selector.h>
 
-#include <ardour/plugin.h>
+#include "ardour/plugin.h"
 #include "plugin_interest.h"
 
 namespace ARDOUR {

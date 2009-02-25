@@ -24,11 +24,11 @@
 #include <sstream>
 #include <algorithm>
 #include <sigc++/bind.h>
-#include <ardour/automation_list.h>
-#include <ardour/event_type_map.h>
-#include <evoral/Curve.hpp>
-#include <pbd/stacktrace.h>
-#include <pbd/enumwriter.h>
+#include "ardour/automation_list.h"
+#include "ardour/event_type_map.h"
+#include "evoral/Curve.hpp"
+#include "pbd/stacktrace.h"
+#include "pbd/enumwriter.h"
 
 #include "i18n.h"
 

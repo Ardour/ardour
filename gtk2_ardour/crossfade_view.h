@@ -23,7 +23,7 @@
 #include <vector>
 #include <libgnomecanvasmm.h>
 #include <sigc++/signal.h>
-#include <ardour/crossfade.h>
+#include "ardour/crossfade.h"
 
 #include "time_axis_view_item.h"
 

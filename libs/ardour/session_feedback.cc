@@ -24,19 +24,19 @@
 #include <fcntl.h>
 #include <poll.h>
 
-#include <midi++/types.h>
-#include <midi++/port.h>
-#include <midi++/manager.h>
+#include "midi++/types.h"
+#include "midi++/port.h"
+#include "midi++/manager.h"
 
 #include <glibmm/thread.h>
 
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
-#include <ardour/configuration.h>
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
+#include "ardour/configuration.h"
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
+#include "ardour/audio_track.h"
+#include "ardour/audio_diskstream.h"
 #include <control_protocol/control_protocol.h>
 
 #include "i18n.h"

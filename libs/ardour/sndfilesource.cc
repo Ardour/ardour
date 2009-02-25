@@ -28,10 +28,10 @@
 
 #include <glibmm/miscutils.h>
 
-#include <ardour/sndfilesource.h>
-#include <ardour/sndfile_helpers.h>
-#include <ardour/utils.h>
-#include <ardour/version.h>
+#include "ardour/sndfilesource.h"
+#include "ardour/sndfile_helpers.h"
+#include "ardour/utils.h"
+#include "ardour/version.h"
 
 #include "i18n.h"
 

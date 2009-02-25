@@ -20,8 +20,8 @@
 
 #include "export_format_dialog.h"
 
-#include <ardour/session.h>
-#include <ardour/export_format_specification.h>
+#include "ardour/session.h"
+#include "ardour/export_format_specification.h"
 
 #include "i18n.h"
 

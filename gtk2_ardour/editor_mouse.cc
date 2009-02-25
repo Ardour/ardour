@@ -25,11 +25,11 @@
 #include <string>
 #include <algorithm>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/tearoff.h>
-#include <pbd/memento_command.h>
-#include <pbd/basename.h>
+#include "pbd/memento_command.h"
+#include "pbd/basename.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -50,20 +50,20 @@
 #include "rgb_macros.h"
 #include "control_point_dialog.h"
 
-#include <ardour/types.h>
-#include <ardour/profile.h>
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/midi_diskstream.h>
-#include <ardour/playlist.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/audioregion.h>
-#include <ardour/midi_region.h>
-#include <ardour/dB.h>
-#include <ardour/utils.h>
-#include <ardour/region_factory.h>
-#include <ardour/source_factory.h>
+#include "ardour/types.h"
+#include "ardour/profile.h"
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/playlist.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audioregion.h"
+#include "ardour/midi_region.h"
+#include "ardour/dB.h"
+#include "ardour/utils.h"
+#include "ardour/region_factory.h"
+#include "ardour/source_factory.h"
 
 #include <bitset>
 

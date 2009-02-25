@@ -29,18 +29,18 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/basename.h>
-#include <pbd/xml++.h>
-#include <pbd/enumwriter.h>
+#include "pbd/basename.h"
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
 
-#include <ardour/midi_region.h>
-#include <ardour/session.h>
-#include <ardour/gain.h>
-#include <ardour/dB.h>
-#include <ardour/playlist.h>
-#include <ardour/midi_source.h>
-#include <ardour/types.h>
-#include <ardour/midi_ring_buffer.h>
+#include "ardour/midi_region.h"
+#include "ardour/session.h"
+#include "ardour/gain.h"
+#include "ardour/dB.h"
+#include "ardour/playlist.h"
+#include "ardour/midi_source.h"
+#include "ardour/types.h"
+#include "ardour/midi_ring_buffer.h"
 
 #include "i18n.h"
 #include <locale.h>

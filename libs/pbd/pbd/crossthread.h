@@ -20,7 +20,7 @@
 #ifndef __pbd__crossthread_h__
 #define __pbd__crossthread_h__
 
-#include <pbd/abstract_ui.h>
+#include "pbd/abstract_ui.h"
 #include <sigc++/sigc++.h>
 #include <pthread.h>
 

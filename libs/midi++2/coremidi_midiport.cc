@@ -21,11 +21,11 @@
 #include <fcntl.h>
 #include <cerrno>
 
-#include <midi++/coremidi_midiport.h>
-#include <midi++/types.h>
+#include "midi++/coremidi_midiport.h"
+#include "midi++/types.h"
 #include <mach/mach_time.h>
 
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
 using namespace std;
 using namespace MIDI;

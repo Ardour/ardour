@@ -26,10 +26,10 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/undo.h>
+#include "pbd/undo.h"
 
-#include <ardour/ardour.h>
-#include <ardour/processor.h>
+#include "ardour/ardour.h"
+#include "ardour/processor.h"
 
 using std::string;
 

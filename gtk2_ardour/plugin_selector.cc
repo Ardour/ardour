@@ -30,11 +30,11 @@
 
 #include <gtkmm2ext/utils.h>
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 
-#include <ardour/plugin_manager.h>
-#include <ardour/plugin.h>
-#include <ardour/configuration.h>
+#include "ardour/plugin_manager.h"
+#include "ardour/plugin.h"
+#include "ardour/configuration.h"
 
 #include "ardour_ui.h"
 #include "plugin_selector.h"

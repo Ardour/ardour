@@ -1,16 +1,12 @@
+#include <cassert>
+#include <sigc++/sigc++.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-
-#include <evoral/Sequence.hpp>
-#include <evoral/TypeMap.hpp>
-#include <evoral/EventSink.hpp>
-#include <evoral/midi_events.h>
-#include <evoral/Control.hpp>
-
-#include <sigc++/sigc++.h>
-
-#include <cassert>
-
+#include "evoral/Sequence.hpp"
+#include "evoral/TypeMap.hpp"
+#include "evoral/EventSink.hpp"
+#include "evoral/midi_events.h"
+#include "evoral/Control.hpp"
 
 using namespace Evoral;
 

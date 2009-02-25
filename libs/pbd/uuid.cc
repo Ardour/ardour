@@ -18,7 +18,7 @@
 
 */
 
-#include <pbd/uuid.h>
+#include "pbd/uuid.h"
 
 using namespace PBD;
 

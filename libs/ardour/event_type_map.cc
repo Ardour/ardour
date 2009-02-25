@@ -18,13 +18,13 @@
 
 */
 
-#include <ardour/types.h>
-#include <ardour/event_type_map.h>
-#include <evoral/Parameter.hpp>
-#include <evoral/midi_events.h>
-#include <evoral/MIDIParameters.hpp>
-#include <pbd/error.h>
-#include <pbd/compose.h>
+#include "ardour/types.h"
+#include "ardour/event_type_map.h"
+#include "evoral/Parameter.hpp"
+#include "evoral/midi_events.h"
+#include "evoral/MIDIParameters.hpp"
+#include "pbd/error.h"
+#include "pbd/compose.h"
 
 using namespace std;
 

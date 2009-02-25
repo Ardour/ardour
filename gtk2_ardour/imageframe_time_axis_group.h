@@ -27,7 +27,7 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <jack/jack.h>
-#include <ardour/types.h>
+#include "ardour/types.h"
 #include "imageframe_time_axis_view.h"
 
 class PublicEditor ;

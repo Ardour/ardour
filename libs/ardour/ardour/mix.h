@@ -19,8 +19,8 @@
 #ifndef __ardour_mix_h__
 #define __ardour_mix_h__
 
-#include <ardour/types.h>
-#include <ardour/utils.h>
+#include "ardour/types.h"
+#include "ardour/utils.h"
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 

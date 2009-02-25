@@ -22,14 +22,14 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include <pbd/xml++.h>
-#include <pbd/error.h>
-#include <pbd/failed_constructor.h>
+#include "pbd/xml++.h"
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 
-#include <midi++/types.h>
-#include <midi++/port.h>
-#include <midi++/channel.h>
-#include <midi++/factory.h>
+#include "midi++/types.h"
+#include "midi++/port.h"
+#include "midi++/channel.h"
+#include "midi++/factory.h"
 
 using namespace MIDI;
 using namespace std;

@@ -26,7 +26,7 @@
 #endif
 #include <inttypes.h>
 
-#include <pbd/id.h>
+#include "pbd/id.h"
 #include <string>
 
 using namespace std;

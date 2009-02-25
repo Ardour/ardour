@@ -17,7 +17,7 @@
 
 */
 
-#include <pbd/whitespace.h>
+#include "pbd/whitespace.h"
 
 using namespace std;
 

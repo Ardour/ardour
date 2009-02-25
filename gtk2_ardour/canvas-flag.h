@@ -5,7 +5,7 @@
 #include <libgnomecanvasmm/group.h>
 #include <libgnomecanvasmm/widget.h>
 
-#include <ardour/midi_model.h>
+#include "ardour/midi_model.h"
 
 #include "simplerect.h"
 #include "simpleline.h"

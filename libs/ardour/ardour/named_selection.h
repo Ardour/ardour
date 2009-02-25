@@ -24,7 +24,7 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 
-#include <pbd/stateful.h> 
+#include "pbd/stateful.h" 
 
 class XMLNode;
 

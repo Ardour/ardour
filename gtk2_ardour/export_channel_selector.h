@@ -23,8 +23,8 @@
 
 #include <list>
 
-#include <ardour/export_profile_manager.h>
-#include <ardour/export_channel.h>
+#include "ardour/export_profile_manager.h"
+#include "ardour/export_channel.h"
 
 #include <gtkmm.h>
 #include <sigc++/signal.h>

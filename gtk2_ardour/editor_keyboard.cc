@@ -17,11 +17,11 @@
 
 */
 
-#include <ardour/audioregion.h>
-#include <ardour/playlist.h>
-#include <ardour/location.h>
+#include "ardour/audioregion.h"
+#include "ardour/playlist.h"
+#include "ardour/location.h"
 
-#include <pbd/memento_command.h>
+#include "pbd/memento_command.h"
 
 #include "editor.h"
 #include "region_view.h"

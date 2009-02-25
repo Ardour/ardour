@@ -24,7 +24,7 @@
 #include <ostream>
 #include <iostream>
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
 namespace ARDOUR {
 

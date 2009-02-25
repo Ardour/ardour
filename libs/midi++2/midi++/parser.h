@@ -25,7 +25,7 @@
 
 #include <sigc++/sigc++.h>
 
-#include <midi++/types.h>
+#include "midi++/types.h"
 
 namespace MIDI {
 

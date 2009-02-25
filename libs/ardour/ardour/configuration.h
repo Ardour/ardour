@@ -26,11 +26,11 @@
 #include <sys/types.h>
 #include <string>
 
-#include <pbd/stateful.h> 
+#include "pbd/stateful.h" 
 
-#include <ardour/types.h>
-#include <ardour/utils.h>
-#include <ardour/configuration_variable.h>
+#include "ardour/types.h"
+#include "ardour/utils.h"
+#include "ardour/configuration_variable.h"
 
 class XMLNode;
 

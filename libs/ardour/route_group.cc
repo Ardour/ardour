@@ -24,14 +24,14 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/error.h>
-#include <pbd/enumwriter.h>
+#include "pbd/error.h"
+#include "pbd/enumwriter.h"
 
-#include <ardour/route_group.h>
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/configuration.h>
-#include <ardour/session.h>
+#include "ardour/route_group.h"
+#include "ardour/audio_track.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/configuration.h"
+#include "ardour/session.h"
 
 using namespace ARDOUR;
 using namespace sigc;

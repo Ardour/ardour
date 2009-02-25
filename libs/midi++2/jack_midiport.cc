@@ -21,10 +21,10 @@
 #include <cerrno>
 #include <cassert>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <midi++/types.h>
-#include <midi++/jack.h>
+#include "midi++/types.h"
+#include "midi++/jack.h"
 
 using namespace std;
 using namespace MIDI;

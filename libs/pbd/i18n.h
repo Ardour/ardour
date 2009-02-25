@@ -1,7 +1,7 @@
 #ifndef __i18n_h__
 #define __i18n_h__
 
-#include <pbd/compose.h>
+#include "pbd/compose.h"
 #include "gettext.h"
 
 #define _(Text) dgettext (PACKAGE, Text)

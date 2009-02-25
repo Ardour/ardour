@@ -20,13 +20,13 @@
 
 #include "session_import_dialog.h"
 
-#include <pbd/failed_constructor.h>
+#include "pbd/failed_constructor.h"
 
-#include <ardour/audio_region_importer.h>
-#include <ardour/audio_playlist_importer.h>
-#include <ardour/audio_track_importer.h>
-#include <ardour/location_importer.h>
-#include <ardour/tempo_map_importer.h>
+#include "ardour/audio_region_importer.h"
+#include "ardour/audio_playlist_importer.h"
+#include "ardour/audio_track_importer.h"
+#include "ardour/location_importer.h"
+#include "ardour/tempo_map_importer.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>

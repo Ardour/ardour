@@ -20,7 +20,7 @@
 #ifndef __ardour_gtk_processor_selection_h__
 #define __ardour_gtk_processor_selection_h__
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
 class ProcessorSelection {
   public:

@@ -17,8 +17,8 @@
 
 */
 
-#include <pbd/command.h>
-#include <pbd/xml++.h>
+#include "pbd/command.h"
+#include "pbd/xml++.h"
 
 XMLNode &Command::get_state()
 {

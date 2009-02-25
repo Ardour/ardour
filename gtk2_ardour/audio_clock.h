@@ -25,7 +25,7 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 #include <gtkmm/frame.h>
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 
 namespace ARDOUR {
 	class Session;

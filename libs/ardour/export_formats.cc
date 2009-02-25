@@ -18,7 +18,7 @@
 
 */
 
-#include <ardour/export_formats.h>
+#include "ardour/export_formats.h"
 
 #include "i18n.h"
 

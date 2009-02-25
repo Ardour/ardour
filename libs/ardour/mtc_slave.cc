@@ -21,15 +21,15 @@
 #include <poll.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <pbd/error.h>
-#include <pbd/failed_constructor.h>
-#include <pbd/pthread_utils.h>
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/pthread_utils.h"
 
-#include <midi++/port.h>
-#include <ardour/slave.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/cycles.h>
+#include "midi++/port.h"
+#include "ardour/slave.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/cycles.h"
 
 #include "i18n.h"
 

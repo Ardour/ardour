@@ -22,8 +22,8 @@
 #include <sstream>
 #include <time.h>
 
-#include <pbd/undo.h>
-#include <pbd/xml++.h>
+#include "pbd/undo.h"
+#include "pbd/xml++.h"
 
 #include <sigc++/bind.h>
 

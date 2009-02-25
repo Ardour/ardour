@@ -22,10 +22,10 @@
 
 #include <list>
 
-#include <pbd/xml++.h>
-#include <ardour/ardour.h>
-#include <ardour/route.h>
-#include <ardour/track.h>
+#include "pbd/xml++.h"
+#include "ardour/ardour.h"
+#include "ardour/route.h"
+#include "ardour/track.h"
 
 #include "axis_view.h"
 

@@ -28,7 +28,7 @@
 
 #include <cassert>
 
-#include <pbd/compose.h>
+#include "pbd/compose.h"
 
 #include "i18n.h"
 

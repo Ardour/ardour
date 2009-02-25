@@ -25,13 +25,13 @@
 #include <ctime>
 #include <sigc++/bind.h>
 
-#include <pbd/stl_delete.h>
-#include <pbd/xml++.h>
-#include <pbd/enumwriter.h>
+#include "pbd/stl_delete.h"
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
 
-#include <ardour/location.h>
-#include <ardour/session.h>
-#include <ardour/audiofilesource.h>
+#include "ardour/location.h"
+#include "ardour/session.h"
+#include "ardour/audiofilesource.h"
 
 #include "i18n.h"
 

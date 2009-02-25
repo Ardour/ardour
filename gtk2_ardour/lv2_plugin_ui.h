@@ -29,7 +29,7 @@
 #include <gtkmm/widget.h>
 
 #include <ardour_dialog.h>
-#include <ardour/types.h>
+#include "ardour/types.h"
 #include "plugin_ui.h"
 
 #ifdef HAVE_LV2

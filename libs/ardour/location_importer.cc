@@ -18,14 +18,14 @@
 
 */
 
-#include <ardour/location_importer.h>
+#include "ardour/location_importer.h"
 
 #include <sstream>
 #include <stdexcept>
 
-#include <ardour/session.h>
-#include <pbd/convert.h>
-#include <pbd/failed_constructor.h>
+#include "ardour/session.h"
+#include "pbd/convert.h"
+#include "pbd/failed_constructor.h"
 
 #include "i18n.h"
 

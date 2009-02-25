@@ -18,12 +18,12 @@
 
 */
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/types.h>
-#include <ardour/midi_stretch.h>
-#include <ardour/session.h>
-#include <ardour/midi_region.h>
+#include "ardour/types.h"
+#include "ardour/midi_stretch.h"
+#include "ardour/session.h"
+#include "ardour/midi_region.h"
 
 #include "i18n.h"
 

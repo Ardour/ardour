@@ -29,37 +29,37 @@
 
 #ifdef VST_SUPPORT
 #include <fst.h>
-#include <pbd/basename.h>
+#include "pbd/basename.h"
 #include <cstring>
 #endif // VST_SUPPORT
 
 #include <glibmm/miscutils.h>
 
-#include <pbd/pathscanner.h>
+#include "pbd/pathscanner.h"
 
-#include <ardour/ladspa.h>
-#include <ardour/session.h>
-#include <ardour/plugin_manager.h>
-#include <ardour/plugin.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/ladspa.h"
+#include "ardour/session.h"
+#include "ardour/plugin_manager.h"
+#include "ardour/plugin.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/filesystem_paths.h"
 
 #ifdef HAVE_SLV2
 #include <slv2/slv2.h>
-#include <ardour/lv2_plugin.h>
+#include "ardour/lv2_plugin.h"
 #endif
 
 #ifdef VST_SUPPORT
-#include <ardour/vst_plugin.h>
+#include "ardour/vst_plugin.h"
 #endif
 
 #ifdef HAVE_AUDIOUNITS
-#include <ardour/audio_unit.h>
+#include "ardour/audio_unit.h"
 #include <Carbon/Carbon.h>
 #endif
 
-#include <pbd/error.h>
-#include <pbd/stl_delete.h>
+#include "pbd/error.h"
+#include "pbd/stl_delete.h"
 
 #include "i18n.h"
 

@@ -20,7 +20,7 @@
 #ifndef __ardour_rbeffect_h__
 #define __ardour_rbeffect_h__
 
-#include <ardour/filter.h>
+#include "ardour/filter.h"
 
 namespace ARDOUR {
 

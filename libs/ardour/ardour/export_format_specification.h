@@ -23,10 +23,10 @@
 
 #include <glibmm/ustring.h>
 
-#include <pbd/uuid.h>
+#include "pbd/uuid.h"
 
-#include <ardour/types.h>
-#include <ardour/export_format_base.h>
+#include "ardour/types.h"
+#include "ardour/export_format_base.h"
 
 using std::string;
 

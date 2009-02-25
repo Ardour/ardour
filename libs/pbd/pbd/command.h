@@ -21,7 +21,7 @@
 #ifndef __lib_pbd_command_h__
 #define __lib_pbd_command_h__
 
-#include <pbd/statefuldestructible.h>
+#include "pbd/statefuldestructible.h"
 #include <boost/utility.hpp>
 
 class Command : public PBD::StatefulDestructible, public boost::noncopyable

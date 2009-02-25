@@ -21,7 +21,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include <pbd/textreceiver.h>
+#include "pbd/textreceiver.h"
 
 TextReceiver::TextReceiver (const string &n)
 

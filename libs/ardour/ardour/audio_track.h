@@ -20,7 +20,7 @@
 #ifndef __ardour_audio_track_h__
 #define __ardour_audio_track_h__
 
-#include <ardour/track.h>
+#include "ardour/track.h"
 
 namespace ARDOUR {
 

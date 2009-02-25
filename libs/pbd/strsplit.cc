@@ -17,7 +17,7 @@
 
 */
 
-#include <pbd/strsplit.h>
+#include "pbd/strsplit.h"
 
 using namespace std;
 using namespace Glib;

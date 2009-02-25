@@ -28,9 +28,9 @@
 #include <boost/shared_ptr.hpp>
 #include <gtkmm.h>
 
-#include <pbd/xml++.h>
-#include <ardour/element_importer.h>
-#include <ardour/element_import_handler.h>
+#include "pbd/xml++.h"
+#include "ardour/element_importer.h"
+#include "ardour/element_import_handler.h"
 
 #include "ardour_dialog.h"
 

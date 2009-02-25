@@ -30,7 +30,7 @@
 #include "canvas_impl.h"
 
 #include <gtkmm2ext/gtk_ui.h>
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>

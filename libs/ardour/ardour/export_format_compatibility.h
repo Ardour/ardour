@@ -21,7 +21,7 @@
 #ifndef __ardour_export_format_compatibility_h__
 #define __ardour_export_format_compatibility_h__
 
-#include <ardour/export_format_base.h>
+#include "ardour/export_format_base.h"
 
 namespace ARDOUR
 {

@@ -29,17 +29,17 @@
 
 #include <time.h>
 
-#include <pbd/fastlog.h>
-#include <pbd/ringbufferNPT.h>
-#include <pbd/stateful.h> 
-#include <pbd/rcu.h> 
+#include "pbd/fastlog.h"
+#include "pbd/ringbufferNPT.h"
+#include "pbd/stateful.h" 
+#include "pbd/rcu.h" 
 
-#include <ardour/ardour.h>
-#include <ardour/configuration.h>
-#include <ardour/utils.h>
-#include <ardour/diskstream.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/port.h>
+#include "ardour/ardour.h"
+#include "ardour/configuration.h"
+#include "ardour/utils.h"
+#include "ardour/diskstream.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/port.h"
 
 struct tm;
 

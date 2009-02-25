@@ -24,10 +24,10 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/playlist.h>
-#include <ardour/audioregion.h>
-#include <ardour/audiosource.h>
-#include <ardour/audio_diskstream.h>
+#include "ardour/playlist.h"
+#include "ardour/audioregion.h"
+#include "ardour/audiosource.h"
+#include "ardour/audio_diskstream.h"
 
 #include "tape_region_view.h"
 #include "audio_time_axis.h"

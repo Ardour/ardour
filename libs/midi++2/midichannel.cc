@@ -19,9 +19,9 @@
 */
 
 #include <cstring>
-#include <midi++/types.h>
-#include <midi++/port.h>
-#include <midi++/channel.h>
+#include "midi++/types.h"
+#include "midi++/port.h"
+#include "midi++/channel.h"
 
 using namespace sigc;
 using namespace MIDI;

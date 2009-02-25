@@ -5,12 +5,12 @@
 #include <climits>
 #include <cerrno>
 
-#include <pbd/compose.h>
-#include <pbd/error.h>
+#include "pbd/compose.h"
+#include "pbd/error.h"
 
-#include <ardour/session_utils.h>
-#include <ardour/filename_extensions.h>
-#include <ardour/utils.h>
+#include "ardour/session_utils.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 

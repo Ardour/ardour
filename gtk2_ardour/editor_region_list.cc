@@ -23,13 +23,13 @@
 #include <string>
 #include <sstream>
 
-#include <pbd/basename.h>
+#include "pbd/basename.h"
 
-#include <ardour/audioregion.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/silentfilesource.h>
-#include <ardour/session_region.h>
-#include <ardour/profile.h>
+#include "ardour/audioregion.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/silentfilesource.h"
+#include "ardour/session_region.h"
+#include "ardour/profile.h"
 
 #include <gtkmm2ext/stop_signal.h>
 

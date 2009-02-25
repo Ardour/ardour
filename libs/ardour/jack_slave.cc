@@ -23,8 +23,8 @@
 #include <jack/jack.h>
 #include <jack/transport.h>
 
-#include <ardour/slave.h>
-#include <ardour/session.h>
+#include "ardour/slave.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

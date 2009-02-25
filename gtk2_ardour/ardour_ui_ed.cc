@@ -23,8 +23,8 @@
    is to cut down on the nasty compile times for both these classes.
 */
 
-#include <pbd/file_utils.h>
-#include <pbd/fpu.h>
+#include "pbd/file_utils.h"
+#include "pbd/fpu.h"
 
 #include <glibmm/miscutils.h>
 
@@ -44,10 +44,10 @@
 #include <gtkmm2ext/sync-menu.h>
 #endif
 
-#include <ardour/session.h>
-#include <ardour/profile.h>
-#include <ardour/audioengine.h>
-#include <ardour/control_protocol_manager.h>
+#include "ardour/session.h"
+#include "ardour/profile.h"
+#include "ardour/audioengine.h"
+#include "ardour/control_protocol_manager.h"
 
 #include <control_protocol/control_protocol.h>
 

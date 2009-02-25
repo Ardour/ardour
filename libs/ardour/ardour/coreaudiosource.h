@@ -21,7 +21,7 @@
 #define __coreaudio_source_h__
 
 #include <appleutility/CAAudioFile.h>
-#include <ardour/audiofilesource.h>
+#include "ardour/audiofilesource.h"
 
 namespace ARDOUR {
 

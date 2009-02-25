@@ -20,7 +20,7 @@
 #ifndef __ardour_dialog_h__
 #define __ardour_dialog_h__
 
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 #include <gtkmm/window.h>
 #include <gtkmm/dialog.h>
 

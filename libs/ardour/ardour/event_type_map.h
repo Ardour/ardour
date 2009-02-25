@@ -22,8 +22,8 @@
 #define __ardour_event_type_map_h__
 
 #include <string>
-#include <evoral/TypeMap.hpp>
-#include <evoral/ControlList.hpp>
+#include "evoral/TypeMap.hpp"
+#include "evoral/ControlList.hpp"
 
 namespace ARDOUR {
 

@@ -22,8 +22,8 @@
 #include <jack/types.h>
 #include <gtkmm2ext/utils.h>
 
-#include <ardour/audioregion.h>
-#include <ardour/profile.h>
+#include "ardour/audioregion.h"
+#include "ardour/profile.h"
 
 #include "ardour_ui.h"
 #include "editor.h"

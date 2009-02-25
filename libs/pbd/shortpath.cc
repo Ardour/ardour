@@ -17,7 +17,7 @@
 
 */
 
-#include <pbd/shortpath.h>
+#include "pbd/shortpath.h"
 
 using namespace Glib;
 using namespace std;

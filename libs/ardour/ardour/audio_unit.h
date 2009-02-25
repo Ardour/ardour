@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-#include <ardour/plugin.h>
+#include "ardour/plugin.h"
 
 #include <AudioUnit/AudioUnit.h>
 #include <appleutility/AUParamInfo.h>

@@ -18,23 +18,23 @@
     $Id$
 */
 
-#include <pbd/error.h>
-#include <pbd/convert.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/stacktrace.h>
+#include "pbd/error.h"
+#include "pbd/convert.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/stacktrace.h"
 
-#include <ardour/source_factory.h>
-#include <ardour/sndfilesource.h>
-#include <ardour/silentfilesource.h>
-#include <ardour/configuration.h>
-#include <ardour/smf_source.h>
+#include "ardour/source_factory.h"
+#include "ardour/sndfilesource.h"
+#include "ardour/silentfilesource.h"
+#include "ardour/configuration.h"
+#include "ardour/smf_source.h"
 
 #ifdef  HAVE_COREAUDIO
 #define USE_COREAUDIO_FOR_FILES
 #endif
 
 #ifdef USE_COREAUDIO_FOR_FILES
-#include <ardour/coreaudiosource.h>
+#include "ardour/coreaudiosource.h"
 #endif
 
 

@@ -20,7 +20,7 @@
 #ifndef __ardour_dB_h__
 #define __ardour_dB_h__
 
-#include <pbd/fastlog.h>
+#include "pbd/fastlog.h"
 
 static inline float dB_to_coefficient (float dB) {
 	return dB > -318.8f ? pow (10.0f, dB * 0.05f) : 0.0f;

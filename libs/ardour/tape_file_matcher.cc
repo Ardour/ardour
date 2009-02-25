@@ -16,9 +16,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/tape_file_matcher.h>
+#include "ardour/tape_file_matcher.h"
 
 #include "i18n.h"
 

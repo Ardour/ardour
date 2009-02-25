@@ -23,8 +23,8 @@
 #include <iostream>
 #include <string>
 
-#include <pbd/transmitter.h>
-#include <pbd/error.h>
+#include "pbd/transmitter.h"
+#include "pbd/error.h"
 
 using std::string;
 using std::ios;

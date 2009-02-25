@@ -17,7 +17,7 @@
 
 */
 
-#include <pbd/replace_all.h>
+#include "pbd/replace_all.h"
 
 int
 replace_all (std::string& str,

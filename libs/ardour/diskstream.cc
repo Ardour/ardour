@@ -33,26 +33,26 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/error.h>
-#include <pbd/basename.h>
+#include "pbd/error.h"
+#include "pbd/basename.h"
 #include <glibmm/thread.h>
-#include <pbd/xml++.h>
-#include <pbd/memento_command.h>
+#include "pbd/xml++.h"
+#include "pbd/memento_command.h"
 
-#include <ardour/ardour.h>
-#include <ardour/audioengine.h>
-#include <ardour/diskstream.h>
-#include <ardour/utils.h>
-#include <ardour/configuration.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/send.h>
-#include <ardour/playlist.h>
-#include <ardour/cycle_timer.h>
-#include <ardour/region.h>
-#include <ardour/panner.h>
-#include <ardour/session.h>
-#include <ardour/io.h>
-#include <ardour/route.h>
+#include "ardour/ardour.h"
+#include "ardour/audioengine.h"
+#include "ardour/diskstream.h"
+#include "ardour/utils.h"
+#include "ardour/configuration.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/send.h"
+#include "ardour/playlist.h"
+#include "ardour/cycle_timer.h"
+#include "ardour/region.h"
+#include "ardour/panner.h"
+#include "ardour/session.h"
+#include "ardour/io.h"
+#include "ardour/route.h"
 
 #include "i18n.h"
 #include <locale.h>

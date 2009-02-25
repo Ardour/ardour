@@ -22,21 +22,21 @@
 #include <algorithm>
 #include <unistd.h>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include <glibmm/thread.h>
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/timestamps.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/audioengine.h>
-#include <ardour/slave.h>
-#include <ardour/auditioner.h>
-#include <ardour/cycles.h>
-#include <ardour/cycle_timer.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/timestamps.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audioengine.h"
+#include "ardour/slave.h"
+#include "ardour/auditioner.h"
+#include "ardour/cycles.h"
+#include "ardour/cycle_timer.h"
 
-#include <midi++/manager.h>
+#include "midi++/manager.h"
 
 #include "i18n.h"
 

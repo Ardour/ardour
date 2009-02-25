@@ -20,7 +20,7 @@
 #define __ardour_port_set_h__
 
 #include <vector>
-#include <ardour/chan_count.h>
+#include "ardour/chan_count.h"
 #include <boost/utility.hpp>
 
 namespace ARDOUR {

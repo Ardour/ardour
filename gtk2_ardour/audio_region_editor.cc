@@ -17,11 +17,11 @@
 
 */
 
-#include <pbd/memento_command.h>
+#include "pbd/memento_command.h"
 
-#include <ardour/audioregion.h>
-#include <ardour/playlist.h>
-#include <ardour/utils.h>
+#include "ardour/audioregion.h"
+#include "ardour/playlist.h"
+#include "ardour/utils.h"
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/window_title.h>

@@ -25,17 +25,17 @@
 #include <cmath>
 
 #include <sigc++/bind.h>
-#include <pbd/error.h>
-#include <pbd/basename.h>
-#include <pbd/fastlog.h>
+#include "pbd/error.h"
+#include "pbd/basename.h"
+#include "pbd/fastlog.h"
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/tearoff.h>
 
-#include <ardour/audioengine.h>
-#include <ardour/ardour.h>
-#include <ardour/profile.h>
-#include <ardour/route.h>
+#include "ardour/audioengine.h"
+#include "ardour/ardour.h"
+#include "ardour/profile.h"
+#include "ardour/route.h"
 
 #include "ardour_ui.h"
 #include "keyboard.h"

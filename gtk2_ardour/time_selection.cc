@@ -19,8 +19,8 @@
 
 #include <algorithm>
 
-#include <pbd/error.h>
-#include <ardour/ardour.h>
+#include "pbd/error.h"
+#include "ardour/ardour.h"
 
 #include "time_selection.h"
 

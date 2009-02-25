@@ -23,9 +23,9 @@
 
 #include <string>
 
-#include <pbd/error.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/memento_command.h>
+#include "pbd/error.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/memento_command.h"
 
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/utils.h>
@@ -35,15 +35,15 @@
 #include "audio_region_view.h"
 #include "region_selection.h"
 
-#include <ardour/session.h>
-#include <ardour/region.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/audio_track.h>
-#include <ardour/audioregion.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/stretch.h>
-#include <ardour/midi_stretch.h>
-#include <ardour/pitch.h>
+#include "ardour/session.h"
+#include "ardour/region.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audio_track.h"
+#include "ardour/audioregion.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/stretch.h"
+#include "ardour/midi_stretch.h"
+#include "ardour/pitch.h"
 
 #ifdef USE_RUBBERBAND
 #include <rubberband/RubberBandStretcher.h>

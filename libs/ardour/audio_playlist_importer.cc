@@ -18,18 +18,18 @@
 
 */
 
-#include <ardour/audio_playlist_importer.h>
+#include "ardour/audio_playlist_importer.h"
 
 #include <sstream>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/compose.h>
-#include <pbd/error.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/compose.h"
+#include "pbd/error.h"
 
-#include <ardour/audio_region_importer.h>
-#include <ardour/session.h>
-#include <ardour/playlist.h>
-#include <ardour/playlist_factory.h>
+#include "ardour/audio_region_importer.h"
+#include "ardour/session.h"
+#include "ardour/playlist.h"
+#include "ardour/playlist_factory.h"
 
 using namespace PBD;
 using namespace ARDOUR;

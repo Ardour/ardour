@@ -21,14 +21,14 @@
 #ifndef __ardour_location_importer_h__
 #define __ardour_location_importer_h__
 
-#include <ardour/element_importer.h>
-#include <ardour/element_import_handler.h>
+#include "ardour/element_importer.h"
+#include "ardour/element_import_handler.h"
 
 #include <boost/shared_ptr.hpp>
 
-#include <pbd/xml++.h>
-#include <ardour/location.h>
-#include <ardour/types.h>
+#include "pbd/xml++.h"
+#include "ardour/location.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

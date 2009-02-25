@@ -28,7 +28,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <midi++/port.h>
+#include "midi++/port.h"
 
 namespace MIDI {
 

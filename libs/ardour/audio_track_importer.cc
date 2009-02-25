@@ -18,14 +18,14 @@
 
 */
 
-#include <ardour/audio_track_importer.h>
+#include "ardour/audio_track_importer.h"
 
-#include <ardour/audio_playlist_importer.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/session.h>
+#include "ardour/audio_playlist_importer.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/session.h"
 
-#include <pbd/failed_constructor.h>
-#include <pbd/convert.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/convert.h"
 
 #include <sstream>
 #include <algorithm>

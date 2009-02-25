@@ -25,9 +25,9 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
-#include <ardour/types.h>
-#include <ardour/data_type.h>
-#include <evoral/Parameter.hpp>
+#include "ardour/types.h"
+#include "ardour/data_type.h"
+#include "evoral/Parameter.hpp"
 
 class AddMidiCCTrackDialog : public Gtk::Dialog
 {

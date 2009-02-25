@@ -26,13 +26,13 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include <pbd/convert.h>
-#include <pbd/basename.h>
-#include <pbd/mountpoint.h>
-#include <pbd/stl_delete.h>
-#include <pbd/strsplit.h>
-#include <pbd/shortpath.h>
-#include <pbd/enumwriter.h>
+#include "pbd/convert.h"
+#include "pbd/basename.h"
+#include "pbd/mountpoint.h"
+#include "pbd/stl_delete.h"
+#include "pbd/strsplit.h"
+#include "pbd/shortpath.h"
+#include "pbd/enumwriter.h"
 
 #include <sndfile.h>
 
@@ -40,18 +40,18 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/thread.h>
 
-#include <ardour/audiofilesource.h>
-#include <ardour/sndfile_helpers.h>
-#include <ardour/sndfilesource.h>
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/source_factory.h>
-#include <ardour/filename_extensions.h>
+#include "ardour/audiofilesource.h"
+#include "ardour/sndfile_helpers.h"
+#include "ardour/sndfilesource.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/source_factory.h"
+#include "ardour/filename_extensions.h"
 
 // if these headers come before sigc++ is included
 // the parser throws ObjC++ errors. (nil is a keyword)
 #ifdef HAVE_COREAUDIO 
-#include <ardour/coreaudiosource.h>
+#include "ardour/coreaudiosource.h"
 #include <AudioToolbox/ExtendedAudioFile.h>
 #include <AudioToolbox/AudioFormat.h>
 #endif // HAVE_COREAUDIO

@@ -17,12 +17,12 @@
 
 */
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/playlist.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/midi_playlist.h>
-#include <ardour/playlist_factory.h>
+#include "ardour/playlist.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/playlist_factory.h"
 
 #include "i18n.h"
 

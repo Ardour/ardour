@@ -19,14 +19,14 @@
 
 #include <string>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include <gtkmm/menu.h>
 
 #include <gtkmm2ext/utils.h>
 
-#include <ardour/session.h>
-#include <ardour/utils.h>
+#include "ardour/session.h"
+#include "ardour/utils.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"

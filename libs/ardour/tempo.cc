@@ -25,9 +25,9 @@
 #include <sigc++/bind.h>
 
 #include <glibmm/thread.h>
-#include <pbd/xml++.h>
-#include <ardour/tempo.h>
-#include <ardour/utils.h>
+#include "pbd/xml++.h"
+#include "ardour/tempo.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 #include <locale.h>

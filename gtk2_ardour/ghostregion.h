@@ -23,7 +23,7 @@
 #include <vector>
 #include <sigc++/signal.h>
 #include <libgnomecanvasmm.h>
-#include <ardour/configuration.h>
+#include "ardour/configuration.h"
 #include "canvas.h"
 
 namespace Gnome {

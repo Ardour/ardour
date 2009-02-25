@@ -16,28 +16,28 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include <pbd/error.h>
+#include "pbd/error.h"
 #include <sigc++/retype.h>
 #include <sigc++/retype_return.h>
 #include <sigc++/bind.h>
 
-#include <pbd/enumwriter.h>
-#include <midi++/events.h>
-#include <evoral/midi_util.h>
+#include "pbd/enumwriter.h"
+#include "midi++/events.h"
+#include "evoral/midi_util.h"
 
-#include <ardour/midi_track.h>
-#include <ardour/midi_diskstream.h>
-#include <ardour/session.h>
-#include <ardour/io_processor.h>
-#include <ardour/midi_region.h>
-#include <ardour/midi_source.h>
-#include <ardour/route_group_specialized.h>
-#include <ardour/processor.h>
-#include <ardour/midi_playlist.h>
-#include <ardour/panner.h>
-#include <ardour/utils.h>
-#include <ardour/buffer_set.h>
-#include <ardour/meter.h>
+#include "ardour/midi_track.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/session.h"
+#include "ardour/io_processor.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
+#include "ardour/route_group_specialized.h"
+#include "ardour/processor.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/panner.h"
+#include "ardour/utils.h"
+#include "ardour/buffer_set.h"
+#include "ardour/meter.h"
 
 
 #include "i18n.h"

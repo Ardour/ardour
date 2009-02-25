@@ -23,9 +23,9 @@
 
 #include <cstdio>
 #include <time.h>
-#include <evoral/SMF.hpp>
-#include <ardour/midi_source.h>
-#include <ardour/file_source.h>
+#include "evoral/SMF.hpp"
+#include "ardour/midi_source.h"
+#include "ardour/file_source.h"
 
 namespace Evoral { template<typename T> class Event; }
 

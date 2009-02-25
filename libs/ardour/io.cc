@@ -27,23 +27,23 @@
 #include <glibmm.h>
 #include <glibmm/thread.h>
 
-#include <pbd/xml++.h>
-#include <pbd/replace_all.h>
-#include <pbd/unknown_type.h>
+#include "pbd/xml++.h"
+#include "pbd/replace_all.h"
+#include "pbd/unknown_type.h"
 
-#include <ardour/audioengine.h>
-#include <ardour/io.h>
-#include <ardour/route.h>
-#include <ardour/port.h>
-#include <ardour/audio_port.h>
-#include <ardour/midi_port.h>
-#include <ardour/session.h>
-#include <ardour/cycle_timer.h>
-#include <ardour/panner.h>
-#include <ardour/buffer_set.h>
-#include <ardour/meter.h>
-#include <ardour/amp.h>
-#include <ardour/user_bundle.h>
+#include "ardour/audioengine.h"
+#include "ardour/io.h"
+#include "ardour/route.h"
+#include "ardour/port.h"
+#include "ardour/audio_port.h"
+#include "ardour/midi_port.h"
+#include "ardour/session.h"
+#include "ardour/cycle_timer.h"
+#include "ardour/panner.h"
+#include "ardour/buffer_set.h"
+#include "ardour/meter.h"
+#include "ardour/amp.h"
+#include "ardour/user_bundle.h"
 
 #include "i18n.h"
 

@@ -19,7 +19,7 @@
 #ifndef __ardour_amp_h__
 #define __ardour_amp_h__
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

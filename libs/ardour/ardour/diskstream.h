@@ -31,20 +31,20 @@
 
 #include <boost/utility.hpp>
 
-#include <evoral/types.hpp>
+#include "evoral/types.hpp"
 
-#include <pbd/fastlog.h>
-#include <pbd/ringbufferNPT.h>
-#include <pbd/stateful.h>
-#include <pbd/statefuldestructible.h> 
+#include "pbd/fastlog.h"
+#include "pbd/ringbufferNPT.h"
+#include "pbd/stateful.h"
+#include "pbd/statefuldestructible.h" 
 
-#include <ardour/ardour.h>
-#include <ardour/configuration.h>
-#include <ardour/location.h>
-#include <ardour/session_object.h>
-#include <ardour/types.h>
-#include <ardour/utils.h>
-#include <ardour/chan_count.h>
+#include "ardour/ardour.h"
+#include "ardour/configuration.h"
+#include "ardour/location.h"
+#include "ardour/session_object.h"
+#include "ardour/types.h"
+#include "ardour/utils.h"
+#include "ardour/chan_count.h"
 
 struct tm;
 

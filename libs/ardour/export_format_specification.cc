@@ -18,18 +18,18 @@
 
 */
 
-#include <ardour/export_format_specification.h>
+#include "ardour/export_format_specification.h"
 
 #include <sstream>
 
-#include <ardour/export_format_compatibility.h>
-#include <ardour/export_formats.h>
-#include <ardour/session.h>
+#include "ardour/export_format_compatibility.h"
+#include "ardour/export_formats.h"
+#include "ardour/session.h"
 
-#include <pbd/error.h>
-#include <pbd/xml++.h>
-#include <pbd/enumwriter.h>
-#include <pbd/convert.h>
+#include "pbd/error.h"
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
+#include "pbd/convert.h"
 
 #include "i18n.h"
 

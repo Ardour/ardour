@@ -31,7 +31,7 @@
 #include <gtkmm2ext/selector.h>
 #include <list>
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 #include "ardour_dialog.h"
 #include "route_ui.h"

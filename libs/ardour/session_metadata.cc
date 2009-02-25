@@ -17,7 +17,7 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/session_metadata.h>
+#include "ardour/session_metadata.h"
 
 #include <iostream>
 #include <sstream>

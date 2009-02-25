@@ -21,7 +21,7 @@
 #include <sigc++/sigc++.h>
 #include <boost/shared_ptr.hpp>
 
-#include <pbd/file_utils.h>
+#include "pbd/file_utils.h"
 
 #include "ardour/session.h"
 #include "ardour/session_directory.h"

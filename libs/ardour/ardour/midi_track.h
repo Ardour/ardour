@@ -20,8 +20,8 @@
 #ifndef __ardour_midi_track_h__
 #define __ardour_midi_track_h__
 
-#include <ardour/track.h>
-#include <ardour/midi_ring_buffer.h>
+#include "ardour/track.h"
+#include "ardour/midi_ring_buffer.h"
 
 namespace ARDOUR
 {

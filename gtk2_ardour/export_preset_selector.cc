@@ -20,7 +20,7 @@
 
 #include "export_preset_selector.h"
 
-#include <ardour/export_preset.h>
+#include "ardour/export_preset.h"
 
 #include "i18n.h"
 

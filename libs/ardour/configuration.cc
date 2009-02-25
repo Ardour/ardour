@@ -24,18 +24,18 @@
 #include <glib/gstdio.h> /* for g_stat() */
 #include <glibmm/miscutils.h>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/xml++.h>
-#include <pbd/filesystem.h>
-#include <pbd/file_utils.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/xml++.h"
+#include "pbd/filesystem.h"
+#include "pbd/file_utils.h"
 
-#include <midi++/manager.h>
+#include "midi++/manager.h"
 
-#include <ardour/ardour.h>
-#include <ardour/configuration.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/control_protocol_manager.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/ardour.h"
+#include "ardour/configuration.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/control_protocol_manager.h"
+#include "ardour/filesystem_paths.h"
 
 #include "i18n.h"
 

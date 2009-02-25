@@ -20,7 +20,7 @@
 #ifndef __ardour_chan_count_h__
 #define __ardour_chan_count_h__
 
-#include <ardour/data_type.h>
+#include "ardour/data_type.h"
 #include <cassert>
 
 namespace ARDOUR {

@@ -24,8 +24,8 @@
 
 #include <glibmm/thread.h>
 
-#include <ardour/session.h>
-#include <ardour/route.h>
+#include "ardour/session.h"
+#include "ardour/route.h"
 
 namespace ARDOUR {
 

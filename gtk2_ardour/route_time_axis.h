@@ -35,8 +35,8 @@
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/slider_controller.h>
 
-#include <ardour/playlist.h>
-#include <ardour/types.h>
+#include "ardour/playlist.h"
+#include "ardour/types.h"
 
 #include "ardour_dialog.h"
 #include "route_ui.h"

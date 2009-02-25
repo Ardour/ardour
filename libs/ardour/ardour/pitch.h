@@ -20,7 +20,7 @@
 #ifndef __ardour_pitch_h__
 #define __ardour_pitch_h__
 
-#include <ardour/filter.h>
+#include "ardour/filter.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -28,7 +28,7 @@ namespace ARDOUR {
 
 #ifdef USE_RUBBERBAND
 
-#include <ardour/rb_effect.h>
+#include "ardour/rb_effect.h"
 
 namespace ARDOUR {
 

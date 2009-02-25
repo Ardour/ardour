@@ -27,9 +27,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ardour/ardour.h>
-#include <ardour/types.h>
-#include <ardour/session.h>
+#include "ardour/ardour.h"
+#include "ardour/types.h"
+#include "ardour/session.h"
 
 namespace ARDOUR
 {

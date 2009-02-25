@@ -16,9 +16,9 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/buffer.h>
-#include <ardour/audio_buffer.h>
-#include <ardour/midi_buffer.h>
+#include "ardour/buffer.h"
+#include "ardour/audio_buffer.h"
+#include "ardour/midi_buffer.h"
 
 #ifdef __x86_64__
 static const int CPU_CACHE_ALIGN = 64;

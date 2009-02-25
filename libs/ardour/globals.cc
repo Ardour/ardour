@@ -31,7 +31,7 @@
 #endif
 
 #ifdef HAVE_AUDIOUNITS
-#include <ardour/audio_unit.h>
+#include "ardour/audio_unit.h"
 #endif
 
 #ifdef __SSE__
@@ -43,32 +43,32 @@
 
 #include <lrdf.h>
 
-#include <pbd/error.h>
-#include <pbd/id.h>
-#include <pbd/strsplit.h>
-#include <pbd/fpu.h>
-#include <pbd/file_utils.h>
+#include "pbd/error.h"
+#include "pbd/id.h"
+#include "pbd/strsplit.h"
+#include "pbd/fpu.h"
+#include "pbd/file_utils.h"
 
-#include <midi++/port.h>
-#include <midi++/manager.h>
-#include <midi++/mmc.h>
+#include "midi++/port.h"
+#include "midi++/manager.h"
+#include "midi++/mmc.h"
 
-#include <ardour/ardour.h>
-#include <ardour/analyser.h>
-#include <ardour/audio_library.h>
-#include <ardour/configuration.h>
-#include <ardour/profile.h>
-#include <ardour/plugin_manager.h>
-#include <ardour/audiosource.h>
-#include <ardour/utils.h>
-#include <ardour/session.h>
-#include <ardour/source_factory.h>
-#include <ardour/control_protocol_manager.h>
-#include <ardour/audioengine.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/ardour.h"
+#include "ardour/analyser.h"
+#include "ardour/audio_library.h"
+#include "ardour/configuration.h"
+#include "ardour/profile.h"
+#include "ardour/plugin_manager.h"
+#include "ardour/audiosource.h"
+#include "ardour/utils.h"
+#include "ardour/session.h"
+#include "ardour/source_factory.h"
+#include "ardour/control_protocol_manager.h"
+#include "ardour/audioengine.h"
+#include "ardour/filesystem_paths.h"
 
-#include <ardour/mix.h>
-#include <ardour/runtime_functions.h>
+#include "ardour/mix.h"
+#include "ardour/runtime_functions.h"
 
 #if defined (__APPLE__)
        #include <Carbon/Carbon.h> // For Gestalt

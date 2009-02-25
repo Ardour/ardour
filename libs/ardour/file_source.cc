@@ -26,23 +26,23 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include <pbd/convert.h>
-#include <pbd/basename.h>
-#include <pbd/mountpoint.h>
-#include <pbd/stl_delete.h>
-#include <pbd/strsplit.h>
-#include <pbd/shortpath.h>
-#include <pbd/enumwriter.h>
+#include "pbd/convert.h"
+#include "pbd/basename.h"
+#include "pbd/mountpoint.h"
+#include "pbd/stl_delete.h"
+#include "pbd/strsplit.h"
+#include "pbd/shortpath.h"
+#include "pbd/enumwriter.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/thread.h>
 
-#include <ardour/file_source.h>
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/source_factory.h>
-#include <ardour/filename_extensions.h>
+#include "ardour/file_source.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/source_factory.h"
+#include "ardour/filename_extensions.h"
 
 #include "i18n.h"
 

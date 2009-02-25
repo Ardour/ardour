@@ -27,33 +27,33 @@
 #include <map>
 #include <set>
 
-#include <pbd/error.h>
-#include <pbd/basename.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/memento_command.h>
-#include <pbd/whitespace.h>
+#include "pbd/error.h"
+#include "pbd/basename.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/memento_command.h"
+#include "pbd/whitespace.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/popup.h>
 
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/audioregion.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/utils.h>
-#include <ardour/location.h>
-#include <ardour/named_selection.h>
-#include <ardour/audio_track.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/region_factory.h>
-#include <ardour/playlist_factory.h>
-#include <ardour/reverse.h>
-#include <ardour/transient_detector.h>
-#include <ardour/dB.h>
-#include <ardour/quantize.h>
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audioregion.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/utils.h"
+#include "ardour/location.h"
+#include "ardour/named_selection.h"
+#include "ardour/audio_track.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/region_factory.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/reverse.h"
+#include "ardour/transient_detector.h"
+#include "ardour/dB.h"
+#include "ardour/quantize.h"
 
 #include "ardour_ui.h"
 #include "editor.h"

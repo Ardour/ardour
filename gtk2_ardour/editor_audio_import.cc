@@ -26,28 +26,28 @@
 
 #include <sndfile.h>
 
-#include <pbd/pthread_utils.h>
-#include <pbd/basename.h>
-#include <pbd/shortpath.h>
+#include "pbd/pthread_utils.h"
+#include "pbd/basename.h"
+#include "pbd/shortpath.h"
 
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/audioregion.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/midi_track.h>
-#include <ardour/midi_region.h>
-#include <ardour/utils.h>
-#include <ardour/audio_track.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/region_factory.h>
-#include <ardour/source_factory.h>
-#include <ardour/session.h>
-#include <pbd/memento_command.h>
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audioregion.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/midi_track.h"
+#include "ardour/midi_region.h"
+#include "ardour/utils.h"
+#include "ardour/audio_track.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/region_factory.h"
+#include "ardour/source_factory.h"
+#include "ardour/session.h"
+#include "pbd/memento_command.h"
 
 #include "ardour_ui.h"
 #include "editor.h"

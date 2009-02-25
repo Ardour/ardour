@@ -32,14 +32,14 @@
 #include <glibmm/thread.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-#include <pbd/xml++.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/enumwriter.h>
+#include "pbd/xml++.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/enumwriter.h"
 
-#include <ardour/playlist.h>
-#include <ardour/session.h>
-#include <ardour/source.h>
-#include <ardour/transient_detector.h>
+#include "ardour/playlist.h"
+#include "ardour/session.h"
+#include "ardour/source.h"
+#include "ardour/transient_detector.h"
 
 #include "i18n.h"
 

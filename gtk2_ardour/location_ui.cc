@@ -24,10 +24,10 @@
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <ardour/utils.h>
-#include <ardour/configuration.h>
-#include <ardour/session.h>
-#include <pbd/memento_command.h>
+#include "ardour/utils.h"
+#include "ardour/configuration.h"
+#include "ardour/session.h"
+#include "pbd/memento_command.h"
 
 #include "ardour_ui.h"
 #include "prompter.h"

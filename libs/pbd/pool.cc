@@ -23,8 +23,8 @@
 #include <vector>
 #include <cstdlib>
 
-#include <pbd/pool.h>
-#include <pbd/error.h>
+#include "pbd/pool.h"
+#include "pbd/error.h"
 
 using namespace std;
 using namespace PBD;

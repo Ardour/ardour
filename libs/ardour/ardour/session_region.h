@@ -20,8 +20,8 @@
 #ifndef __ardour_session_region_h__
 #define __ardour_session_region_h__
 
-#include <ardour/session.h>
-#include <ardour/audioregion.h>
+#include "ardour/session.h"
+#include "ardour/audioregion.h"
 
 namespace ARDOUR {
 

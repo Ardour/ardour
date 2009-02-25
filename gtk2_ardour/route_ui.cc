@@ -25,11 +25,11 @@
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/route_group.h>
-#include <pbd/memento_command.h>
-#include <pbd/stacktrace.h>
-#include <pbd/shiva.h>
-#include <pbd/controllable.h>
+#include "ardour/route_group.h"
+#include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
+#include "pbd/shiva.h"
+#include "pbd/controllable.h"
 
 #include "route_ui.h"
 #include "keyboard.h"
@@ -40,14 +40,14 @@
 #include "latency_gui.h"
 #include "automation_time_axis.h"
 
-#include <ardour/route.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/midi_track.h>
-#include <ardour/midi_diskstream.h>
-#include <ardour/profile.h>
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/audio_track.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/midi_track.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/profile.h"
 
 #include "i18n.h"
 using namespace sigc;

@@ -22,7 +22,7 @@
 
 #include <bitset>
 
-#include <ardour/midi_buffer.h>
+#include "ardour/midi_buffer.h"
 
 
 namespace ARDOUR {

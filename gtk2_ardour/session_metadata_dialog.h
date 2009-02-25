@@ -28,7 +28,7 @@
 #include <string>
 #include <list>
 
-#include <ardour/session_metadata.h>
+#include "ardour/session_metadata.h"
 
 using std::string;
 using Glib::ustring;

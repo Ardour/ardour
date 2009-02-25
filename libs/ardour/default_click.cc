@@ -18,8 +18,8 @@
 
 */
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
 
 using namespace ARDOUR;
 

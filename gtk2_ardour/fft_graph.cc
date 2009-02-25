@@ -29,7 +29,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treepath.h>
 
-#include <pbd/stl_delete.h>
+#include "pbd/stl_delete.h"
 
 #include <math.h>
 

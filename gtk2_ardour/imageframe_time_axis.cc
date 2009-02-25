@@ -20,15 +20,15 @@
 #include <string>
 #include <algorithm>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include <gtkmm/menu.h>
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/session.h>
-#include <ardour/utils.h>
+#include "ardour/session.h"
+#include "ardour/utils.h"
 
 #include "public_editor.h"
 #include "imageframe_time_axis.h"

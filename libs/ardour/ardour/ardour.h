@@ -26,11 +26,11 @@
 #include <limits.h>
 #include <signal.h>
 
-#include <pbd/error.h>
-#include <pbd/failed_constructor.h>
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 
-#include <ardour/configuration.h>
-#include <ardour/types.h>
+#include "ardour/configuration.h"
+#include "ardour/types.h"
 
 // #include <jack/jack.h> need this to inline jack_get_microseconds
 

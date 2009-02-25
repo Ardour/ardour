@@ -24,23 +24,23 @@
 #include <sigc++/bind.h>
 #include <sigc++/retype.h>
 
-#include <pbd/undo.h>
-#include <pbd/error.h>
+#include "pbd/undo.h"
+#include "pbd/error.h"
 #include <glibmm/thread.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/memento_command.h>
-#include <pbd/stacktrace.h>
+#include "pbd/pthread_utils.h"
+#include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
 
-#include <midi++/mmc.h>
-#include <midi++/port.h>
+#include "midi++/mmc.h"
+#include "midi++/port.h"
 
-#include <ardour/ardour.h>
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/auditioner.h>
-#include <ardour/slave.h>
-#include <ardour/location.h>
+#include "ardour/ardour.h"
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/auditioner.h"
+#include "ardour/slave.h"
+#include "ardour/location.h"
 
 #include "i18n.h"
 

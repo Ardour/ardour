@@ -21,9 +21,9 @@
 #ifndef __ardour_plugin_eq_gui_h
 #define __ardour_plugin_eq_gui_h
 
-#include <ardour/buffer_set.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/plugin.h>
+#include "ardour/buffer_set.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/plugin.h"
 
 #include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>

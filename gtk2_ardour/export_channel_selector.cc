@@ -22,16 +22,16 @@
 
 #include <algorithm>
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 
-#include <ardour/audio_port.h>
-#include <ardour/audio_track.h>
-#include <ardour/audioengine.h>
-#include <ardour/export_channel_configuration.h>
-#include <ardour/export_handler.h>
-#include <ardour/io.h>
-#include <ardour/route.h>
-#include <ardour/session.h>
+#include "ardour/audio_port.h"
+#include "ardour/audio_track.h"
+#include "ardour/audioengine.h"
+#include "ardour/export_channel_configuration.h"
+#include "ardour/export_handler.h"
+#include "ardour/io.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
 
 #include <sstream>
 

@@ -23,14 +23,14 @@
 #include <vector>
 #include <list>
 
-#include <pbd/fastlog.h>
-#include <pbd/undo.h>
+#include "pbd/fastlog.h"
+#include "pbd/undo.h"
 
-#include <ardour/ardour.h>
-#include <ardour/automatable_controls.h>
-#include <ardour/gain.h>
-#include <ardour/logcurve.h>
-#include <ardour/region.h>
+#include "ardour/ardour.h"
+#include "ardour/automatable_controls.h"
+#include "ardour/gain.h"
+#include "ardour/logcurve.h"
+#include "ardour/region.h"
 
 class XMLNode;
 

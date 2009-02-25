@@ -32,20 +32,20 @@
 
 #include <lrdf.h>
 
-#include <pbd/compose.h>
-#include <pbd/error.h>
-#include <pbd/xml++.h>
+#include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/xml++.h"
 
-#include <midi++/manager.h>
+#include "midi++/manager.h"
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/buffer_set.h>
-#include <ardour/audio_buffer.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/buffer_set.h"
+#include "ardour/audio_buffer.h"
 
-#include <pbd/stl_delete.h>
+#include "pbd/stl_delete.h"
 
 #include "i18n.h"
 #include <locale.h>

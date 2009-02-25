@@ -25,9 +25,9 @@
 #include <iostream>
 #include <boost/utility.hpp>
 
-#include <ardour/types.h>
-#include <ardour/data_type.h>
-#include <ardour/runtime_functions.h>
+#include "ardour/types.h"
+#include "ardour/data_type.h"
+#include "ardour/runtime_functions.h"
 
 namespace ARDOUR {
 

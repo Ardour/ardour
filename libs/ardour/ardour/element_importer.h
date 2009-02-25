@@ -26,7 +26,7 @@
 
 #include <sigc++/signal.h>
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 using std::string;
 

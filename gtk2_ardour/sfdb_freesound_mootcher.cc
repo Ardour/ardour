@@ -39,12 +39,12 @@
 *************************************************************************************/
 #include "sfdb_freesound_mootcher.h"
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <ardour/audio_library.h>
+#include "ardour/audio_library.h"
 
 #define TRUE 1
 

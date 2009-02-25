@@ -22,8 +22,8 @@
 
 #include <sndfile.h>
 
-#include <ardour/audiofilesource.h>
-#include <ardour/broadcast_info.h>
+#include "ardour/audiofilesource.h"
+#include "ardour/broadcast_info.h"
 
 namespace ARDOUR {
 

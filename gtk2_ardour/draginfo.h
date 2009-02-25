@@ -28,7 +28,7 @@
 #include "canvas.h"
 #include "editor_items.h"
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 namespace ARDOUR {
 	class Location;

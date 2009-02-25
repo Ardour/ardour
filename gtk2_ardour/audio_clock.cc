@@ -20,15 +20,15 @@
 #include <cstdio> // for sprintf
 #include <cmath>
 
-#include <pbd/convert.h>
-#include <pbd/enumwriter.h>
+#include "pbd/convert.h"
+#include "pbd/enumwriter.h"
 
 #include <gtkmm2ext/utils.h>
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/tempo.h>
-#include <ardour/profile.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
+#include "ardour/profile.h"
 #include <sigc++/bind.h>
 
 #include "ardour_ui.h"

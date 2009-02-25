@@ -26,13 +26,13 @@
 #include <cmath>
 #include <glibmm/thread.h>
 
-#include <pbd/undo.h>
-#include <pbd/stateful.h> 
-#include <pbd/statefuldestructible.h> 
+#include "pbd/undo.h"
+#include "pbd/stateful.h" 
+#include "pbd/statefuldestructible.h" 
 
 #include <sigc++/signal.h>
 
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 
 class XMLNode;
 

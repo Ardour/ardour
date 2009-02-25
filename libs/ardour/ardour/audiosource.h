@@ -33,10 +33,10 @@
 
 #include <sigc++/signal.h>
 
-#include <ardour/source.h>
-#include <ardour/ardour.h>
-#include <pbd/stateful.h> 
-#include <pbd/xml++.h>
+#include "ardour/source.h"
+#include "ardour/ardour.h"
+#include "pbd/stateful.h" 
+#include "pbd/xml++.h"
 
 using std::list;
 using std::vector;

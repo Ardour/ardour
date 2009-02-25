@@ -31,16 +31,16 @@
 #include <boost/weak_ptr.hpp>
 
 #include <glibmm/thread.h>
-#include <pbd/fastlog.h>
-#include <pbd/xml++.h>
-#include <pbd/undo.h>
-#include <pbd/stateful.h> 
-#include <pbd/controllable.h>
-#include <pbd/destructible.h>
+#include "pbd/fastlog.h"
+#include "pbd/xml++.h"
+#include "pbd/undo.h"
+#include "pbd/stateful.h" 
+#include "pbd/controllable.h"
+#include "pbd/destructible.h"
 
-#include <ardour/ardour.h>
-#include <ardour/io.h>
-#include <ardour/types.h>
+#include "ardour/ardour.h"
+#include "ardour/io.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

@@ -21,7 +21,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ardour/route.h>
+#include "ardour/route.h"
 
 namespace ARDOUR {
 

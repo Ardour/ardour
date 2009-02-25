@@ -22,8 +22,8 @@
 
 #include <string>
 #include <glib.h>
-#include <ardour/ardour.h>
-#include <pbd/destructible.h>
+#include "ardour/ardour.h"
+#include "pbd/destructible.h"
 
 #include "canvas.h"
 

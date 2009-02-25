@@ -25,14 +25,14 @@
 
 #include <libgnomecanvasmm.h>
 
-#include <pbd/error.h>
-#include <pbd/memento_command.h>
+#include "pbd/error.h"
+#include "pbd/memento_command.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/session.h>
-#include <ardour/tempo.h>
+#include "ardour/session.h"
+#include "ardour/tempo.h"
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
 

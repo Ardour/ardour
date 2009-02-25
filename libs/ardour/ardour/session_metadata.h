@@ -26,8 +26,8 @@
 #include <map>
 #include <utility>
 
-#include <pbd/statefuldestructible.h>
-#include <pbd/xml++.h>
+#include "pbd/statefuldestructible.h"
+#include "pbd/xml++.h"
 
 namespace ARDOUR {
 

@@ -20,8 +20,8 @@
 
 #include <vector>
 
-#include <pbd/receiver.h>
-#include <pbd/transmitter.h>
+#include "pbd/receiver.h"
+#include "pbd/transmitter.h"
 
 using namespace sigc;
 

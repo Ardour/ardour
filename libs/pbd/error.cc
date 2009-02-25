@@ -17,7 +17,7 @@
 
 */
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 Transmitter  PBD::error (Transmitter::Error);
 Transmitter  PBD::info (Transmitter::Info);

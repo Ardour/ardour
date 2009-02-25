@@ -28,16 +28,16 @@
 
 #include <sigc++/signal.h>
 
-#include <ardour/playlist.h>
-#include <ardour/tempo.h>
-#include <ardour/midi_region.h>
-#include <ardour/midi_source.h>
-#include <ardour/midi_diskstream.h>
-#include <ardour/midi_model.h>
-#include <ardour/midi_patch_manager.h>
+#include "ardour/playlist.h"
+#include "ardour/tempo.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_patch_manager.h"
 
-#include <evoral/Parameter.hpp>
-#include <evoral/Control.hpp>
+#include "evoral/Parameter.hpp"
+#include "evoral/Control.hpp"
 
 #include "streamview.h"
 #include "midi_region_view.h"

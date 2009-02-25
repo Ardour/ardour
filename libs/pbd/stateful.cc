@@ -20,10 +20,10 @@
 
 #include <unistd.h>
 
-#include <pbd/stateful.h>
-#include <pbd/filesystem.h>
-#include <pbd/xml++.h>
-#include <pbd/error.h>
+#include "pbd/stateful.h"
+#include "pbd/filesystem.h"
+#include "pbd/xml++.h"
+#include "pbd/error.h"
 
 #include "i18n.h"
 

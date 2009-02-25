@@ -20,8 +20,8 @@
 #ifndef ARDOUR_FILESYSTEM_PATHS_INCLUDED
 #define ARDOUR_FILESYSTEM_PATHS_INCLUDED
 
-#include <pbd/filesystem.h>
-#include <pbd/search_path.h>
+#include "pbd/filesystem.h"
+#include "pbd/search_path.h"
 
 namespace ARDOUR {
 

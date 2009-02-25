@@ -21,7 +21,7 @@
 #define __ardour_gtk_time_selection_h__
 
 #include <list>
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 namespace ARDOUR {
 	class RouteGroup;

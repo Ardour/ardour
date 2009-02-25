@@ -31,8 +31,8 @@
 #include <gtkmm/button.h>
 #include <gtkmm/comboboxtext.h>
 
-#include <ardour/types.h>
-#include <ardour/data_type.h>
+#include "ardour/types.h"
+#include "ardour/data_type.h"
 
 class AddRouteDialog : public Gtk::Dialog
 {

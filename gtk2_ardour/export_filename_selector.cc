@@ -20,9 +20,9 @@
 
 #include "export_filename_selector.h"
 
-#include <ardour/export_handler.h>
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
+#include "ardour/export_handler.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
 
 #include "i18n.h"
 

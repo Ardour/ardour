@@ -18,20 +18,20 @@
 
 */
 
-#include <ardour/export_handler.h>
+#include "ardour/export_handler.h"
 
-#include <pbd/convert.h>
-#include <pbd/filesystem.h>
+#include "pbd/convert.h"
+#include "pbd/filesystem.h"
 
-#include <ardour/ardour.h>
-#include <ardour/configuration.h>
-#include <ardour/export_timespan.h>
-#include <ardour/export_channel_configuration.h>
-#include <ardour/export_status.h>
-#include <ardour/export_format_specification.h>
-#include <ardour/export_filename.h>
-#include <ardour/export_processor.h>
-#include <ardour/export_failed.h>
+#include "ardour/ardour.h"
+#include "ardour/configuration.h"
+#include "ardour/export_timespan.h"
+#include "ardour/export_channel_configuration.h"
+#include "ardour/export_status.h"
+#include "ardour/export_format_specification.h"
+#include "ardour/export_filename.h"
+#include "ardour/export_processor.h"
+#include "ardour/export_failed.h"
 
 using namespace PBD;
 using std::ofstream;

@@ -24,7 +24,7 @@
 #include <cstring>
 #include <limits.h>
 
-#include <pbd/mountpoint.h>
+#include "pbd/mountpoint.h"
 
 using std::string;
 

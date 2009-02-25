@@ -23,7 +23,7 @@
 #include <string>
 #include <iostream>
 
-#include <ardour/cycles.h>
+#include "ardour/cycles.h"
 
 class CycleTimer {
   private:

@@ -24,9 +24,9 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeiter.h>
 
-#include <ardour/audioregion.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/types.h>
+#include "ardour/audioregion.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/types.h"
 
 #include "analysis_window.h"
 

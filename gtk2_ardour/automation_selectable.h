@@ -20,7 +20,7 @@
 #ifndef __ardour_gtk_automation_selectable_h__
 #define __ardour_gtk_automation_selectable_h__
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 #include "selectable.h"
 
 class TimeAxisView;

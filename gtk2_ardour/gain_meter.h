@@ -32,7 +32,7 @@
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/colormap.h>
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/focus_entry.h>

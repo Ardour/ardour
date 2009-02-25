@@ -19,12 +19,12 @@
 
 #include <limits.h>
 
-#include <ardour/io.h>
-#include <ardour/route.h>
-#include <ardour/route_group.h>
-#include <ardour/session.h>
-#include <ardour/session_route.h>
-#include <ardour/dB.h>
+#include "ardour/io.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
+#include "ardour/session.h"
+#include "ardour/session_route.h"
+#include "ardour/dB.h"
 
 #include <gtkmm/style.h>
 #include <gdkmm/color.h>
@@ -33,9 +33,9 @@
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include <midi++/manager.h>
-#include <pbd/fastlog.h>
-#include <pbd/stacktrace.h>
+#include "midi++/manager.h"
+#include "pbd/fastlog.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour_ui.h"
 #include "gain_meter.h"
@@ -45,9 +45,9 @@
 #include "keyboard.h"
 #include "public_editor.h"
 
-#include <ardour/session.h>
-#include <ardour/route.h>
-#include <ardour/meter.h>
+#include "ardour/session.h"
+#include "ardour/route.h"
+#include "ardour/meter.h"
 
 #include "i18n.h"
 

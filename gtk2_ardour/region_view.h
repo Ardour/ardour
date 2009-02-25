@@ -24,8 +24,8 @@
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
-#include <ardour/region.h>
-#include <ardour/beats_frames_converter.h>
+#include "ardour/region.h"
+#include "ardour/beats_frames_converter.h"
 
 #include "time_axis_view_item.h"
 #include "automation_line.h"

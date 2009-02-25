@@ -27,10 +27,10 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/error.h>
-#include <pbd/stl_delete.h>
-#include <pbd/whitespace.h>
-#include <pbd/memento_command.h>
+#include "pbd/error.h"
+#include "pbd/stl_delete.h"
+#include "pbd/whitespace.h"
+#include "pbd/memento_command.h"
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -40,21 +40,21 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
-#include <ardour/audioplaylist.h>
-#include <ardour/diskstream.h>
-#include <ardour/event_type_map.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/location.h>
-#include <ardour/panner.h>
-#include <ardour/playlist.h>
-#include <ardour/playlist.h>
-#include <ardour/processor.h>
-#include <ardour/profile.h>
-#include <ardour/route_group.h>
-#include <ardour/session.h>
-#include <ardour/session_playlist.h>
-#include <ardour/utils.h>
-#include <evoral/Parameter.hpp>
+#include "ardour/audioplaylist.h"
+#include "ardour/diskstream.h"
+#include "ardour/event_type_map.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/location.h"
+#include "ardour/panner.h"
+#include "ardour/playlist.h"
+#include "ardour/playlist.h"
+#include "ardour/processor.h"
+#include "ardour/profile.h"
+#include "ardour/route_group.h"
+#include "ardour/session.h"
+#include "ardour/session_playlist.h"
+#include "ardour/utils.h"
+#include "evoral/Parameter.hpp"
 
 #include "ardour_ui.h"
 #include "route_time_axis.h"
@@ -75,7 +75,7 @@
 #include "streamview.h"
 #include "utils.h"
 
-#include <ardour/track.h>
+#include "ardour/track.h"
 
 #include "i18n.h"
 

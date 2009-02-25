@@ -23,7 +23,7 @@
 
 #include <exception>
 #include <string>
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 #include "i18n.h"
 

@@ -24,16 +24,16 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/playlist.h>
-#include <ardour/audioregion.h>
-#include <ardour/audiosource.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/profile.h>
+#include "ardour/playlist.h"
+#include "ardour/audioregion.h"
+#include "ardour/audiosource.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/profile.h"
 
-#include <pbd/memento_command.h>
-#include <pbd/stacktrace.h>
+#include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
 
-#include <evoral/Curve.hpp>
+#include "evoral/Curve.hpp"
 
 #include "streamview.h"
 #include "audio_region_view.h"

@@ -23,7 +23,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <glibmm/ustring.h>
-#include <pbd/statefuldestructible.h>
+#include "pbd/statefuldestructible.h"
 
 using Glib::ustring;
 

@@ -37,8 +37,8 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 
-#include <ardour/session.h>
-#include <ardour/audiofilesource.h>
+#include "ardour/session.h"
+#include "ardour/audiofilesource.h"
 
 #include "ardour_dialog.h"
 #include "editing.h"

@@ -1,8 +1,8 @@
 #ifndef __i18n_h__
 #define __i18n_h__
 
-#include <pbd/compose.h>
-#include <pbd/convert.h>
+#include "pbd/compose.h"
+#include "pbd/convert.h"
 #include "gettext.h"
 
 #include <vector>

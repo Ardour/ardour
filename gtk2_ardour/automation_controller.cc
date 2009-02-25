@@ -18,7 +18,7 @@
 
 */
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 #include "ardour/automation_list.h"
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"

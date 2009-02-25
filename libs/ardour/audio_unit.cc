@@ -19,20 +19,20 @@
 
 #include <sstream>
 
-#include <pbd/transmitter.h>
-#include <pbd/xml++.h>
-#include <pbd/whitespace.h>
+#include "pbd/transmitter.h"
+#include "pbd/xml++.h"
+#include "pbd/whitespace.h"
 
 #include <glibmm/thread.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include <ardour/ardour.h>
-#include <ardour/audioengine.h>
-#include <ardour/io.h>
-#include <ardour/audio_unit.h>
-#include <ardour/session.h>
-#include <ardour/utils.h>
+#include "ardour/ardour.h"
+#include "ardour/audioengine.h"
+#include "ardour/io.h"
+#include "ardour/audio_unit.h"
+#include "ardour/session.h"
+#include "ardour/utils.h"
 
 #include <appleutility/CAAudioUnit.h>
 #include <appleutility/CAAUParameter.h>

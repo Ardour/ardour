@@ -1,6 +1,6 @@
 #include <map>
 
-#include <ardour/profile.h>
+#include "ardour/profile.h"
 
 #include <gtkmm/stock.h>
 #include <gtkmm/label.h>
@@ -8,10 +8,10 @@
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
 
-#include <pbd/strsplit.h>
-#include <pbd/replace_all.h>
+#include "pbd/strsplit.h"
+#include "pbd/replace_all.h"
 
-#include <ardour/profile.h>
+#include "ardour/profile.h"
 
 #include "actions.h"
 #include "keyboard.h"

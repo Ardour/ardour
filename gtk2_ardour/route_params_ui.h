@@ -32,9 +32,9 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treeview.h>
 
-#include <pbd/stateful.h>
+#include "pbd/stateful.h"
 
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 
 #include "io_selector.h"
 #include "ardour_dialog.h"

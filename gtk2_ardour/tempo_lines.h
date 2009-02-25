@@ -22,7 +22,7 @@
 #include <map>
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
-#include <ardour/tempo.h>
+#include "ardour/tempo.h"
 #include "canvas.h"
 #include "simpleline.h"
 

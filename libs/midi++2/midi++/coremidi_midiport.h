@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <midi++/port.h>
+#include "midi++/port.h"
 
 #include <CoreMIDI/CoreMIDI.h>
 

@@ -19,7 +19,7 @@
 #include <string>
 #include "evoral/MIDIEvent.hpp"
 #ifdef EVORAL_MIDI_XML
-	#include <pbd/xml++.h>
+	#include "pbd/xml++.h"
 #endif
 
 using namespace std;

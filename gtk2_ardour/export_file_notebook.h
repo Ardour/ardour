@@ -24,7 +24,7 @@
 #include <sigc++/signal.h>
 #include <gtkmm.h>
 
-#include <ardour/export_profile_manager.h>
+#include "ardour/export_profile_manager.h"
 
 #include "export_format_selector.h"
 #include "export_filename_selector.h"

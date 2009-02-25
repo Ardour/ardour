@@ -22,8 +22,8 @@
 
 #include <exception>
 #include <time.h>
-#include <ardour/audiosource.h>
-#include <ardour/file_source.h>
+#include "ardour/audiosource.h"
+#include "ardour/file_source.h"
 
 namespace ARDOUR {
 

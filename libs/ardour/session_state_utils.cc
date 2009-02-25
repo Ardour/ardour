@@ -18,12 +18,12 @@
 
 #include <algorithm>
 
-#include <pbd/compose.h>
-#include <pbd/error.h>
-#include <pbd/file_utils.h>
+#include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/file_utils.h"
 
-#include <ardour/session_state_utils.h>
-#include <ardour/filename_extensions.h>
+#include "ardour/session_state_utils.h"
+#include "ardour/filename_extensions.h"
 
 #include "i18n.h"
 

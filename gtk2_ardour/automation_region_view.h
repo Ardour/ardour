@@ -20,8 +20,8 @@
 #ifndef __gtk_ardour_automation_region_view_h__
 #define __gtk_ardour_automation_region_view_h__
 
-#include <ardour/diskstream.h>
-#include <ardour/types.h>
+#include "ardour/diskstream.h"
+#include "ardour/types.h"
 
 #include "region_view.h"
 #include "automation_time_axis.h"

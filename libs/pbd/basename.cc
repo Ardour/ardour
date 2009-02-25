@@ -17,7 +17,7 @@
 
 */
 
-#include <pbd/basename.h>
+#include "pbd/basename.h"
 #include <glibmm/miscutils.h>
 
 using Glib::ustring;

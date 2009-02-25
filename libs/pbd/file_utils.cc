@@ -22,10 +22,10 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/pattern.h>
 
-#include <pbd/compose.h>
-#include <pbd/file_utils.h>
+#include "pbd/compose.h"
+#include "pbd/file_utils.h"
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
 namespace PBD {
 

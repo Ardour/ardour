@@ -17,9 +17,9 @@
 
 */
 
-#include <pbd/tokenizer.h>
-#include <pbd/search_path.h>
-#include <pbd/error.h>
+#include "pbd/tokenizer.h"
+#include "pbd/search_path.h"
+#include "pbd/error.h"
 
 namespace {
 

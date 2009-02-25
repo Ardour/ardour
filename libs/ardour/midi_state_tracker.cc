@@ -18,8 +18,8 @@
 */
 
 #include <iostream>
-#include <ardour/event_type_map.h>
-#include <ardour/midi_state_tracker.h>
+#include "ardour/event_type_map.h"
+#include "ardour/midi_state_tracker.h"
 
 using namespace std;
 using namespace ARDOUR;

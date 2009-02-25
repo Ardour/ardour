@@ -19,16 +19,16 @@
 
 #include <algorithm>
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
-#include <ardour/send.h>
-#include <ardour/session.h>
-#include <ardour/port.h>
-#include <ardour/audio_port.h>
-#include <ardour/buffer_set.h>
-#include <ardour/meter.h>
-#include <ardour/panner.h>
-#include <ardour/io.h>
+#include "ardour/send.h"
+#include "ardour/session.h"
+#include "ardour/port.h"
+#include "ardour/audio_port.h"
+#include "ardour/buffer_set.h"
+#include "ardour/meter.h"
+#include "ardour/panner.h"
+#include "ardour/io.h"
 
 #include "i18n.h"
 

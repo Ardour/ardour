@@ -30,13 +30,13 @@
 #include "canvas.h"
 #include "simplerect.h"
 
-#include <evoral/TimeConverter.hpp>
+#include "evoral/TimeConverter.hpp"
 
-#include <pbd/undo.h>
-#include <pbd/statefuldestructible.h> 
+#include "pbd/undo.h"
+#include "pbd/statefuldestructible.h" 
 
-#include <ardour/automation_list.h>
-#include <ardour/types.h>
+#include "ardour/automation_list.h"
+#include "ardour/types.h"
 
 class AutomationLine;
 class ControlPoint;

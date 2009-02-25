@@ -17,9 +17,9 @@
  *
  */
 
-#include <ardour/gdither_types_internal.h>
-#include <ardour/gdither.h>
-#include <ardour/noise.h>
+#include "ardour/gdither_types_internal.h"
+#include "ardour/gdither.h"
+#include "ardour/noise.h"
 
 /* this monstrosity is necessary to get access to lrintf() and random().
    whoever is writing the glibc headers <cmath> and <cstdlib> should be

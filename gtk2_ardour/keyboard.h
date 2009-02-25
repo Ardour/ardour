@@ -28,8 +28,8 @@
 #include <gtk/gtk.h>
 #include <gtkmm/accelkey.h>
 
-#include <ardour/types.h>
-#include <pbd/stateful.h>
+#include "ardour/types.h"
+#include "pbd/stateful.h"
 
 #include "selection.h"
 

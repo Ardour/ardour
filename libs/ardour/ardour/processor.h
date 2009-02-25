@@ -24,16 +24,16 @@
 #include <string>
 #include <exception>
 
-#include <pbd/statefuldestructible.h> 
+#include "pbd/statefuldestructible.h" 
 
 #include <sigc++/signal.h>
 
-#include <ardour/ardour.h>
-#include <ardour/automatable_controls.h>
-#include <ardour/buffer_set.h>
-#include <ardour/latent.h>
-#include <ardour/session_object.h>
-#include <ardour/types.h>
+#include "ardour/ardour.h"
+#include "ardour/automatable_controls.h"
+#include "ardour/buffer_set.h"
+#include "ardour/latent.h"
+#include "ardour/session_object.h"
+#include "ardour/types.h"
 
 class XMLNode;
 

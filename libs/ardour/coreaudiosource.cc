@@ -22,9 +22,9 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#include <pbd/error.h>
-#include <ardour/coreaudiosource.h>
-#include <ardour/utils.h>
+#include "pbd/error.h"
+#include "ardour/coreaudiosource.h"
+#include "ardour/utils.h"
 
 #include <appleutility/CAAudioFile.h>
 #include <appleutility/CAStreamBasicDescription.h>

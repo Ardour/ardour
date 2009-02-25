@@ -22,8 +22,8 @@
 
 #include <sstream>
 
-#include <ardour/audioengine.h>
-#include <ardour/sndfile_helpers.h>
+#include "ardour/audioengine.h"
+#include "ardour/sndfile_helpers.h"
 
 #include "ardour_ui.h"
 #include "export_range_markers_dialog.h"

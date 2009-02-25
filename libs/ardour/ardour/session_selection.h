@@ -20,8 +20,8 @@
 #ifndef __ardour_session_named_selection_h__
 #define __ardour_session_named_selection_h__
 
-#include <ardour/session.h>
-#include <ardour/named_selection.h>
+#include "ardour/session.h"
+#include "ardour/named_selection.h"
 
 namespace ARDOUR {
 

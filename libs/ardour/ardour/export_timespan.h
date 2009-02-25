@@ -26,9 +26,9 @@
 
 #include <glibmm/ustring.h>
 
-#include <ardour/export_status.h>
-#include <ardour/export_channel.h>
-#include <ardour/ardour.h>
+#include "ardour/export_status.h"
+#include "ardour/export_channel.h"
+#include "ardour/ardour.h"
 
 using Glib::ustring;
 

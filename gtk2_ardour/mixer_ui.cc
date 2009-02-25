@@ -22,7 +22,7 @@
 
 #include <gtkmm/accelmap.h>
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 #include <glibmm/thread.h>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -30,12 +30,12 @@
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <ardour/audio_diskstream.h>
-#include <ardour/audio_track.h>
-#include <ardour/plugin_manager.h>
-#include <ardour/route_group.h>
-#include <ardour/session.h>
-#include <ardour/session_route.h>
+#include "ardour/audio_diskstream.h"
+#include "ardour/audio_track.h"
+#include "ardour/plugin_manager.h"
+#include "ardour/route_group.h"
+#include "ardour/session.h"
+#include "ardour/session_route.h"
 
 #include "keyboard.h"
 #include "mixer_ui.h"

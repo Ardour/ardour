@@ -21,12 +21,12 @@
 #include <fcntl.h>
 #include <cerrno>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/error.h>
-#include <pbd/xml++.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/error.h"
+#include "pbd/xml++.h"
 
-#include <midi++/types.h>
-#include <midi++/alsa_sequencer.h>
+#include "midi++/types.h"
+#include "midi++/alsa_sequencer.h"
 
 #include "i18n.h"
 

@@ -22,10 +22,10 @@
 #include <algorithm>
 #include <typeinfo>
 
-#include <pbd/stacktrace.h>
+#include "pbd/stacktrace.h"
 
-#include <ardour/audio_diskstream.h>
-#include <ardour/audioplaylist.h>
+#include "ardour/audio_diskstream.h"
+#include "ardour/audioplaylist.h"
 
 #include "editor.h"
 #include "keyboard.h"

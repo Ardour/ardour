@@ -22,10 +22,10 @@
 
 #include <sigc++/signal.h>
 
-#include <pbd/filesystem.h>
+#include "pbd/filesystem.h"
 
-#include <ardour/export_status.h>
-#include <ardour/export_handler.h>
+#include "ardour/export_status.h"
+#include "ardour/export_handler.h"
 
 using namespace ARDOUR;
 using namespace PBD;

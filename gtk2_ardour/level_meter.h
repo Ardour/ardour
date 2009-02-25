@@ -30,7 +30,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/focus_entry.h>

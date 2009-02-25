@@ -30,26 +30,26 @@
 
 #include <lrdf.h>
 
-#include <pbd/compose.h>
-#include <pbd/error.h>
-#include <pbd/xml++.h>
+#include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/xml++.h"
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/plugin.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/plugin_manager.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/plugin.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/plugin_manager.h"
 
 #ifdef HAVE_AUDIOUNITS
-#include <ardour/audio_unit.h>
+#include "ardour/audio_unit.h"
 #endif
 
 #ifdef HAVE_SLV2
-#include <ardour/lv2_plugin.h>
+#include "ardour/lv2_plugin.h"
 #endif
 
-#include <pbd/stl_delete.h>
+#include "pbd/stl_delete.h"
 
 #include "i18n.h"
 #include <locale.h>

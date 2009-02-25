@@ -17,9 +17,9 @@
 
 */
 
-#include <pbd/error.h>
-#include <ardour/resampled_source.h>
-#include <pbd/failed_constructor.h>
+#include "pbd/error.h"
+#include "ardour/resampled_source.h"
+#include "pbd/failed_constructor.h"
 
 #include "i18n.h"
 

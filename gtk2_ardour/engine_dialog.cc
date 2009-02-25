@@ -5,7 +5,7 @@
 
 #include <glibmm.h>
 #include <gtkmm/messagedialog.h>
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
 #ifdef __APPLE__
 #include <CoreAudio/CoreAudio.h>
@@ -16,15 +16,15 @@
 #include <alsa/asoundlib.h>
 #endif
 
-#include <ardour/profile.h>
+#include "ardour/profile.h"
 #include <jack/jack.h>
 
 #include <gtkmm/stock.h>
 #include <gtkmm2ext/utils.h>
 
-#include <pbd/convert.h>
-#include <pbd/error.h>
-#include <pbd/pathscanner.h>
+#include "pbd/convert.h"
+#include "pbd/error.h"
+#include "pbd/pathscanner.h"
 
 #ifdef __APPLE
 #include <CFBundle.h>

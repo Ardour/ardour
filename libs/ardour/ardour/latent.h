@@ -1,7 +1,7 @@
 #ifndef __ardour_latent_h__
 #define __ardour_latent_h__
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

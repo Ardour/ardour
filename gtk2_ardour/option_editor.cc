@@ -19,18 +19,18 @@
 #include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
-#include <pbd/whitespace.h>
+#include "pbd/whitespace.h"
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/configuration.h>
-#include <ardour/auditioner.h>
-#include <ardour/sndfilesource.h>
-#include <ardour/crossfade.h>
-#include <ardour/profile.h>
-#include <midi++/manager.h>
-#include <midi++/factory.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/configuration.h"
+#include "ardour/auditioner.h"
+#include "ardour/sndfilesource.h"
+#include "ardour/crossfade.h"
+#include "ardour/profile.h"
+#include "midi++/manager.h"
+#include "midi++/factory.h"
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>

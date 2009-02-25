@@ -23,10 +23,10 @@
 
 #include <iostream>
 
-#include <pbd/command.h>
-#include <pbd/stacktrace.h>
-#include <pbd/xml++.h>
-#include <pbd/shiva.h>
+#include "pbd/command.h"
+#include "pbd/stacktrace.h"
+#include "pbd/xml++.h"
+#include "pbd/shiva.h"
 
 #include <sigc++/slot.h>
 #include <typeinfo>

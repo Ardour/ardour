@@ -18,7 +18,7 @@
 */
 
 #include <iostream>
-#include <ardour/midi_buffer.h>
+#include "ardour/midi_buffer.h"
 
 #ifdef __x86_64__
 static const int CPU_CACHE_ALIGN = 64;

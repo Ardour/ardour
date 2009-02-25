@@ -18,7 +18,7 @@
 
 #include <glib.h>
 
-#include <pbd/filesystem_paths.h>
+#include "pbd/filesystem_paths.h"
 
 namespace PBD {
 

@@ -25,7 +25,7 @@
 #include <sigc++/sigc++.h>
 #include <boost/shared_ptr.hpp>
 
-#include <ardour/source.h>
+#include "ardour/source.h"
 
 class XMLNode;
 

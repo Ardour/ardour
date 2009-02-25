@@ -19,8 +19,8 @@
 #include <cassert>
 #include <iostream>
 
-#include <ardour/midi_port.h>
-#include <ardour/data_type.h>
+#include "ardour/midi_port.h"
+#include "ardour/data_type.h"
 
 using namespace ARDOUR;
 using namespace std;

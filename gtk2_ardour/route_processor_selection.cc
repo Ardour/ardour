@@ -19,11 +19,11 @@
 
 #include <algorithm>
 #include <sigc++/bind.h>
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/playlist.h>
-#include <ardour/processor.h>
-#include <ardour/route.h>
+#include "ardour/playlist.h"
+#include "ardour/processor.h"
+#include "ardour/route.h"
 
 #include "route_processor_selection.h"
 

@@ -21,9 +21,9 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <pbd/enumwriter.h>
+#include "pbd/enumwriter.h"
 
-#include <ardour/audioengine.h>
+#include "ardour/audioengine.h"
 
 #include "editor.h"
 #include "mixer_strip.h"

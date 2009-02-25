@@ -25,7 +25,7 @@
    avoid multiplying dependencies.
 */
 
-#include <ardour/region.h>
+#include "ardour/region.h"
 
 #include "selection.h"
 #include "region_view.h"

@@ -29,8 +29,8 @@
 #include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
 
-#include <ardour/types.h>
-#include <ardour/export_profile_manager.h>
+#include "ardour/types.h"
+#include "ardour/export_profile_manager.h"
 
 namespace ARDOUR {
 	class Location;

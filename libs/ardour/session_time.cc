@@ -22,17 +22,17 @@
 #include <cmath>
 #include <unistd.h>
 
-#include <ardour/timestamps.h>
+#include "ardour/timestamps.h"
 
-#include <pbd/error.h>
-#include <pbd/enumwriter.h>
-#include <pbd/stacktrace.h>
+#include "pbd/error.h"
+#include "pbd/enumwriter.h"
+#include "pbd/stacktrace.h"
 
-#include <ardour/ardour.h>
-#include <ardour/configuration.h>
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
-#include <ardour/tempo.h>
+#include "ardour/ardour.h"
+#include "ardour/configuration.h"
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
 
 #include "i18n.h"
 

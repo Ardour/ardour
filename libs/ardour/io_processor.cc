@@ -26,16 +26,16 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/xml++.h>
-#include <pbd/enumwriter.h>
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
 
-#include <ardour/io_processor.h>
-#include <ardour/session.h>
-#include <ardour/utils.h>
-#include <ardour/send.h>
-#include <ardour/port_insert.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/io.h>
+#include "ardour/io_processor.h"
+#include "ardour/session.h"
+#include "ardour/utils.h"
+#include "ardour/send.h"
+#include "ardour/port_insert.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/io.h"
 
 #include "i18n.h"
 

@@ -1,7 +1,7 @@
 #define __STDC_FORMAT_MACROS 1
 #include <inttypes.h>
 
-#include <ardour/latent.h>
+#include "ardour/latent.h"
 #include <gtkmm2ext/utils.h>
 
 #include "latency_gui.h"

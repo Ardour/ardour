@@ -23,7 +23,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 namespace ARDOUR
 {

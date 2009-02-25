@@ -27,8 +27,8 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 
-#include <ardour/location.h>
-#include <ardour/session.h>
+#include "ardour/location.h"
+#include "ardour/session.h"
 
 #include "ardour_dialog.h"
 

@@ -25,7 +25,7 @@
 
 #include <glibmm/pattern.h>
 
-#include <pbd/search_path.h>
+#include "pbd/search_path.h"
 
 namespace PBD {
 

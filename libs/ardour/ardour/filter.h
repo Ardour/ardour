@@ -22,7 +22,7 @@
 #define __ardour_filter_h__
 
 #include <vector>
-#include <ardour/region.h>
+#include "ardour/region.h"
 
 namespace ARDOUR {
 

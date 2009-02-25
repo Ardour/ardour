@@ -24,7 +24,7 @@
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
-#include <ardour/audioregion.h>
+#include "ardour/audioregion.h"
 
 #include "region_view.h"
 #include "route_time_axis.h"

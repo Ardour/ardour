@@ -30,11 +30,11 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/ringbuffer.h>
+#include "pbd/ringbuffer.h"
 #include <jack/jack.h>
 #include <jack/midiport.h>
-#include <midi++/port.h>
-#include <midi++/event.h>
+#include "midi++/port.h"
+#include "midi++/event.h"
 
 namespace MIDI
 {

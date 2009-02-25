@@ -20,7 +20,7 @@
 #define __ardour_audio_buffer_h__
 
 #include <cstring>
-#include <ardour/buffer.h>
+#include "ardour/buffer.h"
 
 namespace ARDOUR {
 

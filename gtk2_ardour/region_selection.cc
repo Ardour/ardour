@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include <ardour/region.h>
+#include "ardour/region.h"
 
 #include "region_view.h"
 #include "region_selection.h"

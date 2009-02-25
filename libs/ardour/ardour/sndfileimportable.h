@@ -22,9 +22,9 @@
 
 #include <boost/shared_ptr.hpp>
 #include <sndfile.h>
-#include <pbd/failed_constructor.h>
-#include <ardour/types.h>
-#include <ardour/importable_source.h>
+#include "pbd/failed_constructor.h"
+#include "ardour/types.h"
+#include "ardour/importable_source.h"
 
 namespace ARDOUR {
 

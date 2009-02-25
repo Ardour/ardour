@@ -45,14 +45,14 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/dndtreeview.h>
 
-#include <pbd/stateful.h>
-#include <ardour/session.h>
-#include <ardour/tempo.h>
-#include <ardour/stretch.h>
-#include <ardour/location.h>
-#include <ardour/audioregion.h>
-#include <ardour/track.h>
-#include <ardour/types.h>
+#include "pbd/stateful.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
+#include "ardour/stretch.h"
+#include "ardour/location.h"
+#include "ardour/audioregion.h"
+#include "ardour/track.h"
+#include "ardour/types.h"
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"

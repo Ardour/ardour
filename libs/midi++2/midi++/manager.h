@@ -25,8 +25,8 @@
 
 #include <string>
 
-#include <midi++/types.h>
-#include <midi++/port.h>
+#include "midi++/types.h"
+#include "midi++/port.h"
 
 namespace MIDI {
 

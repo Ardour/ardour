@@ -22,8 +22,8 @@
 
 #include <samplerate.h>
 
-#include <ardour/types.h>
-#include <ardour/importable_source.h>
+#include "ardour/types.h"
+#include "ardour/importable_source.h"
 
 namespace ARDOUR {
 

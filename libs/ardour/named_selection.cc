@@ -17,13 +17,13 @@
 
 */
 
-#include <pbd/failed_constructor.h>
-#include <pbd/error.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/error.h"
 
-#include <ardour/session.h>
-#include <ardour/utils.h>
-#include <ardour/playlist.h>
-#include <ardour/named_selection.h>
+#include "ardour/session.h"
+#include "ardour/utils.h"
+#include "ardour/playlist.h"
+#include "ardour/named_selection.h"
 
 #include "i18n.h"
 

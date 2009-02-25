@@ -33,11 +33,11 @@
 
 #include <gtkmm2ext/focus_entry.h>
 
-#include <pbd/stateful.h>
+#include "pbd/stateful.h"
 
-#include <ardour/types.h>
-#include <ardour/region.h>
-#include <evoral/Parameter.hpp>
+#include "ardour/types.h"
+#include "ardour/region.h"
+#include "evoral/Parameter.hpp"
 
 #include "prompter.h"
 #include "axis_view.h"

@@ -20,7 +20,7 @@
 #ifndef __ardour_playlist_factory_h__
 #define __ardour_playlist_factory_h__
 
-#include <ardour/playlist.h>
+#include "ardour/playlist.h"
 
 class XMLNode;
 

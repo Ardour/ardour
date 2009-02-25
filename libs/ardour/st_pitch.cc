@@ -20,13 +20,13 @@
 #include <algorithm>
 #include <cmath>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/types.h>
-#include <ardour/pitch.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/session.h>
-#include <ardour/audioregion.h>
+#include "ardour/types.h"
+#include "ardour/pitch.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/session.h"
+#include "ardour/audioregion.h"
 
 #include "i18n.h"
 

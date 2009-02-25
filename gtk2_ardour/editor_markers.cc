@@ -25,9 +25,9 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <ardour/location.h>
-#include <ardour/profile.h>
-#include <pbd/memento_command.h>
+#include "ardour/location.h"
+#include "ardour/profile.h"
+#include "pbd/memento_command.h"
 
 #include "editor.h"
 #include "marker.h"

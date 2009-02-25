@@ -29,26 +29,26 @@
 #include <gtkmm/stock.h>
 #include <glibmm/fileutils.h>
 
-#include <pbd/convert.h>
-#include <pbd/tokenizer.h>
-#include <pbd/enumwriter.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/xml++.h>
+#include "pbd/convert.h"
+#include "pbd/tokenizer.h"
+#include "pbd/enumwriter.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/xml++.h"
 
 #include <gtkmm2ext/utils.h>
 
-#include <evoral/SMFReader.hpp>
+#include "evoral/SMFReader.hpp"
 
-#include <ardour/audio_library.h>
-#include <ardour/auditioner.h>
-#include <ardour/audioregion.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/smf_source.h>
-#include <ardour/region_factory.h>
-#include <ardour/source_factory.h>
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/profile.h>
+#include "ardour/audio_library.h"
+#include "ardour/auditioner.h"
+#include "ardour/audioregion.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/smf_source.h"
+#include "ardour/region_factory.h"
+#include "ardour/source_factory.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/profile.h"
 
 #include "ardour_ui.h"
 #include "editing.h"

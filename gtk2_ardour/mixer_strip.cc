@@ -21,9 +21,9 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/convert.h>
-#include <pbd/enumwriter.h>
-#include <pbd/replace_all.h>
+#include "pbd/convert.h"
+#include "pbd/enumwriter.h"
+#include "pbd/replace_all.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -33,19 +33,19 @@
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/bindable_button.h>
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/route.h>
-#include <ardour/route_group.h>
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/panner.h>
-#include <ardour/send.h>
-#include <ardour/processor.h>
-#include <ardour/profile.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/user_bundle.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
+#include "ardour/audio_track.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/panner.h"
+#include "ardour/send.h"
+#include "ardour/processor.h"
+#include "ardour/profile.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/user_bundle.h"
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"

@@ -1,7 +1,7 @@
 #include <cassert>
-#include <pbd/failed_constructor.h>
-#include <pbd/compose.h>
-#include <pbd/xml++.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/compose.h"
+#include "pbd/xml++.h"
 #include "ardour/user_bundle.h"
 #include "ardour/port_set.h"
 #include "ardour/io.h"

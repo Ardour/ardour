@@ -17,11 +17,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <pbd/memento_command.h>
-#include <ardour/automation_control.h>
-#include <ardour/event_type_map.h>
-#include <ardour/session.h>
-#include <ardour/source.h>
+#include "pbd/memento_command.h"
+#include "ardour/automation_control.h"
+#include "ardour/event_type_map.h"
+#include "ardour/session.h"
+#include "ardour/source.h"
 #include "automation_region_view.h"
 #include "public_editor.h"
 

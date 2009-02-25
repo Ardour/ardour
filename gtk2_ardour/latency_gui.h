@@ -10,9 +10,9 @@
 #include <gtkmm/adjustment.h>
 
 #include <gtkmm2ext/barcontroller.h>
-#include <pbd/controllable.h>
+#include "pbd/controllable.h"
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 #include "ardour_dialog.h"
 

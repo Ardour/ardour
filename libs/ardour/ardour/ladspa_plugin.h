@@ -27,11 +27,11 @@
 
 #include <sigc++/signal.h>
 
-#include <pbd/stateful.h> 
+#include "pbd/stateful.h" 
 
 #include <jack/types.h>
-#include <ardour/ladspa.h>
-#include <ardour/plugin.h>
+#include "ardour/ladspa.h"
+#include "ardour/plugin.h"
 
 namespace ARDOUR {
 class AudioEngine;

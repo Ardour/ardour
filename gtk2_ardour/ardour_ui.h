@@ -36,8 +36,8 @@
 
 #include <libgnomecanvasmm/canvas.h>
 
-#include <pbd/xml++.h>
-#include <pbd/controllable.h>
+#include "pbd/xml++.h"
+#include "pbd/controllable.h"
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
@@ -57,10 +57,10 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/stateful_button.h>
 #include <gtkmm2ext/bindable_button.h>
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/configuration.h>
-#include <ardour/types.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/configuration.h"
+#include "ardour/types.h"
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"

@@ -19,9 +19,9 @@
 #include <cstring>
 #include <cmath>
 #include <algorithm>
-#include <ardour/amp.h>
-#include <ardour/buffer_set.h>
-#include <ardour/audio_buffer.h>
+#include "ardour/amp.h"
+#include "ardour/buffer_set.h"
+#include "ardour/audio_buffer.h"
 
 namespace ARDOUR {
 

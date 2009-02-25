@@ -20,12 +20,12 @@
 #include <algorithm>
 #include <cstdlib>
 
-#include <pbd/stacktrace.h>
+#include "pbd/stacktrace.h"
 
-#include <ardour/diskstream.h>
-#include <ardour/playlist.h>
-#include <ardour/route_group.h>
-#include <ardour/profile.h>
+#include "ardour/diskstream.h"
+#include "ardour/playlist.h"
+#include "ardour/route_group.h"
+#include "ardour/profile.h"
 
 #include "editor.h"
 #include "actions.h"

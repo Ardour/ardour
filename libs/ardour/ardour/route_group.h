@@ -25,8 +25,8 @@
 #include <string>
 #include <stdint.h>
 #include <sigc++/signal.h>
-#include <pbd/stateful.h> 
-#include <ardour/types.h>
+#include "pbd/stateful.h" 
+#include "ardour/types.h"
 
 using std::string;
 using std::list;
@@ -88,7 +88,7 @@ class RouteGroup : public PBD::Stateful, public sigc::trackable {
 	    }
     }
 
-    /* to use these, #include <ardour/route_group_specialized.h> */
+    /* to use these, #include "ardour/route_group_specialized.h" */
 
     template<class T> void apply (void (Track::*func)(T, void *), T val, void *src);
 

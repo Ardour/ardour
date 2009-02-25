@@ -20,7 +20,7 @@
 
 #include <cstring>
 #include <cstdlib>
-#include <midi++/types.h>
+#include "midi++/types.h"
 
 const char *MIDI::controller_names[] = {
 	"bank (0)",

@@ -18,10 +18,10 @@
 */
 
 #include <cmath>
-#include <ardour/types.h>
-#include <ardour/utils.h>
-#include <ardour/mix.h>
-#include <ardour/runtime_functions.h>
+#include "ardour/types.h"
+#include "ardour/utils.h"
+#include "ardour/mix.h"
+#include "ardour/runtime_functions.h"
 #include <stdint.h>
 
 using namespace ARDOUR;

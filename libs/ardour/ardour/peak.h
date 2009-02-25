@@ -21,8 +21,8 @@
 #define __ardour_peak_h__
 
 #include <cmath>
-#include <ardour/types.h>
-#include <ardour/utils.h>
+#include "ardour/types.h"
+#include "ardour/utils.h"
 
 static inline float
 default_compute_peak (const ARDOUR::Sample * const buf, nframes_t nsamples, float current) 

@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 #include <alsa/asoundlib.h>
-#include <midi++/port.h>
+#include "midi++/port.h"
 
 namespace MIDI {
 

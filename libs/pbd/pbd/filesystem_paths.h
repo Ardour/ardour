@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include <pbd/filesystem.h>
+#include "pbd/filesystem.h"
 
 namespace PBD {
 

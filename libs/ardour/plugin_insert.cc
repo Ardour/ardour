@@ -21,34 +21,34 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/xml++.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/xml++.h"
 
-#include <ardour/audio_buffer.h>
-#include <ardour/automation_list.h>
-#include <ardour/buffer_set.h>
-#include <ardour/event_type_map.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/plugin.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/port.h>
-#include <ardour/route.h>
+#include "ardour/audio_buffer.h"
+#include "ardour/automation_list.h"
+#include "ardour/buffer_set.h"
+#include "ardour/event_type_map.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/port.h"
+#include "ardour/route.h"
 
 #ifdef HAVE_SLV2
-#include <ardour/lv2_plugin.h>
+#include "ardour/lv2_plugin.h"
 #endif
 
 #ifdef VST_SUPPORT
-#include <ardour/vst_plugin.h>
+#include "ardour/vst_plugin.h"
 #endif
 
 #ifdef HAVE_AUDIOUNITS
-#include <ardour/audio_unit.h>
+#include "ardour/audio_unit.h"
 #endif
 
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
-#include <ardour/types.h>
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
+#include "ardour/types.h"
 
 #include "i18n.h"
 

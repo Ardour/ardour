@@ -16,9 +16,9 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/port_set.h>
-#include <ardour/midi_port.h>
-#include <ardour/audio_port.h>
+#include "ardour/port_set.h"
+#include "ardour/midi_port.h"
+#include "ardour/audio_port.h"
 
 namespace ARDOUR {
 

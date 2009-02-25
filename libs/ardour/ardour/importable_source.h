@@ -20,8 +20,8 @@
 #ifndef __ardour_importable_source_h__
 #define __ardour_importable_source_h__
 
-#include <pbd/failed_constructor.h>
-#include <ardour/types.h>
+#include "pbd/failed_constructor.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

@@ -19,15 +19,15 @@
 
 #include <cassert>
 
-#include <pbd/error.h>
-#include <pbd/convert.h>
+#include "pbd/error.h"
+#include "pbd/convert.h"
 
-#include <midi++/types.h>
-#include <midi++/factory.h>
-#include <midi++/fifomidi.h>
+#include "midi++/types.h"
+#include "midi++/factory.h"
+#include "midi++/fifomidi.h"
 
 #ifdef WITH_JACK_MIDI
-#include <midi++/jack.h>
+#include "midi++/jack.h"
 
 std::string MIDI::JACK_MidiPort::typestring = "jack";
 #endif // WITH_JACK_MIDI
@@ -35,8 +35,8 @@ std::string MIDI::JACK_MidiPort::typestring = "jack";
 std::string MIDI::FIFO_MidiPort::typestring = "fifo";
 
 #ifdef WITH_ALSA
-#include <midi++/alsa_sequencer.h>
-#include <midi++/alsa_rawmidi.h>
+#include "midi++/alsa_sequencer.h"
+#include "midi++/alsa_rawmidi.h"
 
 std::string MIDI::ALSA_SequencerMidiPort::typestring = "alsa/sequencer";
 std::string MIDI::ALSA_RawMidiPort::typestring = "alsa/raw";
@@ -44,7 +44,7 @@ std::string MIDI::ALSA_RawMidiPort::typestring = "alsa/raw";
 #endif // WITH_ALSA
 
 #ifdef WITH_COREMIDI
-#include <midi++/coremidi_midiport.h>
+#include "midi++/coremidi_midiport.h"
 
 std::string MIDI::CoreMidi_MidiPort::typestring = "coremidi";
 

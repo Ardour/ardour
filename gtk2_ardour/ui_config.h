@@ -24,8 +24,8 @@
 #include <ostream>
 #include <iostream>
 
-#include <pbd/stateful.h> 
-#include <pbd/xml++.h>
+#include "pbd/stateful.h" 
+#include "pbd/xml++.h"
 
 template<class T>
 class UIConfigVariable 

@@ -24,13 +24,13 @@
 #include <time.h>
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
-#include <pbd/stateful.h>
-#include <pbd/xml++.h>
-#include <evoral/Sequence.hpp>
-#include <ardour/ardour.h>
-#include <ardour/buffer.h>
-#include <ardour/source.h>
-#include <ardour/beats_frames_converter.h>
+#include "pbd/stateful.h"
+#include "pbd/xml++.h"
+#include "evoral/Sequence.hpp"
+#include "ardour/ardour.h"
+#include "ardour/buffer.h"
+#include "ardour/source.h"
+#include "ardour/beats_frames_converter.h"
 
 namespace ARDOUR {
 

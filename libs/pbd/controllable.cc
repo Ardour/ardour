@@ -17,9 +17,9 @@
 
 */
 
-#include <pbd/controllable.h>
-#include <pbd/xml++.h>
-#include <pbd/error.h>
+#include "pbd/controllable.h"
+#include "pbd/xml++.h"
+#include "pbd/error.h"
 
 #include "i18n.h"
 

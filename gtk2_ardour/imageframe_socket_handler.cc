@@ -43,8 +43,8 @@
 
 #include "i18n.h"
 
-#include <ardour/session.h>
-#include <ardour/session_utils.h>
+#include "ardour/session.h"
+#include "ardour/session_utils.h"
 
 #include <unistd.h>
 

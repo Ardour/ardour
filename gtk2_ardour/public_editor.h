@@ -30,7 +30,7 @@
 #include <jack/types.h>
 #include <sigc++/signal.h>
 
-#include <pbd/statefuldestructible.h> 
+#include "pbd/statefuldestructible.h" 
 
 #include "editing.h"
 #include "canvas.h"

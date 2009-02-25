@@ -36,13 +36,13 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
 
-#include <pbd/error.h>
-#include <pbd/basename.h>
-#include <pbd/compose.h>
-#include <pbd/failed_constructor.h>
-#include <pbd/enumwriter.h>
-#include <pbd/memento_command.h>
-#include <pbd/file_utils.h>
+#include "pbd/error.h"
+#include "pbd/basename.h"
+#include "pbd/compose.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/enumwriter.h"
+#include "pbd/memento_command.h"
+#include "pbd/file_utils.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -52,26 +52,26 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <midi++/manager.h>
+#include "midi++/manager.h"
 
-#include <ardour/ardour.h>
-#include <ardour/profile.h>
-#include <ardour/session_directory.h>
-#include <ardour/session_route.h>
-#include <ardour/session_state_utils.h>
-#include <ardour/session_utils.h>
-#include <ardour/port.h>
-#include <ardour/audioengine.h>
-#include <ardour/playlist.h>
-#include <ardour/utils.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/recent_sessions.h>
-#include <ardour/port.h>
-#include <ardour/audio_track.h>
-#include <ardour/midi_track.h>
-#include <ardour/filesystem_paths.h>
-#include <ardour/filename_extensions.h>
+#include "ardour/ardour.h"
+#include "ardour/profile.h"
+#include "ardour/session_directory.h"
+#include "ardour/session_route.h"
+#include "ardour/session_state_utils.h"
+#include "ardour/session_utils.h"
+#include "ardour/port.h"
+#include "ardour/audioengine.h"
+#include "ardour/playlist.h"
+#include "ardour/utils.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/recent_sessions.h"
+#include "ardour/port.h"
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
+#include "ardour/filesystem_paths.h"
+#include "ardour/filename_extensions.h"
 
 typedef uint64_t microseconds_t;
 

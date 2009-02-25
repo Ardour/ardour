@@ -23,9 +23,9 @@
 #include <vector>
 #include <list>
 
-#include <ardour/ardour.h>
-#include <ardour/playlist.h>
-#include <evoral/Parameter.hpp>
+#include "ardour/ardour.h"
+#include "ardour/playlist.h"
+#include "evoral/Parameter.hpp"
 
 namespace ARDOUR
 {

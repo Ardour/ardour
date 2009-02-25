@@ -1,8 +1,8 @@
 #include <unistd.h>
 
-#include <pbd/abstract_ui.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/failed_constructor.h>
+#include "pbd/abstract_ui.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/failed_constructor.h"
 
 #include "i18n.h"
 

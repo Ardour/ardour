@@ -20,7 +20,7 @@
 #ifndef __ardour_onset_detector_h__
 #define __ardour_onset_detector_h__
 
-#include <ardour/audioanalyser.h>
+#include "ardour/audioanalyser.h"
 
 namespace ARDOUR {
 

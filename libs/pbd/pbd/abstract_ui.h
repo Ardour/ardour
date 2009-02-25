@@ -28,9 +28,9 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/receiver.h>
-#include <pbd/ringbufferNPT.h>
-#include <pbd/base_ui.h>
+#include "pbd/receiver.h"
+#include "pbd/ringbufferNPT.h"
+#include "pbd/base_ui.h"
 
 class Touchable;
 

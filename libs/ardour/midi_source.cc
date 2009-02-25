@@ -28,18 +28,18 @@
 #include <iomanip>
 #include <algorithm>
 
-#include <pbd/xml++.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/basename.h>
+#include "pbd/xml++.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/basename.h"
 
-#include <ardour/audioengine.h>
-#include <ardour/midi_model.h>
-#include <ardour/midi_ring_buffer.h>
-#include <ardour/midi_source.h>
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/source_factory.h>
-#include <ardour/tempo.h>
+#include "ardour/audioengine.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_source.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/source_factory.h"
+#include "ardour/tempo.h"
 
 #include "i18n.h"
 

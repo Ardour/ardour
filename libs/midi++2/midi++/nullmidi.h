@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 
-#include <midi++/port.h>
+#include "midi++/port.h"
 
 namespace MIDI {
 

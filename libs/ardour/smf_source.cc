@@ -25,22 +25,22 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <pbd/mountpoint.h>
-#include <pbd/pathscanner.h>
-#include <pbd/stl_delete.h>
-#include <pbd/strsplit.h>
+#include "pbd/mountpoint.h"
+#include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
+#include "pbd/strsplit.h"
 
 #include <glibmm/miscutils.h>
 
-#include <evoral/SMFReader.hpp>
-#include <evoral/Control.hpp>
+#include "evoral/SMFReader.hpp"
+#include "evoral/Control.hpp"
 
-#include <ardour/audioengine.h>
-#include <ardour/event_type_map.h>
-#include <ardour/midi_model.h>
-#include <ardour/midi_ring_buffer.h>
-#include <ardour/session.h>
-#include <ardour/smf_source.h>
+#include "ardour/audioengine.h"
+#include "ardour/event_type_map.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_ring_buffer.h"
+#include "ardour/session.h"
+#include "ardour/smf_source.h"
 
 #include "i18n.h"
 

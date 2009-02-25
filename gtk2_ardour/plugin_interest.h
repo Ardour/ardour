@@ -21,7 +21,7 @@
 #define __gtkardour_plugin_interest_h__
 
 #include <vector>
-#include <ardour/plugin.h>
+#include "ardour/plugin.h"
 
 typedef std::vector<ARDOUR::PluginPtr> SelectedPlugins;
 

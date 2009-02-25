@@ -26,14 +26,14 @@
 #include <utility>
 #include <boost/utility.hpp>
 #include <glibmm/thread.h>
-#include <pbd/command.h>
-#include <ardour/types.h>
-#include <ardour/midi_buffer.h>
-#include <ardour/midi_ring_buffer.h>
-#include <ardour/automatable_sequence.h>
-#include <ardour/types.h>
-#include <evoral/Note.hpp>
-#include <evoral/Sequence.hpp>
+#include "pbd/command.h"
+#include "ardour/types.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/midi_ring_buffer.h"
+#include "ardour/automatable_sequence.h"
+#include "ardour/types.h"
+#include "evoral/Note.hpp"
+#include "evoral/Sequence.hpp"
 
 namespace ARDOUR {
 

@@ -27,16 +27,16 @@
 
 #include <libgnomecanvasmm/line.h>
 
-#include <ardour/automation_list.h>
-#include <evoral/Curve.hpp>
-#include <ardour/crossfade.h>
-#include <ardour/session.h>
-#include <ardour/auditioner.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/audiosource.h>
-#include <ardour/playlist_templates.h>
-#include <ardour/region_factory.h>
-#include <ardour/profile.h>
+#include "ardour/automation_list.h"
+#include "evoral/Curve.hpp"
+#include "ardour/crossfade.h"
+#include "ardour/session.h"
+#include "ardour/auditioner.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audiosource.h"
+#include "ardour/playlist_templates.h"
+#include "ardour/region_factory.h"
+#include "ardour/profile.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 

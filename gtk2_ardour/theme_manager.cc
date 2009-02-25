@@ -27,11 +27,11 @@
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm/settings.h>
 
-#include <pbd/file_utils.h>
+#include "pbd/file_utils.h"
 
-#include <ardour/configuration.h>
-#include <ardour/filesystem_paths.h>
-#include <ardour/profile.h>
+#include "ardour/configuration.h"
+#include "ardour/filesystem_paths.h"
+#include "ardour/profile.h"
 
 #include "theme_manager.h"
 #include "rgb_macros.h"

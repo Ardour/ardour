@@ -23,7 +23,7 @@
 #include <string>
 #include <stdint.h>
 
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
 using namespace std;
 

@@ -23,7 +23,7 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 
 #include <glibmm/miscutils.h>
 
@@ -37,17 +37,17 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/send.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/port_insert.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/profile.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/send.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/port_insert.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/profile.h"
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"

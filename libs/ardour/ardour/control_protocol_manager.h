@@ -27,7 +27,7 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/stateful.h> 
+#include "pbd/stateful.h" 
 
 namespace ARDOUR {
 

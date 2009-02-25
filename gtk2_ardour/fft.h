@@ -30,7 +30,7 @@
 #include <fftw3.h>
 
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 class FFT
 {

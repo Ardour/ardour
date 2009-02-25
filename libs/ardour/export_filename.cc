@@ -18,18 +18,18 @@
 
 */
 
-#include <ardour/export_filename.h>
+#include "ardour/export_filename.h"
 
-#include <pbd/xml++.h>
-#include <pbd/convert.h>
-#include <pbd/enumwriter.h>
+#include "pbd/xml++.h"
+#include "pbd/convert.h"
+#include "pbd/enumwriter.h"
 
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/export_timespan.h>
-#include <ardour/export_format_specification.h>
-#include <ardour/export_channel_configuration.h>
-#include <ardour/export_failed.h>
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/export_timespan.h"
+#include "ardour/export_format_specification.h"
+#include "ardour/export_channel_configuration.h"
+#include "ardour/export_failed.h"
 
 #include "i18n.h"
 

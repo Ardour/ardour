@@ -32,25 +32,25 @@
 
 #include <glibmm.h>
 
-#include <pbd/error.h>
-#include <pbd/failed_constructor.h>
-#include <pbd/xml++.h>
-#include <pbd/enumwriter.h>
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
 
-#include <evoral/Curve.hpp>
+#include "evoral/Curve.hpp"
 
-#include <ardour/session.h>
-#include <ardour/panner.h>
-#include <ardour/utils.h>
-#include <ardour/audio_buffer.h>
+#include "ardour/session.h"
+#include "ardour/panner.h"
+#include "ardour/utils.h"
+#include "ardour/audio_buffer.h"
 
-#include <ardour/runtime_functions.h>
-#include <ardour/buffer_set.h>
-#include <ardour/audio_buffer.h>
+#include "ardour/runtime_functions.h"
+#include "ardour/buffer_set.h"
+#include "ardour/audio_buffer.h"
 
 #include "i18n.h"
 
-#include <pbd/mathfix.h>
+#include "pbd/mathfix.h"
 
 using namespace std;
 using namespace ARDOUR;

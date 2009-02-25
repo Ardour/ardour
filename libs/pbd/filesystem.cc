@@ -27,9 +27,9 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include <pbd/filesystem.h>
-#include <pbd/error.h>
-#include <pbd/compose.h>
+#include "pbd/filesystem.h"
+#include "pbd/error.h"
+#include "pbd/compose.h"
 
 #include "i18n.h"
 

@@ -24,8 +24,8 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include <evoral/ControlSet.hpp>
-#include <ardour/types.h>
+#include "evoral/ControlSet.hpp"
+#include "ardour/types.h"
 
 class XMLNode;
 

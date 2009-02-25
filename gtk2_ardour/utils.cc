@@ -32,13 +32,13 @@
 #include <gtkmm/paned.h>
 #include <gtk/gtkpaned.h>
 
-#include <pbd/file_utils.h>
+#include "pbd/file_utils.h"
 
 #include <gtkmm2ext/utils.h>
-#include <ardour/configuration.h>
-#include <ardour/configuration.h>
+#include "ardour/configuration.h"
+#include "ardour/configuration.h"
 
-#include <ardour/filesystem_paths.h>
+#include "ardour/filesystem_paths.h"
 
 #include "ardour_ui.h"
 #include "keyboard.h"

@@ -34,30 +34,30 @@
 #include <boost/scoped_array.hpp>
 #include <boost/shared_array.hpp>
 
-#include <pbd/basename.h>
-#include <pbd/convert.h>
+#include "pbd/basename.h"
+#include "pbd/convert.h"
 
-#include <evoral/SMF.hpp>
+#include "evoral/SMF.hpp"
 
-#include <ardour/ardour.h>
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/audioengine.h>
-#include <ardour/sndfilesource.h>
-#include <ardour/sndfile_helpers.h>
-#include <ardour/audioregion.h>
-#include <ardour/region_factory.h>
-#include <ardour/source_factory.h>
-#include <ardour/resampled_source.h>
-#include <ardour/sndfileimportable.h>
-#include <ardour/analyser.h>
-#include <ardour/smf_source.h>
-#include <ardour/tempo.h>
+#include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audioengine.h"
+#include "ardour/sndfilesource.h"
+#include "ardour/sndfile_helpers.h"
+#include "ardour/audioregion.h"
+#include "ardour/region_factory.h"
+#include "ardour/source_factory.h"
+#include "ardour/resampled_source.h"
+#include "ardour/sndfileimportable.h"
+#include "ardour/analyser.h"
+#include "ardour/smf_source.h"
+#include "ardour/tempo.h"
 
 #ifdef HAVE_COREAUDIO
 #ifdef USE_COREAUDIO_FOR_FILE_IO
-#include <ardour/caimportable.h>
+#include "ardour/caimportable.h"
 #endif
 #endif
 

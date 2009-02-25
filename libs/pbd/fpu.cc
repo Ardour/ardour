@@ -2,8 +2,8 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#include <pbd/fpu.h>
-#include <pbd/error.h>
+#include "pbd/fpu.h"
+#include "pbd/error.h"
 
 #include "i18n.h"
 

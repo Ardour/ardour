@@ -1,8 +1,8 @@
 #include <fstream>
 #include <gtkmm/stock.h>
 
-#include <ardour/ardour.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/ardour.h"
+#include "ardour/filesystem_paths.h"
 
 #include "nag.h"
 #include "i18n.h"

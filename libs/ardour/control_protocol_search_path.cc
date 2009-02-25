@@ -19,9 +19,9 @@
 
 #include <glibmm/miscutils.h>
 
-#include <ardour/control_protocol_search_path.h>
-#include <ardour/directory_names.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/control_protocol_search_path.h"
+#include "ardour/directory_names.h"
+#include "ardour/filesystem_paths.h"
 
 namespace {
 	const char * const surfaces_env_variable_name = "ARDOUR_SURFACES_PATH";

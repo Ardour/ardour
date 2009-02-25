@@ -28,22 +28,22 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <midi++/mmc.h>
-#include <midi++/port.h>
-#include <midi++/manager.h>
-#include <pbd/error.h>
+#include "midi++/mmc.h"
+#include "midi++/port.h"
+#include "midi++/manager.h"
+#include "pbd/error.h"
 #include <glibmm/thread.h>
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
-#include <ardour/configuration.h>
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
-#include <ardour/audio_track.h>
-#include <ardour/midi_track.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/slave.h>
-#include <ardour/cycles.h>
-#include <ardour/smpte.h>
+#include "ardour/configuration.h"
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/slave.h"
+#include "ardour/cycles.h"
+#include "ardour/smpte.h"
 
 #include "i18n.h"
 

@@ -32,15 +32,15 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/dndtreeview.h>
 
-#include <pbd/stateful.h>
+#include "pbd/stateful.h"
 
-#include <ardour/types.h>
-#include <ardour/ardour.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/port_insert.h>
-#include <ardour/processor.h>
+#include "ardour/types.h"
+#include "ardour/ardour.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/port_insert.h"
+#include "ardour/processor.h"
 
-#include <pbd/fastlog.h>
+#include "pbd/fastlog.h"
 
 #include "plugin_interest.h"
 #include "route_ui.h"

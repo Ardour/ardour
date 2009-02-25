@@ -22,7 +22,7 @@
 #include <list>
 #include <cmath>
 
-#include <ardour/location.h>
+#include "ardour/location.h"
 #include "enums.h"
 #include "simplerect.h"
 #include "canvas.h"

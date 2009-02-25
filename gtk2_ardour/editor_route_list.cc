@@ -33,9 +33,9 @@
 #include "gui_thread.h"
 #include "actions.h"
 
-#include <pbd/unknown_type.h>
+#include "pbd/unknown_type.h"
 
-#include <ardour/route.h>
+#include "ardour/route.h"
 
 #include "i18n.h"
 

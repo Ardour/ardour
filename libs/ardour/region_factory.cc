@@ -17,16 +17,16 @@
 
 */
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
-#include <ardour/region_factory.h>
-#include <ardour/region.h>
-#include <ardour/audioregion.h>
-#include <ardour/audiosource.h>
-#include <ardour/midi_source.h>
-#include <ardour/midi_region.h>
+#include "ardour/region_factory.h"
+#include "ardour/region.h"
+#include "ardour/audioregion.h"
+#include "ardour/audiosource.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_region.h"
 
 #include "i18n.h"
 

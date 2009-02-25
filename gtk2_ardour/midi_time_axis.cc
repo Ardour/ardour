@@ -25,10 +25,10 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/error.h>
-#include <pbd/stl_delete.h>
-#include <pbd/whitespace.h>
-#include <pbd/enumwriter.h>
+#include "pbd/error.h"
+#include "pbd/stl_delete.h"
+#include "pbd/whitespace.h"
+#include "pbd/enumwriter.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>
@@ -36,16 +36,16 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
-#include <ardour/midi_playlist.h>
-#include <ardour/midi_diskstream.h>
-#include <ardour/midi_patch_manager.h>
-#include <ardour/processor.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/location.h>
-#include <ardour/playlist.h>
-#include <ardour/session.h>
-#include <ardour/session_playlist.h>
-#include <ardour/utils.h>
+#include "ardour/midi_playlist.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/midi_patch_manager.h"
+#include "ardour/processor.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/location.h"
+#include "ardour/playlist.h"
+#include "ardour/session.h"
+#include "ardour/session_playlist.h"
+#include "ardour/utils.h"
 
 #include "ardour_ui.h"
 #include "midi_time_axis.h"
@@ -74,7 +74,7 @@
 #include "ghostregion.h"
 #include "canvas-note-event.h"
 
-#include <ardour/midi_track.h>
+#include "ardour/midi_track.h"
 
 #include "i18n.h"
 

@@ -20,7 +20,7 @@
 
 #define __STDC_LIMIT_MACROS 1
 #include <stdint.h>
-#include <ardour/chan_count.h>
+#include "ardour/chan_count.h"
 
 namespace ARDOUR {
 

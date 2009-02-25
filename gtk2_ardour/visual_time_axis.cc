@@ -23,9 +23,9 @@
 #include <string>
 #include <vector>
 
-#include <pbd/error.h>
-#include <pbd/stl_delete.h>
-#include <pbd/whitespace.h>
+#include "pbd/error.h"
+#include "pbd/stl_delete.h"
+#include "pbd/whitespace.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
@@ -33,10 +33,10 @@
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/choice.h>
 
-#include <ardour/session.h>
-#include <ardour/utils.h>
-#include <ardour/processor.h>
-#include <ardour/location.h>
+#include "ardour/session.h"
+#include "ardour/utils.h"
+#include "ardour/processor.h"
+#include "ardour/location.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"

@@ -22,14 +22,14 @@
 
 #include <glibmm/miscutils.h>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/xml++.h>
-#include <pbd/filesystem.h>
-#include <pbd/file_utils.h>
-#include <pbd/error.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/xml++.h"
+#include "pbd/filesystem.h"
+#include "pbd/file_utils.h"
+#include "pbd/error.h"
 
-#include <ardour/ardour.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/ardour.h"
+#include "ardour/filesystem_paths.h"
 
 #include "ui_config.h"
 

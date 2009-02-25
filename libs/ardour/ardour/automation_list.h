@@ -27,13 +27,13 @@
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
 
-#include <pbd/undo.h>
-#include <pbd/xml++.h>
-#include <pbd/statefuldestructible.h> 
+#include "pbd/undo.h"
+#include "pbd/xml++.h"
+#include "pbd/statefuldestructible.h" 
 
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 
-#include <evoral/ControlList.hpp>
+#include "evoral/ControlList.hpp"
 
 namespace ARDOUR {
 

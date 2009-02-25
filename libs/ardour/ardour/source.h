@@ -25,12 +25,12 @@
 
 #include <boost/utility.hpp>
 #include <sigc++/signal.h>
-#include <pbd/statefuldestructible.h> 
+#include "pbd/statefuldestructible.h" 
 
-#include <ardour/ardour.h>
-#include <ardour/session_object.h>
-#include <ardour/data_type.h>
-#include <ardour/readable.h>
+#include "ardour/ardour.h"
+#include "ardour/session_object.h"
+#include "ardour/data_type.h"
+#include "ardour/readable.h"
 
 namespace ARDOUR {
 

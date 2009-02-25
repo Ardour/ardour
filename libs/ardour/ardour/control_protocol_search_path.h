@@ -20,7 +20,7 @@
 #ifndef ARDOUR_CONTROL_PROTOCOL_SEARCH_PATH_INCLUDED
 #define ARDOUR_CONTROL_PROTOCOL_SEARCH_PATH_INCLUDED
 
-#include <pbd/search_path.h>
+#include "pbd/search_path.h"
 
 namespace ARDOUR {
 

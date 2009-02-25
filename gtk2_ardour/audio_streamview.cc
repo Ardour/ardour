@@ -24,15 +24,15 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
-#include <ardour/audioplaylist.h>
-#include <ardour/audioregion.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/audio_track.h>
-#include <ardour/playlist_templates.h>
-#include <ardour/source.h>
-#include <ardour/region_factory.h>
-#include <ardour/profile.h>
+#include "ardour/audioplaylist.h"
+#include "ardour/audioregion.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audio_track.h"
+#include "ardour/playlist_templates.h"
+#include "ardour/source.h"
+#include "ardour/region_factory.h"
+#include "ardour/profile.h"
 
 #include "audio_streamview.h"
 #include "audio_region_view.h"

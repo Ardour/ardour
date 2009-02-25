@@ -23,10 +23,10 @@
 #include <iostream>
 
 #include <sigc++/sigc++.h>
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
-#include <midi++/types.h>
-#include <midi++/parser.h>
+#include "midi++/types.h"
+#include "midi++/parser.h"
 
 namespace MIDI {
 

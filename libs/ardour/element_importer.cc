@@ -18,13 +18,13 @@
 
 */
 
-#include <ardour/element_importer.h>
+#include "ardour/element_importer.h"
 
 #include <sstream>
 #include <iomanip>
 
-#include <pbd/convert.h>
-#include <ardour/session.h>
+#include "pbd/convert.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

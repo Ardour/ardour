@@ -20,10 +20,10 @@
 #include <map>
 #include <vector>
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 
 #include <sndfile.h>
-#include <ardour/sndfile_helpers.h>
+#include "ardour/sndfile_helpers.h"
 
 #include "i18n.h"
 

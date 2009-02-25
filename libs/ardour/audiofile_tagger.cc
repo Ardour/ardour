@@ -18,11 +18,11 @@
 
 */
 
-#include <ardour/audiofile_tagger.h>
+#include "ardour/audiofile_tagger.h"
 
-#include <ardour/session_metadata.h>
+#include "ardour/session_metadata.h"
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 
 #include <taglib/fileref.h>
 #include <taglib/oggfile.h>

@@ -34,17 +34,17 @@
 
 #include <sigc++/signal.h>
 
-#include <pbd/undo.h>
-#include <pbd/stateful.h> 
-#include <pbd/statefuldestructible.h>
+#include "pbd/undo.h"
+#include "pbd/stateful.h" 
+#include "pbd/statefuldestructible.h"
 
-#include <evoral/types.hpp>
+#include "evoral/types.hpp"
 
-#include <ardour/ardour.h>
-#include <ardour/session_object.h>
-#include <ardour/crossfade_compare.h>
-#include <ardour/location.h>
-#include <ardour/data_type.h>
+#include "ardour/ardour.h"
+#include "ardour/session_object.h"
+#include "ardour/crossfade_compare.h"
+#include "ardour/location.h"
+#include "ardour/data_type.h"
 
 namespace ARDOUR  {
 

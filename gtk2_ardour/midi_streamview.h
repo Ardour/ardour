@@ -22,7 +22,7 @@
 #include <list>
 #include <cmath>
 
-#include <ardour/location.h>
+#include "ardour/location.h"
 #include "enums.h"
 #include "streamview.h"
 #include "time_axis_view_item.h"

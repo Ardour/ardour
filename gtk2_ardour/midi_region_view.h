@@ -24,11 +24,11 @@
 
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
-#include <ardour/midi_track.h>
-#include <ardour/midi_region.h>
-#include <ardour/midi_model.h>
-#include <ardour/diskstream.h>
-#include <ardour/types.h>
+#include "ardour/midi_track.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_model.h"
+#include "ardour/diskstream.h"
+#include "ardour/types.h"
 
 #include "region_view.h"
 #include "midi_time_axis.h"

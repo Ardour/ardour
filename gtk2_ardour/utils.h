@@ -23,7 +23,7 @@
 #include <string>
 #include <cmath>
 #include <vector>
-#include <ardour/types.h>
+#include "ardour/types.h"
 #include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
 #include <glibmm/ustring.h>

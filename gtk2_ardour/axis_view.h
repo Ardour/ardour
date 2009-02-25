@@ -25,7 +25,7 @@
 #include <gtkmm/label.h>
 #include <gdkmm/color.h>
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 #include "prompter.h"
 #include "selectable.h"
 

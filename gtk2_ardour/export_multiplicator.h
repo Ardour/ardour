@@ -30,7 +30,7 @@
 #include <utility>
 #include <map>
 
-#include <ardour/export_profile_manager.h>
+#include "ardour/export_profile_manager.h"
 
 #include <gtkmm.h>
 #include <boost/shared_ptr.hpp>

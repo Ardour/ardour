@@ -1,4 +1,4 @@
-#include <ardour/directory_names.h>
+#include "ardour/directory_names.h"
 
 #include "i18n.h"
 

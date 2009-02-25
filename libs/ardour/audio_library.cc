@@ -26,11 +26,11 @@
 
 #include <glibmm/convert.h>
 
-#include <pbd/compose.h>
+#include "pbd/compose.h"
 
-#include <ardour/audio_library.h>
-#include <ardour/utils.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/audio_library.h"
+#include "ardour/utils.h"
+#include "ardour/filesystem_paths.h"
 
 #include "i18n.h"
 

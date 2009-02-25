@@ -21,7 +21,7 @@
 #ifndef __ardour_quantize_h__
 #define __ardour_quantize_h__
 
-#include <ardour/filter.h>
+#include "ardour/filter.h"
 
 namespace ARDOUR {
 

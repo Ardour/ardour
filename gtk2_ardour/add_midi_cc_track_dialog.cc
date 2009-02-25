@@ -22,8 +22,8 @@
 
 #include <sigc++/bind.h>
 #include <gtkmm/stock.h>
-#include <pbd/error.h>
-#include <pbd/convert.h>
+#include "pbd/error.h"
+#include "pbd/convert.h"
 
 #include "utils.h"
 #include "add_midi_cc_track_dialog.h"

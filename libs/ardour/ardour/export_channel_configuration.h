@@ -26,11 +26,11 @@
 #include <glibmm/ustring.h>
 #include <sigc++/signal.h>
 
-#include <ardour/export_channel.h>
-#include <ardour/export_status.h>
-#include <ardour/ardour.h>
+#include "ardour/export_channel.h"
+#include "ardour/export_status.h"
+#include "ardour/ardour.h"
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
 using Glib::ustring;
 

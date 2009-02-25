@@ -23,7 +23,7 @@
 #include <iterator>
 #include <string>
 
-#include <pbd/whitespace.h>
+#include "pbd/whitespace.h"
 
 namespace PBD {
 

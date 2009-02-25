@@ -18,27 +18,27 @@
 
 */
 
-#include <ardour/export_profile_manager.h>
+#include "ardour/export_profile_manager.h"
 
 #include <cassert>
 #include <stdexcept>
 
 #include <glibmm/fileutils.h>
 
-#include <pbd/enumwriter.h>
-#include <pbd/xml++.h>
-#include <pbd/convert.h>
+#include "pbd/enumwriter.h"
+#include "pbd/xml++.h"
+#include "pbd/convert.h"
 
-#include <ardour/export_failed.h>
-#include <ardour/export_file_io.h>
-#include <ardour/export_format_specification.h>
-#include <ardour/export_timespan.h>
-#include <ardour/export_channel_configuration.h>
-#include <ardour/export_filename.h>
-#include <ardour/export_preset.h>
-#include <ardour/export_handler.h>
-#include <ardour/filename_extensions.h>
-#include <ardour/session.h>
+#include "ardour/export_failed.h"
+#include "ardour/export_file_io.h"
+#include "ardour/export_format_specification.h"
+#include "ardour/export_timespan.h"
+#include "ardour/export_channel_configuration.h"
+#include "ardour/export_filename.h"
+#include "ardour/export_preset.h"
+#include "ardour/export_handler.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

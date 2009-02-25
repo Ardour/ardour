@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include <ardour/region.h>
+#include "ardour/region.h"
 #include <gtkmm2ext/doi.h>
 
 #include "canvas-simplerect.h"

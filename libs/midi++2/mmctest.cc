@@ -1,8 +1,8 @@
 #include <cstdio>
 #include <fcntl.h>
 
-#include <pbd/error.h>
-#include <pbd/textreceiver.h>
+#include "pbd/error.h"
+#include "pbd/textreceiver.h"
 
 Transmitter error (Transmitter::Error);
 Transmitter info (Transmitter::Info);

@@ -17,8 +17,8 @@
 */
 
 #include <iostream>
-#include <evoral/midi_events.h>
-#include <ardour/midi_track.h>
+#include "evoral/midi_events.h"
+#include "ardour/midi_track.h"
 
 #include "piano_roll_header.h"
 #include "midi_time_axis.h"

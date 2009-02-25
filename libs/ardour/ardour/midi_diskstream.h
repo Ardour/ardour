@@ -32,16 +32,16 @@
 
 #include <time.h>
 
-#include <pbd/fastlog.h>
-#include <pbd/ringbufferNPT.h>
+#include "pbd/fastlog.h"
+#include "pbd/ringbufferNPT.h"
 
-#include <ardour/ardour.h>
-#include <ardour/configuration.h>
-#include <ardour/diskstream.h>
-#include <ardour/midi_playlist.h>
-#include <ardour/midi_ring_buffer.h>
-#include <ardour/midi_state_tracker.h>
-#include <ardour/utils.h>
+#include "ardour/ardour.h"
+#include "ardour/configuration.h"
+#include "ardour/diskstream.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_state_tracker.h"
+#include "ardour/utils.h"
 
 struct tm;
 

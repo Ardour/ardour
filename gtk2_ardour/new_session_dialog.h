@@ -33,7 +33,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/expander.h>
 
-#include <ardour/utils.h>
+#include "ardour/utils.h"
 
 #include <glibmm/refptr.h>
 

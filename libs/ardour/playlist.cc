@@ -27,17 +27,17 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/stl_delete.h>
-#include <pbd/xml++.h>
-#include <pbd/stacktrace.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/stl_delete.h"
+#include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
 
-#include <ardour/playlist.h>
-#include <ardour/session.h>
-#include <ardour/region.h>
-#include <ardour/region_factory.h>
-#include <ardour/playlist_factory.h>
-#include <ardour/transient_detector.h>
+#include "ardour/playlist.h"
+#include "ardour/session.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/transient_detector.h"
 
 #include "i18n.h"
 

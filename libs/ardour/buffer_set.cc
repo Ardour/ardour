@@ -18,10 +18,10 @@
 
 #include <iostream>
 #include <algorithm>
-#include <ardour/buffer_set.h>
-#include <ardour/buffer.h>
-#include <ardour/port.h>
-#include <ardour/port_set.h>
+#include "ardour/buffer_set.h"
+#include "ardour/buffer.h"
+#include "ardour/port.h"
+#include "ardour/port_set.h"
 
 namespace ARDOUR {
 

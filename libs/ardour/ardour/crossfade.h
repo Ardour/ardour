@@ -26,13 +26,13 @@
 
 #include <sigc++/signal.h>
 
-#include <pbd/undo.h>
-#include <pbd/statefuldestructible.h> 
+#include "pbd/undo.h"
+#include "pbd/statefuldestructible.h" 
 
-#include <ardour/ardour.h>
-#include <ardour/audioregion.h>
-#include <ardour/crossfade_compare.h>
-#include <evoral/Curve.hpp>
+#include "ardour/ardour.h"
+#include "ardour/audioregion.h"
+#include "ardour/crossfade_compare.h"
+#include "evoral/Curve.hpp"
 
 namespace ARDOUR {
 

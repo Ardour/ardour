@@ -18,7 +18,7 @@
 
 */
 
-#include <ardour/export_status.h>
+#include "ardour/export_status.h"
 
 namespace ARDOUR
 {

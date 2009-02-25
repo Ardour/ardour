@@ -17,20 +17,20 @@
 
 */
 
-#include <ardour/ardour.h>
+#include "ardour/ardour.h"
 #include <fstream>
 #include <inttypes.h>
 #include <cstdio>
 #include <errno.h>
-#include <pbd/error.h>
-#include <pbd/enumwriter.h>
-#include <midi++/names.h>
-#include <ardour/automatable.h>
-#include <ardour/event_type_map.h>
-#include <ardour/midi_track.h>
-#include <ardour/panner.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/session.h>
+#include "pbd/error.h"
+#include "pbd/enumwriter.h"
+#include "midi++/names.h"
+#include "ardour/automatable.h"
+#include "ardour/event_type_map.h"
+#include "ardour/midi_track.h"
+#include "ardour/panner.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

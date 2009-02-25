@@ -25,8 +25,8 @@
 #include <gtkmm/widget.h>
 #include <gtkmm/checkbutton.h>
 #include <boost/shared_ptr.hpp>
-#include <ardour/data_type.h>
-#include <ardour/types.h>
+#include "ardour/data_type.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 	class Session;

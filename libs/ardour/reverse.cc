@@ -19,13 +19,13 @@
 
 #include <algorithm>
 
-#include <pbd/basename.h>
+#include "pbd/basename.h"
 
-#include <ardour/types.h>
-#include <ardour/reverse.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/session.h>
-#include <ardour/audioregion.h>
+#include "ardour/types.h"
+#include "ardour/reverse.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/session.h"
+#include "ardour/audioregion.h"
 
 #include "i18n.h"
 

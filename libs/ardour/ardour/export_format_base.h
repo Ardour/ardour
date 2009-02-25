@@ -29,8 +29,8 @@
 
 #include <sndfile.h>
 #include <samplerate.h>
-#include <ardour/gdither_types.h>
-#include <ardour/ardour.h>
+#include "ardour/gdither_types.h"
+#include "ardour/ardour.h"
 
 using std::string;
 

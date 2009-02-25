@@ -19,8 +19,8 @@
 
 #include <fst.h>
 #include <gtk/gtksocket.h>
-#include <ardour/processor.h>
-#include <ardour/vst_plugin.h>
+#include "ardour/processor.h"
+#include "ardour/vst_plugin.h"
 
 #include "plugin_ui.h"
 

@@ -19,10 +19,10 @@
     $Id: midiregion.h 733 2006-08-01 17:19:38Z drobilla $
 */
 
-#include <ardour/audioengine.h>
-#include <ardour/beats_frames_converter.h>
-#include <ardour/session.h>
-#include <ardour/tempo.h>
+#include "ardour/audioengine.h"
+#include "ardour/beats_frames_converter.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
 
 namespace ARDOUR {
 

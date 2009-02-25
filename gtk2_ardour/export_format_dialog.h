@@ -21,12 +21,12 @@
 #ifndef __export_format_dialog_h__
 #define __export_format_dialog_h__
 
-#include <ardour/types.h>
-#include <ardour/export_format_manager.h>
-#include <ardour/export_format_compatibility.h>
-#include <ardour/export_formats.h>
+#include "ardour/types.h"
+#include "ardour/export_format_manager.h"
+#include "ardour/export_format_compatibility.h"
+#include "ardour/export_formats.h"
 
-#include <pbd/xml++.h>
+#include "pbd/xml++.h"
 
 #include "ardour_dialog.h"
 #include "audio_clock.h"

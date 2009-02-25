@@ -17,7 +17,7 @@
 
 */
 
-#include <ardour/gain.h>
+#include "ardour/gain.h"
 
 using namespace ARDOUR;
 

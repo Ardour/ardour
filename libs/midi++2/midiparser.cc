@@ -28,11 +28,11 @@
 #include <iostream>
 #include <iterator>
 
-#include <midi++/types.h>
-#include <midi++/parser.h>
-#include <midi++/port.h>
-#include <midi++/mmc.h>
-#include <pbd/transmitter.h>
+#include "midi++/types.h"
+#include "midi++/parser.h"
+#include "midi++/port.h"
+#include "midi++/mmc.h"
+#include "pbd/transmitter.h"
 
 using namespace std;
 using namespace sigc;

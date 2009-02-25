@@ -19,7 +19,7 @@
 #ifndef __ardour_piano_roll_header_h__
 #define __ardour_piano_roll_header_h__
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 #include <gtkmm/drawingarea.h>
 

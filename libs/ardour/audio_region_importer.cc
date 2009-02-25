@@ -18,19 +18,19 @@
 
 */
 
-#include <ardour/audio_region_importer.h>
+#include "ardour/audio_region_importer.h"
 
 #include <sstream>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/compose.h>
-#include <pbd/error.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/compose.h"
+#include "pbd/error.h"
 
-#include <ardour/session.h>
-#include <ardour/region.h>
-#include <ardour/source_factory.h>
-#include <ardour/region_factory.h>
-#include <ardour/session_directory.h>
+#include "ardour/session.h"
+#include "ardour/region.h"
+#include "ardour/source_factory.h"
+#include "ardour/region_factory.h"
+#include "ardour/session_directory.h"
 
 #include "i18n.h"
 

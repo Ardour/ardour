@@ -19,20 +19,20 @@
 
 #include <limits.h>
 
-#include <ardour/io.h>
-#include <ardour/route.h>
-#include <ardour/route_group.h>
-#include <ardour/session.h>
-#include <ardour/session_route.h>
-#include <ardour/dB.h>
-#include <ardour/meter.h>
+#include "ardour/io.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
+#include "ardour/session.h"
+#include "ardour/session_route.h"
+#include "ardour/dB.h"
+#include "ardour/meter.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/barcontroller.h>
-#include <midi++/manager.h>
-#include <pbd/fastlog.h>
+#include "midi++/manager.h"
+#include "pbd/fastlog.h"
 
 #include "ardour_ui.h"
 #include "level_meter.h"
@@ -42,8 +42,8 @@
 #include "keyboard.h"
 #include "public_editor.h"
 
-#include <ardour/session.h>
-#include <ardour/route.h>
+#include "ardour/session.h"
+#include "ardour/route.h"
 
 #include "i18n.h"
 

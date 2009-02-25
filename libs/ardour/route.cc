@@ -22,36 +22,36 @@
 #include <cassert>
 
 #include <sigc++/bind.h>
-#include <pbd/xml++.h>
-#include <pbd/enumwriter.h>
-#include <pbd/stacktrace.h>
-#include <pbd/memento_command.h>
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
+#include "pbd/stacktrace.h"
+#include "pbd/memento_command.h"
 
-#include <evoral/Curve.hpp>
+#include "evoral/Curve.hpp"
 
-#include <ardour/timestamps.h>
-#include <ardour/audioengine.h>
-#include <ardour/route.h>
-#include <ardour/buffer.h>
-#include <ardour/processor.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/port_insert.h>
-#include <ardour/send.h>
-#include <ardour/session.h>
-#include <ardour/utils.h>
-#include <ardour/configuration.h>
-#include <ardour/cycle_timer.h>
-#include <ardour/route_group.h>
-#include <ardour/port.h>
-#include <ardour/audio_port.h>
-#include <ardour/ladspa_plugin.h>
-#include <ardour/panner.h>
-#include <ardour/dB.h>
-#include <ardour/amp.h>
-#include <ardour/meter.h>
-#include <ardour/buffer_set.h>
-#include <ardour/mix.h>
-#include <ardour/profile.h>
+#include "ardour/timestamps.h"
+#include "ardour/audioengine.h"
+#include "ardour/route.h"
+#include "ardour/buffer.h"
+#include "ardour/processor.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/port_insert.h"
+#include "ardour/send.h"
+#include "ardour/session.h"
+#include "ardour/utils.h"
+#include "ardour/configuration.h"
+#include "ardour/cycle_timer.h"
+#include "ardour/route_group.h"
+#include "ardour/port.h"
+#include "ardour/audio_port.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/panner.h"
+#include "ardour/dB.h"
+#include "ardour/amp.h"
+#include "ardour/meter.h"
+#include "ardour/buffer_set.h"
+#include "ardour/mix.h"
+#include "ardour/profile.h"
 
 #include "i18n.h"
 

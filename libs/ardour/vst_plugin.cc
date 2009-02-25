@@ -36,20 +36,20 @@
 #include <lrdf.h>
 #include <fst.h>
 
-#include <pbd/compose.h>
-#include <pbd/error.h>
-#include <pbd/pathscanner.h>
-#include <pbd/xml++.h>
+#include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/pathscanner.h"
+#include "pbd/xml++.h"
 
 #include <vst/aeffectx.h>
 
-#include <ardour/session.h>
-#include <ardour/audioengine.h>
-#include <ardour/filesystem_paths.h>
-#include <ardour/vst_plugin.h>
-#include <ardour/buffer_set.h>
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
+#include "ardour/filesystem_paths.h"
+#include "ardour/vst_plugin.h"
+#include "ardour/buffer_set.h"
 
-#include <pbd/stl_delete.h>
+#include "pbd/stl_delete.h"
 
 #include "i18n.h"
 #include <locale.h>

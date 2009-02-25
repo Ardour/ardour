@@ -25,15 +25,15 @@
 #include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 
-#include <pbd/statefuldestructible.h> 
-#include <pbd/controllable.h>
+#include "pbd/statefuldestructible.h" 
+#include "pbd/controllable.h"
 
 #include <jack/types.h>
-#include <ardour/chan_count.h>
-#include <ardour/cycles.h>
-#include <ardour/latent.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/types.h>
+#include "ardour/chan_count.h"
+#include "ardour/cycles.h"
+#include "ardour/latent.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/types.h"
 
 #include <vector>
 #include <set>

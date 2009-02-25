@@ -21,7 +21,7 @@
 #define __ardour_session_object_h__
 
 #include <string>
-#include <pbd/statefuldestructible.h> 
+#include "pbd/statefuldestructible.h" 
 
 namespace ARDOUR {
 

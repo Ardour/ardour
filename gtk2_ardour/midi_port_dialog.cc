@@ -2,7 +2,7 @@
 #include <sigc++/bind.h>
 #include <gtkmm/stock.h>
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 #include <gtkmm2ext/utils.h>
 
 #include "midi_port_dialog.h"

@@ -37,23 +37,23 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/error.h>
-#include <pbd/pool.h>
-#include <pbd/rcu.h>
-#include <pbd/statefuldestructible.h>
-#include <pbd/undo.h>
+#include "pbd/error.h"
+#include "pbd/pool.h"
+#include "pbd/rcu.h"
+#include "pbd/statefuldestructible.h"
+#include "pbd/undo.h"
 
-#include <midi++/mmc.h>
-#include <midi++/types.h>
+#include "midi++/mmc.h"
+#include "midi++/types.h"
 
-#include <pbd/destructible.h>
-#include <pbd/stateful.h>
+#include "pbd/destructible.h"
+#include "pbd/stateful.h"
 
-#include <ardour/ardour.h>
-#include <ardour/chan_count.h>
-#include <ardour/configuration.h>
-#include <ardour/location.h>
-#include <ardour/smpte.h>
+#include "ardour/ardour.h"
+#include "ardour/chan_count.h"
+#include "ardour/configuration.h"
+#include "ardour/location.h"
+#include "ardour/smpte.h"
 
 class XMLTree;
 class XMLNode;

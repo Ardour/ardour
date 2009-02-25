@@ -19,18 +19,18 @@
 
 #include <glibmm/thread.h>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/audio_diskstream.h>
-#include <ardour/audioregion.h>
-#include <ardour/audioengine.h>
-#include <ardour/route.h>
-#include <ardour/session.h>
-#include <ardour/auditioner.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/panner.h>
-#include <ardour/data_type.h>
-#include <ardour/region_factory.h>
+#include "ardour/audio_diskstream.h"
+#include "ardour/audioregion.h"
+#include "ardour/audioengine.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/auditioner.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/panner.h"
+#include "ardour/data_type.h"
+#include "ardour/region_factory.h"
 
 using namespace std;
 using namespace ARDOUR;

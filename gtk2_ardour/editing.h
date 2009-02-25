@@ -22,7 +22,7 @@
 
 #include <string>
 #include <map>
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 // This involves some cpp magic. --taybin
 

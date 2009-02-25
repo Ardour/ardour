@@ -32,13 +32,13 @@
 #include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 
-#include <pbd/uuid.h>
-#include <pbd/file_utils.h>
-#include <pbd/xml++.h>
+#include "pbd/uuid.h"
+#include "pbd/file_utils.h"
+#include "pbd/xml++.h"
 
-#include <ardour/filesystem_paths.h>
-#include <ardour/location.h>
-#include <ardour/types.h>
+#include "ardour/filesystem_paths.h"
+#include "ardour/location.h"
+#include "ardour/types.h"
 
 using std::string;
 using std::list;

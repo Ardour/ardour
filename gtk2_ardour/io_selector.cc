@@ -22,7 +22,7 @@
 
 #include <gtkmm2ext/doi.h>
 
-#include <ardour/port_insert.h>
+#include "ardour/port_insert.h"
 #include "ardour/session.h"
 #include "ardour/io.h"
 #include "ardour/audioengine.h"

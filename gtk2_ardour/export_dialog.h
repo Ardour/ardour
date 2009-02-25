@@ -23,8 +23,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ardour/export_handler.h>
-#include <ardour/export_profile_manager.h>
+#include "ardour/export_handler.h"
+#include "ardour/export_profile_manager.h"
 
 #include "public_editor.h"
 #include "export_timespan_selector.h"

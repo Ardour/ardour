@@ -22,9 +22,9 @@
 #include <cmath>
 #include <string>
 
-#include <pbd/stl_delete.h>
-#include <pbd/xml++.h>
-#include <pbd/failed_constructor.h>
+#include "pbd/stl_delete.h"
+#include "pbd/xml++.h"
+#include "pbd/failed_constructor.h"
 
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/fastmeter.h>
@@ -33,13 +33,13 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/slider_controller.h>
 
-#include <midi++/manager.h>
+#include "midi++/manager.h"
 
-#include <ardour/plugin.h>
-#include <ardour/plugin_insert.h>
-#include <ardour/ladspa_plugin.h>
+#include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/ladspa_plugin.h"
 #ifdef HAVE_LV2
-#include <ardour/lv2_plugin.h>
+#include "ardour/lv2_plugin.h"
 #endif
 
 #include <lrdf.h>

@@ -22,7 +22,7 @@
 
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include <ardour/route_group.h>
+#include "ardour/route_group.h"
 
 #include "editor.h"
 #include "keyboard.h"
@@ -31,7 +31,7 @@
 #include "prompter.h"
 #include "gui_thread.h"
 
-#include <ardour/route.h>
+#include "ardour/route.h"
 
 #include "i18n.h"
 

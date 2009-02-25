@@ -21,8 +21,8 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <midi++/types.h>
-#include <midi++/fifomidi.h>
+#include "midi++/types.h"
+#include "midi++/fifomidi.h"
 
 using namespace MIDI;
 

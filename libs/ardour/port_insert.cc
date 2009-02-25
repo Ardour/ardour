@@ -21,18 +21,18 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/failed_constructor.h>
-#include <pbd/xml++.h>
+#include "pbd/failed_constructor.h"
+#include "pbd/xml++.h"
 
-#include <ardour/port_insert.h>
-#include <ardour/plugin.h>
-#include <ardour/port.h>
-#include <ardour/route.h>
-#include <ardour/buffer_set.h>
+#include "ardour/port_insert.h"
+#include "ardour/plugin.h"
+#include "ardour/port.h"
+#include "ardour/route.h"
+#include "ardour/buffer_set.h"
 
-#include <ardour/audioengine.h>
-#include <ardour/session.h>
-#include <ardour/types.h>
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
+#include "ardour/types.h"
 
 #include "i18n.h"
 

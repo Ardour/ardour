@@ -21,7 +21,7 @@
 #ifndef MIDI_PATCH_MANAGER_H_
 #define MIDI_PATCH_MANAGER_H_
 
-#include <midi++/midnam_patch.h>
+#include "midi++/midnam_patch.h"
 
 namespace ARDOUR {
 	class Session;

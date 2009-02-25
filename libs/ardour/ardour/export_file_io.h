@@ -26,13 +26,13 @@
 
 #include <boost/shared_ptr.hpp>
 #include <glibmm/ustring.h>
-#include <ardour/sndfile_helpers.h>
+#include "ardour/sndfile_helpers.h"
 
-#include <ardour/graph.h>
-#include <ardour/types.h>
-#include <ardour/ardour.h>
-#include <ardour/export_format_specification.h>
-#include <ardour/export_utilities.h>
+#include "ardour/graph.h"
+#include "ardour/types.h"
+#include "ardour/ardour.h"
+#include "ardour/export_format_specification.h"
+#include "ardour/export_utilities.h"
 
 using Glib::ustring;
 

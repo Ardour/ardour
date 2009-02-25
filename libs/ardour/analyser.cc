@@ -17,12 +17,12 @@
 
 */
 
-#include <ardour/analyser.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/transient_detector.h>
+#include "ardour/analyser.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/transient_detector.h"
 
-#include <pbd/pthread_utils.h>
-#include <pbd/convert.h>
+#include "pbd/pthread_utils.h"
+#include "pbd/convert.h"
 
 using namespace std;
 using namespace sigc;

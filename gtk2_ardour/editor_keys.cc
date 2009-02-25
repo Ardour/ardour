@@ -21,10 +21,10 @@
 #include <cmath>
 #include <string>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/session.h>
-#include <ardour/region.h>
+#include "ardour/session.h"
+#include "ardour/region.h"
 #include <gtkmm/treeview.h>
 
 #include "ardour_ui.h"

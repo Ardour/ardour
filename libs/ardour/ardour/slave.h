@@ -25,9 +25,9 @@
 #include <jack/jack.h>
 
 #include <sigc++/signal.h>
-#include <ardour/ardour.h>
-#include <midi++/parser.h>
-#include <midi++/types.h>
+#include "ardour/ardour.h"
+#include "midi++/parser.h"
+#include "midi++/types.h"
 
 namespace MIDI {
 	class Port;

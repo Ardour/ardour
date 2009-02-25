@@ -28,9 +28,9 @@
 #include <dlfcn.h>
 
 #include <sigc++/signal.h>
-#include <pbd/stateful.h> 
+#include "pbd/stateful.h" 
 #include <jack/types.h>
-#include <ardour/plugin.h>
+#include "ardour/plugin.h"
 
 using std::string;
 using std::vector;

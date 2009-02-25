@@ -23,11 +23,11 @@
 
 #include <samplerate.h>
 
-#include <ardour/graph.h>
-#include <ardour/types.h>
-#include <ardour/ardour.h>
-#include <ardour/export_format_base.h>
-#include <ardour/runtime_functions.h>
+#include "ardour/graph.h"
+#include "ardour/types.h"
+#include "ardour/ardour.h"
+#include "ardour/export_format_base.h"
+#include "ardour/runtime_functions.h"
 
 namespace ARDOUR
 {

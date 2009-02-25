@@ -17,13 +17,13 @@
 
 */
 
-#include <pbd/error.h>
-#include <pbd/filesystem_paths.h>
+#include "pbd/error.h"
+#include "pbd/filesystem_paths.h"
 
 #include <glibmm/miscutils.h>
 
-#include <ardour/directory_names.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/directory_names.h"
+#include "ardour/filesystem_paths.h"
 
 #define WITH_STATIC_PATHS 1
 

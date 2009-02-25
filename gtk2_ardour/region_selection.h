@@ -22,7 +22,7 @@
 #include <set>
 #include <list>
 #include <sigc++/signal.h>
-#include <ardour/types.h>
+#include "ardour/types.h"
 
 using std::list;
 using std::set;

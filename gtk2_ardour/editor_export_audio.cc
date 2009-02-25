@@ -32,17 +32,17 @@
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
 
-#include <pbd/pthread_utils.h>
-#include <ardour/types.h>
-#include <ardour/audio_track.h>
-#include <ardour/audiofilesource.h>
-#include <ardour/audio_diskstream.h>
-#include <ardour/audioregion.h>
-#include <ardour/audioplaylist.h>
-#include <ardour/chan_count.h>
-#include <ardour/session_directory.h>
-#include <ardour/source_factory.h>
-#include <ardour/audiofilesource.h>
+#include "pbd/pthread_utils.h"
+#include "ardour/types.h"
+#include "ardour/audio_track.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audioregion.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/chan_count.h"
+#include "ardour/session_directory.h"
+#include "ardour/source_factory.h"
+#include "ardour/audiofilesource.h"
 
 #include "i18n.h"
 

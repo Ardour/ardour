@@ -20,7 +20,7 @@
 #ifndef __export_range_markers_dialog_h__
 #define __export_range_markers_dialog_h__
 
-#include <ardour/location.h>
+#include "ardour/location.h"
 
 #include "export_dialog.h"
 

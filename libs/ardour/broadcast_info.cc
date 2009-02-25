@@ -18,18 +18,18 @@
 
 */
 
-#include <ardour/broadcast_info.h>
+#include "ardour/broadcast_info.h"
 
 #include <sstream>
 #include <iomanip>
 
 #include <glibmm.h>
 
-#include <ardour/svn_revision.h>
-#include <ardour/ardour.h>
-#include <ardour/session.h>
+#include "ardour/svn_revision.h"
+#include "ardour/ardour.h"
+#include "ardour/session.h"
 
-#include <pbd/convert.h>
+#include "pbd/convert.h"
 
 using namespace PBD;
 

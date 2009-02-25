@@ -18,13 +18,13 @@
 
 #include <limits.h>
 
-#include <ardour/io.h>
-#include <ardour/dB.h>
+#include "ardour/io.h"
+#include "ardour/dB.h"
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/barcontroller.h>
-#include <midi++/manager.h>
-#include <pbd/fastlog.h>
+#include "midi++/manager.h"
+#include "pbd/fastlog.h"
 
 #include "ardour_ui.h"
 #include "panner_ui.h"
@@ -33,9 +33,9 @@
 #include "panner.h"
 #include "gui_thread.h"
 
-#include <ardour/session.h>
-#include <ardour/panner.h>
-#include <ardour/route.h>
+#include "ardour/session.h"
+#include "ardour/panner.h"
+#include "ardour/route.h"
 
 #include "i18n.h"
 

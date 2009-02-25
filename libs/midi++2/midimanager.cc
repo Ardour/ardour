@@ -21,12 +21,12 @@
 
 #include <glib.h>
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <midi++/types.h>
-#include <midi++/manager.h>
-#include <midi++/factory.h>
-#include <midi++/channel.h>
+#include "midi++/types.h"
+#include "midi++/manager.h"
+#include "midi++/factory.h"
+#include "midi++/channel.h"
 
 using namespace std;
 using namespace MIDI;

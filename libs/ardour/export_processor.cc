@@ -18,18 +18,18 @@
 
 */
 
-#include <ardour/export_processor.h>
+#include "ardour/export_processor.h"
 
-#include <pbd/error.h>
-#include <pbd/filesystem.h>
+#include "pbd/error.h"
+#include "pbd/filesystem.h"
 
-#include <ardour/session.h>
-#include <ardour/audiofile_tagger.h>
-#include <ardour/broadcast_info.h>
-#include <ardour/export_failed.h>
-#include <ardour/export_filename.h>
-#include <ardour/export_status.h>
-#include <ardour/export_format_specification.h>
+#include "ardour/session.h"
+#include "ardour/audiofile_tagger.h"
+#include "ardour/broadcast_info.h"
+#include "ardour/export_failed.h"
+#include "ardour/export_filename.h"
+#include "ardour/export_status.h"
+#include "ardour/export_format_specification.h"
 
 #include "i18n.h"
 

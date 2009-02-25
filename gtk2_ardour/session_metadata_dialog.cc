@@ -25,10 +25,10 @@
 #include <gtkmm2ext/window_title.h>
 
 #include "i18n.h"
-#include <pbd/xml++.h>
-#include <ardour/session.h>
-#include <ardour/session_directory.h>
-#include <ardour/session_utils.h>
+#include "pbd/xml++.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
+#include "ardour/session_utils.h"
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 

@@ -21,7 +21,7 @@
 #define __ardour_gtk_gui_thread_h__
 
 #include <gtkmm2ext/gtk_ui.h>
-#include <pbd/crossthread.h>
+#include "pbd/crossthread.h"
 
 #define ENSURE_GUI_THREAD(slot) \
      if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {\

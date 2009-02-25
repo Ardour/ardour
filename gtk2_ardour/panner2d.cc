@@ -24,8 +24,8 @@
 #include <cairo.h>
 #include <gtkmm/menu.h>
 
-#include <pbd/error.h>
-#include <ardour/panner.h>
+#include "pbd/error.h"
+#include "ardour/panner.h"
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "panner2d.h"

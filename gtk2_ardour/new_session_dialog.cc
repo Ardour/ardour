@@ -17,13 +17,13 @@
 
 */
 
-#include <pbd/error.h>
+#include "pbd/error.h"
 
-#include <ardour/recent_sessions.h>
-#include <ardour/session_state_utils.h>
-#include <ardour/template_utils.h>
-#include <ardour/session.h>
-#include <ardour/profile.h>
+#include "ardour/recent_sessions.h"
+#include "ardour/session_state_utils.h"
+#include "ardour/template_utils.h"
+#include "ardour/session.h"
+#include "ardour/profile.h"
 
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserbutton.h>

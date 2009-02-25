@@ -20,7 +20,7 @@
 #ifndef __ardour_fft_graph_h
 #define __ardour_fft_graph_h
 
-#include <ardour/types.h>
+#include "ardour/types.h"
 #include <fftw3.h>
 
 #include <gtkmm/drawingarea.h>

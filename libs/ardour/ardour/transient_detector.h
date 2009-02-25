@@ -20,7 +20,7 @@
 #ifndef __ardour_transient_detector_h__
 #define __ardour_transient_detector_h__
 
-#include <ardour/audioanalyser.h>
+#include "ardour/audioanalyser.h"
 
 namespace ARDOUR {
 

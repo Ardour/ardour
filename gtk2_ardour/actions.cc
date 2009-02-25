@@ -29,11 +29,11 @@
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
 
-#include <pbd/error.h>
-#include <pbd/file_utils.h>
+#include "pbd/error.h"
+#include "pbd/file_utils.h"
 
-#include <ardour/ardour.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/ardour.h"
+#include "ardour/filesystem_paths.h"
 
 #include "actions.h"
 #include "i18n.h"

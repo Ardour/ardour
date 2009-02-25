@@ -22,7 +22,7 @@
 #include <vector>
 #include <string>
 
-#include <pbd/filesystem.h>
+#include "pbd/filesystem.h"
 
 namespace ARDOUR {
 

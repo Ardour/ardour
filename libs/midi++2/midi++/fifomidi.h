@@ -24,8 +24,8 @@
 #include <string>
 #include <unistd.h>
 
-#include <midi++/port.h>
-#include <midi++/fd_midiport.h>
+#include "midi++/port.h"
+#include "midi++/fd_midiport.h"
 
 namespace MIDI {
 
