@@ -28,6 +28,10 @@
 
 using std::string;
 
+#ifdef HAVE_WAFCONFIG_H
+#include "wafconfig.h"
+#endif
+
 #if HAVE_GETMNTENT
 #include <mntent.h>
 

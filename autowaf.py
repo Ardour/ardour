@@ -91,7 +91,7 @@ def check_tool(conf, name):
 
 def check_pkg(conf, name, **args):
 	"Check for a package iff it hasn't been checked for yet"
-	var_name = 'HAVE_' + args['uselib_store']
+	var_name = 'HAVE_' + args['uselib_store'].replace('/', '_')
 	check = not var_name in conf.env
 	if not check and 'atleast_version' in args:
 		# Re-check if version is newer than previous check
@@ -100,13 +100,13 @@ def check_pkg(conf, name, **args):
 			check = True;
 	if check:
 		conf.check_cfg(package=name, args="--cflags --libs", **args)
-		found = bool(conf.env['HAVE_' + args['uselib_store']])
+		found = bool(conf.env[var_name])
 		if found:
-			conf.define('HAVE_' + args['uselib_store'], int(found))
+			conf.define(var_name, int(found))
 			if 'atleast_version' in args:
 				conf.env['VERSION_' + name] = args['atleast_version']
 		else:
-			conf.undefine('HAVE_' + args['uselib_store'])
+			conf.undefine(var_name)
 			if args['mandatory'] == True:
 				conf.fatal("Required package " + name + " not found")
 
@@ -198,7 +198,7 @@ def configure(conf):
 	g_step = 2
 	
 def set_local_lib(conf, name, has_objects):
-	conf.define('HAVE_' + name.upper(), 1)
+	conf.define('HAVE_' + name.upper().replace('/', '_'), 1)
 	if has_objects:
 		if type(conf.env['AUTOWAF_LOCAL_LIBS']) != dict:
 			conf.env['AUTOWAF_LOCAL_LIBS'] = {}

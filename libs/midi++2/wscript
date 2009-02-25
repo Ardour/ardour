@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+import autowaf
+
+# Version of this package (even if built as a child)
+LIBMIDIPP_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBMIDIPP_LIB_VERSION = '4.1.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libmidipp'
+VERSION = LIBMIDIPP_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2', mandatory=True)
+	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0', mandatory=True)
+	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
+	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML', mandatory=True)
+	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.109.0', mandatory=True)
+
+	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
+	conf.write_config_header('wafconfig.h')
+
+	# TODO
+	conf.env['SYSMIDI'] == 'JACK MIDI'
+	conf.env.append_value('CXXFLAGS', '-DWITH_JACK_MIDI')
+
+	# Boost headers
+	autowaf.check_header(conf, 'boost/shared_ptr.hpp', mandatory=True)
+	autowaf.check_header(conf, 'boost/weak_ptr.hpp', mandatory=True)
+
+def build(bld):
+	# Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		fd_midiport.cc
+		fifomidi.cc
+		midi.cc
+		midichannel.cc
+		midifactory.cc
+		midimanager.cc
+		midiparser.cc
+		midiport.cc
+		midnam_patch.cc
+		mmc.cc
+		mtc.cc
+		version.cc
+	'''
+	if bld.env['SYSMIDI'] == 'JACK MIDI':
+		obj.source += ' jack_midiport.cc '
+	elif bld.env['SYSMIDI'] == 'Alsa Sequencer':
+		obj.source += ' alsa_sequencer_midiport.cc '
+	elif bld.env['SYSMIDI'] == 'CoreMIDI':
+		obj.source += ' coremidi_midiport.cc '
+	obj.export_incdirs = ['.']
+	obj.includes     = ['.']
+	obj.name         = 'libmidipp'
+	obj.target       = 'midipp'
+	obj.uselib       = 'GLIBMM SIGCPP XML JACK'
+	obj.uselib_local = 'libpbd libevoral'
+	obj.vnum         = LIBMIDIPP_LIB_VERSION
+	obj.install_path = ''
+	
+def shutdown():
+	autowaf.shutdown()
+

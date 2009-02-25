@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+import autowaf
+
+# Version of this package (even if built as a child)
+LIBPBD_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBPBD_LIB_VERSION = '4.1.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libpbd'
+VERSION = LIBPBD_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2', mandatory=True)
+	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0', mandatory=True)
+	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
+	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML', mandatory=True)
+	autowaf.check_pkg(conf, 'uuid', uselib_store='UUID', mandatory=True)
+
+	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
+	conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
+
+	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
+	conf.write_config_header('wafconfig.h')
+
+	# Boost headers
+	autowaf.check_header(conf, 'boost/shared_ptr.hpp', mandatory=True)
+	autowaf.check_header(conf, 'boost/weak_ptr.hpp', mandatory=True)
+
+def build(bld):
+	# Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		basename.cc
+		base_ui.cc
+		command.cc
+		convert.cc
+		controllable.cc
+		enumwriter.cc
+		dmalloc.cc
+		error.cc
+		filesystem.cc
+		filesystem_paths.cc
+		file_utils.cc
+		fpu.cc
+		id.cc
+		mountpoint.cc
+		pathscanner.cc
+		pool.cc
+		pthread_utils.cc
+		receiver.cc
+		search_path.cc
+		shortpath.cc
+		stacktrace.cc
+		stateful.cc
+		strreplace.cc
+		strsplit.cc
+		textreceiver.cc
+		transmitter.cc
+		undo.cc
+		uuid.cc
+		version.cc
+		whitespace.cc
+		xml++.cc
+	'''
+	obj.export_incdirs = ['.']
+	obj.includes     = ['.']
+	obj.name         = 'libpbd'
+	obj.target       = 'pbd'
+	obj.uselib       = 'GLIBMM SIGCPP XML UUID'
+	obj.vnum         = LIBPBD_LIB_VERSION
+	obj.install_path = ''
+	
+def shutdown():
+	autowaf.shutdown()
+
