@@ -135,7 +135,7 @@ FD_MidiPort::do_slow_write (byte *msg, unsigned int msglen)
 		}
 
 		bytes_written++;
-		for (i = 0; i < slowdown * 10000; i++);
+		for (i = 0; i < slowdown * 10000; i++) {}
 	}
 
 

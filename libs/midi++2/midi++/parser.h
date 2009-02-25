@@ -122,7 +122,7 @@ class Parser : public sigc::trackable {
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
 	
-	const nframes_t get_midi_clock_timestamp() const { return _midi_clock_timestamp; }
+	nframes_t get_midi_clock_timestamp() const { return _midi_clock_timestamp; }
 	void set_midi_clock_timestamp(const nframes_t timestamp) { _midi_clock_timestamp = timestamp; } 
 
 	sigc::signal<void,MTC_Status> mtc_status;
