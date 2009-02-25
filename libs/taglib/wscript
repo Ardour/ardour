@@ -25,7 +25,6 @@ def set_options(opt):
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
-	conf.write_config_header('config.h')
 
 def build(bld):
 	# Library
@@ -66,7 +65,7 @@ def build(bld):
 		taglib/ogg/speex
 		taglib/ogg/flac
 	'''.split()
-	obj.export_incdirs = include_dirs
+	obj.export_incdirs = ['.', 'taglib', 'taglib/toolkit']
 	obj.includes     = include_dirs
 	obj.name         = 'libtaglib'
 	obj.target       = 'taglib'

@@ -1,0 +1,216 @@
+#!/usr/bin/env python
+import autowaf
+import os
+
+# Version of this package (even if built as a child)
+LIBARDOUR_VERSION = '3.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBARDOUR_LIB_VERSION = '3.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libardour'
+VERSION = LIBARDOUR_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def check_header_and_define(conf, header, define):
+	conf.check(header_name=header, define_name=define)
+	if conf.env[define]:
+		conf.env.append_value('CCFLAGS', '-D' + define)
+		conf.env.append_value('CXXFLAGS', '-D' + define)
+	
+def configure(conf):
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2', mandatory=True)
+	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0', mandatory=True)
+	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0', mandatory=True)
+	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML', mandatory=True)
+	
+	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
+	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
+
+	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
+	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
+	
+	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
+	conf.write_config_header('wafconfig.h')
+
+	# Boost headers
+	autowaf.check_header(conf, 'boost/shared_ptr.hpp', mandatory=True)
+	autowaf.check_header(conf, 'boost/weak_ptr.hpp', mandatory=True)
+
+def build(bld):
+	# Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		amp.cc
+		analyser.cc
+		audio_buffer.cc
+		audio_diskstream.cc
+		audio_library.cc
+		audio_playlist.cc
+		audio_playlist_importer.cc
+		audio_port.cc
+		audio_region_importer.cc
+		audio_track.cc
+		audio_track_importer.cc
+		audioanalyser.cc
+		audioengine.cc
+		audiofile_tagger.cc
+		audiofilesource.cc
+		audioregion.cc
+		audiosource.cc
+		auditioner.cc
+		automatable.cc
+		automation.cc
+		automation_control.cc
+		automation_list.cc
+		beats_frames_converter.cc
+		broadcast_info.cc
+		buffer.cc
+		buffer_set.cc
+		bundle.cc
+		chan_count.cc
+		configuration.cc
+		control_protocol_manager.cc
+		control_protocol_search_path.cc
+		crossfade.cc
+		cycle_timer.cc
+		default_click.cc
+		directory_names.cc
+		diskstream.cc
+		element_import_handler.cc
+		element_importer.cc
+		enums.cc
+		event_type_map.cc
+		export_channel.cc
+		export_channel_configuration.cc
+		export_file_io.cc
+		export_filename.cc
+		export_format_base.cc
+		export_format_manager.cc
+		export_format_specification.cc
+		export_formats.cc
+		export_handler.cc
+		export_preset.cc
+		export_processor.cc
+		export_profile_manager.cc
+		export_status.cc
+		export_timespan.cc
+		export_utilities.cc
+		filename_extensions.cc
+		file_source.cc
+		filesystem_paths.cc
+		filter.cc
+		find_session.cc
+		gain.cc
+		gdither.cc
+		globals.cc
+		import.cc
+		io.cc
+		io_processor.cc
+		jack_slave.cc
+		ladspa_plugin.cc
+		location.cc
+		location_importer.cc
+		meter.cc
+		midi_buffer.cc
+		midi_clock_slave.cc
+		midi_diskstream.cc
+		midi_model.cc
+		midi_patch_manager.cc
+		midi_playlist.cc
+		midi_port.cc
+		midi_region.cc
+		midi_ring_buffer.cc
+		midi_source.cc
+		midi_state_tracker.cc
+		midi_stretch.cc
+		midi_track.cc
+		mix.cc
+		mtc_slave.cc
+		named_selection.cc
+		onset_detector.cc
+		panner.cc
+		pcm_utils.cc
+		playlist.cc
+		playlist_factory.cc
+		plugin.cc
+		plugin_insert.cc
+		plugin_manager.cc
+		port.cc
+		port_insert.cc
+		port_set.cc
+		processor.cc
+		quantize.cc
+		recent_sessions.cc
+		region.cc
+		region_factory.cc
+		resampled_source.cc
+		reverse.cc
+		route.cc
+		route_group.cc
+		send.cc
+		session.cc
+		session_butler.cc
+		session_click.cc
+		session_command.cc
+		session_directory.cc
+		session_events.cc
+		session_export.cc
+		session_metadata.cc
+		session_midi.cc
+		session_process.cc
+		session_state.cc
+		session_state_utils.cc
+		session_time.cc
+		session_transport.cc
+		session_utils.cc
+		smf_source.cc
+		sndfile_helpers.cc
+		sndfileimportable.cc
+		sndfilesource.cc
+		source.cc
+		source_factory.cc
+		svn_revision.cc
+		tape_file_matcher.cc
+		template_utils.cc
+		tempo.cc
+		tempo_map_importer.cc
+		ticker.cc
+		track.cc
+		transient_detector.cc
+		user_bundle.cc
+		utils.cc
+		version.cc
+	'''
+	obj.export_incdirs = ['.']
+	obj.includes     = ['.', '../surfaces/control_protocol']
+	obj.name         = 'libardour'
+	obj.target       = 'ardour'
+	obj.uselib       = 'GLIBMM SIGCPP XML UUID'
+	obj.uselib_local = 'libpbd libmidipp libevoral libvamp libtaglib'
+	obj.vnum         = LIBARDOUR_LIB_VERSION
+	obj.install_path = ''
+	obj.cxxflags     = ' -DPACKAGE=\\\"libardour3\\\"'
+	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
+			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
+	obj.cxxflags     += ' -DVAMP_DIR=\\\"' + os.path.join(
+			os.path.normpath(bld.env['LIBDIRNAME']), 'ardour3', 'vamp') + '\\\"'
+	
+def shutdown():
+	autowaf.shutdown()
+

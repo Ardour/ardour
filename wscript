@@ -15,8 +15,8 @@ children = [
 	'libs/evoral',
 	'libs/vamp-sdk',
 	'libs/taglib',
-#	'libs/surfaces',
-#	'libs/ardour'
+	'libs/surfaces',
+	'libs/ardour'
 ]
 
 def set_options(opt):
@@ -31,6 +31,7 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
 	autowaf.set_recursive()
 	autowaf.configure(conf)
+	#conf.env.append_value('CXXFLAGS', '-DBOOST_NO_STD_LOCALE=1')
 	for i in children:
 		sub_config_and_use(conf, i)
 

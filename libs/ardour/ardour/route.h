@@ -153,7 +153,7 @@ class Route : public IO
 	boost::shared_ptr<Processor> nth_processor (uint32_t n) {
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
-		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n);
+		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n) {}
 		if (i == _processors.end()) {
 			return boost::shared_ptr<Processor> ();
 		} else {

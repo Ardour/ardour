@@ -24,7 +24,9 @@
  ***************************************************************************/
 
 #ifndef HAVE_ZLIB
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 #endif
 
 #if HAVE_ZLIB

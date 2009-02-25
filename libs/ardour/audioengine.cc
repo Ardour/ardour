@@ -55,12 +55,6 @@ using namespace PBD;
 
 gint AudioEngine::m_meter_exit;
 
-static void 
-ardour_jack_error (const char* msg) 
-{
-	error << "JACK: " << msg << endmsg;
-}
-
 AudioEngine::AudioEngine (string client_name) 
 	: ports (new Ports)
 {
@@ -887,7 +881,7 @@ AudioEngine::n_physical_outputs (DataType type) const
 		return 0;
 	}
 
-	for (i = 0; ports[i]; ++i);
+	for (i = 0; ports[i]; ++i) {}
 	free (ports);
 
 	return i;
@@ -908,7 +902,7 @@ AudioEngine::n_physical_inputs (DataType type) const
 	}
 
 	if (ports) {
-		for (i = 0; ports[i]; ++i);
+		for (i = 0; ports[i]; ++i) {}
 		free (ports);
 	}
 	return i;
@@ -982,7 +976,7 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 		return "";
 	}
 
-	for (i = 0; i < n && ports[i]; ++i);
+	for (i = 0; i < n && ports[i]; ++i) {}
 
 	if (ports[i]) {
 		ret = ports[i];
@@ -1115,6 +1109,12 @@ AudioEngine::remove_connections_for (Port& port)
 
 
 #ifdef HAVE_JACK_CLIENT_OPEN
+
+static void 
+ardour_jack_error (const char* msg) 
+{
+	error << "JACK: " << msg << endmsg;
+}
 
 int
 AudioEngine::connect_to_jack (string client_name)

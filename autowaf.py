@@ -52,6 +52,8 @@ def set_options(opt):
 			help="Header files [Default: PREFIX/include]")
 	opt.add_option('--datadir', type='string',
 			help="Shared data [Default: PREFIX/share]")
+	opt.add_option('--configdir', type='string',
+			help="Configuration data [Default: PREFIX/etc]")
 	opt.add_option('--mandir', type='string',
 			help="Manual pages [Default: DATADIR/man]")
 	opt.add_option('--htmldir', type='string',
@@ -163,6 +165,10 @@ def configure(conf):
 			conf.env['DATADIR'] = Options.options.datadir
 		else:
 			conf.env['DATADIR'] = conf.env['PREFIX'] + '/share/'
+		if Options.options.configdir:
+			conf.env['CONFIGDIR'] = Options.options.configdir
+		else:
+			conf.env['CONFIGDIR'] = conf.env['PREFIX'] + '/etc/'
 		if Options.options.htmldir:
 			conf.env['HTMLDIR'] = Options.options.htmldir
 		else:
@@ -188,6 +194,7 @@ def configure(conf):
 	conf.env['BINDIRNAME'] = chop_prefix(conf, 'BINDIR')
 	conf.env['LIBDIRNAME'] = chop_prefix(conf, 'LIBDIR')
 	conf.env['DATADIRNAME'] = chop_prefix(conf, 'DATADIR')
+	conf.env['CONFIGDIRNAME'] = chop_prefix(conf, 'CONFIGDIR')
 	conf.env['LV2DIRNAME'] = chop_prefix(conf, 'LV2DIR')
 	
 	if Options.options.debug:

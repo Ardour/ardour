@@ -28,6 +28,7 @@ taglib_files += glob.glob ('taglib/toolkit/*.cpp')
 domain = 'taglib'
 
 taglib.Append(CCFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+taglib.Append(CCFLAGS = "-DHAVE_CONFIG_H=1")
 # mingw may need this
 #taglib.Append(CCFLAGS="-no-undefined")
 taglib.Append(PACKAGE = domain)

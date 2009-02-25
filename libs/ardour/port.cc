@@ -19,11 +19,12 @@
 
 #include "ardour/port.h"
 #include "ardour/audioengine.h"
-#include "ardour/i18n.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include <stdexcept>
+
+#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

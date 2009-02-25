@@ -2,17 +2,17 @@
 import autowaf
 
 # Version of this package (even if built as a child)
-LIBPBD_VERSION = '0.0.0'
+LIBSURFACES_VERSION = '0.0.0'
 
 # Library version (UNIX style major, minor, micro)
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBPBD_LIB_VERSION = '4.1.0'
+LIBSURFACES_LIB_VERSION = '4.1.0'
 
 # Variables for 'waf dist'
-APPNAME = 'libpbd'
-VERSION = LIBPBD_VERSION
+APPNAME = 'libsurfaces'
+VERSION = LIBSURFACES_VERSION
 
 # Mandatory variables
 srcdir = '.'
@@ -30,11 +30,6 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML', mandatory=True)
 	autowaf.check_pkg(conf, 'uuid', uselib_store='UUID', mandatory=True)
 
-	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
-
-	# This must be defined for libpbd only, it breaks ardour
-	conf.check(header_name='execinfo.h', define_name='PBD_HAVE_EXECINFO')
-
 	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
 	conf.write_config_header('wafconfig.h')
 
@@ -46,47 +41,17 @@ def build(bld):
 	# Library
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
-		basename.cc
-		base_ui.cc
-		command.cc
-		convert.cc
-		controllable.cc
-		enumwriter.cc
-		dmalloc.cc
-		error.cc
-		filesystem.cc
-		filesystem_paths.cc
-		file_utils.cc
-		fpu.cc
-		id.cc
-		mountpoint.cc
-		pathscanner.cc
-		pool.cc
-		pthread_utils.cc
-		receiver.cc
-		search_path.cc
-		shortpath.cc
-		stacktrace.cc
-		stateful.cc
-		strreplace.cc
-		strsplit.cc
-		textreceiver.cc
-		transmitter.cc
-		undo.cc
-		uuid.cc
-		version.cc
-		whitespace.cc
-		xml++.cc
+		control_protocol/basic_ui.cc
+		control_protocol/control_protocol.cc
+		control_protocol/smpte.cc
 	'''
-	obj.export_incdirs = ['.']
-	obj.cxxflags     = '-DPACKAGE=\\\"libpbd\\\"'
-	if bld.env['PBD_HAVE_EXECINFO']:
-		obj.cxxflags += ' -DHAVE_EXECINFO '
-	obj.includes     = ['.']
-	obj.name         = 'libpbd'
-	obj.target       = 'pbd'
-	obj.uselib       = 'GLIBMM SIGCPP XML UUID'
-	obj.vnum         = LIBPBD_LIB_VERSION
+	obj.export_incdirs = ['./control_protocol']
+	obj.cxxflags     = '-DPACKAGE=\\\"ardour_cp\\\"'
+	obj.includes     = ['.', './control_protocol']
+	obj.name         = 'libsurfaces'
+	obj.target       = 'surfaces'
+	obj.uselib_local = 'libardour'
+	obj.vnum         = LIBSURFACES_LIB_VERSION
 	obj.install_path = ''
 	
 def shutdown():
