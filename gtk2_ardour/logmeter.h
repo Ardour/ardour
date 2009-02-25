@@ -21,13 +21,13 @@
 #define __ardour_gtk_log_meter_h__
 
 #if 1
-inline float
+static inline float
 _log_meter (float power, double lower_db, double upper_db, double non_linearity)
 {
 	return (power < lower_db ? 0.0 : pow((power-lower_db)/(upper_db-lower_db), non_linearity));
 }
 
-inline float
+static inline float
 alt_log_meter (float power)
 {
 	return _log_meter (power, -192.0, 0.0, 8.0);

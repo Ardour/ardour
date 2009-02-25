@@ -16,7 +16,9 @@ children = [
 	'libs/vamp-sdk',
 	'libs/taglib',
 	'libs/surfaces',
-	'libs/ardour'
+	'libs/ardour',
+	'libs/gtkmm2ext',
+	'gtk2_ardour'
 ]
 
 def set_options(opt):

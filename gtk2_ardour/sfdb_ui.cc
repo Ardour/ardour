@@ -37,7 +37,7 @@
 
 #include <gtkmm2ext/utils.h>
 
-#include "evoral/SMFReader.hpp"
+#include "evoral/SMF.hpp"
 
 #include "ardour/audio_library.h"
 #include "ardour/auditioner.h"
@@ -1100,7 +1100,8 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 
 		} else if (SMFSource::safe_midi_file_extension (*i)) {
 
-			Evoral::SMFReader reader(*i);
+			Evoral::SMF reader;
+			reader.open(*i);
 			if (reader.num_tracks() > 1) {
 				multichannel = true; // "channel" == track here...
 			}

@@ -95,6 +95,8 @@ def nameify(name):
 	return name.replace('/', '_').replace('++', 'PP').replace('-', '_')
 
 def check_pkg(conf, name, **args):
+	if not 'mandatory' in args:
+		args['mandatory'] = True
 	"Check for a package iff it hasn't been checked for yet"
 	var_name = 'HAVE_' + nameify(args['uselib_store'])
 	check = not var_name in conf.env
@@ -130,7 +132,7 @@ def configure(conf):
 	def append_cxx_flags(val):
 		conf.env.append_value('CCFLAGS', val)
 		conf.env.append_value('CXXFLAGS', val)
-	conf.line_just = 42
+	conf.line_just = 43
 	check_tool(conf, 'misc')
 	check_tool(conf, 'compiler_cc')
 	check_tool(conf, 'compiler_cxx')

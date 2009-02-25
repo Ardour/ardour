@@ -31,7 +31,7 @@ def build(bld):
 	obj = bld.new_task_gen('cxx', 'shlib')
 	prefix = 'libs/taglib/'
 	sources = glob.glob(prefix + 'taglib/*.cpp')
-	sources += glob.glob(prefix + 'libs//taglib/flac/*.cpp')
+	sources += glob.glob(prefix + 'taglib/flac/*.cpp')
 	sources += glob.glob(prefix + 'taglib/mpc/*.cpp')
 	sources += glob.glob(prefix + 'taglib/mpeg/*.cpp')
 	sources += glob.glob(prefix + 'taglib/mpeg/id3v1/*.cpp')
