@@ -81,18 +81,19 @@ def build(bld):
 	obj.vnum         = EVORAL_LIB_VERSION
 	obj.install_path = ''
 	
-	# Unit tests
-	obj              = bld.new_task_gen('cxx', 'program')
-	obj.source       = '''
-		test/SequenceTest.cpp
-		test/SMFTest.cpp
-		test/testrunner.cpp
-	'''
-	obj.includes     = ['.', './src']
-	obj.uselib_local = 'libevoral'
-	obj.uselib       = 'CPPUNIT'
-	obj.target       = 'run-tests'
-	obj.install_path = ''
+	if bld.env['HAVE_CPPUNIT']:
+		# Unit tests
+		obj              = bld.new_task_gen('cxx', 'program')
+		obj.source       = '''
+			test/SequenceTest.cpp
+			test/SMFTest.cpp
+			test/testrunner.cpp
+		'''
+		obj.includes     = ['.', './src']
+		obj.uselib_local = 'libevoral'
+		obj.uselib       = 'CPPUNIT'
+		obj.target       = 'run-tests'
+		obj.install_path = ''
 
 def shutdown():
 	autowaf.shutdown()
