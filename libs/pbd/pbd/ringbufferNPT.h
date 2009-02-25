@@ -34,10 +34,9 @@ class RingBufferNPT
 		size = sz;
 		buf = new T[size];
 		reset ();
-
-	};
+	}
 	
-	virtual ~RingBufferNPT() {
+	virtual ~RingBufferNPT () {
 		delete [] buf;
 	}
 

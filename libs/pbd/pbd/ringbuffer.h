@@ -30,14 +30,13 @@ class RingBuffer
 	RingBuffer (guint sz) {
 //	size = ffs(sz); /* find first [bit] set is a single inlined assembly instruction. But it looks like the API rounds up so... */
 	guint power_of_two;
-	for (power_of_two = 1; 1U<<power_of_two < sz; power_of_two++);
-		size = 1<<power_of_two;
-		size_mask = size;
-		size_mask -= 1;
-		buf = new T[size];
-		reset ();
-
-	};
+	for (power_of_two = 1; 1U<<power_of_two < sz; power_of_two++) {}
+	size = 1<<power_of_two;
+	size_mask = size;
+	size_mask -= 1;
+	buf = new T[size];
+	reset ();
+	}
 	
 	virtual ~RingBuffer() {
 		delete [] buf;
