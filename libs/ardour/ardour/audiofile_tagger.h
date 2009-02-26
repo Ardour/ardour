@@ -34,7 +34,7 @@ namespace ARDOUR
 
 class SessionMetadata;
 
-/// Clas with static functions for tagging audiofiles
+/// Class with static functions for tagging audiofiles
 class AudiofileTagger
 {
   public:
