@@ -36,8 +36,7 @@ user_config_directory ()
 {
 	const string home_dir = Glib::get_home_dir ();
 
-	if (home_dir.empty ())
-	{
+	if (home_dir.empty ()) {
 		const string error_msg = "Unable to determine home directory";
 
 		// log the error
@@ -71,13 +70,9 @@ SearchPath
 system_config_search_path ()
 {
 #ifdef WITH_STATIC_PATHS
-
 	SearchPath config_path(string(CONFIG_DIR));
-
 #else
-
 	SearchPath config_path(system_config_directories());
-
 #endif
 
 	config_path.add_subdirectory_to_paths("ardour3");
@@ -89,13 +84,9 @@ SearchPath
 system_data_search_path ()
 {
 #ifdef WITH_STATIC_PATHS
-
 	SearchPath data_path(string(DATA_DIR));
-
 #else
-
 	SearchPath data_path(system_data_directories());
-
 #endif
 
 	data_path.add_subdirectory_to_paths("ardour3");

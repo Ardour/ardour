@@ -4,9 +4,9 @@ cd `dirname "$0"`/..
 
 libs=build/default/libs
 
-export ARDOUR_PATH=gtk2_ardour/icons:gtk2_ardour/pixmaps:gtk2_ardour:.
+export ARDOUR_PATH=gtk2_ardour/icons:gtk2_ardour/pixmaps:gtk2_ardour:build/default/gtk2_ardour:.
 export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate
-export ARDOUR_DATA_PATH=gtk2_ardour:.
+export ARDOUR_DATA_PATH=gtk2_ardour:build/default/gtk2_ardour:.
 if test -d $HOME/gtk/inst ; then
     echo USING NEW CLEARLOOKS
     export GTK_PATH=~/.ardour3:$libs/clearlooks-newer
