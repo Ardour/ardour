@@ -472,7 +472,7 @@ my_subst_dict['@INSTALL_PREFIX@'] = final_prefix
 my_subst_dict['@LIBDIR@'] = env['LIBDIR']
 my_subst_dict['@LIBS@'] = 'libs'
 my_subst_dict['@VERSION@'] = ardour_version
-my_subst_dict['@EXECUTABLE@'] = 'ardour-' + ardour_version
+my_subst_dict['@EXECUTABLE@'] = 'gtk2_ardour/ardour-' + ardour_version
 
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
