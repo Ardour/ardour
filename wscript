@@ -127,19 +127,8 @@ def configure(conf):
 	for i in children:
 		sub_config_and_use(conf, i)
 	
-	print conf.env['CCFLAGS']
-	print conf.env['CXXFLAGS']
-
-	# Fix utterly braindead FLAC include path
-	for prefix in [ '/usr/include', '/usr/local/include' ]:
-		for flags in [ conf.env['CCFLAGS'], conf.env['CXXFLAGS'] ]:
-			for i in flags:
-				if i == '-I' + prefix + '/FLAC':
-					print '*** STRIPPED IDIOTIC FLAC INCLUDE PATH'
-					flags.remove(i)
-
-	print conf.env['CCFLAGS']
-	print conf.env['CXXFLAGS']
+	# Fix utterly braindead FLAC include path to not smash assert.h
+	conf.env['CPPPATH_FLAC'] = []
 
 	autowaf.print_summary(conf)
 	opts = Options.options
