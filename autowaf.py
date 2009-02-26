@@ -129,9 +129,9 @@ def configure(conf):
 	global g_step
 	if g_step > 1:
 		return
-	def append_cxx_flags(val):
-		conf.env.append_value('CCFLAGS', val)
-		conf.env.append_value('CXXFLAGS', val)
+	def append_cxx_flags(vals):
+		conf.env.append_value('CCFLAGS', vals.split())
+		conf.env.append_value('CXXFLAGS', vals.split())
 	conf.line_just = 43
 	check_tool(conf, 'misc')
 	check_tool(conf, 'compiler_cc')
@@ -201,13 +201,13 @@ def configure(conf):
 	conf.env['LV2DIRNAME'] = chop_prefix(conf, 'LV2DIR')
 	
 	if Options.options.debug:
-		conf.env['CCFLAGS'] = '-O0 -g'
-		conf.env['CXXFLAGS'] = '-O0 -g'
+		conf.env['CCFLAGS'] = [ '-O0', '-g' ]
+		conf.env['CXXFLAGS'] = [ '-O0',  '-g' ]
 	else:
 		append_cxx_flags('-DNDEBUG')
 	if Options.options.strict:
-		conf.env.append_value('CCFLAGS', '-std=c99 -pedantic')
-		conf.env.append_value('CXXFLAGS', '-ansi -Woverloaded-virtual')
+		conf.env.append_value('CCFLAGS', [ '-std=c99', '-pedantic' ])
+		conf.env.append_value('CXXFLAGS', [ '-ansi', '-Woverloaded-virtual'])
 		append_cxx_flags('-Wall -Wextra -Wno-unused-parameter')
 	append_cxx_flags('-fPIC -DPIC')
 	g_step = 2
