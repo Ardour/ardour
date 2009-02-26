@@ -24,9 +24,9 @@
 
 #include "pbd/convert.h"
 
-#include <taglib/fileref.h>
-#include <taglib/oggfile.h>
-#include <taglib/flacfile.h>
+#include "taglib/fileref.h"
+#include "taglib/oggfile.h"
+#include "taglib/flacfile.h"
 
 /* Convert Glib::ustring to TagLib::String */
 #define TL_STR(ustring) TagLib::String ((ustring).c_str(), TagLib::String::UTF8)
