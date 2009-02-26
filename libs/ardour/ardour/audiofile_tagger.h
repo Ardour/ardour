@@ -23,9 +23,9 @@
 
 #include <string>
 
-#include "taglib/taglib.h"
+#include "taglib/ogg/xiphcomment.h"
 #include "taglib/tag.h"
-#include "taglib/xiphcomment.h"
+#include "taglib/toolkit/taglib.h"
 
 using std::string;
 
