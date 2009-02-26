@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+import autowaf
+
+# Version of this package (even if built as a child)
+LIBARDOURVAMPPLUGINS_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBARDOURVAMPPLUGINS_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libardourvampplugins'
+VERSION = LIBARDOURVAMPPLUGINS_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
+	autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', mandatory=False)
+
+def build(bld):
+	# Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		plugins.cpp
+		AmplitudeFollower.cpp
+		PercussionOnsetDetector.cpp
+		SpectralCentroid.cpp
+		ZeroCrossing.cpp
+	'''
+	obj.export_incdirs = ['.']
+	obj.includes     = ['.']
+	obj.name         = 'libardourvampplugins'
+	obj.target       = 'ardourvampplugins'
+	obj.uselib       = 'FFTW3F'
+	obj.uselib_local = 'libvampplugin'
+	if bld.env['HAVE_AUBIO']:
+		obj.source += ' Onset.cpp '
+		obj.uselib += ' AUBIO '
+	obj.vnum         = LIBARDOURVAMPPLUGINS_LIB_VERSION
+	obj.install_path = ''
+	
+def shutdown():
+	autowaf.shutdown()
+

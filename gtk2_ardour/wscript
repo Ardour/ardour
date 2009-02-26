@@ -222,7 +222,7 @@ def build(bld):
 	obj.target       = 'ardour-3.0'
 	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA'
 	obj.uselib       += ' GTKMM GNOMECANVASMM'
-	obj.uselib_local = '''libpbd libmidipp libevoral libvamp libtaglib libardour libsurfaces
+	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libsurfaces
 	                      libgtkmm2ext libgtk2_ardour_c libtaglib'''
 	obj.install_path = ''
 	obj.cxxflags     = '-DVERSIONSTRING=\\\"' + GTK2_ARDOUR_VERSION + '\\\"'

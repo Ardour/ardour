@@ -54,7 +54,7 @@ def build(bld):
 	obj.name         = 'librubberband'
 	obj.target       = 'rubberband'
 	obj.uselib       = 'FFTW3 FFTW3F SAMPLERATE SNDFILE'
-	obj.uselib_local = 'libvamp'
+	obj.uselib_local = 'libvamphost'
 	obj.vnum         = LIBRUBBERBAND_LIB_VERSION
 	obj.install_path = ''
 	obj.cxxflags     = '-DPACKAGE=\\\"librubberband\\\"'

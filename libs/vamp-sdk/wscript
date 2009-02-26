@@ -29,7 +29,7 @@ def configure(conf):
 	conf.env.append_value('CXXFLAGS', '-DHAVE_FFTW3')
 
 def build(bld):
-	# Library
+	# Host Library
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
 		vamp-sdk/PluginHostAdapter.cpp
@@ -42,8 +42,22 @@ def build(bld):
 	'''
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.']
-	obj.name         = 'libvamp'
-	obj.target       = 'vamp'
+	obj.name         = 'libvamphost'
+	obj.target       = 'vamphost'
+	obj.uselib       = 'FFTW3 FFTW3F'
+	obj.vnum         = LIBVAMP_LIB_VERSION
+	obj.install_path = ''
+	
+	# Plugin Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		vamp-sdk/PluginAdapter.cpp
+		vamp-sdk/RealTime.cpp
+	'''
+	obj.export_incdirs = ['.']
+	obj.includes     = ['.']
+	obj.name         = 'libvampplugin'
+	obj.target       = 'vampplugin'
 	obj.uselib       = 'FFTW3 FFTW3F'
 	obj.vnum         = LIBVAMP_LIB_VERSION
 	obj.install_path = ''
