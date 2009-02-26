@@ -118,7 +118,7 @@ int main(int argc, char **argv)
             { "pitch-hq",      0, 0, '%' },
             { "threads",       0, 0, '@' },
             { "quiet",         0, 0, 'q' },
-            { 0, 0, 0 }
+            { 0, 0, 0, '\0' }
         };
 
         c = getopt_long(argc, argv, "t:p:d:RPFc:f:T:D:qhV", longOpts, &optionIndex);
