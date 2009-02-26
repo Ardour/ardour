@@ -3,7 +3,10 @@ import autowaf
 import os
 
 # Version of this package (even if built as a child)
-GTKMM2EXT_VERSION = '0.0.0'
+MAJOR = '0'
+MINOR = '8'
+MICRO = '3'
+GTKMM2EXT_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 
 # Library version (UNIX style major, minor, micro)
 # major increment <=> incompatible changes
@@ -19,10 +22,14 @@ VERSION = GTKMM2EXT_VERSION
 srcdir = '.'
 blddir = 'build'
 
+path_prefix = 'libs/gtkmm2ext/'
+
 def set_options(opt):
 	autowaf.set_options(opt)
 
 def configure(conf):
+	autowaf.build_version_files(path_prefix+'gtkmm2ext/version.h', path_prefix+'version.cc',
+			'libgtkmm2ext', MAJOR, MINOR, MICRO)
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
 	autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')

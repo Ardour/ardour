@@ -338,6 +338,38 @@ def build_dox(bld, name, version, srcdir, blddir):
 	out1.argv = [os.path.abspath(doc_dir) + '/reference.doxygen']
 	out1.command_is_external = True
 
+# Version code file generation
+def build_version_files(header_path, source_path, domain, major, minor, micro):
+	header_path = os.path.abspath(header_path)
+	source_path = os.path.abspath(source_path)
+	text  = "int " + domain + "_major_version = " + str(major) + ";\n"
+	text += "int " + domain + "_minor_version = " + str(minor) + ";\n"
+	text += "int " + domain + "_micro_version = " + str(micro) + ";\n"
+	try:
+		o = file(source_path, 'w')
+		o.write(text)
+		o.close()
+	except IOError:
+		print "Could not open", source_path, " for writing\n"
+		sys.exit(-1)
+
+	text  = "#ifndef __" + domain + "_version_h__\n"
+	text += "#define __" + domain + "_version_h__\n"
+	text += "extern const char* " + domain + "_revision;\n"
+	text += "extern int " + domain + "_major_version;\n"
+	text += "extern int " + domain + "_minor_version;\n"
+	text += "extern int " + domain + "_micro_version;\n"
+	text += "#endif /* __" + domain + "_version_h__ */\n"
+	try:
+		o = file(header_path, 'w')
+		o.write(text)
+		o.close()
+	except IOError:
+		print "Could not open", header_path, " for writing\n"
+		sys.exit(-1)
+		
+	return None
+
 def shutdown():
 	# This isn't really correct (for packaging), but people asking is annoying
 	if Options.commands['install']:

@@ -19,6 +19,8 @@ VERSION = LIBTAGLIB_VERSION
 srcdir = '.'
 blddir = 'build'
 
+path_prefix = 'libs/taglib/'
+
 def set_options(opt):
 	autowaf.set_options(opt)
 
@@ -29,25 +31,24 @@ def configure(conf):
 def build(bld):
 	# Library
 	obj = bld.new_task_gen('cxx', 'shlib')
-	prefix = 'libs/taglib/'
-	sources = glob.glob(prefix + 'taglib/*.cpp')
-	sources += glob.glob(prefix + 'taglib/flac/*.cpp')
-	sources += glob.glob(prefix + 'taglib/mpc/*.cpp')
-	sources += glob.glob(prefix + 'taglib/mpeg/*.cpp')
-	sources += glob.glob(prefix + 'taglib/mpeg/id3v1/*.cpp')
-	sources += glob.glob(prefix + 'taglib/mpeg/id3v2/*.cpp')
-	sources += glob.glob(prefix + 'taglib/mpeg/id3v2/frames/*.cpp')
-	sources += glob.glob(prefix + 'taglib/ogg/*.cpp')
-	sources += glob.glob(prefix + 'taglib/ogg/vorbis/*.cpp')
-	sources += glob.glob(prefix + 'taglib/ogg/speex/*.cpp')
-	sources += glob.glob(prefix + 'taglib/ogg/flac/*.cpp')
-	sources += glob.glob(prefix + 'taglib/trueaudio/*.cpp')
-	sources += glob.glob(prefix + 'taglib/wavpack/*.cpp')
-	sources += glob.glob(prefix + 'taglib/ape/*.cpp')
-	sources += glob.glob(prefix + 'taglib/toolkit/*.cpp')
+	sources = glob.glob(path_prefix + 'taglib/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/flac/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/mpc/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/mpeg/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/mpeg/id3v1/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/mpeg/id3v2/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/mpeg/id3v2/frames/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/ogg/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/ogg/vorbis/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/ogg/speex/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/ogg/flac/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/trueaudio/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/wavpack/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/ape/*.cpp')
+	sources += glob.glob(path_prefix + 'taglib/toolkit/*.cpp')
 	obj.source = []
 	for i in sources:
-		obj.source += [ i.replace(prefix, '') ]
+		obj.source += [ i.replace(path_prefix, '') ]
 	
 	include_dirs = '''
 		taglib
