@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <cmath>
+#include <cassert>
 
 #include <sigc++/bind.h>
 #include <gtkmm/stock.h>

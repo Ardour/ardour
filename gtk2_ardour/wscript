@@ -249,13 +249,14 @@ def build(bld):
 	wrapper_subst_dict = {
 		'INSTALL_PREFIX' : bld.env['PREFIX'],
 		'LIBDIR'         : os.path.normpath(bld.env['LIBDIRNAME']),
+		'LIBS'           : 'build/default/libs',
 		'VERSION'        : '3.0',
 		'EXECUTABLE'     : 'build/default/gtk2_ardour/ardour-3.0'
 	}
 
 	obj = bld.new_task_gen('subst')
-	obj.source = 'ardev-common-waf.sh.in'
-	obj.target = 'ardev-common-waf.sh'
+	obj.source = 'ardev_common.sh.in'
+	obj.target = 'ardev_common-waf.sh'
 	obj.chmod  = 0755
 	obj.dict   = wrapper_subst_dict
 	
