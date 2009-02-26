@@ -138,6 +138,7 @@ def configure(conf):
 	check_tool(conf, 'compiler_cxx')
 	conf.env['BUILD_DOCS'] = Options.options.build_docs
 	conf.env['DEBUG'] = Options.options.debug
+	conf.env['STRICT'] = Options.options.strict
 	conf.env['PREFIX'] = os.path.abspath(os.path.expanduser(os.path.normpath(conf.env['PREFIX'])))
 	if Options.options.bundle:
 		conf.env['BUNDLE'] = True
@@ -268,6 +269,7 @@ def print_summary(conf):
 	display_header('Global configuration')
 	display_msg(conf, "Install prefix", conf.env['PREFIX'])
 	display_msg(conf, "Debuggable build", str(conf.env['DEBUG']))
+	display_msg(conf, "Strict compiler flags", str(conf.env['STRICT']))
 	display_msg(conf, "Build documentation", str(conf.env['BUILD_DOCS']))
 	print
 	g_step = 3
