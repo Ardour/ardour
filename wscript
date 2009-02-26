@@ -97,7 +97,7 @@ def set_options(opt):
 			help='Set to turn on i18n support')
 	opt.add_option('--surfaces', action='store_true', default=True, dest='surfaces',
 			help='Build support for control surfaces')
-	opt.add_option('--syslibs', action='store_true', default=False, dest='syslibs',
+	opt.add_option('--syslibs', action='store_true', default=True, dest='syslibs',
 			help='Use existing system versions of various libraries instead of internal ones')
 	opt.add_option('--tranzport', action='store_true', default=True, dest='tranzport',
 			help='Compile with support for Frontier Designs (if libusb is available)')
