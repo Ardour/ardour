@@ -332,14 +332,15 @@ def build(bld):
 	# Menus
 	menus_argv = []
 	if bld.env['GTKOSX']:
-		menus_argv = [ '-E', '-P', '-DGTKOSX', '-DTOP_MENUBAR', 'ardour.menus.in', 'ardour.menus' ]
+		menus_argv = [ '-E', '-P', '-DGTKOSX', '-DTOP_MENUBAR' ]
 	else:
-		menus_argv = [ '-E', '-P', '../gtk2_ardour/ardour.menus.in' ]
+		menus_argv = [ '-E', '-P' ]
 	obj = bld.new_task_gen('command-output')
 	obj.command = 'cpp'
 	obj.command_is_external = True
 	obj.no_inputs = True
 	obj.argv = menus_argv
+	obj.stdin = 'ardour.menus.in'
 	obj.stdout = 'ardour.menus'
 
 	# Keybindings
