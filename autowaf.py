@@ -200,12 +200,14 @@ def configure(conf):
 	conf.env['LV2DIRNAME'] = chop_prefix(conf, 'LV2DIR')
 	
 	if Options.options.debug:
-		conf.env['CCFLAGS'] = '-O0 -g -std=c99'
-		conf.env['CXXFLAGS'] = '-O0 -g -ansi'
+		conf.env['CCFLAGS'] = '-O0 -g'
+		conf.env['CXXFLAGS'] = '-O0 -g'
+	else:
+		append_cxx_flags('-DNDEBUG')
 	if Options.options.strict:
-		conf.env['CCFLAGS'] = '-O0 -g -std=c99 -pedantic'
+		conf.env.append_value('CCFLAGS', '-std=c99 -pedantic')
+		conf.env.append_value('CXXFLAGS', '-ansi -Woverloaded-virtual')
 		append_cxx_flags('-Wall -Wextra -Wno-unused-parameter')
-		conf.env.append_value('CXXFLAGS', '-Woverloaded-virtual')
 	append_cxx_flags('-fPIC -DPIC')
 	g_step = 2
 	
