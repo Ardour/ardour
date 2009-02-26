@@ -131,8 +131,7 @@ MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 			const Evoral::Event<nframes_t>& ev = *i;
-			// event times should be frames, relative to cycle start
-			assert(ev.time() >= 0);
+			// event times are in frames, relative to cycle start
 			assert(ev.time() < (nframes+offset));
 			if (ev.time() >= offset) {
 				jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());

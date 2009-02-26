@@ -182,11 +182,7 @@ SampleRateConverter::process (float * data, nframes_t frames)
 		
 		
 		nframes_t frames_written = piped_to->write (data_out, frames_out);
-		if (frames_written < 0) {
-			return frames_written;
-		} else {
-			frames_out_total += frames_written;
-		}
+		frames_out_total += frames_written;
 
 	} while (leftover_frames > frames_in);
 

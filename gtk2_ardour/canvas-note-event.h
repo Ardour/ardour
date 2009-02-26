@@ -49,7 +49,7 @@ namespace Canvas {
  *
  * A newer, better canvas should remove the need for all the ugly here.
  */
-class CanvasNoteEvent : public sigc::trackable, public InteractiveItem {
+class CanvasNoteEvent : virtual public sigc::trackable, public InteractiveItem {
 public:
 	typedef Evoral::Note<double> NoteType;
 	CanvasNoteEvent(

@@ -105,7 +105,8 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 }
 
 TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
-	: trackview (other.trackview)
+	: sigc::trackable(other)
+	, trackview (other.trackview)
 {
 
 	Gdk::Color c;

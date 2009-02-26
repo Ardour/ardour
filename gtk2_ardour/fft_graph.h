@@ -54,8 +54,8 @@ class FFTGraph : public Gtk::DrawingArea
 		void on_size_allocate(Gtk::Allocation & alloc);
 		FFTResult *prepareResult(Gdk::Color color, std::string trackname);
 		
-		const void set_show_minmax     (bool v) { _show_minmax     = v; redraw(); };
-		const void set_show_normalized (bool v) { _show_normalized = v; redraw(); };
+		void set_show_minmax     (bool v) { _show_minmax     = v; redraw(); }
+		void set_show_normalized (bool v) { _show_normalized = v; redraw(); }
 
 	private:
 

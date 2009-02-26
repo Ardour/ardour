@@ -105,7 +105,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 
 
 MidiRegionView::MidiRegionView (const MidiRegionView& other)
-	: RegionView (other)
+	: sigc::trackable(other)
+	, RegionView (other)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _default_note_length(1.0)

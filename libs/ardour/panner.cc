@@ -897,7 +897,7 @@ void
 Panner::remove (uint32_t which)
 {
 	vector<StreamPanner*>::iterator i;
-	for (i = _streampanners.begin(); i != _streampanners.end() && which; ++i, --which);
+	for (i = _streampanners.begin(); i != _streampanners.end() && which; ++i, --which) {}
 
 	if (i != _streampanners.end()) {
 		delete *i;

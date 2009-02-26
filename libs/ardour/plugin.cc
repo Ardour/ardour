@@ -58,12 +58,18 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Plugin::Plugin (AudioEngine& e, Session& s)
-	: _engine (e), _session (s)
+	: _engine (e)
+	, _session (s)
+	, _cycles (0)
 {
 }
 
 Plugin::Plugin (const Plugin& other)
-	: _engine (other._engine), _session (other._session), _info (other._info)
+	: _engine (other._engine)
+	, _session (other._session)
+	, _info (other._info)
+	, _cycles (0)
+	, presets (other.presets)
 {
 }
 

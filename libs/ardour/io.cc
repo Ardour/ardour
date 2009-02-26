@@ -1633,7 +1633,7 @@ IO::find_possible_bundle (const string &desired_name, const string &default_name
 
 		// find highest set bit
 		mask = 1;
-		while ((mask <= bundle_number) && (mask <<= 1));
+		while ((mask <= bundle_number) && (mask <<= 1)) {}
 		
 		// "wrap" bundle number into largest possible power of 2 
 		// that works...

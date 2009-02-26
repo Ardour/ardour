@@ -89,6 +89,7 @@ GType gtk_custom_ruler_get_type (void)
 				sizeof (GtkCustomRuler),
 				0,		/* n_preallocs */
 				(GInstanceInitFunc) gtk_custom_ruler_init,
+				NULL			/* value_table */
 			};
 		
 		ruler_type = g_type_register_static (GTK_TYPE_WIDGET, "GtkCustomRuler",

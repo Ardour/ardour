@@ -82,7 +82,8 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
 }
 
 RegionView::RegionView (const RegionView& other)
-	: TimeAxisViewItem (other)
+	: sigc::trackable(other)
+	, TimeAxisViewItem (other)
 	, _time_converter(other._time_converter)
 {
 	/* derived concrete type will call init () */
@@ -95,7 +96,8 @@ RegionView::RegionView (const RegionView& other)
 }
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
-	: TimeAxisViewItem (other)
+	: sigc::trackable(other)
+	, TimeAxisViewItem (other)
 	, _time_converter(other._time_converter)
 {
 	/* this is a pseudo-copy constructor used when dragging regions 

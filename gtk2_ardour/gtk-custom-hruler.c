@@ -48,8 +48,7 @@ GType gtk_custom_hruler_get_type (void)
 {
 	static GType hruler_type = 0;
 	
-	if (!hruler_type)
-	{
+	if (!hruler_type) {
 		static const GTypeInfo hruler_info =
 			{
 				sizeof (GtkCustomHRulerClass),
@@ -61,6 +60,7 @@ GType gtk_custom_hruler_get_type (void)
 				sizeof (GtkCustomHRuler),
 				0,		/* n_preallocs */
 				(GInstanceInitFunc) gtk_custom_hruler_init,
+				NULL /* value_table */
 			};
 		
 		hruler_type = g_type_register_static (gtk_custom_ruler_get_type(), "GtkCustomHRuler",

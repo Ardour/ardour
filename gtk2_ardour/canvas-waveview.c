@@ -919,61 +919,62 @@ gnome_canvas_waveview_set_property (GObject      *object,
 }
 
 static void
-gnome_canvas_waveview_get_property (GObject      *object,
-				    guint         prop_id,
-				    GValue       *value,
-				    GParamSpec   *pspec)
+gnome_canvas_waveview_get_property (
+		GObject      *object,
+		guint         prop_id,
+		GValue       *value,
+		GParamSpec   *pspec)
 {
 	
    
 	g_return_if_fail (object != NULL);
-        g_return_if_fail (GNOME_IS_CANVAS_WAVEVIEW (object));
+	g_return_if_fail (GNOME_IS_CANVAS_WAVEVIEW (object));
 
 	GnomeCanvasWaveView *waveview = GNOME_CANVAS_WAVEVIEW (object);
 
 	switch (prop_id) {
 	case PROP_DATA_SRC:
-	        g_value_set_pointer(value, waveview->data_src);
+		g_value_set_pointer(value, waveview->data_src);
 		break;
 
 	case PROP_CHANNEL:
-	        g_value_set_uint(value, waveview->channel);
+		g_value_set_uint(value, waveview->channel);
 		break;
 
 	case PROP_LENGTH_FUNCTION:
-	        g_value_set_pointer(value, waveview->length_function);
+		g_value_set_pointer(value, waveview->length_function);
 		break;
 
 	case PROP_SOURCEFILE_LENGTH_FUNCTION:
-	        g_value_set_pointer(value, waveview->sourcefile_length_function);
+		g_value_set_pointer(value, waveview->sourcefile_length_function);
 		break;
 
 	case PROP_PEAK_FUNCTION:
-	        g_value_set_pointer(value, waveview->peak_function);
+		g_value_set_pointer(value, waveview->peak_function);
 		break;
 
 	case PROP_GAIN_FUNCTION:
-	        g_value_set_pointer(value, waveview->gain_curve_function);
+		g_value_set_pointer(value, waveview->gain_curve_function);
 		break;
 
 	case PROP_GAIN_SRC:
-	        g_value_set_pointer(value, waveview->gain_src);
+		g_value_set_pointer(value, waveview->gain_src);
 		break;
 
 	case PROP_CACHE:
-	        g_value_set_pointer(value, waveview->cache);
+		g_value_set_pointer(value, waveview->cache);
 		break;
 
 	case PROP_CACHE_UPDATER:
-	        g_value_set_boolean(value, waveview->cache_updater);
+		g_value_set_boolean(value, waveview->cache_updater);
 		break;
 
 	case PROP_SAMPLES_PER_UNIT:
-	        g_value_set_double(value, waveview->samples_per_unit);
+		g_value_set_double(value, waveview->samples_per_unit);
 		break;
 
 	case PROP_AMPLITUDE_ABOVE_AXIS:
-	        g_value_set_double(value, waveview->amplitude_above_axis);
+		g_value_set_double(value, waveview->amplitude_above_axis);
 		break;
 
 	case PROP_X:

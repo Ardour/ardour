@@ -90,7 +90,7 @@ class MetricSection {
 	virtual ~MetricSection() {}
 
 	const BBT_Time& start() const { return _start; }
-	const nframes_t frame() const { return _frame; }
+	nframes_t       frame() const { return _frame; }
 
 	void set_movable (bool yn) { _movable = yn; }
 	bool movable() const { return _movable; }

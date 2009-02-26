@@ -341,7 +341,7 @@ UI::signal_pipe_callback (void *arg, int fd, GdkInputCondition cond)
 	
 	/* flush (nonblocking) pipe */
 	
-	while (read (fd, buf, 256) > 0);
+	while (read (fd, buf, 256) > 0) {}
 	
 	((UI *) arg)->handle_ui_requests ();
 }

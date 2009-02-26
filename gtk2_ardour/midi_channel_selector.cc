@@ -181,7 +181,7 @@ MidiMultipleChannelSelector::set_channel_mode(ChannelMode mode, uint16_t mask)
 	}
 }
 
-const uint16_t 
+uint16_t 
 MidiMultipleChannelSelector::get_selected_channels() const 
 { 
 	uint16_t selected_channels = 0;

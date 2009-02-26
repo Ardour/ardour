@@ -53,7 +53,7 @@ class SingleMidiChannelSelector : public MidiChannelSelector
 public:
 	SingleMidiChannelSelector(uint8_t active_channel = 0);
 	
-	const uint8_t get_active_channel() const { return _active_channel; }
+	uint8_t get_active_channel() const { return _active_channel; }
 	
 	sigc::signal<void, uint8_t> channel_selected;
 	
@@ -79,8 +79,8 @@ public:
 	 *         bit 0 represents channel 0 and bit 15 represents channel 15
 	 *          
 	 */
-	const uint16_t get_selected_channels() const;
-	void           set_selected_channels(uint16_t selected_channels);
+	uint16_t get_selected_channels() const;
+	void     set_selected_channels(uint16_t selected_channels);
 	
 protected:
 	ARDOUR::ChannelMode _channel_mode;

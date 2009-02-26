@@ -733,7 +733,7 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 	AutomationSelection::iterator p;
 	boost::shared_ptr<AutomationList> alist(line.the_list());
 	
-	for (p = selection.lines.begin(); p != selection.lines.end() && nth; ++p, --nth);
+	for (p = selection.lines.begin(); p != selection.lines.end() && nth; ++p, --nth) {}
 
 	if (p == selection.lines.end()) {
 		return false;

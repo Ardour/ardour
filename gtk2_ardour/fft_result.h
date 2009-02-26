@@ -39,16 +39,16 @@ class FFTResult
 		void analyzeWindow(float *window);
 		void finalize();
 
-		const int length() { return _dataSize; }
+		int length() const { return _dataSize; }
 
 		float avgAt(int x);
 		float maxAt(int x);
 		float minAt(int x);
 		
-		const float minimum() { return _minimum; }
-		const float maximum() { return _maximum; }
+		float minimum() const { return _minimum; }
+		float maximum() const { return _maximum; }
 		
-		const Gdk::Color get_color() { return _color; }
+		Gdk::Color get_color() const { return _color; }
 		
 	private:
 		FFTResult(FFTGraph *graph, Gdk::Color color, std::string trackname);

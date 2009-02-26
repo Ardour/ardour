@@ -160,24 +160,24 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 	return 0;
 }
 
-ExportFormatSpecification::ExportFormatSpecification (Session & s) :
-  session (s),
-
-   has_sample_format (false),
-   supports_tagging (false),
-  _has_broadcast_info (false),
-  _channel_limit (0),
-  _dither_type (D_None),
-  _src_quality (SRC_SincBest),
-  _tag (true),
-
-  _trim_beginning (false),
-  _silence_beginning (s),
-  _trim_end (false),
-  _silence_end (s),
-
-  _normalize (false),
-  _normalize_target (1.0)
+ExportFormatSpecification::ExportFormatSpecification (Session & s)
+	: session (s)
+	
+	, has_sample_format (false)
+	, supports_tagging (false)
+	, _has_broadcast_info (false)
+	, _channel_limit (0)
+	, _dither_type (D_None)
+	, _src_quality (SRC_SincBest)
+	, _tag (true)
+	
+	, _trim_beginning (false)
+	, _silence_beginning (s)
+	, _trim_end (false)
+	, _silence_end (s)
+	
+	, _normalize (false)
+	, _normalize_target (1.0)
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -186,10 +186,10 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s) :
 	qualities.insert (Q_None);
 }
 
-ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const & state) :
-   session (s),
-  _silence_beginning (s),
-  _silence_end (s)
+ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const & state)
+	: session (s)
+	, _silence_beginning (s)
+	, _silence_end (s)
 {
 	_silence_beginning.type = Time::SMPTE;
 	_silence_end.type = Time::SMPTE;
@@ -197,10 +197,11 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	set_state (state);
 }
 
-ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification const & other) :
-   session (other.session),
-  _silence_beginning (other.session),
-  _silence_end (other.session)
+ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification const & other)
+	: ExportFormatBase(other)
+	, session (other.session)
+	, _silence_beginning (other.session)
+	, _silence_end (other.session)
 {
 	set_name (other.name() + " (copy)");
 

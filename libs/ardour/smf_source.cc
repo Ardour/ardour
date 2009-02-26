@@ -279,7 +279,6 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sfr
 			name().c_str(), ev.time(), ev.size()); 
 	for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 	
-	assert(ev.time() >= 0);
 	if (ev.time() < _last_ev_time_frames) {
 		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
 		return;

@@ -99,7 +99,8 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 
 
 AudioRegionView::AudioRegionView (const AudioRegionView& other)
-	: RegionView (other)
+	: sigc::trackable(other)
+	, RegionView (other)
 	, zero_line(0)
 	, fade_in_shape(0)
 	, fade_out_shape(0)

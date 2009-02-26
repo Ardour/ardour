@@ -1435,7 +1435,7 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 	boost::shared_ptr<Playlist> playlist = get_diskstream()->playlist();
 	PlaylistSelection::iterator p;
 	
-	for (p = selection.playlists.begin(); p != selection.playlists.end() && nth; ++p, --nth);
+	for (p = selection.playlists.begin(); p != selection.playlists.end() && nth; ++p, --nth) {}
 
 	if (p == selection.playlists.end()) {
 		return false;

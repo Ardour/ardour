@@ -21,7 +21,6 @@
 #define __ardour_plugin_h__
 
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 
@@ -88,7 +87,7 @@ class PluginInfo {
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
-class Plugin : public PBD::StatefulDestructible, public Latent, public boost::noncopyable
+class Plugin : public PBD::StatefulDestructible, public Latent
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
@@ -194,14 +193,16 @@ class Plugin : public PBD::StatefulDestructible, public Latent, public boost::no
   protected:
 	friend class PluginInsert;
 	friend struct PluginInsert::PluginControl;
+	
 	virtual void set_parameter (uint32_t which, float val) = 0;
+	
+	bool save_preset (string uri, string domain /* vst, ladspa etc. */);
 
-	ARDOUR::AudioEngine& _engine;
-	ARDOUR::Session& _session;
-	PluginInfoPtr _info;
-	uint32_t _cycles;
-	map<string,PresetRecord> presets;
-	bool save_preset(string uri, string domain /* vst, ladspa etc. */);
+	ARDOUR::AudioEngine&     _engine;
+	ARDOUR::Session&         _session;
+	PluginInfoPtr            _info;
+	uint32_t                 _cycles;
+	map<string,PresetRecord>  presets;
 };
 
 PluginPtr find_plugin(ARDOUR::Session&, string unique_id, ARDOUR::PluginType);

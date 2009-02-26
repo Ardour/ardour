@@ -45,82 +45,81 @@
 
 class AnalysisWindow : public Gtk::Window
 {
-  public:
-	  AnalysisWindow  ();
-	  ~AnalysisWindow ();
+public:
+	AnalysisWindow  ();
+	~AnalysisWindow ();
 
-	  void set_rangemode();
-	  void set_regionmode();
-	  
-	  void track_list_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter);
+	void set_rangemode();
+	void set_regionmode();
 
-	  void analyze ();
+	void track_list_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter);
 
-	  const void set_session(ARDOUR::Session *session) { _session = session; };
+	void analyze ();
 
-  private:
-	  
-	  ARDOUR::Session *_session;
+	void set_session(ARDOUR::Session *session) { _session = session; };
 
-	  void clear_tracklist();
+private:
 
-	  void source_selection_changed (Gtk::RadioButton *);
-	  void display_model_changed    (Gtk::RadioButton *);
-	  void show_minmax_changed	();
-	  void show_normalized_changed	();
+	ARDOUR::Session *_session;
 
-	  void analyze_data				(Gtk::Button *);
-	  
-	  struct TrackListColumns : public Gtk::TreeModel::ColumnRecord {
-		  public:
-		  TrackListColumns () {
-			  	add (trackname);
+	void clear_tracklist();
+
+	void source_selection_changed (Gtk::RadioButton *);
+	void display_model_changed    (Gtk::RadioButton *);
+	void show_minmax_changed	();
+	void show_normalized_changed	();
+
+	void analyze_data				(Gtk::Button *);
+
+	struct TrackListColumns : public Gtk::TreeModel::ColumnRecord {
+		public:
+			TrackListColumns () {
+				add (trackname);
 				add (visible);
 				add (color);
 				add (graph);
-		  }
-		  Gtk::TreeModelColumn<std::string> trackname;
-		  Gtk::TreeModelColumn<bool>        visible;
-          Gtk::TreeModelColumn<Gdk::Color>  color;
-		  Gtk::TreeModelColumn<FFTResult *>  graph;
-	  };
+			}
+			Gtk::TreeModelColumn<std::string> trackname;
+			Gtk::TreeModelColumn<bool>        visible;
+			Gtk::TreeModelColumn<Gdk::Color>  color;
+			Gtk::TreeModelColumn<FFTResult *>  graph;
+	};
 
-	  // Packing essentials
-	  Gtk::HBox hbox;
-	  Gtk::VBox vbox;
-	  
-	  // Left  side
-	  Glib::RefPtr<Gtk::ListStore> tlmodel;
-	  TrackListColumns tlcols;
-	  Gtk::TreeView track_list;
-	  
-	  Gtk::Label source_selection_label;
+	// Packing essentials
+	Gtk::HBox hbox;
+	Gtk::VBox vbox;
 
+	// Left  side
+	Glib::RefPtr<Gtk::ListStore> tlmodel;
+	TrackListColumns tlcols;
+	Gtk::TreeView track_list;
 
-	  Gtk::RadioButton source_selection_ranges_rb;
-	  Gtk::RadioButton source_selection_regions_rb;
-
-	  Gtk::HSeparator hseparator1;
-	  
-	  Gtk::Label display_model_label;
-	  Gtk::RadioButton display_model_composite_separate_rb;
-	  Gtk::RadioButton display_model_composite_all_tracks_rb;
-	  
-	  Gtk::Button refresh_button;
+	Gtk::Label source_selection_label;
 
 
-	  Gtk::CheckButton show_minmax_button;
-	  Gtk::CheckButton show_normalized_button;
+	Gtk::RadioButton source_selection_ranges_rb;
+	Gtk::RadioButton source_selection_regions_rb;
 
-	  
-	  
-	  // The graph
-	  FFTGraph fft_graph;
+	Gtk::HSeparator hseparator1;
 
-	  bool track_list_ready;
-	  Glib::Mutex track_list_lock;
+	Gtk::Label display_model_label;
+	Gtk::RadioButton display_model_composite_separate_rb;
+	Gtk::RadioButton display_model_composite_all_tracks_rb;
 
-	  friend class FFTGraph;
+	Gtk::Button refresh_button;
+
+
+	Gtk::CheckButton show_minmax_button;
+	Gtk::CheckButton show_normalized_button;
+
+
+	// The graph
+	FFTGraph fft_graph;
+
+	bool track_list_ready;
+	Glib::Mutex track_list_lock;
+
+	friend class FFTGraph;
 };
 
 #endif // __ardour_analysis_window_h

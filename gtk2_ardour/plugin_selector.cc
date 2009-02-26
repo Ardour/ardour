@@ -281,7 +281,7 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 
 			newrow[plugin_columns.creator] = creator;
 
-			if ((*i)->n_inputs.n_total() < 0) {
+			if ((*i)->n_inputs.n_total() < 0) { // FIXME: Impossible (unsigned)
 				newrow[plugin_columns.audio_ins] = "various";
 				newrow[plugin_columns.midi_ins] = "various";
 			} else {
@@ -290,7 +290,8 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
 				newrow[plugin_columns.midi_ins] = buf;
 			}
-			if ((*i)->n_outputs.n_total() < 0) {
+
+			if ((*i)->n_outputs.n_total() < 0) { // FIXME: Impossible (unsigned)
 				newrow[plugin_columns.audio_outs] = "various";
 				newrow[plugin_columns.midi_outs] = "various";
 			} else {

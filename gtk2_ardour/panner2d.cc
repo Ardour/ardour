@@ -118,6 +118,8 @@ Panner2d::reset (uint32_t n_inputs)
 		
 	case 2:
 		pucks[0]->set_text ("R");
+		assert(existing_pucks >= 0);
+		// FIXME: Impossible (unsigned)
 		if (existing_pucks < 0) {
 			pucks[0]->x.set_value (0.5f);
 			pucks[1]->y.set_value (0.25f);
