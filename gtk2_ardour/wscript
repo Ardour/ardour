@@ -16,12 +16,6 @@ blddir = 'build'
 def set_options(opt):
 	autowaf.set_options(opt)
 
-def check_header_and_define(conf, header, define):
-	conf.check(header_name=header, define_name=define)
-	if conf.env[define]:
-		conf.env.append_value('CCFLAGS', '-D' + define)
-		conf.env.append_value('CXXFLAGS', '-D' + define)
-	
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
@@ -36,9 +30,6 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
 	
 	conf.check_tool('misc') # subst tool
-
-	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
-	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
 
 	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
 	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
