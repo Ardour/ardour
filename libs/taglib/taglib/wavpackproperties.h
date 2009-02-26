@@ -1,0 +1,1 @@
+./wavpack/wavpackproperties.h

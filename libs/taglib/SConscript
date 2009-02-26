@@ -112,25 +112,9 @@ taglib/wavpack/wavpackproperties.h
 
 libtaglib = taglib.SharedLibrary ('taglib', taglib_files)
  
-#
-# the header structure of this library is not very convenient
-# if you don't want to install the library. headers are distributed
-# all over the place, making a simple -Ipath flag for the compiler
-# rather difficult. This hack creates a directory and copies
-# the headers into it, allowing us to use -I#libs/taglib/headers
-#
-
-def headercopy(env, target, source):
-    if os.access (str(target[0]), os.X_OK) != True:
-        os.makedirs (str(target[0]))
-    for file in source : 
-        copy (str(file), str(target[0]))
-        
-header_dir = taglib.Command ('#libs/taglib/headers/taglib', headers, headercopy)
-
 config_h = taglib.Command('config.h', ['config.h.in'], 'cd libs/taglib && ./configure && cd -', ENV=os.environ)
 
-Default([config_h,header_dir,libtaglib])
+Default([config_h,libtaglib])
 
 env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libtaglib))
 

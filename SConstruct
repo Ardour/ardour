@@ -1221,7 +1221,7 @@ else:
                                           CPPPATH=['#libs', '#libs/soundtouch'])
     libraries['taglib'] = LibraryInfo(LIBS='libtaglib',
                                       LIBPATH='#libs/taglib',
-                                      CPPPATH=['#libs/taglib/headers','#libs/taglib/headers/taglib'])
+                                      CPPPATH=['#libs/taglib', '#libs/taglib/taglib'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
