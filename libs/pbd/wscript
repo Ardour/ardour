@@ -24,10 +24,8 @@ def set_options(opt):
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
-	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
-	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
-	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
+	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 	autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
 
 	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')

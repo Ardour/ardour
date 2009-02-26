@@ -33,7 +33,8 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
 	autowaf.set_recursive()
 	autowaf.configure(conf)
-	#conf.env.append_value('CXXFLAGS', '-DBOOST_NO_STD_LOCALE=1')
+	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
+	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
 	for i in children:
 		sub_config_and_use(conf, i)
 

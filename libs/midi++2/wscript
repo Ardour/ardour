@@ -24,11 +24,9 @@ def set_options(opt):
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
-	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
-	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
-	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
-	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
 	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.109.0')
+	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
+	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 
 	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
 	conf.write_config_header('wafconfig.h')
