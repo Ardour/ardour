@@ -44,8 +44,9 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
 	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
 	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
+	autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
 	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
-	#autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH')
+	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
 
 	conf.env.append_value('CXXFLAGS', '-DUSE_RUBBERBAND')
 	
@@ -227,6 +228,9 @@ def build(bld):
 	obj.uselib_local += ' librubberband '
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '
+	if bld.env['HAVE_SLV2']:
+		obj.source += ' lv2_plugin.cc '
+		obj.uselib += ' SLV2 '
 	
 def shutdown():
 	autowaf.shutdown()
