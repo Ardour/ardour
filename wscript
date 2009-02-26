@@ -15,6 +15,7 @@ children = [
 	'libs/evoral',
 	'libs/vamp-sdk',
 	'libs/taglib',
+	'libs/rubberband',
 	'libs/surfaces',
 	'libs/ardour',
 	'libs/gtkmm2ext',

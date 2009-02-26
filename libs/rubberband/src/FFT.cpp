@@ -18,7 +18,9 @@
 
 //#define FFT_MEASUREMENT 1
 
+#ifndef HAVE_FFTW3
 #define HAVE_FFTW3 // for Ardour
+#endif
 
 #ifdef HAVE_FFTW3
 #include <fftw3.h>

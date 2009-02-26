@@ -38,8 +38,9 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
 	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
-	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
-	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH')
+	#autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH')
+
+	conf.env.append_value('CXXFLAGS', '-DUSE_RUBBERBAND')
 	
 	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
 	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
@@ -215,8 +216,10 @@ def build(bld):
 			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
 	obj.cxxflags     += ' -DVAMP_DIR=\\\"' + os.path.join(
 			os.path.normpath(bld.env['LIBDIRNAME']), 'ardour3', 'vamp') + '\\\"'
-	obj.source += ' st_stretch.cc st_pitch.cc '
-	obj.uselib += ' SOUNDTOUCH '
+	obj.source += ' rb_effect.cc '
+	obj.uselib_local += ' librubberband '
+	#obj.source += ' st_stretch.cc st_pitch.cc '
+	#obj.uselib += ' SOUNDTOUCH '
 	
 def shutdown():
 	autowaf.shutdown()

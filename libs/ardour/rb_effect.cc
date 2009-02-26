@@ -21,7 +21,7 @@
 #include <cmath>
 
 #include "pbd/error.h"
-#include <rubberband/RubberBandStretcher.h>
+#include "rubberband/RubberBandStretcher.h"
 
 #include "ardour/types.h"
 #include "ardour/stretch.h"
