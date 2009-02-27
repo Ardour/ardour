@@ -195,11 +195,11 @@ load_rc_file (const string& filename, bool themechange)
 	spath += user_config_directory();
 	spath += system_config_search_path();
 
-	if(!find_file_in_search_path (spath, filename, rc_file_path))
-	{
-		warning << string_compose(_("Unable to find UI style file %1 in search path %2. Ardour will look strange"),
+	if (!find_file_in_search_path (spath, filename, rc_file_path)) {
+		warning << string_compose(
+				_("Unable to find UI style file %1 in search path %2. Ardour will look strange"),
 				filename, spath.to_string()) 
-			<< endmsg;
+				<< endmsg;
 		return;
 	}
 

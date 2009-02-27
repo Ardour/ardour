@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import autowaf
+import os
 
 # Version of this package (even if built as a child)
 MAJOR = '4'
@@ -89,7 +90,7 @@ def build(bld):
 	obj.target       = 'pbd'
 	obj.uselib       = 'GLIBMM SIGCPP XML UUID'
 	obj.vnum         = LIBPBD_LIB_VERSION
-	obj.install_path = ''
+	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = '-DPACKAGE=\\\"libpbd\\\"'
 	if bld.env['PBD_HAVE_EXECINFO']:
 		obj.cxxflags += ' -DHAVE_EXECINFO '

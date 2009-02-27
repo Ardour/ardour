@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import autowaf
 import os
+import glob
 
 # Version of this package (even if built as a child)
 MAJOR = '3'
@@ -216,15 +217,15 @@ def build(bld):
 	obj.uselib       = 'GLIBMM AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF'
 	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libtaglib'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
-	obj.install_path = ''
+	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = ' -DPACKAGE=\\\"libardour3\\\"'
-	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIRNAME']) + '\\\"'
+	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIR']) + '\\\"'
+	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIR']) + '\\\"'
+	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIR']) + '\\\"'
 	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
-			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
+			os.path.normpath(bld.env['DATADIR']), 'locale') + '\\\"'
 	obj.cxxflags     += ' -DVAMP_DIR=\\\"' + os.path.join(
-			os.path.normpath(bld.env['LIBDIRNAME']), 'ardour3', 'vamp') + '\\\"'
+			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '\\\"'
 	obj.source += ' rb_effect.cc '
 	obj.uselib_local += ' librubberband '
 	#obj.source += ' st_stretch.cc st_pitch.cc '

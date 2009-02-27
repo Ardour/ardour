@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import autowaf
+import os
 
 # Version of this package (even if built as a child)
 LIBVAMP_VERSION = '0.0.0'
@@ -46,7 +47,7 @@ def build(bld):
 	obj.target       = 'vamphost'
 	obj.uselib       = 'FFTW3 FFTW3F'
 	obj.vnum         = LIBVAMP_LIB_VERSION
-	obj.install_path = ''
+	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	
 	# Plugin Library
 	obj = bld.new_task_gen('cxx', 'shlib')
@@ -60,7 +61,7 @@ def build(bld):
 	obj.target       = 'vampplugin'
 	obj.uselib       = 'FFTW3 FFTW3F'
 	obj.vnum         = LIBVAMP_LIB_VERSION
-	obj.install_path = ''
+	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	
 def shutdown():
 	autowaf.shutdown()

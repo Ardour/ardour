@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import autowaf
+import os
 
 # Version of this package (even if built as a child)
 MAJOR = '2'
@@ -76,7 +77,7 @@ def build(bld):
 	obj.uselib       = 'GLIBMM SIGCPP XML JACK'
 	obj.uselib_local = 'libpbd libevoral'
 	obj.vnum         = LIBMIDIPP_LIB_VERSION
-	obj.install_path = ''
+	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	
 def shutdown():
 	autowaf.shutdown()

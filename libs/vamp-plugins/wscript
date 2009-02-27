@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import autowaf
+import os
 
 # Version of this package (even if built as a child)
 LIBARDOURVAMPPLUGINS_VERSION = '0.0.0'
@@ -47,7 +48,7 @@ def build(bld):
 		obj.source += ' Onset.cpp '
 		obj.uselib += ' AUBIO '
 	obj.vnum         = LIBARDOURVAMPPLUGINS_LIB_VERSION
-	obj.install_path = ''
+	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	
 def shutdown():
 	autowaf.shutdown()
