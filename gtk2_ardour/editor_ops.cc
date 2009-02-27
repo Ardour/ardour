@@ -3626,6 +3626,7 @@ void*
 Editor::freeze_thread ()
 {
 	clicked_routeview->audio_track()->freeze (*current_interthread_info);
+	current_interthread_info->done = true;
 	return 0;
 }
 
