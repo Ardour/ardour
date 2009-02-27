@@ -108,3 +108,9 @@ libs/glibmm2/autom4te.cache
 libs/sigc++2/autom4te.cache
 .sconf_temp
 libs/taglib/headers/taglib
+.lock-wscript
+.waf-*
+build
+*.swp
+tags
+

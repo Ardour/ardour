@@ -1,4 +1,4 @@
-TOP=..
+TOP=`dirname "$0"`/..
 
 #export G_DEBUG=fatal_criticals
 
