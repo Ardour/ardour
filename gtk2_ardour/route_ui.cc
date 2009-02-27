@@ -1194,3 +1194,5 @@ RouteUI::adjust_latency ()
 {
 	LatencyDialog dialog (_route->name() + _("latency"), *(_route.get()), _session.frame_rate(), _session.engine().frames_per_cycle());
 }
+
+

@@ -41,13 +41,14 @@
 #include "pbd/pathscanner.h"
 #include "pbd/xml++.h"
 
-#include <vst/aeffectx.h>
+#include <fst.h>
 
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/vst_plugin.h"
 #include "ardour/buffer_set.h"
+#include "ardour/audio_buffer.h"
 
 #include "pbd/stl_delete.h"
 
@@ -82,7 +83,7 @@ VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 
 	_plugin->dispatcher (_plugin, effSetProgram, 0, 0, NULL, 0.0f);
 	
-	Plugin::setup_controls ();
+	// Plugin::setup_controls ();
 }
 
 VSTPlugin::VSTPlugin (const VSTPlugin &other)
@@ -94,8 +95,8 @@ VSTPlugin::VSTPlugin (const VSTPlugin &other)
 		throw failed_constructor();
 	}
 	_plugin = _fst->plugin;
-
-	Plugin::setup_controls ();
+	
+	// Plugin::setup_controls ();
 }
 
 VSTPlugin::~VSTPlugin ()
@@ -158,43 +159,27 @@ VSTPlugin::get_state()
 		}
 
 		/* save it to a file */
-
-		Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "vst");
-		struct stat sbuf;
-
+		
 		sys::path user_vst_directory(user_config_directory());
-	
 		user_vst_directory /= "vst";
-		path = user_vst_directory.to_string();
 
-		if (stat (path.c_str(), &sbuf)) {
-			if (errno == ENOENT) {
-				if (g_mkdir_with_parents (path.c_str(), 0600)) {
-					error << string_compose (_("cannot create VST chunk directory: %1"),
-								 strerror (errno))
-					      << endmsg;
-					return *root;
-				}
-
-			} else {
-
-				warning << string_compose (_("cannot check VST chunk directory: %1"), strerror (errno))
-					<< endmsg;
-				return *root;
-			}
-
-		} else if (!S_ISDIR (sbuf.st_mode)) {
-			error << string_compose (_("%1 exists but is not a directory"), path)
-			      << endmsg;
+		try {
+			sys::create_directories (user_vst_directory);	
+		}
+		catch (const sys::filesystem_error& ex)
+		{
+			error << "Could not create user configuration directory" << endmsg;
 			return *root;
 		}
 		
-		path = Glib::build_filename (path, "something");
+		sys::path file (user_vst_directory);
+		
+		file /= "something";
 		
 		/* store information */
 
 		XMLNode* chunk_node = new XMLNode (X_("chunk"));
-		chunk_node->add_property ("path", path);
+		chunk_node->add_property ("path", file.to_string());
 		
 		root->add_child_nocopy (*chunk_node);
 		
@@ -348,10 +333,10 @@ VSTPlugin::save_preset (string name)
 }
 
 string
-VSTPlugin::describe_parameter (uint32_t param)
+VSTPlugin::describe_parameter (Evoral::Parameter param)
 {
 	char name[64];
-	_plugin->dispatcher (_plugin, effGetParamName, param, 0, name, 0);
+	_plugin->dispatcher (_plugin, effGetParamName, param.id(), 0, name, 0);
 	return name;
 }
 
@@ -369,13 +354,13 @@ VSTPlugin::signal_latency () const
 #endif
 }
 
-set<uint32_t>
+set<Evoral::Parameter>
 VSTPlugin::automatable () const
 {
-	set<uint32_t> ret;
+	set<Evoral::Parameter> ret;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
-		ret.insert (ret.end(), i);
+		ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
 	}
 
 	return ret;
@@ -474,11 +459,9 @@ VSTPlugin::has_editor () const
 void
 VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 {
-	char lab[9];
 	char *first_nonws;
 
-	_plugin->dispatcher (_plugin, effGetParamLabel, param, 0, lab, 0);
-	_plugin->dispatcher (_plugin, effGetParamDisplay, param, 0, buf, 0);
+	_plugin->dispatcher (_plugin, 7 /* effGetParamDisplay */, param, 0, buf, 0);
 
 	if (buf[0] == '\0') {
 		return;

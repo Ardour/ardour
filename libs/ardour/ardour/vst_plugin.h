@@ -66,13 +66,13 @@ class VSTPlugin : public ARDOUR::Plugin
 	void set_parameter (uint32_t port, float val);
 	float get_parameter (uint32_t port) const;
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
-	std::set<uint32_t> automatable() const;
+	std::set<Evoral::Parameter> automatable() const;
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
 	void activate ();
 	void deactivate ();
 	void set_block_size (nframes_t nframes);
 	int connect_and_run (BufferSet&, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
-	string describe_parameter (uint32_t);
+	string describe_parameter (Evoral::Parameter);
 	string state_node_name() const { return "vst"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
 
