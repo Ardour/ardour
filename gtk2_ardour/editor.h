@@ -88,30 +88,31 @@ namespace LADSPA {
 	class Plugin;
 }
 
-class TimeAxisView;
-class AudioTimeAxisView;
-class AutomationTimeAxisView;
+class AnalysisWindow;
 class AudioRegionView;
-class CrossfadeView;
-class PluginSelector;
-class PlaylistSelector;
-class Marker;
-class GroupedButtons;
+class AudioStreamView;
+class AudioTimeAxisView;
 class AutomationLine;
+class AutomationSelection;
+class AutomationTimeAxisView;
+class BundleManager;
+class ControlPoint;
+class CrossfadeView;
+class GlobalPortMatrixWindow;
+class GroupedButtons;
+class Marker;
+class MixerStrip;
+class PlaylistSelector;
+class PluginSelector;
+class RhythmFerret;
 class Selection;
+class SoundFileOmega;
+class StreamView;
 class TempoLines;
+class TimeAxisView;
+class TimeFXDialog;
 class TimeSelection;
 class TrackSelection;
-class AutomationSelection;
-class MixerStrip;
-class StreamView;
-class AudioStreamView;
-class ControlPoint;
-class SoundFileOmega;
-class RhythmFerret;
-class AnalysisWindow;
-class BundleManager;
-class GlobalPortMatrixWindow;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -133,7 +134,7 @@ class Editor : public PublicEditor
 	void             connect_to_session (ARDOUR::Session *);
 	ARDOUR::Session* current_session() const { return session; }
 	void             first_idle ();
-	virtual bool have_idled() const { return _have_idled; }
+	virtual bool     have_idled () const { return _have_idled; }
 
 	nframes64_t leftmost_position() const { return leftmost_frame; }
 	nframes64_t current_page_frames() const {
@@ -264,6 +265,7 @@ class Editor : public PublicEditor
 	bool show_measures () const { return _show_measures; }
 
 	/* analysis window */
+
 	void analyze_region_selection();
 	void analyze_range_selection();
 
@@ -277,9 +279,9 @@ class Editor : public PublicEditor
 	void add_toplevel_controls (Gtk::Container&);
 	Gtk::HBox& get_status_bar_packer()  { return status_bar_hpacker; }
 
-	void      set_zoom_focus (Editing::ZoomFocus);
+	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	double   get_current_zoom () const { return frames_per_unit; }
+	double             get_current_zoom () const { return frames_per_unit; }
 
 	void temporal_zoom_step (bool coarser);
 
@@ -337,8 +339,8 @@ class Editor : public PublicEditor
 	void video_pullup_chosen (ARDOUR::Session::PullupFormat pullup);
 	void subframes_per_frame_chosen (uint32_t);
 
-	void update_smpte_mode();
-	void update_video_pullup();
+	void update_smpte_mode ();
+	void update_video_pullup ();
 	void update_subframes_per_frame ();
 
 	/* fades/xfades */
@@ -628,10 +630,10 @@ class Editor : public PublicEditor
 
 	bool verbose_cursor_on; // so far unused
 
-	Gtk::EventBox      time_canvas_event_box;
-	Gtk::EventBox      track_canvas_event_box;
-	Gtk::EventBox      time_button_event_box;
-	Gtk::EventBox      ruler_label_event_box;
+	Gtk::EventBox             time_canvas_event_box;
+	Gtk::EventBox             track_canvas_event_box;
+	Gtk::EventBox             time_button_event_box;
+	Gtk::EventBox             ruler_label_event_box;
 
 	ArdourCanvas::Group      *minsec_group;
 	ArdourCanvas::Pixbuf     *logo_item;
@@ -696,14 +698,14 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
-	bool                   no_ruler_shown_update;
+	bool                            no_ruler_shown_update;
 	
 	gint ruler_button_press (GdkEventButton*);
 	gint ruler_button_release (GdkEventButton*);
 	gint ruler_mouse_motion (GdkEventMotion*);
 	bool ruler_scroll (GdkEventScroll* event);
 
-	gint ruler_pressed_button;
+	gint          ruler_pressed_button;
 	Gtk::Widget * ruler_grabbed_widget;
 	
 	void initialize_rulers ();
@@ -813,7 +815,6 @@ class Editor : public PublicEditor
 	Gtk::Label  range_mark_label;
 	Gtk::Label  transport_mark_label;
 	Gtk::Label  cd_mark_label;
-	
 
 	Gtk::VBox          time_button_vbox;
 	Gtk::HBox          time_button_hbox;
@@ -833,11 +834,9 @@ class Editor : public PublicEditor
 	    void set_y_axis (double position);
 	};
 
-	friend struct Cursor; /* it needs access to several private
-				 fields. XXX fix me.
-			      */
+	friend struct Cursor; /* FIXME: needs access to several private fields */
 
-	Cursor* playhead_cursor;
+	Cursor*              playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
 
 	void    cursor_to_region_boundary (Cursor*, int32_t dir);
@@ -2016,48 +2015,54 @@ public:
 
 	/* Drag-n-Drop */
 
-	int convert_drop_to_paths (std::vector<Glib::ustring>& paths,
-				   const Glib::RefPtr<Gdk::DragContext>& context,
-				   gint                x,
-				   gint                y,
-				   const Gtk::SelectionData& data,
-				   guint               info,
-				   guint               time);
+	int convert_drop_to_paths (
+			std::vector<Glib::ustring>&           paths,
+			const Glib::RefPtr<Gdk::DragContext>& context,
+			gint                                  x,
+			gint                                  y,
+			const Gtk::SelectionData&             data,
+			guint                                 info,
+			guint                                 time);
 
-	void  track_canvas_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,
-						gint                x,
-						gint                y,
-						const Gtk::SelectionData& data,
-						guint               info,
-						guint               time);
+	void track_canvas_drag_data_received (
+			const Glib::RefPtr<Gdk::DragContext>& context,
+			gint                                  x,
+			gint                                  y,
+			const Gtk::SelectionData&             data,
+			guint                                 info,
+			guint                                 time);
 	
-	void  region_list_display_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,
-						       gint                x,
-						       gint                y,
-						       const Gtk::SelectionData& data,
-						       guint               info,
-						       guint               time);
+	void region_list_display_drag_data_received (
+			const Glib::RefPtr<Gdk::DragContext>& context,
+			gint                                  x,
+			gint                                  y,
+			const Gtk::SelectionData&             data,
+			guint                                 info,
+			guint                                 time);
 
-	void  drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
-			   gint                x,
-			   gint                y,
-			   const Gtk::SelectionData& data,
-			   guint               info,
-			   guint               time);
+	void drop_paths (
+			const Glib::RefPtr<Gdk::DragContext>& context,
+			gint                                  x,
+			gint                                  y,
+			const Gtk::SelectionData&             data,
+			guint                                 info,
+			guint                                 time);
 
-	void  drop_regions  (const Glib::RefPtr<Gdk::DragContext>& context,
-			     gint                x,
-			     gint                y,
-			     const Gtk::SelectionData& data,
-			     guint               info,
-			     guint               time);
+	void drop_regions (
+			const Glib::RefPtr<Gdk::DragContext>& context,
+			gint                                  x,
+			gint                                  y,
+			const Gtk::SelectionData&             data,
+			guint                                 info,
+			guint                                 time);
 
-	void  drop_routes (const Glib::RefPtr<Gdk::DragContext>& context,
-			   gint                x,
-			   gint                y,
-			   const Gtk::SelectionData& data,
-			   guint               info,
-			   guint               time);
+	void drop_routes (
+			const Glib::RefPtr<Gdk::DragContext>& context,
+			gint                x,
+			gint                y,
+			const Gtk::SelectionData& data,
+			guint               info,
+			guint               time);
 
 	/* audio export */
 
@@ -2127,45 +2132,6 @@ public:
 	void time_fx_motion (ArdourCanvas::Item*, GdkEvent*);
 	void start_time_fx (ArdourCanvas::Item*, GdkEvent*);
 	void end_time_fx (ArdourCanvas::Item*, GdkEvent*);
-
-	struct TimeFXDialog : public ArdourDialog {
-	    ARDOUR::TimeFXRequest request;
-	    Editor&               editor;
-	    bool                  pitching;
-	    Gtk::Adjustment       pitch_octave_adjustment;
-	    Gtk::Adjustment       pitch_semitone_adjustment;
-	    Gtk::Adjustment       pitch_cent_adjustment;
-	    Gtk::SpinButton       pitch_octave_spinner;
-	    Gtk::SpinButton       pitch_semitone_spinner;
-	    Gtk::SpinButton       pitch_cent_spinner;
-	    RegionSelection       regions;
-	    Gtk::ProgressBar      progress_bar;
-
-	    /* SoundTouch */
-	    Gtk::ToggleButton     quick_button;
-	    Gtk::ToggleButton     antialias_button;
-	    Gtk::HBox             upper_button_box;
-
-	    /* RubberBand */
-	    Gtk::ComboBoxText     stretch_opts_selector;
-	    Gtk::Label            stretch_opts_label;
-	    Gtk::ToggleButton     precise_button;
-	    Gtk::ToggleButton     preserve_formants_button;
-	    Gtk::HBox             opts_box;
-
-	    Gtk::Button*          cancel_button;
-	    Gtk::Button*          action_button;
-	    Gtk::VBox             packer;
-	    int                   status;
-
-	    TimeFXDialog (Editor& e, bool for_pitch);
-
-	    gint update_progress ();
-	    sigc::connection first_cancel;
-	    sigc::connection first_delete;
-	    void cancel_in_progress ();
-	    gint delete_in_progress (GdkEventAny*);
-	};
 
 	/* "whats mine is yours" */
 

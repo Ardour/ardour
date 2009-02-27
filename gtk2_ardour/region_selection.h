@@ -28,11 +28,10 @@ using std::list;
 using std::set;
 
 class RegionView;
+class TimeAxisView;
 
-/**
- *  Class to represent list of selected regions.
+/** Class to represent list of selected regions.
  */
-
 class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 {
   public:

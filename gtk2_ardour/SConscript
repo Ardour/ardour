@@ -248,6 +248,7 @@ tempo_lines.cc
 theme_manager.cc
 time_axis_view.cc
 time_axis_view_item.cc
+time_fx_dialog.cc
 time_selection.cc
 ui_config.cc
 utils.cc
