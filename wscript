@@ -80,7 +80,7 @@ def set_options(opt):
 	opt.add_option('--aubio', action='store_true', default=True, dest='aubio',
 			help="Use Paul Brossier's aubio library for feature detection (if available)")
 	opt.add_option('--audiounits', action='store_true', default=False, dest='audiounits',
-			help='Compile with Apple\'s AudioUnit library. (experimental)')
+			help='Compile with Apple\'s AudioUnit library (experimental)')
 	opt.add_option('--coreaudio', action='store_true', default=False, dest='coreaudio',
 			help='Compile with Apple\'s CoreAudio library')
 	opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
@@ -94,15 +94,15 @@ def set_options(opt):
 	opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
 			help='Compile with support for LV2 (if slv2 is available)')
 	opt.add_option('--nls', action='store_true', default=True, dest='nls',
-			help='Set to turn on i18n support')
+			help='Enable i18n (native language support)')
 	opt.add_option('--surfaces', action='store_true', default=True, dest='surfaces',
 			help='Build support for control surfaces')
 	opt.add_option('--syslibs', action='store_true', default=True, dest='syslibs',
 			help='Use existing system versions of various libraries instead of internal ones')
 	opt.add_option('--tranzport', action='store_true', default=True, dest='tranzport',
-			help='Compile with support for Frontier Designs (if libusb is available)')
+			help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
 	opt.add_option('--universal', action='store_true', default=False, dest='universal',
-			help='Compile as universal binary.  Requires that external libraries are universal.')
+			help='Compile as universal binary (requires that external libraries are universal)')
 	opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
 			help='Add revision information to executable name inside the build directory')
 	opt.add_option('--vst', action='store_true', default=False, dest='vst',

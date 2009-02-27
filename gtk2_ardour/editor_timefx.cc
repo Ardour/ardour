@@ -311,18 +311,14 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 		/* default/4 */
 
 		transients = Transients; peaklock = true; longwin = false; shortwin = false; 
-	};
+	}
 
-
-	if (realtime)    options |= RubberBandStretcher::OptionProcessRealTime;
-	if (precise)     options |= RubberBandStretcher::OptionStretchPrecise;
-	if (preserve_formants)	options |= RubberBandStretcher::OptionFormantPreserved;
-
-	if (!peaklock)   options |= RubberBandStretcher::OptionPhaseIndependent;
-	if (longwin)     options |= RubberBandStretcher::OptionWindowLong;
-	if (shortwin)    options |= RubberBandStretcher::OptionWindowShort;
-		
-		
+	if (realtime)          options |= RubberBandStretcher::OptionProcessRealTime;
+	if (precise)           options |= RubberBandStretcher::OptionStretchPrecise;
+	if (preserve_formants) options |= RubberBandStretcher::OptionFormantPreserved;
+	if (!peaklock)         options |= RubberBandStretcher::OptionPhaseIndependent;
+	if (longwin)           options |= RubberBandStretcher::OptionWindowLong;
+	if (shortwin)          options |= RubberBandStretcher::OptionWindowShort;
 		
 	switch (transients) {
 	case NoTransients:
