@@ -643,14 +643,13 @@ Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, 
 
 		}
 
-		/* XXX: not sure if this should be emitted here; perhaps it should happen
-		   when the slave is actually followed */
-		Located (); /* EMIT SIGNAL */
-
 	} else {
-
 		locate (target_frame, with_roll, with_flush, with_loop);
 	}
+
+	/* XXX: not sure if this should be emitted here in the synced_to_jack () case;
+	 * perhaps it should happen when the slave is actually followed */
+	Located (); /* EMIT SIGNAL */
 }
 
 int
