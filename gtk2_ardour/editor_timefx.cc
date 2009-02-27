@@ -420,7 +420,11 @@ Editor::do_timefx (TimeFXDialog& dialog)
 		if (dialog.pitching) {
 			fx = new Pitch (*session, dialog.request);
 		} else {
-			fx = new Stretch (*session, dialog.request);
+#ifdef USE_RUBBERBAND
+			fx = new RBStretch (*session, dialog.request);
+#else
+			fx = new STStretch (*session, dialog.request);
+#endif
 		}
 
 		if (fx->run (region)) {

@@ -28,10 +28,10 @@
 
 namespace ARDOUR {
 
-class Stretch : public RBEffect {
+class RBStretch : public RBEffect {
   public:
-	Stretch (ARDOUR::Session&, TimeFXRequest&);
-	~Stretch() {}
+	RBStretch (ARDOUR::Session&, TimeFXRequest&);
+	~RBStretch() {}
 };
 
 } /* namespace */
@@ -42,10 +42,10 @@ class Stretch : public RBEffect {
 
 namespace ARDOUR {
 
-class Stretch : public Filter {
+class STStretch : public Filter {
   public:
-	Stretch (ARDOUR::Session&, TimeFXRequest&);
-	~Stretch ();
+	STStretch (ARDOUR::Session&, TimeFXRequest&);
+	~STStretch ();
 
 	int run (boost::shared_ptr<ARDOUR::Region>);
 

@@ -35,7 +35,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace soundtouch;
 
-Stretch::Stretch (Session& s, TimeFXRequest& req)
+STStretch::STStretch (Session& s, TimeFXRequest& req)
 	: Filter (s)
 	, tsr (req)
 {
@@ -59,12 +59,12 @@ Stretch::Stretch (Session& s, TimeFXRequest& req)
 	tsr.progress = 0.0f;
 }
 
-Stretch::~Stretch ()
+STStretch::~STStretch ()
 {
 }
 
 int
-Stretch::run (boost::shared_ptr<Region> a_region)
+STStretch::run (boost::shared_ptr<Region> a_region)
 {
 	SourceList nsrcs;
 	nframes_t total_frames;

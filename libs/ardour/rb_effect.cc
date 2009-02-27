@@ -42,7 +42,7 @@ Pitch::Pitch (Session& s, TimeFXRequest& req)
 {
 }
 
-Stretch::Stretch (Session& s, TimeFXRequest& req)
+RBStretch::RBStretch (Session& s, TimeFXRequest& req)
 	: RBEffect (s, req)
 {
 }
