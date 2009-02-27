@@ -144,55 +144,55 @@ def configure(conf):
 		conf.env['BUNDLE'] = True
 		conf.define('BUNDLE', 1)
 		conf.env['BINDIR'] = conf.env['PREFIX']
-		conf.env['INCLUDEDIR'] = conf.env['PREFIX'] + '/Headers/'
-		conf.env['LIBDIR'] = conf.env['PREFIX'] + '/Libraries/'
-		conf.env['DATADIR'] = conf.env['PREFIX'] + '/Resources/'
-		conf.env['HTMLDIR'] = conf.env['PREFIX'] + '/Resources/Documentation/'
-		conf.env['MANDIR'] = conf.env['PREFIX'] + '/Resources/Man/'
-		conf.env['LV2DIR'] = conf.env['PREFIX'] + '/PlugIns/'
+		conf.env['INCLUDEDIR'] = os.path.join(conf.env['PREFIX'], 'Headers')
+		conf.env['LIBDIR'] = os.path.join(conf.env['PREFIX'], 'Libraries')
+		conf.env['DATADIR'] = os.path.join(conf.env['PREFIX'], 'Resources')
+		conf.env['HTMLDIR'] = os.path.join(conf.env['PREFIX'], 'Resources/Documentation')
+		conf.env['MANDIR'] = os.path.join(conf.env['PREFIX'], 'Resources/Man')
+		conf.env['LV2DIR'] = os.path.join(conf.env['PREFIX'], 'PlugIns')
 	else:
 		conf.env['BUNDLE'] = False
 		if Options.options.bindir:
 			conf.env['BINDIR'] = Options.options.bindir
 		else:
-			conf.env['BINDIR'] = conf.env['PREFIX'] + '/bin/'
+			conf.env['BINDIR'] = os.path.join(conf.env['PREFIX'], 'bin')
 		if Options.options.includedir:
 			conf.env['INCLUDEDIR'] = Options.options.includedir
 		else:
-			conf.env['INCLUDEDIR'] = conf.env['PREFIX'] + '/include/'
+			conf.env['INCLUDEDIR'] = os.path.join(conf.env['PREFIX'], 'include')
 		if Options.options.libdir:
 			conf.env['LIBDIR'] = Options.options.libdir
 		else:
-			conf.env['LIBDIR'] = conf.env['PREFIX'] + '/lib/'
+			conf.env['LIBDIR'] = os.path.join(conf.env['PREFIX'], 'lib')
 		if Options.options.datadir:
 			conf.env['DATADIR'] = Options.options.datadir
 		else:
-			conf.env['DATADIR'] = conf.env['PREFIX'] + '/share/'
+			conf.env['DATADIR'] = os.path.join(conf.env['PREFIX'], 'share')
 		if Options.options.configdir:
 			conf.env['CONFIGDIR'] = Options.options.configdir
 		else:
-			conf.env['CONFIGDIR'] = conf.env['PREFIX'] + '/etc/'
+			conf.env['CONFIGDIR'] = os.path.join(conf.env['PREFIX'], 'etc')
 		if Options.options.htmldir:
 			conf.env['HTMLDIR'] = Options.options.htmldir
 		else:
-			conf.env['HTMLDIR'] = conf.env['DATADIR'] + 'doc/' + Utils.g_module.APPNAME + '/'
+			conf.env['HTMLDIR'] = os.path.join(conf.env['DATADIR'], 'doc', Utils.g_module.APPNAME)
 		if Options.options.mandir:
 			conf.env['MANDIR'] = Options.options.mandir
 		else:
-			conf.env['MANDIR'] = conf.env['DATADIR'] + 'man/'
+			conf.env['MANDIR'] = os.path.join(conf.env['DATADIR'], 'man')
 		if Options.options.lv2dir:
 			conf.env['LV2DIR'] = Options.options.lv2dir
 		else:
 			if Options.options.lv2_user:
 				if sys.platform == "darwin":
-					conf.env['LV2DIR'] = os.getenv('HOME') + '/Library/Audio/Plug-Ins/LV2'
+					conf.env['LV2DIR'] = os.path.join(os.getenv('HOME'), 'Library/Audio/Plug-Ins/LV2')
 				else:
-					conf.env['LV2DIR'] = os.getenv('HOME') + '/.lv2'
+					conf.env['LV2DIR'] = os.path.join(os.getenv('HOME'), '.lv2')
 			else:
 				if sys.platform == "darwin":
 					conf.env['LV2DIR'] = '/Library/Audio/Plug-Ins/LV2'
 				else:
-					conf.env['LV2DIR'] = conf.env['LIBDIR'] + 'lv2/'
+					conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'lv2')
 		
 	conf.env['BINDIRNAME'] = chop_prefix(conf, 'BINDIR')
 	conf.env['LIBDIRNAME'] = chop_prefix(conf, 'LIBDIR')
@@ -236,7 +236,7 @@ def use_lib(bld, obj, libs):
 				obj.uselib_local = 'lib' + l.lower() + ' '
 		
 		if in_headers or in_libs:
-			inc_flag = '-iquote ' + abssrcdir + '/' + l.lower()
+			inc_flag = '-iquote ' + os.path.join(abssrcdir, l.lower())
 			for f in ['CCFLAGS', 'CXXFLAGS']:
 				if not inc_flag in bld.env[f]:
 					bld.env.prepend_value(f, inc_flag)
@@ -324,11 +324,11 @@ def build_dox(bld, name, version, srcdir, blddir):
 	obj.source = 'doc/reference.doxygen.in'
 	obj.target = 'doc/reference.doxygen'
 	if is_child():
-		src_dir = srcdir + '/' + name.lower()
-		doc_dir = blddir + '/default/' + name.lower() + '/doc'
+		src_dir = os.path.join(srcdir, name.lower())
+		doc_dir = os.path.join(blddir, 'default', name.lower(), 'doc')
 	else:
 		src_dir = srcdir
-		doc_dir = blddir + '/default/doc'
+		doc_dir = os.path.join(blddir, 'default', 'doc')
 	obj.dict = {
 		name + '_VERSION' : version,
 		name + '_SRCDIR'  : os.path.abspath(src_dir),
