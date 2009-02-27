@@ -25,8 +25,20 @@ def configure(conf):
 	autowaf.configure(conf)
 
 def build(bld):
-	bld.add_subdirs('control_protocol')
-	bld.add_subdirs('generic_midi')
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		osc.cc
+		osc_controllable.cc
+		interface.cc
+	'''
+	obj.export_incdirs = ['./osc']
+	obj.cxxflags     = '-DPACKAGE=\\\"ardour_cp\\\"'
+	obj.includes     = ['.', './osc']
+	obj.name         = 'libsurfaces'
+	obj.target       = 'surfaces'
+	obj.uselib_local = 'libardour'
+	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.install_path = ''
 	
 def shutdown():
 	autowaf.shutdown()

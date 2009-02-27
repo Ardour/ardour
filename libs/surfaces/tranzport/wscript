@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+import autowaf
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBSURFACES_LIB_VERSION = '4.1.0'
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+
+def build(bld):
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		button_events.cc
+		buttons.cc
+		general.cc
+		init.cc
+		interface.cc
+		io.cc
+		io_usb.cc
+		lcd.cc
+		lights.cc
+		mode.cc
+		panner.cc
+		screen.cc
+		show.cc
+		state.cc
+		wheel.cc
+		wheel_modes.cc
+	'''
+	obj.export_incdirs = ['./tranzport']
+	obj.cxxflags     = '-DPACKAGE=\\\"ardour_tranzport\\\"'
+	obj.includes     = ['.', './tranzport']
+	obj.name         = 'libtranzport'
+	obj.target       = 'tranzport'
+	obj.uselib_local = 'libardour libsurfaces'
+	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.install_path = ''
+	
+def shutdown():
+	autowaf.shutdown()
+

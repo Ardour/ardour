@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+import autowaf
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBSURFACES_LIB_VERSION = '4.1.0'
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+
+def build(bld):
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source = '''
+		bcf_surface.cc
+		bcf_surface_generated.cc
+		controls.cc
+		dummy_port.cc
+		interface.cc
+		mackie_button_handler.cc
+		mackie_control_protocol.cc
+		mackie_control_protocol_poll.cc
+		mackie_jog_wheel.cc
+		mackie_midi_builder.cc
+		mackie_port.cc
+		mackie_surface.cc
+		mackie_surface_generated.cc
+		midi_byte_array.cc
+		route_signal.cc
+		surface.cc
+		surface_port.cc
+		types.cc
+	'''
+	obj.export_incdirs = ['./mackie']
+	obj.cxxflags     = '-DPACKAGE=\\\"ardour_mackie\\\"'
+	obj.includes     = ['.', './mackie']
+	obj.name         = 'libmackie'
+	obj.target       = 'mackie'
+	obj.uselib_local = 'libardour libsurfaces'
+	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.install_path = ''
+	
+def shutdown():
+	autowaf.shutdown()
+
