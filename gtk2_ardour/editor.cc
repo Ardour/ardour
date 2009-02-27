@@ -3509,15 +3509,6 @@ Editor::State::~State ()
 	delete selection;
 }
 
-UndoAction
-Editor::get_memento () const
-{
-	State *state = new State (this);
-
-	store_state (*state);
-	return bind (mem_fun (*(const_cast<Editor*>(this)), &Editor::restore_state), state);
-}
-
 void
 Editor::store_state (State& state) const
 {

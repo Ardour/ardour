@@ -2360,32 +2360,6 @@ Session::set_global_record_enable (GlobalRouteBooleanState s, void* src)
 	set_global_route_boolean (s, &Route::set_record_enable, src);
 }
 
-#if 0
-UndoAction
-Session::global_mute_memento (void* src)
-{
-	return sigc::bind (mem_fun (*this, &Session::set_global_mute), get_global_route_boolean (&Route::muted), src);
-}
-
-UndoAction
-Session::global_metering_memento (void* src)
-{
-	return sigc::bind (mem_fun (*this, &Session::set_global_route_metering), get_global_route_metering (), src);
-}
-
-UndoAction
-Session::global_solo_memento (void* src)
-{
-	return sigc::bind (mem_fun (*this, &Session::set_global_solo), get_global_route_boolean (&Route::soloed), src);
-}
-
-UndoAction
-Session::global_record_enable_memento (void* src)
-{
-	return sigc::bind (mem_fun (*this, &Session::set_global_record_enable), get_global_route_boolean (&Route::record_enabled), src);
-}
-#endif
-
 static bool
 accept_all_non_peak_files (const string& path, void *arg)
 {

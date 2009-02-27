@@ -2075,10 +2075,6 @@ public:
 
 	void write_selection ();
 
-	/* history */
-
-	UndoAction get_memento() const;
-
 	XMLNode *before; /* used in *_reversible_command */
 
 	void begin_reversible_command (string cmd_name);

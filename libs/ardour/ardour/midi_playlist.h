@@ -51,7 +51,6 @@ public:
 			nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);
-	UndoAction get_memento() const;
 
 	bool destroy_region (boost::shared_ptr<Region>);
 	

@@ -90,8 +90,6 @@ class MidiRegion : public Region
 	
 	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
 
-	UndoAction get_memento() const;
-
 	boost::shared_ptr<MidiModel> model()             { return midi_source()->model(); }
 	boost::shared_ptr<const MidiModel> model() const { return midi_source()->model(); }
 

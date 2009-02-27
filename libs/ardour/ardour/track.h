@@ -111,7 +111,6 @@ class Track : public Route
 	    XMLNode                      state;
 	    boost::shared_ptr<Processor> processor;
 	    PBD::ID                      id;
-	    UndoAction                   memento;
 	};
 
 	struct FreezeRecord {

@@ -359,8 +359,6 @@ AudioTrack::set_state_part_two ()
 
 	if ((fnode = find_named_node (*pending_state, X_("freeze-info"))) != 0) {
 
-		
-		_freeze_record.have_mementos = false;
 		_freeze_record.state = Frozen;
 		
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
@@ -862,7 +860,6 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	}
 
 	_freeze_record.processor_info.clear ();
-	_freeze_record.have_mementos = true;
 
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock);
@@ -927,14 +924,7 @@ AudioTrack::unfreeze ()
 	if (_freeze_record.playlist) {
 		audio_diskstream()->use_playlist (_freeze_record.playlist);
 
-		if (_freeze_record.have_mementos) {
-
-			for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
-				(*i)->memento ();
-			}
-
-		} else {
-
+		{
 			Glib::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
 			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 				for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {

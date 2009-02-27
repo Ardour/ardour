@@ -285,8 +285,6 @@ MidiTrack::set_state_part_two ()
 
 	if ((fnode = find_named_node (*pending_state, X_("freeze-info"))) != 0) {
 
-		
-		_freeze_record.have_mementos = false;
 		_freeze_record.state = Frozen;
 		
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
