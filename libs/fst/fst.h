@@ -8,22 +8,28 @@
 /**
  * Display FST error message.
  *
- * @param fmt printf-style formatting specification
+ * Set via fst_set_error_function(), otherwise a FST-provided
+ * default will print @a msg (plus a newline) to stderr.
+ *
+ * @param msg error message text (no newline at end).
  */
-extern void fst_error (const char *fmt, ...);
+extern void (*fst_error_callback)(const char *msg);
 
 /**
  * Set the @ref fst_error_callback for error message display.
  *
  * The FST library provides two built-in callbacks for this purpose:
- * default_fst_error_callback().
- *
- * The default will print the message (plus a newline) to stderr.
- *
+ * default_fst_error_callback() and silent_fst_error_callback().
  */
 void fst_set_error_function (void (*func)(const char *));
 
-#include <vst/AEffect.h>
+void  fst_error (const char *fmt, ...);
+
+#define VESTIGE_HEADER
+
+#ifdef VESTIGE_HEADER
+#include <vestige/aeffectx.h>
+#endif
 
 typedef struct _FST FST;
 typedef struct _FSTHandle FSTHandle;
@@ -32,6 +38,7 @@ typedef struct _FSTInfo FSTInfo;
 struct _FSTInfo 
 {
     char *name;
+    char *creator;
     int UniqueID;
     char *Category;
     
@@ -50,30 +57,46 @@ struct _FSTInfo
     char **ParamLabels;
 };
 
+typedef struct AEffect * (*main_entry_t)(audioMasterCallback);
+
 struct _FSTHandle
 {
     void*    dll;
     char*    name;
     char*    nameptr; /* ptr returned from strdup() etc. */
-    AEffect* (*main_entry)(audioMasterCallback);
+    //struct AEffect* (*main_entry)(audioMasterCallback);
+    main_entry_t main_entry;
 
     int plugincnt;
 };
 
 struct _FST 
 {
-    AEffect*    plugin;
+    struct AEffect*    plugin;
     void*       window; /* win32 HWND */
     int         xid; /* X11 XWindow */
     FSTHandle*  handle;
     int 	width;
     int 	height;
+    int		wantIdle;
     int         destroy;
 
-    struct _FST* next;
+    int		want_program;
+    float      *want_params;
+    float      *set_params;
 
+    int         dispatcher_wantcall;
+    int         dispatcher_opcode;
+    int         dispatcher_index;
+    int         dispatcher_val;
+    void *	dispatcher_ptr;
+    float	dispatcher_opt;
+    int		dispatcher_retval;
+
+    struct _FST* next;
     pthread_mutex_t lock;
     pthread_cond_t  window_status_change;
+    pthread_cond_t  plugin_dispatcher_called;
     int             been_activated;
 };
 
@@ -81,8 +104,7 @@ struct _FST
 extern "C" {
 #endif
 
-extern int  fst_init ();
-extern void fst_finish ();
+extern int        fst_init (void* possible_hmodule);
 
 extern FSTHandle* fst_load (const char*);
 extern int        fst_unload (FSTHandle*);
@@ -90,17 +112,26 @@ extern int        fst_unload (FSTHandle*);
 extern FST*       fst_instantiate (FSTHandle*, audioMasterCallback amc, void* userptr);
 extern void       fst_close (FST*);
 
-extern void fst_event_loop_remove_plugin (FST* fst);
-extern void fst_event_loop_add_plugin (FST* fst);
-
+extern int fst_create_editor (FST* fst);
 extern int  fst_run_editor (FST*);
 extern void  fst_destroy_editor (FST*);
 extern int  fst_get_XID (FST*);
+extern void fst_move_window_into_view (FST*);
 
-extern void fst_signal_handler (int sig, siginfo_t* info, void* context);
+extern FSTInfo *fst_get_info (char *dllpathname);
+extern void fst_free_info (FSTInfo *info);
+extern void fst_event_loop_remove_plugin (FST* fst);
+extern int fst_call_dispatcher(FST *fst, int opcode, int index, int val, void *ptr, float opt );
 
-extern FSTInfo *fst_get_info( char *dllpathname );
-extern void fst_free_info( FSTInfo *info );
+/**
+ * Load a plugin state from a file.
+ */
+extern int fst_load_state (FST * fst, char * filename);
+
+/**
+ * Save a plugin state to a file.
+ */
+extern int fst_save_state (FST * fst, char * filename);
 
 #ifdef __cplusplus
 }

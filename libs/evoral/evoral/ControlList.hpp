@@ -19,6 +19,7 @@
 #ifndef EVORAL_CONTROL_LIST_HPP
 #define EVORAL_CONTROL_LIST_HPP
 
+#include <cassert>
 #include <list>
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>

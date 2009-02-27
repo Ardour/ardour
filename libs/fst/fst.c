@@ -3,15 +3,6 @@
 
 #include "fst.h"
 
-
-void 
-default_fst_error_callback (const char *desc)
-{
-	fprintf(stderr, "%s\n", desc);
-}
-
-void (*fst_error_callback)(const char *desc) = &default_fst_error_callback;
-
 void 
 fst_error (const char *fmt, ...)
 {
@@ -24,4 +15,10 @@ fst_error (const char *fmt, ...)
 	va_end (ap);
 }
 
+void 
+default_fst_error_callback (const char *desc)
+{
+	fprintf(stderr, "%s\n", desc);
+}
 
+void (*fst_error_callback)(const char *desc) = &default_fst_error_callback;

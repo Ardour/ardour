@@ -315,7 +315,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 
 #ifdef VST_SUPPORT
-	if (Config->get_use_vst() && fst_init ()) {
+	if (Config->get_use_vst() && fst_init (0)) {
 		return -1;
 	}
 #endif

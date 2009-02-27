@@ -41,9 +41,6 @@
 #include "ardour/utils.h"
 #include "ardour/event_type_map.h"
 #include "ardour/io.h"
-#ifdef VST_SUPPORT
-#include <fst.h>
-#endif
 
 #include "ardour/timestamps.h"
 

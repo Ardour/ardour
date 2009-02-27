@@ -146,14 +146,14 @@ VSTPlugin::get_state()
 	XMLNode *root = new XMLNode (state_node_name());
 	LocaleGuard lg (X_("POSIX"));
 
-	if (_plugin->flags & effFlagsProgramChunks) {
+	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 		/* fetch the current chunk */
 		
 		void* data;
 		long  data_size;
 		
-		if ((data_size = _plugin->dispatcher (_plugin, effGetChunk, 0, 0, &data, false)) == 0) {
+		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
 			return *root;
 		}
 
@@ -262,6 +262,8 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
 
+#ifdef VESTIGE_COMPLETE
+
 		/* i have yet to find or hear of a VST plugin that uses this */
 
 		if (prop.flags & kVstParameterUsesIntegerMinMax) {
@@ -297,6 +299,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
 		desc.label = prop.label;
+#endif
 
 	} else {
 
@@ -325,7 +328,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 bool
 VSTPlugin::load_preset (string name)
 {
-	if (_plugin->flags & effFlagsProgramChunks) {
+	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 		error << _("no support for presets using chunks at this time")
 		      << endmsg;
 		return false;
@@ -336,7 +339,7 @@ VSTPlugin::load_preset (string name)
 bool
 VSTPlugin::save_preset (string name)
 {
-	if (_plugin->flags & effFlagsProgramChunks) {
+	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 		error << _("no support for presets using chunks at this time")
 		      << endmsg;
 		return false;
@@ -359,7 +362,11 @@ VSTPlugin::signal_latency () const
 		return _user_latency;
 	}
 
-	return _plugin->initialDelay;
+#ifdef VESTIGE_HEADER
+        return *((nframes_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
+#else
+	return _plugin->initial_delay;
+#endif
 }
 
 set<uint32_t>
@@ -424,8 +431,13 @@ string
 VSTPlugin::unique_id() const
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), "%d", _plugin->uniqueID);
-	return string (buf);
+
+#ifdef VESTIGE_HEADER
+       snprintf (buf, sizeof (buf), "%d", *((int32_t*) &_plugin->unused_id));
+#else
+       snprintf (buf, sizeof (buf), "%d", _plugin->uniqueID);
+#endif
+       return string (buf);
 }
 
 

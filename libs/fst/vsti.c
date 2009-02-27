@@ -30,7 +30,9 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <jackvst.h>
-#include <vst/aeffectx.h>
+#include <vestige/aeffectx.h>
+#include <pthread.h>
+#include <sched.h>
 
 snd_seq_t *
 create_sequencer (const char* client_name, bool isinput)
@@ -74,7 +76,7 @@ queue_midi (JackVST *jvst, int val1, int val2, int val3)
 		return;
 	}
 		
-	pevent = (struct VstMidiEevent *) vec[0].buf;
+	pevent = (struct VstMidiEvent *) vec[0].buf;
 
 	//  printf("note: %d\n",note);
 	
@@ -104,6 +106,13 @@ void *midireceiver(void *arg)
 	JackVST *jvst = (JackVST* )arg;
 	int val;
 
+	struct sched_param scp;
+	scp.sched_priority = 50;
+
+	// Try to set fifo priority...
+	// this works, if we are root or newe sched-cap manegment is used...
+	pthread_setschedparam( pthread_self(), SCHED_FIFO, &scp ); 
+	
 	while (1) {
 
 		snd_seq_event_input (jvst->seq, &event);

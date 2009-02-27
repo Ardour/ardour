@@ -1,15 +1,13 @@
-
 #include "fst.h"
-#include "vst/aeffectx.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 #define MAX_STRING_LEN 256
 
@@ -49,6 +47,7 @@ static FSTInfo *load_fst_info_file( char *filename ) {
     }
 
     if( (info->name = read_string( fp )) == NULL ) goto error;
+    if( (info->creator = read_string( fp )) == NULL ) goto error;
     if( 1 != fscanf( fp, "%d\n", &info->UniqueID ) ) goto error;
     if( (info->Category = read_string( fp )) == NULL ) goto error;
     if( 1 != fscanf( fp, "%d\n", &info->numInputs ) ) goto error;
@@ -96,6 +95,7 @@ static int save_fst_info_file( FSTInfo *info, char *filename ) {
     }
 
     fprintf( fp, "%s\n", info->name );
+    fprintf( fp, "%s\n", info->creator );
     fprintf( fp, "%d\n", info->UniqueID );
     fprintf( fp, "%s\n", info->Category );
     fprintf( fp, "%d\n", info->numInputs );
@@ -123,7 +123,7 @@ static char *fst_dllpath_to_infopath( char *dllpath ) {
     if( strstr( dllpath, ".dll" ) == NULL ) return NULL;
     
     retval = strdup( dllpath );
-    sprintf( retval + strlen(retval) - 4, ".fst" );
+    sprintf( retval + strlen(retval) - 4, ".fsi" );
     return retval;
 }
 
@@ -144,7 +144,7 @@ static int fst_info_file_is_valid( char *dllpath ) {
 }
 
 static int fst_can_midi( FST *fst ) {
-	AEffect *plugin = fst->plugin;
+	struct AEffect *plugin = fst->plugin;
 	int vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
 
 	if (vst_version >= 2) {
@@ -160,8 +160,9 @@ static int fst_can_midi( FST *fst ) {
 }
 static FSTInfo *fst_info_from_plugin( FST *fst ) {
     FSTInfo *info = (FSTInfo *) malloc( sizeof( FSTInfo ) );
-    AEffect *plugin;
+    struct AEffect *plugin;
     int i;
+    char creator[65];
 
     if( ! fst ) {
 	fst_error( "fst is NULL\n" );
@@ -174,7 +175,19 @@ static FSTInfo *fst_info_from_plugin( FST *fst ) {
     
 
     info->name = strdup(fst->handle->name ); 
+    plugin->dispatcher (plugin, 47 /* effGetVendorString */, 0, 0, creator, 0);
+    if (strlen (creator) == 0) {
+      info->creator = strdup ("Unknown");
+    } else {
+      info->creator = strdup (creator);
+    }
+
+#ifdef VESTIGE_HEADER
+    info->UniqueID = *((int32_t *) &plugin->unused_id);
+#else
     info->UniqueID = plugin->uniqueID;
+#endif
+
     info->Category = strdup( "None" );          // FIXME:  
     info->numInputs = plugin->numInputs;
     info->numOutputs = plugin->numOutputs;
@@ -188,22 +201,20 @@ static FSTInfo *fst_info_from_plugin( FST *fst ) {
     for( i=0; i<info->numParams; i++ ) {
 	char name[20];
 	char label[9];
-		plugin->dispatcher (plugin,
-				    effGetParamName,
-				    i, 0, name, 0);
-		
-		plugin->dispatcher (plugin,
-				    effGetParamLabel,
-				    i, 0, label, 0);
-
+	plugin->dispatcher (plugin,
+			    effGetParamName,
+			    i, 0, name, 0);
 	info->ParamNames[i] = strdup( name );
+	plugin->dispatcher (plugin,
+			    6 /* effGetParamLabel */,
+			    i, 0, label, 0);
 	info->ParamLabels[i] = strdup( label );
     }
     return info;
 }
 
 // most simple one :) could be sufficient.... 
-static long simple_master_callback( AEffect *fx, long opcode, long index, long value, void *ptr, float opt ) {
+static long simple_master_callback( struct AEffect *fx, long opcode, long index, long value, void *ptr, float opt ) {
     if( opcode == audioMasterVersion )
 	return 2;
     else
@@ -227,9 +238,7 @@ FSTInfo *fst_get_info( char *dllpath ) {
 	FSTInfo *info;
 	char *fstpath;
 
-	if( !(h = fst_load( dllpath )) ) {
-		return NULL;
-	}
+	if( !(h = fst_load( dllpath )) ) return NULL;
 	if( !(fst = fst_instantiate( h, simple_master_callback, NULL )) ) {
 	    fst_unload( h );
 	    fst_error( "instantiate failed\n" );
@@ -261,6 +270,7 @@ void fst_free_info( FSTInfo *info ) {
 	free( info->ParamLabels[i] );
     }
     free( info->name );
+    free( info->creator );
     free( info->Category );
     free( info );
 }
