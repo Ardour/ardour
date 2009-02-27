@@ -209,7 +209,7 @@ def configure(conf):
 		conf.env.append_value('CCFLAGS', [ '-std=c99', '-pedantic' ])
 		conf.env.append_value('CXXFLAGS', [ '-ansi', '-Woverloaded-virtual'])
 		append_cxx_flags('-Wall -Wextra -Wno-unused-parameter')
-	append_cxx_flags('-fPIC -DPIC')
+	append_cxx_flags('-fPIC -DPIC -fshow-column')
 	g_step = 2
 	
 def set_local_lib(conf, name, has_objects):
