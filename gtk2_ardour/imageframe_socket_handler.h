@@ -22,13 +22,13 @@
 
 #include <string>
 #include <list>
-#include "editor.h"
 #include "ardour_image_compositor_socket.h"
 
 class TimeAxisViewItem ;
 class ImageFrameView ;
 class MarkerView ;
 class ImageFrameTimeAxisGroup ;
+class Editor ;
 
 /**
  * ImageFrameSocketHandler defines the handler between Ardour and an Image Compositor

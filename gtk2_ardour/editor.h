@@ -527,10 +527,10 @@ class Editor : public PublicEditor
 
 	TimeAxisView*      clicked_axisview;
 	RouteTimeAxisView* clicked_routeview;
-        /** The last RegionView that was clicked on, or 0 if the last click was not
-         * on a RegionView.  This is set up by the canvas event handlers in
-         * editor_canvas_events.cc
-         */
+	/** The last RegionView that was clicked on, or 0 if the last click was not
+	 * on a RegionView.  This is set up by the canvas event handlers in
+	 * editor_canvas_events.cc
+	 */
 	RegionView*        clicked_regionview;
 	RegionSelection    latest_regionviews;
 	uint32_t           clicked_selection;
@@ -833,8 +833,6 @@ class Editor : public PublicEditor
 	    void set_length (double units);
 	    void set_y_axis (double position);
 	};
-
-	friend struct Cursor; /* FIXME: needs access to several private fields */
 
 	Cursor*              playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
@@ -2134,8 +2132,6 @@ public:
 	void end_time_fx (ArdourCanvas::Item*, GdkEvent*);
 
 	/* "whats mine is yours" */
-
-	friend class TimeFXDialog;
 
 	TimeFXDialog* current_timefx;
 
