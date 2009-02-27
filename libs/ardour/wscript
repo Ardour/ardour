@@ -49,6 +49,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
 
 	conf.env.append_value('CXXFLAGS', '-DUSE_RUBBERBAND')
+	conf.define('HAVE_RUBBERBAND', 1)
 	
 	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
 	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
