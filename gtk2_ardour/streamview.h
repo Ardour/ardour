@@ -46,7 +46,6 @@ struct RecBoxInfo {
 	nframes_t                 length;
 };
 
-class PublicEditor;
 class Selectable;
 class RouteTimeAxisView;
 class RegionView;

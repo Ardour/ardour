@@ -2053,6 +2053,9 @@ Editor::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t t
 	drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK, *cursor, time);
 }
 
+/** @param item Canvas item
+ *  @param event GDK event, or 0.
+ */
 bool
 Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
@@ -2064,9 +2067,9 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		return false;
 	}
 	
-	drag_info.item->ungrab (event->button.time);
+	drag_info.item->ungrab (event ? event->button.time : 0);
 
-	if (drag_info.finished_callback) {
+	if (drag_info.finished_callback && event) {
 		drag_info.last_pointer_x = drag_info.current_pointer_x;
 		drag_info.last_pointer_y = drag_info.current_pointer_y;
 		(this->*(drag_info.finished_callback)) (item, event);
