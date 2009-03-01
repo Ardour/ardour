@@ -1682,12 +1682,12 @@ IO::create_ports (const XMLNode& node)
 	if ((prop = node.property ("input-connection")) != 0) {
 
 		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("in"), _("input"));
-		
-		if (!c) {
-			return -1;
-		} 
-
-		num_inputs = c->nchannels();
+	
+		if (c) {
+			num_inputs = c->nchannels ();
+		} else {
+			num_inputs = 0;
+		}
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 
@@ -1698,11 +1698,11 @@ IO::create_ports (const XMLNode& node)
 
 		boost::shared_ptr<Bundle> c = find_possible_bundle(prop->value(), _("out"), _("output"));
 
-		if (!c) {
-			return -1;
-		} 
-
-		num_outputs = c->nchannels ();
+		if (c) {
+			num_outputs = c->nchannels ();
+		} else {
+			num_outputs = 0;
+		}
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
 
@@ -1731,7 +1731,6 @@ IO::create_ports (const XMLNode& node)
 int
 IO::make_connections (const XMLNode& node)
 {
-
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("input-connection")) != 0) {
@@ -1739,9 +1738,11 @@ IO::make_connections (const XMLNode& node)
 		
 		if (!c) {
 			return -1;
-		} 
+		}
 
-		connect_input_ports_to_bundle (c, this);
+		if (n_inputs().get(c->type()) == c->nchannels() && c->ports_are_outputs()) {
+			connect_input_ports_to_bundle (c, this);
+		}
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {
@@ -1757,8 +1758,10 @@ IO::make_connections (const XMLNode& node)
 			return -1;
 		} 
 		
-		connect_output_ports_to_bundle (c, this);
-		
+		if (n_outputs().get(c->type()) == c->nchannels() && c->ports_are_inputs()) {
+			connect_output_ports_to_bundle (c, this);
+		}
+
 	} else if ((prop = node.property ("outputs")) != 0) {
 		if (set_outputs (prop->value())) {
 			error << string_compose(_("improper output channel list in XML node (%1)"), prop->value()) << endmsg;
