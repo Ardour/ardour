@@ -519,6 +519,24 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	button_selection (item, event, item_type);
 
+	//ctrl-drag or right-click-drag on a "range" ruler should start a range drag
+	if (event->type == GDK_BUTTON_PRESS) {
+		if (event->button.button == 3 || ( (event->button.button == 1) && (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier) ))) {
+			if (item_type == TransportMarkerBarItem) {
+				start_range_markerbar_op (item, event, CreateTransportMarker);
+				return true;
+			}
+			if (item_type == RangeMarkerBarItem) {
+				start_range_markerbar_op (item, event, CreateRangeMarker);
+				return true;
+			}
+			if (item_type == CdMarkerBarItem) {
+				start_range_markerbar_op (item, event, CreateCDMarker);
+				return true;
+			}
+		}
+	}
+
 	if (drag_info.item == 0 &&
 	    (Keyboard::is_delete_event (&event->button) ||
 	     Keyboard::is_context_menu_event (&event->button) ||
@@ -581,34 +599,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return true;
 				break;
 
-				
-			case RangeMarkerBarItem:
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {		
-					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
-				} else {
-					start_range_markerbar_op (item, event, CreateRangeMarker); 
-				}	
-				return true;
-				break;
-
-			case CdMarkerBarItem:
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
-				} else {
-					start_range_markerbar_op (item, event, CreateCDMarker); 
-				}
-				return true;
-				break;
-
-			case TransportMarkerBarItem:
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
-				} else {
-					start_range_markerbar_op (item, event, CreateTransportMarker);
-				}
-				return true;
-				break;
-				
 			default:
 				break;
 			}
@@ -1795,6 +1785,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case MarkerViewHandleEndItem:
 	/* </CMT Additions> */
 	  if (drag_info.item && (event->motion.state & Gdk::BUTTON1_MASK ||
+				 (event->motion.state & Gdk::BUTTON3_MASK) ||
 				 (event->motion.state & Gdk::BUTTON2_MASK))) {
 		  if (!from_autoscroll) {
 			  maybe_autoscroll_horizontally (&event->motion);
