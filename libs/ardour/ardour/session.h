@@ -281,6 +281,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	string new_audio_source_name (const string&, uint32_t nchans, uint32_t chan, bool destructive);
 	string new_midi_source_name (const string&);
 	string new_source_path_from_name (DataType type, const string&);
+	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
 
 	void process (nframes_t nframes);
 

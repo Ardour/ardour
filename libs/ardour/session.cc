@@ -1980,6 +1980,88 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 }
 
+RouteList
+Session::new_route_from_template (uint32_t how_many, const std::string& template_path)
+{
+	char name[32];
+	RouteList ret;
+	uint32_t control_id;
+	XMLTree tree;
+
+	if (!tree.read (template_path.c_str())) {
+		return ret;
+	}
+
+	XMLNode* node = tree.root();
+
+	control_id = ntracks() + nbusses() + 1;
+
+	while (how_many) {
+
+		XMLNode node_copy (*node); // make a copy so we can change the name if we need to
+	  
+		std::string node_name = IO::name_from_state (*node_copy.children().front());
+
+		if (route_by_name (node_name) != 0) {
+
+			/* generate a new name by adding a number to the end of the template name */
+
+			uint32_t number = 1;
+
+			do {
+				snprintf (name, sizeof (name), "%s %" PRIu32, node_name.c_str(), number);
+	      
+				number++;
+	      
+				if (route_by_name (name) == 0) {
+					break;
+				}
+	      
+			} while (number < UINT_MAX);
+
+			if (number == UINT_MAX) {
+				fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+				/*NOTREACHED*/
+			}
+
+			IO::set_name_in_state (node_copy, name);
+		}
+
+		try {
+			shared_ptr<Route> route (XMLRouteFactory (node_copy));
+	    
+			if (route == 0) {
+				error << _("Session: cannot create track/bus from template description") << endmsg;
+				goto out;
+			}
+
+			route->set_remote_control_id (control_id);
+			++control_id;
+	    
+			ret.push_back (route);
+		}
+	  
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new route from template") << endmsg;
+			goto out;
+		}
+	  
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			goto out;
+		}
+	  
+		--how_many;
+	}
+
+  out:
+	if (!ret.empty()) {
+		add_routes (ret, true);
+	}
+
+	return ret;
+}
+
 void
 Session::add_routes (RouteList& new_routes, bool save)
 {

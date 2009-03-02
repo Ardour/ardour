@@ -215,6 +215,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	static sigc::signal<int>            PortsCreated;
 
 	static void update_meters();
+	static std::string name_from_state (const XMLNode&);
+	static void set_name_in_state (XMLNode&, const std::string&);
 
   private: 
 	

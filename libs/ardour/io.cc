@@ -2778,4 +2778,24 @@ IO::bundle_channel_name (uint32_t c, uint32_t n) const
 	return "";
 }
 
+string
+IO::name_from_state (const XMLNode& node)
+{
+	const XMLProperty* prop;
+	
+	if ((prop = node.property ("name")) != 0) {
+		return prop->value();
+	} 
+	
+	return string();
+}
 
+void
+IO::set_name_in_state (XMLNode& node, const string& new_name)
+{
+	const XMLProperty* prop;
+	
+	if ((prop = node.property ("name")) != 0) {
+		node.add_property ("name", new_name);
+	} 
+}
