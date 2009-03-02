@@ -1081,19 +1081,32 @@ Editor::markerview_end_handle_end_trim (ArdourCanvas::Item* item, GdkEvent* even
 void
 Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* src)
 {
+	route_redisplay_does_not_sync_order_keys = true;
+	no_route_list_redisplay = true;
+
 	ImageFrameTimeAxis* iftav ;
 	iftav = new ImageFrameTimeAxis(track_name, *this, *session, *track_canvas) ;
 	iftav->set_time_axis_name(track_name, this) ;
 	track_views.push_back(iftav) ;
 
-	TreeModel::Row row = *(route_display_model->append());
 
+	TreeModel::Row row = *(route_display_model->append());
+#if 1 // fake Route workaround
+	row[route_display_columns.route] = 
+		session->new_video_track(iftav->name());
+#endif
 	row[route_display_columns.text] = iftav->name();
 	row[route_display_columns.tv] = iftav;
+	row[route_display_columns.visible] = true;
 	route_list_display.get_selection()->select (row);
 
 	iftav->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
+	iftav->set_old_order_key (route_display_model->children().size() - 1);
 	iftav->gui_changed.connect(mem_fun(*this, &Editor::handle_gui_changes)) ;
+
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
+	route_redisplay_does_not_sync_order_keys = false;
 }
 
 void

@@ -669,6 +669,13 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @return the return value from the socket call
 		 */
 		int read_message(std::string& msg) ;
+
+		/**
+		 * Reads a return message ("RT0"/"RT1") from the Socket
+		 *
+		 * @return true if "RT0" was received,, otherwise false
+		 */
+		bool read_result();
 		
 		/**
 		 * Convenience method to compose and send a success messasge back to the Image Compositor

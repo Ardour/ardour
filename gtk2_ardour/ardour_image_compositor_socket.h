@@ -46,6 +46,8 @@ namespace ardourvis
 	/** the number of characters used to for the size of the image data message */
 	const int32_t IMAGE_DATA_MESSAGE_SIZE_CHARS = 32 ;
 
+	/** the number of characters in a return/reply message */
+	const int32_t RETURN_MSG_SIZE = 3 ;
 	// ------------------------------------------------------------------------- //
 	// Main Actions
 	// we join the action chars with items to create the message

@@ -2115,6 +2115,25 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 	return ret;
 }
 
+boost::shared_ptr<Route>
+Session::new_video_track (string name)
+{
+	uint32_t control_id = ntracks() + nbusses() + 1;
+	shared_ptr<Route> new_route (
+		new Route ( *this, name, -1, -1, -1, -1, Route::Flag(0), ARDOUR::DataType::NIL));
+	new_route->set_remote_control_id (control_id);
+
+	RouteList rl;
+	rl.push_back (new_route);
+        {
+		RCUWriter<RouteList> writer (routes);
+		shared_ptr<RouteList> r = writer.get_copy ();
+                r->insert (r->end(), rl.begin(), rl.end());
+		resort_routes_using (r);
+        }
+	return new_route;
+}
+
 void
 Session::add_routes (RouteList& new_routes, bool save)
 {

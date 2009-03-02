@@ -138,6 +138,7 @@ ImageFrameTimeAxis::~ImageFrameTimeAxis ()
 void
 ImageFrameTimeAxis::set_height (uint32_t h)
 {
+	bool changed = (height == 0) || (h != height);
 	VisualTimeAxis::set_height(h) ;
 	
 	// tell out view helper of the change too
@@ -146,8 +147,10 @@ ImageFrameTimeAxis::set_height (uint32_t h)
 		view->set_height((double) height) ;
 	}
 	
+	if (changed) {
 	// tell those interested that we have had our height changed
-	 gui_changed("track_height",(void*)0); /* EMIT_SIGNAL */
+		gui_changed("track_height",(void*)0); /* EMIT_SIGNAL */
+	}
 }
 
 /**

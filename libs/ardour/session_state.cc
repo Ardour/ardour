@@ -1359,6 +1359,11 @@ Session::load_routes (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->property ("default-type")->value() == "unknown" ) {
+		  std::cout << "ignoring route with type unknown. (video-track)" << std::endl;
+		  // Note: this may mess up remote_control IDs or more..
+		  continue;
+		}
 
 		boost::shared_ptr<Route> route (XMLRouteFactory (**niter));
 

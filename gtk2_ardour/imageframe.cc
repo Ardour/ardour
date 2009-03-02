@@ -35,7 +35,7 @@ ImageFrame::ImageFrame(Group& parentx, ArtPixBuf* pbuf, double x, double y, Gtk:
 : Item(GNOME_CANVAS_ITEM(g_object_new(get_type(),0)))
 {
   item_construct(parentx);
-  set("pixbuf", pbuf, "x", x,"y", y,"width", w,"height", h, 0);
+  set("pixbuf", pbuf, "x", x,"y", y,"width", w,"height", h, "anchor", anchor, 0);
 }
 
 ImageFrame::ImageFrame(Group& parentx)

@@ -1834,6 +1834,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			string coutname = _name;
 			coutname += _("[control]");
 
+			delete _control_outs;
 			_control_outs = new IO (_session, coutname);
 			_control_outs->set_state (**(child->children().begin()));
 

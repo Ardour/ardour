@@ -67,7 +67,7 @@ ImageFrameView::ImageFrameView(const string & item_id,
 	uint32_t width,
 	uint32_t height,
 	uint32_t num_channels)
-  : TimeAxisViewItem(item_id, *parent, *tv, spu, basic_color, start, duration,
+  : TimeAxisViewItem(item_id, *parent, *tv, spu, basic_color, start, duration, false,
 		     TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
 						   TimeAxisViewItem::ShowNameHighlight|
 						   TimeAxisViewItem::ShowFrame|
@@ -86,7 +86,16 @@ ImageFrameView::ImageFrameView(const string & item_id,
 	memcpy(the_rgb_data, rgb_data, (width*height*num_channels)) ;
 
 	ArtPixBuf* pbuf ;
-	pbuf = art_pixbuf_new_rgba(the_rgb_data, width, height, (num_channels * width));
+	if (num_channels==3)
+	  pbuf = art_pixbuf_new_rgb(the_rgb_data, width, height, (num_channels * width));
+	else if (num_channels==4)
+	  pbuf = art_pixbuf_new_rgba(the_rgb_data, width, height, (num_channels * width));
+	else  {
+	  ; // error unsupported image data format
+	  art_free(the_rgb_data);
+	  std::cerr << "imageframe_view: unsupported image data format" << std::endl;
+	  return;
+	}
 	imageframe = 0 ;
 	
 	//calculate our image width based on the track height

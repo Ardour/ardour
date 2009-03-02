@@ -84,18 +84,22 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
-	hide_button.add(*(Gtk::manage(new Gtk::Image(get_xpm("small_x.xpm")))));
+	hide_button.add (*(manage (new Image (::get_icon("hide")))));
+	hide_button.show_all ();
+
 	size_button.signal_button_release_event().connect (mem_fun (*this, &VisualTimeAxis::size_click)) ;
 	visual_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::visual_click)) ;
 	hide_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::hide_click)) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(visual_button, _("Visual options")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("Hide this track")) ;
-		
+
+if (0) {		
+		/* old school - when we used to put an extra row of buttons in place */
 	controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-
+}
 	/* remove focus from the buttons */
 	size_button.unset_flags(Gtk::CAN_FOCUS) ;
 	hide_button.unset_flags(Gtk::CAN_FOCUS) ;
@@ -154,15 +158,21 @@ VisualTimeAxis::set_height(uint32_t h)
 	if (h >= hNormal) {
 		hide_name_label ();
 		show_name_entry ();
-		other_button_hbox.show_all() ;
+		visual_button.show();
+		size_button.show();
+		hide_button.show();
 	} else if (h >= hSmaller) {
 		hide_name_label ();
 		show_name_entry ();
-		other_button_hbox.hide_all() ;
+		visual_button.hide ();
+		size_button.hide ();
+		hide_button.hide();
 	} else if (h >= hSmall) {
 		hide_name_entry ();
 		show_name_label ();
-		other_button_hbox.hide_all() ;
+		visual_button.hide ();
+		size_button.hide ();
+		hide_button.hide ();
 	}
 }
 

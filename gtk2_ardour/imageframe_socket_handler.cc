@@ -316,8 +316,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_removed(const string & track_
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 		
 /**
@@ -357,8 +356,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_renamed(const string & new_id
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 
 //------------------------
@@ -393,8 +391,7 @@ ImageFrameSocketHandler::send_marker_time_axis_removed(const string & track_id, 
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 		
 /**
@@ -434,8 +431,7 @@ ImageFrameSocketHandler::send_marker_time_axis_renamed(const string & new_id, co
 	send_message(msgBuffer.str()) ;
 	
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 
 //---------------------------------
@@ -476,8 +472,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_removed(const string & 
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 
 /**
@@ -521,8 +516,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(const string & 
 	send_message(msgBuffer.str()) ;
 	
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 
 
@@ -561,8 +555,7 @@ ImageFrameSocketHandler::send_imageframe_view_position_change(nframes_t pos, voi
 	send_message(msgBuffer.str()) ;
 	
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 		
 /**
@@ -596,8 +589,7 @@ ImageFrameSocketHandler::send_imageframe_view_duration_change(nframes_t dur, voi
 	send_message(msgBuffer.str()) ;
 	
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 		
 /**
@@ -632,8 +624,7 @@ ImageFrameSocketHandler::send_imageframe_view_renamed(const string & new_id, con
 	send_message(msgBuffer.str()) ;
 	
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 		
 /**
@@ -669,8 +660,7 @@ ImageFrameSocketHandler::send_imageframe_view_removed(const string & item_id, vo
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 
 
@@ -709,8 +699,7 @@ ImageFrameSocketHandler::send_marker_view_position_change(nframes_t pos, void* s
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 		
 /**
@@ -742,8 +731,7 @@ ImageFrameSocketHandler::send_marker_view_duration_change(nframes_t dur, void* s
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }	
 
 		
@@ -780,8 +768,7 @@ ImageFrameSocketHandler::send_marker_view_renamed(const string & new_id, const s
 	send_message(msgBuffer.str()) ;
 	
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 		
 /**
@@ -815,8 +802,7 @@ ImageFrameSocketHandler::send_marker_view_removed(const string & item_id, void* 
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
-	std::string retmsg ;
-	read_message(retmsg) ;
+	read_result();
 }
 
 
@@ -2323,6 +2309,25 @@ ImageFrameSocketHandler::read_message(std::string& msg)
 	return(retcode) ;
 }
 
+/**
+ * Reads a reply message ("RT0"/"RT1") from the Socket
+ *
+ * @return true if "RT0" was received,, otherwise false
+ */
+bool
+ImageFrameSocketHandler::read_result()
+{
+	char buf[(ardourvis::RETURN_MSG_SIZE)+1] ;
+	int retcode = ::recv(theArdourToCompositorSocket, buf, ardourvis::RETURN_MSG_SIZE, 0) ;
+	buf[ardourvis::RETURN_MSG_SIZE]='\0';
+	if (retcode > 0) {
+	  std::cout << "Received Result [" << buf << "]\n" ;
+	  if (retcode == ardourvis::RETURN_MSG_SIZE && buf == ardourvis::RETURN_TRUE) {
+	    return (true);
+	  }
+	}
+	return(false) ;
+}
 
 /**
  * Convenience method to string_compose and send a success messasge back to the Image Compositor

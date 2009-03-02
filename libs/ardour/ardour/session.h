@@ -504,7 +504,13 @@ class Session : public PBD::StatefulDestructible
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
 	RouteList new_audio_route (int input_channels, int output_channels, uint32_t how_many);
 	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
-	
+
+	/* this is a hack put in to support work on video tracks by Robin Gareus. Nobody 
+	   should assume that this works yet (February 2009)
+	*/
+
+ 	boost::shared_ptr<Route> new_video_track (string name);
+
 	void   remove_route (boost::shared_ptr<Route>);
 
 	void   resort_routes ();
