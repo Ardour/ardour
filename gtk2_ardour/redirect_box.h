@@ -99,6 +99,7 @@ class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 	RouteRedirectSelection  & _rr_selection;
 
 	void route_going_away ();
+	bool can_cut_redirects ();
 
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    ModelColumns () {
@@ -183,6 +184,7 @@ class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 	void for_selected_redirects (void (RedirectBox::*pmf)(boost::shared_ptr<ARDOUR::Redirect>));
 	void get_selected_redirects (vector<boost::shared_ptr<ARDOUR::Redirect> >&);
 
+	static Glib::RefPtr<Gtk::Action> cut_action;
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	void paste_redirect_list (const std::list<boost::shared_ptr<ARDOUR::Redirect> >& redirects);
 	

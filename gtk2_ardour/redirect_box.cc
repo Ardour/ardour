@@ -78,6 +78,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 
 RedirectBox* RedirectBox::_current_redirect_box = 0;
+RefPtr<Action> RedirectBox::cut_action;
 RefPtr<Action> RedirectBox::paste_action;
 bool RedirectBox::get_colors = true;
 Gdk::Color* RedirectBox::active_redirect_color;
@@ -254,6 +255,8 @@ RedirectBox::show_redirect_menu (gint arg)
 		plugin_menu_item->set_submenu (_plugin_selector.plugin_menu());
 	}
 
+	cut_action->set_sensitive (can_cut_redirects ());
+	
 	paste_action->set_sensitive (!_rr_selection.redirects.empty());
 
 	redirect_menu->popup (1, arg);
@@ -762,6 +765,23 @@ RedirectBox::rename_redirects ()
 	}
 }
 
+bool
+RedirectBox::can_cut_redirects ()
+{
+	vector<boost::shared_ptr<Redirect> > sel;
+	get_selected_redirects (sel);
+	
+	/* cut_redirects () does not cut inserts or sends */
+	for (vector<boost::shared_ptr<Redirect> >::const_iterator i = sel.begin (); i != sel.end (); ++i) {
+
+		if (boost::dynamic_pointer_cast<PluginInsert>(*i) != 0) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void
 RedirectBox::cut_redirects ()
 {
@@ -1206,8 +1226,8 @@ RedirectBox::register_actions ()
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),  sigc::ptr_fun (RedirectBox::rb_clear));
 
 	/* standard editing stuff */
-	act = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),  sigc::ptr_fun (RedirectBox::rb_cut));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	cut_action = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),  sigc::ptr_fun (RedirectBox::rb_cut));
+	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);
 	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),  sigc::ptr_fun (RedirectBox::rb_copy));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 
