@@ -3317,18 +3317,6 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	double cy = drag_info.grab_y + drag_info.cumulative_y_drag + dy;
 
-	// calculate zero crossing point. back off by .01 to stay on the
-	// positive side of zero
-	double zero_gain_y = (1.0 - ZERO_GAIN_FRACTION) * line->height() - .01;
-
-	// line->parent_group().i2w(_unused, zero_gain_y);
-
-	// make sure we hit zero when passing through
-	if ((cy < zero_gain_y and (cy - dy) > zero_gain_y)
-			or (cy > zero_gain_y and (cy - dy) < zero_gain_y)) {
-		cy = zero_gain_y;
-	}
-
 	drag_info.cumulative_y_drag = cy - drag_info.grab_y;
 
 	cy = max (0.0, cy);
