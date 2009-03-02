@@ -18,6 +18,7 @@
 */
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cfloat>
 #include <unistd.h>
@@ -33,16 +34,15 @@ using namespace PBD;
 int
 curvetest (string filename)
 {
+	// needed to initialize ID objects/counter used
+	// by Curve et al.
+	PBD::ID::init ();
+
 	ifstream in (filename.c_str());
 	stringstream line;
 	Curve c (-1.0, +1.0, 0, true);
 	double minx = DBL_MAX;
 	double maxx = DBL_MIN;
-
-	// needed to initialize ID objects/counter used
-	// by Curve et al.
-
-	PBD::ID::init ();
 
 	while (in) {
 		double x, y;
@@ -71,7 +71,7 @@ curvetest (string filename)
 	c.get_vector (minx, maxx, foo, 1024);
 	
 	for (int i = 0; i < 1024; ++i) {
-	        cout << minx + (((double) i / 1024.0) * (maxx - minx)) << ' ' << foo[i] << endl;
+	        cout << setw(20) << setprecision(20) << minx + (((double) i / 1024.0) * (maxx - minx)) << ' ' << foo[i] << endl;
 	}
 	
 	return 0;
