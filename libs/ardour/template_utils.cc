@@ -88,7 +88,7 @@ find_route_templates (vector<RouteTemplateInfo>& template_names)
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {
-		  continue;
+			continue;
 		}
 
 		XMLNode* root = tree.root();

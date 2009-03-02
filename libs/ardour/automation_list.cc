@@ -282,6 +282,8 @@ AutomationList::serialize_events ()
 	XMLNode* node = new XMLNode (X_("events"));
 	stringstream str;
 
+	str.precision(15);  //10 digits is enough digits for 24 hours at 96kHz
+
 	for (iterator xx = _events.begin(); xx != _events.end(); ++xx) {
 		str << (double) (*xx)->when;
 		str << ' ';
