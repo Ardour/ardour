@@ -47,6 +47,9 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_diskstream.h"
+#include "ardour/template_utils.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/directory_names.h"
 #include "ardour/profile.h"
 
 #include "i18n.h"
@@ -1195,4 +1198,37 @@ RouteUI::adjust_latency ()
 	LatencyDialog dialog (_route->name() + _("latency"), *(_route.get()), _session.frame_rate(), _session.engine().frames_per_cycle());
 }
 
-
+void
+RouteUI::save_as_template ()
+{
+	sys::path path;
+	Glib::ustring safe_name;
+	string name;
+	
+	path = ARDOUR::user_route_template_directory ();
+	
+	if (g_mkdir_with_parents (path.to_string().c_str(), 0755)) {
+		error << string_compose (_("Cannot create route template directory %1"), path.to_string()) << endmsg;
+		return;
+	}
+	
+	Prompter p (true); // modal
+	
+	p.set_prompt (_("Template name:"));
+	switch (p.run()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
+	}
+	
+	p.hide ();
+	p.get_result (name, true);
+	
+	safe_name = legalize_for_path (name);
+	safe_name += temp_suffix;
+	
+	path /= safe_name;
+	
+	_route->save_as_template (path.to_string(), name);
+}

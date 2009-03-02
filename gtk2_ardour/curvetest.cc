@@ -40,6 +40,11 @@ curvetest (string filename)
 	double minx = DBL_MAX;
 	double maxx = DBL_MIN;
 
+	// needed to initialize ID objects/counter used
+	// by Curve et al.
+
+	PBD::ID::init ();
+
 	while (in) {
 		double x, y;
 

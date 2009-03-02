@@ -1144,6 +1144,7 @@ MixerStrip::build_route_ops_menu ()
 
 	MenuList& items = route_ops_menu->items();
 
+	items.push_back (MenuElem (_("Save As Template"), mem_fun(*this, &RouteUI::save_as_template)));
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteUI::route_rename)));
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun (*this, &RouteUI::toggle_route_active)));

@@ -168,6 +168,7 @@ class RouteUI : public virtual AxisView
 	void reversibly_apply_track_boolean (string name, void (ARDOUR::Track::*func)(bool, void*), bool, void *);
 
 	void adjust_latency ();
+	void save_as_template ();
  
    protected:
  	std::vector<sigc::connection> connections;

@@ -32,7 +32,8 @@
 #include <gtkmm/comboboxtext.h>
 
 #include "ardour/types.h"
-#include "ardour/data_type.h"
+#include "ardour/template_utils.h"
+#include "ardour/session.h"
 
 class AddRouteDialog : public Gtk::Dialog
 {
@@ -41,24 +42,38 @@ class AddRouteDialog : public Gtk::Dialog
 	~AddRouteDialog ();
 
 	bool track ();
-	ARDOUR::DataType type();
-	std::string name_template ();
 	int channels ();
 	int count ();
+
+	std::string name_template ();
+	std::string track_template ();
+
+	ARDOUR::DataType type();
 	ARDOUR::TrackMode mode();
 
   private:
 	Gtk::Entry name_template_entry;
 	Gtk::RadioButton track_button;
 	Gtk::RadioButton bus_button;
+	Gtk::RadioButton template_button;
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText track_mode_combo;
-	Gtk::Frame aframe;
-	Gtk::Frame ccframe;
+	Gtk::ComboBoxText track_template_combo;
 
+	std::vector<ARDOUR::RouteTemplateInfo> route_templates;
+	
 	void track_type_chosen ();
+	void refill_track_templates ();
+
+	Gtk::HBox* hbox3;
+	Gtk::HBox* hbox9;
+	Gtk::HBox* hbox4;
+	
+	void reset_template_option_visibility ();
+	
+	void on_show ();
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */
