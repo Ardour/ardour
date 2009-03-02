@@ -17,6 +17,7 @@
 
 */
 
+#include <cstdio>
 #include <pbd/stacktrace.h>
 #include <iostream>
 

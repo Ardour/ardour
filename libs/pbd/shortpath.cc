@@ -17,6 +17,7 @@
 
 */
 
+#include <stdint.h>
 #include <pbd/shortpath.h>
 
 using namespace Glib;

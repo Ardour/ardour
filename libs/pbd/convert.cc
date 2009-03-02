@@ -17,6 +17,7 @@
 
 */
 
+#include <cstdio>
 #include <cmath>
 #include <locale>
 #include <algorithm>
