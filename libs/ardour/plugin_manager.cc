@@ -309,6 +309,7 @@ PluginManager::ladspa_discover (string path)
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
 	const char *errstr;
+	bool first = true;
 
 	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
 		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
@@ -360,7 +361,23 @@ PluginManager::ladspa_discover (string path)
 			}
 		}
 
-		_ladspa_plugin_info.push_back (info);
+		if(_ladspa_plugin_info.empty()){
+			_ladspa_plugin_info.push_back (info);
+		}
+
+		//Ensure that the plugin is not already in the plugin list.
+
+		bool found = false;
+
+		for (PluginInfoList::const_iterator i = _ladspa_plugin_info.begin(); i != _ladspa_plugin_info.end(); ++i) {
+			if(0 == info->unique_id.compare((*i)->unique_id)){
+			      found = true;
+			}
+		}
+
+		if(!found){
+		    _ladspa_plugin_info.push_back (info);
+		}
 	}
 
 // GDB WILL NOT LIKE YOU IF YOU DO THIS
