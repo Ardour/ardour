@@ -593,6 +593,9 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			case MarkerBarItem:
 			case TempoBarItem:
 			case MeterBarItem:
+			case TransportMarkerBarItem:
+			case RangeMarkerBarItem:
+			case CdMarkerBarItem:
 				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 					start_cursor_grab_no_stop(&playhead_cursor->canvas_item, event);
 				}
