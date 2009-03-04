@@ -82,6 +82,7 @@ class NewSessionDialog;
 class LocationUI;
 class ThemeManager;
 class BundleManager;
+class ArdourStartup;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -109,6 +110,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
   public:
 	ARDOUR_UI (int *argcp, char **argvp[]);
 	~ARDOUR_UI();
+
+	void run_startup ();
 
 	void show ();
 	bool shown() { return shown_flag; }
@@ -258,49 +261,15 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_options_window ();
 
   private:
-	struct GlobalClickBox : public Gtk::VBox {
-	    Gtkmm2ext::ClickBox  *box;
-	    Gtk::Frame      frame;
-	    Gtk::Label      label;
-	    vector<string> &strings;
-	    Gtk::Adjustment adjustment;
-
-	    static void printer (char buf[32], Gtk::Adjustment &adj, void *arg);
-
-	    GlobalClickBox (const string &str, vector<string> &vs)
-		    : strings (vs),
-		      adjustment (0, 0, vs.size() - 1, 1, 1, 0) {
-		    box = new Gtkmm2ext::ClickBox (&adjustment, "ClickButton");
-		    label.set_text (str);
-		    label.set_name ("GlobalButtonLabel");
-		    frame.add (*box);
-		    frame.set_shadow_type (Gtk::SHADOW_IN);
-		    pack_start (label);
-		    pack_start (frame);
-		    box->set_print_func (printer, this);
-		    box->set_wrap (true);
-	    };
-	};
-
-	ARDOUR::AudioEngine                 *engine;
-	ARDOUR::Session                     *session;
-
-	Gtk::Tooltips          _tooltips;
+	ArdourStartup*      _startup;
+	ARDOUR::AudioEngine *engine;
+	ARDOUR::Session      *session;
+	Gtk::Tooltips        _tooltips;
 
 	void                goto_editor_window ();
 	void                goto_mixer_window ();
 	void                toggle_editor_mixer_on_top ();
 	bool                _mixer_on_top;
-
-	Gtk::Table               adjuster_table;
-	Gtk::Frame               adjuster_frame;
-	Gtk::Fixed               adjuster_base;
-
-	GlobalClickBox     *online_control_button;
-	vector<string>      online_control_strings;
-
-	GlobalClickBox    *crossfade_time_button;
-	vector<string>     crossfade_time_strings;
 
 	Gtk::ToggleButton   preroll_button;
 	Gtk::ToggleButton   postroll_button;

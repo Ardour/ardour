@@ -94,6 +94,7 @@ typedef uint64_t microseconds_t;
 #include "session_metadata_dialog.h"
 #include "gain_meter.h"
 #include "route_time_axis.h"
+#include "startup.h"
 
 #include "i18n.h"
 
@@ -176,11 +177,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	about = 0;
 	splash = 0;
-
-	if (ARDOUR_COMMAND_LINE::session_name.length()) {	
-		/* only show this if we're not going to post the new session dialog */
-		show_splash ();
-	}
+	_startup = 0;
 
 	if (theArdourUI == 0) {
 		theArdourUI = this;
@@ -278,6 +275,17 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
 
 	platform_setup ();
+}
+
+void
+ARDOUR_UI::run_startup ()
+{
+	if (_startup == 0) {
+		_startup = new ArdourStartup ();
+	}
+
+	_startup->present ();
+	main().run();
 }
 
 int
@@ -1652,13 +1660,6 @@ ARDOUR_UI::map_transport_state ()
 }
 
 void
-ARDOUR_UI::GlobalClickBox::printer (char buf[32], Adjustment &adj, void *arg)
-{
-	snprintf (buf, sizeof(buf), "%s", ((GlobalClickBox *) arg)->strings[
-		(int) adj.get_value()].c_str());
-}
-
-void
 ARDOUR_UI::engine_stopped ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_stopped));
@@ -2225,8 +2226,8 @@ ARDOUR_UI::end_loading_messages ()
 void
 ARDOUR_UI::loading_message (const std::string& msg)
 {
-	show_splash ();
-	splash->message (msg);
+	// show_splash ();
+	// splash->message (msg);
 	flush_pending ();
 }
 

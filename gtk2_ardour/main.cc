@@ -382,6 +382,8 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
+	ui->run_startup ();
+
 	ui->run (text_receiver);
 	ui = 0;
 

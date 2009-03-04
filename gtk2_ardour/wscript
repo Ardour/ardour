@@ -196,6 +196,7 @@ def build(bld):
 		simpleline.cc
 		simplerect.cc
 		splash.cc
+                startup.cc
 		streamview.cc
 		tape_region_view.cc
 		tempo_dialog.cc
