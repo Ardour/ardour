@@ -5525,8 +5525,12 @@ msgstr ""
 "men vid punkten det infogades finns bara\n"
 "%3 aktiva signalströmmar.\n"
 "\n"
-"Detta är orimligt - du slängers bort\n"
+"Detta är orimligt - du slänger bort\n"
 "en del av signalen."
+
+#: gtk2_ardour/redirect_box.cc:422 gtk2_ardour/redirect_box.cc:725
+msgid "ardour: weird plugin dialog"
+msgstr "ardour: underlig plugin"
 
 #: ../redirect_box.cc:394
 msgid ""
@@ -7699,3 +7703,55 @@ msgstr "Använd regiontoningar (globalt)"
 msgid "Ranges"
 msgstr "Omfång"
 
+#: gtk2_ardour/mixer_strip.cc:1049
+msgid "Save As Template"
+msgstr "Spara som spårmall"
+
+#: gtk2_ardour/add_route_dialog.cc:68
+msgid "Using this template:"
+msgstr "Med denna spårmall:"
+
+#: gtk2_ardour/add_route_dialog.cc:119
+msgid "Add this many:"
+msgstr "Lägg till:"
+
+
+#: gtk2_ardour/add_route_dialog.cc:144
+msgid "OR"
+msgstr "ELLER"
+
+#: gtk2_ardour/route_ui.cc:1191
+msgid "Template name:"
+msgstr "Namn på spårmall:"
+
+#: gtk2_ardour/add_route_dialog.cc:174
+msgid "Track Mode"
+msgstr "Spårläge"
+
+#: gtk2_ardour/ardour_ui_ed.cc:206
+msgid "Toggle Editor Mixer on Top"
+msgstr "Växla Redigerare & Mixer överst"
+
+#: gtk2_ardour/ardour_ui_ed.cc:449
+msgid "New plugins are active"
+msgstr "Nya insticksprogram är aktiverade"
+
+#: gtk2_ardour/editor_actions.cc:393
+msgid "Add 1 Range Marker"
+msgstr "Lägga till 1 omfångsmarkör"
+
+#: gtk2_ardour/editor_actions.cc:396
+msgid "Add Range Marker(s)"
+msgstr "Lägga till omfångsmarkörer"
+
+#: gtk2_ardour/ardour_ui_ed.cc:597
+msgid "Auto Rebind Controls"
+msgstr "Återkoppla kontroller automatiskt"
+
+#: gtk2_ardour/ardour_ui_ed.cc:514
+msgid "Override muting"
+msgstr "Åsidosätt tystning "
+
+#: gtk2_ardour/editor.cc:1965
+msgid "Add Single Range"
+msgstr "Lägg till enskilt omfång "
