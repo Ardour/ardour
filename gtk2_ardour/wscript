@@ -53,31 +53,8 @@ def configure(conf):
 	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
 
 def build(bld):
-	# Canvas library (plain C)
-	obj = bld.new_task_gen('cc', 'staticlib')
-	obj.source = '''
-		canvas-simpleline.c
-		canvas-simplerect.c
-		canvas-waveview.c
-		gtk-custom-hruler.c
-		gtk-custom-ruler.c
-	'''
-	obj.includes     = ['.']
-	obj.name         = 'libgtk2_ardour_c'
-	obj.target       = 'gtk2_ardour_c'
-	obj.uselib       = 'GNOMECANVAS'
-	obj.uselib_local = 'libardour'
-	obj.install_path = ''
-	obj.cxxflags     = '-DVERSIONSTRING=\\\"' + GTK2_ARDOUR_VERSION + '\\\"'
-	obj.cxxflags     += ' -DPACKAGE=\\\"gtk2_ardour\\\"'
-	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
-			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
-
 	# Program
-	obj = bld.new_task_gen('cxx', 'program')
+	obj = bld.new_task_gen(features = 'cxx cc cprogram')
 	obj.source = '''
 		about.cc
 		actions.cc
@@ -104,11 +81,14 @@ def build(bld):
 		automation_time_axis.cc
 		axis_view.cc
 		bundle_manager.cc
+		canvas-flag.cc
 		canvas-note-event.cc
 		canvas-note.cc
-		canvas-flag.cc
 		canvas-program-change.cc
+		canvas-simpleline.c
+		canvas-simplerect.c
 		canvas-sysex.cc
+		canvas-waveview.c
 		control_point.cc
 		control_point_dialog.cc
 		crossfade_edit.cc
@@ -145,8 +125,8 @@ def build(bld):
 		enums.cc
 		export_channel_selector.cc
 		export_dialog.cc
-		export_filename_selector.cc
 		export_file_notebook.cc
+		export_filename_selector.cc
 		export_format_dialog.cc
 		export_format_selector.cc
 		export_preset_selector.cc
@@ -154,11 +134,12 @@ def build(bld):
 		fft.cc
 		fft_graph.cc
 		fft_result.cc
-		plugin_eq_gui.cc
 		gain_meter.cc
 		generic_pluginui.cc
 		ghostregion.cc
 		global_port_matrix.cc
+		gtk-custom-hruler.c
+		gtk-custom-ruler.c
 		io_selector.cc
 		keyboard.cc
 		keyeditor.cc
@@ -185,6 +166,7 @@ def build(bld):
 		panner_ui.cc
 		piano_roll_header.cc
 		playlist_selector.cc
+		plugin_eq_gui.cc
 		plugin_selector.cc
 		plugin_ui.cc
 		port_group.cc
@@ -236,7 +218,7 @@ def build(bld):
 	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA'
 	obj.uselib       += ' GTKMM GNOMECANVASMM'
 	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libsurfaces
-	                      libgtkmm2ext libgtk2_ardour_c libtaglib'''
+	                      libgtkmm2ext libtaglib'''
 	obj.cxxflags     = '-DVERSIONSTRING=\\\"' + GTK2_ARDOUR_VERSION + '\\\"'
 	obj.cxxflags     += ' -DPACKAGE=\\\"gtk2_ardour\\\"'
 	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIRNAME']) + '\\\"'
