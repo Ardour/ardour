@@ -54,13 +54,13 @@ class AudioTrack : public Track
 	int use_diskstream (const PBD::ID& id);
 	void use_new_diskstream ();
 
-	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t nframes, nframes_t end_frame);
+	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t nframes, nframes_t end_frame, bool enable_processing = true);
 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
 
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&);
+	boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
 
 	int set_state(const XMLNode& node);
 
