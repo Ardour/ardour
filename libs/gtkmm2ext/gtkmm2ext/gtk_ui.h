@@ -120,6 +120,8 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	void set_tip (Gtk::Widget *w, const gchar *tip, const gchar *hlp);
 	void idle_add (int (*func)(void *), void *arg);
 
+	Gtk::Main& main() const { return *theMain; }
+
 	template<class T> static bool idle_delete (T *obj) { delete obj; return false; }
 	template<class T> static void delete_when_idle (T *obj) {
 		Glib::signal_idle().connect (bind (slot (&UI::idle_delete<T>), obj));
@@ -139,7 +141,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
 
 	static pthread_t the_gui_thread() { return gui_thread; }
-
+	
   protected:
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len, 
