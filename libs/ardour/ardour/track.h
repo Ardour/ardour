@@ -83,6 +83,8 @@ class Track : public Route
 	XMLNode&    get_template();
 	virtual int set_state(const XMLNode& node) = 0;
 
+	static void zero_diskstream_id_in_xml (XMLNode&);
+
 	PBD::Controllable& rec_enable_control() { return _rec_enable_control; }
 
 	bool record_enabled() const;

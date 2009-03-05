@@ -52,7 +52,8 @@ class AudioTrack : public Track
 
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
-	
+	void use_new_diskstream ();
+
 	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t nframes, nframes_t end_frame);
 
 	void freeze (InterThreadInfo&);
