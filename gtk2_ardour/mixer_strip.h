@@ -192,6 +192,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void diskstream_changed ();
 
 	Gtk::Menu *send_action_menu;
+	Gtk::MenuItem* rename_menu_item;
 	void build_send_action_menu ();
 
 	void new_send ();

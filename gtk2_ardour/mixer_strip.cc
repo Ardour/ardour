@@ -1146,6 +1146,7 @@ MixerStrip::build_route_ops_menu ()
 
 	items.push_back (MenuElem (_("Save As Template"), mem_fun(*this, &RouteUI::save_as_template)));
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteUI::route_rename)));
+	rename_menu_item = &items.back();
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun (*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
@@ -1181,8 +1182,7 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 
 		Menu_Helpers::MenuList& items = route_ops_menu->items();
 		/* do not allow rename if the track is record-enabled */
-		static_cast<MenuItem*> (&items.front())->set_sensitive (!_route->record_enabled());
-
+		rename_menu_item->set_sensitive (!_route->record_enabled());
 		route_ops_menu->popup (1, ev->time);
 	}
 	return FALSE;
