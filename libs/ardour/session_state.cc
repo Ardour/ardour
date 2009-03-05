@@ -1408,8 +1408,10 @@ Session::XMLRouteFactory (const XMLNode& node)
 	
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
-	if (prop)
+
+	if (prop) {
 		type = DataType(prop->value());
+	} 
 	
 	assert(type != DataType::NIL);
 

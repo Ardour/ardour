@@ -51,21 +51,8 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _immediate_events(1024) // FIXME: size?
 	, _note_mode(Sustained)
 {
-	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
+	use_new_diskstream ();
 
-	if (_flags & Hidden) {
-		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Hidden);
-	} else {
-		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Recordable);
-	}
-
-	assert(mode != Destructive);
-
-	boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, name, dflags));
-	_session.add_diskstream (ds);
-
-	set_diskstream (boost::dynamic_pointer_cast<MidiDiskstream> (ds));
-	
 	_declickable = true;
 	_freeze_record.state = NoFreeze;
 	_saved_meter_point = _meter_point;
@@ -98,6 +85,24 @@ MidiTrack::~MidiTrack ()
 {
 }
 
+void
+MidiTrack::use_new_diskstream ()
+{
+	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
+
+	if (_flags & Hidden) {
+		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Hidden);
+	} else {
+		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Recordable);
+	}
+
+	assert(_mode != Destructive);
+
+	boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, name(), dflags));
+	_session.add_diskstream (ds);
+
+	set_diskstream (boost::dynamic_pointer_cast<MidiDiskstream> (ds));
+}	
 
 int
 MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
@@ -191,12 +196,22 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 	} else {
 		
 		PBD::ID id (prop->value());
+		PBD::ID zero ("0");
 		
-		if (use_diskstream (id)) {
+		/* this wierd hack is used when creating tracks from a template. there isn't
+		   a particularly good time to interpose between setting the first part of
+		   the track state (notably Route::set_state() and the track mode), and the
+		   second part (diskstream stuff). So, we have a special ID for the diskstream
+		   that means "you should create a new diskstream here, not look for
+		   an old one.
+		*/
+		
+		if (id == zero) {
+			use_new_diskstream ();
+		} else if (use_diskstream (id)) {
 			return -1;
 		}
 	}
-
 
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
@@ -214,7 +229,11 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 
 	pending_state = const_cast<XMLNode*> (&node);
 
-	_session.StateReady.connect (mem_fun (*this, &MidiTrack::set_state_part_two));
+	if (_session.state_of_the_state() & Session::Loading) {
+		_session.StateReady.connect (mem_fun (*this, &MidiTrack::set_state_part_two));
+	} else {
+		set_state_part_two ();
+	}
 
 	return 0;
 }

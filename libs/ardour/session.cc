@@ -2024,8 +2024,10 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				/*NOTREACHED*/
 			}
 
-			IO::set_name_in_state (node_copy, name);
+			IO::set_name_in_state (*node_copy.children().front(), name);
 		}
+
+		Track::zero_diskstream_id_in_xml (node_copy);
 
 		try {
 			shared_ptr<Route> route (XMLRouteFactory (node_copy));
@@ -2035,6 +2037,15 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				goto out;
 			}
 
+			if (boost::dynamic_pointer_cast<Track>(route)) {
+				/* force input/output change signals so that the new diskstream
+				   picks up the configuration of the route. During session
+				   loading this normally happens in a different way.
+				*/
+				route->input_changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
+				route->output_changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
+			}
+			
 			route->set_remote_control_id (control_id);
 			++control_id;
 	    

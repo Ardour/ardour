@@ -50,7 +50,7 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 }
 
 Track::Track (Session& sess, const XMLNode& node, DataType default_type)
-	: Route (sess, node)
+	: Route (sess, node, default_type)
 	, _rec_enable_control (new RecEnableControllable(*this))
 {
 	_freeze_record.state = NoFreeze;
@@ -228,3 +228,10 @@ Track::set_latency_delay (nframes_t longest_session_latency)
 	_diskstream->set_roll_delay (_roll_delay);
 }
 
+void
+Track::zero_diskstream_id_in_xml (XMLNode& node)
+{
+       if (node.property ("diskstream-id")) {
+               node.add_property ("diskstream-id", "0");
+       }
+}

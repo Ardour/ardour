@@ -83,6 +83,7 @@ class Track : public Route
 	XMLNode&    get_state();
 	XMLNode&    get_template();
 	virtual int set_state(const XMLNode& node) = 0;
+	static void zero_diskstream_id_in_xml (XMLNode&);
 
 	boost::shared_ptr<PBD::Controllable> rec_enable_control() { return _rec_enable_control; }
 

@@ -51,23 +51,7 @@ using namespace PBD;
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode)
 {
-	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
-
-	if (_flags & Hidden) {
-		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Hidden);
-	} else {
-		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Recordable);
-	}
-
-	if (mode == Destructive) {
-		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);
-	}
-
-	boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, name, dflags));
-	
-	_session.add_diskstream (ds);
-
-	set_diskstream (boost::dynamic_pointer_cast<AudioDiskstream> (ds), this);
+	use_new_diskstream ();
 }
 
 AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
@@ -78,6 +62,28 @@ AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
 
 AudioTrack::~AudioTrack ()
 {
+}
+
+void
+AudioTrack::use_new_diskstream ()
+{
+	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
+
+	if (_flags & Hidden) {
+		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Hidden);
+	} else {
+		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Recordable);
+	}
+
+	if (_mode == Destructive) {
+		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);
+	}
+
+	boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, name(), dflags));
+	
+	_session.add_diskstream (ds);
+
+	set_diskstream (boost::dynamic_pointer_cast<AudioDiskstream> (ds), this);
 }
 
 int
@@ -265,8 +271,19 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 	} else {
 		
 		PBD::ID id (prop->value());
+		PBD::ID zero ("0");
 		
-		if (use_diskstream (id)) {
+		/* this wierd hack is used when creating tracks from a template. there isn't
+		   a particularly good time to interpose between setting the first part of
+		   the track state (notably Route::set_state() and the track mode), and the
+		   second part (diskstream stuff). So, we have a special ID for the diskstream
+		   that means "you should create a new diskstream here, not look for
+		   an old one.
+		*/
+		
+		if (id == zero) {
+			use_new_diskstream ();
+		} else if (use_diskstream (id)) {
 			return -1;
 		}
 	}
@@ -288,7 +305,11 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 
 	pending_state = const_cast<XMLNode*> (&node);
 
-	_session.StateReady.connect (mem_fun (*this, &AudioTrack::set_state_part_two));
+	if (_session.state_of_the_state() & Session::Loading) {
+		_session.StateReady.connect (mem_fun (*this, &AudioTrack::set_state_part_two));
+	} else {
+		set_state_part_two ();
+	}
 
 	return 0;
 }

@@ -71,6 +71,7 @@ class AudioTrack : public Track
   private:
 	int  set_diskstream (boost::shared_ptr<AudioDiskstream>, void *);
 	int  deprecated_use_diskstream_connections ();
+	void use_new_diskstream ();
 	void set_state_part_two ();
 	void set_state_part_three ();
 };

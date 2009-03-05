@@ -99,6 +99,7 @@ private:
 			nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
+	void use_new_diskstream ();
 	void set_state_part_two ();
 	void set_state_part_three ();
 

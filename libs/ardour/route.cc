@@ -2224,7 +2224,6 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		child = *niter;
 
 		if (child->name() == IO::state_node_name && call_base) {
-
 			IO::set_state (*child);
 			break;
 		}
