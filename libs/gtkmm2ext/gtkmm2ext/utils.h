@@ -36,15 +36,22 @@ namespace Gtk {
 namespace Gtkmm2ext {
 	void init ();
 
-	void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>, int& width, int& height);
+	void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>, 
+				 int& width, int& height);
 
 	void set_size_request_to_display_given_text (Gtk::Widget &w,
 						     const gchar *text,
 						     gint hpadding,
 						     gint vpadding);
 
-	void set_popdown_strings (Gtk::ComboBoxText&, const std::vector<std::string>&);
-	
+	void set_size_request_to_display_given_text (Gtk::Widget &w,
+					const std::vector<std::string>&,
+						     gint hpadding,
+						     gint vpadding);
+
+	void set_popdown_strings (Gtk::ComboBoxText&, 
+					const std::vector<std::string>&);
+
 	template<class T> void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);
 	}

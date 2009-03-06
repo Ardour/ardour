@@ -188,6 +188,11 @@ ARDOUR_UI::transport_forwarding ()
 void
 ARDOUR_UI::setup_transport ()
 {
+#ifdef GTKOSX
+        const guint32 FUDGE = 38; // Combo's are stupid - they steal space from the entry for the button
+#else
+        const guint32 FUDGE = 24; // Combo's are stupid - they steal space from the entry for the button
+#endif
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
 
@@ -374,11 +379,12 @@ ARDOUR_UI::setup_transport ()
 	shuttle_units_button.set_name (X_("ShuttleButton"));
 	shuttle_units_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
 	
-	shuttle_style_button.set_name (X_("ShuttleButton"));
+	shuttle_style_button.set_name (X_("ShuttleStyleButton"));
 
 	vector<string> shuttle_strings;
 	shuttle_strings.push_back (_("sprung"));
 	shuttle_strings.push_back (_("wheel"));
+	set_size_request_to_display_given_text (shuttle_style_button, shuttle_strings, 6+FUDGE, 10);
 	set_popdown_strings (shuttle_style_button, shuttle_strings);
 	shuttle_style_button.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::shuttle_style_changed));
 
@@ -389,8 +395,7 @@ ARDOUR_UI::setup_transport ()
 
 	mtc_port_changed ();
 	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
-	const guint32 FUDGE = 25; // Combo's are stupid - they steal space from the entry for the button
-	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 2+FUDGE, 10);
+	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 4+FUDGE, 10);
 
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
@@ -878,8 +883,6 @@ ARDOUR_UI::editor_realized ()
 	Config->map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
 
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
-	const guint32 FUDGE = 25; // Combo's are stupid - they steal space from the entry for the button
-	set_size_request_to_display_given_text (shuttle_style_button, _("sprung"), 2+FUDGE, 10);
 	reset_dpi();
 }
 
