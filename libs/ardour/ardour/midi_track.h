@@ -66,7 +66,8 @@ public:
 	void unfreeze ();
 
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region>  bounce_range (nframes_t start, nframes_t end, InterThreadInfo&);
+	boost::shared_ptr<Region>  bounce_range (nframes_t start, nframes_t end, InterThreadInfo&,
+						 bool enable_processing);
 
 	int set_state(const XMLNode& node);
 

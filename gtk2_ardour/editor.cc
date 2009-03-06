@@ -2173,8 +2173,10 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Duplicate range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
 	edit_items.push_back (MenuElem (_("Create chunk from range"), mem_fun(*this, &Editor::create_named_selection)));
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Consolidate range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true)));
-	edit_items.push_back (MenuElem (_("Bounce range to region list"), bind (mem_fun(*this, &Editor::bounce_range_selection), false)));
+	edit_items.push_back (MenuElem (_("Consolidate range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true, false)));
+	edit_items.push_back (MenuElem (_("Consolidate range with processing"), bind (mem_fun(*this, &Editor::bounce_range_selection), true, true)));
+	edit_items.push_back (MenuElem (_("Bounce range to region list"), bind (mem_fun(*this, &Editor::bounce_range_selection), false, false)));
+	edit_items.push_back (MenuElem (_("Bounce range to region list with processing"), bind (mem_fun(*this, &Editor::bounce_range_selection), false, true)));
 	edit_items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_range)));
 }
 

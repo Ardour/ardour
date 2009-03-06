@@ -635,7 +635,7 @@ MidiTrack::bounce (InterThreadInfo& itt)
 
 
 boost::shared_ptr<Region>
-MidiTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
+MidiTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt, bool enable_processing)
 {
 	throw;
 	//vector<MidiSource*> srcs;

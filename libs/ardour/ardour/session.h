@@ -725,7 +725,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* flattening stuff */
 
 	boost::shared_ptr<Region> write_one_track (AudioTrack&, nframes_t start, nframes_t end,
-			bool overwrite, vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot);
+			bool overwrite, vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
+			bool enable_processing = true);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */

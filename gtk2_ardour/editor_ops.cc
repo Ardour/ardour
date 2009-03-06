@@ -3688,7 +3688,7 @@ Editor::freeze_route ()
 }
 
 void
-Editor::bounce_range_selection (bool replace)
+Editor::bounce_range_selection (bool replace, bool enable_processing)
 {
 	if (selection->time.empty()) {
 		return;
@@ -3723,7 +3723,7 @@ Editor::bounce_range_selection (bool replace)
 		itt.progress = false;
 
                 XMLNode &before = playlist->get_state();
-		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt);
+		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt, enable_processing);
 		
 		if (replace) {
 			list<AudioRange> ranges;

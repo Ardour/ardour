@@ -2067,7 +2067,7 @@ public:
 	int  write_region_selection(RegionSelection&);
 	bool write_region (string path, boost::shared_ptr<ARDOUR::AudioRegion>);
 	void bounce_region_selection ();
-	void bounce_range_selection (bool replace);
+	void bounce_range_selection (bool replace, bool enable_processing);
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);

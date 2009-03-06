@@ -78,7 +78,7 @@ class Track : public Route
 	virtual void unfreeze () = 0;
 
 	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;
-	virtual boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&) = 0;
+	virtual boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing = true) = 0;
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();

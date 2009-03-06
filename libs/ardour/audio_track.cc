@@ -722,7 +722,7 @@ AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end
 }
 
 int
-AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes)
+AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes, bool enable_processing)
 {
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
@@ -761,6 +761,9 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 		}
 	}
 
+	// If no processing is required, there's no need to go any further.
+	if (!enable_processing)
+		return 0;
 
 	/* note: only run processors during export. other layers in the machinery
 	   will already have checked that there are no external port processors.
@@ -830,10 +833,10 @@ AudioTrack::bounce (InterThreadInfo& itt)
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
+AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt, bool enable_processing)
 {
 	vector<boost::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt);
+	return _session.write_one_track (*this, start, end, false, srcs, itt, enable_processing);
 }
 
 void
