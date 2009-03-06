@@ -58,6 +58,26 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 }
 
 void
+Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, 
+				const std::vector<std::string>& strings,
+					   gint hpadding, gint vpadding)
+	
+{
+	int width, height;
+	int width_max = 0;
+	int height_max = 0;
+	w.ensure_style ();
+	
+	for (vector<string>::const_iterator i = strings.begin(); 
+		i != strings.end(); ++i) {
+	get_ink_pixel_size (w.create_pango_layout (*i), width, height);
+	width_max = max(width_max,width);
+	height_max = max(height_max, height);
+	}
+	w.set_size_request(width_max + hpadding, height_max + vpadding);
+}
+
+void
 Gtkmm2ext::init ()
 {
 	// Necessary for gettext
