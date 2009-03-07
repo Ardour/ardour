@@ -65,7 +65,9 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 }
 
 Plugin::Plugin (const Plugin& other)
-	: _engine (other._engine)
+	: StatefulDestructible()
+	, Latent()
+	, _engine (other._engine)
 	, _session (other._session)
 	, _info (other._info)
 	, _cycles (0)

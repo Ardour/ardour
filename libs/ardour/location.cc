@@ -43,7 +43,8 @@ using namespace sigc;
 using namespace PBD;
 
 Location::Location (const Location& other)
-	: _name (other._name),
+	: StatefulDestructible(),
+	  _name (other._name),
 	  _start (other._start),
 	  _end (other._end),
 	  _flags (other._flags)

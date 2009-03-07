@@ -1180,7 +1180,6 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 	if (ev->button == 1 || ev->button == 3) {
 		list_route_operations ();
 
-		Menu_Helpers::MenuList& items = route_ops_menu->items();
 		/* do not allow rename if the track is record-enabled */
 		rename_menu_item->set_sensitive (!_route->record_enabled());
 		route_ops_menu->popup (1, ev->time);

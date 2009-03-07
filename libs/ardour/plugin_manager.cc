@@ -313,7 +313,6 @@ PluginManager::ladspa_discover (string path)
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
 	const char *errstr;
-	bool first = true;
 
 	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
 		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
