@@ -50,7 +50,6 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
-#include "plugin_eq_gui.h"
 
 #include "i18n.h"
 
@@ -65,7 +64,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	: PlugUIBase (pi),
 	  button_table (initial_button_rows, initial_button_cols),
 	  output_table (initial_output_rows, initial_output_cols),
-	  eqgui_toggle(_("Freq Analysis")),
 	  hAdjustment(0.0, 0.0, 0.0),
 	  vAdjustment(0.0, 0.0, 0.0),
 	  scroller_view(hAdjustment, vAdjustment),
@@ -99,6 +97,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
 	constraint_hbox->pack_start (eqgui_toggle, false, false);
+	add2(plugin_eq_bin);
 
 	v1_box->pack_start (*smaller_hbox, false, true);
 	v2_box->pack_start (focus_button, false, true);
@@ -123,9 +122,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	else {
 		main_contents.pack_start (hpacker, false, false);
 	}
-
-	eqgui_toggle.set_active (false);
-	eqgui_toggle.signal_toggled().connect( mem_fun(*this, &GenericPluginUI::toggle_plugin_analysis));
 
 	pi->ActiveChanged.connect (bind(mem_fun(*this, &GenericPluginUI::processor_active_changed),
 					boost::weak_ptr<Processor>(pi)));
@@ -836,41 +832,4 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 }
 
 
-void
-GenericPluginUI::toggle_plugin_analysis()
-{
 
-
-
-	if (eqgui_toggle.get_active() && !get_child2()) {
-		// Create the GUI
-		PluginEqGui *foo = new PluginEqGui(insert);
-		pack2( *foo );
-		show_all();
-	} 
-	
-	Gtk::Widget *gui;
-
-	if (!eqgui_toggle.get_active() && (gui = get_child2())) {
-		// Hide & remove
-		gui->hide();
-		remove(*gui);
-
-		delete gui;
-
-		Gtk::Widget *toplevel = get_toplevel();
-		if (!toplevel) {
-			std::cerr << "No toplevel widget?!?!" << std::endl;
-			return;
-		}
-
-		Gtk::Container *cont = dynamic_cast<Gtk::Container *>(toplevel);
-		if (!cont) {
-			std::cerr << "Toplevel widget is not a container?!?" << std::endl;
-			return;
-		}
-
-		Gtk::Allocation alloc(0, 0, 50, 50); // Just make it small
-		toplevel->size_allocate(alloc);
-	}
-}

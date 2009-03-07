@@ -57,6 +57,7 @@
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "keyboard.h"
+#include "plugin_eq_gui.h"
 
 #include "i18n.h"
 
@@ -340,7 +341,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	  plugin (insert->plugin()),
 	  save_button(_("Add")),
 	  bypass_button (_("Bypass")),
-	  latency_gui (*pi, pi->session().frame_rate(), pi->session().get_block_size())
+	  latency_gui (*pi, pi->session().frame_rate(), pi->session().get_block_size()),
+	  eqgui_toggle (_("Freq Analysis"))
 {
 	//preset_combo.set_use_arrows_always(true);
 	update_presets();
@@ -354,6 +356,10 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	insert->ActiveChanged.connect (bind(
 			mem_fun(*this, &PlugUIBase::processor_active_changed),
 			boost::weak_ptr<Processor>(insert)));
+
+	eqgui_toggle.set_active (false);
+	eqgui_toggle.signal_toggled().connect( mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
+
 	
 	bypass_button.set_active (!pi->active());
 
@@ -373,6 +379,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to focus all keyboard events on this plugin window"), "");
 	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
+
+	plugin_eq_bin.set_expanded(true);
 }
 
 void
@@ -456,6 +464,43 @@ PlugUIBase::focus_toggled (GdkEventButton* ev)
 	}
 
 	return true;
+}
+
+void
+PlugUIBase::toggle_plugin_analysis()
+{
+	if (eqgui_toggle.get_active() && !plugin_eq_bin.get_child()) {
+		// Create the GUI
+		PluginEqGui *foo = new PluginEqGui(insert);
+		plugin_eq_bin.add( *foo );
+		plugin_eq_bin.show_all();
+	} 
+	
+	Gtk::Widget *gui;
+
+	if (!eqgui_toggle.get_active() && (gui = plugin_eq_bin.get_child())) {
+		// Hide & remove
+		gui->hide();
+		//plugin_eq_bin.remove(*gui);
+		plugin_eq_bin.remove();
+
+		delete gui;
+
+		Gtk::Widget *toplevel = plugin_eq_bin.get_toplevel();
+		if (!toplevel) {
+			std::cerr << "No toplevel widget?!?!" << std::endl;
+			return;
+		}
+
+		Gtk::Container *cont = dynamic_cast<Gtk::Container *>(toplevel);
+		if (!cont) {
+			std::cerr << "Toplevel widget is not a container?!?" << std::endl;
+			return;
+		}
+
+		Gtk::Allocation alloc(0, 0, 50, 50); // Just make it small
+		toplevel->size_allocate(alloc);
+	}
 }
 
 void

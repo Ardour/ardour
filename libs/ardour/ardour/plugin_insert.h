@@ -111,8 +111,8 @@ class PluginInsert : public Processor
 		_signal_analysis_input_bufferset.ensure_buffers(input_streams(), nframes);
 		_signal_analysis_output_bufferset.ensure_buffers(output_streams(), nframes);
 
-		_signal_analysis_collect_nframes_max = nframes; 
 		_signal_analysis_collected_nframes   = 0;
+		_signal_analysis_collect_nframes_max = nframes; 
 	}
 
   private:

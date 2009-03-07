@@ -246,9 +246,11 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	// buffers for the signal analysis are ensured inside PluginInsert
 	uint32_t n_chans = std::max(inputs, outputs);
 	_bufferset.ensure_buffers(ARDOUR::DataType::AUDIO, n_chans, _buffer_size);
+	_collect_bufferset.ensure_buffers(ARDOUR::DataType::AUDIO, n_chans, _buffer_size);
 
 	ARDOUR::ChanCount chanCount(ARDOUR::DataType::AUDIO, n_chans);
 	_bufferset.set_count(chanCount);
+	_collect_bufferset.set_count(chanCount);
 }
 
 void 
@@ -313,15 +315,79 @@ PluginEqGui::run_impulse_analysis()
 		memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
 		*d = 1.0;
 	}
+
 	uint32_t x,y;
 	x=y=0;
 
-	_plugin->connect_and_run(_bufferset, x, y, _buffer_size, (nframes_t)0);
 
-	// Analyze all output buffers
+
+	_plugin->connect_and_run(_bufferset, x, y, _buffer_size, (nframes_t)0);
+	nframes_t f = _plugin->signal_latency();
+	// Adding user_latency() could be interesting
+
+	// Gather all output, taking latency into account.
 	_impulse_fft->reset();
+		
+	// Silence collect buffers to copy data to, can't use silence() because consecutive calls won't work
 	for (uint32_t i = 0; i < outputs; ++i) {
-		_impulse_fft->analyze(_bufferset.get_audio(i).data(_buffer_size, 0));
+		ARDOUR::AudioBuffer &buf = _collect_bufferset.get_audio(i);
+		ARDOUR::Sample *d = buf.data(_buffer_size, 0);
+		memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
+	}
+
+	if (f == 0) {
+		//std::cerr << "0: no latency, copying full buffer, trivial.." << std::endl;
+		for (uint32_t i = 0; i < outputs; ++i) {
+			memcpy(_collect_bufferset.get_audio(i).data(_buffer_size, 0),
+			       _bufferset.get_audio(i).data(_buffer_size, 0), _buffer_size * sizeof(float));
+		}
+	} else {
+		//int C = 0;
+		//std::cerr << (++C) << ": latency is " << f << " frames, doing split processing.." << std::endl;
+		nframes_t target_offset = 0;
+		nframes_t frames_left = _buffer_size; // refaktoroi
+		do {
+			if (f >= _buffer_size) {
+				//std::cerr << (++C) << ": f (=" << f << ") is larger than buffer_size, still trying to reach the actual output" << std::endl;
+				// there is no data in this buffer regarding to the input!
+				f -= _buffer_size;
+			} else {
+				// this buffer contains either the first, last or a whole bu the output of the impulse
+				// first part: offset is 0, so we copy to the start of _collect_bufferset
+				//             we start at output offset "f"
+				//             .. and copy "buffer size" - "f" - "offset" frames
+
+				nframes_t length = _buffer_size - f - target_offset;
+
+				//std::cerr << (++C) << ": copying " << length << " frames to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
+				for (uint32_t i = 0; i < outputs; ++i) {
+					memcpy(_collect_bufferset.get_audio(i).data(_buffer_size, target_offset),
+                                       		_bufferset.get_audio(i).data(_buffer_size, 0) + f, 
+                                       		length * sizeof(float));
+				}
+
+				target_offset += length;
+				frames_left   -= length;
+				f = 0;
+			}
+			if (frames_left > 0) {
+				// Silence the buffers
+				for (uint32_t i = 0; i < inputs; ++i) {
+					ARDOUR::AudioBuffer &buf = _bufferset.get_audio(i);
+					ARDOUR::Sample *d = buf.data(_buffer_size, 0);
+					memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
+				}
+
+				x=y=0;
+				_plugin->connect_and_run(_bufferset, x, y, _buffer_size, (nframes_t)0);
+			}
+		} while ( frames_left > 0);
+
+	}
+
+
+	for (uint32_t i = 0; i < outputs; ++i) {
+		_impulse_fft->analyze(_collect_bufferset.get_audio(i).data(_buffer_size, 0));
 	}
 
 	// normalize the output
@@ -329,7 +395,6 @@ PluginEqGui::run_impulse_analysis()
 
 	// This signals calls expose_analysis_area()
 	_analysis_area->queue_draw();	
-
 }
 
 bool

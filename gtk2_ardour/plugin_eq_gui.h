@@ -94,6 +94,7 @@ class PluginEqGui : public Gtk::Table
 
 		// buffers		
 		ARDOUR::BufferSet _bufferset;
+		ARDOUR::BufferSet _collect_bufferset;
 
 
 		// dimensions

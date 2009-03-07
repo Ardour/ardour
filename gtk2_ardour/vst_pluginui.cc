@@ -40,11 +40,14 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	preset_box.pack_end (bypass_button, false, false, 10);
 	preset_box.pack_end (save_button, false, false);
 	preset_box.pack_end (preset_combo, false, false);
+	preset_box.pack_end (eqgui_toggle, false, false);
+
 
 	bypass_button.set_active (!insert->active());
 	
 	pack_start (preset_box, false, false);
 	pack_start (socket, true, true);
+	pack_start (plugin_eq_bin, true, true);
 }
 
 VSTPluginUI::~VSTPluginUI ()

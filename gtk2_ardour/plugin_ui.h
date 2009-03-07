@@ -93,6 +93,9 @@ class PlugUIBase : public virtual sigc::trackable
 
 	LatencyGUI latency_gui;
 
+	Gtk::Expander plugin_eq_bin;
+	Gtk::ToggleButton eqgui_toggle;
+
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;
 
@@ -100,6 +103,7 @@ class PlugUIBase : public virtual sigc::trackable
 	void save_plugin_setting (void);
 	bool focus_toggled(GdkEventButton*);
 	void bypass_toggled();
+	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 };
 
@@ -123,8 +127,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::HPaned
 	
 	Gtk::Table button_table;
 	Gtk::Table output_table;
-
-	Gtk::ToggleButton eqgui_toggle;
 
 	Gtk::ScrolledWindow scroller;
 	Gtk::Adjustment hAdjustment;
@@ -211,8 +213,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::HPaned
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
 	void start_touch (ControlUI*);
 	void stop_touch (ControlUI*);
-
-	void toggle_plugin_analysis ();
 
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
 };
