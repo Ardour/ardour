@@ -156,6 +156,7 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 
 	connections.push_back (_route->processors_changed.connect (mem_fun(*this, &ProcessorBox::redisplay_processors)));
 	connections.push_back (_route->GoingAway.connect (mem_fun (*this, &ProcessorBox::route_going_away)));
+	connections.push_back (_route->NameChanged.connect (mem_fun(*this, &ProcessorBox::route_name_changed)));
 
 	redisplay_processors ();
 }
@@ -1118,9 +1119,6 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 			
 			plugin_insert->set_gui (plugin_ui);
 			
-			// change window title when route name is changed
-			_route->NameChanged.connect (bind (mem_fun(*this, &ProcessorBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
-			
 		} else {
 			plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
 			plugin_ui->set_parent (win);
@@ -1378,16 +1376,38 @@ ProcessorBox::rb_edit ()
 }
 
 void
-ProcessorBox::route_name_changed (PluginUIWindow* plugin_ui, boost::weak_ptr<PluginInsert> wpi)
+ProcessorBox::route_name_changed ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &ProcessorBox::route_name_changed), plugin_ui, wpi));
+	ENSURE_GUI_THREAD (mem_fun (*this, &ProcessorBox::route_name_changed));
 
-	boost::shared_ptr<PluginInsert> pi (wpi.lock());
+	boost::shared_ptr<Processor> processor;
+	boost::shared_ptr<PluginInsert> plugin_insert;
+	boost::shared_ptr<Send> send;
 
-	if (pi) {
-		WindowTitle title(Glib::get_application_name());
-		title += generate_processor_title (pi);
-		plugin_ui->set_title (title.get_string());
+	Gtk::TreeModel::Children children = model->children();
+
+	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+  		Gtk::TreeModel::Row row = *iter;
+
+  		processor= row[columns.processor];
+		
+		void* gui = processor->get_gui();
+
+		if (!gui) {
+			continue;
+		}
+
+		/* rename editor windows for sends and plugins */
+
+		WindowTitle title (Glib::get_application_name());
+		
+		if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
+			title += send->name();
+			static_cast<Window*>(gui)->set_title (title.get_string());
+		} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor)) != 0) {
+			title += generate_processor_title (plugin_insert);
+			static_cast<Window*>(gui)->set_title (title.get_string());
+		}
 	}
 }
 

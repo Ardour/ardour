@@ -222,7 +222,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	static void rb_ab_plugins ();
 	static void rb_edit ();
 	
-	void route_name_changed (PluginUIWindow* plugin_ui, boost::weak_ptr<ARDOUR::PluginInsert> pi);
+	void route_name_changed ();
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 };
 
