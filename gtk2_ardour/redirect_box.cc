@@ -158,6 +158,7 @@ RedirectBox::set_route (boost::shared_ptr<Route> r)
 
 	connections.push_back (_route->redirects_changed.connect (mem_fun(*this, &RedirectBox::redisplay_redirects)));
 	connections.push_back (_route->GoingAway.connect (mem_fun (*this, &RedirectBox::route_going_away)));
+	connections.push_back (_route->name_changed.connect (mem_fun(*this, &RedirectBox::route_name_changed)));
 
 	redisplay_redirects (0);
 }
@@ -1149,9 +1150,6 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				
 				plugin_insert->set_gui (plugin_ui);
 				
-				// change window title when route name is changed
-				_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
-				
 			} else {
 				plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
 				plugin_ui->set_parent (win);
@@ -1411,16 +1409,39 @@ RedirectBox::rb_edit ()
 }
 
 void
-RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::weak_ptr<PluginInsert> wpi)
+RedirectBox::route_name_changed (void* src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, wpi));
-	boost::shared_ptr<PluginInsert> pi (wpi.lock());
-	
+	boost::shared_ptr<Redirect> redirect;
+	boost::shared_ptr<Insert> insert;
+	Gtk::TreeModel::Children children = model->children();
 
-	if (pi) {
-		WindowTitle title(Glib::get_application_name());
-		title += generate_redirect_title (pi);
-		plugin_ui->set_title (title.get_string());
+	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+  		Gtk::TreeModel::Row row = *iter;
+
+  		redirect= row[columns.redirect];
+		
+		void* gui = redirect->get_gui();
+
+		if (!gui) {
+			continue;
+		}
+
+		/* rename editor windows for sends and plugins */
+
+		WindowTitle title (Glib::get_application_name());
+		
+		if ((insert = boost::dynamic_pointer_cast<Insert> (redirect)) == 0) {
+			boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (redirect);
+			title += send->name();
+			static_cast<Window*>(gui)->set_title (title.get_string());
+		} else {
+			boost::shared_ptr<PluginInsert> plugin_insert;
+			
+			if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
+				title += generate_redirect_title (plugin_insert);
+			}
+			static_cast<Window*>(gui)->set_title (title.get_string());
+		}
 	}
 }
 

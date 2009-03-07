@@ -221,7 +221,7 @@ class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 	static void rb_deactivate_all ();
 	static void rb_edit ();
 	
-	void route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::weak_ptr<ARDOUR::PluginInsert> pi);
+	void route_name_changed (void* src);
 	std::string generate_redirect_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 };
 
