@@ -47,12 +47,21 @@ class ExportChannelSelector : public Gtk::HBox
 {
   protected:
 	typedef boost::shared_ptr<ARDOUR::ExportChannelConfiguration> ChannelConfigPtr;
-	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
+	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
+	
+	ARDOUR::Session * session;
+	ProfileManagerPtr manager;
 
   public:
+	ExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
+	  : session (session)
+	  , manager (manager)
+	{}
+
 	virtual ~ExportChannelSelector () {}
 	
-	virtual void set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_) = 0;
+	virtual void sync_with_manager () = 0;
+	
 	sigc::signal<void> CriticalSelectionChanged;
 };
 
@@ -61,10 +70,10 @@ class PortExportChannelSelector : public ExportChannelSelector
 
   public:
 
-	PortExportChannelSelector ();
+	PortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
 	~PortExportChannelSelector ();
 	
-	void set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_);
+	void sync_with_manager ();
 
   private:
 
@@ -74,7 +83,6 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 	typedef std::list<ARDOUR::ExportChannelPtr> CahnnelList;
 
-	ARDOUR::Session * session;
 	ARDOUR::ExportProfileManager::ChannelConfigStatePtr state;
 
 	/*** GUI stuff ***/
@@ -189,15 +197,17 @@ class PortExportChannelSelector : public ExportChannelSelector
 class RegionExportChannelSelector : public ExportChannelSelector
 {
   public:
-	RegionExportChannelSelector (ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
+	RegionExportChannelSelector (ARDOUR::Session * session,
+	                             ProfileManagerPtr manager,
+	                             ARDOUR::AudioRegion const & region,
+	                             ARDOUR::AudioTrack & track);
 	
-	virtual void set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_);
+	virtual void sync_with_manager ();
 
   private:
 
 	void handle_selection ();
 
-	ARDOUR::Session * session;
 	ARDOUR::ExportProfileManager::ChannelConfigStatePtr state;
 	boost::shared_ptr<ARDOUR::RegionExportChannelFactory> factory;
 	ARDOUR::AudioRegion const & region;

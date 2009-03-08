@@ -168,8 +168,8 @@ void
 ExportDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorMultiple ());
-	channel_selector.reset (new PortExportChannelSelector ());
+	timespan_selector.reset (new ExportTimespanSelectorMultiple (session, profile_manager));
+	channel_selector.reset (new PortExportChannelSelector (session, profile_manager));
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -198,8 +198,8 @@ ExportDialog::close_dialog ()
 void
 ExportDialog::sync_with_manager ()
 {
-	timespan_selector->set_state (profile_manager->get_timespans().front(), session);
-	channel_selector->set_state (profile_manager->get_channel_configs().front(), session);
+	timespan_selector->sync_with_manager();
+	channel_selector->sync_with_manager();
 	file_notebook->sync_with_manager ();
 
 	update_warnings ();
@@ -363,8 +363,8 @@ void
 ExportRangeDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorSingle (range_id));
-	channel_selector.reset (new PortExportChannelSelector ());
+	timespan_selector.reset (new ExportTimespanSelectorSingle (session, profile_manager, range_id));
+	channel_selector.reset (new PortExportChannelSelector (session, profile_manager));
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -376,8 +376,8 @@ void
 ExportSelectionDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorSingle (X_("selection")));
-	channel_selector.reset (new PortExportChannelSelector ());
+	timespan_selector.reset (new ExportTimespanSelectorSingle (session, profile_manager, X_("selection")));
+	channel_selector.reset (new PortExportChannelSelector (session, profile_manager));
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -401,7 +401,7 @@ ExportRegionDialog::init_components ()
 	Glib::ustring loc_id = profile_manager->set_single_range (region.position(), region.position() + region.length(), region.name());
 
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorSingle (loc_id));
-	channel_selector.reset (new RegionExportChannelSelector (region, track));
+	timespan_selector.reset (new ExportTimespanSelectorSingle (session, profile_manager, loc_id));
+	channel_selector.reset (new RegionExportChannelSelector (session, profile_manager, region, track));
 	file_notebook.reset (new ExportFileNotebook ());
 }

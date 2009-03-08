@@ -40,13 +40,13 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-PortExportChannelSelector::PortExportChannelSelector () :
+PortExportChannelSelector::PortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
+  ExportChannelSelector (session, manager),
   channels_label (_("Channels:"), Gtk::ALIGN_LEFT),
   split_checkbox (_("Split to mono files")),
   max_channels (20),
   channel_view (max_channels)
 {
-
 	channels_hbox.pack_start (channels_label, false, false, 0);
 	channels_hbox.pack_end (channels_spinbutton, false, false, 0);
 	
@@ -78,6 +78,7 @@ PortExportChannelSelector::PortExportChannelSelector () :
 	
 	/* Finalize */
 	
+	sync_with_manager();
 	show_all_children ();
 	
 }
@@ -90,10 +91,9 @@ PortExportChannelSelector::~PortExportChannelSelector ()
 }
 
 void
-PortExportChannelSelector::set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_)
+PortExportChannelSelector::sync_with_manager ()
 {
-	state = state_;
-	session = session_;
+	state = manager->get_channel_configs().front();
 	
 	split_checkbox.set_active (state->config->get_split());
 	channels_spinbutton.set_value (state->config->get_n_chans());
@@ -433,8 +433,11 @@ PortExportChannelSelector::ChannelTreeView::update_selection_text (Glib::ustring
 	update_config ();
 }
 
-RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track) :
-  session (0),
+RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * session,
+                                                          ProfileManagerPtr manager,
+                                                          ARDOUR::AudioRegion const & region,
+                                                          ARDOUR::AudioTrack & track) :
+  ExportChannelSelector (session, manager),
   region (region),
   track (track),
   region_chans (region.n_channels()),
@@ -458,16 +461,15 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::AudioRegion co
 	processed_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
 	vbox.pack_start (processed_button);
 	
+	sync_with_manager();
 	vbox.show_all_children ();
 	show_all_children ();
 }
 
 void
-RegionExportChannelSelector::set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_)
+RegionExportChannelSelector::sync_with_manager ()
 {
-	state = state_;
-	session = session_;
-	
+	state = manager->get_channel_configs().front();
 	handle_selection ();
 }
 

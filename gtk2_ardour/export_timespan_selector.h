@@ -43,26 +43,31 @@ using ARDOUR::CDMarkerFormat;
 
 /// Timespan Selector base
 class ExportTimespanSelector : public Gtk::VBox {
+  protected:
+	typedef std::list<ARDOUR::Location *> LocationList;
+	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
+	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
+
+	typedef boost::shared_ptr<ARDOUR::ExportTimespan> TimespanPtr;
+	typedef std::list<TimespanPtr> TimespanList;
+	typedef boost::shared_ptr<TimespanList> TimespanListPtr;
+	typedef ARDOUR::ExportProfileManager::TimespanStatePtr TimespanStatePtr;
+
   public:
 
-	ExportTimespanSelector ();
+	ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
+	
 	virtual ~ExportTimespanSelector ();
 
-	void set_state (ARDOUR::ExportProfileManager::TimespanStatePtr const state_, ARDOUR::Session * session_);
+	void sync_with_manager ();
 	
 	sigc::signal<void> CriticalSelectionChanged;
 
   protected:
 
-	typedef std::list<ARDOUR::Location *> LocationList;
-	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
-
-	typedef boost::shared_ptr<ARDOUR::ExportTimespan> TimespanPtr;
-	typedef std::list<TimespanPtr> TimespanList;
-	typedef boost::shared_ptr<TimespanList> TimespanListPtr;
-
-	ARDOUR::Session *                              session;
-	ARDOUR::ExportProfileManager::TimespanStatePtr state;
+	ARDOUR::Session * session;
+	ProfileManagerPtr manager;
+	TimespanStatePtr  state;
 
 	virtual void fill_range_list () = 0;
 	
@@ -123,7 +128,7 @@ class ExportTimespanSelector : public Gtk::VBox {
 class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 {
   public:
-	ExportTimespanSelectorMultiple ();
+	ExportTimespanSelectorMultiple (ARDOUR::Session * session, ProfileManagerPtr manager);
 
   private:
 
@@ -138,7 +143,7 @@ class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 class ExportTimespanSelectorSingle : public ExportTimespanSelector
 {
   public:
-	ExportTimespanSelectorSingle (Glib::ustring range_id);
+	ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, Glib::ustring range_id);
 
   private:
 

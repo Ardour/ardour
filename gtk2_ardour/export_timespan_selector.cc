@@ -39,7 +39,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-ExportTimespanSelector::ExportTimespanSelector () :
+ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
+  session (session),
+  manager (manager),
   time_format_label (_("Show Times as:"), Gtk::ALIGN_LEFT)
 {
 
@@ -126,13 +128,10 @@ ExportTimespanSelector::set_time_format_from_state ()
 }
 
 void
-ExportTimespanSelector::set_state (ARDOUR::ExportProfileManager::TimespanStatePtr const state_, ARDOUR::Session * session_)
+ExportTimespanSelector::sync_with_manager ()
 {
-	state = state_;
-	session = session_;
-
+	state = manager->get_timespans().front();
 	fill_range_list ();
-	
 	CriticalSelectionChanged();
 }
 
@@ -293,8 +292,8 @@ ExportTimespanSelector::update_range_name (Glib::ustring const & path, Glib::ust
 
 /*** ExportTimespanSelectorSingle ***/
 
-ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (Glib::ustring range_id) :
-  ExportTimespanSelector (),
+ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, Glib::ustring range_id) :
+  ExportTimespanSelector (session, manager),
   range_id (range_id)
 {
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
@@ -358,8 +357,8 @@ ExportTimespanSelectorSingle::fill_range_list ()
 
 /*** ExportTimespanSelectorMultiple ***/
 
-ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple () :
-  ExportTimespanSelector ()
+ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session * session, ProfileManagerPtr manager) :
+  ExportTimespanSelector (session, manager)
 {
 	range_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	range_view.append_column_editable ("", range_cols.selected);
