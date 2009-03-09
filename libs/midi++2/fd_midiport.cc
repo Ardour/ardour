@@ -92,7 +92,7 @@ FD_MidiPort::list_devices ()
 {
 	PathScanner scanner;
 
-	return scanner (*midi_dirpath, *midi_filename_pattern, false, true);
+	return scanner (*midi_dirpath, *midi_filename_pattern, false, true, false);
 }	
 
 int
