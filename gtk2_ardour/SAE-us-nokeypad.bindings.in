@@ -8,6 +8,7 @@
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>period")
 (gtk_accel_path "<Actions>/Transport/record-roll" "<%PRIMARY%>space")
+(gtk_accel_path "<Actions>/Editor/play-from-edit-point-and-return" "<%LEVEL4%>space")
 
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<%PRIMARY%><%SECONDARY%>less")
 (gtk_accel_path "<Actions>/Editor/align-regions-end-relative" "<%PRIMARY%>less")
