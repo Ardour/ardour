@@ -157,7 +157,7 @@ Editor::remove_route (TimeAxisView *tv)
 		}
 	}
 
-	if (current_mixer_strip->route() == route) {
+	if (current_mixer_strip && (current_mixer_strip->route() == route)) {
 
 		if (next_tv) {
 			set_selected_mixer_strip (*next_tv);
