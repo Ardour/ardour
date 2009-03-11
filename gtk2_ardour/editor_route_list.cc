@@ -82,7 +82,6 @@ Editor::handle_new_route (Session::RouteList& routes)
 		}
 
 		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
-		cerr << "Connect to GA for " << tv << " named " << tv->name() << endl;
 		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
 
@@ -160,21 +159,15 @@ Editor::remove_route (TimeAxisView *tv)
 
 	if (current_mixer_strip->route() == route) {
 
-		cerr << "CMS is the one being deleted\n";
-		
 		if (next_tv) {
-			cerr << "move to " << next_tv->name() << endl;
 			set_selected_mixer_strip (*next_tv);
 		} else {
-			cerr << "no next TV, hide editor mixer strip\n";
-			/* make the editor mixer strip go away setting the
+			/* make the editor mixer strip go away by setting the
 			 * button to inactive (which also unticks the menu option)
 			 */
 			
 			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
 		}
-	} else {
-		cerr << "CMS differs from the deleted one\n";
 	}
 }
 

@@ -170,6 +170,8 @@ class RouteUI : public virtual AxisView
 	std::string m_name;
 	std::string r_name;
 
+	bool self_destruct; 
+
 	void init ();
 	void reset ();
 
