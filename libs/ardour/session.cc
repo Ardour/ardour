@@ -677,8 +677,6 @@ Session::set_worst_io_latencies ()
 void
 Session::when_engine_running ()
 {
-	string first_physical_output;
-
 	/* we don't want to run execute this again */
 
 	BootMessage (_("Set block size and sample rate"));
@@ -725,16 +723,20 @@ Session::when_engine_running ()
 
 		} else {
 			
-			/* default state for Click */
-
-			first_physical_output = _engine.get_nth_physical_audio_output (0);
+			/* default state for Click: dual-mono to first 2 physical outputs */
 			
-			if (first_physical_output.length()) {
-				if (_click_io->add_output_port (first_physical_output, this)) {
-					// relax, even though its an error
-				} else {
-					_clicking = Config->get_clicking ();
+			for (int physport = 0; physport < 2; ++physport) {
+				string physical_output = _engine.get_nth_physical_audio_output (physport);
+			
+				if (physical_output.length()) {
+					if (_click_io->add_output_port (physical_output, this)) {
+						// relax, even though its an error
+					} 
 				}
+			}
+
+			if (_click_io->n_outputs() > 0) {
+				_clicking = Config->get_clicking ();
 			}
 		}
 	}
