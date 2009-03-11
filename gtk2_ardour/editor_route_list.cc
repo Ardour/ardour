@@ -295,9 +295,13 @@ Editor::redisplay_route_list ()
 		return;
 	}
 
+	track_views.clear (); // we will reload as we go along
+
 	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		boost::shared_ptr<Route> route = (*i)[route_display_columns.route];
+
+		track_views.push_back (tv);
 
 		if (tv == 0) {
 			// just a "title" row
@@ -314,7 +318,7 @@ Editor::redisplay_route_list ()
 		}
 
 		bool visible = (*i)[route_display_columns.visible];
-
+		
 		if (visible) {
 			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &edit_controls_vbox);
