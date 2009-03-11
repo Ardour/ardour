@@ -82,6 +82,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		}
 
 		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
+		cerr << "Connect to GA for " << tv << " named " << tv->name() << endl;
 		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
 
@@ -122,6 +123,8 @@ Editor::remove_route (TimeAxisView *tv)
 	TrackViewList::iterator i;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
+	boost::shared_ptr<Route> route;
+	TimeAxisView* next_tv;
 
 	if (tv == entered_track) {
 		entered_track = 0;
@@ -135,6 +138,7 @@ Editor::remove_route (TimeAxisView *tv)
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[route_display_columns.tv] == tv) {
+			route = (*ri)[route_display_columns.route];
 			route_display_model->erase (ri);
 			break;
 		}
@@ -143,14 +147,35 @@ Editor::remove_route (TimeAxisView *tv)
 	route_redisplay_does_not_sync_order_keys = false;
 
 	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
-		track_views.erase (i);
+		i = track_views.erase (i);
+		
+		if (track_views.empty()) {
+			next_tv = 0;
+		} else if (i == track_views.end()) {
+			next_tv = track_views.front();
+		} else {
+			next_tv = (*i);
+		}
 	}
 
-	/* since the editor mixer goes away when you remove a route, set the
-	 * button to inactive and untick the menu option
-	 */
+	if (current_mixer_strip->route() == route) {
 
-	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+		cerr << "CMS is the one being deleted\n";
+		
+		if (next_tv) {
+			cerr << "move to " << next_tv->name() << endl;
+			set_selected_mixer_strip (*next_tv);
+		} else {
+			cerr << "no next TV, hide editor mixer strip\n";
+			/* make the editor mixer strip go away setting the
+			 * button to inactive (which also unticks the menu option)
+			 */
+			
+			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+		}
+	} else {
+		cerr << "CMS differs from the deleted one\n";
+	}
 }
 
 void
