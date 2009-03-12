@@ -448,14 +448,16 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 
 			control_ui->pack_start (control_ui->label, true, true);
 			control_ui->pack_start (*control_ui->button, false, true);
-			control_ui->pack_start (control_ui->automate_button, false, false);
+			//control_ui->pack_start (control_ui->automate_button, false, false);
 
-			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
-		
-			if(plugin->get_parameter (port_index) == 1){
+			if(plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
 			}
 
+			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
+		
+			plugin->ParameterChanged.connect (bind (mem_fun(*this, &GenericPluginUI::toggle_parameter_changed), control_ui));
+	
 			return control_ui;
 		}
 	
@@ -574,9 +576,10 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 		control_ui->meterinfo->packed = true;
 		
 		output_controls.push_back (control_ui);
+
+		plugin->ParameterChanged.connect (bind (mem_fun(*this, &GenericPluginUI::parameter_changed), control_ui));
 	}
 	
-	plugin->ParameterChanged.connect (bind (mem_fun(*this, &GenericPluginUI::parameter_changed), control_ui));
 	return control_ui;
 }
 
@@ -640,6 +643,18 @@ GenericPluginUI::control_adjustment_changed (ControlUI* cui)
 }
 
 void
+GenericPluginUI::toggle_parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
+{
+	if (!cui->ignore_change && cui->port_index == abs_port_id) {
+		if (val > 0.5) {
+			cui->button->set_active (true);
+		} else {
+			cui->button->set_active (false);
+		}
+	}
+}
+
+void
 GenericPluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
 {
 	if (cui->port_index == abs_port_id) {
@@ -668,14 +683,6 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 				break;
 			}
 		}
-	} else if (cui->adjustment == 0) {
-
-		if (val > 0.5) {
-			cui->button->set_active (true);
-		} else {
-			cui->button->set_active (false);
-		}
-
 	} else {
 		if (cui->logarithmic) {
 			val = log(val);
@@ -690,9 +697,9 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 void
 GenericPluginUI::control_port_toggled (ControlUI* cui)
 {
-	if (!cui->ignore_change) {
-		insert->set_parameter (cui->port_index, cui->button->get_active());
-	}
+	cui->ignore_change++;
+	insert->set_parameter (cui->port_index, cui->button->get_active());
+	cui->ignore_change--;
 }
 
 void

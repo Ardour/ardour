@@ -191,6 +191,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	std::vector<string> setup_scale_values(guint32 port_index, ControlUI* cui);
 	void control_adjustment_changed (ControlUI* cui);
 	void parameter_changed (uint32_t, float, ControlUI* cui);
+	void toggle_parameter_changed (uint32_t, float, ControlUI* cui);
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (ControlUI* cui);
