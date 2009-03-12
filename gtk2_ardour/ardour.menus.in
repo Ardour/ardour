@@ -77,8 +77,8 @@
 	           <separator/>
 		   <menuitem action='playhead-to-next-region-boundary'/>
 		   <menuitem action='playhead-to-previous-region-boundary'/>
-		   <menuitem action='playhead-to-next-region-boundary-no-selection'/>
-		   <menuitem action='playhead-to-previous-region-boundary-no-selection'/>
+		   <menuitem action='playhead-to-next-region-boundary-noselection'/>
+		   <menuitem action='playhead-to-previous-region-boundary-noselection'/>
 		   <menuitem action='playhead-to-next-region-sync'/>
 		   <menuitem action='playhead-to-previous-region-sync'/>
 		   <separator/>
