@@ -1769,6 +1769,7 @@ public:
 	void redisplay_route_list();
 	bool ignore_route_list_reorder;
 	bool no_route_list_redisplay;
+	bool sync_track_view_list_and_route_list ();
 
 	void build_route_list_menu ();
 	void show_route_list_menu ();

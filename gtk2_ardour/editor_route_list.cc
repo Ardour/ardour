@@ -295,13 +295,9 @@ Editor::redisplay_route_list ()
 		return;
 	}
 
-	track_views.clear (); // we will reload as we go along
-
 	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		boost::shared_ptr<Route> route = (*i)[route_display_columns.route];
-
-		track_views.push_back (tv);
 
 		if (tv == 0) {
 			// just a "title" row
@@ -332,6 +328,13 @@ Editor::redisplay_route_list ()
 		++n;
 	}
 
+	/* whenever we go idle, update the track view list to reflect the new order.
+	   we can't do this here, because we could mess up something that is traversing
+	   the track order and has caused a redisplay of the list.
+	*/
+
+	Glib::signal_idle().connect (mem_fun (*this, &Editor::sync_track_view_list_and_route_list));
+
 	full_canvas_height = position + canvas_timebars_vsize;
 	vertical_adjustment.set_upper (full_canvas_height);
 	if ((vertical_adjustment.get_value() + canvas_height) > vertical_adjustment.get_upper()) {
@@ -345,6 +348,22 @@ Editor::redisplay_route_list ()
 	if (!route_redisplay_does_not_reset_order_keys && !route_redisplay_does_not_sync_order_keys) {
 		session->sync_order_keys (_order_key);
 	}
+}
+
+bool
+Editor::sync_track_view_list_and_route_list ()
+{
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator i;
+
+	track_views.clear ();
+
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		TimeAxisView *tv = (*i)[route_display_columns.tv];
+		track_views.push_back (tv);
+	}
+	
+	return false; // do not call again (until needed)
 }
 
 void
