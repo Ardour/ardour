@@ -122,12 +122,14 @@
 (gtk_accel_path "<Actions>/Editor/move-selected-tracks-down" "<%PRIMARY%>downarrow")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary" "leftarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary-noselection" "<%LEVEL4%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/tab-to-transient-backwards" "<%PRIMARY%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/nudge-playhead-backward" "<%SECONDARY%>leftarrow")
 (gtk_accel_path "<Actions>/Transport/Rewind" "<%TERTIARY%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/selected-marker-to-previous-region-boundary" "<%PRIMARY%><%TERTIARY%>leftarrow")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary" "rightarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary-noselection" "<%LEVEL4%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/tab-to-transient-forwards" "<%PRIMARY%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/nudge-playhead-forward" "<%SECONDARY%>rightarrow")
 (gtk_accel_path "<Actions>/Transport/Forward" "<%TERTIARY%>rightarrow")
