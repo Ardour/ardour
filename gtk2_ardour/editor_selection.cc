@@ -252,6 +252,16 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_
 }
 
 void
+Editor::get_onscreen_tracks (TrackViewList& tvl)
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		if ((*i)->y_position < canvas_height) {
+			tvl.push_back (*i);
+		}
+	}
+}
+
+void
 Editor::get_relevant_audio_tracks (set<AudioTimeAxisView*>& relevant_tracks)
 {
 	/* step one: get all selected tracks and all tracks in the relevant edit groups */

@@ -78,6 +78,8 @@ CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (LayerModel, layer_model, "layer-model", MoveAddHigher)
 CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)
 CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
+CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
+CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)
 
 /* monitoring, mute, solo etc */
 

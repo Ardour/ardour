@@ -804,6 +804,7 @@ Editor::find_next_region_boundary (nframes64_t pos, int32_t dir, const TrackView
 	nframes64_t distance = max_frames;
 	nframes64_t current_nearest = -1;
 
+
 	for (TrackViewList::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
 		nframes64_t contender;
 		nframes64_t d;
@@ -829,10 +830,45 @@ Editor::find_next_region_boundary (nframes64_t pos, int32_t dir, const TrackView
 	return current_nearest;
 }
 
-void
-Editor::cursor_to_region_boundary (Cursor* cursor, int32_t dir)
+nframes64_t
+Editor::get_region_boundary (nframes64_t pos, int32_t dir, bool with_selection, bool only_onscreen)
 {
-	nframes64_t pos = cursor->current_frame;
+	nframes64_t target;
+	TrackViewList tvl;
+
+	if (with_selection && Config->get_region_boundaries_from_selected_tracks()) {
+
+		if (!selection->tracks.empty()) {
+			
+			target = find_next_region_boundary (pos, dir, selection->tracks);
+			
+		} else {
+			
+			if (only_onscreen || Config->get_region_boundaries_from_onscreen_tracks()) {
+				get_onscreen_tracks (tvl);
+				target = find_next_region_boundary (pos, dir, tvl);
+			} else {
+				target = find_next_region_boundary (pos, dir, track_views);
+			}
+		}
+		
+	} else {
+
+		if (only_onscreen || Config->get_region_boundaries_from_onscreen_tracks()) {
+			get_onscreen_tracks (tvl);
+			target = find_next_region_boundary (pos, dir, tvl);
+		} else {
+			target = find_next_region_boundary (pos, dir, track_views);
+		}
+	}
+	
+	return target;
+}
+
+void
+Editor::cursor_to_region_boundary (bool with_selection, int32_t dir)
+{
+	nframes64_t pos = playhead_cursor->current_frame;
 	nframes64_t target;
 
 	if (!session) {
@@ -844,37 +880,24 @@ Editor::cursor_to_region_boundary (Cursor* cursor, int32_t dir)
 		pos += dir;
 	}
 
-	if (!selection->tracks.empty()) {
-		
-		target = find_next_region_boundary (pos, dir, selection->tracks);
-		
-	} else {
-		
-		target = find_next_region_boundary (pos, dir, track_views);
-	}
-	
-	if (target < 0) {
+	if ((target = get_region_boundary (pos, dir, with_selection, false)) < 0) {
 		return;
 	}
 
 
-	if (cursor == playhead_cursor) {
-		session->request_locate (target);
-	} else {
-		cursor->set_position (target);
-	}
+	session->request_locate (target);
 }
 
 void
-Editor::cursor_to_next_region_boundary (Cursor* cursor)
+Editor::cursor_to_next_region_boundary (bool with_selection)
 {
-	cursor_to_region_boundary (cursor, 1);
+	cursor_to_region_boundary (with_selection, 1);
 }
 
 void
-Editor::cursor_to_previous_region_boundary (Cursor* cursor)
+Editor::cursor_to_previous_region_boundary (bool with_selection)
 {
-	cursor_to_region_boundary (cursor, -1);
+	cursor_to_region_boundary (with_selection, -1);
 }
 
 void
@@ -1022,7 +1045,7 @@ Editor::cursor_to_selection_end (Cursor *cursor)
 }
 
 void
-Editor::selected_marker_to_region_boundary (int32_t dir)
+Editor::selected_marker_to_region_boundary (bool with_selection, int32_t dir)
 {
 	nframes64_t target;
 	Location* loc;
@@ -1054,16 +1077,7 @@ Editor::selected_marker_to_region_boundary (int32_t dir)
 		pos += dir;
 	}
 
-	if (!selection->tracks.empty()) {
-		
-		target = find_next_region_boundary (pos, dir, selection->tracks);
-		
-	} else {
-		
-		target = find_next_region_boundary (pos, dir, track_views);
-	}
-	
-	if (target < 0) {
+	if ((target = get_region_boundary (pos, dir, with_selection, false)) < 0) {
 		return;
 	}
 
@@ -1071,15 +1085,15 @@ Editor::selected_marker_to_region_boundary (int32_t dir)
 }
 
 void
-Editor::selected_marker_to_next_region_boundary ()
+Editor::selected_marker_to_next_region_boundary (bool with_selection)
 {
-	selected_marker_to_region_boundary (1);
+	selected_marker_to_region_boundary (with_selection, 1);
 }
 
 void
-Editor::selected_marker_to_previous_region_boundary ()
+Editor::selected_marker_to_previous_region_boundary (bool with_selection)
 {
-	selected_marker_to_region_boundary (-1);
+	selected_marker_to_region_boundary (with_selection, -1);
 }
 
 void
