@@ -222,6 +222,17 @@ Editor::update_current_screen ()
 			goto almost_done;
 		}
 
+#undef DEBUG_CURRENT_SCREEN
+#if DEBUG_CURRENT_SCREEN
+
+		cerr << "@ " << frame << " last " << last_update_frame << " follow " << _follow_playhead 
+		     << " ret " << session->requested_return_frame()
+		     << " left " << leftmost_frame
+		     << " right " << leftmost_frame + current_page_frames()
+		     << " speed " << session->transport_speed ()
+		     << endl;
+#endif
+
 		/* only update if the playhead is on screen or we are following it */
 
 		if (_follow_playhead && session->requested_return_frame() < 0) {
@@ -234,7 +245,10 @@ Editor::update_current_screen ()
 #undef CONTINUOUS_SCROLL
 #ifndef  CONTINUOUS_SCROLL
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
-					
+
+#ifdef DEBUG_CURRENT_SCREEN
+					cerr << "\trecenter...\n";
+#endif 					
 					if (session->transport_speed() < 0) {
 						if (frame > (current_page_frames()/2)) {
 							center_screen (frame-(current_page_frames()/2));

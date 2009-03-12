@@ -4287,7 +4287,6 @@ Editor::on_key_release_event (GdkEventKey* ev)
 void
 Editor::reset_x_origin (nframes64_t frame)
 {
-	//cerr << "resetting x origin" << endl;
 	queue_visual_change (frame);
 }
 
@@ -4476,12 +4475,19 @@ Editor::post_zoom ()
 void
 Editor::queue_visual_change (nframes64_t where)
 {
-//	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
-//	pending_visual_change.time_origin = where;
+	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
+	
+	/* if we're moving beyond the end, make sure the upper limit of the horizontal adjustment
+	   can reach.
+	*/
+	
+	if (where > session->current_end_frame()) {
+		horizontal_adjustment.set_upper ((where + current_page_frames()) / frames_per_unit);
+	}
+	
+	pending_visual_change.time_origin = where;
 
 	if (pending_visual_change.idle_handler_id < 0) {
-		pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
-		pending_visual_change.time_origin = where;
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
 	}
 }
@@ -4523,7 +4529,7 @@ Editor::idle_visual_changer ()
 		update_fixed_rulers ();
 		redisplay_tempo (true);
 	}
-	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
+	// cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;
 	return 0; /* this is always a one-shot call */
 }
