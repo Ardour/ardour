@@ -267,7 +267,9 @@ fst_init (void* possible_hmodule)
 		return -1;
 	}
 
+#ifdef HAVE_JACK_SET_THREAD_CREATOR
 	jack_set_thread_creator (wine_pthread_create);
+#endif
 
 	return 0;
 }

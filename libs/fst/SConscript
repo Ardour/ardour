@@ -10,7 +10,45 @@ fst_src = glob.glob('*.c')
 Import('env install_prefix libraries')
 fst = env.Clone(CC="winegcc")
 fst.Append (CPPPATH=".")
-fst.Merge ([libraries['glib2']])
+fst.Merge ([
+        libraries['glib2'],
+        libraries['jack']
+        ])
+
+
+#
+# See if JACK supports jack_set_thread_creator()
+#
+
+jack_test_source_file = """
+#include <jack/jack.h>
+#include <pthread.h>
+int
+my_pthread_create (pthread_t* thread_id, const pthread_attr_t* attr, void *(*function)(void*), void* arg)
+{
+    return 0;
+}
+int main(int argc, char **argv)
+{
+    jack_set_thread_creator (my_pthread_create);
+    return 0;
+}
+"""
+def CheckJackSetThreadCreator(context):
+    context.Message('Checking for jack_set_thread_creator()...')
+    result = context.TryLink(jack_test_source_file, '.c')
+    context.Result(result)
+    return result
+
+
+conf = Configure(fst, custom_tests = {
+	'CheckJackSetThreadCreator' : CheckJackSetThreadCreator,
+})
+
+if conf.CheckJackSetThreadCreator():
+    fst.Append(CCFLAGS="-DHAVE_JACK_SET_THREAD_CREATOR")
+
+fst = conf.Finish ()
 
 if fst['VST']:
     a = fst.Object ('fst', 'fst.c')
