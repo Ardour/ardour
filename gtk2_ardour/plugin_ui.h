@@ -38,6 +38,8 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/socket.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/socket.h>
 
@@ -264,6 +266,22 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	
 	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
 	void save_plugin_setting ();
+
+	struct PresetModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    PresetModelColumns() { 
+		    add (name);
+		    add (number);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<int> number;
+	};
+
+	PresetModelColumns preset_columns;
+	Glib::RefPtr<Gtk::ListStore> preset_model;
+	Gtk::ComboBox vst_preset_combo;
+
+	void create_preset_store ();
+	void preset_chosen ();
 };
 #endif // VST_SUPPORT
 

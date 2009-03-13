@@ -70,13 +70,16 @@ VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 
 	/* set rate and blocksize */
 
+	cerr << name() << " dispatch  effSetSampleRate\n";
 	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, 
 			     (float) session.frame_rate());
+	cerr << name() << " dispatch  effSetBlockSize\n";
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, 
 			     session.get_block_size(), NULL, 0.0f);
 	
 	/* set program to zero */
 
+	cerr << name() << " dispatch  effSetProgram\n";
 	_plugin->dispatcher (_plugin, effSetProgram, 0, 0, NULL, 0.0f);
 	
 	Plugin::setup_controls ();
@@ -106,6 +109,7 @@ void
 VSTPlugin::set_block_size (nframes_t nframes)
 {
 	deactivate ();
+	cerr << name() << " dispatch  effSetBlockSize\n";
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, nframes, NULL, 0.0f);
 	activate ();
 }
@@ -150,6 +154,7 @@ VSTPlugin::get_state()
 		void* data;
 		long  data_size;
 		
+		cerr << name() << " dispatch = GetChunk\n";
 		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
 			return *root;
 		}
@@ -253,6 +258,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	desc.min_unbound = false;
 	desc.max_unbound = false;
 
+	cerr << name() << " dispatch ParamProps\n";
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
 
 #ifdef VESTIGE_COMPLETE
@@ -300,6 +306,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		char label[64];
 		label[0] = '\0';
 
+		cerr << name() << " dispatch  effGetParamName\n";
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
 
 		desc.label = label;
@@ -345,6 +352,7 @@ string
 VSTPlugin::describe_parameter (uint32_t param)
 {
 	char name[64];
+	cerr << this->name() << " dispatch  effGetParamName\n";
 	_plugin->dispatcher (_plugin, effGetParamName, param, 0, name, 0);
 	return name;
 }
@@ -378,6 +386,7 @@ VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_
 	float *outs[_plugin->numOutputs];
 	int32_t i;
 
+
 	for (i = 0; i < (int32_t) _plugin->numInputs; ++i) {
 		ins[i] = bufs[min((uint32_t) in_index,maxbuf - 1)] + offset;
 		in_index++;
@@ -398,20 +407,24 @@ VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_
 
 	/* we already know it can support processReplacing */
 
+	cerr << "++++++++++ " << name() << " RUN in " << pthread_self() << endl;
 	_plugin->processReplacing (_plugin, ins, outs, nframes);
-	
+	cerr << "\tdone\n";
+
 	return 0;
 }
 
 void
 VSTPlugin::deactivate ()
 {
+	cerr << "\n\n\n ************ " << name() << " DEACTIVATE in " << pthread_self() << endl;
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 0, NULL, 0.0f);
 }
 
 void
 VSTPlugin::activate ()
 {
+	cerr << "\n\n\n ************ " << name() << " ACTIVATE in " << pthread_self() << endl;
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 1, NULL, 0.0f);
 }
 
@@ -463,6 +476,7 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 {
 	char *first_nonws;
 
+	cerr << name() << " dispatch  paramDisplay\n";
 	_plugin->dispatcher (_plugin, 7 /* effGetParamDisplay */, param, 0, buf, 0);
 
 	if (buf[0] == '\0') {

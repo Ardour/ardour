@@ -129,8 +129,18 @@
 #define kVstMidiType 1
 #define kVstTransportPlaying (1 << 1)
 #define kVstParameterUsesFloatStep (1 << 2)
+
+/* validity flags for a VstTimeINfo structure this info comes from the web */
+
+#define kVstNanosValid (1 << 8)
+#define kVstPpqPosValid (1 << 9)
 #define kVstTempoValid (1 << 10)
 #define kVstBarsValid (1 << 11)
+#define kVstCyclePosValid (1 << 12)
+#define kVstTimeSigValid (1 << 13)
+#define kVstSmpteValid (1 << 14)
+#define kVstClockValid (1 << 15)
+
 #define kVstTransportChanged 1
 
 typedef struct VstMidiEvent
@@ -253,28 +263,24 @@ typedef struct AEffect
 
 typedef struct VstTimeInfo
 {
-	// 00
-	double samplePos;
-	// 08
-	double sampleRate;
-	// unconfirmed 10 18
-	char empty1[8 + 8];
-	// 20?
-	double tempo;
-	// unconfirmed 28 30 38
-	char empty2[8 + 8 + 8];
-	// 40?
-	int timeSigNumerator;
-	// 44?
-	int timeSigDenominator;
-	// unconfirmed 48 4c 50
-	char empty3[4 + 4 + 4];
-	// 54
-	int flags;
+    /* info from online documentation of VST provided by Steinberg */
+
+    double samplePos;
+    double sampleRate;
+    double nanoSeconds;
+    double ppqPos;
+    double tempo;
+    double barStartPos;
+    double cycleStartPos;
+    double cycleEndPos;
+    double timeSigNumerator;
+    double timeSigDenominator;
+    long   smpteOffset;
+    long   smpteFrameRate;
+    long   samplesToNextClock;
+    long   flags;
 
 } VstTimeInfo;
-
-
 
 
 typedef long int (* audioMasterCallback)( AEffect * , long int , long int ,

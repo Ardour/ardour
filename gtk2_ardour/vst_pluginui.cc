@@ -35,11 +35,17 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	: PlugUIBase (pi),
 	  vst (vp)
 {
+	create_preset_store ();
+
 	fst_run_editor (vst->fst());
 
+	preset_box.set_spacing (6);
+	preset_box.set_border_width (6);
 	preset_box.pack_end (bypass_button, false, false, 10);
 	preset_box.pack_end (save_button, false, false);
-	preset_box.pack_end (preset_combo, false, false);
+	preset_box.pack_end (vst_preset_combo, false, false);
+
+	vst_preset_combo.signal_changed().connect (mem_fun (*this, &VSTPluginUI::preset_chosen));
 
 	bypass_button.set_active (!insert->active());
 	
@@ -50,6 +56,17 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 VSTPluginUI::~VSTPluginUI ()
 {
 	// nothing to do here - plugin destructor destroys the GUI
+}
+
+void
+VSTPluginUI::preset_chosen ()
+{
+	int program = vst_preset_combo.get_active_row_number ();
+	cerr << "switch to program " << program << endl;
+	// cant be done here. plugin only expects one GUI thread.
+	//jvst->fst->plugin->dispatcher( jvst->fst->plugin, effSetProgram, 0, program, NULL, 0.0 );
+	vst->fst()->want_program = program;
+	socket.grab_focus ();
 }
 
 int
@@ -121,6 +138,44 @@ VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 	return false;
 }
 
+void
+VSTPluginUI::create_preset_store ()
+{
+	FST *fst = vst->fst();
+	int vst_version = fst->plugin->dispatcher (fst->plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
+
+	preset_model = ListStore::create (preset_columns);
+
+	cerr << "There are " << fst->plugin->numPrograms << " programs\n";
+
+	for (int i = 0; i < fst->plugin->numPrograms; ++i) {
+		char buf[100];
+		TreeModel::Row row = *(preset_model->append());
+
+		snprintf (buf, 90, "preset %d", i);
+
+		if (vst_version >= 2) {
+			fst->plugin->dispatcher (fst->plugin, 29, i, 0, buf, 0.0);
+		}
+		
+		row[preset_columns.name] = buf;
+		row[preset_columns.number] = i;
+
+		cerr << "Preset " << i << " => " << buf << endl;
+	}
+	
+	if (fst->plugin->numPrograms > 0) {
+		fst->plugin->dispatcher( fst->plugin, effSetProgram, 0, 0, NULL, 0.0 );
+	}
+	
+	vst_preset_combo.set_model (preset_model);
+
+	CellRenderer* renderer = manage (new CellRendererText());
+	vst_preset_combo.pack_start (*renderer, true);
+	vst_preset_combo.add_attribute (*renderer, "text", 0);
+	vst_preset_combo.set_active (0);
+}
+
 typedef int (*error_handler_t)( Display *, XErrorEvent *);
 static Display *the_gtk_display;
 static error_handler_t wine_error_handler;
@@ -146,3 +201,4 @@ gui_init (int *argc, char **argv[])
 	the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
 	gtk_error_handler = XSetErrorHandler( fst_xerror_handler );
 }
+

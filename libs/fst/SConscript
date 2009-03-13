@@ -17,8 +17,9 @@ if fst['VST']:
     b = fst.Object ('fstinfofile', 'fstinfofile.c')
     c = fst.Object ('vstwin', 'vstwin.c')
     d = fst.Object ('vsti', 'vsti.c')
+    e = fst.Object ('thread', 'thread.c')
 
-    Default([a,b,c,d])
+    Default([a,b,c,d,e])
     
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      fst_src + ['SConscript',

@@ -3,4 +3,4 @@
 . ../gtk2_ardour/ardev_common.sh
 
 export LD_LIBRARY_PATH=gtk2_ardour:$LD_LIBRARY_PATH
-exec wine ./vst/ardour_vst.exe.so "$@"
+wine-pthread ./vst/ardour_vst.exe.so "$@"

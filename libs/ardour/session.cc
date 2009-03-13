@@ -1308,6 +1308,8 @@ Session::disable_record (bool rt_context, bool force)
 
 	if ((rs = (RecordState) g_atomic_int_get (&_record_status)) != Disabled) {
 
+		cerr << "disable record is doing something\n";
+
 		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
 			g_atomic_int_set (&_record_status, Disabled);
 		} else {

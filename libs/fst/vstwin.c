@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <jack/jack.h>
+#include <jack/thread.h>
 #include <libgen.h>
 #include <windows.h>
 #include <winnt.h>
@@ -182,6 +184,7 @@ again:
 			    /* condition/unlock: it was signalled & unlocked in fst_create_editor()   */
 			}
 			if(fst->want_program != -1 ) {
+				fprintf (stderr, "switching to program %d\n", fst->want_program);
 				fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
 				fst->want_program = -1; 
 			}
@@ -263,6 +266,9 @@ fst_init (void* possible_hmodule)
 		fst_error ("could not create new thread proxy");
 		return -1;
 	}
+
+	jack_set_thread_creator (wine_pthread_create);
+
 	return 0;
 }
 

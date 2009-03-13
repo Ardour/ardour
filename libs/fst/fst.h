@@ -133,6 +133,9 @@ extern int fst_load_state (FST * fst, char * filename);
  */
 extern int fst_save_state (FST * fst, char * filename);
 
+extern int wine_pthread_create (pthread_t* thread_id, const pthread_attr_t* attr, void *(*function)(void*), void* arg);
+
+
 #ifdef __cplusplus
 }
 #endif

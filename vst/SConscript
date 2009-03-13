@@ -16,6 +16,7 @@ winmain.c
 #libs/fst/fstinfofile.o
 #libs/fst/vstwin.o
 #libs/fst/vsti.o
+#libs/fst/thread.o
 """
 )
 

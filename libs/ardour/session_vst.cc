@@ -24,11 +24,12 @@
 #include <fst/vestige/aeffectx.h>
 
 #include <ardour/session.h>
+#include <ardour/tempo.h>
 #include <ardour/vst_plugin.h>
 
 #include "i18n.h"
 
-// #define DEBUG_CALLBACKS
+#define DEBUG_CALLBACKS
 
 #ifdef DEBUG_CALLBACKS
 #define SHOW_CALLBACK printf
@@ -49,14 +50,15 @@ long Session::vst_callback (AEffect* effect,
 	VSTPlugin* plug;
 	Session* session;
 
-	SHOW_CALLBACK ("am callback, opcode = %d", opcode);
 	
 	if (effect && effect->user) {
 	        plug = (VSTPlugin*) (effect->user);
 		session = &plug->session();
+		SHOW_CALLBACK ("am callback %d, opcode = %ld, plugin = \"%s\" ", pthread_self(), opcode, plug->name());
 	} else {
 		plug = 0;
 		session = 0;
+		SHOW_CALLBACK ("am callback %d, opcode = %ld", pthread_self(), opcode);
 	}
 
 	switch(opcode){
@@ -113,7 +115,30 @@ long Session::vst_callback (AEffect* effect,
 		if (session) {
 			_timeInfo.samplePos = session->transport_frame();
 			_timeInfo.sampleRate = session->frame_rate();
+			_timeInfo.flags = 0;
+			
+			cerr << "pos = " << _timeInfo.samplePos << " SR = " << _timeInfo.sampleRate
+			     << " asked for " << std::hex << value << std::dec << endl;
+
+			if (value & (kVstTempoValid)) {
+				const Tempo& t (session->tempo_map().tempo_at (session->transport_frame()));
+				_timeInfo.tempo = t.beats_per_minute ();
+				_timeInfo.flags |= (kVstTempoValid);
+				cerr << "Tempo = " << _timeInfo.tempo << endl;
+			}
+			if (value & (kVstBarsValid)) {
+				const Meter& m (session->tempo_map().meter_at (session->transport_frame()));
+				_timeInfo.timeSigNumerator = m.beats_per_bar ();
+				_timeInfo.timeSigDenominator = m.note_divisor ();
+				_timeInfo.flags |= (kVstBarsValid);
+				cerr << "Meter = " << _timeInfo.timeSigNumerator << '/' << _timeInfo.timeSigDenominator << endl;
+			}
+			
+			if (session->transport_speed() != 0.0f) {
+				_timeInfo.flags |= kVstTransportPlaying;
+			} 
 		}
+
 		return (long)&_timeInfo;
 
 	case audioMasterProcessEvents:
@@ -128,7 +153,13 @@ long Session::vst_callback (AEffect* effect,
 	case audioMasterTempoAt:
 		SHOW_CALLBACK ("amc: audioMasterTempoAt\n");
 		// returns tempo (in bpm * 10000) at sample frame location passed in <value>
-		return 0;
+		if (session) {
+			const Tempo& t (session->tempo_map().tempo_at (value));
+			return t.beats_per_minute() * 1000;
+		} else {
+			return 0;
+		}
+		break;
 
 	case audioMasterGetNumAutomatableParameters:
 		SHOW_CALLBACK ("amc: audioMasterGetNumAutomatableParameters\n");
@@ -306,7 +337,7 @@ long Session::vst_callback (AEffect* effect,
 		return 0;
 		
 	default:
-		SHOW_CALLBACK ("VST master dispatcher: undefed: %d, %d\n", opcode, effKeysRequired);
+		SHOW_CALLBACK ("VST master dispatcher: undefed: %d\n", opcode);
 		break;
 	}	
 	
