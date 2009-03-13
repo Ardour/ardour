@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2003 Paul Davis 
+    Copyright (C) 1999-2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,8 +49,6 @@ using namespace ARDOUR;
 using namespace sigc;
 using namespace PBD;
 
-#define DEBUG_TRANSPORT
-
 void
 Session::request_input_change_handling ()
 {
@@ -79,9 +77,6 @@ void
 Session::request_transport_speed (float speed)
 {
 	Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, speed);
-#ifdef DEBUG_TRANSPORT
-	cerr << "Queued transport speed request @ " << speed << endl;
-#endif
 	queue_event (ev);
 }
 
@@ -141,13 +136,11 @@ Session::realtime_stop (bool abort)
 {
 	/* assume that when we start, we'll be moving forwards */
 
-#if 1
 	if (_transport_speed < 0.0f) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportStop | PostTransportReverse);
 	} else {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportStop);
 	}
-#endif
 
 	if (actively_recording()) {
 
@@ -169,25 +162,21 @@ Session::realtime_stop (bool abort)
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportAbort);
 	}
 
-#if 0
-
 	_clear_event_type (Event::StopOnce);
 	_clear_event_type (Event::RangeStop);
 	_clear_event_type (Event::RangeLocate);
 
-	// disable_record (true);
-	
-	// reset_slave_state ();
-#endif		
+	disable_record (true);
+
+	reset_slave_state ();
+		
 	_transport_speed = 0;
 
-#if 0
 	if (Config->get_use_video_sync()) {
 		waiting_for_sync_offset = true;
 	}
 
 	transport_sub_state = ((Config->get_slave_source() == None && Config->get_auto_return()) ? AutoReturning : 0);
-#endif
 }
 
 void
@@ -200,8 +189,6 @@ Session::butler_transport_work ()
 
 	int on_entry = g_atomic_int_get (&butler_should_do_transport_work);
 	finished = true;
-
-	cerr << "PTW = " << hex << post_transport_work << dec << endl;
 
 	if (post_transport_work & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -248,12 +235,11 @@ Session::butler_transport_work ()
 	}
 
 	if (post_transport_work & (PostTransportStop|PostTransportLocate)) {
-		// cerr << "call NRS\n";
-		// non_realtime_stop (post_transport_work & PostTransportAbort, on_entry, finished);
-		// if (!finished) {
-		// g_atomic_int_dec_and_test (&butler_should_do_transport_work);
-		// goto restart;
-		// }
+		non_realtime_stop (post_transport_work & PostTransportAbort, on_entry, finished);
+		if (!finished) {
+			g_atomic_int_dec_and_test (&butler_should_do_transport_work);
+			goto restart;
+		}
 	}
 
 	if (post_transport_work & PostTransportOverWrite) {
@@ -307,8 +293,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	did_record = false;
 	saved = false;
-
-	cerr << "NRS\n";
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	
@@ -367,8 +351,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_have_captured = true;
 	}
 
-	return;
-
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->transport_stopped (*now, xnow, abort);
 	}
@@ -395,7 +377,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	    synced_to_jack()) {
 		
 		if (pending_locate_flush) {
-			cerr << "Flush all redirects\n";
 			flush_all_redirects ();
 		}
 		
@@ -499,7 +480,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	if (post_transport_work & PostTransportStop) { 
-		// _play_range = false;
+		_play_range = false;
 
 		/* do not turn off autoloop on stop */
 		
@@ -797,10 +778,6 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 void
 Session::set_transport_speed (float speed, bool abort)
 {
-#ifdef DEBUG_TRANSPORT
-	cerr << "Session::set_trasport_speed, new = " << speed 
-	     << " cur = " << _transport_speed << endl;
-#endif
 	if (_transport_speed == speed) {
 		return;
 	}
@@ -909,10 +886,6 @@ Session::set_transport_speed (float speed, bool abort)
 void
 Session::stop_transport (bool abort)
 {
-#ifdef DEBUG_TRANSPORT
-	cerr << "Session::stop_transport @ " << _transport_frame << endl;
-#endif
-	
 	if (_transport_speed == 0.0f) {
 		return;
 	}
@@ -948,16 +921,12 @@ Session::stop_transport (bool abort)
 	}
 
 	realtime_stop (abort);
-	// schedule_butler_transport_work ();
+	schedule_butler_transport_work ();
 }
 
 void
 Session::start_transport ()
 {
-#ifdef DEBUG_TRANSPORT
-	cerr << "Session::start_transport @ " << _transport_frame << endl;
-#endif
-
 	_last_roll_location = _transport_frame;
 	have_looped = false;
 
@@ -1008,7 +977,7 @@ Session::post_transport ()
 
 	if (post_transport_work & PostTransportStop) {
 
-		// transport_sub_state = 0;
+		transport_sub_state = 0;
 	}
 
 	if (post_transport_work & PostTransportLocate) {
