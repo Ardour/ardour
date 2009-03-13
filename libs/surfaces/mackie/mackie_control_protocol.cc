@@ -543,11 +543,13 @@ void MackieControlProtocol::update_surface()
 		switch_banks( _current_initial_bank );
 		
 		// create a RouteSignal for the master route
-		// but only the first time around
-		master_route_signal = shared_ptr<RouteSignal>( new RouteSignal( *master_route(), *this, master_strip(), mcu_port() ) );
-		// update strip from route
-		master_route_signal->notify_all();
-		
+		boost::shared_ptr<Route> mr = master_route ();
+		if (mr) {
+			master_route_signal = shared_ptr<RouteSignal> (new RouteSignal (mr, *this, master_strip(), mcu_port()) );
+			// update strip from route
+			master_route_signal->notify_all();
+		}
+
 		// sometimes the jog wheel is a pot
 		surface().blank_jog_ring( mcu_port(), builder );
 		
@@ -656,13 +658,7 @@ void MackieControlProtocol::create_ports()
 
 shared_ptr<Route> MackieControlProtocol::master_route()
 {
-	shared_ptr<Route> retval;
-	retval = session->route_by_name( "master" );
-	if ( retval == 0 )
-	{
-		// TODO search through all routes for one with the master attribute set
-	}
-	return retval;
+	return session->master_out ();
 }
 
 Strip & MackieControlProtocol::master_strip()
