@@ -19,6 +19,7 @@
 #define route_signal_h
 
 #include <sigc++/sigc++.h>
+#include <boost/shared_ptr.hpp>
 
 #include <vector>
 
@@ -45,7 +46,7 @@ class SurfacePort;
 class RouteSignal
 {
 public:
-	RouteSignal( ARDOUR::Route & route, MackieControlProtocol & mcp, Strip & strip, SurfacePort & port )
+        RouteSignal(boost::shared_ptr<ARDOUR::Route> route, MackieControlProtocol & mcp, Strip & strip, SurfacePort & port )
 	: _route( route ), _mcp( mcp ), _strip( strip ), _port( port ), _last_gain_written(0.0)
 	{
 		connect();
@@ -62,7 +63,7 @@ public:
 	// call all signal handlers manually
 	void notify_all();
 	
-	const ARDOUR::Route & route() const { return _route; }
+	boost::shared_ptr<const ARDOUR::Route> route() const { return _route; }
 	Strip & strip() { return _strip; }
 	SurfacePort & port() { return _port; }
 	
@@ -73,7 +74,7 @@ public:
 	void last_pan_written( const MidiByteArray & other ) { _last_pan_written = other; }
 	
 private:
-	ARDOUR::Route & _route;
+	boost::shared_ptr<ARDOUR::Route> _route;
 	MackieControlProtocol & _mcp;
 	Strip & _strip;
 	SurfacePort & _port;

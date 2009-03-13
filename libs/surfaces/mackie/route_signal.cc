@@ -25,6 +25,7 @@
 
 #include <stdexcept>
 
+using namespace ARDOUR;
 using namespace Mackie;
 using namespace std;
 
@@ -33,39 +34,30 @@ void RouteSignal::connect()
 	back_insert_iterator<Connections> cins = back_inserter( _connections );
 	
 	if ( _strip.has_solo() )
-		cins = _route.solo_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
+		cins = _route->solo_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
 	
 	if ( _strip.has_mute() )
-		cins = _route.mute_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
+		cins = _route->mute_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
 	
 	if ( _strip.has_gain() )
-		cins = _route.gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this, true ) );
+		cins = _route->gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this, true ) );
 		
-	cins = _route.name_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
+	cins = _route->name_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
-	cins = _route.panner().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
-	for ( unsigned int i = 0; i < _route.panner().size(); ++i )
+	cins = _route->panner().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
+	for ( unsigned int i = 0; i < _route->panner().size(); ++i )
 	{
-		cins = _route.panner()[i]->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
+		cins = _route->panner()[i]->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
 	}
 	
-	try
-	{
-		cins = dynamic_cast<ARDOUR::Track&>( _route )
-			.rec_enable_control()
-			.Changed
-			.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), this ) )
-		;
+	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
+	if (trk) {
+		cins = trk->rec_enable_control() .Changed .connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), this));
 	}
-	catch ( std::bad_cast & )
-	{
-		// this should catch the dynamic_cast to Track, if what we're working
-		// with can't be record-enabled
-	}
-
+	
 	// TODO this works when a currently-banked route is made inactive, but not
 	// when a route is activated which should be currently banked.
-	cins = _route.active_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_active_changed ), this ) );
+	cins = _route->active_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_active_changed ), this ) );
 	
 	// TODO
 	// SelectedChanged
