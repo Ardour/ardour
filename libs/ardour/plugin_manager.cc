@@ -499,6 +499,7 @@ PluginManager::vst_discover_from_path (string path)
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+			std::cerr << " discovering " << **x << std::endl;
 			vst_discover (**x);
 		}
 	}
