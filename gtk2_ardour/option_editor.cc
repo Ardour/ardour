@@ -1353,35 +1353,6 @@ OptionEditor::edit_button_changed ()
 }
 
 void
-OptionEditor::fixup_combo_size (Gtk::ComboBoxText& combo, vector<string>& strings)
-{
-	/* find the widest string */
-
-	string::size_type maxlen = 0;
-	string maxstring;
-
-	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i) {
-		string::size_type l;
-
-		if ((l = (*i).length()) > maxlen) {
-			maxlen = l;
-			maxstring = *i;
-		}
-	}
-
-	/* try to include ascenders and descenders */
-
-	if (maxstring.length() > 2) {
-		maxstring[0] = 'g';
-		maxstring[1] = 'l';
-	}
-
-	const guint32 FUDGE = 10; // Combo's are stupid - they steal space from the entry for the button
-
-	set_size_request_to_display_given_text (combo, maxstring.c_str(), 10 + FUDGE, 10);
-}
-
-void
 OptionEditor::parameter_changed (const char* parameter_name)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &OptionEditor::parameter_changed), parameter_name));

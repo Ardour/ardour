@@ -82,13 +82,7 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
 	
-	/* the string here needs to be the longest one to display */
-	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
-	// TRANSLATORS: this is not a mis-spelling of "thirty", we're including a vertical 
-	// descender to make sure the height gets computed properly.
-        Gtkmm2ext::set_size_request_to_display_given_text (note_types, "thirtq-second (32)", 7+FUDGE, 15);
-
-	set_popdown_strings (note_types, strings);
+	set_popdown_strings (note_types, strings, true);
 
 	if (note_type==1.0f)
 		note_types.set_active_text (_("whole (1)"));
@@ -309,14 +303,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
 	
-	/* the string here needs to be the longest one to display */
-	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
-
-	// TRANSLATORS: this is not a mis-spelling of "thirty", we're including a vertical 
-	// descender to make sure the height gets computed properly.
-        Gtkmm2ext::set_size_request_to_display_given_text (note_types, _("thirtq-second (32)"), 7+FUDGE, 15);
-
-	set_popdown_strings (note_types, strings);
+	set_popdown_strings (note_types, strings, true);
 
 	if (note_type==1.0f)
 		note_types.set_active_text (_("whole (1)"));

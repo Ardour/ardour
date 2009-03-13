@@ -157,17 +157,19 @@ AddRouteDialog::AddRouteDialog ()
 	hbox5->pack_start (track_button, PACK_EXPAND_PADDING);
 	hbox5->pack_start (bus_button, PACK_EXPAND_PADDING);
 
-	set_popdown_strings (channel_combo, channel_combo_strings);
-	set_popdown_strings (track_mode_combo, track_mode_strings);
-	channel_combo.set_active_text (channel_combo_strings.front());
 	channel_combo.set_name (X_("ChannelCountSelector"));
+	track_mode_combo.set_name (X_("ChannelCountSelector"));
+
+	set_popdown_strings (channel_combo, channel_combo_strings, true);
+	set_popdown_strings (track_mode_combo, track_mode_strings, true);
+
+	channel_combo.set_active_text (channel_combo_strings.front());
+	track_mode_combo.set_active_text (track_mode_strings.front());
 
 	track_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
 	bus_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
 	template_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
 
-	track_mode_combo.set_active_text (track_mode_strings.front());
-	track_mode_combo.set_name (X_("ChannelCountSelector"));
 	
 	VBox* vbox1 = manage (new VBox);
 	vbox1->set_spacing (6);
