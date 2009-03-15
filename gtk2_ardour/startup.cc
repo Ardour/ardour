@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include <gtkmm/main.h>
+#include <gtkmm/filechooser.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
@@ -29,6 +30,7 @@ ArdourStartup::ArdourStartup ()
 	, ic_new_session_button (_("Open a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
 	, more_new_session_options_button (_("I'd like more options for this session"))
+	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 {
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
@@ -260,7 +262,7 @@ ArdourStartup::setup_new_session_page ()
 		hbox2->pack_start (new_folder_chooser, true, true);
 		
 		label2->set_text (_("Create session folder in:"));
-		new_folder_chooser.set_current_folder(getenv ("HOME"));	
+		new_folder_chooser.set_current_folder(getenv ("HOME"));
 		new_folder_chooser.set_title (_("Select folder for session"));
 		
 		hbox2->show();
