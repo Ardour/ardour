@@ -43,7 +43,7 @@ public:
 		const SMPTE::Time& transport_smpte) = 0;
 	
 	virtual void set_session(Session& s);
-	virtual void going_away() { _session = 0;  delete this; }
+	virtual void going_away() { _session = 0; }
 
 protected:
 	Session* _session;
@@ -72,7 +72,7 @@ public:
 	
 	void set_session(Session& s);
 	void going_away() { _midi_port = 0; Ticker::going_away(); }
-	
+
 	/// slot for the signal session::MIDIClock_PortChanged
 	void update_midi_clock_port();
 	
