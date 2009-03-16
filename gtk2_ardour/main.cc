@@ -382,7 +382,9 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
+#ifdef SOMEBODY_WANTS_TO_FIX_THIS
 	ui->run_startup ();
+#endif
 
 	ui->run (text_receiver);
 	ui = 0;
