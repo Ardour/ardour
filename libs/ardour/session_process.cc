@@ -47,12 +47,17 @@ Session::process (nframes_t nframes)
 {
 	_silent = false;
 
+	if (processing_blocked()) {
+		_silent = true;
+		return;
+	}
+
 	if (non_realtime_work_pending()) {
 		if (!transport_work_requested ()) {
 			post_transport ();
 		} 
 	} 
-	
+
 	(this->*process_function) (nframes);
 	
 	{
@@ -80,13 +85,6 @@ Session::no_roll (nframes_t nframes, nframes_t offset)
 
 	if (_click_io) {
 		_click_io->silence (nframes, offset);
-	}
-
-	if (g_atomic_int_get (&processing_prohibited)) {
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->silence (nframes, offset);
-		}
-		return 0;
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -866,9 +864,7 @@ Session::maybe_sync_start (nframes_t& nframes, nframes_t& offset)
 		   with any fancy stuff here, just the minimal silence.
 		*/
 
-		g_atomic_int_inc (&processing_prohibited);
-		no_roll (nframes, 0);
-		g_atomic_int_dec_and_test (&processing_prohibited);
+		_silent = true;
 
 		if (Config->get_locate_while_waiting_for_sync()) {
 			if (micro_locate (nframes)) {
