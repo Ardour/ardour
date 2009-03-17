@@ -147,49 +147,21 @@ VSTPlugin::get_state()
 
 		/* fetch the current chunk */
 		
-		void* data;
+		guchar* data;
 		long  data_size;
 		
 		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
 			return *root;
 		}
 
-		/* save it to a file */
-
-		Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "vst");
-		struct stat sbuf;
-
-		if (stat (path.c_str(), &sbuf)) {
-			if (errno == ENOENT) {
-				if (g_mkdir_with_parents (path.c_str(), 0600)) {
-					error << string_compose (_("cannot create VST chunk directory: %1"),
-								 strerror (errno))
-					      << endmsg;
-					return *root;
-				}
-
-			} else {
-
-				warning << string_compose (_("cannot check VST chunk directory: %1"), strerror (errno))
-					<< endmsg;
-				return *root;
-			}
-
-		} else if (!S_ISDIR (sbuf.st_mode)) {
-			error << string_compose (_("%1 exists but is not a directory"), path)
-			      << endmsg;
-			return *root;
-		}
-		
-		path = Glib::build_filename (path, "something");
-		
 		/* store information */
 
 		XMLNode* chunk_node = new XMLNode (X_("chunk"));
-		chunk_node->add_property ("path", path);
-		
+		gchar * encoded_data = g_base64_encode (data, data_size);
+		chunk_node->add_content (encoded_data);
+		g_free (encoded_data);
+
 		root->add_child_nocopy (*chunk_node);
-		
 	} else {
 
 		XMLNode* parameters = new XMLNode ("parameters");
@@ -221,10 +193,26 @@ VSTPlugin::set_state(const XMLNode& node)
 
 	XMLNode* child;
 
-	if ((child = find_named_node (node, X_("chunks"))) != 0) {
+	if ((child = find_named_node (node, X_("chunk"))) != 0) {
+
+		XMLPropertyList::const_iterator i;
+
+		XMLNodeList::const_iterator n;
+		for (n = child->children ().begin (); n != child->children ().end (); ++n) {
+			if ((*n)->is_content ()) {
+				gsize chunk_size = 0;
+				guchar * data = g_base64_decode ((*n)->content ().c_str (), &chunk_size);
+				if (_plugin->dispatcher (_plugin, 24 /* effSetChunk */, 0, chunk_size, data, 0) == 0) {
+					g_free (data);
+					return 0;
+				} else {
+					g_free (data);
+					return -1;
+				}
+			}
+		}
 
 		return 0;
-
 	} else if ((child = find_named_node (node, X_("parameters"))) != 0) {
 		
 		XMLPropertyList::const_iterator i;
