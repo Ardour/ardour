@@ -157,8 +157,11 @@ if test x$STRIP != x ; then
     strip $APPROOT/MacOS/Ardour2
 fi
 if test x$WITH_JACK != x ; then
-    cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
-    cp /usr/local/bin/jackd $APPROOT/MacOS
+    if [ -f /usr/local/lib/jack/jack_coreaudio.so ] ; then 
+	cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
+	cp /usr/local/bin/jackd $APPROOT/MacOS
+	JACK_SHARED_OBJECTS="$Frameworks/*.so"
+    fi
 fi
 
 # copy locale files
@@ -322,7 +325,7 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for dylib in $Frameworks/*.so $Frameworks/*.dylib $Frameworks/modules/*.so $Surfaces/*.dylib ; do
+for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $Surfaces/*.dylib ; do
     # skip symlinks
     if test ! -L $dylib ; then
 	
