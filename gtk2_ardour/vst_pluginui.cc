@@ -62,7 +62,6 @@ void
 VSTPluginUI::preset_chosen ()
 {
 	int program = vst_preset_combo.get_active_row_number ();
-	cerr << "switch to program " << program << endl;
 	// cant be done here. plugin only expects one GUI thread.
 	//jvst->fst->plugin->dispatcher( jvst->fst->plugin, effSetProgram, 0, program, NULL, 0.0 );
 	vst->fst()->want_program = program;
@@ -146,8 +145,6 @@ VSTPluginUI::create_preset_store ()
 
 	preset_model = ListStore::create (preset_columns);
 
-	cerr << "There are " << fst->plugin->numPrograms << " programs\n";
-
 	for (int i = 0; i < fst->plugin->numPrograms; ++i) {
 		char buf[100];
 		TreeModel::Row row = *(preset_model->append());
@@ -160,8 +157,6 @@ VSTPluginUI::create_preset_store ()
 		
 		row[preset_columns.name] = buf;
 		row[preset_columns.number] = i;
-
-		cerr << "Preset " << i << " => " << buf << endl;
 	}
 	
 	if (fst->plugin->numPrograms > 0) {
