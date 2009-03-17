@@ -384,7 +384,7 @@ Session::process_with_events (nframes_t nframes)
 
 			/* if an event left our state changing, do the right thing */
 
-			if (non_realtime_work_pending()) {
+			if (nframes && non_realtime_work_pending()) {
 				no_roll (nframes, offset);
 				break;
 			}

@@ -29,7 +29,7 @@
 
 #include "i18n.h"
 
-#define DEBUG_CALLBACKS
+#undef DEBUG_CALLBACKS
 
 #ifdef DEBUG_CALLBACKS
 #define SHOW_CALLBACK printf
@@ -117,21 +117,16 @@ long Session::vst_callback (AEffect* effect,
 			_timeInfo.sampleRate = session->frame_rate();
 			_timeInfo.flags = 0;
 			
-			cerr << "pos = " << _timeInfo.samplePos << " SR = " << _timeInfo.sampleRate
-			     << " asked for " << std::hex << value << std::dec << endl;
-
 			if (value & (kVstTempoValid)) {
 				const Tempo& t (session->tempo_map().tempo_at (session->transport_frame()));
 				_timeInfo.tempo = t.beats_per_minute ();
 				_timeInfo.flags |= (kVstTempoValid);
-				cerr << "Tempo = " << _timeInfo.tempo << endl;
 			}
 			if (value & (kVstBarsValid)) {
 				const Meter& m (session->tempo_map().meter_at (session->transport_frame()));
 				_timeInfo.timeSigNumerator = m.beats_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
 				_timeInfo.flags |= (kVstBarsValid);
-				cerr << "Meter = " << _timeInfo.timeSigNumerator << '/' << _timeInfo.timeSigDenominator << endl;
 			}
 			
 			if (session->transport_speed() != 0.0f) {

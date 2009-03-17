@@ -563,7 +563,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	Sample* tmpb;
 	nframes_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-	
+
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
