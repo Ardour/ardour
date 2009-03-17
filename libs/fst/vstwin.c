@@ -184,7 +184,6 @@ again:
 			    /* condition/unlock: it was signalled & unlocked in fst_create_editor()   */
 			}
 			if(fst->want_program != -1 ) {
-				fprintf (stderr, "switching to program %d\n", fst->want_program);
 				fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
 				fst->want_program = -1; 
 			}
@@ -212,7 +211,6 @@ again:
 		    pthread_mutex_unlock (&plugin_mutex);
 		}
 	}
-	fprintf (stderr, "VST GUI EVENT LOOP THREAD EXIT\n");
 	return 0;
 }
 
@@ -380,9 +378,7 @@ fst_create_editor (FST* fst)
 	//SetWindowPos (fst->window, 0, 0, 0, er->right-er->left+8, er->bottom-er->top+26, SWP_NOMOVE|SWP_NOZORDER);
 	
 	fst->xid = (int) GetPropA (window, "__wine_x11_whole_window");
-	printf( "And xid = %x\n", fst->xid );
 	fst->been_activated = TRUE;
-	printf ("Signalling window ready\n");
 	pthread_cond_signal (&fst->window_status_change);
 	pthread_mutex_unlock (&fst->lock);
 
@@ -393,8 +389,8 @@ void
 fst_move_window_into_view (FST* fst)
 {
         if (fst->window) {
-	  SetWindowPos (fst->window, 0, 0, 0, fst->width, fst->height+24, 0);
-	  ShowWindow (fst->window, SW_SHOWNA);
+		SetWindowPos (fst->window, 0, 0, 0, fst->width, fst->height+24, 0);
+		ShowWindow (fst->window, SW_SHOWNA);
 	}
 }
 
