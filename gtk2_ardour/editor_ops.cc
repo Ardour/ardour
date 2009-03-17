@@ -3625,7 +3625,7 @@ Editor::freeze_thread ()
 gint
 Editor::freeze_progress_timeout (void *arg)
 {
-	interthread_progress_bar.set_fraction (current_interthread_info->progress/100);
+	interthread_progress_bar.set_fraction (current_interthread_info->progress);
 	return !(current_interthread_info->done || current_interthread_info->cancel);
 }
 
