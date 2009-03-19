@@ -363,6 +363,7 @@ void
 PlugUIBase::redirect_active_changed (Redirect* r, void* src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PlugUIBase::redirect_active_changed), r, src));
+	bypass_button.set_active (!r->active());
 }
 
 void
