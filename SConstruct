@@ -401,9 +401,11 @@ env.Append (BUILDERS = {'Tarball' : tarball_bld})
 def pushEnvironment(context):
     if os.environ.has_key('PATH'):
 	context.Append(PATH = os.environ['PATH'])
+	context.['ENV']['PATH'] = os.environ['PATH'])
 	
     if os.environ.has_key('PKG_CONFIG_PATH'):
 	context.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
+	context.['ENV']['PKG_CONFIG_PATH'] = os.environ['PKG_CONFIG_PATH'])
 	    
     if os.environ.has_key('CC'):
 	context['CC'] = os.environ['CC']
