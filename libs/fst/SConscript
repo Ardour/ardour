@@ -8,13 +8,14 @@ import glob
 fst_src = glob.glob('*.c')
 
 Import('env install_prefix libraries')
-fst = env.Clone(CC="winegcc")
+fst = env.Clone()
 fst.Append (CPPPATH=".")
 fst.Merge ([
-        libraries['glib2'],
-        libraries['jack']
+        libraries['jack'],
+        libraries['glib2']
         ])
 
+fst.Replace(CC = list ("winegcc"))
 
 #
 # See if JACK supports jack_set_thread_creator()
