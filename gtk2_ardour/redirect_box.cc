@@ -346,7 +346,11 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 		show_redirect_menu(ev->time);
 		ret = true;
 
-	} else if (redirect && Keyboard::is_button2_event (ev) && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))) {
+	} else if (redirect && Keyboard::is_button2_event (ev)
+#ifndef GTKOSX
+		   && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))
+#endif 
+		) {
 		
 		/* button2-click with no modifiers */
 
