@@ -1454,6 +1454,7 @@ AUPluginInfo::discover ()
 	
 	discover_fx (plugs);
 	discover_music (plugs);
+	discover_generators (plugs);
 
 	return plugs;
 }
@@ -1485,6 +1486,19 @@ AUPluginInfo::discover_fx (PluginInfoList& plugs)
 }
 
 void
+AUPluginInfo::discover_generators (PluginInfoList& plugs)
+{
+	CAComponentDescription desc;
+	desc.componentFlags = 0;
+	desc.componentFlagsMask = 0;
+	desc.componentSubType = 0;
+	desc.componentManufacturer = 0;
+	desc.componentType = kAudioUnitType_Generator;
+
+	discover_by_description (plugs, desc);
+}
+
+void
 AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescription& desc)
 {
 	Component comp = 0;
@@ -1501,11 +1515,21 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		/* no panners, format converters or i/o AU's for our purposes
 		 */
 
+		AUPluginInfo::get_names (temp, info->name, info->creator);
+		cerr << "Discovered effect " << info->name << " by " << info->creator << " type = " << info->descriptor->Type() << " sub = " << info->descriptor->SubType() << endl;
+
 		switch (info->descriptor->Type()) {
 		case kAudioUnitType_Panner:
 		case kAudioUnitType_OfflineEffect:
 		case kAudioUnitType_FormatConverter:
 			continue;
+		case kAudioUnitType_Output:
+		case kAudioUnitType_MusicDevice:
+		case kAudioUnitType_MusicEffect:
+		case kAudioUnitType_Effect:
+		case kAudioUnitType_Mixer:
+		case kAudioUnitType_Generator:
+			break;
 		default:
 			break;
 		}
@@ -1515,15 +1539,12 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		case kAudioUnitSubType_SystemOutput:
 		case kAudioUnitSubType_GenericOutput:
 		case kAudioUnitSubType_AUConverter:
+			/* we don't want output units here */
 			continue;
 			break;
 
 		case kAudioUnitSubType_DLSSynth:
-			info->category = "DLSSynth";
-			break;
-
-		case kAudioUnitType_MusicEffect:
-			info->category = "MusicEffect";
+			info->category = "DLS Synth";
 			break;
 
 		case kAudioUnitSubType_Varispeed:
@@ -1535,55 +1556,59 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			break;
 
 		case kAudioUnitSubType_LowPassFilter:
-			info->category = "LowPassFilter";
+			info->category = "Low-pass Filter";
 			break;
 
 		case kAudioUnitSubType_HighPassFilter:
-			info->category = "HighPassFilter";
+			info->category = "High-pass Filter";
 			break;
 
 		case kAudioUnitSubType_BandPassFilter:
-			info->category = "BandPassFilter";
+			info->category = "Band-pass Filter";
 			break;
 
 		case kAudioUnitSubType_HighShelfFilter:
-			info->category = "HighShelfFilter";
+			info->category = "High-shelf Filter";
 			break;
 
 		case kAudioUnitSubType_LowShelfFilter:
-			info->category = "LowShelfFilter";
+			info->category = "Low-shelf Filter";
 			break;
 
 		case kAudioUnitSubType_ParametricEQ:
-			info->category = "ParametricEQ";
+			info->category = "Parametric EQ";
 			break;
 
 		case kAudioUnitSubType_GraphicEQ:
-			info->category = "GraphicEQ";
+			info->category = "Graphic EQ";
 			break;
 
 		case kAudioUnitSubType_PeakLimiter:
-			info->category = "PeakLimiter";
+			info->category = "Peak Limiter";
 			break;
 
 		case kAudioUnitSubType_DynamicsProcessor:
-			info->category = "DynamicsProcessor";
+			info->category = "Dynamics Processor";
 			break;
 
 		case kAudioUnitSubType_MultiBandCompressor:
-			info->category = "MultiBandCompressor";
+			info->category = "Multiband Compressor";
 			break;
 
 		case kAudioUnitSubType_MatrixReverb:
-			info->category = "MatrixReverb";
+			info->category = "Matrix Reverb";
 			break;
 
-		case kAudioUnitType_Mixer:
-			info->category = "Mixer";
+		case kAudioUnitSubType_SampleDelay:
+			info->category = "Sample Delay";
 			break;
 
-		case kAudioUnitSubType_StereoMixer:
-			info->category = "StereoMixer";
+		case kAudioUnitSubType_Pitch:
+			info->category = "Pitch";
+			break;
+
+		case kAudioUnitSubType_NetSend:
+			info->category = "Net Sender";
 			break;
 
 		case kAudioUnitSubType_3DMixer:
@@ -1592,6 +1617,19 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		case kAudioUnitSubType_MatrixMixer:
 			info->category = "MatrixMixer";
+			break;
+
+		case kAudioUnitSubType_ScheduledSoundPlayer:
+			info->category = "Scheduled Sound Player";
+			break;
+
+
+		case kAudioUnitSubType_AudioFilePlayer:
+			info->category = "Audio File Player";
+			break;
+
+		case kAudioUnitSubType_NetReceive:
+			info->category = "Net Receiver";
 			break;
 
 		default:

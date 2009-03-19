@@ -177,6 +177,7 @@ class AUPluginInfo : public PluginInfo {
 	
 	static void discover_music (PluginInfoList&);
 	static void discover_fx (PluginInfoList&);
+	static void discover_generators (PluginInfoList&);
 	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
 	static Glib::ustring au_cache_path ();
 
