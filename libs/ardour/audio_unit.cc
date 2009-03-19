@@ -1515,9 +1515,6 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		/* no panners, format converters or i/o AU's for our purposes
 		 */
 
-		AUPluginInfo::get_names (temp, info->name, info->creator);
-		cerr << "Discovered effect " << info->name << " by " << info->creator << " type = " << info->descriptor->Type() << " sub = " << info->descriptor->SubType() << endl;
-
 		switch (info->descriptor->Type()) {
 		case kAudioUnitType_Panner:
 		case kAudioUnitType_OfflineEffect:
