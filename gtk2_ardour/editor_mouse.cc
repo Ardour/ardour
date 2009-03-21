@@ -1123,7 +1123,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case CdMarkerBarItem:
 			case TempoBarItem:
 			case MeterBarItem:
-				popup_ruler_menu (pixel_to_frame(event->button.x), item_type);
+				popup_ruler_menu (where, item_type);
 				break;
 
 			case MarkerItem:
