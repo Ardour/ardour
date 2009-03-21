@@ -855,6 +855,10 @@ Editor::catch_vanishing_regionview (RegionView *rv)
 	   audioregionview by itself.
 	*/
 
+	if (rv->get_canvas_group() == drag_info.item) {
+		end_grab (drag_info.item, 0);
+	}
+
 	if (clicked_regionview == rv) {
 		clicked_regionview = 0;
 	}

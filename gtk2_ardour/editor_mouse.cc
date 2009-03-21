@@ -1977,9 +1977,9 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		return false;
 	}
 	
-	drag_info.item->ungrab (event->button.time);
+	drag_info.item->ungrab (event ? event->button.time : 0);
 
-	if (drag_info.finished_callback) {
+	if (drag_info.finished_callback && event) {
 		drag_info.last_pointer_x = drag_info.current_pointer_x;
 		drag_info.last_pointer_y = drag_info.current_pointer_y;
 		(this->*(drag_info.finished_callback)) (item, event);
