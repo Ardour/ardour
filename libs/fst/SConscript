@@ -15,7 +15,7 @@ fst.Merge ([
         libraries['glib2']
         ])
 
-fst.Replace(CC = list ("winegcc"))
+fst.Replace(CC = ("winegcc"))
 
 #
 # See if JACK supports jack_set_thread_creator()
