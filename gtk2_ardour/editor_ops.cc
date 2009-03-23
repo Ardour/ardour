@@ -688,7 +688,8 @@ Editor::build_region_boundary_cache ()
 				break;	
 
 			case SyncPoint:
-				rpos = r->adjust_to_sync (r->first_frame());
+				rpos = r->sync_position ();
+				//r->adjust_to_sync (r->first_frame());
 				break;
 
 			default:
@@ -774,7 +775,8 @@ Editor::find_next_region (nframes64_t frame, RegionPoint point, int32_t dir, Tra
 			break;
 
 		case SyncPoint:
-			rpos = r->adjust_to_sync (r->first_frame());
+			rpos = r->sync_position ();
+			// r->adjust_to_sync (r->first_frame());
 			break;
 		}
 
@@ -946,7 +948,8 @@ Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 		break;
 
 	case SyncPoint:
-		pos = r->adjust_to_sync (r->first_frame());
+		pos = r->sync_position ();
+		// r->adjust_to_sync (r->first_frame());
 		break;	
 	}
 	
