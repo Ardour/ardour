@@ -1571,7 +1571,8 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 			pos = r->last_frame ();
 			break;
 		case SyncPoint:
-			pos = r->adjust_to_sync (r->first_frame());
+			pos = r->sync_position ();
+			// r->adjust_to_sync (r->first_frame());
 			break;
 		}
 
