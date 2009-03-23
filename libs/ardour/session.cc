@@ -2340,7 +2340,7 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 			
 			/* don't mess with busses */
 			
-			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
+			if (boost::dynamic_pointer_cast<AudioTrack>(*i) == 0) {
 				continue;
 			}
 			
@@ -2348,7 +2348,7 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 			
 			/* don't mess with tracks */
 			
-			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
+			if (boost::dynamic_pointer_cast<AudioTrack>(*i) != 0) {
 				continue;
 			}
 		}
@@ -2431,7 +2431,7 @@ Session::update_route_solo_state ()
         for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			mute = true;
-			if (dynamic_cast<AudioTrack*>((*i).get())) {
+			if (boost::dynamic_pointer_cast<AudioTrack>(*i)) {
 				is_track = true;
 			}
 			break;
@@ -2476,7 +2476,7 @@ Session::modify_solo_mute (bool is_track, bool mute)
 			
 			/* only alter track solo mute */
 			
-			if (dynamic_cast<AudioTrack*>((*i).get())) {
+			if (boost::dynamic_pointer_cast<AudioTrack>(*i)) {
 				if ((*i)->soloed()) {
 					(*i)->set_solo_mute (!mute);
 				} else {
@@ -2487,8 +2487,8 @@ Session::modify_solo_mute (bool is_track, bool mute)
 		} else {
 
 			/* only alter bus solo mute */
-
-			if (!dynamic_cast<AudioTrack*>((*i).get())) {
+			
+			if (!boost::dynamic_pointer_cast<AudioTrack>(*i)) {
 
 				if ((*i)->soloed()) {
 
@@ -3602,7 +3602,7 @@ void
 Session::set_all_solo (bool yn)
 {
 	shared_ptr<RouteList> r = routes.reader ();
-	
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->hidden()) {
 			(*i)->set_solo (yn, this);
