@@ -509,14 +509,18 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, n
 		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
 	/* regular diskstream/butler read complete with fades etc */
-	return _read_at (sources, _length, buf, mixdown_buffer, gain_buffer, file_position, cnt, chan_n, read_frames, skip_frames, ReadOps (~0));
+	return _read_at (sources, _length, buf, mixdown_buffer, gain_buffer, file_position, cnt, 
+			 chan_n, read_frames, skip_frames, ReadOps (~0));
 }
 
 nframes_t
 AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
 			     nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (master_sources, master_sources.front()->length(), buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
+	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
+
+	return _read_at (master_sources, master_sources.front()->length(), buf, mixdown_buffer, 
+			 gain_buffer, position, cnt, chan_n, 0, 0, ReadOps (0));
 }
 
 nframes_t
