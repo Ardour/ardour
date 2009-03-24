@@ -26,6 +26,7 @@
 #ifndef _AEFFECTX_H
 #define _AEFFECTX_H
 
+#include <stdint.h>
 
 #define audioMasterAutomate 0
 #define audioMasterVersion 1
@@ -128,7 +129,6 @@
 #define kVstLangEnglish 1
 #define kVstMidiType 1
 #define kVstTransportPlaying (1 << 1)
-#define kVstParameterUsesFloatStep (1 << 2)
 
 /* validity flags for a VstTimeINfo structure this info comes from the web */
 
@@ -192,27 +192,49 @@ typedef struct VstEvents
 	VstEvent * events[];
 } VstEvents;
 
+/* constants from http://www.rawmaterialsoftware.com/juceforum/viewtopic.php?t=3740&sid=183f74631fee71a493316735e2b9f28b */
 
-
-
-// Not finished, neither really used
-typedef struct VstParameterProperties
+enum Vestige2StringConstants
 {
-	float stepFloat;
-	char label[64];
-	int flags;
-	int minInteger;
-	int maxInteger;
-	int stepInteger;
-	char shortLabel[8];
-	int category;
-	char categoryLabel[24];
-	char empty[128];
+	VestigeMaxNameLen       = 64,
+	VestigeMaxLabelLen      = 64,
+	VestigeMaxShortLabelLen = 8,
+	VestigeMaxCategLabelLen = 24,
+	VestigeMaxFileNameLen   = 100
+}; 
 
-} VstParameterProperties;
+/* this struct taken from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
+struct VstParameterProperties
+{
+    float stepFloat;              /* float step */
+    float smallStepFloat;         /* small float step */
+    float largeStepFloat;         /* large float step */
+    char label[VestigeMaxLabelLen];  /* parameter label */
+    int32_t flags;               /* @see VstParameterFlags */
+    int32_t minInteger;          /* integer minimum */
+    int32_t maxInteger;          /* integer maximum */
+    int32_t stepInteger;         /* integer step */
+    int32_t largeStepInteger;    /* large integer step */
+    char shortLabel[VestigeMaxShortLabelLen]; /* short label, recommended: 6 + delimiter */
+    int16_t displayIndex;        /* index where this parameter should be displayed (starting with 0) */
+    int16_t category;            /* 0: no category, else group index + 1 */
+    int16_t numParametersInCategory; /* number of parameters in category */
+    int16_t reserved;            /* zero */
+    char categoryLabel[VestigeMaxCategLabelLen]; /* category label, e.g. "Osc 1"  */
+    char future[16];              /* reserved for future use */
+};
 
-
-
+/* this enum taken from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
+enum VstParameterFlags
+{
+	kVstParameterIsSwitch                = 1 << 0,  /* parameter is a switch (on/off) */
+	kVstParameterUsesIntegerMinMax       = 1 << 1,  /* minInteger, maxInteger valid */
+	kVstParameterUsesFloatStep           = 1 << 2,  /* stepFloat, smallStepFloat, largeStepFloat valid */
+	kVstParameterUsesIntStep             = 1 << 3,  /* stepInteger, largeStepInteger valid */
+	kVstParameterSupportsDisplayIndex    = 1 << 4,  /* displayIndex valid */
+	kVstParameterSupportsDisplayCategory = 1 << 5,  /* category, etc. valid */
+	kVstParameterCanRamp                 = 1 << 6   /* set if parameter value can ramp up/down */
+};
 
 typedef struct AEffect
 {

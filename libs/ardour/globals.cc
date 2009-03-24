@@ -378,6 +378,9 @@ ARDOUR::cleanup ()
 	delete Library;
 	lrdf_cleanup ();
 	delete &ControlProtocolManager::instance();
+#ifdef VST_SUPPORT
+	fst_exit ();
+#endif
 	return 0;
 }
 

@@ -241,7 +241,7 @@ OSC::init_osc_thread ()
 	pthread_attr_init(&attr);
 	pthread_attr_setstacksize(&attr, 500000);
 
-	pthread_create (&_osc_thread, &attr, &OSC::_osc_receiver, this);
+	pthread_create_and_store (X_("OSC"), &_osc_thread, &attr, &OSC::_osc_receiver, this);
 	if (!_osc_thread) {
 		return false;
 	}

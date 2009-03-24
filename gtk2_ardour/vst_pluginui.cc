@@ -55,16 +55,15 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 
 VSTPluginUI::~VSTPluginUI ()
 {
-	// nothing to do here - plugin destructor destroys the GUI
+	// plugin destructor destroys the custom GUI, via Windows fun-and-games,
+	// and then our PluginUIWindow does the rest
 }
 
 void
 VSTPluginUI::preset_chosen ()
 {
-	int program = vst_preset_combo.get_active_row_number ();
-	// cant be done here. plugin only expects one GUI thread.
-	//jvst->fst->plugin->dispatcher( jvst->fst->plugin, effSetProgram, 0, program, NULL, 0.0 );
-	vst->fst()->want_program = program;
+	// we can't dispatch directly here, too many plugins only expects one GUI thread.
+	vst->fst()->want_program = vst_preset_combo.get_active_row_number ();
 	socket.grab_focus ();
 }
 

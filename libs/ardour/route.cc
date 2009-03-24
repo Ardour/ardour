@@ -1152,8 +1152,8 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_
 	}
 
 	redirect->drop_references ();
-
 	redirects_changed (src); /* EMIT SIGNAL */
+
 	return 0;
 }
 

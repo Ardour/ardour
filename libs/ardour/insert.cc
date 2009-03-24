@@ -281,6 +281,8 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 	   be able to handle in-place processing.
 	*/
 
+	// cerr << "Connect and run for " << _plugins[0]->name() << " auto ? " << with_auto << endl;
+
 	if (with_auto) {
 
 		vector<AutomationList*>::iterator li;
@@ -293,11 +295,11 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 			if (alist && alist->automation_playback()) {
 				bool valid;
 
-				float val = alist->rt_safe_eval (now, valid);				
+				// float val = alist->rt_safe_eval (now, valid);				
 
 				if (valid) {
 					/* set the first plugin, the others will be set via signals */
-					_plugins[0]->set_parameter (n, val);
+					// _plugins[0]->set_parameter (n, val);
 				}
 
 			} 
@@ -309,6 +311,7 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 	}
 
 	/* leave remaining channel buffers alone */
+	// cerr << "--- and out\n";
 }
 
 void
@@ -679,8 +682,7 @@ PluginInsert::set_state(const XMLNode& node)
 		 */
 		
 		if (type == ARDOUR::VST) {
-			if (prop = node.property ("id")) {
-			}
+			prop = node.property ("id");
 		}
 #endif		
 		/* recheck  */

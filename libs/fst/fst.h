@@ -105,6 +105,7 @@ extern "C" {
 #endif
 
 extern int        fst_init (void* possible_hmodule);
+extern void       fst_exit ();
 
 extern FSTHandle* fst_load (const char*);
 extern int        fst_unload (FSTHandle*);

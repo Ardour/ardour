@@ -15,6 +15,7 @@ typedef struct {
 static DWORD WINAPI
 fake_thread_proxy (LPVOID parameter) 
 {
+	DWORD retval;
 	real_thread_info_t* rti = (real_thread_info_t*) parameter;
 
 	pthread_mutex_lock (&rti->init_lock);
@@ -35,7 +36,10 @@ fake_thread_proxy (LPVOID parameter)
 	   uses a 1:1 thread design.
 	*/
 
-	return (DWORD) rti->thread_function (rti->thread_arg);
+	retval = (DWORD) rti->thread_function (rti->thread_arg);
+	free (rti);
+
+	return retval;
 }
 
 int

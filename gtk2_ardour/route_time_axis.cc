@@ -1461,7 +1461,6 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 
 				Track *track = dynamic_cast<Track *>(*i);
 				if (!track) {
-					std::cerr << "route " << (*i)->name() << " is not a Track" << std::endl;
 					continue;
 				}
 
@@ -1884,7 +1883,7 @@ RouteTimeAxisView::redirects_changed (void *src)
 		++tmp;
 
 		if (!(*i)->valid) {
-
+			
 			delete *i;
 			redirect_automation.erase (i);
 

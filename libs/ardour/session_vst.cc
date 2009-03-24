@@ -29,10 +29,11 @@
 
 #include "i18n.h"
 
-#undef DEBUG_CALLBACKS
+#define DEBUG_CALLBACKS
+static int debug_callbacks = -1;
 
 #ifdef DEBUG_CALLBACKS
-#define SHOW_CALLBACK printf
+#define SHOW_CALLBACK if (debug_callbacks) printf
 #else
 #define SHOW_CALLBACK(...)
 #endif
@@ -50,15 +51,18 @@ long Session::vst_callback (AEffect* effect,
 	VSTPlugin* plug;
 	Session* session;
 
+	if (debug_callbacks < 0) {
+		debug_callbacks = (getenv ("ARDOUR_DEBUG_VST_CALLBACKS") != 0);
+	}
 	
 	if (effect && effect->user) {
 	        plug = (VSTPlugin*) (effect->user);
 		session = &plug->session();
-		SHOW_CALLBACK ("am callback %d, opcode = %ld, plugin = \"%s\" ", pthread_self(), opcode, plug->name());
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld, plugin = \"%s\" ", pthread_self(), opcode, plug->name());
 	} else {
 		plug = 0;
 		session = 0;
-		SHOW_CALLBACK ("am callback %d, opcode = %ld", pthread_self(), opcode);
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld", pthread_self(), opcode);
 	}
 
 	switch(opcode){
@@ -174,7 +178,10 @@ long Session::vst_callback (AEffect* effect,
 
 	case audioMasterNeedIdle:
 		SHOW_CALLBACK ("amc: audioMasterNeedIdle\n");
-	       // plug needs idle calls (outside its editor window)
+		// plug needs idle calls (outside its editor window)
+		if (plug) {
+			plug->fst()->wantIdle = 1;
+		}
 		return 0;
 
 	case audioMasterSizeWindow:
@@ -184,10 +191,16 @@ long Session::vst_callback (AEffect* effect,
 
 	case audioMasterGetSampleRate:
 		SHOW_CALLBACK ("amc: audioMasterGetSampleRate\n");
+		if (session) {
+			return session->frame_rate();
+		}
 		return 0;
 
 	case audioMasterGetBlockSize:
 		SHOW_CALLBACK ("amc: audioMasterGetBlockSize\n");
+		if (session) {
+			return session->get_block_size();
+		}
 		return 0;
 
 	case audioMasterGetInputLatency:

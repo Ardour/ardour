@@ -1153,7 +1153,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				plugin_ui->set_title (title.get_string());
 				
 				plugin_insert->set_gui (plugin_ui);
-				
+
 			} else {
 				plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
 				plugin_ui->set_parent (win);

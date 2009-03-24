@@ -70,13 +70,16 @@ VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 
 	/* set rate and blocksize */
 
+	//cerr << "Dispatch " <<  "effSetSampleRate" << " for " << name() << endl;
 	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, 
 			     (float) session.frame_rate());
+	//cerr << "Dispatch " << "effSetBlockSize" << " for " << name() << endl;
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, 
 			     session.get_block_size(), NULL, 0.0f);
 	
 	/* set program to zero */
 
+	//cerr << "Dispatch " << "effSetProgram" << " for " << name() << endl;
 	_plugin->dispatcher (_plugin, effSetProgram, 0, 0, NULL, 0.0f);
 	
 	Plugin::setup_controls ();
@@ -106,6 +109,7 @@ void
 VSTPlugin::set_block_size (nframes_t nframes)
 {
 	deactivate ();
+	//cerr << "Dispatch effSetBlockSize for " << name() << endl;
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, nframes, NULL, 0.0f);
 	activate ();
 }
@@ -119,13 +123,17 @@ VSTPlugin::default_value (uint32_t port)
 void
 VSTPlugin::set_parameter (uint32_t which, float val)
 {
+	// cerr << "SetParameter for " << name() << endl;
 	_plugin->setParameter (_plugin, which, val);
+	// cerr << "signal param change\n";
 	ParameterChanged (which, val); /* EMIT SIGNAL */
+	// cerr << "change done\n";
 }
 
 float
 VSTPlugin::get_parameter (uint32_t which) const
 {
+	// cerr << "GetParameter for " << name() << endl;
 	return _plugin->getParameter (_plugin, which);
 	
 }
@@ -150,6 +158,7 @@ VSTPlugin::get_state()
 		guchar* data;
 		long  data_size;
 		
+		//cerr << "Dispatch getChunk for " << name() << endl;
 		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
 			return *root;
 		}
@@ -202,6 +211,7 @@ VSTPlugin::set_state(const XMLNode& node)
 			if ((*n)->is_content ()) {
 				gsize chunk_size = 0;
 				guchar * data = g_base64_decode ((*n)->content ().c_str (), &chunk_size);
+				//cerr << "Dispatch setChunk for " << name() << endl;
 				if (_plugin->dispatcher (_plugin, 24 /* effSetChunk */, 0, chunk_size, data, 0) == 0) {
 					g_free (data);
 					return 0;
@@ -224,6 +234,7 @@ VSTPlugin::set_state(const XMLNode& node)
 			sscanf ((*i)->name().c_str(), "param_%ld", &param);
 			sscanf ((*i)->value().c_str(), "%f", &val);
 
+			// cerr << "setParameter for " << name() << endl;
 			_plugin->setParameter (_plugin, param, val);
 		}
 
@@ -241,9 +252,9 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	desc.min_unbound = false;
 	desc.max_unbound = false;
 
+	//cerr << "Dispatch getParameterProperties for " << name() << endl;
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
 
-#ifdef VESTIGE_COMPLETE
 		/* i have yet to find or hear of a VST plugin that uses this */
 
 		if (prop.flags & kVstParameterUsesIntegerMinMax) {
@@ -279,7 +290,6 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
 		desc.label = prop.label;
-#endif
 
 	} else {
 
@@ -288,6 +298,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		char label[64];
 		label[0] = '\0';
 
+		// cerr << "Dispatch paramName for " << name() << endl;
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
 
 		desc.label = label;
@@ -333,6 +344,7 @@ string
 VSTPlugin::describe_parameter (uint32_t param)
 {
 	char name[64];
+	// cerr << "Dispatch effGetParamName for " << this->name() << endl;
 	_plugin->dispatcher (_plugin, effGetParamName, param, 0, name, 0);
 	return name;
 }
@@ -390,6 +402,7 @@ VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_
 
 	/* we already know it can support processReplacing */
 
+	// cerr << "!ProcessReplacing for " << name() << endl;
 	_plugin->processReplacing (_plugin, ins, outs, nframes);
 
 	return 0;
@@ -398,12 +411,14 @@ VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_
 void
 VSTPlugin::deactivate ()
 {
+	//cerr << "Dispatch effMainsChanged for " << name() << endl;
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 0, NULL, 0.0f);
 }
 
 void
 VSTPlugin::activate ()
 {
+	//cerr << "Dispatch effMainsChanged for " << name() << endl;
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 1, NULL, 0.0f);
 }
 
@@ -455,6 +470,7 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 {
 	char *first_nonws;
 
+	//cerr << "Dispatch getParamDisplay for " << name() << endl;
 	_plugin->dispatcher (_plugin, 7 /* effGetParamDisplay */, param, 0, buf, 0);
 
 	if (buf[0] == '\0') {

@@ -450,7 +450,7 @@ AudioEngine::set_session (Session *s)
 		/* page in as much of the session process code as we
 		   can before we really start running.
 		*/
-		
+
 		session->process (blocksize);
 		session->process (blocksize);
 		session->process (blocksize);
