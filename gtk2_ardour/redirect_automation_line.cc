@@ -58,6 +58,7 @@ RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& r
 
 	upper = desc.upper;
 	lower = desc.lower;
+	range = upper - lower;
 
 	if (desc.toggled) {
 		no_draw = true;
@@ -65,7 +66,6 @@ RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& r
 	}
 
 	no_draw = false;
-	range = upper - lower;
 
 	/* XXX set min/max for underlying curve ??? */
 }
