@@ -123,7 +123,7 @@ VSTPlugin::default_value (uint32_t port)
 void
 VSTPlugin::set_parameter (uint32_t which, float val)
 {
-	// cerr << "SetParameter for " << name() << endl;
+	// cerr << "1SetParameter for " << name() << endl;
 	_plugin->setParameter (_plugin, which, val);
 	// cerr << "signal param change\n";
 	ParameterChanged (which, val); /* EMIT SIGNAL */
@@ -234,7 +234,7 @@ VSTPlugin::set_state(const XMLNode& node)
 			sscanf ((*i)->name().c_str(), "param_%ld", &param);
 			sscanf ((*i)->value().c_str(), "%f", &val);
 
-			// cerr << "setParameter for " << name() << endl;
+			// cerr << "2setParameter for " << name() << endl;
 			_plugin->setParameter (_plugin, param, val);
 		}
 
@@ -248,14 +248,13 @@ int
 VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) const
 {
 	VstParameterProperties prop;
-
+	
 	desc.min_unbound = false;
 	desc.max_unbound = false;
+	prop.flags = 0;
 
 	//cerr << "Dispatch getParameterProperties for " << name() << endl;
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
-
-		/* i have yet to find or hear of a VST plugin that uses this */
 
 		if (prop.flags & kVstParameterUsesIntegerMinMax) {
 			desc.lower = prop.minInteger;
@@ -287,6 +286,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		}
 		
 		desc.toggled = prop.flags & kVstParameterIsSwitch;
+		// cerr << "parameter " << which << " toggled = " << desc.toggled << " from " << std::hex << prop.flags << " vs. " << kVstParameterIsSwitch << std::dec << endl;
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
 		desc.label = prop.label;
