@@ -281,8 +281,8 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 	   be able to handle in-place processing.
 	*/
 
-	// cerr << "Connect and run for " << _plugins[0]->name() << " auto ? " << with_auto << endl;
-
+	// cerr << "Connect and run for " << _plugins[0]->name() << " auto ? " << with_auto << " nf = " << nframes << " off = " << offset << endl;
+	
 	if (with_auto) {
 
 		vector<AutomationList*>::iterator li;
@@ -294,22 +294,24 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 
 			if (alist && alist->automation_playback()) {
 				bool valid;
-
-				// float val = alist->rt_safe_eval (now, valid);				
+				
+				float val = alist->rt_safe_eval (now, valid);				
 
 				if (valid) {
 					/* set the first plugin, the others will be set via signals */
-					// _plugins[0]->set_parameter (n, val);
+					// cerr << "\t@ " << now << " param[" << n << "] = " << val << endl;
+					_plugins[0]->set_parameter (n, val);
 				}
 
 			} 
 		}
-	}
+	} 
 
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		// cerr << "\trun C&R with in = " << in_index << " out = " << out_index << " nf = " << nframes << " off = " << offset << endl;
 		(*i)->connect_and_run (bufs, nbufs, in_index, out_index, nframes, offset);
 	}
-
+	
 	/* leave remaining channel buffers alone */
 	// cerr << "--- and out\n";
 }
@@ -441,10 +443,15 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
  		connect_and_run (bufs, nbufs, cnt, offset, true, now);
  		
  		nframes -= cnt;
- 		offset += cnt;
 		now += cnt;
 		buffer_correct += cnt;
 
+		/* we are going to advance the buffer pointers by "cnt" so there
+		   is no reason to specify a non-zero offset anymore.
+		*/
+
+ 		offset = 0;
+		
 		for (uint32_t i = 0; i < nbufs; i++) {
 			bufs[i] += cnt;
 		}
