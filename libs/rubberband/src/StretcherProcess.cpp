@@ -67,7 +67,7 @@ RubberBandStretcher::Impl::ProcessThread::run()
 
         m_dataAvailable.lock();
         if (!m_s->testInbufReadSpace(m_channel) && !m_abandoning) {
-            m_dataAvailable.wait();
+            m_dataAvailable.wait(50000); // bounded in case of abandonment
         } else {
             m_dataAvailable.unlock();
         }
@@ -448,8 +448,8 @@ RubberBandStretcher::Impl::calculateIncrements(size_t &phaseIncrementRtn,
 
     if (m_channels == 1) {
 
-        df = m_phaseResetAudioCurve->process(cd.mag, m_increment);
-        silent = (m_silentAudioCurve->process(cd.mag, m_increment) > 0.f);
+        df = m_phaseResetAudioCurve->processDouble(cd.mag, m_increment);
+        silent = (m_silentAudioCurve->processDouble(cd.mag, m_increment) > 0.f);
 
     } else {
 
@@ -464,8 +464,8 @@ RubberBandStretcher::Impl::calculateIncrements(size_t &phaseIncrementRtn,
             }
         }
     
-        df = m_phaseResetAudioCurve->process(tmp, m_increment);
-        silent = (m_silentAudioCurve->process(tmp, m_increment) > 0.f);
+        df = m_phaseResetAudioCurve->processDouble(tmp, m_increment);
+        silent = (m_silentAudioCurve->processDouble(tmp, m_increment) > 0.f);
     }
 
     int incr = m_stretchCalculator->calculateSingle
@@ -736,7 +736,7 @@ RubberBandStretcher::Impl::modifyChunk(size_t channel,
             bool inherit = false;
 
             if (laminar) {
-                if (distance >= mi) {
+                if (distance >= mi || i == count) {
                     inherit = false;
                 } else if (bandlimited && (i == bandhigh || i == bandlow)) {
                     inherit = false;

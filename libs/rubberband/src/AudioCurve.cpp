@@ -31,9 +31,9 @@ AudioCurve::~AudioCurve()
 }
 
 float
-AudioCurve::process(const double *R__ mag, size_t increment)
+AudioCurve::processDouble(const double *R__ mag, size_t increment)
 {
-    cerr << "WARNING: Using inefficient AudioCurve::process(double)" << endl;
+    cerr << "AudioCurve::processDouble: WARNING: Using inefficient and lossy conversion for AudioCurve::process(float)" << endl;
     float *tmp = new float[m_windowSize];
     for (int i = 0; i < int(m_windowSize); ++i) tmp[i] = float(mag[i]);
     float df = process(tmp, increment);

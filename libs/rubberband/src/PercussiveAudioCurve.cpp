@@ -82,7 +82,7 @@ PercussiveAudioCurve::process(const float *R__ mag, size_t increment)
 }
 
 float
-PercussiveAudioCurve::process(const double *R__ mag, size_t increment)
+PercussiveAudioCurve::processDouble(const double *R__ mag, size_t increment)
 {
     Profiler profiler("PercussiveAudioCurve::process");
 

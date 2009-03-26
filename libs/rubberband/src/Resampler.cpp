@@ -137,9 +137,11 @@ D_SRC::resample(const float *const R__ *const R__ in,
         data.data_out = *out;
     } else {
         if (incount * m_channels > m_iinsize) {
+            m_iinsize = incount * m_channels;
             m_iin = allocFloat(m_iin, m_iinsize);
         }
         if (outcount * m_channels > m_ioutsize) {
+            m_ioutsize = outcount * m_channels;
             m_iout = allocFloat(m_iout, m_ioutsize);
         }
         for (int i = 0; i < incount; ++i) {

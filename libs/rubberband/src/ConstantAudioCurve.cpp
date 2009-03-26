@@ -43,5 +43,11 @@ ConstantAudioCurve::process(const float *R__, size_t)
     return 1.f;
 }
 
+float
+ConstantAudioCurve::processDouble(const double *R__, size_t)
+{
+    return 1.f;
+}
+
 }
 

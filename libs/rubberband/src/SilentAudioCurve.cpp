@@ -53,7 +53,7 @@ SilentAudioCurve::process(const float *R__ mag, size_t)
 }
 
 float
-SilentAudioCurve::process(const double *R__ mag, size_t)
+SilentAudioCurve::processDouble(const double *R__ mag, size_t)
 {
     const int hs = m_windowSize / 2;
     static double threshold = pow(10.0, -6);
