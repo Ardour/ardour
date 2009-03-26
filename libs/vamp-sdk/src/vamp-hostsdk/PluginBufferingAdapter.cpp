@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006-2007 Chris Cannam and QMUL.
-    This file by Mark Levy and Chris Cannam.
+    This file by Mark Levy and Chris Cannam, Copyright 2007-2008 QMUL.
   
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -38,10 +38,12 @@
 #include <vector>
 #include <map>
 
-#include "PluginBufferingAdapter.h"
+#include <vamp-hostsdk/PluginBufferingAdapter.h>
 
 using std::vector;
 using std::map;
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginBufferingAdapter.cpp)
 
 namespace Vamp {
 	
@@ -52,10 +54,18 @@ class PluginBufferingAdapter::Impl
 public:
     Impl(Plugin *plugin, float inputSampleRate);
     ~Impl();
-		
+	
+    void setPluginStepSize(size_t stepSize);	
+    void setPluginBlockSize(size_t blockSize);
+
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
 
+    void getActualStepAndBlockSizes(size_t &stepSize, size_t &blockSize);
+
     OutputList getOutputDescriptors() const;
+
+    void setParameter(std::string, float);
+    void selectProgram(std::string);
 
     void reset();
 
@@ -219,19 +229,22 @@ protected:
     };
 
     Plugin *m_plugin;
-    size_t m_inputStepSize;
-    size_t m_inputBlockSize;
-    size_t m_stepSize;
-    size_t m_blockSize;
+    size_t m_inputStepSize;  // value passed to wrapper initialise()
+    size_t m_inputBlockSize; // value passed to wrapper initialise()
+    size_t m_setStepSize;    // value passed to setPluginStepSize()
+    size_t m_setBlockSize;   // value passed to setPluginBlockSize()
+    size_t m_stepSize;       // value actually used to initialise plugin
+    size_t m_blockSize;      // value actually used to initialise plugin
     size_t m_channels;
     vector<RingBuffer *> m_queue;
     float **m_buffers;
     float m_inputSampleRate;
-    RealTime m_timestamp;
+    long m_frame;
     bool m_unrun;
-    OutputList m_outputs;
+    mutable OutputList m_outputs;
+    mutable std::map<int, bool> m_rewriteOutputTimes;
 		
-    void processBlock(FeatureSet& allFeatureSets, RealTime timestamp);
+    void processBlock(FeatureSet& allFeatureSets);
 };
 		
 PluginBufferingAdapter::PluginBufferingAdapter(Plugin *plugin) :
@@ -244,6 +257,49 @@ PluginBufferingAdapter::~PluginBufferingAdapter()
 {
     delete m_impl;
 }
+
+size_t
+PluginBufferingAdapter::getPreferredStepSize() const
+{
+    return getPreferredBlockSize();
+}
+
+size_t
+PluginBufferingAdapter::getPreferredBlockSize() const
+{
+    return PluginWrapper::getPreferredBlockSize();
+}
+
+size_t
+PluginBufferingAdapter::getPluginPreferredStepSize() const
+{
+    return PluginWrapper::getPreferredStepSize();
+}
+
+size_t
+PluginBufferingAdapter::getPluginPreferredBlockSize() const
+{
+    return PluginWrapper::getPreferredBlockSize();
+}
+
+void
+PluginBufferingAdapter::setPluginStepSize(size_t stepSize)
+{
+    m_impl->setPluginStepSize(stepSize);
+}
+
+void
+PluginBufferingAdapter::setPluginBlockSize(size_t blockSize)
+{
+    m_impl->setPluginBlockSize(blockSize);
+}
+
+void
+PluginBufferingAdapter::getActualStepAndBlockSizes(size_t &stepSize,
+                                                   size_t &blockSize)
+{
+    m_impl->getActualStepAndBlockSizes(stepSize, blockSize);
+}
 		
 bool
 PluginBufferingAdapter::initialise(size_t channels, size_t stepSize, size_t blockSize)
@@ -255,6 +311,18 @@ PluginBufferingAdapter::OutputList
 PluginBufferingAdapter::getOutputDescriptors() const
 {
     return m_impl->getOutputDescriptors();
+}
+
+void
+PluginBufferingAdapter::setParameter(std::string name, float value)
+{
+    m_impl->setParameter(name, value);
+}
+
+void
+PluginBufferingAdapter::selectProgram(std::string name)
+{
+    m_impl->selectProgram(name);
 }
 
 void
@@ -280,16 +348,18 @@ PluginBufferingAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
     m_plugin(plugin),
     m_inputStepSize(0),
     m_inputBlockSize(0),
+    m_setStepSize(0),
+    m_setBlockSize(0),
     m_stepSize(0),
     m_blockSize(0),
     m_channels(0), 
     m_queue(0),
     m_buffers(0),
     m_inputSampleRate(inputSampleRate),
-    m_timestamp(RealTime::zeroTime),
+    m_frame(0),
     m_unrun(true)
 {
-    m_outputs = plugin->getOutputDescriptors();
+    (void)getOutputDescriptors(); // set up m_outputs and m_rewriteOutputTimes
 }
 		
 PluginBufferingAdapter::Impl::~Impl()
@@ -302,13 +372,35 @@ PluginBufferingAdapter::Impl::~Impl()
     }
     delete[] m_buffers;
 }
-
-size_t
-PluginBufferingAdapter::getPreferredStepSize() const
+		
+void
+PluginBufferingAdapter::Impl::setPluginStepSize(size_t stepSize)
 {
-    return getPreferredBlockSize();
+    if (m_inputStepSize != 0) {
+        std::cerr << "PluginBufferingAdapter::setPluginStepSize: ERROR: Cannot be called after initialise()" << std::endl;
+        return;
+    }
+    m_setStepSize = stepSize;
 }
 		
+void
+PluginBufferingAdapter::Impl::setPluginBlockSize(size_t blockSize)
+{
+    if (m_inputBlockSize != 0) {
+        std::cerr << "PluginBufferingAdapter::setPluginBlockSize: ERROR: Cannot be called after initialise()" << std::endl;
+        return;
+    }
+    m_setBlockSize = blockSize;
+}
+
+void
+PluginBufferingAdapter::Impl::getActualStepAndBlockSizes(size_t &stepSize,
+                                                         size_t &blockSize)
+{
+    stepSize = m_stepSize;
+    blockSize = m_blockSize;
+}
+
 bool
 PluginBufferingAdapter::Impl::initialise(size_t channels, size_t stepSize, size_t blockSize)
 {
@@ -320,37 +412,64 @@ PluginBufferingAdapter::Impl::initialise(size_t channels, size_t stepSize, size_
     m_channels = channels;	
     m_inputStepSize = stepSize;
     m_inputBlockSize = blockSize;
+
+    // if the user has requested particular step or block sizes, use
+    // those; otherwise use the step and block sizes which the plugin
+    // prefers
+
+    m_stepSize = 0;
+    m_blockSize = 0;
+
+    if (m_setStepSize > 0) {
+        m_stepSize = m_setStepSize;
+    }
+    if (m_setBlockSize > 0) {
+        m_blockSize = m_setBlockSize;
+    }
+
+    if (m_stepSize == 0 && m_blockSize == 0) {
+        m_stepSize = m_plugin->getPreferredStepSize();
+        m_blockSize = m_plugin->getPreferredBlockSize();
+    }
     
-    // use the step and block sizes which the plugin prefers
-    m_stepSize = m_plugin->getPreferredStepSize();
-    m_blockSize = m_plugin->getPreferredBlockSize();
+    bool freq = (m_plugin->getInputDomain() == Vamp::Plugin::FrequencyDomain);
     
     // or sensible defaults if it has no preference
     if (m_blockSize == 0) {
-        m_blockSize = 1024;
-    }
-    if (m_stepSize == 0) {
-        if (m_plugin->getInputDomain() == Vamp::Plugin::FrequencyDomain) {
-            m_stepSize = m_blockSize/2;
-        } else {
-            m_stepSize = m_blockSize;
-        }
-    } else if (m_stepSize > m_blockSize) {
-        if (m_plugin->getInputDomain() == Vamp::Plugin::FrequencyDomain) {
+        if (m_stepSize == 0) {
+            m_blockSize = 1024;
+            if (freq) {
+                m_stepSize = m_blockSize / 2;
+            } else {
+                m_stepSize = m_blockSize;
+            }
+        } else if (freq) {
             m_blockSize = m_stepSize * 2;
         } else {
             m_blockSize = m_stepSize;
         }
+    } else if (m_stepSize == 0) { // m_blockSize != 0 (that was handled above)
+        if (freq) {
+            m_stepSize = m_blockSize/2;
+        } else {
+            m_stepSize = m_blockSize;
+        }
     }
-    
-    // std::cerr << "PluginBufferingAdapter::initialise: stepSize " << m_inputStepSize << " -> " << m_stepSize 
-    // << ", blockSize " << m_inputBlockSize << " -> " << m_blockSize << std::endl;			
     
     // current implementation breaks if step is greater than block
     if (m_stepSize > m_blockSize) {
-        std::cerr << "PluginBufferingAdapter::initialise: plugin's preferred stepSize greater than blockSize, giving up!" << std::endl;
-        return false;
+        size_t newBlockSize;
+        if (freq) {
+            newBlockSize = m_stepSize * 2;
+        } else {
+            newBlockSize = m_stepSize;
+        }
+        std::cerr << "PluginBufferingAdapter::initialise: WARNING: step size " << m_stepSize << " is greater than block size " << m_blockSize << ": cannot handle this in adapter; adjusting block size to " << newBlockSize << std::endl;
+        m_blockSize = newBlockSize;
     }
+    
+//    std::cerr << "PluginBufferingAdapter::initialise: NOTE: stepSize " << m_inputStepSize << " -> " << m_stepSize 
+//              << ", blockSize " << m_inputBlockSize << " -> " << m_blockSize << std::endl;			
 
     m_buffers = new float *[m_channels];
 
@@ -359,41 +478,108 @@ PluginBufferingAdapter::Impl::initialise(size_t channels, size_t stepSize, size_
         m_buffers[i] = new float[m_blockSize];
     }
     
-    return m_plugin->initialise(m_channels, m_stepSize, m_blockSize);
+    bool success = m_plugin->initialise(m_channels, m_stepSize, m_blockSize);
+
+//    std::cerr << "PluginBufferingAdapter::initialise: success = " << success << std::endl;
+
+    if (success) {
+        // Re-query outputs; properties such as bin count may have
+        // changed on initialise
+        m_outputs.clear();
+        (void)getOutputDescriptors();
+    }
+
+    return success;
 }
 		
 PluginBufferingAdapter::OutputList
 PluginBufferingAdapter::Impl::getOutputDescriptors() const
 {
-    OutputList outs = m_plugin->getOutputDescriptors();
-    for (size_t i = 0; i < outs.size(); ++i) {
-        if (outs[i].sampleType == OutputDescriptor::OneSamplePerStep) {
-            outs[i].sampleRate = 1.f / m_stepSize;
-        }
-        outs[i].sampleType = OutputDescriptor::VariableSampleRate;
+    if (m_outputs.empty()) {
+//    std::cerr << "PluginBufferingAdapter::getOutputDescriptors: querying anew" << std::endl;
+
+        m_outputs = m_plugin->getOutputDescriptors();
     }
+
+    PluginBufferingAdapter::OutputList outs = m_outputs;
+
+    for (size_t i = 0; i < outs.size(); ++i) {
+
+        switch (outs[i].sampleType) {
+
+        case OutputDescriptor::OneSamplePerStep:
+            outs[i].sampleType = OutputDescriptor::FixedSampleRate;
+            outs[i].sampleRate = (1.f / m_inputSampleRate) * m_stepSize;
+            m_rewriteOutputTimes[i] = true;
+            break;
+            
+        case OutputDescriptor::FixedSampleRate:
+            if (outs[i].sampleRate == 0.f) {
+                outs[i].sampleRate = (1.f / m_inputSampleRate) * m_stepSize;
+            }
+            // We actually only need to rewrite output times for
+            // features that don't have timestamps already, but we
+            // can't tell from here whether our features will have
+            // timestamps or not
+            m_rewriteOutputTimes[i] = true;
+            break;
+
+        case OutputDescriptor::VariableSampleRate:
+            m_rewriteOutputTimes[i] = false;
+            break;
+        }
+    }
+
     return outs;
+}
+
+void
+PluginBufferingAdapter::Impl::setParameter(std::string name, float value)
+{
+    m_plugin->setParameter(name, value);
+
+    // Re-query outputs; properties such as bin count may have changed
+    m_outputs.clear();
+    (void)getOutputDescriptors();
+}
+
+void
+PluginBufferingAdapter::Impl::selectProgram(std::string name)
+{
+    m_plugin->selectProgram(name);
+
+    // Re-query outputs; properties such as bin count may have changed
+    m_outputs.clear();
+    (void)getOutputDescriptors();
 }
 
 void
 PluginBufferingAdapter::Impl::reset()
 {
-    m_timestamp = RealTime::zeroTime;
+    m_frame = 0;
     m_unrun = true;
 
     for (size_t i = 0; i < m_queue.size(); ++i) {
         m_queue[i]->reset();
     }
+
+    m_plugin->reset();
 }
 
 PluginBufferingAdapter::FeatureSet
 PluginBufferingAdapter::Impl::process(const float *const *inputBuffers,
                                       RealTime timestamp)
 {
+    if (m_inputStepSize == 0) {
+        std::cerr << "PluginBufferingAdapter::process: ERROR: Plugin has not been initialised" << std::endl;
+        return FeatureSet();
+    }
+
     FeatureSet allFeatureSets;
 
     if (m_unrun) {
-        m_timestamp = timestamp;
+        m_frame = RealTime::realTime2Frame(timestamp,
+                                           int(m_inputSampleRate + 0.5));
         m_unrun = false;
     }
 			
@@ -414,7 +600,7 @@ PluginBufferingAdapter::Impl::process(const float *const *inputBuffers,
     // process as much as we can
 
     while (m_queue[0]->getReadSpace() >= int(m_blockSize)) {
-        processBlock(allFeatureSets, timestamp);
+        processBlock(allFeatureSets);
     }	
     
     return allFeatureSets;
@@ -427,7 +613,7 @@ PluginBufferingAdapter::Impl::getRemainingFeatures()
     
     // process remaining samples in queue
     while (m_queue[0]->getReadSpace() >= int(m_blockSize)) {
-        processBlock(allFeatureSets, m_timestamp);
+        processBlock(allFeatureSets);
     }
     
     // pad any last samples remaining and process
@@ -435,7 +621,7 @@ PluginBufferingAdapter::Impl::getRemainingFeatures()
         for (size_t i = 0; i < m_channels; ++i) {
             m_queue[i]->zero(m_blockSize - m_queue[i]->getReadSpace());
         }
-        processBlock(allFeatureSets, m_timestamp);
+        processBlock(allFeatureSets);
     }			
     
     // get remaining features			
@@ -454,44 +640,58 @@ PluginBufferingAdapter::Impl::getRemainingFeatures()
 }
     
 void
-PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets,
-                                           RealTime timestamp)
+PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets)
 {
     for (size_t i = 0; i < m_channels; ++i) {
         m_queue[i]->peek(m_buffers[i], m_blockSize);
     }
 
-    FeatureSet featureSet = m_plugin->process(m_buffers, m_timestamp);
+    long frame = m_frame;
+    RealTime timestamp = RealTime::frame2RealTime
+        (frame, int(m_inputSampleRate + 0.5));
+
+    FeatureSet featureSet = m_plugin->process(m_buffers, timestamp);
     
-    for (map<int, FeatureList>::iterator iter = featureSet.begin();
+    for (FeatureSet::iterator iter = featureSet.begin();
          iter != featureSet.end(); ++iter) {
-	
-        FeatureList featureList = iter->second;
+
         int outputNo = iter->first;
+
+        if (m_rewriteOutputTimes[outputNo]) {
+            
+            FeatureList featureList = iter->second;
 	
-        for (size_t i = 0; i < featureList.size(); ++i) {
+            for (size_t i = 0; i < featureList.size(); ++i) {
+
+                switch (m_outputs[outputNo].sampleType) {
+
+                case OutputDescriptor::OneSamplePerStep:
+                    // use our internal timestamp, always
+                    featureList[i].timestamp = timestamp;
+                    featureList[i].hasTimestamp = true;
+                    break;
+
+                case OutputDescriptor::FixedSampleRate:
+                    // use our internal timestamp if feature lacks one
+                    if (!featureList[i].hasTimestamp) {
+                        featureList[i].timestamp = timestamp;
+                        featureList[i].hasTimestamp = true;
+                    }
+                    break;
+
+                case OutputDescriptor::VariableSampleRate:
+                    break;		// plugin must set timestamp
+
+                default:
+                    break;
+                }
             
-            // make sure the timestamp is set
-            switch (m_outputs[outputNo].sampleType) {
-
-            case OutputDescriptor::OneSamplePerStep:
-		// use our internal timestamp - OK????
-                featureList[i].timestamp = m_timestamp;
-                break;
-
-            case OutputDescriptor::FixedSampleRate:
-		// use our internal timestamp
-                featureList[i].timestamp = m_timestamp;
-                break;
-
-            case OutputDescriptor::VariableSampleRate:
-                break;		// plugin must set timestamp
-
-            default:
-                break;
+                allFeatureSets[outputNo].push_back(featureList[i]);
             }
-            
-            allFeatureSets[outputNo].push_back(featureList[i]);		
+        } else {
+            for (size_t i = 0; i < iter->second.size(); ++i) {
+                allFeatureSets[outputNo].push_back(iter->second[i]);
+            }
         }
     }
     
@@ -501,16 +701,12 @@ PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets,
         m_queue[i]->skip(m_stepSize);
     }
     
-    // fake up the timestamp each time we step forward
-
-    long frame = RealTime::realTime2Frame(m_timestamp,
-                                          int(m_inputSampleRate + 0.5));
-    m_timestamp = RealTime::frame2RealTime(frame + m_stepSize,
-                                           int(m_inputSampleRate + 0.5));
+    // increment internal frame counter each time we step forward
+    m_frame += m_stepSize;
 }
 
 }
 	
 }
 
-
+_VAMP_SDK_HOSTSPACE_END(PluginBufferingAdapter.cpp)

@@ -6,7 +6,7 @@
     An API for audio analysis and feature extraction plugins.
 
     Centre for Digital Music, Queen Mary, University of London.
-    Copyright 2006-2007 Chris Cannam and QMUL.
+    Copyright 2006 Chris Cannam.
   
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -34,33 +34,46 @@
     authorization.
 */
 
-#ifndef _VAMP_PLUGIN_WRAPPER_H_
-#define _VAMP_PLUGIN_WRAPPER_H_
+#ifndef _VAMP_PLUGIN_HOST_ADAPTER_H_
+#define _VAMP_PLUGIN_HOST_ADAPTER_H_
 
-#include <vamp-sdk/Plugin.h>
+#include "hostguard.h"
+#include "Plugin.h"
+
+#include <vamp/vamp.h>
+
+#include <vector>
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginHostAdapter.h)
 
 namespace Vamp {
 
-namespace HostExt {
-
 /**
- * \class PluginWrapper PluginWrapper.h <vamp-sdk/hostext/PluginWrapper.h>
+ * \class PluginHostAdapter PluginHostAdapter.h <vamp-hostsdk/PluginHostAdapter.h>
  * 
- * PluginWrapper is a simple base class for adapter plugins.  It takes
- * a pointer to a "to be wrapped" Vamp plugin on construction, and
- * provides implementations of all the Vamp plugin methods that simply
- * delegate through to the wrapped plugin.  A subclass can therefore
- * override only the methods that are meaningful for the particular
- * adapter.
+ * PluginHostAdapter is a wrapper class that a Vamp host can use to
+ * make the C-language VampPluginDescriptor object appear as a C++
+ * Vamp::Plugin object.
  *
- * \note This class was introduced in version 1.1 of the Vamp plugin SDK.
+ * The Vamp API is defined in vamp/vamp.h as a C API.  The C++ objects
+ * used for convenience by plugins and hosts actually communicate
+ * using the C low-level API, but the details of this communication
+ * are handled seamlessly by the Vamp SDK implementation provided the
+ * plugin and host use the proper C++ wrapper objects.
+ *
+ * See also PluginAdapter, the plugin-side wrapper that makes a C++
+ * plugin object available using the C query API.
  */
 
-class PluginWrapper : public Plugin
+class PluginHostAdapter : public Plugin
 {
 public:
-    virtual ~PluginWrapper();
+    PluginHostAdapter(const VampPluginDescriptor *descriptor,
+                      float inputSampleRate);
+    virtual ~PluginHostAdapter();
     
+    static std::vector<std::string> getPluginPath();
+
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
     void reset();
 
@@ -95,12 +108,16 @@ public:
     FeatureSet getRemainingFeatures();
 
 protected:
-    PluginWrapper(Plugin *plugin); // I take ownership of plugin
-    Plugin *m_plugin;
+    void convertFeatures(VampFeatureList *, FeatureSet &);
+
+    const VampPluginDescriptor *m_descriptor;
+    VampPluginHandle m_handle;
 };
 
 }
 
-}
+_VAMP_SDK_HOSTSPACE_END(PluginHostAdapter.h)
 
 #endif
+
+

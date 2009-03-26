@@ -37,14 +37,17 @@
 #ifndef _VAMP_PLUGIN_CHANNEL_ADAPTER_H_
 #define _VAMP_PLUGIN_CHANNEL_ADAPTER_H_
 
+#include "hostguard.h"
 #include "PluginWrapper.h"
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginChannelAdapter.h)
 
 namespace Vamp {
 
 namespace HostExt {
 
 /**
- * \class PluginChannelAdapter PluginChannelAdapter.h <vamp-sdk/hostext/PluginChannelAdapter.h>
+ * \class PluginChannelAdapter PluginChannelAdapter.h <vamp-hostsdk/PluginChannelAdapter.h>
  *
  * PluginChannelAdapter is a Vamp plugin adapter that implements a
  * policy for management of plugins that expect a different number of
@@ -109,12 +112,28 @@ namespace HostExt {
 class PluginChannelAdapter : public PluginWrapper
 {
 public:
-    PluginChannelAdapter(Plugin *plugin); // I take ownership of plugin
+    /**
+     * Construct a PluginChannelAdapter wrapping the given plugin.
+     * The adapter takes ownership of the plugin, which will be
+     * deleted when the adapter is deleted.
+     */
+    PluginChannelAdapter(Plugin *plugin);
     virtual ~PluginChannelAdapter();
 
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
 
     FeatureSet process(const float *const *inputBuffers, RealTime timestamp);
+
+    /**
+     * Call process(), providing interleaved audio data with the
+     * number of channels passed to initialise().  The adapter will
+     * de-interleave into temporary buffers as appropriate before
+     * calling process().
+     *
+     * \note This function was introduced in version 1.4 of the Vamp
+     * plugin SDK.
+     */
+    FeatureSet processInterleaved(const float *inputBuffer, RealTime timestamp);
 
 protected:
     class Impl;
@@ -124,5 +143,7 @@ protected:
 }
 
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginChannelAdapter.h)
 
 #endif

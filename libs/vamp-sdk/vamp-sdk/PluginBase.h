@@ -34,13 +34,18 @@
     authorization.
 */
 
-#ifndef _VAMP_PLUGIN_BASE_H_
-#define _VAMP_PLUGIN_BASE_H_
+#ifndef _VAMP_SDK_PLUGIN_BASE_H_
+#define _VAMP_SDK_PLUGIN_BASE_H_
 
 #include <string>
 #include <vector>
 
-#define VAMP_SDK_VERSION "1.1"
+#define VAMP_SDK_VERSION "2.0"
+#define VAMP_SDK_MAJOR_VERSION 2
+#define VAMP_SDK_MINOR_VERSION 0
+
+#include "plugguard.h"
+_VAMP_SDK_PLUGSPACE_BEGIN(PluginBase.h)
 
 namespace Vamp {
 
@@ -64,12 +69,12 @@ public:
     /**
      * Get the Vamp API compatibility level of the plugin.
      */
-    virtual unsigned int getVampApiVersion() const { return 1; }
+    virtual unsigned int getVampApiVersion() const { return 2; }
 
     /**
      * Get the computer-usable name of the plugin.  This should be
      * reasonably short and contain no whitespace or punctuation
-     * characters.  It may only contain the characters [a-zA-Z0-9_].
+     * characters.  It may only contain the characters [a-zA-Z0-9_-].
      * This is the authoritative way for a program to identify a
      * plugin within a given library.
      *
@@ -127,7 +132,7 @@ public:
 	/**
 	 * The name of the parameter, in computer-usable form.  Should
 	 * be reasonably short, and may only contain the characters
-	 * [a-zA-Z0-9_].
+	 * [a-zA-Z0-9_-].
 	 */
 	std::string identifier;
 
@@ -190,6 +195,9 @@ public:
          * encoded in the names.
          */
         std::vector<std::string> valueNames;
+
+        ParameterDescriptor() : // the defaults are invalid: you must set them
+            minValue(0), maxValue(0), defaultValue(0), isQuantized(false) { }
     };
 
     typedef std::vector<ParameterDescriptor> ParameterList;
@@ -248,5 +256,7 @@ public:
 };
 
 }
+
+_VAMP_SDK_PLUGSPACE_END(PluginBase.h)
 
 #endif

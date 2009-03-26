@@ -37,9 +37,10 @@
     authorization.
 */
 
-#include "PluginInputDomainAdapter.h"
+#include <vamp-hostsdk/PluginInputDomainAdapter.h>
 
 #include <cmath>
+
 
 /**
  * If you want to compile using FFTW instead of the built-in FFT
@@ -68,6 +69,9 @@
 #include <fftw3.h>
 #endif
 
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginInputDomainAdapter.cpp)
+
 namespace Vamp {
 
 namespace HostExt {
@@ -84,6 +88,8 @@ public:
     size_t getPreferredBlockSize() const;
 
     FeatureSet process(const float *const *inputBuffers, RealTime timestamp);
+    
+    RealTime getTimestampAdjustment() const;
 
 protected:
     Plugin *m_plugin;
@@ -148,6 +154,13 @@ PluginInputDomainAdapter::process(const float *const *inputBuffers, RealTime tim
 {
     return m_impl->process(inputBuffers, timestamp);
 }
+
+RealTime
+PluginInputDomainAdapter::getTimestampAdjustment() const
+{
+    return m_impl->getTimestampAdjustment();
+}
+
 
 PluginInputDomainAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
     m_plugin(plugin),
@@ -336,6 +349,17 @@ PluginInputDomainAdapter::Impl::makeBlockSizeAcceptable(size_t blockSize) const
     return blockSize;
 }
 
+RealTime
+PluginInputDomainAdapter::Impl::getTimestampAdjustment() const
+{
+    if (m_plugin->getInputDomain() == TimeDomain) {
+        return RealTime::zeroTime;
+    } else {
+        return RealTime::frame2RealTime
+            (m_blockSize/2, int(m_inputSampleRate + 0.5));
+    }
+}
+
 Plugin::FeatureSet
 PluginInputDomainAdapter::Impl::process(const float *const *inputBuffers,
                                         RealTime timestamp)
@@ -388,8 +412,7 @@ PluginInputDomainAdapter::Impl::process(const float *const *inputBuffers,
 
 //    std::cerr << "PluginInputDomainAdapter: sampleRate " << m_inputSampleRate << ", blocksize " << m_blockSize << ", adjusting time from " << timestamp;
 
-    timestamp = timestamp + RealTime::frame2RealTime
-        (m_blockSize/2, int(m_inputSampleRate + 0.5));
+    timestamp = timestamp + getTimestampAdjustment();
 
 //    std::cerr << " to " << timestamp << std::endl;
 
@@ -554,4 +577,6 @@ PluginInputDomainAdapter::Impl::fft(unsigned int n, bool inverse,
 }
         
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginInputDomainAdapter.cpp)
 

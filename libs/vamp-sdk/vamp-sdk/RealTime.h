@@ -51,6 +51,9 @@
 struct timeval;
 #endif
 
+#include "plugguard.h"
+_VAMP_SDK_PLUGSPACE_BEGIN(RealTime.h)
+
 namespace Vamp {
 
 /**
@@ -158,5 +161,7 @@ struct RealTime
 std::ostream &operator<<(std::ostream &out, const RealTime &rt);
 
 }
+
+_VAMP_SDK_PLUGSPACE_END(RealTime.h)
     
 #endif

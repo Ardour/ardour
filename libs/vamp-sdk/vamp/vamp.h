@@ -50,7 +50,7 @@ extern "C" {
  * See also the vampApiVersion field in the plugin descriptor, and the
  * hostApiVersion argument to the vampGetPluginDescriptor function.
  */
-#define VAMP_API_VERSION 1
+#define VAMP_API_VERSION 2
 
 /**
  * C language API for Vamp plugins.
@@ -160,6 +160,15 @@ typedef struct _VampOutputDescriptor
        "Resolution" of result, if sampleType is vampVariableSampleRate. */
     float sampleRate;
 
+    /** 1 if the returned results for this output are known to have a
+        duration field.
+
+        This field is new in Vamp API version 2; it must not be tested
+        for plugins that report an older API version in their plugin
+        descriptor.
+    */
+    int hasDuration;
+
 } VampOutputDescriptor;
 
 typedef struct _VampFeature
@@ -184,13 +193,46 @@ typedef struct _VampFeature
 
 } VampFeature;
 
+typedef struct _VampFeatureV2
+{
+    /** 1 if the feature has a duration. */
+    int hasDuration;
+
+    /** Seconds component of duratiion. */
+    int durationSec;
+
+    /** Nanoseconds component of duration. */
+    int durationNsec;
+
+} VampFeatureV2;
+
+typedef union _VampFeatureUnion
+{
+    // sizeof(featureV1) >= sizeof(featureV2) for backward compatibility
+    VampFeature   v1;
+    VampFeatureV2 v2;
+
+} VampFeatureUnion;
+
 typedef struct _VampFeatureList
 {
     /** Number of features in this feature list. */
     unsigned int featureCount;
 
-    /** Features in this feature list.  May be NULL if featureCount is zero. */
-    VampFeature *features;
+    /** Features in this feature list.  May be NULL if featureCount is
+        zero.
+
+        If present, this array must contain featureCount feature
+        structures for a Vamp API version 1 plugin, or 2*featureCount
+        feature unions for a Vamp API version 2 plugin.
+
+        The features returned by an API version 2 plugin must consist
+        of the same feature structures as in API version 1 for the
+        first featureCount array elements, followed by featureCount
+        unions that contain VampFeatureV2 structures (or NULL pointers
+        if no V2 feature structures are present).
+     */
+    VampFeatureUnion *features;
 
 } VampFeatureList;
 
@@ -289,7 +331,7 @@ typedef struct _VampPluginDescriptor
         handle, or releaseOutputDescriptor for this descriptor. Host
         must call releaseOutputDescriptor after use. */
     VampOutputDescriptor *(*getOutputDescriptor)(VampPluginHandle,
-                                                unsigned int);
+                                                 unsigned int);
 
     /** Destroy a descriptor for a feature output. */
     void (*releaseOutputDescriptor)(VampOutputDescriptor *);
@@ -312,6 +354,7 @@ typedef struct _VampPluginDescriptor
 
 } VampPluginDescriptor;
 
+
 /** Get the descriptor for a given plugin index in this library.
     Return NULL if the index is outside the range of valid indices for
     this plugin library.
@@ -324,9 +367,15 @@ typedef struct _VampPluginDescriptor
     field for its actual compatibility level, the host should be able
     to do the right thing with it: use it if possible, discard it
     otherwise.
+
+    This is the only symbol that a Vamp plugin actually needs to
+    export from its shared object; all others can be hidden.  See the
+    accompanying documentation for notes on how to achieve this with
+    certain compilers.
 */
 const VampPluginDescriptor *vampGetPluginDescriptor
     (unsigned int hostApiVersion, unsigned int index);
+
 
 /** Function pointer type for vampGetPluginDescriptor. */
 typedef const VampPluginDescriptor *(*VampGetPluginDescriptorFunction)

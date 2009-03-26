@@ -34,7 +34,9 @@
     authorization.
 */
 
-#include "PluginChannelAdapter.h"
+#include <vamp-hostsdk/PluginChannelAdapter.h>
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginChannelAdapter.cpp)
 
 namespace Vamp {
 
@@ -49,6 +51,7 @@ public:
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
 
     FeatureSet process(const float *const *inputBuffers, RealTime timestamp);
+    FeatureSet processInterleaved(const float *inputBuffers, RealTime timestamp);
 
 protected:
     Plugin *m_plugin;
@@ -56,6 +59,7 @@ protected:
     size_t m_inputChannels;
     size_t m_pluginChannels;
     float **m_buffer;
+    float **m_deinterleave;
     const float **m_forwardPtrs;
 };
 
@@ -83,12 +87,20 @@ PluginChannelAdapter::process(const float *const *inputBuffers,
     return m_impl->process(inputBuffers, timestamp);
 }
 
+PluginChannelAdapter::FeatureSet
+PluginChannelAdapter::processInterleaved(const float *inputBuffers,
+                                         RealTime timestamp)
+{
+    return m_impl->processInterleaved(inputBuffers, timestamp);
+}
+
 PluginChannelAdapter::Impl::Impl(Plugin *plugin) :
     m_plugin(plugin),
     m_blockSize(0),
     m_inputChannels(0),
     m_pluginChannels(0),
     m_buffer(0),
+    m_deinterleave(0),
     m_forwardPtrs(0)
 {
 }
@@ -107,6 +119,14 @@ PluginChannelAdapter::Impl::~Impl()
         }
         delete[] m_buffer;
         m_buffer = 0;
+    }
+
+    if (m_deinterleave) {
+        for (size_t i = 0; i < m_inputChannels; ++i) {
+            delete[] m_deinterleave[i];
+        }
+        delete[] m_deinterleave;
+        m_deinterleave = 0;
     }
 
     if (m_forwardPtrs) {
@@ -143,7 +163,7 @@ PluginChannelAdapter::Impl::initialise(size_t channels, size_t stepSize, size_t 
 
         m_pluginChannels = minch;
 
-        // std::cerr << "PluginChannelAdapter::initialise: expanding " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
+//        std::cerr << "PluginChannelAdapter::initialise: expanding " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
 
     } else if (m_inputChannels > maxch) {
 
@@ -155,22 +175,42 @@ PluginChannelAdapter::Impl::initialise(size_t channels, size_t stepSize, size_t 
             m_buffer = new float *[1];
             m_buffer[0] = new float[blockSize];
 
-            // std::cerr << "PluginChannelAdapter::initialise: mixing " << m_inputChannels << " to mono for plugin" << std::endl;
+//            std::cerr << "PluginChannelAdapter::initialise: mixing " << m_inputChannels << " to mono for plugin" << std::endl;
 
         } else {
             
-            // std::cerr << "PluginChannelAdapter::initialise: reducing " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
+//            std::cerr << "PluginChannelAdapter::initialise: reducing " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
         }
 
         m_pluginChannels = maxch;
 
     } else {
  
-        // std::cerr << "PluginChannelAdapter::initialise: accepting given number of channels (" << m_inputChannels << ")" << std::endl;
+//        std::cerr << "PluginChannelAdapter::initialise: accepting given number of channels (" << m_inputChannels << ")" << std::endl;
         m_pluginChannels = m_inputChannels;
     }
 
     return m_plugin->initialise(m_pluginChannels, stepSize, blockSize);
+}
+
+PluginChannelAdapter::FeatureSet
+PluginChannelAdapter::Impl::processInterleaved(const float *inputBuffers,
+                                               RealTime timestamp)
+{
+    if (!m_deinterleave) {
+        m_deinterleave = new float *[m_inputChannels];
+        for (size_t i = 0; i < m_inputChannels; ++i) {
+            m_deinterleave[i] = new float[m_blockSize];
+        }
+    }
+
+    for (size_t i = 0; i < m_inputChannels; ++i) {
+        for (size_t j = 0; j < m_blockSize; ++j) {
+            m_deinterleave[i][j] = inputBuffers[j * m_inputChannels + i];
+        }
+    }
+
+    return process(m_deinterleave, timestamp);
 }
 
 PluginChannelAdapter::FeatureSet
@@ -224,5 +264,7 @@ PluginChannelAdapter::Impl::process(const float *const *inputBuffers,
 }
 
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginChannelAdapter.cpp)
 
 

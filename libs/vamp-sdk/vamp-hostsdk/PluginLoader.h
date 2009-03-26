@@ -41,7 +41,10 @@
 #include <string>
 #include <map>
 
+#include "hostguard.h"
 #include "PluginWrapper.h"
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginLoader.h)
 
 namespace Vamp {
 
@@ -50,7 +53,7 @@ class Plugin;
 namespace HostExt {
 
 /**
- * \class PluginLoader PluginLoader.h <vamp-sdk/hostext/PluginLoader.h>
+ * \class PluginLoader PluginLoader.h <vamp-hostsdk/PluginLoader.h>
  * 
  * Vamp::HostExt::PluginLoader is a convenience class for discovering
  * and loading Vamp plugins using the typical plugin-path, library
@@ -233,6 +236,8 @@ protected:
 }
 
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginLoader.h)
 
 #endif
 
