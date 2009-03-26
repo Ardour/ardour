@@ -756,10 +756,9 @@ else:
 
 if env['DIST_TARGET'] == 'x86_64' and env['VST']:
     print "\n\n=================================================="
-    print "You cannot use VST plugins with a 64 bit host."
-    print "Recompile with the DIST_TARGET=i386 or DIST_TARGET=i686."
-    print "\nPlease be aware that this will only work if your system"
-    print "    is setup with 32 bit versions of all the required libraries."
+    print "You cannot use VST plugins with a 64 bit host. Please run scons with VST=0"
+    print "\nIt is theoretically possible to build a 32 bit host on a 64 bit system."
+    print "However, this is tricky and not recommended for beginners."
     sys.exit (-1)
 
 #
