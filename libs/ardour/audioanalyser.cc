@@ -1,5 +1,5 @@
 #include <cstring>
-#include <vamp-sdk/hostext/PluginLoader.h>
+#include <vamp-hostsdk/PluginLoader.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <glib/gstdio.h> // for g_remove()

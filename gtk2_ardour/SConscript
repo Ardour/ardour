@@ -52,8 +52,8 @@ gtkardour.Merge ([
     libraries['sigc2'],
     libraries['sndfile-ardour'],
     libraries['sysmidi'],
-    libraries['vamp'],
     libraries['vamphost'],
+    libraries['vamp'],
     libraries['xml'],
     libraries['xslt']
 ])

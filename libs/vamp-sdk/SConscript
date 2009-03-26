@@ -16,6 +16,7 @@ src/vamp-hostsdk/PluginChannelAdapter.cpp
 src/vamp-hostsdk/PluginInputDomainAdapter.cpp
 src/vamp-hostsdk/PluginLoader.cpp
 src/vamp-hostsdk/PluginWrapper.cpp
+src/vamp-hostsdk/RealTime.cpp
 """)
 
 Import('env install_prefix libraries')
