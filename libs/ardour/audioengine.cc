@@ -493,9 +493,9 @@ AudioEngine::port_registration_failure (const std::string& portname)
 	string reason;
 	
 	if (p) {
-		reason = _("a port with this name already exists: check for duplicated track/bus names");
+		reason = string_compose (_("a port with the name \"%1\" already exists: check for duplicated track/bus names"), portname);
 	} else {
-		reason = _("unknown error");
+		reason = _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.");
 	}
 	
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());

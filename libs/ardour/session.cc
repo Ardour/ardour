@@ -1873,7 +1873,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 
-			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			error << pfe.what() << endmsg;
 
 			if (track) {
 				/* we need to get rid of this, since the track failed to be created */
@@ -2018,7 +2018,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
-			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			error << pfe.what() << endmsg;
 			goto failure;
 		}
 
@@ -2113,7 +2113,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		}
 	  
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
-			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			error << pfe.what() << endmsg;
 			goto out;
 		}
 	  
