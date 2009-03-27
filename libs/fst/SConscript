@@ -61,6 +61,7 @@ if fst['VST']:
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      fst_src + ['SConscript',
                                                 'fst.h',
-                                                'jackvst.h'
+                                                'jackvst.h',
+                                                'vestige'
                                                 ] ))
 
