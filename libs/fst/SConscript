@@ -62,6 +62,6 @@ env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      fst_src + ['SConscript',
                                                 'fst.h',
                                                 'jackvst.h',
-                                                'vestige'
+                                                'vestige/*.h'
                                                 ] ))
 
