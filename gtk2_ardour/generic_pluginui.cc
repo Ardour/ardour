@@ -479,9 +479,6 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 			control_ui->adjustment->set_lower (log(control_ui->adjustment->get_lower()));
 		}
 	
-		float delta = desc.upper - desc.lower;
-
-		control_ui->adjustment->set_page_size (delta/100.0);
 		control_ui->adjustment->set_step_increment (desc.step);
 		control_ui->adjustment->set_page_increment (desc.largestep);
 
