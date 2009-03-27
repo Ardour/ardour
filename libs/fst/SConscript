@@ -58,10 +58,13 @@ if fst['VST']:
     e = fst.Object ('thread', 'thread.c')
     Default([a,b,c,d,e])
     
+vestige_headers = glob.glob ('vestige/*.h')
+
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-                                     fst_src + ['SConscript',
-                                                'fst.h',
-                                                'jackvst.h',
-                                                'vestige/*.h'
-                                                ] ))
+                                     fst_src + vestige_headers +
+                                     ['SConscript',
+                                      'fst.h',
+                                      'jackvst.h',
+                                      ] 
+                                     ))
 
