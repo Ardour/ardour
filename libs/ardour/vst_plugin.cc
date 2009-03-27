@@ -222,7 +222,11 @@ VSTPlugin::set_state(const XMLNode& node)
 			}
 		}
 
+		_fst->current_program = _plugin->dispatcher (_plugin, 3, /* effGetProgram */, 0, NULL, NULL, 0);
+		cerr << name() << ": current program is " << _fst->current_program << endl;
+
 		return 0;
+
 	} else if ((child = find_named_node (node, X_("parameters"))) != 0) {
 		
 		XMLPropertyList::const_iterator i;
@@ -238,8 +242,14 @@ VSTPlugin::set_state(const XMLNode& node)
 			_plugin->setParameter (_plugin, param, val);
 		}
 
+		/* program number is not knowable */
+
+		_fst->current_program = -1;
+
 		return 0;
 	}
+
+	
 
 	return -1;
 }

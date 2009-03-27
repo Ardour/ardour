@@ -167,7 +167,12 @@ VSTPluginUI::create_preset_store ()
 	CellRenderer* renderer = manage (new CellRendererText());
 	vst_preset_combo.pack_start (*renderer, true);
 	vst_preset_combo.add_attribute (*renderer, "text", 0);
-	vst_preset_combo.set_active (0);
+
+	if (vst->fst()->current_program != -1) {
+		vst_preset_combo.set_active (vst->fst()->current_program);
+	} else {
+		vst_preset_combo.set_active (0);
+	}
 }
 
 typedef int (*error_handler_t)( Display *, XErrorEvent *);

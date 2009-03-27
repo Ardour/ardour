@@ -82,6 +82,7 @@ struct _FST
     int         destroy;
 
     int		want_program;
+    int         current_program;
     float      *want_params;
     float      *set_params;
 

@@ -71,6 +71,7 @@ fst_new ()
 	pthread_cond_init (&fst->window_status_change, NULL);
 	pthread_cond_init (&fst->plugin_dispatcher_called, NULL);
 	fst->want_program = -1;
+	fst->current_program = -1;
 	return fst;
 }
 
@@ -165,7 +166,11 @@ again:
 				}
 
 				if (fst->want_program != -1 ) {
-					fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
+					fst->plugin->dispatcher (fst->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
+					fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0)) 
+					fst->plugin->dispatcher (fst->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
+					/* assume it worked */
+					fst->current_program = fst->want_program;
 					fst->want_program = -1; 
 				}
 				
