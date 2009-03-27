@@ -151,6 +151,12 @@ VSTPlugin::get_state()
 	XMLNode *root = new XMLNode (state_node_name());
 	LocaleGuard lg (X_("POSIX"));
 
+	if (_fst->current_program != -1) {
+		char buf[32];
+		snprintf (buf, sizeof (buf), "%d", _fst->current_program);
+		root->add_property ("current-program", buf);
+	}
+
 	if (_plugin->flags & 32 /* effFlagsProgramChunks */) {
 
 		/* fetch the current chunk */
@@ -194,38 +200,35 @@ int
 VSTPlugin::set_state(const XMLNode& node)
 {
 	LocaleGuard lg (X_("POSIX"));
-
+	const XMLProperty* prop;
+	
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to VSTPlugin::set_state") << endmsg;
 		return 0;
 	}
 
+	if ((prop = node.property ("current-program")) != 0) {
+		_fst->current_program = atoi (prop->value());
+	}
+
 	XMLNode* child;
+	int ret = -1;
 
 	if ((child = find_named_node (node, X_("chunk"))) != 0) {
 
 		XMLPropertyList::const_iterator i;
-
 		XMLNodeList::const_iterator n;
+		int ret = -1;
+
 		for (n = child->children ().begin (); n != child->children ().end (); ++n) {
 			if ((*n)->is_content ()) {
 				gsize chunk_size = 0;
 				guchar * data = g_base64_decode ((*n)->content ().c_str (), &chunk_size);
 				//cerr << "Dispatch setChunk for " << name() << endl;
-				if (_plugin->dispatcher (_plugin, 24 /* effSetChunk */, 0, chunk_size, data, 0) == 0) {
-					g_free (data);
-					return 0;
-				} else {
-					g_free (data);
-					return -1;
-				}
+				ret = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, 0, chunk_size, data, 0);
+				g_free (data);
 			}
 		}
-
-		_fst->current_program = _plugin->dispatcher (_plugin, 3, /* effGetProgram */, 0, NULL, NULL, 0);
-		cerr << name() << ": current program is " << _fst->current_program << endl;
-
-		return 0;
 
 	} else if ((child = find_named_node (node, X_("parameters"))) != 0) {
 		
@@ -246,12 +249,12 @@ VSTPlugin::set_state(const XMLNode& node)
 
 		_fst->current_program = -1;
 
-		return 0;
+		ret = 0;
 	}
 
 	
 
-	return -1;
+	return ret;
 }
 
 int

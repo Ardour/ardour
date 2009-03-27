@@ -80,6 +80,7 @@ struct _FST
     int 	height;
     int		wantIdle;
     int         destroy;
+    int         vst_version;
 
     int		want_program;
     int         current_program;

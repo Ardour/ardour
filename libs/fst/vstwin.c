@@ -166,11 +166,17 @@ again:
 				}
 
 				if (fst->want_program != -1 ) {
-					fst->plugin->dispatcher (fst->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
-					fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0)) 
-					fst->plugin->dispatcher (fst->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
-					/* assume it worked */
-					fst->current_program = fst->want_program;
+					if (fst->vst_version >= 2) {
+						fst->plugin->dispatcher (fst->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
+					}
+
+					fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
+
+					if (fst->vst_version >= 2) {
+						fst->plugin->dispatcher (fst->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
+					}
+					/* did it work? */
+					fst->current_program = fst->plugin->dispatcher (fst->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
 					fst->want_program = -1; 
 				}
 				
@@ -569,6 +575,8 @@ fst_instantiate (FSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	fst->plugin->dispatcher (fst->plugin, effOpen, 0, 0, 0, 0);
 	//fst->plugin->dispatcher (fst->plugin, effMainsChanged, 0, 0, NULL, 0);
 
+	fst->vst_version = fst->plugin->dispatcher (fst->plugin, effGetVstVersion, 0, 0, 0, 0);
+	
 	fst->handle->plugincnt++;
 	fst->wantIdle = 0;
 
