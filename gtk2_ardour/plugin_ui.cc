@@ -398,6 +398,7 @@ PlugUIBase::save_plugin_setting ()
 	prompter.set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 
 	prompter.show_all();
+	prompter.present ();
 
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:

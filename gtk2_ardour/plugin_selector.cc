@@ -50,6 +50,7 @@ using namespace std;
 static const char* _filter_mode_strings[] = {
 	N_("Name contains"),
 	N_("Type contains"),
+	N_("Category contains"),
 	N_("Author contains"),
 	N_("Library contains"),
 	N_("Favorites only"),
@@ -208,13 +209,34 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		
 		if (mode == _("Name contains")) {
 			compstr = info->name;
-		} else if (mode == _("Type contains")) {
+		} else if (mode == _("Category contains")) {
 			compstr = info->category;
+		} else if (mode == _("Type contains")) {
+
+			switch (info->type) {
+			case LADSPA:
+				compstr = X_("LADSPA");
+				break;
+			case AudioUnit:
+				compstr = X_("AudioUnit");
+				break;
+			case LV2:
+				compstr = X_("LV2");
+				break;
+			case VST:
+				compstr = X_("VST");
+				break;
+			}
+
 		} else if (mode == _("Author contains")) {
 			compstr = info->creator;
 		} else if (mode == _("Library contains")) {
 			compstr = info->path;
 		} 
+
+		if (compstr.empty()) {
+			return false;
+		}
 
 		transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
 
