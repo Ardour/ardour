@@ -42,8 +42,6 @@ Port::Port (jack_port_t *p)
 void
 Port::reset ()
 {
-	reset_buffer ();
-	
 	_last_monitor = false;
 	_silent = false;
 	_metering = 0;

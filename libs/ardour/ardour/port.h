@@ -33,24 +33,11 @@ class AudioEngine;
 class Port : public sigc::trackable {
    public:
 	virtual ~Port() { 
-		free (_port);
+        // Port is an opage pointer, so should be be desallocated ??
 	}
 
 	Sample *get_buffer (nframes_t nframes) {
-		if (_flags & JackPortIsOutput) {
-			return _buffer;
-		} else {
-			return (Sample *) jack_port_get_buffer (_port, nframes);
-		}
-	}
-
-	void reset_buffer () {
-		if (_flags & JackPortIsOutput) {
-			_buffer = (Sample *) jack_port_get_buffer (_port, 0);
-		} else {
-			_buffer = 0; /* catch illegal attempts to use it */
-		}
-		_silent = false;
+		return (Sample *) jack_port_get_buffer (_port, nframes);
 	}
 
 	std::string name() { 
@@ -166,7 +153,7 @@ class Port : public sigc::trackable {
 	/** Assumes that the port is an audio output port */
 	void silence (nframes_t nframes, nframes_t offset) {
 		if (!_silent) {
-			memset (_buffer + offset, 0, sizeof (Sample) * nframes);
+			memset ((Sample *) jack_port_get_buffer (_port, nframes) + offset, 0, sizeof (Sample) * nframes);
 			if (offset == 0) {
 				/* XXX this isn't really true, but i am not sure
 				   how to set this correctly. we really just
@@ -189,8 +176,6 @@ class Port : public sigc::trackable {
 	void reset ();
 	
 	/* engine isn't supposed to below here */
-
-	Sample *_buffer;
 
 	/* cache these 3 from JACK so that we can
 	   access them for reconnecting.
