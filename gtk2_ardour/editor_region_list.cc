@@ -177,7 +177,7 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 			foo << region->n_channels ();
 			str += " [";
 			str += foo.str();
-			str += ']';
+			str += "]";
 		}
 
 		row[region_list_columns.name] = str;
@@ -236,7 +236,7 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 	
 	row[region_list_columns.region] = region;
 	
-	populate_row(region, row);
+	populate_row(region, (*row));
 }
 
 
@@ -328,7 +328,7 @@ Editor::set_selected_in_region_list(RegionSelection& regions)
 			boost::shared_ptr<Region> compared_region = (*i)[region_list_columns.region];
 
 			if (r == compared_region) {
-				region_list_display.get_selection()->select(*i);;
+				region_list_display.get_selection()->select(*i);
 				break;
 			}
 			
@@ -352,12 +352,12 @@ Editor::set_selected_in_region_list_subrow (boost::shared_ptr<Region> region, Tr
 		boost::shared_ptr<Region> compared_region = (*i)[region_list_columns.region];
 		
 		if (region == compared_region) {
-			region_list_display.get_selection()->select(*i);;
+			region_list_display.get_selection()->select(*i);
 			return true;
 		}
 		
 		if (!(*i).children().empty()) {
-			if (update_region_subrows(region, (*i), level + 1)) {
+			if (set_selected_in_region_list_subrow(region, (*i), level + 1)) {
 				return true;
 			}
 		}
@@ -704,9 +704,9 @@ Editor::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &ro
 		row[region_list_columns.start] = start_str;
 		row[region_list_columns.end] = end_str;
 		
-		if (region->sync_position() == region->position()) {
+		if (region->sync_position() == 0) {
 			row[region_list_columns.sync] = _("Start");
-		} else if (region->sync_position() == (region->position() + region->length() - 1)) {
+		} else if (region->sync_position() == region->length() - 1) {
 			row[region_list_columns.sync] = _("End");
 		} else {
 			row[region_list_columns.sync] = sync_str;
