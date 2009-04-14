@@ -95,8 +95,8 @@ SMFSource::~SMFSource ()
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, sframes_t position,
-		sframes_t start, nframes_t dur,
+SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t position,
+		sframes_t start, nframes_t duration,
 		sframes_t stamp_offset, sframes_t negative_stamp_offset) const
 {
 	int      ret  = 0;
@@ -122,14 +122,14 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, sframes_t position,
 		while (time < start_ticks) {
 			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 			if (ret == -1) { // EOF
-				_last_read_end = start + dur;
-				return dur;
+				_last_read_end = start + duration;
+				return duration;
 			}
 			time += ev_delta_t; // accumulate delta time
 		}
 	}
 	
-	_last_read_end = start + dur;
+	_last_read_end = start + duration;
 
 	while (true) {
 		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
@@ -148,8 +148,8 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, sframes_t position,
 		assert(time >= start_ticks);
 		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
 
-		if (ev_frame_time < start + dur) {
-			dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
+		if (ev_frame_time < start + duration) {
+			destination.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
 		} else {
 			break;
 		}
@@ -162,12 +162,12 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& dst, sframes_t position,
 		ev_size = scratch_size; // ensure read_event only allocates if necessary
 	}
 	
-	return dur;
+	return duration;
 }
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, sframes_t position, nframes_t dur)
+SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position, nframes_t duration)
 {
 	_write_data_count = 0;
 		
@@ -185,12 +185,16 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, sframes_t position, n
 	Evoral::MIDIEvent<nframes_t> ev;
 
 	while (true) {
-		bool ret = src.peek_time(&time);
-		if (!ret || time > _last_write_end + dur) {
+		bool ret = source.peek_time(&time);
+		g_debug ("time: %u, last_write_end: %lu, duration: %u", time, _last_write_end, duration);
+		if (!ret || time > _last_write_end + duration) {
+			if (!ret) g_debug ("peek failed");
+			if (time > _last_write_end + duration) g_debug ("time: %u > last_write_end: %lu + duration: %u", time, _last_write_end, duration);
+ 
 			break;
 		}
 
-		ret = src.read_prefix(&time, &type, &size);
+		ret = source.read_prefix(&time, &type, &size);
 		if (!ret) {
 			cerr << "ERROR: Unable to read event prefix, corrupt MIDI ring buffer" << endl;
 			break;
@@ -201,7 +205,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, sframes_t position, n
 			buf = (uint8_t*)realloc(buf, size);
 		}
 
-		ret = src.read_contents(size, buf);
+		ret = source.read_contents(size, buf);
 		if (!ret) {
 			cerr << "ERROR: Read time/size but not buffer, corrupt MIDI ring buffer" << endl;
 			break;
@@ -228,9 +232,9 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& src, sframes_t position, n
 	Evoral::SMF::flush();
 	free(buf);
 
-	ViewDataRangeReady(position + _last_write_end, dur); /* EMIT SIGNAL */
+	ViewDataRangeReady(position + _last_write_end, duration); /* EMIT SIGNAL */
 
-	return dur;
+	return duration;
 }
 		
 
