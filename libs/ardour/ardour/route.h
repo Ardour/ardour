@@ -90,13 +90,13 @@ class Route : public IO
 
 
 	virtual int  roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			   nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+			   int declick, bool can_record, bool rec_monitors_input);
 
 	virtual int  no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			      nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+			      bool state_changing, bool can_record, bool rec_monitors_input);
 
 	virtual int  silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-				  nframes_t offset, bool can_record, bool rec_monitors_input);
+				  bool can_record, bool rec_monitors_input);
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
 	virtual void set_record_enable (bool yn, void *src) {}
@@ -285,7 +285,7 @@ class Route : public IO
 	gain_t                    desired_solo_gain;
 	gain_t                    desired_mute_gain;
 
-	nframes_t            check_initial_delay (nframes_t, nframes_t&, nframes_t&);
+	nframes_t            check_initial_delay (nframes_t, nframes_t&);
 
 	nframes_t           _initial_delay;
 	nframes_t           _roll_delay;
@@ -303,11 +303,11 @@ class Route : public IO
 	ToggleControllable _mute_control;
 	
 	void passthru (nframes_t start_frame, nframes_t end_frame, 
-		       nframes_t nframes, nframes_t offset, int declick, bool meter_inputs);
+		       nframes_t nframes, int declick, bool meter_inputs);
 
 	void process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				     nframes_t start_frame, nframes_t end_frame,
-				     nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+				     nframes_t nframes, bool with_redirects, int declick,
 				     bool meter);
 
   protected:
@@ -315,7 +315,7 @@ class Route : public IO
 
 	virtual XMLNode& state(bool);
 
-	void silence (nframes_t nframes, nframes_t offset);
+	void silence (nframes_t nframes);
 	sigc::connection input_signal_connection;
 
 	uint32_t redirect_max_outs;

@@ -1089,7 +1089,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t slave_wait_end;
 
 	void reset_slave_state ();
-	bool follow_slave (nframes_t, nframes_t);
+	bool follow_slave (nframes_t);
 	void set_slave_source (SlaveSource);
 
 	bool _exporting;
@@ -1097,8 +1097,8 @@ class Session : public PBD::StatefulDestructible
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);
-	int  process_routes (nframes_t, nframes_t);
-	int  silent_process_routes (nframes_t, nframes_t);
+	int  process_routes (nframes_t);
+	int  silent_process_routes (nframes_t);
 
 	bool get_rec_monitors_input () {
 		if (actively_recording()) {
@@ -1132,7 +1132,7 @@ class Session : public PBD::StatefulDestructible
 		return false;
 	}
 
-	bool maybe_sync_start (nframes_t&, nframes_t&);
+	bool maybe_sync_start (nframes_t&);
 
 	void check_declick_out ();
 
@@ -1379,7 +1379,8 @@ class Session : public PBD::StatefulDestructible
 	
 	void reset_record_status ();
 	
-	int no_roll (nframes_t nframes, nframes_t offset);
+	int fail_roll (nframes_t nframes);
+	int no_roll (nframes_t nframes);
 	
 	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work); }
 	bool process_can_proceed() const { return !(post_transport_work & ProcessCannotProceedMask); }
@@ -1716,7 +1717,7 @@ class Session : public PBD::StatefulDestructible
 	Click *get_click();
 	void   setup_click_sounds (int which);
 	void   clear_clicks ();
-	void   click (nframes_t start, nframes_t nframes, nframes_t offset);
+	void   click (nframes_t start, nframes_t nframes);
 
 	vector<Route*> master_outs;
 	

@@ -70,7 +70,7 @@ class Redirect : public IO
 	Placement placement() const { return _placement; }
 	void set_placement (Placement, void *src);
 
-	virtual void run (vector<Sample *>& ibufs, uint32_t nbufs, nframes_t nframes, nframes_t offset) = 0;
+	virtual void run (vector<Sample *>& ibufs, uint32_t nbufs, nframes_t nframes) = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
 	virtual nframes_t latency() { return 0; }

@@ -72,6 +72,7 @@ sigc::signal<int>                 IO::PortsLegal;
 sigc::signal<int>                 IO::PannersLegal;
 sigc::signal<void,uint32_t>  IO::MoreOutputs;
 sigc::signal<int>                 IO::PortsCreated;
+sigc::signal<void,nframes_t>      IO::CycleStart;
 
 Glib::StaticMutex       IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
 
@@ -141,6 +142,9 @@ IO::IO (Session& s, string name,
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 
+	_output_offset = 0;
+	CycleStart.connect (mem_fun (*this, &IO::cycle_start));
+
 	_session.add_controllable (&_gain_control);
 }
 
@@ -173,6 +177,9 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 
+	_output_offset = 0;
+	CycleStart.connect (mem_fun (*this, &IO::cycle_start));
+
 	_session.add_controllable (&_gain_control);
 }
 
@@ -199,12 +206,12 @@ IO::~IO ()
 }
 
 void
-IO::silence (nframes_t nframes, nframes_t offset)
+IO::silence (nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	for (vector<Port *>::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		(*i)->silence (nframes, offset);
+		(*i)->silence (nframes);
 	}
 }
 
@@ -265,7 +272,7 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, ga
 }
 
 void
-IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start, nframes_t end, nframes_t nframes, nframes_t offset)
+IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start, nframes_t end, nframes_t nframes)
 {
 	Sample* dst;
 
@@ -277,7 +284,7 @@ IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start, nfram
 
 	if (_noutputs == 1) {
 
-		dst = output(0)->get_buffer (nframes) + offset;
+		dst = get_output_buffer (0, nframes);
 
 		for (uint32_t n = 0; n < nbufs; ++n) {
 			if (bufs[n] != dst) {
@@ -299,7 +306,7 @@ IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start, nfram
 	/* the terrible silence ... */
 
 	for (out = _outputs.begin(), o = 0; out != _outputs.end(); ++out, ++o) {
-		obufs[o] = (*out)->get_buffer (nframes) + offset;
+		obufs[o] = get_output_buffer (o, nframes);
 		memset (obufs[o], 0, sizeof (Sample) * nframes);
 		(*out)->mark_silence (false);
 	}
@@ -312,7 +319,7 @@ IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start, nfram
 }
 
 void
-IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff)
+IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, gain_t gain_coeff)
 {
 	Sample* dst;
 	Sample* src;
@@ -328,13 +335,13 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t off
 	*/
 
 	if (_panner->bypassed() || _panner->empty()) {
-		deliver_output_no_pan (bufs, nbufs, nframes, offset);
+		deliver_output_no_pan (bufs, nbufs, nframes);
 		return;
 	}
 
 	if (_noutputs == 1) {
 
-		dst = output(0)->get_buffer (nframes) + offset;
+		dst = get_output_buffer (0, nframes);
 
 		if (gain_coeff == 0.0f) {
 
@@ -389,7 +396,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t off
 	/* XXX this is wasteful but i see no way to avoid it */
 	
 	for (out = _outputs.begin(), o = 0; out != _outputs.end(); ++out, ++o) {
-		obufs[o] = (*out)->get_buffer (nframes) + offset;
+		obufs[o] = get_output_buffer (o, nframes);
 		memset (obufs[o], 0, sizeof (Sample) * nframes);
 		(*out)->mark_silence (false);
 	}
@@ -411,7 +418,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t off
 }
 
 void
-IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -420,7 +427,7 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, n
 	}
 	
 	if (_panner->bypassed() || _panner->empty()) {
-		deliver_output_no_pan (bufs, nbufs, nframes, offset);
+		deliver_output_no_pan (bufs, nbufs, nframes);
 		return;
 	}
 
@@ -447,14 +454,14 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, n
 	/* simple, non-automation panning to outputs */
 
 	if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
-		pan (bufs, nbufs, nframes, offset, pangain * speed_quietning);
+		pan (bufs, nbufs, nframes, pangain * speed_quietning);
 	} else {
-		pan (bufs, nbufs, nframes, offset, pangain);
+		pan (bufs, nbufs, nframes, pangain);
 	}
 }
 
 void
-IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -504,7 +511,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 	
 	for (o = _outputs.begin(), i = 0; o != _outputs.end(); ++o, ++i) {
 
-		dst = (*o)->get_buffer (nframes) + offset;
+		dst = get_output_buffer (i, nframes);
 		src = bufs[min(nbufs,i)];
 
 		if (dg != _gain) {
@@ -536,7 +543,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 }
 
 void
-IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -550,19 +557,8 @@ IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 		if (i == _inputs.end()) {
 			break;
 		}
-		
-		/* XXX always read the full extent of the port buffer that
-		   we need. One day, we may use jack_port_get_buffer_at_offset()
-		   or something similar. For now, this simple hack will
-		   have to do.
 
-		   Hack? Why yes .. we only need to read nframes-worth of
-		   data, but the data we want is at `offset' within the
-		   buffer.
-		*/
-
-		last = (*i)->get_buffer (nframes+offset) + offset;
-		// the dest buffer's offset has already been applied
+		last = get_input_buffer (n, nframes);
 		memcpy (bufs[n], last, sizeof (Sample) * nframes);
 	}
 
@@ -570,7 +566,6 @@ IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 	
 	if (last) {
 		while (n < nbufs) {
-			// the dest buffer's offset has already been applied
 			memcpy (bufs[n], last, sizeof (Sample) * nframes);
 			++n;
 		}
@@ -583,13 +578,12 @@ IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 }
 
 void
-IO::just_meter_input (nframes_t start_frame, nframes_t end_frame, 
-		      nframes_t nframes, nframes_t offset)
+IO::just_meter_input (nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	vector<Sample*>& bufs = _session.get_passthru_buffers ();
 	uint32_t nbufs = n_process_buffers ();
 
-	collect_input (bufs, nbufs, nframes, offset);
+	collect_input (bufs, nbufs, nframes);
 
 	for (uint32_t n = 0; n < nbufs; ++n) {
 		_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]);
@@ -2827,3 +2821,40 @@ IO::set_name_in_state (XMLNode& node, const string& new_name)
 		node.add_property ("name", new_name);
 	} 
 }
+
+void
+IO::cycle_start (nframes_t nframes)
+{
+	_output_offset = 0;
+}
+
+void
+IO::increment_output_offset (nframes_t n)
+{
+	_output_offset += n;
+}
+
+Sample*
+IO::get_input_buffer (int n, nframes_t nframes)
+{
+	Port* port;
+
+	if (!(port = input (n))) {
+		return 0;
+	}
+
+	return port->get_buffer (nframes);
+}
+
+Sample*
+IO::get_output_buffer (int n, nframes_t nframes)
+{
+	Port* port;
+
+	if (!(port = output (n))) {
+		return 0;
+	}
+
+	return port->get_buffer (nframes) + _output_offset;
+}
+	       

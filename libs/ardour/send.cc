@@ -150,7 +150,7 @@ Send::set_state(const XMLNode& node)
 }
 
 void
-Send::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+Send::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 {
 	if (active()) {
 
@@ -163,8 +163,7 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t 
 			memcpy (sendbufs[i], bufs[i], sizeof (Sample) * nframes);
 		}
 		
-		
-		IO::deliver_output (sendbufs, nbufs, nframes, offset);
+		IO::deliver_output (sendbufs, nbufs, nframes);
 
 		if (_metering) {
 			uint32_t n;
@@ -179,13 +178,13 @@ Send::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t 
 			} else {
 
 				for (n = 0; n < no; ++n) {
-					_peak_power[n] = Session::compute_peak (output(n)->get_buffer(nframes) + offset, nframes, _peak_power[n]);
+					_peak_power[n] = Session::compute_peak (get_output_buffer(n, nframes), nframes, _peak_power[n]);
 				}
 			}
 		}
 
 	} else {
-		silence (nframes, offset);
+		silence (nframes);
 		
 		if (_metering) {
 			uint32_t n;

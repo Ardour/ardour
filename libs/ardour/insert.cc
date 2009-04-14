@@ -308,12 +308,8 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 	} 
 
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		// cerr << "\trun C&R with in = " << in_index << " out = " << out_index << " nf = " << nframes << " off = " << offset << endl;
 		(*i)->connect_and_run (bufs, nbufs, in_index, out_index, nframes, offset);
 	}
-	
-	/* leave remaining channel buffers alone */
-	// cerr << "--- and out\n";
 }
 
 void
@@ -355,7 +351,7 @@ PluginInsert::transport_stopped (nframes_t now)
 }
 
 void
-PluginInsert::silence (nframes_t nframes, nframes_t offset)
+PluginInsert::silence (nframes_t nframes)
 {
 	int32_t in_index = 0;
 	int32_t out_index = 0;
@@ -364,20 +360,20 @@ PluginInsert::silence (nframes_t nframes, nframes_t offset)
 	if (active()) {
 		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 			n = input_streams();
-			(*i)->connect_and_run (_session.get_silent_buffers (n), n, in_index, out_index, nframes, offset);
+			(*i)->connect_and_run (_session.get_silent_buffers (n), n, in_index, out_index, nframes, 0);
 		}
 	}
 }
 	
 void
-PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 {
 	if (active()) {
 
 		if (_session.transport_rolling()) {
-			automation_run (bufs, nbufs, nframes, offset);
+			automation_run (bufs, nbufs, nframes);
 		} else {
-			connect_and_run (bufs, nbufs, nframes, offset, false);
+			connect_and_run (bufs, nbufs, nframes, 0, false);
 		}
 
 	} else {
@@ -413,63 +409,46 @@ PluginInsert::set_parameter (uint32_t port, float val)
 }
 
 void
-PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 {
 	ControlEvent next_event (0, 0.0f);
 	nframes_t now = _session.transport_frame ();
 	nframes_t end = now + nframes;
+	nframes_t offset = 0;
 
 	Glib::Mutex::Lock lm (_automation_lock, Glib::TRY_LOCK);
 
 	if (!lm.locked()) {
-		connect_and_run (bufs, nbufs, nframes, offset, false);
+		connect_and_run (bufs, nbufs, nframes, 0, false, now);
 		return;
 	}
-	
-	if (!find_next_event (now, end, next_event)) {
-		
- 		/* no events have a time within the relevant range */
-		
- 		connect_and_run (bufs, nbufs, nframes, offset, true, now);
- 		return;
- 	}
 
-	nframes_t buffer_correct = 0;
-	
+	if (!find_next_event (now, end, next_event)) {
+ 		/* no events have a time within the relevant range */
+ 		connect_and_run (bufs, nbufs, nframes, 0, true, now);
+ 		return;
+	}
+
  	while (nframes) {
 		nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
 
-		// This is called first, but nframes = 256
  		connect_and_run (bufs, nbufs, cnt, offset, true, now);
  		
  		nframes -= cnt;
 		now += cnt;
-		buffer_correct += cnt;
-
-		/* we are going to advance the buffer pointers by "cnt" so there
-		   is no reason to specify a non-zero offset anymore.
-		*/
-
- 		offset = 0;
-		
-		for (uint32_t i = 0; i < nbufs; i++) {
-			bufs[i] += cnt;
-		}
+		offset += cnt;
 
 		if (!find_next_event (now, end, next_event)) {
 			break;
 		}
-  	}
-  
+	}
+	    
  	/* cleanup anything that is left to do */
   
  	if (nframes) {
  		connect_and_run (bufs, nbufs, nframes, offset, true, now);
   	}
 
-	for (uint32_t i = 0; i < nbufs; i++) {
-		bufs[i] -= buffer_correct;
-	}
 }	
 
 float
@@ -939,7 +918,7 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 {
 	if (n_outputs() == 0) {
 		return;
@@ -947,7 +926,7 @@ PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nfra
 
 	if (!active()) {
 		/* deliver silence */
-		silence (nframes, offset);
+		silence (nframes);
 		return;
 	}
 
@@ -958,14 +937,14 @@ PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nfra
 	/* deliver output */
 
 	for (o = _outputs.begin(), n = 0; o != _outputs.end(); ++o, ++n) {
-		memcpy ((*o)->get_buffer (nframes) + offset, bufs[min(nbufs,n)], sizeof (Sample) * nframes);
+		memcpy (get_output_buffer (n, nframes), bufs[min(nbufs,n)], sizeof (Sample) * nframes);
 		(*o)->mark_silence (false);
 	}
 	
 	/* collect input */
 	
 	for (i = _inputs.begin(), n = 0; i != _inputs.end(); ++i, ++n) {
-		memcpy (bufs[min(nbufs,n)], (*i)->get_buffer (nframes) + offset, sizeof (Sample) * nframes);
+		memcpy (bufs[min(nbufs,n)], get_input_buffer (n, nframes), sizeof (Sample) * nframes);
 	}
 }
 

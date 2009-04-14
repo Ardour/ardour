@@ -456,7 +456,7 @@ Redirect::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_even
 	AutomationList::TimeComparator cmp;
 
 	next_event.when = max_frames;
-	
+
   	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
 
  		const AutomationList* alist = *li;

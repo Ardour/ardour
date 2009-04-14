@@ -463,14 +463,15 @@ AudioTrack::n_process_buffers ()
 }
 
 void
-AudioTrack::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter)
+AudioTrack::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick, bool meter)
 {
 	uint32_t nbufs = n_process_buffers ();
-	process_output_buffers (_session.get_silent_buffers (nbufs), nbufs, start_frame, end_frame, nframes, offset, true, declick, meter);
+
+	process_output_buffers (_session.get_silent_buffers (nbufs), nbufs, start_frame, end_frame, nframes, true, declick, meter);
 }
 
 int 
-AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
+AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs() == 0) {
@@ -478,7 +479,7 @@ AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fra
 	}
 
 	if (!_active) {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 
@@ -486,7 +487,7 @@ AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fra
 
 		/* XXX is this safe to do against transport state changes? */
 
-		passthru_silence (start_frame, end_frame, nframes, offset, 0, false);
+		passthru_silence (start_frame, end_frame, nframes, 0, false);
 		return 0;
 	}
 
@@ -535,12 +536,12 @@ AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fra
 		*/
 		
 		if (_have_internal_generator) {
-			passthru_silence (start_frame, end_frame, nframes, offset, 0, true);
+			passthru_silence (start_frame, end_frame, nframes, 0, true);
 		} else {
 			if (_meter_point == MeterInput) {
-				just_meter_input (start_frame, end_frame, nframes, offset);
+				just_meter_input (start_frame, end_frame, nframes);
 			}
-			passthru_silence (start_frame, end_frame, nframes, offset, 0, false);
+			passthru_silence (start_frame, end_frame, nframes, 0, false);
 		}
 
 	} else {
@@ -548,14 +549,14 @@ AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fra
 		/* we're sending signal, but we may still want to meter the input. 
 		 */
 
-		passthru (start_frame, end_frame, nframes, offset, 0, (_meter_point == MeterInput));
+		passthru (start_frame, end_frame, nframes, 0, (_meter_point == MeterInput));
 	}
 
 	return 0;
 }
 
 int
-AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
+AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
 	int dret;
@@ -579,26 +580,28 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	}
 
 	if (!_active) {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 
 	transport_frame = _session.transport_frame();
 
-	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
-		/* need to do this so that the diskstream sets its
-		   playback distance to zero, thus causing diskstream::commit
-		   to do nothing.
-		*/
-		return diskstream->process (transport_frame, 0, 0, can_record, rec_monitors_input);
-	} 
+	if (!can_record || !diskstream->record_enabled()) {
+		if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
+			/* need to do this so that the diskstream sets its
+			   playback distance to zero, thus causing diskstream::commit
+			   to do nothing.
+			*/
+			return diskstream->process (transport_frame, 0, can_record, rec_monitors_input);
+		} 
+	}
 
 	_silent = false;
 	apply_gain_automation = false;
 
-	if ((dret = diskstream->process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input)) != 0) {
 		
-		silence (nframes, offset);
+		silence (nframes);
 
 		return dret;
 	}
@@ -606,7 +609,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	/* special condition applies */
 	
 	if (_meter_point == MeterInput) {
-		just_meter_input (start_frame, end_frame, nframes, offset);
+		just_meter_input (start_frame, end_frame, nframes);
 	}
 
 	if (diskstream->record_enabled() && !can_record && !Config->get_auto_input()) {
@@ -615,7 +618,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		   at least potentially (depending on monitoring options)
 		 */
 
-		passthru (start_frame, end_frame, nframes, offset, 0, true);
+		passthru (start_frame, end_frame, nframes, 0, true);
 
 	} else if ((b = diskstream->playback_buffer(0)) != 0) {
 
@@ -709,18 +712,18 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			}
 		}
 
-		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
-		silence (nframes, offset);
+		silence (nframes);
 	}
 
 	return 0;
 }
 
 int
-AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
+AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 			 bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs() == 0 && _redirects.empty()) {
@@ -728,16 +731,16 @@ AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end
 	}
 
 	if (!_active) {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 
 	_silent = true;
 	apply_gain_automation = false;
 
-	silence (nframes, offset);
+	silence (nframes);
 
-	return audio_diskstream()->process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
+	return audio_diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input);
 }
 
 int
@@ -793,7 +796,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 		if ((insert = boost::dynamic_pointer_cast<Insert>(*i)) != 0) {
 			switch (insert->placement()) {
 			case PreFader:
-				insert->run (buffers, nbufs, nframes, 0);
+				insert->run (buffers, nbufs, nframes);
 				break;
 			case PostFader:
 				post_fader_work = true;
@@ -830,7 +833,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 				case PreFader:
 					break;
 				case PostFader:
-					insert->run (buffers, nbufs, nframes, 0);
+					insert->run (buffers, nbufs, nframes);
 					break;
 				}
 			}

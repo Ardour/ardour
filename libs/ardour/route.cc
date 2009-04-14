@@ -277,7 +277,7 @@ Route::set_gain (gain_t val, void *src)
 void
 Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+			       nframes_t nframes, bool with_redirects, int declick,
 			       bool meter)
 {
 	uint32_t n;
@@ -385,11 +385,11 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output (bufs, nbufs, nframes, offset);
+			co->deliver_output (bufs, nbufs, nframes);
 			
 		} 
 	} 
@@ -403,7 +403,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		for (n = 0; n < nbufs; ++n)  {
 			Sample *sp = bufs[n];
 			
-			for (nframes_t nx = offset; nx < nframes + offset; ++nx) {
+			for (nframes_t nx = 0; nx < nframes; ++nx) {
 				sp[nx] += 1.0e-27f;
 			}
 		}
@@ -423,10 +423,10 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					case PreFader:
 						if (dsg == 0) {
 							if (boost::dynamic_pointer_cast<Send>(*i) || boost::dynamic_pointer_cast<PortInsert>(*i)) {
-								(*i)->silence (nframes, offset);
+								(*i)->silence (nframes);
 							}
 						} else {
-							(*i)->run (bufs, nbufs, nframes, offset);
+							(*i)->run (bufs, nbufs, nframes);
 						}
 						break;
 					case PostFader:
@@ -438,7 +438,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						(*i)->silence (nframes, offset);
+						(*i)->silence (nframes);
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -486,11 +486,11 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output_no_pan (bufs, nbufs, nframes, offset);
+			co->deliver_output_no_pan (bufs, nbufs, nframes);
 			
 		} 
 	} 
@@ -596,10 +596,10 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					case PostFader:
 						if (dsg == 0) {
 							if (boost::dynamic_pointer_cast<Send>(*i) || boost::dynamic_pointer_cast<PortInsert>(*i)) {
-								(*i)->silence (nframes, offset);
+								(*i)->silence (nframes);
 							}
 						} else {
-							(*i)->run (bufs, nbufs, nframes, offset);
+							(*i)->run (bufs, nbufs, nframes);
 						}
 						break;
 					}
@@ -610,7 +610,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					case PreFader:
 						break;
 					case PostFader:
-						(*i)->silence (nframes, offset);
+						(*i)->silence (nframes);
 						break;
 					}
 				}
@@ -651,11 +651,11 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output_no_pan (bufs, nbufs, nframes, offset);
+			co->deliver_output_no_pan (bufs, nbufs, nframes);
 		} 
 	} 
 
@@ -682,7 +682,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 	} else if (no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording())) {
 		
-		IO::silence (nframes, offset);
+		IO::silence (nframes);
 		
 	} else {
 
@@ -708,22 +708,22 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				reset_peak_meters ();
 			}
 
-			IO::silence (nframes, offset);
+			IO::silence (nframes);
 			
 		} else {
 			
 			if ((_session.transport_speed() > 1.5f || 
 			     _session.transport_speed() < -1.5f) &&
 			    Config->get_quieten_at_speed()) {
-				pan (bufs, nbufs, nframes, offset, speed_quietning); 
+				pan (bufs, nbufs, nframes, speed_quietning); 
 			} else {
 				// cerr << _name << " panner state = " << _panner->automation_state() << endl;
 				if (!_panner->empty() &&
 				    (_panner->automation_state() & Play ||
 				     ((_panner->automation_state() & Touch) && !_panner->touching()))) {
-					pan_automated (bufs, nbufs, start_frame, end_frame, nframes, offset);
+					pan_automated (bufs, nbufs, start_frame, end_frame, nframes);
 				} else {
-					pan (bufs, nbufs, nframes, offset, 1.0); 
+					pan (bufs, nbufs, nframes, 1.0); 
 				}
 			}
 		}
@@ -744,7 +744,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		} else {
 			uint32_t no = n_outputs();
 			for (n = 0; n < no; ++n) {
-				_peak_power[n] = Session::compute_peak (output(n)->get_buffer (nframes) + offset, nframes, _peak_power[n]);
+				_peak_power[n] = Session::compute_peak (get_output_buffer (n, nframes), nframes, _peak_power[n]);
 			}
 		}
 	}
@@ -758,14 +758,14 @@ Route::n_process_buffers ()
 
 void
 
-Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter_first)
+Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick, bool meter_first)
 {
 	vector<Sample*>& bufs = _session.get_passthru_buffers();
 	uint32_t limit = n_process_buffers ();
 
 	_silent = false;
 
-	collect_input (bufs, limit, nframes, offset);
+	collect_input (bufs, limit, nframes);
 
 #define meter_stream meter_first
 
@@ -778,7 +778,7 @@ Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, 
 		meter_stream = true;
 	}
 		
-	process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, true, declick, meter_stream);
+	process_output_buffers (bufs, limit, start_frame, end_frame, nframes, true, declick, meter_stream);
 
 #undef meter_stream
 }
@@ -2005,16 +2005,16 @@ Route::curve_reallocate ()
 }
 
 void
-Route::silence (nframes_t nframes, nframes_t offset)
+Route::silence (nframes_t nframes)
 {
 	if (!_silent) {
 
 		// reset_peak_meters ();
 		
-		IO::silence (nframes, offset);
+		IO::silence (nframes);
 
 		if (_control_outs) {
-			_control_outs->silence (nframes, offset);
+			_control_outs->silence (nframes);
 		}
 
 		{ 
@@ -2028,10 +2028,10 @@ Route::silence (nframes_t nframes, nframes_t offset)
 						continue;
 					}
 
-					(*i)->silence (nframes, offset);
+					(*i)->silence (nframes);
 				}
 
-				if (nframes == _session.get_block_size() && offset == 0) {
+				if (nframes == _session.get_block_size()) {
 					// _silent = true;
 				}
 			}
@@ -2310,36 +2310,36 @@ Route::pans_required () const
 }
 
 int 
-Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
-		   bool session_state_changing, bool can_record, bool rec_monitors_input)
+Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,  
+		bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs() == 0) {
 		return 0;
 	}
 
 	if (session_state_changing || !_active)  {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 
 	apply_gain_automation = false;
 	
 	if (n_inputs()) {
-		passthru (start_frame, end_frame, nframes, offset, 0, false);
+		passthru (start_frame, end_frame, nframes, 0, false);
 	} else {
-		silence (nframes, offset);
+		silence (nframes);
 	}
 
 	return 0;
 }
 
 nframes_t
-Route::check_initial_delay (nframes_t nframes, nframes_t& offset, nframes_t& transport_frame)
+Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
 {
 	if (_roll_delay > nframes) {
 
 		_roll_delay -= nframes;
-		silence (nframes, offset);
+		silence (nframes);
 		/* transport frame is not legal for caller to use */
 		return 0;
 
@@ -2347,9 +2347,15 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& offset, nframes_t& tra
 
 		nframes -= _roll_delay;
 
-		silence (_roll_delay, offset);
+		silence (_roll_delay);
 
-		offset += _roll_delay;
+		/* we've written _roll_delay of samples into the 
+		   output ports, so make a note of that for
+		   future reference.
+		*/
+
+		increment_output_offset (_roll_delay);
+
 		transport_frame += _roll_delay;
 
 		_roll_delay = 0;
@@ -2359,7 +2365,7 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& offset, nframes_t& tra
 }
 
 int
-Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
+Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
 	     bool can_record, bool rec_monitors_input)
 {
 	{
@@ -2372,13 +2378,13 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 	}
 
 	if ((n_outputs() == 0 && _redirects.empty()) || n_inputs() == 0 || !_active) {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 	
 	nframes_t unused = 0;
 
-	if ((nframes = check_initial_delay (nframes, offset, unused)) == 0) {
+	if ((nframes = check_initial_delay (nframes, unused)) == 0) {
 		return 0;
 	}
 
@@ -2399,16 +2405,16 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		}
 	}
 
-	passthru (start_frame, end_frame, nframes, offset, declick, false);
+	passthru (start_frame, end_frame, nframes, declick, false);
 
 	return 0;
 }
 
 int
-Route::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
+Route::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		    bool can_record, bool rec_monitors_input)
 {
-	silence (nframes, offset);
+	silence (nframes);
 	return 0;
 }
 

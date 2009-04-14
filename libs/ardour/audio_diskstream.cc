@@ -407,6 +407,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 		/* starting to record: compute first+last frames */
 
 		first_recordable_frame = transport_frame + _capture_offset;
+		// cerr << "set FRF = " << transport_frame << " + " << _capture_offset << " = " << first_recordable_frame << endl;
 		last_recordable_frame = max_frames;
 		capture_start_frame = transport_frame;
 
@@ -415,9 +416,11 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 			/* was stopped, now rolling (and recording) */
 
 			if (_alignment_style == ExistingMaterial) {
-				first_recordable_frame += _session.worst_output_latency();
+				//cerr << "A FRF += " << _session.worst_output_latency () << endl;
+				// first_recordable_frame += _session.worst_output_latency();
 			} else {
-				first_recordable_frame += _roll_delay;
+				// cerr << "B FRF += " << _roll_delay<< endl;
+				// first_recordable_frame += _roll_delay;
   			}
 
 		} else {
@@ -440,6 +443,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 					   this is needed.
 					*/
 
+					// cerr << "1 FRF += " << _capture_offset << endl;
 					first_recordable_frame += _capture_offset;
 
 				} else {
@@ -450,12 +454,14 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 					   on the output latency.
 					*/
 
+					// cerr << "2 FRF += " << _session.worst_output_latency() << endl;
 					first_recordable_frame += _session.worst_output_latency();
 				}
 
 			} else {
 
 				if (Config->get_punch_in()) {
+					// cerr << "3 FRF += " << _roll_delay << endl;
 					first_recordable_frame += _roll_delay;
 				} else {
 					capture_start_frame -= _roll_delay;
@@ -463,6 +469,8 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 			}
 			
 		}
+
+		// cerr << _name << " FRF = " << first_recordable_frame << " CSF = " << capture_start_frame << endl;
 
 		if (recordable() && destructive()) {
 			boost::shared_ptr<ChannelList> c = channels.reader();
@@ -501,7 +509,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 }
 
 int
-AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input)
+AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -645,7 +653,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				   rec_offset
 				*/
 
-				memcpy (chaninfo->current_capture_buffer, _io->input(n)->get_buffer (rec_nframes) + offset + rec_offset, sizeof (Sample) * rec_nframes);
+				memcpy (chaninfo->current_capture_buffer, _io->get_input_buffer (n, rec_nframes) + rec_offset, sizeof (Sample) * rec_nframes);
 
 			} else {
 
@@ -656,7 +664,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 					goto out;
 				}
 
-				Sample* buf = _io->input (n)->get_buffer (nframes) + offset;
+				Sample* buf = _io->get_input_buffer (n, nframes);
 				nframes_t first = chaninfo->capture_vector.len[0];
 
 				memcpy (chaninfo->capture_wrap_buffer, buf, sizeof (Sample) * first);
@@ -1407,7 +1415,8 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 	vector.buf[1] = 0;
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
-	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+	int nn = 0;
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++nn) {
 	
 		(*chan)->capture_buf->get_read_vector (&vector);
 

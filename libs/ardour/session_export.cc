@@ -582,13 +582,13 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 	if (!_exporting) {
 		/* finished, but still freewheeling */
 		cerr << "\tExport ... not exporting yet, no_roll() for " << nframes <<endl;
-		no_roll (nframes, 0);
+		no_roll (nframes);
 		return 0;
 	}
 	
 	if (!spec->running || spec->stop || (this_nframes = min ((spec->end_frame - spec->pos), nframes)) == 0) {
 		cerr << "\tExport ... not running or at end, no_roll() for " << nframes <<endl;
-		no_roll (nframes, 0);
+		no_roll (nframes);
 		return stop_audio_export (*spec);
 	}
 

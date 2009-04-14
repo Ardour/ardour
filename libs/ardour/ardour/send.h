@@ -42,7 +42,7 @@ class Send : public Redirect
 
 	uint32_t bit_slot() const { return bitslot; }
 	
-	void run (vector<Sample *> &bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void run (vector<Sample *> &bufs, uint32_t nbufs, nframes_t nframes);
 	void activate() {}
 	void deactivate () {}
 

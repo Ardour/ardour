@@ -24,6 +24,8 @@ using namespace std;
 
 nframes_t Port::_short_over_length = 2;
 nframes_t Port::_long_over_length = 10;
+nframes_t Port::_port_offset = 0;
+nframes_t Port::_buffer_size = 0;
 
 Port::Port (jack_port_t *p) 
 	: _port (p)

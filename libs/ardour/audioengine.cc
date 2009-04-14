@@ -29,6 +29,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
 #include <ardour/port.h>
+#include <ardour/io.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
@@ -110,8 +111,11 @@ AudioEngine::start ()
 
 	if (!_running) {
 
+		nframes_t blocksize = jack_get_buffer_size (_jack);
+		cerr << "pre-run: Set Port buffer size to " << blocksize << endl;
+		Port::set_buffer_size (blocksize);
+
 		if (session) {
-			nframes_t blocksize = jack_get_buffer_size (_jack);
 
 			BootMessage (_("Connect session to engine"));
 
@@ -293,6 +297,14 @@ AudioEngine::process_callback (nframes_t nframes)
 		return 0;
 	}
 
+	/* reset port buffer offset for the start of a new cycle */
+
+	Port::set_port_offset (0);
+
+	/* tell all IO objects that we're starting a new cycle */
+
+	IO::CycleStart (nframes);
+
 	if (_freewheeling) {
 		if (Freewheel (nframes)) {
 			jack_set_freewheel (_jack, false);
@@ -340,7 +352,7 @@ AudioEngine::process_callback (nframes_t nframes)
 			Port *port = (*i);
 			
 			if (port->sends_output()) {
-				Sample *buf = port->get_buffer(nframes);
+				Sample *buf = port->get_buffer (nframes);
 				memset (buf, 0, sizeof(Sample) * nframes);
 				// this should work but doesn't
 				//port->silence(0, nframes);  //need to implement declicking fade
@@ -391,8 +403,11 @@ AudioEngine::jack_bufsize_callback (nframes_t nframes)
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
-	boost::shared_ptr<Ports> p = ports.reader();
+	cerr << "bufsize: Set Port buffer size to " << nframes << endl;
+	Port::set_buffer_size (nframes);
 
+	boost::shared_ptr<Ports> p = ports.reader();
+	
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		(*i)->reset();
 	}
@@ -1173,7 +1188,7 @@ AudioEngine::reconnect_to_jack ()
 		(*i)->reset ();
 
 		if ((*i)->flags() & JackPortIsOutput) {
-			(*i)->silence (jack_get_buffer_size (_jack), 0);
+			(*i)->silence (jack_get_buffer_size (_jack));
 		}
 	}
 
@@ -1189,6 +1204,7 @@ AudioEngine::reconnect_to_jack ()
 	if (session) {
 		session->reset_jack_connection (_jack);
 		nframes_t blocksize = jack_get_buffer_size (_jack);
+		Port::set_buffer_size (blocksize);
 		session->set_block_size (blocksize);
 		session->set_frame_rate (jack_get_sample_rate (_jack));
 	}

@@ -173,7 +173,7 @@ Auditioner::play_audition (nframes_t nframes)
 	int ret;
 
 	if (g_atomic_int_get (&_active) == 0) {
-		silence (nframes, 0);
+		silence (nframes);
 		return 0;
 	}
 
@@ -181,8 +181,8 @@ Auditioner::play_audition (nframes_t nframes)
 
 	_diskstream->prepare ();
 
-	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, 0, false, false, false)) != 0) {
-		silence (nframes, 0);
+	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, false, false)) != 0) {
+		silence (nframes);
 		return ret;
 	}
 

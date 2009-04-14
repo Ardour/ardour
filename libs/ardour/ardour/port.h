@@ -36,8 +36,16 @@ class Port : public sigc::trackable {
         // Port is an opage pointer, so should be be desallocated ??
 	}
 
-	Sample *get_buffer (nframes_t nframes) {
-		return (Sample *) jack_port_get_buffer (_port, nframes);
+	static nframes_t port_offset() { return _port_offset; }
+
+	static void set_port_offset (nframes_t off) {
+		_port_offset = off;
+	}
+	static void increment_port_offset (nframes_t n) {
+		_port_offset += n;
+	}
+	static void set_buffer_size (nframes_t sz) {
+		_buffer_size = sz;
 	}
 
 	std::string name() { 
@@ -97,8 +105,8 @@ class Port : public sigc::trackable {
 		if (_metering) { _metering--; }
 	}
 
-	float                       peak_db() const { return _peak_db; }
-	jack_default_audio_sample_t peak()    const { return _peak; }
+	float  peak_db() const { return _peak_db; }
+	Sample peak()    const { return _peak; }
 
 	uint32_t short_overs () const { return _short_overs; }
 	uint32_t long_overs ()  const { return _long_overs; }
@@ -151,15 +159,11 @@ class Port : public sigc::trackable {
 	bool is_silent() const { return _silent; }
 
 	/** Assumes that the port is an audio output port */
-	void silence (nframes_t nframes, nframes_t offset) {
+	void silence (nframes_t nframes) {
 		if (!_silent) {
-			memset ((Sample *) jack_port_get_buffer (_port, nframes) + offset, 0, sizeof (Sample) * nframes);
-			if (offset == 0) {
-				/* XXX this isn't really true, but i am not sure
-				   how to set this correctly. we really just
-				   want to set it true when the entire port
-				   buffer has been overrwritten.
-				*/
+			memset ((Sample *) jack_port_get_buffer (_port, nframes) + _port_offset, 0, sizeof (Sample) * nframes);
+			if (nframes == _buffer_size) {
+				/* its a heuristic. its not perfect */
 				_silent = true;
 			}
 		}
@@ -188,15 +192,33 @@ class Port : public sigc::trackable {
 	bool                         _last_monitor : 1;
 	bool                         _silent : 1;
 	jack_port_t                 *_port;
-	nframes_t               _overlen;
-	jack_default_audio_sample_t  _peak;
+	nframes_t                    _overlen;
+	Sample                       _peak;
 	float                        _peak_db;
 	uint32_t                     _short_overs;
 	uint32_t                     _long_overs;
 	unsigned short               _metering;
-	
+
 	static nframes_t        _long_over_length;
 	static nframes_t        _short_over_length;
+
+	static nframes_t _port_offset;
+	static nframes_t _buffer_size;
+
+  private:
+	friend class IO;      // get_(input|output)_buffer
+	friend class Session; // session_export.cc
+
+	Sample *get_buffer (nframes_t nframes) {
+		
+		/* ignore requested size, because jack always
+		   reads the entire port buffer. 
+		*/
+
+		return (Sample *) jack_port_get_buffer (_port, _buffer_size) + _port_offset;
+	}
+
+
 };
  
 } // namespace ARDOUR

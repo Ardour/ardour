@@ -90,18 +90,17 @@ class IO : public PBD::StatefulDestructible
 	const string& name() const { return _name; }
 	virtual int set_name (string str, void *src);
 	
-	virtual void silence  (nframes_t, nframes_t offset);
+	virtual void silence  (nframes_t);
 
 	// These should be moved in to a separate object that manipulates an IO
 	
-	void pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
+	void pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, gain_t gain_coeff);
 	void pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start_frame, nframes_t end_frame, 
-			    nframes_t nframes, nframes_t offset);
-	void collect_input  (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
-	void deliver_output (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
-	void deliver_output_no_pan (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
-	void just_meter_input (nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset);
+			    nframes_t nframes);
+	void collect_input  (vector<Sample*>&, uint32_t nbufs, nframes_t nframes);
+	void deliver_output (vector<Sample*>&, uint32_t nbufs, nframes_t nframes);
+	void deliver_output_no_pan (vector<Sample*>&, uint32_t nbufs, nframes_t nframes);
+	void just_meter_input (nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 
 	virtual uint32_t n_process_buffers () { return 0; }
 
@@ -161,6 +160,9 @@ class IO : public PBD::StatefulDestructible
 	uint32_t n_inputs () const { return _ninputs; }
 	uint32_t n_outputs () const { return _noutputs; }
 
+	Sample* get_input_buffer (int n, nframes_t);
+	Sample* get_output_buffer (int n, nframes_t);
+
 	sigc::signal<void>                active_changed;
 
 	sigc::signal<void,IOChange,void*> input_changed;
@@ -214,6 +216,7 @@ class IO : public PBD::StatefulDestructible
 
 	void reset_max_peak_meters ();
 
+	static sigc::signal<void,nframes_t> CycleStart;
 	
 	static void update_meters();
 	static std::string name_from_state (const XMLNode&);
@@ -348,6 +351,10 @@ class IO : public PBD::StatefulDestructible
 	int set_inputs (const string& str);
 	int set_outputs (const string& str);
 
+	void increment_output_offset (nframes_t);
+
+	void cycle_start (nframes_t);
+
 	static bool connecting_legal;
 	static bool ports_legal;
 
@@ -355,6 +362,8 @@ class IO : public PBD::StatefulDestructible
 
 	uint32_t _ninputs;
 	uint32_t _noutputs;
+	nframes_t _output_offset;
+
 
 	/* are these the best variable names ever, or what? */
 

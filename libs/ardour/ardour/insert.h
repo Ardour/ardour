@@ -49,7 +49,7 @@ class Insert : public Redirect
 	
 	virtual ~Insert() { }
 
-	virtual void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset) = 0;
+	virtual void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes) = 0;
 	virtual void activate () {}
 	virtual void deactivate () {}
 
@@ -70,7 +70,7 @@ class PortInsert : public Insert
 	int set_state(const XMLNode&);
 
 	void init ();
-	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes);
 
 	nframes_t latency();
 	
@@ -99,8 +99,8 @@ class PluginInsert : public Insert
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&);
 
-	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
-	void silence (nframes_t nframes, nframes_t offset);
+	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes);
+	void silence (nframes_t nframes);
 	void activate ();
 	void deactivate ();
 
@@ -149,7 +149,7 @@ class PluginInsert : public Insert
 	void parameter_changed (uint32_t, float);
 	
 	vector<boost::shared_ptr<Plugin> > _plugins;
-	void automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes);
 	void connect_and_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
 
 	void init ();
