@@ -602,6 +602,7 @@ AUPlugin::_set_block_size (nframes_t nframes)
 
 	if (initialized) {
 		unit->Uninitialize ();
+		initialized = false;
 	}
 
 	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 
