@@ -171,9 +171,9 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 {
 	_write_data_count = 0;
 		
-	nframes_t         time;
-	Evoral::EventType type;
-	uint32_t          size;
+	nframes_t         event_time;
+	Evoral::EventType event_type;
+	uint32_t          event_size;
 
 	size_t   buf_capacity = 4;
 	uint8_t* buf          = (uint8_t*)malloc(buf_capacity);
@@ -185,36 +185,36 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 	Evoral::MIDIEvent<nframes_t> ev;
 
 	while (true) {
-		bool ret = source.peek_time(&time);
-		g_debug ("time: %u, last_write_end: %lu, duration: %u", time, _last_write_end, duration);
-		if (!ret || time > _last_write_end + duration) {
+		bool ret = source.peek_time(&event_time);
+		g_debug ("event_time: %u, last_write_end: %lu, duration: %u", event_time, _last_write_end, duration);
+		if (!ret || event_time > _last_write_end + duration) {
 			if (!ret) g_debug ("peek failed");
-			if (time > _last_write_end + duration) g_debug ("time: %u > last_write_end: %lu + duration: %u", time, _last_write_end, duration);
+			if (event_time > _last_write_end + duration) g_debug ("event_time: %u > last_write_end: %lu + duration: %u", event_time, _last_write_end, duration);
  
 			break;
 		}
 
-		ret = source.read_prefix(&time, &type, &size);
+		ret = source.read_prefix(&event_time, &event_type, &event_size);
 		if (!ret) {
 			cerr << "ERROR: Unable to read event prefix, corrupt MIDI ring buffer" << endl;
 			break;
 		}
 
-		if (size > buf_capacity) {
-			buf_capacity = size;
-			buf = (uint8_t*)realloc(buf, size);
+		if (event_size > buf_capacity) {
+			buf_capacity = event_size;
+			buf = (uint8_t*)realloc(buf, event_size);
 		}
 
-		ret = source.read_contents(size, buf);
+		ret = source.read_contents(event_size, buf);
 		if (!ret) {
-			cerr << "ERROR: Read time/size but not buffer, corrupt MIDI ring buffer" << endl;
+			cerr << "ERROR: Read event time/size but not buffer, corrupt MIDI ring buffer" << endl;
 			break;
 		}
 		
-		assert(time >= position);
-		time -= position;
+		assert(event_time >= position);
+		event_time -= position;
 		
-		ev.set(buf, size, time);
+		ev.set(buf, event_size, event_time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
 			cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
