@@ -855,28 +855,14 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		return true;
 	}
 
-	if (region == 0) {
-		region_list_display.get_selection()->unselect_all();
-		deselect_all();
-		return false;
-	}
-
-	switch (ev->button) {
-	case 1:
-		break;
-
-	case 2:
-		// audition on middle click (stop audition too)
+	if (region != 0 && Keyboard::is_button2_event (ev)) {
+		// start/stop audition
 		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			consider_auditioning (region);
 		}
 		return true;
-		break;
-
-	default:
-		break; 
 	}
-
+	
 	return false;
 }	
 

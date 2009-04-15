@@ -313,6 +313,7 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 	  gint             n_keys;
 	  gint             use_command;
 	  gboolean         add_modifiers = FALSE;
+	  UInt8            modifiers = 0; /* implies Command key */
 
 	  if (gdk_keymap_get_entries_for_keyval (keymap, key->accel_key,
 						 &keys, &n_keys) == 0)
@@ -347,10 +348,14 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 		  }
 
 	    } else {
-		  SetMenuItemCommandKey (carbon_item->menu, carbon_item->index,
-					 true, keys[0].keycode);
-		  g_free (keys);
-		  add_modifiers = TRUE;
+                 SetMenuItemCommandKey (carbon_item->menu, carbon_item->index, true, keys[0].keycode);
+                 if (keys[0].level == 1) {
+			 /* regular key, but it needs shift to make it work */
+			 modifiers |= kMenuShiftModifier;
+		 }
+
+		 g_free (keys);
+		 add_modifiers = TRUE;
 	    }
 
 	  if (add_modifiers)
@@ -589,7 +594,7 @@ menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
 					 sizeof (widget), 0, &widget);
 	      if (err == noErr && GTK_IS_WIDGET (widget))
 		{
-		  g_idle_add (dummy_gtk_menu_item_activate, widget);
+		  g_idle_add ((GSourceFunc) dummy_gtk_menu_item_activate, widget);
 		  // gtk_menu_item_activate (GTK_MENU_ITEM (widget));
 		  _in_carbon_menu_event_handler = 0;
 		  return noErr;

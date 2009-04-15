@@ -377,7 +377,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	
 	focus_button.add (*focus_out_image);
 
-	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to focus all keyboard events on this plugin window"), "");
+	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow the plugin to receive keyboard events that Ardour would normally use as a shortcut"), "");
 	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
 
 	plugin_eq_bin.set_expanded(true);
@@ -417,6 +417,7 @@ PlugUIBase::save_plugin_setting ()
 	prompter.set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 
 	prompter.show_all();
+	prompter.present ();
 
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
@@ -454,13 +455,13 @@ PlugUIBase::focus_toggled (GdkEventButton* ev)
 		focus_button.remove ();
 		focus_button.add (*focus_out_image);
 		focus_out_image->show ();
-		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to focus all keyboard events on this plugin window"), "");
+		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow the plugin to receive keyboard events that Ardour would normally use as a shortcut"), "");
 	} else {
 		Keyboard::the_keyboard().magic_widget_grab_focus();
 		focus_button.remove ();
 		focus_button.add (*focus_in_image);
 		focus_in_image->show ();
-		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to remove keyboard focus from this plugin window"), "");
+		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow normal use of Ardour keyboard shortcuts"), "");
 	}
 
 	return true;

@@ -77,8 +77,10 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt,
 
 RouteUI::~RouteUI()
 {
-	GoingAway (); /* EMIT SIGNAL */
-
+       /* derived classes should emit GoingAway so that they receive the signal
+          when the object is still a legal derived instance.
+       */
+	
 	delete solo_menu;
 	delete mute_menu;
 	delete remote_control_menu;
@@ -87,6 +89,7 @@ RouteUI::~RouteUI()
 void
 RouteUI::init ()
 {
+	self_destruct = true;
 	xml_node = 0;
 	mute_menu = 0;
 	solo_menu = 0;
@@ -162,8 +165,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	   up when the route is destroyed.
 	*/
 
-  	new PairedShiva<Route,RouteUI> (*_route, *this);
-  
+	if (self_destruct) {
+		new PairedShiva<Route,RouteUI> (*_route, *this);
+	}
+
 	mute_button->set_controllable (_route->mute_control());
 	mute_button->set_label (m_name);
 	

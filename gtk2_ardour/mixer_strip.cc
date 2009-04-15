@@ -102,6 +102,14 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 			 
 {
 	init ();
+	
+	if (!_mixer_owned) {
+		/* the editor mixer strip: don't destroy it every time
+		   the underlying route goes away.
+		*/
+		
+		self_destruct = false;
+	}
 }
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt, bool in_mixer)
@@ -1280,16 +1288,16 @@ MixerStrip::width_clicked ()
 void
 MixerStrip::hide_clicked ()
 {
-    // LAME fix to reset the button status for when it is redisplayed (part 1)
-    hide_button.set_sensitive(false);
-    
+	// LAME fix to reset the button status for when it is redisplayed (part 1)
+	hide_button.set_sensitive(false);
+	
 	if (_embedded) {
-		 Hiding(); /* EMIT_SIGNAL */
+		Hiding(); /* EMIT_SIGNAL */
 	} else {
 		_mixer.hide_strip (this);
 	}
 	
-    // (part 2)
+	// (part 2)
 	hide_button.set_sensitive(true);
 }
 

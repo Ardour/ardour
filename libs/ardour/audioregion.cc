@@ -356,10 +356,10 @@ nframes_t
 AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		sframes_t position, nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (_master_sources,
-			_master_sources.front()->length(_master_sources.front()->timeline_position()),
-			buf, mixdown_buffer, gain_buffer,
-			position, cnt, chan_n, 0, 0);
+	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
+
+	return _read_at (_master_sources, _master_sources.front()->length(_master_sources.front()->timeline_position()), 
+			 buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0, ReadOps (0));
 }
 
 nframes_t

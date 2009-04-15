@@ -565,17 +565,21 @@ Session::when_engine_running ()
 
 		} else {
 
-			/* default state for Click */
+			/* default state for Click: dual-mono to first 2 physical outputs */
 
-			first_physical_output = _engine.get_nth_physical_output (DataType::AUDIO, 0);
+                       for (int physport = 0; physport < 2; ++physport) {
+                               string physical_output = _engine.get_nth_physical_output (DataType::AUDIO, physport);
 
-			if (first_physical_output.length()) {
-				if (_click_io->add_output_port (first_physical_output, this)) {
-					// relax, even though its an error
-				} else {
-					_clicking = Config->get_clicking ();
-				}
-			}
+                               if (physical_output.length()) {
+                                       if (_click_io->add_output_port (physical_output, this)) {
+                                               // relax, even though its an error
+				       }
+			       }
+		       }
+		       
+                       if (_click_io->n_outputs () > ChanCount::ZERO) {
+                               _clicking = Config->get_clicking ();
+                       }
 		}
 	}
 
@@ -1529,7 +1533,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 		shared_ptr<RouteList> r = routes.reader ();
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
+			if (boost::dynamic_pointer_cast<MidiTrack>(*i) != 0) {
 				if (!(*i)->is_hidden()) {
 					n++;
 					//channels_used += (*i)->n_inputs().n_midi();
@@ -1687,7 +1691,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		shared_ptr<RouteList> r = routes.reader ();
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
+			if (boost::dynamic_pointer_cast<AudioTrack>(*i) != 0) {
 				if (!(*i)->is_hidden()) {
 					n++;
 					channels_used += (*i)->n_inputs().n_audio();
@@ -1805,7 +1809,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 
-			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			error << pfe.what() << endmsg;
 
 			if (track) {
 				/* we need to get rid of this, since the track failed to be created */
@@ -1963,7 +1967,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
-			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			error << pfe.what() << endmsg;
 			goto failure;
 		}
 
@@ -2058,7 +2062,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		}
 	  
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
-			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			error << pfe.what() << endmsg;
 			goto out;
 		}
 	  
@@ -2182,10 +2186,10 @@ Session::remove_route (shared_ptr<Route> route)
 		/* writer goes out of scope, forces route list update */
 	}
 
-	Track* t;
+	boost::shared_ptr<Track> t;
 	boost::shared_ptr<Diskstream> ds;
 
-	if ((t = dynamic_cast<Track*>(route.get())) != 0) {
+	if ((t = boost::dynamic_pointer_cast<Track>(route)) != 0) {
 		ds = t->diskstream();
 	}
 
@@ -2262,7 +2266,7 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 
 			/* don't mess with busses */
 
-			if (dynamic_cast<Track*>((*i).get()) == 0) {
+			if (boost::dynamic_pointer_cast<Track>(*i) == 0) {
 				continue;
 			}
 
@@ -2270,7 +2274,7 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 
 			/* don't mess with tracks */
 
-			if (dynamic_cast<Track*>((*i).get()) != 0) {
+			if (boost::dynamic_pointer_cast<Track>(*i) != 0) {
 				continue;
 			}
 		}
@@ -2306,7 +2310,7 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
         for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			something_soloed = true;
-			if (dynamic_cast<Track*>((*i).get())) {
+			if (boost::dynamic_pointer_cast<Track>(*i)) {
 				if (is_track) {
 					same_thing_soloed = true;
 					break;
@@ -2353,7 +2357,7 @@ Session::update_route_solo_state ()
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			mute = true;
-			if (dynamic_cast<Track*>((*i).get())) {
+			if (boost::dynamic_pointer_cast<Track>(*i)) {
 				is_track = true;
 			}
 			break;
@@ -2398,7 +2402,7 @@ Session::modify_solo_mute (bool is_track, bool mute)
 
 			/* only alter track solo mute */
 
-			if (dynamic_cast<Track*>((*i).get())) {
+			if (boost::dynamic_pointer_cast<Track>(*i)) {
 				if ((*i)->soloed()) {
 					(*i)->set_solo_mute (!mute);
 				} else {
@@ -2410,7 +2414,7 @@ Session::modify_solo_mute (bool is_track, bool mute)
 
 			/* only alter bus solo mute */
 
-			if (!dynamic_cast<Track*>((*i).get())) {
+			if (!boost::dynamic_pointer_cast<Track>(*i)) {
 
 				if ((*i)->soloed()) {
 
@@ -3673,10 +3677,10 @@ Session::record_enable_change_all (bool yn)
 	shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		Track* at;
+		boost::shared_ptr<Track> t;
 
-		if ((at = dynamic_cast<Track*>((*i).get())) != 0) {
-			at->set_record_enable (yn, this);
+		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
+			t->set_record_enable (yn, this);
 		}
 	}
 
@@ -4040,13 +4044,13 @@ Session::freeze (InterThreadInfo& itt)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-		Track *at;
+		boost::shared_ptr<Track> t;
 
-		if ((at = dynamic_cast<Track*>((*i).get())) != 0) {
+		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/
-			at->freeze (itt);
+			t->freeze (itt);
 		}
 	}
 
@@ -4255,7 +4259,7 @@ Session::ntracks () const
 	shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if (dynamic_cast<Track*> ((*i).get())) {
+		if (boost::dynamic_pointer_cast<Track> (*i)) {
 			++n;
 		}
 	}
@@ -4270,7 +4274,7 @@ Session::nbusses () const
 	shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if (dynamic_cast<Track*> ((*i).get()) == 0) {
+		if (boost::dynamic_pointer_cast<Track>(*i) == 0) {
 			++n;
 		}
 	}

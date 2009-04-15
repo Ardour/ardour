@@ -296,6 +296,7 @@ class Editor : public PublicEditor
 	void clear_playlists (TimeAxisView* v);
 
 	TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0);
+	void get_onscreen_tracks (TrackViewList&);
 
 	Width editor_mixer_strip_width;
 	void maybe_add_mixer_strip_width (XMLNode&);
@@ -837,18 +838,20 @@ class Editor : public PublicEditor
 	Cursor*              playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
 
-	void    cursor_to_region_boundary (Cursor*, int32_t dir);
-	void    cursor_to_next_region_boundary (Cursor*);
-	void    cursor_to_previous_region_boundary (Cursor*);
+	nframes64_t get_region_boundary (nframes64_t pos, int32_t dir, bool with_selection, bool only_onscreen);
+
+	void    cursor_to_region_boundary (bool with_selection, int32_t dir);
+	void    cursor_to_next_region_boundary (bool with_selection);
+	void    cursor_to_previous_region_boundary (bool with_selection);
 	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_previous_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_region_point (Cursor*, ARDOUR::RegionPoint, int32_t dir);
 	void    cursor_to_selection_start (Cursor *);
 	void    cursor_to_selection_end   (Cursor *);
 
-	void    selected_marker_to_region_boundary (int32_t dir);
-	void    selected_marker_to_next_region_boundary ();
-	void    selected_marker_to_previous_region_boundary ();
+	void    selected_marker_to_region_boundary (bool with_selection, int32_t dir);
+	void    selected_marker_to_next_region_boundary (bool with_selection);
+	void    selected_marker_to_previous_region_boundary (bool with_selection);
 	void    selected_marker_to_next_region_point (ARDOUR::RegionPoint);
 	void    selected_marker_to_previous_region_point (ARDOUR::RegionPoint);
 	void    selected_marker_to_region_point (ARDOUR::RegionPoint, int32_t dir);
@@ -1908,6 +1911,7 @@ public:
 	void route_list_reordered (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* what);
 	bool ignore_route_list_reorder;
 	bool no_route_list_redisplay;
+	bool sync_track_view_list_and_route_list ();
 
 	void build_route_list_menu ();
 	void show_route_list_menu ();

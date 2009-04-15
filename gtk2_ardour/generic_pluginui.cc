@@ -462,14 +462,15 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 			control_ui->pack_start (control_ui->label, true, true);
 			control_ui->pack_start (*control_ui->button, false, true);
-			control_ui->pack_start (control_ui->automate_button, false, false);
+			// control_ui->pack_start (control_ui->automate_button, false, false);
 
 			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
-		
-			if(plugin->get_parameter (port_index) == 1){
+			mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::toggle_parameter_changed), control_ui));
+			
+			if (plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
 			}
-
+			
 			return control_ui;
 		}
 
@@ -496,9 +497,6 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		}*/
 		
 	
-		float delta = desc.upper - desc.lower;
-
-		control_ui->controller->adjustment()->set_page_size (delta/100.0);
 		control_ui->controller->adjustment()->set_step_increment (desc.step);
 		control_ui->controller->adjustment()->set_page_increment (desc.largestep);
 //#endif
@@ -643,6 +641,20 @@ GenericPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 }
 
 void
+GenericPluginUI::toggle_parameter_changed (ControlUI* cui)
+{
+	float val = cui->control->get_value();
+	
+	if (!cui->ignore_change) {
+		if (val > 0.5) {
+			cui->button->set_active (true);
+		} else {
+			cui->button->set_active (false);
+		}
+	}
+}
+
+void
 GenericPluginUI::parameter_changed (ControlUI* cui)
 {
 	if (!cui->update_pending) {
@@ -661,6 +673,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 	float val = cui->control->get_value();
 
 	cui->ignore_change++;
+
 	if (cui->combo) {
 	        std::map<string,float>::iterator it;
 		for (it = cui->combo_map->begin(); it != cui->combo_map->end(); ++it) {
@@ -697,9 +710,9 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 void
 GenericPluginUI::control_port_toggled (ControlUI* cui)
 {
-	if (!cui->ignore_change) {
-		insert->automation_control(cui->parameter())->set_value(cui->button->get_active());
-	}
+	cui->ignore_change++;
+	insert->automation_control (cui->parameter())->set_value (cui->button->get_active());
+	cui->ignore_change--;
 }
 
 void

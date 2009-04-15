@@ -2261,6 +2261,18 @@ Route::_set_state (const XMLNode& node, bool call_base)
 
 			delete _control_outs;
 			_control_outs = new IO (_session, coutname);
+			
+			/* fix up the control out name in the XML before setting it.
+			   Otherwise track templates don't work because the control
+			   outs end up with the stored template name, rather than
+			   the new name of the track based on the template.
+			*/
+			
+			XMLProperty* prop = (*child->children().begin())->property ("name");
+			if (prop) {
+				prop->set_value (coutname);
+			}
+			
 			_control_outs->set_state (**(child->children().begin()));
 
 		} else if (child->name() == X_("Comment")) {

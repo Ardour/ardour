@@ -232,8 +232,6 @@ class OptionEditor : public ArdourDialog
 	void edit_button_changed ();
 	void delete_button_changed ();
 	void bindings_changed ();
-
-	void fixup_combo_size (Gtk::ComboBoxText&, std::vector<std::string>& strings);
 };
 
 #endif /* __gtk_ardour_option_editor_h__ */

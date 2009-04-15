@@ -346,9 +346,13 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 		show_processor_menu(ev->time);
 		ret = true;
 
-	} else if (processor && Keyboard::is_button2_event (ev) && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))) {
-		
-		/* button2-click with no modifiers */
+	} else if (processor && Keyboard::is_button2_event (ev)
+#ifndef GTKOSX
+		   && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))
+#endif
+		) {		
+
+		/* button2-click with no/appropriate modifiers */
 
 		if (processor->active()) {
 			processor->deactivate ();

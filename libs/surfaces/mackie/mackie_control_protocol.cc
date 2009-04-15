@@ -293,7 +293,7 @@ void MackieControlProtocol::switch_banks( int initial )
 			cout << "remote id " << route->remote_control_id() << " connecting " << route->name() << " to " << strip.name() << " with port " << port_for_id(i) << endl;
 #endif
 			route_table[i] = route;
-			RouteSignal * rs = new RouteSignal( *route, *this, strip, port_for_id(i) );
+			RouteSignal * rs = new RouteSignal (route, *this, strip, port_for_id(i) );
 			route_signals.push_back( rs );
 			// update strip from route
 			rs->notify_all();
@@ -543,11 +543,14 @@ void MackieControlProtocol::update_surface()
 		switch_banks( _current_initial_bank );
 		
 		// create a RouteSignal for the master route
-		// but only the first time around
-		master_route_signal = shared_ptr<RouteSignal>( new RouteSignal( *master_route(), *this, master_strip(), mcu_port() ) );
-		// update strip from route
-		master_route_signal->notify_all();
-		
+
+               boost::shared_ptr<Route> mr = master_route ();
+               if (mr) {
+                       master_route_signal = shared_ptr<RouteSignal> (new RouteSignal (mr, *this, master_strip(), mcu_port()) );
+                       // update strip from route
+                       master_route_signal->notify_all();
+               }
+	       
 		// sometimes the jog wheel is a pot
 		surface().blank_jog_ring( mcu_port(), builder );
 		
@@ -656,13 +659,8 @@ void MackieControlProtocol::create_ports()
 
 shared_ptr<Route> MackieControlProtocol::master_route()
 {
-	shared_ptr<Route> retval;
-	retval = session->route_by_name( "master" );
-	if ( retval == 0 )
-	{
-		// TODO search through all routes for one with the master attribute set
-	}
-	return retval;
+	boost::shared_ptr<IO> mo = session->master_out ();
+	return boost::dynamic_pointer_cast<Route>(mo);
 }
 
 Strip & MackieControlProtocol::master_strip()
@@ -966,7 +964,7 @@ void MackieControlProtocol::notify_solo_changed( RouteSignal * route_signal )
 	try
 	{
 		Button & button = route_signal->strip().solo();
-		route_signal->port().write( builder.build_led( button, route_signal->route().soloed() ) );
+		route_signal->port().write( builder.build_led( button, route_signal->route()->soloed() ) );
 	}
 	catch( exception & e )
 	{
@@ -979,7 +977,7 @@ void MackieControlProtocol::notify_mute_changed( RouteSignal * route_signal )
 	try
 	{
 		Button & button = route_signal->strip().mute();
-		route_signal->port().write( builder.build_led( button, route_signal->route().muted() ) );
+		route_signal->port().write( builder.build_led( button, route_signal->route()->muted() ) );
 	}
 	catch( exception & e )
 	{
@@ -992,7 +990,7 @@ void MackieControlProtocol::notify_record_enable_changed( RouteSignal * route_si
 	try
 	{
 		Button & button = route_signal->strip().recenable();
-		route_signal->port().write( builder.build_led( button, route_signal->route().record_enabled() ) );
+		route_signal->port().write( builder.build_led( button, route_signal->route()->record_enabled() ) );
 	}
 	catch( exception & e )
 	{
@@ -1022,7 +1020,7 @@ void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal, boo
 		Fader & fader = route_signal->strip().gain();
 		if ( !fader.in_use() )
 		{
-			float gain_value = route_signal->route().gain_control()->get_value();
+			float gain_value = route_signal->route()->gain_control()->get_value();
 			// check that something has actually changed
 			if ( force_update || gain_value != route_signal->last_gain_written() )
 			{
@@ -1045,7 +1043,7 @@ void MackieControlProtocol::notify_name_changed( RouteSignal * route_signal )
 		if ( !strip.is_master() )
 		{
 			string line1;
-			string fullname = route_signal->route().name();
+			string fullname = route_signal->route()->name();
 			
 			if ( fullname.length() <= 6 )
 			{
@@ -1072,11 +1070,11 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal, b
 	try
 	{
 		Pot & pot = route_signal->strip().vpot();
-		const Panner & panner = route_signal->route().panner();
+		const Panner & panner = route_signal->route()->panner();
 		if ( panner.npanners() == 1 || ( panner.npanners() == 2 && panner.linked() ) )
 		{
 			float pos;
-			route_signal->route().panner().streampanner(0).get_effective_position( pos );
+			route_signal->route()->panner().streampanner(0).get_effective_position( pos );
 			
 			// cache the MidiByteArray here, because the mackie led control is much lower
 			// resolution than the panner control. So we save lots of byte
@@ -1103,13 +1101,13 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal, b
 // TODO handle plugin automation polling
 void MackieControlProtocol::update_automation( RouteSignal & rs )
 {
-	ARDOUR::AutoState gain_state = rs.route().gain_control()->automation_state();
+	ARDOUR::AutoState gain_state = rs.route()->gain_control()->automation_state();
 	if ( gain_state == Touch || gain_state == Play )
 	{
 		notify_gain_changed( &rs, false );
 	}
 	
-	ARDOUR::AutoState panner_state = rs.route().panner().automation_state();
+	ARDOUR::AutoState panner_state = rs.route()->panner().automation_state();
 	if ( panner_state == Touch || panner_state == Play )
 	{
 		notify_panner_changed( &rs, false );

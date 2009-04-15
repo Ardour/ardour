@@ -405,13 +405,8 @@ RouteTimeAxisView::playlist_click ()
 void
 RouteTimeAxisView::automation_click ()
 {
-	if (automation_action_menu == 0) {
-		/* this seems odd, but the automation action
-		   menu is built as part of the display menu.
-		*/
-		build_display_menu ();
-	}
 	conditionally_add_to_selection ();
+	build_automation_action_menu ();
 	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
@@ -506,6 +501,7 @@ RouteTimeAxisView::build_display_menu ()
 	if (!Profile->get_sae()) {
 		build_remote_control_menu ();
 		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		/* rebuild this every time */
 		build_automation_action_menu ();
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
 		items.push_back (SeparatorElem());

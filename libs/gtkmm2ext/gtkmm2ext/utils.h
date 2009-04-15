@@ -45,12 +45,21 @@ namespace Gtkmm2ext {
 						     gint vpadding);
 
 	void set_size_request_to_display_given_text (Gtk::Widget &w,
-					const std::vector<std::string>&,
+						     const std::vector<std::string>&,
 						     gint hpadding,
 						     gint vpadding);
 
 	void set_popdown_strings (Gtk::ComboBoxText&, 
-					const std::vector<std::string>&);
+				  const std::vector<std::string>&, 
+				  bool set_size = false,
+				  gint hpadding = 0, gint vpadding = 0);
+
+        // Combo's are stupid - they steal space from the entry for the button
+#ifdef GTKOSX
+        static const guint32 COMBO_FUDGE = 38; 
+#else
+        static const guint32 COMBO_FUDGE = 24; 
+#endif
 
 	template<class T> void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);

@@ -3017,12 +3017,6 @@ Editor::setup_toolbar ()
 {
 	string pixmap_path;
 
-#ifdef GTKOSX
-	const guint32 FUDGE = 38; // Combo's are stupid - they steal space from the entry for the button
-#else
-	const guint32 FUDGE = 24; // Combo's are stupid - they steal space from the entry for the button
-#endif
-
 	/* Mode Buttons (tool selection) */
 
 	vector<ToggleButton *> mouse_mode_buttons;
@@ -3081,8 +3075,7 @@ Editor::setup_toolbar ()
 	edit_mode_strings.push_back (edit_mode_to_string (Lock));
 
 	edit_mode_selector.set_name ("EditModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, edit_mode_strings, 7+FUDGE, 10);
-	set_popdown_strings (edit_mode_selector, edit_mode_strings);
+	set_popdown_strings (edit_mode_selector, edit_mode_strings, true);
 	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
 	mode_box->pack_start(edit_mode_selector);
@@ -3165,8 +3158,7 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, zoom_focus_strings, 2+FUDGE, 10);
-	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
+	set_popdown_strings (zoom_focus_selector, zoom_focus_strings, true);
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
@@ -3179,20 +3171,17 @@ Editor::setup_toolbar ()
 	snap_box.set_border_width (2);
 
 	snap_type_selector.set_name ("SnapTypeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, 7+FUDGE, 10);
-	set_popdown_strings (snap_type_selector, snap_type_strings);
+	set_popdown_strings (snap_type_selector, snap_type_strings, true);
 	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Snap/Grid Units"));
 
 	snap_mode_selector.set_name ("SnapModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, snap_mode_strings, 7+FUDGE, 10);
-	set_popdown_strings (snap_mode_selector, snap_mode_strings);
+	set_popdown_strings (snap_mode_selector, snap_mode_strings, true);
 	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (snap_mode_selector, _("Snap/Grid Mode"));
 
 	edit_point_selector.set_name ("EditPointSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_point_selector, edit_point_strings, 7+FUDGE, 10);
-	set_popdown_strings (edit_point_selector, edit_point_strings);
+	set_popdown_strings (edit_point_selector, edit_point_strings, true);
 	edit_point_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_point_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (edit_point_selector, _("Edit point"));
 
@@ -4749,12 +4738,19 @@ Editor::post_zoom ()
 void
 Editor::queue_visual_change (nframes64_t where)
 {
-//	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
-//	pending_visual_change.time_origin = where;
-
+	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
+	
+	/* if we're moving beyond the end, make sure the upper limit of the horizontal adjustment
+	   can reach.
+	*/
+	
+	if (where > session->current_end_frame()) {
+		horizontal_adjustment.set_upper ((where + current_page_frames()) / frames_per_unit);
+	}
+	
+	pending_visual_change.time_origin = where;
+	
 	if (pending_visual_change.idle_handler_id < 0) {
-		pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
-		pending_visual_change.time_origin = where;
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
 	}
 }

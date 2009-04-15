@@ -30,6 +30,9 @@ ArdourStartup::ArdourStartup ()
 	, ic_new_session_button (_("Open a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
 	, more_new_session_options_button (_("I'd like more options for this session"))
+	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
+Ardour will play NO role in monitoring"))
+	, monitor_via_ardour_button (_("Ask Ardour to playback material as it is being recorded"))
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 {
 	set_keep_above (true);
@@ -56,6 +59,7 @@ ArdourStartup::ArdourStartup ()
 		// XXX touch been_here_before;
 		setup_new_user_page ();
 		setup_first_time_config_page ();
+		setup_monitoring_choice_page ();
 	} else {
 		setup_initial_choice_page ();
 	}
@@ -139,6 +143,43 @@ Where would you like new Ardour sessions to be stored by default?\n\
 	/* user can just skip all these settings if they want to */
 
 	set_page_complete (*vbox, true);
+}
+
+void
+ArdourStartup::setup_monitoring_choice_page ()
+{
+	mon_vbox.set_spacing (6);
+	mon_vbox.set_border_width (6);
+	
+	RadioButton::Group g (monitor_via_hardware_button.get_group());
+	monitor_via_ardour_button.set_group (g);
+
+	monitor_label.set_markup("\
+While recording instruments or vocals, you probably want to listen to the\n\
+signal as well as record it. This is called \"monitoring\". There are\n\
+different ways to do this depending on the equipment you have and the\n\
+configuration of that equipment. The two most common are presented here.\n\
+Please choose whichever one is right for your setup.\n\n\
+<i>You can change this preference at any time, via the Options menu</i>");
+
+	mon_vbox.pack_start (monitor_label);
+	mon_vbox.pack_start (monitor_via_hardware_button);
+	mon_vbox.pack_start (monitor_via_ardour_button);
+
+	mon_vbox.show ();
+	monitor_label.show ();
+	monitor_via_ardour_button.show ();
+	monitor_via_hardware_button.show ();
+
+	append_page (mon_vbox);
+	set_page_title (mon_vbox, _("Monitoring Choices"));
+	set_page_header_image (mon_vbox, icon_pixbuf);
+
+	/* user could just click on "Forward" if default
+	 * choice is correct.
+	 */
+
+	set_page_complete (mon_vbox, true);
 }
 
 void

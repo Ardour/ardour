@@ -651,6 +651,24 @@ Keyboard::load_keybindings (string path)
 
 	release_keys.clear ();
 
+	bool show_bindings = (getenv ("ARDOUR_SHOW_BINDINGS") != 0);
+	
+	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
+		
+		if (show_bindings) {
+			
+			cerr << "Action: " << (*n) << " Group: " << (*g) << " binding = ";
+			
+			if ((*b).get_key() != GDK_VoidSymbol) {
+				cerr << (*b).get_key() << " w/mod = " << hex << (*b).get_mod() << dec << " = " << (*b).get_abbrev();
+			} else {
+				cerr << "unbound";
+			}
+			
+			cerr << endl;
+		}
+	}
+
 	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
 		if ((*b).get_mod() & Gdk::RELEASE_MASK) {
 			release_keys.insert (pair<AccelKey,two_strings> (*b, two_strings (*g, *n)));

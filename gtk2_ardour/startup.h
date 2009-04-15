@@ -49,6 +49,14 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::RadioButton ic_new_session_button;
 	Gtk::RadioButton ic_existing_session_button;
 
+	/* monitoring choices */
+
+	Gtk::VBox mon_vbox;
+	Gtk::Label monitor_label;
+	Gtk::RadioButton monitor_via_hardware_button;
+	Gtk::RadioButton monitor_via_ardour_button;
+	void setup_monitoring_choice_page ();
+
 	/* session page (could be new or existing) */
 
 	void setup_session_page ();

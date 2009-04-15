@@ -169,6 +169,8 @@ Editor::remove_route (TimeAxisView *tv)
 	TrackViewList::iterator i;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
+	boost::shared_ptr<Route> route;
+	TimeAxisView* next_tv;
 
 	if (tv == entered_track) {
 		entered_track = 0;
@@ -182,6 +184,7 @@ Editor::remove_route (TimeAxisView *tv)
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[route_display_columns.tv] == tv) {
+			route = (*ri)[route_display_columns.route];
 			route_display_model->erase (ri);
 			break;
 		}
@@ -190,14 +193,29 @@ Editor::remove_route (TimeAxisView *tv)
 	route_redisplay_does_not_sync_order_keys = false;
 
 	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
-		track_views.erase (i);
+
+               i = track_views.erase (i);
+
+               if (track_views.empty()) {
+                       next_tv = 0;
+               } else if (i == track_views.end()) {
+                       next_tv = track_views.front();
+               } else {
+                      next_tv = (*i);
+               }
 	}
+       if (current_mixer_strip && current_mixer_strip->route() == route) {
 
-	/* since the editor mixer goes away when you remove a route, set the
-	 * button to inactive and untick the menu option
-	 */
+               if (next_tv) {
+                       set_selected_mixer_strip (*next_tv);
+               } else {
+                       /* make the editor mixer strip go away setting the
+                        * button to inactive (which also unticks the menu option)
+                        */
 
-	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+                       ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+               }
+       } 
 }
 
 void
@@ -361,6 +379,13 @@ Editor::redisplay_route_list ()
 		
 	}
 
+	/* whenever we go idle, update the track view list to reflect the new order.
+	   we can't do this here, because we could mess up something that is traversing
+	   the track order and has caused a redisplay of the list.
+	*/
+
+	Glib::signal_idle().connect (mem_fun (*this, &Editor::sync_track_view_list_and_route_list));
+	
 	full_canvas_height = position + canvas_timebars_vsize;
 	vertical_adjustment.set_upper (full_canvas_height);
 	if ((vertical_adjustment.get_value() + canvas_height) > vertical_adjustment.get_upper()) {
@@ -374,6 +399,22 @@ Editor::redisplay_route_list ()
 	if (!route_redisplay_does_not_reset_order_keys && !route_redisplay_does_not_sync_order_keys) {
 		session->sync_order_keys (_order_key);
 	}
+}
+
+bool
+Editor::sync_track_view_list_and_route_list ()
+{
+       TreeModel::Children rows = route_display_model->children();
+       TreeModel::Children::iterator i;
+
+       track_views.clear ();
+
+       for (i = rows.begin(); i != rows.end(); ++i) {
+               TimeAxisView *tv = (*i)[route_display_columns.tv];
+               track_views.push_back (tv);
+       }
+
+       return false; // do not call again (until needed)
 }
 
 void

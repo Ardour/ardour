@@ -189,11 +189,6 @@ ARDOUR_UI::transport_forwarding ()
 void
 ARDOUR_UI::setup_transport ()
 {
-#ifdef GTKOSX
-        const guint32 FUDGE = 38; // Combo's are stupid - they steal space from the entry for the button
-#else
-        const guint32 FUDGE = 24; // Combo's are stupid - they steal space from the entry for the button
-#endif
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
 
@@ -376,6 +371,7 @@ ARDOUR_UI::setup_transport ()
 
 	speed_display_box.add (speed_display_label);
 	speed_display_box.set_name (X_("ShuttleDisplay"));
+	set_size_request_to_display_given_text (speed_display_label, X_("> 24.0"), 2, 2);
 
 	shuttle_units_button.set_name (X_("ShuttleButton"));
 	shuttle_units_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
@@ -385,8 +381,7 @@ ARDOUR_UI::setup_transport ()
 	vector<string> shuttle_strings;
 	shuttle_strings.push_back (_("sprung"));
 	shuttle_strings.push_back (_("wheel"));
-	set_size_request_to_display_given_text (shuttle_style_button, shuttle_strings, 6+FUDGE, 10);
-	set_popdown_strings (shuttle_style_button, shuttle_strings);
+	set_popdown_strings (shuttle_style_button, shuttle_strings, true);
 	shuttle_style_button.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::shuttle_style_changed));
 
 	Frame* sdframe = manage (new Frame);
@@ -396,7 +391,9 @@ ARDOUR_UI::setup_transport ()
 
 	mtc_port_changed ();
 	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
-	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 4+FUDGE, 10);
+	// XXX HOW TO USE set_popdown_strings() and combo_fudge with this when we don't know
+	// the real strings till later?
+	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 4+COMBO_FUDGE, 10);
 
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
@@ -777,15 +774,33 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 	
 	last_shuttle_request = now;
 
-	bool neg = (shuttle_fract < 0.0);
+	if (Config->get_shuttle_units() == Semitones) {
 
-	double fract = 1 - sqrt (1 - (shuttle_fract * shuttle_fract)); // Formula A1
+		const double step = 1.0 / 24.0; // range is 24 semitones up & down
+		double semitones;
+		double speed;
 
-	if (neg) {
-		fract = -fract;
+		semitones = round (shuttle_fract / step);
+		speed = pow (2.0, (semitones / 12.0));
+
+		session->request_transport_speed (speed);
+
+	} else {
+
+		bool neg;
+		double fract;
+		
+		neg = (shuttle_fract < 0.0);
+
+		fract = 1 - sqrt (1 - (shuttle_fract * shuttle_fract)); // Formula A1
+
+		if (neg) {
+			fract = -fract;
+		}
+
+		session->request_transport_speed (shuttle_max_speed * fract);
 	}
 
-	session->request_transport_speed (shuttle_max_speed * fract); // Formula A2
 	shuttle_box.queue_draw ();
 }
 
@@ -856,10 +871,11 @@ ARDOUR_UI::update_speed_display ()
 			if (Config->get_shuttle_units() == Percentage) {
 				snprintf (buf, sizeof (buf), "%.2f", x);
 			} else {
+
 				if (x < 0) {
-					snprintf (buf, sizeof (buf), "< %.1f", 12.0 * fast_log2 (-x));
+					snprintf (buf, sizeof (buf), "< %d", (int) round (12.0 * fast_log2 (-x)));
 				} else {
-					snprintf (buf, sizeof (buf), "> %.1f", 12.0 * fast_log2 (x));
+					snprintf (buf, sizeof (buf), "> %d", (int) round (12.0 * fast_log2 (x)));
 				}
 			}
 			speed_display_label.set_text (buf);
