@@ -342,6 +342,19 @@ RubberBandStretcher::Impl::calculateSizes()
     size_t windowSize = m_baseWindowSize;
     size_t outputIncrement;
 
+    if (m_pitchScale <= 0.0) {
+        // This special case is likelier than one might hope, because
+        // of naive initialisations in programs that set it from a
+        // variable
+        std::cerr << "RubberBandStretcher: WARNING: Pitch scale must be greater than zero!\nResetting it from " << m_pitchScale << " to the default of 1.0: no pitch change will occur" << std::endl;
+        m_pitchScale = 1.0;
+    }
+    if (m_timeRatio <= 0.0) {
+        // Likewise
+        std::cerr << "RubberBandStretcher: WARNING: Time ratio must be greater than zero!\nResetting it from " << m_timeRatio << " to the default of 1.0: no time stretch will occur" << std::endl;
+        m_timeRatio = 1.0;
+    }
+
     double r = getEffectiveRatio();
 
     if (m_realtime) {
@@ -921,9 +934,18 @@ RubberBandStretcher::Impl::calculateStretch()
 {
     Profiler profiler("RubberBandStretcher::Impl::calculateStretch");
 
+    size_t inputDuration = m_inputDuration;
+
+    if (!m_realtime && m_expectedInputDuration > 0) {
+        if (m_expectedInputDuration != inputDuration) {
+            std::cerr << "RubberBandStretcher: WARNING: Actual study() duration differs from duration set by setExpectedInputDuration (" << m_inputDuration << " vs " << m_expectedInputDuration << ", diff = " << (m_expectedInputDuration - m_inputDuration) << "), using the latter for calculation" << std::endl;
+            inputDuration = m_expectedInputDuration;
+        }
+    }
+
     std::vector<int> increments = m_stretchCalculator->calculate
         (getEffectiveRatio(),
-         m_inputDuration,
+         inputDuration,
          m_phaseResetDf,
          m_stretchDf);
 

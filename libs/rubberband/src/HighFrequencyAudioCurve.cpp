@@ -51,5 +51,19 @@ HighFrequencyAudioCurve::process(const float *R__ mag, size_t increment)
     return result;
 }
 
+float
+HighFrequencyAudioCurve::processDouble(const double *R__ mag, size_t increment)
+{
+    float result = 0.0;
+
+    const int sz = m_windowSize / 2;
+
+    for (int n = 0; n <= sz; ++n) {
+        result = result + (float)mag[n] * n;
+    }
+
+    return result;
+}
+
 }
 

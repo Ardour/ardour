@@ -109,7 +109,7 @@ float *allocFloat(float *ptr, int count)
     void *allocated;
 #ifndef _WIN32
 #ifndef __APPLE__
-    if (!posix_memalign(&allocated, 16, count * sizeof(float)))
+    if (posix_memalign(&allocated, 16, count * sizeof(float)))
 #endif
 #endif
         allocated = malloc(count * sizeof(float));
@@ -133,7 +133,7 @@ double *allocDouble(double *ptr, int count)
     void *allocated;
 #ifndef _WIN32
 #ifndef __APPLE__
-    if (!posix_memalign(&allocated, 16, count * sizeof(double)))
+    if (posix_memalign(&allocated, 16, count * sizeof(double)))
 #endif
 #endif
         allocated = malloc(count * sizeof(double));

@@ -65,5 +65,19 @@ SpectralDifferenceAudioCurve::process(const float *R__ mag, size_t increment)
     return result;
 }
 
+float
+SpectralDifferenceAudioCurve::processDouble(const double *R__ mag, size_t increment)
+{
+    float result = 0.0;
+
+    for (size_t n = 0; n <= m_windowSize / 2; ++n) {
+        result += sqrtf(fabsf((mag[n] * mag[n]) -
+                              (m_prevMag[n] * m_prevMag[n])));
+        m_prevMag[n] = (float)mag[n];
+    }
+
+    return result;
+}
+
 }
 

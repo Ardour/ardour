@@ -31,7 +31,7 @@ public:
     virtual void setWindowSize(size_t newSize) = 0;
     
     virtual float process(const float *R__ mag, size_t increment) = 0;
-    virtual float process(const double *R__ mag, size_t increment);
+    virtual float processDouble(const double *R__ mag, size_t increment);
     virtual void reset() = 0;
 
 protected:
