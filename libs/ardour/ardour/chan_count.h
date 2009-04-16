@@ -20,6 +20,8 @@
 #ifndef __ardour_chan_count_h__
 #define __ardour_chan_count_h__
 
+#include <ostream>
+
 #include "ardour/data_type.h"
 #include <cassert>
 
@@ -109,8 +111,9 @@ private:
 	uint32_t _counts[DataType::num_types];
 };
 
-
 } // namespace ARDOUR
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanCount& c);
 
 #endif // __ardour_chan_count_h__
 

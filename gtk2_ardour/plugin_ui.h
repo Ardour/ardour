@@ -71,7 +71,7 @@ class PlugUIBase : public virtual sigc::trackable
 {
   public:
 	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>);
-	virtual ~PlugUIBase() {}
+	virtual ~PlugUIBase();
 
 	virtual gint get_preferred_height () = 0;
 	virtual gint get_preferred_width () = 0;
@@ -241,6 +241,7 @@ class PluginUIWindow : public Gtk::Window
 
   private:
 	PlugUIBase* _pluginui;
+	sigc::connection death_connection;
 	Gtk::Window* parent;
 	Gtk::VBox vbox;
 	bool non_gtk_gui;

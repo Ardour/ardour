@@ -56,8 +56,8 @@ gtkardour.Merge ([
     libraries['sndfile'],
     libraries['taglib'],
     libraries['sysmidi'],
-    libraries['vamp'],
     libraries['vamphost'],
+    libraries['vamp'],
     libraries['xml'],
     libraries['xslt']
 ])

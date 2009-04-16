@@ -136,8 +136,8 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
-	insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
-
+	death_connection = insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
+	
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
 
@@ -155,6 +155,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 
 PluginUIWindow::~PluginUIWindow ()
 {
+	delete _pluginui;
 }
 
 void
@@ -333,6 +334,9 @@ PluginUIWindow::plugin_going_away ()
 	if (_pluginui) {
 		_pluginui->stop_updating(0);
 	}
+
+	death_connection.disconnect ();
+
 	delete_when_idle (this);
 }
 
@@ -381,6 +385,10 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
 
 	plugin_eq_bin.set_expanded(true);
+}
+
+PlugUIBase::~PlugUIBase()
+{
 }
 
 void

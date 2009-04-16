@@ -39,6 +39,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/filter.h"
 #include "ardour/profile.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 

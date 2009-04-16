@@ -34,7 +34,7 @@
     authorization.
 */
 
-#include <vamp-hostsdk/PluginChannelAdapter.h>
+#include "vamp-hostsdk/PluginChannelAdapter.h"
 
 _VAMP_SDK_HOSTSPACE_BEGIN(PluginChannelAdapter.cpp)
 

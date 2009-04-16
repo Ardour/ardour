@@ -1054,6 +1054,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void process_export         (nframes_t);
 	int  process_export_fw      (nframes_t);
 
+	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
+	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
+	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
+
 	/* slave tracking */
 
 	static const int delta_accumulator_size = 25;

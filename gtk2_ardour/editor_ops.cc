@@ -3688,7 +3688,7 @@ Editor::freeze_route ()
 	pthread_attr_init(&attr);
 	pthread_attr_setstacksize(&attr, 500000);
 
-	pthread_create (&itt.thread, &attr, _freeze_thread, this);
+	pthread_create_and_store (X_("freezer"), &itt.thread, &attr, _freeze_thread, this);
 
 	pthread_attr_destroy(&attr);
 

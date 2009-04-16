@@ -44,5 +44,8 @@ infinity_factory()
 const ChanCount ChanCount::INFINITE = infinity_factory();
 const ChanCount ChanCount::ZERO     = ChanCount();
 
-
 } // namespace ARDOUR
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanCount& c) {
+	return o << "AUDIO=" << c.n_audio() << ":MIDI=" << c.n_midi();
+}

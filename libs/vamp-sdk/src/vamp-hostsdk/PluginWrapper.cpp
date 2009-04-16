@@ -34,7 +34,7 @@
     authorization.
 */
 
-#include <vamp-hostsdk/PluginWrapper.h>
+#include "vamp-hostsdk/PluginWrapper.h"
 
 _VAMP_SDK_HOSTSPACE_BEGIN(PluginWrapper.cpp)
 

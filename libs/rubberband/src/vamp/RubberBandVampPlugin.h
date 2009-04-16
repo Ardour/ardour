@@ -15,7 +15,7 @@
 #ifndef _RUBBERBAND_VAMP_PLUGIN_H_
 #define _RUBBERBAND_VAMP_PLUGIN_H_
 
-#include <vamp-sdk/Plugin.h>
+#include "vamp-sdk/Plugin.h"
 
 #include "RubberBandStretcher.h"
 

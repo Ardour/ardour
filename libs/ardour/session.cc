@@ -4085,7 +4085,9 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 	// any bigger than this seems to cause stack overflows in called functions
 	const nframes_t chunk_size = (128 * 1024)/4;
 
-	g_atomic_int_set (&processing_prohibited, 1);
+	// block all process callback handling
+
+	block_processing ();
 
 	/* call tree *MUST* hold route_lock */
 
@@ -4211,7 +4213,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 		}
 	}
 
-	g_atomic_int_set (&processing_prohibited, 0);
+	unblock_processing ();
 
 	return result;
 }

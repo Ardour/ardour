@@ -18,10 +18,13 @@
 */
 
 #include <sstream>
+#include <errno.h>
+#include <string.h>
 
 #include "pbd/transmitter.h"
 #include "pbd/xml++.h"
 #include "pbd/whitespace.h"
+#include "pbd/pathscanner.h"
 
 #include <glibmm/thread.h>
 #include <glibmm/fileutils.h>
@@ -37,8 +40,8 @@
 #include <appleutility/CAAudioUnit.h>
 #include <appleutility/CAAUParameter.h>
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
-#include <AudioUnit/AudioUnit.h>
 
 #include "i18n.h"
 
@@ -46,7 +49,18 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
+#ifndef AU_STATE_SUPPORT
+static bool seen_get_state_message = false;
+static bool seen_set_state_message = false;
+static bool seen_loading_message = false;
+static bool seen_saving_message = false;
+#endif
+
 AUPluginInfo::CachedInfoMap AUPluginInfo::cached_info;
+
+static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audio/Presets";
+static string preset_suffix = ".aupreset";
+static bool preset_search_path_initialized = false;
 
 static OSStatus 
 _render_callback(void *userData,
@@ -59,6 +73,212 @@ _render_callback(void *userData,
 	return ((AUPlugin*)userData)->render_callback (ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
 }
 
+static int 
+save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
+
+{
+	CFDataRef xmlData;
+	int fd;
+
+	// Convert the property list into XML data.
+	
+	xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList);
+
+	if (!xmlData) {
+		error << _("Could not create XML version of property list") << endmsg;
+		return -1;
+	}
+
+	// Write the XML data to the file.
+
+	fd = open (path.c_str(), O_WRONLY|O_CREAT|O_EXCL, 0664);
+	while (fd < 0) {
+		if (errno == EEXIST) {
+			/* tell any UI's that this file already exists and ask them what to do */
+			bool overwrite = Plugin::PresetFileExists(); // EMIT SIGNAL
+			if (overwrite) {
+				fd = open (path.c_str(), O_WRONLY, 0664);
+				continue;
+			} else {
+				return 0;
+			}
+		}
+		error << string_compose (_("Cannot open preset file %1 (%2)"), path, strerror (errno)) << endmsg;
+		CFRelease (xmlData);
+		return -1;
+	}
+
+	size_t cnt = CFDataGetLength (xmlData);
+
+	if (write (fd, CFDataGetBytePtr (xmlData), cnt) != cnt) {
+		CFRelease (xmlData);
+		close (fd);
+		return -1;
+	}
+
+	close (fd);
+	return 0;
+}
+ 
+
+static CFPropertyListRef 
+load_property_list (Glib::ustring path) 
+{
+	int fd;
+	CFPropertyListRef propertyList;
+	CFDataRef         xmlData;
+	CFStringRef       errorString;
+
+	// Read the XML file.
+	
+	if ((fd = open (path.c_str(), O_RDONLY)) < 0) {
+		return propertyList;
+
+	}
+	
+	off_t len = lseek (fd, 0, SEEK_END);
+	char* buf = new char[len];
+	lseek (fd, 0, SEEK_SET);
+
+	if (read (fd, buf, len) != len) {
+		delete [] buf;
+		close (fd);
+		return propertyList;
+	}
+	
+	close (fd);
+
+	xmlData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (UInt8*) buf, len, kCFAllocatorNull);
+	
+	// Reconstitute the dictionary using the XML data.
+	
+	propertyList = CFPropertyListCreateFromXMLData( kCFAllocatorDefault,
+							xmlData,
+							kCFPropertyListImmutable,
+							&errorString);
+
+	CFRelease (xmlData);
+	delete [] buf;
+
+	return propertyList;
+}
+
+//-----------------------------------------------------------------------------
+static void 
+set_preset_name_in_plist (CFPropertyListRef plist, string preset_name)
+{
+	if (!plist) {
+		return;
+	}
+	CFStringRef pn = CFStringCreateWithCString (kCFAllocatorDefault, preset_name.c_str(), kCFStringEncodingUTF8);
+
+	if (CFGetTypeID (plist) == CFDictionaryGetTypeID()) {
+		CFDictionarySetValue ((CFMutableDictionaryRef)plist, CFSTR(kAUPresetNameKey), pn);
+	}
+	
+	CFRelease (pn);
+}
+
+//-----------------------------------------------------------------------------
+static std::string
+get_preset_name_in_plist (CFPropertyListRef plist)
+{
+	std::string ret;
+
+	if (!plist) {
+		return ret;
+	}
+
+	if (CFGetTypeID (plist) == CFDictionaryGetTypeID()) {
+		const void *p = CFDictionaryGetValue ((CFMutableDictionaryRef)plist, CFSTR(kAUPresetNameKey));
+		if (p) {
+			CFStringRef str = (CFStringRef) p;
+			int len = CFStringGetLength(str);
+			len =  (len * 2) + 1;
+			char local_buffer[len];
+			if (CFStringGetCString (str, local_buffer, len, kCFStringEncodingUTF8)) {
+				ret = local_buffer;
+			}
+		} 
+	}
+	return ret;
+}
+
+//--------------------------------------------------------------------------
+// general implementation for ComponentDescriptionsMatch() and ComponentDescriptionsMatch_Loosely()
+// if inIgnoreType is true, then the type code is ignored in the ComponentDescriptions
+Boolean ComponentDescriptionsMatch_General(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2, Boolean inIgnoreType);
+Boolean ComponentDescriptionsMatch_General(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2, Boolean inIgnoreType)
+{
+	if ( (inComponentDescription1 == NULL) || (inComponentDescription2 == NULL) )
+		return FALSE;
+
+	if ( (inComponentDescription1->componentSubType == inComponentDescription2->componentSubType) 
+			&& (inComponentDescription1->componentManufacturer == inComponentDescription2->componentManufacturer) )
+	{
+		// only sub-type and manufacturer IDs need to be equal
+		if (inIgnoreType)
+			return TRUE;
+		// type, sub-type, and manufacturer IDs all need to be equal in order to call this a match
+		else if (inComponentDescription1->componentType == inComponentDescription2->componentType)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+//--------------------------------------------------------------------------
+// general implementation for ComponentAndDescriptionMatch() and ComponentAndDescriptionMatch_Loosely()
+// if inIgnoreType is true, then the type code is ignored in the ComponentDescriptions
+Boolean ComponentAndDescriptionMatch_General(Component inComponent, const ComponentDescription * inComponentDescription, Boolean inIgnoreType);
+Boolean ComponentAndDescriptionMatch_General(Component inComponent, const ComponentDescription * inComponentDescription, Boolean inIgnoreType)
+{
+	OSErr status;
+	ComponentDescription desc;
+
+	if ( (inComponent == NULL) || (inComponentDescription == NULL) )
+		return FALSE;
+
+	// get the ComponentDescription of the input Component
+	status = GetComponentInfo(inComponent, &desc, NULL, NULL, NULL);
+	if (status != noErr)
+		return FALSE;
+
+	// check if the Component's ComponentDescription matches the input ComponentDescription
+	return ComponentDescriptionsMatch_General(&desc, inComponentDescription, inIgnoreType);
+}
+
+//--------------------------------------------------------------------------
+// determine if 2 ComponentDescriptions are basically equal
+// (by that, I mean that the important identifying values are compared, 
+// but not the ComponentDescription flags)
+Boolean ComponentDescriptionsMatch(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2)
+{
+	return ComponentDescriptionsMatch_General(inComponentDescription1, inComponentDescription2, FALSE);
+}
+
+//--------------------------------------------------------------------------
+// determine if 2 ComponentDescriptions have matching sub-type and manufacturer codes
+Boolean ComponentDescriptionsMatch_Loose(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2)
+{
+	return ComponentDescriptionsMatch_General(inComponentDescription1, inComponentDescription2, TRUE);
+}
+
+//--------------------------------------------------------------------------
+// determine if a ComponentDescription basically matches that of a particular Component
+Boolean ComponentAndDescriptionMatch(Component inComponent, const ComponentDescription * inComponentDescription)
+{
+	return ComponentAndDescriptionMatch_General(inComponent, inComponentDescription, FALSE);
+}
+
+//--------------------------------------------------------------------------
+// determine if a ComponentDescription matches only the sub-type and manufacturer codes of a particular Component
+Boolean ComponentAndDescriptionMatch_Loosely(Component inComponent, const ComponentDescription * inComponentDescription)
+{
+	return ComponentAndDescriptionMatch_General(inComponent, inComponentDescription, TRUE);
+}
+
+
 AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> _comp)
 	: Plugin (engine, session),
 	  comp (_comp),
@@ -70,6 +290,14 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	  current_buffers (0),
 	frames_processed (0)
 {			
+	if (!preset_search_path_initialized) {
+		Glib::ustring p = Glib::get_home_dir();
+		p += "/Library/Audio/Presets:";
+		p += preset_search_path;
+		preset_search_path = p;
+		preset_search_path_initialized = true;
+	}
+
 	init ();
 }
 
@@ -109,7 +337,6 @@ AUPlugin::init ()
 		err = CAAudioUnit::Open (*(comp.get()), *unit);
 	} catch (...) {
 		error << _("Exception thrown during AudioUnit plugin loading - plugin ignored") << endmsg;
-		cerr << _("Exception thrown during AudioUnit plugin loading - plugin ignored") << endl;
 		throw failed_constructor();
 	}
 
@@ -293,12 +520,8 @@ AUPlugin::default_value (uint32_t port)
 }
 
 nframes_t
-AUPlugin::signal_latency () const
+AUPlugin::latency () const
 {
-	if (_user_latency) {
-		return _user_latency;
-	}
-
 	return unit->Latency() * _session.frame_rate();
 }
 
@@ -378,6 +601,7 @@ AUPlugin::_set_block_size (nframes_t nframes)
 
 	if (initialized) {
 		unit->Uninitialize ();
+		initialized = false;
 	}
 
 	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 
@@ -394,7 +618,7 @@ AUPlugin::_set_block_size (nframes_t nframes)
 }
 
 int32_t
-AUPlugin::configure_io (ChanCount in, ChanCount out)
+AUPlugin::configure_io (int32_t in, int32_t out)
 {
 	AudioStreamBasicDescription streamFormat;
 
@@ -417,13 +641,13 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	streamFormat.mBytesPerPacket = 4;
 	streamFormat.mBytesPerFrame = 4;
 
-	streamFormat.mChannelsPerFrame = in.n_audio();
+	streamFormat.mChannelsPerFrame = in;
 
 	if (set_input_format (streamFormat) != 0) {
 		return -1;
 	}
 
-	streamFormat.mChannelsPerFrame = out.n_audio();
+	streamFormat.mChannelsPerFrame = out;
 
 	if (set_output_format (streamFormat) != 0) {
 		return -1;
@@ -432,22 +656,16 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	return Plugin::configure_io (in, out);
 }
 
-bool
-AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
-{
-	int32_t ret = count_for_configuration (in, out);
-	return ret >= 0;
-}
-
 int32_t
-AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
+AUPlugin::can_do (int32_t in, int32_t& out)
 {
 	// XXX as of May 13th 2008, AU plugin support returns a count of either 1 or -1. We never
 	// attempt to multiply-instantiate plugins to meet io configurations.
 
 	int32_t plugcnt = -1;
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
-	int32_t in = cin.n_audio(); /* XXX handle MIDI one day ??? */
+
+	out = -1;
 
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
 
@@ -468,19 +686,19 @@ AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
 
 			if (possible_out == -1) {
 				/* out much match in (UNLIKELY!!) */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = 1;
 			} else if (possible_out == -2) {
 				/* any configuration possible, pick matching */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = 1;
 			} else if (possible_out < -2) {
 				/* explicit variable number of outputs, pick maximum */
-				out.set (DataType::AUDIO, -possible_out);
+				out = -possible_out;
 				plugcnt = 1;
 			} else {
 				/* exact number of outputs */
-				out.set (DataType::AUDIO, possible_out);
+				out = possible_out;
 				plugcnt = 1;
 			}
 		}
@@ -491,19 +709,19 @@ AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
 
 			if (possible_out == -1) {
 				/* out much match in */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = 1;
 			} else if (possible_out == -2) {
 				/* any configuration possible, pick matching */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = 1;
 			} else if (possible_out < -2) {
 				/* explicit variable number of outputs, pick maximum */
-				out.set (DataType::AUDIO, -possible_out);
+				out = -possible_out;
 				plugcnt = 1;
 			} else {
 				/* exact number of outputs */
-				out.set (DataType::AUDIO, possible_out);
+				out = possible_out;
 				plugcnt = 1;
 			}
 		}	
@@ -512,7 +730,7 @@ AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
 
 			if (possible_out == -1) {
 				/* any configuration possible, pick matching */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = 1;
 			} else if (possible_out == -2) {
 				error << string_compose (_("AU plugin %1 has illegal IO configuration (-2,-2)"), name())
@@ -520,11 +738,11 @@ AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
 				plugcnt = -1;
 			} else if (possible_out < -2) {
 				/* explicit variable number of outputs, pick maximum */
-				out.set (DataType::AUDIO, -possible_out);
+				out = -possible_out;
 				plugcnt = 1;
 			} else {
 				/* exact number of outputs */
-				out.set (DataType::AUDIO, possible_out);
+				out = possible_out;
 				plugcnt = 1;
 			}
 		}
@@ -540,7 +758,7 @@ AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
 
 			if (possible_out == -1) {
 				/* out must match in */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = 1;
 			} else if (possible_out == -2) {
 				error << string_compose (_("AU plugin %1 has illegal IO configuration (-2,-2)"), name())
@@ -548,11 +766,11 @@ AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
 				plugcnt = -1;
 			} else if (possible_out < -2) {
 				/* explicit variable number of outputs, pick maximum */
-				out.set (DataType::AUDIO, -possible_out);
+				out = -possible_out;
 				plugcnt = 1;
 			} else {
 				/* exact number of outputs */
-				out.set (DataType::AUDIO, possible_out);
+				out = possible_out;
 				plugcnt = 1;
 			}
 		}
@@ -563,19 +781,19 @@ AUPlugin::count_for_configuration(ChanCount cin, ChanCount& out) const
 			
 			if (possible_out == -1) {
 				/* out must match in */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = 1;
 			} else if (possible_out == -2) {
 				/* any output configuration, pick matching */
-				out.set (DataType::AUDIO, in);
+				out = in;
 				plugcnt = -1;
 			} else if (possible_out < -2) {
 				/* explicit variable number of outputs, pick maximum */
-				out.set (DataType::AUDIO, -possible_out);
+				out = -possible_out;
 				plugcnt = 1;
 			} else {
 				/* exact number of outputs */
-				out.set (DataType::AUDIO, possible_out);
+				out = possible_out;
 				plugcnt = 1;
 			}
 		}
@@ -608,7 +826,7 @@ AUPlugin::set_output_format (AudioStreamBasicDescription& fmt)
 					      fmt.mChannelsPerFrame * sizeof(AudioBuffer));
 
 	Glib::Mutex::Lock em (_session.engine().process_lock());
-	IO::PortCountChanged (ChanCount (DataType::AUDIO, fmt.mChannelsPerFrame));
+	IO::MoreOutputs (fmt.mChannelsPerFrame);
 
 	return 0;
 }
@@ -635,36 +853,25 @@ AUPlugin::set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescriptio
 	return 0;
 }
 
-
-ChanCount
+uint32_t
 AUPlugin::input_streams() const
 {
-	ChanCount in;
-
 	if (input_channels < 0) {
 		warning << string_compose (_("AUPlugin: %1 input_streams() called without any format set!"), name()) << endmsg;
-		in.set_audio (1);
-	} else {
-		in.set_audio (input_channels);
+		return 1;
 	}
-
-	return in;
+	return input_channels;
 }
 
 
-ChanCount
+uint32_t
 AUPlugin::output_streams() const
 {
-	ChanCount out;
-
 	if (output_channels < 0) {
 		warning << string_compose (_("AUPlugin: %1 output_streams() called without any format set!"), name()) << endmsg;
-		out.set_audio (1);
-	} else {
-		out.set_audio (output_channels);
+		return 1;
 	}
-
-	return out;
+	return output_channels;
 }
 
 OSStatus 
@@ -783,33 +990,406 @@ AUPlugin::parameter_is_output (uint32_t) const
 XMLNode&
 AUPlugin::get_state()
 {
-	XMLNode *root = new XMLNode (state_node_name());
 	LocaleGuard lg (X_("POSIX"));
+	XMLNode *root = new XMLNode (state_node_name());
+
+#ifdef AU_STATE_SUPPORT
+	CFDataRef xmlData;
+	CFPropertyListRef propertyList;
+
+	if (unit->GetAUPreset (propertyList) != noErr) {
+		return *root;
+	}
+
+	// Convert the property list into XML data.
+	
+	xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList);
+
+	if (!xmlData) {
+		error << _("Could not create XML version of property list") << endmsg;
+		return *root;
+	}
+
+	/* re-parse XML bytes to create a libxml++ XMLTree that we can merge into
+	   our state node. GACK!
+	*/
+
+	XMLTree t;
+
+	if (t.read_buffer (string ((const char*) CFDataGetBytePtr (xmlData), CFDataGetLength (xmlData)))) {
+		if (t.root()) {
+			root->add_child_copy (*t.root());
+		}
+	}
+
+	CFRelease (xmlData);
+	CFRelease (propertyList);
+#else
+	if (!seen_get_state_message) {
+		info << _("Saving AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version")
+		     << endmsg;
+		seen_get_state_message = true;
+	}
+#endif
+	
 	return *root;
 }
 
 int
 AUPlugin::set_state(const XMLNode& node)
 {
-	return -1;
-}
+#ifdef AU_STATE_SUPPORT
+	int ret = -1;
+	CFPropertyListRef propertyList;
+	LocaleGuard lg (X_("POSIX"));
 
-bool
-AUPlugin::save_preset (string name)
-{
-	return false;
+	if (node.name() != state_node_name()) {
+		error << _("Bad node sent to AUPlugin::set_state") << endmsg;
+		return -1;
+	}
+	
+	if (node.children().empty()) {
+		return -1;
+	}
+
+	XMLNode* top = node.children().front();
+	XMLNode* copy = new XMLNode (*top);
+
+	XMLTree t;
+	t.set_root (copy);
+
+	const string& xml = t.write_buffer ();
+	CFDataRef xmlData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (UInt8*) xml.data(), xml.length(), kCFAllocatorNull);
+	CFStringRef errorString;
+
+	propertyList = CFPropertyListCreateFromXMLData( kCFAllocatorDefault,
+							xmlData,
+							kCFPropertyListImmutable,
+							&errorString);
+
+	CFRelease (xmlData);
+	
+	if (propertyList) {
+		if (unit->SetAUPreset (propertyList) == noErr) {
+			ret = 0;
+		} 
+		CFRelease (propertyList);
+	}
+	
+	return ret;
+#else
+	if (!seen_set_state_message) {
+		info << _("Restoring AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version")
+		     << endmsg;
+	}
+	return 0;
+#endif
 }
 
 bool
 AUPlugin::load_preset (const string preset_label)
 {
-	return false;
+#ifdef AU_STATE_SUPPORT
+	bool ret = false;
+	CFPropertyListRef propertyList;
+	Glib::ustring path;
+	PresetMap::iterator x = preset_map.find (preset_label);
+
+	if (x == preset_map.end()) {
+		return false;
+	}
+	
+	if ((propertyList = load_property_list (x->second)) != 0) {
+		if (unit->SetAUPreset (propertyList) == noErr) {
+			ret = true;
+		}
+		CFRelease(propertyList);
+	}
+	
+	return ret;
+#else
+	if (!seen_loading_message) {
+		info << _("Loading AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version")
+		     << endmsg;
+		seen_loading_message = true;
+	}
+	return true;
+#endif
 }
 
-vector<Plugin::PresetRecord>
+bool
+AUPlugin::save_preset (string preset_name)
+{
+#ifdef AU_STATE_SUPPORT
+	CFPropertyListRef propertyList;
+	vector<Glib::ustring> v;
+	Glib::ustring user_preset_path;
+	bool ret = true;
+
+	std::string m = maker();
+	std::string n = name();
+	
+	strip_whitespace_edges (m);
+	strip_whitespace_edges (n);
+
+	v.push_back (Glib::get_home_dir());
+	v.push_back ("Library");
+	v.push_back ("Audio");
+	v.push_back ("Presets");
+	v.push_back (m);
+	v.push_back (n);
+	
+	user_preset_path = Glib::build_filename (v);
+
+	if (g_mkdir_with_parents (user_preset_path.c_str(), 0775) < 0) {
+		error << string_compose (_("Cannot create user plugin presets folder (%1)"), user_preset_path) << endmsg;
+		return false;
+	}
+
+	if (unit->GetAUPreset (propertyList) != noErr) {
+		return false;
+	}
+
+	// add the actual preset name */
+
+	v.push_back (preset_name + preset_suffix);
+		
+	// rebuild
+
+	user_preset_path = Glib::build_filename (v);
+	
+	set_preset_name_in_plist (propertyList, preset_name);
+
+	if (save_property_list (propertyList, user_preset_path)) {
+		error << string_compose (_("Saving plugin state to %1 failed"), user_preset_path) << endmsg;
+		ret = false;
+	}
+
+	CFRelease(propertyList);
+
+	return ret;
+#else
+	if (!seen_saving_message) {
+		info << _("Saving AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version")
+		     << endmsg;
+		seen_saving_message = true;
+	}
+	return false;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// this is just a little helper function used by GetAUComponentDescriptionFromPresetFile()
+static SInt32 
+GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDictionaryKey, Boolean * outSuccess)
+{
+	CFNumberRef cfNumber;
+	SInt32 numberValue = 0;
+	Boolean dummySuccess;
+
+	if (outSuccess == NULL)
+		outSuccess = &dummySuccess;
+	if ( (inAUStateDictionary == NULL) || (inDictionaryKey == NULL) )
+	{
+		*outSuccess = FALSE;
+		return 0;
+	}
+
+	cfNumber = (CFNumberRef) CFDictionaryGetValue(inAUStateDictionary, inDictionaryKey);
+	if (cfNumber == NULL)
+	{
+		*outSuccess = FALSE;
+		return 0;
+	}
+	*outSuccess = CFNumberGetValue(cfNumber, kCFNumberSInt32Type, &numberValue);
+	if (*outSuccess)
+		return numberValue;
+	else
+		return 0;
+}
+
+static OSStatus 
+GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, ComponentDescription * outComponentDescription)
+{
+        CFDictionaryRef auStateDictionary;
+        ComponentDescription tempDesc = {0};
+        SInt32 versionValue;
+        Boolean gotValue;
+
+        if ( (inAUStateData == NULL) || (outComponentDescription == NULL) )
+                return paramErr;
+	
+        // the property list for AU state data must be of the dictionary type
+        if (CFGetTypeID(inAUStateData) != CFDictionaryGetTypeID()) {
+                return kAudioUnitErr_InvalidPropertyValue;
+	}
+
+        auStateDictionary = (CFDictionaryRef)inAUStateData;
+
+        // first check to make sure that the version of the AU state data is one that we know understand
+        // XXX should I really do this?  later versions would probably still hold these ID keys, right?
+        versionValue = GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetVersionKey), &gotValue);
+
+        if (!gotValue) {
+                return kAudioUnitErr_InvalidPropertyValue;
+	}
+#define kCurrentSavedStateVersion 0
+        if (versionValue != kCurrentSavedStateVersion) {
+                return kAudioUnitErr_InvalidPropertyValue;
+	}
+
+        // grab the ComponentDescription values from the AU state data
+        tempDesc.componentType = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetTypeKey), NULL);
+        tempDesc.componentSubType = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetSubtypeKey), NULL);
+        tempDesc.componentManufacturer = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetManufacturerKey), NULL);
+        // zero values are illegit for specific ComponentDescriptions, so zero for any value means that there was an error
+        if ( (tempDesc.componentType == 0) || (tempDesc.componentSubType == 0) || (tempDesc.componentManufacturer == 0) )
+                return kAudioUnitErr_InvalidPropertyValue;
+
+        *outComponentDescription = tempDesc;
+        return noErr;
+}
+
+
+static bool au_preset_filter (const string& str, void* arg)
+{
+	/* Not a dotfile, has a prefix before a period, suffix is aupreset */
+
+	bool ret;
+	
+	ret = (str[0] != '.' && str.length() > 9 && str.find (preset_suffix) == (str.length() - preset_suffix.length()));
+
+	if (ret && arg) {
+
+		/* check the preset file path name against this plugin
+		   ID. The idea is that all preset files for this plugin
+		   include "<manufacturer>/<plugin-name>" in their path.
+		*/
+
+		Plugin* p = (Plugin *) arg;
+		string match = p->maker();
+		match += '/';
+		match += p->name();
+
+		ret = str.find (match) != string::npos;
+
+		if (ret == false) {
+			string m = p->maker ();
+			string n = p->name ();
+			strip_whitespace_edges (m);
+			strip_whitespace_edges (n);
+			match = m;
+			match += '/';
+			match += n;
+			
+			ret = str.find (match) != string::npos;
+		}
+	}
+	
+	return ret;
+}
+
+bool 
+check_and_get_preset_name (Component component, const string& pathstr, string& preset_name)
+{
+        OSStatus status;
+        CFPropertyListRef plist;
+	ComponentDescription presetDesc;
+	bool ret = false;
+		
+	plist = load_property_list (pathstr);
+
+	if (!plist) {
+		return ret;
+	}
+	
+	// get the ComponentDescription from the AU preset file
+	
+	status = GetAUComponentDescriptionFromStateData(plist, &presetDesc);
+	
+	if (status == noErr) {
+		if (ComponentAndDescriptionMatch_Loosely(component, &presetDesc)) {
+
+			/* try to get the preset name from the property list */
+
+			if (CFGetTypeID(plist) == CFDictionaryGetTypeID()) {
+
+				const void* psk = CFDictionaryGetValue ((CFMutableDictionaryRef)plist, CFSTR(kAUPresetNameKey));
+
+				if (psk) {
+
+					const char* p = CFStringGetCStringPtr ((CFStringRef) psk, kCFStringEncodingUTF8);
+
+					if (!p) {
+						char buf[PATH_MAX+1];
+
+						if (CFStringGetCString ((CFStringRef)psk, buf, sizeof (buf), kCFStringEncodingUTF8)) {
+							preset_name = buf;
+						}
+					}
+				}
+			}
+		} 
+	}
+
+	CFRelease (plist);
+
+	return true;
+}
+
+std::string
+AUPlugin::current_preset() const
+{
+	string preset_name;
+	
+#ifdef AU_STATE_SUPPORT
+	CFPropertyListRef propertyList;
+
+	if (unit->GetAUPreset (propertyList) == noErr) {
+		preset_name = get_preset_name_in_plist (propertyList);
+		CFRelease(propertyList);
+	}
+#endif
+	return preset_name;
+}
+
+vector<string>
 AUPlugin::get_presets ()
 {
-	vector<PresetRecord> presets;
+	vector<string*>* preset_files;
+	vector<string> presets;
+	PathScanner scanner;
+
+	preset_files = scanner (preset_search_path, au_preset_filter, this, true, true, -1, true);
+	
+	if (!preset_files) {
+		return presets;
+	}
+
+	for (vector<string*>::iterator x = preset_files->begin(); x != preset_files->end(); ++x) {
+
+		string path = *(*x);
+		string preset_name;
+
+		/* make an initial guess at the preset name using the path */
+
+		preset_name = Glib::path_get_basename (path);
+		preset_name = preset_name.substr (0, preset_name.find_last_of ('.'));
+
+		/* check that this preset file really matches this plugin
+		   and potentially get the "real" preset name from
+		   within the file.
+		*/
+
+		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
+			presets.push_back (preset_name);
+			preset_map[preset_name] = path;
+		} 
+
+		delete *x;
+	}
+
+	delete preset_files;
 	
 	return presets;
 }
@@ -874,6 +1454,7 @@ AUPluginInfo::discover ()
 	
 	discover_fx (plugs);
 	discover_music (plugs);
+	discover_generators (plugs);
 
 	return plugs;
 }
@@ -905,6 +1486,19 @@ AUPluginInfo::discover_fx (PluginInfoList& plugs)
 }
 
 void
+AUPluginInfo::discover_generators (PluginInfoList& plugs)
+{
+	CAComponentDescription desc;
+	desc.componentFlags = 0;
+	desc.componentFlagsMask = 0;
+	desc.componentSubType = 0;
+	desc.componentManufacturer = 0;
+	desc.componentType = kAudioUnitType_Generator;
+
+	discover_by_description (plugs, desc);
+}
+
+void
 AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescription& desc)
 {
 	Component comp = 0;
@@ -926,6 +1520,13 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		case kAudioUnitType_OfflineEffect:
 		case kAudioUnitType_FormatConverter:
 			continue;
+		case kAudioUnitType_Output:
+		case kAudioUnitType_MusicDevice:
+		case kAudioUnitType_MusicEffect:
+		case kAudioUnitType_Effect:
+		case kAudioUnitType_Mixer:
+		case kAudioUnitType_Generator:
+			break;
 		default:
 			break;
 		}
@@ -935,15 +1536,12 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		case kAudioUnitSubType_SystemOutput:
 		case kAudioUnitSubType_GenericOutput:
 		case kAudioUnitSubType_AUConverter:
+			/* we don't want output units here */
 			continue;
 			break;
 
 		case kAudioUnitSubType_DLSSynth:
-			info->category = "DLSSynth";
-			break;
-
-		case kAudioUnitType_MusicEffect:
-			info->category = "MusicEffect";
+			info->category = "DLS Synth";
 			break;
 
 		case kAudioUnitSubType_Varispeed:
@@ -955,55 +1553,59 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			break;
 
 		case kAudioUnitSubType_LowPassFilter:
-			info->category = "LowPassFilter";
+			info->category = "Low-pass Filter";
 			break;
 
 		case kAudioUnitSubType_HighPassFilter:
-			info->category = "HighPassFilter";
+			info->category = "High-pass Filter";
 			break;
 
 		case kAudioUnitSubType_BandPassFilter:
-			info->category = "BandPassFilter";
+			info->category = "Band-pass Filter";
 			break;
 
 		case kAudioUnitSubType_HighShelfFilter:
-			info->category = "HighShelfFilter";
+			info->category = "High-shelf Filter";
 			break;
 
 		case kAudioUnitSubType_LowShelfFilter:
-			info->category = "LowShelfFilter";
+			info->category = "Low-shelf Filter";
 			break;
 
 		case kAudioUnitSubType_ParametricEQ:
-			info->category = "ParametricEQ";
+			info->category = "Parametric EQ";
 			break;
 
 		case kAudioUnitSubType_GraphicEQ:
-			info->category = "GraphicEQ";
+			info->category = "Graphic EQ";
 			break;
 
 		case kAudioUnitSubType_PeakLimiter:
-			info->category = "PeakLimiter";
+			info->category = "Peak Limiter";
 			break;
 
 		case kAudioUnitSubType_DynamicsProcessor:
-			info->category = "DynamicsProcessor";
+			info->category = "Dynamics Processor";
 			break;
 
 		case kAudioUnitSubType_MultiBandCompressor:
-			info->category = "MultiBandCompressor";
+			info->category = "Multiband Compressor";
 			break;
 
 		case kAudioUnitSubType_MatrixReverb:
-			info->category = "MatrixReverb";
+			info->category = "Matrix Reverb";
 			break;
 
-		case kAudioUnitType_Mixer:
-			info->category = "Mixer";
+		case kAudioUnitSubType_SampleDelay:
+			info->category = "Sample Delay";
 			break;
 
-		case kAudioUnitSubType_StereoMixer:
-			info->category = "StereoMixer";
+		case kAudioUnitSubType_Pitch:
+			info->category = "Pitch";
+			break;
+
+		case kAudioUnitSubType_NetSend:
+			info->category = "Net Sender";
 			break;
 
 		case kAudioUnitSubType_3DMixer:
@@ -1012,6 +1614,19 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		case kAudioUnitSubType_MatrixMixer:
 			info->category = "MatrixMixer";
+			break;
+
+		case kAudioUnitSubType_ScheduledSoundPlayer:
+			info->category = "Scheduled Sound Player";
+			break;
+
+
+		case kAudioUnitSubType_AudioFilePlayer:
+			info->category = "Audio File Player";
+			break;
+
+		case kAudioUnitSubType_NetReceive:
+			info->category = "Net Receiver";
 			break;
 
 		default:
@@ -1038,8 +1653,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			   of values.
 			*/
 
-			info->n_inputs = ChanCount (DataType::AUDIO, info->cache.io_configs.front().first);
-			info->n_outputs = ChanCount (DataType::AUDIO, info->cache.io_configs.front().second);
+			info->n_inputs = info->cache.io_configs.front().first;
+			info->n_outputs = info->cache.io_configs.front().second;
 
 			if (info->cache.io_configs.size() > 1) {
 				cerr << "ODD: variable IO config for " << info->unique_id << endl;

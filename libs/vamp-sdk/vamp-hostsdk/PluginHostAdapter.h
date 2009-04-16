@@ -40,7 +40,7 @@
 #include "hostguard.h"
 #include "Plugin.h"
 
-#include <vamp/vamp.h>
+#include "vamp/vamp.h"
 
 #include <vector>
 

@@ -42,6 +42,6 @@
 
 #include "hostguard.h"
 
-#include <vamp-sdk/Plugin.h>
+#include "vamp-sdk/Plugin.h"
 
 #endif

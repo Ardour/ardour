@@ -38,7 +38,7 @@
 #define _VAMP_PLUGIN_WRAPPER_H_
 
 #include "hostguard.h"
-#include <vamp-hostsdk/Plugin.h>
+#include "vamp-hostsdk/Plugin.h"
 
 _VAMP_SDK_HOSTSPACE_BEGIN(PluginWrapper.h)
 

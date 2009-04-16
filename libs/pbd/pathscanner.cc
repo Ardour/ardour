@@ -26,9 +26,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <pbd/error.h>
-#include <pbd/pathscanner.h>
-#include <pbd/stl_delete.h>
+#include "pbd/error.h"
+#include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
 
 using namespace PBD;
 

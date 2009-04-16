@@ -65,6 +65,9 @@ pbd.Merge ([ libraries['sigc2'],
              libraries['glib2'],
              libraries['boost'] ])
 
+if pbd['VST']:
+    pbd.Append(CCFLAGS="-DWINE_THREAD_SUPPORT", CPPPATH="#libs/fst")
+
 pbd.VersionBuild(['version.cc','pbd/version.h'], [])
 
 libpbd = pbd.SharedLibrary('pbd', pbd_files)

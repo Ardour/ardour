@@ -28,6 +28,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ardour/plugin.h"
 
@@ -63,13 +64,13 @@ class AUPlugin : public ARDOUR::Plugin
 	AUPlugin (const AUPlugin& other);
 	virtual ~AUPlugin ();
 	
-	std::string unique_id () const;
+        std::string unique_id () const;
 	const char * label () const;
 	const char * name () const { return _info->name.c_str(); }
 	const char * maker () const { return _info->creator.c_str(); }
 	uint32_t parameter_count () const;
 	float default_value (uint32_t port);
-	nframes_t signal_latency () const;
+	nframes_t latency () const;
 	void set_parameter (uint32_t which, float val);
 	float get_parameter (uint32_t which) const;
     
@@ -79,8 +80,7 @@ class AUPlugin : public ARDOUR::Plugin
 	void deactivate ();
 	void set_block_size (nframes_t nframes);
     
-	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
-	
+	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
 	std::set<uint32_t> automatable() const;
 	string describe_parameter (uint32_t);
 	string state_node_name () const { return "audiounit"; }
@@ -97,15 +97,14 @@ class AUPlugin : public ARDOUR::Plugin
 	bool save_preset (string name);
 	bool load_preset (const string preset_label);
 	std::vector<std::string> get_presets ();
-    
+	std::string current_preset() const;
+
 	bool has_editor () const;
 	
-	bool reconfigurable_io() const { return true; }
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
-	int32_t count_for_configuration (const ChanCount& in, ChanCount out) const;
-	bool configure_io (ChanCount in, ChanCount& out);
-	ChanCount output_streams() const;
-	ChanCount input_streams() const;
+	int32_t can_do (int32_t in, int32_t& out);
+	uint32_t output_streams() const;
+	uint32_t input_streams() const;
+	int32_t configure_io (int32_t in, int32_t out);
 
 	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
 	boost::shared_ptr<CAComponent> get_comp () const { return comp; }
@@ -118,13 +117,18 @@ class AUPlugin : public ARDOUR::Plugin
   private:
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
-
+	
         bool initialized;
 	int32_t input_channels;
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
 	AudioBufferList* buffers;
-	
+
+	/* XXX this should really be shared across all AUPlugin instances */
+
+	typedef std::map<std::string,std::string> PresetMap;
+	PresetMap preset_map;
+
 	UInt32 global_elements;
 	UInt32 output_elements;
 	UInt32 input_elements;
@@ -144,7 +148,6 @@ class AUPlugin : public ARDOUR::Plugin
 	
 	std::vector<AUParameterDescriptor> descriptors;
 	void init ();
-
 };
 	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
@@ -171,9 +174,10 @@ class AUPluginInfo : public PluginInfo {
   private:
 	boost::shared_ptr<CAComponentDescription> descriptor;
 	UInt32 version;
-
+	
 	static void discover_music (PluginInfoList&);
 	static void discover_fx (PluginInfoList&);
+	static void discover_generators (PluginInfoList&);
 	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
 	static Glib::ustring au_cache_path ();
 

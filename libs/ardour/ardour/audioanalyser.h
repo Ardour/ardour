@@ -24,7 +24,7 @@
 #include <string>
 #include <ostream>
 #include <fstream>
-#include <vamp-sdk/Plugin.h>
+#include "vamp-sdk/Plugin.h"
 #include <boost/utility.hpp>
 #include "ardour/audioregion.h"
 

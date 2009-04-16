@@ -147,40 +147,31 @@ VSTPlugin::get_state()
 	XMLNode *root = new XMLNode (state_node_name());
 	LocaleGuard lg (X_("POSIX"));
 
+	if (_fst->current_program != -1) {
+		char buf[32];
+		snprintf (buf, sizeof (buf), "%d", _fst->current_program);
+		root->add_property ("current-program", buf);
+	}
+
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 		/* fetch the current chunk */
 		
-		void* data;
+		guchar* data;
 		long  data_size;
 		
 		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
 			return *root;
 		}
 
-		/* save it to a file */
-		
-		sys::path user_vst_directory(user_config_directory());
-		user_vst_directory /= "vst";
-
-		try {
-			sys::create_directories (user_vst_directory);	
-		}
-		catch (const sys::filesystem_error& ex)
-		{
-			error << "Could not create user configuration directory" << endmsg;
-			return *root;
-		}
-		
-		sys::path file (user_vst_directory);
-		
-		file /= "something";
-		
 		/* store information */
 
 		XMLNode* chunk_node = new XMLNode (X_("chunk"));
-		chunk_node->add_property ("path", file.to_string());
-		
+
+		gchar * encoded_data = g_base64_encode (data, data_size);
+		chunk_node->add_content (encoded_data);
+		g_free (encoded_data);
+
 		root->add_child_nocopy (*chunk_node);
 		
 	} else {
@@ -211,11 +202,30 @@ VSTPlugin::set_state(const XMLNode& node)
 		return 0;
 	}
 
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("current-program")) != 0) {
+		_fst->current_program = atoi (prop->value());
+	}
+
 	XMLNode* child;
+	int ret = -1;
+	
+	if ((child = find_named_node (node, X_("chunk"))) != 0) {
 
-	if ((child = find_named_node (node, X_("chunks"))) != 0) {
+		XMLPropertyList::const_iterator i;
+		XMLNodeList::const_iterator n;
+		int ret = -1;
 
-		return 0;
+		for (n = child->children ().begin (); n != child->children ().end (); ++n) {
+			if ((*n)->is_content ()) {
+				gsize chunk_size = 0;
+				guchar * data = g_base64_decode ((*n)->content ().c_str (), &chunk_size);
+				//cerr << "Dispatch setChunk for " << name() << endl;
+				ret = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, 0, chunk_size, data, 0);
+				g_free (data);
+			}
+		}
 
 	} else if ((child = find_named_node (node, X_("parameters"))) != 0) {
 		
@@ -231,10 +241,15 @@ VSTPlugin::set_state(const XMLNode& node)
 			_plugin->setParameter (_plugin, param, val);
 		}
 
-		return 0;
+		/* program number is not knowable */
+
+		_fst->current_program = -1;
+
+		ret = 0;
+
 	}
 
-	return -1;
+	return ret;
 }
 
 int
@@ -244,6 +259,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 	desc.min_unbound = false;
 	desc.max_unbound = false;
+	prop.flags = 0;
 
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
 

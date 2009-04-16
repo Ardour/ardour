@@ -34,7 +34,7 @@
     authorization.
 */
 
-#include <vamp-hostsdk/PluginSummarisingAdapter.h>
+#include "vamp-hostsdk/PluginSummarisingAdapter.h"
 
 #include <map>
 #include <algorithm>

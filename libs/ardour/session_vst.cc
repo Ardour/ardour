@@ -21,16 +21,19 @@
 #include <cstdio>
 
 #include <fst.h>
+#include <fst/vestige/aeffectx.h>
 
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 #include "ardour/vst_plugin.h"
 
 #include "i18n.h"
 
-// #define DEBUG_CALLBACKS
+#define DEBUG_CALLBACKS
+static int debug_callbacks = -1;
 
 #ifdef DEBUG_CALLBACKS
-#define SHOW_CALLBACK printf
+#define SHOW_CALLBACK if (debug_callbacks) printf
 #else
 #define SHOW_CALLBACK(...)
 #endif
@@ -48,14 +51,18 @@ long Session::vst_callback (AEffect* effect,
 	VSTPlugin* plug;
 	Session* session;
 
-	SHOW_CALLBACK ("am callback, opcode = %d", opcode);
+	if (debug_callbacks < 0) {
+		debug_callbacks = (getenv ("ARDOUR_DEBUG_VST_CALLBACKS") != 0);
+	}
 	
 	if (effect && effect->user) {
-		plug = (VSTPlugin*) (effect->user);
+	        plug = (VSTPlugin*) (effect->user);
 		session = &plug->session();
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld, plugin = \"%s\" ", pthread_self(), opcode, plug->name());
 	} else {
 		plug = 0;
 		session = 0;
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld", pthread_self(), opcode);
 	}
 
 	switch(opcode){
@@ -112,7 +119,25 @@ long Session::vst_callback (AEffect* effect,
 		if (session) {
 			_timeInfo.samplePos = session->transport_frame();
 			_timeInfo.sampleRate = session->frame_rate();
+			_timeInfo.flags = 0;
+			
+			if (value & (kVstTempoValid)) {
+				const Tempo& t (session->tempo_map().tempo_at (session->transport_frame()));
+				_timeInfo.tempo = t.beats_per_minute ();
+				_timeInfo.flags |= (kVstTempoValid);
+			}
+			if (value & (kVstBarsValid)) {
+				const Meter& m (session->tempo_map().meter_at (session->transport_frame()));
+				_timeInfo.timeSigNumerator = m.beats_per_bar ();
+				_timeInfo.timeSigDenominator = m.note_divisor ();
+				_timeInfo.flags |= (kVstBarsValid);
+			}
+			
+			if (session->transport_speed() != 0.0f) {
+				_timeInfo.flags |= kVstTransportPlaying;
+			} 
 		}
+
 		return (long)&_timeInfo;
 
 	case audioMasterProcessEvents:
@@ -127,7 +152,13 @@ long Session::vst_callback (AEffect* effect,
 	case audioMasterTempoAt:
 		SHOW_CALLBACK ("amc: audioMasterTempoAt\n");
 		// returns tempo (in bpm * 10000) at sample frame location passed in <value>
-		return 0;
+		if (session) {
+			const Tempo& t (session->tempo_map().tempo_at (value));
+			return t.beats_per_minute() * 1000;
+		} else {
+			return 0;
+		}
+		break;
 
 	case audioMasterGetNumAutomatableParameters:
 		SHOW_CALLBACK ("amc: audioMasterGetNumAutomatableParameters\n");
@@ -147,7 +178,10 @@ long Session::vst_callback (AEffect* effect,
 
 	case audioMasterNeedIdle:
 		SHOW_CALLBACK ("amc: audioMasterNeedIdle\n");
-	       // plug needs idle calls (outside its editor window)
+		// plug needs idle calls (outside its editor window)
+		if (plug) {
+			plug->fst()->wantIdle = 1;
+		}
 		return 0;
 
 	case audioMasterSizeWindow:
@@ -157,10 +191,16 @@ long Session::vst_callback (AEffect* effect,
 
 	case audioMasterGetSampleRate:
 		SHOW_CALLBACK ("amc: audioMasterGetSampleRate\n");
+		if (session) {
+			return session->frame_rate();
+		}
 		return 0;
 
 	case audioMasterGetBlockSize:
 		SHOW_CALLBACK ("amc: audioMasterGetBlockSize\n");
+		if (session) {
+			return session->get_block_size();
+		}
 		return 0;
 
 	case audioMasterGetInputLatency:
@@ -305,7 +345,7 @@ long Session::vst_callback (AEffect* effect,
 		return 0;
 		
 	default:
-		SHOW_CALLBACK ("VST master dispatcher: undefed: %d, %d\n", opcode, effKeysRequired);
+		SHOW_CALLBACK ("VST master dispatcher: undefed: %d\n", opcode);
 		break;
 	}	
 	

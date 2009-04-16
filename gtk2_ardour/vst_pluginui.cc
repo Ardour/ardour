@@ -20,7 +20,7 @@
 #include <fst.h>
 #include <gtk/gtk.h>
 #include <gtk/gtksocket.h>
-#include "ardour/processor.h"
+#include "ardour/insert.h"
 #include "ardour/vst_plugin.h"
 
 #include "plugin_ui.h"
@@ -35,24 +35,36 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	: PlugUIBase (pi),
 	  vst (vp)
 {
+	create_preset_store ();
+
 	fst_run_editor (vst->fst());
 
+	preset_box.set_spacing (6);
+	preset_box.set_border_width (6);
 	preset_box.pack_end (bypass_button, false, false, 10);
 	preset_box.pack_end (save_button, false, false);
-	preset_box.pack_end (preset_combo, false, false);
-	preset_box.pack_end (eqgui_toggle, false, false);
+	preset_box.pack_end (vst_preset_combo, false, false);
 
+	vst_preset_combo.signal_changed().connect (mem_fun (*this, &VSTPluginUI::preset_chosen));
 
 	bypass_button.set_active (!insert->active());
 	
 	pack_start (preset_box, false, false);
 	pack_start (socket, true, true);
-	pack_start (plugin_eq_bin, true, true);
 }
 
 VSTPluginUI::~VSTPluginUI ()
 {
-	// nothing to do here - plugin destructor destroys the GUI
+	// plugin destructor destroys the custom GUI, via Windows fun-and-games,
+	// and then our PluginUIWindow does the rest
+}
+
+void
+VSTPluginUI::preset_chosen ()
+{
+	// we can't dispatch directly here, too many plugins only expects one GUI thread.
+	vst->fst()->want_program = vst_preset_combo.get_active_row_number ();
+	socket.grab_focus ();
 }
 
 int
@@ -124,28 +136,68 @@ VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 	return false;
 }
 
+void
+VSTPluginUI::create_preset_store ()
+{
+	FST *fst = vst->fst();
+	int vst_version = fst->plugin->dispatcher (fst->plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
+
+	preset_model = ListStore::create (preset_columns);
+
+	for (int i = 0; i < fst->plugin->numPrograms; ++i) {
+		char buf[100];
+		TreeModel::Row row = *(preset_model->append());
+
+		snprintf (buf, 90, "preset %d", i);
+
+		if (vst_version >= 2) {
+			fst->plugin->dispatcher (fst->plugin, 29, i, 0, buf, 0.0);
+		}
+		
+		row[preset_columns.name] = buf;
+		row[preset_columns.number] = i;
+	}
+	
+	if (fst->plugin->numPrograms > 0) {
+		fst->plugin->dispatcher( fst->plugin, effSetProgram, 0, 0, NULL, 0.0 );
+	}
+	
+	vst_preset_combo.set_model (preset_model);
+
+	CellRenderer* renderer = manage (new CellRendererText());
+	vst_preset_combo.pack_start (*renderer, true);
+	vst_preset_combo.add_attribute (*renderer, "text", 0);
+
+	if (vst->fst()->current_program != -1) {
+		vst_preset_combo.set_active (vst->fst()->current_program);
+	} else {
+		vst_preset_combo.set_active (0);
+	}
+}
+
 typedef int (*error_handler_t)( Display *, XErrorEvent *);
 static Display *the_gtk_display;
 static error_handler_t wine_error_handler;
 static error_handler_t gtk_error_handler;
 
-static int
+static int 
 fst_xerror_handler( Display *disp, XErrorEvent *ev )
 {
-       if (disp == the_gtk_display) {
-               printf ("relaying error to gtk\n");
-               return gtk_error_handler (disp, ev);
-       } else {
-               printf( "relaying error to wine\n" );
-               return wine_error_handler (disp, ev);
-       }
+	if (disp == the_gtk_display) {
+		printf ("relaying error to gtk\n");
+		return gtk_error_handler (disp, ev);
+	} else {
+		printf( "relaying error to wine\n" );
+		return wine_error_handler (disp, ev);
+	}
 }
 
 void
 gui_init (int *argc, char **argv[])
 {
-       wine_error_handler = XSetErrorHandler (NULL);
-       gtk_init (argc, argv);
-       the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
-       gtk_error_handler = XSetErrorHandler( fst_xerror_handler );
+	wine_error_handler = XSetErrorHandler (NULL);
+	gtk_init (argc, argv);
+	the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
+	gtk_error_handler = XSetErrorHandler( fst_xerror_handler );
 }
+

@@ -24,6 +24,9 @@
 #include <stdint.h>
 
 #include "pbd/pthread_utils.h"
+#ifdef WINE_THREAD_SUPPORT
+#include <fst.h>
+#endif
 
 using namespace std;
 
@@ -38,6 +41,15 @@ namespace PBD {
 }
 
 using namespace PBD;
+
+static int thread_creator (pthread_t* thread_id, const pthread_attr_t* attr, void *(*function)(void*), void* arg)
+{
+#ifdef WINE_THREAD_SUPPORT
+       return wine_pthread_create (thread_id, attr, function, arg);
+#else
+       return pthread_create (thread_id, attr, function, arg);
+#endif
+}
 
 void
 PBD::notify_gui_about_thread_creation (pthread_t thread, std::string str, int request_count)
@@ -70,7 +82,7 @@ pthread_create_and_store (string name, pthread_t  *thread, pthread_attr_t *attr,
 		attr = &default_attr;
 	}
 
-	if ((ret = pthread_create (thread, attr, start_routine, arg)) == 0) {
+	if ((ret = thread_creator (thread, attr, start_routine, arg)) == 0) {
 		std::pair<string,pthread_t> newpair;
 		newpair.first = name;
 		newpair.second = *thread;

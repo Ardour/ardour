@@ -34,7 +34,7 @@
     authorization.
 */
 
-#include <vamp-sdk/PluginAdapter.h>
+#include "vamp-sdk/PluginAdapter.h"
 
 #include <cstring>
 #include <cstdlib>

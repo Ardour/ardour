@@ -38,7 +38,7 @@
 #define _VAMP_PLUGIN_ADAPTER_H_
 
 #include <map>
-#include <vamp/vamp.h>
+#include "vamp/vamp.h"
 
 #include "Plugin.h"
 

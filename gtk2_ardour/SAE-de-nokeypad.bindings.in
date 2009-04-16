@@ -8,8 +8,9 @@
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>period")
 (gtk_accel_path "<Actions>/Transport/record-roll" "<%PRIMARY%>space")
+(gtk_accel_path "<Actions>/Editor/play-from-edit-point-and-return" "<%LEVEL4%>space")
 
-(gtk_accel_path "<Actions>/Common/ToggleOptionsEditor" "<%PRIMARY%>,")
+(gtk_accel_path "<Actions>/Common/ToggleOptionsEditor" "<%PRIMARY%>comma")
 
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<%PRIMARY%><%SECONDARY%>less")
 (gtk_accel_path "<Actions>/Editor/align-regions-end-relative" "<%PRIMARY%>less")
@@ -82,7 +83,7 @@
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "<%PRIMARY%>d")
 (gtk_accel_path "<Actions>/Editor/multi-duplicate-region" "<%PRIMARY%><%TERTIARY%>d")
 (gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "f")
-(gtk_accel_path "<Actions>/Common/toggle-rhythm-ferret" "<%SECONDARY%>f")
+(gtk_accel_path "<Actions>/Editor/toggle-rhythm-ferret" "<%SECONDARY%>f")
 ; (gtk_accel_path "<Actions>/Editor/set-edit-point" "g")
 ; (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
 (gtk_accel_path "<Actions>/Editor/nudge-backward" "g")
@@ -120,6 +121,7 @@
 (gtk_accel_path "<Actions>/Editor/editor-delete" "BackSpace")
 (gtk_accel_path "<Actions>/Editor/remove-last-capture" "<%PRIMARY%>BackSpace")
 
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary-noselection" "<%LEVEL4%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary" "leftarrow")
 (gtk_accel_path "<Actions>/Editor/playhead-backward-to-grid" "<%TERTIARY%><%LEVEL4%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-sync" "<%TERTIARY%><%SECONDARY%>leftarrow")
@@ -130,6 +132,7 @@
 
 (gtk_accel_path "<Actions>/Editor/selected-marker-to-previous-region-boundary" "<%PRIMARY%><%TERTIARY%>leftarrow")
 
+(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary-noselection" "<%LEVEL4%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary" "rightarrow")
 (gtk_accel_path "<Actions>/Editor/playhead-forward-to-grid" "<%TERTIARY%><%LEVEL4%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-sync" "<%TERTIARY%><%SECONDARY%>leftarrow")

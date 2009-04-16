@@ -41,6 +41,6 @@
 // use this header instead.
 
 #include "hostguard.h"
-#include <vamp-sdk/RealTime.h>
+#include "vamp-sdk/RealTime.h"
 
 #endif

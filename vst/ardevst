@@ -2,5 +2,5 @@
 
 . ../gtk2_ardour/ardev_common.sh
 
-export LD_LIBRARY_PATH=../gtk2_ardour:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$TOP/gtk2_ardour:$LD_LIBRARY_PATH
 exec wine $TOP/vst/ardour_vst.exe.so "$@"
