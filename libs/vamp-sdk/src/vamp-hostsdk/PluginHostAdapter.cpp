@@ -34,10 +34,14 @@
     authorization.
 */
 
+#include <vamp-hostsdk/PluginHostAdapter.h>
 #include <cstdlib>
-#include "PluginHostAdapter.h"
 
-#include <cstdlib>
+#if ( VAMP_SDK_MAJOR_VERSION != 2 || VAMP_SDK_MINOR_VERSION != 0 )
+#error Incorrect Vamp SDK header included (not the expected 2.0 SDK)
+#endif
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginHostAdapter.cpp)
 
 namespace Vamp
 {
@@ -94,7 +98,7 @@ PluginHostAdapter::getPluginPath()
         }
 #ifdef _WIN32
         char *cpfiles = getenv("ProgramFiles");
-        if (!cpfiles) cpfiles = "C:\\Program Files";
+        if (!cpfiles) cpfiles = (char *)"C:\\Program Files";
         std::string pfiles(cpfiles);
         std::string::size_type f;
         while ((f = envPath.find("%ProgramFiles%")) != std::string::npos &&
@@ -129,7 +133,11 @@ PluginHostAdapter::initialise(size_t channels,
 void
 PluginHostAdapter::reset()
 {
-    if (!m_handle) return;
+    if (!m_handle) {
+//        std::cerr << "PluginHostAdapter::reset: no handle" << std::endl;
+        return;
+    }
+//    std::cerr << "PluginHostAdapter::reset(" << m_handle << ")" << std::endl;
     m_descriptor->reset(m_handle);
 }
 
@@ -321,7 +329,7 @@ PluginHostAdapter::getOutputDescriptors() const
         d.unit = sd->unit;
         d.hasFixedBinCount = sd->hasFixedBinCount;
         d.binCount = sd->binCount;
-        if (d.hasFixedBinCount) {
+        if (d.hasFixedBinCount && sd->binNames) {
             for (unsigned int j = 0; j < sd->binCount; ++j) {
                 d.binNames.push_back(sd->binNames[j] ? sd->binNames[j] : "");
             }
@@ -342,6 +350,12 @@ PluginHostAdapter::getOutputDescriptors() const
         }
 
         d.sampleRate = sd->sampleRate;
+
+        if (m_descriptor->vampApiVersion >= 2) {
+            d.hasDuration = sd->hasDuration;
+        } else {
+            d.hasDuration = false;
+        }
 
         list.push_back(d);
 
@@ -397,25 +411,46 @@ PluginHostAdapter::convertFeatures(VampFeatureList *features,
 
         if (list.featureCount > 0) {
 
-            for (unsigned int j = 0; j < list.featureCount; ++j) {
-                
-                Feature feature;
-                feature.hasTimestamp = list.features[j].hasTimestamp;
-                feature.timestamp = RealTime(list.features[j].sec,
-                                             list.features[j].nsec);
+            Feature feature;
+            feature.values.reserve(list.features[0].v1.valueCount);
 
-                for (unsigned int k = 0; k < list.features[j].valueCount; ++k) {
-                    feature.values.push_back(list.features[j].values[k]);
+            for (unsigned int j = 0; j < list.featureCount; ++j) {
+
+                feature.hasTimestamp = list.features[j].v1.hasTimestamp;
+                feature.timestamp = RealTime(list.features[j].v1.sec,
+                                             list.features[j].v1.nsec);
+                feature.hasDuration = false;
+
+                if (m_descriptor->vampApiVersion >= 2) {
+                    unsigned int j2 = j + list.featureCount;
+                    feature.hasDuration = list.features[j2].v2.hasDuration;
+                    feature.duration = RealTime(list.features[j2].v2.durationSec,
+                                                list.features[j2].v2.durationNsec);
                 }
 
-                if (list.features[j].label) {
-                    feature.label = list.features[j].label;
+                for (unsigned int k = 0; k < list.features[j].v1.valueCount; ++k) {
+                    feature.values.push_back(list.features[j].v1.values[k]);
+                }
+
+                if (list.features[j].v1.label) {
+                    feature.label = list.features[j].v1.label;
                 }
 
                 fs[i].push_back(feature);
+
+                if (list.features[j].v1.valueCount > 0) {
+                    feature.values.clear();
+                }
+
+                if (list.features[j].v1.label) {
+                    feature.label = "";
+                }
             }
         }
     }
 }
 
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginHostAdapter.cpp)
+

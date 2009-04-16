@@ -37,14 +37,17 @@
 #ifndef _VAMP_PLUGIN_INPUT_DOMAIN_ADAPTER_H_
 #define _VAMP_PLUGIN_INPUT_DOMAIN_ADAPTER_H_
 
+#include "hostguard.h"
 #include "PluginWrapper.h"
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginInputDomainAdapter.h)
 
 namespace Vamp {
 
 namespace HostExt {
 
 /**
- * \class PluginInputDomainAdapter PluginInputDomainAdapter.h <vamp-sdk/hostext/PluginInputDomainAdapter.h>
+ * \class PluginInputDomainAdapter PluginInputDomainAdapter.h <vamp-hostsdk/PluginInputDomainAdapter.h>
  * 
  * PluginInputDomainAdapter is a Vamp plugin adapter that converts
  * time-domain input into frequency-domain input for plugins that need
@@ -79,7 +82,12 @@ namespace HostExt {
 class PluginInputDomainAdapter : public PluginWrapper
 {
 public:
-    PluginInputDomainAdapter(Plugin *plugin); // I take ownership of plugin
+    /**
+     * Construct a PluginInputDomainAdapter wrapping the given plugin.
+     * The adapter takes ownership of the plugin, which will be
+     * deleted when the adapter is deleted.
+     */
+    PluginInputDomainAdapter(Plugin *plugin);
     virtual ~PluginInputDomainAdapter();
     
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
@@ -91,6 +99,29 @@ public:
 
     FeatureSet process(const float *const *inputBuffers, RealTime timestamp);
 
+    /**
+     * Return the amount by which the timestamps supplied to process()
+     * are being incremented when they are passed to the plugin's own
+     * process() implementation.
+     *
+     * The Vamp API mandates that the timestamp passed to the plugin
+     * for time-domain input should be the time of the first sample in
+     * the block, but the timestamp passed for frequency-domain input
+     * should be the timestamp of the centre of the block.
+     *
+     * The PluginInputDomainAdapter adjusts its timestamps properly so
+     * that the plugin receives correct times, but in some
+     * circumstances (such as for establishing the correct timing of
+     * implicitly-timed features, i.e. features without their own
+     * timestamps) the host may need to be aware that this adjustment
+     * is taking place.
+     *
+     * If the plugin requires time-domain input, this function will
+     * return zero.  The result of calling this function before
+     * initialise() has been called is undefined.
+     */
+    RealTime getTimestampAdjustment() const;
+
 protected:
     class Impl;
     Impl *m_impl;
@@ -99,5 +130,7 @@ protected:
 }
 
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginInputDomainAdapter.h)
 
 #endif

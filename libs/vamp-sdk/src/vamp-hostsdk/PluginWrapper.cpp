@@ -34,7 +34,9 @@
     authorization.
 */
 
-#include "PluginWrapper.h"
+#include <vamp-hostsdk/PluginWrapper.h>
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginWrapper.cpp)
 
 namespace Vamp {
 
@@ -199,3 +201,4 @@ PluginWrapper::getRemainingFeatures()
 
 }
 
+_VAMP_SDK_HOSTSPACE_END(PluginWrapper.cpp)

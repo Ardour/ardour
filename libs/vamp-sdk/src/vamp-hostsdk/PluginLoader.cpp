@@ -34,16 +34,15 @@
     authorization.
 */
 
-#include "vamp-sdk/PluginHostAdapter.h"
-#include "PluginLoader.h"
-#include "PluginInputDomainAdapter.h"
-#include "PluginChannelAdapter.h"
-#include "PluginBufferingAdapter.h"
+#include <vamp-hostsdk/PluginHostAdapter.h>
+#include <vamp-hostsdk/PluginLoader.h>
+#include <vamp-hostsdk/PluginInputDomainAdapter.h>
+#include <vamp-hostsdk/PluginChannelAdapter.h>
+#include <vamp-hostsdk/PluginBufferingAdapter.h>
 
-#include <string>
-#include <cstring>
 #include <fstream>
 #include <cctype> // tolower
+
 #include <cstring>
 
 #ifdef _WIN32
@@ -66,6 +65,8 @@
 #endif /* ! _WIN32 */
 
 using namespace std;
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginLoader.cpp)
 
 namespace Vamp {
 	
@@ -518,7 +519,7 @@ PluginLoader::Impl::loadLibrary(string path)
              << path << "\"" << endl;
     }
 #else
-    handle = dlopen(path.c_str(), RTLD_LAZY);
+    handle = dlopen(path.c_str(), RTLD_LAZY | RTLD_LOCAL);
     if (!handle) {
         cerr << "Vamp::HostExt::PluginLoader: Unable to load library \""
              << path << "\": " << dlerror() << endl;
@@ -586,8 +587,6 @@ PluginLoader::Impl::listFiles(string dir, string extension)
     struct dirent *e = 0;
     while ((e = readdir(d))) {
  
-        if (!(e->d_type & DT_REG) && (e->d_type != DT_UNKNOWN)) continue;
-        
         if (!e->d_name) continue;
        
         size_t len = strlen(e->d_name);
@@ -637,3 +636,6 @@ PluginLoader::Impl::PluginDeletionNotifyAdapter::~PluginDeletionNotifyAdapter()
 }
 
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginLoader.cpp)
+

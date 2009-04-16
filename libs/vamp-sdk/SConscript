@@ -5,18 +5,18 @@ import os.path
 import glob
 
 vampsdk_files = Split ("""
-vamp-sdk/PluginAdapter.cpp
-vamp-sdk/RealTime.cpp
+src/vamp-sdk/PluginAdapter.cpp
+src/vamp-sdk/RealTime.cpp
 """)
 
 vamphostsdk_files = Split ("""
-vamp-sdk/PluginHostAdapter.cpp
-vamp-sdk/hostext/PluginBufferingAdapter.cpp
-vamp-sdk/hostext/PluginChannelAdapter.cpp
-vamp-sdk/hostext/PluginInputDomainAdapter.cpp
-vamp-sdk/hostext/PluginLoader.cpp
-vamp-sdk/hostext/PluginWrapper.cpp
-vamp-sdk/RealTime.cpp
+src/vamp-hostsdk/PluginHostAdapter.cpp
+src/vamp-hostsdk/PluginBufferingAdapter.cpp
+src/vamp-hostsdk/PluginChannelAdapter.cpp
+src/vamp-hostsdk/PluginInputDomainAdapter.cpp
+src/vamp-hostsdk/PluginLoader.cpp
+src/vamp-hostsdk/PluginWrapper.cpp
+src/vamp-hostsdk/RealTime.cpp
 """)
 
 Import('env install_prefix libraries')
@@ -43,4 +43,4 @@ env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      vamphostsdk_files +
                                      glob.glob('vamp/*.h') + 
                                      glob.glob('vamp-sdk/*.h') + 
-                                     glob.glob('vamp-sdk/hostext/*.h')))
+                                     glob.glob('vamp-hostsdk/*.h')))

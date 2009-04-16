@@ -34,15 +34,18 @@
     authorization.
 */
 
-#ifndef _VAMP_PLUGIN_H_
-#define _VAMP_PLUGIN_H_
-
-#include "PluginBase.h"
-#include "RealTime.h"
+#ifndef _VAMP_SDK_PLUGIN_H_
+#define _VAMP_SDK_PLUGIN_H_
 
 #include <string>
 #include <vector>
 #include <map>
+
+#include "PluginBase.h"
+#include "RealTime.h"
+
+#include "plugguard.h"
+_VAMP_SDK_PLUGSPACE_BEGIN(Plugin.h)
 
 namespace Vamp {
 
@@ -200,7 +203,7 @@ public:
 	/**
 	 * The name of the output, in computer-usable form.  Should be
 	 * reasonably short and without whitespace or punctuation, using
-         * the characters [a-zA-Z0-9_] only.
+         * the characters [a-zA-Z0-9_-] only.
          * Example: "zero_crossing_count"
 	 */
 	std::string identifier;
@@ -304,6 +307,16 @@ public:
 	 * this to zero if that behaviour is not desired.
 	 */
 	float sampleRate;
+
+        /**
+         * True if the returned results for this output are known to
+         * have a duration field.
+         */
+        bool hasDuration;
+
+        OutputDescriptor() : // defaults for mandatory non-class-type members
+            hasFixedBinCount(false), hasKnownExtents(false), isQuantized(false),
+            sampleType(OneSamplePerStep), hasDuration(false) { }
     };
 
     typedef std::vector<OutputDescriptor> OutputList;
@@ -319,17 +332,34 @@ public:
     {
 	/**
 	 * True if an output feature has its own timestamp.  This is
-	 * mandatory if the output has VariableSampleRate, and is
-	 * likely to be disregarded otherwise.
+	 * mandatory if the output has VariableSampleRate, optional if
+	 * the output has FixedSampleRate, and unused if the output
+	 * has OneSamplePerStep.
 	 */
 	bool hasTimestamp;
 
 	/**
 	 * Timestamp of the output feature.  This is mandatory if the
-	 * output has VariableSampleRate, and is likely to be
-	 * disregarded otherwise.  Undefined if hasTimestamp is false.
+	 * output has VariableSampleRate or if the output has
+	 * FixedSampleRate and hasTimestamp is true, and unused
+	 * otherwise.
 	 */
 	RealTime timestamp;
+
+        /**
+         * True if an output feature has a specified duration.  This
+         * is optional if the output has VariableSampleRate or
+         * FixedSampleRate, and and unused if the output has
+         * OneSamplePerStep.
+         */
+        bool hasDuration;
+
+        /**
+         * Duration of the output feature.  This is mandatory if the
+         * output has VariableSampleRate or FixedSampleRate and
+         * hasDuration is true, and unused otherwise.
+         */
+        RealTime duration;
 	
 	/**
 	 * Results for a single sample of this feature.  If the output
@@ -342,9 +372,13 @@ public:
 	 * Label for the sample of this feature.
 	 */
 	std::string label;
+
+        Feature() : // defaults for mandatory non-class-type members
+            hasTimestamp(false), hasDuration(false) { }
     };
 
     typedef std::vector<Feature> FeatureList;
+
     typedef std::map<int, FeatureList> FeatureSet; // key is output no
 
     /**
@@ -353,9 +387,9 @@ public:
      * If the plugin's inputDomain is TimeDomain, inputBuffers will
      * point to one array of floats per input channel, and each of
      * these arrays will contain blockSize consecutive audio samples
-     * (the host will zero-pad as necessary).  The timestamp will be
-     * the real time in seconds of the start of the supplied block of
-     * samples.
+     * (the host will zero-pad as necessary).  The timestamp in this
+     * case will be the real time in seconds of the start of the
+     * supplied block of samples.
      *
      * If the plugin's inputDomain is FrequencyDomain, inputBuffers
      * will point to one array of floats per input channel, and each
@@ -398,6 +432,8 @@ protected:
 };
 
 }
+
+_VAMP_SDK_PLUGSPACE_END(Plugin.h)
 
 #endif
 

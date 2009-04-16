@@ -53,11 +53,13 @@
 using std::cerr;
 using std::endl;
 
-#include "RealTime.h"
-
 #ifndef _WIN32
 #include <sys/time.h>
 #endif
+
+#include <vamp-sdk/RealTime.h>
+
+_VAMP_SDK_PLUGSPACE_BEGIN(RealTime.cpp)
 
 namespace Vamp {
 
@@ -224,17 +226,8 @@ long
 RealTime::realTime2Frame(const RealTime &time, unsigned int sampleRate)
 {
     if (time < zeroTime) return -realTime2Frame(-time, sampleRate);
-
-    // We like integers.  The last term is always zero unless the
-    // sample rate is greater than 1MHz, but hell, you never know...
-
-    long frame =
-	time.sec * sampleRate +
-	(time.msec() * sampleRate) / 1000 +
-	((time.usec() - 1000 * time.msec()) * sampleRate) / 1000000 +
-	((time.nsec - 1000 * time.usec()) * sampleRate) / 1000000000;
-
-    return frame;
+    double s = time.sec + double(time.nsec + 1) / 1000000000.0;
+    return long(s * sampleRate);
 }
 
 RealTime
@@ -245,10 +238,15 @@ RealTime::frame2RealTime(long frame, unsigned int sampleRate)
     RealTime rt;
     rt.sec = frame / long(sampleRate);
     frame -= rt.sec * long(sampleRate);
-    rt.nsec = (int)(((float(frame) * 1000000) / long(sampleRate)) * 1000);
+    rt.nsec = (int)(((double(frame) * 1000000.0) / sampleRate) * 1000.0);
     return rt;
 }
 
 const RealTime RealTime::zeroTime(0,0);
 
 }
+
+_VAMP_SDK_PLUGSPACE_END(RealTime.cpp)
+
+
+

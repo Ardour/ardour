@@ -37,15 +37,19 @@
 #ifndef _VAMP_PLUGIN_HOST_ADAPTER_H_
 #define _VAMP_PLUGIN_HOST_ADAPTER_H_
 
+#include "hostguard.h"
+#include "Plugin.h"
+
 #include <vamp/vamp.h>
-#include <vamp-sdk/Plugin.h>
 
 #include <vector>
+
+_VAMP_SDK_HOSTSPACE_BEGIN(PluginHostAdapter.h)
 
 namespace Vamp {
 
 /**
- * \class PluginHostAdapter PluginHostAdapter.h <vamp-sdk/PluginHostAdapter.h>
+ * \class PluginHostAdapter PluginHostAdapter.h <vamp-hostsdk/PluginHostAdapter.h>
  * 
  * PluginHostAdapter is a wrapper class that a Vamp host can use to
  * make the C-language VampPluginDescriptor object appear as a C++
@@ -111,6 +115,8 @@ protected:
 };
 
 }
+
+_VAMP_SDK_HOSTSPACE_END(PluginHostAdapter.h)
 
 #endif
 

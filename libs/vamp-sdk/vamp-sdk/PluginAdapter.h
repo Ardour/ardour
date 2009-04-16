@@ -37,11 +37,13 @@
 #ifndef _VAMP_PLUGIN_ADAPTER_H_
 #define _VAMP_PLUGIN_ADAPTER_H_
 
+#include <map>
 #include <vamp/vamp.h>
 
 #include "Plugin.h"
 
-#include <map>
+#include "plugguard.h"
+_VAMP_SDK_PLUGSPACE_BEGIN(PluginAdapter.h)
 
 namespace Vamp {
 
@@ -112,6 +114,8 @@ protected:
 };
     
 }
+
+_VAMP_SDK_PLUGSPACE_END(PluginAdapter.h)
 
 #endif
 
