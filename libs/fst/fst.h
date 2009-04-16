@@ -80,8 +80,10 @@ struct _FST
     int 	height;
     int		wantIdle;
     int         destroy;
+    int         vst_version;
 
     int		want_program;
+    int         current_program;
     float      *want_params;
     float      *set_params;
 
@@ -105,6 +107,7 @@ extern "C" {
 #endif
 
 extern int        fst_init (void* possible_hmodule);
+extern void       fst_exit ();
 
 extern FSTHandle* fst_load (const char*);
 extern int        fst_unload (FSTHandle*);
@@ -132,6 +135,9 @@ extern int fst_load_state (FST * fst, char * filename);
  * Save a plugin state to a file.
  */
 extern int fst_save_state (FST * fst, char * filename);
+
+extern int wine_pthread_create (pthread_t* thread_id, const pthread_attr_t* attr, void *(*function)(void*), void* arg);
+
 
 #ifdef __cplusplus
 }

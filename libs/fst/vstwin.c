@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <jack/jack.h>
+#include <jack/thread.h>
 #include <libgen.h>
 #include <windows.h>
 #include <winnt.h>
@@ -24,11 +26,7 @@ static FST* fst_first = NULL;
 const char magic[] = "FST Plugin State v002";
 
 DWORD  gui_thread_id = 0;
-
-extern boolean g_quit;
-
-
-
+static int gui_quit = 0;
 
 #define DELAYED_WINDOW 1
 
@@ -36,12 +34,11 @@ extern boolean g_quit;
 static LRESULT WINAPI 
 my_window_proc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 {
-	FST* fst=NULL;
-	LRESULT result;
-
-//	if (msg != WM_TIMER) {
-//		fst_error ("window callback handler, msg = 0x%x win=%p\n", msg, w);
-//	}
+#if 0
+	if (msg != WM_TIMER) {
+		fst_error ("window callback handler, msg = 0x%x win=%p\n", msg, w);
+	}
+#endif
 
 	switch (msg) {
 	case WM_KEYUP:
@@ -49,47 +46,21 @@ my_window_proc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 		break;
 
 	case WM_CLOSE:
-		//printf("wtf.\n" );
-		PostQuitMessage (0);
+		/* we don't care about windows closing ... */
+		return 0;
+		break;
+
 	case WM_DESTROY:
 	case WM_NCDESTROY:
-		/* we should never get these */
-		//return 0;
-		break;
-#if 0
-	case WM_PAINT:
-			if ((fst = GetPropA (w, "fst_ptr")) != NULL) {
-				if (fst->window && !fst->been_activated) {
-					fst->been_activated = TRUE;
-					pthread_cond_signal (&fst->window_status_change);
-					pthread_mutex_unlock (&fst->lock);
-				}
-			}
-		break;
-#endif
-
-#if 0	
-	case WM_TIMER:
-		fst = GetPropA( w, "fst_ptr" );
-		if( !fst ) {
-		    printf( "Timer without fst_ptr Prop :(\n" );
-		    return 0;
-		}
-
-		fst->plugin->dispatcher(fst->plugin, effEditIdle, 0, 0, NULL, 0.0f);
-		if( fst->wantIdle )
-		    fst->plugin->dispatcher(fst->plugin, 53, 0, 0, NULL, 0.0f);
+		/* we don't care about windows being destroyed ... */
 		return 0;
-#endif
-
-
+		break;
 
 	default:
 		break;
 	}
 
 	return DefWindowProcA (w, msg, wp, lp );
-	//return 0;
 }
 
 static FST* 
@@ -100,6 +71,7 @@ fst_new ()
 	pthread_cond_init (&fst->window_status_change, NULL);
 	pthread_cond_init (&fst->plugin_dispatcher_called, NULL);
 	fst->want_program = -1;
+	fst->current_program = -1;
 	return fst;
 }
 
@@ -114,7 +86,6 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 {
 	MSG msg;
 	FST* fst;
-	char c;
 	HMODULE hInst;
 	HWND window;
 
@@ -141,75 +112,98 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 		fst_error ("cannot set timer on dummy window");
 	}
 
-	while (GetMessageA (&msg, NULL, 0,0)) {
+	while (!gui_quit) {
+
+		if (!GetMessageA (&msg, NULL, 0,0)) {
+			if (!gui_quit) {
+				fprintf (stderr, "QUIT message received by Windows GUI thread - ignored\n");
+				continue;
+			} else {
+				break;
+			}
+		}
+
 		TranslateMessage( &msg );
 		DispatchMessageA (&msg);
 
 		/* handle window creation requests, destroy requests, 
 		   and run idle callbacks 
 		*/
-		
-		if( msg.message == WM_TIMER  ) {
-		    pthread_mutex_lock (&plugin_mutex);
+
+		if (msg.message == WM_TIMER) {
+			pthread_mutex_lock (&plugin_mutex);
+		    
 again:
-		    for (fst = fst_first; fst; fst = fst->next) {
-
-			if (fst->destroy) {
-			    if (fst->window) {
-				fst->plugin->dispatcher( fst->plugin, effEditClose, 0, 0, NULL, 0.0 );
-				CloseWindow (fst->window);
-				fst->window = NULL;
-				fst->destroy = FALSE;
-			    }
-			    fst_event_loop_remove_plugin (fst);
-			    fst->been_activated = FALSE;
-			    pthread_mutex_lock (&fst->lock);
-			    pthread_cond_signal (&fst->window_status_change);
-			    pthread_mutex_unlock (&fst->lock);
-			    goto again;
-			} 
-
-			if (fst->window == NULL) {
-			    pthread_mutex_lock (&fst->lock);
-			    fst_error ("Creating window for FST plugin %s", fst->handle->name);
-			    if (fst_create_editor (fst)) {
-				fst_error ("cannot create editor for plugin %s", fst->handle->name);
-				fst_event_loop_remove_plugin (fst);
-				pthread_cond_signal (&fst->window_status_change);
-				pthread_mutex_unlock (&fst->lock);
-				goto again;
-			    }
-			    /* condition/unlock: it was signalled & unlocked in fst_create_editor()   */
-			}
-			if(fst->want_program != -1 ) {
-				fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
-				fst->want_program = -1; 
-			}
-			
-			if(fst->dispatcher_wantcall) {
-
+			for (fst = fst_first; fst; fst = fst->next) {
+				
 				pthread_mutex_lock (&fst->lock);
-				fst->dispatcher_retval = fst->plugin->dispatcher( fst->plugin, fst->dispatcher_opcode,
-										  fst->dispatcher_index,
-										  fst->dispatcher_val,
-										  fst->dispatcher_ptr,
-										  fst->dispatcher_opt );
-				fst->dispatcher_wantcall = 0;
-				pthread_cond_signal (&fst->plugin_dispatcher_called);
+
+				if (fst->destroy) {
+					fprintf (stderr, "%s scheduled for destroy\n", fst->handle->name);
+					if (fst->window) {
+						fst->plugin->dispatcher( fst->plugin, effEditClose, 0, 0, NULL, 0.0 );
+						CloseWindow (fst->window);
+						fst->window = NULL;
+						fst->destroy = FALSE;
+					}
+					fst_event_loop_remove_plugin (fst);
+					fst->been_activated = FALSE;
+					pthread_cond_signal (&fst->window_status_change);
+					pthread_mutex_unlock (&fst->lock);
+					goto again;
+				} 
+				
+				if (fst->window == NULL) {
+					if (fst_create_editor (fst)) {
+						fst_error ("cannot create editor for plugin %s", fst->handle->name);
+						fst_event_loop_remove_plugin (fst);
+						pthread_cond_signal (&fst->window_status_change);
+						pthread_mutex_unlock (&fst->lock);
+						goto again;
+					} else {
+						/* condition/unlock: it was signalled & unlocked in fst_create_editor()   */
+					}
+				}
+
+				if (fst->want_program != -1 ) {
+					if (fst->vst_version >= 2) {
+						fst->plugin->dispatcher (fst->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
+					}
+
+					fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
+
+					if (fst->vst_version >= 2) {
+						fst->plugin->dispatcher (fst->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
+					}
+					/* did it work? */
+					fst->current_program = fst->plugin->dispatcher (fst->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
+					fst->want_program = -1; 
+				}
+				
+				if(fst->dispatcher_wantcall) {
+					fst->dispatcher_retval = fst->plugin->dispatcher( fst->plugin, 
+											  fst->dispatcher_opcode,
+											  fst->dispatcher_index,
+											  fst->dispatcher_val,
+											  fst->dispatcher_ptr,
+											  fst->dispatcher_opt );
+					fst->dispatcher_wantcall = 0;
+					pthread_cond_signal (&fst->plugin_dispatcher_called);
+				}
+				
+				fst->plugin->dispatcher (fst->plugin, effEditIdle, 0, 0, NULL, 0);
+
+				if( fst->wantIdle ) {
+					fst->plugin->dispatcher (fst->plugin, 53, 0, 0, NULL, 0);
+				}
+
 				pthread_mutex_unlock (&fst->lock);
 			}
-
-			pthread_mutex_lock (&fst->lock);
-			fst->plugin->dispatcher (fst->plugin, effEditIdle, 0, 0, NULL, 0);
-			if( fst->wantIdle ) {
-				fst->plugin->dispatcher (fst->plugin, 53, 0, 0, NULL, 0);
-			}
-			pthread_mutex_unlock (&fst->lock);
-		    }
-		    pthread_mutex_unlock (&plugin_mutex);
+			pthread_mutex_unlock (&plugin_mutex);
+			
 		}
 	}
-	fprintf (stderr, "VST GUI EVENT LOOP THREAD EXIT\n");
+
 	return 0;
 }
 
@@ -220,37 +214,25 @@ fst_init (void* possible_hmodule)
 	HMODULE hInst;
 	
 	if (possible_hmodule) {
-	  hInst = (HMODULE) possible_hmodule;
+		hInst = (HMODULE) possible_hmodule;
 	} else if ((hInst = GetModuleHandleA (NULL)) == NULL) {
-	  fst_error ("can't get module handle");
-	  return -1;
+		fst_error ("can't get module handle");
+		return -1;
 	}
-    wclass.cbSize = sizeof(WNDCLASSEX);
-    wclass.style = 0;
-    wclass.lpfnWndProc = my_window_proc;
-    wclass.cbClsExtra = 0;
-    wclass.cbWndExtra = 0;
-    wclass.hInstance = hInst;
-    wclass.hIcon = LoadIcon(hInst, "FST");
-    wclass.hCursor = LoadCursor(0, IDI_APPLICATION);
-//    wclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wclass.lpszMenuName = "MENU_FST";
-    wclass.lpszClassName = "FST";
-    wclass.hIconSm = 0;
 
-#if 0
-	wc.style = 0;
-	wc.lpfnWndProc = my_window_proc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = hInst;
-	wc.hIcon = LoadIconA( hInst, "FST");
-	wc.hCursor = LoadCursorA( NULL, IDI_APPLICATION );
-	wc.hbrBackground = GetStockObject( BLACK_BRUSH );
-	wc.lpszMenuName = "FSTMENU";
-	wc.lpszClassName = "FST";
-	//wc.hIconSm = 0;
-#endif
+	wclass.cbSize = sizeof(WNDCLASSEX);
+	wclass.style = 0;
+	wclass.lpfnWndProc = my_window_proc;
+	wclass.cbClsExtra = 0;
+	wclass.cbWndExtra = 0;
+	wclass.hInstance = hInst;
+	wclass.hIcon = LoadIcon(hInst, "FST");
+	wclass.hCursor = LoadCursor(0, IDI_APPLICATION);
+//    wclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wclass.lpszMenuName = "MENU_FST";
+	wclass.lpszClassName = "FST";
+	wclass.hIconSm = 0;
+
 
 	if (!RegisterClassExA(&wclass)){
 		printf( "Class register failed :(\n" );
@@ -263,7 +245,19 @@ fst_init (void* possible_hmodule)
 		fst_error ("could not create new thread proxy");
 		return -1;
 	}
+
+#ifdef HAVE_JACK_SET_THREAD_CREATOR
+	jack_set_thread_creator (wine_pthread_create);
+#endif
+
 	return 0;
+}
+
+void
+fst_exit ()
+{
+	gui_quit = 1;
+	PostQuitMessage (0);
 }
 
 int
@@ -319,7 +313,6 @@ int
 fst_create_editor (FST* fst)
 {
 	HMODULE hInst;
-	char class[20];
 	HWND window;
 	struct ERect* er;
 
@@ -372,9 +365,7 @@ fst_create_editor (FST* fst)
 	//SetWindowPos (fst->window, 0, 0, 0, er->right-er->left+8, er->bottom-er->top+26, SWP_NOMOVE|SWP_NOZORDER);
 	
 	fst->xid = (int) GetPropA (window, "__wine_x11_whole_window");
-	printf( "And xid = %x\n", fst->xid );
 	fst->been_activated = TRUE;
-	printf ("Signalling window ready\n");
 	pthread_cond_signal (&fst->window_status_change);
 	pthread_mutex_unlock (&fst->lock);
 
@@ -385,25 +376,24 @@ void
 fst_move_window_into_view (FST* fst)
 {
         if (fst->window) {
-	  SetWindowPos (fst->window, 0, 0, 0, fst->width, fst->height+24, 0);
-	  ShowWindow (fst->window, SW_SHOWNA);
+		SetWindowPos (fst->window, 0, 0, 0, fst->width, fst->height+24, 0);
+		ShowWindow (fst->window, SW_SHOWNA);
 	}
 }
 
 void
 fst_destroy_editor (FST* fst)
 {
-	FST* p;
-	FST* prev;
-
 	pthread_mutex_lock (&fst->lock);
 	if (fst->window) {
+		fprintf (stderr, "mark %s for destroy\n", fst->handle->name);
 		fst->destroy = TRUE;
 		//if (!PostThreadMessageA (gui_thread_id, WM_USER, 0, 0)) {
 		//if (!PostThreadMessageA (gui_thread_id, WM_QUIT, 0, 0)) {
 		//	fst_error ("could not post message to gui thread");
 		//}
 		pthread_cond_wait (&fst->window_status_change, &fst->lock);
+		fprintf (stderr, "%s editor destroyed\n", fst->handle->name);
 
 	}
 	pthread_mutex_unlock (&fst->lock);
@@ -481,7 +471,7 @@ fst_load_vst_library(const char * path)
 FSTHandle*
 fst_load (const char *path)
 {
-	char* buf, *buf2;
+	char* buf;
 	FSTHandle* fhandle;
 	char* period;
 
@@ -585,6 +575,8 @@ fst_instantiate (FSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	fst->plugin->dispatcher (fst->plugin, effOpen, 0, 0, 0, 0);
 	//fst->plugin->dispatcher (fst->plugin, effMainsChanged, 0, 0, NULL, 0);
 
+	fst->vst_version = fst->plugin->dispatcher (fst->plugin, effGetVstVersion, 0, 0, 0, 0);
+	
 	fst->handle->plugincnt++;
 	fst->wantIdle = 0;
 
@@ -742,7 +734,6 @@ int fst_save_state (FST * fst, char * filename)
 		char effectName[64];
 		char vendorString[64];
 		int success;
-		unsigned length;
 
 		// write header
 		fprintf( f, "<plugin_state>\n" );
