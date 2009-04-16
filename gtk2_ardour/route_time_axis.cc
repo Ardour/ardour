@@ -397,7 +397,8 @@ void
 RouteTimeAxisView::automation_click ()
 {
 	conditionally_add_to_selection ();
-	build_automation_action_menu ();
+	if (!automation_action_menu)
+		build_automation_action_menu ();
 	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
@@ -1839,10 +1840,12 @@ RouteTimeAxisView::redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutoma
 	if (showit != ran->view->marked_for_display()) {
 
 		if (showit) {
+			ran->menu_item->set_active(true);
 			ran->view->set_marked_for_display (true);
 			ran->view->canvas_display->show();
 			ran->view->canvas_background->show();
 		} else {
+			ran->menu_item->set_active(false);
 			rai->redirect->mark_automation_visible (ran->what, true);
 			ran->view->set_marked_for_display (false);
 			ran->view->hide ();
