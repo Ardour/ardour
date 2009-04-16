@@ -33,13 +33,13 @@ def build(bld):
 	# Host Library
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
-		vamp-sdk/PluginHostAdapter.cpp
-		vamp-sdk/hostext/PluginBufferingAdapter.cpp
-		vamp-sdk/hostext/PluginChannelAdapter.cpp
-		vamp-sdk/hostext/PluginInputDomainAdapter.cpp
-		vamp-sdk/hostext/PluginLoader.cpp
-		vamp-sdk/hostext/PluginWrapper.cpp
-		vamp-sdk/RealTime.cpp
+		src/vamp-hostsdk/PluginHostAdapter.cpp
+		src/vamp-hostsdk/PluginBufferingAdapter.cpp
+		src/vamp-hostsdk/PluginChannelAdapter.cpp
+		src/vamp-hostsdk/PluginInputDomainAdapter.cpp
+		src/vamp-hostsdk/PluginLoader.cpp
+		src/vamp-hostsdk/PluginWrapper.cpp
+		src/vamp-hostsdk/RealTime.cpp
 	'''
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.']
@@ -52,8 +52,8 @@ def build(bld):
 	# Plugin Library
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
-		vamp-sdk/PluginAdapter.cpp
-		vamp-sdk/RealTime.cpp
+		src/vamp-sdk/PluginAdapter.cpp
+		src/vamp-sdk/RealTime.cpp
 	'''
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.']

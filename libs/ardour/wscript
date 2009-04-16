@@ -215,7 +215,7 @@ def build(bld):
 	obj.name         = 'libardour'
 	obj.target       = 'ardour'
 	obj.uselib       = 'GLIBMM AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF'
-	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libtaglib'
+	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = ' -DPACKAGE=\\\"libardour3\\\"'
