@@ -777,6 +777,17 @@ else:
     env['LIBDIR']='lib'
 
 #
+# no VST on x86_64
+#
+
+if env['DIST_TARGET'] == 'x86_64' and env['VST']:
+    print "\n\n=================================================="
+    print "You cannot use VST plugins with a 64 bit host. Please run scons with VST=0"
+    print "\nIt is theoretically possible to build a 32 bit host on a 64 bit system."
+    print "However, this is tricky and not recommended for beginners."
+    sys.exit (-1)
+
+#
 # a single way to test if we're on OS X
 #
 
