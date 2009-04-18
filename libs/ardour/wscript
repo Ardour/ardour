@@ -218,14 +218,14 @@ def build(bld):
 	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	obj.cxxflags     = ' -DPACKAGE=\\\"libardour3\\\"'
-	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIR']) + '\\\"'
-	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIR']) + '\\\"'
-	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIR']) + '\\\"'
-	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
-			os.path.normpath(bld.env['DATADIR']), 'locale') + '\\\"'
-	obj.cxxflags     += ' -DVAMP_DIR=\\\"' + os.path.join(
-			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '\\\"'
+	obj.cxxflags     = ['-DPACKAGE="libardour3"']
+	obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+	obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
+	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
+			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+	obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
+			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
 	obj.source += ' rb_effect.cc '
 	obj.uselib_local += ' librubberband '
 	#obj.source += ' st_stretch.cc st_pitch.cc '

@@ -220,13 +220,13 @@ def build(bld):
 	obj.uselib       += ' GTKMM GNOMECANVASMM'
 	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libsurfaces
 	                      libgtkmm2ext libtaglib'''
-	obj.cxxflags     = '-DVERSIONSTRING=\\\"' + GTK2_ARDOUR_VERSION + '\\\"'
-	obj.cxxflags     += ' -DPACKAGE=\\\"gtk2_ardour\\\"'
-	obj.cxxflags     += ' -DDATA_DIR=\\\"' + os.path.normpath(bld.env['DATADIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DCONFIG_DIR=\\\"' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DMODULE_DIR=\\\"' + os.path.normpath(bld.env['LIBDIRNAME']) + '\\\"'
-	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
-			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
+	obj.cxxflags     = ['-DVERSIONSTRING="' + GTK2_ARDOUR_VERSION + '"']
+	obj.cxxflags     += ['-DPACKAGE="gtk2_ardour"']
+	obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIRNAME']) + '"']
+	obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '"']
+	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIRNAME']) + '"']
+	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
+			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
 	
 	# Wrappers
 

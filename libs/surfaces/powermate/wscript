@@ -25,7 +25,7 @@ def build(bld):
 		powermate.cc
 	'''
 	obj.export_incdirs = ['./powermate']
-	obj.cxxflags     = '-DPACKAGE=\\\"ardour_powermate\\\"'
+	obj.cxxflags     = '-DPACKAGE="ardour_powermate"'
 	obj.includes     = ['.', './powermate']
 	obj.name         = 'libpowermate'
 	obj.target       = 'powermate'

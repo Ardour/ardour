@@ -70,9 +70,10 @@ def build(bld):
 	obj.uselib_local = 'libpbd'
 	obj.vnum         = GTKMM2EXT_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	obj.cxxflags     = '-DPACKAGE=\\\"libgtkmm2ext\\\"'
-	obj.cxxflags     += ' -DLOCALEDIR=\\\"' + os.path.join(
-			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '\\\"'
+	obj.cxxflags     = [
+			'-DPACKAGE="libgtkmm2ext"',
+			'-DLOCALEDIR="' + os.path.join(
+				os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
 
 def shutdown():
 	autowaf.shutdown()

@@ -41,7 +41,7 @@ def build(bld):
 		types.cc
 	'''
 	obj.export_incdirs = ['./mackie']
-	obj.cxxflags     = '-DPACKAGE=\\\"ardour_mackie\\\"'
+	obj.cxxflags     = '-DPACKAGE="ardour_mackie"'
 	obj.includes     = ['.', './mackie']
 	obj.name         = 'libmackie'
 	obj.target       = 'mackie'

@@ -53,7 +53,7 @@ def build(bld):
 		src/libsmf/smf_tempo.c
 	'''
 	libsmf.export_incdirs = ['./src/libsmf']
-	libsmf.defines      = 'SMF_VERSION=\\\"1.2\\\"'
+	libsmf.defines      = 'SMF_VERSION="1.2"'
 	libsmf.includes     = ['./src']
 	libsmf.name         = 'libsmf'
 	libsmf.target       = 'smf'

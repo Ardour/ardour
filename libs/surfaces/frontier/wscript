@@ -34,7 +34,7 @@ def build(bld):
 		midicontrollable.cc
 	'''
 	obj.export_incdirs = ['./generic_midi']
-	obj.cxxflags     = '-DPACKAGE=\\\"ardour_genericmidi\\\"'
+	obj.cxxflags     = '-DPACKAGE="ardour_genericmidi"'
 	obj.includes     = ['.', './generic_midi']
 	obj.name         = 'libgeneric_midi'
 	obj.target       = 'generic_midi'

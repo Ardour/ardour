@@ -33,7 +33,7 @@ def build(bld):
 		interface.cc
 	'''
 	obj.export_incdirs = ['./osc']
-	obj.cxxflags     = '-DPACKAGE=\\\"ardour_cp\\\"'
+	obj.cxxflags     = '-DPACKAGE="ardour_cp"'
 	obj.includes     = ['.', './osc']
 	obj.name         = 'libsurfaces'
 	obj.target       = 'surfaces'

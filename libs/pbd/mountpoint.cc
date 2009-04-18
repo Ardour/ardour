@@ -32,7 +32,7 @@ using std::string;
 #include "wafconfig.h"
 #endif
 
-#if HAVE_GETMNTENT
+#ifdef HAVE_GETMNTENT
 #include <mntent.h>
 
 struct mntent_sorter {
