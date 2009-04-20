@@ -218,6 +218,8 @@ EngineControl::EngineControl ()
 	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineControl::realtime_changed));
 	realtime_changed ();
 
+#if PROVIDE_TOO_MANY_OPTIONS
+
 #ifndef __APPLE__
 	label = manage (new Label (_("Realtime Priority")));
 	label->set_alignment (1.0, 0.5);
@@ -262,6 +264,7 @@ EngineControl::EngineControl ()
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
+#endif /* PROVIDE_TOO_MANY_OPTIONS */
 	label = manage (new Label (_("Number of ports")));
 	label->set_alignment (1.0, 0.5);
 	options_packer.attach (ports_spinner, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
@@ -377,8 +380,10 @@ EngineControl::build_command_line (vector<string>& cmd)
 		uint32_t msecs;
 		secs = atof (str);
 		msecs = (uint32_t) floor (secs * 1000.0);
-		cmd.push_back ("-t");
-		cmd.push_back (to_string (msecs, std::dec));
+		if (msecs > 0) {
+			cmd.push_back ("-t");
+			cmd.push_back (to_string (msecs, std::dec));
+		}
 	}
 
 	if (no_memory_lock_button.get_active()) {

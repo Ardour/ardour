@@ -1,3 +1,4 @@
+#include <fstream>
 #include <algorithm>
 
 #include <gtkmm/main.h>
@@ -14,6 +15,7 @@
 #include "ardour/template_utils.h"
 
 #include "startup.h"
+#include "engine_dialog.h"
 #include "i18n.h"
 
 using namespace std;
@@ -34,7 +36,25 @@ ArdourStartup::ArdourStartup ()
 Ardour will play NO role in monitoring"))
 	, monitor_via_ardour_button (_("Ask Ardour to playback material as it is being recorded"))
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
+	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
+	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
+	, _control_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
+	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
+
 {
+	audio_page_index = -1;
+	initial_choice_index = -1;
+	new_user_page_index = -1;
+	default_folder_page_index = -1;
+	monitoring_page_index = -1;
+	session_page_index = -1;
+	final_page_index = -1;
+	session_options_page_index = -1;
+
+	engine_dialog = 0;
+	config_modified = false;
+	default_dir_chooser = 0;
+
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
 
@@ -54,19 +74,35 @@ Ardour will play NO role in monitoring"))
 
 	sys::path been_here_before = user_config_directory();
 	been_here_before /= ".a3"; // XXXX use more specific version so we can catch upgrades
-	
-	if (!exists (been_here_before)) {
-		// XXX touch been_here_before;
+	bool new_user = !exists (been_here_before);
+	bool need_audio_setup = !EngineControl::engine_running();
+
+	if (new_user) {
+		/* "touch" the file */
+		ofstream fout (been_here_before.to_string().c_str());
 		setup_new_user_page ();
 		setup_first_time_config_page ();
 		setup_monitoring_choice_page ();
+
+		if (need_audio_setup) {
+			setup_audio_page ();
+		}
+
 	} else {
+
+		if (need_audio_setup) {
+			setup_audio_page ();
+		}
+
 		setup_initial_choice_page ();
 	}
 
 	setup_session_page ();
 	setup_more_options_page ();
-	setup_final_page ();
+
+	if (new_user) {
+		setup_final_page ();
+	}
 
 	the_startup = this;
 }
@@ -75,18 +111,70 @@ ArdourStartup::~ArdourStartup ()
 {
 }
 
+Glib::ustring
+ArdourStartup::session_name (bool& should_be_new)
+{
+	if (ic_new_session_button.get_active()) {
+		should_be_new = true;
+		return new_name_entry.get_text ();
+	} else {
+		should_be_new = false;
+
+		TreeIter iter = recent_session_display.get_selection()->get_selected();
+		
+		if (iter) {
+			return (*iter)[recent_session_columns.visible_name];
+		}
+
+		return "";
+	}
+}
+
+Glib::ustring
+ArdourStartup::session_folder ()
+{
+	if (ic_new_session_button.get_active()) {
+		return new_folder_chooser.get_current_folder();
+	} else {
+		TreeIter iter = recent_session_display.get_selection()->get_selected();
+
+		if (iter) {
+			return (*iter)[recent_session_columns.fullpath];
+		} 
+		return "";
+	}
+}
+
+void
+ArdourStartup::setup_audio_page ()
+{
+	engine_dialog = manage (new EngineControl);
+
+	engine_dialog->show_all ();
+
+	audio_page_index = append_page (*engine_dialog);
+	set_page_type (*engine_dialog, ASSISTANT_PAGE_CONTENT);
+	set_page_title (*engine_dialog, _("Audio Setup"));
+	
+	/* the default parameters should work, so the page is potentially complete */
+
+	set_page_complete (*engine_dialog, true);
+}
+
 void
 ArdourStartup::setup_new_user_page ()
 {
-	Label* foomatic = manage (new Label (_("\
-Ardour is a digital audio workstation. You can use it to\n\
+	Label* foomatic = manage (new Label);
+
+	foomatic->set_markup (_("\
+<span size=\"larger\">Ardour is a digital audio workstation. You can use it to\n\
 record, edit and mix multi-track audio. You can produce your\n\
 own CDs, mix video soundtracks, or just experiment with new\n\
 ideas about music and sound.\n\
 \n\
 There are a few things that need to configured before you start\n\
-using the program.\
-")));
+using the program.</span>\
+"));
 	
 	HBox* hbox = manage (new HBox);
 	HBox* vbox = manage (new HBox);
@@ -101,7 +189,7 @@ using the program.\
 	hbox->show ();
 	vbox->show ();
 
-	append_page (*vbox);
+	new_user_page_index = append_page (*vbox);
 	set_page_type (*vbox, ASSISTANT_PAGE_INTRO);
 	set_page_title (*vbox, _("Welcome to Ardour"));
 	set_page_header_image (*vbox, icon_pixbuf);
@@ -109,9 +197,17 @@ using the program.\
 }
 
 void
+ArdourStartup::default_dir_changed ()
+{
+	Config->set_default_session_parent_dir (default_dir_chooser->get_current_folder());
+	config_modified = true;
+}
+
+void
 ArdourStartup::setup_first_time_config_page ()
 {
-	Gtk::FileChooserButton* fcb = manage (new FileChooserButton (_("Default session folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER));
+	default_dir_chooser = manage (new FileChooserButton (_("Default folder for Ardour sessions"), 
+							     FILE_CHOOSER_ACTION_SELECT_FOLDER));
 	Gtk::Label* txt = manage (new Label);
 	HBox* hbox1 = manage (new HBox);
 	VBox* vbox = manage (new VBox);
@@ -126,16 +222,26 @@ Where would you like new Ardour sessions to be stored by default?\n\
 	hbox1->set_border_width (6);
 	vbox->set_border_width (6);
 
-	hbox1->pack_start (*fcb, false, true);
+	hbox1->pack_start (*default_dir_chooser, false, true);
 	vbox->pack_start (*txt, false, true);
 	vbox->pack_start (*hbox1, false, true);
 
-	fcb->show ();
+	string def = Config->get_default_session_parent_dir();
+
+	/* XXX really need glob here */
+
+	if (def == "~") {
+		def = Glib::get_home_dir();
+	}
+	default_dir_chooser->set_current_folder (def);
+	default_dir_chooser->signal_current_folder_changed().connect (mem_fun (*this, &ArdourStartup::default_dir_changed));
+	default_dir_chooser->show ();
+
 	txt->show ();
 	hbox1->show ();
 	vbox->show ();
 
-	append_page (*vbox);
+	default_folder_page_index = append_page (*vbox);
 	set_page_title (*vbox, _("Default folder for new sessions"));
 	set_page_header_image (*vbox, icon_pixbuf);
 	set_page_type (*vbox, ASSISTANT_PAGE_CONTENT);
@@ -162,16 +268,16 @@ configuration of that equipment. The two most common are presented here.\n\
 Please choose whichever one is right for your setup.\n\n\
 <i>You can change this preference at any time, via the Options menu</i>");
 
-	mon_vbox.pack_start (monitor_label);
-	mon_vbox.pack_start (monitor_via_hardware_button);
-	mon_vbox.pack_start (monitor_via_ardour_button);
+	mon_vbox.pack_start (monitor_label, false, false);
+	mon_vbox.pack_start (monitor_via_hardware_button, false, false);
+	mon_vbox.pack_start (monitor_via_ardour_button, false, false);
 
 	mon_vbox.show ();
 	monitor_label.show ();
 	monitor_via_ardour_button.show ();
 	monitor_via_hardware_button.show ();
 
-	append_page (mon_vbox);
+	monitoring_page_index = append_page (mon_vbox);
 	set_page_title (mon_vbox, _("Monitoring Choices"));
 	set_page_header_image (mon_vbox, icon_pixbuf);
 
@@ -191,14 +297,23 @@ ArdourStartup::setup_initial_choice_page ()
 	RadioButton::Group g (ic_new_session_button.get_group());
 	ic_existing_session_button.set_group (g);
 
-	ic_vbox.pack_start (ic_new_session_button);
-	ic_vbox.pack_start (ic_existing_session_button);
+	HBox* centering_hbox = manage (new HBox);
+	VBox* centering_vbox = manage (new VBox);
+	
+	centering_vbox->pack_start (ic_new_session_button, false, true);
+	centering_vbox->pack_start (ic_existing_session_button, false, true);
+	centering_vbox->show ();
+
+	centering_hbox->pack_start (*centering_vbox, true, true);
+	centering_hbox->show ();
+
+	ic_vbox.pack_start (*centering_hbox, true, true);
 
 	ic_new_session_button.show ();
 	ic_existing_session_button.show ();
 	ic_vbox.show ();
 
-	append_page (ic_vbox);
+	initial_choice_index = append_page (ic_vbox);
 	set_page_title (ic_vbox, _("What would you like to do?"));
 	set_page_header_image (ic_vbox, icon_pixbuf);
 
@@ -219,7 +334,9 @@ ArdourStartup::setup_session_page ()
 	session_vbox.show ();
 	session_hbox.show ();
 
-	append_page (session_vbox);
+	session_page_index = append_page (session_vbox);
+	/* initial setting */
+	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
 }
 
 void
@@ -227,7 +344,7 @@ ArdourStartup::setup_final_page ()
 {
 	final_page.set_text ("Ardour is ready for use");
 	final_page.show ();
-	append_page (final_page);
+	final_page_index = append_page (final_page);
 	set_page_complete (final_page, true);
 	set_page_header_image (final_page, icon_pixbuf);
 	set_page_type (final_page, ASSISTANT_PAGE_CONFIRM);
@@ -254,6 +371,25 @@ ArdourStartup::on_apply ()
 
 	// XXX do stuff and then ....
 
+	if (engine_dialog) {
+		engine_dialog->setup_engine ();
+	}
+
+	if (config_modified) {
+
+		if (default_dir_chooser) {
+			Config->set_default_session_parent_dir (default_dir_chooser->get_current_folder());
+		}
+		
+		if (monitor_via_hardware_button.get_active()) {
+			Config->set_monitoring_model (ExternalMonitoring);
+		} else if (monitor_via_ardour_button.get_active()) {
+			Config->set_monitoring_model (SoftwareMonitoring);
+		}
+		
+		Config->save_state ();
+	}
+
 	gtk_main_quit ();
 }
 
@@ -261,6 +397,7 @@ void
 ArdourStartup::on_prepare (Gtk::Widget* page)
 {
 	if (page == &session_vbox) {
+		
 		if (ic_new_session_button.get_active()) {
 			/* new session requested */
 			setup_new_session_page ();
@@ -268,7 +405,7 @@ ArdourStartup::on_prepare (Gtk::Widget* page)
 			/* existing session requested */
 			setup_existing_session_page ();
 		}
-	}
+	} 
 }
 
 void
@@ -294,6 +431,7 @@ ArdourStartup::setup_new_session_page ()
 		new_name_entry.show ();
 		
 		new_name_entry.signal_changed().connect (mem_fun (*this, &ArdourStartup::new_name_changed));
+		new_name_entry.signal_activate().connect (mem_fun (*this, &ArdourStartup::move_along_now));
 		
 		HBox* hbox2 = manage (new HBox);
 		Label* label2 = manage (new Label);
@@ -303,7 +441,16 @@ ArdourStartup::setup_new_session_page ()
 		hbox2->pack_start (new_folder_chooser, true, true);
 		
 		label2->set_text (_("Create session folder in:"));
-		new_folder_chooser.set_current_folder(getenv ("HOME"));
+		
+		string def = Config->get_default_session_parent_dir();
+		
+		/* XXX really need glob here */
+		
+		if (def == "~") {
+			def = Glib::get_home_dir();
+		}
+
+		new_folder_chooser.set_current_folder (def);
 		new_folder_chooser.set_title (_("Select folder for session"));
 		
 		hbox2->show();
@@ -360,6 +507,9 @@ ArdourStartup::setup_new_session_page ()
 	session_new_vbox.show ();
 	session_hbox.pack_start (session_new_vbox, false, false);
 	set_page_title (session_vbox, _("New Session"));
+	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
+
+	new_name_entry.grab_focus ();
 }
 
 void
@@ -396,11 +546,10 @@ ArdourStartup::redisplay_recent_sessions ()
 	        session_directories.push_back ((*i).second);
 	}
 	
-	for (vector<sys::path>::const_iterator i = session_directories.begin();
-			i != session_directories.end(); ++i)
+	for (vector<sys::path>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
 	{
 		std::vector<sys::path> state_file_paths;
-	    
+
 		// now get available states for this session
 
 		get_state_files_in_directory (*i, state_file_paths);
@@ -418,7 +567,6 @@ ArdourStartup::redisplay_recent_sessions ()
 		/* check whether session still exists */
 		if (!Glib::file_test(fullpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 			/* session doesn't exist */
-			cerr << "skipping non-existent session " << fullpath << endl;
 			continue;
 		}		
 		
@@ -490,6 +638,7 @@ ArdourStartup::setup_existing_session_page ()
 
 	recent_scroller.show();
 	redisplay_recent_sessions ();
+	recent_session_display.signal_row_activated().connect (mem_fun (*this, &ArdourStartup::recent_row_activated));
 
 	session_hbox.pack_start (recent_scroller, true, true);
 	set_page_title (session_vbox, _("Select a session"));
@@ -500,8 +649,11 @@ void
 ArdourStartup::more_new_session_options_button_clicked ()
 {
 	if (more_new_session_options_button.get_active()) {
-		more_options_vbox.show ();
+		more_options_vbox.show_all ();
+		set_page_type (more_options_vbox, ASSISTANT_PAGE_CONFIRM);
+		set_page_type (session_vbox, ASSISTANT_PAGE_CONTENT);
 	} else {
+		set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
 		more_options_vbox.hide ();
 	}
 }
@@ -509,24 +661,354 @@ ArdourStartup::more_new_session_options_button_clicked ()
 void
 ArdourStartup::setup_more_options_page ()
 {
-	Label* foomatic = manage (new Label);
-	foomatic->set_text (_("Here be more options...."));
-	foomatic->show ();
-
 	more_options_vbox.set_border_width (12);
-	more_options_hbox.set_border_width (12);
-	
-	more_options_hbox.pack_start (*foomatic, true, true);
-	more_options_vbox.pack_start (more_options_hbox, true, true);
 
-	more_options_hbox.show ();
+	_output_limit_count.set_adjustment (_output_limit_count_adj);
+	_input_limit_count.set_adjustment (_input_limit_count_adj);
+	_control_bus_channel_count.set_adjustment (_control_bus_channel_count_adj);
+	_master_bus_channel_count.set_adjustment (_master_bus_channel_count_adj);
+	
+	chan_count_label_1.set_text (_("channels"));
+	chan_count_label_2.set_text (_("channels"));
+	chan_count_label_3.set_text (_("channels"));
+	chan_count_label_4.set_text (_("channels"));
+
+	chan_count_label_1.set_alignment(0,0.5);
+	chan_count_label_1.set_padding(0,0);
+	chan_count_label_1.set_line_wrap(false);
+
+	chan_count_label_2.set_alignment(0,0.5);
+	chan_count_label_2.set_padding(0,0);
+	chan_count_label_2.set_line_wrap(false);
+
+	chan_count_label_3.set_alignment(0,0.5);
+	chan_count_label_3.set_padding(0,0);
+	chan_count_label_3.set_line_wrap(false);
+
+	chan_count_label_4.set_alignment(0,0.5);
+	chan_count_label_4.set_padding(0,0);
+	chan_count_label_4.set_line_wrap(false);
+
+	bus_label.set_markup (_("<b>Busses</b>"));
+	input_label.set_markup (_("<b>Inputs</b>"));
+	output_label.set_markup (_("<b>Outputs</b>"));
+
+	_create_control_bus.set_label (_("Create monitor bus"));
+	_create_control_bus.set_flags(Gtk::CAN_FOCUS);
+	_create_control_bus.set_relief(Gtk::RELIEF_NORMAL);
+	_create_control_bus.set_mode(true);
+	_create_control_bus.set_active(false);
+	_create_control_bus.set_border_width(0);
+
+	_control_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
+	_control_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
+	_control_bus_channel_count.set_numeric(true);
+	_control_bus_channel_count.set_digits(0);
+	_control_bus_channel_count.set_wrap(false);
+	_control_bus_channel_count.set_sensitive(false);
+
+	_master_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
+	_master_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
+	_master_bus_channel_count.set_numeric(true);
+	_master_bus_channel_count.set_digits(0);
+	_master_bus_channel_count.set_wrap(false);
+
+	_create_master_bus.set_label (_("Create master bus"));
+	_create_master_bus.set_flags(Gtk::CAN_FOCUS);
+	_create_master_bus.set_relief(Gtk::RELIEF_NORMAL);
+	_create_master_bus.set_mode(true);
+	_create_master_bus.set_active(true);
+	_create_master_bus.set_border_width(0);
+
+	advanced_table.set_row_spacings(0);
+	advanced_table.set_col_spacings(0);
+	
+	_connect_inputs.set_label (_("Automatically connect to physical_inputs"));
+	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
+	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
+	_connect_inputs.set_mode(true);
+	_connect_inputs.set_active(true);
+	_connect_inputs.set_border_width(0);
+	
+	_limit_input_ports.set_label (_("Use only"));
+	_limit_input_ports.set_flags(Gtk::CAN_FOCUS);
+	_limit_input_ports.set_relief(Gtk::RELIEF_NORMAL);
+	_limit_input_ports.set_mode(true);
+	_limit_input_ports.set_sensitive(true);
+	_limit_input_ports.set_border_width(0);
+
+	_input_limit_count.set_flags(Gtk::CAN_FOCUS);
+	_input_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
+	_input_limit_count.set_numeric(true);
+	_input_limit_count.set_digits(0);
+	_input_limit_count.set_wrap(false);
+	_input_limit_count.set_sensitive(false);
+
+	bus_hbox.pack_start (bus_table, Gtk::PACK_SHRINK, 18);
+
+	bus_label.set_alignment(0, 0.5);
+	bus_label.set_padding(0,0);
+	bus_label.set_line_wrap(false);
+	bus_label.set_selectable(false);
+	bus_label.set_use_markup(true);
+	bus_frame.set_shadow_type(Gtk::SHADOW_NONE);
+	bus_frame.set_label_align(0,0.5);
+	bus_frame.add(bus_hbox);
+	bus_frame.set_label_widget(bus_label);
+	
+	bus_table.set_row_spacings (0);
+	bus_table.set_col_spacings (0);
+	bus_table.attach (_create_master_bus, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
+	bus_table.attach (_master_bus_channel_count, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
+	bus_table.attach (chan_count_label_1, 2, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 0);
+	bus_table.attach (_create_control_bus, 0, 1, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
+	bus_table.attach (_control_bus_channel_count, 1, 2, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
+	bus_table.attach (chan_count_label_2, 2, 3, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 0);
+
+	input_port_limit_hbox.pack_start(_limit_input_ports, Gtk::PACK_SHRINK, 6);
+	input_port_limit_hbox.pack_start(_input_limit_count, Gtk::PACK_SHRINK, 0);
+	input_port_limit_hbox.pack_start(chan_count_label_3, Gtk::PACK_SHRINK, 6);
+	input_port_vbox.pack_start(_connect_inputs, Gtk::PACK_SHRINK, 0);
+	input_port_vbox.pack_start(input_port_limit_hbox, Gtk::PACK_EXPAND_PADDING, 0);
+	input_table.set_row_spacings(0);
+	input_table.set_col_spacings(0);
+	input_table.attach(input_port_vbox, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 6);
+
+	input_hbox.pack_start (input_table, Gtk::PACK_SHRINK, 18);
+
+	input_label.set_alignment(0, 0.5);
+	input_label.set_padding(0,0);
+	input_label.set_line_wrap(false);
+	input_label.set_selectable(false);
+	input_label.set_use_markup(true);
+	input_frame.set_shadow_type(Gtk::SHADOW_NONE);
+	input_frame.set_label_align(0,0.5);
+	input_frame.add(input_hbox);
+	input_frame.set_label_widget(input_label);
+
+	_connect_outputs.set_label (_("Automatically connect outputs"));
+	_connect_outputs.set_flags(Gtk::CAN_FOCUS);
+	_connect_outputs.set_relief(Gtk::RELIEF_NORMAL);
+	_connect_outputs.set_mode(true);
+	_connect_outputs.set_active(true);
+	_connect_outputs.set_border_width(0);
+	_limit_output_ports.set_label (_("Use only"));
+	_limit_output_ports.set_flags(Gtk::CAN_FOCUS);
+	_limit_output_ports.set_relief(Gtk::RELIEF_NORMAL);
+	_limit_output_ports.set_mode(true);
+	_limit_output_ports.set_sensitive(true);
+	_limit_output_ports.set_border_width(0);
+	_output_limit_count.set_flags(Gtk::CAN_FOCUS);
+	_output_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
+	_output_limit_count.set_numeric(false);
+	_output_limit_count.set_digits(0);
+	_output_limit_count.set_wrap(false);
+	_output_limit_count.set_sensitive(false);
+	output_port_limit_hbox.pack_start(_limit_output_ports, Gtk::PACK_SHRINK, 6);
+	output_port_limit_hbox.pack_start(_output_limit_count, Gtk::PACK_SHRINK, 0);
+	output_port_limit_hbox.pack_start(chan_count_label_4, Gtk::PACK_SHRINK, 6);
+
+	_connect_outputs_to_master.set_label (_("... to master bus"));
+	_connect_outputs_to_master.set_flags(Gtk::CAN_FOCUS);
+	_connect_outputs_to_master.set_relief(Gtk::RELIEF_NORMAL);
+	_connect_outputs_to_master.set_mode(true);
+	_connect_outputs_to_master.set_active(false);
+	_connect_outputs_to_master.set_border_width(0);
+
+	_connect_outputs_to_master.set_group (connect_outputs_group);
+	_connect_outputs_to_physical.set_group (connect_outputs_group);
+
+	_connect_outputs_to_physical.set_label (_("... to physical outputs"));
+	_connect_outputs_to_physical.set_flags(Gtk::CAN_FOCUS);
+	_connect_outputs_to_physical.set_relief(Gtk::RELIEF_NORMAL);
+	_connect_outputs_to_physical.set_mode(true);
+	_connect_outputs_to_physical.set_active(false);
+	_connect_outputs_to_physical.set_border_width(0);
+
+	output_conn_vbox.pack_start(_connect_outputs, Gtk::PACK_SHRINK, 0);
+	output_conn_vbox.pack_start(_connect_outputs_to_master, Gtk::PACK_SHRINK, 0);
+	output_conn_vbox.pack_start(_connect_outputs_to_physical, Gtk::PACK_SHRINK, 0);
+	output_vbox.set_border_width(6);
+
+	output_port_vbox.pack_start(output_port_limit_hbox, Gtk::PACK_SHRINK, 0);
+
+	output_vbox.pack_start(output_conn_vbox);
+	output_vbox.pack_start(output_port_vbox);
+
+	output_label.set_alignment(0, 0.5);
+	output_label.set_padding(0,0);
+	output_label.set_line_wrap(false);
+	output_label.set_selectable(false);
+	output_label.set_use_markup(true);
+	output_frame.set_shadow_type(Gtk::SHADOW_NONE);
+	output_frame.set_label_align(0,0.5);
+
+	output_hbox.pack_start (output_vbox, Gtk::PACK_SHRINK, 18);
+
+	output_frame.add(output_hbox);
+	output_frame.set_label_widget(output_label);
+
+	more_options_vbox.pack_start(advanced_table, Gtk::PACK_SHRINK, 0);
+	more_options_vbox.pack_start(bus_frame, Gtk::PACK_SHRINK, 6);
+	more_options_vbox.pack_start(input_frame, Gtk::PACK_SHRINK, 6);
+	more_options_vbox.pack_start(output_frame, Gtk::PACK_SHRINK, 0);
+
+	/* signals */
+
+	_connect_inputs.signal_clicked().connect (mem_fun (*this, &ArdourStartup::connect_inputs_clicked));
+	_connect_outputs.signal_clicked().connect (mem_fun (*this, &ArdourStartup::connect_outputs_clicked));
+	_limit_input_ports.signal_clicked().connect (mem_fun (*this, &ArdourStartup::limit_inputs_clicked));
+	_limit_output_ports.signal_clicked().connect (mem_fun (*this, &ArdourStartup::limit_outputs_clicked));
+	_create_master_bus.signal_clicked().connect (mem_fun (*this, &ArdourStartup::master_bus_button_clicked));
+	_create_control_bus.signal_clicked().connect (mem_fun (*this, &ArdourStartup::monitor_bus_button_clicked));
 
 	/* note that more_options_vbox is NOT visible by
 	 * default. this is entirely by design - this page
 	 * should be skipped unless explicitly requested.
 	 */
 	
-	append_page (more_options_vbox);
+	session_options_page_index = append_page (more_options_vbox);
 	set_page_title (more_options_vbox, _("Advanced Session Options"));
 	set_page_complete (more_options_vbox, true);
+}
+
+bool
+ArdourStartup::create_master_bus() const
+{
+	return _create_master_bus.get_active();
+}
+
+int
+ArdourStartup::master_channel_count() const
+{
+	return _master_bus_channel_count.get_value_as_int();
+}
+
+bool
+ArdourStartup::create_control_bus() const
+{
+	return _create_control_bus.get_active();
+}
+
+int
+ArdourStartup::control_channel_count() const
+{
+	return _control_bus_channel_count.get_value_as_int();
+}
+
+bool
+ArdourStartup::connect_inputs() const
+{
+	return _connect_inputs.get_active();
+}
+
+bool
+ArdourStartup::limit_inputs_used_for_connection() const
+{
+	return _limit_input_ports.get_active();
+}
+
+int
+ArdourStartup::input_limit_count() const
+{
+	return _input_limit_count.get_value_as_int();
+}
+
+bool
+ArdourStartup::connect_outputs() const
+{
+	return _connect_outputs.get_active();
+}
+
+bool
+ArdourStartup::limit_outputs_used_for_connection() const
+{
+	return _limit_output_ports.get_active();
+}
+
+int
+ArdourStartup::output_limit_count() const
+{
+	return _output_limit_count.get_value_as_int();
+}
+
+bool
+ArdourStartup::connect_outs_to_master() const
+{
+	return _connect_outputs_to_master.get_active();
+}
+
+bool
+ArdourStartup::connect_outs_to_physical() const
+{
+	return _connect_outputs_to_physical.get_active();
+}
+
+void
+ArdourStartup::connect_inputs_clicked ()
+{
+	_limit_input_ports.set_sensitive(_connect_inputs.get_active());
+
+	if (_connect_inputs.get_active() && _limit_input_ports.get_active()) {
+		_input_limit_count.set_sensitive(true);
+	} else {
+		_input_limit_count.set_sensitive(false);
+	}
+}
+
+void
+ArdourStartup::connect_outputs_clicked ()
+{
+	_limit_output_ports.set_sensitive(_connect_outputs.get_active());
+
+	if (_connect_outputs.get_active() && _limit_output_ports.get_active()) {
+		_output_limit_count.set_sensitive(true);
+	} else {
+		_output_limit_count.set_sensitive(false);
+	}
+}
+
+void
+ArdourStartup::limit_inputs_clicked ()
+{
+	_input_limit_count.set_sensitive(_limit_input_ports.get_active());
+}
+
+void
+ArdourStartup::limit_outputs_clicked ()
+{
+	_output_limit_count.set_sensitive(_limit_output_ports.get_active());
+}
+
+void
+ArdourStartup::master_bus_button_clicked ()
+{
+	_master_bus_channel_count.set_sensitive(_create_master_bus.get_active());
+}
+
+void
+ArdourStartup::monitor_bus_button_clicked ()
+{
+	_control_bus_channel_count.set_sensitive(_create_control_bus.get_active());
+}
+
+void
+ArdourStartup::move_along_now ()
+{
+	gint cur = get_current_page ();
+
+	if (cur == session_page_index) {
+		if (more_new_session_options_button.get_active()) {
+			set_current_page (session_options_page_index);
+		} else {
+			on_apply ();
+		}
+	}
+}
+
+void
+ArdourStartup::recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col)
+{
+	set_page_complete (session_vbox, true);
+	move_along_now ();
 }

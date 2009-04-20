@@ -78,7 +78,6 @@ class RouteParams_UI;
 class About;
 class Splash;
 class AddRouteDialog;
-class NewSessionDialog;
 class LocationUI;
 class ThemeManager;
 class BundleManager;
@@ -122,7 +121,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_about ();
 	void hide_about ();
 
-	void idle_load (const Glib::ustring& path);
 	void finish();
 
 	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
@@ -531,8 +529,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	gint session_menu (GdkEventButton *);
 
 	bool _will_create_new_session_automatically;
-
-	NewSessionDialog* new_session_dialog;
 
 	void open_session ();
 	void open_recent_session ();

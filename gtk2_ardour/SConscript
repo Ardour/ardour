@@ -204,7 +204,6 @@ midi_time_axis.cc
 mixer_strip.cc
 mixer_ui.cc
 nag.cc
-new_session_dialog.cc
 option_editor.cc
 opts.cc
 panner.cc
