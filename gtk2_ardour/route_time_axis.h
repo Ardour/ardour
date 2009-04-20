@@ -283,6 +283,7 @@ protected:
 	Gtk::RadioMenuItem* align_existing_item;
 	Gtk::RadioMenuItem* align_capture_item;
 	Gtk::RadioMenuItem* normal_track_mode_item;
+	Gtk::RadioMenuItem* non_layered_track_mode_item;
 	Gtk::RadioMenuItem* destructive_track_mode_item;
 	Gtk::Menu*          playlist_menu;
 	Gtk::Menu*          playlist_action_menu;
@@ -298,7 +299,7 @@ protected:
 	ArdourCanvas::SimpleRect* timestretch_rect;
 
 	void set_track_mode (ARDOUR::TrackMode);
-	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item);
+	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item, Gtk::RadioMenuItem* reset_item_2);
 	void track_mode_changed ();
 
 	list<ProcessorAutomationInfo*> processor_automation;

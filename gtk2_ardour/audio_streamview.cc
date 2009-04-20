@@ -134,6 +134,8 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	}
 
 	switch (_trackview.audio_track()->mode()) {
+	
+	case NonLayered:
 	case Normal:
 		if (recording) {
 			region_view = new AudioRegionView (canvas_group, _trackview, region, 
@@ -519,6 +521,7 @@ AudioStreamView::setup_rec_box ()
 
 			switch (_trackview.audio_track()->mode()) {
 			case Normal:
+			case NonLayered:
 				xend = xstart;
 				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 				break;

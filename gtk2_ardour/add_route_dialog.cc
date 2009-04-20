@@ -56,6 +56,7 @@ static const char* channel_setup_names[] = {
 
 static const char* track_mode_names[] = {
 	N_("Normal"),
+	N_("Non Layered"),
 	N_("Tape"),
 	0
 };
@@ -273,6 +274,8 @@ AddRouteDialog::mode ()
 	Glib::ustring str = track_mode_combo.get_active_text();
 	if (str == _("Normal")) {
 		return ARDOUR::Normal;
+	} else if (str == _("Non Layered")){
+		return ARDOUR::NonLayered;
 	} else if (str == _("Tape")) {
 		return ARDOUR::Destructive;
 	} else {

@@ -386,6 +386,13 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "trim-to-previous-region", _("Trim to Previous"), mem_fun(*this, &Editor::trim_region_to_previous_region_end));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "trim-to-next-region", _("Trim to Next"), mem_fun(*this, &Editor::trim_region_to_next_region_start));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "set-loop-from-edit-range", _("Set Loop from Edit Range"), bind (mem_fun(*this, &Editor::set_loop_from_edit_range), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-loop-from-region", _("Set Loop from Region"), bind (mem_fun(*this, &Editor::set_loop_from_region), false));

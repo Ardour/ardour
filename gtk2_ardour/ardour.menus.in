@@ -185,6 +185,8 @@
 		   <menuitem action='crop'/>
 		   <menuitem action='trim-region-to-loop'/>
 		   <menuitem action='trim-region-to-punch'/>
+		   <menuitem action='trim-to-previous-region'/>
+		   <menuitem action='trim-to-next-region'/>
 	       </menu>
 	       <menu action="FadeMenu">
 		   <menuitem action='set-fade-in-length'/>

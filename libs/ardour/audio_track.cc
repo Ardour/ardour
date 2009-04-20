@@ -77,7 +77,10 @@ AudioTrack::use_new_diskstream ()
 
 	if (_mode == Destructive) {
 		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);
+	} else if (_mode == NonLayered){
+		dflags = AudioDiskstream::Flag(dflags | AudioDiskstream::NonLayered);
 	}
+    
 
 	boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, name(), dflags));
 	
@@ -94,7 +97,8 @@ AudioTrack::set_mode (TrackMode m)
 		if (_diskstream->set_destructive (m == Destructive)) {
 			return -1;
 		}
-
+		
+		_diskstream->set_non_layered (m == NonLayered);
 		_mode = m;
 		
 		TrackModeChanged (); /* EMIT SIGNAL */
@@ -107,6 +111,7 @@ bool
 AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
 {
 	switch (m) {
+	case NonLayered:
 	case Normal:
 		bounce_required = false;
 		return true;
@@ -177,6 +182,7 @@ AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void *src)
 	_diskstream = ds;
 	_diskstream->set_io (*this);
 	_diskstream->set_destructive (_mode == Destructive);
+	_diskstream->set_non_layered (_mode == NonLayered);
 
 	if (audio_diskstream()->deprecated_io_node) {
 

@@ -245,9 +245,15 @@ AudioTimeAxisView::build_mode_menu()
 	mode_menu->set_name ("ArdourContextMenu");
 
 	RadioMenuItem::Group mode_group;
+
 	items.push_back (RadioMenuElem (mode_group, _("Normal"),
 				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Normal)));
 	normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+
+	items.push_back (RadioMenuElem (mode_group, _("Non Overlapping"),
+				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
+	non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+
 	items.push_back (RadioMenuElem (mode_group, _("Tape"),
 				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Destructive)));
 	destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
@@ -255,6 +261,9 @@ AudioTimeAxisView::build_mode_menu()
 	switch (track()->mode()) {
 		case ARDOUR::Destructive:
 			destructive_track_mode_item->set_active ();
+			break;
+		case ARDOUR::NonLayered:
+			non_layered_track_mode_item->set_active ();
 			break;
 		case ARDOUR::Normal:
 			normal_track_mode_item->set_active ();

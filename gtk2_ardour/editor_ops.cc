@@ -3476,6 +3476,49 @@ Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint poi
 	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
 }	
 
+void
+Editor::trim_region_front ()
+{
+	trim_region (true);
+}
+
+void
+Editor::trim_region_back ()
+{
+	trim_region (false);
+}
+
+void
+Editor::trim_region (bool front)
+{
+	nframes64_t where = get_preferred_edit_position();
+	RegionSelection rs;
+
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
+	}
+
+	begin_reversible_command (front ? _("trim front") : _("trim back"));
+
+	for (list<RegionView*>::const_iterator i = rs.by_layer().begin(); i != rs.by_layer().end(); ++i) {
+		if (!(*i)->region()->locked()) {
+			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
+			XMLNode &before = pl->get_state();
+			if (front) {
+				(*i)->region()->trim_front (where, this);	
+			} else {
+				(*i)->region()->trim_end (where, this);	
+			}
+			XMLNode &after = pl->get_state();
+			session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+		}
+	}
+
+	commit_reversible_command ();
+}
+
 /** Trim the end of the selected regions to the position of the edit cursor */
 void
 Editor::trim_region_to_loop ()
@@ -3619,6 +3662,85 @@ Editor::trim_region_from_edit_point ()
 				*(rv->region()->playlist()), &before, &after));
 	}
 		
+	commit_reversible_command ();
+}
+
+void
+Editor::trim_region_to_previous_region_end ()
+{
+	return trim_to_region(false);
+}
+
+void
+Editor::trim_region_to_next_region_start ()
+{
+	return trim_to_region(true);
+}
+
+void
+Editor::trim_to_region(bool forward)
+{
+	RegionSelection rs;
+
+	get_regions_for_action (rs);
+
+	begin_reversible_command (_("trim to region"));
+
+	boost::shared_ptr<Region> next_region;
+
+	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
+
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!arv) {
+			continue;
+		}
+
+		AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&arv->get_time_axis_view());
+
+		if (!atav) {
+			return;
+		}
+
+		float speed = 1.0;
+
+		if (atav->get_diskstream() != 0) {
+			speed = atav->get_diskstream()->speed();
+		}
+
+		
+		boost::shared_ptr<Region> region = arv->region();
+		boost::shared_ptr<Playlist> playlist (region->playlist());
+		
+		XMLNode &before = playlist->get_state();
+
+		if(forward){
+
+		    next_region = playlist->find_next_region (region->first_frame(), Start, 1);
+
+		    if(!next_region){
+			continue;
+		    }
+
+		    region->trim_end((nframes64_t) (next_region->first_frame() * speed), this);
+		    arv->region_changed (Change (LengthChanged));
+		}
+		else {
+
+		    next_region = playlist->find_next_region (region->first_frame(), Start, 0);
+
+		    if(!next_region){
+			continue;
+		    }
+
+		    region->trim_front((nframes64_t) ((next_region->last_frame() + 1) * speed), this);		    
+		    arv->region_changed (Change (LengthChanged|PositionChanged|StartChanged));
+		}
+
+		XMLNode &after = playlist->get_state();
+		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+	}
+
 	commit_reversible_command ();
 }
 
@@ -5205,49 +5327,6 @@ Editor::ensure_entered_track_selected (bool op_really_wants_one_track_if_none_ar
 			}
 		}
 	}
-}
-
-void
-Editor::trim_region_front ()
-{
-	trim_region (true);
-}
-
-void
-Editor::trim_region_back ()
-{
-	trim_region (false);
-}
-
-void
-Editor::trim_region (bool front)
-{
-	nframes64_t where = get_preferred_edit_position();
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
-
-	if (rs.empty()) {
-		return;
-	}
-
-	begin_reversible_command (front ? _("trim front") : _("trim back"));
-
-	for (list<RegionView*>::const_iterator i = rs.by_layer().begin(); i != rs.by_layer().end(); ++i) {
-		if (!(*i)->region()->locked()) {
-			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
-			XMLNode &before = pl->get_state();
-			if (front) {
-				(*i)->region()->trim_front (where, this);	
-			} else {
-				(*i)->region()->trim_end (where, this);	
-			}
-			XMLNode &after = pl->get_state();
-			session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
-		}
-	}
-
-	commit_reversible_command ();
 }
 
 struct EditorOrderRouteSorter {

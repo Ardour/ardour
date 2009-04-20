@@ -424,6 +424,8 @@ StreamView::update_rec_box ()
 		double xend;
 		
 		switch (_trackview.track()->mode()) {
+		
+		case NonLayered:
 		case Normal:
 			rect.length = at - rect.start;
 			xstart = _trackview.editor().frame_to_pixel (rect.start);

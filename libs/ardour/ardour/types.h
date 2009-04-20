@@ -135,6 +135,7 @@ namespace ARDOUR {
 
 	enum TrackMode {
 		Normal,
+		NonLayered,
 		Destructive
 	};
 

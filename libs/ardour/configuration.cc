@@ -129,7 +129,8 @@ Configuration::load_state ()
 			"ardour.rc", user_rc_file))
 	{
 		XMLTree tree;
-		
+		found = true;
+
 		string rcfile = user_rc_file.to_string();
 
 		/* stupid XML parser hates empty files */

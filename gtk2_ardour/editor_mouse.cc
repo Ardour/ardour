@@ -4340,6 +4340,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		if (changed_tracks || drag_info.copy) {
 
 			boost::shared_ptr<Playlist> to_playlist = dest_rtv->playlist();
+			
 			if (!to_playlist) {
 				++i;
 				continue;
@@ -4350,6 +4351,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			sigc::connection c = dest_rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			
 			insert_result = modified_playlists.insert (to_playlist);
+			
 			if (insert_result.second) {
 				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
 			}
@@ -4380,11 +4382,13 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
 			insert_result = modified_playlists.insert (playlist);
+			
 			if (insert_result.second) {
 				session->add_command (new MementoCommand<Playlist>(*playlist, &playlist->get_state(), 0));
 			}
 			/* freeze to avoid lots of relayering in the case of a multi-region drag */
 			frozen_insert_result = frozen_playlists.insert(playlist);
+			
 			if (frozen_insert_result.second) {
 				playlist->freeze();
 			}
@@ -4416,6 +4420,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			/* remove the region from the old playlist */
 
 			insert_result = modified_playlists.insert (from_playlist);
+			
 			if (insert_result.second) {
 				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));
 			}
@@ -4478,13 +4483,13 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		for (set<boost::shared_ptr<Playlist> >::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
 			session->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));	
 		}
+
 		commit_reversible_command ();
 	}
 
 	for (vector<RegionView*>::iterator x = copies.begin(); x != copies.end(); ++x) {
 		delete *x;
 	}
-
 }
 	
 void
@@ -4807,6 +4812,7 @@ Editor::cancel_selection ()
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
+
 	selection->clear ();
 	clicked_selection = 0;
 }	
@@ -5075,6 +5081,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	RegionView* rv = clicked_regionview;
 	nframes64_t frame_delta = 0;
+
 	bool left_direction;
 	bool obey_snap = !Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier());
 
@@ -5129,11 +5136,14 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			(*i)->region()->freeze ();
 		
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-			if (arv)
+
+			if (arv){
 				arv->temporarily_hide_envelope ();
+			}
 
 			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
 			insert_result = motion_frozen_playlists.insert (pl);
+
 			if (insert_result.second) {
 				session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
 				pl->freeze();
@@ -5147,13 +5157,20 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		frame_delta = (drag_info.current_pointer_frame - drag_info.last_pointer_frame);
 	}
 
+	bool non_overlap_trim = false;
+
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+		non_overlap_trim = true;
+	}
+
 	switch (trim_op) {		
 	case StartTrim:
 		if ((left_direction == false) && (drag_info.current_pointer_frame <= rv->region()->first_frame()/speed)) {
 			break;
 		} else {
+
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-				single_start_trim (**i, frame_delta, left_direction, obey_snap);
+				single_start_trim (**i, frame_delta, left_direction, obey_snap, non_overlap_trim);
 			}
 			break;
 		}
@@ -5162,8 +5179,9 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		if ((left_direction == true) && (drag_info.current_pointer_frame > (nframes64_t) (rv->region()->last_frame()/speed))) {
 			break;
 		} else {
+
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-				single_end_trim (**i, frame_delta, left_direction, obey_snap);
+				single_end_trim (**i, frame_delta, left_direction, obey_snap, non_overlap_trim);
 			}
 			break;
 		}
@@ -5242,7 +5260,7 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 }
 
 void
-Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool obey_snap)
+Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool obey_snap, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());	
 
@@ -5269,14 +5287,37 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 	if (obey_snap) {
 		snap_to (new_bound, (left_direction ? 0 : 1));	
 	}
+	
+	nframes64_t pre_trim_first_frame = region->first_frame();
 
 	region->trim_front ((nframes64_t) (new_bound * speed), this);
+  
+	if (no_overlap) {
+		//Get the next region on the left of this region and shrink/expand it.
+		boost::shared_ptr<Playlist> playlist (region->playlist());
+		boost::shared_ptr<Region> region_left = playlist->find_next_region (pre_trim_first_frame, End, 0);
+		
+		bool regions_touching = false;
+
+		if (region_left != 0 && (pre_trim_first_frame == region_left->last_frame() + 1)){
+		    regions_touching = true;
+		}
+
+		//Only trim region on the left if the first frame has gone beyond the left region's last frame.
+		if (region_left != 0 && 
+			(region_left->last_frame() > region->first_frame() || regions_touching)) 
+		{
+			region_left->trim_end(region->first_frame(), this);
+		}
+	}
+
+	
 
 	rv.region_changed (Change (LengthChanged|PositionChanged|StartChanged));
 }
 
 void
-Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool obey_snap)
+Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool obey_snap, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -5293,7 +5334,7 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
 	}
-	
+
 	if (left_direction) {
 		new_bound = (nframes64_t) ((region->last_frame() + 1)/speed) - frame_delta;
 	} else {
@@ -5303,10 +5344,37 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 	if (obey_snap) {
 		snap_to (new_bound);
 	}
+
+	nframes64_t pre_trim_last_frame = region->last_frame();
+
 	region->trim_end ((nframes64_t) (new_bound * speed), this);
-	rv.region_changed (LengthChanged);
+
+	if (no_overlap) {
+		//Get the next region on the right of this region and shrink/expand it.
+		boost::shared_ptr<Playlist> playlist (region->playlist());
+		boost::shared_ptr<Region> region_right = playlist->find_next_region (pre_trim_last_frame, Start, 1);
+
+		bool regions_touching = false;
+
+		if (region_right != 0 && (pre_trim_last_frame == region_right->first_frame() - 1)){
+		    regions_touching = true;
+		}
+
+		//Only trim region on the right if the last frame has gone beyond the right region's first frame.
+		if (region_right != 0 &&
+			(region_right->first_frame() < region->last_frame() || regions_touching)) 
+		{
+			region_right->trim_front(region->last_frame() + 1, this);
+		}
+		
+		rv.region_changed (Change (LengthChanged|PositionChanged|StartChanged));
+	}
+	else {
+		rv.region_changed (LengthChanged);
+	}
 }
-	
+
+
 void
 Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
@@ -5343,6 +5411,7 @@ void
 Editor::point_trim (GdkEvent* event)
 {
 	RegionView* rv = clicked_regionview;
+
 	nframes64_t new_bound = drag_info.current_pointer_frame;
 
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
@@ -5356,25 +5425,29 @@ Editor::point_trim (GdkEvent* event)
 		begin_reversible_command (_("Start point trim"));
 
 		if (selection->selected (rv)) {
-
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
 			     i != selection->regions.by_layer().end(); ++i)
 			{
+				if ( (*i) == NULL){
+				    cerr << "region view contains null region" << endl;
+				}
+
 				if (!(*i)->region()->locked()) {
 					boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
 					XMLNode &before = pl->get_state();
-					(*i)->region()->trim_front (new_bound, this);	
+
+					(*i)->region()->trim_front (new_bound, this);
+
 					XMLNode &after = pl->get_state();
 					session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 				}
 			}
 
 		} else {
-
 			if (!rv->region()->locked()) {
 				boost::shared_ptr<Playlist> pl = rv->region()->playlist();
 				XMLNode &before = pl->get_state();
-				rv->region()->trim_front (new_bound, this);	
+				rv->region()->trim_front (new_bound, this);
 				XMLNode &after = pl->get_state();
 				session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 			}

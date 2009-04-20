@@ -147,7 +147,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 	   its OK to block (for short intervals).
 	*/
 
-	Glib::Mutex::Lock rm (region_lock);
+	Glib::RecMutex::Lock rm (region_lock);
 
 	end =  start + cnt - 1;
 	read_frames = 0;

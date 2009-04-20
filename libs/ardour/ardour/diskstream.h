@@ -64,7 +64,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	enum Flag {
 		Recordable  = 0x1,
 		Hidden      = 0x2,
-		Destructive = 0x4
+		Destructive = 0x4,
+		NonLayered   = 0x8
 	};
 
 	Diskstream (Session &, const string& name, Flag f = Recordable);
@@ -94,10 +95,12 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	bool destructive() const { return _flags & Destructive; }
 	virtual int set_destructive (bool yn) { return -1; }
+	virtual int set_non_layered (bool yn) { return -1; }
 	virtual	bool can_become_destructive (bool& requires_bounce) const { return false; }
 
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
+	bool           non_layered()  const { return _flags & NonLayered; }
 	bool           reversed()    const { return _actual_speed < 0.0f; }
 	double         speed()       const { return _visible_speed; }
 	

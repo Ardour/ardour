@@ -152,6 +152,7 @@ setup_enum_writer ()
 	REGISTER (_MeterPoint);
 
 	REGISTER_ENUM (Normal);
+	REGISTER_ENUM (NonLayered);
 	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
 

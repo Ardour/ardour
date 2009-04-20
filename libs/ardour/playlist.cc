@@ -474,7 +474,7 @@ Playlist::flush_notifications ()
  *************************************************************/
 
 void
-Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, float times) 
+Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, float times, bool auto_partition) 
 {
 	RegionLock rlock (this);
 	times = fabs (times);
@@ -482,6 +482,10 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 	int itimes = (int) floor (times);
 
 	nframes_t pos = position;
+
+	if(times == 1 && auto_partition){
+		partition(pos, (nframes_t) (pos + region->length()), true);
+	}
 	
 	if (itimes >= 1) {
 		add_region_internal (region, pos);
@@ -510,7 +514,6 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 		add_region_internal (sub, pos);
 	}
 
-
 	possibly_splice_unlocked (position, (pos + length) - position, boost::shared_ptr<Region>());
 }
 
@@ -529,8 +532,9 @@ Playlist::set_region_ownership ()
 bool
 Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t position)
 {
-	if (region->data_type() != _type)
+	if (region->data_type() != _type){
 		return false;
+	}
 
 	RegionSortByPosition cmp;
 	nframes_t old_length = 0;
@@ -674,11 +678,11 @@ Playlist::get_region_list_equivalent_regions (boost::shared_ptr<Region> other, v
 }
 
 void
-Playlist::partition (nframes_t start, nframes_t end, bool just_top_level)
+Playlist::partition (nframes_t start, nframes_t end, bool cut)
 {
 	RegionList thawlist;
 
-	partition_internal (start, end, false, thawlist);
+	partition_internal (start, end, cut, thawlist);
 
 	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
 		(*i)->thaw ("separation");
@@ -692,6 +696,7 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 
 	{
 		RegionLock rlock (this);
+
 		boost::shared_ptr<Region> region;
 		boost::shared_ptr<Region> current;
 		string new_name;
@@ -708,16 +713,18 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 		RegionList copy = regions;
 		
 		for (RegionList::iterator i = copy.begin(); i != copy.end(); i = tmp) {
-			
+
 			tmp = i;
 			++tmp;
 			
 			current = *i;
 
 			if (current->first_frame() >= start && current->last_frame() < end) {
+
 				if (cutting) {
 					remove_region_internal (current);
 				}
+
 				continue;
 			}
 			
@@ -740,7 +747,6 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 			pos4 = current->last_frame();
 			
 			if (overlap == OverlapInternal) {
-			
 				/* split: we need 3 new regions, the front, middle and end.
 				   cut:   we need 2 regions, the front and end.
 				*/
@@ -757,7 +763,6 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				*/
 
 				if (!cutting) {
-				
 					/* "middle" ++++++ */
 					
 					_session.region_name (new_name, current->name(), false);
@@ -772,7 +777,7 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				_session.region_name (new_name, current->name(), false);
 				region = RegionFactory::create (current, pos3 - pos1, pos4 - pos3, new_name, 
 								regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
-				
+
 				add_region_internal (region, end);
 				new_regions.push_back (region);
 				
@@ -781,9 +786,9 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				current->freeze ();
 				thawlist.push_back (current);
 				current->trim_end (pos2, this);
-				
+
 			} else if (overlap == OverlapEnd) {
-				
+
 				/*
 				                              start           end
 				    ---------------*************************------------
@@ -795,12 +800,13 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				*/
 				
 				if (!cutting) {
-					
+
 					/* end +++++ */
 					
 					_session.region_name (new_name, current->name(), false);
 					region = RegionFactory::create (current, pos2 - pos1, pos4 - pos2, new_name, (layer_t) regions.size(),
 									Region::Flag(current->flags()|Region::Automatic|Region::LeftOfSplit));
+
 					add_region_internal (region, start);
 					new_regions.push_back (region);
 				}
@@ -810,9 +816,9 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				current->freeze ();
 				thawlist.push_back (current);
 				current->trim_end (pos2, this);
-				
+
 			} else if (overlap == OverlapStart) {
-				
+
 				/* split: we need 2 regions: the front and the end.
 				   cut: just trim current to skip the cut area
 				*/
@@ -830,11 +836,11 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				*/
 
 				if (!cutting) {
-				
 					/* front **** */
 					_session.region_name (new_name, current->name(), false);
 					region = RegionFactory::create (current, 0, pos3 - pos1, new_name,
 									regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
+
 					add_region_internal (region, pos1);
 					new_regions.push_back (region);
 				} 
@@ -844,9 +850,8 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				current->freeze ();
 				thawlist.push_back (current);
 				current->trim_front (pos3, this);
-				
 			} else if (overlap == OverlapExternal) {
-				
+
 				/* split: no split required.
 				   cut: remove the region.
 				*/
@@ -866,10 +871,11 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				if (cutting) {
 					remove_region_internal (current);
 				}
+
 				new_regions.push_back (current);
 			}
 		}
-		
+
 		in_partition = false;
 	}
 
@@ -1591,8 +1597,11 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 	boost::shared_ptr<Region> ret;
 	nframes_t closest = max_frames;
 
+	bool end_iter = false;
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		if(end_iter) break;
 
 		nframes_t distance;
 		boost::shared_ptr<Region> r = (*i);
@@ -1614,23 +1623,28 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 		switch (dir) {
 		case 1: /* forwards */
 
-			if (pos >= frame) {
+			if (pos > frame) {
 				if ((distance = pos - frame) < closest) {
 					closest = distance;
 					ret = r;
+					end_iter = true;
 				}
 			}
 
 			break;
 
 		default: /* backwards */
-
-			if (pos <= frame) {
+			
+			if (pos < frame) {
 				if ((distance = frame - pos) < closest) {
 					closest = distance;
 					ret = r;
 				}
 			}
+			else {
+				end_iter = true;
+			}
+
 			break;
 		}
 	}
@@ -1707,6 +1721,7 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 }
 
 /***********************************************************************/
+
 
 
 

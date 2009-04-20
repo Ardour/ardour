@@ -1997,8 +1997,8 @@ public:
 	void point_trim (GdkEvent*);
 	void trim_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void single_contents_trim (RegionView&, nframes64_t, bool, bool, bool);
-	void single_start_trim (RegionView&, nframes64_t, bool, bool);
-	void single_end_trim (RegionView&, nframes64_t, bool, bool);
+	void single_start_trim (RegionView&, nframes64_t, bool, bool, bool);
+	void single_end_trim (RegionView&, nframes64_t, bool, bool, bool);
 
 	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void thaw_region_after_trim (RegionView& rv);
@@ -2012,6 +2012,10 @@ public:
 	void trim_region_to_loop ();
 	void trim_region_to_punch ();
 	void trim_region_to_location (const ARDOUR::Location&, const char* cmd);
+
+	void trim_to_region(bool forward);
+	void trim_region_to_previous_region_end();
+	void trim_region_to_next_region_start();
 
 	bool show_gain_after_trim;
 

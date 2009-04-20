@@ -1687,7 +1687,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			_last_capture_regions.push_back (region);
 			
 			i_am_the_modifier++;
-			_playlist->add_region (region, (*ci)->start);
+			_playlist->add_region (region, (*ci)->start, 1, non_layered());
 			i_am_the_modifier--;
 			
 			buffer_position += (*ci)->frames;
@@ -2402,6 +2402,21 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	}
 
 	_playlist->add_region (region, position);
+
+	return 0;
+}
+
+int
+AudioDiskstream::set_non_layered (bool yn)
+{
+	if (yn != non_layered()) {
+		
+		if (yn) {
+			_flags = Flag (_flags | NonLayered);
+		} else {
+			_flags = Flag (_flags & ~NonLayered);
+		}
+	}
 
 	return 0;
 }

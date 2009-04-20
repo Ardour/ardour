@@ -130,7 +130,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	   its OK to block (for short intervals).
 	*/
 
-	Glib::Mutex::Lock rm (region_lock);
+	Glib::RecMutex::Lock rm (region_lock);
 
 	nframes_t end = start + dur - 1;
 
@@ -271,7 +271,7 @@ MidiPlaylist::contained_automation()
 	   its OK to block (for short intervals).
 	*/
 
-	Glib::Mutex::Lock rm (region_lock);
+	Glib::RecMutex::Lock rm (region_lock);
 
 	set<Evoral::Parameter> ret;
 

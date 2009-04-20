@@ -91,7 +91,7 @@ class Playlist : public SessionObject,
 
 	/* Editing operations */
 
-	void add_region (boost::shared_ptr<Region>, nframes_t position, float times = 1);
+	void add_region (boost::shared_ptr<Region>, nframes_t position, float times = 1, bool auto_partition = false);
 	void remove_region (boost::shared_ptr<Region>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
@@ -99,7 +99,7 @@ class Playlist : public SessionObject,
 	void split_region (boost::shared_ptr<Region>, nframes_t position);
 	void split (nframes64_t at);
 	void shift (nframes64_t at, nframes64_t distance, bool move_intersected, bool ignore_music_glue);
-	void partition (nframes_t start, nframes_t end, bool just_top_level);
+	void partition (nframes_t start, nframes_t end, bool cut = false);
 	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
 	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
 	void shuffle (boost::shared_ptr<Region>, int dir);
@@ -187,7 +187,7 @@ class Playlist : public SessionObject,
 	DataType        _type;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
-	mutable Glib::Mutex region_lock;
+	mutable Glib::RecMutex region_lock;
 	std::set<boost::shared_ptr<Region> > pending_adds;
 	std::set<boost::shared_ptr<Region> > pending_removes;
 	RegionList       pending_bounds;
@@ -212,6 +212,7 @@ class Playlist : public SessionObject,
 	PBD::ID         _orig_diskstream_id;
 	uint64_t         layer_op_counter;
 	nframes_t   freeze_length;
+	bool		 auto_partition;
 
 	void init (bool hide);
 

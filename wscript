@@ -110,7 +110,7 @@ def set_options(opt):
 	opt.add_option('--wiimote', action='store_true', default=False, dest='wiimote',
 			help='Build the wiimote control surface')
 	opt.add_option('--windows-key', type='string', dest='windows_key',
-			help='Set X Modifier (Mod1,Mod2,Mod3,Mod4,Mod5) for "Windows" key [Default: Mod4]')
+			help='Set X Modifier (Mod1,Mod2,Mod3,Mod4,Mod5) for "Windows" key [Default: Mod4]', default='Mod4><Super')
 	for i in children:
 		opt.sub_options(i)
 	
