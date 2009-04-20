@@ -31,7 +31,7 @@ class ArdourStartup : public Gtk::Assistant {
 	bool use_session_template() { return false; }
 	Glib::ustring session_template_name() { return ""; }
 
-	EngineControl& engine_control() { return *engine_dialog; }
+	EngineControl* engine_control() { return engine_dialog; }
 
 	// advanced session options
 

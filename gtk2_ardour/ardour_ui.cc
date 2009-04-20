@@ -526,8 +526,8 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
 	Config->add_extra_xml (get_transport_controllable_state());
-	if (_startup && _startup->engine_control().was_used()) {
-		Config->add_extra_xml (_startup->engine_control().get_state());
+	if (_startup && _startup->engine_control() && _startup->engine_control()->was_used()) {
+		Config->add_extra_xml (_startup->engine_control()->get_state());
 	}
 	Config->save_state();
 	ui_config->save_state ();
@@ -649,8 +649,8 @@ ARDOUR_UI::startup ()
 	bool backend_audio_is_running = EngineControl::engine_running();
 	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
 	
-	if (audio_setup) {
-		_startup->engine_control().set_state (*audio_setup);
+	if (audio_setup && _startup && _startup->engine_control()) {
+		_startup->engine_control()->set_state (*audio_setup);
 	}
 	
 	if (!get_session_parameters (backend_audio_is_running, ARDOUR_COMMAND_LINE::new_session)) {
