@@ -17,6 +17,8 @@
 #include <gtkmm/table.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/combobox.h>
 
 class EngineControl;
 
@@ -25,11 +27,13 @@ class ArdourStartup : public Gtk::Assistant {
 	ArdourStartup ();
 	~ArdourStartup ();
 
+	void set_new_only (bool);
+
 	Glib::ustring session_name (bool& should_be_new);
 	Glib::ustring session_folder ();
 
-	bool use_session_template() { return false; }
-	Glib::ustring session_template_name() { return ""; }
+	bool use_session_template();
+	Glib::ustring session_template_name();
 
 	EngineControl* engine_control() { return engine_dialog; }
 
@@ -55,6 +59,8 @@ class ArdourStartup : public Gtk::Assistant {
   private:
 	bool applying;
 	bool config_modified;
+	bool new_user;
+	bool new_only;
 
 	void on_apply ();
 	void on_cancel ();
@@ -136,11 +142,30 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::Entry new_name_entry;
 	Gtk::FileChooserButton new_folder_chooser;
 	Gtk::FileChooserButton session_template_chooser;
+
+	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
+		SessionTemplateColumns () { 
+			add (name);
+			add (path);
+		}
+
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
+	};
+
+	SessionTemplateColumns session_template_columns;
+	Glib::RefPtr<Gtk::ListStore>  template_model;
+	Gtk::ComboBox template_chooser;
+
 	Gtk::VBox session_new_vbox;
 	Gtk::CheckButton more_new_session_options_button;
+	Gtk::RadioButtonGroup session_template_group;
+	Gtk::RadioButton use_session_as_template_button;
+	Gtk::RadioButton use_template_button;
 
 	void more_new_session_options_button_clicked();
 	void new_name_changed ();
+	void populate_session_templates ();
 
 	/* more options for new sessions */
 

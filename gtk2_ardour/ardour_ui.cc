@@ -277,12 +277,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 }
 
 void
-ARDOUR_UI::run_startup ()
+ARDOUR_UI::run_startup (bool should_be_new)
 {
 	if (_startup == 0) {
 		_startup = new ArdourStartup ();
 	}
 
+	_startup->set_new_only (should_be_new);
 	_startup->present ();
 
 	main().run();
@@ -537,7 +538,7 @@ ARDOUR_UI::save_ardour_state ()
 
 	if (session) {
 		session->add_instant_xml (enode);
-	session->add_instant_xml (mnode);
+		session->add_instant_xml (mnode);
 	} else {
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
@@ -644,18 +645,17 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
-	string name, path;
-	
-	bool backend_audio_is_running = EngineControl::engine_running();
 	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
 	
 	if (audio_setup && _startup && _startup->engine_control()) {
 		_startup->engine_control()->set_state (*audio_setup);
 	}
 	
-	if (!get_session_parameters (backend_audio_is_running, ARDOUR_COMMAND_LINE::new_session)) {
-		return;
+	if (get_session_parameters (ARDOUR_COMMAND_LINE::new_session)) {
+		exit (1);
 	}
+
+	goto_editor_window ();
 	
 	BootMessage (_("Ardour is ready for use"));
 	show ();
@@ -2232,91 +2232,96 @@ ARDOUR_UI::loading_message (const std::string& msg)
 	flush_pending ();
 }
 
-/** @param offer_quit true to offer a Cancel button, otherwise call it Quit */
-bool
-ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be_new, bool offer_cancel)
+int
+ARDOUR_UI::get_session_parameters (bool should_be_new)
 {
-	bool existing_session = false;
 	Glib::ustring session_name;
 	Glib::ustring session_path;
 	Glib::ustring template_name;
-	int response;
+	int ret = -1;
+	bool likely_new = false;
 
-	_session_is_new = false;
+	while (ret != 0) {
 
-	session_name = _startup->session_name (should_be_new);
+		if (!should_be_new && !ARDOUR_COMMAND_LINE::session_name.empty()) {
 
-	if (session_name.empty()) {
-		response = Gtk::RESPONSE_NONE;
-		goto try_again;
-	} 
-	
-	/* if the user mistakenly typed path information into the session filename entry,
-	   convert what they typed into a path & a name
-	*/
-	
-	if (session_name[0] == '/' || 
-	    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-	    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
-		
-		session_path = Glib::path_get_dirname (session_name);
-		session_name = Glib::path_get_basename (session_name);
-		
-	} else {
-		
-		session_path = _startup->session_folder();
-	}
-	
-	template_name = Glib::ustring();			
+			session_path = Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name);
+			session_name = Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name);
+			
+		} else {
 
-	if (create_engine ()) {
-		/* FAIL */
-	}
-	
-	if (should_be_new) {
+			run_startup (should_be_new);
+			
+			/* if we run the startup dialog again, offer more than just "new session" */
+			
+			should_be_new = false;
+			
+			session_name = _startup->session_name (likely_new);
+			
+			/* this shouldn't happen, but we catch it just in case it does */
+			
+			if (session_name.empty()) {
+				break;
+			} 
+			if (_startup->use_session_template()) {
+				template_name = _startup->session_template_name();
+				_session_is_new = true;
+			} 
 
-		//XXX This is needed because session constructor wants a 
-		//non-existant path. hopefully this will be fixed at some point.
+
+			if (session_name[0] == '/' || 
+			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+				
+				session_path = Glib::path_get_dirname (session_name);
+				session_name = Glib::path_get_basename (session_name);
+				
+			} else {
+				
+				session_path = _startup->session_folder();
+			}
+		}
+
+		if (create_engine ()) {
+			break;
+		}
 		
 		session_path = Glib::build_filename (session_path, session_name);
 		
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
-			
-			if (ask_about_loading_existing_session (session_path)) {
-				goto loadit;
-			} else {
-				response = RESPONSE_NONE;
-				goto try_again;
+
+			if (likely_new) {
+				if (!ask_about_loading_existing_session (session_path)) {
+					continue;
+				} 
 			} 
-		}
-		
-		_session_is_new = true;
 
-		
-		if (_startup->use_session_template()) {
-			
-			template_name = _startup->session_template_name();
-			goto loadit;
-			
+			_session_is_new = false;
+
 		} else {
-			if (build_session_from_nsd (session_path, session_name)) {
-				response = RESPONSE_NONE;
-				goto try_again;
-			}
-			goto done;
-		}
-	}
 
-  loadit:
-	if (load_session (session_path, session_name, template_name)) {
-		/* force a retry */
+			if (!likely_new) {
+				MessageDialog msg (string_compose (_("There is no existing session called \"%1\""), 
+								   ARDOUR_COMMAND_LINE::session_name));
+				msg.run ();
+				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+				continue;
+			}
+
+			_session_is_new = true;
+		}
+
+		if (likely_new && template_name.empty()) {
+			
+			ret = build_session_from_nsd (session_path, session_name);
+
+		} else {
+
+			ret = load_session (session_path, session_name, template_name);
+		}
 	}
 	
-  try_again:
-
-  done:
-	goto_editor_window ();
-	return true;
+	return ret;
 }	
 
 void
@@ -2328,7 +2333,7 @@ ARDOUR_UI::close_session()
 
 	unload_session (true);
 
-	get_session_parameters (true, false);
+	get_session_parameters (false);
 }
 
 int

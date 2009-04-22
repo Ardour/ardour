@@ -1231,7 +1231,7 @@ RouteUI::save_as_template ()
 	p.get_result (name, true);
 	
 	safe_name = legalize_for_path (name);
-	safe_name += temp_suffix;
+	safe_name += template_suffix;
 	
 	path /= safe_name;
 	

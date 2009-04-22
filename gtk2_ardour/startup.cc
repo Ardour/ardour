@@ -7,6 +7,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/filesystem.h"
+#include "pbd/replace_all.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
@@ -15,6 +16,7 @@
 #include "ardour/template_utils.h"
 
 #include "startup.h"
+#include "opts.h"
 #include "engine_dialog.h"
 #include "i18n.h"
 
@@ -26,6 +28,14 @@ using namespace PBD;
 using namespace ARDOUR;
 
 ArdourStartup* ArdourStartup::the_startup = 0;
+
+static string poor_mans_glob (string path)
+{
+	string copy = path;
+	replace_all (copy, "~", Glib::get_home_dir());
+	return copy;
+}
+	
 
 ArdourStartup::ArdourStartup ()
 	: applying (false)
@@ -50,10 +60,14 @@ Ardour will play NO role in monitoring"))
 	session_page_index = -1;
 	final_page_index = -1;
 	session_options_page_index = -1;
+	new_only = false;
 
 	engine_dialog = 0;
 	config_modified = false;
 	default_dir_chooser = 0;
+
+	use_template_button.set_group (session_template_group);
+	use_session_as_template_button.set_group (session_template_group);
 
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
@@ -74,7 +88,8 @@ Ardour will play NO role in monitoring"))
 
 	sys::path been_here_before = user_config_directory();
 	been_here_before /= ".a3"; // XXXX use more specific version so we can catch upgrades
-	bool new_user = !exists (been_here_before);
+	new_user = !exists (been_here_before);
+
 	bool need_audio_setup = !EngineControl::engine_running();
 
 	if (new_user) {
@@ -109,6 +124,44 @@ Ardour will play NO role in monitoring"))
 
 ArdourStartup::~ArdourStartup ()
 {
+}
+
+void
+ArdourStartup::set_new_only (bool yn)
+{
+	new_only = yn;
+
+	if (new_only) {
+		ic_vbox.hide ();
+	} else {
+		ic_vbox.show ();
+	}
+}
+
+bool
+ArdourStartup::use_session_template ()
+{
+	if (use_template_button.get_active()) {
+		return template_chooser.get_active_row_number() != 0;
+	} else {
+		return !session_template_chooser.get_filename().empty();
+	}
+}
+
+Glib::ustring
+ArdourStartup::session_template_name ()
+{
+	string ret;
+
+	if (use_template_button.get_active()) {
+		TreeModel::iterator iter = template_chooser.get_active ();
+		TreeModel::Row row = (*iter);
+		string s = row[session_template_columns.path];
+		return s;
+	} else {
+		return session_template_chooser.get_filename();
+
+	}
 }
 
 Glib::ustring
@@ -226,14 +279,7 @@ Where would you like new Ardour sessions to be stored by default?\n\
 	vbox->pack_start (*txt, false, true);
 	vbox->pack_start (*hbox1, false, true);
 
-	string def = Config->get_default_session_parent_dir();
-
-	/* XXX really need glob here */
-
-	if (def == "~") {
-		def = Glib::get_home_dir();
-	}
-	default_dir_chooser->set_current_folder (def);
+	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
 
@@ -409,6 +455,25 @@ ArdourStartup::on_prepare (Gtk::Widget* page)
 }
 
 void
+ArdourStartup::populate_session_templates ()
+{
+	vector<TemplateInfo> templates;
+	
+	find_session_templates (templates);
+
+	template_model->clear ();
+
+	for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
+		TreeModel::Row row;
+
+		row = *(template_model->append ());
+		
+		row[session_template_columns.name] = (*x).name;
+		row[session_template_columns.path] = (*x).path;
+	}
+}
+
+void
 ArdourStartup::setup_new_session_page ()
 {
 	if (!session_hbox.get_children().empty()) {
@@ -417,6 +482,8 @@ ArdourStartup::setup_new_session_page ()
 
 	if (session_new_vbox.get_children().empty()) {
 		
+		session_new_vbox.set_spacing (12);
+
 		HBox* hbox1 = manage (new HBox);
 		Label* label1 = manage (new Label);
 		
@@ -429,10 +496,20 @@ ArdourStartup::setup_new_session_page ()
 		hbox1->show();
 		label1->show();
 		new_name_entry.show ();
+
+		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+			new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
+			/* name provided - they can move right along */
+			set_page_complete (session_vbox, true);
+		}
 		
 		new_name_entry.signal_changed().connect (mem_fun (*this, &ArdourStartup::new_name_changed));
 		new_name_entry.signal_activate().connect (mem_fun (*this, &ArdourStartup::move_along_now));
 		
+		session_new_vbox.pack_start (*hbox1, false, false);
+
+		/* --- */
+
 		HBox* hbox2 = manage (new HBox);
 		Label* label2 = manage (new Label);
 		
@@ -442,51 +519,79 @@ ArdourStartup::setup_new_session_page ()
 		
 		label2->set_text (_("Create session folder in:"));
 		
-		string def = Config->get_default_session_parent_dir();
-		
-		/* XXX really need glob here */
-		
-		if (def == "~") {
-			def = Glib::get_home_dir();
+		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+			new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
+		} else {
+			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		}
-
-		new_folder_chooser.set_current_folder (def);
 		new_folder_chooser.set_title (_("Select folder for session"));
 		
 		hbox2->show();
 		label2->show();
 		new_folder_chooser.show ();
-		
-		if (is_directory (user_template_directory ())) {
-			session_template_chooser.set_current_folder (user_template_directory().to_string());
-		} else if (is_directory (system_template_directory ())) {
-			session_template_chooser.set_current_folder (system_template_directory().to_string());
-		} else {
-			/* hmm, no templates ... what to do? */
+
+		session_new_vbox.pack_start (*hbox2, false, false);
+
+		/* --- */
+
+		template_model = ListStore::create (session_template_columns);
+		populate_session_templates ();
+
+		if (!template_model->children().empty()) {
+
+			HBox* hbox3 = manage (new HBox);
+			use_template_button.set_label (_("Use this template"));
+
+			TreeModel::Row row = *template_model->prepend ();
+			row[session_template_columns.name] = (_("no template"));
+			row[session_template_columns.path] = string();
+
+			hbox3->set_spacing (6);
+			hbox3->pack_start (use_template_button, false, false);
+			hbox3->pack_start (template_chooser, true, true);
+			
+			template_chooser.set_model (template_model);
+			
+			Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
+			text_renderer->property_editable() = false;
+			
+			template_chooser.pack_start (*text_renderer);
+			template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
+			template_chooser.set_active (0);
+			
+			hbox3->show ();
+			use_template_button.show();
+			template_chooser.show ();
+
+			session_new_vbox.pack_start (*hbox3, false, false);
 		}
-		
-		if (is_directory (system_template_directory ())) {
-			session_template_chooser.add_shortcut_folder (system_template_directory().to_string());
+			
+		/* --- */
+
+		if (!new_user) {
+			session_template_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
+			
+			HBox* hbox3a = manage (new HBox);
+			use_session_as_template_button.set_label (_("Use an existing session as a template:"));
+			
+			hbox3a->set_spacing (6);
+			hbox3a->pack_start (use_session_as_template_button, false, false);
+			hbox3a->pack_start (session_template_chooser, true, true);
+			
+			hbox3a->show ();
+			use_session_as_template_button.show ();
+			session_template_chooser.show ();
+			
+			Gtk::FileFilter* template_filter = manage (new (Gtk::FileFilter));
+			template_filter->add_pattern(X_("*.template"));
+			session_template_chooser.set_filter (*template_filter);
+			session_template_chooser.set_title (_("Select template"));
+
+			session_new_vbox.pack_start (*hbox3a, false, false);
 		}
-		
-		HBox* hbox3 = manage (new HBox);
-		Label* label3 = manage (new Label);
-		
-		hbox3->set_spacing (6);
-		hbox3->pack_start (*label3, false, false);
-		hbox3->pack_start (session_template_chooser, true, true);
-		
-		label3->set_text (_("Use this template:"));
-		
-		hbox3->show ();
-		label3->show ();
-		session_template_chooser.show ();
-		
-		Gtk::FileFilter* template_filter = manage (new (Gtk::FileFilter));
-		template_filter->add_pattern(X_("*.template"));
-		session_template_chooser.set_filter (*template_filter);
-		session_template_chooser.set_title (_("Select template"));
-		
+
+
+		/* --- */
 		
 		HBox* hbox4 = manage (new HBox);
 	
@@ -496,11 +601,7 @@ ArdourStartup::setup_new_session_page ()
 		hbox4->show ();
 		more_new_session_options_button.show ();
 		more_new_session_options_button.signal_clicked().connect (mem_fun (*this, &ArdourStartup::more_new_session_options_button_clicked));
-		session_new_vbox.set_spacing (12);
-	
-		session_new_vbox.pack_start (*hbox1, false, false);
-		session_new_vbox.pack_start (*hbox2, false, false);
-		session_new_vbox.pack_start (*hbox3, false, false);
+
 		session_new_vbox.pack_start (*hbox4, false, false);
 	}
 

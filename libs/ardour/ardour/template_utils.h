@@ -17,12 +17,13 @@ namespace ARDOUR {
 	sys::path user_template_directory ();
 	sys::path user_route_template_directory ();
 
-	struct RouteTemplateInfo {
+	struct TemplateInfo {
 	    std::string name;
 	    std::string path;
 	};
 
-	void find_route_templates (std::vector<RouteTemplateInfo>& template_names);
+	void find_route_templates (std::vector<TemplateInfo>& template_names);
+	void find_session_templates (std::vector<TemplateInfo>& template_names);
 
 } // namespace ARDOUR
 

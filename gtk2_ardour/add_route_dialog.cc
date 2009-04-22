@@ -313,7 +313,7 @@ AddRouteDialog::track_template ()
 
 	string str = track_template_combo.get_active_text();
 
-	for (vector<RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
+	for (vector<TemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
 		if ((*x).name == str) {
 			return (*x).path;
 		}
@@ -337,7 +337,7 @@ AddRouteDialog::refill_track_templates ()
   
 	if (!route_templates.empty()) {
 		vector<string> v;
-		for (vector<RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
+		for (vector<TemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
 			v.push_back ((*x).name);
 		}
 		set_popdown_strings (track_template_combo, v);

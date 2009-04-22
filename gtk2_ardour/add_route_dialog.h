@@ -62,7 +62,7 @@ class AddRouteDialog : public Gtk::Dialog
 	Gtk::ComboBoxText track_mode_combo;
 	Gtk::ComboBoxText track_template_combo;
 
-	std::vector<ARDOUR::RouteTemplateInfo> route_templates;
+	std::vector<ARDOUR::TemplateInfo> route_templates;
 	
 	void track_type_chosen ();
 	void refill_track_templates ();

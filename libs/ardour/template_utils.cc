@@ -2,6 +2,7 @@
 #include <cstring>
 
 #include "pbd/filesystem.h"
+#include "pbd/basename.h"
 #include "pbd/pathscanner.h"
 #include "pbd/xml++.h"
 
@@ -62,19 +63,57 @@ user_route_template_directory ()
 static bool
 template_filter (const string &str, void *arg)
 {
-	return (str.length() > strlen(temp_suffix) &&
-		str.find (temp_suffix) == (str.length() - strlen (temp_suffix)));
+	cerr << "Checking into " << str << " using " << template_suffix << endl;
+	return (str.length() > strlen(template_suffix) &&
+		str.find (template_suffix) == (str.length() - strlen (template_suffix)));
 }
 
 void
-find_route_templates (vector<RouteTemplateInfo>& template_names)
+find_session_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string *> *templates;
 	PathScanner scanner;
-	SearchPath spath (system_data_search_path());
+	SearchPath spath (system_template_directory());
+	spath += user_template_directory ();
 
-	spath += user_config_directory();
-	spath.add_subdirectory_to_paths(route_templates_dir_name);
+	templates = scanner (spath.to_string(), template_filter, 0, false, true);
+	
+	if (!templates) {
+		cerr << "Found nothing along " << spath.to_string() << endl;
+		return;
+	}
+
+	cerr << "Found " << templates->size() << " along " << spath.to_string() << endl;
+	
+	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
+		string fullpath = *(*i);
+
+		XMLTree tree;
+
+		if (!tree.read (fullpath.c_str())) {
+			continue;
+		}
+
+		XMLNode* root = tree.root();
+		
+		TemplateInfo rti;
+
+		rti.name = basename_nosuffix (fullpath);
+		rti.path = fullpath;
+
+		template_names.push_back (rti);
+	}
+
+	free (templates);
+}
+
+void
+find_route_templates (vector<TemplateInfo>& template_names)
+{
+	vector<string *> *templates;
+	PathScanner scanner;
+	SearchPath spath (system_route_template_directory());
+	spath += user_route_template_directory ();
 
 	templates = scanner (spath.to_string(), template_filter, 0, false, true);
 	
@@ -93,7 +132,7 @@ find_route_templates (vector<RouteTemplateInfo>& template_names)
 
 		XMLNode* root = tree.root();
 		
-		RouteTemplateInfo rti;
+		TemplateInfo rti;
 
 		rti.name = IO::name_from_state (*root->children().front());
 		rti.path = fullpath;
@@ -104,4 +143,4 @@ find_route_templates (vector<RouteTemplateInfo>& template_names)
 	free (templates);
 }
 
-} // namespace ARDOUR
+}
