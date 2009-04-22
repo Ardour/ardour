@@ -124,6 +124,11 @@ RouteUI::init ()
 void
 RouteUI::reset ()
 {
+	//Remove route connections associated with us.
+	for (vector<sigc::connection>::iterator it = connections.begin(); it!=connections.end(); ++it) {
+	    (*it).disconnect();
+	}
+
 	connections.clear ();
 
 	delete solo_menu;
@@ -180,10 +185,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
 	connections.push_back (_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
   
-	/* when solo changes, update mute state too, in case the user wants us to display it */
-
-	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
-	
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
@@ -206,6 +207,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	connections.push_back (_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu)));
 
 	/* map the current state */
+
+	mute_changed (0);
+	solo_changed (0);
 
 	map_frozen ();
 }

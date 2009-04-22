@@ -78,7 +78,7 @@ Editor::show_editor_mixer (bool yn)
 	if (yn) {
 
 		if (selection->tracks.empty()) {
-			
+
 			if (track_views.empty()) {	
 				show_editor_mixer_when_tracks_arrive = true;
 				return;
@@ -94,7 +94,6 @@ Editor::show_editor_mixer (bool yn)
 			}
 
 		} else {
-
 			sort_track_selection ();
 			
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
@@ -183,7 +182,6 @@ void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
 	RouteTimeAxisView* at;
-	bool show = false;
 	bool created;
 
 	if (!session || (at = dynamic_cast<RouteTimeAxisView*>(&view)) == 0) {
@@ -191,6 +189,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+	
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
 		if (!tact || !tact->get_active()) {
@@ -212,19 +211,11 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		return;
 	}
 	
-	if (current_mixer_strip->get_parent()) {
-		show = true;
-	}
-
-	current_mixer_strip->set_route (at->route());
-
 	if (created) {
 		current_mixer_strip->set_width (editor_mixer_strip_width, (void*) this);
 	}
 
-	if (show) {
-		show_editor_mixer (true);
-	}
+	current_mixer_strip->set_route (at->route());
 }
 
 double current = 0.0;
@@ -300,7 +291,6 @@ Editor::update_current_screen ()
 			}
 
 		} else {
-			
 			if (frame != last_update_frame) {
 				playhead_cursor->set_position (frame);
 			}

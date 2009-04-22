@@ -416,9 +416,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	connections.push_back (_route->meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed)));
 	connections.push_back (_route->input_changed.connect (mem_fun(*this, &MixerStrip::input_changed)));
 	connections.push_back (_route->output_changed.connect (mem_fun(*this, &MixerStrip::output_changed)));
-	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
-	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
-	connections.push_back (_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
 	connections.push_back (_route->mix_group_changed.connect (mem_fun(*this, &MixerStrip::mix_group_changed)));
 	connections.push_back (_route->panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan)));
 
