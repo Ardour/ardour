@@ -38,7 +38,7 @@ using namespace PBD;
 Pool Session::Click::pool ("click", sizeof (Click), 128);
 
 void
-Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
+Session::click (nframes_t start, nframes_t nframes)
 {
 	TempoMap::BBTPointList *points;
 	Sample *buf;
@@ -50,7 +50,7 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 	Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
 	
 	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0) {
-		_click_io->silence (nframes, offset);
+		_click_io->silence (nframes);
 		return;
 	} 
 
@@ -127,7 +127,7 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 		i = next;
 	}
 	
-	_click_io->deliver_output (bufs, start, end, nframes, offset);
+	_click_io->deliver_output (bufs, start, end, nframes);
 }
 
 void

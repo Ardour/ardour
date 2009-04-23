@@ -20,12 +20,6 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/midi_buffer.h"
 
-#ifdef __x86_64__
-static const int CPU_CACHE_ALIGN = 64;
-#else
-static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
-#endif
-
 namespace ARDOUR {
 
 

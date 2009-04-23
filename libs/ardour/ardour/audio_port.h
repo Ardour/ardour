@@ -35,14 +35,15 @@ class AudioPort : public Port
 		return DataType::AUDIO;
 	}
 	
-	void cycle_start (nframes_t, nframes_t);
-	void cycle_end (nframes_t, nframes_t);
+	void cycle_start (nframes_t);
+	void cycle_end (nframes_t);
+	void cycle_split ();
 
-	Buffer& get_buffer (nframes_t nframes, nframes_t offset) {
+	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
 		return get_audio_buffer (nframes, offset);
 	}
 	
-	AudioBuffer& get_audio_buffer (nframes_t, nframes_t);
+	AudioBuffer& get_audio_buffer (nframes_t nframes, nframes_t offset = 0);
 
   protected:
 	friend class AudioEngine;
@@ -50,8 +51,8 @@ class AudioPort : public Port
 	AudioPort (std::string const &, Flags);
   
   private:
-	bool _buffer_data_set;
 	AudioBuffer* _buffer;
+
 };
  
 } // namespace ARDOUR

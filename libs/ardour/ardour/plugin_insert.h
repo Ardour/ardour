@@ -54,7 +54,7 @@ class PluginInsert : public Processor
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&);
 
-	void run_in_place (BufferSet& in, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
+	void run_in_place (BufferSet& in, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 	void silence (nframes_t nframes, nframes_t offset);
 	
 	void activate ();
@@ -136,7 +136,7 @@ class PluginInsert : public Processor
 	BufferSet _signal_analysis_input_bufferset;
 	BufferSet _signal_analysis_output_bufferset;
 	
-	void automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset);
+	void automation_run (BufferSet& bufs, nframes_t nframes);
 	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
 
 	void init ();

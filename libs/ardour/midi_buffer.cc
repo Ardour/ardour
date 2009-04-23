@@ -18,17 +18,11 @@
 */
 
 #include <iostream>
+#include "pbd/malign.h"
 #include "ardour/midi_buffer.h"
-
-#ifdef __x86_64__
-static const int CPU_CACHE_ALIGN = 64;
-#else
-static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
-#endif
 
 using namespace std;
 using namespace ARDOUR;
-
 
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
@@ -60,12 +54,8 @@ MidiBuffer::resize(size_t size)
 
 	_size = 0;
 	_capacity = size;
+	cache_aligned_malloc ((void**) &_data, _capacity);
 
-#ifdef NO_POSIX_MEMALIGN
-	_data = (uint8_t*)malloc(_capacity);
-#else
-	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, _capacity);
-#endif	
 	assert(_data);
 }
 
@@ -84,39 +74,31 @@ MidiBuffer::copy(const MidiBuffer& copy)
  * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
  */
 void
-MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
+MidiBuffer::read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset, nframes_t src_offset)
 {
-	assert(src.type() == DataType::MIDI);
-	assert(&src != this);
+	assert (src.type() == DataType::MIDI);
+	assert (&src != this);
 
-	const MidiBuffer& msrc = (MidiBuffer&)src;
+	const MidiBuffer& msrc = (MidiBuffer&) src;
 	
-	assert(_capacity >= msrc.size());
+	assert (_capacity >= msrc.size());
 
-	if (offset == 0) {
-		clear();
-		assert(_size == 0);
+	if (dst_offset == 0) {
+		clear ();
+		assert (_size == 0);
 	}
+
+	/* XXX use dst_offset somehow */
 	
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::MIDIEvent<TimeType> ev(*i, false);
-		/*cout << this << " MidiBuffer::read_from event type: " << int(ev.type())
-				<< " time: " << ev.time() << " size: " << ev.size()
-				<< " status: " << (int)*ev.buffer() << " buffer size: " << _size << endl;*/
-		if (ev.time() < offset) {
-			//cout << "MidiBuffer::read_from skipped event before " << offset << endl;
-		} else if (ev.time() < (nframes + offset)) {
-			//cout << "MidiBuffer::read_from appending event" << endl;
-			push_back(ev);
-		} else {
-			//cerr << "MidiBuffer::read_from skipped event after "
-			//	<< nframes << " + " << offset << endl;
+		if (ev.time() >= src_offset && ev.time() < (nframes+src_offset)) {
+			push_back (ev);
 		}
 	}
 
 	_silent = src.silent();
 }
-
 
 /** Push an event into the buffer.
  *
@@ -217,12 +199,11 @@ MidiBuffer::reserve(TimeType time, size_t size)
 
 
 void
-MidiBuffer::silence(nframes_t dur, nframes_t offset)
+MidiBuffer::silence (nframes_t nframes, nframes_t offset)
 {
-	// FIXME use parameters
-	if (offset != 0) {
-		cerr << "WARNING: MidiBuffer::silence w/ offset != 0 (not implemented)" << endl;
-	}
+	/* XXX iterate over existing events, find all in range given by offset & nframes,
+	   and delete them.
+	*/
 
 	_size = 0;
 	_silent = true;

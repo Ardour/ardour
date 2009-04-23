@@ -123,6 +123,8 @@ class AudioEngine : public sigc::trackable
 	Port *register_input_port (DataType, const std::string& portname);
 	Port *register_output_port (DataType, const std::string& portname);
 	int   unregister_port (Port &);
+
+	void split_cycle (nframes_t offset);
 	
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);

@@ -371,22 +371,22 @@ MidiTrack::set_state_part_two ()
 }	
 
 int 
-MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
-		     bool session_state_changing, bool can_record, bool rec_monitors_input)
+MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		    bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().n_midi() == 0) {
 		return 0;
 	}
 
 	if (!_active) {
-		silence (nframes, offset);
+		silence (nframes);
 	}
 
 	if (session_state_changing) {
 
 		/* XXX is this safe to do against transport state changes? */
 
-		passthru_silence (start_frame, end_frame, nframes, offset, 0, false);
+		passthru_silence (start_frame, end_frame, nframes, 0, false);
 		return 0;
 	}
 
@@ -430,12 +430,12 @@ MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fram
 		*/
 		
 		if (_have_internal_generator) {
-			passthru_silence (start_frame, end_frame, nframes, offset, 0, true);
+			passthru_silence (start_frame, end_frame, nframes, 0, true);
 		} else {
 			if (_meter_point == MeterInput) {
-				just_meter_input (start_frame, end_frame, nframes, offset);
+				just_meter_input (start_frame, end_frame, nframes);
 			}
-			passthru_silence (start_frame, end_frame, nframes, offset, 0, false);
+			passthru_silence (start_frame, end_frame, nframes, 0, false);
 		}
 
 	} else {
@@ -443,25 +443,22 @@ MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fram
 		/* we're sending signal, but we may still want to meter the input. 
 		 */
 
-		passthru (start_frame, end_frame, nframes, offset, 0, (_meter_point == MeterInput));
+		passthru (start_frame, end_frame, nframes, 0, (_meter_point == MeterInput));
 	}
 	
-	flush_outputs( nframes, offset );
+	flush_outputs (nframes);
 
 	return 0;
 }
 
 int
-MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
-		  bool can_record, bool rec_monitors_input)
+MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
+		 bool can_record, bool rec_monitors_input)
 {
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 	
-	// I guess this is the right place to call cycle_start for our ports.
-	// but it actually sucks, to directly mess with the IO.... oh well.
-	
-	prepare_inputs( nframes, offset );
+	prepare_inputs (nframes);
 
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -477,26 +474,26 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 	}
 
 	if (!_active) {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 
 	nframes_t transport_frame = _session.transport_frame();
 
 	
-	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
+	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		   */
-		return diskstream->process (transport_frame, 0, 0, can_record, rec_monitors_input);
+		return diskstream->process (transport_frame, 0, can_record, rec_monitors_input);
 	} 
 
 	_silent = false;
 
-	if ((dret = diskstream->process (transport_frame, nframes, offset, can_record, rec_monitors_input)) != 0) {
+	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input)) != 0) {
 
-		silence (nframes, offset);
+		silence (nframes);
 
 		return dret;
 	}
@@ -504,7 +501,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 	/* special condition applies */
 
 	if (_meter_point == MeterInput) {
-		just_meter_input (start_frame, end_frame, nframes, offset);
+		just_meter_input (start_frame, end_frame, nframes);
 	}
 
 	if (diskstream->record_enabled() && !can_record && !Config->get_auto_input()) {
@@ -513,7 +510,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		   at least potentially (depending on monitoring options)
 		   */
 
-		passthru (start_frame, end_frame, nframes, offset, 0, true);
+		passthru (start_frame, end_frame, nframes, 0, true);
 
 	} else {
 		/*
@@ -530,51 +527,51 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		//const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 
-		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame, offset);
+		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame);
 
-		process_output_buffers (bufs, start_frame, end_frame, nframes, offset,
-				(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, start_frame, end_frame, nframes,
+					(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 	
 	}
 
-	flush_outputs( nframes, offset );
+	flush_outputs (nframes);
 
 	return 0;
 }
 
 int
-MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
-			 bool can_record, bool rec_monitors_input)
+MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,  
+			bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().n_midi() == 0 && _processors.empty()) {
 		return 0;
 	}
 
 	if (!_active) {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 
 	_silent = true;
 	apply_gain_automation = false;
 
-	silence (nframes, offset);
+	silence (nframes);
 
-	return midi_diskstream()->process (_session.transport_frame() + offset, nframes, offset, can_record, rec_monitors_input);
+	return midi_diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input);
 }
 
 void
 MidiTrack::process_output_buffers (BufferSet& bufs,
-			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_processors, int declick,
-			       bool meter)
+				   nframes_t start_frame, nframes_t end_frame, 
+				   nframes_t nframes, bool with_processors, int declick,
+				   bool meter)
 {
 	/* There's no such thing as a MIDI bus for the time being.
 	 * We'll do all the MIDI route work here for now, but the long-term goal is to have
 	 * Route::process_output_buffers handle everything */
 	
 	if (meter && (_meter_point == MeterInput || _meter_point == MeterPreFader)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
 	}
 
 	// Run all processors
@@ -582,33 +579,35 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-				(*i)->run_in_place (bufs, start_frame, end_frame, nframes, offset);
+				(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
 			}
 		} 
 	}
 	
 	if (meter && (_meter_point == MeterPostFader)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
 	}
 	
 	// Main output stage
 	if (muted()) {
-		IO::silence(nframes, offset);
+		IO::silence (nframes);
 	} else {
 
 		// Write 'automation' controllers (e.g. CC events from a UI slider)
-		write_controller_messages(bufs.get_midi(0), start_frame, end_frame, nframes, offset);
+		write_controller_messages(bufs.get_midi(0), start_frame, end_frame, nframes);
 		
-		deliver_output(bufs, start_frame, end_frame, nframes, offset);
+		deliver_output(bufs, start_frame, end_frame, nframes);
 	}
 }
 
 void
-MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start, nframes_t end, 
-			       nframes_t nframes, nframes_t offset)
+MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start, nframes_t end, nframes_t nframes)
 {
 	// Append immediate events (UI controls)
-	_immediate_events.read(output_buf, 0, 0, offset + nframes - 1); // all stamps = 0
+
+	// XXX TAKE _port_offset in Port into account???
+
+	_immediate_events.read (output_buf, 0, 0, nframes - 1); // all stamps = 0
 }
 
 int

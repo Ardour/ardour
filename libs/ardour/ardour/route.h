@@ -91,13 +91,13 @@ class Route : public IO
 
 
 	virtual int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+			  int declick, bool can_record, bool rec_monitors_input);
 
 	virtual int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+			     bool state_changing, bool can_record, bool rec_monitors_input);
 
 	virtual int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			nframes_t offset, bool can_record, bool rec_monitors_input);
+				 bool can_record, bool rec_monitors_input);
 
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
@@ -273,16 +273,16 @@ class Route : public IO
 	void curve_reallocate ();
 
   protected:
-	nframes_t check_initial_delay (nframes_t, nframes_t&, nframes_t&);
+	nframes_t check_initial_delay (nframes_t, nframes_t&);
 	
 	void passthru (nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes, nframes_t offset, int declick, bool meter_inputs);
+			nframes_t nframes, int declick, bool meter_inputs);
 
 	virtual void process_output_buffers (BufferSet& bufs,
-			nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes, nframes_t offset, bool with_processors, int declick,
-			bool meter);
-
+					     nframes_t start_frame, nframes_t end_frame,
+					     nframes_t nframes, bool with_processors, int declick,
+					     bool meter);
+	
 	Flag           _flags;
 	int            _pending_declick;
 	MeterPoint     _meter_point;
@@ -326,10 +326,10 @@ class Route : public IO
 	virtual XMLNode& state(bool);
 
 	void passthru_silence (nframes_t start_frame, nframes_t end_frame,
-	                       nframes_t nframes, nframes_t offset, int declick,
+	                       nframes_t nframes, int declick,
 	                       bool meter);
 	
-	void silence (nframes_t nframes, nframes_t offset);
+	void silence (nframes_t nframes);
 	
 	sigc::connection input_signal_connection;
 

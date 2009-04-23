@@ -1077,14 +1077,11 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	nframes_t slave_wait_end;
 
 	void reset_slave_state ();
-	bool follow_slave (nframes_t, nframes_t);
+	bool follow_slave (nframes_t);
 	void calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta);
-	void track_slave_state(
-			float     slave_speed, 
-			nframes_t slave_transport_frame, 
-			nframes_t this_delta,
-			bool      starting);
-	void follow_slave_silently(nframes_t nframes, nframes_t offset, float slave_speed);
+	void track_slave_state(float slave_speed, nframes_t slave_transport_frame, 
+			       nframes_t this_delta, bool starting);
+	void follow_slave_silently(nframes_t nframes, float slave_speed);
 	
 	void set_slave_source (SlaveSource);
 
@@ -1105,8 +1102,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);
-	int  process_routes (nframes_t, nframes_t);
-	int  silent_process_routes (nframes_t, nframes_t);
+	int  process_routes (nframes_t);
+	int  silent_process_routes (nframes_t);
 
 	bool get_rec_monitors_input () {
 		if (actively_recording()) {
@@ -1140,7 +1137,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		return false;
 	}
 
-	bool maybe_sync_start (nframes_t&, nframes_t&);
+	bool maybe_sync_start (nframes_t&);
 
 	void check_declick_out ();
 
@@ -1385,7 +1382,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void reset_record_status ();
 
-	int no_roll (nframes_t nframes, nframes_t offset);
+	int no_roll (nframes_t nframes);
+	int fail_roll (nframes_t nframes);
 
 	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work); }
 	bool process_can_proceed() const { return !(post_transport_work & ProcessCannotProceedMask); }
@@ -1673,7 +1671,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	Click *get_click();
 	void   setup_click_sounds (int which);
 	void   clear_clicks ();
-	void   click (nframes_t start, nframes_t nframes, nframes_t offset);
+	void   click (nframes_t start, nframes_t nframes);
 
 	vector<Route*> master_outs;
 

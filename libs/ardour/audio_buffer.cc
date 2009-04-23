@@ -16,17 +16,13 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "ardour/audio_buffer.h"
-#include "pbd/error.h"
 #include <errno.h>
 
-#include "i18n.h"
+#include "ardour/audio_buffer.h"
+#include "pbd/error.h"
+#include "pbd/malign.h"
 
-#ifdef __x86_64__
-static const int CPU_CACHE_ALIGN = 64;
-#else
-static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
-#endif
+#include "i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;
@@ -50,19 +46,6 @@ AudioBuffer::~AudioBuffer()
 		free(_data);
 }
 
-/* called to replace a pointer to an external buffer (e.g. JACK) with 
-   buffer-owned memory.
-*/
-
-void
-AudioBuffer::replace_data (size_t capacity)
-{
-	_owns_data = true;
-	_data = 0;
-	_capacity = 0; // force reallocation
-	resize (capacity);
-}
-
 void
 AudioBuffer::resize (size_t size)
 {
@@ -83,20 +66,7 @@ AudioBuffer::resize (size_t size)
 	_size = size;
 	_silent = false;
 
-#ifdef NO_POSIX_MEMALIGN
-	_data =  (Sample *) malloc(sizeof(Sample) * _capacity);
-#else
-	if (posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Sample) * _capacity)) {
-		fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
-				CPU_CACHE_ALIGN, sizeof (Sample) * _capacity, strerror (errno)) << endmsg;
-	}
-#endif	
-
+	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * _capacity);
 }
 
-void
-AudioBuffer::copy_to_internal (Sample* p, nframes_t cnt, nframes_t offset)
-{
-	memcpy (_data + offset, p, sizeof(Sample*) * cnt);
-}
 

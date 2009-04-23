@@ -109,7 +109,7 @@ Send::set_state(const XMLNode& node)
 }
 
 void
-Send::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+Send::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	if (active()) {
 
@@ -121,18 +121,18 @@ Send::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 		sendbufs.read_from(bufs, nframes);
 		assert(sendbufs.count() == bufs.count());
 
-		_io->deliver_output (sendbufs, start_frame, end_frame, nframes, offset);
+		_io->deliver_output (sendbufs, start_frame, end_frame, nframes);
 
 		if (_metering) {
 			if (_io->effective_gain() == 0) {
 				_io->peak_meter().reset();
 			} else {
-				_io->peak_meter().run_in_place(_io->output_buffers(), start_frame, end_frame, nframes, offset);
+				_io->peak_meter().run_in_place(_io->output_buffers(), start_frame, end_frame, nframes);
 			}
 		}
 
 	} else {
-		_io->silence (nframes, offset);
+		_io->silence (nframes);
 		
 		if (_metering) {
 			_io->peak_meter().reset();

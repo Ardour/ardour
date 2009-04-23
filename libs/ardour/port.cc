@@ -30,6 +30,8 @@ using namespace std;
 using namespace ARDOUR;
 
 AudioEngine* Port::_engine = 0;
+nframes_t Port::_port_offset = 0;
+nframes_t Port::_buffer_size = 0;
 
 /** @param n Port short name */
 Port::Port (std::string const & n, DataType t, Flags f)
@@ -260,3 +262,4 @@ Port::set_latency (nframes_t n)
 {
 	jack_port_set_latency (_jack_port, n);
 }
+

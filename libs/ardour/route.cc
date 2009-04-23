@@ -285,15 +285,14 @@ Route::set_gain (gain_t val, void *src)
  * @param start_frame Initial transport frame 
  * @param end_frame Final transport frame
  * @param nframes Number of frames to output (to ports)
- * @param offset Output offset (of port buffers, for split cycles)
  *
  * Note that (end_frame - start_frame) may not be equal to nframes when the
  * transport speed isn't 1.0 (eg varispeed).
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-		nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset,
-		bool with_processors, int declick, bool meter)
+			       nframes_t start_frame, nframes_t end_frame, nframes_t nframes,
+			       bool with_processors, int declick, bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
@@ -369,7 +368,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   ----------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
@@ -400,11 +399,11 @@ Route::process_output_buffers (BufferSet& bufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes);
 			
 		} 
 	} 
@@ -418,7 +417,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 			Sample* const sp = i->data();
 			
-			for (nframes_t nx = offset; nx < nframes + offset; ++nx) {
+			for (nframes_t nx = 0; nx < nframes; ++nx) {
 				sp[nx] += 1.0e-27f;
 			}
 		}
@@ -435,7 +434,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				for (i = _processors.begin(); i != _processors.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						(*i)->run_in_place (bufs, start_frame, end_frame, nframes, offset);
+						(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -446,7 +445,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				for (i = _processors.begin(); i != _processors.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						(*i)->silence (nframes, offset);
+						(*i)->silence (nframes);
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -475,7 +474,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   ----------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPreFader)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
 	}
 
 	
@@ -499,11 +498,11 @@ Route::process_output_buffers (BufferSet& bufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes);
 		} 
 	} 
 	
@@ -608,7 +607,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					case PreFader:
 						break;
 					case PostFader:
-						(*i)->run_in_place (bufs, start_frame, end_frame, nframes, offset);
+						(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
 						break;
 					}
 				}
@@ -618,7 +617,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					case PreFader:
 						break;
 					case PostFader:
-						(*i)->silence (nframes, offset);
+						(*i)->silence (nframes);
 						break;
 					}
 				}
@@ -660,11 +659,11 @@ Route::process_output_buffers (BufferSet& bufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes);
 		} 
 	} 
 
@@ -692,7 +691,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	} else if (no_monitor && record_enabled()
 			&& (!Config->get_auto_input() || _session.actively_recording())) {
 		
-		IO::silence (nframes, offset);
+		IO::silence (nframes);
 		
 	} else {
 
@@ -718,11 +717,11 @@ Route::process_output_buffers (BufferSet& bufs,
 				peak_meter().reset();
 			}
 
-			IO::silence (nframes, offset);
+			IO::silence (nframes);
 			
 		} else {
 			
-			deliver_output(bufs, start_frame, end_frame, nframes, offset);
+			deliver_output(bufs, start_frame, end_frame, nframes);
 
 		}
 
@@ -736,7 +735,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
 			_meter->reset();
 		} else {
-			_meter->run_in_place(output_buffers(), start_frame, end_frame, nframes, offset);
+			_meter->run_in_place(output_buffers(), start_frame, end_frame, nframes);
 		}
 	}
 }
@@ -748,15 +747,14 @@ Route::process_output_buffers (BufferSet& bufs,
  * @param start_frame Initial transport frame 
  * @param end_frame Final transport frame
  * @param nframes Number of frames to output (to ports)
- * @param offset Output offset (of port buffers, for split cycles)
  *
  * Note that (end_frame - start_frame) may not be equal to nframes when the
  * transport speed isn't 1.0 (eg varispeed).
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-		nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset,
-		bool with_processors, int declick, bool meter)
+			       nframes_t start_frame, nframes_t end_frame, nframes_t nframes,
+			       bool with_processors, int declick, bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
@@ -822,7 +820,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	{
 		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		for (i = processors.begin(); i != processors.end(); ++i) {
-			(*i)->run_in_place (bufs, start_frame, end_frame, nframes, offset);
+			(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
 		}
 	}
 
@@ -832,7 +830,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   ----------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
@@ -869,11 +867,11 @@ Route::process_output_buffers (BufferSet& bufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes);
 		} 
 	} 
 	
@@ -987,11 +985,11 @@ Route::process_output_buffers (BufferSet& bufs,
 
 			) {
 			
-			co->silence (nframes, offset);
+			co->silence (nframes);
 			
 		} else {
 
-			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes);
 		} 
 	} 
 
@@ -1009,7 +1007,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	} else if (no_monitor && record_enabled()
 			&& (!Config->get_auto_input() || _session.actively_recording())) {
 		
-		IO::silence (nframes, offset);
+		IO::silence (nframes);
 		
 	} else {
 
@@ -1035,11 +1033,11 @@ Route::process_output_buffers (BufferSet& bufs,
 				peak_meter().reset();
 			}
 
-			IO::silence (nframes, offset);
+			IO::silence (nframes);
 			
 		} else {
 			
-			deliver_output(bufs, start_frame, end_frame, nframes, offset);
+			deliver_output(bufs, start_frame, end_frame, nframes);
 
 		}
 
@@ -1055,28 +1053,28 @@ Route::n_process_buffers ()
 }
 
 void
-Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter_first)
+Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick, bool meter_first)
 {
 	BufferSet& bufs = _session.get_scratch_buffers(n_process_buffers());
 
 	_silent = false;
 
-	collect_input (bufs, nframes, offset);
+	collect_input (bufs, nframes);
 
 	if (meter_first) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
 		meter_first = false;
 	 } else {
 		meter_first = true;
 	 }
 		
-	process_output_buffers (bufs, start_frame, end_frame, nframes, offset, true, declick, meter_first);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick, meter_first);
 }
 
 void
-Route::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter)
+Route::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick, bool meter)
 {
-	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
+	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, true, declick, meter);
 }
 
 void
@@ -2428,14 +2426,14 @@ Route::curve_reallocate ()
 }
 
 void
-Route::silence (nframes_t nframes, nframes_t offset)
+Route::silence (nframes_t nframes)
 {
 	if (!_silent) {
 
-		IO::silence (nframes, offset);
+		IO::silence (nframes);
 
 		if (_control_outs) {
-			_control_outs->silence (nframes, offset);
+			_control_outs->silence (nframes);
 		}
 
 		{ 
@@ -2449,10 +2447,10 @@ Route::silence (nframes_t nframes, nframes_t offset)
 						continue;
 					}
 
-					(*i)->silence (nframes, offset);
+					(*i)->silence (nframes);
 				}
 
-				if (nframes == _session.get_block_size() && offset == 0) {
+				if (nframes == _session.get_block_size()) {
 					// _silent = true;
 				}
 			}
@@ -2738,46 +2736,48 @@ Route::pans_required () const
 }
 
 int 
-Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
-		   bool session_state_changing, bool can_record, bool rec_monitors_input)
+Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,  
+		bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().n_total() == 0) {
 		return 0;
 	}
 
 	if (session_state_changing || !_active)  {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 
 	apply_gain_automation = false;
 	
 	if (n_inputs().n_total()) {
-		passthru (start_frame, end_frame, nframes, offset, 0, false);
+		passthru (start_frame, end_frame, nframes, 0, false);
 	} else {
-		silence (nframes, offset);
+		silence (nframes);
 	}
 
 	return 0;
 }
 
 nframes_t
-Route::check_initial_delay (nframes_t nframes, nframes_t& offset, nframes_t& transport_frame)
+Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
 {
 	if (_roll_delay > nframes) {
 
 		_roll_delay -= nframes;
-		silence (nframes, offset);
+		silence (nframes);
 		/* transport frame is not legal for caller to use */
 		return 0;
 
 	} else if (_roll_delay > 0) {
 
 		nframes -= _roll_delay;
-
-		silence (_roll_delay, offset);
-
-		offset += _roll_delay;
+		silence (_roll_delay);
+		/* we've written _roll_delay of samples into the 
+		   output ports, so make a note of that for
+		   future reference.
+		*/
+		increment_output_offset (_roll_delay);
 		transport_frame += _roll_delay;
 
 		_roll_delay = 0;
@@ -2787,7 +2787,7 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& offset, nframes_t& tra
 }
 
 int
-Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
+Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
 	     bool can_record, bool rec_monitors_input)
 {
 	{
@@ -2800,13 +2800,13 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 	}
 
 	if ((n_outputs().n_total() == 0 && _processors.empty()) || n_inputs().n_total() == 0 || !_active) {
-		silence (nframes, offset);
+		silence (nframes);
 		return 0;
 	}
 	
 	nframes_t unused = 0;
 
-	if ((nframes = check_initial_delay (nframes, offset, unused)) == 0) {
+	if ((nframes = check_initial_delay (nframes, unused)) == 0) {
 		return 0;
 	}
 
@@ -2826,16 +2826,16 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		}
 	}
 
-	passthru (start_frame, end_frame, nframes, offset, declick, false);
+	passthru (start_frame, end_frame, nframes, declick, false);
 
 	return 0;
 }
 
 int
-Route::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
+Route::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		    bool can_record, bool rec_monitors_input)
 {
-	silence (nframes, offset);
+	silence (nframes);
 	return 0;
 }
 

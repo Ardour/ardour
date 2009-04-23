@@ -72,13 +72,13 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 
 	virtual void run_in_place (BufferSet& bufs,
 			nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes, nframes_t offset) { assert(is_in_place()); }
+			nframes_t nframes) { assert(is_in_place()); }
 	
 	virtual void run_out_of_place (BufferSet& input, BufferSet& output,
 			nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes, nframes_t offset) { assert(is_out_of_place()); }
+			nframes_t nframes) { assert(is_out_of_place()); }
 	
-	virtual void silence (nframes_t nframes, nframes_t offset) {}
+	virtual void silence (nframes_t nframes) {}
 	
 	void activate ()   { _active = true; ActiveChanged(); }
 	void deactivate () { _active = false; ActiveChanged(); }

@@ -215,7 +215,7 @@ class AudioDiskstream : public Diskstream
   protected:
 	friend class AudioTrack;
 
-	int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input);
+	int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input);
 	bool commit  (nframes_t nframes);
 
   private:

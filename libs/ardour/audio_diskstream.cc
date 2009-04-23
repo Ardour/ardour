@@ -513,7 +513,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 }
 
 int
-AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input)
+AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -658,8 +658,9 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 				AudioPort* const ap = _io->audio_input(n);
 				assert(ap);
-				assert(rec_nframes <= ap->get_audio_buffer( nframes, offset ).capacity());
-				memcpy (chaninfo->current_capture_buffer, ap->get_audio_buffer( nframes, offset ).data(rec_nframes, offset + rec_offset), sizeof (Sample) * rec_nframes);
+				assert(rec_nframes <= ap->get_audio_buffer(nframes).capacity());
+				memcpy (chaninfo->current_capture_buffer, ap->get_audio_buffer (rec_nframes).data(rec_offset), sizeof (Sample) * rec_nframes);
+
 
 			} else {
 
@@ -673,7 +674,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				AudioPort* const ap = _io->audio_input(n);
 				assert(ap);
 
-				Sample* buf = ap->get_audio_buffer( nframes, offset ).data(nframes, offset);
+				Sample* buf = ap->get_audio_buffer(nframes).data();
 				nframes_t first = chaninfo->capture_vector.len[0];
 
 				memcpy (chaninfo->capture_wrap_buffer, buf, sizeof (Sample) * first);

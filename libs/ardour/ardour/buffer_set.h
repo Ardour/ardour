@@ -53,7 +53,7 @@ public:
 
 	void clear();
 	
-	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset);
+	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset = 0);
 
 	void ensure_buffers(const ChanCount& count, size_t buffer_capacity);
 	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);
@@ -81,7 +81,7 @@ public:
 		return (MidiBuffer&)get(DataType::MIDI, i);
 	}
 
-	void read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset=0);
+	void read_from(BufferSet& in, nframes_t nframes);
 
 	// ITERATORS
 	// FIXME: possible to combine these?  templates?

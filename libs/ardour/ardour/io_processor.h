@@ -60,10 +60,8 @@ class IOProcessor : public Processor
 	
 	virtual void automation_snapshot (nframes_t now, bool force);
 
-	virtual void run_in_place (BufferSet& in, nframes_t start, nframes_t end,
-			nframes_t nframes, nframes_t offset) = 0;
-
-	void silence (nframes_t nframes, nframes_t offset);
+	virtual void run_in_place (BufferSet& in, nframes_t start, nframes_t end, nframes_t nframes) = 0;
+	void silence (nframes_t nframes);
 
 	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;
 	sigc::signal<void,IOProcessor*,uint32_t> AutomationChanged;

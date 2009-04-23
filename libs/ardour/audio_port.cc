@@ -27,7 +27,6 @@ using namespace std;
 
 AudioPort::AudioPort (const std::string& name, Flags flags)
 	: Port (name, DataType::AUDIO, flags)
-	, _buffer_data_set (false)
 	, _buffer (new AudioBuffer (0))
 {
 	assert (name.find_first_of (':') == string::npos);
@@ -39,7 +38,7 @@ AudioPort::~AudioPort ()
 }
 
 void
-AudioPort::cycle_start (nframes_t nframes, nframes_t offset)
+AudioPort::cycle_start (nframes_t nframes)
 {
 	/* caller must hold process lock */
 
@@ -50,36 +49,51 @@ AudioPort::cycle_start (nframes_t nframes, nframes_t offset)
 	   happen when Port::get_buffer() is called.
 	*/
 
-	if (sends_output() && !_buffer_data_set) {
-		
-		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes) + offset, nframes);
-		_buffer_data_set = true;
-		
-	}
+	if (sends_output()) {
 
-	if (receives_input()) {
-		_buffer_data_set = false;
-	} else {
-		_buffer->silence (nframes, offset);
+		/* Notice that cycle_start() is always run with the *entire* process cycle frame count,
+		   so we do not bother to apply _port_offset here - we always want the address of the
+		   entire JACK port buffer. We are not collecting data here - just noting the
+		   address where we will write data later in the process cycle.
+		*/
+
+		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes), nframes);
+		_buffer->prepare ();
 	}
 }
 
-AudioBuffer &
+void
+AudioPort::cycle_end (nframes_t nframes)
+{
+	if (sends_output() && !_buffer->written()) {
+		_buffer->silence (nframes);
+	}
+}
+
+void
+AudioPort::cycle_split ()
+{
+}
+
+AudioBuffer&
 AudioPort::get_audio_buffer (nframes_t nframes, nframes_t offset)
 {
 	/* caller must hold process lock */
 
-	if (receives_input () && !_buffer_data_set) {
+	if (receives_input ()) {
 
-		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes) + offset, nframes);
-		
+		/* Get a pointer to the audio data @ offset + _port_offset within the JACK port buffer and store
+		   it in our _buffer member.
+
+		   Note that offset is expected to be zero in almost all cases.
+		*/
+
+		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes) + offset + _port_offset, nframes);
 	} 
 	
+	/* output ports set their _buffer data information during ::cycle_start()
+	 */
+
 	return *_buffer;
 }
 
-void
-AudioPort::cycle_end (nframes_t nframes, nframes_t offset)
-{
-       _buffer_data_set = false;
-}

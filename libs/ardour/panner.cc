@@ -1267,7 +1267,7 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 }
 
 void
-Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff)
+Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes_t nframes, gain_t gain_coeff)
 {
 	if (outbufs.count().n_audio() == 0) {
 		// Don't want to lose audio...
@@ -1288,37 +1288,37 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 
 			/* only one output, and gain was zero, so make it silent */
 
-			dst.silence(offset);
+			dst.silence (nframes);
 			
 		} else if (gain_coeff == 1.0f){
 
 			/* mix all buffers into the output */
 
 			// copy the first
-			dst.read_from(inbufs.get_audio(0), nframes, offset);
+			dst.read_from(inbufs.get_audio(0), nframes);
 			
 			// accumulate starting with the second
-            if (inbufs.count().n_audio() > 0) {
-                BufferSet::audio_iterator i = inbufs.audio_begin();
-                for (++i; i != inbufs.audio_end(); ++i) {
-                    dst.accumulate_from(*i, nframes, offset);
-                }
-            }
+			if (inbufs.count().n_audio() > 0) {
+				BufferSet::audio_iterator i = inbufs.audio_begin();
+				for (++i; i != inbufs.audio_end(); ++i) {
+					dst.accumulate_from(*i, nframes);
+				}
+			}
 
 		} else {
 
 			/* mix all buffers into the output, scaling them all by the gain */
 
 			// copy the first
-			dst.read_from(inbufs.get_audio(0), nframes, offset);
+			dst.read_from(inbufs.get_audio(0), nframes);
 			
 			// accumulate (with gain) starting with the second
-            if (inbufs.count().n_audio() > 0) {
-		    	BufferSet::audio_iterator i = inbufs.audio_begin();
-			    for (++i; i != inbufs.audio_end(); ++i) {
-    				dst.accumulate_with_gain_from(*i, nframes, offset, gain_coeff);
-    			}
-            }
+			if (inbufs.count().n_audio() > 0) {
+				BufferSet::audio_iterator i = inbufs.audio_begin();
+				for (++i; i != inbufs.audio_end(); ++i) {
+					dst.accumulate_with_gain_from(*i, nframes, gain_coeff);
+				}
+			}
 
 		}
 
@@ -1327,7 +1327,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 	
 	/* the terrible silence ... */
 	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
-		i->silence(nframes, offset);
+		i->silence(nframes);
 	}
 
 	BufferSet::audio_iterator i = inbufs.audio_begin();
@@ -1338,7 +1338,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 }
 
 void
-Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {	
 	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug
@@ -1360,7 +1360,7 @@ Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, nframes_t start
 			gain_coeff = speed_quietning;
 		}
 
-		distribute_no_automation(inbufs, outbufs, nframes, offset, gain_coeff);
+		distribute_no_automation(inbufs, outbufs, nframes, gain_coeff);
 		return;
 	}
 
@@ -1373,12 +1373,12 @@ Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, nframes_t start
 		// FIXME: apply gain automation?
 
 		// copy the first
-		dst.read_from(inbufs.get_audio(0), nframes, offset);
+		dst.read_from(inbufs.get_audio(0), nframes);
 
 		// accumulate starting with the second
 		BufferSet::audio_iterator i = inbufs.audio_begin();
 		for (++i; i != inbufs.audio_end(); ++i) {
-			dst.accumulate_from(*i, nframes, offset);
+			dst.accumulate_from(*i, nframes);
 		}
 
 		return;
@@ -1389,7 +1389,7 @@ Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, nframes_t start
 	
 	/* the terrible silence ... */
 	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
-		i->silence(nframes, offset);
+		i->silence(nframes);
 	}
 
 	BufferSet::audio_iterator i = inbufs.audio_begin();

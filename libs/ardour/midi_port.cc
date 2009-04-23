@@ -41,7 +41,7 @@ MidiPort::~MidiPort()
 
 
 void
-MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
+MidiPort::cycle_start (nframes_t nframes)
 {
 	_buffer->clear ();
 	assert (_buffer->size () == 0);
@@ -55,25 +55,31 @@ MidiBuffer &
 MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 {
 	if (_has_been_mixed_down) {
-	    return *_buffer;
+		return *_buffer;
 	}
 
 	if (receives_input ()) {
-			
+
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 		const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
 		
 		assert (event_count < _buffer->capacity());
+
+		/* suck all relevant MIDI events from the JACK MIDI port buffer
+		   into our MidiBuffer
+		*/
 		
-		jack_midi_event_t ev;
-		
+		nframes_t off = offset + _port_offset;
+
 		for (nframes_t i = 0; i < event_count; ++i) {
 			
+			jack_midi_event_t ev;
+
 			jack_midi_event_get (&ev, jack_buffer, i);
 			
-			// i guess this should do but i leave it off to test the rest first.
-			//if (ev.time > offset && ev.time < offset+nframes)
-			_buffer->push_back (ev);
+			if (ev.time > off && ev.time < off+nframes) {
+				_buffer->push_back (ev);
+			}
 		}
 		
 		if (nframes) {
@@ -81,7 +87,7 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 		}
 		
 	} else {
-		_buffer->silence (nframes, offset);
+		_buffer->silence (nframes);
 	}
 	
 	if (nframes) {
@@ -93,47 +99,34 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 
 	
 void
-MidiPort::cycle_end (nframes_t nframes, nframes_t offset)
+MidiPort::cycle_end (nframes_t nframes)
 {
-#if 0
+	_has_been_mixed_down = false;
+}
 
-	if (sends_output ()) {
-		/* FIXME: offset */
-
-		// We're an output - copy events from source buffer to Jack buffer
-		
-		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
-		
-		jack_midi_clear_buffer (jack_buffer);
-		
-		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
-			const Evoral::Event& ev = *i;
-
-			// event times should be frames, relative to cycle start
-			assert(ev.time() >= 0);
-			assert(ev.time() < nframes);
-			jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
-		}
-	}
-#endif
-
+void
+MidiPort::cycle_split ()
+{
 	_has_been_mixed_down = false;
 }
 
 void
 MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 {
-	/* FIXME: offset */
-	
 	if (sends_output ()) {
 		
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 			const Evoral::Event<nframes_t>& ev = *i;
+
 			// event times are in frames, relative to cycle start
-			assert(ev.time() < (nframes+offset));
-			if (ev.time() >= offset) {
+
+			// XXX split cycle start or cycle start?
+
+			assert(ev.time() < (nframes+offset+_port_offset));
+
+			if (ev.time() >= offset + _port_offset) {
 				jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
 			}
 		}

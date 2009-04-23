@@ -416,7 +416,7 @@ MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframe
 }
 
 int
-MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input)
+MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input)
 {
 	// FIXME: waay too much code to duplicate (AudioDiskstream::process)
 	int       ret = -1;
@@ -520,7 +520,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 	if (nominally_recording || rec_nframes) {
 
 		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
-		MidiBuffer& buf = _source_port->get_midi_buffer(nframes, offset);
+		MidiBuffer& buf = _source_port->get_midi_buffer(nframes);
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 			assert(ev.buffer());
@@ -1476,12 +1476,10 @@ MidiDiskstream::use_pending_capture_data (XMLNode& node)
  * so that an event at \a start has time = 0
  */
 void
-MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset)
+MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 {
-	if (offset == 0) {
-		dst.clear();
-		assert(dst.size() == 0);
-	}
+	dst.clear();
+	assert(dst.size() == 0);
 	
 	// Reverse.  ... We just don't do reverse, ok?  Back off.
 	if (end <= start) {
@@ -1491,13 +1489,13 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nf
 	// Check only events added this offset cycle
 	MidiBuffer::iterator this_cycle_start = dst.end();
 	
-	// Translates stamps to be relative to start, but add offset.
+	// Translates stamps to be relative to start
 	#if 1
-		_playback_buf->read(dst, start, end, offset);
+		_playback_buf->read(dst, start, end);
 	#else	
-		const size_t events_read = _playback_buf->read(dst, start, end, offset);
+		const size_t events_read = _playback_buf->read(dst, start, end);
 		cout << "frames read = " << frames_read << " events read = " << events_read
-		<< " end = " << end << " start = " << start << " offset = " << offset
+		<< " end = " << end << " start = " << start
 		<< " readspace " << _playback_buf->read_space()
 		<< " writespace " << _playback_buf->write_space() << endl;
 	#endif
@@ -1508,7 +1506,7 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nf
 	// Feed the data through the MidiStateTracker
 	// If it detects a LoopEvent it will add necessary note offs
 	if (_midi_state_tracker.track(this_cycle_start, dst.end())) {
-		_midi_state_tracker.resolve_notes(dst, end-start - 1 + offset);
+		_midi_state_tracker.resolve_notes(dst, end-start - 1);
 	}
 }
 

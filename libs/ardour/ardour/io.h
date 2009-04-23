@@ -101,13 +101,11 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	
 	bool set_name (const string& str);
 
-	virtual void silence  (nframes_t, nframes_t offset);
+	virtual void silence  (nframes_t);
 
-	void collect_input  (BufferSet& bufs, nframes_t nframes, nframes_t offset);
-	void deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
-	                                      nframes_t nframes, nframes_t offset);
-	void just_meter_input (nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset);
+	void collect_input  (BufferSet& bufs, nframes_t nframes);
+	void deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
+	void just_meter_input (nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
@@ -213,6 +211,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	/// raised when the number of input or output ports changes
 	static sigc::signal<void,ChanCount> PortCountChanged;
 	static sigc::signal<int>            PortsCreated;
+	static sigc::signal<void,nframes_t> CycleStart;
 
 	static void update_meters();
 	static std::string name_from_state (const XMLNode&);
@@ -287,9 +286,10 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	bool                _denormal_protection;
 	XMLNode*             deferred_state;
 	DataType            _default_type;
+	nframes_t           _output_offset;
 
-	virtual void prepare_inputs (nframes_t nframes, nframes_t offset);
-	virtual void flush_outputs (nframes_t nframes, nframes_t offset);
+	virtual void prepare_inputs (nframes_t nframes);
+	virtual void flush_outputs (nframes_t nframes);
 
 	virtual void set_deferred_state() {}
 
@@ -310,13 +310,16 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int set_inputs (const string& str);
 	int set_outputs (const string& str);
 
+	void increment_output_offset (nframes_t);
+	void cycle_start (nframes_t);
+
 	static bool connecting_legal;
 	static bool ports_legal;
 
   private:
 	static bool panners_legal;
 
-	void copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset);
+	void copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes);
 
 	int connecting_became_legal ();
 	int panners_became_legal ();

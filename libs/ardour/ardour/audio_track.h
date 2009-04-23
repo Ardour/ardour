@@ -40,13 +40,13 @@ class AudioTrack : public Track
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
 	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+		  int declick, bool can_record, bool rec_monitors_input);
 	
 	int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+		     bool state_changing, bool can_record, bool rec_monitors_input);
 	
 	int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		nframes_t offset, bool can_record, bool rec_monitors_input);
+			 bool can_record, bool rec_monitors_input);
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 

@@ -117,9 +117,9 @@ IOProcessor::set_state (const XMLNode& node)
 }
 
 void
-IOProcessor::silence (nframes_t nframes, nframes_t offset)
+IOProcessor::silence (nframes_t nframes)
 {
-	_io->silence(nframes, offset);
+	_io->silence (nframes);
 }
 
 ChanCount

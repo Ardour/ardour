@@ -94,7 +94,13 @@ Session::prepare_diskstreams ()
 }
 
 int
-Session::no_roll (nframes_t nframes, nframes_t offset)
+Session::fail_roll (nframes_t nframes)
+{
+	return no_roll (nframes);
+}
+
+int
+Session::no_roll (nframes_t nframes)
 {
 	nframes_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
@@ -102,7 +108,7 @@ Session::no_roll (nframes_t nframes, nframes_t offset)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {
-		_click_io->silence (nframes, offset);
+		_click_io->silence (nframes);
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -113,7 +119,7 @@ Session::no_roll (nframes_t nframes, nframes_t offset)
 		
 		(*i)->set_pending_declick (declick);
 		
-		if ((*i)->no_roll (nframes, _transport_frame, end_frame, offset, non_realtime_work_pending(), 
+		if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(), 
 				   actively_recording(), declick)) {
 			error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
 			ret = -1;
@@ -125,7 +131,7 @@ Session::no_roll (nframes_t nframes, nframes_t offset)
 }
 
 int
-Session::process_routes (nframes_t nframes, nframes_t offset)
+Session::process_routes (nframes_t nframes)
 {
 	bool record_active;
 	int  declick = get_transport_declick_required();
@@ -152,7 +158,7 @@ Session::process_routes (nframes_t nframes, nframes_t offset)
 
 		(*i)->set_pending_declick (declick);
 
-		if ((ret = (*i)->roll (nframes, start_frame, end_frame, offset, declick, record_active, rec_monitors)) < 0) {
+		if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, rec_monitors)) < 0) {
 
 			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
 			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
@@ -173,7 +179,7 @@ Session::process_routes (nframes_t nframes, nframes_t offset)
 }
 
 int
-Session::silent_process_routes (nframes_t nframes, nframes_t offset)
+Session::silent_process_routes (nframes_t nframes)
 {
 	bool record_active = actively_recording();
 	int  declick = get_transport_declick_required();
@@ -196,7 +202,7 @@ Session::silent_process_routes (nframes_t nframes, nframes_t offset)
 			continue;
 		}
 
-		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, offset, record_active, rec_monitors)) < 0) {
+		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors)) < 0) {
 			
 			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
 			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
@@ -236,7 +242,7 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 		   also runs commit() for every diskstream.
 		 */
 
-		if ((dret = (*i)->process (_transport_frame, nframes, 0, actively_recording(), get_rec_monitors_input())) == 0) {
+		if ((dret = (*i)->process (_transport_frame, nframes, actively_recording(), get_rec_monitors_input())) == 0) {
 			if ((*i)->commit (nframes)) {
 				needs_butler = true;
 			}
@@ -271,7 +277,6 @@ Session::process_with_events (nframes_t nframes)
 	Event*         ev;
 	nframes_t      this_nframes;
 	nframes_t      end_frame;
-	nframes_t      offset;
 	bool           session_needs_butler = false;
 	nframes_t      stop_limit;
 	long           frames_moved;
@@ -279,7 +284,7 @@ Session::process_with_events (nframes_t nframes)
 	/* make sure the auditioner is silent */
 
 	if (auditioner) {
-		auditioner->silence (nframes, 0);
+		auditioner->silence (nframes);
 	}
 
 	/* handle any pending events */
@@ -339,13 +344,13 @@ Session::process_with_events (nframes_t nframes)
 		}
 		
 		if (!_exporting && _slave) {
-			if (!follow_slave (nframes, 0)) {
+			if (!follow_slave (nframes)) {
 				return;
 			}
 		} 
 
 		if (_transport_speed == 0) {
-			no_roll (nframes, 0);
+			no_roll (nframes);
 			return;
 		}
 	
@@ -365,7 +370,7 @@ Session::process_with_events (nframes_t nframes)
 		}
 
 		if (maybe_stop (stop_limit)) {
-			no_roll (nframes, 0);
+			no_roll (nframes);
 			return;
 		} 
 
@@ -373,10 +378,10 @@ Session::process_with_events (nframes_t nframes)
 		the_next_one = next_event;
 		++the_next_one;
 
-		offset = 0;
-
 		/* yes folks, here it is, the actual loop where we really truly
-		   process some audio */
+		   process some audio 
+		*/
+
 		while (nframes) {
 
 			this_nframes = nframes; /* real (jack) time relative */
@@ -390,20 +395,19 @@ Session::process_with_events (nframes_t nframes)
 
 			if (this_nframes) {
 				
-				click (_transport_frame, nframes, offset);
+				click (_transport_frame, this_nframes);
 				
 				/* now process frames between now and the first event in this block */
 				prepare_diskstreams ();
 
-				if (process_routes (this_nframes, offset)) {
-					no_roll (nframes, 0);
+				if (process_routes (this_nframes)) {
+					fail_roll (nframes);
 					return;
 				}
 				
 				commit_diskstreams (this_nframes, session_needs_butler);
 
 				nframes -= this_nframes;
-				offset += this_nframes;
 				
 				if (frames_moved < 0) {
 					decrement_transport_position (-frames_moved);
@@ -415,6 +419,8 @@ Session::process_with_events (nframes_t nframes)
 				check_declick_out ();
 			}
 
+			_engine.split_cycle (this_nframes);
+			
 			/* now handle this event and all others scheduled for the same time */
 			
 			while (this_event && this_event->action_frame == _transport_frame) {
@@ -431,7 +437,7 @@ Session::process_with_events (nframes_t nframes)
 			/* if an event left our state changing, do the right thing */
 
 			if (nframes && non_realtime_work_pending()) {
-				no_roll (nframes, offset);
+				no_roll (nframes);
 				break;
 			}
 
@@ -470,7 +476,7 @@ Session::transport_locked () const
 }
 
 bool
-Session::follow_slave (nframes_t nframes, nframes_t offset)
+Session::follow_slave (nframes_t nframes)
 {
 	double slave_speed;
 	nframes_t slave_transport_frame;
@@ -590,14 +596,14 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 	cerr << "reached silent_motion:" <<endl;
 	#endif
 	
-	follow_slave_silently(nframes, offset, slave_speed);
+	follow_slave_silently (nframes, slave_speed);
 	
   noroll:
 	/* don't move at all */
 	#ifdef DEBUG_SLAVES	
 	cerr << "reached no_roll:" <<endl;
 	#endif
-	no_roll (nframes, 0);
+	no_roll (nframes);
 	return false;
 }
 
@@ -746,7 +752,7 @@ Session::track_slave_state(
 }
 
 void
-Session::follow_slave_silently(nframes_t nframes, nframes_t offset, float slave_speed)
+Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 {
 	if (slave_speed && _transport_speed) {
 
@@ -757,7 +763,7 @@ Session::follow_slave_silently(nframes_t nframes, nframes_t offset, float slave_
 		bool need_butler;
 		
 		prepare_diskstreams ();
-		silent_process_routes (nframes, offset);
+		silent_process_routes (nframes);
 		commit_diskstreams (nframes, need_butler);
 
 		if (need_butler) {
@@ -794,7 +800,6 @@ Session::process_without_events (nframes_t nframes)
 	bool session_needs_butler = false;
 	nframes_t stop_limit;
 	long frames_moved;
-	nframes_t offset = 0;
 
 	if (!process_can_proceed()) {
 		_silent = true;
@@ -802,13 +807,13 @@ Session::process_without_events (nframes_t nframes)
 	}
 
 	if (!_exporting && _slave) {
-		if (!follow_slave (nframes, 0)) {
+		if (!follow_slave (nframes)) {
 			return;
 		}
 	} 
 
 	if (_transport_speed == 0) {
-		no_roll (nframes, 0);
+		fail_roll (nframes);
 		return;
 	}
 		
@@ -827,15 +832,15 @@ Session::process_without_events (nframes_t nframes)
 	}
 		
 	if (maybe_stop (stop_limit)) {
-		no_roll (nframes, 0);
+		fail_roll (nframes);
 		return;
 	} 
 
-	if (maybe_sync_start (nframes, offset)) {
+	if (maybe_sync_start (nframes)) {
 		return;
 	}
 
-	click (_transport_frame, nframes, offset);
+	click (_transport_frame, nframes);
 
 	prepare_diskstreams ();
 	
@@ -849,8 +854,8 @@ Session::process_without_events (nframes_t nframes)
 			calculate_varispeed_playback_distance(nframes, phase, phi, target_phi); 
 	}
 
-	if (process_routes (nframes, offset)) {
-		no_roll (nframes, offset);
+	if (process_routes (nframes)) {
+		fail_roll (nframes);
 		return;
 	}
 
@@ -880,7 +885,7 @@ Session::process_audition (nframes_t nframes)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
-			(*i)->silence (nframes, 0);
+			(*i)->silence (nframes);
 		}
 	}
 
@@ -914,7 +919,7 @@ Session::process_audition (nframes_t nframes)
 }
 
 bool
-Session::maybe_sync_start (nframes_t& nframes, nframes_t& offset)
+Session::maybe_sync_start (nframes_t& nframes)
 {
 	nframes_t sync_offset;
 
@@ -929,9 +934,9 @@ Session::maybe_sync_start (nframes_t& nframes, nframes_t& offset)
 		   is left to do.
 		*/
 
-		no_roll (sync_offset, 0);
+		no_roll (sync_offset);
 		nframes -= sync_offset;
-		offset += sync_offset;
+		Port::increment_port_offset (sync_offset);
 		waiting_for_sync_offset = false;
 		
 		if (nframes == 0) {

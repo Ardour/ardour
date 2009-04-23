@@ -188,7 +188,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	friend class Track;
 
 	virtual void prepare ();
-	virtual int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input) = 0;
+	virtual int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input) = 0;
 	virtual bool commit  (nframes_t nframes) = 0;
 	virtual void recover (); /* called if commit will not be called, but process was */
 

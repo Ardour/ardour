@@ -65,6 +65,7 @@ def build(bld):
 		file_utils.cc
 		fpu.cc
 		id.cc
+                malign.cc
 		mountpoint.cc
 		pathscanner.cc
 		pool.cc

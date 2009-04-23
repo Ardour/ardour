@@ -218,7 +218,7 @@ class Panner : public Processor
 	bool is_out_of_place () const { return true; }
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return true; };
 
-	void run_out_of_place(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes, nframes_t offset);
+	void run_out_of_place(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes);
 
 	//void* get_inline_gui() const = 0;
 	//void* get_full_gui() const = 0;
@@ -301,7 +301,7 @@ class Panner : public Processor
 	/* disallow copy construction */
 	Panner (Panner const &);
 	
-	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
+	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, gain_t gain_coeff);
 	std::vector<StreamPanner*> _streampanners;
 	uint32_t     current_outs;
 	bool             _linked;

@@ -300,6 +300,22 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
 }
 
+void
+AudioEngine::split_cycle (nframes_t offset)
+{
+	/* caller must hold process lock */
+
+	Port::increment_port_offset (offset);
+
+	/* tell all Ports that we're going to start a new (split) cycle */
+
+	boost::shared_ptr<Ports> p = ports.reader();
+
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		(*i)->cycle_split ();
+	}
+}
+
 /** Method called by JACK (via _process_callback) which says that there
  * is work to be done.
  * @param nframes Number of frames to process.
@@ -336,10 +352,17 @@ AudioEngine::process_callback (nframes_t nframes)
 		return 0;
 	}
 
+	/* tell all IO objects that we're starting a new cycle */
+
+	IO::CycleStart (nframes);
+	Port::set_port_offset (0);
+
+	/* tell all Ports that we're starting a new cycle */
+
 	boost::shared_ptr<Ports> p = ports.reader();
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->cycle_start (nframes, 0);
+		(*i)->cycle_start (nframes);
 	}
 
 	if (_freewheeling) {
@@ -392,16 +415,17 @@ AudioEngine::process_callback (nframes_t nframes)
 			Port *port = (*i);
 			
 			if (port->sends_output()) {
-				port->get_buffer(nframes, 0 ).silence(nframes);
+				port->get_buffer(nframes).silence(nframes);
 			}
 		}
 	}
 
-	// Finalize ports (ie write data if necessary)
+	// Finalize ports
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->cycle_end (nframes, 0);
+		(*i)->cycle_end (nframes);
 	}
+
 	_processed_frames = next_processed_frames;
 	return 0;
 }
@@ -508,7 +532,7 @@ AudioEngine::set_session (Session *s)
 		boost::shared_ptr<Ports> p = ports.reader();
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			(*i)->cycle_start (blocksize, 0);
+			(*i)->cycle_start (blocksize);
 		}
 
 		s->process (blocksize);
@@ -521,7 +545,7 @@ AudioEngine::set_session (Session *s)
 		s->process (blocksize);
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			(*i)->cycle_end (blocksize, 0);
+			(*i)->cycle_end (blocksize);
 		}
 	}
 }

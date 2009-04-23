@@ -65,7 +65,7 @@ class MidiDiskstream : public Diskstream
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 	
-	void get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset);
+	void get_playback(MidiBuffer& dst, nframes_t start, nframes_t end);
 
 	void set_record_enabled (bool yn);
 
@@ -136,7 +136,7 @@ class MidiDiskstream : public Diskstream
   protected:
 	friend class MidiTrack;
 
-	int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input);
+	int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input);
 	bool commit  (nframes_t nframes);
 	static nframes_t midi_readahead;
 

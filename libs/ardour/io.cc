@@ -75,6 +75,7 @@ sigc::signal<int>            IO::PortsLegal;
 sigc::signal<int>            IO::PannersLegal;
 sigc::signal<void,ChanCount> IO::PortCountChanged;
 sigc::signal<int>            IO::PortsCreated;
+sigc::signal<void,nframes_t> IO::CycleStart;
 
 Glib::StaticMutex IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
 
@@ -152,6 +153,9 @@ IO::IO (Session& s, const string& name,
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 	
+	_output_offset = 0;
+	CycleStart.connect (mem_fun (*this, &IO::cycle_start));
+
 	_session.add_controllable (_gain_control);
 
 	setup_bundles_for_inputs_and_outputs ();
@@ -190,6 +194,9 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 	
+	_output_offset = 0;
+	CycleStart.connect (mem_fun (*this, &IO::cycle_start));
+
 	_session.add_controllable (_gain_control);
 
 	setup_bundles_for_inputs_and_outputs ();
@@ -217,12 +224,12 @@ IO::~IO ()
 }
 
 void
-IO::silence (nframes_t nframes, nframes_t offset)
+IO::silence (nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		i->get_buffer(nframes,offset).silence (nframes, offset);
+		i->get_buffer(nframes).silence (nframes);
 	}
 }
 
@@ -232,7 +239,7 @@ IO::silence (nframes_t nframes, nframes_t offset)
  * to the outputs, eg applying gain or pan or whatever else needs to be done.
  */
 void
-IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	// FIXME: type specific code doesn't actually need to be here, it will go away in time
 
@@ -262,7 +269,7 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 	   can use the output buffers.
 	*/
 
-	output_buffers().attach_buffers (_outputs, nframes, offset);
+	output_buffers().attach_buffers (_outputs, nframes, _output_offset);
 
 	// Use the panner to distribute audio to output port buffers
 
@@ -272,23 +279,23 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 		   cycle. XXX fix me to not waste cycles and do memory allocation etc.
 		*/
 		
-		_panner->run_out_of_place(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
+		_panner->run_out_of_place(bufs, output_buffers(), start_frame, end_frame, nframes);
 
 	} else {
 
 		/* do a 1:1 copy of data to output ports */
 
 		if (bufs.count().n_audio() > 0 && _outputs.count().n_audio () > 0) {
-			copy_to_outputs (bufs, DataType::AUDIO, nframes, offset);
+			copy_to_outputs (bufs, DataType::AUDIO, nframes);
 		}
 		if (bufs.count().n_midi() > 0 && _outputs.count().n_midi () > 0) {
-			copy_to_outputs (bufs, DataType::MIDI, nframes, offset);
+			copy_to_outputs (bufs, DataType::MIDI, nframes);
 		}
 	}
 }
 
 void
-IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset)
+IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes)
 {
 	// Copy any buffers 1:1 to outputs
 	
@@ -298,9 +305,8 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_
 	
 	while (i != bufs.end(type) && o != _outputs.end (type)) {
 		
-		Buffer& port_buffer (o->get_buffer (nframes, offset));
-		port_buffer.read_from (*i, nframes, offset);
-
+		Buffer& port_buffer (o->get_buffer (nframes));
+		port_buffer.read_from (*i, nframes, _output_offset);
 		prev = i;
 		++i;
 		++o;
@@ -309,14 +315,14 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_
 	/* extra outputs get a copy of the last buffer */
 	
 	while (o != _outputs.end(type)) {
-		Buffer& port_buffer (o->get_buffer (nframes, offset));
-		port_buffer.read_from(*prev, nframes, offset);
+		Buffer& port_buffer (o->get_buffer (nframes));
+		port_buffer.read_from (*prev, nframes, _output_offset);
 		++o;
 	}
 }
 
 void
-IO::collect_input (BufferSet& outs, nframes_t nframes, nframes_t offset)
+IO::collect_input (BufferSet& outs, nframes_t nframes)
 {
 	assert(outs.available() >= n_inputs());
 	
@@ -330,22 +336,19 @@ IO::collect_input (BufferSet& outs, nframes_t nframes, nframes_t offset)
 		BufferSet::iterator o = outs.begin(*t);
 		PortSet::iterator e = _inputs.end (*t);
 		for (PortSet::iterator i = _inputs.begin(*t); i != e; ++i, ++o) {
-			Buffer& b (i->get_buffer (nframes,offset));
-			o->read_from (b, nframes, offset);
+			Buffer& b (i->get_buffer (nframes));
+			o->read_from (b, nframes);
 		}
 
 	}
 }
 
 void
-IO::just_meter_input (nframes_t start_frame, nframes_t end_frame, 
-		      nframes_t nframes, nframes_t offset)
+IO::just_meter_input (nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	BufferSet& bufs = _session.get_scratch_buffers (n_inputs());
-
-	collect_input (bufs, nframes, offset);
-
-	_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+	collect_input (bufs, nframes);
+	_meter->run_in_place (bufs, start_frame, end_frame, nframes);
 }
 
 
@@ -2739,25 +2742,19 @@ IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 }
 
 void
-IO::prepare_inputs (nframes_t nframes, nframes_t offset)
+IO::prepare_inputs (nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 }
 
 void
-IO::flush_outputs (nframes_t nframes, nframes_t offset)
+IO::flush_outputs (nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
+
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-
-		/* Only run cycle_start() on output ports, because 
-		   inputs must be done in the correct processing order,
-		   which requires interleaving with route processing.
-		*/
-
-		(*i).flush_buffers (nframes, offset);
+		(*i).flush_buffers (nframes, _output_offset);
 	}
-		
 }
 
 std::string
@@ -2799,3 +2796,16 @@ IO::set_name_in_state (XMLNode& node, const string& new_name)
 		node.add_property ("name", new_name);
 	} 
 }
+
+void
+IO::cycle_start (nframes_t nframes)
+{
+	_output_offset = 0;
+}
+
+void
+IO::increment_output_offset (nframes_t n)
+{
+	_output_offset += n;
+}
+

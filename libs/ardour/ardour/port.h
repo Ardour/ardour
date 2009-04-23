@@ -44,6 +44,18 @@ public:
 
 	virtual ~Port ();
 
+	static nframes_t port_offset() { return _port_offset; }
+
+	static void set_port_offset (nframes_t off) {
+		_port_offset = off;
+	}
+	static void increment_port_offset (nframes_t n) {
+		_port_offset += n;
+	}
+	static void set_buffer_size (nframes_t sz) {
+		_buffer_size = sz;
+	}
+
 	/** @return Port short name */
 	std::string name () const {
 		return _name;
@@ -91,10 +103,11 @@ public:
 	virtual void reset ();
 
 	virtual DataType type () const = 0;
-	virtual void cycle_start (nframes_t, nframes_t) = 0;
-	virtual void cycle_end (nframes_t, nframes_t) = 0;
-	virtual Buffer& get_buffer (nframes_t, nframes_t) = 0;
-	virtual void flush_buffers (nframes_t, nframes_t) {}
+	virtual void cycle_start (nframes_t) = 0;
+	virtual void cycle_end (nframes_t) = 0;
+	virtual void cycle_split () = 0;
+	virtual Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) = 0;
+	virtual void flush_buffers (nframes_t, nframes_t offset = 0) {}
 
 	static void set_engine (AudioEngine *);
 
@@ -105,6 +118,9 @@ protected:
 	Port (std::string const &, DataType, Flags);
 
 	jack_port_t* _jack_port; ///< JACK port
+
+	static nframes_t _port_offset;
+	static nframes_t _buffer_size;
 
 	static AudioEngine* _engine; ///< the AudioEngine
 

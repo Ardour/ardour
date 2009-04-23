@@ -39,17 +39,17 @@ public:
 	~MidiTrack ();
 	
 	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+		  int declick, bool can_record, bool rec_monitors_input);
 	
 	int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+		     bool state_changing, bool can_record, bool rec_monitors_input);
 	
 	int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		nframes_t offset, bool can_record, bool rec_monitors_input);
+			 bool can_record, bool rec_monitors_input);
 
 	void process_output_buffers (BufferSet& bufs,
 				     nframes_t start_frame, nframes_t end_frame,
-				     nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+				     nframes_t nframes, bool with_redirects, int declick,
 				     bool meter);
 
 	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
@@ -96,8 +96,7 @@ protected:
 	int _set_state (const XMLNode&, bool call_base);
 
 private:
-	void write_controller_messages(MidiBuffer& buf,
-			nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
+	void write_controller_messages(MidiBuffer& buf, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 	void use_new_diskstream ();

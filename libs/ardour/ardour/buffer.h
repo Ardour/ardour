@@ -67,15 +67,15 @@ public:
 	 * The buffer is not silent after this operation. the @a capacity argument
 	 * passed to the constructor must have been non-zero.
 	 */
-	virtual void resize(size_t) = 0;
+	virtual void resize (size_t) = 0;
 	
-	/** Clear (eg zero, or empty) buffer starting at TIME @a offset */
-	virtual void silence(nframes_t len, nframes_t offset=0) = 0;
+	/** Clear (eg zero, or empty) buffer */
+	virtual void silence (nframes_t len, nframes_t offset = 0) = 0;
 	
 	/** Clear the entire buffer */
 	virtual void clear() { silence(_capacity, 0); }
 	
-	virtual void read_from(const Buffer& src, nframes_t offset, nframes_t len) = 0;
+	virtual void read_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) = 0;
 
   protected:
 	Buffer(DataType type, size_t capacity)

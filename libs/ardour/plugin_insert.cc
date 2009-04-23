@@ -365,14 +365,14 @@ PluginInsert::silence (nframes_t nframes, nframes_t offset)
 }
 	
 void
-PluginInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+PluginInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	if (active()) {
 
 		if (_session.transport_rolling()) {
-			automation_run (bufs, nframes, offset);
+			automation_run (bufs, nframes);
 		} else {
-			connect_and_run (bufs, nframes, offset, false);
+			connect_and_run (bufs, nframes, 9, false);
 		}
 	} else {
 
@@ -386,7 +386,7 @@ PluginInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t en
 			/* not active, but something has make up for any channel count increase */
 			
 			for (uint32_t n = out - in; n < out; ++n) {
-				memcpy (bufs.get_audio(n).data(nframes, offset), bufs.get_audio(in - 1).data(nframes, offset), sizeof (Sample) * nframes);
+				memcpy (bufs.get_audio(n).data(), bufs.get_audio(in - 1).data(), sizeof (Sample) * nframes);
 			}
 		}
 
@@ -428,11 +428,12 @@ PluginInsert::get_parameter (Evoral::Parameter param)
 }
 
 void
-PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
+PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes)
 {
 	Evoral::ControlEvent next_event (0, 0.0f);
 	nframes_t now = _session.transport_frame ();
 	nframes_t end = now + nframes;
+	nframes_t offset = 0;
 
 	Glib::Mutex::Lock lm (data().control_lock(), Glib::TRY_LOCK);
 

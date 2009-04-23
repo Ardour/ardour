@@ -37,9 +37,8 @@ public:
 	MidiBuffer(size_t capacity);
 	~MidiBuffer();
 
-	void silence(nframes_t dur, nframes_t offset=0);
-	
-	void read_from(const Buffer& src, nframes_t nframes, nframes_t offset);
+	void silence (nframes_t nframes, nframes_t offset = 0);
+	void read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset = 0, nframes_t src_offset = 0);
 	
 	void copy(const MidiBuffer& copy);
 
@@ -54,7 +53,7 @@ public:
 	
 	template<typename BufferType, typename EventType>
 	struct iterator_base {
-		iterator_base<BufferType, EventType>(BufferType& b, size_t o) : buffer(b), offset(o) {}
+	    iterator_base<BufferType, EventType>(BufferType& b, nframes_t o) : buffer(b), offset(o) {}
 		inline EventType operator*() const {
 			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);

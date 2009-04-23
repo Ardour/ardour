@@ -28,78 +28,86 @@ class AudioBuffer : public Buffer
 {
 public:
 	AudioBuffer(size_t capacity);
-	
 	~AudioBuffer();
 
-	void silence(nframes_t len, nframes_t offset = 0) {
+	void silence (nframes_t len, nframes_t offset = 0) {
 		if (!_silent) {
 			assert(_capacity > 0);
 			assert(offset + len <= _capacity);
 			memset(_data + offset, 0, sizeof (Sample) * len);
-			if (offset == 0 && len == _capacity) {
+			if (len == _capacity) {
 				_silent = true;
 			}
 		}
+		_written = true;
 	}
 	
-	/** Read @a len frames FROM THE START OF @a src into self at @a offset */
-	void read_from(const Buffer& src, nframes_t len, nframes_t offset) {
+	/** Read @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
+	void read_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
 		assert(&src != this);
 		assert(_capacity > 0);
 		assert(src.type() == DataType::AUDIO);
-		assert(offset + len <= _capacity);
-		memcpy(_data + offset, ((AudioBuffer&)src).data(), sizeof(Sample) * len);
-		_silent = src.silent();
+		assert(len <= _capacity);
+		memcpy(_data + dst_offset, ((AudioBuffer&)src).data() + src_offset, sizeof(Sample) * len);
+		if (dst_offset == 0 && src_offset == 0 && len == _capacity) {
+			_silent = src.silent();
+		} else {
+			_silent = _silent && src.silent();
+		}
+		_written = true;
 	}
 	
-	/** Accumulate (add)@a len frames FROM THE START OF @a src into self at @a offset */
-	void accumulate_from(const AudioBuffer& src, nframes_t len, nframes_t offset) {
+	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
+	void accumulate_from (const AudioBuffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
 		assert(_capacity > 0);
-		assert(offset + len <= _capacity);
+		assert(len <= _capacity);
 
-		Sample*       const dst_raw = _data + offset;
-		const Sample* const src_raw = src.data();
+		Sample*       const dst_raw = _data + dst_offset;
+		const Sample* const src_raw = src.data() + src_offset;
 
 		mix_buffers_no_gain(dst_raw, src_raw, len);
 
 		_silent = (src.silent() && _silent);
+		_written = true;
 	}
 	
-	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
+	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset
 	 * scaling by @a gain_coeff */
-	void accumulate_with_gain_from(const AudioBuffer& src, nframes_t len, nframes_t offset, gain_t gain_coeff) {
+	void accumulate_with_gain_from (const AudioBuffer& src, nframes_t len, gain_t gain_coeff, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
 
 		assert(_capacity > 0);
-		assert(offset + len <= _capacity);
+		assert(len <= _capacity);
 
 		if (src.silent()) {
 			return;
 		}
 
-		Sample*       const dst_raw = _data + offset;
-		const Sample* const src_raw = src.data();
+		Sample*       const dst_raw = _data + dst_offset;
+		const Sample* const src_raw = src.data() + src_offset;
 
 		mix_buffers_with_gain (dst_raw, src_raw, len, gain_coeff);
 
 		_silent = ( (src.silent() && _silent) || (_silent && gain_coeff == 0) );
+		_written = true;
 	}
 
-	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
+	/** Accumulate (add) @a len frames FROM THE START OF @a src into self
 	 * scaling by @a gain_coeff */
-	void accumulate_with_gain_from(const Sample* src_raw, nframes_t len, nframes_t offset, gain_t gain_coeff) {
+	void accumulate_with_gain_from (const Sample* src_raw, nframes_t len, gain_t gain_coeff, nframes_t dst_offset = 0) {
 
 		assert(_capacity > 0);
-		assert(offset + len <= _capacity);
+		assert(len <= _capacity);
 
-		Sample*       const dst_raw = _data + offset;
+		Sample*       const dst_raw = _data + dst_offset;
 
 		mix_buffers_with_gain (dst_raw, src_raw, len, gain_coeff);
 
 		_silent = (_silent && gain_coeff == 0);
+		_written = true;
 	}
 	
-	void apply_gain(gain_t gain, nframes_t len, nframes_t offset=0) {
-		apply_gain_to_buffer (_data + offset, len, gain);
+	void apply_gain (gain_t gain, nframes_t len) {
+		apply_gain_to_buffer (_data, len, gain);
 	}
 
 	/** Set the data contained by this buffer manually (for setting directly to jack buffer).
@@ -112,6 +120,7 @@ public:
 		_size = size;
 		_data = data;
 		_silent = false;
+		_written = false;
 	}
 
 	/** Reallocate the buffer used internally to handle at least @nframes of data
@@ -120,33 +129,25 @@ public:
 	 */
 	void resize (size_t nframes);
 
-	const Sample* data () const { return _data; }
-	Sample* data () { return _data; }
 
-	const Sample* data(nframes_t nframes, nframes_t offset) const
-		{ assert(offset + nframes <= _capacity); return _data + offset; }
-
-	Sample* data (nframes_t nframes, nframes_t offset)
-		{ assert(offset + nframes <= _capacity); return _data + offset; }
-
-	void replace_data (size_t nframes);
-
-	void drop_data () {
-		assert (_owns_data);
-		assert (_data);
-
-		free (_data);
-		_data = 0;
-		_size = 0;
-		_capacity = 0;
-		_silent = false;
+	const Sample* data (nframes_t offset = 0) const { 
+		assert(offset <= _capacity); 
+		return _data + offset; 
 	}
 
-	void copy_to_internal (Sample* p, nframes_t cnt, nframes_t offset);
+	Sample* data (nframes_t offset = 0) { 
+		assert(offset <= _capacity); 
+		return _data + offset; 
+	}
+
+	void prepare () { _written = false; }
+	bool written() const { return _written; }
 
   private:
 	bool    _owns_data;
+	bool    _written;
 	Sample* _data; ///< Actual buffer contents
+	
 };
 
 

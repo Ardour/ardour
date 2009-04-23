@@ -92,12 +92,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using boost::shared_ptr;
 
-#ifdef __x86_64__
-static const int CPU_CACHE_ALIGN = 64;
-#else
-static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
-#endif
-
 bool Session::_disable_all_loaded_plugins = false;
 
 sigc::signal<void,std::string> Session::Dialog;
@@ -3847,15 +3841,18 @@ Session::tempo_map_changed (Change ignored)
 void
 Session::ensure_buffers (ChanCount howmany)
 {
-	if (current_block_size == 0)
+	if (current_block_size == 0) {
 		return; // too early? (is this ok?)
+	}
 
 	// We need at least 2 MIDI scratch buffers to mix/merge
-	if (howmany.n_midi() < 2)
+	if (howmany.n_midi() < 2) {
 		howmany.set_midi(2);
+	}
 
 	// FIXME: JACK needs to tell us maximum MIDI buffer size
 	// Using nasty assumption (max # events == nframes) for now
+
 	_scratch_buffers->ensure_buffers(howmany, current_block_size);
 	_mix_buffers->ensure_buffers(howmany, current_block_size);
 	_silent_buffers->ensure_buffers(howmany, current_block_size);

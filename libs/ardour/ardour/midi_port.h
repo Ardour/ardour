@@ -36,15 +36,16 @@ class MidiPort : public Port {
 		return DataType::MIDI;
 	}
 
-	void cycle_start (nframes_t nframes, nframes_t offset);
-	void cycle_end (nframes_t nframes, nframes_t offset);
-	void flush_buffers (nframes_t nframes, nframes_t offset);
+	void cycle_start (nframes_t nframes);
+	void cycle_end (nframes_t nframes);
+	void cycle_split ();
+	void flush_buffers (nframes_t nframes, nframes_t offset = 0);
 
-	Buffer& get_buffer (nframes_t nframes, nframes_t offset) {
+	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
 		return get_midi_buffer (nframes, offset);
 	}
-	
-	MidiBuffer& get_midi_buffer (nframes_t nframes, nframes_t offset);
+
+	MidiBuffer& get_midi_buffer (nframes_t nframes, nframes_t offset = 0);
 
   protected:
 	friend class AudioEngine;
@@ -52,9 +53,9 @@ class MidiPort : public Port {
 	MidiPort (const std::string& name, Flags);
   
   private:
-
 	MidiBuffer* _buffer;
 	bool _has_been_mixed_down;
+
 };
  
 } // namespace ARDOUR

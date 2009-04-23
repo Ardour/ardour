@@ -77,7 +77,7 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+PortInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	if (_io->n_outputs().n_total() == 0) {
 		return;
@@ -85,13 +85,12 @@ PortInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_
 
 	if (!active()) {
 		/* deliver silence */
-		_io->silence (nframes, offset);
+		_io->silence (nframes);
 		return;
 	}
 
-	_io->deliver_output(bufs, start_frame, end_frame, nframes, offset);
-
-	_io->collect_input(bufs, nframes, offset);
+	_io->deliver_output (bufs, start_frame, end_frame, nframes);
+	_io->collect_input (bufs, nframes);
 }
 
 XMLNode&

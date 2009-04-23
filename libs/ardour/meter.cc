@@ -36,7 +36,7 @@ namespace ARDOUR {
  * be set to 0.
  */
 void
-PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	uint32_t n = 0;
 	uint32_t meterable = std::min(bufs.count().n_total(), (uint32_t)_peak_power.size());
@@ -70,7 +70,7 @@ PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_f
 
 	// Meter what we have (audio)
 	for ( ; n < limit; ++n) {
-		_peak_power[n] = compute_peak (bufs.get_audio(n).data(nframes, offset), nframes, _peak_power[n]); 
+		_peak_power[n] = compute_peak (bufs.get_audio(n).data(), nframes, _peak_power[n]); 
 	}
 
 	// Zero any excess peaks
