@@ -151,7 +151,9 @@ ArdourStartup::use_session_template ()
 Glib::ustring
 ArdourStartup::session_template_name ()
 {
-	string ret;
+	if (ic_existing_session_button.get_active()) {
+		return ustring();
+	}
 
 	if (use_template_button.get_active()) {
 		TreeModel::iterator iter = template_chooser.get_active ();

@@ -2286,12 +2286,14 @@ ARDOUR_UI::get_session_parameters (bool should_be_new)
 			break;
 		}
 		
-		session_path = Glib::build_filename (session_path, session_name);
-		
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
 			if (likely_new) {
-				if (!ask_about_loading_existing_session (session_path)) {
+
+				ustring existing = Glib::build_filename (session_path, session_name);
+				
+				if (!ask_about_loading_existing_session (existing)) {
+					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 					continue;
 				} 
 			} 
@@ -2301,8 +2303,7 @@ ARDOUR_UI::get_session_parameters (bool should_be_new)
 		} else {
 
 			if (!likely_new) {
-				MessageDialog msg (string_compose (_("There is no existing session called \"%1\""), 
-								   ARDOUR_COMMAND_LINE::session_name));
+				MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
