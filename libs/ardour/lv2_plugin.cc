@@ -486,7 +486,7 @@ LV2Plugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_i
 			} else if (parameter_is_output(port_index)) {
 				//const size_t index = min(out_index,nbufs - 1);
 				//slv2_instance_connect_port(_instance, port_index,
-ss				//		bufs.get_midi(index).data(offset));
+				//		bufs.get_midi(index).data(offset));
 				// FIXME: hope it's connection optional...
 				slv2_instance_connect_port(_instance, port_index, NULL);
 				out_index++;
