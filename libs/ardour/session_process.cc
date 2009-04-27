@@ -759,7 +759,7 @@ Session::process_without_events (nframes_t nframes)
 	}
 		
 	if (maybe_stop (stop_limit)) {
-		fail_roll (nframes);
+		no_roll (nframes);
 		return;
 	} 
 
