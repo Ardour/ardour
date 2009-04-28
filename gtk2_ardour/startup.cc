@@ -189,7 +189,7 @@ Glib::ustring
 ArdourStartup::session_folder ()
 {
 	if (ic_new_session_button.get_active()) {
-		return new_folder_chooser.get_current_folder();
+		return Glib::build_filename (new_folder_chooser.get_current_folder(), new_name_entry.get_text());
 	} else {
 		TreeIter iter = recent_session_display.get_selection()->get_selected();
 
