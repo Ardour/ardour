@@ -96,6 +96,9 @@ libs/glibmm2/scripts/ltversion.m4
 libs/glibmm2/scripts/lt~obsolete.m4
 libs/glibmm2/scripts/missing
 libs/glibmm2/stamp-h1
+libs/glibmm2/glibmm-2.4.pc
+libs/glibmm2/glibmm/
+libs/glibmm2/glibmmconfig.h
 libs/sigc++2/scripts/libtool.m4
 libs/sigc++2/scripts/ltoptions.m4
 libs/sigc++2/scripts/ltsugar.m4
