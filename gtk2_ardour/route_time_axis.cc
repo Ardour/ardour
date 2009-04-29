@@ -1346,11 +1346,14 @@ RouteTimeAxisView::name_entry_changed ()
 		return;
 	}
 
-	if (_session.route_name_unique (x)) {
-		_route->set_name (x);
-	} else {
+	if (!_session.route_name_unique (x)) {
 		ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
 		name_entry.set_text (_route->name());
+	} else if (_session.route_name_internal (x)) {
+		ARDOUR_UI::instance()->popup_error (_("You cannot create a track with that name as it is reserved for Ardour"));
+		name_entry.set_text (_route->name());
+	} else {
+		_route->set_name (x);
 	}
 }
 

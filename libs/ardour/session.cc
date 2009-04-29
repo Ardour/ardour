@@ -4002,6 +4002,20 @@ Session::route_name_unique (string n) const
 	return true;
 }
 
+bool
+Session::route_name_internal (string n) const
+{
+	if (auditioner && auditioner->name() == n) {
+		return true;
+	}
+
+	if (_click_io && _click_io->name() == n) {
+		return true;
+	}
+
+	return false;
+}
+
 uint32_t
 Session::n_playlists () const
 {

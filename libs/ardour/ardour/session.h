@@ -332,6 +332,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 
 	bool route_name_unique (string) const;
+	bool route_name_internal (string) const;
 
 	bool get_record_enabled() const {
 		return (record_status () >= Enabled);
