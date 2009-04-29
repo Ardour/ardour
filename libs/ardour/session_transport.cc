@@ -1016,7 +1016,7 @@ Session::reset_rf_scale (nframes_t motion)
 }
 
 void
-Session::set_slave_source (SlaveSource src)
+Session::set_slave_source (SlaveSource src, bool stop_the_transport)
 {
 	bool reverse = false;
 	bool non_rt_required = false;
@@ -1041,7 +1041,9 @@ Session::set_slave_source (SlaveSource src)
 
 	switch (src) {
 	case None:
-		stop_transport ();
+		if (stop_the_transport) {
+			stop_transport ();
+		}
 		break;
 		
 	case MTC:
@@ -1233,10 +1235,15 @@ Session::engine_halted ()
 	g_atomic_int_set (&butler_should_do_transport_work, 0);
 	post_transport_work = PostTransportWork (0);
 	stop_butler ();
-	
+
 	realtime_stop (false);
 	non_realtime_stop (false, 0, ignored);
 	transport_sub_state = 0;
+
+	if (synced_to_jack()) {
+		/* transport is already stopped, hence the second argument */
+		set_slave_source (None, false);
+	}
 
 	TransportStateChange (); /* EMIT SIGNAL */
 }

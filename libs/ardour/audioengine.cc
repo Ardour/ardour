@@ -819,6 +819,7 @@ AudioEngine::halted (void *arg)
 	ae->_running = false;
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
+	ae->_jack = 0;
 
 	if (was_running) {
 		ae->Halted(); /* EMIT SIGNAL */
@@ -962,8 +963,7 @@ nframes_t
 AudioEngine::get_port_total_latency (const Port& port)
 {
 	if (!_jack) {
-		fatal << _("get_port_total_latency() called with no JACK client connection") << endmsg;
-		/*NOTREACHED*/
+		return 0;
 	}
 
 	return jack_port_get_total_latency (_jack, port._port);

@@ -1090,7 +1090,7 @@ class Session : public PBD::StatefulDestructible
 
 	void reset_slave_state ();
 	bool follow_slave (nframes_t);
-	void set_slave_source (SlaveSource);
+	void set_slave_source (SlaveSource, bool stop_transport = true);
 
 	bool _exporting;
 	int  prepare_to_export (ARDOUR::AudioExportSpecification&);
