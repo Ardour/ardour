@@ -292,6 +292,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void add_diskstream (boost::shared_ptr<Diskstream>);
 	boost::shared_ptr<Diskstream> diskstream_by_id (const PBD::ID& id);
 	boost::shared_ptr<Diskstream> diskstream_by_name (string name);
+	bool have_rec_enabled_diskstream () const;
 
 	bool have_captured() const { return _have_captured; }
 
@@ -1742,6 +1743,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	SessionMetadata * _metadata;
 
 	mutable bool have_looped; ///< Used in ::audible_frame(*)
+
+	void update_have_rec_enabled_diskstream ();
+	gint _have_rec_enabled_diskstream;
 };
 
 } // namespace ARDOUR

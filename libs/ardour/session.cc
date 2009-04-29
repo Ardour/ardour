@@ -140,7 +140,8 @@ Session::Session (AudioEngine &eng,
 	  click_data (0),
 	  click_emphasis_data (0),
 	  main_outs (0),
-	  _metadata (new SessionMetadata())
+	  _metadata (new SessionMetadata()),
+	  _have_rec_enabled_diskstream (false)
 
 {
 	bool new_session;
@@ -223,7 +224,8 @@ Session::Session (AudioEngine &eng,
 	  click_data (0),
 	  click_emphasis_data (0),
 	  main_outs (0),
-	  _metadata (new SessionMetadata())
+	  _metadata (new SessionMetadata()),
+	  _have_rec_enabled_diskstream (false)
 {
 	bool new_session;
 
@@ -2140,6 +2142,8 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), dstream));
 	/* this will connect to future changes, and check the current length */
 	diskstream_playlist_changed (dstream);
+
+	dstream->RecordEnableChanged.connect (mem_fun (*this, &Session::update_have_rec_enabled_diskstream));
 
 	dstream->prepare ();
 
@@ -4325,3 +4329,28 @@ Session::sync_order_keys (const char* base)
 }
 
 
+/** @return true if there is at least one record-enabled diskstream, otherwise false */
+bool
+Session::have_rec_enabled_diskstream () const
+{
+	return g_atomic_int_get (&_have_rec_enabled_diskstream) == 1;
+}
+
+/** Update the state of our rec-enabled diskstreams flag */
+void
+Session::update_have_rec_enabled_diskstream ()
+{
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader ();
+	DiskstreamList::iterator i = dsl->begin ();
+	while (i != dsl->end () && (*i)->record_enabled () == false) {
+		++i;
+	}
+
+	int const old = g_atomic_int_get (&_have_rec_enabled_diskstream);
+
+	g_atomic_int_set (&_have_rec_enabled_diskstream, i != dsl->end () ? 1 : 0);
+
+	if (g_atomic_int_get (&_have_rec_enabled_diskstream) != old) {
+		RecordStateChanged (); /* EMIT SIGNAL */
+	}
+}

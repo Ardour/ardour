@@ -1957,23 +1957,20 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	if (session == 0) {
 		return;
 	}
+
+	Session::RecordState const r = session->record_status ();
+	bool const h = session->have_rec_enabled_diskstream ();
 	
-	switch (session->record_status()) {
-	case Session::Enabled:
+	if (r == Session::Enabled || (r == Session::Recording && !h)) {
 		if (onoff) {
 			rec_button.set_visual_state (2);
 		} else {
 			rec_button.set_visual_state (0);
 		}
-		break;
-
-	case Session::Recording:
+	} else if (r == Session::Recording && h) {
 		rec_button.set_visual_state (1);
-		break;
-
-	default:
+	} else {
 		rec_button.set_visual_state (0);
-		break;
 	}
 }
 
@@ -3175,13 +3172,13 @@ ARDOUR_UI::record_state_changed ()
 		return;
 	}
 
-	switch (session->record_status()) {
-	case Session::Recording:
+	Session::RecordState const r = session->record_status ();
+	bool const h = session->have_rec_enabled_diskstream ();
+	
+	if (r == Session::Recording && h)  {
 		big_clock.set_widget_name ("BigClockRecording");
-		break;
-	default:
+        } else {
 		big_clock.set_widget_name ("BigClockNonRecording");
-		break;
 	}
 }
 
