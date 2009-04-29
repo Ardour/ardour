@@ -2052,6 +2052,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		items.push_back (SeparatorElem());
 	}
 
+	items.push_back (MenuElem (_("Strip silence..."), mem_fun (*this, &Editor::strip_region_silence)));
 	items.push_back (MenuElem (_("Reverse"), mem_fun(*this, &Editor::reverse_region)));
 	items.push_back (SeparatorElem());
 

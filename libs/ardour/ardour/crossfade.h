@@ -170,7 +170,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool update ();
 
   protected:
-	nframes_t read_raw_internal (Sample*, sframes_t, nframes_t) const;	
+	nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int) const;	
 };
 
 

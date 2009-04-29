@@ -54,6 +54,7 @@
 #include "ardour/transient_detector.h"
 #include "ardour/dB.h"
 #include "ardour/quantize.h"
+#include "ardour/strip_silence.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -73,6 +74,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "utils.h"
+#include "strip_silence_dialog.h"
 
 #include "i18n.h"
 
@@ -4660,6 +4662,22 @@ Editor::reverse_region ()
 	apply_filter (rev, _("reverse regions"));
 }
 
+void
+Editor::strip_region_silence ()
+{
+	if (!session) {
+		return;
+	}
+
+	StripSilenceDialog d;
+	int const r = d.run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		StripSilence s (*session, d.threshold (), d.minimum_length (), d.fade_length ());
+		apply_filter (s, _("strip silence"));
+	}
+}
+
 
 void
 Editor::quantize_region ()
@@ -4707,7 +4725,28 @@ Editor::apply_filter (Filter& filter, string command)
 			if (arv->audio_region()->apply (filter) == 0) {
 
 				XMLNode &before = playlist->get_state();
-				playlist->replace_region (arv->region(), filter.results.front(), arv->region()->position());
+
+				if (filter.results.empty ()) {
+
+					/* no regions returned; remove the old one */
+					playlist->remove_region (arv->region ());
+					
+				} else {
+
+					std::vector<boost::shared_ptr<Region> >::iterator res = filter.results.begin ();
+
+					/* first region replaces the old one */
+					playlist->replace_region (arv->region(), *res, (*res)->position());
+					++res;
+
+					/* add the rest */
+					while (res != filter.results.end()) {
+						playlist->add_region (*res, (*res)->position());
+						++res;
+					}
+					
+				}
+
 				XMLNode &after = playlist->get_state();
 				session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
 			} else {

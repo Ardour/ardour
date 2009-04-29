@@ -242,6 +242,7 @@ simplerect.cc
 splash.cc
 startup.cc
 streamview.cc
+strip_silence_dialog.cc
 tape_region_view.cc
 tempo_dialog.cc
 tempo_lines.cc

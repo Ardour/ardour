@@ -106,7 +106,7 @@ class AudioRegion : public Region
 	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
 			sframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
 	
-	virtual nframes_t read_raw_internal (Sample*, sframes_t, nframes_t) const;
+	virtual nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int channel) const;
 
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
@@ -162,6 +162,7 @@ class AudioRegion : public Region
 	void resume_fade_out ();
 
 	int get_transients (AnalysisFeatureList&, bool force_new = false);
+	std::list<std::pair<nframes_t, nframes_t> > find_silence (Sample, nframes_t) const;
 
   private:
 	friend class RegionFactory;

@@ -1191,6 +1191,7 @@ class Editor : public PublicEditor
 	void audition_playlist_region_via_route (boost::shared_ptr<ARDOUR::Region>, ARDOUR::Route&);
 	void split_multichannel_region();
 	void reverse_region ();
+	void strip_region_silence ();
 	void normalize_region ();
 	void denormalize_region ();
 	void adjust_region_scale_amplitude (bool up);

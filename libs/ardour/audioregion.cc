@@ -1062,9 +1062,9 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Reg
 }
 
 nframes_t
-AudioRegion::read_raw_internal (Sample* buf, sframes_t pos, nframes_t cnt) const
+AudioRegion::read_raw_internal (Sample* buf, sframes_t pos, nframes_t cnt, int channel) const
 {
-	return audio_source()->read  (buf, pos, cnt);
+	return audio_source()->read (buf, pos, cnt, channel);
 }
 
 int
@@ -1184,7 +1184,7 @@ AudioRegion::normalize_to (float target_dB)
 
 			/* read it in */
 
-			if (read_raw_internal (buf, fpos, to_read) != to_read) {
+			if (read_raw_internal (buf, fpos, to_read, 0) != to_read) {
 				return;
 			}
 			
@@ -1437,6 +1437,71 @@ then quit ardour and restart."));
 
 	return 0;
 }
+
+/** Find areas of `silence' within a region.
+ *
+ *  @param threshold Threshold below which signal is considered silence (as a sample value)
+ *  @param min_length Minimum length of silent period to be reported.
+ *  @return Silent periods; first of pair is the offset within the region, second is the length of the period
+ */
+
+std::list<std::pair<nframes_t, nframes_t> >
+AudioRegion::find_silence (Sample threshold, nframes_t min_length) const
+{
+	nframes_t const block_size = 64 * 1024;
+	Sample loudest[block_size];
+	Sample buf[block_size];
+	
+	nframes_t pos = _start;
+	nframes_t const end = _start + _length - 1;
+
+	std::list<std::pair<nframes_t, nframes_t> > silent_periods;
+
+	bool in_silence = false;
+	nframes_t silence_start = 0;
+	bool silence;
+
+	while (pos < end) {
+
+		nframes_t const to_read = min (end - pos, block_size);
+
+		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
+		memset (loudest, 0, sizeof (Sample) * block_size);
+		for (uint32_t n = 0; n < n_channels(); ++n) {
+
+			read_raw_internal (buf, pos, block_size, n);
+			for (nframes_t i = 0; i < block_size; ++i) {
+				loudest[i] = max (loudest[i], abs (buf[i]));
+			}
+		}
+
+		/* now look for silence */
+		for (nframes_t i = 0; i < block_size; ++i) {
+			silence = abs (loudest[i]) < threshold;
+			if (silence && !in_silence) {
+				/* non-silence to silence */
+				in_silence = true;
+				silence_start = pos + i;
+			} else if (!silence && in_silence) {
+				/* silence to non-silence */
+				in_silence = false;
+				if (pos + i - 1 - silence_start >= min_length) {
+					silent_periods.push_back (std::make_pair (silence_start, pos + i - 1));
+				}
+			}
+		}
+
+		pos += block_size;
+	}
+
+	if (in_silence && end - 1 - silence_start >= min_length) {
+		/* last block was silent, so finish off the last period */
+		silent_periods.push_back (std::make_pair (silence_start, end));
+	}
+
+	return silent_periods;
+}
+
 
 extern "C" {
 
