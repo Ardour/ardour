@@ -392,6 +392,7 @@ gnome_canvas_waveview_destroy (GtkObject *object)
 #define DEBUG_CACHE 0
 #undef CACHE_MEMMOVE_OPTIMIZATION
 
+/** @return cache index of start_sample within the cache */
 static gint32
 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_sample, gulong end_sample)
 {
@@ -438,7 +439,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	/* Note the assumption that we have a 1:1 units:pixel ratio for the canvas. Its everywhere ... */
 	
 	half_width = (gulong) floor ((waveview->screen_width * waveview->samples_per_unit)/2.0 + 0.5);
-	
+
 	if (start_sample < half_width) {
 		new_cache_start = 0;
 	} else {
@@ -1091,8 +1092,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 	int pymin, pymax;
 	int cache_index;
 	double half_height;
-	int x, end, begin;
-	int zbegin, zend;
+	int x;
 	char rectify;
 
 	waveview = GNOME_CANVAS_WAVEVIEW (item);
@@ -1108,31 +1108,29 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		buf->is_bg = FALSE;
 	}
 
-	begin = MAX(waveview->bbox_ulx, buf->rect.x0);
+	/* a "unit" means a pixel */
 
-	if (begin == waveview->bbox_ulx) {
-		zbegin = begin + 1;
-	} else {
-		zbegin = begin;
-	}
+	/* begin: render start x (units) */
+	int const begin = MAX (waveview->bbox_ulx, buf->rect.x0);
 
-	if (waveview->bbox_lrx >= 0) {
-		end = MIN(waveview->bbox_lrx,buf->rect.x1);
-	} else {
-		end = buf->rect.x1;
-	}
+        /* zbegin: start x for zero line (units) */
+	int const zbegin = (begin == waveview->bbox_ulx) ? (begin + 1) : begin;
 
-	if (end == waveview->bbox_lrx) {
-		zend = end - 1;
-	} else {
-		zend = end;
-	}
+	/* end: render end x (units) */
+	int const end = (waveview->bbox_lrx >= 0) ? MIN (waveview->bbox_lrx,buf->rect.x1) : buf->rect.x1;
+
+	/* zend: end x for zero-line (units) */
+	int const zend = (end == waveview->bbox_lrx) ? (end - 1) : end;
 
 	if (begin == end) {
 		return;
 	}
 
-	s1 = floor ((begin - waveview->bbox_ulx) * waveview->samples_per_unit) ;
+	/* s1: start sample
+	   s2: end sample
+	*/
+
+	s1 = floor ((begin - waveview->bbox_ulx) * waveview->samples_per_unit);
 
 	// fprintf (stderr, "0x%x begins at sample %f\n", waveview, waveview->bbox_ulx * waveview->samples_per_unit);
 
@@ -1176,7 +1174,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 //	check_cache (waveview, "post-ensure");
 
 	/* don't rectify at single-sample zoom */
-	if(waveview->rectified && waveview->samples_per_unit > 1) {
+	if (waveview->rectified && waveview->samples_per_unit > 1) {
 		rectify = TRUE;
 	}
 	else {
@@ -1195,7 +1193,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 /* this makes it slightly easier to comprehend whats going on */
 #define origin half_height
 
-	if(waveview->filled && !rectify) {
+	if (waveview->filled && !rectify) {
 		int prev_pymin = 1;
 		int prev_pymax = 0;
 		int last_pymin = 1;
@@ -1205,7 +1203,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		int next_clip_max = 0;
 		int next_clip_min = 0;
 
-		if(s1 < waveview->samples_per_unit) {
+		if (s1 < waveview->samples_per_unit) {
 			/* we haven't got a prev vars to compare with, so outline the whole line here */
 			prev_pymax = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
 			prev_pymin = prev_pymax;
@@ -1229,6 +1227,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		 * Compute the variables outside the rendering rect
 		 */
 		if(prev_pymax != prev_pymin) {
+
 			prev_pymax = (int) rint ((item->y1 + origin - MIN(waveview->cache->data[cache_index].max, 1.0) * half_height) * item->canvas->pixels_per_unit);
 			prev_pymin = (int) rint ((item->y1 + origin - MAX(waveview->cache->data[cache_index].min, -1.0) * half_height) * item->canvas->pixels_per_unit);
 			++cache_index;
@@ -1236,9 +1235,21 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		if(last_pymax != last_pymin) {
 			/* take the index of one sample right of what we render */
 			int index = cache_index + (end - begin);
-			
-			last_pymax = (int) rint ((item->y1 + origin - MIN(waveview->cache->data[index].max, 1.0) * half_height) * item->canvas->pixels_per_unit);
-			last_pymin = (int) rint ((item->y1 + origin - MAX(waveview->cache->data[index].min, -1.0) * half_height) * item->canvas->pixels_per_unit);
+
+			if (index >= waveview->cache->data_size) {
+				
+				/* the data we want is off the end of the cache, which must mean its beyond
+				   the end of the region's source; hence the peak values are 0 */
+				last_pymax = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+				last_pymin = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+				
+			} else {
+				
+				last_pymax = (int) rint ((item->y1 + origin - MIN(waveview->cache->data[index].max, 1.0) * half_height) * item->canvas->pixels_per_unit);
+				last_pymin = (int) rint ((item->y1 + origin - MAX(waveview->cache->data[index].min, -1.0) * half_height) * item->canvas->pixels_per_unit);
+				
+			}
+				
 		}
 
 		/* 
@@ -1283,8 +1294,12 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			else {
 				++cache_index;
 
-				max = waveview->cache->data[cache_index].max;
-				min = waveview->cache->data[cache_index].min;
+				if (cache_index < waveview->cache->data_size) {
+					max = waveview->cache->data[cache_index].max;
+					min = waveview->cache->data[cache_index].min;
+				} else {
+					max = min = 0;
+				}
 
 				next_clip_max = 0;
 				next_clip_min = 0;
@@ -1611,7 +1626,6 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	cairo_t* cr;
 	gulong s1, s2;
 	int cache_index;
-	double zbegin, zend;
 	gboolean rectify;
 	double origin;
 	double clip_length;
@@ -1630,10 +1644,8 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 
 	if (x > waveview->bbox_ulx) {
 		ulx = x;
-		zbegin = ulx;
 	} else {
 		ulx = waveview->bbox_ulx;
-		zbegin = ulx + 1;
 	}
 
 	if (y > waveview->bbox_uly) {
@@ -1644,10 +1656,8 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 
 	if (x + width > waveview->bbox_lrx) {
 		lrx = waveview->bbox_lrx;
-		zend = lrx - 1;
 	} else {
 		lrx = x + width;
-		zend = lrx;
 	}
 
 	if (y + height > waveview->bbox_lry) {
@@ -1675,8 +1685,6 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	uly -= y;
 	lrx -= x;
 	lry -= y;
-	zbegin -= x;
-	zend -= x;
 
 	/* don't rectify at single-sample zoom */
 	if(waveview->rectified && waveview->samples_per_unit > 1.0) {

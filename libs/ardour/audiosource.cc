@@ -283,6 +283,10 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, sframes_t start, nfr
 	return read_peaks_with_fpp (peaks, npeaks, start, cnt, samples_per_visual_peak, _FPP);
 }
 
+/** @param peaks Buffer to write peak data.
+ *  @param npeaks Number of peaks to write.
+ */
+
 int 
 AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t start, nframes_t cnt, 
 				  double samples_per_visual_peak, nframes_t samples_per_file_peak) const
@@ -325,9 +329,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 		npeaks = min ((nframes_t) floor (cnt / samples_per_visual_peak), npeaks);
 		zero_fill = old - npeaks;
 	}
-
-	// cerr << "actual npeaks = " << npeaks << " zf = " << zero_fill << endl;
 	
+	// cerr << "actual npeaks = " << npeaks << " zf = " << zero_fill << endl;
+
 	if (npeaks == cnt) {
 
 #ifdef DEBUG_READ_PEAKS
@@ -536,7 +540,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 		while (nvisual_peaks < npeaks) {
 
 			if (i == frames_read) {
-				
+
 				to_read = min (chunksize, nframes_t(_length - current_frame));
 
 				if (to_read == 0) {
@@ -544,6 +548,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 					   and fix it rather than do this band-aid move.
 					*/
 					zero_fill = npeaks - nvisual_peaks;
+					npeaks -= zero_fill;
 					break;
 				}
 
