@@ -52,7 +52,7 @@ public:
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 	
 	void append_event_unlocked_beats (const Evoral::Event<double>& ev);
-	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t position);
+	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t source_start);
 
 	void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
 	void mark_streaming_write_completed ();

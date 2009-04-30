@@ -50,25 +50,25 @@ class MidiSource : virtual public Source
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio frames (even if the source has tempo time).
 	 * \param dst Ring buffer where read events are written
-	 * \param position Start position of the SOURCE in this read context
+	 * \param source_start Start position of the SOURCE in this read context
 	 * \param start Start of range to be read
 	 * \param cnt Length of range to be read (in audio frames)
 	 * \param stamp_offset Offset to add to event times written to dst
 	 * \param negative_stamp_offset Offset to subtract from event times written to dst
 	 */
 	virtual nframes_t midi_read (MidiRingBuffer<nframes_t>& dst,
-			sframes_t position,
+			sframes_t source_start,
 			sframes_t start, nframes_t cnt,
 			sframes_t stamp_offset, sframes_t negative_stamp_offset) const;
 
 	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
-			sframes_t position,
+			sframes_t source_start,
 			nframes_t cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<double>& ev) = 0;
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
-			sframes_t position) = 0;
+			sframes_t source_start) = 0;
 	
 	virtual sframes_t length (sframes_t pos) const;
 	virtual void      update_length (sframes_t pos, sframes_t cnt);

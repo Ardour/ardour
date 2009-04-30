@@ -95,7 +95,7 @@ SMFSource::~SMFSource ()
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t position,
+SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t source_start,
 		sframes_t start, nframes_t duration,
 		sframes_t stamp_offset, sframes_t negative_stamp_offset) const
 {
@@ -112,7 +112,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t posi
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 	
-	BeatsFramesConverter converter(_session, position);
+	BeatsFramesConverter converter(_session, source_start);
 
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
 
