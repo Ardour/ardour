@@ -20,6 +20,8 @@
 #ifndef __ardour_gui_h__
 #define __ardour_gui_h__
 
+#include <time.h>
+
 /* need _BSD_SOURCE to get timersub macros */
 
 #ifdef _BSD_SOURCE
@@ -31,7 +33,6 @@
 #endif
 
 #include <list>
-
 #include <cmath>
 
 #include <libgnomecanvasmm/canvas.h>
@@ -636,6 +637,19 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	ARDOUR::microseconds_t last_peak_grab;
 	ARDOUR::microseconds_t last_shuttle_request;
+
+	struct DiskBufferStat {
+	    time_t when;
+	    uint32_t capture;
+	    uint32_t playback;
+
+	    DiskBufferStat (time_t w, uint32_t c, uint32_t p) 
+	    : when (w), capture (c), playback (p) {}
+	};
+	
+	std::list<DiskBufferStat> disk_buffer_stats;
+	void push_buffer_stats (uint32_t, uint32_t);
+	void write_buffer_stats ();
 
 	bool have_disk_speed_dialog_displayed;
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
