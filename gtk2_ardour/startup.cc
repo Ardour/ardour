@@ -142,7 +142,7 @@ bool
 ArdourStartup::use_session_template ()
 {
 	if (use_template_button.get_active()) {
-		return template_chooser.get_active_row_number() != 0;
+		return template_chooser.get_active_row_number() > 0;
 	} else {
 		return !session_template_chooser.get_filename().empty();
 	}
