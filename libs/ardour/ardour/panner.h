@@ -229,9 +229,8 @@ class Panner : public Processor
 	StreamPanner* add ();
 	void remove (uint32_t which);
 	void reset (uint32_t noutputs, uint32_t npans);
-
-	
-
+	void reset_streampanner (uint32_t which_panner);
+	void reset_to_default ();
 
 	XMLNode& get_state (void);
 	XMLNode& state (bool full);

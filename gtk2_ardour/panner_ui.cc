@@ -497,9 +497,9 @@ PannerUI::build_pan_menu (uint32_t which)
 	bypass_menu_item->set_active (_io->panner().bypassed());
 	bypass_menu_item->signal_toggled().connect (mem_fun(*this, &PannerUI::pan_bypass_toggle));
 
-	items.push_back (MenuElem (_("Reset"), mem_fun(*this, &PannerUI::pan_reset)));
+	items.push_back (MenuElem (_("Reset"), bind (mem_fun (*this, &PannerUI::pan_reset), which)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Reset all")));
+	items.push_back (MenuElem (_("Reset all"), mem_fun (*this, &PannerUI::pan_reset_all)));
 }
 
 void
@@ -518,8 +518,15 @@ PannerUI::pan_bypass_toggle ()
 }
 
 void
-PannerUI::pan_reset ()
+PannerUI::pan_reset (uint32_t which)
 {
+	_io->panner().reset_streampanner (which);
+}
+
+void
+PannerUI::pan_reset_all ()
+{
+	_io->panner().reset_to_default ();
 }
 
 void
