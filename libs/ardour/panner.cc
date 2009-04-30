@@ -800,6 +800,79 @@ Panner::set_bypassed (bool yn)
 	}
 }
 
+void
+Panner::reset_to_default ()
+{
+	vector<float> positions;
+
+	switch (outputs.size()) {
+	case 0:
+	case 1:
+		return;
+	}
+
+	if (outputs.size() == 2) {
+		switch (size()) {
+		case 1:
+			front()->set_position (0.5);
+			front()->automation().reset_default (0.5);
+			return;
+			break;
+		case 2:
+			front()->set_position (0.0);
+			front()->automation().reset_default (0.0);
+			back()->set_position (1.0);
+			back()->automation().reset_default (1.0);
+			return;
+		default:
+			break;
+		}
+	}
+	
+	vector<Output>::iterator o;
+	iterator p;
+
+	for (o = outputs.begin(), p = begin(); o != outputs.end() && p != end(); ++o, ++p) {
+		(*p)->set_position ((*o).x, (*o).y);
+	}
+}
+
+void
+Panner::reset_streampanner (uint32_t which)
+{
+	if (which >= size() || which >= outputs.size()) {
+		return;
+	}
+	
+	switch (outputs.size()) {
+	case 0:
+	case 1:
+		return;
+
+	case 2:
+		switch (size()) {
+		case 1:
+			/* stereo out, 1 stream, default = middle */
+			front()->set_position (0.5);
+			front()->automation().reset_default (0.5);
+			break;
+		case 2:
+			/* stereo out, 2 streams, default = hard left/right */
+			if (which == 0) {
+				front()->set_position (0.0);
+				front()->automation().reset_default (0.0);
+			} else {
+				back()->set_position (1.0);
+				back()->automation().reset_default (1.0);
+			}
+			break;
+		}
+		return;
+
+	default:
+		(*this)[which]->set_position (outputs[which].x, outputs[which].y);
+	}
+}
 
 void
 Panner::reset (uint32_t nouts, uint32_t npans)

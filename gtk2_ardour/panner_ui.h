@@ -140,7 +140,8 @@ class PannerUI : public Gtk::HBox
 	Gtk::CheckMenuItem* bypass_menu_item;
 	void build_pan_menu (uint32_t which);
 	void pan_mute (uint32_t which);
-	void pan_reset ();
+	void pan_reset (uint32_t which);
+	void pan_reset_all ();
 	void pan_bypass_toggle ();
 
 	void pan_automation_state_changed();

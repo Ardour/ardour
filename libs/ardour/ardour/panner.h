@@ -248,6 +248,8 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void remove (uint32_t which);
 	void clear ();
 	void reset (uint32_t noutputs, uint32_t npans);
+	void reset_streampanner (uint32_t which_panner);
+	void reset_to_default ();
 
 	void snapshot (nframes_t now);
 	void transport_stopped (nframes_t frame);
