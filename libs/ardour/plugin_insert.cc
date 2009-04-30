@@ -352,14 +352,14 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 }
 
 void
-PluginInsert::silence (nframes_t nframes, nframes_t offset)
+PluginInsert::silence (nframes_t nframes)
 {
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
 
 	if (active()) {
 		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_index, out_index, nframes, offset);
+			(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_index, out_index, nframes, 0);
 		}
 	}
 }
@@ -372,7 +372,7 @@ PluginInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t en
 		if (_session.transport_rolling()) {
 			automation_run (bufs, nframes);
 		} else {
-			connect_and_run (bufs, nframes, 9, false);
+			connect_and_run (bufs, nframes, 0, false);
 		}
 	} else {
 

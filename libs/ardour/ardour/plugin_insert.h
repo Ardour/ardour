@@ -55,7 +55,7 @@ class PluginInsert : public Processor
 	int set_state(const XMLNode&);
 
 	void run_in_place (BufferSet& in, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
-	void silence (nframes_t nframes, nframes_t offset);
+	void silence (nframes_t nframes);
 	
 	void activate ();
 	void deactivate ();
