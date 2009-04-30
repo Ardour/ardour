@@ -5,7 +5,7 @@
 
 #else
 
-#include <pbd/stacktrace.h>
+#include "pbd/stacktrace.h"
 
 #ifndef BOOST_SHARED_PTR_HPP_INCLUDED
 #define BOOST_SHARED_PTR_HPP_INCLUDED
@@ -23,7 +23,7 @@
 //  See http://www.boost.org/libs/smart_ptr/shared_ptr.htm for documentation.
 //
 
-#include <pbd/stacktrace.h>
+#include "pbd/stacktrace.h"
 
 #include <boost/config.hpp>   // for broken compiler workarounds
 
