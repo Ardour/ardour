@@ -4669,7 +4669,23 @@ Editor::strip_region_silence ()
 		return;
 	}
 
-	StripSilenceDialog d;
+	RegionSelection rs;
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
+	}
+
+	std::list<boost::shared_ptr<AudioRegion> > ar;
+	
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*i);
+	        if (arv) {
+			ar.push_back (arv->audio_region ());
+		}
+	}
+	
+	StripSilenceDialog d (ar);
 	int const r = d.run ();
 
 	if (r == Gtk::RESPONSE_OK) {

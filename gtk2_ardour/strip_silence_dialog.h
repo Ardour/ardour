@@ -19,12 +19,18 @@
 
 #include <gtkmm/spinbutton.h>
 #include "ardour_dialog.h"
+#include "canvas.h"
+
+namespace ARDOUR {
+	class AudioRegion;
+}
 
 /// Dialog box to set options for the `strip silence' filter
 class StripSilenceDialog : public ArdourDialog
 {
 public:
-	StripSilenceDialog ();
+	StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const &);
+	~StripSilenceDialog ();
 
 	double threshold () const {
 		return _threshold.get_value ();
@@ -39,7 +45,26 @@ public:
 	}
 	
 private:
+	void create_waves ();
+	void peaks_ready ();
+	void canvas_allocation (Gtk::Allocation &);
+	void update_silence_rects ();
+	
 	Gtk::SpinButton _threshold;
 	Gtk::SpinButton _minimum_length;
 	Gtk::SpinButton _fade_length;
+
+	struct Wave {
+		boost::shared_ptr<ARDOUR::AudioRegion> region;
+		ArdourCanvas::WaveView* view;
+		std::list<ArdourCanvas::SimpleRect*> silence_rects;
+		double samples_per_unit;
+	};
+
+	ArdourCanvas::Canvas* _canvas;
+	std::list<Wave> _waves;
+	int _wave_width;
+	int _wave_height;
+
+	sigc::connection _peaks_ready_connection;
 };
