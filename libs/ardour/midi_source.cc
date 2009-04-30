@@ -125,13 +125,13 @@ MidiSource::invalidate ()
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t position,
+MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 		sframes_t start, nframes_t cnt,
 		sframes_t stamp_offset, sframes_t negative_stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
 
-	BeatsFramesConverter converter(_session, position);
+	BeatsFramesConverter converter(_session, source_start);
 
 	if (_model) {
 #define BEATS_TO_FRAMES(t) (converter.to(t) + stamp_offset - negative_stamp_offset)
@@ -139,7 +139,7 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t position,
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 		
 		if (_last_read_end == 0 || start != _last_read_end || !i.valid()) {
-			cerr << "MidiSource::midi_read seeking to frame " << start << endl;
+			cerr << "MidiSource seeking to " << start << " from " << _last_read_end << endl;
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (BEATS_TO_FRAMES(i->time()) >= start) {
 					break;
@@ -159,16 +159,16 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t position,
 		}
 		return cnt;
 	} else {
-		return read_unlocked (dst, position, start, cnt, stamp_offset, negative_stamp_offset);
+		return read_unlocked (dst, source_start, start, cnt, stamp_offset, negative_stamp_offset);
 	}
 }
 
 nframes_t
-MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, sframes_t position, nframes_t duration)
+MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, sframes_t source_start, nframes_t duration)
 {
 	Glib::Mutex::Lock lm (_lock);
-	const nframes_t ret = write_unlocked (source, position, duration);
-	_last_write_end = position + duration;
+	const nframes_t ret = write_unlocked (source, source_start, duration);
+	_last_write_end = source_start + duration;
 	return ret;
 }
 
