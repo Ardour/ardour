@@ -136,7 +136,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	frame_position = start ;
 	item_duration = duration ;
 	name_connected = false;
-	// why? fill_opacity = 60;
+	fill_opacity = 60;
 	position_locked = false ;
 	max_item_duration = ARDOUR::max_frames;
 	min_item_duration = 0 ;

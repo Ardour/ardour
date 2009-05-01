@@ -339,14 +339,13 @@ Editor::redisplay_route_list ()
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	uint32_t position;
-	uint32_t order;
 	int n;
 
 	if (no_route_list_redisplay) {
 		return;
 	}
 
-	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
+	for (n = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		boost::shared_ptr<Route> route = (*i)[route_display_columns.route];
 
@@ -361,7 +360,7 @@ Editor::redisplay_route_list ()
 			   to tracks.
 			*/
 			
-			route->set_order_key (_order_key, order);
+			route->set_order_key (_order_key, n);
 		}
 
 		bool visible = (*i)[route_display_columns.visible];

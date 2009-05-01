@@ -155,7 +155,7 @@ long
 Route::order_key (const char* name) const
 {
 	OrderKeys::const_iterator i;
-	
+
 	for (i = order_keys.begin(); i != order_keys.end(); ++i) {
 		if (!strcmp (name, i->first)) {
 			return i->second;
@@ -196,8 +196,8 @@ Route::sync_order_keys (const char* base)
 		++i;
 	} else {
 		/* key exists - use it and reset all others (actually, itself included) */
-		i = order_keys.begin();
 		key = i->second;
+		i = order_keys.begin();
 	}
 
 	for (; i != order_keys.end(); ++i) {
