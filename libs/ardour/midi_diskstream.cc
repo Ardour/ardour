@@ -542,10 +542,8 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 		/* data will be written to disk */
 
 		if (rec_nframes == nframes && rec_offset == 0) {
-
 			playback_distance = nframes;
 		} else {
-		
 			collect_playback = true;
 		}
 
@@ -615,20 +613,15 @@ MidiDiskstream::commit (nframes_t nframes)
 		adjust_capture_position = 0;
 	}
 
-	/* what audio does:
-	 * can't do this with midi: write space is in bytes, chunk_frames is in frames
-	if (_slaved) {
-		need_butler = _playback_buf->write_space() >= _playback_buf->capacity() / 2;
-	} else {
-		need_butler = _playback_buf->write_space() >= disk_io_chunk_frames
-			|| _capture_buf->read_space() >= disk_io_chunk_frames;
-	}*/
-	
-	// Use The Counters To calculate how much time the Ringbuffer holds.
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
-	if ((frames_written - frames_read) <= midi_readahead)
+	if ((frames_written - frames_read) + nframes < midi_readahead) {
 		need_butler = true;
+	}
+
+	/*cerr << "MDS written: " << frames_written << " - read: " << frames_read <<
+		" = " << frames_written - frames_read
+		<< " + " << nframes << " < " << midi_readahead << " = " << need_butler << ")" << endl;*/
 	
 	if (commit_should_unlock) {
 		state_lock.unlock();
@@ -685,13 +678,9 @@ MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 int
 MidiDiskstream::can_internal_playback_seek (nframes_t distance)
 {
-	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
+	uint32_t frames_read    = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
-	if ((frames_written-frames_read) < distance) {
-		return false;
-	} else {
-		return true;
-	}
+	return ((frames_written - frames_read) < distance);
 }
 
 int
@@ -763,11 +752,13 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 		this_read = min(dur,this_read);
 
 		if (midi_playlist()->read (*_playback_buf, start, this_read) != this_read) {
-			error << string_compose(_("MidiDiskstream %1: cannot read %2 from playlist at frame %3"), _id, this_read, 
-					 start) << endmsg;
+			error << string_compose(
+					_("MidiDiskstream %1: cannot read %2 from playlist at frame %3"),
+					_id, this_read, start) << endmsg;
 			return -1;
 		}
-		//cout << "this write " << this_read << "start= " << start << endl;
+		
+		//cout << "MDS this read " << this_read << " start = " << start << endl;
 		g_atomic_int_add(&_frames_written_to_ringbuffer, this_read);
 
 		_read_data_count = _playlist->read_data_count();
@@ -775,7 +766,7 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 		if (reversed) {
 
 			// Swap note ons with note offs here.  etc?
-			// Fully reversing MIDI required look-ahead (well, behind) to find previous
+			// Fully reversing MIDI requires look-ahead (well, behind) to find previous
 			// CC values etc.  hard.
 
 		} else {
@@ -836,14 +827,15 @@ MidiDiskstream::do_refill ()
 	// and lets write as much as we need to get this to be midi_readahead;
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
-	if ((frames_written-frames_read) >= midi_readahead) {
-		//cout << "Nothing to do. all fine" << endl;
+	if ((frames_written - frames_read) >= midi_readahead) {
+		//cout << "MDS Nothing to do. all fine" << endl;
 		return 0;
 	}
 
 	nframes_t to_read = midi_readahead - (frames_written - frames_read);
 
-	//cout << "read for midi_readahead " << to_read << "  rb_contains: " << frames_written-frames_read << endl;
+	//cout << "MDS read for midi_readahead " << to_read << "  rb_contains: "
+	//	<< frames_written - frames_read << endl;
 
 	to_read = min(to_read, (max_frames - file_frame));
 	
@@ -1494,8 +1486,8 @@ MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 		_playback_buf->read(dst, start, end);
 	#else	
 		const size_t events_read = _playback_buf->read(dst, start, end);
-		cout << "frames read = " << frames_read << " events read = " << events_read
-		<< " end = " << end << " start = " << start
+		cout << "MDS events read = " << events_read
+		<< " start = " << start << " end = " << end
 		<< " readspace " << _playback_buf->read_space()
 		<< " writespace " << _playback_buf->write_space() << endl;
 	#endif

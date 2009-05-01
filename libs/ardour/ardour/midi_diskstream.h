@@ -128,7 +128,7 @@ class MidiDiskstream : public Diskstream
 	void non_realtime_input_change ();
 	void non_realtime_locate (nframes_t location);
 
-	static void set_readahed_frames( nframes_t frames_ahead ) { midi_readahead = frames_ahead; }
+	static void set_readahead_frames(nframes_t frames_ahead) { midi_readahead = frames_ahead; }
 
   protected:
 	int seek (nframes_t which_sample, bool complete_refill = false);

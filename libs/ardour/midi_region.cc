@@ -144,9 +144,6 @@ MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, 
 nframes_t
 MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer<nframes_t>& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
-	/*cerr << "MidiRegion " << _name << "._read_at(" << position << ") - "
-		<< position << " duration: " << dur << endl;*/
-
 	nframes_t internal_offset = 0;
 	nframes_t src_offset      = 0;
 	nframes_t to_read         = 0;
@@ -168,7 +165,6 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer<nframes_t>& dst, nf
 		return 0; /* read nothing */
 	}
 	
-
 	if ((to_read = min (dur, _length - internal_offset)) == 0) {
 		return 0; /* read nothing */
 	}
@@ -199,7 +195,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer<nframes_t>& dst, nf
 	if (src->midi_read (
 			dst, // destination buffer
 			_position - _start, // start position of the source in this read context
-			_start + internal_offset, // where to start reading in the region
+			_start + internal_offset, // where to start reading in the source
 			to_read, // read duration in frames
 			output_buffer_position, // the offset in the output buffer
 			negative_output_buffer_position // amount to substract from note times

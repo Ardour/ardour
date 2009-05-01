@@ -50,10 +50,10 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
 
 		if (ev_time > end) {
-			//cerr << "MRB: PAST END (" << ev_time << " : " << end << ")" << endl;
+			//cerr << "MRB event @ " << ev_time << " past end @ " << end << endl;
 			break;
 		} else if (ev_time < start) {
-			//cerr << "MRB (start " << start << ") - Skipping event at (too early) time " << ev_time << endl;
+			//cerr << "MRB event @ " << ev_time << " before start @ " << start << endl;
 			break;
 		}
 
@@ -63,8 +63,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 			continue;
 		}
 
-		// This event marks a loop happening. this means that
-		// the next events timestamp will be non-monotonic.
+		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
 		if (ev_type == LoopEventType) {
 			ev_time -= start;
 			ev_time += offset;
@@ -73,6 +72,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 			
 			// We can safely return, without reading the data, because
 			// a LoopEvent does not have data.
+			cerr << "MRB loop boundary @ " << ev_time << endl;
 			return count + 1;
 		}
 
@@ -83,16 +83,16 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		// Ignore event if it doesn't match channel filter
 		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
 			const uint8_t channel = status & 0x0F;
-			if ( !(get_channel_mask() & (1L << channel)) ) {
+			if (!(get_channel_mask() & (1L << channel))) {
 				//cerr << "MRB skipping event due to channel mask" << endl;
 				this->skip(ev_size); // Advance read pointer to next event
 				continue;
 			}
 		}
 
-		//cerr << "MRB " << this << " - Reading event, time = "
-		//	<< ev_time << " - " << start << " => " << ev_time - start
-		//	<< ", size = " << ev_size << endl;
+		/*cerr << "MRB " << this << " - Reading event, time = "
+			<< ev_time << " - " << start << " => " << ev_time - start
+			<< ", size = " << ev_size << endl;*/
 
 		assert(ev_time >= start);
 		ev_time -= start;
@@ -119,14 +119,11 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 				write_loc[0] = (write_loc[0] & 0xF0) | (get_channel_mask() & 0x0F);
 			}
 			++count;
-			//cerr << "MRB - read event at time " << ev_time << endl;
 		} else {
 			cerr << "WARNING: error reading event contents from MIDI ring" << endl;
 		}
 	}
 	
-	//cerr << "MTB read space: " << read_space() << endl;
-
 	return count;
 }
 

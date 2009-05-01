@@ -140,7 +140,6 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	vector<boost::shared_ptr<Region> > regs;
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			regs.push_back(*i);
 		}
@@ -150,7 +149,6 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	sort(regs.begin(), regs.end(), layer_cmp);
 
 	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
-		// FIXME: ensure time is monotonic here?
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
 		if (mr) {
 			mr->read_at (dst, start, dur, chan_n, _note_mode);

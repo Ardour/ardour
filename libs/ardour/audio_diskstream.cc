@@ -652,8 +652,8 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 				
 				chaninfo->current_capture_buffer = chaninfo->capture_vector.buf[0];
 
-				/* note: grab the entire port buffer, but only copy what we were supposed to for recording, and use
-				   rec_offset
+				/* note: grab the entire port buffer, but only copy what we were supposed to
+				   for recording, and use rec_offset
 				*/
 
 				AudioPort* const ap = _io->audio_input(n);

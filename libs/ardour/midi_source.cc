@@ -138,7 +138,7 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 		
-		if (_last_read_end == 0 || start != _last_read_end || !i.valid()) {
+		if (_last_read_end == 0 || start != _last_read_end) { // || !i.valid()) {
 			cerr << "MidiSource seeking to " << start << " from " << _last_read_end << endl;
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (BEATS_TO_FRAMES(i->time()) >= start) {
@@ -150,8 +150,8 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 		_last_read_end = start + cnt;
 
 		for (; i != _model->end(); ++i) {
-			const nframes_t time_frames = BEATS_TO_FRAMES(i->time());
-			if (time_frames < start + cnt) {
+			const sframes_t time_frames = BEATS_TO_FRAMES(i->time());
+			if (time_frames < source_start + start + cnt) {
 				dst.write(time_frames, i->event_type(), i->size(), i->buffer());
 			} else {
 				break;
