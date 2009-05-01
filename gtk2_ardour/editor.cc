@@ -1241,6 +1241,8 @@ Editor::connect_to_session (Session *t)
 {
 	session = t;
 
+	compute_fixed_ruler_scale ();
+
 	/* there are never any selected regions at startup */
 
 	sensitize_the_right_region_actions (false);
