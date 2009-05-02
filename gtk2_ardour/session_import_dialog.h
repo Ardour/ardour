@@ -63,7 +63,6 @@ class SessionImportDialog : public ArdourDialog
 	void end_dialog ();
 	void update (string path);
 	void show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-	bool query_tooltip(int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip>& tooltip);
 	
 	std::pair<bool, string> open_rename_dialog (string text, string name);
 	bool open_prompt_dialog (string text);
@@ -85,8 +84,9 @@ class SessionImportDialog : public ArdourDialog
 	  Gtk::TreeModelColumn<std::string>    name;
 	  Gtk::TreeModelColumn<bool>           queued;
 	  Gtk::TreeModelColumn<ElementPtr>     element;
+	  Gtk::TreeModelColumn<std::string>    info;
 
-	  SessionBrowserColumns() { add (name); add (queued); add (element); }
+	  SessionBrowserColumns() { add (name); add (queued); add (element); add (info); }
 	};
 	
 	SessionBrowserColumns         sb_cols;

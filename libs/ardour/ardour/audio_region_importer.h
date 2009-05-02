@@ -76,6 +76,7 @@ class AudioRegionImporter : public ElementImporter
 
 	// Interface implementation
 	string get_info () const;
+	Session::ImportStatus * get_import_status () { return &status; }
 	
 	// other stuff
 	void add_sources_to_session ();
@@ -93,6 +94,7 @@ class AudioRegionImporter : public ElementImporter
 	PBD::ID old_id;
 	PBD::ID id;
 	std::list<string> filenames;
+	Session::ImportStatus status;
 	
 	bool parse_xml_region ();
 	bool parse_source_xml ();

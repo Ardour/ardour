@@ -336,22 +336,21 @@ AudioRegionImporter::prepare_sources ()
 		return;
 	}
 	
-	Session::ImportStatus status;
-	
-	// Get sources that still need to be imported
-	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
-		if (!handler.check_source (*it)) {
-			status.paths.push_back (*it);
-		}
-	}
-	
-	// Prepare rest of import struct TODO quality
+	status.total = 0;
 	status.replace_existing_source = false;
 	status.done = false;
 	status.cancel = false;
 	status.freeze = false;
 	status.progress = 0.0;
-	status.quality = SrcBest;
+	status.quality = SrcBest; // TODO other qualities also
+	
+	// Get sources that still need to be imported
+	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
+		if (!handler.check_source (*it)) {
+			status.paths.push_back (*it);
+			status.total++;
+		}
+	}
 	
 	// import files
 	// TODO: threading & exception handling

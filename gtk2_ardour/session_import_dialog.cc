@@ -68,6 +68,7 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
 	session_browser.set_name ("SessionBrowser");
 	session_browser.append_column (_("Elements"), sb_cols.name);
 	session_browser.append_column_editable (_("Import"), sb_cols.queued);
+	session_browser.set_tooltip_column (3);
 	session_browser.get_column(0)->set_min_width (180);
 	session_browser.get_column(1)->set_min_width (40);
 	session_browser.get_column(1)->set_sizing (Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
@@ -82,10 +83,6 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
 	session_browser.signal_row_activated().connect(mem_fun (*this, &SessionImportDialog::show_info));
 	
 	get_vbox()->pack_start (session_scroll, false, false);
-	
-	// Tooltips
-	session_browser.set_has_tooltip();
-	session_browser.signal_query_tooltip().connect(mem_fun(*this, &SessionImportDialog::query_tooltip));
 	
 	// Buttons
 	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -146,6 +143,7 @@ SessionImportDialog::fill_list ()
 			child[sb_cols.name] = (*element)->get_name();
 			child[sb_cols.queued] = false;
 			child[sb_cols.element] = *element;
+			child[sb_cols.info] = (*element)->get_info();
 		}
 	}
 }
@@ -250,36 +248,10 @@ SessionImportDialog::show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewCo
 	}
 	
 	Gtk::TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
-	ElementPtr element = (*cell)[sb_cols.element];
-	string info = element->get_info();
+	string info = (*cell)[sb_cols.info];
 	
 	Gtk::MessageDialog msg (info, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
 	msg.run();
-}
-
-bool
-SessionImportDialog::query_tooltip(int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip>& tooltip)
-{
-	Gtk::TreeModel::Path path;
-	Gtk::TreeViewColumn* column;
-	int cell_x, cell_y;
-	
-	// Get element
-	session_browser.get_path_at_pos (x, y, path, column, cell_x, cell_y);
-	if (path.gobj() == 0) {
-		return false;
-	}
-	Gtk::TreeModel::iterator row = session_browser.get_model()->get_iter (path);
-	//--row; // FIXME Strange offset in rows, if someone figures this out, please fix
-	ElementPtr element = (*row)[sb_cols.element];
-	if (element.get() == 0) {
-		return false;
-	}
-	
-	// Prepare tooltip
-	tooltip->set_text(element->get_info());
-	
-	return true;
 }
 
 void
