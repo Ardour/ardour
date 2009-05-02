@@ -234,6 +234,7 @@ def build(bld):
 	if bld.env['HAVE_SLV2']:
 		obj.source += ' lv2_plugin.cc '
 		obj.uselib += ' SLV2 '
+		obj.cxxflags += ['-DHAVE_SLV2']
 	
 def shutdown():
 	autowaf.shutdown()

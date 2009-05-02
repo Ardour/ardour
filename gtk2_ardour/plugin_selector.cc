@@ -337,7 +337,7 @@ PluginSelector::ladspa_refiller (const std::string& filterstr)
 void
 PluginSelector::lv2_refiller (const std::string& filterstr)
 {
-#ifdef HAVE_LV2
+#ifdef HAVE_SLV2
 	refiller (manager->lv2_plugin_info(), filterstr, "LV2");
 #endif
 }
@@ -543,7 +543,7 @@ PluginSelector::plugin_menu()
 #ifdef HAVE_AUDIOUNITS
 	all_plugs.insert (all_plugs.end(), manager->au_plugin_info().begin(), manager->au_plugin_info().end());
 #endif
-#ifdef HAVE_LV2
+#ifdef HAVE_SLV2
 	all_plugs.insert (all_plugs.end(), manager->lv2_plugin_info().begin(), manager->lv2_plugin_info().end());
 #endif
 
