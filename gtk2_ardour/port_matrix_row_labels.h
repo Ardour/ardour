@@ -53,6 +53,7 @@ public:
 
 private:
 	void render_channel_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
+	void render_bundle_name (cairo_t *, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>);
 	double channel_x (ARDOUR::BundleChannel const &) const;
 	double channel_y (ARDOUR::BundleChannel const &) const;
 	
@@ -63,6 +64,7 @@ private:
 	void queue_draw_for (ARDOUR::BundleChannel const &);
 	double port_name_x () const;
 	void maybe_popup_context_menu (double, double, uint32_t);
+	double bundle_name_x () const;
 
 	double _longest_port_name;
 	double _longest_bundle_name;

@@ -42,6 +42,7 @@ public:
 	virtual void mouseover_changed (PortMatrixNode const &) = 0;
 	virtual void draw_extra (cairo_t *) = 0;
 
+	void set_show_ports (bool);
 	void setup ();
 	GdkPixmap* get_pixmap (GdkDrawable *);
 	std::pair<uint32_t, uint32_t> dimensions ();

@@ -67,17 +67,17 @@ BundleEditorMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 	}
 }
 
-PortMatrix::State
+PortMatrixNode::State
 BundleEditorMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 {
 	ARDOUR::Bundle::PortList const& pl = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 	for (ARDOUR::Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 		if (!c[OURS].bundle->port_attached_to_channel (c[OURS].channel, *i)) {
-			return NOT_ASSOCIATED;
+			return PortMatrixNode::NOT_ASSOCIATED;
 		}
 	}
 
-	return ASSOCIATED;
+	return PortMatrixNode::ASSOCIATED;
 }
 
 void

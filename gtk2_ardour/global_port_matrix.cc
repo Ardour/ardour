@@ -71,7 +71,7 @@ GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 	}
 }
 
-PortMatrix::State
+PortMatrixNode::State
 GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 {
 	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
@@ -79,7 +79,7 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 	if (in_ports.empty() || out_ports.empty()) {
 		/* we're looking at a bundle with no parts associated with this channel,
 		   so nothing to connect */
-		return UNKNOWN;
+		return PortMatrixNode::UNKNOWN;
 	}
 		
 	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
@@ -90,21 +90,20 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 
 			/* we don't know the state of connections between two non-Ardour ports */
 			if (!p && !q) {
-				return UNKNOWN;
+				return PortMatrixNode::UNKNOWN;
 			}
 
 			if (p && p->connected_to (*j) == false) {
-				return NOT_ASSOCIATED;
+				return PortMatrixNode::NOT_ASSOCIATED;
 			} else if (q && q->connected_to (*i) == false) {
-				return NOT_ASSOCIATED;
+				return PortMatrixNode::NOT_ASSOCIATED;
 			}
 
 		}
 	}
 
-	return ASSOCIATED;
+	return PortMatrixNode::ASSOCIATED;
 }
-
 
 GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::DataType t)
 	: _port_matrix (s, t)
@@ -124,10 +123,21 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::Data
 	_rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
 	_rescan_button.signal_clicked().connect (sigc::mem_fun (_port_matrix, &GlobalPortMatrix::setup_all_ports));
 	buttons_hbox->pack_start (_rescan_button, Gtk::PACK_SHRINK);
+
+	_show_ports_button.set_label (_("Show individual ports"));
+	_show_ports_button.set_active (true);
+	_show_ports_button.signal_toggled().connect (sigc::mem_fun (*this, &GlobalPortMatrixWindow::show_ports_toggled));
+	buttons_hbox->pack_start (_show_ports_button, Gtk::PACK_SHRINK);
 	
 	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox);
 	vbox->pack_start (_port_matrix);
 	vbox->pack_start (*buttons_hbox, Gtk::PACK_SHRINK);
 	add (*vbox);
 	show_all ();
+}
+
+void
+GlobalPortMatrixWindow::show_ports_toggled ()
+{
+	_port_matrix.set_show_only_bundles (!_show_ports_button.get_active());
 }

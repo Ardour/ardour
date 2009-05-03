@@ -39,6 +39,7 @@ public:
 
 private:
 	virtual void render_channel_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &) = 0;
+	virtual void render_bundle_name (cairo_t *, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>) = 0;
 	virtual double channel_x (ARDOUR::BundleChannel const &) const = 0;
 	virtual double channel_y (ARDOUR::BundleChannel const &) const = 0;
 	virtual void queue_draw_for (ARDOUR::BundleChannel const &) = 0;

@@ -33,7 +33,7 @@ class IOSelector : public PortMatrix
 	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
-	State get_state (ARDOUR::BundleChannel c[2]) const;
+	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
 	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
 	bool can_remove_channels (int d) const {

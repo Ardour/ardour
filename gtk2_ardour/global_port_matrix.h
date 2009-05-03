@@ -33,7 +33,7 @@ public:
 	void setup_ports (int);
 	
 	void set_state (ARDOUR::BundleChannel c[2], bool);
-	State get_state (ARDOUR::BundleChannel c[2]) const;
+	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
 	void add_channel (boost::shared_ptr<ARDOUR::Bundle>) {}
 	bool can_remove_channels (int d) const {
@@ -63,8 +63,11 @@ public:
 	GlobalPortMatrixWindow (ARDOUR::Session&, ARDOUR::DataType);
 
 private:
+	void show_ports_toggled ();
+	
 	GlobalPortMatrix _port_matrix;
 	Gtk::Button _rescan_button;
+	Gtk::CheckButton _show_ports_button;
 };
 
 

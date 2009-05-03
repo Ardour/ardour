@@ -19,19 +19,30 @@
 
 #include "ardour/bundle.h"
 #include "port_matrix_labels.h"
+#include "port_matrix.h"
 
 void
 PortMatrixLabels::draw_extra (cairo_t* cr)
 {
 	for (std::vector<ARDOUR::BundleChannel>::const_iterator i = _channel_highlights.begin(); i != _channel_highlights.end(); ++i) {
 
-		render_channel_name (
-			cr,
-			highlighted_channel_colour(),
-			component_to_parent_x (channel_x (*i)),
-			component_to_parent_y (channel_y (*i)),
-			*i
-			);
+		if (_matrix->show_only_bundles()) {
+			render_bundle_name (
+				cr,
+				highlighted_channel_colour(),
+				component_to_parent_x (channel_x (*i)),
+				component_to_parent_y (channel_y (*i)),
+				i->bundle
+				);
+		} else {
+			render_channel_name (
+				cr,
+				highlighted_channel_colour(),
+				component_to_parent_x (channel_x (*i)),
+				component_to_parent_y (channel_y (*i)),
+				*i
+				);
+		}
 	}
 }
 

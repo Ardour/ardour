@@ -112,7 +112,7 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 	}
 }
 
-PortMatrix::State
+PortMatrixNode::State
 IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 {
 	ARDOUR::Bundle::PortList const & our_ports = c[_ours].bundle->channel_ports (c[_ours].channel);
@@ -121,7 +121,7 @@ IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 	if (our_ports.empty() || other_ports.empty()) {
 		/* we're looking at a bundle with no parts associated with this channel,
 		   so nothing to connect */
-		return UNKNOWN;
+		return PortMatrixNode::UNKNOWN;
 	}
 
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
@@ -135,12 +135,12 @@ IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 			
 			if (!f->connected_to (*j)) {
 				/* if any one thing is not connected, all bets are off */
-				return NOT_ASSOCIATED;
+				return PortMatrixNode::NOT_ASSOCIATED;
 			}
 		}
 	}
 
-	return ASSOCIATED;
+	return PortMatrixNode::ASSOCIATED;
 }
 
 uint32_t

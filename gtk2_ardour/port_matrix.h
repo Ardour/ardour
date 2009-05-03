@@ -29,6 +29,7 @@
 #include <boost/shared_ptr.hpp>
 #include "ardour/bundle.h"
 #include "port_group.h"
+#include "port_matrix_types.h"
 
 /** The `port matrix' UI.  This is a widget which lets the user alter
  *  associations between one set of ports and another.  e.g. to connect
@@ -36,7 +37,7 @@
  *
  *  It is made up of a body, PortMatrixBody, which is rendered using cairo,
  *  and some scrollbars and other stuff.  All of this is arranged inside the
- *  VBox that we inherit from.
+ *  Table that we inherit from.
  */
 
 namespace ARDOUR {
@@ -45,7 +46,7 @@ namespace ARDOUR {
 
 class PortMatrixBody;
 
-class PortMatrix : public Gtk::VBox
+class PortMatrix : public Gtk::Table
 {
 public:
 	PortMatrix (ARDOUR::Session&, ARDOUR::DataType);
@@ -78,6 +79,12 @@ public:
 		return _arrangement;
 	}
 
+	bool show_only_bundles () const {
+		return _show_only_bundles;
+	}
+
+	void set_show_only_bundles (bool);
+
 	PortGroupList const * columns () const;
 
 	/** @return index into the _ports array for the list which is displayed as columns */
@@ -105,16 +112,10 @@ public:
 	 */
 	virtual void set_state (ARDOUR::BundleChannel c[2], bool s) = 0;
 
-	enum State {
-		ASSOCIATED,     ///< the ports are associaed
-		NOT_ASSOCIATED, ///< the ports are not associated
-		UNKNOWN         ///< we don't know anything about these two ports' relationship
-	};
-
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @return state
 	 */
-	virtual State get_state (ARDOUR::BundleChannel c[2]) const = 0;
+	virtual PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const = 0;
 	virtual bool list_is_global (int) const = 0;
 
 	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>) = 0;
@@ -161,7 +162,6 @@ private:
 	PortMatrixBody* _body;
 	Gtk::HScrollbar _hscroll;
 	Gtk::VScrollbar _vscroll;
-	Gtk::HBox _main_hbox;
 	Gtk::HBox _column_visibility_box;
 	bool _column_visibility_box_added;
 	Gtk::Label _column_visibility_label;
@@ -177,6 +177,7 @@ private:
 	int _row_index;
 	int _column_index;
 	int _min_height_divisor;
+	bool _show_only_bundles;
 };
 
 #endif

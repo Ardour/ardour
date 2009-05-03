@@ -37,7 +37,8 @@
  *  @param type Port type that we are handling.
  */
 PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
-	: _session (session),
+	: Gtk::Table (2, 2),
+	  _session (session),
 	  _type (type),
 	  _column_visibility_box_added (false),
 	  _row_visibility_box_added (false),
@@ -46,7 +47,8 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	  _arrangement (TOP_TO_RIGHT),
 	  _row_index (0),
 	  _column_index (1),
-	  _min_height_divisor (1)
+	  _min_height_divisor (1),
+	  _show_only_bundles (false)
 {
 	_body = new PortMatrixBody (this);
 
@@ -147,15 +149,14 @@ PortMatrix::setup ()
 		_scroller_table.remove (*_body);
 		_scroller_table.remove (_hscroll);
 
-		_main_hbox.remove (_scroller_table);
+		remove (_scroller_table);
 		if (_row_visibility_box_added) {
-			_main_hbox.remove (_row_visibility_box);
+			remove (_row_visibility_box);
 		}
 		
 		if (_column_visibility_box_added) {
 			remove (_column_visibility_box);
 		}
-		remove (_main_hbox);
 	}
 
 	if (_column_index == 0) {
@@ -190,23 +191,21 @@ PortMatrix::setup ()
 		_scroller_table.attach (*_body, 0, 1, 1, 2);
 		_scroller_table.attach (_vscroll, 1, 2, 1, 2, Gtk::SHRINK);
 
-		_main_hbox.pack_start (_scroller_table);
+		attach (_scroller_table, 0, 1, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 
 		if (rows()->size() > 1) {
-			_main_hbox.pack_start (_row_visibility_box, Gtk::PACK_SHRINK);
+			attach (_row_visibility_box, 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
 			_row_visibility_box_added = true;
 		} else {
 			_row_visibility_box_added = false;
 		}
 
 		if (columns()->size() > 1) {
-			pack_start (_column_visibility_box, Gtk::PACK_SHRINK);
+			attach (_column_visibility_box, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
 			_column_visibility_box_added = true;
 		} else {
 			_column_visibility_box_added = false;
 		}
-		
-		pack_start (_main_hbox);
 		
 	} else {
 		_scroller_table.attach (_vscroll, 0, 1, 0, 1, Gtk::SHRINK);
@@ -214,18 +213,16 @@ PortMatrix::setup ()
 		_scroller_table.attach (_hscroll, 1, 2, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
 		if (rows()->size() > 1) {
-			_main_hbox.pack_start (_row_visibility_box, Gtk::PACK_SHRINK);
+			attach (_row_visibility_box, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
 			_row_visibility_box_added = true;
 		} else {
 			_row_visibility_box_added = false;
 		}
 		
-		_main_hbox.pack_start (_scroller_table);
+		attach (_scroller_table, 1, 2, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 
-		pack_start (_main_hbox);
-		
 		if (columns()->size() > 1) {
-			pack_start (_column_visibility_box, Gtk::PACK_SHRINK);
+			attach (_column_visibility_box, 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
 			_column_visibility_box_added = true;
 		} else {
 			_column_visibility_box_added = false;
@@ -294,7 +291,7 @@ PortMatrix::disassociate_all ()
 						ARDOUR::BundleChannel (*k, l)
 							};
 
-					if (get_state (c) == ASSOCIATED) {
+					if (get_state (c) == PortMatrixNode::ASSOCIATED) {
 						set_state (c, false);
 					}
 
@@ -476,7 +473,7 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle> bundle,
 			c[dim] = ARDOUR::BundleChannel (sb, channel);
 			c[1-dim] = ARDOUR::BundleChannel (*i, j);
 
-			if (get_state (c) == ASSOCIATED) {
+			if (get_state (c) == PortMatrixNode::ASSOCIATED) {
 				set_state (c, false);
 			}
 		}
@@ -500,4 +497,13 @@ PortMatrix::setup_all_ports ()
 {
 	setup_ports (0);
 	setup_ports (1);
+}
+
+void
+PortMatrix::set_show_only_bundles (bool s)
+{
+	_show_only_bundles = s;
+	_body->setup ();
+	setup_scrollbars ();
+	queue_draw ();
 }

@@ -59,6 +59,10 @@ private:
 	PortMatrixNode position_to_node (double, double) const;
 	ARDOUR::BundleChannel position_to_channel (double, ARDOUR::BundleList const &, double) const;
 	void queue_draw_for (PortMatrixNode const &);
+	void draw_association_indicator (cairo_t *, uint32_t, uint32_t, double p = 1);
+	void draw_unknown_indicator (cairo_t *, uint32_t, uint32_t);
+	PortMatrixNode::State bundle_to_bundle_state (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::Bundle>) const;
+	
 };
 
 #endif
