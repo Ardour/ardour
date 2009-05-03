@@ -32,7 +32,7 @@
 #include "ardour/types.h"
 #include "plugin_ui.h"
 
-#ifdef HAVE_LV2
+#ifdef HAVE_SLV2
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -75,7 +75,8 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 	bool is_update_wanted(uint32_t index);
 };
-#endif // HAVE_LV2
+
+#endif // HAVE_SLV2
 
 #endif /* __ardour_lv2_plugin_ui_h__ */
 

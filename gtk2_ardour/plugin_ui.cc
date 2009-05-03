@@ -43,7 +43,7 @@
 #ifdef VST_SUPPORT
 #include "ardour/vst_plugin.h"
 #endif
-#ifdef HAVE_LV2
+#ifdef HAVE_SLV2
 #include "ardour/lv2_plugin.h"
 #include "lv2_plugin_ui.h"
 #endif
@@ -289,7 +289,7 @@ PluginUIWindow::app_activated (bool yn)
 bool
 PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 {
-#ifndef HAVE_LV2
+#ifndef HAVE_SLV2
 	return false;
 #else
 
