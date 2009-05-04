@@ -772,10 +772,13 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 					
 				} else {
 					
-					memcpy ((char *) chaninfo->playback_wrap_buffer, chaninfo->playback_vector.buf[0],
-						chaninfo->playback_vector.len[0] * sizeof (Sample));
-					memcpy (chaninfo->playback_wrap_buffer + chaninfo->playback_vector.len[0], chaninfo->playback_vector.buf[1], 
-						(necessary_samples - chaninfo->playback_vector.len[0]) * sizeof (Sample));
+					memcpy ((char *) chaninfo->playback_wrap_buffer,
+							chaninfo->playback_vector.buf[0],
+							chaninfo->playback_vector.len[0] * sizeof (Sample));
+					memcpy (chaninfo->playback_wrap_buffer + chaninfo->playback_vector.len[0],
+							chaninfo->playback_vector.buf[1], 
+							(necessary_samples - chaninfo->playback_vector.len[0])
+									* sizeof (Sample));
 					
 					chaninfo->current_playback_buffer = chaninfo->playback_wrap_buffer;
 				}

@@ -80,8 +80,10 @@ class MidiDiskstream : public Diskstream
 	int set_state(const XMLNode& node);
 
 	void monitor_input (bool);
-
-	boost::shared_ptr<SMFSource> write_source () { return _write_source; }
+	
+	MidiRingBuffer<nframes_t>*   playback_buffer () { return _playback_buf; }
+	MidiRingBuffer<nframes_t>*   capture_buffer ()  { return _capture_buf; }
+	boost::shared_ptr<SMFSource> write_source ()    { return _write_source; }
 	
 	int set_destructive (bool yn); // doom!
 	

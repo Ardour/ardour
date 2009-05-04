@@ -494,7 +494,6 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input)) != 0) {
 
 		silence (nframes);
-
 		return dret;
 	}
 

@@ -424,7 +424,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 	nframes_t rec_nframes = 0;
 	bool      nominally_recording;
 	bool      re = record_enabled ();
-	bool      collect_playback = false;
+	bool      collect_playback = true;
 
 	/* if we've already processed the frames corresponding to this call,
 	   just return. this allows multiple routes that are taking input
@@ -537,27 +537,23 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 
 	if (rec_nframes) {
 
-		/* XXX XXX XXX XXX XXX XXX XXX XXX */
-		
 		/* data will be written to disk */
 
 		if (rec_nframes == nframes && rec_offset == 0) {
 			playback_distance = nframes;
-		} else {
-			collect_playback = true;
 		}
 
 		adjust_capture_position = rec_nframes;
 
 	} else if (nominally_recording) {
 
+		cerr << "B" << endl;
+
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
 
 		playback_distance = nframes;
+		collect_playback = false;
 
-	} else {
-
-		collect_playback = true;
 	}
 
 	if (collect_playback) {
@@ -574,10 +570,13 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 			necessary_samples = nframes;
 		}
 
-		// XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
-		// Write into playback buffer here, and whatnot?
-		//cerr << "MDS FIXME: collect playback" << endl;
-
+		// Pump entire port buffer into playback buffer (FIXME: split cycles?)
+		MidiBuffer& buf = _source_port->get_midi_buffer(nframes);
+		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
+			assert(ev.buffer());
+			_playback_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
+		}
 	}
 
 	ret = 0;
@@ -1416,9 +1415,7 @@ void
 MidiDiskstream::monitor_input (bool yn)
 {
 	if (_source_port)
-		_source_port->request_monitor_input (yn);
-	else
-		cerr << "MidiDiskstream NO SOURCE PORT TO MONITOR\n";
+		_source_port->ensure_monitor_input (yn);
 }
 
 void
