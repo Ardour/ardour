@@ -78,11 +78,13 @@ MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const std:
 	, _model(m)
 	, _name(name)
 {
+	assert(_model);
 }
 
 MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
 	: _model(m)
 {
+	assert(_model);
 	set_state(node);
 }
 

@@ -168,7 +168,7 @@ MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, sframes_t source_star
 {
 	Glib::Mutex::Lock lm (_lock);
 	const nframes_t ret = write_unlocked (source, source_start, duration);
-	_last_write_end = source_start + duration;
+	_last_write_end += duration;
 	return ret;
 }
 
