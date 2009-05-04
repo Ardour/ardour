@@ -233,7 +233,7 @@ def build(bld):
 	#obj.uselib += ' SOUNDTOUCH '
 	if bld.env['HAVE_SLV2']:
 		obj.source += ' lv2_plugin.cc lv2_event_buffer.cc uri_map.cc '
-		obj.uselib += ' LRDF SLV2'
+		obj.uselib += ' SLV2 '
 		obj.cxxflags += ['-DHAVE_SLV2']
 
 def shutdown():
