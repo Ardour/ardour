@@ -176,7 +176,7 @@ version.cc
 arch_specific_objects = [ ]
 
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
-lv2_files = [ 'lv2_plugin.cc' ]
+lv2_files = [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc' ]
 audiounit_files = [ 'audio_unit.cc' ]
 coreaudio_files = [ 'coreaudiosource.cc', 'caimportable.cc' ]
 extra_sources = [ ]

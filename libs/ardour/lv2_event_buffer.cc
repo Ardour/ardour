@@ -20,9 +20,9 @@
 #define __STDC_LIMIT_MACROS 1
 #include <stdint.h>
 #include <iostream>
-#include "ardour/lv2_event_buffer.h"
 #include "lv2ext/lv2_event.h"
 #include "lv2ext/lv2_event_helpers.h"
+#include "ardour/lv2_event_buffer.h"
 
 using namespace std;
 

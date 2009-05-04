@@ -139,7 +139,6 @@ def build(bld):
 		ladspa_plugin.cc
 		location.cc
 		location_importer.cc
-		lv2_event_buffer.cc
 		meter.cc
 		midi_buffer.cc
 		midi_clock_slave.cc
@@ -210,7 +209,6 @@ def build(bld):
 		transient_detector.cc
 		user_bundle.cc
 		utils.cc
-		uri_map.cc
 		version.cc
 	'''
 	obj.export_incdirs = ['.']
@@ -234,7 +232,7 @@ def build(bld):
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '
 	if bld.env['HAVE_SLV2']:
-		obj.source += ' lv2_plugin.cc'
+		obj.source += ' lv2_plugin.cc lv2_event_buffer.cc uri_map.cc '
 		obj.uselib += ' LRDF SLV2'
 		obj.cxxflags += ['-DHAVE_SLV2']
 	

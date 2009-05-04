@@ -20,12 +20,14 @@
 #include <algorithm>
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
-#include "ardour/lv2_event_buffer.h"
-#include "ardour/lv2_plugin.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/port.h"
 #include "ardour/port_set.h"
 #include "ardour/audioengine.h"
+#ifdef HAVE_SLV2
+#include "ardour/lv2_plugin.h"
+#include "ardour/lv2_event_buffer.h"
+#endif
 
 namespace ARDOUR {
 
@@ -127,6 +129,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		_available.set(type, num_buffers);
 	}
 
+#ifdef HAVE_SLV2
 	// Ensure enough low level MIDI format buffers are available for conversion
 	// in both directions (input & output, out-of-place)
 	if (type == DataType::MIDI && _lv2_buffers.size() < _buffers[type].size() * 2) {
@@ -134,6 +137,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 			_lv2_buffers.push_back(std::make_pair(false, new LV2EventBuffer(buffer_capacity)));
 		}
 	}
+#endif
 
 	// Post-conditions
 	assert(bufs[0]->type() == type);
@@ -159,6 +163,8 @@ BufferSet::get(DataType type, size_t i)
 	assert(i <= _count.get(type));
 	return *_buffers[type][i];
 }
+
+#ifdef HAVE_SLV2
 
 LV2EventBuffer&
 BufferSet::get_lv2_midi(bool input, size_t i)
@@ -196,6 +202,8 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 		mbuf.push_back(frames, size, data);
 	}
 }
+
+#endif
 
 // FIXME: make 'in' const
 void
