@@ -186,11 +186,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 
 	while (true) {
 		bool ret = source.peek_time(&time);
-		g_debug ("time: %u, last_write_end: %lu, duration: %u", time, _last_write_end, duration);
 		if (!ret || time > _last_write_end + duration) {
-			if (!ret) g_debug ("peek failed");
-			if (time > _last_write_end + duration) g_debug ("time: %u > last_write_end: %lu + duration: %u", time, _last_write_end, duration);
- 
 			break;
 		}
 
