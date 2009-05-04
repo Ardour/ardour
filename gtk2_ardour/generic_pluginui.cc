@@ -82,11 +82,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
-	Label* latency_label = manage (new Label (_("<span size=\"large\">Latency</span>")));
-	latency_label->set_use_markup (true);
-
-	smaller_hbox->pack_start (*latency_label, false, false, 10);
-	smaller_hbox->pack_start (latency_gui, false, false, 10);
+	latency_button.add (latency_label);
+	latency_button.signal_clicked().connect (mem_fun (*this, &PlugUIBase::latency_button_clicked));
+	set_latency_label ();
+	
+	smaller_hbox->pack_start (latency_button, false, false, 10);
 	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (bypass_button, false, true);

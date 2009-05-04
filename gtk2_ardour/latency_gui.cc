@@ -45,7 +45,7 @@ LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
 	  /* max 1 second, step by frames, page by msecs */
 	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
 	  bc (adjustment, ignored, sigc::mem_fun (*this, &LatencyGUI::latency_printer)),
-	  reset_button (_("Automatic"))
+	  reset_button (_("Reset"))
 {
 	Widget* w;
 

@@ -127,6 +127,7 @@ PluginManager::PluginManager ()
 	} 
 
 #ifdef HAVE_SLV2
+	cerr << "Creating a new lv2 world\n";
 	_lv2_world = new LV2World();
 #endif
 

@@ -683,6 +683,8 @@ LV2PluginInfo::discover (void* lv2_world)
 	LV2World* world = (LV2World*)lv2_world;
 	SLV2Plugins plugins = slv2_world_get_all_plugins(world->world);
 
+	cerr << "Discovered " << slv2_plugins_size (plugins) << " Lv2 plugins\n";
+
 	for (unsigned i=0; i < slv2_plugins_size(plugins); ++i) {
 		SLV2Plugin p = slv2_plugins_get_at(plugins, i);
 		LV2PluginInfoPtr info (new LV2PluginInfo(lv2_world, p));

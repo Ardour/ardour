@@ -50,6 +50,7 @@
 
 #include <lrdf.h>
 
+#include "ardour_dialog.h"
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"
@@ -57,6 +58,7 @@
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "keyboard.h"
+#include "latency_gui.h"
 #include "plugin_eq_gui.h"
 
 #include "i18n.h"
@@ -345,7 +347,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	  plugin (insert->plugin()),
 	  save_button(_("Add")),
 	  bypass_button (_("Bypass")),
-	  latency_gui (*pi, pi->session().frame_rate(), pi->session().get_block_size()),
+	  latency_gui (0),
 	  eqgui_toggle (_("Freq Analysis"))
 {
 	//preset_combo.set_use_arrows_always(true);
@@ -389,6 +391,36 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 PlugUIBase::~PlugUIBase()
 {
+	delete latency_gui;
+}
+
+void
+PlugUIBase::set_latency_label ()
+{
+	char buf[64];
+	nframes_t l = insert->effective_latency ();
+	nframes_t sr = insert->session().frame_rate();
+
+	if (l < sr / 1000) {
+		snprintf (buf, sizeof (buf), "latency (%d samples)", l);
+	} else {
+		snprintf (buf, sizeof (buf), "latency (%.2f msecs)", (float) l / ((float) sr / 1000.0f));
+	}
+
+	latency_label.set_text (buf);
+}
+
+void
+PlugUIBase::latency_button_clicked ()
+{
+	if (!latency_gui) {
+		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
+		latency_dialog = new ArdourDialog ("Edit Latency", false, false);
+		latency_dialog->get_vbox()->pack_start (*latency_gui);
+		latency_dialog->signal_hide().connect (mem_fun (*this, &PlugUIBase::set_latency_label));
+	}
+
+	latency_dialog->show_all ();
 }
 
 void

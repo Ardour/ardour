@@ -43,8 +43,6 @@
 
 #include "ardour/types.h"
 
-#include "ardour_dialog.h"
-#include "latency_gui.h"
 #include "automation_controller.h"
 
 namespace ARDOUR {
@@ -67,6 +65,9 @@ namespace Gtkmm2ext {
 	class PixmapButton;
 }
 
+class LatencyGUI;
+class ArdourDialog;
+
 class PlugUIBase : public virtual sigc::trackable
 {
   public:
@@ -83,6 +84,8 @@ class PlugUIBase : public virtual sigc::trackable
 
 	virtual void update_presets ();
 
+	void latency_button_clicked ();
+
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
@@ -91,7 +94,12 @@ class PlugUIBase : public virtual sigc::trackable
 	Gtk::ToggleButton bypass_button;
 	Gtk::EventBox focus_button;
 
-	LatencyGUI latency_gui;
+	Gtk::Label latency_label;
+	Gtk::Button latency_button;
+	void set_latency_label ();
+
+	LatencyGUI* latency_gui;
+	ArdourDialog* latency_dialog;
 
 	Gtk::Expander plugin_eq_bin;
 	Gtk::ToggleButton eqgui_toggle;
