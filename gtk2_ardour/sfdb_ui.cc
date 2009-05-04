@@ -120,13 +120,10 @@ SoundFileBox::SoundFileBox (bool persistent)
 	  autoplay_btn (_("Auto-play"))
 	
 {
-	HBox* hbox;
-	VBox* vbox;
-
 	set_name (X_("SoundFileBox"));
 	set_size_request (300, -1);
 
-	preview_label.set_markup (_("<b>Soundfile Info</b>"));
+	preview_label.set_markup (_("<b>Sound File Information</b>"));
 
 	border_frame.set_label_widget (preview_label);
 	border_frame.add (main_box);
@@ -135,55 +132,55 @@ SoundFileBox::SoundFileBox (bool persistent)
 	set_border_width (6);
 
 	main_box.set_border_width (6);
-	main_box.set_spacing (12);
 
 	length.set_text (_("Length:"));
+	length.set_alignment (1, 0.5);
 	timecode.set_text (_("Timestamp:"));
+	timecode.set_alignment (1, 0.5);
 	format.set_text (_("Format:"));
+	format.set_alignment (1, 0.5);
 	channels.set_text (_("Channels:"));
+	channels.set_alignment (1, 0.5);
 	samplerate.set_text (_("Sample rate:"));
+	samplerate.set_alignment (1, 0.5);
+
+	format_text.set_max_width_chars (8);
+	format_text.set_ellipsize (Pango::ELLIPSIZE_END);
+	format_text.set_alignment (0, 1);
 
 	table.set_col_spacings (6);
 	table.set_homogeneous (false);
 	table.set_row_spacings (6);
 
-	table.attach (channels, 0, 1, 0, 1, FILL|EXPAND, (AttachOptions) 0);
-	table.attach (samplerate, 0, 1, 1, 2, FILL|EXPAND, (AttachOptions) 0);
-	table.attach (format, 0, 1, 2, 4, FILL|EXPAND, (AttachOptions) 0);
-	table.attach (length, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
-	table.attach (timecode, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
+	table.attach (channels, 0, 1, 0, 1, FILL, FILL);
+	table.attach (samplerate, 0, 1, 1, 2, FILL, FILL);
+	table.attach (format, 0, 1, 2, 4, FILL, FILL);
+	table.attach (length, 0, 1, 4, 5, FILL, FILL);
+	table.attach (timecode, 0, 1, 5, 6, FILL, FILL);
 
-	table.attach (channels_value, 1, 2, 0, 1, FILL, (AttachOptions) 0);
-	table.attach (samplerate_value, 1, 2, 1, 2, FILL, (AttachOptions) 0);
-	table.attach (format_text, 1, 2, 2, 4, FILL, AttachOptions (0));
-	table.attach (length_clock, 1, 2, 4, 5, FILL, (AttachOptions) 0);
-	table.attach (timecode_clock, 1, 2, 5, 6, FILL, (AttachOptions) 0);
+	table.attach (channels_value, 1, 2, 0, 1, FILL, FILL);
+	table.attach (samplerate_value, 1, 2, 1, 2, FILL, FILL);
+	table.attach (format_text, 1, 2, 2, 4, FILL, FILL);
+	table.attach (length_clock, 1, 2, 4, 5, FILL, FILL);
+	table.attach (timecode_clock, 1, 2, 5, 6, FILL, FILL);
 
 	length_clock.set_mode (ARDOUR_UI::instance()->secondary_clock.mode());
 	timecode_clock.set_mode (AudioClock::SMPTE);
 
-	hbox = manage (new HBox);
-	hbox->pack_start (table, false, false);
-	main_box.pack_start (*hbox, false, false);
+	main_box.pack_start (table, false, false);
 
 	tags_entry.set_editable (true);
 	tags_entry.signal_focus_out_event().connect (mem_fun (*this, &SoundFileBox::tags_entry_left));
-	hbox = manage (new HBox);
-	hbox->pack_start (tags_entry, true, true);
-
-	vbox = manage (new VBox);
 
 	Label* label = manage (new Label (_("Tags:")));
 	label->set_alignment (0.0f, 0.5f);
-	vbox->set_spacing (6);
-	vbox->pack_start(*label, false, false);
-	vbox->pack_start(*hbox, true, true);
+	main_box.pack_start (*label, false, false);
+	main_box.pack_start (tags_entry, true, true);
 
-	main_box.pack_start(*vbox, true, true);
-	main_box.pack_start(bottom_box, false, false);
+	main_box.pack_start (bottom_box, false, false);
 	
 	play_btn.set_image (*(manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON))));
-	play_btn.set_label (_("Play (double click)"));
+	play_btn.set_label (_("Play"));
 
 	stop_btn.set_image (*(manage (new Image (Stock::MEDIA_STOP, ICON_SIZE_BUTTON))));
 	stop_btn.set_label (_("Stop"));
@@ -196,12 +193,6 @@ SoundFileBox::SoundFileBox (bool persistent)
 
 	play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::audition));
 	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_audition));
-
-	length.set_alignment (0.0f, 0.5f);
-	format.set_alignment (0.0f, 0.5f);
-	channels.set_alignment (0.0f, 0.5f);
-	samplerate.set_alignment (0.0f, 0.5f);
-	timecode.set_alignment (0.0f, 0.5f);
 
 	channels_value.set_alignment (0.0f, 0.5f);
 	samplerate_value.set_alignment (0.0f, 0.5f);
@@ -236,10 +227,10 @@ SoundFileBox::setup_labels (const ustring& filename)
 
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
 
-		preview_label.set_markup (_("<b>Soundfile Info</b>"));
-		format_text.set_text (_("n/a"));
-		channels_value.set_text (_("n/a"));
-		samplerate_value.set_text (_("n/a"));
+		preview_label.set_markup (_("<b>Sound File Information</b>"));
+		format_text.set_text ("");
+		channels_value.set_text ("");
+		samplerate_value.set_text ("");
 		tags_entry.get_buffer()->set_text ("");
 
 		length_clock.set (0);
@@ -252,7 +243,11 @@ SoundFileBox::setup_labels (const ustring& filename)
 	}
 
 	preview_label.set_markup (string_compose ("<b>%1</b>", Glib::path_get_basename (filename)));
-	format_text.set_text (sf_info.format_name);
+	std::string n = sf_info.format_name;
+	if (n.substr (0, 8) == X_("Format: ")) {
+		n = n.substr (8);
+	}
+	format_text.set_text (n);
 	channels_value.set_text (to_string (sf_info.channels, std::dec));
 
 	if (_session && sf_info.samplerate != _session->frame_rate()) {
@@ -1271,7 +1266,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	channel_combo.set_sensitive (false);
 
 	l = manage (new Label);
-	l->set_text (_("Conversion Quality:"));
+	l->set_text (_("Conversion quality:"));
 
 	hbox = manage (new HBox);
 	hbox->set_border_width (12);
