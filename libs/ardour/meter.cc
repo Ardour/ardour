@@ -98,8 +98,6 @@ PeakMeter::reset_max ()
 bool
 PeakMeter::configure_io (ChanCount in, ChanCount out)
 {
-	cerr << "METER CONFIGURE IO " << in << " -> " << out << endl;
-
 	/* we're transparent no matter what.  fight the power. */
 	if (out != in) {
 		return false;
@@ -107,8 +105,6 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 
 	uint32_t limit = in.n_total();
 	
-	cerr << "METER LIMIT " << limit << endl;
-
 	while (_peak_power.size() > limit) {
 		_peak_power.pop_back();
 		_visible_peak_power.pop_back();
