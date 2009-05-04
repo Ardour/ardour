@@ -228,6 +228,7 @@ def build(bld):
 	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
 			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
 	if bld.env['HAVE_SLV2']:
+		obj.source += ' lv2_plugin_ui.cc '
 		obj.cxxflags += ['-DHAVE_SLV2']
 	
 	# Wrappers
