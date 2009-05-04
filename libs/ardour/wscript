@@ -232,8 +232,8 @@ def build(bld):
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '
 	if bld.env['HAVE_SLV2']:
-		obj.source += ' lv2_plugin.cc '
-		obj.uselib += ' SLV2 '
+		obj.source += ' lv2_plugin.cc'
+		obj.uselib += ' LRDF SLV2'
 		obj.cxxflags += ['-DHAVE_SLV2']
 	
 def shutdown():

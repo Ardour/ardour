@@ -211,7 +211,7 @@ def build(bld):
 		version.cc
 		waveview.cc
 	'''
-	obj.source += 'x11.cc'
+	obj.source += ' x11.cc'
 	obj.includes     = ['.']
 	obj.name         = 'gtk2_ardour'
 	obj.target       = 'ardour-3.0'
