@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <limits>
 #include "evoral/Note.hpp"
 
 namespace Evoral {
@@ -38,7 +39,7 @@ Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
 	_off_event.buffer()[2] = 0x40;
 	
 	assert(time() == t);
-	assert(length() == l);
+	assert(length() - l <= std::numeric_limits<Time>::epsilon());
 	assert(note() == n);
 	assert(velocity() == v);
 	assert(_on_event.channel() == _off_event.channel());
