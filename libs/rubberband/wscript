@@ -59,7 +59,7 @@ def build(bld):
 	obj.vnum         = LIBRUBBERBAND_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = '-DPACKAGE="librubberband"'
-	
+
 def shutdown():
 	autowaf.shutdown()
 

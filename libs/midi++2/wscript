@@ -78,7 +78,7 @@ def build(bld):
 	obj.uselib_local = 'libpbd libevoral'
 	obj.vnum         = LIBMIDIPP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	
+
 def shutdown():
 	autowaf.shutdown()
 

@@ -33,7 +33,7 @@ def build(bld):
 	obj.uselib_local = 'libardour libsurfaces'
 	obj.vnum         = LIBSURFACES_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	
+
 def shutdown():
 	autowaf.shutdown()
 

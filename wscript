@@ -113,7 +113,7 @@ def set_options(opt):
 			help='Set X Modifier (Mod1,Mod2,Mod3,Mod4,Mod5) for "Windows" key [Default: Mod4]', default='Mod4><Super')
 	for i in children:
 		opt.sub_options(i)
-	
+
 def sub_config_and_use(conf, name, has_objects = True):
 	conf.sub_config(name)
 	autowaf.set_local_lib(conf, name, has_objects)
@@ -126,7 +126,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
 	for i in children:
 		sub_config_and_use(conf, i)
-	
+
 	# Fix utterly braindead FLAC include path to not smash assert.h
 	conf.env['CPPPATH_FLAC'] = []
 

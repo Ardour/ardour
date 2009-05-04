@@ -27,7 +27,7 @@ def configure(conf):
 			'gtk2_ardour', MAJOR, MINOR, MICRO)
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
-	
+
 	autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 	autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
 	autowaf.check_pkg(conf, 'gthread', uselib_store='GTHREAD', atleast_version='2.10.1')
@@ -36,12 +36,12 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'libgnomecanvas-2.0', uselib_store='GNOMECANVAS', atleast_version='2.0')
 	autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6', uselib_store='GNOMECANVASMM', atleast_version='2.12.0')
 	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
-	
+
 	conf.check_tool('misc') # subst tool
 
 	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
 	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
-	
+
 	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
 	conf.write_config_header('wafconfig.h')
 
@@ -231,7 +231,7 @@ def build(bld):
 		obj.source += ' lv2_plugin_ui.cc '
 		obj.uselib += ' SLV2 '
 		obj.cxxflags += ['-DHAVE_SLV2']
-	
+
 	# Wrappers
 
 	wrapper_subst_dict = {
@@ -247,16 +247,16 @@ def build(bld):
 	obj.target       = 'ardev_common_waf.sh'
 	obj.chmod        = 0755
 	obj.dict         = wrapper_subst_dict
-	
+
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour.sh.in'
 	obj.target       = 'ardour3'
 	obj.chmod        = 0755
 	obj.dict         = wrapper_subst_dict
 	obj.install_path = bld.env['BINDIR']
-	
+
 	# Font configuration
-	
+
 	font_subst_dict = {}
 	font_sizes      = {}
 	base_font       = ""
@@ -304,31 +304,31 @@ def build(bld):
 		}
 
 	# RC files
-	
+
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_dark.rc.in'
 	obj.target       = 'ardour3_ui_dark.rc'
 	obj.dict         = font_subst_dict
 	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
-	
+
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_light.rc.in'
 	obj.target       = 'ardour3_ui_light.rc'
 	obj.dict         = font_subst_dict
 	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
-	
+
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_dark_sae.rc.in'
 	obj.target       = 'ardour3_ui_dark_sae.rc'
 	obj.dict         = font_subst_dict
 	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
-	
+
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_light_sae.rc.in'
 	obj.target       = 'ardour3_ui_light_sae.rc'
 	obj.dict         = font_subst_dict
 	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
-	
+
 	# Menus
 	menus_argv = []
 	if bld.env['GTKOSX']:
@@ -357,14 +357,14 @@ def build(bld):
 		keybindings_dict['%TERTIARY%']  = 'Shift'
 		keybindings_dict['%LEVEL4%']    = bld.env['WINDOWS_KEY']
 		keybindings_dict['%WINDOW%']    = 'Alt'
-	
+
 	for b in [ 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad',
 	           'mnemonic-us', 'ergonomic-us' ]:
 		obj = bld.new_task_gen('subst')
 		obj.target = b + '.bindings'
 		obj.source = obj.target + '.in'
 		obj.dict   = keybindings_dict
-	
+
 	# Icons/Images
 	bld.install_files('${DATADIR}/ardour3/icons', 'icons/*.png')
 	bld.install_files('${DATADIR}/ardour3/pixmaps', 'pixmaps/*.xpm')

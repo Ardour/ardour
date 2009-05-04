@@ -27,7 +27,7 @@ def configure(conf):
 def build(bld):
 	bld.add_subdirs('control_protocol')
 	bld.add_subdirs('generic_midi')
-	
+
 def shutdown():
 	autowaf.shutdown()
 

@@ -40,10 +40,10 @@ def build(bld):
 	# Headers
 	#bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.h')
 	#bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.hpp')
-	
+
 	# Pkgconfig file
 	#autowaf.build_pc(bld, 'EVORAL', EVORAL_VERSION, 'GLIBMM GTHREAD')
-	
+
 	libsmf = bld.new_task_gen('cc', 'shlib')
 	libsmf.source = '''
 		src/libsmf/smf.c
@@ -81,7 +81,7 @@ def build(bld):
 	obj.uselib_local = 'libsmf'
 	obj.vnum         = EVORAL_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	
+
 	if bld.env['HAVE_CPPUNIT']:
 		# Unit tests
 		obj              = bld.new_task_gen('cxx', 'program')

@@ -33,7 +33,7 @@ def check_header_and_define(conf, header, define):
 	if conf.env[define]:
 		conf.env.append_value('CCFLAGS', '-D' + define)
 		conf.env.append_value('CXXFLAGS', '-D' + define)
-	
+
 def configure(conf):
 	autowaf.build_version_files(path_prefix+'ardour/version.h', path_prefix+'version.cc',
 			'libardour3', MAJOR, MINOR, MICRO)
@@ -51,13 +51,13 @@ def configure(conf):
 
 	conf.env.append_value('CXXFLAGS', '-DUSE_RUBBERBAND')
 	conf.define('HAVE_RUBBERBAND', 1)
-	
+
 	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
 	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
 
 	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
 	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
-	
+
 	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
 	conf.write_config_header('wafconfig.h')
 
@@ -235,7 +235,7 @@ def build(bld):
 		obj.source += ' lv2_plugin.cc lv2_event_buffer.cc uri_map.cc '
 		obj.uselib += ' LRDF SLV2'
 		obj.cxxflags += ['-DHAVE_SLV2']
-	
+
 def shutdown():
 	autowaf.shutdown()
 

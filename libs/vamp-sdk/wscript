@@ -48,7 +48,7 @@ def build(bld):
 	obj.uselib       = 'FFTW3 FFTW3F'
 	obj.vnum         = LIBVAMP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	
+
 	# Plugin Library
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
@@ -62,7 +62,7 @@ def build(bld):
 	obj.uselib       = 'FFTW3 FFTW3F'
 	obj.vnum         = LIBVAMP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	
+
 def shutdown():
 	autowaf.shutdown()
 

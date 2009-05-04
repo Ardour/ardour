@@ -95,7 +95,7 @@ def build(bld):
 	obj.cxxflags     = ['-DPACKAGE="libpbd"']
 	if bld.env['PBD_HAVE_EXECINFO']:
 		obj.cxxflags += ['-DHAVE_EXECINFO']
-	
+
 def shutdown():
 	autowaf.shutdown()
 

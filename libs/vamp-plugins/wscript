@@ -49,7 +49,7 @@ def build(bld):
 		obj.uselib += ' AUBIO '
 	obj.vnum         = LIBARDOURVAMPPLUGINS_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	
+
 def shutdown():
 	autowaf.shutdown()
 
