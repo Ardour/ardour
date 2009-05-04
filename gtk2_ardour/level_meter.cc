@@ -19,9 +19,6 @@
 
 #include <limits.h>
 
-#include "ardour/io.h"
-#include "ardour/route.h"
-#include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
@@ -43,7 +40,6 @@
 #include "public_editor.h"
 
 #include "ardour/session.h"
-#include "ardour/route.h"
 
 #include "i18n.h"
 
@@ -60,7 +56,8 @@ using namespace std;
 
 LevelMeter::LevelMeter (Session& s)
 	: _session (s)
-	
+	, _meter (0)
+	, meter_length (0)
 {
 	set_spacing (1);
 	Config->ParameterChanged.connect (mem_fun (*this, &LevelMeter::parameter_changed));
@@ -83,9 +80,12 @@ LevelMeter::~LevelMeter ()
 }
 
 void
-LevelMeter::set_io (boost::shared_ptr<IO> io)
+LevelMeter::set_meter (PeakMeter& meter)
 {
-	_io = io;
+	_configuration_connection.disconnect();
+	_meter = &meter;
+	_configuration_connection = _meter->ConfigurationChanged.connect(
+			mem_fun(*this, &LevelMeter::configuration_changed));
 }
 
 float
@@ -97,9 +97,9 @@ LevelMeter::update_meters ()
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
-			peak = _io->peak_meter().peak_power (n);
+			peak = _meter->peak_power (n);
 			(*i).meter->set (log_meter (peak));
-			mpeak = _io->peak_meter().max_peak_power(n);
+			mpeak = _meter->max_peak_power(n);
 			if (mpeak > max_peak) {
 				max_peak = mpeak;
 			}
@@ -133,9 +133,15 @@ LevelMeter::parameter_changed(const char* parameter_name)
 }
 
 void
+LevelMeter::configuration_changed(ChanCount in, ChanCount out)
+{
+	color_changed = true;
+	setup_meters (meter_length, regular_meter_width);
+}
+
+void
 LevelMeter::hide_all_meters ()
 {
-
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); ++i) {
 		if ((*i).packed) {
 			remove (*((*i).meter));
@@ -147,36 +153,18 @@ LevelMeter::hide_all_meters ()
 void
 LevelMeter::setup_meters (int len, int initial_width)
 {
- 	if (!_io) {
+ 	if (!_meter) {
  		return; /* do it later */
  	}
  
-	uint32_t nmeters = _io->n_outputs().n_total();
+	int32_t nmidi = _meter->input_streams().n_midi();
+	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
+	meter_length = len;
 
 	guint16 width;
 
 	hide_all_meters ();
-
-	Route* r;
-
-	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
-
-		switch (r->meter_point()) {
-		case MeterPreFader:
-		case MeterInput:
-			nmeters = r->n_inputs().n_total();
-			break;
-		case MeterPostFader:
-			nmeters = r->n_outputs().n_total();
-			break;
-		}
-
-	} else {
-
-		nmeters = _io->n_outputs().n_total();
-
-	}
 
 	if (nmeters == 0) {
 		return;
@@ -192,15 +180,21 @@ LevelMeter::setup_meters (int len, int initial_width)
 		meters.push_back (MeterInfo());
 	}
 
-
-	int b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
-	int m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
-	int t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
-	int c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
-
 	//cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
+		uint32_t b, m, t, c;
+		if (n < nmidi) {
+			b = ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorBase.get();
+			m = ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorMid.get();
+			t = ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorTop.get();
+			c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+		} else {
+			b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
+			m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
+			t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
+			c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+		}
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);

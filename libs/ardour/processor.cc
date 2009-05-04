@@ -256,5 +256,7 @@ Processor::configure_io (ChanCount in, ChanCount out)
 	_configured_output = out; 
 	_configured = true;
 
+	ConfigurationChanged.emit (in, out);
+
 	return true;
 }

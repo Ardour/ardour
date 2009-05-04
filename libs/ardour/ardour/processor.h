@@ -107,8 +107,9 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 
 	static sigc::signal<void,Processor*> ProcessorCreated;
 
-	sigc::signal<void> ActiveChanged;
-	sigc::signal<void> PlacementChanged;
+	sigc::signal<void>                     ActiveChanged;
+	sigc::signal<void>                     PlacementChanged;
+	sigc::signal<void,ChanCount,ChanCount> ConfigurationChanged;
 
 protected:
 	int       _pending_active;

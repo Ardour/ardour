@@ -39,14 +39,11 @@
 #include "enums.h"
 
 namespace ARDOUR {
-	class IO;
 	class Session;
-	class Route;
-	class RouteGroup;
+	class PeakMeter;
 }
 namespace Gtkmm2ext {
 	class FastMeter;
-	class BarController;
 }
 namespace Gtk {
 	class Menu;
@@ -58,7 +55,7 @@ class LevelMeter : public Gtk::HBox
 	LevelMeter (ARDOUR::Session&);
 	~LevelMeter ();
 
-	virtual void set_io (boost::shared_ptr<ARDOUR::IO> io);
+	virtual void set_meter (ARDOUR::PeakMeter& meter);
 
 	void update_gain_sensitive ();
 
@@ -69,18 +66,16 @@ class LevelMeter : public Gtk::HBox
 	void setup_meters (int len=0, int width=3);
 
   private:
-
-	//friend class MixerStrip;
-	boost::shared_ptr<ARDOUR::IO> _io;
-	ARDOUR::Session& _session;
+	ARDOUR::Session&   _session;
+	ARDOUR::PeakMeter* _meter;
 
 	Width _width;
 
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;
-	    gint16          width;
-		int				length;   
-	    bool            packed;
+	    gint16                width;
+		int			          length;   
+	    bool                  packed;
 	    
 	    MeterInfo() { 
 		    meter = 0;
@@ -90,15 +85,19 @@ class LevelMeter : public Gtk::HBox
 	    }
 	};
 
-	guint16 regular_meter_width;
-	static const guint16 thin_meter_width = 2;
-	std::vector<MeterInfo>    meters;
-	float       max_peak;
+	guint16                regular_meter_width;
+	int                    meter_length;
+	static const guint16   thin_meter_width = 2;
+	std::vector<MeterInfo> meters;
+	float                  max_peak;
+
+	sigc::connection _configuration_connection;
 	
 	void hide_all_meters ();
 	gint meter_button_release (GdkEventButton*, uint32_t);
 
 	void parameter_changed (const char*);
+	void configuration_changed (ARDOUR::ChanCount in, ARDOUR::ChanCount out);
 
 	void on_theme_changed ();
 	bool style_changed;

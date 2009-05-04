@@ -58,7 +58,7 @@ namespace Gtk {
 class GainMeterBase : virtual public sigc::trackable
 {
   public:
-	GainMeterBase ( ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,
+	GainMeterBase (ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,
 		       bool horizontal);
 	virtual ~GainMeterBase ();
 
@@ -94,7 +94,7 @@ class GainMeterBase : virtual public sigc::trackable
 	Gtkmm2ext::FocusEntry        gain_display;
 	Gtk::Button                  peak_display;
 	Gtk::DrawingArea             meter_metric_area;
-	LevelMeter		    *level_meter;
+	LevelMeter                  *level_meter;
 
 	sigc::connection gain_watching;
 
@@ -126,7 +126,7 @@ class GainMeterBase : virtual public sigc::trackable
 	void gain_activated ();
 	bool gain_focused (GdkEventFocus*);
 
-	float       max_peak;
+	float max_peak;
 	
 	void gain_adjusted ();
 	void gain_changed ();

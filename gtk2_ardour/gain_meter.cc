@@ -165,7 +165,7 @@ GainMeterBase::set_io (boost::shared_ptr<IO> io)
 	
  	_io = io;
 	
- 	level_meter->set_io (_io);
+ 	level_meter->set_meter (_io->peak_meter());
  	gain_slider->set_controllable (_io->gain_control());
 
 	boost::shared_ptr<Route> r;
