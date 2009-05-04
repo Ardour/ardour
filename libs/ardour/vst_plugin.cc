@@ -383,7 +383,9 @@ VSTPlugin::automatable () const
 }
 
 int
-VSTPlugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_index, nframes_t nframes, nframes_t offset)
+VSTPlugin::connect_and_run (BufferSet& bufs,
+		ChanMapping in_map, ChanMapping out_map,
+		nframes_t nframes, nframes_t offset)
 {
 	float *ins[_plugin->numInputs];
 	float *outs[_plugin->numOutputs];

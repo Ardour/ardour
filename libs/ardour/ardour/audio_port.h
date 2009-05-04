@@ -38,6 +38,8 @@ class AudioPort : public Port
 	void cycle_start (nframes_t);
 	void cycle_end (nframes_t);
 	void cycle_split ();
+	
+	size_t raw_buffer_size(jack_nframes_t nframes) const;
 
 	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
 		return get_audio_buffer (nframes, offset);

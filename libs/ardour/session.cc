@@ -3849,19 +3849,22 @@ Session::ensure_buffers (ChanCount howmany)
 		return; // too early? (is this ok?)
 	}
 
-	// We need at least 2 MIDI scratch buffers to mix/merge
-	if (howmany.n_midi() < 2) {
-		howmany.set_midi(2);
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		size_t count = std::max(_scratch_buffers->available().get(*t), howmany.get(*t));
+		_scratch_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
+		_mix_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
+		_silent_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
 	}
 
-	// FIXME: JACK needs to tell us maximum MIDI buffer size
-	// Using nasty assumption (max # events == nframes) for now
-
-	_scratch_buffers->ensure_buffers(howmany, current_block_size);
-	_mix_buffers->ensure_buffers(howmany, current_block_size);
-	_silent_buffers->ensure_buffers(howmany, current_block_size);
-
 	allocate_pan_automation_buffers (current_block_size, howmany.n_audio(), false);
+}
+
+void
+Session::ensure_buffer_set(BufferSet& buffers, const ChanCount& count)
+{
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		buffers.ensure_buffers(*t, count.get(*t), _engine.raw_buffer_size(*t));
+	}
 }
 
 uint32_t
@@ -4149,7 +4152,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 	to_do = len;
 
 	/* create a set of reasonably-sized buffers */
-	buffers.ensure_buffers(nchans, chunk_size);
+	buffers.ensure_buffers(DataType::AUDIO, nchans.n_audio(), chunk_size);
 	buffers.set_count(nchans);
 
 	for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {

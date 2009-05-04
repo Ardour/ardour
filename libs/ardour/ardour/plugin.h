@@ -29,6 +29,7 @@
 
 #include <jack/types.h>
 #include "ardour/chan_count.h"
+#include "ardour/chan_mapping.h"
 #include "ardour/cycles.h"
 #include "ardour/latent.h"
 #include "ardour/plugin_insert.h"
@@ -126,7 +127,9 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual void deactivate () = 0;
 	virtual void set_block_size (nframes_t nframes) = 0;
 
-	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset) = 0;
+	virtual int connect_and_run (BufferSet& bufs,
+			ChanMapping in, ChanMapping out,
+			nframes_t nframes, nframes_t offset) = 0;
 	
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
 	virtual string describe_parameter (Evoral::Parameter) = 0;

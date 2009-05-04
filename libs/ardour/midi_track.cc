@@ -579,6 +579,7 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+				bufs.set_count(ChanCount::max(bufs.count(), (*i)->output_streams()));
 				(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
 			}
 		} 

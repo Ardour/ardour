@@ -365,7 +365,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int make_connections (const XMLNode&);
 	boost::shared_ptr<Bundle> find_possible_bundle (const string &desired_name, const string &default_name, const string &connection_type_name);
 
-	void setup_peak_meters ();
+	virtual void setup_peak_meters ();
 	void meter ();
 
 	bool ensure_inputs_locked (ChanCount, bool clear, void *src);

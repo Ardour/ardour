@@ -40,9 +40,10 @@
 
 namespace ARDOUR {
 
-class Session;
-class Port;
 class InternalPort;
+class MidiPort;
+class Port;
+class Session;
 
 class AudioEngine : public sigc::trackable
 {
@@ -73,6 +74,8 @@ class AudioEngine : public sigc::trackable
 
 	nframes_t frame_rate();
 	nframes_t frames_per_cycle();
+
+	size_t raw_buffer_size(DataType t);
 
 	int usecs_per_cycle () const { return _usecs_per_cycle; }
 
@@ -213,6 +216,7 @@ class AudioEngine : public sigc::trackable
 	bool                      _running;
 	bool                      _has_run;
 	nframes_t                 _buffer_size;
+	std::map<DataType,size_t> _raw_buffer_sizes;
 	nframes_t                 _frame_rate;
 	/// number of frames between each check for changes in monitor input
 	nframes_t                  monitor_check_interval;

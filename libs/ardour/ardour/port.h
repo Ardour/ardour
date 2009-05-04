@@ -101,6 +101,9 @@ public:
 	void set_latency (nframes_t);
 
 	virtual void reset ();
+	
+	/** @return the size of the raw buffer (bytes) for duration @a nframes (audio frames) */
+	virtual size_t raw_buffer_size(jack_nframes_t nframes) const = 0;
 
 	virtual DataType type () const = 0;
 	virtual void cycle_start (nframes_t) = 0;
@@ -108,7 +111,7 @@ public:
 	virtual void cycle_split () = 0;
 	virtual Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) = 0;
 	virtual void flush_buffers (nframes_t, nframes_t offset = 0) {}
-
+	
 	static void set_engine (AudioEngine *);
 
 	sigc::signal<void, bool> MonitorInputChanged;

@@ -434,51 +434,30 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams, b
 	ArdourDialog dialog (_("ardour: weird plugin dialog"));
 	Label label;
 
-	/* i hate this kind of code */
+	string text = string_compose(_("You attempted to add the plugin \"%1\" at index %2.\n"),
+			p.name(), streams.index);
 
-	if (streams.count > p.get_info()->n_inputs) {
-		label.set_text (string_compose (_(
-"You attempted to add a plugin (%1).\n"
-"The plugin has %2 inputs\n"
-"but at the processorion point, there are\n"
-"%3 active signal streams.\n"
-"\n"
-"This makes no sense - you are throwing away\n"
-"part of the signal."),
-					 p.name(),
-					 p.get_info()->n_inputs.n_total(),
-					 streams.count.n_total()));
-	} else if (streams.count < p.get_info()->n_inputs) {
-		label.set_text (string_compose (_(
-"You attempted to add a plugin (%1).\n"
-"The plugin has %2 inputs\n"
-"but at the processorion point there are\n"
-"only %3 active signal streams.\n"
-"\n"
-"This makes no sense - unless the plugin supports\n"
-"side-chain inputs. A future version of Ardour will\n"
-"support this type of configuration."),
-					 p.name(),
-					 p.get_info()->n_inputs.n_total(),
-					 streams.count.n_total()));
-	} else {
-		label.set_text (string_compose (_(
-"You attempted to add a plugin (%1).\n"
-"\n"
-"The I/O configuration doesn't make sense:\n"
-"\n" 
-"The plugin has %2 inputs and %3 outputs.\n"
-"The track/bus has %4 inputs and %5 outputs.\n"
-"The processorion point, has %6 active signals.\n"
-"\n"
-"Ardour does not understand what to do in such situations.\n"),
-					 p.name(),
-					 p.get_info()->n_inputs.n_total(),
-					 p.get_info()->n_outputs.n_total(),
-					 io->n_inputs().n_total(),
-					 io->n_outputs().n_total(),
-					 streams.count.n_total()));
+	bool has_midi  = streams.count.n_midi() > 0 || p.get_info()->n_inputs.n_midi() > 0;
+	bool has_audio = streams.count.n_audio() > 0 || p.get_info()->n_inputs.n_audio() > 0;
+
+	text += _("\nThis plugin has:\n");
+	if (has_midi) {
+		text += string_compose("\t%1 ", p.get_info()->n_inputs.n_midi()) + _("MIDI input(s)\n");
 	}
+	if (has_audio) {
+		text += string_compose("\t%1 ", p.get_info()->n_inputs.n_audio()) + _("audio input(s)\n");
+	}
+
+	text += "\nBut at the insertion point, there are:\n";
+	if (has_midi) {
+		text += string_compose("\t%1 ", streams.count.n_midi()) + _("MIDI channel(s)\n");
+	}
+	if (has_audio) {
+		text += string_compose("\t%1 ", streams.count.n_audio()) + _("audio channel(s)\n");
+	}
+
+	text += "\nArdour is unable to insert this plugin here.\n";
+	label.set_text(text);
 
 	dialog.get_vbox()->pack_start (label);
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);

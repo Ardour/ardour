@@ -25,6 +25,7 @@
 #include "gui_thread.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/data_type.h"
+#include "ardour/chan_mapping.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -310,18 +311,16 @@ PluginEqGui::run_impulse_analysis()
 
 	// Create the impulse, can't use silence() because consecutive calls won't work
 	for (uint32_t i = 0; i < inputs; ++i) {
-		ARDOUR::AudioBuffer &buf = _bufferset.get_audio(i);
-		ARDOUR::Sample *d = buf.data();
+		ARDOUR::AudioBuffer& buf = _bufferset.get_audio(i);
+		ARDOUR::Sample* d = buf.data();
 		memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
 		*d = 1.0;
 	}
 
-	uint32_t x,y;
-	x=y=0;
+	ARDOUR::ChanMapping in_map(_plugin->get_info()->n_inputs);
+	ARDOUR::ChanMapping out_map(_plugin->get_info()->n_outputs);
 
-
-
-	_plugin->connect_and_run(_bufferset, x, y, _buffer_size, (nframes_t)0);
+	_plugin->connect_and_run(_bufferset, in_map, out_map, _buffer_size, (nframes_t)0);
 	nframes_t f = _plugin->signal_latency();
 	// Adding user_latency() could be interesting
 
@@ -378,8 +377,9 @@ PluginEqGui::run_impulse_analysis()
 					memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
 				}
 
-				x=y=0;
-				_plugin->connect_and_run(_bufferset, x, y, _buffer_size, (nframes_t)0);
+				in_map  = ARDOUR::ChanMapping(_plugin->get_info()->n_inputs);
+				out_map = ARDOUR::ChanMapping(_plugin->get_info()->n_outputs);
+				_plugin->connect_and_run(_bufferset, in_map, out_map, _buffer_size, (nframes_t)0);
 			}
 		} while ( frames_left > 0);
 

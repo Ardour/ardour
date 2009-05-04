@@ -30,12 +30,13 @@
 #include <vector>
 #include <map>
 
-#include "ardour/plugin.h"
-
 #include <AudioUnit/AudioUnit.h>
 #include <appleutility/AUParamInfo.h>
 
 #include <boost/shared_ptr.hpp>
+
+#include "ardour/plugin.h"
+#include "ardour/chan_mapping.h"
 
 class CAComponent;
 class CAAudioUnit;

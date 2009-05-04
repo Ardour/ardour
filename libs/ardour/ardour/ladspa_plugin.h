@@ -84,7 +84,10 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	void set_block_size (nframes_t nframes) {}
 	
-	int         connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
+	int connect_and_run (BufferSet& bufs,
+			ChanMapping in, ChanMapping out,
+			nframes_t nframes, nframes_t offset);
+
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "ladspa"; }
 	void        print_parameter (uint32_t, char*, uint32_t len) const;

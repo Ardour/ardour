@@ -29,11 +29,12 @@ using namespace ARDOUR;
 using namespace PBD;
 
 void
-LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
-             uint32_t         port_index,
-             uint32_t         buffer_size,
-             uint32_t         format,
-             const void*      buffer)
+LV2PluginUI::lv2_ui_write(
+		LV2UI_Controller controller,
+		uint32_t         port_index,
+		uint32_t         buffer_size,
+		uint32_t         format,
+		const void*      buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 	if (*(float*)buffer != me->_values[port_index])

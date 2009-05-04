@@ -95,8 +95,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual bool is_out_of_place () const { return false; }
 
 	virtual bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const = 0;
-	virtual ChanCount output_streams() const { return _configured_input; }
 	virtual ChanCount input_streams () const { return _configured_input; }
+	virtual ChanCount output_streams() const { return _configured_output; }
 
 	virtual XMLNode& state (bool full);
 	virtual XMLNode& get_state (void);
@@ -116,6 +116,7 @@ protected:
 	bool      _next_ab_is_active;
 	bool      _configured;
 	ChanCount _configured_input;
+	ChanCount _configured_output;
 	Placement _placement;
 	uint32_t  _sort_key;
 	void*     _gui;  /* generic, we don't know or care what this is */

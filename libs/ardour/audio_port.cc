@@ -97,3 +97,9 @@ AudioPort::get_audio_buffer (nframes_t nframes, nframes_t offset)
 	return *_buffer;
 }
 
+size_t
+AudioPort::raw_buffer_size(nframes_t nframes) const
+{
+	return nframes * sizeof(float);
+}
+

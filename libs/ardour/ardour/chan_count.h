@@ -20,10 +20,10 @@
 #ifndef __ardour_chan_count_h__
 #define __ardour_chan_count_h__
 
+#include <cassert>
 #include <ostream>
 
 #include "ardour/data_type.h"
-#include <cassert>
 
 namespace ARDOUR {
 
@@ -102,6 +102,14 @@ public:
 
 	bool operator>=(const ChanCount& other) const {
 		return ( (*this > other) || (*this == other) );
+	}
+	
+	static ChanCount max(const ChanCount& a, const ChanCount& b) {
+		ChanCount ret;
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			ret.set(*t, std::max(a.get(*t), b.get(*t)));
+		}
+		return ret;
 	}
 
 	static const ChanCount INFINITE;

@@ -1463,8 +1463,6 @@ AudioRegion::find_silence (Sample threshold, nframes_t min_length) const
 
 	while (pos < end) {
 
-		nframes_t const to_read = min (end - pos, block_size);
-
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
 		memset (loudest, 0, sizeof (Sample) * block_size);
 		for (uint32_t n = 0; n < n_channels(); ++n) {

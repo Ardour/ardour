@@ -85,7 +85,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 void
 Route::init ()
 {
-	processor_max_outs.reset();
+	processor_max_streams.reset();
 	_muted = false;
 	_soloed = false;
 	_solo_safe = false;
@@ -1049,7 +1049,15 @@ Route::process_output_buffers (BufferSet& bufs,
 ChanCount
 Route::n_process_buffers ()
 {
-	return max (n_inputs(), processor_max_outs);
+	return max (n_inputs(), processor_max_streams);
+}
+
+void
+Route::setup_peak_meters()
+{
+	ChanCount max_streams = std::max (_inputs.count(), _outputs.count());
+	max_streams = std::max (max_streams, processor_max_streams);
+	_meter->configure_io (max_streams, max_streams);
 }
 
 void
@@ -1169,9 +1177,9 @@ Route::set_mute (bool yn, void *src)
 int
 Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
 {
-	ChanCount old_pmo = processor_max_outs;
+	ChanCount old_pms = processor_max_streams;
 
-	if (!_session.engine().connected()) {
+	if (!_session.engine().connected() || !processor) {
 		return 1;
 	}
 
@@ -1220,7 +1228,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		_user_latency = 0;
 	}
 	
-	if (processor_max_outs != old_pmo || old_pmo == ChanCount::ZERO) {
+	if (processor_max_streams != old_pms || old_pms == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -1237,7 +1245,7 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 	   differences between this and ::add_processor()
 	*/
 
-	ChanCount old_pmo = processor_max_outs;
+	ChanCount old_pms = processor_max_streams;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -1281,7 +1289,7 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 		_user_latency = 0;
 	}
 	
-	if (processor_max_outs != old_pmo || old_pmo == ChanCount::ZERO) {
+	if (processor_max_streams != old_pms || old_pms == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -1428,7 +1436,7 @@ Route::pre_fader_streams() const
 void
 Route::clear_processors (Placement p)
 {
-	const ChanCount old_pmo = processor_max_outs;
+	const ChanCount old_pms = processor_max_streams;
 
 	if (!_session.engine().connected()) {
 		return;
@@ -1452,11 +1460,11 @@ Route::clear_processors (Placement p)
 	}
 
 	/* FIXME: can't see how this test can ever fire */
-	if (processor_max_outs != old_pmo) {
+	if (processor_max_streams != old_pms) {
 		reset_panner ();
 	}
 	
-	processor_max_outs.reset();
+	processor_max_streams.reset();
 	_have_internal_generator = false;
 	processors_changed (); /* EMIT SIGNAL */
 }
@@ -1464,13 +1472,13 @@ Route::clear_processors (Placement p)
 int
 Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
 {
-	ChanCount old_pmo = processor_max_outs;
+	ChanCount old_pms = processor_max_streams;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
-	processor_max_outs.reset();
+	processor_max_streams.reset();
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
@@ -1538,7 +1546,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		}
 	}
 
-	if (old_pmo != processor_max_outs) {
+	if (old_pms != processor_max_streams) {
 		reset_panner ();
 	}
 
@@ -1570,7 +1578,7 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 	uint32_t max_audio = 0;
 	uint32_t max_midi = 0;
 
-	processor_max_outs.reset ();
+	processor_max_streams.reset ();
 	
 	/* Step 1: build a map that links each insert to an in/out channel count 
 
@@ -1664,7 +1672,7 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 
   recompute:
 
-	processor_max_outs.reset ();
+	processor_max_streams.reset ();
 	prev = _processors.end();
 
 	for (r = _processors.begin(); r != _processors.end(); prev = r, ++r) {
@@ -1684,14 +1692,16 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 
 		} else {
 			
+			max_audio = max ((*r)->input_streams ().n_audio(), max_audio);
+			max_midi = max ((*r)->input_streams ().n_midi(), max_midi);
 			max_audio = max ((*r)->output_streams ().n_audio(), max_audio);
 			max_midi = max ((*r)->output_streams ().n_midi(), max_midi);
 		}
 	}
 
-	processor_max_outs.set (DataType::AUDIO, max_audio);
-	processor_max_outs.set (DataType::MIDI, max_midi);
-			
+	processor_max_streams.set (DataType::AUDIO, max_audio);
+	processor_max_streams.set (DataType::MIDI, max_midi);
+
 	/* we're done */
 	return 0;
 
@@ -1701,9 +1711,9 @@ Route::_reset_processor_counts (ProcessorStreams* err)
 		max_midi = max ((*r)->output_streams ().n_midi(), max_midi);
 	}
 
-	processor_max_outs.set (DataType::AUDIO, max_audio);
-	processor_max_outs.set (DataType::MIDI, max_midi);
-
+	processor_max_streams.set (DataType::AUDIO, max_audio);
+	processor_max_streams.set (DataType::MIDI, max_midi);
+	
 	return ret;
 }				   
 
@@ -1821,7 +1831,7 @@ Route::sort_processors (ProcessorStreams* err)
 	{
 		ProcessorSorter comparator;
 		Glib::RWLock::WriterLock lm (_processor_lock);
-		ChanCount old_pmo = processor_max_outs;
+		ChanCount old_pms = processor_max_streams;
 
 		/* the sweet power of C++ ... */
 
@@ -1831,7 +1841,7 @@ Route::sort_processors (ProcessorStreams* err)
 	
 		if (_reset_processor_counts (err)) {
 			_processors = as_it_was_before;
-			processor_max_outs = old_pmo;
+			processor_max_streams = old_pms;
 			return -1;
 		} 
 	} 
@@ -2332,15 +2342,18 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 	
 		(*i)->id().print (buf, sizeof (buf));
 
-
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 			// legacy sessions (IOProcessor as a child of Processor, both is-a IO)
-			if (strncmp(buf,(*niter)->child(X_("IOProcessor"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
+			XMLNode* ioproc_node = (*niter)->child(X_("IOProcessor"));
+			if (ioproc_node && strncmp(buf, ioproc_node->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
 				processorInStateList = true;
 				break;
-			} else if (strncmp(buf,(*niter)->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
-				processorInStateList = true;
+			} else {
+				XMLProperty* id_prop = (*niter)->property(X_("id"));
+				if (id_prop && strncmp(buf, id_prop->value().c_str(), sizeof(buf)) == 0) {
+					processorInStateList = true;
+				}
 				break;
 			}
 		}
@@ -2348,7 +2361,6 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 		if (!processorInStateList) {
 			remove_processor (*i);
 		}
-
 
 		i = tmp;
 	}
@@ -2364,11 +2376,16 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 
 		while (o != _processors.end()) {
 			(*o)->id().print (buf, sizeof (buf));
-			if ( strncmp(buf, (*niter)->child(X_("IOProcessor"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
+			XMLNode* ioproc_node = (*niter)->child(X_("IOProcessor"));
+			if (ioproc_node && strncmp(buf, ioproc_node->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
 				break;
-			else if (strncmp(buf,(*niter)->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
-				break;
-			
+			} else {
+				XMLProperty* id_prop = (*niter)->property(X_("id"));
+				if (id_prop && strncmp(buf, id_prop->value().c_str(), sizeof(buf)) == 0) {
+					break;
+				}
+			}
+
 			++o;
 		}
 
@@ -2732,7 +2749,7 @@ Route::pans_required () const
 		return 0;
 	}
 	
-	return max (n_inputs ().n_audio(), processor_max_outs.n_audio());
+	return max (n_inputs ().n_audio(), processor_max_streams.n_audio());
 }
 
 int 

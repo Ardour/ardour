@@ -944,6 +944,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
 	pan_t** pan_automation_buffer () const  { return _pan_automation_buffer; }
+	
+	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);
 
 	/* VST support */
 

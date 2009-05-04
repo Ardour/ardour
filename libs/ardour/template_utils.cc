@@ -94,8 +94,6 @@ find_session_templates (vector<TemplateInfo>& template_names)
 			continue;
 		}
 
-		XMLNode* root = tree.root();
-		
 		TemplateInfo rti;
 
 		rti.name = basename_nosuffix (fullpath);

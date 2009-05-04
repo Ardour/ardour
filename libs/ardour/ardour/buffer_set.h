@@ -31,6 +31,7 @@ class Buffer;
 class AudioBuffer;
 class MidiBuffer;
 class PortSet;
+class LV2EventBuffer;
 
 /** A set of buffers of various types.
  *
@@ -55,7 +56,6 @@ public:
 	
 	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset = 0);
 
-	void ensure_buffers(const ChanCount& count, size_t buffer_capacity);
 	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);
 
 	const ChanCount& available() const { return _available; }
@@ -68,10 +68,7 @@ public:
 	
 	size_t buffer_capacity(DataType type) const;
 
-	Buffer& get(DataType type, size_t i) {
-		assert(i <= _count.get(type));
-		return *_buffers[type][i];
-	}
+	Buffer& get(DataType type, size_t i);
 
 	AudioBuffer& get_audio(size_t i) {
 		return (AudioBuffer&)get(DataType::AUDIO, i);
@@ -80,6 +77,14 @@ public:
 	MidiBuffer& get_midi(size_t i) {
 		return (MidiBuffer&)get(DataType::MIDI, i);
 	}
+
+	/** Get a MIDI buffer translated into an LV2 MIDI buffer for use with plugins.
+	 * The index here corresponds directly to MIDI buffer numbers (i.e. the index
+	 * passed to get_midi), translation back and forth will happen as needed */
+	LV2EventBuffer& get_lv2_midi(bool input, size_t i);
+
+	/** Flush modified LV2 event output buffers back to Ardour buffers */
+	void flush_lv2_midi(bool input, size_t i);
 
 	void read_from(BufferSet& in, nframes_t nframes);
 
@@ -137,6 +142,11 @@ private:
 
 	/// Vector of vectors, indexed by DataType
 	std::vector<BufferVec> _buffers;
+	
+	/// LV2 MIDI buffers (for conversion to/from MIDI buffers)
+	//
+	typedef std::vector< std::pair<bool, LV2EventBuffer*> > LV2Buffers;
+	LV2Buffers _lv2_buffers;
 
 	/// Use counts (there may be more actual buffers than this)
 	ChanCount _count;

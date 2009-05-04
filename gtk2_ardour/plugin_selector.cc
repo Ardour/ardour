@@ -303,25 +303,15 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 
 			newrow[plugin_columns.creator] = creator;
 
-			if ((*i)->n_inputs.n_total() < 0) { // FIXME: Impossible (unsigned)
-				newrow[plugin_columns.audio_ins] = "various";
-				newrow[plugin_columns.midi_ins] = "various";
-			} else {
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_audio());
-				newrow[plugin_columns.audio_ins] = buf;
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
-				newrow[plugin_columns.midi_ins] = buf;
-			}
-
-			if ((*i)->n_outputs.n_total() < 0) { // FIXME: Impossible (unsigned)
-				newrow[plugin_columns.audio_outs] = "various";
-				newrow[plugin_columns.midi_outs] = "various";
-			} else {
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());		
-				newrow[plugin_columns.audio_outs] = buf;
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());		
-				newrow[plugin_columns.midi_outs] = buf;
-			}
+			snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_audio());
+			newrow[plugin_columns.audio_ins] = buf;
+			snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
+			newrow[plugin_columns.midi_ins] = buf;
+			
+			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());		
+			newrow[plugin_columns.audio_outs] = buf;
+			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());		
+			newrow[plugin_columns.midi_outs] = buf;
 
 			newrow[plugin_columns.plugin] = *i;
 		}

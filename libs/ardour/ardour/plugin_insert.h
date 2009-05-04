@@ -104,16 +104,10 @@ class PluginInsert : public Processor
 	nframes_t signal_latency() const;
 
 	boost::shared_ptr<Plugin> get_impulse_analysis_plugin();
+	
+	void collect_signal_for_analysis(nframes_t nframes);
 
 	sigc::signal<void, BufferSet*, BufferSet*> AnalysisDataGathered;
-	void collect_signal_for_analysis(nframes_t nframes) { 
-		// called from outside the audio thread, so this should be safe
-		_signal_analysis_input_bufferset.ensure_buffers(input_streams(), nframes);
-		_signal_analysis_output_bufferset.ensure_buffers(output_streams(), nframes);
-
-		_signal_analysis_collected_nframes   = 0;
-		_signal_analysis_collect_nframes_max = nframes; 
-	}
 
   private:
 	/* disallow copy construction */
@@ -126,15 +120,16 @@ class PluginInsert : public Processor
 
 	float default_parameter_value (const Evoral::Parameter& param);
 	
-	std::vector<boost::shared_ptr<Plugin> > _plugins;
+	typedef std::vector<boost::shared_ptr<Plugin> > Plugins;
+	Plugins _plugins;
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
 	nframes_t _signal_analysis_collected_nframes;
 	nframes_t _signal_analysis_collect_nframes_max;
 
-	BufferSet _signal_analysis_input_bufferset;
-	BufferSet _signal_analysis_output_bufferset;
+	BufferSet _signal_analysis_inputs;
+	BufferSet _signal_analysis_outputs;
 	
 	void automation_run (BufferSet& bufs, nframes_t nframes);
 	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);

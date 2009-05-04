@@ -140,14 +140,14 @@ AudioEngine::start ()
 
 	if (!_running) {
 
+		nframes_t blocksize = jack_get_buffer_size (_jack);
+		
 		if (session) {
-			nframes_t blocksize = jack_get_buffer_size (_jack);
-
 			BootMessage (_("Connect session to engine"));
 
 			session->set_block_size (blocksize);
 			session->set_frame_rate (jack_get_sample_rate (_jack));
-
+			
 			/* page in as much of the session process code as we
 			   can before we really start running.
 			*/
@@ -188,6 +188,8 @@ AudioEngine::start ()
 		}
 
 		start_metering_thread();
+
+		_raw_buffer_sizes[DataType::AUDIO] = blocksize * sizeof(float);
 	}
 
 	return _running ? 0 : -1;
@@ -466,6 +468,7 @@ int
 AudioEngine::jack_bufsize_callback (nframes_t nframes)
 {
 	_buffer_size = nframes;
+	_raw_buffer_sizes[DataType::AUDIO] = nframes * sizeof(float);
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
@@ -603,7 +606,11 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 		} else {
 			throw unknown_type();
 		}
-
+		
+		size_t& old_buffer_size  = _raw_buffer_sizes[newport->type()];
+		size_t  port_buffer_size = newport->raw_buffer_size(0);
+		if (port_buffer_size > old_buffer_size)
+			old_buffer_size = port_buffer_size;
 
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
@@ -729,7 +736,7 @@ AudioEngine::disconnect (const string& source, const string& destination)
 	Port* src = get_port_by_name_locked (s);
 	Port* dst = get_port_by_name_locked (d);
 
-		if (src) {
+	if (src) {
 			ret = src->disconnect (d);
 	} else if (dst) {
 			ret = dst->disconnect (s);
@@ -770,6 +777,13 @@ AudioEngine::frame_rate ()
 		/*NOTREACHED*/
 		return 0;
 	}
+}
+
+size_t
+AudioEngine::raw_buffer_size (DataType t)
+{
+	std::map<DataType,size_t>::const_iterator s = _raw_buffer_sizes.find(t);
+	return (s != _raw_buffer_sizes.end()) ? s->second : 0;
 }
 
 ARDOUR::nframes_t
@@ -1184,7 +1198,6 @@ AudioEngine::disconnect_from_jack ()
 		return 0;
 	}
 
-
 	if (_running) {
 		stop_metering_thread ();
 	}
@@ -1197,6 +1210,7 @@ AudioEngine::disconnect_from_jack ()
 
 	_buffer_size = 0;
 	_frame_rate = 0;
+	_raw_buffer_sizes.clear();
 
 	if (_running) {
 		_running = false;

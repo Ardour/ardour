@@ -26,19 +26,16 @@ using namespace ARDOUR;
 using namespace std;
 
 MidiPort::MidiPort (const std::string& name, Flags flags)
-        : Port (name, DataType::MIDI, flags)
+	: Port (name, DataType::MIDI, flags)
 	, _has_been_mixed_down (false)
 {
-	// FIXME: size kludge (see BufferSet::ensure_buffers)
-	// Jack needs to tell us this
-	_buffer = new MidiBuffer (1024 * 32);
+	_buffer = new MidiBuffer (raw_buffer_size(0));
 }
 
 MidiPort::~MidiPort()
 {
 	delete _buffer;
 }
-
 
 void
 MidiPort::cycle_start (nframes_t nframes)
@@ -131,5 +128,11 @@ MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 			}
 		}
 	}
+}
+
+size_t
+MidiPort::raw_buffer_size (nframes_t nframes) const
+{
+	return jack_midi_max_event_size(jack_port_get_buffer(_jack_port, nframes));
 }
 

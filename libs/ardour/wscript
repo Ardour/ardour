@@ -124,8 +124,8 @@ def build(bld):
 		export_status.cc
 		export_timespan.cc
 		export_utilities.cc
-		filename_extensions.cc
 		file_source.cc
+		filename_extensions.cc
 		filesystem_paths.cc
 		filter.cc
 		find_session.cc
@@ -139,6 +139,7 @@ def build(bld):
 		ladspa_plugin.cc
 		location.cc
 		location_importer.cc
+		lv2_event_buffer.cc
 		meter.cc
 		midi_buffer.cc
 		midi_clock_slave.cc
@@ -198,7 +199,7 @@ def build(bld):
 		sndfilesource.cc
 		source.cc
 		source_factory.cc
-                strip_silence.cc
+		strip_silence.cc
 		svn_revision.cc
 		tape_file_matcher.cc
 		template_utils.cc
@@ -209,6 +210,7 @@ def build(bld):
 		transient_detector.cc
 		user_bundle.cc
 		utils.cc
+		uri_map.cc
 		version.cc
 	'''
 	obj.export_incdirs = ['.']

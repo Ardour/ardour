@@ -234,7 +234,7 @@ PluginInsert::parameter_changed (Evoral::Parameter which, float val)
 	if (which.type() != PluginAutomation)
 		return;
 
-	vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin();
+	Plugins::iterator i = _plugins.begin();
 
 	/* don't set the first plugin, just all the slaves */
 
@@ -249,7 +249,7 @@ PluginInsert::parameter_changed (Evoral::Parameter which, float val)
 void
 PluginInsert::set_block_size (nframes_t nframes)
 {
-	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
 }
@@ -257,7 +257,7 @@ PluginInsert::set_block_size (nframes_t nframes)
 void
 PluginInsert::activate ()
 {
-	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->activate ();
 	}
 }
@@ -265,7 +265,7 @@ PluginInsert::activate ()
 void
 PluginInsert::deactivate ()
 {
-	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->deactivate ();
 	}
 }
@@ -280,8 +280,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 		collect_signal_nframes = nframes;
 	}
 
-	uint32_t in_index = 0;
-	uint32_t out_index = 0;
+	ChanMapping in_map(input_streams());
+	ChanMapping out_map(output_streams());
 
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
@@ -315,15 +315,19 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 		//std::cerr << "               streams " << input_streams().n_audio() << std::endl;
 		//std::cerr << "filling buffer with " << collect_signal_nframes << " frames at " << _signal_analysis_collected_nframes << std::endl;
 		for (uint32_t i = 0; i < input_streams().n_audio(); ++i) {
-			_signal_analysis_input_bufferset.get_audio(i).read_from(
+			_signal_analysis_inputs.get_audio(i).read_from(
 				bufs.get_audio(i),
 				collect_signal_nframes,
 				_signal_analysis_collected_nframes); // offset is for target buffer
 		}
 	}
 
-	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (bufs, in_index, out_index, nframes, offset);
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->connect_and_run (bufs, in_map, out_map, nframes, offset);
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			in_map.offset(*t, input_streams().get(*t));
+			out_map.offset(*t, output_streams().get(*t));
+		}
 	}
 
 	if (collect_signal_nframes > 0) {
@@ -331,7 +335,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 		//std::cerr << "       output, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
 		//std::cerr << "               streams " << output_streams().n_audio() << std::endl;
 		for (uint32_t i = 0; i < output_streams().n_audio(); ++i) {
-			_signal_analysis_output_bufferset.get_audio(i).read_from(
+			_signal_analysis_outputs.get_audio(i).read_from(
 				bufs.get_audio(i), 
 				collect_signal_nframes, 
 				_signal_analysis_collected_nframes); // offset is for target buffer
@@ -344,8 +348,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 			_signal_analysis_collect_nframes_max = 0;
 			_signal_analysis_collected_nframes   = 0;
 
-			AnalysisDataGathered(&_signal_analysis_input_bufferset, 
-					     &_signal_analysis_output_bufferset);
+			AnalysisDataGathered(&_signal_analysis_inputs, 
+					     &_signal_analysis_outputs);
 		}
 	}
 	/* leave remaining channel buffers alone */
@@ -354,12 +358,12 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 void
 PluginInsert::silence (nframes_t nframes)
 {
-	uint32_t in_index = 0;
-	uint32_t out_index = 0;
+	ChanMapping in_map(input_streams());
+	ChanMapping out_map(output_streams());
 
 	if (active()) {
-		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_index, out_index, nframes, 0);
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+			(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_map, out_map, nframes, 0);
 		}
 	}
 }
@@ -546,12 +550,11 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	// current buffer size here. each request for data fills in these
 	// buffers and the analyser makes sure it gets enough data for the 
 	// analysis window
-	_signal_analysis_input_bufferset.ensure_buffers (in,  session().engine().frames_per_cycle());
-	_signal_analysis_input_bufferset.set_count(in);
-
-	_signal_analysis_output_bufferset.ensure_buffers(out, session().engine().frames_per_cycle());
-	_signal_analysis_output_bufferset.set_count(out);
-
+	session().ensure_buffer_set (_signal_analysis_inputs, in);
+	_signal_analysis_inputs.set_count (in);
+	
+	session().ensure_buffer_set (_signal_analysis_outputs, out);
+	_signal_analysis_outputs.set_count (out);
 
 	return Processor::configure_io (in, out);
 }
@@ -759,7 +762,7 @@ PluginInsert::set_state(const XMLNode& node)
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == plugin->state_node_name()) {
-			for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 				(*i)->set_state (**niter);
 			}
 			break;
@@ -939,7 +942,7 @@ PluginInsert::PluginControl::set_value (float val)
 
 	}
 
-	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugin->_plugins.begin();
+	for (Plugins::iterator i = _plugin->_plugins.begin();
 			i != _plugin->_plugins.end(); ++i) {
 		(*i)->set_parameter (_list->parameter().id(), val);
 	}
@@ -987,5 +990,18 @@ PluginInsert::get_impulse_analysis_plugin()
 	}
 
 	return ret;
+}
+
+void
+PluginInsert::collect_signal_for_analysis(nframes_t nframes)
+{
+	// called from outside the audio thread, so this should be safe
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		_session.ensure_buffer_set(_signal_analysis_inputs, input_streams());
+		_session.ensure_buffer_set(_signal_analysis_outputs, output_streams());
+	}
+
+	_signal_analysis_collected_nframes   = 0;
+	_signal_analysis_collect_nframes_max = nframes; 
 }
 

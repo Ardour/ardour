@@ -124,11 +124,37 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 		return false;
 	}
 
-	uint8_t* const write_loc = _data + _size;
-	*((TimeType*)write_loc) = ev.time();
-	memcpy(write_loc + stamp_size, ev.buffer(), ev.size());
+	push_back(ev.time(), ev.size(), ev.buffer());
+	
+	return true;
+}
 
-	_size += stamp_size + ev.size();
+
+/** Push an event into the buffer.
+ * @return false if operation failed (not enough room)
+ */
+bool
+MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
+{
+	const size_t stamp_size = sizeof(TimeType);
+	/*cerr << "MidiBuffer: pushing event @ " << ev.time()
+		<< " size = " << ev.size() << endl;*/
+	
+	if (_size + stamp_size + size >= _capacity) {
+		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		return false;
+	}
+
+	if (!Evoral::midi_event_is_valid(data, size)) {
+		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
+		return false;
+	}
+
+	uint8_t* const write_loc = _data + _size;
+	*((TimeType*)write_loc) = time;
+	memcpy(write_loc + stamp_size, data, size);
+
+	_size += stamp_size + size;
 	_silent = false;
 	
 	return true;

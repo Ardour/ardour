@@ -34,6 +34,7 @@
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/lv2_event_buffer.h"
 #include "ardour/lv2_plugin.h"
 
 #include "pbd/stl_delete.h"
@@ -44,7 +45,12 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-	
+
+URIMap   LV2Plugin::_uri_map;
+uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
+		"http://lv2plug.in/ns/ext/event",
+		"http://lv2plug.in/ns/ext/midi#MidiEvent");
+
 LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	: Plugin (e, session)
 	, _world(world)
@@ -88,7 +94,8 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	}
 
 	if (slv2_plugin_has_feature(plugin, world.in_place_broken)) {
-		error << string_compose(_("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
+		error << string_compose(
+				_("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
 				slv2_value_as_string(_name));
 		slv2_value_free(_name);
 		slv2_value_free(_author);
@@ -102,10 +109,11 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
 	_data_access_feature.data = &_data_access_extension_data;
 	
-	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 3);
+	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 4);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
-	_features[2] = NULL;
+	_features[2] = _uri_map.feature();
+	_features[3] = NULL;
 
 	_sample_rate = rate;
 
@@ -347,7 +355,7 @@ LV2Plugin::set_state(const XMLNode& node)
 
 	nodes = node.children ("Port");
 
-	for(iter = nodes.begin(); iter != nodes.end(); ++iter){
+	for (iter = nodes.begin(); iter != nodes.end(); ++iter){
 
 		child = *iter;
 
@@ -450,52 +458,55 @@ LV2Plugin::automatable () const
 }
 
 int
-LV2Plugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_index, nframes_t nframes, nframes_t offset)
+LV2Plugin::connect_and_run (BufferSet& bufs,
+		ChanMapping in_map, ChanMapping out_map,
+		nframes_t nframes, nframes_t offset)
 {
-	uint32_t port_index;
 	cycles_t then, now;
 
-	port_index = 0;
-
 	then = get_cycles ();
-	
-	const uint32_t nbufs = bufs.count().n_audio();
 
-	while (port_index < parameter_count()) {
+	uint32_t audio_in_index  = 0;
+	uint32_t audio_out_index = 0;
+	uint32_t midi_in_index   = 0;
+	uint32_t midi_out_index  = 0;
+	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
-				const size_t index = min(in_index, nbufs - 1);
+				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++);
 				slv2_instance_connect_port(_instance, port_index,
-							   bufs.get_audio(index).data(offset));
-				in_index++;
+						bufs.get_audio(buf_index).data(offset));
 			} else if (parameter_is_output(port_index)) {
-				const size_t index = min(out_index,nbufs - 1);
+				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++);
 				slv2_instance_connect_port(_instance, port_index,
-							   bufs.get_audio(index).data(offset));
-				out_index++;
+						bufs.get_audio(buf_index).data(offset));
 			}
 		} else if (parameter_is_midi(port_index)) {
-			// FIXME: Switch MIDI buffer format to LV2 event buffer
 			if (parameter_is_input(port_index)) {
-				//const size_t index = min(in_index, nbufs - 1);
-				//slv2_instance_connect_port(_instance, port_index,
-				//		bufs.get_midi(index).data(offset));
-				// FIXME: hope it's connection optional...
-				slv2_instance_connect_port(_instance, port_index, NULL);
-				in_index++;
+				const uint32_t buf_index = in_map.get(DataType::MIDI, midi_in_index++);
+				slv2_instance_connect_port(_instance, port_index,
+						bufs.get_lv2_midi(true, buf_index).data());
 			} else if (parameter_is_output(port_index)) {
-				//const size_t index = min(out_index,nbufs - 1);
-				//slv2_instance_connect_port(_instance, port_index,
-				//		bufs.get_midi(index).data(offset));
-				// FIXME: hope it's connection optional...
-				slv2_instance_connect_port(_instance, port_index, NULL);
-				out_index++;
+				const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++);
+				slv2_instance_connect_port(_instance, port_index,
+						bufs.get_lv2_midi(false, buf_index).data());
 			}
+		} else if (!parameter_is_control(port_index)) {
+			std::cerr << "WARNING: Unknown LV2 port type, ignored" << endl;
+			slv2_instance_connect_port(_instance, port_index, NULL);
 		}
-		port_index++;
 	}
 	
 	run (nframes);
+	
+	midi_out_index = 0;
+	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
+		if (parameter_is_midi(port_index) && parameter_is_output(port_index)) {
+			const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++);
+			bufs.flush_lv2_midi(true, buf_index);
+		}
+	}
+	
 	now = get_cycles ();
 	set_cycles ((uint32_t) (now - then));
 
@@ -520,8 +531,8 @@ bool
 LV2Plugin::parameter_is_midi (uint32_t param) const
 {
 	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, param);
-	return slv2_port_is_a(_plugin, port, _world.event_class)
-		&& slv2_port_supports_event(_plugin, port, _world.midi_class);
+	return slv2_port_is_a(_plugin, port, _world.event_class);
+	//	&& slv2_port_supports_event(_plugin, port, _world.midi_class);
 }
 
 bool

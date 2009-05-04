@@ -161,7 +161,7 @@ class Route : public IO
 		}
 	}
 	
-	ChanCount max_processor_outs () const { return processor_max_outs; }
+	ChanCount max_processor_streams () const { return processor_max_streams; }
 	ChanCount pre_fader_streams() const;
 	
 	/** A record of the stream configuration at some point in the processor list.
@@ -333,11 +333,13 @@ class Route : public IO
 	
 	sigc::connection input_signal_connection;
 
-	ChanCount processor_max_outs;
+	ChanCount processor_max_streams;
 	uint32_t _remote_control_id;
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
+	
+	void setup_peak_meters ();
 
 	virtual int  _set_state (const XMLNode&, bool call_base);
 	virtual void _set_processor_states (const XMLNodeList&);

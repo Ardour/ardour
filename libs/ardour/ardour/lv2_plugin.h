@@ -33,6 +33,7 @@
 #include <jack/types.h>
 #include <slv2/slv2.h>
 #include "ardour/plugin.h"
+#include "ardour/uri_map.h"
 
 namespace ARDOUR {
 class AudioEngine;
@@ -95,9 +96,12 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	void set_block_size (nframes_t nframes) {}
 	
-	int         connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
+	int connect_and_run (BufferSet& bufs,
+			ChanMapping in, ChanMapping out,
+			nframes_t nframes, nframes_t offset);
+
 	std::string describe_parameter (Evoral::Parameter);
-	std::string state_node_name() const { return "LV2"; }
+	std::string state_node_name() const { return "lv2"; }
 	void        print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio(uint32_t) const;
@@ -106,6 +110,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool parameter_is_input(uint32_t) const;
 	bool parameter_is_output(uint32_t) const;
 	bool parameter_is_toggled(uint32_t) const;
+
+	static uint32_t midi_event_type() { return _midi_event_type; }
 
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node);
@@ -137,6 +143,9 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_DataAccess _data_access_extension_data;
 	LV2_Feature _data_access_feature;
 	LV2_Feature _instance_access_feature;
+
+	static URIMap   _uri_map;
+	static uint32_t _midi_event_type;
 
 	void init (LV2World& world, SLV2Plugin plugin, nframes_t rate);
 	void run (nframes_t nsamples);

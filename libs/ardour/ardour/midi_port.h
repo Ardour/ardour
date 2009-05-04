@@ -40,6 +40,8 @@ class MidiPort : public Port {
 	void cycle_end (nframes_t nframes);
 	void cycle_split ();
 	void flush_buffers (nframes_t nframes, nframes_t offset = 0);
+	
+	size_t raw_buffer_size(jack_nframes_t nframes) const;
 
 	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
 		return get_midi_buffer (nframes, offset);
