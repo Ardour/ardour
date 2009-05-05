@@ -66,13 +66,14 @@ protected:
 class InteractiveRect: public SimpleRect, public InteractiveItem
 {
 public:
-	InteractiveRect(Group& parent, InteractiveItem* parent_item, double x1, double y1, double x2, double y2) 
+	InteractiveRect(Group& parent, InteractiveItem* parent_item,
+			double x1, double y1, double x2, double y2) 
 		: SimpleRect(parent, x1, y1, x2, y2) 
 		, _parent_item(parent_item)
-		{}
+	{}
 	
 	bool on_event(GdkEvent* ev) {
-		if(_parent_item) {
+		if (_parent_item) {
 			return _parent_item->on_event(ev);
 		} else {
 			return false;

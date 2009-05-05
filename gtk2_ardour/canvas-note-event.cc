@@ -74,8 +74,9 @@ CanvasNoteEvent::move_event(double dx, double dy)
 void
 CanvasNoteEvent::show_velocity()
 {
-	hide_velocity();
-	_text = new InteractiveText(*(_item->property_parent()), this);
+	if (!_text) {
+		_text = new InteractiveText(*(_item->property_parent()), this);
+	}
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
 	ostringstream velo(ios::ate);
@@ -93,8 +94,8 @@ CanvasNoteEvent::hide_velocity()
 	if (_text) {
 		_text->hide();
 		delete _text;
+		_text = 0;
 	}
-	_text = 0;
 }
 
 void 
@@ -166,11 +167,9 @@ CanvasNoteEvent::selected(bool selected)
 				ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5));
 		set_outline_color(calculate_outline(
 				ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
-		show_velocity();
 	} else {
 		set_fill_color(base_color());
 		set_outline_color(calculate_outline(base_color()));
-		hide_velocity();
 	}
 
 	_selected = selected;
@@ -260,17 +259,17 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered(this);
-		_item->grab_focus();
-		show_velocity();
-		Keyboard::magic_widget_grab_focus();
+		//_item->grab_focus();
+		//show_velocity();
+		//Keyboard::magic_widget_grab_focus();
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		Keyboard::magic_widget_drop_focus();
+		//Keyboard::magic_widget_drop_focus();
 		if (! selected()) {
 			hide_velocity();
 		}
-		_region.get_canvas_group()->grab_focus();
+		//_region.get_canvas_group()->grab_focus();
 		break;
 
 	case GDK_BUTTON_PRESS:

@@ -20,8 +20,7 @@ CanvasNote::on_event(GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 2 ||
-				(ev->button.button == 1 &&
-				 edit_mode == Editing::MidiEditResize)) {
+				(ev->button.button == 1 && edit_mode == Editing::MidiEditResize)) {
 			double region_start = _region.get_position_pixels();
 			event_x = ev->button.x;
 			middle_point = region_start + x1() + (x2() - x1()) / 2.0L;

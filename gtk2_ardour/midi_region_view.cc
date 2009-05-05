@@ -499,13 +499,16 @@ MidiRegionView::start_delta_command(string name)
 }
 
 void
-MidiRegionView::command_add_note(const boost::shared_ptr<NoteType> note, bool selected)
+MidiRegionView::command_add_note(const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity)
 {
 	if (_delta_command) {
 		_delta_command->add(note);
 	}
 	if (selected) {
 		_marked_for_selection.insert(note);
+	}
+	if (show_velocity) {
+		_marked_for_velocity.insert(note);
 	}
 }
 
@@ -534,6 +537,7 @@ MidiRegionView::apply_command()
 	midi_view()->midi_track()->diskstream()->playlist_modified();
 
 	_marked_for_selection.clear();
+	_marked_for_velocity.clear();
 }
 	
 
@@ -754,7 +758,6 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 					item->show();
 				}
 
-				event->hide_velocity();
 				if (CanvasNote* note = dynamic_cast<CanvasNote*>(event)) {
 					const double y1 = midi_stream_view()->note_to_y(event->note()->note());
 					const double y2 = y1 + floor(midi_stream_view()->note_height());
@@ -771,9 +774,6 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 					hit->set_height(diamond_size);
 					hit->move(x-hit->x1(), y-hit->y1());
 					hit->show();
-				}
-				if (event->selected()) {
-					event->show_velocity();
 				}
 			}
 		}
@@ -838,6 +838,7 @@ MidiRegionView::end_write()
 	delete[] _active_notes;
 	_active_notes = NULL;
 	_marked_for_selection.clear();
+	_marked_for_velocity.clear();
 }
 
 
@@ -997,6 +998,9 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 	if (event) {
 		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
 			note_selected(event, true);
+		}
+		if (_marked_for_velocity.find(note) != _marked_for_velocity.end()) {
+			event->show_velocity();
 		}
 		event->on_channel_selection_change(_last_channel_selection);
 		_events.push_back(event);
@@ -1163,6 +1167,7 @@ MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->selected() && (*i) != ev) {
 			(*i)->selected(false);
+			(*i)->hide_velocity();
 		}
 	}
 
@@ -1175,6 +1180,7 @@ MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i) != ev) {
 			(*i)->selected(false);
+			(*i)->hide_velocity();
 		}
 	}
 
@@ -1279,8 +1285,9 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 void
 MidiRegionView::move_selection(double dx, double dy)
 {
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		(*i)->move_event(dx, dy);
+	}
 }
 
 
@@ -1550,7 +1557,7 @@ MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bo
 	}
 
 	command_remove_note(event);
-	command_add_note(copy, event->selected());
+	command_add_note(copy, event->selected(), true);
 }
 
 void
@@ -1599,8 +1606,8 @@ void
 MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	if (ev->note() && _mouse_state == EraseTouchDragging) {
-		start_delta_command(_("note entered"));
-		ev->selected(true);
+		if (!_delta_command)
+			start_delta_command(_("note entered"));
 		_delta_command->remove(ev->note());
 	} else if (_mouse_state == SelectTouchDragging) {
 		note_selected(ev, true);

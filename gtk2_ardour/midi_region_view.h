@@ -159,7 +159,7 @@ class MidiRegionView : public RegionView
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
 	void start_delta_command(std::string name = "midi edit");
-	void command_add_note(const boost::shared_ptr<NoteType> note, bool selected);
+	void command_add_note(const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity=false);
 	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
 
 	void apply_command();
@@ -333,6 +333,10 @@ class MidiRegionView : public RegionView
 	/** New notes (created in the current command) which should be selected
 	 * when they appear after the command is applied. */
 	std::set< boost::shared_ptr<NoteType> > _marked_for_selection;
+	
+	/** New notes (created in the current command) which should have visible velocity
+	 * when they appear after the command is applied. */
+	std::set< boost::shared_ptr<NoteType> > _marked_for_velocity;
 
 	std::vector<NoteResizeData *> _resize_data;
 };
