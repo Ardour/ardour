@@ -173,7 +173,7 @@ class MidiRegionView : public RegionView
 	size_t selection_size() { return _selection.size(); }
 
 	void move_selection(double dx, double dy);
-	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_frames, uint8_t d_note);
+	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_pixels, uint8_t d_note);
 
 	/** Return true iff the note is within the currently visible range */
 	bool note_in_visible_range(const boost::shared_ptr<NoteType> note) const;
@@ -230,7 +230,6 @@ class MidiRegionView : public RegionView
 	};
 	
 	/** Snap a region relative pixel coordinate to pixel units.
-	 * for pixel units (double) instead of nframes64_t
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped pixel coordinate relative to region start
 	 */
@@ -240,13 +239,13 @@ class MidiRegionView : public RegionView
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped nframes64_t coordinate relative to region start
 	 */
-	nframes64_t snap_to_frame(double x);
+	nframes64_t snap_pixel_to_frame(double x);
 
 	/** Snap a region relative frame coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped nframes64_t coordinate relative to region start
 	 */
-	nframes64_t snap_to_frame(nframes64_t x);
+	nframes64_t snap_frame_to_frame(nframes64_t x);
 	
 	/** Convert a timestamp in beats to frames (both relative to region start) */
 	nframes64_t beats_to_frames(double beats) const;

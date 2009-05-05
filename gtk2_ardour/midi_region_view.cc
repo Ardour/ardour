@@ -419,12 +419,12 @@ MidiRegionView::create_note_at(double x, double y, double length)
 	assert(note <= 127.0);
 
 	// Start of note in frames relative to region start
-	nframes64_t start_frames = snap_to_frame(trackview.editor().pixel_to_frame(x));
+	nframes64_t start_frames = snap_frame_to_frame(trackview.editor().pixel_to_frame(x));
 	assert(start_frames >= 0);
 
 	// Snap length
 	length = frames_to_beats(
-			snap_to_frame(start_frames + beats_to_frames(length)) - start_frames);
+			snap_frame_to_frame(start_frames + beats_to_frames(length)) - start_frames);
 
 	const boost::shared_ptr<NoteType> new_note(new NoteType(0,
 			frames_to_beats(start_frames + _region->start()), length,
@@ -1319,18 +1319,17 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 
 		const boost::shared_ptr<NoteType> copy(new NoteType(*(*i)->note().get()));
 
-		// we need to snap here again in nframes64_t in order to be sample accurate 
-		double start_frames = snap_to_frame(beats_to_frames((*i)->note()->time()) + dt);
-
-		// keep notes inside region if dragged beyond left region bound
-		if (start_frames < _region->start()) {				
-			start_frames = _region->start();
+		nframes64_t start_frames = beats_to_frames((*i)->note()->time());
+		if (dt >= 0) {
+			start_frames += snap_frame_to_frame(trackview.editor().pixel_to_frame(dt));
+		} else {
+			start_frames -= snap_frame_to_frame(trackview.editor().pixel_to_frame(-dt));
 		}
-		
+
 		copy->set_time(frames_to_beats(start_frames));
 
 		uint8_t original_pitch = (*i)->note()->note();
-		uint8_t new_pitch = original_pitch + dnote - highest_note_difference;
+		uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
 		
 		// keep notes in standard midi range
 		clamp_to_0_127(new_pitch);
@@ -1362,9 +1361,9 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 }
 
 nframes64_t
-MidiRegionView::snap_to_frame(double x)
+MidiRegionView::snap_pixel_to_frame(double x)
 {
-	PublicEditor &editor = trackview.editor();
+	PublicEditor& editor = trackview.editor();
 	// x is region relative, convert it to global absolute frames
 	nframes64_t frame = editor.pixel_to_frame(x) + _region->position();
 	editor.snap_to(frame);
@@ -1372,22 +1371,19 @@ MidiRegionView::snap_to_frame(double x)
 }
 
 nframes64_t
-MidiRegionView::snap_to_frame(nframes64_t x)
+MidiRegionView::snap_frame_to_frame(nframes64_t x)
 {
-	PublicEditor &editor = trackview.editor();
-	// x is region relative
-	// convert x to global frame
+	PublicEditor& editor = trackview.editor();
+	// x is region relative, convert it to global absolute frames
 	nframes64_t frame = x + _region->position();
 	editor.snap_to(frame);
-	// convert event_frame back to local coordinates relative to position
-	frame -= _region->position();
-	return frame;
+	return frame - _region->position(); // convert back to region relative
 }
 
 double
 MidiRegionView::snap_to_pixel(double x)
 {
-	return (double) trackview.editor().frame_to_pixel(snap_to_frame(x));
+	return (double) trackview.editor().frame_to_pixel(snap_pixel_to_frame(x));
 }
 
 double
@@ -1502,7 +1498,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 
 		// because snapping works on world coordinates we have to transform current_x
 		// to world coordinates before snapping and transform it back afterwards
-		nframes64_t current_frame = snap_to_frame(current_x);
+		nframes64_t current_frame = snap_pixel_to_frame(current_x);
 		// transform to region start relative
 		current_frame += _region->start();
 		
