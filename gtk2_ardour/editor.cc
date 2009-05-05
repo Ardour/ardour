@@ -352,7 +352,7 @@ Editor::Editor ()
 	zoomed_to_region = false;
 	rhythm_ferret = 0;
 	_bundle_manager = 0;
-        for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
 		_global_port_matrix[*i] = 0;
 	}
 	allow_vertical_scroll = false;
@@ -1255,7 +1255,7 @@ Editor::connect_to_session (Session *t)
 	session->request_locate (playhead_cursor->current_frame);
 
 	if (first_action_message) {
-	        first_action_message->hide();
+		first_action_message->hide();
 	}
 
 	update_title ();
@@ -2789,7 +2789,7 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 
 	case SnapToSMPTEFrame:
-	        if (((direction == 0) && (fmod((double)start, (double)session->frames_per_smpte_frame()) > (session->frames_per_smpte_frame() / 2))) || (direction > 0)) {
+		if (((direction == 0) && (fmod((double)start, (double)session->frames_per_smpte_frame()) > (session->frames_per_smpte_frame() / 2))) || (direction > 0)) {
 			start = (nframes64_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
 		} else {
 			start = (nframes64_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
@@ -3367,14 +3367,14 @@ Editor::setup_midi_toolbar ()
 }
 
 int
-Editor::convert_drop_to_paths (vector<ustring>& paths, 
-			       const RefPtr<Gdk::DragContext>& context,
-			       gint                x,
-			       gint                y,
-			       const SelectionData& data,
-			       guint               info,
-			       guint               time)			       
-
+Editor::convert_drop_to_paths (
+		vector<ustring>&                paths, 
+		const RefPtr<Gdk::DragContext>& context,
+		gint                            x,
+		gint                            y,
+		const SelectionData&            data,
+		guint                           info,
+		guint                           time)
 {	
 	if (session == 0) {
 		return -1;
@@ -3447,7 +3447,7 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 		if ((*i).substr (0,7) == "file://") {
 			
 			ustring p = *i;
-                        PBD::url_decode (p);
+			PBD::url_decode (p);
 
 			// scan forward past three slashes
 			
@@ -3531,7 +3531,7 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (session) {
-                before = &get_state();
+		before = &get_state();
 		session->begin_reversible_command (name);
 	}
 }
@@ -4359,7 +4359,7 @@ Editor::rename_snapshot (Glib::ustring old_name)
 		prompter.get_result (new_name);
 		if (new_name.length()) {
 			session->rename_state (old_name, new_name);
-		        redisplay_snapshots ();
+			redisplay_snapshots ();
 		}
 	}
 }
@@ -4906,17 +4906,17 @@ Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
 
 	if ((tll = transport_loop_location()) == 0) {
 		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoLoop);
-                XMLNode &before = session->locations()->get_state();
+		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (loc, true);
 		session->set_auto_loop_location (loc);
-                XMLNode &after = session->locations()->get_state();
+		XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	} else {
-                XMLNode &before = tll->get_state();
+		XMLNode &before = tll->get_state();
 		tll->set_hidden (false, this);
 		tll->set (start, end);
-                XMLNode &after = tll->get_state();
-                session->add_command (new MementoCommand<Location>(*tll, &before, &after));
+		XMLNode &after = tll->get_state();
+		session->add_command (new MementoCommand<Location>(*tll, &before, &after));
 	}
 	
 	commit_reversible_command ();
@@ -4933,18 +4933,18 @@ Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
 
 	if ((tpl = transport_punch_location()) == 0) {
 		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoPunch);
-                XMLNode &before = session->locations()->get_state();
+		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (loc, true);
 		session->set_auto_loop_location (loc);
-                XMLNode &after = session->locations()->get_state();
+		XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	}
 	else {
-                XMLNode &before = tpl->get_state();
+		XMLNode &before = tpl->get_state();
 		tpl->set_hidden (false, this);
 		tpl->set (start, end);
-                XMLNode &after = tpl->get_state();
-                session->add_command (new MementoCommand<Location>(*tpl, &before, &after));
+		XMLNode &after = tpl->get_state();
+		session->add_command (new MementoCommand<Location>(*tpl, &before, &after));
 	}
 	
 	commit_reversible_command ();
