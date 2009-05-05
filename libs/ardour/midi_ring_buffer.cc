@@ -65,14 +65,12 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 
 		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
 		if (ev_type == LoopEventType) {
-			ev_time -= start;
+			/*ev_time -= start;
 			ev_time += offset;
-			Evoral::MIDIEvent<T> loopevent(LoopEventType, ev_time); 
-			dst.push_back(loopevent);
-			
-			// We can safely return, without reading the data, because
-			// a LoopEvent does not have data.
-			cerr << "MRB loop boundary @ " << ev_time << endl;
+			cerr << "MRB loop boundary @ " << ev_time << endl;*/
+
+			// Return without reading data or writing to buffer (loop events have no data)
+			// FIXME: This is not correct, loses events after the loop this cycle
 			return count + 1;
 		}
 
