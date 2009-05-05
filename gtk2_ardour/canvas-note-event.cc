@@ -287,8 +287,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		switch (_state) {
 		case Pressed: // Drag begin
 			if (midi_edit_mode == Editing::MidiEditSelect
-					&& _region.mouse_state() != MidiRegionView::SelectTouchDragging
-					&& _region.mouse_state() != MidiRegionView::EraseTouchDragging) {
+					&& _region.mouse_state() != MidiRegionView::SelectTouchDragging) {
 				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				_state = Dragging;

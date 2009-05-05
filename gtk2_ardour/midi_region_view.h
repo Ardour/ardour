@@ -218,8 +218,7 @@ class MidiRegionView : public RegionView
 		Pressed,
 		SelectTouchDragging,
 		SelectRectDragging,
-		AddDragging,
-		EraseTouchDragging
+		AddDragging
 	};
 
 	MouseState mouse_state() const { return _mouse_state; }

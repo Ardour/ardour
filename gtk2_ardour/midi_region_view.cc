@@ -195,9 +195,6 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
-	static bool delete_mod = false;
-	static Editing::MidiEditMode original_mode;
-
 	static double drag_start_x, drag_start_y;
 	static double last_x, last_y;
 	double event_x, event_y;
@@ -212,14 +209,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
-		if (ev->key.keyval == GDK_Delete && !delete_mod) {
-			delete_mod = true;
-			original_mode = midi_edit_mode;
-			trackview.editor().set_midi_edit_mode(MidiEditErase);
-			start_delta_command(_("erase notes"));
-			_mouse_state = EraseTouchDragging;
-			return true;
-		} else if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
+		if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
 			_mouse_state = SelectTouchDragging;
 			return true;
 		} else if (ev->key.keyval == GDK_Escape) {
@@ -230,15 +220,8 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 	case GDK_KEY_RELEASE:
 		if (ev->key.keyval == GDK_Delete) {
-			if (_mouse_state == EraseTouchDragging) {
-				delete_selection();
-				apply_command();
-			}
-			if (delete_mod) {
-				trackview.editor().set_midi_edit_mode(original_mode);
-				_mouse_state = None;
-				delete_mod = false;
-			}
+			delete_selection();
+			apply_command();
 			return true;
 		} else if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
 			_mouse_state = None;
@@ -247,9 +230,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return false;
 
 	case GDK_BUTTON_PRESS:
-		if (_mouse_state != SelectTouchDragging && 
-			_mouse_state != EraseTouchDragging &&
-			ev->button.button == 1) {
+		if (_mouse_state != SelectTouchDragging && ev->button.button == 1) {
 			_pressed_button = ev->button.button;
 			_mouse_state = Pressed;
 			return true;
@@ -363,7 +344,6 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			last_x = event_x;
 			last_y = event_y;
 
-		case EraseTouchDragging:
 		case SelectTouchDragging:
 			return false;
 
@@ -1150,7 +1130,13 @@ MidiRegionView::next_program(CanvasProgramChange& program)
 void
 MidiRegionView::delete_selection()
 {
-	assert(_delta_command);
+	if (_selection.empty()) {
+		return;
+	}
+
+	if (!_delta_command) {
+		_delta_command = _model->new_delta_command("delete selection");
+	}
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->selected()) {
@@ -1605,11 +1591,7 @@ MidiRegionView::change_channel(uint8_t channel)
 void
 MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 {
-	if (ev->note() && _mouse_state == EraseTouchDragging) {
-		if (!_delta_command)
-			start_delta_command(_("note entered"));
-		_delta_command->remove(ev->note());
-	} else if (_mouse_state == SelectTouchDragging) {
+	if (_mouse_state == SelectTouchDragging) {
 		note_selected(ev, true);
 	}
 }
