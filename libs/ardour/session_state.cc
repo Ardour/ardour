@@ -205,7 +205,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_npan_buffers = 0;
 	pending_abort = false;
 	destructive_index = 0;
-	current_trans = 0;
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
 	butler_thread = (pthread_t) 0;
@@ -2251,29 +2250,36 @@ Session::edit_group_by_name (string name)
 }
 
 void
-Session::begin_reversible_command (const string& name)
+Session::begin_reversible_command(const string& name)
 {
-	current_trans = new UndoTransaction;
-	current_trans->set_name (name);
+	UndoTransaction* trans = new UndoTransaction();
+	trans->set_name(name);
+	if (!_current_trans.empty()) {
+		_current_trans.top()->add_command(trans);
+	}
+	_current_trans.push(trans);
 }
 
 void
-Session::commit_reversible_command (Command *cmd)
+Session::commit_reversible_command(Command *cmd)
 {
+	assert(!_current_trans.empty());
 	struct timeval now;
 
 	if (cmd) {
-		current_trans->add_command (cmd);
+		_current_trans.top()->add_command(cmd);
 	}
 
-	if (current_trans->empty()) {
+	if (_current_trans.top()->empty()) {
+		_current_trans.pop();
 		return;
 	}
 
-	gettimeofday (&now, 0);
-	current_trans->set_timestamp (now);
+	gettimeofday(&now, 0);
+	_current_trans.top()->set_timestamp(now);
 
-	_history.add (current_trans);
+	_history.add(_current_trans.top());
+	_current_trans.pop();
 }
 
 Session::GlobalRouteBooleanState 

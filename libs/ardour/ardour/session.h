@@ -838,7 +838,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {
-		current_trans->add_command (cmd);
+		assert(!_current_trans.empty ());
+		_current_trans.top()->add_command (cmd);
 	}
 
 	std::map<PBD::ID, PBD::StatefulThingWithGoingAway*> registry;
@@ -1613,8 +1614,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void reverse_diskstream_buffers ();
 
-	UndoHistory _history;
-	UndoTransaction* current_trans;
+	UndoHistory                  _history;
+	std::stack<UndoTransaction*> _current_trans;
 
 	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);
 	GlobalRouteMeterState get_global_route_metering ();

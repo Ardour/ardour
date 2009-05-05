@@ -400,13 +400,13 @@ Editor::mouse_add_new_marker (nframes64_t where, bool is_cd, bool is_xrun)
 	if (session) {
 		session->locations()->next_available_name(markername, markerprefix);
 		if (!is_xrun && !choose_new_marker_name(markername)) {
-		    	return;
+			return;
 		}		
 		Location *location = new Location (where, where, markername, (Location::Flags) flags);
 		session->begin_reversible_command (_("add marker"));
-                XMLNode &before = session->locations()->get_state();
+		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
-                XMLNode &after = session->locations()->get_state();
+		XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 		session->commit_reversible_command ();
 
@@ -1042,7 +1042,7 @@ Editor::marker_menu_rename ()
 	loc = find_location_from_marker (marker, is_start);
 
 	if (!loc) return;
-	
+
 	ArdourPrompter dialog (true);
 	string txt;
 
@@ -1075,12 +1075,12 @@ Editor::marker_menu_rename ()
 	}
 
 	begin_reversible_command ( _("rename marker") );
-        XMLNode &before = session->locations()->get_state();
+	XMLNode &before = session->locations()->get_state();
 
 	dialog.get_result(txt);
 	loc->set_name (txt);
-	
-        XMLNode &after = session->locations()->get_state();
+
+	XMLNode &after = session->locations()->get_state();
 	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	commit_reversible_command ();
 }

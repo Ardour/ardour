@@ -406,8 +406,8 @@ RhythmFerret::do_split_action ()
 
 		i = tmp;
 	}
+	
 	session->commit_reversible_command ();
-
 }
 
 void
