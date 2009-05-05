@@ -148,8 +148,8 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 		name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 	}
 
-	if (name_text) {
-		name_text->set_data ("regionview", this);
+	if (name_pixbuf) {
+		name_pixbuf->set_data ("regionview", this);
 	}
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);

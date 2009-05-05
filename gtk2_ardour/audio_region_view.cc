@@ -463,10 +463,11 @@ AudioRegionView::set_height (gdouble height)
 
 	manage_zero_line ();
 	reset_fade_shapes ();
-	
-	if (name_text) {
-		name_text->raise_to_top();
+
+	if (name_pixbuf) {
+		name_pixbuf->raise_to_top();
 	}
+
 }
 
 void

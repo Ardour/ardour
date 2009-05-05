@@ -23,7 +23,7 @@
 #include <jack/jack.h>
 #include <string>
 
-#include <libgnomecanvasmm/text.h>
+#include <libgnomecanvasmm/pixbuf.h>
 
 #include "selectable.h"
 #include "simplerect.h"
@@ -231,7 +231,7 @@ class TimeAxisViewItem : public Selectable
     /**
      * 
      */
-    ArdourCanvas::Text* get_name_text();
+    ArdourCanvas::Pixbuf* get_name_pixbuf();
 
 
     /**
@@ -454,18 +454,13 @@ class TimeAxisViewItem : public Selectable
     ArdourCanvas::Group*      group;
     ArdourCanvas::SimpleRect* vestigial_frame;
     ArdourCanvas::SimpleRect* frame;
-    ArdourCanvas::Text*       name_text;
+    ArdourCanvas::Pixbuf*     name_pixbuf;
     ArdourCanvas::SimpleRect* name_highlight;
     ArdourCanvas::SimpleRect* frame_handle_start;
     ArdourCanvas::SimpleRect* frame_handle_end;
 
-    int name_text_width;
-    double last_name_text_width;
-
-    std::map<Glib::ustring::size_type,int> name_text_size_cache;
-    
     Visibility visibility;
-	bool _recregion;
+    bool _recregion;
 
 
 }; /* class TimeAxisViewItem */

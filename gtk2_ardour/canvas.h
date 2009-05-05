@@ -33,6 +33,7 @@ namespace Gnome {
 		class Text;
 		class Line;
 		class Points;
+		class Pixbuf;
 		class ImageFrame;
 	}
 }
