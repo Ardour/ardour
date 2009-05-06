@@ -514,13 +514,15 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 	cycles_t now;
 	cycles_t then = get_cycles ();
 
+	uint32_t audio_in_index  = 0;
+	uint32_t audio_out_index = 0;
 	for (uint32_t port_index = 0; port_index < parameter_count(); ++port_index) {
 		if (LADSPA_IS_PORT_AUDIO(port_descriptor(port_index))) {
 			if (LADSPA_IS_PORT_INPUT(port_descriptor(port_index))) {
-				const uint32_t buf_index = in_map.get(DataType::AUDIO, port_index);
+				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++);
 				connect_port(port_index, bufs.get_audio(buf_index).data(offset));
 			} else if (LADSPA_IS_PORT_OUTPUT(port_descriptor(port_index))) {
-				const uint32_t buf_index = out_map.get(DataType::AUDIO, port_index);
+				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++);
 				connect_port(port_index, bufs.get_audio(buf_index).data(offset));
 			}
 		}
