@@ -74,7 +74,7 @@ Ardour will play NO role in monitoring"))
 
 	sys::path icon_file;
 
-	if (!find_file_in_search_path (ardour_search_path() + system_data_search_path(), "ardour_icon_48px.png", icon_file)) {
+	if (!find_file_in_search_path (ardour_search_path() + system_data_search_path().add_subdirectory_to_paths("icons"), "ardour_icon_48px.png", icon_file)) {
 		throw failed_constructor();
 	}
 
