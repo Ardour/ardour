@@ -126,13 +126,13 @@ automation_streamview.cc
 automation_time_axis.cc
 axis_view.cc
 bundle_manager.cc
+canvas-flag.cc
 canvas-note-event.cc
 canvas-note.cc
-canvas-flag.cc
 canvas-program-change.cc
-canvas-sysex.cc
 canvas-simpleline.c
 canvas-simplerect.c
+canvas-sysex.cc
 canvas-waveview.c
 control_point.cc
 control_point_dialog.cc
@@ -170,8 +170,8 @@ engine_dialog.cc
 enums.cc
 export_channel_selector.cc
 export_dialog.cc
-export_filename_selector.cc
 export_file_notebook.cc
+export_filename_selector.cc
 export_format_dialog.cc
 export_format_selector.cc
 export_preset_selector.cc
@@ -179,7 +179,6 @@ export_timespan_selector.cc
 fft.cc
 fft_graph.cc
 fft_result.cc
-plugin_eq_gui.cc
 gain_meter.cc
 generic_pluginui.cc
 ghostregion.cc
@@ -211,6 +210,7 @@ panner2d.cc
 panner_ui.cc
 piano_roll_header.cc
 playlist_selector.cc
+plugin_eq_gui.cc
 plugin_selector.cc
 plugin_ui.cc
 port_group.cc
@@ -227,6 +227,7 @@ public_editor.cc
 region_gain_line.cc
 region_selection.cc
 region_view.cc
+return_ui.cc
 rhythm_ferret.cc
 route_params_ui.cc
 route_processor_selection.cc
