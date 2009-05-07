@@ -44,10 +44,12 @@ void RouteSignal::connect()
 		
 	cins = _route->NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
-	cins = _route->panner().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
-	for ( unsigned int i = 0; i < _route->panner().npanners(); ++i ) {
-		cins = _route->panner().streampanner (i).Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
- 	}
+	if (_route->panner()) {
+		cins = _route->panner()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
+		for ( unsigned int i = 0; i < _route->panner()->npanners(); ++i ) {
+			cins = _route->panner()->streampanner (i).Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
+		}
+	}
 	
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	if (trk) {

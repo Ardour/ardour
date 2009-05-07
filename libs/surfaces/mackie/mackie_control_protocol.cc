@@ -909,14 +909,14 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 		case Control::type_pot:
 			if ( control.group().is_strip() )
 			{
-				if ( route != 0 )
+				if ( route != 0 && route->panner() )
 				{
 					// pan for mono input routes, or stereo linked panners
-					if ( route->panner().npanners() == 1 || ( route->panner().npanners() == 2 && route->panner().linked() ) )
+					if ( route->panner()->npanners() == 1 || ( route->panner()->npanners() == 2 && route->panner()->linked() ) )
 					{
 						// assume pan for now
 						float xpos;
-						route->panner().streampanner (0).get_effective_position (xpos);
+						route->panner()->streampanner (0).get_effective_position (xpos);
 						
 						// calculate new value, and trim
 						xpos += state.delta * state.sign;
@@ -925,7 +925,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 						else if ( xpos < 0.0 )
 							xpos = 0.0;
 						
-						route->panner().streampanner (0).set_position( xpos );
+						route->panner()->streampanner (0).set_position( xpos );
 					}
 				}
 				else
@@ -1070,11 +1070,11 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal, b
 	try
 	{
 		Pot & pot = route_signal->strip().vpot();
-		const Panner & panner = route_signal->route()->panner();
-		if ( panner.npanners() == 1 || ( panner.npanners() == 2 && panner.linked() ) )
+		boost::shared_ptr<Panner> panner = route_signal->route()->panner();
+		if ( panner && panner->npanners() == 1 || ( panner->npanners() == 2 && panner->linked() ) )
 		{
 			float pos;
-			route_signal->route()->panner().streampanner(0).get_effective_position( pos );
+			route_signal->route()->panner()->streampanner(0).get_effective_position( pos );
 			
 			// cache the MidiByteArray here, because the mackie led control is much lower
 			// resolution than the panner control. So we save lots of byte
@@ -1107,10 +1107,12 @@ void MackieControlProtocol::update_automation( RouteSignal & rs )
 		notify_gain_changed( &rs, false );
 	}
 	
-	ARDOUR::AutoState panner_state = rs.route()->panner().automation_state();
-	if ( panner_state == Touch || panner_state == Play )
-	{
-		notify_panner_changed( &rs, false );
+	if ( rs.route()->panner() ) {
+		ARDOUR::AutoState panner_state = rs.route()->panner()->automation_state();
+		if ( panner_state == Touch || panner_state == Play )
+		{
+			notify_panner_changed( &rs, false );
+		}
 	}
 	_automation_last.start();
 }
