@@ -20,10 +20,10 @@
 #include <gtkmm2ext/doi.h>
 
 #include "ardour/io.h"
-#include "ardour/send.h"
+#include "ardour/return.h"
 
 #include "utils.h"
-#include "send_ui.h"
+#include "return_ui.h"
 #include "io_selector.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -31,25 +31,22 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
-	: _send (s)
+ReturnUI::ReturnUI (boost::shared_ptr<Return> r, Session& se)
+	: _return (r)
 	, _session (se)
 	, _gpm (se)
-	, _panners (se)
 {
- 	_panners.set_io (s->io());
- 	_gpm.set_io (s->io());
+ 	_gpm.set_io (r->io());
 
 	_hbox.pack_start (_gpm, true, true);
-	set_name ("SendUIFrame");
+	set_name ("ReturnUIFrame");
 	
 	_vbox.set_spacing (5);
 	_vbox.set_border_width (5);
 
 	_vbox.pack_start (_hbox, false, false, false);
-	_vbox.pack_start (_panners, false,false);
 
-	io = manage (new IOSelector (se, s->io(), true));
+	io = manage (new IOSelector (se, r->io(), true));
 	
 	pack_start (_vbox, false, false);
 
@@ -57,26 +54,21 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 
 	show_all ();
 
-	_send->set_metering (true);
+	//_return->set_metering (true);
 
-	_send->io()->input_changed.connect (mem_fun (*this, &SendUI::ins_changed));
-	_send->io()->output_changed.connect (mem_fun (*this, &SendUI::outs_changed));
+	_return->io()->input_changed.connect (mem_fun (*this, &ReturnUI::ins_changed));
+	//_return->io()->output_changed.connect (mem_fun (*this, &ReturnUI::outs_changed));
 	
-	_panners.set_width (Wide);
-	_panners.setup_pan ();
-
 	_gpm.setup_meters ();
-	_gpm.set_fader_name ("SendUIFrame");
+	_gpm.set_fader_name ("ReturnUIFrame");
 
-	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (
-	//		mem_fun (*this, &SendUI::update));
-	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
-			mem_fun (*this, &SendUI::fast_update));
+	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::update));
+	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::fast_update));
 }
 
-SendUI::~SendUI ()
+ReturnUI::~ReturnUI ()
 {
-	_send->set_metering (false);
+	//_return->set_metering (false);
 
 	/* XXX not clear that we need to do this */
 
@@ -85,66 +77,56 @@ SendUI::~SendUI ()
 }
 
 void
-SendUI::ins_changed (IOChange change, void* ignored)
+ReturnUI::ins_changed (IOChange change, void* ignored)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &SendUI::ins_changed), change, ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &ReturnUI::ins_changed), change, ignored));
 	if (change & ConfigurationChanged) {
-		_panners.setup_pan ();
-	}
-}
-
-void
-SendUI::outs_changed (IOChange change, void* ignored)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &SendUI::outs_changed), change, ignored));
-	if (change & ConfigurationChanged) {
-		_panners.setup_pan ();
 		_gpm.setup_meters ();
 	}
 }
 
 void
-SendUI::update ()
+ReturnUI::update ()
 {
 }
 
 void
-SendUI::fast_update ()
+ReturnUI::fast_update ()
 {
 	if (Config->get_meter_falloff() > 0.0f) {
 		_gpm.update_meters ();
 	}
 }
 	
-SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
-	: ArdourDialog (string("Ardour: send ") + s->name())
+ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
+	: ArdourDialog (string("Ardour: return ") + s->name())
 {
-	ui = new SendUI (s, ss);
+	ui = new ReturnUI (s, ss);
 
 	hpacker.pack_start (*ui, true, true);
 
 	get_vbox()->set_border_width (5);
 	get_vbox()->pack_start (hpacker);
 
-	set_name ("SendUIWindow");
+	set_name ("ReturnUIWindow");
 	
 	going_away_connection = s->GoingAway.connect (
-			mem_fun (*this, &SendUIWindow::send_going_away));
+			mem_fun (*this, &ReturnUIWindow::return_going_away));
 
 	signal_delete_event().connect (bind (
 			ptr_fun (just_hide_it),
 			reinterpret_cast<Window *> (this)));
 }
 
-SendUIWindow::~SendUIWindow ()
+ReturnUIWindow::~ReturnUIWindow ()
 {
 	delete ui;
 }
 
 void
-SendUIWindow::send_going_away ()
+ReturnUIWindow::return_going_away ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &SendUIWindow::send_going_away));
+	ENSURE_GUI_THREAD (mem_fun (*this, &ReturnUIWindow::return_going_away));
 	delete_when_idle (this);
 	going_away_connection.disconnect ();
 }

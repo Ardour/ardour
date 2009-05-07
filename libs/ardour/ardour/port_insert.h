@@ -54,9 +54,6 @@ class PortInsert : public IOProcessor
 
 	nframes_t signal_latency() const;
 	
-	ChanCount output_streams() const;
-	ChanCount input_streams() const;
-
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 

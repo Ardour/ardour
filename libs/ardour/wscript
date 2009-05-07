@@ -175,6 +175,7 @@ def build(bld):
 		region.cc
 		region_factory.cc
 		resampled_source.cc
+		return.cc
 		reverse.cc
 		route.cc
 		route_group.cc

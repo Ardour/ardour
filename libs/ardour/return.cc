@@ -21,7 +21,7 @@
 
 #include "pbd/xml++.h"
 
-#include "ardour/send.h"
+#include "ardour/return.h"
 #include "ardour/session.h"
 #include "ardour/port.h"
 #include "ardour/audio_port.h"
@@ -35,18 +35,15 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Send::Send (Session& s)
-	: IOProcessor (s, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1))
+Return::Return (Session& s)
+	: IOProcessor (s, string_compose (_("return %1"), (_bitslot = s.next_return_id()) + 1))
 {
-	_metering = false;
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Send::Send (Session& s, const XMLNode& node)
-	: IOProcessor (s, "send")
+Return::Return (Session& s, const XMLNode& node)
+	: IOProcessor (s, "return")
 {
-	_metering = false;
-
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -54,23 +51,23 @@ Send::Send (Session& s, const XMLNode& node)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Send::~Send ()
+Return::~Return ()
 {
 	GoingAway ();
 }
 
 XMLNode&
-Send::get_state(void)
+Return::get_state(void)
 {
 	return state (true);
 }
 
 XMLNode&
-Send::state(bool full)
+Return::state(bool full)
 {
 	XMLNode& node = IOProcessor::state(full);
 	char buf[32];
-	node.add_property ("type", "send");
+	node.add_property ("type", "return");
 	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
 	node.add_property ("bitslot", buf);
 
@@ -78,22 +75,22 @@ Send::state(bool full)
 }
 
 int
-Send::set_state(const XMLNode& node)
+Return::set_state(const XMLNode& node)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("bitslot")) == 0) {
-		_bitslot = _session.next_send_id();
+		_bitslot = _session.next_return_id();
 	} else {
 		sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
-		_session.mark_send_id (_bitslot);
+		_session.mark_return_id (_bitslot);
 	}
 
 	const XMLNode* insert_node = &node;
 
-	/* Send has regular IO automation (gain, pan) */
+	/* Return has regular IO automation (gain, pan) */
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "IOProcessor") {
@@ -109,102 +106,53 @@ Send::set_state(const XMLNode& node)
 }
 
 void
-Send::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
+Return::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
 	if (active()) {
-
-		_io->deliver_output (bufs, start_frame, end_frame, nframes);
-
-		if (_metering) {
-			if (_io->effective_gain() == 0) {
-				_io->peak_meter().reset();
-			} else {
-				_io->peak_meter().run_in_place(_io->output_buffers(), start_frame, end_frame, nframes);
-			}
-		}
-
-	} else {
-		_io->silence (nframes);
-		
-		if (_metering) {
-			_io->peak_meter().reset();
-		}
-	}
-}
-
-void
-Send::set_metering (bool yn)
-{
-	_metering = yn;
-
-	if (!_metering) {
-		/* XXX possible thread hazard here */
-		_io->peak_meter().reset();
+		_io->collect_input (bufs, nframes, _configured_input);
+		bufs.set_count(_configured_output);
 	}
 }
 
 bool
-Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+Return::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	if (_io->input_maximum() == ChanCount::INFINITE
-			&& _io->output_maximum() == ChanCount::INFINITE) {
-
-		/* not configured yet, we can support anything */
-
-		out = in;
-		return true; /* we can support anything the first time we're asked */
-
-	} else {
-
-		/* for a send, processor input corresponds to IO output */
-
-		if (_io->output_maximum() == in) {
-			out = in;
-			return true;
-		} 
-	}
-
-	return false;
+	out = in + _io->n_inputs();
+	return true;
 }
 
 bool
-Send::configure_io (ChanCount in, ChanCount out)
+Return::configure_io (ChanCount in, ChanCount out)
 {
-	/* we're transparent no matter what.  fight the power. */
-
-	if (out != in) {
+	if (out != in + _io->n_inputs()) {
 		return false;
 	}
 
-	/*_io->set_output_maximum (in);
-	_io->set_output_minimum (in);
-	_io->set_input_maximum (ChanCount::ZERO);
-	_io->set_input_minimum (ChanCount::ZERO);*/
-
-	if (_io->ensure_io (ChanCount::ZERO, in, false, this) != 0) {
-		return false;
+	// Ensure there are enough buffers (since we add some)
+	if (_session.get_scratch_buffers(in).count() < out) {
+		Glib::Mutex::Lock em (_session.engine().process_lock());
+		IO::PortCountChanged(out);
 	}
 
 	Processor::configure_io(in, out);
-	_io->reset_panner();
 
 	return true;
 }
 
-/** Set up the XML description of a send so that its name is unique.
- *  @param state XML send state.
+/** Set up the XML description of a return so that its name is unique.
+ *  @param state XML return state.
  *  @param session Session.
  */
 void
-Send::make_unique (XMLNode &state, Session &session)
+Return::make_unique (XMLNode &state, Session &session)
 {
-	uint32_t const bitslot = session.next_send_id() + 1;
+	uint32_t const bitslot = session.next_return_id() + 1;
 
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
 	state.property("bitslot")->set_value (buf);
 
-	std::string const name = string_compose (_("send %1"), bitslot);
+	std::string const name = string_compose (_("return %1"), bitslot);
 	
 	state.property("name")->set_value (name);
 
@@ -213,3 +161,4 @@ Send::make_unique (XMLNode &state, Session &session)
 		io->property("name")->set_value (name);
 	}
 }
+

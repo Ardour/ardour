@@ -162,23 +162,7 @@ PortInsert::signal_latency() const
 bool
 PortInsert::configure_io (ChanCount in, ChanCount out)
 {
-	/* do not allow configuration to be changed outside the range of
-	   the last request config. or something like that.
-	*/
-
-	/* this is a bit odd: 
-
-	   the number of inputs we are required to handle corresponds 
-	   to the number of output ports we need.
-
-	   the number of outputs we are required to have corresponds
-	   to the number of input ports we need.
-	*/
-
-	/*_io->set_output_maximum (in);
-	_io->set_output_minimum (in);
-	_io->set_input_maximum (out);
-	_io->set_input_minimum (out);*/
+	/* for an insert, processor input corresponds to IO output, and vice versa */
 
 	if (_io->ensure_io (out, in, false, this) != 0) {
 		return false;
@@ -187,21 +171,10 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 	return Processor::configure_io (in, out);
 }
 
-ChanCount
-PortInsert::output_streams() const
-{
-	return _io->n_inputs ();
-}
-
-ChanCount
-PortInsert::input_streams() const
-{
-	return _io->n_outputs ();
-}
-
 bool
 PortInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
 	out = in;
 	return true;
 }
+

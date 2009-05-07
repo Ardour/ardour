@@ -106,6 +106,14 @@ public:
 		return ( (*this > other) || (*this == other) );
 	}
 	
+	ChanCount operator+(const ChanCount& other) const {
+		ChanCount ret;
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			ret.set(*t, get(*t) + other.get(*t));
+		}
+		return ret;
+	}
+	
 	static ChanCount min(const ChanCount& a, const ChanCount& b) {
 		ChanCount ret;
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {

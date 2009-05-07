@@ -47,23 +47,26 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
+#include "ardour/return.h"
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 
-#include "ardour_ui.h"
-#include "ardour_dialog.h"
-#include "public_editor.h"
-#include "processor_box.h"
-#include "keyboard.h"
-#include "plugin_selector.h"
-#include "route_processor_selection.h"
-#include "mixer_ui.h"
 #include "actions.h"
-#include "plugin_ui.h"
-#include "io_selector.h"
-#include "utils.h"
+#include "ardour_dialog.h"
+#include "ardour_ui.h"
 #include "gui_thread.h"
+#include "io_selector.h"
+#include "keyboard.h"
+#include "mixer_ui.h"
+#include "plugin_selector.h"
+#include "plugin_ui.h"
+#include "processor_box.h"
+#include "public_editor.h"
+#include "return_ui.h"
+#include "route_processor_selection.h"
+#include "send_ui.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -216,6 +219,7 @@ void
 ProcessorBox::remove_processor_gui (boost::shared_ptr<Processor> processor)
 {
 	boost::shared_ptr<Send> send;
+	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PortInsert> port_insert;
 
 	if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
@@ -226,6 +230,10 @@ ProcessorBox::remove_processor_gui (boost::shared_ptr<Processor> processor)
 		SendUIWindow *sui = reinterpret_cast<SendUIWindow*> (send->get_gui());
 		send->set_gui (0);
 		delete sui;
+	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
+		ReturnUIWindow *rui = reinterpret_cast<ReturnUIWindow*> (retrn->get_gui());
+		retrn->set_gui (0);
+		delete rui;
 	}
 }
 
@@ -495,20 +503,13 @@ void
 ProcessorBox::choose_send ()
 {
 	boost::shared_ptr<Send> send (new Send (_session));
-	//send->set_default_type(_route->default_type());
-
-	ChanCount outs;
 
 	/* make an educated guess at the initial number of outputs for the send */
-
-	if (_session.master_out()) {
-		outs = _session.master_out()->n_outputs();
-	} else {
-		outs = _route->n_outputs();
-	}
+	ChanCount outs = (_session.master_out())
+			? _session.master_out()->n_outputs()
+			: _route->n_outputs();
 
 	/* XXX need processor lock on route */
-
 	try {
 		send->io()->ensure_io (ChanCount::ZERO, outs, false, this);
 	} catch (AudioEngine::PortRegistrationFailure& err) {
@@ -516,23 +517,17 @@ ProcessorBox::choose_send ()
 		return;
 	}
 
-	/* let the user adjust the output setup (number and connections) before passing
-	   it along to the Route
-	*/
-
+	/* let the user adjust the IO setup before creation */
 	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->io(), false, true);
-
 	ios->show_all ();
 
-	/* bit of a hack; keep a shared_ptr to send around so that it doesn't get deleted while
+	/* keep a reference to the send so it doesn't get deleted while
 	   the IOSelectorWindow is doing its stuff */
-	_send_being_created = send;
-
-	boost::shared_ptr<Processor> r = boost::static_pointer_cast<Processor>(send);
+	_processor_being_created = send;
 
 	ios->selector().Finished.connect (bind (
 			mem_fun(*this, &ProcessorBox::send_io_finished),
-			boost::weak_ptr<Processor>(r), ios));
+			boost::weak_ptr<Processor>(send), ios));
 }
 
 void
@@ -540,8 +535,65 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 {
 	boost::shared_ptr<Processor> processor (weak_processor.lock());
 
-	/* now we can lose the dummy shared_ptr */
-	_send_being_created.reset ();
+	/* drop our temporary reference to the new send */
+	_processor_being_created.reset ();
+
+	if (!processor) {
+		return;
+	}
+
+	switch (r) {
+	case IOSelector::Cancelled:
+		// processor will go away when all shared_ptrs to it vanish
+		break;
+
+	case IOSelector::Accepted:
+		_route->add_processor (processor, 0, 0, _placement);
+		if (Profile->get_sae()) {
+			processor->activate ();
+		}
+		break;
+	}
+
+	delete_when_idle (ios);
+}
+
+void
+ProcessorBox::choose_return ()
+{
+	boost::shared_ptr<Return> retrn (new Return (_session));
+
+	/* assume user just wants a single audio input (sidechain) by default */
+	ChanCount ins(DataType::AUDIO, 1);
+
+	/* XXX need processor lock on route */
+	try {
+		retrn->io()->ensure_io (ins, ChanCount::ZERO, false, this);
+	} catch (AudioEngine::PortRegistrationFailure& err) {
+		error << string_compose (_("Cannot set up new return: %1"), err.what()) << endmsg;
+		return;
+	}
+
+	/* let the user adjust the IO setup before creation */
+	IOSelectorWindow *ios = new IOSelectorWindow (_session, retrn->io(), true, true);
+	ios->show_all ();
+
+	/* keep a reference to the send so it doesn't get deleted while
+	   the IOSelectorWindow is doing its stuff */
+	_processor_being_created = retrn;
+
+	ios->selector().Finished.connect (bind (
+			mem_fun(*this, &ProcessorBox::return_io_finished),
+			boost::weak_ptr<Processor>(retrn), ios));
+}
+
+void
+ProcessorBox::return_io_finished (IOSelector::Result r, boost::weak_ptr<Processor> weak_processor, IOSelectorWindow* ios)
+{
+	boost::shared_ptr<Processor> processor (weak_processor.lock());
+
+	/* drop our temporary reference to the new return */
+	_processor_being_created.reset ();
 
 	if (!processor) {
 		return;
@@ -1067,6 +1119,7 @@ void
 ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 {
 	boost::shared_ptr<Send> send;
+	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
 	Window* gidget = 0;
@@ -1103,6 +1156,32 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		}
 
 		gidget = send_ui;
+	
+	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
+
+		if (!_session.engine().connected()) {
+			return;
+		}
+
+		boost::shared_ptr<Return> retrn = boost::dynamic_pointer_cast<Return> (processor);
+
+		ReturnUIWindow *return_ui;
+
+		if (retrn->get_gui() == 0) {
+
+			return_ui = new ReturnUIWindow (retrn, _session);
+
+			WindowTitle title(Glib::get_application_name());
+			title += retrn->name();
+			return_ui->set_title (title.get_string());
+
+			send->set_gui (return_ui);
+
+		} else {
+			return_ui = reinterpret_cast<ReturnUIWindow *> (retrn->get_gui());
+		}
+
+		gidget = return_ui;
 
 	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor)) != 0) {
 
@@ -1194,6 +1273,9 @@ ProcessorBox::register_actions ()
 	act = ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),
 			sigc::ptr_fun (ProcessorBox::rb_choose_send));
 	ActionManager::jack_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (popup_act_grp, X_("newreturn"), _("New Return ..."),
+			sigc::ptr_fun (ProcessorBox::rb_choose_return));
+	ActionManager::jack_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
@@ -1265,6 +1347,15 @@ ProcessorBox::rb_choose_send ()
 		return;
 	}
 	_current_processor_box->choose_send ();
+}
+
+void
+ProcessorBox::rb_choose_return ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+	_current_processor_box->choose_return ();
 }
 
 void

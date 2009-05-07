@@ -26,29 +26,31 @@
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/window_title.h>
 
+#include "ardour/ardour.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audio_track.h"
+#include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/plugin_manager.h"
+#include "ardour/port_insert.h"
+#include "ardour/return.h"
+#include "ardour/route.h"
+#include "ardour/send.h"
+#include "ardour/session.h"
 #include "ardour/session.h"
 #include "ardour/session_route.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/plugin.h"
-#include "ardour/plugin_manager.h"
-#include "ardour/ardour.h"
-#include "ardour/session.h"
-#include "ardour/route.h"
-#include "ardour/audio_track.h"
-#include "ardour/send.h"
-#include "ardour/plugin_insert.h"
-#include "ardour/port_insert.h"
 
-#include "route_params_ui.h"
+#include "ardour_ui.h"
+#include "gui_thread.h"
+#include "io_selector.h"
 #include "keyboard.h"
 #include "mixer_strip.h"
 #include "plugin_selector.h"
-#include "ardour_ui.h"
 #include "plugin_ui.h"
-#include "io_selector.h"
+#include "return_ui.h"
+#include "route_params_ui.h"
 #include "send_ui.h"
 #include "utils.h"
-#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -559,6 +561,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert, 
 	}
 	
 	boost::shared_ptr<Send> send;
+	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
 	
@@ -568,35 +571,66 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert, 
 
 		if (place == PreFader) {
 			cleanup_pre_view();
-			_pre_plugin_conn = send->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), insert));
+			_pre_plugin_conn = send->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::redirect_going_away),
+					insert));
 			_active_pre_view = send_ui;
 			
 			pre_redir_hpane.add2 (*_active_pre_view);
 			pre_redir_hpane.show_all();
-		}
-		else {
+		} else {
 			cleanup_post_view();
-			_post_plugin_conn = send->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), insert));
+			_post_plugin_conn = send->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::redirect_going_away),
+					insert));
 			_active_post_view = send_ui;
 			
 			post_redir_hpane.add2 (*_active_post_view);
 			post_redir_hpane.show_all();
 		}
+
+	} else if ((retrn = boost::dynamic_pointer_cast<Return> (insert)) != 0) {
+
+		ReturnUI *return_ui = new ReturnUI (retrn, *session);
+
+		if (place == PreFader) {
+			cleanup_pre_view();
+			_pre_plugin_conn = retrn->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::redirect_going_away),
+					insert));
+			_active_pre_view = return_ui;
+			
+			pre_redir_hpane.add2 (*_active_pre_view);
+			pre_redir_hpane.show_all();
+		} else {
+			cleanup_post_view();
+			_post_plugin_conn = retrn->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::redirect_going_away),
+					insert));
+			_active_post_view = return_ui;
+			
+			post_redir_hpane.add2 (*_active_post_view);
+			post_redir_hpane.show_all();
+		}
+
 	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {				
 
 		GenericPluginUI *plugin_ui = new GenericPluginUI (plugin_insert, true);
 
 		if (place == PreFader) {
 			cleanup_pre_view();
-			_pre_plugin_conn = plugin_insert->plugin()->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PreFader));
+			_pre_plugin_conn = plugin_insert->plugin()->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::plugin_going_away),
+					PreFader));
 			plugin_ui->start_updating (0);
 			_active_pre_view = plugin_ui;
 			pre_redir_hpane.pack2 (*_active_pre_view);
 			pre_redir_hpane.show_all();
-		}
-		else {
+		} else {
 			cleanup_post_view();
-			_post_plugin_conn = plugin_insert->plugin()->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), PostFader));
+			_post_plugin_conn = plugin_insert->plugin()->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::plugin_going_away),
+					PostFader));
 			plugin_ui->start_updating (0);
 			_active_post_view = plugin_ui;
 			post_redir_hpane.pack2 (*_active_post_view);
@@ -609,15 +643,18 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert, 
 				
 		if (place == PreFader) {
 			cleanup_pre_view();
-			_pre_plugin_conn = port_insert->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), insert));
+			_pre_plugin_conn = port_insert->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::redirect_going_away),
+					insert));
 			_active_pre_view = portinsert_ui;
 			pre_redir_hpane.pack2 (*_active_pre_view);
 			portinsert_ui->redisplay();
 			pre_redir_hpane.show_all();
-		}
-		else {
+		} else {
 			cleanup_post_view();
-			_post_plugin_conn = port_insert->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), insert));
+			_post_plugin_conn = port_insert->GoingAway.connect (bind (
+					mem_fun(*this, &RouteParams_UI::redirect_going_away),
+					insert));
 			_active_post_view = portinsert_ui;
 			post_redir_hpane.pack2 (*_active_post_view);
 			portinsert_ui->redisplay();

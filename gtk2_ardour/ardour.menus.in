@@ -607,6 +607,7 @@
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
+	 <menuitem action='newreturn'/>
 	  <separator/>
 	 <menuitem action='clear'/>
 	  <separator/>
@@ -663,6 +664,7 @@
          <menuitem action='newplugin'/>
          <menuitem action='newinsert'/>
          <menuitem action='newsend'/>
+         <menuitem action='newreturn'/>
          <separator/>
          <menuitem action='clear'/>
          <separator/>

@@ -102,7 +102,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	virtual void silence  (nframes_t);
 
-	void collect_input  (BufferSet& bufs, nframes_t nframes);
+	void collect_input  (BufferSet& bufs, nframes_t nframes, ChanCount offset=ChanCount::ZERO);
 	void deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 	void just_meter_input (nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 
@@ -214,7 +214,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	static sigc::signal<int>            ConnectingLegal;
 	/// raised when the number of input or output ports changes
 	static sigc::signal<void,ChanCount> PortCountChanged;
-	static sigc::signal<int>            PortsCreated;
 	static sigc::signal<void,nframes_t> CycleStart;
 
 	static void update_meters();

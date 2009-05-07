@@ -129,6 +129,7 @@
 ; (gtk_accel_path "<Actions>/Editor/EditSelectRegionOptions" "")
 (gtk_accel_path "<Actions>/Editor/crop" "c")
 ; (gtk_accel_path "<Actions>/redirectmenu/newsend" "")
+; (gtk_accel_path "<Actions>/redirectmenu/newreturn" "")
 ; (gtk_accel_path "<Actions>/Editor/ToggleGeneric MIDISurfaceSubMenu" "")
 ; (gtk_accel_path "<Actions>/Editor/MeterFalloff" "")
 ; (gtk_accel_path "<Actions>/RegionList/rlRemove" "")

@@ -17,64 +17,61 @@
 
 */
 
-#ifndef __ardour_gtk_send_ui_h__
-#define __ardour_gtk_send_ui_h__
+#ifndef __ardour_gtk_return_ui_h__
+#define __ardour_gtk_return_ui_h__
 
 #include "gain_meter.h"
 #include "panner_ui.h"
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
-	class Send;
+	class Return;
 	class Session;
 	class IOProcessor;
 }
 
 class IOSelector;
 
-class SendUI : public Gtk::HBox
+class ReturnUI : public Gtk::HBox
 {
   public:
-	SendUI (boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session&);
-	~SendUI();
+	ReturnUI (boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session&);
+	~ReturnUI();
 
 	void update ();
 	void fast_update ();
 
 	IOSelector* io;
 
-	boost::shared_ptr<ARDOUR::Send>& send() { return _send; }
+	boost::shared_ptr<ARDOUR::Return>& retrn() { return _return; }
 
   private:
-	boost::shared_ptr<ARDOUR::Send> _send;
-	ARDOUR::Session&                _session;
-	GainMeter                       _gpm;
-	PannerUI                        _panners;
-	Gtk::VBox                       _vbox;
-	Gtk::VBox                       _hbox;
+	boost::shared_ptr<ARDOUR::Return> _return;
+	ARDOUR::Session&                  _session;
+	GainMeter                         _gpm;
+	Gtk::VBox                         _vbox;
+	Gtk::VBox                         _hbox;
 
 	sigc::connection screen_update_connection;
 	sigc::connection fast_screen_update_connection;
 		
 	void ins_changed (ARDOUR::IOChange, void*);
-	void outs_changed (ARDOUR::IOChange, void*);
 };
 
-class SendUIWindow : public ArdourDialog
+class ReturnUIWindow : public ArdourDialog
 {
   public:
-	SendUIWindow(boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session&);
-	~SendUIWindow();
+	ReturnUIWindow(boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session&);
+	~ReturnUIWindow();
 
-	SendUI* ui;
+	ReturnUI* ui;
 
   private:
 	Gtk::HBox hpacker;
 
-	void send_going_away ();
+	void return_going_away ();
 	sigc::connection going_away_connection;
 };
 
-#endif /* __ardour_gtk_send_ui_h__ */
-
+#endif /* __ardour_gtk_return_ui_h__ */
 

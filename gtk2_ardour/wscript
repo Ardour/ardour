@@ -182,6 +182,7 @@ def build(bld):
 		region_gain_line.cc
 		region_selection.cc
 		region_view.cc
+		return_ui.cc
 		rhythm_ferret.cc
 		route_params_ui.cc
 		route_processor_selection.cc

@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2009 Paul Davis 
+    Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +18,8 @@
 
 */
 
-#ifndef __ardour_send_h__
-#define __ardour_send_h__
+#ifndef __ardour_return_h__
+#define __ardour_return_h__
 
 #include <sigc++/signal.h>
 #include <string>
@@ -31,25 +32,23 @@
 
 namespace ARDOUR {
 
-class Send : public IOProcessor 
+class Return : public IOProcessor 
 {
-  public:	
-	Send (Session&);
-	Send (Session&, const XMLNode&);
-	virtual ~Send ();
-
-	uint32_t bit_slot() const { return _bitslot; }
+public:	
+	Return (Session&);
+	Return (Session&, const XMLNode&);
+	virtual ~Return ();
 	
+	uint32_t bit_slot() const { return _bitslot; }
+
 	void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 	
 	void activate() {}
 	void deactivate () {}
 
-	void set_metering (bool yn);
-
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
-	int set_state(const XMLNode& node);
+	int      set_state(const XMLNode& node);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 
@@ -59,14 +58,14 @@ class Send : public IOProcessor
 	static uint32_t how_many_sends();
 	static void make_unique (XMLNode &, Session &);
 
-  private:
+private:
 	/* disallow copy construction */
-	Send (const Send&);
+	Return (const Return&);
 	
-	bool      _metering;
 	uint32_t  _bitslot;
 };
 
 } // namespace ARDOUR
 
-#endif /* __ardour_send_h__ */
+#endif /* __ardour_return_h__ */
+

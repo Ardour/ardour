@@ -94,8 +94,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	bool                 ab_direction;
 	std::vector<sigc::connection> connections;
 
-	/// a send that is in the process of creation
-	boost::shared_ptr<ARDOUR::Send> _send_being_created;
+	boost::shared_ptr<ARDOUR::Processor> _processor_being_created;
 
 	ARDOUR::Placement   _placement;
 
@@ -147,6 +146,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	void choose_send ();
 	void send_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
+	void choose_return ();
+	void return_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
 	void choose_insert ();
 	void choose_plugin ();
 	void use_plugins (const SelectedPlugins&);
@@ -209,6 +210,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	static void rb_choose_plugin ();
 	static void rb_choose_insert ();
 	static void rb_choose_send ();
+	static void rb_choose_return ();
 	static void rb_clear ();
 	static void rb_cut ();
 	static void rb_copy ();

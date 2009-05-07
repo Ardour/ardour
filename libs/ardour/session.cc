@@ -72,6 +72,7 @@
 #include "ardour/processor.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
+#include "ardour/return.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
@@ -3666,6 +3667,7 @@ void
 Session::add_processor (Processor* processor)
 {
 	Send* send;
+	Return* retrn;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 
@@ -3675,6 +3677,8 @@ Session::add_processor (Processor* processor)
 		_plugin_inserts.insert (_plugin_inserts.begin(), plugin_insert);
 	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		_sends.insert (_sends.begin(), send);
+	} else if ((retrn = dynamic_cast<Return *> (processor)) != 0) {
+		_returns.insert (_returns.begin(), retrn);
 	} else {
 		fatal << _("programming error: unknown type of Insert created!") << endmsg;
 		/*NOTREACHED*/
@@ -3689,6 +3693,7 @@ void
 Session::remove_processor (Processor* processor)
 {
 	Send* send;
+	Return* retrn;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 
@@ -3705,6 +3710,12 @@ Session::remove_processor (Processor* processor)
 		if (x != _sends.end()) {
 			send_bitset[send->bit_slot()] = false;
 			_sends.erase (x);
+		}
+	} else if ((retrn = dynamic_cast<Return *> (processor)) != 0) {
+		list<Return*>::iterator x = find (_returns.begin(), _returns.end(), retrn);
+		if (x != _returns.end()) {
+			return_bitset[send->bit_slot()] = false;
+			_returns.erase (x);
 		}
 	} else {
 		fatal << _("programming error: unknown type of Insert deleted!") << endmsg;
@@ -3884,6 +3895,26 @@ Session::next_send_id ()
 	}
 }
 
+uint32_t
+Session::next_return_id ()
+{
+	/* this doesn't really loop forever. just think about it */
+
+	while (true) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < return_bitset.size(); ++n) {
+			if (!return_bitset[n]) {
+				return_bitset[n] = true;
+				return n;
+
+			}
+		}
+
+		/* none available, so resize and try again */
+
+		return_bitset.resize (return_bitset.size() + 16, false);
+	}
+}
+
 void
 Session::mark_send_id (uint32_t id)
 {
@@ -3894,6 +3925,18 @@ Session::mark_send_id (uint32_t id)
 		warning << string_compose (_("send ID %1 appears to be in use already"), id) << endmsg;
 	}
 	send_bitset[id] = true;
+}
+
+void
+Session::mark_return_id (uint32_t id)
+{
+	if (id >= return_bitset.size()) {
+		return_bitset.resize (id+16, false);
+	}
+	if (return_bitset[id]) {
+		warning << string_compose (_("return ID %1 appears to be in use already"), id) << endmsg;
+	}
+	return_bitset[id] = true;
 }
 
 void

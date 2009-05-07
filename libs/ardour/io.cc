@@ -74,7 +74,6 @@ sigc::signal<int>            IO::ConnectingLegal;
 sigc::signal<int>            IO::PortsLegal;
 sigc::signal<int>            IO::PannersLegal;
 sigc::signal<void,ChanCount> IO::PortCountChanged;
-sigc::signal<int>            IO::PortsCreated;
 sigc::signal<void,nframes_t> IO::CycleStart;
 
 Glib::StaticMutex IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
@@ -290,24 +289,31 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes)
 }
 
 void
-IO::collect_input (BufferSet& outs, nframes_t nframes)
+IO::collect_input (BufferSet& outs, nframes_t nframes, ChanCount offset)
 {
 	assert(outs.available() >= n_inputs());
 	
-	if (n_inputs() == ChanCount::ZERO)
+	if (n_inputs() == ChanCount::ZERO) {
 		return;
+	}
 
 	outs.set_count(n_inputs());
-	
+
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		
+		PortSet::iterator   i = _inputs.begin(*t);
 		BufferSet::iterator o = outs.begin(*t);
-		PortSet::iterator e = _inputs.end (*t);
-		for (PortSet::iterator i = _inputs.begin(*t); i != e; ++i, ++o) {
+
+		cerr << (*t).to_string() << endl;
+		for (uint32_t off = 0; off < offset.get(*t); ++off, ++o) {
+			if (o == outs.end(*t)) {
+				continue;
+			}
+		}
+
+		for ( ; i != _inputs.end(*t); ++i, ++o) {
 			Buffer& b (i->get_buffer (nframes));
 			o->read_from (b, nframes);
 		}
-
 	}
 }
 
@@ -795,7 +801,8 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 {
 	Port* input_port = 0;
 	bool  changed    = false;
-
+	
+	_configured_inputs = count;
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		
@@ -867,13 +874,13 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 
 	in = ChanCount::min (_input_maximum, in);
 	out = ChanCount::min (_output_maximum, out);
+	
+	_configured_inputs = in;
+	_configured_outputs = out;
 
 	if (in == n_inputs() && out == n_outputs() && !clear) {
 		return 0;
 	}
-
-	_configured_inputs = in;
-	_configured_outputs = out;
 
 	{
 		BLOCK_PROCESS_CALLBACK ();
@@ -1034,6 +1041,8 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 	Port* output_port    = 0;
 	bool  changed        = false;
 	bool  need_pan_reset = false;
+	
+	_configured_outputs = count;
 
 	if (n_outputs() != count) {
 		need_pan_reset = true;
@@ -1708,7 +1717,6 @@ IO::create_ports (const XMLNode& node)
 
 	set_deferred_state ();
 
-	PortsCreated();
 	return 0;
 }
 

@@ -424,6 +424,7 @@
 ; (gtk_accel_path "<Actions>/redirectmenu/newinsert" "")
 ; (gtk_accel_path "<Actions>/redirectmenu/newplugin" "")
 ; (gtk_accel_path "<Actions>/redirectmenu/newsend" "")
+; (gtk_accel_path "<Actions>/redirectmenu/newreturn" "")
 ; (gtk_accel_path "<Actions>/redirectmenu/paste" "")
 ; (gtk_accel_path "<Actions>/redirectmenu/rename" "")
 ; (gtk_accel_path "<Actions>/redirectmenu/selectall" "")

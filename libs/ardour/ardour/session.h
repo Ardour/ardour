@@ -101,6 +101,7 @@ class Port;
 class PortInsert;
 class Processor;
 class Region;
+class Return;
 class Route;
 class RouteGroup;
 class SMFSource;
@@ -764,8 +765,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	}
 
 	uint32_t next_send_id();
+	uint32_t next_return_id();
 	uint32_t next_insert_id();
 	void mark_send_id (uint32_t);
+	void mark_return_id (uint32_t);
 	void mark_insert_id (uint32_t);
 
 	/* s/w "RAID" management */
@@ -1566,7 +1569,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	list<PortInsert *>              _port_inserts;
 	list<PluginInsert *>            _plugin_inserts;
 	list<Send *>                    _sends;
+	list<Return *>                  _returns;
 	boost::dynamic_bitset<uint32_t> send_bitset;
+	boost::dynamic_bitset<uint32_t> return_bitset;
 	boost::dynamic_bitset<uint32_t> insert_bitset;
 	uint32_t                        send_cnt;
 	uint32_t                        insert_cnt;
