@@ -303,7 +303,6 @@ IO::collect_input (BufferSet& outs, nframes_t nframes, ChanCount offset)
 		PortSet::iterator   i = _inputs.begin(*t);
 		BufferSet::iterator o = outs.begin(*t);
 
-		cerr << (*t).to_string() << endl;
 		for (uint32_t off = 0; off < offset.get(*t); ++off, ++o) {
 			if (o == outs.end(*t)) {
 				continue;
