@@ -7312,8 +7312,7 @@ msgstr "Ardour/GTK "
 
 #: gtk2_ardour/main.cc:294
 msgid ""
-"\n"
-"   (built using "
+" (built using "
 msgstr ""
 "\n"
 "   (kompiliert mit Version "
@@ -7355,7 +7354,7 @@ msgid "could not create ARDOUR GUI"
 msgstr "konnte das grafische Ardour User Interface nicht erstellen"
 
 #: gtk2_ardour/ui_config.cc:78
-msgid "loading default ui configuration file %1"
+msgid "Loading default ui configuration file %1"
 msgstr "lade voreingestellte UI-Konfigurationsdatei %1"
 
 #: gtk2_ardour/ui_config.cc:81
@@ -7367,8 +7366,8 @@ msgid "Ardour: default ui configuration file \"%1\" not loaded successfully."
 msgstr "Ardour: Die voreingestellte UI-Konfigurationsdatei \"%1\" konnte nicht geladen werden."
 
 #: gtk2_ardour/ui_config.cc:104
-msgid "loading user ui configuration file %1"
-msgstr "lade benutzerdefinierte UI-Konfigurationsdatei %1"
+msgid "Loading user ui configuration file %1"
+msgstr "Lade benutzerdefinierte UI-Konfigurationsdatei %1"
 
 #: gtk2_ardour/ui_config.cc:107
 msgid "Ardour: cannot read ui configuration file \"%1\""

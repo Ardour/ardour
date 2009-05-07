@@ -79,7 +79,7 @@ UIConfiguration::load_defaults ()
 
 		string rcfile = default_ui_rc_file.to_string();
 
-		cerr << string_compose (_("loading default ui configuration file %1"), rcfile) << endl;
+		cerr << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 		
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("Ardour: cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
@@ -109,7 +109,7 @@ UIConfiguration::load_state ()
 
 		string rcfile = default_ui_rc_file.to_string();
 
-		cerr << string_compose (_("loading default ui configuration file %1"), rcfile) << endl;
+		cerr << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 		
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("Ardour: cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
@@ -132,7 +132,7 @@ UIConfiguration::load_state ()
 	
 		string rcfile = user_ui_rc_file.to_string();
 
-		cerr << string_compose (_("loading user ui configuration file %1"), rcfile) << endl;
+		cerr << string_compose (_("Loading user ui configuration file %1"), rcfile) << endl;
 
 		if (!tree.read (rcfile)) {
 			error << string_compose(_("Ardour: cannot read ui configuration file \"%1\""), rcfile) << endmsg;

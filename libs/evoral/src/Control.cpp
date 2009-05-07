@@ -54,19 +54,6 @@ Control::set_float(float value, bool to_list, FrameTime frame)
 }
 
 
-/** Get the latest user-set value, which may not equal get_value() when automation
- * is playing back, etc.
- *
- * Automation write/touch works by periodically sampling this value and adding it
- * to the AutomationList.
- */
-float
-Control::user_float() const
-{
-	return _user_value;
-}
-	
-
 void
 Control::set_list(boost::shared_ptr<ControlList> list)
 {

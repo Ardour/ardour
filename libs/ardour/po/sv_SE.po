@@ -423,7 +423,7 @@ msgid ""
 msgstr ""
 
 #: libs/ardour/configuration.cc:87
-msgid "loading system configuration file %1"
+msgid "Loading system configuration file %1"
 msgstr ""
 
 #: libs/ardour/configuration.cc:90
@@ -435,7 +435,7 @@ msgid "Ardour: system configuration file \"%1\" not loaded successfully."
 msgstr ""
 
 #: libs/ardour/configuration.cc:111
-msgid "loading user configuration file %1"
+msgid "Loading user configuration file %1"
 msgstr ""
 
 #: libs/ardour/configuration.cc:114

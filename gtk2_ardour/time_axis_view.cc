@@ -1104,8 +1104,6 @@ TimeAxisView::compute_controls_size_info ()
 	two_row_table.show_all ();
 	req = two_row_table.size_request ();
 
-	cerr << "Normal height is " << req.height << " + " << extra_height << endl;
-
 	// height required to show all normal buttons 
 
 	hNormal = /*req.height*/ 48 + extra_height;

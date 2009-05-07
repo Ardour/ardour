@@ -58,13 +58,12 @@ sigc::signal<void,Processor*> Processor::ProcessorCreated;
 // Always saved as Processor, but may be IOProcessor or Send in legacy sessions
 const string Processor::state_node_name = "Processor";
 
-Processor::Processor(Session& session, const string& name, Placement p)
+Processor::Processor(Session& session, const string& name)
 	: SessionObject(session, name)
 	, AutomatableControls(session)
 	, _active(false)
 	, _next_ab_is_active(false)
 	, _configured(false)
-	, _placement(p)
 	, _gui(0)
 {
 }
@@ -75,15 +74,6 @@ Processor::set_sort_key (uint32_t key)
 	_sort_key = key;
 }
 	
-void
-Processor::set_placement (Placement p)
-{
-	if (_placement != p) {
-		_placement = p;
-		 PlacementChanged (); /* EMIT SIGNAL */
-	}
-}
-
 XMLNode&
 Processor::get_state (void)
 {
@@ -120,26 +110,28 @@ Processor::state (bool full_state)
 
 	node->add_property("name", _name);
 	node->add_property("active", active() ? "yes" : "no");	
-	node->add_property("placement", enum_2_string (_placement));
 
 	if (_extra_xml){
 		node->add_child_copy (*_extra_xml);
 	}
 	
 	if (full_state) {
-
 		XMLNode& automation = Automatable::get_automation_state(); 
-		
-		for (set<Evoral::Parameter>::iterator x = _visible_controls.begin(); x != _visible_controls.end(); ++x) {
-			if (x != _visible_controls.begin()) {
-				sstr << ' ';
+		if (!automation.children().empty()
+				|| !automation.properties().empty()
+				|| !_visible_controls.empty()) {
+
+			for (set<Evoral::Parameter>::iterator x = _visible_controls.begin();
+					x != _visible_controls.end(); ++x) {
+				if (x != _visible_controls.begin()) {
+					sstr << ' ';
+				}
+				sstr << *x;
 			}
-			sstr << *x;
+
+			automation.add_property ("visible", sstr.str());
+			node->add_child_nocopy (automation);
 		}
-
-		automation.add_property ("visible", sstr.str());
-
-		node->add_child_nocopy (automation);
 	}
 
 	return *node;
@@ -163,7 +155,6 @@ Processor::set_state (const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("Automation")) {
-
 
 			XMLProperty *prop;
 			
@@ -203,7 +194,8 @@ Processor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("active")) == 0) {
-		warning << _("XML node describing a processor is missing the `active' field, trying legacy active flag from child node") << endmsg;
+		warning << _("XML node describing a processor is missing the `active' field,"
+			   "trying legacy active flag from child node") << endmsg;
 		if (legacy_active) {
 			prop = legacy_active;
 		} else {
@@ -216,31 +208,6 @@ Processor::set_state (const XMLNode& node)
 		_active = !_active;
 		ActiveChanged (); /* EMIT_SIGNAL */
 	}	
-
-	if ((prop = node.property ("placement")) == 0) {
-		warning << _("XML node describing a processor is missing the `placement' field, trying legacy placement flag from child node") << endmsg;
-		if (legacy_placement) {
-			prop = legacy_placement; 
-		} else {
-			error << _("No child node with placement property") << endmsg;
-			return -1;
-		}
-	}
-
-	/* hack to handle older sessions before we only used EnumWriter */
-
-	string pstr;
-
-	if (prop->value() == "pre") {
-		pstr = "PreFader";
-	} else if (prop->value() == "post") {
-		pstr = "PostFader";
-	} else {
-		pstr = prop->value();
-	}
-
-	Placement p = Placement (string_2_enum (pstr, p));
-	set_placement (p);
 
 	return 0;
 }

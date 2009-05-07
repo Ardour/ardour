@@ -16,65 +16,40 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_meter_h__
-#define __ardour_meter_h__
+#ifndef __ardour_control_outputs_h__
+#define __ardour_control_outputs_h__
 
-#include <vector>
+#include <string>
 #include "ardour/types.h"
-#include "ardour/processor.h"
-#include "pbd/fastlog.h"
+#include "ardour/chan_count.h"
+#include "ardour/io_processor.h"
 
 namespace ARDOUR {
 
 class BufferSet;
-class ChanCount;
-class Session;
+class IO;
 
-
-/** Meters peaks on the input and stores them for access.
- */
-class PeakMeter : public Processor {
+class ControlOutputs : public IOProcessor {
 public:
-	PeakMeter(Session& s) : Processor(s, "Meter") {}
+	ControlOutputs(Session& s, IO* io);
 
-	void reset ();
-	void reset_max ();
-	
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
-	
-	/** Compute peaks */
+
 	void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
 	
-	float peak_power (uint32_t n) { 
-		if (n < _visible_peak_power.size()) {
-			return _visible_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
-	}
-	
-	float max_peak_power (uint32_t n) {
-		if (n < _max_peak_power.size()) {
-			return _max_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
-	}
-	
+	bool deliver() const  { return _deliver; }
+	void deliver(bool yn) { _deliver = yn; }
+
 	XMLNode& state (bool full);
 	XMLNode& get_state();
 
 private:
-	friend class IO;
-	void meter();
-
-	std::vector<float> _peak_power;
-	std::vector<float> _visible_peak_power;
-	std::vector<float> _max_peak_power;
+	bool _deliver;
 };
 
 
 } // namespace ARDOUR
 
-#endif // __ardour_meter_h__
+#endif // __ardour_control_outputs_h__
+

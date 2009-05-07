@@ -210,6 +210,7 @@ Port::total_latency () const
 int
 Port::reestablish ()
 {
+	cerr << "RE-REGISTER: " << _name.c_str() << endl;
 	_jack_port = jack_port_register (_engine->jack(), _name.c_str(), type().to_jack_type(), _flags, 0);
 
 	if (_jack_port == 0) {

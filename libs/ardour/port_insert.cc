@@ -40,29 +40,15 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PortInsert::PortInsert (Session& s, Placement p)
-	: IOProcessor (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), p, 1, -1, 1, -1)
+PortInsert::PortInsert (Session& s)
+	: IOProcessor (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), "")
 {
 	init ();
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-void
-PortInsert::init ()
-{
-	if (_io->add_input_port ("", this)) {
-		error << _("PortInsert: cannot add input port") << endmsg;
-		throw failed_constructor();
-	}
-	
-	if (_io->add_output_port ("", this)) {
-		error << _("PortInsert: cannot add output port") << endmsg;
-		throw failed_constructor();
-	}
-}
-
 PortInsert::PortInsert (Session& s, const XMLNode& node)
-	: IOProcessor (s, "unnamed port insert", PreFader)
+	: IOProcessor (s, "unnamed port insert")
 {
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -74,6 +60,15 @@ PortInsert::PortInsert (Session& s, const XMLNode& node)
 PortInsert::~PortInsert ()
 {
 	GoingAway ();
+}
+
+void
+PortInsert::init ()
+{
+	if (_io->ensure_io(output_streams(), input_streams(), false, this)) { // sic
+		error << _("PortInsert: cannot create ports") << endmsg;
+		throw failed_constructor();
+	}
 }
 
 void
@@ -180,10 +175,10 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 	   to the number of input ports we need.
 	*/
 
-	_io->set_output_maximum (in);
+	/*_io->set_output_maximum (in);
 	_io->set_output_minimum (in);
 	_io->set_input_maximum (out);
-	_io->set_input_minimum (out);
+	_io->set_input_minimum (out);*/
 
 	if (_io->ensure_io (out, in, false, this) != 0) {
 		return false;

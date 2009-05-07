@@ -97,7 +97,9 @@ def build(bld):
 		buffer_set.cc
 		bundle.cc
 		chan_count.cc
+		chan_mapping.cc
 		configuration.cc
+		control_outputs.cc
 		control_protocol_manager.cc
 		control_protocol_search_path.cc
 		crossfade.cc

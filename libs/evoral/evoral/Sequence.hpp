@@ -85,7 +85,7 @@ public:
 	inline const boost::shared_ptr< Note<Time> >       note_at(size_t i)       { return _notes[i]; }
 
 	inline size_t n_notes() const { return _notes.size(); }
-	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::empty(); }
+	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::controls_empty(); }
 
 	inline static bool note_time_comparator(const boost::shared_ptr< const Note<Time> >& a,
 	                                        const boost::shared_ptr< const Note<Time> >& b) { 

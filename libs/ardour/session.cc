@@ -112,6 +112,9 @@ Session::Session (AudioEngine &eng,
 		  string mix_template)
 
 	: _engine (eng),
+	  phi (0),
+	  target_phi (0),
+	  phase (0),
 	  _requested_return_frame (-1),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
@@ -196,6 +199,9 @@ Session::Session (AudioEngine &eng,
 		  nframes_t initial_length)
 
 	: _engine (eng),
+	  phi (0),
+	  target_phi (0),
+	  phase (0),
 	  _requested_return_frame (-1),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
@@ -264,14 +270,18 @@ Session::Session (AudioEngine &eng,
 		int control_id = 1;
 
 		if (control_out_channels) {
-			shared_ptr<Route> r (new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut));
+			ChanCount count(DataType::AUDIO, control_out_channels);
+			shared_ptr<Route> r (new Route (*this, _("monitor"), Route::ControlOut,
+						DataType::AUDIO, count, count));
 			r->set_remote_control_id (control_id++);
 
 			rl.push_back (r);
 		}
 
 		if (master_out_channels) {
-			shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
+			ChanCount count(DataType::AUDIO, master_out_channels);
+			shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut,
+						DataType::AUDIO, count, count));
 			r->set_remote_control_id (control_id);
 
 			rl.push_back (r);
@@ -543,7 +553,7 @@ Session::when_engine_running ()
 	try {
 		XMLNode* child = 0;
 
-		_click_io.reset (new ClickIO (*this, "click", 0, 0, -1, -1));
+		_click_io.reset (new ClickIO (*this, "click"));
 
 		if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
 
@@ -656,36 +666,20 @@ Session::when_engine_running ()
 		/* create master/control ports */
 
 		if (_master_out) {
-			uint32_t n;
-
 			/* force the master to ignore any later call to this */
-
 			if (_master_out->pending_state_node) {
 				_master_out->ports_became_legal();
 			}
 
 			/* no panner resets till we are through */
-
 			_master_out->defer_pan_reset ();
 
-			while (_master_out->n_inputs().n_audio()
-					< _master_out->input_maximum().n_audio()) {
-				if (_master_out->add_input_port ("", this, DataType::AUDIO)) {
-					error << _("cannot setup master inputs")
-					      << endmsg;
-					break;
-				}
-			}
-			n = 0;
-			while (_master_out->n_outputs().n_audio()
-					< _master_out->output_maximum().n_audio()) {
-				if (_master_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this, DataType::AUDIO)) {
-					error << _("cannot setup master outputs")
-					      << endmsg;
-					break;
-				}
-				n++;
-			}
+			/* create ports */
+			_master_out->set_input_minimum(ChanCount(DataType::AUDIO, n_physical_inputs));
+			_master_out->set_output_minimum(ChanCount(DataType::AUDIO, n_physical_outputs));
+			_master_out->ensure_io (
+					_master_out->input_minimum (), _master_out->output_minimum (),
+					true, this);
 
 			_master_out->allow_pan_reset ();
 
@@ -765,30 +759,15 @@ Session::hookup_io ()
 	IO::enable_ports ();
 
 	if (_control_out) {
-		uint32_t n;
 		vector<string> cports;
 
-		while (_control_out->n_inputs().n_audio() < _control_out->input_maximum().n_audio()) {
-			if (_control_out->add_input_port ("", this)) {
-				error << _("cannot setup control inputs")
-				      << endmsg;
-				break;
-			}
-		}
-		n = 0;
-		while (_control_out->n_outputs().n_audio() < _control_out->output_maximum().n_audio()) {
-			if (_control_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this)) {
-				error << _("cannot set up master outputs")
-				      << endmsg;
-				break;
-			}
-			n++;
-		}
-
+		_control_out->ensure_io(
+				_control_out->input_minimum(), _control_out->output_minimum(),
+				false, this);
 
 		uint32_t ni = _control_out->n_inputs().get (DataType::AUDIO);
 
-		for (n = 0; n < ni; ++n) {
+		for (uint32_t n = 0; n < ni; ++n) {
 			cports.push_back (_control_out->input(n)->name());
 		}
 
@@ -1313,7 +1292,6 @@ Session::set_block_size (nframes_t nframes)
 	*/
 
 	{
-
 		current_block_size = nframes;
 
 		ensure_buffers(_scratch_buffers->available());
@@ -1757,14 +1735,13 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				uint32_t nphysical_out = physoutputs.size();
 
 				for (uint32_t x = 0; x < track->n_outputs().n_audio(); ++x) {
-					
 					port = "";
 					
 					if (Config->get_output_auto_connect() & AutoConnectPhysical) {
 						port = physoutputs[(channels_used+x)%nphysical_out];
 					} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
-						if (_master_out) {
-							port = _master_out->input (x%_master_out->n_inputs().n_audio())->name();
+						if (_master_out && _master_out->n_inputs().n_audio() > 0) {
+							port = _master_out->input (x % _master_out->n_inputs().n_audio())->name();
 						}
 					}
 					
@@ -1906,7 +1883,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		} while (bus_id < (UINT_MAX-1));
 
 		try {
-			shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
+			shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO));
 
 			if (bus->ensure_io (ChanCount(DataType::AUDIO, input_channels), ChanCount(DataType::AUDIO, output_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),

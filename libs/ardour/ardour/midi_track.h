@@ -41,17 +41,6 @@ public:
 	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		  int declick, bool can_record, bool rec_monitors_input);
 	
-	int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		     bool state_changing, bool can_record, bool rec_monitors_input);
-	
-	int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			 bool can_record, bool rec_monitors_input);
-
-	void process_output_buffers (BufferSet& bufs,
-				     nframes_t start_frame, nframes_t end_frame,
-				     nframes_t nframes, bool with_redirects, int declick,
-				     bool meter);
-
 	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
 
 	int use_diskstream (string name);

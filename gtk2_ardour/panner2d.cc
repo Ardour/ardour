@@ -65,15 +65,15 @@ Panner2d::Target::set_text (const char* txt)
 	text = strdup (txt);
 }
 
-Panner2d::Panner2d (Panner& p, int32_t h)
+Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
 	: panner (p), width (0), height (h)
 {
 	allow_x = false;
 	allow_y = false;
 	allow_target = false;
 
-	panner.StateChanged.connect (mem_fun(*this, &Panner2d::handle_state_change));
-	panner.Changed.connect (mem_fun(*this, &Panner2d::handle_position_change));
+	panner->StateChanged.connect (mem_fun(*this, &Panner2d::handle_state_change));
+	panner->Changed.connect (mem_fun(*this, &Panner2d::handle_position_change));
 	
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -135,7 +135,7 @@ Panner2d::reset (uint32_t n_inputs)
 			
 			if (existing_pucks < i) {
 				float x, y;
-				panner.streampanner (i).get_position (x, y);
+				panner->streampanner (i).get_position (x, y);
 				pucks[i]->x.set_value (x);
 				pucks[i]->y.set_value (y);
 			}
@@ -147,11 +147,11 @@ Panner2d::reset (uint32_t n_inputs)
 	
 	/* add all outputs */
 	
-	while (targets.size() < panner.nouts()) {
+	while (targets.size() < panner->nouts()) {
 		add_target (0.0, 0.0);
 	}
 	
-	while (targets.size() > panner.nouts()) {
+	while (targets.size() > panner->nouts()) {
 		targets.erase (targets.begin());
 	}
 
@@ -159,13 +159,13 @@ Panner2d::reset (uint32_t n_inputs)
 		(*x).second->visible = false;
 	}
 
-	for (uint32_t n = 0; n < panner.nouts(); ++n) {
+	for (uint32_t n = 0; n < panner->nouts(); ++n) {
 		char buf[16];
 
 		snprintf (buf, sizeof (buf), "%d", n+1);
 		targets[n]->set_text (buf);
-		targets[n]->x.set_value (panner.output(n).x);
-		targets[n]->y.set_value (panner.output(n).y);
+		targets[n]->x.set_value (panner->output(n).x);
+		targets[n]->y.set_value (panner->output(n).y);
 		targets[n]->visible = true;
 	}
 	
@@ -275,14 +275,14 @@ Panner2d::handle_position_change ()
 
 	for (n = 0; n < pucks.size(); ++n) {
 		float x, y;
-		panner.streampanner(n).get_position (x, y);
+		panner->streampanner(n).get_position (x, y);
 		pucks[n]->x.set_value (x);
 		pucks[n]->y.set_value (y);
 	}
 
 	for (n = 0; n < targets.size(); ++n) {
-		targets[n]->x.set_value (panner.output(n).x);
-		targets[n]->y.set_value (panner.output(n).y);
+		targets[n]->x.set_value (panner->output(n).x);
+		targets[n]->y.set_value (panner->output(n).y);
 	}
 
 	queue_draw ();
@@ -454,7 +454,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	cairo_set_line_width (cr, 1.0);
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
-	if (!panner.bypassed()) {
+	if (!panner->bypassed()) {
 		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 1.0);
 	} else {
 		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 0.2);
@@ -478,7 +478,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	cairo_arc (cr, height/2, height/2, height/2, 0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
-	if (!panner.bypassed()) {
+	if (!panner->bypassed()) {
 		float arc_radius;
 
 		cairo_select_font_face (cr, "sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -715,7 +715,8 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 			
 			if (drag_is_puck) {
 				
-				panner.streampanner(drag_index).set_position (drag_target->x.get_value(), drag_target->y.get_value(), false);
+				panner->streampanner(drag_index).set_position (
+						drag_target->x.get_value(), drag_target->y.get_value(), false);
 				
 			} else {
 				
@@ -745,7 +746,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 void
 Panner2d::toggle_bypass ()
 {
-	panner.set_bypassed (!panner.bypassed());
+	panner->set_bypassed (!panner->bypassed());
 }
 
 void
@@ -766,7 +767,7 @@ Panner2d::allow_y_motion (bool yn)
 	allow_y = yn;
 }
 
-Panner2dWindow::Panner2dWindow (Panner&p, int32_t h, uint32_t inputs)
+Panner2dWindow::Panner2dWindow (boost::shared_ptr<Panner> p, int32_t h, uint32_t inputs)
 	: widget (p, h)
 	, reset_button (_("Reset"))
 	, bypass_button (_("Bypass"))

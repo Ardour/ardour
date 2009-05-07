@@ -339,8 +339,7 @@ Session::second_stage_init (bool new_session)
 	/* handle this one in a different way than all others, so that its clear what happened */
 	
 	catch (AudioEngine::PortRegistrationFailure& err) {
-		error << _("Unable to create all required ports")
-		      << endmsg;
+		error << err.what() << endmsg;
 		return -1;
 	}
 
@@ -2831,7 +2830,12 @@ void
 Session::set_deletion_in_progress ()
 {
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Deletion);
+}
 
+void
+Session::clear_deletion_in_progress ()
+{
+	_state_of_the_state = StateOfTheState (_state_of_the_state & (~Deletion));
 }
 
 void

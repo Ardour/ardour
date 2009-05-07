@@ -4797,8 +4797,7 @@ msgstr ""
 
 #: ../main.cc:397
 msgid ""
-"\n"
-"   (built using "
+" (built using "
 msgstr ""
 "\n"
 "   (kompilerat med "

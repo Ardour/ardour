@@ -27,6 +27,8 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/runtime_functions.h"
 
+using namespace std;
+
 namespace ARDOUR {
 
 
@@ -38,44 +40,39 @@ namespace ARDOUR {
 void
 PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
+	const uint32_t n_audio = min(_configured_input.n_audio(), bufs.count().n_audio());
+	const uint32_t n_midi  = min(_configured_input.n_midi(), bufs.count().n_midi());
+	
 	uint32_t n = 0;
-	uint32_t meterable = std::min(bufs.count().n_total(), (uint32_t)_peak_power.size());
-	uint32_t limit = std::min (meterable, (uint32_t)bufs.count().n_midi());
-
-	// Meter what we have (midi)
-	for ( ; n < limit; ++n) {
-		float val = 0;
-		
-		// GUI needs a better MIDI meter, not much information can be
-		// expressed through peaks alone
-		for (MidiBuffer::iterator i = bufs.get_midi(n).begin(); i != bufs.get_midi(n).end(); ++i) {
-			const Evoral::MIDIEvent<nframes_t> ev(*i, false);
+	
+	// Meter MIDI in to the first n_midi peaks
+	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
+		float val = 0.0f;
+		for (MidiBuffer::iterator e = bufs.get_midi(i).begin(); e != bufs.get_midi(i).end(); ++e) {
+			const Evoral::MIDIEvent<nframes_t> ev(*e, false);
 			if (ev.is_note_on()) {
 				const float this_vel = log(ev.buffer()[2] / 127.0 * (M_E*M_E-M_E) + M_E) - 1.0;
-				//printf("V %d -> %f\n", (int)((Byte)ev.buffer[2]), this_vel);
-				if (this_vel > val)
+				if (this_vel > val) {
 					val = this_vel;
+				}
 			} else {
 				val += 1.0 / bufs.get_midi(n).capacity();
-				if (val > 1.0)
+				if (val > 1.0) {
 					val = 1.0;
+				}
 			}
 		}
-			
 		_peak_power[n] = val;
-
 	}
-	
-	limit = std::min (meterable, bufs.count().n_audio());
 
-	// Meter what we have (audio)
-	for ( ; n < limit; ++n) {
-		_peak_power[n] = compute_peak (bufs.get_audio(n).data(), nframes, _peak_power[n]); 
+	// Meter audio in to the rest of the peaks
+	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
+		_peak_power[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_power[n]); 
 	}
 
 	// Zero any excess peaks
-	for (size_t n = meterable; n < _peak_power.size(); ++n) {
-		_peak_power[n] = 0;
+	for (uint32_t i = n; i < _peak_power.size(); ++i) {
+		_peak_power[i] = 0.0f;
 	}
 }
 
@@ -83,7 +80,7 @@ void
 PeakMeter::reset ()
 {
 	for (size_t i = 0; i < _peak_power.size(); ++i) {
-		_peak_power[i] = 0;
+		_peak_power[i] = 0.0f;
 	}
 }
 
@@ -96,13 +93,19 @@ PeakMeter::reset_max ()
 }
 
 bool
+PeakMeter::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+{
+	out = in;
+	return true;
+}
+
+bool
 PeakMeter::configure_io (ChanCount in, ChanCount out)
 {
-	/* we're transparent no matter what.  fight the power. */
-	if (out != in) {
+	if (out != in) { // always 1:1
 		return false;
 	}
-
+	
 	uint32_t limit = in.n_total();
 	
 	while (_peak_power.size() > limit) {
@@ -163,6 +166,20 @@ PeakMeter::meter ()
 			_visible_peak_power[n] = std::max (new_peak, -INFINITY);
 		}
 	}
+}
+
+XMLNode&
+PeakMeter::state (bool full_state)
+{
+	return get_state();
+}
+
+XMLNode&
+PeakMeter::get_state()
+{
+	XMLNode* node = new XMLNode(state_node_name);
+	node->add_property("type", "meter");
+	return *node;
 }
 
 } // namespace ARDOUR

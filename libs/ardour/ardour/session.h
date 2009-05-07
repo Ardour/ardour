@@ -255,6 +255,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void set_clean ();
 	bool dirty() const { return _state_of_the_state & Dirty; }
 	void set_deletion_in_progress ();
+	void clear_deletion_in_progress ();
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
 	sigc::signal<void> DirtyChanged;
 

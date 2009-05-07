@@ -242,7 +242,6 @@ Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy
 			    boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
 				add_control(newcontrol);
 				newcontrol->set_list(al);
-				warning << "Control did not exist";
 			}
 
 		} else {
@@ -268,7 +267,9 @@ Automatable::get_automation_state ()
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(li->second->list());
-		node->add_child_nocopy (l->get_state ());
+		if (!l->empty()) {
+			node->add_child_nocopy (l->get_state ());
+		}
 	}
 
 	return *node;
@@ -410,7 +411,12 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == GainAutomation) {
 		control = new IO::GainControl( X_("gaincontrol"), (IO*)this, param);
 	} else if (param.type() == PanAutomation) {
-		control = new Panner::PanControllable( ((Panner *)this)->session(), X_("panner"), *(Panner *)this, param);
+		Panner* me = dynamic_cast<Panner*>(this);
+		if (me) {
+			control = new Panner::PanControllable(me->session(), X_("panner"), *me, param);
+		} else {
+			cerr << "ERROR: PanAutomation for non-Panner" << endl;
+		}
 	} else {
 		control = new AutomationControl(_a_session, param);
 	}

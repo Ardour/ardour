@@ -35,15 +35,15 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Send::Send (Session& s, Placement p)
-	: IOProcessor (s, string_compose (_("send %1"), (bitslot = s.next_send_id()) + 1), p)
+Send::Send (Session& s)
+	: IOProcessor (s, string_compose (_("send %1"), (bitslot = s.next_send_id()) + 1))
 {
 	_metering = false;
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (Session& s, const XMLNode& node)
-	: IOProcessor (s, "send", PreFader)
+	: IOProcessor (s, "send")
 {
 	_metering = false;
 
@@ -183,10 +183,10 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	_io->set_output_maximum (in);
+	/*_io->set_output_maximum (in);
 	_io->set_output_minimum (in);
 	_io->set_input_maximum (ChanCount::ZERO);
-	_io->set_input_minimum (ChanCount::ZERO);
+	_io->set_input_minimum (ChanCount::ZERO);*/
 
 	if (_io->ensure_io (ChanCount::ZERO, in, false, this) != 0) {
 		return false;

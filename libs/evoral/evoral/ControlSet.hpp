@@ -58,8 +58,8 @@ public:
 
 	bool find_next_event(FrameTime start, FrameTime end, ControlEvent& ev) const;
 	
-	virtual bool empty() const { return _controls.size() == 0; }
-	virtual void clear();
+	virtual bool controls_empty() const { return _controls.size() == 0; }
+	virtual void clear_controls();
 
 	void what_has_data(std::set<Parameter>&) const;
 	

@@ -29,29 +29,30 @@
 
 #include "evoral/Curve.hpp"
 
-#include "ardour/timestamps.h"
+#include "ardour/amp.h"
+#include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
-#include "ardour/route.h"
 #include "ardour/buffer.h"
-#include "ardour/processor.h"
+#include "ardour/buffer_set.h"
+#include "ardour/configuration.h"
+#include "ardour/control_outputs.h"
+#include "ardour/cycle_timer.h"
+#include "ardour/dB.h"
+#include "ardour/ladspa_plugin.h"
+#include "ardour/meter.h"
+#include "ardour/mix.h"
+#include "ardour/panner.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/port.h"
 #include "ardour/port_insert.h"
+#include "ardour/processor.h"
+#include "ardour/profile.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
+#include "ardour/timestamps.h"
 #include "ardour/utils.h"
-#include "ardour/configuration.h"
-#include "ardour/cycle_timer.h"
-#include "ardour/route_group.h"
-#include "ardour/port.h"
-#include "ardour/audio_port.h"
-#include "ardour/ladspa_plugin.h"
-#include "ardour/panner.h"
-#include "ardour/dB.h"
-#include "ardour/amp.h"
-#include "ardour/meter.h"
-#include "ardour/buffer_set.h"
-#include "ardour/mix.h"
-#include "ardour/profile.h"
 
 #include "i18n.h"
 
@@ -62,21 +63,22 @@ using namespace PBD;
 uint32_t Route::order_key_cnt = 0;
 sigc::signal<void,const char*> Route::SyncOrderKeys;
 
-Route::Route (Session& sess, string name,
-		int in_min, int in_max, int out_min, int out_max,
-		Flag flg, DataType default_type)
-	: IO (sess, name, in_min, in_max, out_min, out_max, default_type)
+Route::Route (Session& sess, string name, Flag flg,
+		DataType default_type, ChanCount in, ChanCount out)
+	: IO (sess, name, default_type, in, ChanCount::INFINITE, out, ChanCount::INFINITE)
 	, _flags (flg)
 	, _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl))
 	, _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
 {
+	_configured_inputs = in;
+	_configured_outputs = out;
 	init ();
 }
 
 Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 	: IO (sess, *node.child ("IO"), default_type)
-	,  _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl))
-	,  _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
+	, _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl))
+	, _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
 {
 	init ();
 	_set_state (node, false);
@@ -104,6 +106,7 @@ Route::init ()
 	_declickable = false;
 	_pending_declick = true;
 	_remote_control_id = 0;
+	_in_configure_processors = false;
 	
 	_edit_group = 0;
 	_mix_group = 0;
@@ -118,10 +121,13 @@ Route::init ()
 	mute_gain = 1.0;
 	desired_mute_gain = 1.0;
 
-	_control_outs = 0;
-
 	input_changed.connect (mem_fun (this, &Route::input_change_handler));
 	output_changed.connect (mem_fun (this, &Route::output_change_handler));
+
+	_amp->set_sort_key (0);
+	_meter->set_sort_key (1);
+	add_processor (_amp, NULL);
+	add_processor (_meter, NULL);
 }
 
 Route::~Route ()
@@ -132,8 +138,6 @@ Route::~Route ()
 	for (OrderKeys::iterator i = order_keys.begin(); i != order_keys.end(); ++i) {
 		free ((void*)(i->first));
 	}
-
-	delete _control_outs;
 }
 
 void
@@ -217,7 +221,6 @@ Route::ensure_track_or_route_name(string name, Session &session)
 	return newname;
 }
 
-
 void
 Route::inc_gain (gain_t fraction, void *src)
 {
@@ -291,21 +294,15 @@ Route::set_gain (gain_t val, void *src)
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-			       nframes_t start_frame, nframes_t end_frame, nframes_t nframes,
-			       bool with_processors, int declick, bool meter)
+		nframes_t start_frame, nframes_t end_frame, nframes_t nframes,
+		bool with_processors, int declick)
 {
-	// This is definitely very audio-only for now
-	assert(_default_type == DataType::AUDIO);
-	
 	ProcessorList::iterator i;
-	bool post_fader_work = false;
 	bool mute_declick_applied = false;
 	gain_t dmg, dsg, dg;
-	IO *co;
-	bool mute_audible;
-	bool solo_audible;
 	bool no_monitor;
-	gain_t* gab = _session.gain_automation_buffer();
+
+	bufs.is_silent(false);
 
 	switch (Config->get_monitoring_model()) {
 	case HardwareMonitoring:
@@ -317,96 +314,89 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	declick = _pending_declick;
-
-	{
-		Glib::Mutex::Lock cm (_control_outs_lock, Glib::TRY_LOCK);
-		
-		if (cm.locked()) {
-			co = _control_outs;
-		} else {
-			co = 0;
-		}
-	}
 	
+	const bool recording_without_monitoring = no_monitor && record_enabled()
+			&& (!Config->get_auto_input() || _session.actively_recording());
+	
+
+	/* -------------------------------------------------------------------------------------------
+	   SET UP GAIN (FADER)
+	   ----------------------------------------------------------------------------------------- */
+
 	{ 
 		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
 		
 		if (dm.locked()) {
 			dmg = desired_mute_gain;
 			dsg = desired_solo_gain;
-			dg = _desired_gain;
+			dg = _gain_control->user_float();
 		} else {
 			dmg = mute_gain;
 			dsg = solo_gain;
 			dg = _gain;
 		}
 	}
+	
+	// apply gain at the amp if...
+	_amp->apply_gain(
+			// we're not recording
+			!(record_enabled() && _session.actively_recording())
+			// or (we are recording, and) software monitoring is required
+			|| Config->get_monitoring_model() == SoftwareMonitoring);
+	
+	// mute at the amp if...
+	_amp->apply_mute(
+		!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader,
+		mute_gain, dmg);
+
+	_amp->set_gain (_gain, dg);
+	
+
+	/* -------------------------------------------------------------------------------------------
+	   SET UP CONTROL OUTPUTS
+	   ----------------------------------------------------------------------------------------- */
+
+	boost::shared_ptr<ControlOutputs> co = _control_outs;
+	if (co) {
+		// deliver control outputs unless we're ...
+		co->deliver (!(
+				dsg == 0 || // muted by solo of another track
+				(dmg == 0 && _mute_affects_control_outs) || // or muted by mute of this track
+				!recording_without_monitoring )); // or rec-enabled w/o s/w monitoring 
+	}
+	
 
 	/* -------------------------------------------------------------------------------------------
 	   GLOBAL DECLICK (for transport changes etc.)
 	   ----------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		Amp::run_in_place (bufs, nframes, 0.0, 1.0, false);
+		Amp::apply_gain (bufs, nframes, 0.0, 1.0, false);
 		_pending_declick = 0;
 	} else if (declick < 0) {
-		Amp::run_in_place (bufs, nframes, 1.0, 0.0, false);
+		Amp::apply_gain (bufs, nframes, 1.0, 0.0, false);
 		_pending_declick = 0;
-	} else {
-
-		/* no global declick */
-
+	} else { // no global declick
 		if (solo_gain != dsg) {
-			Amp::run_in_place (bufs, nframes, solo_gain, dsg, false);
+			Amp::apply_gain (bufs, nframes, solo_gain, dsg, false);
 			solo_gain = dsg;
 		}
 	}
 
 
 	/* -------------------------------------------------------------------------------------------
-	   INPUT METERING & MONITORING
+	   PRE-FADER MUTING
 	   ----------------------------------------------------------------------------------------- */
 
-	if (meter && (_meter_point == MeterInput)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
-	}
-
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
+		Amp::apply_gain (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
+	if (mute_gain == 0.0f && dmg == 0.0f) {
+		bufs.is_silent(true);
+	}
 
-	if ((_meter_point == MeterInput) && co) {
-		
-		solo_audible = dsg > 0;
-		mute_audible = dmg > 0;// || !_mute_affects_pre_fader;
-		
-		if (    // muted by solo of another track
-			
-			!solo_audible || 
-			
-			// muted by mute of this track 
-			
-			!mute_audible ||
-			
-			// rec-enabled but not s/w monitoring 
-			
-			// TODO: this is probably wrong
-
-			( no_monitor && record_enabled()
-			 	&& (!Config->get_auto_input() || _session.actively_recording()) )
-
-			) {
-			
-			co->silence (nframes);
-			
-		} else {
-
-			co->deliver_output (bufs, start_frame, end_frame, nframes);
-			
-		} 
-	} 
 
 	/* -------------------------------------------------------------------------------------------
 	   DENORMAL CONTROL
@@ -423,300 +413,78 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 	}
 
+
 	/* -------------------------------------------------------------------------------------------
-	   PRE-FADER REDIRECTS
+	   PROCESSORS (including Amp (fader) and Meter)
 	   ----------------------------------------------------------------------------------------- */
 
 	if (with_processors) {
 		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
-			if (mute_gain > 0 || !_mute_affects_pre_fader) {
+			//if (!bufs.is_silent()) {
 				for (i = _processors.begin(); i != _processors.end(); ++i) {
-					switch ((*i)->placement()) {
-					case PreFader:
-						(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
-						break;
-					case PostFader:
-						post_fader_work = true;
-						break;
-					}
+					bufs.set_count(ChanCount::max(bufs.count(), (*i)->input_streams()));
+					(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
+					bufs.set_count(ChanCount::max(bufs.count(), (*i)->output_streams()));
 				}
-			} else {
+			/*} else {
 				for (i = _processors.begin(); i != _processors.end(); ++i) {
-					switch ((*i)->placement()) {
-					case PreFader:
-						(*i)->silence (nframes);
-						break;
-					case PostFader:
-						post_fader_work = true;
-						break;
-					}
+					(*i)->silence (nframes);
+					bufs.set_count(ChanCount::max(bufs.count(), (*i)->output_streams()));
 				}
-			}
+			}*/
 		} 
-	}
 
-	/* When we entered this method, the number of bufs was set by n_process_buffers(), so
-	 * it may be larger than required.  Consider e.g a mono track with two redirects A and B.
-	 * If A has one input and three outputs, and B three inputs and one output, n_process_buffers()
-	 * will be 3.  In this case, now we've done pre-fader redirects, we can reset the number of bufs.
-	 */
-	bufs.set_count (pre_fader_streams());
-	
-	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
-		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
-		mute_gain = dmg;
-		mute_declick_applied = true;
-	}
-
-	/* -------------------------------------------------------------------------------------------
-	   PRE-FADER METERING & MONITORING
-	   ----------------------------------------------------------------------------------------- */
-
-	if (meter && (_meter_point == MeterPreFader)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
-	}
-
-	
-	if ((_meter_point == MeterPreFader) && co) {
-		
-		solo_audible = dsg > 0;
-		mute_audible = dmg > 0 || !_mute_affects_pre_fader;
-		
-		if ( // muted by solo of another track
-			
-			!solo_audible || 
-			
-			// muted by mute of this track 
-			
-			!mute_audible ||
-			
-			// rec-enabled but not s/w monitoring 
-			
-			( no_monitor && record_enabled()
-			 	&& (!Config->get_auto_input() || _session.actively_recording()) )
-
-			) {
-			
-			co->silence (nframes);
-			
-		} else {
-
-			co->deliver_output (bufs, start_frame, end_frame, nframes);
-		} 
-	} 
-	
-	/* -------------------------------------------------------------------------------------------
-	   GAIN STAGE
-	   ----------------------------------------------------------------------------------------- */
-
-	/* if not recording or recording and requiring any monitor signal, then apply gain */
-
-	if ( // not recording 
-
-		!(record_enabled() && _session.actively_recording()) || 
-		
-		// OR recording 
-		
-		// AND software monitoring required
-
-		Config->get_monitoring_model() == SoftwareMonitoring) { 
-		
-		if (apply_gain_automation) {
-			
-			if (_phase_invert) {
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] *= -gab[nx];
-					}
-				}
-			} else {
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] *= gab[nx];
-					}
-				}
-			}
-			
-			if (apply_gain_automation && _session.transport_rolling() && nframes > 0) {
-				_effective_gain = gab[nframes-1];
-			}
-			
-		} else {
-			
-			/* manual (scalar) gain */
-			
-			if (_gain != dg) {
-				
-				Amp::run_in_place (bufs, nframes, _gain, dg, _phase_invert);
-				_gain = dg;
-				
-			} else if (_gain != 0 && (_phase_invert || _gain != 1.0)) {
-				
-				/* no need to interpolate current gain value,
-				   but its non-unity, so apply it. if the gain
-				   is zero, do nothing because we'll ship silence
-				   below.
-				*/
-
-				gain_t this_gain;
-				
-				if (_phase_invert) {
-					this_gain = -_gain;
-				} else {
-					this_gain = _gain;
-				}
-				
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					apply_gain_to_buffer(sp,nframes,this_gain);
-				}
-
-			} else if (_gain == 0) {
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					i->clear();
-				}
-			}
+		if (!_processors.empty()) {
+			bufs.set_count(ChanCount::max(bufs.count(), _processors.back()->output_streams()));
 		}
-
-	} else {
-
-		/* actively recording, no monitoring required; leave buffers as-is to save CPU cycles */
-
 	}
+	
 
 	/* -------------------------------------------------------------------------------------------
-	   POST-FADER REDIRECTS
-	   ----------------------------------------------------------------------------------------- */
-
-	/* note that post_fader_work cannot be true unless with_processors was also true,
-	   so don't test both
-	*/
-
-	if (post_fader_work) {
-
-		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
-		if (rm.locked()) {
-			if (mute_gain > 0 || !_mute_affects_post_fader) {
-				for (i = _processors.begin(); i != _processors.end(); ++i) {
-					switch ((*i)->placement()) {
-					case PreFader:
-						break;
-					case PostFader:
-						(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
-						break;
-					}
-				}
-			} else {
-				for (i = _processors.begin(); i != _processors.end(); ++i) {
-					switch ((*i)->placement()) {
-					case PreFader:
-						break;
-					case PostFader:
-						(*i)->silence (nframes);
-						break;
-					}
-				}
-			}
-		} 
-	}
-
-	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_control_outs) {
-		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
-		mute_gain = dmg;
-		mute_declick_applied = true;
-	}
-
-	/* -------------------------------------------------------------------------------------------
-	   CONTROL OUTPUT STAGE
-	   ----------------------------------------------------------------------------------------- */
-
-	if ((_meter_point == MeterPostFader) && co) {
-		
-		solo_audible = solo_gain > 0;
-		mute_audible = dmg > 0 || !_mute_affects_control_outs;
-
-		if ( // silent anyway
-
-			(_gain == 0 && !apply_gain_automation) ||
-
-			// muted by solo of another track
-
-			!solo_audible || 
-
-			// muted by mute of this track 
-
-			!mute_audible ||
-
-			// recording but not s/w monitoring 
-			
-			( no_monitor && record_enabled()
-			 	&& (!Config->get_auto_input() || _session.actively_recording()) )
-
-			) {
-			
-			co->silence (nframes);
-			
-		} else {
-
-			co->deliver_output (bufs, start_frame, end_frame, nframes);
-		} 
-	} 
-
-	/* -------------------------------------------------------------------------------------------
-	   GLOBAL MUTE 
+	   POST-FADER MUTING
 	   ----------------------------------------------------------------------------------------- */
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
-		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
+		Amp::apply_gain (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
+	if (mute_gain == 0.0f && dmg == 0.0f) {
+		bufs.is_silent(true);
+	}
 	
+
 	/* -------------------------------------------------------------------------------------------
 	   MAIN OUTPUT STAGE
 	   ----------------------------------------------------------------------------------------- */
 
-	solo_audible = dsg > 0;
-	mute_audible = dmg > 0 || !_mute_affects_main_outs;
+	bool solo_audible = dsg > 0;
+	bool mute_audible = dmg > 0 || !_mute_affects_main_outs;
 	
 	if (n_outputs().get(_default_type) == 0) {
 	    
 	    /* relax */
 
-	} else if (no_monitor && record_enabled()
-			&& (!Config->get_auto_input() || _session.actively_recording())) {
-		
+	} else if (recording_without_monitoring) {
+
 		IO::silence (nframes);
-		
+
 	} else {
 
-		if ( // silent anyway
-
-			(_gain == 0 && !apply_gain_automation) ||
+		if ( // we're silent anyway
+			(_gain == 0 && !_amp->apply_gain_automation()) ||
 			
-			// muted by solo of another track, but not using control outs for solo
-
+			// or muted by solo of another track, but not using control outs for solo
 			(!solo_audible && (Config->get_solo_model() != SoloBus)) ||
 			
-			// muted by mute of this track
-
+			// or muted by mute of this track
 			!mute_audible
-
 			) {
 
 			/* don't use Route::silence() here, because that causes
 			   all outputs (sends, port processors, etc. to be silent).
 			*/
-			
-			if (_meter_point == MeterPostFader) {
-				peak_meter().reset();
-			}
-
 			IO::silence (nframes);
 			
 		} else {
@@ -731,320 +499,18 @@ Route::process_output_buffers (BufferSet& bufs,
 	   POST-FADER METERING
 	   ----------------------------------------------------------------------------------------- */
 
+	/* TODO: Processor-list-ification needs to go further for this to be cleanly possible...
 	if (meter && (_meter_point == MeterPostFader)) {
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
 			_meter->reset();
 		} else {
 			_meter->run_in_place(output_buffers(), start_frame, end_frame, nframes);
 		}
-	}
+	}*/
+
+	// at this point we've reached the desired mute gain regardless
+	mute_gain = dmg;
 }
-
-#ifdef NEW_POB
-/** Process this route for one (sub) cycle (process thread)
- *
- * @param bufs Scratch buffers to use for the signal path
- * @param start_frame Initial transport frame 
- * @param end_frame Final transport frame
- * @param nframes Number of frames to output (to ports)
- *
- * Note that (end_frame - start_frame) may not be equal to nframes when the
- * transport speed isn't 1.0 (eg varispeed).
- */
-void
-Route::process_output_buffers (BufferSet& bufs,
-			       nframes_t start_frame, nframes_t end_frame, nframes_t nframes,
-			       bool with_processors, int declick, bool meter)
-{
-	// This is definitely very audio-only for now
-	assert(_default_type == DataType::AUDIO);
-	
-	ProcessorList::iterator i;
-	bool post_fader_work = false;
-	bool mute_declick_applied = false;
-	gain_t dmg, dsg, dg;
-	IO *co;
-	bool mute_audible;
-	bool solo_audible;
-	bool no_monitor;
-	gain_t* gab = _session.gain_automation_buffer();
-
-	switch (Config->get_monitoring_model()) {
-	case HardwareMonitoring:
-	case ExternalMonitoring:
-		no_monitor = true;
-		break;
-	default:
-		no_monitor = false;
-	}
-
-	declick = _pending_declick;
-
-	{
-		Glib::Mutex::Lock cm (_control_outs_lock, Glib::TRY_LOCK);
-		
-		if (cm.locked()) {
-			co = _control_outs;
-		} else {
-			co = 0;
-		}
-	}
-	
-	{ 
-		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
-		
-		if (dm.locked()) {
-			dmg = desired_mute_gain;
-			dsg = desired_solo_gain;
-			dg = _desired_gain;
-		} else {
-			dmg = mute_gain;
-			dsg = solo_gain;
-			dg = _gain;
-		}
-	}
-
-	/* -------------------------------------------------------------------------------------------
-	   GLOBAL DECLICK (for transport changes etc.)
-	   input metering & monitoring (control outs)
-	   denormal control
-	   pre-fader redirects
-	   pre-fader metering & monitoring (control outs)
-	   gain stage
-	   post-fader redirects
-	   global mute
-	   main output
-	   post-fader metering & monitoring (control outs)
-	   ----------------------------------------------------------------------------------------- */
-
-	{
-		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
-		for (i = processors.begin(); i != processors.end(); ++i) {
-			(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
-		}
-	}
-
-	
-	/* -------------------------------------------------------------------------------------------
-	   INPUT METERING & MONITORING
-	   ----------------------------------------------------------------------------------------- */
-
-	if (meter && (_meter_point == MeterInput)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
-	}
-
-	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
-		mute_gain = dmg;
-		mute_declick_applied = true;
-	}
-
-	/* -------------------------------------------------------------------------------------------
-	   PRE-FADER REDIRECTS
-	   ----------------------------------------------------------------------------------------- */
-
-	// This really should already be true...
-	bufs.set_count(pre_fader_streams());
-	
-
-	if ((_meter_point == MeterPreFader) && co) {
-		
-		solo_audible = dsg > 0;
-		mute_audible = dmg > 0 || !_mute_affects_pre_fader;
-		
-		if ( // muted by solo of another track
-			
-			!solo_audible || 
-			
-			// muted by mute of this track 
-			
-			!mute_audible ||
-			
-			// rec-enabled but not s/w monitoring 
-			
-			( no_monitor && record_enabled()
-				&& (!Config->get_auto_input() || _session.actively_recording()) )
-
-			) {
-			
-			co->silence (nframes);
-			
-		} else {
-
-			co->deliver_output (bufs, start_frame, end_frame, nframes);
-		} 
-	} 
-	
-	/* -------------------------------------------------------------------------------------------
-	   GAIN STAGE
-	   ----------------------------------------------------------------------------------------- */
-
-	/* if not recording or recording and requiring any monitor signal, then apply gain */
-
-	if ( // not recording 
-
-		!(record_enabled() && _session.actively_recording()) || 
-		
-		// OR recording 
-		
-		// AND software monitoring required
-
-		Config->get_monitoring_model() == SoftwareMonitoring) { 
-		
-		if (apply_gain_automation) {
-			
-			if (_phase_invert) {
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] *= -gab[nx];
-					}
-				}
-			} else {
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] *= gab[nx];
-					}
-				}
-			}
-			
-			if (apply_gain_automation && _session.transport_rolling() && nframes > 0) {
-				_effective_gain = gab[nframes-1];
-			}
-			
-		} else {
-			
-			/* manual (scalar) gain */
-			
-			if (_gain != dg) {
-				
-				Amp::run_in_place (bufs, nframes, _gain, dg, _phase_invert);
-				_gain = dg;
-				
-			} else if (_gain != 0 && (_phase_invert || _gain != 1.0)) {
-				
-				/* no need to interpolate current gain value,
-				   but its non-unity, so apply it. if the gain
-				   is zero, do nothing because we'll ship silence
-				   below.
-				*/
-
-				gain_t this_gain;
-				
-				if (_phase_invert) {
-					this_gain = -_gain;
-				} else {
-					this_gain = _gain;
-				}
-				
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					apply_gain_to_buffer(sp,nframes,this_gain);
-				}
-
-			} else if (_gain == 0) {
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					i->clear();
-				}
-			}
-		}
-
-	} else {
-
-		/* actively recording, no monitoring required; leave buffers as-is to save CPU cycles */
-
-	}
-
-	/* -------------------------------------------------------------------------------------------
-	   CONTROL OUTPUT STAGE
-	   ----------------------------------------------------------------------------------------- */
-
-	if ((_meter_point == MeterPostFader) && co) {
-		
-		solo_audible = solo_gain > 0;
-		mute_audible = dmg > 0 || !_mute_affects_control_outs;
-
-		if ( // silent anyway
-
-			(_gain == 0 && !apply_gain_automation) || 
-
-			// muted by solo of another track
-
-			!solo_audible || 
-
-			// muted by mute of this track 
-
-			!mute_audible ||
-
-			// recording but not s/w monitoring 
-
-			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
-
-			) {
-			
-			co->silence (nframes);
-			
-		} else {
-
-			co->deliver_output (bufs, start_frame, end_frame, nframes);
-		} 
-	} 
-
-	/* -------------------------------------------------------------------------------------------
-	   MAIN OUTPUT STAGE
-	   ----------------------------------------------------------------------------------------- */
-
-	solo_audible = dsg > 0;
-	mute_audible = dmg > 0 || !_mute_affects_main_outs;
-	
-	if (n_outputs().get(_default_type) == 0) {
-	    
-	    /* relax */
-
-	} else if (no_monitor && record_enabled()
-			&& (!Config->get_auto_input() || _session.actively_recording())) {
-		
-		IO::silence (nframes);
-		
-	} else {
-
-		if ( // silent anyway
-
-			(_gain == 0 && !apply_gain_automation) ||
-
-			// muted by solo of another track, but not using control outs for solo
-
-			(!solo_audible && (Config->get_solo_model() != SoloBus)) ||
-
-			// muted by mute of this track
-
-			!mute_audible
-
-			) {
-
-			/* don't use Route::silence() here, because that causes
-			   all outputs (sends, port processors, etc. to be silent).
-			*/
-
-			if (_meter_point == MeterPostFader) {
-				peak_meter().reset();
-			}
-
-			IO::silence (nframes);
-			
-		} else {
-			
-			deliver_output(bufs, start_frame, end_frame, nframes);
-
-		}
-
-	}
-}
-
-#endif /* NEW_POB */
 
 ChanCount
 Route::n_process_buffers ()
@@ -1061,7 +527,7 @@ Route::setup_peak_meters()
 }
 
 void
-Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick, bool meter_first)
+Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick)
 {
 	BufferSet& bufs = _session.get_scratch_buffers(n_process_buffers());
 
@@ -1069,20 +535,13 @@ Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, 
 
 	collect_input (bufs, nframes);
 
-	if (meter_first) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
-		meter_first = false;
-	 } else {
-		meter_first = true;
-	 }
-		
-	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick, meter_first);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick);
 }
 
 void
-Route::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick, bool meter)
+Route::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, int declick)
 {
-	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, true, declick, meter);
+	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, true, declick);
 }
 
 void
@@ -1114,7 +573,6 @@ Route::catch_up_on_solo_mute_override ()
 	}
 	
 	{
-
 		Glib::Mutex::Lock lm (declick_lock);
 		
 		if (_muted) {
@@ -1166,7 +624,7 @@ Route::set_mute (bool yn, void *src)
 		
 		Glib::Mutex::Lock lm (declick_lock);
 		
-		if (_soloed && Config->get_solo_mute_override()){
+		if (_soloed && Config->get_solo_mute_override()) {
 			desired_mute_gain = 1.0f;
 		} else {
 			desired_mute_gain = (yn?0.0f:1.0f);
@@ -1174,8 +632,24 @@ Route::set_mute (bool yn, void *src)
 	}
 }
 
+static void
+dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& procs)
+{
+	cerr << name << " {" << endl;
+	for (list<boost::shared_ptr<Processor> >::const_iterator p = procs.begin();
+			p != procs.end(); ++p) {
+		cerr << "\t" << (*p)->sort_key() << ": " << (*p)->name() << endl;
+	}
+	cerr << "}" << endl;
+}
+
+/** Add a processor to the route.
+ * If @a iter is not NULL, it must point to an iterator in _processors and the new
+ * processor will be inserted immediately before this location.  Otherwise,
+ * @a position is used.
+ */
 int
-Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
+Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, ProcessorList::iterator* iter, Placement placement)
 {
 	ChanCount old_pms = processor_max_streams;
 
@@ -1189,18 +663,66 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
-		//processor->set_default_type(_default_type);
+		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), processor);
 
-		_processors.push_back (processor);
+		if (processor == _amp || processor == _meter) {
+			// Ensure only one amp and one meter are in the list at any time
+			if (loc != _processors.end()) {
+			   	if (iter) {
+					if (*iter == loc) { // Already in place, do nothing
+						return 0;
+					} else { // New position given, relocate
+						_processors.erase(loc);
+					}
+				} else { // Insert at end
+					_processors.erase(loc);
+					loc = _processors.end();
+				}
+			}
+
+		} else {
+			if (loc != _processors.end()) {
+				cerr << "ERROR: Processor added to route twice!" << endl;
+				return 1;
+			}
+		}
+
+		// Use position given by user
+		if (iter) {
+			loc = *iter;
+
+		// Insert immediately before the amp
+		} else if (placement == PreFader) {
+			loc = find(_processors.begin(), _processors.end(), _amp);
+
+		// Insert at end
+		} else {
+			loc = _processors.end();
+		}
+		
+		// Update sort keys
+		if (loc == _processors.end()) {
+			processor->set_sort_key(_processors.size());
+		} else {
+			processor->set_sort_key((*loc)->sort_key());
+			for (ProcessorList::iterator p = loc; p != _processors.end(); ++p) {
+				(*p)->set_sort_key((*p)->sort_key() + 1);
+			}
+		}
+
+		_processors.insert(loc, processor);
 
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
-		if (_reset_processor_counts (err)) {
-			_processors.pop_back ();
-			_reset_processor_counts (0); // it worked before we tried to add it ...
+		if (configure_processors_unlocked (err)) {
+			dump_processors(_name, _processors);
+			ProcessorList::iterator ploc = loc;
+			--ploc;
+			_processors.erase(ploc);
+			configure_processors_unlocked (0); // it worked before we tried to add it ...
 			return -1;
 		}
-
+	
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
 			
 			if (pi->natural_input_streams() == ChanCount::ZERO) {
@@ -1211,13 +733,8 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		}
 		
 		// Ensure peak vector sizes before the plugin is activated
-
-		ChanCount potential_max_streams;
-
-		potential_max_streams.set (DataType::AUDIO, max (processor->input_streams().n_audio(), 
-								 processor->output_streams().n_audio()));
-		potential_max_streams.set (DataType::MIDI, max (processor->input_streams().n_midi(), 
-								processor->output_streams().n_midi()));
+		ChanCount potential_max_streams = ChanCount::max(
+				processor->input_streams(), processor->output_streams());
 
 		_meter->configure_io (potential_max_streams, potential_max_streams);
 
@@ -1232,13 +749,15 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		reset_panner ();
 	}
 
+	dump_processors (_name, _processors);
 	processors_changed (); /* EMIT SIGNAL */
+
 	
 	return 0;
 }
 
 int
-Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
+Route::add_processors (const ProcessorList& others, ProcessorStreams* err, Placement placement)
 {
 	/* NOTE: this is intended to be used ONLY when copying
 	   processors from another Route. Hence the subtle
@@ -1257,9 +776,17 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 		ProcessorList::iterator existing_end = _processors.end();
 		--existing_end;
 
-		ChanCount potential_max_streams;
+		ChanCount potential_max_streams = ChanCount::max(input_minimum(), output_minimum());
 
 		for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
+			
+			// Ensure meter only appears in the list once
+			if (*i == _meter) {
+				ProcessorList::iterator m = find(_processors.begin(), _processors.end(), *i);
+				if (m != _processors.end()) {
+					_processors.erase(m);
+				}
+			}
 			
 			boost::shared_ptr<PluginInsert> pi;
 			
@@ -1274,12 +801,16 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 			// Ensure peak vector sizes before the plugin is activated
 			_meter->configure_io (potential_max_streams, potential_max_streams);
 
-			_processors.push_back (*i);
+			ProcessorList::iterator loc = (placement == PreFader)
+					? find(_processors.begin(), _processors.end(), _amp)
+					: _processors.end();
+
+			_processors.insert (loc, *i);
 			
-			if (_reset_processor_counts (err)) {
+			if (configure_processors_unlocked (err)) {
 				++existing_end;
 				_processors.erase (existing_end, _processors.end());
-				_reset_processor_counts (0); // it worked before we tried to add it ...
+				configure_processors_unlocked (0); // it worked before we tried to add it ...
 				return -1;
 			}
 			
@@ -1292,9 +823,24 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 	if (processor_max_streams != old_pms || old_pms == ChanCount::ZERO) {
 		reset_panner ();
 	}
-
+	
+	dump_processors (_name, _processors);
 	processors_changed (); /* EMIT SIGNAL */
+
 	return 0;
+}
+
+void
+Route::placement_range(Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end)
+{
+	if (p == PreFader) {
+		start = _processors.begin();
+		end = find(_processors.begin(), _processors.end(), _amp);
+	} else {
+		start = find(_processors.begin(), _processors.end(), _amp);
+		++start;
+		end = _processors.end();
+	}
 }
 
 /** Turn off all processors with a given placement
@@ -1305,10 +851,11 @@ Route::disable_processors (Placement p)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->placement() == p) {
-			(*i)->deactivate ();
-		}
+	ProcessorList::iterator start, end;
+	placement_range(p, start, end);
+	
+	for (ProcessorList::iterator i = start; i != end; ++i) {
+		(*i)->deactivate ();
 	}
 
 	_session.set_dirty ();
@@ -1336,8 +883,11 @@ Route::disable_plugins (Placement p)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<PluginInsert> (*i) && (*i)->placement() == p) {
+	ProcessorList::iterator start, end;
+	placement_range(p, start, end);
+	
+	for (ProcessorList::iterator i = start; i != end; ++i) {
+		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 			(*i)->deactivate ();
 		}
 	}
@@ -1417,7 +967,10 @@ Route::pre_fader_streams() const
 	/* Find the last pre-fader redirect that isn't a send; sends don't affect the number
 	 * of streams. */
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->placement() == PreFader && boost::dynamic_pointer_cast<Send> (*i) == 0) {
+		if ((*i) == _amp) {
+			break;
+		}
+		if (boost::dynamic_pointer_cast<Send> (*i) == 0) {
 			processor = *i;
 		}
 	}
@@ -1441,21 +994,38 @@ Route::clear_processors (Placement p)
 	if (!_session.engine().connected()) {
 		return;
 	}
+	
+	bool already_deleting = _session.deletion_in_progress();
+	if (!already_deleting) {
+		_session.set_deletion_in_progress();
+	}
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList new_list;
 		
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if ((*i)->placement() == p) {
-				/* it's the placement we want to get rid of */
+		ProcessorList::iterator amp_loc = find(_processors.begin(), _processors.end(), _amp);
+		if (p == PreFader) {
+			// Get rid of PreFader processors
+			for (ProcessorList::iterator i = _processors.begin(); i != amp_loc; ++i) {
 				(*i)->drop_references ();
-			} else {
-				/* it's a different placement, so keep it */
+			}
+			// Keep the rest
+			for (ProcessorList::iterator i = amp_loc; i != _processors.end(); ++i) {
 				new_list.push_back (*i);
 			}
+		} else {
+			// Keep PreFader processors
+			for (ProcessorList::iterator i = _processors.begin(); i != amp_loc; ++i) {
+				new_list.push_back (*i);
+			}
+			new_list.push_back (_amp);
+			// Get rid of PostFader processors
+			for (ProcessorList::iterator i = amp_loc; i != _processors.end(); ++i) {
+				(*i)->drop_references ();
+			}
 		}
-		
+
 		_processors = new_list;
 	}
 
@@ -1467,11 +1037,19 @@ Route::clear_processors (Placement p)
 	processor_max_streams.reset();
 	_have_internal_generator = false;
 	processors_changed (); /* EMIT SIGNAL */
+
+	if (!already_deleting) {
+		_session.clear_deletion_in_progress();
+	}
 }
 
 int
 Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
 {
+	if (processor == _amp || processor == _meter) {
+		return 0;
+	}
+
 	ChanCount old_pms = processor_max_streams;
 
 	if (!_session.engine().connected()) {
@@ -1490,7 +1068,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 				ProcessorList::iterator tmp;
 
-				/* move along, see failure case for reset_processor_counts()
+				/* move along, see failure case for configure_processors()
 				   where we may need to reprocessor the processor.
 				*/
 
@@ -1524,11 +1102,11 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			return 1;
 		}
 
-		if (_reset_processor_counts (err)) {
+		if (configure_processors_unlocked (err)) {
 			/* get back to where we where */
 			_processors.insert (i, processor);
 			/* we know this will work, because it worked before :) */
-			_reset_processor_counts (0);
+			configure_processors_unlocked (0);
 			return -1;
 		}
 
@@ -1551,224 +1129,72 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 	}
 
 	processor->drop_references ();
-
+	
+	dump_processors (_name, _processors);
 	processors_changed (); /* EMIT SIGNAL */
+
 	return 0;
 }
 
 int
-Route::reset_processor_counts (ProcessorStreams* err)
+Route::configure_processors (ProcessorStreams* err)
 {
-	Glib::RWLock::WriterLock lm (_processor_lock);
-	return _reset_processor_counts (err);
-}
-
-
-int
-Route::_reset_processor_counts (ProcessorStreams* err)
-{
-	ProcessorList::iterator r;
-	uint32_t insert_cnt = 0;
-	uint32_t send_cnt = 0;
-	map<Placement,list<ProcessorCount> > proc_map;
-	ProcessorList::iterator prev;
-	ChanCount initial_streams = n_inputs ();
-	ChanCount previous_initial_streams = n_inputs ();
-	int ret = -1;
-	uint32_t max_audio = 0;
-	uint32_t max_midi = 0;
-
-	processor_max_streams.reset ();
-	
-	/* Step 1: build a map that links each insert to an in/out channel count 
-
-	   Divide inserts up by placement so we get the signal flow
-	   properly modelled. we need to do this because the _processors
-	   list is not sorted by placement, and because other reasons may 
-	   exist now or in the future for this separate treatment.
-	*/
-
-	/* ... but it should/will be... */
-	
-	for (r = _processors.begin(); r != _processors.end(); ++r) {
-
-		boost::shared_ptr<PluginInsert> plugin_insert;
-		boost::shared_ptr<PortInsert> port_insert;
-
-		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert>(*r)) != 0) {
-
-			++insert_cnt;
-			proc_map[(*r)->placement()].push_back (ProcessorCount (*r));
-
-			/* reset plugin counts back to one for now so
-			   that we have a predictable, controlled
-			   state to try to configure.
-			*/
-
-			plugin_insert->set_count (1);
-
-		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert>(*r)) != 0) {
-
-			++insert_cnt;
-			proc_map[(*r)->placement()].push_back (ProcessorCount (*r));
-
-		} else if (boost::dynamic_pointer_cast<Send> (*r) != 0) {
-			++send_cnt;
-		}
+	if (!_in_configure_processors) {
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		return configure_processors_unlocked (err);
 	}
-
-	if (insert_cnt == 0) {
-		if (send_cnt) {
-			goto recompute;
-		} else {
-			ret = 0;
-			goto streamcount;
-		}
-	}
-
-	/* Now process each placement in order, checking to see if we 
-	   can really do what has been requested.
-	*/
-
-	/* A: PreFader */
-	
-	if (check_some_processor_counts (proc_map[PreFader], n_inputs (), err)) {
-		goto streamcount;
-	}
-
-	if (!proc_map[PreFader].empty()) {
-		previous_initial_streams = n_inputs ();
-		for (list<ProcessorCount>::iterator i = proc_map[PreFader].begin(); i != proc_map[PreFader].end(); i++) {
-			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) == false) {
-				goto streamcount;
-			}
-			previous_initial_streams = initial_streams;
-		}
-	}
-
-	/* B: PostFader */
-
-	if (check_some_processor_counts (proc_map[PostFader], initial_streams, err)) {
-		goto streamcount;
-	}
-
-	if (!proc_map[PostFader].empty()) {
-		for (list<ProcessorCount>::iterator i = proc_map[PostFader].begin(); i != proc_map[PostFader].end(); i++) {
-			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) == false) {
-				goto streamcount;
-			}
-			previous_initial_streams = initial_streams;
-		}
-	}
-
-	/* OK, everything can be set up correctly, so lets do it */
-
-	apply_some_processor_counts (proc_map[PreFader]);
-	apply_some_processor_counts (proc_map[PostFader]);
-
-	/* recompute max outs of any processor */
-
-	ret = 0;
-
-  recompute:
-
-	processor_max_streams.reset ();
-	prev = _processors.end();
-
-	for (r = _processors.begin(); r != _processors.end(); prev = r, ++r) {
-		boost::shared_ptr<Send> s;
-
-		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
-
-			/* don't pay any attention to send output configuration, since it doesn't
-			   affect the route.
-			 */
-
-			if (r == _processors.begin()) {
-				s->expect_inputs (n_inputs());
-			} else {
-				s->expect_inputs ((*prev)->output_streams());
-			}
-
-		} else {
-			
-			max_audio = max ((*r)->input_streams ().n_audio(), max_audio);
-			max_midi = max ((*r)->input_streams ().n_midi(), max_midi);
-			max_audio = max ((*r)->output_streams ().n_audio(), max_audio);
-			max_midi = max ((*r)->output_streams ().n_midi(), max_midi);
-		}
-	}
-
-	processor_max_streams.set (DataType::AUDIO, max_audio);
-	processor_max_streams.set (DataType::MIDI, max_midi);
-
-	/* we're done */
-	return 0;
-
-  streamcount:
-	for (r = _processors.begin(); r != _processors.end(); ++r) {
-		max_audio = max ((*r)->output_streams ().n_audio(), max_audio);
-		max_midi = max ((*r)->output_streams ().n_midi(), max_midi);
-	}
-
-	processor_max_streams.set (DataType::AUDIO, max_audio);
-	processor_max_streams.set (DataType::MIDI, max_midi);
-	
-	return ret;
-}				   
-
-int32_t
-Route::apply_some_processor_counts (list<ProcessorCount>& iclist)
-{
-	list<ProcessorCount>::iterator i;
-	
-	for (i = iclist.begin(); i != iclist.end(); ++i) {
-
-		ProcessorCount& pc (*i);
-
-		if (pc.processor->configure_io (pc.in, pc.out)) {
-			return -1;
-		}
-
-		/* make sure that however many we have, they are all active */
-
-		pc.processor->activate ();
-	}
-
 	return 0;
 }
 
-/** Returns whether \a iclist can be configured and run starting with
- * \a required_inputs at the first processor's inputs.
- * If false is returned, \a iclist can not be run with \a required_inputs, and \a err is set.
- * Otherwise, \a err is set to the output of the list.
+/** Configure the input/output configuration of each processor in the processors list.
+ * Return 0 on success, otherwise configuration is impossible.
  */
-bool
-Route::check_some_processor_counts (list<ProcessorCount>& iclist, ChanCount required_inputs, ProcessorStreams* err)
+int
+Route::configure_processors_unlocked (ProcessorStreams* err)
 {
-	list<ProcessorCount>::iterator i;
-	size_t index = 0;
-			
-	if (err) {
-		err->index = 0;
-		err->count = required_inputs;
+	if (_in_configure_processors) {
+	   return 0;
 	}
 
-	for (i = iclist.begin(); i != iclist.end(); ++i, ++index) {
+	_in_configure_processors = true;
 
-		if (!(*i).processor->can_support_io_configuration (required_inputs, (*i).out)) {
+	// Check each processor in order to see if we can configure as requested
+	ChanCount in = _configured_inputs;
+	ChanCount out;
+	list< pair<ChanCount,ChanCount> > configuration;
+	uint32_t index = 0;
+	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
+		(*p)->set_sort_key(index);
+		if ((*p)->can_support_io_configuration(in, out)) {
+			configuration.push_back(make_pair(in, out));
+			in = out;
+		} else {
 			if (err) {
 				err->index = index;
-				err->count = required_inputs;
+				err->count = in;
 			}
-			return true;
+			_in_configure_processors = false;
+			return -1;
 		}
-		
-		(*i).in = required_inputs;
-		required_inputs = (*i).out;
+	}
+	
+	// We can, so configure everything
+	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
+	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
+		(*p)->configure_io(c->first, c->second);
+		(*p)->activate();
+		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
+		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
+		out = c->second;
 	}
 
-	return false;
+	// Ensure route outputs match last processor's outputs
+	if (out != n_outputs()) {
+		ensure_io(_configured_inputs, out, false, this);
+	}
+
+	_in_configure_processors = false;
+	return 0;
 }
 
 void
@@ -1805,9 +1231,16 @@ Route::all_processors_active (Placement p, bool state)
 	if (_processors.empty()) {
 		return;
 	}
+	ProcessorList::iterator start, end;
+	placement_range(p, start, end);
 
+	bool before_amp = true;
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->placement() == p) {
+		if ((*i) == _amp) {
+			before_amp = false;
+			continue;
+		}
+		if (p == PreFader && before_amp) {
 			if (state) {
 				(*i)->activate ();
 			} else {
@@ -1839,7 +1272,7 @@ Route::sort_processors (ProcessorStreams* err)
 
 		_processors.sort (comparator);
 	
-		if (_reset_processor_counts (err)) {
+		if (configure_processors_unlocked (err)) {
 			_processors = as_it_was_before;
 			processor_max_streams = old_pms;
 			return -1;
@@ -1925,7 +1358,7 @@ Route::state(bool full_state)
 
 	if (_control_outs) {
 		XMLNode* cnode = new XMLNode (X_("ControlOuts"));
-		cnode->add_child_nocopy (_control_outs->state (full_state));
+		cnode->add_child_nocopy (_control_outs->io()->state (full_state));
 		node->add_child_nocopy (*cnode);
 	}
 
@@ -2033,8 +1466,8 @@ Route::set_deferred_state ()
 	deferred_state = 0;
 }
 
-void
-Route::add_processor_from_xml (const XMLNode& node)
+bool
+Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator* iter)
 {
 	const XMLProperty *prop;
 
@@ -2043,15 +1476,15 @@ Route::add_processor_from_xml (const XMLNode& node)
 	
 		try {
 			boost::shared_ptr<Send> send (new Send (_session, node));
-			add_processor (send);
+			add_processor (send, 0, iter);
+			return true;
 		} 
 		
 		catch (failed_constructor &err) {
 			error << _("Send construction failed") << endmsg;
-			return;
+			return false;
 		}
 		
-	// use "Processor" in XML?
 	} else if (node.name() == "Processor") {
 		
 		try {
@@ -2076,13 +1509,21 @@ Route::add_processor_from_xml (const XMLNode& node)
 
 					processor.reset (new Send (_session, node));
 					have_insert = true;
+				
+				} else if (prop->value() == "meter") {
+
+					processor = _meter;
+				
+				} else if (prop->value() == "amp") {
+					
+					processor = _amp;
 
 				} else {
 
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 				}
 				
-				add_processor (processor);
+				return (add_processor (processor, 0, iter) == 0);
 				
 			} else {
 				error << _("Processor XML node has no type property") << endmsg;
@@ -2091,9 +1532,10 @@ Route::add_processor_from_xml (const XMLNode& node)
 
 		catch (failed_constructor &err) {
 			warning << _("processor could not be created. Ignored.") << endmsg;
-			return;
+			return false;
 		}
 	}
+	return false;
 }
 
 int
@@ -2238,6 +1680,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	XMLNodeList processor_nodes;
+	bool has_meter_processor = false; // legacy sessions don't
 			
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 
@@ -2245,12 +1688,18 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			
 		if (child->name() == X_("Send") || child->name() == X_("Processor")) {
 			processor_nodes.push_back(child);
+			if ((prop = child->property (X_("type"))) != 0 && prop->value() == "meter")  {
+				has_meter_processor = true;
+			}
 		}
 
 	}
 
 	_set_processor_states(processor_nodes);
-
+	if (!has_meter_processor) {
+		set_meter_point(_meter_point, NULL);
+	}
+	processors_changed ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
@@ -2267,8 +1716,8 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			string coutname = _name;
 			coutname += _("[control]");
 
-			delete _control_outs;
-			_control_outs = new IO (_session, coutname);
+			_control_outs = boost::shared_ptr<ControlOutputs> (
+					new ControlOutputs (_session, new IO (_session, coutname)));
 			
 			/* fix up the control out name in the XML before setting it.
 			   Otherwise track templates don't work because the control
@@ -2281,7 +1730,9 @@ Route::_set_state (const XMLNode& node, bool call_base)
 				prop->set_value (coutname);
 			}
 			
-			_control_outs->set_state (**(child->children().begin()));
+			_control_outs->io()->set_state (**(child->children().begin()));
+			_control_outs->set_sort_key (_meter->sort_key() + 1);
+			add_processor (_control_outs, 0);
 
 		} else if (child->name() == X_("Comment")) {
 
@@ -2303,8 +1754,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 				_mute_control->set_state (*child);
 				_session.add_controllable (_mute_control);
 			}
-		}
-		else if (child->name() == X_("RemoteControl")) {
+		} else if (child->name() == X_("RemoteControl")) {
 			if ((prop = child->property (X_("id"))) != 0) {
 				int32_t x;
 				sscanf (prop->value().c_str(), "%d", &x);
@@ -2365,6 +1815,7 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 		i = tmp;
 	}
 
+	Placement placement = PreFader;
 
 	// Iterate through state list and make sure all processors are on the track and in the correct order,
 	// set the state of existing processors according to the new state on the same go
@@ -2389,50 +1840,33 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 			++o;
 		}
 
+		// If the processor (*niter) is not on the route,
+		// create it and move it to the correct location
 		if (o == _processors.end()) {
-			// If the processor (*niter) is not on the route, we need to create it
-			// and move it to the correct location
-
-			ProcessorList::iterator prev_last = _processors.end();
-			--prev_last; // We need this to check whether adding succeeded
-			
-			add_processor_from_xml (**niter);
-
-			ProcessorList::iterator last = _processors.end();
-			--last;
-
-			if (prev_last == last) {
-				cerr << "Could not fully restore state as some processors were not possible to create" << endl;
-				continue;
-
+			if (add_processor_from_xml (**niter, &i)) {
+				--i; // move iterator to the newly inserted processor
+			} else {
+				cerr << "Error restoring route: unable to restore processor" << endl;
 			}
 
-			boost::shared_ptr<Processor> tmp = (*last);
-			// remove the processor from the wrong location
-			_processors.erase(last);
-			// processor the new processor at the current location
-			_processors.insert(i, tmp);
+		// Otherwise, we found the processor (*niter) on the route,
+		// ensure it is at the location provided in the XML state
+		} else {
 
-			--i; // move pointer to the newly processored processor
-			continue;
+			if (i != o) {
+				boost::shared_ptr<Processor> tmp = (*o);
+				_processors.erase(o); // remove the old copy
+				_processors.insert(i, tmp); // insert the processor at the correct location
+				--i; // move iterator to the correct processor
+			}
+
+			(*i)->set_state((**niter));
 		}
 
-		// We found the processor (*niter) on the route, first we must make sure the processor
-		// is at the location provided in the XML state
-		if (i != o) {
-			boost::shared_ptr<Processor> tmp = (*o);
-			// remove the old copy
-			_processors.erase(o);
-			// processor the processor at the correct location
-			_processors.insert(i, tmp);
-
-			--i; // move pointer so it points to the right processor
+		if (*i == _amp) {
+			placement = PostFader;
 		}
-
-		(*i)->set_state( (**niter) );
 	}
-	
-	processors_changed ();
 }
 
 void
@@ -2450,7 +1884,7 @@ Route::silence (nframes_t nframes)
 		IO::silence (nframes);
 
 		if (_control_outs) {
-			_control_outs->silence (nframes);
+			_control_outs->io()->silence (nframes);
 		}
 
 		{ 
@@ -2479,13 +1913,8 @@ Route::silence (nframes_t nframes)
 int
 Route::set_control_outs (const vector<string>& ports)
 {
-	Glib::Mutex::Lock lm (_control_outs_lock);
 	vector<string>::const_iterator i;
-	size_t limit;
 	
-	delete _control_outs;
-	_control_outs = 0;
-
 	if (is_control() || is_master()) {
 		/* no control outs for these two special busses */
 		return 0;
@@ -2498,28 +1927,31 @@ Route::set_control_outs (const vector<string>& ports)
  	string coutname = _name;
  	coutname += _("[control]");
  	
- 	_control_outs = new IO (_session, coutname);
+	IO* out_io = new IO (_session, coutname);
+	boost::shared_ptr<ControlOutputs> out_proc(new ControlOutputs (_session, out_io));
 
-	/* our control outs need as many outputs as we
-	   have audio outputs. we track the changes in ::output_change_handler().
-	*/
-	
-	// XXX its stupid that we have to get this value twice
-
-	limit = n_outputs().n_audio();
-	
-	if (_control_outs->ensure_io (ChanCount::ZERO, ChanCount (DataType::AUDIO, n_outputs().get (DataType::AUDIO)), true, this)) {
+	/* As an IO, our control outs need as many IO outputs as we have outputs
+	 *   (we track the changes in ::output_change_handler()).
+	 * As a processor, the control outs is an identity processor
+	 *   (i.e. it does not modify its input buffers whatsoever)
+	 */
+	if (out_io->ensure_io (ChanCount::ZERO, n_outputs(), true, this)) {
 		return -1;
 	}
-	
+
 	/* now connect to the named ports */
 	
-	for (size_t n = 0; n < limit; ++n) {
-		if (_control_outs->connect_output (_control_outs->output (n), ports[n % ports.size()], this)) {
-			error << string_compose (_("could not connect %1 to %2"), _control_outs->output(n)->name(), ports[n]) << endmsg;
+	for (size_t n = 0; n < n_outputs().n_total(); ++n) {
+		if (out_io->connect_output (out_io->output (n), ports[n % ports.size()], this)) {
+			error << string_compose (_("could not connect %1 to %2"),
+					out_io->output(n)->name(), ports[n]) << endmsg;
 			return -1;
 		}
 	}
+
+	_control_outs = out_proc;
+	_control_outs->set_sort_key (_meter->sort_key() + 1);
+	add_processor (_control_outs, NULL);
  
  	return 0;
 }	
@@ -2631,11 +2063,11 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	if (_control_outs) {
 
-		no = _control_outs->n_outputs().n_total();
+		no = _control_outs->io()->n_outputs().n_total();
 		
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
-				if (_control_outs->output(i)->connected_to (other->input (j)->name())) {
+				if (_control_outs->io()->output(i)->connected_to (other->input (j)->name())) {
 					return true;
 				}
 			}
@@ -2651,22 +2083,22 @@ Route::set_mute_config (mute_type t, bool onoff, void *src)
 	switch (t) {
 	case PRE_FADER:
 		_mute_affects_pre_fader = onoff;
-		 pre_fader_changed(src); /* EMIT SIGNAL */
+		pre_fader_changed(src); /* EMIT SIGNAL */
 		break;
 
 	case POST_FADER:
 		_mute_affects_post_fader = onoff;
-		 post_fader_changed(src); /* EMIT SIGNAL */
+		post_fader_changed(src); /* EMIT SIGNAL */
 		break;
 
 	case CONTROL_OUTS:
 		_mute_affects_control_outs = onoff;
-		 control_outs_changed(src); /* EMIT SIGNAL */
+		control_outs_changed(src); /* EMIT SIGNAL */
 		break;
 
 	case MAIN_OUTS:
 		_mute_affects_main_outs = onoff;
-		 main_outs_changed(src); /* EMIT SIGNAL */
+		main_outs_changed(src); /* EMIT SIGNAL */
 		break;
 	}
 }
@@ -2723,22 +2155,22 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 }
 
 void
-Route::input_change_handler (IOChange change, void *ignored)
+Route::input_change_handler (IOChange change, void *src)
 {
-	if (change & ConfigurationChanged) {
-		reset_processor_counts (0);
+	if ((change & ConfigurationChanged)) {
+		configure_processors (0);
 	}
 }
 
 void
-Route::output_change_handler (IOChange change, void *ignored)
+Route::output_change_handler (IOChange change, void *src)
 {
-	if (change & ConfigurationChanged) {
+	if ((change & ConfigurationChanged)) {
 		if (_control_outs) {
-			_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().n_audio()), true, this);
+			_control_outs->io()->ensure_io (ChanCount::ZERO, n_outputs(), true, this);
 		}
 		
-		reset_processor_counts (0);
+		configure_processors (0);
 	}
 }
 
@@ -2765,10 +2197,10 @@ Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		return 0;
 	}
 
-	apply_gain_automation = false;
+	_amp->apply_gain_automation(false);
 	
-	if (n_inputs().n_total()) {
-		passthru (start_frame, end_frame, nframes, 0, false);
+	if (n_inputs() != ChanCount::ZERO) {
+		passthru (start_frame, end_frame, nframes, 0);
 	} else {
 		silence (nframes);
 	}
@@ -2829,7 +2261,7 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int 
 
 	_silent = false;
 
-	apply_gain_automation = false;
+	_amp->apply_gain_automation(false);
 
 	{ 
 		Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
@@ -2837,13 +2269,14 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int 
 		if (am.locked() && _session.transport_rolling()) {
 			
 			if (_gain_control->automation_playback()) {
-				apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
-						start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+				_amp->apply_gain_automation(
+						_gain_control->list()->curve().rt_safe_get_vector (
+							start_frame, end_frame, _session.gain_automation_buffer(), nframes));
 			}
 		}
 	}
 
-	passthru (start_frame, end_frame, nframes, declick, false);
+	passthru (start_frame, end_frame, nframes, declick);
 
 	return 0;
 }
@@ -2912,7 +2345,35 @@ Route::set_meter_point (MeterPoint p, void *src)
 {
 	if (_meter_point != p) {
 		_meter_point = p;
+
+		// Move meter in the processors list
+		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _meter);
+		_processors.erase(loc);
+		switch (p) {
+		case MeterInput:
+			loc = _processors.begin();
+			break;
+		case MeterPreFader:
+			loc = find(_processors.begin(), _processors.end(), _amp);
+			break;
+		case MeterPostFader:
+			loc = _processors.end();
+			break;
+		}
+		_processors.insert(loc, _meter);
+		
+		// Update sort key
+		if (loc == _processors.end()) {
+			_meter->set_sort_key(_processors.size());
+		} else {
+			_meter->set_sort_key((*loc)->sort_key());
+			for (ProcessorList::iterator p = loc; p != _processors.end(); ++p) {
+				(*p)->set_sort_key((*p)->sort_key() + 1);
+			}
+		}
+
 		 meter_change (src); /* EMIT SIGNAL */
+		processors_changed (); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 }
@@ -3054,6 +2515,7 @@ Route::set_block_size (nframes_t nframes)
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
+	_session.ensure_buffers(processor_max_streams);
 }
 
 void

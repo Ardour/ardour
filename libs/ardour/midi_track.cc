@@ -25,20 +25,20 @@
 #include "midi++/events.h"
 #include "evoral/midi_util.h"
 
-#include "ardour/midi_track.h"
-#include "ardour/midi_diskstream.h"
-#include "ardour/session.h"
+#include "ardour/amp.h"
+#include "ardour/buffer_set.h"
 #include "ardour/io_processor.h"
+#include "ardour/meter.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
-#include "ardour/route_group_specialized.h"
-#include "ardour/processor.h"
-#include "ardour/midi_playlist.h"
+#include "ardour/midi_track.h"
 #include "ardour/panner.h"
+#include "ardour/processor.h"
+#include "ardour/route_group_specialized.h"
+#include "ardour/session.h"
 #include "ardour/utils.h"
-#include "ardour/buffer_set.h"
-#include "ardour/meter.h"
-
 
 #include "i18n.h"
 
@@ -60,10 +60,6 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 
 	set_input_minimum(ChanCount(DataType::MIDI, 1));
 	set_input_maximum(ChanCount(DataType::MIDI, 1));
-	set_output_minimum(ChanCount(DataType::MIDI, 1));
-	set_output_maximum(ChanCount(DataType::MIDI, 1));
-
-	PortCountChanged(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
@@ -75,10 +71,6 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	
 	set_input_minimum(ChanCount(DataType::MIDI, 1));
 	set_input_maximum(ChanCount(DataType::MIDI, 1));
-	set_output_minimum(ChanCount(DataType::MIDI, 1));
-	set_output_maximum(ChanCount(DataType::MIDI, 1));
-	
-	PortCountChanged(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
 }
 
 MidiTrack::~MidiTrack ()
@@ -370,87 +362,6 @@ MidiTrack::set_state_part_two ()
 	return;
 }	
 
-int 
-MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		    bool session_state_changing, bool can_record, bool rec_monitors_input)
-{
-	if (n_outputs().n_midi() == 0) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes);
-	}
-
-	if (session_state_changing) {
-
-		/* XXX is this safe to do against transport state changes? */
-
-		passthru_silence (start_frame, end_frame, nframes, 0, false);
-		return 0;
-	}
-
-	midi_diskstream()->check_record_status (start_frame, nframes, can_record);
-
-	bool send_silence;
-	
-	if (_have_internal_generator) {
-		/* since the instrument has no input streams,
-		   there is no reason to send any signal
-		   into the route.
-		*/
-		send_silence = true;
-	} else {
-
-		if (Config->get_auto_input()) {
-			if (Config->get_monitoring_model() == SoftwareMonitoring) {
-				send_silence = false;
-			} else {
-				send_silence = true;
-			}
-		} else {
-			if (_diskstream->record_enabled()) {
-				if (Config->get_monitoring_model() == SoftwareMonitoring) {
-					send_silence = false;
-				} else {
-					send_silence = true;
-				}
-			} else {
-				send_silence = true;
-			}
-		}
-	}
-
-	apply_gain_automation = false;
-
-	if (send_silence) {
-		
-		/* if we're sending silence, but we want the meters to show levels for the signal,
-		   meter right here.
-		*/
-		
-		if (_have_internal_generator) {
-			passthru_silence (start_frame, end_frame, nframes, 0, true);
-		} else {
-			if (_meter_point == MeterInput) {
-				just_meter_input (start_frame, end_frame, nframes);
-			}
-			passthru_silence (start_frame, end_frame, nframes, 0, false);
-		}
-
-	} else {
-	
-		/* we're sending signal, but we may still want to meter the input. 
-		 */
-
-		passthru (start_frame, end_frame, nframes, 0, (_meter_point == MeterInput));
-	}
-	
-	flush_outputs (nframes);
-
-	return 0;
-}
-
 int
 MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
 		 bool can_record, bool rec_monitors_input)
@@ -509,7 +420,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		   at least potentially (depending on monitoring options)
 		   */
 
-		passthru (start_frame, end_frame, nframes, 0, true);
+		passthru (start_frame, end_frame, nframes, 0);
 
 	} else {
 		/*
@@ -529,75 +440,13 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame);
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes,
-					(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+				(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick);
 	
 	}
 
 	flush_outputs (nframes);
 
 	return 0;
-}
-
-int
-MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,  
-			bool can_record, bool rec_monitors_input)
-{
-	if (n_outputs().n_midi() == 0 && _processors.empty()) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes);
-		return 0;
-	}
-
-	_silent = true;
-	apply_gain_automation = false;
-
-	silence (nframes);
-
-	return midi_diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input);
-}
-
-void
-MidiTrack::process_output_buffers (BufferSet& bufs,
-				   nframes_t start_frame, nframes_t end_frame, 
-				   nframes_t nframes, bool with_processors, int declick,
-				   bool meter)
-{
-	/* There's no such thing as a MIDI bus for the time being.
-	 * We'll do all the MIDI route work here for now, but the long-term goal is to have
-	 * Route::process_output_buffers handle everything */
-	
-	if (meter && (_meter_point == MeterInput || _meter_point == MeterPreFader)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
-	}
-
-	// Run all processors
-	if (with_processors) {
-		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
-		if (rm.locked()) {
-			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-				bufs.set_count(ChanCount::max(bufs.count(), (*i)->output_streams()));
-				(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
-			}
-		} 
-	}
-	
-	if (meter && (_meter_point == MeterPostFader)) {
-		_meter->run_in_place(bufs, start_frame, end_frame, nframes);
-	}
-	
-	// Main output stage
-	if (muted()) {
-		IO::silence (nframes);
-	} else {
-
-		// Write 'automation' controllers (e.g. CC events from a UI slider)
-		write_controller_messages(bufs.get_midi(0), start_frame, end_frame, nframes);
-		
-		deliver_output(bufs, start_frame, end_frame, nframes);
-	}
 }
 
 void

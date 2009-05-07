@@ -467,7 +467,7 @@ msgstr ""
 
 #: libs/ardour/configuration.cc:80
 #, fuzzy
-msgid "loading system configuration file %1"
+msgid "Loading system configuration file %1"
 msgstr ""
 "Ardour: impossibile leggere il file di configurazione di sistema \"%1\""
 
@@ -484,7 +484,7 @@ msgstr ""
 
 #: libs/ardour/configuration.cc:105
 #, fuzzy
-msgid "loading user configuration file %1"
+msgid "Loading user configuration file %1"
 msgstr "Ardour: impossibile la lettura del file di configurazione \"%1\""
 
 #: libs/ardour/configuration.cc:108

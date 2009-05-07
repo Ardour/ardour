@@ -23,6 +23,7 @@
 #include <cassert>
 #include <ostream>
 
+#include "pbd/xml++.h"
 #include "ardour/data_type.h"
 
 namespace ARDOUR {
@@ -35,6 +36,7 @@ namespace ARDOUR {
  */
 class ChanCount {
 public:
+	ChanCount(const XMLNode& node);
 	ChanCount() { reset(); }
 	
 	// Convenience constructor for making single-typed streams (stereo, mono, etc)
@@ -104,6 +106,14 @@ public:
 		return ( (*this > other) || (*this == other) );
 	}
 	
+	static ChanCount min(const ChanCount& a, const ChanCount& b) {
+		ChanCount ret;
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			ret.set(*t, std::min(a.get(*t), b.get(*t)));
+		}
+		return ret;
+	}
+	
 	static ChanCount max(const ChanCount& a, const ChanCount& b) {
 		ChanCount ret;
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -111,6 +121,8 @@ public:
 		}
 		return ret;
 	}
+	
+	XMLNode* state(const std::string& name) const;
 
 	static const ChanCount INFINITE;
 	static const ChanCount ZERO;

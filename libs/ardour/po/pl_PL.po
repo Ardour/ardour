@@ -365,7 +365,7 @@ msgid "AutomationList: passed XML node called %1, not \"AutomationList\" - ignor
 msgstr ""
 
 #: libs/ardour/configuration.cc:97
-msgid "loading system configuration file %1"
+msgid "Loading system configuration file %1"
 msgstr ""
 
 #: libs/ardour/configuration.cc:100
@@ -381,7 +381,7 @@ msgid "your system Ardour configuration file is empty. This probably means that 
 msgstr ""
 
 #: libs/ardour/configuration.cc:131
-msgid "loading user configuration file %1"
+msgid "Loading user configuration file %1"
 msgstr ""
 
 #: libs/ardour/configuration.cc:134

@@ -441,17 +441,15 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 		);
 	
 	/* move panner automation */
-	Panner & p = _io->panner ();
-	for (uint32_t i = 0; i < p.npanners (); ++i) {
-
-		boost::shared_ptr<AutomationList> pan_alist = p.streampanner(i).pan_control()->alist();
-		XMLNode & before = pan_alist->get_state ();
-		pan_alist->move_ranges (movements);
-		_session.add_command (
-			new MementoCommand<AutomationList> (
-				*pan_alist.get(), &before, &pan_alist->get_state ()
-				)
-			);
+	boost::shared_ptr<Panner> p = _io->panner ();
+	if (p) {
+		for (uint32_t i = 0; i < p->npanners (); ++i) {
+			boost::shared_ptr<AutomationList> pan_alist = p->streampanner(i).pan_control()->alist();
+			XMLNode & before = pan_alist->get_state ();
+			pan_alist->move_ranges (movements);
+			_session.add_command (new MementoCommand<AutomationList> (
+					*pan_alist.get(), &before, &pan_alist->get_state ()));
+		}
 	}
 
 	/* move processor automation */

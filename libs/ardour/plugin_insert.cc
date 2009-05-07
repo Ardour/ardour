@@ -58,10 +58,10 @@ using namespace PBD;
 
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
-PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placement placement)
-	: Processor (s, plug->name(), placement),
-          _signal_analysis_collected_nframes(0),
-          _signal_analysis_collect_nframes_max(0)
+PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
+	: Processor (s, plug->name())
+	, _signal_analysis_collected_nframes(0)
+	, _signal_analysis_collect_nframes_max(0)
 {
 	/* the first is the master */
 
@@ -78,7 +78,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 }
 
 PluginInsert::PluginInsert (Session& s, const XMLNode& node)
-	: Processor (s, "unnamed plugin insert", PreFader),
+	: Processor (s, "unnamed plugin insert"),
           _signal_analysis_collected_nframes(0),
           _signal_analysis_collect_nframes_max(0)
 {
@@ -160,14 +160,10 @@ PluginInsert::output_streams() const
 	ChanCount out = _plugins.front()->get_info()->n_outputs;
 
 	if (out == ChanCount::INFINITE) {
-
 		return _plugins.front()->output_streams ();
-
 	} else {
-
 		out.set_audio (out.n_audio() * _plugins.size());
 		out.set_midi (out.n_midi() * _plugins.size());
-
 		return out;
 	}
 }
@@ -182,7 +178,6 @@ PluginInsert::input_streams() const
 	} else {
 		in.set_audio (in.n_audio() * _plugins.size());
 		in.set_midi (in.n_midi() * _plugins.size());
-
 		return in;
 	}
 }
@@ -323,10 +318,10 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 	}
 
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (bufs, in_map, out_map, nframes, offset);
+		(*i)->connect_and_run(bufs, in_map, out_map, nframes, offset);
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			in_map.offset(*t, input_streams().get(*t));
-			out_map.offset(*t, output_streams().get(*t));
+			in_map.offset_to(*t, natural_input_streams().get(*t));
+			out_map.offset_to(*t, natural_output_streams().get(*t));
 		}
 	}
 
@@ -562,61 +557,60 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 bool
 PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
+	// Plugin has flexible I/O, so delegate to it
 	if (_plugins.front()->reconfigurable_io()) {
-		/* plugin has flexible I/O, so delegate to it */
 		return _plugins.front()->can_support_io_configuration (in, out);
 	}
 
+	ChanCount inputs  = _plugins[0]->get_info()->n_inputs;
 	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
-	ChanCount inputs = _plugins[0]->get_info()->n_inputs;
 
-	if ((inputs.n_total() == 0)
-			|| (inputs.n_total() == 1 && outputs == inputs)
-			|| (inputs.n_total() == 1 && outputs == inputs
-				&& ((inputs.n_audio() == 0 && in.n_audio() == 0)
-					|| (inputs.n_midi() == 0 && in.n_midi() == 0)))
-			|| (inputs == in)) {
+	// Plugin inputs match requested inputs exactly
+	if (inputs == in) {
 		out = outputs;
 		return true;
 	}
 
-	bool can_replicate = true;
-
-	/* if number of inputs is a factor of the requested input
-	   configuration for every type, we can replicate.
-	*/
+	// See if replication is possible
+	// We can replicate if there exists a single factor f such that, for every type,
+	// the number of plugin inputs * f = the requested number of inputs
+	uint32_t f             = 0;
+	bool     can_replicate = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		if (inputs.get(*t) >= in.get(*t) || (inputs.get(*t) % in.get(*t) != 0)) {
+		// No inputs of this type
+		if (inputs.get(*t) == 0 && in.get(*t) == 0) {
+			continue;
+
+		// Plugin has more inputs than requested, can not replicate
+		} else if (inputs.get(*t) >= in.get(*t)) {
+			can_replicate = false;
+			break;
+		
+		// Plugin inputs is not a factor of requested inputs, can not replicate
+		} else if (inputs.get(*t) == 0 || in.get(*t) % inputs.get(*t) != 0) {
+			can_replicate = false;
+			break;
+		
+		// Potential factor not set yet
+		} else if (f == 0) {
+			f = in.get(*t) / inputs.get(*t);;
+		}
+
+		// Factor for this type does not match another type, can not replicate
+		if (f != (in.get(*t) / inputs.get(*t))) {
 			can_replicate = false;
 			break;
 		}
 	}
 
-	if (!can_replicate || (in.n_total() % inputs.n_total() != 0)) {
+	if (can_replicate) {
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			out.set (*t, outputs.get(*t) * f);
+		}
+		return true;
+	} else {
 		return false;
 	}
-
-	if (inputs.n_total() == 0) {
-		/* instrument plugin, always legal, but throws away any existing streams */
-		out = outputs;
-	} else if (inputs.n_total() == 1 && outputs == inputs
-			&& ((inputs.n_audio() == 0 && in.n_audio() == 0)
-			    || (inputs.n_midi() == 0 && in.n_midi() == 0))) {
-		/* mono, single-typed plugin, replicate as needed to match in */
-		out = in;
-	} else if (inputs == in) {
-		/* exact match */
-		out = outputs;
-	} else {
-		/* replicate - note that we've already verified that
-		   the replication count is constant across all data types.
-		*/
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			out.set (*t, outputs.get(*t) * (in.get(*t) / inputs.get(*t)));
-		}
-	}
-		
-	return true;
 }
 
 /* Number of plugin instances required to support a given channel configuration.
@@ -798,7 +792,7 @@ PluginInsert::set_state(const XMLNode& node)
 		
 		cnodes = (*niter)->children ("Port");
 		
-		for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
+		for (iter = cnodes.begin(); iter != cnodes.end(); ++iter) {
 			
 			child = *iter;
 			

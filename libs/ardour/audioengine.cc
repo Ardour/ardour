@@ -469,6 +469,8 @@ AudioEngine::jack_bufsize_callback (nframes_t nframes)
 {
 	_buffer_size = nframes;
 	_raw_buffer_sizes[DataType::AUDIO] = nframes * sizeof(float);
+	cout << "FIXME: Assuming maximum MIDI buffer size " << nframes * 4 << "bytes" << endl;
+	_raw_buffer_sizes[DataType::MIDI] = nframes * 4;
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
@@ -604,13 +606,14 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 		} else if (dtype == DataType::MIDI) {
 			newport = new MidiPort (portname, (input ? Port::IsInput : Port::IsOutput));
 		} else {
-			throw unknown_type();
+			throw PortRegistrationFailure("unable to create port (unknown type)");
 		}
 		
 		size_t& old_buffer_size  = _raw_buffer_sizes[newport->type()];
 		size_t  port_buffer_size = newport->raw_buffer_size(0);
-		if (port_buffer_size > old_buffer_size)
+		if (port_buffer_size > old_buffer_size) {
 			old_buffer_size = port_buffer_size;
+		}
 
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
@@ -621,8 +624,13 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 		return newport;
 	}
 
-	catch (...) {
-		throw PortRegistrationFailure("unable to create port (unknown type?)");
+	catch (PortRegistrationFailure& err) {
+		throw err;
+	} catch (std::exception& e) {
+		throw PortRegistrationFailure(string_compose(
+				_("unable to create port: %1"), e.what()).c_str());
+	} catch (...) {
+		throw PortRegistrationFailure("unable to create port (unknown error)");
 	}
 }
 
@@ -1256,6 +1264,10 @@ AudioEngine::reconnect_to_jack ()
 		nframes_t blocksize = jack_get_buffer_size (_jack);
 		session->set_block_size (blocksize);
 		session->set_frame_rate (jack_get_sample_rate (_jack));
+		
+		_raw_buffer_sizes[DataType::AUDIO] = blocksize * sizeof(float);
+		cout << "FIXME: Assuming maximum MIDI buffer size " << blocksize * 4 << "bytes" << endl;
+		_raw_buffer_sizes[DataType::MIDI] = blocksize * 4;
 	}
 
 	last_monitor_check = 0;

@@ -44,7 +44,7 @@ class Plugin;
 class PluginInsert : public Processor
 {
   public:
-	PluginInsert (Session&, boost::shared_ptr<Plugin>, Placement);
+	PluginInsert (Session&, boost::shared_ptr<Plugin>);
 	PluginInsert (Session&, const XMLNode&);
 	~PluginInsert ();
 

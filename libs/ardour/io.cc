@@ -102,36 +102,27 @@ static double direct_gain_to_control (gain_t gain) {
  * and friends if no type is explicitly requested (to avoid breakage).
  */
 IO::IO (Session& s, const string& name,
-	int input_min, int input_max, int output_min, int output_max,
-	DataType default_type)
-	: SessionObject(s, name),
-	  AutomatableControls (s),
-  	  _output_buffers (new BufferSet()),
-	  _active(true),
-	  _default_type (default_type),
-	  _input_minimum (ChanCount::ZERO),
-	  _input_maximum (ChanCount::INFINITE),
-	  _output_minimum (ChanCount::ZERO),
-	  _output_maximum (ChanCount::INFINITE)
+		DataType default_type,
+		ChanCount in_min, ChanCount in_max, ChanCount out_min, ChanCount out_max)
+	: SessionObject (s, name)
+	, AutomatableControls (s)
+  	, _output_buffers (new BufferSet())
+	, _active (true)
+	, _default_type (default_type)
+	, _amp (new Amp(s, *this))
+	, _meter (new PeakMeter(s))
+	, _panner (new Panner(name, s))
+	, _input_minimum (ChanCount::ZERO)
+	, _input_maximum (ChanCount::INFINITE)
+	, _output_minimum (ChanCount::ZERO)
+	, _output_maximum (ChanCount::INFINITE)
 {
-	_panner = new Panner (name, _session);
-	_meter = new PeakMeter (_session);
-
-	if (input_min > 0) {
-		_input_minimum = ChanCount(_default_type, input_min);
-	}
-	if (input_max >= 0) {
-		_input_maximum = ChanCount(_default_type, input_max);
-	}
-	if (output_min > 0) {
-		_output_minimum = ChanCount(_default_type, output_min);
-	}
-	if (output_max >= 0) {
-		_output_maximum = ChanCount(_default_type, output_max);
-	}
+	_input_minimum  = in_min;
+	_output_minimum = out_min;
+	_input_maximum  = in_max;
+	_output_maximum = out_max;
 
 	_gain = 1.0;
-	_desired_gain = 1.0;
 	pending_state_node = 0;
 	no_panner_reset = false;
 	_phase_invert = false;
@@ -143,8 +134,6 @@ IO::IO (Session& s, const string& name,
 	_gain_control = boost::shared_ptr<GainControl>( new GainControl( X_("gaincontrol"), this, Evoral::Parameter(GainAutomation), gl ));
 
 	add_control(_gain_control);
-
-	apply_gain_automation = false;
 	
 	{
 		// IO::Meter is emitted from another thread so the
@@ -162,21 +151,18 @@ IO::IO (Session& s, const string& name,
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
-	: SessionObject(s, "unnamed io"),
-	  AutomatableControls (s),
-  	  _output_buffers (new BufferSet()),
-	  _active(true),
-	  _default_type (dt)
+	: SessionObject(s, "unnamed io")
+	, AutomatableControls (s)
+	, _output_buffers (new BufferSet())
+	, _active(true)
+	, _default_type (dt)
+	, _amp (new Amp(s, *this))
+	, _meter(new PeakMeter (_session))
 {
-	_meter = new PeakMeter (_session);
-	_panner = 0;
 	deferred_state = 0;
 	no_panner_reset = false;
-	_desired_gain = 1.0;
 	_gain = 1.0;
 
-	apply_gain_automation = false;
-	
 	boost::shared_ptr<AutomationList> gl(
 			new AutomationList(Evoral::Parameter(GainAutomation)));
 
@@ -218,9 +204,6 @@ IO::~IO ()
 	}
 
 	m_meter_connection.disconnect();
-
-	delete _meter;
-	delete _panner;
 }
 
 void
@@ -241,50 +224,16 @@ IO::silence (nframes_t nframes)
 void
 IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
 {
-	// FIXME: type specific code doesn't actually need to be here, it will go away in time
-
-	/* ********** AUDIO ********** */
-
-	// Apply gain if gain automation isn't playing
-	if ( ! apply_gain_automation) {
-		
-		gain_t dg = _gain; // desired gain
-
-		{
-			Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
-
-			if (dm.locked()) {
-				dg = _desired_gain;
-			}
-
-		}
-
-		if (dg != _gain || dg != 1.0) {
-			Amp::run_in_place(bufs, nframes, _gain, dg, _phase_invert);
-			_gain = dg;
-		}
-	}
-	
-	/* do this so that any processing that comes after deliver_outputs()
-	   can use the output buffers.
-	*/
-
+	// Attach output buffers to port buffers
 	output_buffers().attach_buffers (_outputs, nframes, _output_offset);
 
 	// Use the panner to distribute audio to output port buffers
+	if (_panner && _panner->npanners() && !_panner->bypassed()) {
 
-	if (0 && _panner && _panner->npanners() && !_panner->bypassed()) {
-
-		/* blech .. we shouldn't be creating and tearing this down every process()
-		   cycle. XXX fix me to not waste cycles and do memory allocation etc.
-		*/
-		
 		_panner->run_out_of_place(bufs, output_buffers(), start_frame, end_frame, nframes);
 
+	// Do a 1:1 copy of data to output ports
 	} else {
-
-		/* do a 1:1 copy of data to output ports */
-
 		if (bufs.count().n_audio() > 0 && _outputs.count().n_audio () > 0) {
 			copy_to_outputs (bufs, DataType::AUDIO, nframes);
 		}
@@ -292,6 +241,27 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 			copy_to_outputs (bufs, DataType::MIDI, nframes);
 		}
 	}
+	
+	// Apply gain to output buffers if gain automation isn't playing
+	if ( ! _amp->apply_gain_automation()) {
+		
+		gain_t dg = _gain; // desired gain
+
+		{
+			Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
+
+			if (dm.locked()) {
+				dg = _gain_control->user_float();
+			}
+
+		}
+
+		if (dg != _gain || dg != 1.0) {
+			Amp::apply_gain(output_buffers(), nframes, _gain, dg, _phase_invert);
+			_gain = dg;
+		}
+	}
+	
 }
 
 void
@@ -302,9 +272,8 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes)
 	PortSet::iterator o = _outputs.begin(type);
 	BufferSet::iterator i = bufs.begin(type);
 	BufferSet::iterator prev = i;
-	
+
 	while (i != bufs.end(type) && o != _outputs.end (type)) {
-		
 		Buffer& port_buffer (o->get_buffer (nframes));
 		port_buffer.read_from (*i, nframes, _output_offset);
 		prev = i;
@@ -312,8 +281,7 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes)
 		++o;
 	}
 	
-	/* extra outputs get a copy of the last buffer */
-	
+	// Copy last buffer to any extra outputs
 	while (o != _outputs.end(type)) {
 		Buffer& port_buffer (o->get_buffer (nframes));
 		port_buffer.read_from (*prev, nframes, _output_offset);
@@ -894,13 +862,18 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 	bool out_changed    = false;
 	bool need_pan_reset = false;
 
-	in = min (_input_maximum, in);
+	assert(in != ChanCount::INFINITE);
+	assert(out != ChanCount::INFINITE);
 
-	out = min (_output_maximum, out);
+	in = ChanCount::min (_input_maximum, in);
+	out = ChanCount::min (_output_maximum, out);
 
 	if (in == n_inputs() && out == n_outputs() && !clear) {
 		return 0;
 	}
+
+	_configured_inputs = in;
+	_configured_outputs = out;
 
 	{
 		BLOCK_PROCESS_CALLBACK ();
@@ -943,9 +916,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 			}
 
 			/* create any necessary new input ports */
-
 			while (n_inputs().get(*t) < nin) {
-
 				string portname = build_legal_port_name (*t, true);
 
 				try {
@@ -959,7 +930,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 					setup_peak_meters ();
 					reset_panner ();
 					/* pass it on */
-					throw AudioEngine::PortRegistrationFailure();
+					throw err;
 				}
 
 				_inputs.add (port);
@@ -983,7 +954,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 					setup_peak_meters ();
 					reset_panner ();
 					/* pass it on */
-					throw AudioEngine::PortRegistrationFailure ();
+					throw err;
 				}
 
 				_outputs.add (port);
@@ -1124,7 +1095,7 @@ IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 {
 	bool changed = false;
 
-	if (_output_maximum < ChanCount::INFINITE) {
+	if (_output_maximum != ChanCount::INFINITE) {
 		count = min (_output_maximum, count);
 		if (count == n_outputs() && !clear) {
 			return 0;
@@ -1152,11 +1123,7 @@ IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 gain_t
 IO::effective_gain () const
 {
-	if (_gain_control->automation_playback()) {
-		return _gain_control->get_value();
-	} else {
-		return _desired_gain;
-	}
+	return _gain_control->get_value();
 }
 
 void
@@ -1305,16 +1272,10 @@ IO::state (bool full_state)
 	snprintf (buf, sizeof(buf), "%2.12f", gain());
 	node->add_property ("gain", buf);
 
-	/* To make backwards compatibility a bit easier, write ChanCount::INFINITE to the session file
-	   as -1.
-	*/
-
-	int const in_max = _input_maximum == ChanCount::INFINITE ? -1 : _input_maximum.get(_default_type);
-	int const out_max = _output_maximum == ChanCount::INFINITE ? -1 : _output_maximum.get(_default_type);
-
-	snprintf (buf, sizeof(buf)-1, "%d,%d,%d,%d", _input_minimum.get(_default_type), in_max, _output_minimum.get(_default_type), out_max);
-
-	node->add_property ("iolimits", buf);
+	/* port counts */
+	
+	node->add_child_nocopy(*n_inputs().state("Inputs"));
+	node->add_child_nocopy(*n_outputs().state("Outputs"));
 
 	/* automation */
 	
@@ -1358,9 +1319,9 @@ IO::set_state (const XMLNode& node)
 		sscanf (prop->value().c_str(), "%d,%d,%d,%d",
 			&in_min, &in_max, &out_min, &out_max);
 
-		/* Correct for the difference between the way we write things to session files and the
-		   way things are described by ChanCount; see comments in io.h about what the different
-		   ChanCount values mean. */
+		// Legacy numbers:
+		// minimum == -1  =>  minimum == 0
+		// maximum == -1  =>  maximum == infinity
 
 		if (in_min < 0) {
 			_input_minimum = ChanCount::ZERO;
@@ -1389,7 +1350,7 @@ IO::set_state (const XMLNode& node)
 	
 	if ((prop = node.property ("gain")) != 0) {
 		set_gain (atof (prop->value().c_str()), this);
-		_gain = _desired_gain;
+		_gain = _gain_control->user_float();
 	}
 
 	if ((prop = node.property ("automation-state")) != 0 || (prop = node.property ("automation-style")) != 0) {
@@ -1400,16 +1361,16 @@ IO::set_state (const XMLNode& node)
 
 		// Old school Panner.
 		if ((*iter)->name() == "Panner") {
-			if (_panner == 0) {
-				_panner = new Panner (_name, _session);
+			if (!_panner) {
+				_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 			}
 			_panner->set_state (**iter);
 		}
 
 		if ((*iter)->name() == "Processor") {
 			if ((*iter)->property ("type") && ((*iter)->property ("type")->value() == "panner" ) ) {
-				if (_panner == 0) {
-					_panner = new Panner (_name, _session);
+				if (!_panner) {
+					_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 				}
 				_panner->set_state (**iter);
 			}
@@ -1427,6 +1388,8 @@ IO::set_state (const XMLNode& node)
 		}
 	}
 
+	get_port_counts (node);
+
 	if (ports_legal) {
 
 		if (create_ports (node)) {
@@ -1438,8 +1401,10 @@ IO::set_state (const XMLNode& node)
 		port_legal_c = PortsLegal.connect (mem_fun (*this, &IO::ports_became_legal));
 	}
 
-	if( !_panner )
-	    _panner = new Panner( _name, _session );
+	if (!_panner) {
+		_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	}
+
 	if (panners_legal) {
 		reset_panner ();
 	} else {
@@ -1573,6 +1538,7 @@ IO::ports_became_legal ()
 
 	port_legal_c.disconnect ();
 
+	get_port_counts (*pending_state_node);
 	ret = create_ports (*pending_state_node);
 
 	if (connecting_legal) {
@@ -1676,48 +1642,64 @@ IO::find_possible_bundle (const string &desired_name, const string &default_name
 }
 
 int
-IO::create_ports (const XMLNode& node)
+IO::get_port_counts (const XMLNode& node)
 {
 	XMLProperty const * prop;
-	uint32_t num_inputs = 0;
-	uint32_t num_outputs = 0;
+	XMLNodeConstIterator iter;
+	ChanCount num_inputs = n_inputs();
+	ChanCount num_outputs = n_outputs();
+
+	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
+		if ((*iter)->name() == X_("Inputs")) {
+			num_inputs = ChanCount::max(num_inputs, ChanCount(**iter));
+		} else if ((*iter)->name() == X_("Outputs")) {
+			num_outputs = ChanCount::max(num_inputs, ChanCount(**iter));
+		}
+	}
 
 	if ((prop = node.property ("input-connection")) != 0) {
 
 		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("in"), _("input"));
-	
 		if (c) {
-			num_inputs = c->nchannels ();
-		} else {
-			num_inputs = 0;
+			num_inputs = ChanCount::max(num_inputs, ChanCount(c->type(), c->nchannels()));
 		}
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 
-		num_inputs = count (prop->value().begin(), prop->value().end(), '{');
+		num_inputs = ChanCount::max(num_inputs, ChanCount(_default_type,
+				count (prop->value().begin(), prop->value().end(), '{')));
 	}
 	
 	if ((prop = node.property ("output-connection")) != 0) {
 
-		boost::shared_ptr<Bundle> c = find_possible_bundle(prop->value(), _("out"), _("output"));
-
+		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("out"), _("output"));
 		if (c) {
-			num_outputs = c->nchannels ();
-		} else {
-			num_outputs = 0;
+			num_outputs = ChanCount::max(num_outputs, ChanCount(c->type(), c->nchannels()));
 		}
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
 
-		num_outputs = count (prop->value().begin(), prop->value().end(), '{');
+		num_outputs = ChanCount::max(num_outputs, ChanCount(_default_type,
+				count (prop->value().begin(), prop->value().end(), '{')));
 	}
+	
+	_configured_inputs = num_inputs;
+	_configured_outputs = num_outputs;
 
+	_input_minimum = ChanCount::min(_input_minimum, num_inputs);
+	_input_maximum = ChanCount::max(_input_maximum, num_inputs);
+	_output_minimum = ChanCount::min(_output_minimum, num_outputs);
+	_output_maximum = ChanCount::max(_output_maximum, num_outputs);
+	
+	return 0;
+}
+
+int
+IO::create_ports (const XMLNode& node)
+{
 	no_panner_reset = true;
 
-	if (ensure_io (ChanCount (_default_type, num_inputs),
-		       ChanCount (_default_type, num_outputs),
-		       true, this)) {
-		
+	if (ensure_io (_input_minimum, _output_minimum, true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
 	}
@@ -1729,7 +1711,6 @@ IO::create_ports (const XMLNode& node)
 	PortsCreated();
 	return 0;
 }
-
 
 int
 IO::make_connections (const XMLNode& node)
@@ -2282,8 +2263,8 @@ IO::meter ()
 void
 IO::clear_automation ()
 {
-	data().clear (); // clears gain automation
-	_panner->data().clear();
+	data().clear_controls (); // clears gain automation
+	_panner->data().clear_controls ();
 }
 
 void
@@ -2325,10 +2306,12 @@ IO::set_parameter_automation_state (Evoral::Parameter param, AutoState state)
 void
 IO::inc_gain (gain_t factor, void *src)
 {
-	if (_desired_gain == 0.0f)
+	float desired_gain = _gain_control->user_float();
+	if (desired_gain == 0.0f) {
 		set_gain (0.000001f + (0.000001f * factor), src);
-	else
-		set_gain (_desired_gain + (_desired_gain * factor), src);
+	} else {
+		set_gain (desired_gain + (desired_gain * factor), src);
+	}
 }
 
 void
@@ -2350,7 +2333,7 @@ IO::set_gain (gain_t val, void *src)
 
 	{
 		Glib::Mutex::Lock dm (declick_lock);
-		_desired_gain = val;
+		_gain_control->set_float(val, false);
 	}
 
 	if (_session.transport_stopped()) {
@@ -2470,7 +2453,7 @@ IO::build_legal_port_name (DataType type, bool in)
 	}
 	
 	snprintf (buf2, name_size+1, "%s %d", buf1, port_number);
-	
+
 	return string (buf2);
 }
 

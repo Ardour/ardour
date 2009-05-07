@@ -38,7 +38,15 @@ public:
 
 	virtual void  set_float(float val, bool to_list=false, FrameTime frame=0);
 	virtual float get_float(bool from_list=false, FrameTime frame=0) const;
-	virtual float user_float() const;
+	
+
+	/** Get the latest user-set value
+	 * (which may not equal get_value() when automation is playing back).
+	 *
+	 * Automation write/touch works by periodically sampling this value
+	 * and adding it to the ControlList.
+	 */
+	float user_float() const { return _user_value; }
 
 	void set_list(boost::shared_ptr<ControlList>);
 

@@ -117,7 +117,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
 
 	if (_last_read_end == 0 || start != _last_read_end) {
-		cerr << "SMFSource::read_unlocked seeking to " << start << endl;
+		//cerr << "SMFSource::read_unlocked seeking to " << start << endl;
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
 			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
@@ -374,10 +374,10 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 	if (! _model) {
 		_model = boost::shared_ptr<MidiModel>(new MidiModel(this));
-		cerr << _name << " loaded new model " << _model.get() << endl;
+		//cerr << _name << " loaded new model " << _model.get() << endl;
 	} else {
-		cerr << _name << " reloading model " << _model.get()
-			<< " (" << _model->n_notes() << " notes)" <<endl;
+		/*cerr << _name << " reloading model " << _model.get()
+			<< " (" << _model->n_notes() << " notes)" << endl;*/
 		_model->clear();
 	}
 

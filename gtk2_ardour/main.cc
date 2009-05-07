@@ -344,7 +344,7 @@ int main (int argc, char *argv[])
 	
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
-	     << _("\n   (built using ")
+	     << _(" (built using ")
 	     << svn_revision
 #ifdef __GNUC__
 	     << _(" and GCC version ") << __VERSION__ 

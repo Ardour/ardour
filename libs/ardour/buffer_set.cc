@@ -34,6 +34,7 @@ namespace ARDOUR {
 /** Create a new, empty BufferSet */
 BufferSet::BufferSet()
 	: _is_mirror(false)
+	, _is_silent(false)
 {
 	for (size_t i=0; i < DataType::num_types; ++i) {
 		_buffers.push_back(BufferVec());
@@ -84,6 +85,7 @@ BufferSet::attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset)
 	}
 	
 	_count = ports.count();
+	_available = ports.count();
 
 	_is_mirror = true;
 }
@@ -97,8 +99,9 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	assert(type != DataType::NIL);
 	assert(type < _buffers.size());
 
-	if (num_buffers == 0)
+	if (num_buffers == 0) {
 		return;
+	}
 
 	// The vector of buffers of the type we care about
 	BufferVec& bufs = _buffers[type];
@@ -132,7 +135,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 #ifdef HAVE_SLV2
 	// Ensure enough low level MIDI format buffers are available for conversion
 	// in both directions (input & output, out-of-place)
-	if (type == DataType::MIDI && _lv2_buffers.size() < _buffers[type].size() * 2) {
+	if (type == DataType::MIDI && _lv2_buffers.size() < _buffers[type].size() * 2 + 1) {
 		while (_lv2_buffers.size() < _buffers[type].size() * 2) {
 			_lv2_buffers.push_back(std::make_pair(false, new LV2EventBuffer(buffer_capacity)));
 		}
@@ -160,7 +163,7 @@ BufferSet::buffer_capacity(DataType type) const
 Buffer&
 BufferSet::get(DataType type, size_t i)
 {
-	assert(i <= _count.get(type));
+	assert(i < _available.get(type));
 	return *_buffers[type][i];
 }
 

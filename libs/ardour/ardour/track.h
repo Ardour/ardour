@@ -44,16 +44,16 @@ class Track : public Route
 	virtual int set_mode (TrackMode m) { return false; }
 	virtual bool can_use_mode (TrackMode m, bool& bounce_required) { return false; }
 	sigc::signal<void> TrackModeChanged;
+	
+	int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+			     bool state_changing, bool can_record, bool rec_monitors_input);
+	
+	int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+			bool can_record, bool rec_monitors_input);
 
 	virtual int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 			  int declick, bool can_record, bool rec_monitors_input) = 0;
 	
-	virtual int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			     bool state_changing, bool can_record, bool rec_monitors_input) = 0;
-	
-	virtual int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-				 bool can_record, bool rec_monitors_input) = 0;
-
 	void toggle_monitor_input ();
 
 	bool can_record();

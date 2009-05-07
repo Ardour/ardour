@@ -41,12 +41,6 @@ class AudioTrack : public Track
 
 	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		  int declick, bool can_record, bool rec_monitors_input);
-	
-	int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		     bool state_changing, bool can_record, bool rec_monitors_input);
-	
-	int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-			 bool can_record, bool rec_monitors_input);
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 

@@ -107,7 +107,7 @@ int
 ARDOUR::setup_midi ()
 {
 	if (Config->midi_ports.size() == 0) {
-		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
+		//warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
 

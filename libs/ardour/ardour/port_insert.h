@@ -40,7 +40,7 @@ class Session;
 class PortInsert : public IOProcessor
 {
   public:
-	PortInsert (Session&, Placement);
+	PortInsert (Session&);
 	PortInsert (Session&, const XMLNode&);
 	~PortInsert ();
 

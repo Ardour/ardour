@@ -446,7 +446,7 @@ msgid "automation list: no y-coordinate stored for control point (point ignored)
 msgstr "λίστα αυτοματισμού: καμία y-συντεταγμένη αποθηκευμένη για σημείο ελέγχου (το σημείο αγνοήθηκε)"
 
 #: libs/ardour/configuration.cc:80
-msgid "loading system configuration file %1"
+msgid "Loading system configuration file %1"
 msgstr "Ανάκληση αρχείου ρυθμίσεων συστήματος %1"
 
 #: libs/ardour/configuration.cc:83
@@ -458,7 +458,7 @@ msgid "Ardour: system configuration file \"%1\" not loaded successfully."
 msgstr "Ardour: το αρχείο διαρρυθμίσεως του συστήματος \"%1\" δεν φορτώθηκε επιτυχώς."
 
 #: libs/ardour/configuration.cc:105
-msgid "loading user configuration file %1"
+msgid "Loading user configuration file %1"
 msgstr "Ανάκληση αρχείου ρυθμίσεων χρήστη %1"
 
 #: libs/ardour/configuration.cc:108

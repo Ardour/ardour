@@ -106,7 +106,11 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		create_automation_child (GainAutomation, false);
 	}
 	
-	_route->panner().Changed.connect (bind (mem_fun(*this, &AudioTimeAxisView::ensure_pan_views), false));
+	if (_route->panner()) {
+		_route->panner()->Changed.connect (bind (
+				mem_fun(*this, &AudioTimeAxisView::ensure_pan_views),
+				false));
+	}
 
 	/* map current state of the route */
 
@@ -370,13 +374,17 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 void
 AudioTimeAxisView::ensure_pan_views (bool show)
 {
-	const set<Evoral::Parameter>& params = _route->panner().what_can_be_automated();
+	if (!_route->panner()) {
+		return;
+	}
+
+	const set<Evoral::Parameter>& params = _route->panner()->what_can_be_automated();
 	set<Evoral::Parameter>::iterator p;
 
 	for (p = params.begin(); p != params.end(); ++p) {
 		boost::shared_ptr<ARDOUR::AutomationControl> pan_control
 			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				_route->panner().data().control(*p));
+				_route->panner()->data().control(*p));
 		
 		if (pan_control->parameter().type() == NullAutomation) {
 			error << "Pan control has NULL automation type!" << endmsg;

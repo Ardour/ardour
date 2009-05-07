@@ -2172,7 +2172,8 @@ AudioDiskstream::set_block_size (nframes_t nframes)
 		boost::shared_ptr<ChannelList> c = channels.reader();
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			if ((*chan)->speed_buffer) delete [] (*chan)->speed_buffer;
+			if ((*chan)->speed_buffer)
+				delete [] (*chan)->speed_buffer;
 			(*chan)->speed_buffer = new Sample[speed_buffer_size];
 		}
 	}
@@ -2195,9 +2196,11 @@ AudioDiskstream::allocate_temporary_buffers ()
 		boost::shared_ptr<ChannelList> c = channels.reader();
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			if ((*chan)->playback_wrap_buffer) delete [] (*chan)->playback_wrap_buffer;
+			if ((*chan)->playback_wrap_buffer)
+				delete [] (*chan)->playback_wrap_buffer;
 			(*chan)->playback_wrap_buffer = new Sample[required_wrap_size];	
-			if ((*chan)->capture_wrap_buffer) delete [] (*chan)->capture_wrap_buffer;
+			if ((*chan)->capture_wrap_buffer)
+				delete [] (*chan)->capture_wrap_buffer;
 			(*chan)->capture_wrap_buffer = new Sample[required_wrap_size];	
 		}
 
@@ -2270,7 +2273,7 @@ int
 AudioDiskstream::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many-- && !c->empty()) {
-		delete c->back();
+		//delete c->back(); // FIXME: crash (thread safe with RCU?)
 		c->pop_back();
 	}
 

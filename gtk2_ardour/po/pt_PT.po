@@ -4529,8 +4529,7 @@ msgstr ""
 
 #: main.cc:401
 msgid ""
-"\n"
-"   (built using "
+" (built using "
 msgstr ""
 "\n"
 "   (compilado "

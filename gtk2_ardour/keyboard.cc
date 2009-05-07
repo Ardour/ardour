@@ -617,7 +617,7 @@ bool
 Keyboard::load_keybindings (string path)
 {
 	try {
-		cerr << "loading bindings from " << path << endl;
+		cerr << "Loading bindings from " << path << endl;
 
 		Gtk::AccelMap::load (path);
 

@@ -5528,8 +5528,7 @@ msgstr "Ardour/GTK"
 
 #: gtk2_ardour/main.cc:314
 msgid ""
-"\n"
-"   (built using "
+" (built using "
 msgstr ""
 "\n"
 "   (construit avec "
@@ -7004,7 +7003,7 @@ msgid "programming error: request for non-existent audio range (%1)!"
 msgstr "programming error: request for non-existent audio range (%1)!"
 
 #: gtk2_ardour/ui_config.cc:67
-msgid "loading default ui configuration file %1"
+msgid "Loading default ui configuration file %1"
 msgstr ""
 "Chargement du fichier de style par défaut (%1) pour l'interface graphique"
 
@@ -7021,9 +7020,9 @@ msgstr ""
 "graphique n'a pas pu être chargé correctement."
 
 #: gtk2_ardour/ui_config.cc:93
-msgid "loading user ui configuration file %1"
+msgid "Loading user ui configuration file %1"
 msgstr ""
-"chargement du fichier utilisateur (%1) pour la configuration de l'interface "
+"Chargement du fichier utilisateur (%1) pour la configuration de l'interface "
 "graphique"
 
 #: gtk2_ardour/ui_config.cc:96

@@ -21,11 +21,15 @@
 #include <sigc++/sigc++.h>
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/compose.h"
 #include "pbd/file_utils.h"
+#include "pbd/error.h"
 
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace sigc;
@@ -55,12 +59,11 @@ MidiPatchManager::refresh()
 	
 	path path_to_patches = _session->session_directory().midi_patch_path();
 	
-	cerr << "Path to patches: " << path_to_patches.to_string() << endl;
+	info << string_compose(_("looking for MIDI patches in %1"), path_to_patches.to_string()) << endmsg;
 	
-	if(!exists(path_to_patches)) {
+	if (!exists(path_to_patches)) {
 		return;
 	}
-	cerr << "Path to patches: " << path_to_patches.to_string() << " exists" << endl;
 	
 	assert(is_directory(path_to_patches));
 	
@@ -69,17 +72,15 @@ MidiPatchManager::refresh()
 	
 	find_matching_files_in_directory(path_to_patches, pattern, result);
 
-	cerr << "patchfiles result contains " << result.size() << " elements" << endl;
+	cerr << "Loading " << result.size() << " MIDI patches from " << path_to_patches.to_string() << endl;
 	
-	for(vector<path>::iterator i = result.begin(); i != result.end(); ++i) {
-		cerr << "processing patchfile " << i->to_string() << endl;	
-		
+	for (vector<path>::iterator i = result.begin(); i != result.end(); ++i) {
 		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(i->to_string()));
-		for(MIDINameDocument::MasterDeviceNamesList::const_iterator device = 
-			  document->master_device_names_by_model().begin();
-		    device != document->master_device_names_by_model().end();
-		    ++device) {
-			cerr << "got model " << device->first << endl;
+		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device = 
+					document->master_device_names_by_model().begin();
+			 	device != document->master_device_names_by_model().end();
+				++device) {
+			//cerr << "got model " << device->first << endl;
 			// have access to the documents by model name
 			_documents[device->first] = document;
 			// build a list of all master devices from all documents

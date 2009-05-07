@@ -22,10 +22,27 @@
 #include <stdint.h>
 #include "ardour/chan_count.h"
 
+#include "i18n.h"
+
+static const char* state_node_name = "Channels";
+
 namespace ARDOUR {
 
 // infinite/zero chan count stuff, for setting minimums and maximums, etc.
 // FIXME: implement this in a less fugly way
+
+ChanCount::ChanCount(const XMLNode& node)
+{
+	reset();
+	XMLNodeConstIterator iter = node.children().begin();
+	for ( ; iter != node.children().end(); ++iter) {
+		if ((*iter)->name() == X_(state_node_name)) {
+			const string& type_str  = (*iter)->property("type")->value();
+			const string& count_str = (*iter)->property("count")->value();
+			set(DataType(type_str), atol(count_str.c_str()));
+		}
+	}
+}
 
 ChanCount
 infinity_factory()
@@ -39,6 +56,21 @@ infinity_factory()
 	return ret;
 }
 
+XMLNode*
+ChanCount::state(const std::string& name) const
+{
+	XMLNode* node = new XMLNode (name);
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t count = get(*t);
+		if (count > 0) {
+			XMLNode* n = new XMLNode(X_(state_node_name));
+			n->add_property("type", (*t).to_string());
+			n->add_property("count", count);
+			node->add_child_nocopy(*n);
+		}
+	}
+	return node;
+}
 
 // Statics
 const ChanCount ChanCount::INFINITE = infinity_factory();

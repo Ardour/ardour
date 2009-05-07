@@ -20,18 +20,19 @@
 #include <sigc++/retype_return.h>
 #include <sigc++/bind.h>
 
-#include "ardour/track.h"
-#include "ardour/diskstream.h"
-#include "ardour/session.h"
-#include "ardour/io_processor.h"
+#include "ardour/amp.h"
+#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
-#include "ardour/route_group_specialized.h"
-#include "ardour/processor.h"
-#include "ardour/audioplaylist.h"
+#include "ardour/diskstream.h"
+#include "ardour/io_processor.h"
 #include "ardour/panner.h"
-#include "ardour/utils.h"
 #include "ardour/port.h"
+#include "ardour/processor.h"
+#include "ardour/route_group_specialized.h"
+#include "ardour/session.h"
+#include "ardour/track.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 
@@ -40,7 +41,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, DataType default_type)
-	: Route (sess, name, 1, -1, -1, -1, flag, default_type)
+	: Route (sess, name, flag, default_type)
 	, _rec_enable_control (new RecEnableControllable(*this))
 {
 	_declickable = true;
@@ -231,7 +232,114 @@ Track::set_latency_delay (nframes_t longest_session_latency)
 void
 Track::zero_diskstream_id_in_xml (XMLNode& node)
 {
-       if (node.property ("diskstream-id")) {
-               node.add_property ("diskstream-id", "0");
-       }
+	if (node.property ("diskstream-id")) {
+		node.add_property ("diskstream-id", "0");
+	}
+}
+
+int 
+Track::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		     bool session_state_changing, bool can_record, bool rec_monitors_input)
+{
+	if (n_outputs().n_total() == 0) {
+		return 0;
+	}
+
+	if (!_active) {
+		silence (nframes);
+		return 0;
+	}
+
+	if (session_state_changing) {
+
+		/* XXX is this safe to do against transport state changes? */
+
+		passthru_silence (start_frame, end_frame, nframes, 0);
+		return 0;
+	}
+
+	diskstream()->check_record_status (start_frame, nframes, can_record);
+
+	bool send_silence;
+	
+	if (_have_internal_generator) {
+		/* since the instrument has no input streams,
+		   there is no reason to send any signal
+		   into the route.
+		*/
+		send_silence = true;
+	} else {
+		if (!Config->get_tape_machine_mode()) {
+			/* 
+			   ADATs work in a strange way.. 
+			   they monitor input always when stopped.and auto-input is engaged. 
+			*/
+			if ((Config->get_monitoring_model() == SoftwareMonitoring)
+					&& (Config->get_auto_input () || _diskstream->record_enabled())) {
+				send_silence = false;
+			} else {
+				send_silence = true;
+			}
+		} else {
+			/* 
+			   Other machines switch to input on stop if the track is record enabled,
+			   regardless of the auto input setting (auto input only changes the 
+			   monitoring state when the transport is rolling) 
+			*/
+			if ((Config->get_monitoring_model() == SoftwareMonitoring)
+					&& _diskstream->record_enabled()) {
+				send_silence = false;
+			} else {
+				send_silence = true;
+			}
+		}
+	}
+
+	_amp->apply_gain_automation(false);
+
+	if (send_silence) {
+		
+		/* if we're sending silence, but we want the meters to show levels for the signal,
+		   meter right here.
+		*/
+		
+		if (_have_internal_generator) {
+			passthru_silence (start_frame, end_frame, nframes, 0);
+		} else {
+			if (_meter_point == MeterInput) {
+				just_meter_input (start_frame, end_frame, nframes);
+			}
+			passthru_silence (start_frame, end_frame, nframes, 0);
+		}
+
+	} else {
+	
+		/* we're sending signal, but we may still want to meter the input. 
+		 */
+
+		passthru (start_frame, end_frame, nframes, false);
+	}
+
+	return 0;
+}
+
+int
+Track::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,  
+		 bool can_record, bool rec_monitors_input)
+{
+	if (n_outputs().n_total() == 0 && _processors.empty()) {
+		return 0;
+	}
+
+	if (!_active) {
+		silence (nframes);
+		return 0;
+	}
+
+	_silent = true;
+	_amp->apply_gain_automation(false);
+
+	silence (nframes);
+
+	return diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input);
 }

@@ -66,7 +66,10 @@ public:
 	const ChanCount& count() const { return _count; }
 	ChanCount&       count()       { return _count; }
 
-	void set_count(const ChanCount& count) { _count = count; }
+	void is_silent(bool yn) { _is_silent = yn; }
+	bool is_silent() const  { return _is_silent; }
+
+	void set_count(const ChanCount& count) { assert(count <= _available); _count = count; }
 	
 	size_t buffer_capacity(DataType type) const;
 
@@ -161,6 +164,9 @@ private:
 
 	/// Whether we (don't) 'own' the contained buffers (otherwise we mirror a PortSet)
 	bool _is_mirror;
+
+	/// Whether the buffer set should be considered silent
+	bool _is_silent;
 };
 
 

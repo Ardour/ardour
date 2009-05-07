@@ -44,10 +44,12 @@
 
 namespace ARDOUR {
 
-class Processor;
+class Amp;
+class ControlOutputs;
 class IOProcessor;
-class Send;
+class Processor;
 class RouteGroup;
+class Send;
 
 enum mute_type {
     PRE_FADER =    0x1,
@@ -70,8 +72,10 @@ class Route : public IO
 		ControlOut = 0x4
 	};
 
-	Route (Session&, std::string name, int input_min, int input_max, int output_min, int output_max,
-	       Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
+	Route (Session&, std::string name, Flag flags = Flag(0),
+			DataType default_type = DataType::AUDIO,
+			ChanCount in=ChanCount::ZERO, ChanCount out=ChanCount::ZERO);
+
 	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
@@ -149,6 +153,15 @@ class Route : public IO
 			method (boost::weak_ptr<Processor> (*i));
 		}
 	}
+	
+	void foreach_processor (Placement p, sigc::slot<void, boost::weak_ptr<Processor> > method) {
+		Glib::RWLock::ReaderLock lm (_processor_lock);
+		ProcessorList::iterator start, end;
+		placement_range(p, start, end);
+		for (ProcessorList::iterator i = start; i != end; ++i) {
+			method (boost::weak_ptr<Processor> (*i));
+		}
+	}
 
 	boost::shared_ptr<Processor> nth_processor (uint32_t n) {
 		Glib::RWLock::ReaderLock lm (_processor_lock);
@@ -170,12 +183,12 @@ class Route : public IO
 	struct ProcessorStreams {
 		ProcessorStreams(size_t i=0, ChanCount c=ChanCount()) : index(i), count(c) {}
 
-		size_t    index; ///< Index of processor where configuration failed
+		uint32_t  index; ///< Index of processor where configuration failed
 		ChanCount count; ///< Input requested of processor
 	};
 
-	int add_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
-	int add_processors (const ProcessorList&, ProcessorStreams* err = 0);
+	int add_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, ProcessorList::iterator* iter=0, Placement=PreFader);
+	int add_processors (const ProcessorList&, ProcessorStreams* err = 0, Placement placement=PreFader);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
 	int sort_processors (ProcessorStreams* err = 0);
 	void disable_processors (Placement);
@@ -226,7 +239,7 @@ class Route : public IO
 	sigc::signal<void,void*> SelectedChanged;
 
 	int set_control_outs (const vector<std::string>& ports);
-	IO* control_outs() { return _control_outs; }
+	boost::shared_ptr<ControlOutputs> control_outs() { return _control_outs; }
 
 	bool feeds (boost::shared_ptr<Route>);
 	std::set<boost::shared_ptr<Route> > fed_by;
@@ -276,12 +289,11 @@ class Route : public IO
 	nframes_t check_initial_delay (nframes_t, nframes_t&);
 	
 	void passthru (nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes, int declick, bool meter_inputs);
+			nframes_t nframes, int declick);
 
 	virtual void process_output_buffers (BufferSet& bufs,
 					     nframes_t start_frame, nframes_t end_frame,
-					     nframes_t nframes, bool with_processors, int declick,
-					     bool meter);
+					     nframes_t nframes, bool with_processors, int declick);
 	
 	Flag           _flags;
 	int            _pending_declick;
@@ -296,8 +308,7 @@ class Route : public IO
 	nframes_t      _roll_delay;
 	ProcessorList  _processors;
 	Glib::RWLock   _processor_lock;
-	IO            *_control_outs;
-	Glib::Mutex    _control_outs_lock;
+	boost::shared_ptr<ControlOutputs> _control_outs;
 	RouteGroup    *_edit_group;
 	RouteGroup    *_mix_group;
 	std::string    _comment;
@@ -326,8 +337,7 @@ class Route : public IO
 	virtual XMLNode& state(bool);
 
 	void passthru_silence (nframes_t start_frame, nframes_t end_frame,
-	                       nframes_t nframes, int declick,
-	                       bool meter);
+	                       nframes_t nframes, int declick);
 	
 	void silence (nframes_t nframes);
 	
@@ -361,24 +371,18 @@ class Route : public IO
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
 
-	int reset_processor_counts (ProcessorStreams*); /* locked */
-	int _reset_processor_counts (ProcessorStreams*); /* unlocked */
+	bool _in_configure_processors;
 
-	/** processor I/O channels and plugin count handling */
-	struct ProcessorCount {
-	    boost::shared_ptr<ARDOUR::Processor> processor;
-	    ChanCount in;
-	    ChanCount out;
-
-	    ProcessorCount (boost::shared_ptr<ARDOUR::Processor> ins) : processor(ins) {}
-	};
+	int configure_processors (ProcessorStreams*);
+	int configure_processors_unlocked (ProcessorStreams*);
 	
-	int32_t apply_some_processor_counts (std::list<ProcessorCount>& iclist);
-	bool    check_some_processor_counts (std::list<ProcessorCount>& iclist,
-				ChanCount required_inputs, ProcessorStreams* err_streams);
-
 	void set_deferred_state ();
-	void add_processor_from_xml (const XMLNode&);
+	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator* iter=0);	
+
+	void placement_range(
+			Placement                p,
+			ProcessorList::iterator& start,
+			ProcessorList::iterator& end);
 };
 
 } // namespace ARDOUR

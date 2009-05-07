@@ -703,7 +703,7 @@ Multi2dPanner::set_state (const XMLNode& node)
 /*---------------------------------------------------------------------- */
 
 Panner::Panner (string name, Session& s)
-	: Processor(s, name, PostFader)
+	: Processor(s, name)
 {
 	//set_name_old_auto (name);
 	set_name (name);
@@ -1012,23 +1012,30 @@ Panner::set_automation_state (AutoState state)
 AutoState
 Panner::automation_state () const
 {
+	boost::shared_ptr<AutomationList> l;
 	if (!empty()) {
-		return ((AutomationList*)_streampanners.front()->pan_control()->list().get())->automation_state ();
-	} else {
-		return Off;
+		boost::shared_ptr<AutomationControl> control = _streampanners.front()->pan_control();
+		if (control) {
+			l = boost::dynamic_pointer_cast<AutomationList>(control->list());
+		}
 	}
+
+	return l ? l->automation_state() : Off;
 }
 
 AutoStyle
 Panner::automation_style () const
 {
+	boost::shared_ptr<AutomationList> l;
 	if (!empty()) {
-		return ((AutomationList*)_streampanners.front()->pan_control()->list().get())->automation_style ();
-	} else {
-		return Absolute;
+		boost::shared_ptr<AutomationControl> control = _streampanners.front()->pan_control();
+		if (control) {
+			l = boost::dynamic_pointer_cast<AutomationList>(control->list());
+		}
 	}
-}
 
+	return l ? l->automation_style() : Absolute;
+}
 
 struct PanPlugins {
     string name;

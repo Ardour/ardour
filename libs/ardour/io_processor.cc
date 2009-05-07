@@ -43,12 +43,19 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-IOProcessor::IOProcessor (Session& s, const string& name, Placement p,
-			  int input_min, int input_max,
-			  int output_min, int output_max, 
-			  DataType dtype)
-	: Processor(s, name, p)
-	, _io (new IO(s, name, input_min, input_max, output_min, output_max, dtype))
+IOProcessor::IOProcessor (Session& s, const string& proc_name, const string io_name, DataType dtype)
+	: Processor(s, proc_name)
+	, _io (new IO(s, io_name != "" ? io_name : proc_name, dtype))
+{
+	_active = false;
+	_sort_key = 0;
+	_gui = 0;
+	_extra_xml = 0;
+}
+
+IOProcessor::IOProcessor (Session& s, IO* io, const string& proc_name, DataType dtype)
+	: Processor(s, proc_name)
+	, _io (io)
 {
 	_active = false;
 	_sort_key = 0;

@@ -20,23 +20,123 @@
 #include <cmath>
 #include <algorithm>
 #include "ardour/amp.h"
-#include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/buffer_set.h"
+#include "ardour/configuration.h"
+#include "ardour/io.h"
+#include "ardour/session.h"
 
 namespace ARDOUR {
 
+Amp::Amp(Session& s, IO& io)
+	: Processor(s, "Amp")
+	, _io(io)
+	, _mute(false)
+	, _apply_gain(true)
+	, _apply_gain_automation(false)
+	, _current_gain(1.0)
+	, _desired_gain(1.0)
+{
+}
+
+bool
+Amp::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+{
+	out = in;
+	return true;
+}
+
+bool
+Amp::configure_io (ChanCount in, ChanCount out)
+{
+	if (out != in) { // always 1:1
+		return false;
+	}
+	
+	return Processor::configure_io (in, out);
+}
+
+void
+Amp::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
+{
+	gain_t* gab = _session.gain_automation_buffer();
+
+	if (_mute && !bufs.is_silent()) {
+		Amp::apply_gain (bufs, nframes, _current_mute_gain, _desired_mute_gain, false);
+		if (_desired_mute_gain == 0.0f) {
+			bufs.is_silent(true);
+		}
+	}
+
+	if (_apply_gain) {
+		
+		if (_apply_gain_automation) {
+			
+			if (_io.phase_invert()) {
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
+						sp[nx] *= -gab[nx];
+					}
+				}
+			} else {
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
+						sp[nx] *= gab[nx];
+					}
+				}
+			}
+			
+		} else { /* manual (scalar) gain */
+			
+			if (_current_gain != _desired_gain) {
+				
+				Amp::apply_gain (bufs, nframes, _current_gain, _desired_gain, _io.phase_invert());
+				_current_gain = _desired_gain;
+				
+			} else if (_current_gain != 0.0f && (_io.phase_invert() || _current_gain != 1.0f)) {
+				
+				/* no need to interpolate current gain value,
+				   but its non-unity, so apply it. if the gain
+				   is zero, do nothing because we'll ship silence
+				   below.
+				*/
+
+				gain_t this_gain;
+				
+				if (_io.phase_invert()) {
+					this_gain = -_current_gain;
+				} else {
+					this_gain = _current_gain;
+				}
+				
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
+					apply_gain_to_buffer(sp, nframes, this_gain);
+				}
+
+			} else if (_current_gain == 0.0f) {
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					i->clear();
+				}
+			}
+		}
+	}
+}
 
 /** Apply a declicked gain to the audio buffers of @a bufs */
 void
-Amp::run_in_place (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
+Amp::apply_gain (BufferSet& bufs, nframes_t nframes,
+		gain_t initial, gain_t target, bool invert_polarity)
 {
-	if (nframes == 0)
+	if (nframes == 0) {
 		return;
+	}
 
-	if (bufs.count().n_audio() == 0)
+	if (bufs.count().n_audio() == 0) {
 		return;
-
-	// assert(bufs.buffer_capacity(DataType::AUDIO) >= nframes);
+	}
 
 	// if we don't need to declick, defer to apply_simple_gain
 	if (initial == target) {
@@ -98,5 +198,18 @@ Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 {
 }
 
+XMLNode&
+Amp::state (bool full_state)
+{
+	return get_state();
+}
+
+XMLNode&
+Amp::get_state()
+{
+	XMLNode* node = new XMLNode(state_node_name);
+	node->add_property("type", "amp");
+	return *node;
+}
 
 } // namespace ARDOUR

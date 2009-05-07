@@ -6147,8 +6147,7 @@ msgstr "Ardour/GTK "
 
 #: gtk2_ardour/main.cc:272
 msgid ""
-"\n"
-"   (built using "
+" (built using "
 msgstr ""
 "\n"
 "   (skompilowany przy użyciu "
@@ -7636,7 +7635,7 @@ msgid "programming error: request for non-existent audio range (%1)!"
 msgstr ""
 
 #: gtk2_ardour/ui_config.cc:76
-msgid "loading default ui configuration file %1"
+msgid "Loading default ui configuration file %1"
 msgstr ""
 
 #: gtk2_ardour/ui_config.cc:79
@@ -7648,7 +7647,7 @@ msgid "Ardour: default ui configuration file \"%1\" not loaded successfully."
 msgstr ""
 
 #: gtk2_ardour/ui_config.cc:102
-msgid "loading user ui configuration file %1"
+msgid "Loading user ui configuration file %1"
 msgstr ""
 
 #: gtk2_ardour/ui_config.cc:105

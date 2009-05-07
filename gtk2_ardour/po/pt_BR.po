@@ -4852,8 +4852,7 @@ msgstr ""
 
 #: main.cc:401
 msgid ""
-"\n"
-"   (built using "
+" (built using "
 msgstr ""
 
 #: main.cc:405

@@ -52,32 +52,31 @@ class XMLNode;
 
 namespace ARDOUR {
 
-class Session;
+class Amp;
 class AudioEngine;
-class UserBundle;
+class AudioPort;
+class BufferSet;
 class Bundle;
+class MidiPort;
 class Panner;
 class PeakMeter;
 class Port;
-class AudioPort;
-class MidiPort;
-class BufferSet;
+class Session;
+class UserBundle;
 
 /** A collection of input and output ports with connections.
  *
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-
 class IO : public SessionObject, public AutomatableControls, public Latent
 {
   public:
 	static const string state_node_name;
 
-	IO (Session&, const string& name, 
-	    int input_min = -1, int input_max = -1, 
-	    int output_min = -1, int output_max = -1,
-	    DataType default_type = DataType::AUDIO);
+	IO (Session&, const string& name, DataType default_type = DataType::AUDIO,
+		ChanCount in_min=ChanCount::ZERO, ChanCount in_max=ChanCount::INFINITE,
+		ChanCount out_min=ChanCount::ZERO, ChanCount out_max=ChanCount::INFINITE);
 	
 	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	
@@ -109,7 +108,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
-	gain_t         gain () const { return _desired_gain; }
+	gain_t         gain () const { return _gain_control->user_float(); }
 	virtual gain_t effective_gain () const;
 	
 	void set_denormal_protection (bool yn, void *src);
@@ -118,10 +117,15 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	void set_phase_invert (bool yn, void *src);
 	bool phase_invert() const { return _phase_invert; }
 
-	Panner& panner()        { return *_panner; }
-	PeakMeter& peak_meter() { return *_meter; }
-	const Panner& panner() const { return *_panner; }
 	void reset_panner ();
+	
+	boost::shared_ptr<Amp> amp() const { return _amp; }
+
+	PeakMeter&       peak_meter()       { return *_meter.get(); }
+	const PeakMeter& peak_meter() const { return *_meter.get(); }
+	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
+
+	boost::shared_ptr<Panner> panner() const { return _panner; }
 	
 	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
@@ -133,8 +137,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	BundleList bundles_connected_to_inputs ();
 	BundleList bundles_connected_to_outputs ();
 
-        boost::shared_ptr<Bundle> bundle_for_inputs () { return _bundle_for_inputs; }
-        boost::shared_ptr<Bundle> bundle_for_outputs () { return _bundle_for_outputs; }
+	boost::shared_ptr<Bundle> bundle_for_inputs () { return _bundle_for_inputs; }
+	boost::shared_ptr<Bundle> bundle_for_outputs () { return _bundle_for_outputs; }
 	
 	int add_input_port (string source, void *src, DataType type = DataType::NIL);
 	int add_output_port (string destination, void *src, DataType type = DataType::NIL);
@@ -271,22 +275,24 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	mutable Glib::Mutex io_lock;
 
   protected:
-	Panner*             _panner;
 	BufferSet*          _output_buffers; //< Set directly to output port buffers
 	bool                _active;
 	gain_t              _gain;
-	gain_t              _effective_gain;
-	gain_t              _desired_gain;
 	Glib::Mutex          declick_lock;
 	PortSet             _outputs;
 	PortSet             _inputs;
-	PeakMeter*          _meter;
 	bool                 no_panner_reset;
 	bool                _phase_invert;
 	bool                _denormal_protection;
 	XMLNode*             deferred_state;
 	DataType            _default_type;
 	nframes_t           _output_offset;
+	ChanCount           _configured_inputs;
+	ChanCount           _configured_outputs;
+	
+	boost::shared_ptr<Amp>       _amp;
+	boost::shared_ptr<PeakMeter> _meter;
+	boost::shared_ptr<Panner>    _panner;
 
 	virtual void prepare_inputs (nframes_t nframes);
 	virtual void flush_outputs (nframes_t nframes);
@@ -301,8 +307,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	virtual void   set_gain (gain_t g, void *src);
 	void           inc_gain (gain_t delta, void *src);
 
-	bool apply_gain_automation;
-	
 	virtual int load_automation (std::string path);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
@@ -361,6 +365,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	void bundle_changed (Bundle::Change);
 
+	int get_port_counts (const XMLNode& node);
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
 	boost::shared_ptr<Bundle> find_possible_bundle (const string &desired_name, const string &default_name, const string &connection_type_name);

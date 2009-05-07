@@ -26,17 +26,11 @@ namespace ARDOUR {
 
 class ClickIO : public IO
 {
-  public:
-	ClickIO (Session& s, const string& name, 
-
-	       int input_min = -1, int input_max = -1, 
-
-	       int output_min = -1, int output_max = -1)
-	: IO (s, name, input_min, input_max, output_min, output_max) {}
-
+public:
+	ClickIO (Session& s, const string& name) : IO (s, name) {}
 	~ClickIO() {}
 
-  protected:
+protected:
 	uint32_t pans_required () const { return 1; }
 };
 

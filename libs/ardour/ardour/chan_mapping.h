@@ -26,6 +26,7 @@
 #include <utility>
 
 #include "ardour/data_type.h"
+#include "ardour/chan_count.h"
 
 namespace ARDOUR {
 
@@ -36,47 +37,26 @@ namespace ARDOUR {
 class ChanMapping {
 public:
 	ChanMapping() {}
-	ChanMapping(ChanCount identity) {
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			for (size_t i = 0; i <= identity.get(*t); ++i)
-				set(*t, i, i);
-		}
-	}
-
-	uint32_t get(DataType t, uint32_t from) {
-		Mappings::iterator tm = _mappings.find(t);
-		assert(tm != _mappings.end());
-		TypeMapping::iterator m = tm->second.find(from);
-		assert(m != tm->second.end());
-		return m->second;
-	}
+	ChanMapping(ARDOUR::ChanCount identity);
 	
-	void set(DataType t, uint32_t from, uint32_t to) {
-		Mappings::iterator tm = _mappings.find(t);
-		if (tm == _mappings.end()) {
-			tm = _mappings.insert(std::make_pair(t, TypeMapping())).first;
-		}
-		tm->second.insert(std::make_pair(from, to));
-	}
-
-	/** Increase the 'to' field of every mapping for type @a t by @a delta */
-	void offset(DataType t, uint32_t delta) {
-		Mappings::iterator tm = _mappings.find(t);
-		if (tm != _mappings.end()) {
-			for (TypeMapping::iterator m = tm->second.begin(); m != tm->second.end(); ++m) {
-				m->second += delta;
-			}
-		}
-	}
-
-private:
+	uint32_t get(DataType t, uint32_t from);
+	void     set(DataType t, uint32_t from, uint32_t to);
+	void     offset_from(DataType t, int32_t delta);
+	void     offset_to(DataType t, int32_t delta);
+	
 	typedef std::map<uint32_t, uint32_t>    TypeMapping;
 	typedef std::map<DataType, TypeMapping> Mappings;
 	
+	Mappings       mappings()       { return _mappings; }
+	const Mappings mappings() const { return _mappings; }
+
+private:
 	Mappings _mappings;
 };
 
 } // namespace ARDOUR
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& m);
 
 #endif // __ardour_chan_mapping_h__
 

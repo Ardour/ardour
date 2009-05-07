@@ -26,22 +26,23 @@
 
 #include "evoral/Curve.hpp"
 
-#include "ardour/audio_track.h"
+#include "ardour/amp.h"
+#include "ardour/audio_buffer.h"
 #include "ardour/audio_diskstream.h"
-#include "ardour/session.h"
-#include "ardour/io_processor.h"
+#include "ardour/audio_track.h"
+#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+#include "ardour/buffer_set.h"
+#include "ardour/io_processor.h"
+#include "ardour/panner.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/processor.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group_specialized.h"
-#include "ardour/processor.h"
-#include "ardour/plugin_insert.h"
-#include "ardour/audioplaylist.h"
-#include "ardour/playlist_factory.h"
-#include "ardour/panner.h"
+#include "ardour/session.h"
 #include "ardour/utils.h"
-#include "ardour/buffer_set.h"
-#include "ardour/audio_buffer.h"
 #include "i18n.h"
 
 using namespace std;
@@ -145,7 +146,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 	
 	if ((prop = node.property ("gain")) != 0) {
 		set_gain (atof (prop->value().c_str()), this);
-		_gain = _desired_gain;
+		_gain = _gain_control->user_float();
 	}
 
 	if ((prop = node.property ("input-connection")) != 0) {
@@ -452,91 +453,6 @@ AudioTrack::set_state_part_two ()
 	return;
 }	
 
-int 
-AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
-		     bool session_state_changing, bool can_record, bool rec_monitors_input)
-{
-	if (n_outputs().n_total() == 0) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes);
-		return 0;
-	}
-
-	if (session_state_changing) {
-
-		/* XXX is this safe to do against transport state changes? */
-
-		passthru_silence (start_frame, end_frame, nframes, 0, false);
-		return 0;
-	}
-
-	audio_diskstream()->check_record_status (start_frame, nframes, can_record);
-
-	bool send_silence;
-	
-	if (_have_internal_generator) {
-		/* since the instrument has no input streams,
-		   there is no reason to send any signal
-		   into the route.
-		*/
-		send_silence = true;
-	} else {
-
-		if (!Config->get_tape_machine_mode()) {
-			/* 
-			   ADATs work in a strange way.. 
-			   they monitor input always when stopped.and auto-input is engaged. 
-			*/
-			if ((Config->get_monitoring_model() == SoftwareMonitoring) && (Config->get_auto_input () || _diskstream->record_enabled())) {
-				send_silence = false;
-			} else {
-				send_silence = true;
-			}
-		} else {
-			/* 
-			   Other machines switch to input on stop if the track is record enabled,
-			   regardless of the auto input setting (auto input only changes the 
-			   monitoring state when the transport is rolling) 
-			*/
-			if ((Config->get_monitoring_model() == SoftwareMonitoring) && _diskstream->record_enabled()) {
-				send_silence = false;
-			} else {
-				send_silence = true;
-			}
-		}
-	}
-
-	apply_gain_automation = false;
-
-	if (send_silence) {
-		
-		/* if we're sending silence, but we want the meters to show levels for the signal,
-		   meter right here.
-		*/
-		
-		if (_have_internal_generator) {
-			passthru_silence (start_frame, end_frame, nframes, 0, true);
-		} else {
-			if (_meter_point == MeterInput) {
-				just_meter_input (start_frame, end_frame, nframes);
-			}
-			passthru_silence (start_frame, end_frame, nframes, 0, false);
-		}
-
-	} else {
-	
-		/* we're sending signal, but we may still want to meter the input. 
-		 */
-
-		passthru (start_frame, end_frame, nframes, 0, (_meter_point == MeterInput));
-	}
-
-	return 0;
-}
-
 int
 AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
 		  bool can_record, bool rec_monitors_input)
@@ -580,7 +496,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	} 
 
 	_silent = false;
-	apply_gain_automation = false;
+	_amp->apply_gain_automation(false);
 
 	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input)) != 0) {
 		silence (nframes);
@@ -599,7 +515,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		   at least potentially (depending on monitoring options)
 		 */
 
-		passthru (start_frame, end_frame, nframes, 0, true);
+		passthru (start_frame, end_frame, nframes, false);
 
 	} else if ((b = diskstream->playback_buffer(0)) != 0) {
 
@@ -691,11 +607,13 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
 			
 			if (am.locked() && gain_control()->automation_playback()) {
-				apply_gain_automation = gain_control()->list()->curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+				_amp->apply_gain_automation(
+						gain_control()->list()->curve().rt_safe_get_vector (
+							start_frame, end_frame, _session.gain_automation_buffer(), nframes));
 			}
 		}
 
-		process_output_buffers (bufs, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick);
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
@@ -706,35 +624,11 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 }
 
 int
-AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,  
-			 bool can_record, bool rec_monitors_input)
-{
-	if (n_outputs().n_total() == 0 && _processors.empty()) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes);
-		return 0;
-	}
-
-	_silent = true;
-	apply_gain_automation = false;
-
-	silence (nframes);
-
-	return audio_diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input);
-}
-
-int
 AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes, bool enable_processing)
 {
-	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
 	float   mix_buffer[nframes];
 	ProcessorList::iterator i;
-	bool post_fader_work = false;
-	gain_t this_gain = _gain;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
 	Glib::RWLock::ReaderLock rlock (_processor_lock);
@@ -767,8 +661,9 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	}
 
 	// If no processing is required, there's no need to go any further.
-	if (!enable_processing)
+	if (!enable_processing) {
 		return 0;
+	}
 
 	/* note: only run processors during export. other layers in the machinery
 	   will already have checked that there are no external port processors.
@@ -776,57 +671,11 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Processor> processor;
-		
 		if ((processor = boost::dynamic_pointer_cast<Processor>(*i)) != 0) {
-			switch (processor->placement()) {
-			case PreFader:
-				processor->run_in_place (buffers, start, start+nframes, nframes);
-				break;
-			case PostFader:
-				post_fader_work = true;
-				break;
-			}
+			processor->run_in_place (buffers, start, start+nframes, nframes);
 		}
 	}
 	
-	if (gain_control()->automation_state() == Play) {
-		
-		gain_control()->list()->curve().get_vector (start, start + nframes, gain_automation, nframes);
-
-		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
-			Sample *b = bi->data();
-			for (nframes_t n = 0; n < nframes; ++n) {
-				b[n] *= gain_automation[n];
-			}
-		}
-
-	} else {
-
-		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
-			Sample *b = bi->data();
-			for (nframes_t n = 0; n < nframes; ++n) {
-				b[n] *= this_gain;
-			}
-		}
-	}
-
-	if (post_fader_work) {
-
-		for (i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> processor;
-			
-			if ((processor = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				switch ((*i)->placement()) {
-				case PreFader:
-					break;
-				case PostFader:
-					processor->run_in_place (buffers, start, start+nframes, nframes);
-					break;
-				}
-			}
-		}
-	} 
-
 	return 0;
 }
 

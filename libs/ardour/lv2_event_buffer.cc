@@ -41,6 +41,11 @@ LV2EventBuffer::LV2EventBuffer(size_t capacity)
 		throw std::bad_alloc();
 	}
 
+	if (capacity == 0) {
+		cerr << "ERROR: LV2 event buffer of size 0 created." << endl;
+		capacity = 1024;
+	}
+
 #ifdef NO_POSIX_MEMALIGN
 	_data = (LV2_Event_Buffer*)malloc(sizeof(LV2_Event_Buffer) + capacity);
 	int ret = (_data != NULL) ? 0 : -1;
@@ -139,7 +144,8 @@ LV2EventBuffer::append(uint32_t       frames,
 #endif
 
 	/*cout << "Appending event type " << type << ", size " << size
-		<< " @ " << frames << "." << subframes << endl;*/
+		<< " @ " << frames << "." << subframes << endl;
+	cout << "Buffer capacity " << _data->capacity << ", size " << _data->size << endl;*/
 
 	if (!lv2_event_write(&_iter, frames, subframes, type, size, data)) {
 		cerr << "ERROR: Failed to write event." << endl;

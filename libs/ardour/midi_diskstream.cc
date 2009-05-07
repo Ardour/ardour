@@ -139,8 +139,9 @@ MidiDiskstream::~MidiDiskstream ()
 void
 MidiDiskstream::non_realtime_locate (nframes_t position)
 {
-	assert(_write_source);
-	_write_source->set_timeline_position (position);
+	if (_write_source) {
+		_write_source->set_timeline_position (position);
+	}
 	seek(position, false);
 }
 
@@ -156,7 +157,10 @@ MidiDiskstream::non_realtime_input_change ()
 		}
 
 		if (input_change_pending & ConfigurationChanged) {
-			assert(_io->n_inputs() == _n_channels);
+			if (_io->n_inputs().n_midi() != _n_channels.n_midi()) {
+				error << "Can not feed IO " << _io->n_inputs()
+					<< " with diskstream " << _n_channels << endl;
+			}
 		} 
 
 		get_input_sources ();
@@ -546,8 +550,6 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 		adjust_capture_position = rec_nframes;
 
 	} else if (nominally_recording) {
-
-		cerr << "B" << endl;
 
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
 

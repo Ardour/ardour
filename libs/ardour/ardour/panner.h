@@ -205,7 +205,7 @@ class Panner : public Processor
 	virtual ~Panner ();
 
 	void clear_panners ();
-
+	bool empty() const { return _streampanners.empty(); }
 
 	/// The fundamental Panner function
 	void set_automation_state (AutoState);

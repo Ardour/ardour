@@ -34,7 +34,7 @@ namespace ARDOUR {
 class Send : public IOProcessor 
 {
   public:	
-	Send (Session&, Placement);
+	Send (Session&);
 	Send (Session&, const XMLNode&);
 	virtual ~Send ();
 

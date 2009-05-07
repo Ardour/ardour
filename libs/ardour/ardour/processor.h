@@ -49,16 +49,21 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
   public:
 	static const string state_node_name;
 
-	Processor(Session&, const string& name, Placement p); // TODO: remove placement (use sort key)
+	Processor(Session&, const string& name);
 	
 	virtual ~Processor() { }
+	
+	/** Configuration of a processor on a bus
+	 * (i.e. how to apply to a BufferSet)
+	 */
+	struct Mapping {
+	    ChanCount in;
+	    ChanCount out;
+	};
 	
 	uint32_t sort_key() const { return _sort_key; }
 	void set_sort_key (uint32_t key);
 
-	Placement placement() const { return _placement; }
-	void set_placement (Placement);
-	
 	bool active () const { return _active; }
 	
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
@@ -108,7 +113,6 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	static sigc::signal<void,Processor*> ProcessorCreated;
 
 	sigc::signal<void>                     ActiveChanged;
-	sigc::signal<void>                     PlacementChanged;
 	sigc::signal<void,ChanCount,ChanCount> ConfigurationChanged;
 
 protected:
@@ -118,9 +122,9 @@ protected:
 	bool      _configured;
 	ChanCount _configured_input;
 	ChanCount _configured_output;
-	Placement _placement;
 	uint32_t  _sort_key;
 	void*     _gui;  /* generic, we don't know or care what this is */
+	Mapping   _mapping;
 };
 
 } // namespace ARDOUR

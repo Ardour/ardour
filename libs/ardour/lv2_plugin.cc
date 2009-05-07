@@ -268,8 +268,8 @@ LV2Plugin::get_state()
 
 		if (parameter_is_input(i) && parameter_is_control(i)) {
 			child = new XMLNode("Port");
-			snprintf(buf, sizeof(buf), "%u", i);
-			child->add_property("number", string(buf));
+			/*snprintf(buf, sizeof(buf), "%u", i);
+			child->add_property("number", string(buf));*/
 			child->add_property("symbol", port_symbol(i));
 			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
 			child->add_property("value", string(buf));
@@ -343,8 +343,8 @@ LV2Plugin::set_state(const XMLNode& node)
 	XMLProperty *prop;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
-	const char *port;
-	const char *data;
+	const char *sym;
+	const char *value;
 	uint32_t port_id;
 	LocaleGuard lg (X_("POSIX"));
 
@@ -359,22 +359,29 @@ LV2Plugin::set_state(const XMLNode& node)
 
 		child = *iter;
 
-		if ((prop = child->property("number")) != 0) {
-			port = prop->value().c_str();
+		if ((prop = child->property("symbol")) != 0) {
+			sym = prop->value().c_str();
 		} else {
-			warning << _("LV2: no lv2 port number") << endmsg;
+			warning << _("LV2: port has no symbol, ignored") << endmsg;
+			continue;
+		}
+
+		map<string,uint32_t>::iterator i = _port_indices.find(sym);
+		if (i != _port_indices.end()) {
+			port_id = i->second;
+		} else {
+			warning << _("LV2: port has unknown index, ignored") << endmsg;
 			continue;
 		}
 
 		if ((prop = child->property("value")) != 0) {
-			data = prop->value().c_str();
+			value = prop->value().c_str();
 		} else {
-			warning << _("LV2: no lv2 port data") << endmsg;
+			warning << _("LV2: port has no value, ignored") << endmsg;
 			continue;
 		}
 
-		sscanf (port, "%" PRIu32, &port_id);
-		set_parameter (port_id, atof(data));
+		set_parameter (port_id, atof(value));
 	}
 	
 	latency_compute_run ();
@@ -462,9 +469,7 @@ LV2Plugin::connect_and_run (BufferSet& bufs,
 		ChanMapping in_map, ChanMapping out_map,
 		nframes_t nframes, nframes_t offset)
 {
-	cycles_t then, now;
-
-	then = get_cycles ();
+	cycles_t then = get_cycles ();
 
 	uint32_t audio_in_index  = 0;
 	uint32_t audio_out_index = 0;
@@ -474,25 +479,29 @@ LV2Plugin::connect_and_run (BufferSet& bufs,
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
 				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++);
+				//cerr << port_index << " : " << " AUDIO IN " << buf_index << endl;
 				slv2_instance_connect_port(_instance, port_index,
 						bufs.get_audio(buf_index).data(offset));
 			} else if (parameter_is_output(port_index)) {
 				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++);
+				//cerr << port_index << " : " << " AUDIO OUT " << buf_index << endl;
 				slv2_instance_connect_port(_instance, port_index,
 						bufs.get_audio(buf_index).data(offset));
 			}
 		} else if (parameter_is_midi(port_index)) {
 			if (parameter_is_input(port_index)) {
 				const uint32_t buf_index = in_map.get(DataType::MIDI, midi_in_index++);
+				//cerr << port_index << " : " << " MIDI IN " << buf_index << endl;
 				slv2_instance_connect_port(_instance, port_index,
 						bufs.get_lv2_midi(true, buf_index).data());
 			} else if (parameter_is_output(port_index)) {
 				const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++);
+				//cerr << port_index << " : " << " MIDI OUT " << buf_index << endl;
 				slv2_instance_connect_port(_instance, port_index,
 						bufs.get_lv2_midi(false, buf_index).data());
 			}
 		} else if (!parameter_is_control(port_index)) {
-			std::cerr << "WARNING: Unknown LV2 port type, ignored" << endl;
+			// Optional port (it'd better be if we've made it this far...)
 			slv2_instance_connect_port(_instance, port_index, NULL);
 		}
 	}
@@ -507,7 +516,7 @@ LV2Plugin::connect_and_run (BufferSet& bufs,
 		}
 	}
 	
-	now = get_cycles ();
+	cycles_t now = get_cycles ();
 	set_cycles ((uint32_t) (now - then));
 
 	return 0;
@@ -683,7 +692,7 @@ LV2PluginInfo::discover (void* lv2_world)
 	LV2World* world = (LV2World*)lv2_world;
 	SLV2Plugins plugins = slv2_world_get_all_plugins(world->world);
 
-	cerr << "Discovered " << slv2_plugins_size (plugins) << " Lv2 plugins\n";
+	cerr << "LV2: Discovered " << slv2_plugins_size (plugins) << " plugins\n";
 
 	for (unsigned i=0; i < slv2_plugins_size(plugins); ++i) {
 		SLV2Plugin p = slv2_plugins_get_at(plugins, i);

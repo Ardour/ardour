@@ -413,20 +413,33 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 						   _("Click to Add/Edit Comments"):
 						   _route->comment());
 
-	connections.push_back (_route->meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed)));
-	connections.push_back (_route->input_changed.connect (mem_fun(*this, &MixerStrip::input_changed)));
-	connections.push_back (_route->output_changed.connect (mem_fun(*this, &MixerStrip::output_changed)));
-	connections.push_back (_route->mix_group_changed.connect (mem_fun(*this, &MixerStrip::mix_group_changed)));
-	connections.push_back (_route->panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan)));
+	connections.push_back (_route->meter_change.connect (
+			mem_fun(*this, &MixerStrip::meter_changed)));
+	connections.push_back (_route->input_changed.connect (
+			mem_fun(*this, &MixerStrip::input_changed)));
+	connections.push_back (_route->output_changed.connect (
+			mem_fun(*this, &MixerStrip::output_changed)));
+	connections.push_back (_route->mix_group_changed.connect (
+			mem_fun(*this, &MixerStrip::mix_group_changed)));
 
-	if (is_audio_track()) {
-		connections.push_back (audio_track()->DiskstreamChanged.connect (mem_fun(*this, &MixerStrip::diskstream_changed)));
-		connections.push_back (get_diskstream()->SpeedChanged.connect (mem_fun(*this, &MixerStrip::speed_changed)));
+	if (_route->panner()) {
+		connections.push_back (_route->panner()->Changed.connect (
+			mem_fun(*this, &MixerStrip::connect_to_pan)));
 	}
 
-	connections.push_back (_route->NameChanged.connect (mem_fun(*this, &RouteUI::name_changed)));
-	connections.push_back (_route->comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed)));
-	connections.push_back (_route->gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed)));
+	if (is_audio_track()) {
+		connections.push_back (audio_track()->DiskstreamChanged.connect (
+			mem_fun(*this, &MixerStrip::diskstream_changed)));
+		connections.push_back (get_diskstream()->SpeedChanged.connect (
+			mem_fun(*this, &MixerStrip::speed_changed)));
+	}
+
+	connections.push_back (_route->NameChanged.connect (
+			mem_fun(*this, &RouteUI::name_changed)));
+	connections.push_back (_route->comment_changed.connect (
+			mem_fun(*this, &MixerStrip::comment_changed)));
+	connections.push_back (_route->gui_changed.connect (
+			mem_fun(*this, &MixerStrip::route_gui_changed)));
 
 	set_stuff_from_route ();
 
@@ -553,17 +566,25 @@ MixerStrip::set_width (Width w, void* owner)
 		((Gtk::Label*)solo_button->get_child())->set_text (_("Solo"));
 
 		if (_route->comment() == "") {
-		       comment_button.unset_bg (STATE_NORMAL);
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("Comments"));
+			comment_button.unset_bg (STATE_NORMAL);
+			((Gtk::Label*)comment_button.get_child())->set_text (_("Comments"));
 		} else {
-		       comment_button.modify_bg (STATE_NORMAL, color());
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Comments*"));
+			comment_button.modify_bg (STATE_NORMAL, color());
+			((Gtk::Label*)comment_button.get_child())->set_text (_("*Comments*"));
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(gain_automation->automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.astate_string(gain_automation->automation_state()));
-		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.astyle_string(_route->panner().automation_style()));
-		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.astate_string(_route->panner().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
+				gpm.astyle_string(gain_automation->automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (
+				gpm.astate_string(gain_automation->automation_state()));
+
+		if (_route->panner()) {
+			((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (
+					panners.astyle_string(_route->panner()->automation_style()));
+			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
+					panners.astate_string(_route->panner()->automation_state()));
+		}
+
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (-1, -1);
 		break;
@@ -583,10 +604,18 @@ MixerStrip::set_width (Width w, void* owner)
 		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Cmt*"));
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.short_astyle_string(gain_automation->automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.short_astate_string(gain_automation->automation_state()));
-		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.short_astyle_string(_route->panner().automation_style()));
-		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.short_astate_string(_route->panner().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
+				gpm.short_astyle_string(gain_automation->automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (
+				gpm.short_astate_string(gain_automation->automation_state()));
+		
+		if (_route->panner()) {
+			((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (
+			panners.short_astyle_string(_route->panner()->automation_style()));
+			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
+			panners.short_astate_string(_route->panner()->automation_state()));
+		}
+
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
@@ -856,9 +885,13 @@ MixerStrip::connect_to_pan ()
 	panstate_connection.disconnect ();
 	panstyle_connection.disconnect ();
 
-		boost::shared_ptr<ARDOUR::AutomationControl> pan_control
-			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				_route->panner().data().control(Evoral::Parameter( PanAutomation ) ));
+	if (!_route->panner()) {
+		return;
+	}
+
+	boost::shared_ptr<ARDOUR::AutomationControl> pan_control
+		= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
+				_route->panner()->data().control(Evoral::Parameter(PanAutomation)));
 
 	if (pan_control) {
 		panstate_connection = pan_control->alist()->automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
@@ -1407,7 +1440,6 @@ MixerStrip::engine_running ()
 void
 MixerStrip::meter_changed (void *src)
 {
-
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &MixerStrip::meter_changed), src));
 
 	switch (_route->meter_point()) {

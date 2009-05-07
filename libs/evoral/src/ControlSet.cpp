@@ -99,7 +99,7 @@ ControlSet::find_next_event (FrameTime now, FrameTime end, ControlEvent& next_ev
 }
 
 void
-ControlSet::clear ()
+ControlSet::clear_controls ()
 {
 	Glib::Mutex::Lock lm (_control_lock);
 

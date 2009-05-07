@@ -449,7 +449,7 @@ Session::import_audiofiles (ImportStatus& status)
 								    frame_rate(), cnt, status.total);
 			write_audio_data_to_new_files (source.get(), status, newfiles);
 		} else if (smf_reader.get()) { // midi
-			status.doing_what = string_compose(_("loading MIDI file %1"), *p);
+			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
 			write_midi_data_to_new_files (smf_reader.get(), status, newfiles);
 		}
 	}
