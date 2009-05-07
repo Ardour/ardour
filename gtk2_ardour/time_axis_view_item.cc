@@ -641,7 +641,9 @@ TimeAxisViewItem::set_height (double height)
 		}
 	}
 
-	name_pixbuf->property_y() = height+1 - NAME_Y_OFFSET;
+	if (visibility & ShowNameText) {
+		name_pixbuf->property_y() = height+1 - NAME_Y_OFFSET;
+	}
 
 	if (frame) {
 		frame->property_y2() = height+1;
