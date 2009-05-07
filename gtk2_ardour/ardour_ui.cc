@@ -1898,11 +1898,34 @@ ARDOUR_UI::snapshot_session ()
 	
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
+	{
 		prompter.get_result (snapname);
-		if (snapname.length()){
+
+		bool do_save = (snapname.length() != 0);
+
+		vector<sys::path> p;
+		get_state_files_in_directory (session->session_directory().root_path(), p);
+		vector<string> n = get_file_names_no_extension (p);
+		if (find (n.begin(), n.end(), snapname) != n.end()) {
+
+			ArdourDialog confirm (_("Confirm snapshot overwrite"), true);
+			Label m (_("A snapshot already exists with that name.  Do you want to overwrite it?"));
+			confirm.get_vbox()->pack_start (m, true, true);
+			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+			confirm.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
+			confirm.show_all ();
+			switch (confirm.run()) {
+			case RESPONSE_CANCEL:
+				do_save = false;
+			}
+		}
+		
+		if (do_save) {
+			std::cout << "DOING IT!" << std::endl;
 			save_state (snapname);
 		}
 		break;
+	}
 
 	default:
 		break;
