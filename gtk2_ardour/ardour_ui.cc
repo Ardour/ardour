@@ -1921,7 +1921,6 @@ ARDOUR_UI::snapshot_session ()
 		}
 		
 		if (do_save) {
-			std::cout << "DOING IT!" << std::endl;
 			save_state (snapname);
 		}
 		break;
