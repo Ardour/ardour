@@ -2695,3 +2695,20 @@ Route::save_as_template (const string& path, const string& name)
 	tree.set_root (&node);
 	return tree.write (path.c_str());
 }
+
+int
+Route::set_name (string str, void* src)
+{
+	int ret;
+
+	if ((ret = IO::set_name (str, src)) == 0) {
+		if (_control_outs) {
+			string coutname = _name;
+			coutname += _("[control]");
+			cerr << _name << " reset control outs to " << coutname << endl;
+			return _control_outs->set_name (coutname, src);
+		}
+		return 0;
+	}
+	return ret;
+}

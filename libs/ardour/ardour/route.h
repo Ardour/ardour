@@ -79,6 +79,8 @@ class Route : public IO
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
+	int set_name (string str, void *src);
+
 	long order_key (const char* name) const;
 	void set_order_key (const char* name, long n);
 

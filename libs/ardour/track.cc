@@ -207,7 +207,7 @@ Track::set_name (string str, void *src)
 
 	/* save state so that the statefile fully reflects any filename changes */
 
-	if ((ret = IO::set_name (str, src)) == 0) {
+	if ((ret = Route::set_name (str, src)) == 0) {
 		_session.save_state ("");
 	}
 	return ret;
