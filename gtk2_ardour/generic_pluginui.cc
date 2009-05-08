@@ -74,7 +74,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	set_border_width (10);
 	//set_homogeneous (false);
 
-	pack1(main_contents);
+	pack_start(main_contents);
 	settings_box.set_homogeneous (false);
 
 	HBox* constraint_hbox = manage (new HBox);
@@ -96,8 +96,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
-	constraint_hbox->pack_start (eqgui_toggle, false, false);
-	add2(plugin_eq_bin);
+	pack_end(plugin_analysis_expander);
 
 	v1_box->pack_start (*smaller_hbox, false, true);
 	v2_box->pack_start (focus_button, false, true);

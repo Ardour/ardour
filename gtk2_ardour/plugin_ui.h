@@ -101,8 +101,7 @@ class PlugUIBase : public virtual sigc::trackable
 	LatencyGUI* latency_gui;
 	ArdourDialog* latency_dialog;
 
-	Gtk::Expander plugin_eq_bin;
-	Gtk::ToggleButton eqgui_toggle;
+	Gtk::Expander plugin_analysis_expander;
 
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;
@@ -115,7 +114,7 @@ class PlugUIBase : public virtual sigc::trackable
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 };
 
-class GenericPluginUI : public PlugUIBase, public Gtk::HPaned
+class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
 	GenericPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
