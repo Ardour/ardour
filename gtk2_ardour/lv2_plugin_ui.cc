@@ -159,7 +159,7 @@ LV2PluginUI::package (Gtk::Window& win)
 bool
 LV2PluginUI::configure_handler (GdkEventConfigure* ev)
 {
-	cout << "CONFIGURE" << endl;
+	std::cout << "CONFIGURE" << std::endl;
 	return false;
 }
 

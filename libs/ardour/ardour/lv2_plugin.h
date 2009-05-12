@@ -116,7 +116,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node);
 	bool     save_preset(std::string uri);
-	bool     load_preset(const string uri);
+	bool     load_preset(const std::string uri);
 	virtual std::vector<Plugin::PresetRecord> get_presets();
 
 	bool has_editor() const;
@@ -136,8 +136,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	float*                   _defaults;
 	float*                   _latency_control_port;
 	bool                     _was_activated;
-	vector<bool>             _port_is_input;
-	map<string,uint32_t>     _port_indices;
+	std::vector<bool>        _port_is_input;
+	std::map<std::string,uint32_t> _port_indices;
 
 	typedef struct { const void* (*extension_data)(const char* uri); } LV2_DataAccess;
 	LV2_DataAccess _data_access_extension_data;
