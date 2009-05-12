@@ -34,8 +34,6 @@
 
 #include "ardour_dialog.h"
 
-using std::string;
-
 namespace ARDOUR {
 	class Session;
 }
@@ -56,16 +54,16 @@ class SessionImportDialog : public ArdourDialog
 	
   private:
 
-	void load_session (const string& filename);
+	void load_session (const std::string& filename);
 	void fill_list ();
 	void browse ();
 	void do_merge ();
 	void end_dialog ();
-	void update (string path);
+	void update (std::string path);
 	void show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 	
-	std::pair<bool, string> open_rename_dialog (string text, string name);
-	bool open_prompt_dialog (string text);
+	std::pair<bool, std::string> open_rename_dialog (std::string text, std::string name);
+	bool open_prompt_dialog (std::string text);
 
 	// Data
 	HandlerList        handlers;

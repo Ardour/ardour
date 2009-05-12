@@ -24,6 +24,7 @@
 #include "region_selection.h"
 #include "time_axis_view.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;

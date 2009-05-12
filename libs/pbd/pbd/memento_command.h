@@ -65,7 +65,7 @@ public:
 	}
 
 	virtual XMLNode &get_state() {
-		string name;
+		std::string name;
 		if (before && after) {
 			name = "MementoCommand";
 		} else if (before) {

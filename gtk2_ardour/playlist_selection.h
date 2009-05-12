@@ -27,6 +27,6 @@ namespace ARDOUR {
 	class Playlist;
 }
 
-struct PlaylistSelection : list<boost::shared_ptr<ARDOUR::Playlist> > {};
+struct PlaylistSelection : std::list<boost::shared_ptr<ARDOUR::Playlist> > {};
 
 #endif /* __ardour_gtk_playlist_selection_h__ */

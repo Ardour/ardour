@@ -22,10 +22,10 @@
 
 namespace PBD {
 
-vector<sys::path>
+std::vector<sys::path>
 system_data_directories ()
 {
-	vector<sys::path> tmp;
+	std::vector<sys::path> tmp;
 	const char * const * dirs;
 
 	dirs = g_get_system_data_dirs ();
@@ -40,10 +40,10 @@ system_data_directories ()
 	return tmp;
 }
 
-vector<sys::path>
+std::vector<sys::path>
 system_config_directories ()
 {
-	vector<sys::path> tmp;
+	std::vector<sys::path> tmp;
 	const char * const * dirs;
 
 	dirs = g_get_system_config_dirs ();

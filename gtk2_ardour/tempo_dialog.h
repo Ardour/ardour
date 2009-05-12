@@ -38,7 +38,7 @@
 struct TempoDialog : public ArdourDialog 
 {
 	Gtk::ComboBoxText note_types;
-	vector<string> strings;
+	std::vector<std::string> strings;
 	Gtk::Adjustment   bpm_adjustment;
 	Gtk::SpinButton   bpm_spinner;
 	Gtk::Frame        bpm_frame;
@@ -54,8 +54,8 @@ struct TempoDialog : public ArdourDialog
 	Gtk::Frame   when_frame;
 	char buf[64];
     
-	TempoDialog (ARDOUR::TempoMap&, nframes_t, const string & action);
-	TempoDialog (ARDOUR::TempoSection&, const string & action);
+	TempoDialog (ARDOUR::TempoMap&, nframes_t, const std::string & action);
+	TempoDialog (ARDOUR::TempoSection&, const std::string & action);
 
 	double get_bpm ();
 	double get_note_type ();
@@ -74,7 +74,7 @@ struct MeterDialog : public ArdourDialog
 {
 	Gtk::Entry   bpb_entry;
 	Gtk::ComboBoxText note_types;
-	vector<string> strings;
+	std::vector<std::string> strings;
 	Gtk::Frame   bpb_frame;
 	Gtk::Button  ok_button;
 	Gtk::Button  cancel_button;
@@ -82,8 +82,8 @@ struct MeterDialog : public ArdourDialog
 	Gtk::Frame   when_frame;
 	char buf[64];
     
-	MeterDialog (ARDOUR::TempoMap&, nframes_t, const string & action);
-	MeterDialog (ARDOUR::MeterSection&, const string & action);
+	MeterDialog (ARDOUR::TempoMap&, nframes_t, const std::string & action);
+	MeterDialog (ARDOUR::MeterSection&, const std::string & action);
 
 	double get_bpb ();
 	double get_note_type ();

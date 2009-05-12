@@ -8,14 +8,11 @@
 
 namespace ARDOUR {
 
-	using std::vector;
-	using namespace PBD;
+	PBD::sys::path system_template_directory ();
+	PBD::sys::path system_route_template_directory ();
 
-	sys::path system_template_directory ();
-	sys::path system_route_template_directory ();
-
-	sys::path user_template_directory ();
-	sys::path user_route_template_directory ();
+	PBD::sys::path user_template_directory ();
+	PBD::sys::path user_route_template_directory ();
 
 	struct TemplateInfo {
 	    std::string name;

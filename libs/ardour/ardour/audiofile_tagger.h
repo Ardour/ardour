@@ -27,8 +27,6 @@
 #include "taglib/taglib.h"
 #include "taglib/xiphcomment.h"
 
-using std::string;
-
 namespace ARDOUR
 {
 
@@ -41,7 +39,7 @@ class AudiofileTagger
 
 	/* Tags file with metadata, return true on success */
 	
-	static bool tag_file (string const & filename, SessionMetadata const & metadata);
+	static bool tag_file (std::string const & filename, SessionMetadata const & metadata);
 
   private:
 

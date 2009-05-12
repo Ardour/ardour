@@ -54,6 +54,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace Gtk;
 using namespace Gdk;
 using namespace sigc; 

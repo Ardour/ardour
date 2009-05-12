@@ -36,7 +36,7 @@ class TempoMapImportHandler : public ElementImportHandler
 {
   public:
 	TempoMapImportHandler (XMLTree const & source, Session & session);
-	string get_info () const;
+	std::string get_info () const;
 };
 
 class TempoMapImporter : public ElementImporter
@@ -46,7 +46,7 @@ class TempoMapImporter : public ElementImporter
   public:
 	TempoMapImporter (XMLTree const & source, Session & session, XMLNode const & node);
 
-	virtual string get_info () const;
+	virtual std::string get_info () const;
 
   protected:
 	bool _prepare_move ();

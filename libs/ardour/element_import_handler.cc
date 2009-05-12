@@ -22,6 +22,7 @@
 
 #include <algorithm>
 
+using namespace std;
 using namespace ARDOUR;
 
 bool ElementImportHandler::_dirty = false;

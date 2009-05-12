@@ -28,9 +28,6 @@
 #include "pbd/stateful.h" 
 #include "ardour/types.h"
 
-using std::string;
-using std::list;
-
 namespace ARDOUR {
 
 class Route;
@@ -46,9 +43,9 @@ class RouteGroup : public PBD::Stateful, public sigc::trackable {
 	    Hidden = 0x4
     };
 
-    RouteGroup (Session& s, const string &n, Flag f = Flag(0));
+    RouteGroup (Session& s, const std::string &n, Flag f = Flag(0));
 
-    const string& name() { return _name; }
+    const std::string& name() { return _name; }
     void set_name (std::string str);
 
     bool is_active () const { return _flags & Active; }
@@ -71,19 +68,19 @@ class RouteGroup : public PBD::Stateful, public sigc::trackable {
     int remove (Route *);
 
     void apply (void (Route::*func)(void *), void *src) {
-	    for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+	    for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		    ((*i)->*func)(src);
 	    }
     }
 
     template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
-	    for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+	    for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		    ((*i)->*func)(val, src);
 	    }
     }
 
     template<class T> void foreach_route (T *obj, void (T::*func)(Route&)) {
-	    for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+	    for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		    (obj->*func)(**i);
 	    }
     }
@@ -101,7 +98,7 @@ class RouteGroup : public PBD::Stateful, public sigc::trackable {
 	    changed();
     }
 
-    const list<Route*>& route_list() { return routes; }
+    const std::list<Route*>& route_list() { return routes; }
     
     sigc::signal<void> changed;
     sigc::signal<void,void*> FlagsChanged;
@@ -112,8 +109,8 @@ class RouteGroup : public PBD::Stateful, public sigc::trackable {
 
  private:
     Session& _session;
-    list<Route *> routes;
-    string _name;
+    std::list<Route *> routes;
+    std::string _name;
     Flag _flags;
 
     void remove_when_going_away (Route*);

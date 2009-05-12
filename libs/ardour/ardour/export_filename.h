@@ -25,8 +25,6 @@
 #include <glibmm/ustring.h>
 #include "pbd/statefuldestructible.h"
 
-using Glib::ustring;
-
 namespace ARDOUR
 {
 
@@ -70,25 +68,25 @@ class ExportFilename {
 	
 	/* data access */
 	
-	ustring get_path (FormatPtr format) const;
-	ustring get_folder () const { return folder; }
+	Glib::ustring get_path (FormatPtr format) const;
+	Glib::ustring get_folder () const { return folder; }
 	
 	TimeFormat get_time_format () const { return time_format; }
 	DateFormat get_date_format () const { return date_format; }
-	ustring get_time_format_str (TimeFormat format) const;
-	ustring get_date_format_str (DateFormat format) const;
+	Glib::ustring get_time_format_str (TimeFormat format) const;
+	Glib::ustring get_date_format_str (DateFormat format) const;
 	
-	ustring get_label () const { return label; }
+	Glib::ustring get_label () const { return label; }
 	uint32_t get_revision () const { return revision; }
 	
 	/* data modification */
 	
 	void set_time_format (TimeFormat format);
 	void set_date_format (DateFormat format);
-	void set_label (ustring value);
+	void set_label (Glib::ustring value);
 	void set_revision (uint32_t value) { revision = value; }
 	void set_channel (uint32_t value) { channel = value; }
-	bool set_folder (ustring path);
+	bool set_folder (Glib::ustring path);
 	
 	void set_timespan (TimespanPtr ts) { timespan = ts; }
 	void set_channel_config (ChannelConfigPtr cc) { channel_config = cc; }
@@ -108,16 +106,16 @@ class ExportFilename {
 
 	Session & session;
 
-	ustring   label;
+	Glib::ustring   label;
 	uint32_t  revision;
 	uint32_t  channel;
 	
-	ustring   folder;
+	Glib::ustring   folder;
 	
 	DateFormat date_format;
 	TimeFormat time_format;
 	
-	ustring get_formatted_time (ustring const & format) const;
+	Glib::ustring get_formatted_time (Glib::ustring const & format) const;
 	struct tm * time_struct; // Due to static allocation no destructor or copy-ctor is needed because of this
 	
 	TimespanPtr timespan;
@@ -125,12 +123,11 @@ class ExportFilename {
 	
 	/* Serialization helpers */
 	
-	typedef std::pair<bool, ustring> FieldPair;
+	typedef std::pair<bool, Glib::ustring> FieldPair;
 	
-	void add_field (XMLNode * node, ustring const & name, bool enabled, ustring const & value = "");
-	FieldPair get_field (XMLNode const & node, ustring const & name);
+	void add_field (XMLNode * node, Glib::ustring const & name, bool enabled, Glib::ustring const & value = "");
+	FieldPair get_field (XMLNode const & node, Glib::ustring const & name);
 	FieldPair analyse_folder ();
-	
 };
 
 

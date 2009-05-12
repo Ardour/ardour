@@ -12,6 +12,9 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/io.h"
 
+using namespace std;
+using namespace PBD;
+
 namespace ARDOUR {
 
 sys::path

@@ -48,7 +48,7 @@ class PluginInsert : public Processor
 	PluginInsert (Session&, const XMLNode&);
 	~PluginInsert ();
 
-	static const string port_automation_node_name;
+	static const std::string port_automation_node_name;
 	
 	XMLNode& state(bool);
 	XMLNode& get_state(void);
@@ -99,7 +99,7 @@ class PluginInsert : public Processor
 
 	PluginType type ();
 
-	string describe_parameter (Evoral::Parameter param);
+	std::string describe_parameter (Evoral::Parameter param);
 
 	nframes_t signal_latency() const;
 

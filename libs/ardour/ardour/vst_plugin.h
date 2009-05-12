@@ -32,11 +32,6 @@
 #include <jack/types.h>
 #include "ardour/plugin.h"
 
-using std::string;
-using std::vector;
-using std::list;
-using std::map;
-
 struct _FSTHandle;
 struct _FST;
 typedef struct _FSTHandle FSTHandle;
@@ -76,8 +71,8 @@ class VSTPlugin : public ARDOUR::Plugin
 			ChanMapping in, ChanMapping out,
 			nframes_t nframes, nframes_t offset);
 
-	string describe_parameter (Evoral::Parameter);
-	string state_node_name() const { return "vst"; }
+	std::string describe_parameter (Evoral::Parameter);
+	std::string state_node_name() const { return "vst"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio(uint32_t i) const { return false; }
@@ -85,8 +80,8 @@ class VSTPlugin : public ARDOUR::Plugin
 	bool parameter_is_input(uint32_t i) const { return true; }
 	bool parameter_is_output(uint32_t i) const { return false; }
 
-	bool load_preset (const string preset_label );
-	bool save_preset(string name);
+	bool load_preset (const std::string preset_label );
+	bool save_preset (std::string name);
 
 	bool has_editor () const;
 

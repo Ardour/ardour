@@ -22,7 +22,6 @@
 
 #include <sys/types.h>
 #include <map>
-#include <string>
 #include <vector>
 
 #include <glibmm/refptr.h>
@@ -32,9 +31,6 @@
 #include <gtkmm/button.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/adjustment.h>
-
-using std::map;
-using std::string;
 
 namespace ARDOUR {
 	class Panner;

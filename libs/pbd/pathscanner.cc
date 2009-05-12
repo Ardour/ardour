@@ -30,6 +30,7 @@
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
 
+using namespace std;
 using namespace PBD;
 
 vector<string *> *

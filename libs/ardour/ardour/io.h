@@ -45,9 +45,6 @@
 #include "ardour/types.h"
 #include "ardour/utils.h"
 
-using std::string;
-using std::vector;
-
 class XMLNode;
 
 namespace ARDOUR {
@@ -72,9 +69,9 @@ class UserBundle;
 class IO : public SessionObject, public AutomatableControls, public Latent
 {
   public:
-	static const string state_node_name;
+	static const std::string state_node_name;
 
-	IO (Session&, const string& name, DataType default_type = DataType::AUDIO,
+	IO (Session&, const std::string& name, DataType default_type = DataType::AUDIO,
 		ChanCount in_min=ChanCount::ZERO, ChanCount in_max=ChanCount::INFINITE,
 		ChanCount out_min=ChanCount::ZERO, ChanCount out_max=ChanCount::INFINITE);
 	
@@ -98,7 +95,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	DataType default_type() const         { return _default_type; }
 	void     set_default_type(DataType t) { _default_type = t; }
 	
-	bool set_name (const string& str);
+	bool set_name (const std::string& str);
 
 	virtual void silence  (nframes_t);
 
@@ -140,19 +137,19 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	boost::shared_ptr<Bundle> bundle_for_inputs () { return _bundle_for_inputs; }
 	boost::shared_ptr<Bundle> bundle_for_outputs () { return _bundle_for_outputs; }
 	
-	int add_input_port (string source, void *src, DataType type = DataType::NIL);
-	int add_output_port (string destination, void *src, DataType type = DataType::NIL);
+	int add_input_port (std::string source, void *src, DataType type = DataType::NIL);
+	int add_output_port (std::string destination, void *src, DataType type = DataType::NIL);
 
 	int remove_input_port (Port *, void *src);
 	int remove_output_port (Port *, void *src);
 
 	int set_input (Port *, void *src);
 
-	int connect_input (Port *our_port, string other_port, void *src);
-	int connect_output (Port *our_port, string other_port, void *src);
+	int connect_input (Port *our_port, std::string other_port, void *src);
+	int connect_output (Port *our_port, std::string other_port, void *src);
 
-	int disconnect_input (Port *our_port, string other_port, void *src);
-	int disconnect_output (Port *our_port, string other_port, void *src);
+	int disconnect_input (Port *our_port, std::string other_port, void *src);
+	int disconnect_output (Port *our_port, std::string other_port, void *src);
 
 	int disconnect_inputs (void *src);
 	int disconnect_outputs (void *src);
@@ -310,8 +307,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 
-	int set_inputs (const string& str);
-	int set_outputs (const string& str);
+	int set_inputs (const std::string& str);
+	int set_outputs (const std::string& str);
 
 	void increment_output_offset (nframes_t);
 	void cycle_start (nframes_t);
@@ -348,12 +345,12 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	std::vector<UserBundleInfo> _bundles_connected_to_outputs; ///< user bundles connected to our outputs
 	std::vector<UserBundleInfo> _bundles_connected_to_inputs; ///< user bundles connected to our inputs
 
-	static int parse_io_string (const string&, vector<string>& chns);
+	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
 
-	static int parse_gain_string (const string&, vector<string>& chns);
+	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
 	
-	int set_sources (vector<string>&, void *src, bool add);
-	int set_destinations (vector<string>&, void *src, bool add);
+	int set_sources (std::vector<std::string>&, void *src, bool add);
+	int set_destinations (std::vector<std::string>&, void *src, bool add);
 
 	int ensure_inputs (ChanCount, bool clear, bool lockit, void *src);
 	int ensure_outputs (ChanCount, bool clear, bool lockit, void *src);
@@ -367,7 +364,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int get_port_counts (const XMLNode& node);
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
-	boost::shared_ptr<Bundle> find_possible_bundle (const string &desired_name, const string &default_name, const string &connection_type_name);
+	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name, const std::string &default_name, const std::string &connection_type_name);
 
 	virtual void setup_peak_meters ();
 	void meter ();

@@ -36,9 +36,6 @@
 
 class XMLNode;
 
-using std::list;
-using std::vector;
-
 namespace ARDOUR {
 class Meter;
 class Tempo {
@@ -123,7 +120,7 @@ class MeterSection : public MetricSection, public Meter {
 		: MetricSection (start), Meter (bpb, note_type) {}
 	MeterSection (const XMLNode&);
 
-	static const string xml_state_node_name;
+	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
 };
@@ -136,12 +133,12 @@ class TempoSection : public MetricSection, public Tempo {
 		: MetricSection (start), Tempo (qpm, note_type) {}
 	TempoSection (const XMLNode&);
 
-	static const string xml_state_node_name;
+	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
 };
 
-typedef list<MetricSection*> Metrics;
+typedef std::list<MetricSection*> Metrics;
 
 class TempoMap : public PBD::StatefulDestructible
 {
@@ -169,7 +166,7 @@ class TempoMap : public PBD::StatefulDestructible
 		    : type (ty), frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
 	};
 
-	typedef vector<BBTPoint> BBTPointList;
+	typedef std::vector<BBTPoint> BBTPointList;
 	
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
 	        Glib::RWLock::ReaderLock lm (lock);

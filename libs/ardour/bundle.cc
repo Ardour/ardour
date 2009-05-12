@@ -28,6 +28,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 

@@ -28,6 +28,7 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
@@ -114,8 +115,8 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
 			mem_fun (*this, &ReturnUIWindow::return_going_away));
 
 	signal_delete_event().connect (bind (
-			ptr_fun (just_hide_it),
-			reinterpret_cast<Window *> (this)));
+					       sigc::ptr_fun (just_hide_it),
+					       reinterpret_cast<Window *> (this)));
 }
 
 ReturnUIWindow::~ReturnUIWindow ()

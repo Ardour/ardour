@@ -181,8 +181,8 @@ CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalNone)
 
 /* BWAV */
 
-CONFIG_VARIABLE (string, bwf_country_code, "bwf-country-code", "US")
-CONFIG_VARIABLE (string, bwf_organization_code, "bwf-organization-code", "US")
+CONFIG_VARIABLE (std::string, bwf_country_code, "bwf-country-code", "US")
+CONFIG_VARIABLE (std::string, bwf_organization_code, "bwf-organization-code", "US")
 
 /* these variables have custom set() methods (e.g. path globbing) */
 

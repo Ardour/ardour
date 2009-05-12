@@ -231,7 +231,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	Gtk::Style *passthru_style;
 
-	void route_gui_changed (string, void*);
+	void route_gui_changed (std::string, void*);
 	void show_route_color ();
 	void show_passthru_color ();
 

@@ -34,9 +34,6 @@
 #include "ardour/automation_control.h"
 #include "ardour/processor.h"
 
-using std::istream;
-using std::ostream;
-
 namespace ARDOUR {
 
 class Route;
@@ -84,7 +81,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 
 	/* old school automation loading */
 
-	virtual int load (istream&, string path, uint32_t&) = 0;
+	virtual int load (std::istream&, std::string path, uint32_t&) = 0;
 
   protected:
 	friend class Panner;
@@ -126,7 +123,7 @@ class BaseStereoPanner : public StreamPanner
 
 	/* old school automation loading */
 
-	int load (istream&, string path, uint32_t&);
+	int load (std::istream&, std::string path, uint32_t&);
 
   protected:
 	float left;
@@ -150,7 +147,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	void get_desired_coefficients (pan_t*) const;
 
 	static StreamPanner* factory (Panner&, Evoral::Parameter param);
-	static string name;
+	static std::string name;
 
 	XMLNode& state (bool full_state); 
 	XMLNode& get_state (void); 
@@ -171,7 +168,7 @@ class Multi2dPanner : public StreamPanner
 				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	static StreamPanner* factory (Panner&, Evoral::Parameter);
-	static string name;
+	static std::string name;
 
 	XMLNode& state (bool full_state); 
 	XMLNode& get_state (void);
@@ -179,7 +176,7 @@ class Multi2dPanner : public StreamPanner
 
 	/* old school automation loading */
 
-	int load (istream&, string path, uint32_t&);
+	int load (std::istream&, std::string path, uint32_t&);
 
   private:
 	void update ();
@@ -201,7 +198,7 @@ class Panner : public Processor
 	};
 
 	//Panner (std::string name, Session&, int _num_bufs);
-	Panner (string name, Session&);
+	Panner (std::string name, Session&);
 	virtual ~Panner ();
 
 	void clear_panners ();

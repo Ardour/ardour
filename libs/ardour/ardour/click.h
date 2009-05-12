@@ -27,7 +27,7 @@ namespace ARDOUR {
 class ClickIO : public IO
 {
 public:
-	ClickIO (Session& s, const string& name) : IO (s, name) {}
+	ClickIO (Session& s, const std::string& name) : IO (s, name) {}
 	~ClickIO() {}
 
 protected:

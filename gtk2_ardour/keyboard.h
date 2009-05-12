@@ -33,8 +33,6 @@
 
 #include "selection.h"
 
-using std::string;
-
 class Keyboard : public sigc::trackable, PBD::Stateful
 {
   public:

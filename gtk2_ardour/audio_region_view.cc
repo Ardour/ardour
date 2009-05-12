@@ -56,6 +56,7 @@
 
 #define MUTED_ALPHA 10
 
+using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;

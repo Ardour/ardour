@@ -27,6 +27,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;

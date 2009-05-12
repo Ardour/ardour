@@ -24,15 +24,11 @@
 #include <utility>
 #include <string>
 
-using std::deque;
-using std::pair;
-using std::string;
-
 namespace ARDOUR {
-	typedef deque<pair<string,string> > RecentSessions;
+	typedef std::deque<std::pair<std::string,std::string> > RecentSessions;
 
 	int read_recent_sessions (RecentSessions& rs);
-	int store_recent_sessions (string name, string path);
+	int store_recent_sessions (std::string name, std::string path);
 	int write_recent_sessions (RecentSessions& rs);
 }; // namespace ARDOUR
 

@@ -115,7 +115,7 @@ class Mixer_UI : public Gtk::Window
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 	
-	list<MixerStrip *> strips;
+	std::list<MixerStrip *> strips;
 
 	bool strip_scroller_button_release (GdkEventButton*);
 

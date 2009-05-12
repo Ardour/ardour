@@ -34,7 +34,7 @@ class Region;
 class Track : public Route
 {
   public:
-	Track (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
+	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
 
 	virtual ~Track ();
 	
@@ -60,7 +60,7 @@ class Track : public Route
 
 	boost::shared_ptr<Diskstream> diskstream() const { return _diskstream; }
 
-	virtual int use_diskstream (string name) = 0;
+	virtual int use_diskstream (std::string name) = 0;
 	virtual int use_diskstream (const PBD::ID& id) = 0;
 
 	nframes_t update_total_latency();
@@ -122,7 +122,7 @@ class Track : public Route
 	    ~FreezeRecord();
 
 	    boost::shared_ptr<Playlist>        playlist;
-	    vector<FreezeRecordProcessorInfo*> processor_info;
+	    std::vector<FreezeRecordProcessorInfo*> processor_info;
 	    bool                               have_mementos;
 	    FreezeState                        state;
 	    gain_t                          gain;

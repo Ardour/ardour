@@ -29,8 +29,6 @@
 #include "ardour/types.h"
 #include "ardour/session.h"
 
-using std::string;
-
 class XMLTree;
 namespace ARDOUR {
 
@@ -45,12 +43,12 @@ class ElementImporter
 	/** Returns the element name
 	 * @return the name of the element
 	 */
-	virtual string get_name () const { return name; };
+	virtual std::string get_name () const { return name; };
 	
 	/** Gets a textual representation of the element
 	 * @return a textual representation on this specific element
 	 */
-	virtual string get_info () const = 0;
+	virtual std::string get_info () const = 0;
 	
 	/** Gets import status, if applicable. */
 	virtual Session::ImportStatus * get_import_status () { return 0; }
@@ -73,10 +71,10 @@ class ElementImporter
 	bool broken () { return _broken; }
 	
 	/// Signal that requests for anew name
-	static sigc::signal <std::pair<bool, string>, string, string> Rename;
+	static sigc::signal <std::pair<bool, std::string>, std::string, std::string> Rename;
 	
 	/// Signal for ok/cancel prompting
-	static sigc::signal <bool, string> Prompt;
+	static sigc::signal <bool, std::string> Prompt;
 	
   protected:
 
@@ -107,19 +105,19 @@ class ElementImporter
 	bool queued () { return _queued; }
 	
 	/// Name of element
-	string  name;
+	std::string  name;
 	
 	/// The sample rate of the session from which we are importing
 	nframes_t sample_rate;
 	
 	/// Converts smpte time to a string
-	string smpte_to_string(SMPTE::Time & time) const;
+	std::string smpte_to_string (SMPTE::Time & time) const;
 	
 	/// Converts samples so that times match the sessions sample rate
 	nframes_t rate_convert_samples (nframes_t samples) const;
 	
 	/// Converts samples so that times match the sessions sample rate (for straight use in XML)
-	string rate_convert_samples (string const & samples) const;
+	std::string rate_convert_samples (std::string const & samples) const;
 	
 	/// Set element broken
 	void set_broken () { _broken = true; }

@@ -189,8 +189,8 @@ class OptionEditor : public ArdourDialog
 	void setup_click_editor ();
 	void clear_click_editor ();
 
-	void click_chosen (const string & paths);
-	void click_emphasis_chosen (const string & paths);
+	void click_chosen (const std::string & paths);
+	void click_emphasis_chosen (const std::string & paths);
 
 	void click_browse_clicked ();
 	void click_emphasis_browse_clicked ();

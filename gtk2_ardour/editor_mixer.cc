@@ -34,6 +34,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace Gtkmm2ext;
 using namespace PBD;
 

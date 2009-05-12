@@ -33,6 +33,8 @@
 
 #include "i18n.h"
 
+using namespace std;
+
 namespace PBD {
 
 namespace sys {

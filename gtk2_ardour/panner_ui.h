@@ -70,7 +70,7 @@ class PannerUI : public Gtk::HBox
 
 	void effective_pan_display ();
 
-	void set_meter_strip_name (string name);
+	void set_meter_strip_name (std::string name);
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
   private:

@@ -24,22 +24,19 @@
 #include <string>
 #include <regex.h>
 
-using std::string;
-using std::vector;
-
 class PathScanner
 
 {
   public:
-	vector<string *> *operator() (const string &dirpath,
-				      bool (*filter)(const string &, void *arg),
-				      void *arg, 
-				      bool match_fullpath = true,
-				      bool return_fullpath = true,
-				      long limit = -1,
-				      bool recurse = false) {
+	std::vector<std::string *> *operator() (const std::string &dirpath,
+						bool (*filter)(const std::string &, void *arg),
+						void *arg, 
+						bool match_fullpath = true,
+						bool return_fullpath = true,
+						long limit = -1,
+						bool recurse = false) {
 		return run_scan (dirpath,
-				 (bool (PathScanner::*)(const string &)) 0, 
+				 (bool (PathScanner::*)(const std::string &)) 0, 
 				 filter, 
 				 arg,
 				 match_fullpath,
@@ -47,49 +44,49 @@ class PathScanner
 				 limit, recurse);
 	}
 
-	vector<string *> *operator() (const string &dirpath,
-				      const string &regexp,
-				      bool match_fullpath = true,
-				      bool return_fullpath = true,
-				      long limit = -1,
-				      bool recurse = false);
-    
-	string *find_first (const string &dirpath,
-			    const string &regexp,
-			    bool match_fullpath = true,
-			    bool return_fullpath = true);
+	std::vector<std::string *> *operator() (const std::string &dirpath,
+						const std::string &regexp,
+						bool match_fullpath = true,
+						bool return_fullpath = true,
+						long limit = -1,
+						bool recurse = false);
 	
-	string *find_first (const string &dirpath,
-			    bool (*filter)(const string &, void *),
-			    void *arg,
-			    bool match_fullpath = true,
-			    bool return_fullpath = true);
+	std::string *find_first (const std::string &dirpath,
+				 const std::string &regexp,
+				 bool match_fullpath = true,
+				 bool return_fullpath = true);
+	
+	std::string *find_first (const std::string &dirpath,
+				 bool (*filter)(const std::string &, void *),
+				 void *arg,
+				 bool match_fullpath = true,
+				 bool return_fullpath = true);
 	
   private:
 	regex_t compiled_pattern;
 	
-	bool regexp_filter (const string &str) {
+	bool regexp_filter (const std::string &str) {
 		return regexec (&compiled_pattern, str.c_str(), 0, 0, 0) == 0;
 	}
 	
-	vector<string *> *run_scan (const string &dirpath,
-				    bool (PathScanner::*mfilter) (const string &),
-				    bool (*filter)(const string &, void *),
-				    void *arg,
-				    bool match_fullpath,
-				    bool return_fullpath,
-				    long limit,
-				    bool recurse = false);
+	std::vector<std::string *> *run_scan (const std::string &dirpath,
+					      bool (PathScanner::*mfilter) (const std::string &),
+					      bool (*filter)(const std::string &, void *),
+					      void *arg,
+					      bool match_fullpath,
+					      bool return_fullpath,
+					      long limit,
+					      bool recurse = false);
 
-	vector<string *> *run_scan_internal (vector<string*>*, 
-					     const string &dirpath,
-				    bool (PathScanner::*mfilter) (const string &),
-				    bool (*filter)(const string &, void *),
-				    void *arg,
-				    bool match_fullpath,
-				    bool return_fullpath,
-				    long limit,
-				    bool recurse = false);
+	std::vector<std::string *> *run_scan_internal (std::vector<std::string*>*, 
+						       const std::string &dirpath,
+						       bool (PathScanner::*mfilter) (const std::string &),
+						       bool (*filter)(const std::string &, void *),
+						       void *arg,
+						       bool match_fullpath,
+						       bool return_fullpath,
+						       long limit,
+						       bool recurse = false);
 };
 
 #endif // __libmisc_pathscanner_h__

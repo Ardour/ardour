@@ -507,7 +507,7 @@ class Editor : public PublicEditor
 
 	    void hide();
 	    void show ();
-	    void set_name (const string&);
+	    void set_name (const std::string&);
 	    void set_position (nframes64_t start, nframes64_t end = 0);
 	    void set_color_rgba (uint32_t);
 	};
@@ -522,7 +522,7 @@ class Editor : public PublicEditor
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
 	void mouse_add_new_marker (nframes64_t where, bool is_cd=false, bool is_xrun=false);
-	bool choose_new_marker_name(string &name);
+	bool choose_new_marker_name(std::string &name);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 
@@ -546,9 +546,9 @@ class Editor : public PublicEditor
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
-	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*) const;
-	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
+	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
 
 	/* end */
@@ -624,8 +624,8 @@ class Editor : public PublicEditor
 	
 	bool track_canvas_motion (GdkEvent*);
 
-	void set_verbose_canvas_cursor (const string &, double x, double y);
-	void set_verbose_canvas_cursor_text (const string &);
+	void set_verbose_canvas_cursor (const std::string &, double x, double y);
+	void set_verbose_canvas_cursor_text (const std::string &);
 	void show_verbose_canvas_cursor();
 	void hide_verbose_canvas_cursor();
 
@@ -866,7 +866,7 @@ class Editor : public PublicEditor
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes64_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 	nframes64_t find_next_region_boundary (nframes64_t, int32_t dir, const TrackViewList&);
 
-	vector<nframes64_t> region_boundary_cache;
+	std::vector<nframes64_t> region_boundary_cache;
 	void build_region_boundary_cache ();
 
 	Gtk::HBox           top_hbox;
@@ -1127,7 +1127,7 @@ class Editor : public PublicEditor
 	int ensure_cursor (nframes64_t* pos);
 
 	void handle_new_region (boost::weak_ptr<ARDOUR::Region>);
-	void handle_new_regions (vector<boost::weak_ptr<ARDOUR::Region> >& );
+	void handle_new_regions (std::vector<boost::weak_ptr<ARDOUR::Region> >& );
 	void handle_region_removed (boost::weak_ptr<ARDOUR::Region>);
 	void add_region_to_region_display (boost::shared_ptr<ARDOUR::Region>);
 	void add_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::Region> > & );
@@ -1141,7 +1141,7 @@ class Editor : public PublicEditor
 	bool no_region_list_redisplay;
 	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
 
-	list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
+	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
@@ -1246,7 +1246,7 @@ class Editor : public PublicEditor
 	bool zoomed_to_region;
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
-	void temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string & op);
+	void temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const std::string & op);
 	void temporal_zoom_to_frame (bool coarser, nframes64_t frame);
 
 	void amplitude_zoom (gdouble scale);
@@ -1263,7 +1263,7 @@ class Editor : public PublicEditor
 	void external_audio_dialog ();
 	void session_import_dialog ();
 
-	int  check_whether_and_how_to_import(string, bool all_or_nothing = true);
+	int  check_whether_and_how_to_import(std::string, bool all_or_nothing = true);
 	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
 	SoundFileOmega* sfbrowser;
@@ -1273,15 +1273,15 @@ class Editor : public PublicEditor
 	bool  idle_drop_paths  (std::vector<Glib::ustring> paths, nframes64_t frame, double ypos);
 	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
 	
-	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-	void do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+	void do_import (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+	void do_embed (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
-	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
+	int  import_sndfiles (std::vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>, bool, uint32_t total);
-	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
+	int  embed_sndfiles (std::vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
-	int add_sources (vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
+	int add_sources (std::vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
 				      boost::shared_ptr<ARDOUR::Track>& existing_track);
@@ -1324,7 +1324,7 @@ class Editor : public PublicEditor
 	/* to support this ... */
 
 	void import_audio (bool as_tracks);
-	void do_import (vector<Glib::ustring> paths, bool split, bool as_tracks);
+	void do_import (std::vector<Glib::ustring> paths, bool split, bool as_tracks);
 
 	void move_to_start ();
 	void move_to_end ();
@@ -1412,7 +1412,7 @@ class Editor : public PublicEditor
 	/// Snap threshold in pixels
 	double snap_threshold;
 
-	void handle_gui_changes (const string &, void *);
+	void handle_gui_changes (const std::string &, void *);
 	bool ignore_gui_changes;
 
 	void    hide_all_tracks (bool with_select);
@@ -1653,7 +1653,7 @@ public:
 	Gtk::Menu* cd_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
-	typedef list<Marker*> Marks;
+	typedef std::list<Marker*> Marks;
 	Marks metric_marks;
 
 	void remove_metric_marks ();
@@ -2074,23 +2074,23 @@ public:
 	/* audio export */
 
 	int  write_region_selection(RegionSelection&);
-	bool write_region (string path, boost::shared_ptr<ARDOUR::AudioRegion>);
+	bool write_region (std::string path, boost::shared_ptr<ARDOUR::AudioRegion>);
 	void bounce_region_selection ();
 	void bounce_range_selection (bool replace, bool enable_processing);
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);
-	bool write_audio_range (ARDOUR::AudioPlaylist&, const ARDOUR::ChanCount& channels, list<ARDOUR::AudioRange>&);
+	bool write_audio_range (ARDOUR::AudioPlaylist&, const ARDOUR::ChanCount& channels, std::list<ARDOUR::AudioRange>&);
 
 	void write_selection ();
 
 	XMLNode *before; /* used in *_reversible_command */
 
-	void begin_reversible_command (string cmd_name);
+	void begin_reversible_command (std::string cmd_name);
 	void commit_reversible_command ();
 
 	void update_title ();	
-	void update_title_s (const string & snapshot_name);
+	void update_title_s (const std::string & snapshot_name);
 
 	struct State {
 	    Selection* selection;
@@ -2172,8 +2172,8 @@ public:
 	bool _xfade_visibility;
 	
 #ifdef WITH_CMT
-	void handle_new_imageframe_time_axis_view(const string & track_name, void* src) ;
-	void handle_new_imageframe_marker_time_axis_view(const string & track_name, TimeAxisView* marked_track) ;
+	void handle_new_imageframe_time_axis_view(const std::string & track_name, void* src) ;
+	void handle_new_imageframe_marker_time_axis_view(const std::string & track_name, TimeAxisView* marked_track) ;
 
 	void start_imageframe_grab(ArdourCanvas::Item*, GdkEvent*) ;
 	void start_markerview_grab(ArdourCanvas::Item*, GdkEvent*) ;
@@ -2236,13 +2236,13 @@ public:
 	
 	/* audio filters */
 
-	void apply_filter (ARDOUR::Filter&, string cmd);
+	void apply_filter (ARDOUR::Filter&, std::string cmd);
 
 	/* handling cleanup */
 
 	int playlist_deletion_dialog (boost::shared_ptr<ARDOUR::Playlist>);
 
-	vector<sigc::connection> session_connections;
+	std::vector<sigc::connection> session_connections;
 
 	/* tracking step changes of track height */
 
@@ -2274,7 +2274,7 @@ public:
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
-	void session_state_saved (string);
+	void session_state_saved (std::string);
 
 	Glib::RefPtr<Gtk::Action>              undo_action;
 	Glib::RefPtr<Gtk::Action>              redo_action;

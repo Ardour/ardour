@@ -25,25 +25,23 @@
 
 namespace ARDOUR {
 
-	using namespace PBD;
-
 	/**
 	 * @return the path to the directory used to store user specific ardour
 	 * configuration files.
 	 */
-	sys::path user_config_directory ();
+	PBD::sys::path user_config_directory ();
 
 	/**
 	 * @return the path to the directory that contains the system wide ardour
 	 * modules.
 	 */
-	sys::path ardour_module_directory ();
+	PBD::sys::path ardour_module_directory ();
 
-	SearchPath ardour_search_path ();
+	PBD::SearchPath ardour_search_path ();
 
-	SearchPath system_config_search_path ();
+	PBD::SearchPath system_config_search_path ();
 
-	SearchPath system_data_search_path ();
+	PBD::SearchPath system_data_search_path ();
 
 } // namespace ARDOUR
 

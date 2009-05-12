@@ -124,7 +124,7 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 	/* CD Marker stuff */
 	
 	struct CDMarkerStatus {
-		CDMarkerStatus (string out_file, TimespanPtr timespan, FormatPtr format, string filename) :
+		CDMarkerStatus (std::string out_file, TimespanPtr timespan, FormatPtr format, std::string filename) :
 		  out (out_file.c_str()), timespan (timespan), format (format), filename (filename),
 		  track_number (1), track_position (0), track_duration (0), track_start_frame (0),
 		  index_number (1), index_position (0)
@@ -134,7 +134,7 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 		std::ofstream  out;
 		TimespanPtr    timespan;
 		FormatPtr      format;
-		string         filename;
+		std::string    filename;
 		Location *     marker;
 		
 		/* Track info */

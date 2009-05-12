@@ -24,7 +24,6 @@
 #include <list>
 #include <vector>
 #include <map>
-#include <set>
 #include <stdexcept>
 
 #include <boost/shared_ptr.hpp>
@@ -39,10 +38,6 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/location.h"
 #include "ardour/types.h"
-
-using std::string;
-using std::list;
-using std::set;
 
 namespace ARDOUR
 {
@@ -72,7 +67,7 @@ class ExportProfileManager
 	
 	PresetList const & get_presets () { return preset_list; }
 	bool load_preset (PresetPtr preset);
-	PresetPtr save_preset (string const & name);
+	PresetPtr save_preset (std::string const & name);
 	void remove_preset ();
 
   private:

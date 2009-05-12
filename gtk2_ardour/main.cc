@@ -50,6 +50,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace Gtk;
 using namespace ARDOUR_COMMAND_LINE;
 using namespace ARDOUR;

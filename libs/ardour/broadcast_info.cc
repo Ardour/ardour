@@ -81,7 +81,7 @@ BroadcastInfo::set_from_session (Session const & session, int64_t time_ref)
 }
 
 bool
-BroadcastInfo::load_from_file (string const & filename)
+BroadcastInfo::load_from_file (std::string const & filename)
 {
 	SNDFILE * file = 0;
 	SF_INFO info;
@@ -112,7 +112,7 @@ BroadcastInfo::load_from_file (SNDFILE* sf)
 	return true;
 }
 
-string
+std::string
 BroadcastInfo::get_description () const
 {
 	return info->description;
@@ -136,12 +136,12 @@ BroadcastInfo::get_origination_time () const
 {
 	struct tm ret;
 	
-	string date = info->origination_date;
+	std::string date = info->origination_date;
 	ret.tm_year = atoi (date.substr (0, 4)) - 1900;
 	ret.tm_mon = atoi (date.substr (5, 2));
 	ret.tm_mday = atoi (date.substr (8, 2));
 	
-	string time = info->origination_time;
+	std::string time = info->origination_time;
 	ret.tm_hour = atoi (time.substr (0,2));
 	ret.tm_min = atoi (time.substr (3,2));
 	ret.tm_sec = atoi (time.substr (6,2));
@@ -149,20 +149,20 @@ BroadcastInfo::get_origination_time () const
 	return ret;
 }
 
-string
+std::string
 BroadcastInfo::get_originator () const
 {
 	return info->originator;
 }
 
-string
+std::string
 BroadcastInfo::get_originator_ref () const
 {
 	return info->originator_reference;
 }
 
 bool
-BroadcastInfo::write_to_file (string const & filename)
+BroadcastInfo::write_to_file (std::string const & filename)
 {
 	SNDFILE * file = 0;
 	SF_INFO info;
@@ -192,7 +192,7 @@ BroadcastInfo::write_to_file (SNDFILE* sf)
 }
 
 void
-BroadcastInfo::set_description (string const & desc)
+BroadcastInfo::set_description (std::string const & desc)
 {
 	_has_info = true;
 	
@@ -229,7 +229,7 @@ BroadcastInfo::set_origination_time (struct tm * now)
 }
 
 void
-BroadcastInfo::set_originator (string const & str)
+BroadcastInfo::set_originator (std::string const & str)
 {
 	_has_info = true;
 	
@@ -242,7 +242,7 @@ BroadcastInfo::set_originator (string const & str)
 }
 
 void
-BroadcastInfo::set_originator_ref (string const & str)
+BroadcastInfo::set_originator_ref (std::string const & str)
 {
 	_has_info = true;
 	

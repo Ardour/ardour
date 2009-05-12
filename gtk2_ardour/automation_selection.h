@@ -26,6 +26,6 @@ namespace ARDOUR {
 	class AutomationList;
 }
 
-struct AutomationSelection : list< boost::shared_ptr<ARDOUR::AutomationList> > {};
+struct AutomationSelection : std::list<boost::shared_ptr<ARDOUR::AutomationList> > {};
 
 #endif /* __ardour_gtk_automation_selection_h__ */

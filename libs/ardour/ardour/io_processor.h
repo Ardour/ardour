@@ -31,8 +31,6 @@
 #include "ardour/ardour.h"
 #include "ardour/processor.h"
 
-using std::string;
-
 class XMLNode;
 
 namespace ARDOUR {
@@ -45,9 +43,9 @@ class IO;
 class IOProcessor : public Processor
 {
   public:
-	IOProcessor (Session&, const string& proc_name, const string io_name="",
+	IOProcessor (Session&, const std::string& proc_name, const std::string io_name="",
 		     ARDOUR::DataType default_type = DataType::AUDIO);
-	IOProcessor (Session&, IO* io, const string& proc_name,
+	IOProcessor (Session&, IO* io, const std::string& proc_name,
 		     ARDOUR::DataType default_type = DataType::AUDIO);
 	virtual ~IOProcessor ();
 	

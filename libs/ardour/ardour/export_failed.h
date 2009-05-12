@@ -27,8 +27,6 @@
 
 #include "i18n.h"
 
-using namespace PBD;
-
 namespace ARDOUR
 {
 
@@ -38,7 +36,7 @@ class ExportFailed : public std::exception
 	ExportFailed (std::string const & reason) :
 	  reason (reason.c_str())
 	{
-		error << string_compose (_("Export failed: %1"), reason) << endmsg;
+		PBD::error << string_compose (_("Export failed: %1"), reason) << endmsg;
 	}
 	
 	~ExportFailed () throw() { }

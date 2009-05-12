@@ -63,9 +63,9 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-
 
 static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)

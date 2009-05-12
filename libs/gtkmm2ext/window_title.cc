@@ -21,6 +21,8 @@
 
 #include "i18n.h"
 
+using namespace std;
+
 namespace {
 	
 // I don't know if this should be translated.

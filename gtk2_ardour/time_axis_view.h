@@ -193,8 +193,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
   	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results);
-	virtual void get_inverted_selectables (Selection&, list<Selectable *>& results);
+	virtual void get_selectables (nframes_t start, nframes_t end, double top, double bot, std::list<Selectable*>& results);
+	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 
 	void add_ghost (RegionView*);
 	void remove_ghost (RegionView*);
@@ -233,8 +233,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	uint32_t height;  /* in canvas units */
 
-	string controls_base_unselected_name;
-	string controls_base_selected_name;
+	std::string controls_base_unselected_name;
+	std::string controls_base_selected_name;
 
 	bool name_entry_button_press (GdkEventButton *ev);
 	bool name_entry_button_release (GdkEventButton *ev);
@@ -310,10 +310,10 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	ArdourCanvas::Group      *selection_group;
 
-	list<GhostRegion*> ghosts;
+	std::list<GhostRegion*> ghosts;
 
-	list<SelectionRect*> free_selection_rects;
-	list<SelectionRect*> used_selection_rects;
+	std::list<SelectionRect*> free_selection_rects;
+	std::list<SelectionRect*> used_selection_rects;
 
 	SelectionRect* get_selection_rect(uint32_t id);
 

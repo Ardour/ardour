@@ -27,6 +27,8 @@ namespace {
 	const char * const surfaces_env_variable_name = "ARDOUR_SURFACES_PATH";
 } // anonymous
 
+using namespace PBD;
+
 namespace ARDOUR {
 
 SearchPath

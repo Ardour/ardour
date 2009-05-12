@@ -125,8 +125,8 @@ class AudioRegionView : public RegionView
 	    WaveformLogScaled = 0x10,
     };
 
-    vector<ArdourCanvas::WaveView *> waves;
-    vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+    std::vector<ArdourCanvas::WaveView *> waves;
+    std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
     ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position 
     ArdourCanvas::SimpleLine*        zero_line;
     ArdourCanvas::Polygon*           fade_in_shape;
@@ -168,7 +168,7 @@ class AudioRegionView : public RegionView
 
     void color_handler ();
 
-    vector<GnomeCanvasWaveViewCache*> wave_caches;
+    std::vector<GnomeCanvasWaveViewCache*> wave_caches;
 
   private:
 

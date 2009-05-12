@@ -47,9 +47,9 @@ class Route;
 class Processor : public SessionObject, public AutomatableControls, public Latent
 {
   public:
-	static const string state_node_name;
+	static const std::string state_node_name;
 
-	Processor(Session&, const string& name);
+	Processor(Session&, const std::string& name);
 	
 	virtual ~Processor() { }
 	

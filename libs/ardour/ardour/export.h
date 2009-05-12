@@ -32,17 +32,12 @@
 #include "ardour/ardour.h"
 #include "ardour/gdither.h"
 
-using std::map;
-using std::vector;
-using std::string;
-using std::pair;
-
 namespace ARDOUR 
 {
 	class Port;
 
-	typedef pair<Port *, uint32_t> PortChannelPair;
-	typedef map<uint32_t, vector<PortChannelPair> > ExportPortMap;
+	typedef std::pair<Port *, uint32_t> PortChannelPair;
+	typedef std::map<uint32_t, std::vector<PortChannelPair> > ExportPortMap;
 
 	struct ExportSpecification : public SF_INFO, public sigc::trackable {
 
@@ -52,14 +47,13 @@ namespace ARDOUR
 	    void init ();
 	    void clear ();
 
-
 	    int prepare (nframes_t blocksize, nframes_t frame_rate);
 
 	    int process (nframes_t nframes);
 
 	    /* set by the user */
 
-	    string              path;
+	    std::string    path;
 	    nframes_t      sample_rate;
 
 	    int            src_quality;

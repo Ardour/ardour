@@ -49,7 +49,7 @@ class AxisView : public virtual Selectable
 
 	ARDOUR::Session& session() const { return _session; }
 
-	virtual string name() const = 0;
+	virtual std::string name() const = 0;
 
 	virtual bool marked_for_display() const { return _marked_for_display; }
 	virtual void set_marked_for_display (bool yn) {
@@ -79,7 +79,7 @@ class AxisView : public virtual Selectable
 	ARDOUR::Session& _session;
 	Gdk::Color _color;
 
-	static list<Gdk::Color> used_colors;
+	static std::list<Gdk::Color> used_colors;
 
 	Gtk::Label name_label;
 

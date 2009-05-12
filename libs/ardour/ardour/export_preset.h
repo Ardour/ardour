@@ -26,8 +26,6 @@
 #include "pbd/uuid.h"
 #include "pbd/xml++.h"
 
-using std::string;
-
 namespace ARDOUR
 {
 
@@ -35,13 +33,13 @@ class Session;
 
 class ExportPreset {
   public:
-	ExportPreset (string filename, Session & s);
+	ExportPreset (std::string filename, Session & s);
 	~ExportPreset ();
 
 	PBD::UUID const & id () const { return _id; }
-	string name () const { return _name; }
+	std::string name () const { return _name; }
 
-	void set_name (string const & name);
+	void set_name (std::string const & name);
 
 	// Note: The set_..._state functions take ownership of the XMLNode
 	void set_global_state (XMLNode & state);
@@ -55,14 +53,14 @@ class ExportPreset {
 
   private:
 
-	void set_id (string const & id);
+	void set_id (std::string const & id);
 
 	XMLNode * get_instant_xml () const;
 	void save_instant_xml () const;
 	void remove_instant_xml () const;
 
 	PBD::UUID  _id;
-	string     _name;
+	std::string _name;
 
 	Session &   session;
 	XMLTree     global;

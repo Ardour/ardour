@@ -24,9 +24,6 @@
 #include <sigc++/signal.h>
 #include "ardour/types.h"
 
-using std::list;
-using std::set;
-
 class RegionView;
 class TimeAxisView;
 
@@ -71,7 +68,7 @@ class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 	nframes_t _current_start; ///< start position for the selection
 	nframes_t _current_end; ///< end position for the selection
 
-	list<RegionView *> _bylayer; ///< list of regions sorted by layer
+	std::list<RegionView *> _bylayer; ///< list of regions sorted by layer
 };
 
 #endif /* __ardour_gtk_region_selection_h__ */

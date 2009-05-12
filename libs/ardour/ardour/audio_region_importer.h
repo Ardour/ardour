@@ -43,14 +43,14 @@ class AudioRegionImportHandler : public ElementImportHandler
   public:
 	// Inerface implementation
 	AudioRegionImportHandler (XMLTree const & source, Session & session);
-	string get_info () const;
+	std::string get_info () const;
 	
 	void create_regions_from_children (XMLNode const & node, ElementList & list);
 	
 	// Source management
-	bool check_source (string const & filename) const;
-	void add_source (string const & filename, boost::shared_ptr<Source> const & source);
-	boost::shared_ptr<Source> const & get_source (string const & filename) const;
+	bool check_source (std::string const & filename) const;
+	void add_source (std::string const & filename, boost::shared_ptr<Source> const & source);
+	boost::shared_ptr<Source> const & get_source (std::string const & filename) const;
 
 	// Id management
 	void register_id (PBD::ID & old_id, PBD::ID & new_id);
@@ -58,8 +58,8 @@ class AudioRegionImportHandler : public ElementImportHandler
 
   private:
 	// Source management
-	typedef std::map<string, boost::shared_ptr<Source> > SourceMap;
-	typedef std::pair<string, boost::shared_ptr<Source> > SourcePair;
+	typedef std::map<std::string, boost::shared_ptr<Source> > SourceMap;
+	typedef std::pair<std::string, boost::shared_ptr<Source> > SourcePair;
 	SourceMap sources;
 
 	// Id management
@@ -75,7 +75,7 @@ class AudioRegionImporter : public ElementImporter
 	~AudioRegionImporter ();
 
 	// Interface implementation
-	string get_info () const;
+	std::string get_info () const;
 	Session::ImportStatus * get_import_status () { return &status; }
 	
 	// other stuff
@@ -93,7 +93,7 @@ class AudioRegionImporter : public ElementImporter
 	AudioRegionImportHandler & handler;
 	PBD::ID old_id;
 	PBD::ID id;
-	std::list<string> filenames;
+	std::list<std::string> filenames;
 	Session::ImportStatus status;
 	
 	bool parse_xml_region ();

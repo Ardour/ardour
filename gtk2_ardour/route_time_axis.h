@@ -83,8 +83,8 @@ public:
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
-	void get_inverted_selectables (Selection&, list<Selectable*>&);
+	void get_selectables (nframes_t start, nframes_t end, double top, double bot, std::list<Selectable *>&);
+	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
 	bool show_automation(Evoral::Parameter param);
 	void set_layer_display (LayerDisplay d);
 	LayerDisplay layer_display () const;
@@ -99,12 +99,12 @@ public:
 	TimeAxisView::Children get_child_list();
 
 	/* The editor calls these when mapping an operation across multiple tracks */
-	void use_new_playlist (bool prompt, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void use_copy_playlist (bool prompt, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void use_copy_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void clear_playlist ();
 
 	/* group playlist name resolving */
-	std::string resolve_new_group_playlist_name(std::string &, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	std::string resolve_new_group_playlist_name(std::string &, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 
 	
 	void build_playlist_menu (Gtk::Menu *);
@@ -118,7 +118,7 @@ public:
 	/* This is a bit nasty to expose :/ */
 	struct RouteAutomationNode {
 		Evoral::Parameter                         param;
-	    Gtk::CheckMenuItem*                       menu_item;
+		Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> track;
 	    
 		RouteAutomationNode (Evoral::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
@@ -131,12 +131,12 @@ public:
 
 	XMLNode* get_automation_child_xml_node (Evoral::Parameter param) { return RouteUI::get_automation_child_xml_node (param); }
 	
-	typedef map<Evoral::Parameter, RouteAutomationNode*> AutomationTracks;
+	typedef std::map<Evoral::Parameter, RouteAutomationNode*> AutomationTracks;
 	AutomationTracks automation_tracks() { return _automation_tracks; }
 
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
 	
-	string              name() const;
+	std::string         name() const;
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* edit_group() const;
 	boost::shared_ptr<ARDOUR::Playlist> playlist() const;
@@ -157,9 +157,9 @@ protected:
 
 	struct ProcessorAutomationNode {
 		Evoral::Parameter                         what;
-	    Gtk::CheckMenuItem*                       menu_item;
+		Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> view;
-	    RouteTimeAxisView&                        parent;
+		RouteTimeAxisView&                        parent;
 
 	    ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
 		    : what (w), menu_item (mitem), parent (p) {}
@@ -171,7 +171,7 @@ protected:
 	    boost::shared_ptr<ARDOUR::Processor> processor;
 	    bool                                 valid;
 	    Gtk::Menu*                           menu;
-	    vector<ProcessorAutomationNode*>     lines;
+	    std::vector<ProcessorAutomationNode*>     lines;
 
 	    ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i) 
 		    : processor (i), valid (true), menu (0) {}
@@ -302,9 +302,9 @@ protected:
 	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item, Gtk::RadioMenuItem* reset_item_2);
 	void track_mode_changed ();
 
-	list<ProcessorAutomationInfo*> processor_automation;
+	std::list<ProcessorAutomationInfo*> processor_automation;
 
-	typedef vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
+	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
 	
 	// Set from XML so context menu automation buttons can be correctly initialized
@@ -323,9 +323,9 @@ protected:
 	XMLNode* underlay_xml_node;
 	bool set_underlay_state();
 
-	typedef list<StreamView*> UnderlayList;
+	typedef std::list<StreamView*> UnderlayList;
 	UnderlayList _underlay_streams;
-	typedef list<RouteTimeAxisView*> UnderlayMirrorList;
+	typedef std::list<RouteTimeAxisView*> UnderlayMirrorList;
 	UnderlayMirrorList _underlay_mirrors;
 };
 

@@ -30,8 +30,6 @@
 #include "ardour/export_channel.h"
 #include "ardour/ardour.h"
 
-using Glib::ustring;
-
 namespace ARDOUR
 {
 
@@ -53,11 +51,11 @@ class ExportTimespan : public sigc::trackable
   public:
 	~ExportTimespan ();
 	
-	ustring name () const { return _name; }
-	void set_name (ustring name) { _name = name; }
+	Glib::ustring name () const { return _name; }
+	void set_name (Glib::ustring name) { _name = name; }
 	
-	ustring range_id () const { return _range_id; }
-	void set_range_id (ustring range_id) { _range_id = range_id; }
+	Glib::ustring range_id () const { return _range_id; }
+	void set_range_id (Glib::ustring range_id) { _range_id = range_id; }
 	
 	/// Registers a channel to be read when export starts rolling
 	void register_channel (ExportChannelPtr channel);
@@ -89,8 +87,8 @@ class ExportTimespan : public sigc::trackable
 
 	TempFileMap    filemap;
 	
-	ustring       _name;
-	ustring       _range_id;
+	Glib::ustring _name;
+	Glib::ustring _range_id;
 
 };
 

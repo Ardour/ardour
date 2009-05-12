@@ -48,7 +48,7 @@ class AudioPlaylistImportHandler : public ElementImportHandler
 
 	AudioPlaylistImportHandler (XMLTree const & source, Session & session, AudioRegionImportHandler & region_handler, const char * nodename = "Playlists");
 	virtual ~AudioPlaylistImportHandler () {}
-	virtual string get_info () const;
+	virtual std::string get_info () const;
 	
 	void get_regions (XMLNode const & node, ElementList & list) const;
 	void update_region_id (XMLProperty* id_prop);
@@ -64,7 +64,7 @@ class UnusedAudioPlaylistImportHandler : public AudioPlaylistImportHandler
   public:
 	UnusedAudioPlaylistImportHandler (XMLTree const & source, Session & session, AudioRegionImportHandler & region_handler) :
 		AudioPlaylistImportHandler (source, session, region_handler, X_("UnusedPlaylists")) { }
-	string get_info () const { return _("Audio Playlists (unused)"); }
+	std::string get_info () const { return _("Audio Playlists (unused)"); }
 };
 
 class AudioPlaylistImporter : public ElementImporter
@@ -74,7 +74,7 @@ class AudioPlaylistImporter : public ElementImporter
 	AudioPlaylistImporter (AudioPlaylistImporter const & other);
 	~AudioPlaylistImporter ();
 
-	string get_info () const;
+	std::string get_info () const;
 	
 	void set_diskstream (PBD::ID const & id);
 	PBD::ID const & orig_diskstream () const { return orig_diskstream_id; }

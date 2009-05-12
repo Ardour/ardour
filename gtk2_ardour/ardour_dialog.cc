@@ -29,6 +29,7 @@
 #include "public_editor.h"
 #include "utils.h"
 
+using namespace std;
 using namespace sigc;
 using namespace Gtk;
 

@@ -32,8 +32,6 @@
 
 #include "pbd/xml++.h"
 
-using Glib::ustring;
-
 namespace ARDOUR
 {
 
@@ -84,8 +82,8 @@ class ExportChannelConfiguration
 	ChannelList const & get_channels () const { return channels; }
 	bool all_channels_have_ports () const;
 	
-	ustring name () const { return _name; }
-	void set_name (ustring name) { _name = name; }
+	Glib::ustring name () const { return _name; }
+	void set_name (Glib::ustring name) { _name = name; }
 	void set_split (bool value) { split = value; }
 	
 	bool get_split () const { return split; }
@@ -127,7 +125,7 @@ class ExportChannelConfiguration
 	FileConfigList  file_configs;
 	
 	bool            split; // Split to mono files
-	ustring        _name;
+	Glib::ustring  _name;
 };
 
 } // namespace ARDOUR

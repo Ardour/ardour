@@ -28,6 +28,7 @@
 
 namespace ARDOUR {
 
+using namespace std;
 using namespace PBD::sys;
 
 SessionDirectory::SessionDirectory (const path& session_path)

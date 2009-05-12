@@ -23,21 +23,19 @@
 #include <string>
 #include <glibmm/ustring.h>
 
-using std::string;
-
 namespace ARDOUR_COMMAND_LINE {
 
-extern string session_name;
+extern std::string session_name;
 extern bool   show_key_actions;
 extern bool   no_splash;
 extern bool   just_version;
-extern string jack_client_name;
+extern std::string jack_client_name;
 extern bool   use_vst;
 extern bool   new_session;
 extern char*  curvetest_file;
 extern bool   try_hw_optimization;
 extern bool   use_gtk_theme;
-extern string keybindings_path;
+extern std::string keybindings_path;
 extern Glib::ustring menus_file;
 extern bool   finder_invoked_ardour;
 

@@ -156,8 +156,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int unload_session (bool hide_stuff = false);
 	void close_session();
 
-	int  save_state_canfail (string state_name = "");
-	void save_state (const string & state_name = "");
+	int  save_state_canfail (std::string state_name = "");
+	void save_state (const std::string & state_name = "");
 
 	static double gain_to_slider_position (ARDOUR::gain_t g);
 	static ARDOUR::gain_t slider_position_to_gain (double pos);
@@ -185,7 +185,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void>      SuperRapidScreenUpdate;
 	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
 
-	void name_io_setup (ARDOUR::AudioEngine&, string&, ARDOUR::IO& io, bool in);
+	void name_io_setup (ARDOUR::AudioEngine&, std::string&, ARDOUR::IO& io, bool in);
 
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
@@ -283,7 +283,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void startup ();
 	void shutdown ();
 
-	int  ask_about_saving_session (const string & why);
+	int  ask_about_saving_session (const std::string & why);
 
 	/* periodic safety backup, to be precise */
 	gint autosave_session();
@@ -483,7 +483,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void recent_session_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 
 	struct RecentSessionsSorter {
-	    bool operator() (std::pair<string,string> a, std::pair<string,string> b) const {
+		bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
 		    return cmp_nocase(a.first, b.first) == -1;
 	    }
 	};
@@ -627,7 +627,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::MenuItem *cleanup_item;
 
-	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title, const string & msg);
+	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title, const std::string & msg);
 	void cleanup ();
 	void flush_trash ();
 

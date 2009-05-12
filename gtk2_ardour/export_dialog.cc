@@ -234,7 +234,7 @@ ExportDialog::update_warnings ()
 	if (!warnings->conflicting_filenames.empty()) {
 		list_files_hbox.show ();
 		for (std::list<Glib::ustring>::iterator it = warnings->conflicting_filenames.begin(); it != warnings->conflicting_filenames.end(); ++it) {
-			ustring::size_type pos = it->find_last_of ("/");
+			Glib::ustring::size_type pos = it->find_last_of ("/");
 			list_files_string += "\n" + it->substr (0, pos + 1) + "<b>" + it->substr (pos + 1) + "</b>";
 		}
 	}

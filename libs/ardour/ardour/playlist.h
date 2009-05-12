@@ -55,12 +55,12 @@ class Playlist : public SessionObject,
                  public boost::noncopyable,
                  public boost::enable_shared_from_this<Playlist> {
   public:
-	typedef list<boost::shared_ptr<Region> >    RegionList;
+	typedef std::list<boost::shared_ptr<Region> >    RegionList;
 
 	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);
-	Playlist (Session&, string name, DataType type, bool hidden = false);
-	Playlist (boost::shared_ptr<const Playlist>, string name, bool hidden = false);
-	Playlist (boost::shared_ptr<const Playlist>, nframes_t start, nframes_t cnt, string name, bool hidden = false);
+	Playlist (Session&, std::string name, DataType type, bool hidden = false);
+	Playlist (boost::shared_ptr<const Playlist>, std::string name, bool hidden = false);
+	Playlist (boost::shared_ptr<const Playlist>, nframes_t start, nframes_t cnt, std::string name, bool hidden = false);
 
 	virtual ~Playlist ();  
 
@@ -73,7 +73,7 @@ class Playlist : public SessionObject,
 	void release();
 	bool used () const { return _refcnt != 0; }
 
-	bool set_name (const string& str);
+	bool set_name (const std::string& str);
 
 	const DataType& data_type() const { return _type; }
 
@@ -105,8 +105,8 @@ class Playlist : public SessionObject,
 	void shuffle (boost::shared_ptr<Region>, int dir);
 	void update_after_tempo_map_change ();
 
-	boost::shared_ptr<Playlist> cut  (list<AudioRange>&, bool result_is_hidden = true);
-	boost::shared_ptr<Playlist> copy (list<AudioRange>&, bool result_is_hidden = true);
+	boost::shared_ptr<Playlist> cut  (std::list<AudioRange>&, bool result_is_hidden = true);
+	boost::shared_ptr<Playlist> copy (std::list<AudioRange>&, bool result_is_hidden = true);
 	int                         paste (boost::shared_ptr<Playlist>, nframes_t position, float times);
 
 	RegionList*                regions_at (nframes_t frame);
@@ -131,9 +131,9 @@ class Playlist : public SessionObject,
 	sigc::signal<void>      Modified;
 	sigc::signal<void>      NameChanged;
 	sigc::signal<void>      LengthChanged;
-	sigc::signal<void, list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;
+	sigc::signal<void, std::list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;
 
-	static string bump_name (string old_name, Session&);
+	static std::string bump_name (std::string old_name, Session&);
 
 	void freeze ();
 	void thaw ();
@@ -193,9 +193,9 @@ class Playlist : public SessionObject,
 	RegionList       pending_bounds;
 	bool             pending_modified;
 	bool             pending_length;
-	list< Evoral::RangeMove<nframes_t> > pending_range_moves;
+	std::list< Evoral::RangeMove<nframes_t> > pending_range_moves;
 	bool             save_on_thaw;
-	string           last_save_reason;
+	std::string      last_save_reason;
 	uint32_t         in_set_state;
 	bool             first_set_state;
 	bool            _hidden;
@@ -270,7 +270,7 @@ class Playlist : public SessionObject,
 	nframes_t _get_maximum_extent() const;
 
 	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t, nframes_t, bool), 
-					      list<AudioRange>& ranges, bool result_is_hidden);
+					      std::list<AudioRange>& ranges, bool result_is_hidden);
 	boost::shared_ptr<Playlist> cut (nframes_t start, nframes_t cnt, bool result_is_hidden);
 	boost::shared_ptr<Playlist> copy (nframes_t start, nframes_t cnt, bool result_is_hidden);
 

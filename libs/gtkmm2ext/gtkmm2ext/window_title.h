@@ -24,8 +24,6 @@
 
 namespace Gtkmm2ext {
 
-using std::string;
-
 /**
  * \class The WindowTitle class can be used to maintain the 
  * consistancy of window titles between windows and dialogs.
@@ -42,19 +40,19 @@ public:
 	 * which will may be the application name or the document 
 	 * name in a document based application.
 	 */
-	WindowTitle(const string& title);
+	WindowTitle(const std::string& title);
 
 	/**
 	 * Add an string element to the window title.
 	 */
-	void operator+= (const string&);
+	void operator+= (const std::string&);
 
 	/// @return The window title string.
-	const string& get_string () { return m_title;}
+	const std::string& get_string () { return m_title;}
 
 private:
 
-	string                         m_title;
+	std::string                         m_title;
 
 };
 

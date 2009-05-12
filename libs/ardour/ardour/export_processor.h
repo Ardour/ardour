@@ -30,9 +30,6 @@
 #include "ardour/export_file_io.h"
 #include "ardour/export_utilities.h"
 
-using Glib::ustring;
-using std::list;
-
 namespace ARDOUR
 {
 

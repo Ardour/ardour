@@ -74,6 +74,7 @@
 class AUPluginUI;
 #endif
 
+using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;

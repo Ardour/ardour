@@ -41,7 +41,7 @@ class CycleTimer {
 	}
 	~CycleTimer() {
 		_exit = get_cycles();
-		std::cerr << _name << ": " << (float) (_exit - _entry) / cycles_per_usec << " (" <<  _entry << ", " << _exit << ')' << endl;
+		std::cerr << _name << ": " << (float) (_exit - _entry) / cycles_per_usec << " (" <<  _entry << ", " << _exit << ')' << std::endl;
 	}
 
 	static float get_mhz ();

@@ -141,7 +141,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	Gtk::Menu *processor_menu;
 	gint processor_menu_map_handler (GdkEventAny *ev);
 	Gtk::Menu * build_processor_menu ();
-	void build_processor_tooltip (Gtk::EventBox&, string);
+	void build_processor_tooltip (Gtk::EventBox&, std::string);
 	void show_processor_menu (gint arg);
 
 	void choose_send ();
@@ -162,7 +162,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void row_deleted (const Gtk::TreeModel::Path& path);
 	void show_processor_active (boost::weak_ptr<ARDOUR::Processor>);
 	void show_processor_name (boost::weak_ptr<ARDOUR::Processor>);
-	string processor_name (boost::weak_ptr<ARDOUR::Processor>);
+	std::string processor_name (boost::weak_ptr<ARDOUR::Processor>);
 
 	void remove_processor_gui (boost::shared_ptr<ARDOUR::Processor>);
 
@@ -185,7 +185,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void clear_processors ();
 	void rename_processors ();
 
-	typedef vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
+	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
 
 	void for_selected_processors (void (ProcessorBox::*pmf)(boost::shared_ptr<ARDOUR::Processor>));
 	void get_selected_processors (ProcSelection&);

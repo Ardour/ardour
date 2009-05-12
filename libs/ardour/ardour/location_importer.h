@@ -36,7 +36,7 @@ class LocationImportHandler : public ElementImportHandler
 {
   public:
 	LocationImportHandler (XMLTree const & source, Session & session);
-	string get_info () const;
+	std::string get_info () const;
 };
 
 class LocationImporter : public ElementImporter
@@ -45,7 +45,7 @@ class LocationImporter : public ElementImporter
 	LocationImporter (XMLTree const & source, Session & session, LocationImportHandler & handler, XMLNode const & node);
 	~LocationImporter ();
 
-	string get_info () const;
+	std::string get_info () const;
 
   protected:
 	bool _prepare_move ();

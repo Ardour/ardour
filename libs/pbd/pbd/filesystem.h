@@ -66,31 +66,29 @@ namespace PBD {
 
 namespace sys {
 
-using std::string;
-
 class path
 {
 public:
 	path() : m_path("") { }
 	path(const path & p) : m_path(p.m_path) { }
-	path(const string & s) : m_path(s) { }
+	path(const std::string & s) : m_path(s) { }
 	path(const char* s) : m_path(s) { }
 	
 	path& operator=(const path& p) { m_path = p.m_path; return *this;}
-	path& operator=(const string& s) { m_path = s; return *this; }
+	path& operator=(const std::string& s) { m_path = s; return *this; }
 	path& operator=(const char* s) { m_path = s; return *this; }
 
 	path& operator/=(const path& rhs);
-	path& operator/=(const string& s);
+	path& operator/=(const std::string& s);
 	path& operator/=(const char* s);
 
-	const string to_string() const { return m_path; }
+	const std::string to_string() const { return m_path; }
 
 	/**
 	 * @return the last component of the path, if the path refers to
 	 * a file then it will be the entire filename including any extension.
 	 */
-	string leaf() const; 
+	std::string leaf () const; 
 
 	/**
 	 * @returns the directory component of a path without any trailing
@@ -101,7 +99,7 @@ public:
 
 private:
 
-	string m_path;
+	std::string m_path;
 };
 
 class filesystem_error : public std::runtime_error
@@ -184,7 +182,7 @@ void copy_file(const path & from_path, const path & to_path);
  * ::basename and most other forms of basename in that it removes the
  * extension from the filename if the filename has one.
  */ 
-string basename (const path& p);
+std::string basename (const path& p);
 
 /**
  * @return If the filename contains a dot, return a substring of the
@@ -193,7 +191,7 @@ string basename (const path& p);
  *
  * @param p a file path.
  */
-string extension (const path& p);
+std::string extension (const path& p);
 
 } // namespace sys
 

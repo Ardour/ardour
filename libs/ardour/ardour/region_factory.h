@@ -54,9 +54,9 @@ class RegionFactory {
 	static boost::shared_ptr<Region> create (boost::shared_ptr<AudioRegion>, nframes_t start, 
 						 nframes_t length, const std::string& name, 
 						 layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, const SourceList&, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (const SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, const SourceList&, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (const SourceList &, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
 	static boost::shared_ptr<Region> create (SourceList &, const XMLNode&);
 };

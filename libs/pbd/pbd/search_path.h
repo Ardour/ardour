@@ -27,9 +27,6 @@
 
 namespace PBD {
 
-using std::string;
-using std::vector;
-
 /**
  * @class The SearchPath class is a helper class for getting a 
  * vector of paths contained in a search path string where a 
@@ -39,7 +36,7 @@ using std::vector;
  * The SearchPath class does not test whether the paths exist
  * or are directories. It is basically just a container.
  */
-class SearchPath : public vector<sys::path>
+class SearchPath : public std::vector<sys::path>
 {
 public:
 	/**
@@ -58,14 +55,14 @@ public:
 	 * 
 	 * @param search_path A path string.
 	 */
-	SearchPath (const string& search_path);
+	SearchPath (const std::string& search_path);
 
 	/**
 	 * Initialize SearchPath from a sys::path.
 	 *
 	 * @param directory_path A directory path.
 	 */
-	SearchPath (const sys::path& directory_path);
+	SearchPath (const PBD::sys::path& directory_path);
 
 	/**
 	 * Initialize SearchPath from a vector of paths that may or may
@@ -73,7 +70,7 @@ public:
 	 *
 	 * @param path A path.
 	 */
-	SearchPath (const vector<sys::path>& paths);
+	SearchPath (const std::vector<PBD::sys::path>& paths);
 
 	/**
 	 * @return a search path string.
@@ -81,7 +78,7 @@ public:
 	 * The string that is returned contains the platform specific
 	 * path separator.
 	 */
-	const string to_string () const;
+	const std::string to_string () const;
 
 	/**
 	 * Add all the directories in path to this.
@@ -91,7 +88,7 @@ public:
 	/**
 	 * Add another directory path to the search path.
 	 */
-	SearchPath& operator+= (const sys::path& directory_path);
+	SearchPath& operator+= (const PBD::sys::path& directory_path);
 	
 	/**
 	 * Concatenate another SearchPath onto this.
@@ -101,18 +98,18 @@ public:
 	/**
 	 * Add another path to the search path.
 	 */
-	SearchPath& operator+ (const sys::path& directory_path);
+	SearchPath& operator+ (const PBD::sys::path& directory_path);
 
 	/**
 	 * Add a sub-directory to each path in the search path.
 	 * @param subdir The directory name, it should not contain 
 	 * any path separating tokens.
 	 */
-	SearchPath& add_subdirectory_to_paths (const string& subdir);
+	SearchPath& add_subdirectory_to_paths (const std::string& subdir);
 
 protected:
 	void add_directory (const sys::path& directory_path);
-	void add_directories (const vector<sys::path>& paths);
+	void add_directories (const std::vector<PBD::sys::path>& paths);
 };
 
 } // namespace PBD

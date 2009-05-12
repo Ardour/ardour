@@ -22,6 +22,8 @@
 
 #include "i18n.h"
 
+using namespace std;
+
 namespace {
 
 const char* const tape_file_regex_string = X_("/T[0-9][0-9][0-9][0-9]-");

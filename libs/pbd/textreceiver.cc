@@ -23,6 +23,8 @@
 
 #include "pbd/textreceiver.h"
 
+using namespace std;
+
 TextReceiver::TextReceiver (const string &n)
 
 {

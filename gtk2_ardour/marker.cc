@@ -29,6 +29,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace ARDOUR;
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 

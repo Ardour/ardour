@@ -6,9 +6,7 @@
 
 namespace ARDOUR {
 
-using std::string;
-
-int find_session (string str, string& path, string& snapshot, bool& isnew);
+int find_session (std::string str, std::string& path, std::string& snapshot, bool& isnew);
 
 /**
  * Create a SessionDirectory at the path specified by
@@ -19,7 +17,7 @@ int find_session (string str, string& path, string& snapshot, bool& isnew);
  *
  * @see SessionDirectory
  */
-bool create_session_directory (const string& session_directory_path);
+bool create_session_directory (const std::string& session_directory_path);
 
 };
 

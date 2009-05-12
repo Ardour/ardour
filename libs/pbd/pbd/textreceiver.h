@@ -24,20 +24,16 @@
 
 #include "receiver.h"
 
-using std::string;
-using std::cout;
-using std::endl;
-
 class TextReceiver : public Receiver 
 {
   public:
-	TextReceiver (const string &n);
+	TextReceiver (const std::string &n);
 
   protected:
 	void receive (Transmitter::Channel, const char *);
 
   private:
-	string name;
+	std::string name;
 };
 
 #endif //__libmisc_textreceiver_h__

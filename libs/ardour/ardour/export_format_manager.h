@@ -31,8 +31,6 @@
 
 #include "ardour/export_formats.h"
 
-using std::string;
-
 namespace ARDOUR
 {
 

@@ -132,7 +132,7 @@ class HasSampleFormat {
 	sigc::signal<void, bool, WeakDitherTypePtr> DitherTypeSelectChanged;
 	sigc::signal<void, bool, WeakDitherTypePtr> DitherTypeCompatibleChanged;
 	
-	static string get_sample_format_name (ExportFormatBase::SampleFormat format);
+	static std::string get_sample_format_name (ExportFormatBase::SampleFormat format);
 
   protected:
 	/* State lists */

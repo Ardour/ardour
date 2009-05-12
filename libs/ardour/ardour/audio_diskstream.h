@@ -55,14 +55,14 @@ class IO;
 class AudioDiskstream : public Diskstream
 {	
   public:
-	AudioDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
+	AudioDiskstream (Session &, const std::string& name, Diskstream::Flag f = Recordable);
 	AudioDiskstream (Session &, const XMLNode&);
 	~AudioDiskstream();
 
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 
-	string input_source (uint32_t n=0) const {
+	std::string input_source (uint32_t n=0) const {
 		boost::shared_ptr<ChannelList> c = channels.reader();
 		if (n < c->size()) {
 			return (*c)[n]->source ? (*c)[n]->source->name() : "";
@@ -280,7 +280,7 @@ class AudioDiskstream : public Diskstream
 	
 	int use_new_write_source (uint32_t n=0);
 
-	int find_and_use_playlist (const string&);
+	int find_and_use_playlist (const std::string &);
 
 	void allocate_temporary_buffers ();
 

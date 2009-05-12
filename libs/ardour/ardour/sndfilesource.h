@@ -60,7 +60,7 @@ class SndFileSource : public AudioFileSource {
 	static void setup_standard_crossfades (nframes_t sample_rate);
 	static const Source::Flag default_writable_flags;
 
-	static int get_soundfile_info (const Glib::ustring& path, SoundFileInfo& _info, string& error_msg);
+	static int get_soundfile_info (const Glib::ustring& path, SoundFileInfo& _info, std::string& error_msg);
 
   protected:
 	void set_header_timeline_position ();

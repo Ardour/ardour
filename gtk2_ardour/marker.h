@@ -50,7 +50,7 @@ class Marker : public PBD::Destructible
 	};
 
 
-	Marker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, Type, 
+	Marker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const std::string& text, Type, 
 		nframes_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
@@ -63,7 +63,7 @@ class Marker : public PBD::Destructible
 	void set_line_vpos (double y_origin, double height);
 
 	void set_position (nframes_t);
-	void set_name (const string&);
+	void set_name (const std::string&);
 	void set_color_rgba (uint32_t rgba);
 	
 	nframes64_t position() const { return frame_position; }
@@ -98,7 +98,7 @@ class Marker : public PBD::Destructible
 class TempoMarker : public Marker
 {
   public:
-        TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::TempoSection&);
+        TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
 	~TempoMarker ();
 
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
@@ -110,7 +110,7 @@ class TempoMarker : public Marker
 class MeterMarker : public Marker
 {
   public:
-        MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, ARDOUR::MeterSection&);
+        MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
 	~MeterMarker ();
 
 	ARDOUR::MeterSection& meter() const { return _meter; }

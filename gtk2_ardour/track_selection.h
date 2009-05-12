@@ -24,6 +24,6 @@
 
 class TimeAxisView;
 
-struct TrackSelection : public list<TimeAxisView*> {};
+struct TrackSelection : public std::list<TimeAxisView*> {};
 
 #endif /* __ardour_gtk_track_selection_h__ */

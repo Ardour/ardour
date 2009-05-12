@@ -82,12 +82,12 @@ class MidiTimeAxisView : public RouteTimeAxisView
 		return _channel_selector.mode_changed; 
 	}
 	
-	sigc::signal<void, string, string>& signal_midi_patch_settings_changed() {
+	sigc::signal<void, std::string, std::string>& signal_midi_patch_settings_changed() {
 		return _midi_patch_settings_changed;
 	}
 	
   private:
-	sigc::signal<void, string, string>  _midi_patch_settings_changed;
+	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 	  		
 	void model_changed();
 	void custom_device_mode_changed();

@@ -22,6 +22,7 @@
 
 #include "ardour/session.h"
 
+using namespace std;
 using namespace ARDOUR;
 
 ExportPreset::ExportPreset (string filename, Session & s) :

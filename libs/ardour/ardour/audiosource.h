@@ -20,9 +20,6 @@
 #ifndef __ardour_audio_source_h__
 #define __ardour_audio_source_h__
 
-#include <list>
-#include <vector>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
@@ -37,9 +34,6 @@
 #include "ardour/ardour.h"
 #include "pbd/stateful.h" 
 #include "pbd/xml++.h"
-
-using std::list;
-using std::vector;
 
 namespace ARDOUR {
 

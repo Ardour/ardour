@@ -34,8 +34,6 @@
 #include "ardour/export_format_specification.h"
 #include "ardour/export_utilities.h"
 
-using Glib::ustring;
-
 namespace ARDOUR
 {
 
@@ -45,15 +43,15 @@ class ExportFileWriter
   public:
 	virtual ~ExportFileWriter () {}
 
-	string filename () const { return _filename; }
+	std::string filename () const { return _filename; }
 	nframes_t position () const { return _position; }
 	
 	void set_position (nframes_t position) { _position = position; }
 	
   protected:
-	ExportFileWriter (string filename) : _filename (filename) {}
+	ExportFileWriter (std::string filename) : _filename (filename) {}
 
-	string _filename;
+	std::string _filename;
 	nframes_t _position;
 };
 
@@ -65,7 +63,7 @@ class SndfileWriterBase : public ExportFileWriter
 	SNDFILE * get_sndfile () const { return sndfile; }
 
   protected:
-	SndfileWriterBase (int channels, nframes_t samplerate, int format, string const & path);
+	SndfileWriterBase (int channels, nframes_t samplerate, int format, std::string const & path);
 	virtual ~SndfileWriterBase ();
 
 	SF_INFO        sf_info;
@@ -81,7 +79,7 @@ class SndfileWriter : public SndfileWriterBase, public GraphSink<T>
 	// Should only be created vie ExportFileFactory and derived classes
   public: // protected
 	friend class ExportFileFactory;
-	SndfileWriter (int channels, nframes_t samplerate, int format, string const & path);
+	SndfileWriter (int channels, nframes_t samplerate, int format, std::string const & path);
 
   public:
 	nframes_t write (T * data, nframes_t frames);
@@ -165,12 +163,12 @@ class ExportFileFactory
 	
 	typedef std::pair<FloatSinkPtr, FileWriterPtr> FilePair;
 
-	static FilePair create (FormatPtr format, uint32_t channels, ustring const & filename);
+	static FilePair create (FormatPtr format, uint32_t channels, Glib::ustring const & filename);
 	static bool check (FormatPtr format, uint32_t channels);
 
   private:
 
-	static FilePair create_sndfile (FormatPtr format, unsigned int channels, ustring const & filename);
+	static FilePair create_sndfile (FormatPtr format, unsigned int channels, Glib::ustring const & filename);
 	static bool check_sndfile (FormatPtr format, unsigned int channels);
 };
 

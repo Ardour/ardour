@@ -20,7 +20,6 @@
 #ifndef __ardour_gtk_automation_time_axis_h__
 #define __ardour_gtk_automation_time_axis_h__
 
-#include <vector>
 #include <list>
 #include <string>
 #include <utility>
@@ -35,10 +34,6 @@
 #include "time_axis_view.h"
 #include "simplerect.h"
 #include "automation_controller.h"
-
-using std::vector;
-using std::list;
-using std::string;
 
 namespace ARDOUR {
 	class Session;
@@ -67,8 +62,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 				TimeAxisView& parent,
 				bool show_regions,
 				ArdourCanvas::Canvas& canvas,
-				const string & name, /* translatable */
-				const string & plug_name = "");
+				const std::string & name, /* translatable */
+				const std::string & plug_name = "");
 
 	~AutomationTimeAxisView();
 	
@@ -82,8 +77,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<AutomationLine> line() { return _line; }
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
-	void get_inverted_selectables (Selection&, list<Selectable*>& results);
+	void get_selectables (nframes_t start, nframes_t end, double top, double bot, std::list<Selectable *>&);
+	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	void show_timestretch (nframes_t start, nframes_t end) {}
 	void hide_timestretch () {}
@@ -100,7 +95,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 	
-	static const string state_node_name;
+	static const std::string state_node_name;
 	XMLNode* get_state_node();
 	
 	boost::shared_ptr<ARDOUR::AutomationControl> control()    { return _control; }
@@ -117,7 +112,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<AutomationLine> _line;
 	AutomationStreamView*             _view;
 	
-	string _name;
+	std::string _name;
 	bool    ignore_toggle;
 
 	bool    first_call_to_set_height;

@@ -36,8 +36,6 @@
 
 #include "ardour/ardour.h"
 
-using std::string;
-
 namespace ARDOUR {
 
 class Location : public PBD::StatefulDestructible
@@ -56,7 +54,7 @@ class Location : public PBD::StatefulDestructible
 
 	Location (nframes_t sample_start,
 		  nframes_t sample_end,
-		  const string &name,
+		  const std::string &name,
 		  Flags bits = Flags(0))		
 		
 		: _name (name),
@@ -90,8 +88,8 @@ class Location : public PBD::StatefulDestructible
 
 	int move_to (nframes_t pos);
 
-	const string& name() const { return _name; }
-	void set_name (const string &str) { _name = str; name_changed(this); }
+	const std::string& name() const { return _name; }
+	void set_name (const std::string &str) { _name = str; name_changed(this); }
 
 	void set_auto_punch (bool yn, void *src);
 	void set_auto_loop (bool yn, void *src);
@@ -123,14 +121,14 @@ class Location : public PBD::StatefulDestructible
    
 	/* CD Track / CD-Text info */
 
-	std::map<string, string> cd_info;
-	XMLNode& cd_info_node (const string &, const string &);
+	std::map<std::string, std::string> cd_info;
+	XMLNode& cd_info_node (const std::string &, const std::string &);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
   private:
-	string        _name;
+	std::string   _name;
 	nframes_t     _start;
 	nframes_t     _end;
 	Flags         _flags;
@@ -165,7 +163,7 @@ class Locations : public PBD::StatefulDestructible
 	Location* end_location() const;
 	Location* start_location() const;
 
-	int next_available_name(string& result,string base);
+	int next_available_name(std::string& result,std::string base);
 	uint32_t num_range_markers() const;
 
 	int set_current (Location *, bool want_lock = true);

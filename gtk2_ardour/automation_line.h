@@ -55,7 +55,7 @@ namespace Gnome {
 class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
-	AutomationLine (const string& name, TimeAxisView&, ArdourCanvas::Group&,
+	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Group&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
 			const Evoral::TimeConverter<double, ARDOUR::sframes_t>* converter = 0);
 	virtual ~AutomationLine ();
@@ -82,7 +82,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	ControlPoint* nth (uint32_t);
 	uint32_t npoints() const { return control_points.size(); }
 
-	string  name()    const { return _name; }
+	std::string  name()    const { return _name; }
 	bool    visible() const { return _visible; }
 	guint32 height()  const { return _height; }
 
@@ -106,9 +106,9 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void show_selection();
 	void hide_selection ();
 
-	string get_verbose_cursor_string (double) const;
-	string fraction_to_string (double) const;
-	double string_to_fraction (string const &) const;
+	std::string get_verbose_cursor_string (double) const;
+	std::string fraction_to_string (double) const;
+	double string_to_fraction (std::string const &) const;
 	void   view_to_model_coord (double& x, double& y) const;
 	void   model_to_view_coord (double& x, double& y) const;
 
@@ -132,7 +132,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	
   protected:
 
-	string    _name;
+	std::string    _name;
 	guint32   _height;
 	uint32_t  _line_color;
 	

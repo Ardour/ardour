@@ -23,8 +23,6 @@
 #include <string>
 #include <stdint.h>
 
-using std::string;
-
 // Use this define when initializing arrarys for use in sndfile_*_format()
 #define SNDFILE_STR_LENGTH 32
 
@@ -44,15 +42,15 @@ extern const char * const sndfile_endian_formats_strings[SNDFILE_ENDIAN_FORMATS+
 
 extern int sndfile_endian_formats[SNDFILE_ENDIAN_FORMATS];
 
-int sndfile_bitdepth_format_from_string(string);
-int sndfile_header_format_from_string(string);
-int sndfile_endian_format_from_string(string);
-string sndfile_file_ending_from_string(string);
+int sndfile_bitdepth_format_from_string (std::string);
+int sndfile_header_format_from_string (std::string);
+int sndfile_endian_format_from_string (std::string);
+std::string sndfile_file_ending_from_string (std::string);
 
 int sndfile_data_width (int format);
 
 // It'd be nice if libsndfile did this for us
-string sndfile_major_format(int);
-string sndfile_minor_format(int);
+std::string sndfile_major_format (int);
+std::string sndfile_minor_format (int);
 
 #endif /* __sndfile_helpers_h__ */

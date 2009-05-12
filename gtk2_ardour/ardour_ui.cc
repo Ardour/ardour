@@ -2325,7 +2325,7 @@ ARDOUR_UI::get_session_parameters (bool should_be_new)
 
 			if (likely_new) {
 
-				ustring existing = Glib::build_filename (session_path, session_name);
+				Glib::ustring existing = Glib::build_filename (session_path, session_name);
 				
 				if (!ask_about_loading_existing_session (existing)) {
 					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that

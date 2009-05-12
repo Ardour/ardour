@@ -29,6 +29,7 @@
 #include "simplerect.h"
 #include "waveview.h"
 
+using namespace std;
 using namespace Editing;
 using namespace ArdourCanvas;
 using namespace ARDOUR;

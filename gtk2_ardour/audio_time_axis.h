@@ -86,7 +86,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	
 	void first_idle ();
 
-	XMLNode* get_child_xml_node (const string & childname);
+	XMLNode* get_child_xml_node (const std::string & childname);
 
 	void set_waveform_shape (Editing::WaveformShape);
 	void set_waveform_scale (Editing::WaveformScale);

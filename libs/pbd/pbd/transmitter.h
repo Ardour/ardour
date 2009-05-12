@@ -25,10 +25,6 @@
 
 #include <sigc++/sigc++.h>
 
-using std::cout;
-using std::cerr;
-using std::endl;
-
 class Transmitter : public std::stringstream
 
 {
@@ -82,11 +78,11 @@ endmsg (std::ostream &ostr)
 	   see if ostr == cout, and handle it specially.
 	*/
 
-	if (&ostr == &cout) {
-		cout << endl;
+	if (&ostr == &std::cout) {
+		std::cout << std::endl;
 		return ostr;
-	} else if (&ostr == &cerr) {
-		cerr << endl;
+	} else if (&ostr == &std::cerr) {
+		std::cerr << std::endl;
 		return ostr;
 	}
 
@@ -97,7 +93,7 @@ endmsg (std::ostream &ostr)
 		   it and assume that that will be enough.
 		*/
 		
-		ostr << endl;
+		ostr << std::endl;
 	}
 
 	return ostr;

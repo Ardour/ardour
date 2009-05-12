@@ -40,10 +40,10 @@ class MidiPlaylist : public ARDOUR::Playlist
 {
 public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);
-	MidiPlaylist (Session&, string name, bool hidden = false);
-	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden = false);
+	MidiPlaylist (Session&, std::string name, bool hidden = false);
+	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, std::string name, bool hidden = false);
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes_t start, nframes_t cnt,
-	              string name, bool hidden = false);
+	              std::string name, bool hidden = false);
 
 	~MidiPlaylist ();
 

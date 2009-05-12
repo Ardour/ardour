@@ -26,6 +26,8 @@
 
 static const char* state_node_name = "Channels";
 
+using namespace std;
+
 namespace ARDOUR {
 
 // infinite/zero chan count stuff, for setting minimums and maximums, etc.

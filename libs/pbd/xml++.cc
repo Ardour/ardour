@@ -12,6 +12,8 @@
 
 #define XML_VERSION "1.0"
 
+using namespace std;
+
 static XMLNode*           readnode(xmlNodePtr);
 static void               writenode(xmlDocPtr, XMLNode*, xmlNodePtr, int);
 static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string& xpath);

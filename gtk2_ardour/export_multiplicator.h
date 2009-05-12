@@ -35,7 +35,6 @@
 #include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
 
-using std::list;
 using ARDOUR::ExportProfileManager;
 
 class ExportMultiplicator : public Gtk::EventBox {

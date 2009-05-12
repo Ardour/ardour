@@ -61,14 +61,14 @@ class CrossfadeEditor : public ArdourDialog
 		    : x (a), y (b) {}
 	};
 	
-	struct Preset : public list<PresetPoint> {
+	struct Preset : public std::list<PresetPoint> {
 	    const char* name;
 	    const char* image_name;
 
 	    Preset (const char* n, const char* x) : name (n), image_name (x) {}
 	};
 	
-	typedef list<Preset*> Presets;
+	typedef std::list<Preset*> Presets;
 	
 	static Presets* fade_in_presets;
 	static Presets* fade_out_presets;
@@ -108,10 +108,10 @@ class CrossfadeEditor : public ArdourDialog
 	struct Half {
 	    ArdourCanvas::Line*     line;
 	    ArdourCanvas::Polygon*  shading;
-	    list<Point*>            points;
+	    std::list<Point*>       points;
 	    ARDOUR::AutomationList  normative_curve; /* 0 - 1.0, linear */
 	    ARDOUR::AutomationList  gain_curve;      /* 0 - 2.0, gain mapping */
-	    vector<ArdourCanvas::WaveView*>  waves;
+	    std::vector<ArdourCanvas::WaveView*>  waves;
 	    
 	    Half();
 	};
@@ -125,8 +125,8 @@ class CrossfadeEditor : public ArdourDialog
 	WhichFade current;
 	
 	bool point_grabbed;
-	vector<Gtk::Button*> fade_out_buttons;
-	vector<Gtk::Button*> fade_in_buttons;
+	std::vector<Gtk::Button*> fade_out_buttons;
+	std::vector<Gtk::Button*> fade_in_buttons;
 
 	Gtk::VBox vpacker2;
 

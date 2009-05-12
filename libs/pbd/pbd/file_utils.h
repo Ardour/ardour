@@ -29,9 +29,6 @@
 
 namespace PBD {
 
-using std::string;
-using std::vector;
-
 /**
  * Get a list of files in a directory.
  * @note You must join path with result to get the absolute path
@@ -42,7 +39,7 @@ using std::vector;
  */
 void
 get_files_in_directory (const sys::path& path,
-                        vector<string>& result);
+                        std::vector<std::string>& result);
 
 /**
  * Takes a directory path and returns all the files in the directory
@@ -55,7 +52,7 @@ get_files_in_directory (const sys::path& path,
 void
 find_matching_files_in_directory (const sys::path& directory,
                                   const Glib::PatternSpec& pattern,
-                                  vector<sys::path>& result);
+                                  std::vector<sys::path>& result);
 
 /**
  * Takes a number of directory paths and returns all the files matching
@@ -66,9 +63,9 @@ find_matching_files_in_directory (const sys::path& directory,
  * @param result A vector in which to place the resulting matches.
  */
 void
-find_matching_files_in_directories (const vector<sys::path>& directory_paths,
+find_matching_files_in_directories (const std::vector<sys::path>& directory_paths,
                                     const Glib::PatternSpec& pattern,
-                                    vector<sys::path>& result);
+                                    std::vector<sys::path>& result);
 
 /**
  * Takes a SearchPath and puts a list of all the files in the search path
@@ -81,7 +78,7 @@ find_matching_files_in_directories (const vector<sys::path>& directory_paths,
 void
 find_matching_files_in_search_path (const SearchPath& search_path,
                                     const Glib::PatternSpec& pattern,
-                                    vector<sys::path>& result);
+                                    std::vector<sys::path>& result);
 
 /**
  * Takes a search path and a file name and place the full path
@@ -91,7 +88,7 @@ find_matching_files_in_search_path (const SearchPath& search_path,
  */
 bool
 find_file_in_search_path (const SearchPath& search_path,
-                          const string& filename,
+                          const std::string& filename,
                           sys::path& result);
 			
 } // namespace PBD

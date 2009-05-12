@@ -41,6 +41,7 @@
 #include "gui_thread.h"
 #include "utils.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;

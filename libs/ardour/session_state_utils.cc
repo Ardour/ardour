@@ -27,6 +27,9 @@
 
 #include "i18n.h"
 
+using namespace std;
+using namespace PBD;
+
 namespace ARDOUR {
 
 bool
@@ -52,7 +55,7 @@ create_backup_file (const sys::path & file_path)
 
 void
 get_state_files_in_directory (const sys::path & directory_path,
-		vector<sys::path> & result)
+			      vector<sys::path> & result)
 {
 	Glib::PatternSpec state_file_pattern('*' + string(statefile_suffix));
 	

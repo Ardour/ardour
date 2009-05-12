@@ -21,6 +21,8 @@
 #include "pbd/search_path.h"
 #include "pbd/error.h"
 
+using namespace std;
+
 namespace {
 
 #ifdef WIN32

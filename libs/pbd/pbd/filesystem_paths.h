@@ -25,11 +25,9 @@
 
 namespace PBD {
 
-	using std::vector;
+	std::vector<sys::path> system_data_directories ();
 
-	vector<sys::path> system_data_directories ();
-
-	vector<sys::path> system_config_directories ();
+	std::vector<sys::path> system_config_directories ();
 
 } // namespace PBD
 

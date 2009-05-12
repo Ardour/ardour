@@ -68,11 +68,11 @@ class Diskstream : public SessionObject, public boost::noncopyable
 		NonLayered   = 0x8
 	};
 
-	Diskstream (Session &, const string& name, Flag f = Recordable);
+	Diskstream (Session &, const std::string& name, Flag f = Recordable);
 	Diskstream (Session &, const XMLNode&);
 	virtual ~Diskstream();
 	
-	bool set_name (const string& str);
+	bool set_name (const std::string& str);
 
 	ARDOUR::IO* io() const { return _io; }
 	void set_io (ARDOUR::IO& io);
@@ -149,7 +149,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	void remove_region_from_last_capture (boost::weak_ptr<Region> wregion);
 
 	void move_processor_automation (boost::weak_ptr<Processor>,
-			list< Evoral::RangeMove<nframes_t> > const &);
+			std::list< Evoral::RangeMove<nframes_t> > const &);
 
 	sigc::signal<void>            RecordEnableChanged;
 	sigc::signal<void>            SpeedChanged;
@@ -215,7 +215,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	virtual void playlist_changed (Change);
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
-	virtual void playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const &);
+	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<nframes_t> > const &);
 
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
 	virtual void transport_looped (nframes_t transport_frame) = 0;
@@ -229,7 +229,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	virtual int use_new_write_source (uint32_t n=0) = 0;
 
-	virtual int find_and_use_playlist (const string&) = 0;
+	virtual int find_and_use_playlist (const std::string&) = 0;
 
 	virtual void allocate_temporary_buffers () = 0;
 

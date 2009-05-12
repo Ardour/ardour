@@ -27,6 +27,8 @@
 
 #define WITH_STATIC_PATHS 1
 
+using namespace PBD;
+
 namespace ARDOUR {
 
 using std::string;

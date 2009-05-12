@@ -28,8 +28,6 @@
 #include "ardour/types.h"
 #include "ardour/export_format_base.h"
 
-using std::string;
-
 class XMLNode;
 
 namespace ARDOUR

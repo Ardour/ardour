@@ -62,7 +62,7 @@ class Route : public IO
 {
   protected:
 
-	typedef list<boost::shared_ptr<Processor> > ProcessorList;
+	typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
 
   public:
 
@@ -238,7 +238,7 @@ class Route : public IO
 
 	sigc::signal<void,void*> SelectedChanged;
 
-	int set_control_outs (const vector<std::string>& ports);
+	int set_control_outs (const std::vector<std::string>& ports);
 	boost::shared_ptr<ControlOutputs> control_outs() { return _control_outs; }
 
 	bool feeds (boost::shared_ptr<Route>);

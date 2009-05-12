@@ -148,7 +148,7 @@ class Selection : public sigc::trackable
 	void remove (boost::shared_ptr<ARDOUR::AutomationList>);
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	void remove (const list<Selectable*>&);
+	void remove (const std::list<Selectable*>&);
 	void remove (Marker*);
 
 	void replace (uint32_t time_index, nframes_t start, nframes_t end);

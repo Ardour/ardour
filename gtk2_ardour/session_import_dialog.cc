@@ -34,6 +34,7 @@
 #include "prompter.h"
 #include "i18n.h"
 
+using namespace std;
 using namespace ARDOUR;
 
 SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :

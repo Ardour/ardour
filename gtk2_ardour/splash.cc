@@ -12,6 +12,7 @@
 
 using namespace Gtk;
 using namespace Glib;
+using namespace PBD;
 using namespace std;
 using namespace ARDOUR;
 

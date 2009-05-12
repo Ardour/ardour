@@ -28,7 +28,7 @@ namespace ARDOUR {
 template<class T> void 
 RouteGroup::apply (void (Track::*func)(T, void *), T val, void *src) 
 {
-	for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+	for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		Track *at;
 		if ((at = dynamic_cast<Track*>(*i)) != 0) {
 			(at->*func)(val, this);

@@ -30,24 +30,21 @@
 
 #include "ardour/session_metadata.h"
 
-using std::string;
-using Glib::ustring;
-
 class MetadataField;
 typedef boost::shared_ptr<MetadataField> MetadataPtr; 
 
 /// Wraps a metadata field to be used in a GUI
 class MetadataField {
   public:
-	MetadataField (ustring const & field_name);
+	MetadataField (Glib::ustring const & field_name);
 	virtual ~MetadataField();
 	virtual MetadataPtr copy () = 0;
 	
 	virtual void save_data (ARDOUR::SessionMetadata & data) const = 0;
 	virtual void load_data (ARDOUR::SessionMetadata const & data) = 0;
 	
-	virtual ustring name() { return _name; }
-	virtual ustring value() { return _value; }
+	virtual Glib::ustring name() { return _name; }
+	virtual Glib::ustring value() { return _value; }
 	
 	/// Get widget containing name of field
 	virtual Gtk::Widget & name_widget () = 0;
@@ -56,17 +53,17 @@ class MetadataField {
 	/// Get widget for editing value
 	virtual Gtk::Widget & edit_widget () = 0;
   protected:
-	ustring _name;
-	ustring _value;
+	Glib::ustring _name;
+	Glib::ustring _value;
 };
 
 /// MetadataField that contains text
 class TextMetadataField : public MetadataField {
   private:
-	typedef ustring (ARDOUR::SessionMetadata::*Getter) () const;
-	typedef void (ARDOUR::SessionMetadata::*Setter) (ustring const &);
+	typedef Glib::ustring (ARDOUR::SessionMetadata::*Getter) () const;
+	typedef void (ARDOUR::SessionMetadata::*Setter) (Glib::ustring const &);
   public:
-	TextMetadataField (Getter getter, Setter setter, ustring const & field_name, guint width = 50);
+	TextMetadataField (Getter getter, Setter setter, Glib::ustring const & field_name, guint width = 50);
 	MetadataPtr copy ();
 	
 	void save_data (ARDOUR::SessionMetadata & data) const;
@@ -94,7 +91,7 @@ class NumberMetadataField : public MetadataField {
 	typedef uint32_t (ARDOUR::SessionMetadata::*Getter) () const;
 	typedef void (ARDOUR::SessionMetadata::*Setter) (uint32_t);
   public:
-	NumberMetadataField (Getter getter, Setter setter, ustring const & field_name, guint numbers, guint width = 50);
+	NumberMetadataField (Getter getter, Setter setter, Glib::ustring const & field_name, guint numbers, guint width = 50);
 	MetadataPtr copy ();
 	
 	void save_data (ARDOUR::SessionMetadata & data) const;
@@ -105,8 +102,8 @@ class NumberMetadataField : public MetadataField {
 	Gtk::Widget & edit_widget ();
   private:
 	void update_value ();
-	ustring uint_to_str (uint32_t i) const;
-	uint32_t str_to_uint (ustring const & str) const;
+	Glib::ustring uint_to_str (uint32_t i) const;
+	uint32_t str_to_uint (Glib::ustring const & str) const;
 	
 	Getter getter;
 	Setter setter;
@@ -122,7 +119,7 @@ class NumberMetadataField : public MetadataField {
 /// Interface for MetadataFields
 class SessionMetadataSet {
   public:
-	SessionMetadataSet (ustring const & name);
+	SessionMetadataSet (Glib::ustring const & name);
 	virtual ~SessionMetadataSet () {};
 	
 	void add_data_field (MetadataPtr field);
@@ -140,14 +137,14 @@ class SessionMetadataSet {
   protected:
 	typedef std::list<MetadataPtr> DataList;
 	DataList list;
-	ustring name;
+	Glib::ustring name;
 	ARDOUR::Session *session;
 };
 
 /// Contains MetadataFields for editing
 class SessionMetadataSetEditable : public SessionMetadataSet {
   public:
-	SessionMetadataSetEditable (ustring const & name);
+	SessionMetadataSetEditable (Glib::ustring const & name);
 	
 	Gtk::Widget & get_widget () { return table; }
 	Gtk::Widget & get_tab_widget ();
@@ -165,7 +162,7 @@ class SessionMetadataSetEditable : public SessionMetadataSet {
 /// Contains MetadataFields for importing
 class SessionMetadataSetImportable : public SessionMetadataSet {
   public:
-	SessionMetadataSetImportable (ustring const & name);
+	SessionMetadataSetImportable (Glib::ustring const & name);
 	
 	Gtk::Widget & get_widget () { return tree_view; }
 	Gtk::Widget & get_tab_widget ();
@@ -183,8 +180,8 @@ class SessionMetadataSetImportable : public SessionMetadataSet {
 	struct Columns : public Gtk::TreeModel::ColumnRecord
 	{
 	  public:
-		Gtk::TreeModelColumn<ustring>     field;
-		Gtk::TreeModelColumn<ustring>     values;
+		Gtk::TreeModelColumn<Glib::ustring>     field;
+		Gtk::TreeModelColumn<Glib::ustring>     values;
 		Gtk::TreeModelColumn<bool>        import;
 		Gtk::TreeModelColumn<MetadataPtr> data;
 	
@@ -199,7 +196,7 @@ class SessionMetadataSetImportable : public SessionMetadataSet {
 	Gtk::CheckButton              select_all_check;
 	
 	void select_all ();
-	void selection_changed (ustring const & path);
+	void selection_changed (Glib::ustring const & path);
 };
 
 /// Metadata dialog interface
@@ -211,7 +208,7 @@ template <typename DataSet>
 class SessionMetadataDialog : public ArdourDialog
 {
   public:
-	SessionMetadataDialog (ustring const & name);
+	SessionMetadataDialog (Glib::ustring const & name);
 
   protected:
 	void init_data ();
@@ -222,7 +219,7 @@ class SessionMetadataDialog : public ArdourDialog
 	virtual void save_and_close ();
 	virtual void end_dialog ();
 	
-	void warn_user (ustring const & string);
+	void warn_user (Glib::ustring const & string);
 	
 	typedef std::list<Gtk::Widget *> WidgetList;
 	typedef boost::shared_ptr<WidgetList> WidgetListPtr;

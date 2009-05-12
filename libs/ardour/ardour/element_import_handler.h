@@ -27,7 +27,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-using std::string;
 class XMLTree;
 
 namespace ARDOUR {
@@ -57,7 +56,7 @@ class ElementImportHandler
 	/** Gets a textual representation of the element type
 	 * @return textual representation of element type
 	 */
-	virtual string get_info () const = 0;
+	virtual std::string get_info () const = 0;
 	
 	/// Elements this handler handles
 	ElementList elements;
@@ -68,13 +67,13 @@ class ElementImportHandler
 	 * @param name name to check
 	 * @return true if name is not used
 	 */
-	bool check_name (const string & name) const;
+	bool check_name (const std::string & name) const;
 	
 	/// Adds name to the list of used names
-	void add_name (string name);
+	void add_name (std::string name);
 	
 	/// Removes name from the list of used names
-	void remove_name (const string & name);
+	void remove_name (const std::string & name);
 	
 	/// Checks wheter or not all elements can be imported cleanly
 	static bool dirty () { return _dirty; }
@@ -103,7 +102,7 @@ class ElementImportHandler
 	
   private:
 	/// Set of names for duplicate checking
-	std::set<string> names;
+	std::set<std::string> names;
 };
 
 } // namespace ARDOUR

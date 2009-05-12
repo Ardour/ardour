@@ -39,7 +39,7 @@ class AudioTrackImportHandler : public ElementImportHandler
   public:
 	AudioTrackImportHandler (XMLTree const & source, Session & session, AudioPlaylistImportHandler & pl_handler);
 	virtual ~AudioTrackImportHandler () {}
-	virtual string get_info () const;
+	virtual std::string get_info () const;
 
   private:
 	AudioPlaylistImportHandler & pl_handler;
@@ -56,7 +56,7 @@ class AudioTrackImporter : public ElementImporter
 	                    AudioPlaylistImportHandler & pl_handler);
 	~AudioTrackImporter ();
 
-	string get_info () const;
+	std::string get_info () const;
 
   protected:
 	bool _prepare_move ();

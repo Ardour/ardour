@@ -74,7 +74,7 @@ protected:
 	uint16_t      _channel;
 	bool          _is_embedded;
 
-	static map<DataType, Glib::ustring> search_paths;
+	static std::map<DataType, Glib::ustring> search_paths;
 };
 
 } // namespace ARDOUR

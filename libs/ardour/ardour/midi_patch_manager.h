@@ -64,8 +64,8 @@ public:
 		{ return _master_devices_by_model[model_name]; }
 	
 	boost::shared_ptr<ChannelNameSet> find_channel_name_set(
-			string model, 
-			string custom_device_mode, 
+			std::string model, 
+			std::string custom_device_mode, 
 			uint8_t channel) {
 		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
 		
@@ -79,8 +79,8 @@ public:
 
 	
 	boost::shared_ptr<Patch> find_patch(
-			string model, 
-			string custom_device_mode, 
+			std::string model, 
+			std::string custom_device_mode, 
 			uint8_t channel, 
 			PatchPrimaryKey patch_key) {
 		
@@ -94,8 +94,8 @@ public:
 	}
 	
 	boost::shared_ptr<Patch> previous_patch(
-			string model, 
-			string custom_device_mode, 
+			std::string model, 
+			std::string custom_device_mode, 
 			uint8_t channel, 
 			PatchPrimaryKey patch_key) {
 		
@@ -109,8 +109,8 @@ public:
 	}
 	
 	boost::shared_ptr<Patch> next_patch(
-			string model, 
-			string custom_device_mode, 
+			std::string model, 
+			std::string custom_device_mode, 
 			uint8_t channel, 
 			PatchPrimaryKey patch_key) {
 		
@@ -123,11 +123,11 @@ public:
 		}
 	}
 	
-	std::list<string> custom_device_mode_names_by_model(std::string model_name) {
+	std::list<std::string> custom_device_mode_names_by_model(std::string model_name) {
 		if (model_name != "") {
 			return master_device_by_model(model_name)->custom_device_mode_names();
 		} else {
-			return std::list<string>();
+			return std::list<std::string>();
 		}
 	}
 	

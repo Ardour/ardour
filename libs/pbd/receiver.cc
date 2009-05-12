@@ -23,6 +23,7 @@
 #include "pbd/receiver.h"
 #include "pbd/transmitter.h"
 
+using namespace std;
 using namespace sigc;
 
 Receiver::Receiver () {}

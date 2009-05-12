@@ -65,7 +65,7 @@ class RouteUI : public virtual AxisView
 	
 	boost::shared_ptr<ARDOUR::Diskstream> get_diskstream() const;
 
-	string name() const;
+	std::string name() const;
 
 	// protected: XXX sigh this should be here
 
@@ -83,8 +83,8 @@ class RouteUI : public virtual AxisView
 	BindableToggleButton* solo_button;
 	BindableToggleButton* rec_enable_button;
 	
-	virtual string solo_button_name () const { return "SoloButton"; }
-	virtual string safe_solo_button_name () const { return "SafeSoloButton"; }
+	virtual std::string solo_button_name () const { return "SoloButton"; }
+	virtual std::string safe_solo_button_name () const { return "SafeSoloButton"; }
 	
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
@@ -164,8 +164,8 @@ class RouteUI : public virtual AxisView
 
 	void set_remote_control_id (uint32_t id, Gtk::CheckMenuItem* item);
 
-	void reversibly_apply_route_boolean (string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
-	void reversibly_apply_track_boolean (string name, void (ARDOUR::Track::*func)(bool, void*), bool, void *);
+	void reversibly_apply_route_boolean (std::string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
+	void reversibly_apply_track_boolean (std::string name, void (ARDOUR::Track::*func)(bool, void*), bool, void *);
 
 	void adjust_latency ();
 	void save_as_template ();

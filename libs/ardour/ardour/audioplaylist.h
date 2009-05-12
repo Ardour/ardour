@@ -40,9 +40,9 @@ class AudioPlaylist : public ARDOUR::Playlist
 	
    public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
-	AudioPlaylist (Session&, string name, bool hidden = false);
-	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, string name, bool hidden = false);
-	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, nframes_t start, nframes_t cnt, string name, bool hidden = false);
+	AudioPlaylist (Session&, std::string name, bool hidden = false);
+	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, std::string name, bool hidden = false);
+	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, nframes_t start, nframes_t cnt, std::string name, bool hidden = false);
 
 	~AudioPlaylist ();
 

@@ -25,15 +25,13 @@
 
 namespace ARDOUR {
 
-using std::string;
-
 class TapeFileMatcher
 {
 public:
 
 	TapeFileMatcher();
 
-	bool matches (const string& filename) const;
+	bool matches (const std::string& filename) const;
 
 private:
 

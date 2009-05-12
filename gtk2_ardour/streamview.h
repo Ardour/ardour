@@ -89,8 +89,8 @@ public:
 	void         foreach_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (nframes_t start, nframes_t end, list<Selectable* >&);
-	void get_inverted_selectables (Selection&, list<Selectable* >& results);
+	void get_selectables (nframes_t start, nframes_t end, std::list<Selectable* >&);
+	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 
 	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region> r) {}
 	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
@@ -135,14 +135,14 @@ protected:
 	ArdourCanvas::Group*      canvas_group;
 	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
 
-	typedef list<RegionView* > RegionViewList;
+	typedef std::list<RegionView* > RegionViewList;
 	RegionViewList  region_views;
 
 	double _samples_per_unit;
 
 	sigc::connection       screen_update_connection;
-	vector<RecBoxInfo>     rec_rects;
-	list< std::pair<boost::shared_ptr<ARDOUR::Region>,RegionView* > > rec_regions;
+	std::vector<RecBoxInfo>     rec_rects;
+	std::list< std::pair<boost::shared_ptr<ARDOUR::Region>,RegionView* > > rec_regions;
 	bool                   rec_updating;
 	bool                   rec_active;
 	bool                   use_rec_regions;
@@ -150,7 +150,7 @@ protected:
 	Gdk::Color region_color;      ///< Contained region color
 	uint32_t   stream_base_color; ///< Background color
 
-	vector<sigc::connection> playlist_connections;
+	std::vector<sigc::connection> playlist_connections;
 	sigc::connection         playlist_change_connection;
 
 	ARDOUR::layer_t _layers;
@@ -158,7 +158,7 @@ protected:
 	
 	double height;
 
-	list<sigc::connection> rec_data_ready_connections;
+	std::list<sigc::connection> rec_data_ready_connections;
 	jack_nframes_t         last_rec_data_frame;
 
 private:

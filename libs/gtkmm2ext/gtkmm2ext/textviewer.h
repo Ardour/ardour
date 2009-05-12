@@ -24,8 +24,6 @@
 
 #include <pbd/transmitter.h>
 
-using std::string;
-
 namespace Gtkmm2ext {
 
 class TextViewer : public Gtk::Window, public Transmitter
@@ -46,7 +44,7 @@ class TextViewer : public Gtk::Window, public Transmitter
 	Gtk::TextView& text()         { return etext; }
 	Gtk::Button& dismiss_button() { return dismiss; }
 
-	void insert_file (const string &);
+	void insert_file (const std::string &);
 	void scroll_to_bottom ();
 	
 	void deliver ();

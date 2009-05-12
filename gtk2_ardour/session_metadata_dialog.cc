@@ -30,6 +30,9 @@
 #include "ardour/session_directory.h"
 #include "ardour/session_utils.h"
 
+using namespace std;
+using namespace Glib;
+
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 
 /*** MetadataField ***/

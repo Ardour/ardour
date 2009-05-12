@@ -22,7 +22,6 @@
 #define __ardour_export_format_base_h__
 
 #include <set>
-#include <string>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <glibmm/ustring.h>
@@ -31,8 +30,6 @@
 #include <samplerate.h>
 #include "ardour/gdither_types.h"
 #include "ardour/ardour.h"
-
-using std::string;
 
 namespace ARDOUR
 {

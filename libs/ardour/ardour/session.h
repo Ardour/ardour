@@ -113,18 +113,13 @@ class Source;
 class TempoMap;
 class VSTPlugin;
 
-using std::vector;
-using std::string;
-using std::map;
-using std::set;
-
 class Session : public PBD::StatefulDestructible, public boost::noncopyable
 {
   private:
 	typedef std::pair<boost::weak_ptr<Route>,bool> RouteBooleanState;
-	typedef vector<RouteBooleanState> GlobalRouteBooleanState;
+	typedef std::vector<RouteBooleanState> GlobalRouteBooleanState;
 	typedef std::pair<boost::weak_ptr<Route>,MeterPoint> RouteMeterState;
-	typedef vector<RouteMeterState> GlobalRouteMeterState;
+	typedef std::vector<RouteMeterState> GlobalRouteMeterState;
 
   public:
 	enum RecordState {
@@ -179,8 +174,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 			Route*       route;
 		};
 
-		list<AudioRange> audio_range;
-		list<MusicRange> music_range;
+		std::list<AudioRange> audio_range;
+		std::list<MusicRange> music_range;
 		
 		boost::shared_ptr<Region> region;
 
@@ -226,15 +221,15 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* creating from an XML file */
 
 	Session (AudioEngine&,
-			const string& fullpath,
-			const string& snapshot_name,
-			string mix_template = "");
+		 	const std::string& fullpath,
+		 	const std::string& snapshot_name,
+		 	std::string mix_template = "");
 
 	/* creating a new Session */
 
 	Session (AudioEngine&,
-			string fullpath,
-			string snapshot_name,
+		 	std::string fullpath,
+		 	std::string snapshot_name,
 			AutoConnectOption input_auto_connect,
 			AutoConnectOption output_auto_connect,
 			uint32_t control_out_channels,
@@ -245,10 +240,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	virtual ~Session ();
 
-	string path() const { return _path; }
-	string name() const { return _name; }
-	string snap_name() const { return _current_snapshot_name; }
-	string raid_path () const;
+	std::string path() const { return _path; }
+	std::string name() const { return _name; }
+	std::string snap_name() const { return _current_snapshot_name; }
+	std::string raid_path () const;
 
 	void set_snap_name ();
 
@@ -277,12 +272,12 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	Glib::ustring peak_path (Glib::ustring) const;
 
-	static string change_source_path_by_name (string oldpath, string oldname, string newname, bool destructive);
+	static std::string change_source_path_by_name (std::string oldpath, std::string oldname, std::string newname, bool destructive);
 
-	string peak_path_from_audio_path (string) const;
-	string new_audio_source_name (const string&, uint32_t nchans, uint32_t chan, bool destructive);
-	string new_midi_source_name (const string&);
-	string new_source_path_from_name (DataType type, const string&);
+	std::string peak_path_from_audio_path (std::string) const;
+	std::string new_audio_source_name (const std::string&, uint32_t nchans, uint32_t chan, bool destructive);
+	std::string new_midi_source_name (const std::string&);
+	std::string new_source_path_from_name (DataType type, const std::string&);
 	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
 
 	void process (nframes_t nframes);
@@ -293,7 +288,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void add_diskstream (boost::shared_ptr<Diskstream>);
 	boost::shared_ptr<Diskstream> diskstream_by_id (const PBD::ID& id);
-	boost::shared_ptr<Diskstream> diskstream_by_name (string name);
+	boost::shared_ptr<Diskstream> diskstream_by_name (std::string name);
 	bool have_rec_enabled_diskstream () const;
 
 	bool have_captured() const { return _have_captured; }
@@ -330,12 +325,12 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
-	boost::shared_ptr<Route> route_by_name (string);
+	boost::shared_ptr<Route> route_by_name (std::string);
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 
-	bool route_name_unique (string) const;
-	bool route_name_internal (string) const;
+	bool route_name_unique (std::string) const;
+	bool route_name_internal (std::string) const;
 
 	bool get_record_enabled() const {
 		return (record_status () >= Enabled);
@@ -437,7 +432,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
-	int location_name(string& result, string base = string(""));
+	int location_name(std::string& result, std::string base = std::string(""));
 
 	void reset_input_monitor_state ();
 
@@ -462,11 +457,11 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	static int rename_template (std::string old_name, std::string new_name);
 	static int delete_template (std::string name);
 
-	sigc::signal<void,string> StateSaved;
+	sigc::signal<void,std::string> StateSaved;
 	sigc::signal<void> StateReady;
 
-	vector<string*>* possible_states() const;
-	static vector<string*>* possible_states(string path);
+	std::vector<std::string*>* possible_states() const;
+	static std::vector<std::string*>* possible_states (std::string path);
 
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node); // not idempotent
@@ -488,14 +483,14 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
 
-	RouteGroup* add_edit_group (string);
-	RouteGroup* add_mix_group (string);
+	RouteGroup* add_edit_group (std::string);
+	RouteGroup* add_mix_group (std::string);
 
 	void remove_edit_group (RouteGroup&);
 	void remove_mix_group (RouteGroup&);
 
-	RouteGroup *mix_group_by_name (string);
-	RouteGroup *edit_group_by_name (string);
+	RouteGroup *mix_group_by_name (std::string);
+	RouteGroup *edit_group_by_name (std::string);
 
 	sigc::signal<void,RouteGroup*> edit_group_added;
 	sigc::signal<void,RouteGroup*> mix_group_added;
@@ -503,13 +498,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	sigc::signal<void>             mix_group_removed;
 
 	void foreach_edit_group (sigc::slot<void,RouteGroup*> sl) {
-		for (list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); i++) {
+		for (std::list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); i++) {
 			sl (*i);
 		}
 	}
 
 	void foreach_mix_group (sigc::slot<void,RouteGroup*> sl) {
-		for (list<RouteGroup *>::iterator i = mix_groups.begin(); i != mix_groups.end(); i++) {
+		for (std::list<RouteGroup *>::iterator i = mix_groups.begin(); i != mix_groups.end(); i++) {
 			sl (*i);
 		}
 	}
@@ -603,9 +598,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	sigc::signal<void,std::vector<boost::weak_ptr<Region> >& > RegionsAdded;
 	sigc::signal<void,boost::weak_ptr<Region> > RegionRemoved;
 
-	int region_name (string& result, string base = string(""), bool newlevel = false);
-	string new_region_name (string);
-	string path_from_region_name (DataType type, string name, string identifier);
+	int region_name (std::string& result, std::string base = std::string(""), bool newlevel = false);
+	std::string new_region_name (std::string);
+	std::string path_from_region_name (DataType type, std::string name, std::string identifier);
 
 	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>);
 
@@ -620,7 +615,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* source management */
 
 	struct ImportStatus : public InterThreadInfo {
-		string doing_what;
+		std::string doing_what;
 
 		/* control info */
 		uint32_t total;
@@ -634,8 +629,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	};
 
 	void import_audiofiles (ImportStatus&);
-	bool sample_rate_convert (ImportStatus&, string infile, string& outfile);
-	string build_tmp_convert_name (string file);
+	bool sample_rate_convert (ImportStatus&, std::string infile, std::string& outfile);
+	std::string build_tmp_convert_name (std::string file);
 
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
@@ -650,7 +645,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void remove_source (boost::weak_ptr<Source>);
 
 	struct cleanup_report {
-		vector<string> paths;
+		std::vector<std::string> paths;
 		int64_t        space;
 	};
 
@@ -686,7 +681,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* playlist management */
 
-	boost::shared_ptr<Playlist> playlist_by_name (string name);
+	boost::shared_ptr<Playlist> playlist_by_name (std::string name);
 	void unassigned_playlists (std::list<boost::shared_ptr<Playlist> > & list);
 	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
 	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistAdded;
@@ -699,7 +694,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* named selections */
 
-	NamedSelection* named_selection_by_name (string name);
+	NamedSelection* named_selection_by_name (std::string name);
 	void add_named_selection (NamedSelection *);
 	void remove_named_selection (NamedSelection *);
 
@@ -729,8 +724,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* flattening stuff */
 
 	boost::shared_ptr<Region> write_one_track (AudioTrack&, nframes_t start, nframes_t end,
-			bool overwrite, vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
-			bool enable_processing = true);
+						   bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
+						   bool enable_processing = true);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -779,7 +774,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void add_bundle (boost::shared_ptr<Bundle>);
 	void remove_bundle (boost::shared_ptr<Bundle>);
-	boost::shared_ptr<Bundle> bundle_by_name (string) const;
+	boost::shared_ptr<Bundle> bundle_by_name (std::string) const;
 
 	sigc::signal<void,boost::shared_ptr<Bundle> > BundleAdded;
 	sigc::signal<void,boost::shared_ptr<Bundle> > BundleRemoved;
@@ -787,10 +782,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* MIDI control */
 
 	void midi_panic(void);
-	int set_mtc_port (string port_tag);
-	int set_mmc_port (string port_tag);
-	int set_midi_port (string port_tag);
-	int set_midi_clock_port (string port_tag);
+	int set_mtc_port (std::string port_tag);
+	int set_mmc_port (std::string port_tag);
+	int set_midi_port (std::string port_tag);
+	int set_midi_clock_port (std::string port_tag);
 	MIDI::Port *mtc_port() const { return _mtc_port; }
 	MIDI::Port *mmc_port() const { return _mmc_port; }
 	MIDI::Port *midi_port() const { return _midi_port; }
@@ -835,10 +830,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	uint32_t undo_depth() const { return _history.undo_depth(); }
 	uint32_t redo_depth() const { return _history.redo_depth(); }
-	string next_undo() const { return _history.next_undo(); }
-	string next_redo() const { return _history.next_redo(); }
+	std::string next_undo() const { return _history.next_undo(); }
+	std::string next_redo() const { return _history.next_redo(); }
 
-	void begin_reversible_command (const string& cmd_name);
+	void begin_reversible_command (const std::string& cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {
@@ -939,8 +934,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* ranges */
 
-	void set_audio_range (list<AudioRange>&);
-	void set_music_range (list<MusicRange>&);
+	void set_audio_range (std::list<AudioRange>&);
+	void set_music_range (std::list<MusicRange>&);
 
 	void request_play_range (bool yn);
 	bool get_play_range () const { return _play_range; }
@@ -988,7 +983,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void update_latency_compensation (bool, bool);
 
   private:
-	int  create (bool& new_session, const string& mix_template, nframes_t initial_length);
+	int  create (bool& new_session, const std::string& mix_template, nframes_t initial_length);
 	void destroy ();
 
 	nframes_t compute_initial_length ();
@@ -1155,8 +1150,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	MIDI::Port*             _mtc_port;
 	MIDI::Port*             _midi_port;
 	MIDI::Port*             _midi_clock_port;
-	string                  _path;
-	string                  _name;
+	std::string             _path;
+	std::string             _name;
 	bool                     session_send_mmc;
 	bool                     session_send_mtc;
 	bool                     session_midi_feedback;
@@ -1172,7 +1167,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void when_engine_running ();
 	void graph_reordered ();
 
-	string _current_snapshot_name;
+	std::string _current_snapshot_name;
 
 	XMLTree* state_tree;
 	bool     state_was_pending;
@@ -1181,7 +1176,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void     auto_save();
 	int      load_options (const XMLNode&);
 	XMLNode& get_options () const;
-	int      load_state (string snapshot_name);
+	int      load_state (std::string snapshot_name);
 	bool     save_config_options_predicate (ConfigVariableBase::Owner owner) const;
 
 	nframes_t _last_roll_location;
@@ -1276,7 +1271,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	sigc::connection auto_loop_changed_connection;
 	void             auto_loop_changed (Location *);
 
-	typedef list<Event *> Events;
+	typedef std::list<Event *> Events;
 	Events           events;
 	Events           immediate_events;
 	Events::iterator next_event;
@@ -1297,7 +1292,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool _remove_event (Event *);
 	void _clear_event_type (Event::Type);
 
-	void first_stage_init (string path, string snapshot_name);
+	void first_stage_init (std::string path, std::string snapshot_name);
 	int  second_stage_init (bool new_tracks);
 	void find_current_end ();
 	void remove_empty_sounds ();
@@ -1357,7 +1352,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	double step_speed;
 
 	typedef sigc::slot<bool> MidiTimeoutCallback;
-	typedef list<MidiTimeoutCallback> MidiTimeoutList;
+	typedef std::list<MidiTimeoutCallback> MidiTimeoutList;
 
 	MidiTimeoutList midi_timeouts;
 	bool mmc_step_timeout ();
@@ -1450,8 +1445,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	int load_mix_groups (const XMLNode&);
 
 
-	list<RouteGroup *> edit_groups;
-	list<RouteGroup *> mix_groups;
+	std::list<RouteGroup *> edit_groups;
+	std::list<RouteGroup *> mix_groups;
 
 	/* disk-streams */
 
@@ -1481,7 +1476,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void catch_up_on_solo_mute_override ();
 	void update_route_solo_state ();
 	void modify_solo_mute (bool, bool);
-	void strip_portname_for_solo (string& portname);
+	void strip_portname_for_solo (std::string& portname);
 
 	/* REGION MANAGEMENT */
 
@@ -1489,7 +1484,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void update_region_name_map (boost::shared_ptr<Region>);
 
 	mutable Glib::Mutex region_lock;
-	typedef map<PBD::ID,boost::shared_ptr<Region> > RegionList;
+	typedef std::map<PBD::ID,boost::shared_ptr<Region> > RegionList;
 	RegionList regions;
 
 	void add_region (boost::shared_ptr<Region>);
@@ -1517,7 +1512,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* PLAYLISTS */
 
 	mutable Glib::Mutex playlist_lock;
-	typedef set<boost::shared_ptr<Playlist> > PlaylistList;
+	typedef std::set<boost::shared_ptr<Playlist> > PlaylistList;
 	PlaylistList playlists;
 	PlaylistList unused_playlists;
 
@@ -1526,7 +1521,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void remove_playlist (boost::weak_ptr<Playlist>);
 	void track_playlist (bool, boost::weak_ptr<Playlist>);
 
-	boost::shared_ptr<Playlist> playlist_factory (string name);
+	boost::shared_ptr<Playlist> playlist_factory (std::string name);
 	boost::shared_ptr<Playlist> XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed ();
@@ -1535,12 +1530,12 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* NAMED SELECTIONS */
 
 	mutable Glib::Mutex named_selection_lock;
-	typedef set<NamedSelection *> NamedSelectionList;
+	typedef std::set<NamedSelection *> NamedSelectionList;
 	NamedSelectionList named_selections;
 
 	int load_named_selections (const XMLNode&);
 
-	NamedSelection *named_selection_factory (string name);
+	NamedSelection *named_selection_factory (std::string name);
 	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
 
 	/* CURVES and AUTOMATION LISTS */
@@ -1566,10 +1561,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* INSERT AND SEND MANAGEMENT */
 
-	list<PortInsert *>              _port_inserts;
-	list<PluginInsert *>            _plugin_inserts;
-	list<Send *>                    _sends;
-	list<Return *>                  _returns;
+	std::list<PortInsert *>              _port_inserts;
+	std::list<PluginInsert *>            _plugin_inserts;
+	std::list<Send *>                    _sends;
+	std::list<Return *>                  _returns;
 	boost::dynamic_bitset<uint32_t> send_bitset;
 	boost::dynamic_bitset<uint32_t> return_bitset;
 	boost::dynamic_bitset<uint32_t> insert_bitset;
@@ -1584,7 +1579,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	struct space_and_path {
 		uint32_t blocks; /* 4kB blocks */
-		string path;
+		std::string path;
 
 		space_and_path() {
 			blocks = 0;
@@ -1597,14 +1592,14 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		}
 	};
 
-	void setup_raid_path (string path);
+	void setup_raid_path (std::string path);
 
-	vector<space_and_path> session_dirs;
-	vector<space_and_path>::iterator last_rr_session_dir;
+	std::vector<space_and_path> session_dirs;
+	std::vector<space_and_path>::iterator last_rr_session_dir;
 	uint32_t _total_free_4k_blocks;
 	Glib::Mutex space_lock;
 
-	string get_best_session_directory_for_new_source ();
+	std::string get_best_session_directory_for_new_source ();
 	void refresh_disk_space ();
 
 	mutable gint _playback_load;
@@ -1663,7 +1658,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		static Pool pool;
 	};
 
-	typedef list<Click*> Clicks;
+	typedef std::list<Click*> Clicks;
 
 	Clicks                 clicks;
 	bool                  _clicking;
@@ -1684,11 +1679,11 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void   clear_clicks ();
 	void   click (nframes_t start, nframes_t nframes);
 
-	vector<Route*> master_outs;
+	std::vector<Route*> master_outs;
 
 	/* range playback */
 
-	list<AudioRange> current_audio_range;
+	std::list<AudioRange> current_audio_range;
 	bool _play_range;
 	void set_play_range (bool yn);
 	void setup_auto_play ();

@@ -34,6 +34,8 @@
 #include "pbd/convert.h"
 #include "pbd/pthread_utils.h"
 
+using namespace PBD;
+
 namespace ARDOUR
 {
 

@@ -38,9 +38,9 @@
 #include "axis_view.h"
 #include "i18n.h"
 
+using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
-
 
 list<Gdk::Color> AxisView::used_colors;
 

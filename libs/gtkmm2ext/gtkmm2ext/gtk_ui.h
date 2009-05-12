@@ -21,7 +21,6 @@
 #define __pbd_gtk_ui_h__
 
 #include <string>
-#include <queue>
 #include <map>
 
 #include <stdint.h>
@@ -41,9 +40,6 @@
 #include <pbd/pool.h>
 #include <pbd/error.h>
 #include <pbd/receiver.h>
-
-using std::string;
-using std::queue;
 
 class Touchable;
 
@@ -89,7 +85,7 @@ struct UIRequest : public BaseUI::BaseRequestObject {
 class UI : public Receiver, public AbstractUI<UIRequest>
 {
   public:
-	UI (string name, int *argc, char **argv[]);
+	UI (std::string name, int *argc, char **argv[]);
 	virtual ~UI ();
 
 	static UI *instance() { return theGtkUI; }
@@ -109,7 +105,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	bool running ();
 	void quit    ();
 	void kill    ();
-	int  load_rcfile (string, bool themechange = false);
+	int  load_rcfile (std::string, bool themechange = false);
 	void run (Receiver &old_receiver);
 
 	void set_state (Gtk::Widget *w, Gtk::StateType state);
@@ -127,7 +123,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 		Glib::signal_idle().connect (bind (slot (&UI::idle_delete<T>), obj));
 	}
 
-	Gdk::Color get_color (const string& prompt, bool& picked, const Gdk::Color *initial = 0);
+	Gdk::Color get_color (const std::string& prompt, bool& picked, const Gdk::Color *initial = 0);
 
 	/* starting is sent just before we enter the main loop,
 	   stopping just after we return from it (at the top level)

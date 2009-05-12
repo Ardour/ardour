@@ -27,6 +27,8 @@
 
 #include "pbd/error.h"
 
+using namespace std;
+
 namespace PBD {
 
 void

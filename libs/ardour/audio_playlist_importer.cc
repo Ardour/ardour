@@ -31,6 +31,7 @@
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
 
+using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 

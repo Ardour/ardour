@@ -163,7 +163,7 @@ class Region
 	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
 	void freeze ();
-	void thaw (const string& why);
+	void thaw (const std::string& why);
 
 	bool covers (nframes_t frame) const {
 		return first_frame() <= frame && frame <= last_frame();
@@ -226,7 +226,7 @@ class Region
 	const SourceList& sources() const { return _sources; }
 	const SourceList& master_sources() const { return _master_sources; }
 
-	std::vector<string> master_source_names();
+	std::vector<std::string> master_source_names();
 	void set_master_sources (const SourceList&);
 	
 	/* automation */
@@ -270,20 +270,20 @@ class Region
 	friend class RegionFactory;
 
 	Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, 
-		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
+		const std::string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
 	Region (const SourceList& srcs, nframes_t start, nframes_t length, 
-		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
+		const std::string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
 	
-	Region (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
-	Region (boost::shared_ptr<const Region>, nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Flag flags = DefaultFlags);
+	Region (boost::shared_ptr<const Region>, nframes_t length, const std::string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (boost::shared_ptr<const Region>);
 	Region (boost::shared_ptr<Source> src, const XMLNode&);
 	Region (const SourceList& srcs, const XMLNode&);
 
-	Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
+	Region (Session& s, nframes_t start, nframes_t length, const std::string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
 
   protected:
-	void copy_stuff (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const string& name, layer_t, Flag flags);
+	void copy_stuff (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const std::string& name, layer_t, Flag flags);
 
 	XMLNode& get_short_state (); /* used only by Session */
 

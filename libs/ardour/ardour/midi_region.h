@@ -35,8 +35,6 @@
 
 class XMLNode;
 
-using std::vector;
-
 namespace ARDOUR {
 
 class Route;
@@ -72,7 +70,7 @@ class MidiRegion : public Region
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
 
-	int separate_by_channel (ARDOUR::Session&, vector< boost::shared_ptr<Region> >&) const;
+	int separate_by_channel (ARDOUR::Session&, std::vector< boost::shared_ptr<Region> >&) const;
 	
 	/* automation */
 	

@@ -32,7 +32,7 @@ class RouteGroup;
 class AudioTrack : public Track
 {
   public:
-	AudioTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
+	AudioTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	AudioTrack (Session&, const XMLNode&);
 	~AudioTrack ();
 
@@ -44,7 +44,7 @@ class AudioTrack : public Track
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 
-	int use_diskstream (string name);
+	int use_diskstream (std::string name);
 	int use_diskstream (const PBD::ID& id);
 	
 	int export_stuff (BufferSet& bufs, nframes_t nframes, nframes_t end_frame, bool enable_processing = true);

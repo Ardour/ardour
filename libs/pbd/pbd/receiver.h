@@ -26,8 +26,6 @@
 
 #include "transmitter.h"
 
-using std::vector;
-
 class strstream;
 
 class Receiver : virtual public sigc::trackable
@@ -43,7 +41,7 @@ class Receiver : virtual public sigc::trackable
 	virtual void receive (Transmitter::Channel, const char *) = 0;
 
   private:
-	vector<sigc::connection *> connections;
+	std::vector<sigc::connection *> connections;
 };
 
 #endif  // __libmisc_receiver_h__

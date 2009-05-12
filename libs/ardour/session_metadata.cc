@@ -22,8 +22,9 @@
 #include <iostream>
 #include <sstream>
 
+using namespace std;
+using namespace Glib;
 using namespace ARDOUR;
-
 
 SessionMetadata::SessionMetadata ()
 {	

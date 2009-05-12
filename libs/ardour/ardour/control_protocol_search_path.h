@@ -24,8 +24,6 @@
 
 namespace ARDOUR {
 
-	using PBD::SearchPath;
-
 	/**
 	 * return a SearchPath containing directories in which to look for 
 	 * control surface plugins.
@@ -35,7 +33,7 @@ namespace ARDOUR {
 	 * contain the user and system directories which may contain control
 	 * surface plugins.
 	 */
-	SearchPath control_protocol_search_path ();
+	PBD::SearchPath control_protocol_search_path ();
 
 } // namespace ARDOUR
 

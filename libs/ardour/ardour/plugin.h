@@ -39,11 +39,6 @@
 #include <set>
 #include <map>
 
-using std::string;
-using std::vector;
-using std::set;
-using std::map;
-
 namespace ARDOUR {
 
 class AudioEngine;
@@ -68,8 +63,8 @@ class PluginInfo {
 		index(o.index) {}
 	virtual ~PluginInfo () { }
 
-	string name;
-	string category;
+	std::string name;
+	std::string category;
 	Glib::ustring creator;
 	Glib::ustring path;
 	ChanCount n_inputs;
@@ -103,7 +98,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	    bool toggled;
 	    bool logarithmic;
 	    bool sr_dependent;
-	    string label;
+	    std::string label;
 	    float lower;
 	    float upper;
 	    float step;
@@ -132,8 +127,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 			nframes_t nframes, nframes_t offset) = 0;
 	
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
-	virtual string describe_parameter (Evoral::Parameter) = 0;
-	virtual string state_node_name() const = 0;
+	virtual std::string describe_parameter (Evoral::Parameter) = 0;
+	virtual std::string state_node_name() const = 0;
 	virtual void print_parameter (uint32_t, char*, uint32_t len) const = 0;
 
 	virtual bool parameter_is_audio(uint32_t) const = 0;
@@ -141,19 +136,19 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
-	virtual bool save_preset(string uri) = 0;
-	virtual bool load_preset (const string uri);
+	virtual bool save_preset (std::string uri) = 0;
+	virtual bool load_preset (const std::string uri);
 
 	struct PresetRecord {
 		PresetRecord(const std::string& u, const std::string& l) : uri(u), label(l) {}
-		string uri;
-		string label;
+		std::string uri;
+		std::string label;
 	};
 
 	virtual std::vector<PresetRecord> get_presets();
 
-	const PresetRecord* preset_by_label(const string& label);
-	const PresetRecord* preset_by_uri(const string& uri);
+	const PresetRecord* preset_by_label(const std::string& label);
+	const PresetRecord* preset_by_uri(const std::string& uri);
 
 	virtual bool has_editor() const = 0;
 
@@ -199,16 +194,16 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	
 	virtual void set_parameter (uint32_t which, float val) = 0;
 	
-	bool save_preset (string uri, string domain /* vst, ladspa etc. */);
+	bool save_preset (std::string uri, std::string domain /* vst, ladspa etc. */);
 
 	ARDOUR::AudioEngine&     _engine;
 	ARDOUR::Session&         _session;
 	PluginInfoPtr            _info;
 	uint32_t                 _cycles;
-	map<string,PresetRecord>  presets;
+	std::map<std::string,PresetRecord>  presets;
 };
 
-PluginPtr find_plugin(ARDOUR::Session&, string unique_id, ARDOUR::PluginType);
+PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);
 
 } // namespace ARDOUR
  

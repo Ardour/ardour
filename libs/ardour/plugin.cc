@@ -54,6 +54,7 @@
 #include "i18n.h"
 #include <locale.h>
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 

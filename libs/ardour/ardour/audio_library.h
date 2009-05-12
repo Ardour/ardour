@@ -24,10 +24,6 @@
 #include <map>
 #include <vector>
 
-using std::vector;
-using std::string;
-using std::map;
-
 namespace ARDOUR {
 
 class AudioLibrary
@@ -36,15 +32,15 @@ class AudioLibrary
 	AudioLibrary ();
 	~AudioLibrary ();
 
-	void set_tags (string member, vector<string> tags);
-	vector<string> get_tags (string member);
+	void set_tags (std::string member, std::vector<std::string> tags);
+	std::vector<std::string> get_tags (std::string member);
 
-	void search_members_and (vector<string>& results, const vector<string> tags);
+	void search_members_and (std::vector<std::string>& results, const std::vector<std::string> tags);
 
 	void save_changes();
 	
   private:
-	string src;
+	std::string src;
 };
 
 extern AudioLibrary* Library;

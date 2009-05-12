@@ -33,8 +33,8 @@
 #include "ardour/export_processor.h"
 #include "ardour/export_failed.h"
 
+using namespace std;
 using namespace PBD;
-using std::ofstream;
 
 namespace ARDOUR
 {
