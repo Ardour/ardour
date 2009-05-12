@@ -574,6 +574,7 @@ Editor::Editor ()
 
 	route_display_model->signal_row_deleted().connect (mem_fun (*this, &Editor::route_list_delete));
 	route_display_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_list_change));
+	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::route_list_reordered));
 
 	route_list_display.signal_button_press_event().connect (mem_fun (*this, &Editor::route_list_display_button_press), false);
 
