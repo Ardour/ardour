@@ -18,8 +18,6 @@
 
 */
 
-#include "ardour/export_profile_manager.h"
-
 #include <cassert>
 #include <stdexcept>
 
@@ -29,7 +27,7 @@
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
 
-#include "ardour/export_failed.h"
+#include "ardour/export_profile_manager.h"
 #include "ardour/export_file_io.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_timespan.h"

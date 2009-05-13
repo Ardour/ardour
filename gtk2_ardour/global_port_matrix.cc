@@ -20,11 +20,13 @@
 #include <gtkmm/image.h>
 #include <gtkmm/stock.h>
 #include "global_port_matrix.h"
-#include "i18n.h"
+
 #include "ardour/bundle.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/port.h"
+
+#include "i18n.h"
 
 GlobalPortMatrix::GlobalPortMatrix (ARDOUR::Session& s, ARDOUR::DataType t)
 	: PortMatrix (s, t)

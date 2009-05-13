@@ -22,7 +22,7 @@
 #include "pbd/error.h"
 #include <glibmm/thread.h>
 
-#include "ardour/ardour.h"
+#include "ardour/session.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
 #include "ardour/export_failed.h"
@@ -30,10 +30,7 @@
 #include "ardour/export_handler.h"
 #include "ardour/export_status.h"
 #include "ardour/export_utilities.h"
-#include "ardour/panner.h"
 #include "ardour/route.h"
-#include "ardour/session.h"
-#include "ardour/timestamps.h"
 
 #include "i18n.h"
 

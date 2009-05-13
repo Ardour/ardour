@@ -24,11 +24,12 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 
-#include "i18n.h"
 #include "pbd/xml++.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_utils.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace Glib;
