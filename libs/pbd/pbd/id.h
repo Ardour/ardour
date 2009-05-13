@@ -40,6 +40,8 @@ class ID {
 		return _id != other._id;
 	}
 
+	bool operator== (const std::string&) const;
+
 	ID& operator= (std::string); 
 
 	bool operator< (const ID& other) const {

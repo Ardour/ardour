@@ -31,6 +31,12 @@ MidiStateTracker::MidiStateTracker ()
 }
 
 void
+MidiStateTracker::reset ()
+{
+	_active_notes.reset ();
+}
+
+void
 MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent<MidiBuffer::TimeType>& event)
 {
 	if (event.is_note_on()) {
@@ -79,3 +85,16 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes_t time)
 	}
 }
 
+void
+MidiStateTracker::dump (ostream& o)
+{
+	o << "******\n";
+	for (int c = 0; c < 16; ++c) {
+		for (int x = 0; x < 128; ++x) {
+			if (_active_notes[c * 128 + x]) {
+				o << "Channel " << c+1 << " Note " << x << " is on\n";
+			}
+		}
+	}
+	o << "+++++\n";
+}

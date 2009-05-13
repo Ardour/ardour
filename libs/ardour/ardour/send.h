@@ -27,11 +27,11 @@
 #include "pbd/stateful.h" 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
-#include "ardour/io_processor.h"
+#include "ardour/delivery.h"
 
 namespace ARDOUR {
 
-class Send : public IOProcessor 
+class Send : public Delivery
 {
   public:	
 	Send (Session&);
@@ -40,12 +40,8 @@ class Send : public IOProcessor
 
 	uint32_t bit_slot() const { return _bitslot; }
 	
-	void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
-	
 	void activate() {}
 	void deactivate () {}
-
-	void set_metering (bool yn);
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
@@ -63,7 +59,6 @@ class Send : public IOProcessor
 	/* disallow copy construction */
 	Send (const Send&);
 	
-	bool      _metering;
 	uint32_t  _bitslot;
 };
 

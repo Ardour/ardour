@@ -100,8 +100,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	virtual void silence  (nframes_t);
 
 	void collect_input  (BufferSet& bufs, nframes_t nframes, ChanCount offset=ChanCount::ZERO);
-	void deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
-	void just_meter_input (nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
+	void deliver_output (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 

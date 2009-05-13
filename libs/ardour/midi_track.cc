@@ -363,7 +363,7 @@ MidiTrack::set_state_part_two ()
 }	
 
 int
-MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
+MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
 		 bool can_record, bool rec_monitors_input)
 {
 	int dret;
@@ -450,7 +450,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 }
 
 void
-MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start, nframes_t end, nframes_t nframes)
+MidiTrack::write_controller_messages(MidiBuffer& output_buf, sframes_t start, sframes_t end, nframes_t nframes)
 {
 	// Append immediate events (UI controls)
 
@@ -460,7 +460,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start, nf
 }
 
 int
-MidiTrack::export_stuff (BufferSet& bufs, nframes_t nframes, nframes_t end_frame)
+MidiTrack::export_stuff (BufferSet& bufs, nframes_t nframes, sframes_t end_frame)
 {
 	return -1;
 }

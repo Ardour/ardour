@@ -38,7 +38,7 @@ namespace ARDOUR {
  * be set to 0.
  */
 void
-PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
+PeakMeter::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	const uint32_t n_audio = min(_configured_input.n_audio(), bufs.count().n_audio());
 	const uint32_t n_midi  = min(_configured_input.n_midi(), bufs.count().n_midi());
@@ -171,15 +171,9 @@ PeakMeter::meter ()
 XMLNode&
 PeakMeter::state (bool full_state)
 {
-	return get_state();
-}
-
-XMLNode&
-PeakMeter::get_state()
-{
-	XMLNode* node = new XMLNode(state_node_name);
-	node->add_property("type", "meter");
-	return *node;
+	XMLNode& node (Processor::state (full_state));
+	node.add_property("type", "meter");
+	return node;
 }
 
 } // namespace ARDOUR

@@ -342,6 +342,7 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 		pending_length = false;
 		LengthChanged (); /* EMIT SIGNAL */
 		pending_modified = false;
+		RegionRemoved (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		Modified (); /* EMIT SIGNAL */
 	}
 }
@@ -360,7 +361,6 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 		list< Evoral::RangeMove<nframes_t> > m;
 		m.push_back (move);
 		RangesMoved (m);
-
 	}
 
 }
@@ -380,6 +380,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_length = false;
 		LengthChanged (); /* EMIT SIGNAL */
 		pending_modified = false;
+		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		Modified (); /* EMIT SIGNAL */
 	}
 }
@@ -420,21 +421,26 @@ Playlist::flush_notifications ()
 	// pending_bounds.sort (cmp);
 
 	for (RegionList::iterator r = pending_bounds.begin(); r != pending_bounds.end(); ++r) {
+
 		if (Config->get_layer_model() == MoveAddHigher) {
 			timestamp_layer_op (*r);
 		}
+
 		pending_length = true;
 		dependent_checks_needed.insert (*r);
-		n++;
-	}
 
-	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
-		dependent_checks_needed.insert (*s);
 		n++;
 	}
 
 	for (s = pending_removes.begin(); s != pending_removes.end(); ++s) {
 		remove_dependents (*s);
+		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+		n++;
+	}
+
+	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
+		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+		dependent_checks_needed.insert (*s);
 		n++;
 	}
 
@@ -449,8 +455,7 @@ Playlist::flush_notifications ()
 			relayer ();
 		}
 		pending_modified = false;
-		Modified (); /* EMIT SIGNAL */
-		
+		Modified (); /* EMIT SIGNAL */		
 	}
 
 	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
@@ -537,6 +542,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 	}
 
 	RegionSortByPosition cmp;
+	
 	nframes_t old_length = 0;
 
 	if (!holding_state()) {
@@ -567,7 +573,9 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 	notify_region_added (region);
 	
 	if (!holding_state ()) {
+
 		check_dependents (region, false);
+
 		if (old_length != _get_maximum_extent()) {
 			notify_length_changed ();
 		}
@@ -1345,15 +1353,14 @@ Playlist::clear (bool with_signals)
 			std::list<sigc::connection>::iterator i = region_state_changed_connections.begin ();
 			i != region_state_changed_connections.end ();
 			++i
-			) {
-
-			i->disconnect ();
-			
+		) {
+			i->disconnect ();	
 		}
 		     
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			pending_removes.insert (*i);
 		}
+
 		regions.clear ();
 	}
 

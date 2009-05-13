@@ -168,6 +168,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
+	void assign_default_sort_key (boost::shared_ptr<ARDOUR::Processor>);
 	std::vector<sigc::connection> processor_active_connections;
 	std::vector<sigc::connection> processor_name_connections;
 	

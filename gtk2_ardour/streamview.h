@@ -93,7 +93,10 @@ public:
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 
 	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region> r) {}
+
+	void add_region_view_weak (boost::weak_ptr<ARDOUR::Region> r);
 	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
+
 	void region_layered (RegionView*);
 	virtual void update_contents_height ();
 	
@@ -114,7 +117,7 @@ protected:
 	void         update_rec_box ();
 	
 	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>,
-			bool wait_for_waves, bool recording = false) = 0;
+		      bool wait_for_waves, bool recording = false) = 0;
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 
 	void         display_diskstream (boost::shared_ptr<ARDOUR::Diskstream>);

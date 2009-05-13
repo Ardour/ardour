@@ -39,7 +39,7 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 	
-	void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
+	void run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	bool apply_gain() const  { return _apply_gain; }
 	void apply_gain(bool yn) { _apply_gain = yn; }
@@ -61,7 +61,6 @@ public:
 	}
 
 	XMLNode& state (bool full);
-	XMLNode& get_state();
 
 	static void apply_gain (BufferSet& bufs, nframes_t nframes,
 			gain_t initial, gain_t target, bool invert_polarity);

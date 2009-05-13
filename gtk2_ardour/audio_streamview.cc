@@ -108,30 +108,32 @@ RegionView*
 AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves, bool recording)
 {
 	AudioRegionView *region_view = 0;
-
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (region == 0) {
 		return NULL;
 	}
 
-	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region() == r) {
-			
-			/* great. we already have a AudioRegionView for this Region. use it again. */
-			
-			(*i)->set_valid (true);
-
-			// this might not be necessary
-			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-			if (arv) {
-				arv->set_waveform_scale (_waveform_scale);
-				arv->set_waveform_shape (_waveform_shape);
-			}
+//	if(!recording){
+//		for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+//			if ((*i)->region() == r) {
+//				cerr << "audio_streamview in add_region_view_internal region found" << endl;
+				/* great. we already have a AudioRegionView for this Region. use it again. */
 				
-			return NULL;
-		}
-	}
+//				(*i)->set_valid (true);
+
+				// this might not be necessary
+//				AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+
+//				if (arv) {
+//					arv->set_waveform_scale (_waveform_scale);
+//					arv->set_waveform_shape (_waveform_shape);
+//				}
+					
+//				return NULL;
+//			}
+//		}
+//	}
 
 	switch (_trackview.audio_track()->mode()) {
 	
@@ -173,6 +175,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	   otherwise, we set it to the current value */
 	   
 	if (region_views.size() == 1) {
+
 		if (region_view->waveform_logscaled()) {
 			_waveform_scale = LogWaveform;
 		} else {
@@ -191,7 +194,6 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	}
 	
 	/* follow global waveform setting */
-
 	region_view->set_waveform_visible(_trackview.editor().show_waveforms());
 
 	/* catch regionview going away */
@@ -396,6 +398,7 @@ AudioStreamView::redisplay_diskstream ()
 	}
 
 	// Add and display region and crossfade views, and flag them as valid
+
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region(
 				static_cast<StreamView*>(this),

@@ -24,7 +24,6 @@
 
 #include "ardour/midi_buffer.h"
 
-
 namespace ARDOUR {
 
 
@@ -38,6 +37,8 @@ public:
 
 	bool track (const MidiBuffer::iterator& from, const MidiBuffer::iterator& to);
 	void resolve_notes (MidiBuffer& buffer, nframes_t time);
+	void dump (std::ostream&);
+	void reset ();
 
 private:
 	void track_note_onoffs(const Evoral::MIDIEvent<MidiBuffer::TimeType>& event);

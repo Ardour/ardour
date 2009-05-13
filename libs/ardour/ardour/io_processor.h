@@ -49,6 +49,8 @@ class IOProcessor : public Processor
 		     ARDOUR::DataType default_type = DataType::AUDIO);
 	virtual ~IOProcessor ();
 	
+	bool set_name (const std::string& str);
+
 	virtual ChanCount output_streams() const;
 	virtual ChanCount input_streams () const;
 	virtual ChanCount natural_output_streams() const;
@@ -56,10 +58,11 @@ class IOProcessor : public Processor
 
 	boost::shared_ptr<IO>       io()       { return _io; }
 	boost::shared_ptr<const IO> io() const { return _io; }
+	void set_io (boost::shared_ptr<IO>);
 	
 	virtual void automation_snapshot (nframes_t now, bool force);
 
-	virtual void run_in_place (BufferSet& in, nframes_t start, nframes_t end, nframes_t nframes) = 0;
+	virtual void run_in_place (BufferSet& in, sframes_t start, sframes_t end, nframes_t nframes) = 0;
 	void silence (nframes_t nframes);
 
 	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;
@@ -74,6 +77,7 @@ class IOProcessor : public Processor
   private:
 	/* disallow copy construction */
 	IOProcessor (const IOProcessor&);
+	bool _own_io;
 
 };
 

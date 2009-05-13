@@ -454,7 +454,7 @@ AudioTrack::set_state_part_two ()
 }	
 
 int
-AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, int declick,
+AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
 	int dret;
@@ -624,7 +624,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 }
 
 int
-AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes, bool enable_processing)
+AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes, bool enable_processing)
 {
 	gain_t  gain_buffer[nframes];
 	float   mix_buffer[nframes];

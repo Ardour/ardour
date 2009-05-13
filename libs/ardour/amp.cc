@@ -57,7 +57,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
+Amp::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	gain_t* gab = _session.gain_automation_buffer();
 
@@ -201,15 +201,9 @@ Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 XMLNode&
 Amp::state (bool full_state)
 {
-	return get_state();
-}
-
-XMLNode&
-Amp::get_state()
-{
-	XMLNode* node = new XMLNode(state_node_name);
-	node->add_property("type", "amp");
-	return *node;
+	XMLNode& node (Processor::state (full_state));
+	node.add_property("type", "amp");
+	return node;
 }
 
 } // namespace ARDOUR

@@ -805,6 +805,10 @@ Session::set_transport_speed (double speed, bool abort)
 	}
 
 	target_phi = (uint64_t) (0x1000000 * fabs(speed));
+
+	/* 8.0 max speed is somewhat arbitrary but based on guestimates regarding disk i/o capability
+	   and user needs. We really need CD-style "skip" playback for ffwd and rewind.
+	*/
 	
 	if (speed > 0) {
 		speed = min (8.0, speed);

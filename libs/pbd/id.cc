@@ -71,6 +71,12 @@ string ID::to_s() const
     return string(buf);
 }
 
+bool
+ID::operator== (const string& str) const
+{
+	return to_s() == str;
+}
+
 ID&
 ID::operator= (string str)
 {

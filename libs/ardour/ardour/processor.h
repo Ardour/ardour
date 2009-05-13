@@ -60,6 +60,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	    ChanCount in;
 	    ChanCount out;
 	};
+
+	virtual bool visible() const { return true; }
 	
 	uint32_t sort_key() const { return _sort_key; }
 	void set_sort_key (uint32_t key);
@@ -76,12 +78,12 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual void set_block_size (nframes_t nframes) {}
 
 	virtual void run_in_place (BufferSet& bufs,
-			nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes) { assert(is_in_place()); }
+				   sframes_t start_frame, sframes_t end_frame,
+				   nframes_t nframes) { assert(is_in_place()); }
 	
 	virtual void run_out_of_place (BufferSet& input, BufferSet& output,
-			nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes) { assert(is_out_of_place()); }
+				       sframes_t start_frame, sframes_t end_frame,
+				       nframes_t nframes) { assert(is_out_of_place()); }
 	
 	virtual void silence (nframes_t nframes) {}
 	
@@ -103,9 +105,14 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual ChanCount input_streams () const { return _configured_input; }
 	virtual ChanCount output_streams() const { return _configured_output; }
 
+	/* note: derived classes should implement state(), NOT get_state(), to allow
+	   us to merge C++ inheritance and XML lack-of-inheritance reasonably
+	   smoothly.
+	 */
+
 	virtual XMLNode& state (bool full);
-	virtual XMLNode& get_state (void);
-	virtual int set_state (const XMLNode&);
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&);
 	
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }

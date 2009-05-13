@@ -26,26 +26,19 @@
 
 namespace ARDOUR {
 
-class BufferSet;
-class IO;
+/* this exists for one reason only: so that it can override the "type" 
+   property in the state of the Delivery processor. we need this
+   because ControlOutputs are "unique" because they deliver to
+   an IO object that is private to a Route and so cannot be looked
+   up in the Session etc.
+*/
 
-class ControlOutputs : public IOProcessor {
+class ControlOutputs : public Delivery {
 public:
-	ControlOutputs(Session& s, IO* io);
+	ControlOutputs(Session& s);
+	XMLNode& get_state ();
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
-	bool configure_io (ChanCount in, ChanCount out);
-
-	void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
-	
-	bool deliver() const  { return _deliver; }
-	void deliver(bool yn) { _deliver = yn; }
-
-	XMLNode& state (bool full);
-	XMLNode& get_state();
-
-private:
-	bool _deliver;
+	static const std::string processor_type_name;
 };
 
 

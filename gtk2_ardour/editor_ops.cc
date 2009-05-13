@@ -199,74 +199,6 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 	_new_regionviews_show_envelope = false;
 }
 
-
-/** Remove `clicked_regionview' */
-void
-Editor::remove_clicked_region ()
-{
-	if (clicked_routeview == 0 || clicked_regionview == 0) {
-		return;
-	}
-
-	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
-	
-	begin_reversible_command (_("remove region"));
-        XMLNode &before = playlist->get_state();
-	playlist->remove_region (clicked_regionview->region());
-        XMLNode &after = playlist->get_state();
-	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
-	commit_reversible_command ();
-}
-
-
-/** Remove the selected regions */
-void
-Editor::remove_selected_regions ()
-{
-	RegionSelection rs; 
-	get_regions_for_action (rs);
-	
-	if (!session) {
-		return;
-	}
-
-	if (rs.empty()) {
-		return;
-	}
-
-	begin_reversible_command (_("remove region"));
-
-	list<boost::shared_ptr<Region> > regions_to_remove;
-
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		// we can't just remove the region(s) in this loop because
-		// this removes them from the RegionSelection, and they thus
-		// disappear from underneath the iterator, and the ++i above
-		// SEGVs in a puzzling fashion.
-
-		// so, first iterate over the regions to be removed from rs and
-		// add them to the regions_to_remove list, and then
-		// iterate over the list to actually remove them.
-	        
-		regions_to_remove.push_back ((*i)->region());
-	}
-	
-	for (list<boost::shared_ptr<Region> >::iterator rl = regions_to_remove.begin(); rl != regions_to_remove.end(); ++rl) {
-		boost::shared_ptr<Playlist> playlist = (*rl)->playlist();
-	        if (!playlist) {
-			// is this check necessary?
-	        	continue;
-	        }
-
-	        XMLNode &before = playlist->get_state();
-		playlist->remove_region (*rl);
-	        XMLNode &after = playlist->get_state();
-		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
-	}
-
-	commit_reversible_command ();
-}
-
 boost::shared_ptr<Region>
 Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 {
@@ -4076,13 +4008,106 @@ struct PlaylistMapping {
     PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
 };
 
+/** Remove `clicked_regionview' */
+void
+Editor::remove_clicked_region ()
+{
+	if (clicked_routeview == 0 || clicked_regionview == 0) {
+		return;
+	}
+
+	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
+	
+	begin_reversible_command (_("remove region"));
+        XMLNode &before = playlist->get_state();
+	playlist->remove_region (clicked_regionview->region());
+        XMLNode &after = playlist->get_state();
+	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+	commit_reversible_command ();
+}
+
+
+/** Remove the selected regions */
+void
+Editor::remove_selected_regions ()
+{
+	RegionSelection rs; 
+	get_regions_for_action (rs);
+	
+	if (!session) {
+		return;
+	}
+
+	if (rs.empty()) {
+		return;
+	}
+
+	begin_reversible_command (_("remove region"));
+
+	list<boost::shared_ptr<Region> > regions_to_remove;
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		// we can't just remove the region(s) in this loop because
+		// this removes them from the RegionSelection, and they thus
+		// disappear from underneath the iterator, and the ++i above
+		// SEGVs in a puzzling fashion.
+
+		// so, first iterate over the regions to be removed from rs and
+		// add them to the regions_to_remove list, and then
+		// iterate over the list to actually remove them.
+	        
+		regions_to_remove.push_back ((*i)->region());
+	}
+
+	vector<PlaylistState> playlists;
+	
+	for (list<boost::shared_ptr<Region> >::iterator rl = regions_to_remove.begin(); rl != regions_to_remove.end(); ++rl) {
+
+		boost::shared_ptr<Playlist> playlist = (*rl)->playlist();
+
+	        if (!playlist) {
+			// is this check necessary?
+	        	continue;
+	        }
+
+		vector<PlaylistState>::iterator i;
+
+		//only take state if this is a new playlist.
+		for (i = playlists.begin(); i != playlists.end(); ++i) {
+			if ((*i).playlist == playlist) {
+				break;
+			}
+		}
+
+		if (i == playlists.end()) {
+
+			PlaylistState before;
+			before.playlist = playlist;
+			before.before = &playlist->get_state();
+
+			playlist->freeze ();
+			playlists.push_back(before);
+		}
+
+		playlist->remove_region (*rl);		
+	}
+
+	vector<PlaylistState>::iterator pl;
+
+	for (pl = playlists.begin(); pl != playlists.end(); ++pl) {
+		(*pl).playlist->thaw ();
+		session->add_command(new MementoCommand<Playlist>(*(*pl).playlist, (*pl).before, &(*pl).playlist->get_state()));
+	}
+
+	commit_reversible_command ();
+}
 
 /** Cut, copy or clear selected regions.
  * @param op Operation (Cut, Copy or Clear)
  */
 void
 Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
-{	
+{
 	/* we can't use a std::map here because the ordering is important, and we can't trivially sort
 	   a map when we want ordered access to both elements. i think.
 	*/
@@ -4106,15 +4131,21 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
 
 			if (pl) {
+				set<PlaylistState, lt_playlist>::iterator fl;
 
-				PlaylistState before;
-				before.playlist = pl;
-				before.before = &pl->get_state();
-				
-				insert_result = freezelist.insert (before);
-				
-				if (insert_result.second) {
+				//only take state if this is a new playlist.
+				for (fl = freezelist.begin(); fl != freezelist.end(); ++fl) {
+					if ((*fl).playlist == pl) {
+						break;
+					}
+				}
+		
+				if (fl == freezelist.end()) {
+					PlaylistState before;
+					before.playlist = pl;
+					before.before = &pl->get_state();
 					pl->freeze ();
+					insert_result = freezelist.insert (before);
 				}
 			}
 		}

@@ -215,7 +215,7 @@ class Panner : public Processor
 	bool is_out_of_place () const { return true; }
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return true; };
 
-	void run_out_of_place(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes);
+	void run_out_of_place(BufferSet& src, BufferSet& dest, sframes_t start_frame, sframes_t end_frames, nframes_t nframes);
 
 	//void* get_inline_gui() const = 0;
 	//void* get_full_gui() const = 0;

@@ -39,7 +39,7 @@ class AudioTrack : public Track
 	int set_mode (TrackMode m); 
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
-	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		  int declick, bool can_record, bool rec_monitors_input);
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
@@ -47,7 +47,7 @@ class AudioTrack : public Track
 	int use_diskstream (std::string name);
 	int use_diskstream (const PBD::ID& id);
 	
-	int export_stuff (BufferSet& bufs, nframes_t nframes, nframes_t end_frame, bool enable_processing = true);
+	int export_stuff (BufferSet& bufs, sframes_t start_frame, nframes_t nframes, bool enable_processing = true);
 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();

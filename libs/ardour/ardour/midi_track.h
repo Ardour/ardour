@@ -38,7 +38,7 @@ public:
 	MidiTrack (Session&, const XMLNode&);
 	~MidiTrack ();
 	
-	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		  int declick, bool can_record, bool rec_monitors_input);
 	
 	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
@@ -48,8 +48,7 @@ public:
 
 	void set_latency_delay (nframes_t);
 
-	int export_stuff (BufferSet& bufs,
-		nframes_t nframes, nframes_t end_frame);
+	int export_stuff (BufferSet& bufs, nframes_t nframes, sframes_t end_frame);
 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
@@ -85,7 +84,7 @@ protected:
 	int _set_state (const XMLNode&, bool call_base);
 
 private:
-	void write_controller_messages(MidiBuffer& buf, nframes_t start_frame, nframes_t end_frame, nframes_t nframes);
+	void write_controller_messages(MidiBuffer& buf, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 	void use_new_diskstream ();

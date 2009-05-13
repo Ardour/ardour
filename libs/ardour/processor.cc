@@ -64,6 +64,7 @@ Processor::Processor(Session& session, const string& name)
 	, _active(false)
 	, _next_ab_is_active(false)
 	, _configured(false)
+	, _sort_key (0)
 	, _gui(0)
 {
 }
@@ -99,17 +100,16 @@ Processor::state (bool full_state)
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	stringstream sstr;
-	
-	// FIXME: This conflicts with "id" used by plugin for name in legacy sessions (ugh).
-	// Do we need to serialize this?
-	/*
 	char buf[64];
+	
+	// NOTE: This conflicts with "id" used by plugin for name in legacy sessions
+
 	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
-	*/
-
 	node->add_property("name", _name);
 	node->add_property("active", active() ? "yes" : "no");	
+	snprintf (buf, sizeof (buf), "%u", _sort_key);
+	node->add_property("sort-key", buf);
 
 	if (_extra_xml){
 		node->add_child_copy (*_extra_xml);
@@ -144,9 +144,14 @@ Processor::set_state (const XMLNode& node)
 	const XMLProperty *legacy_active = 0;
 	const XMLProperty *legacy_placement = 0;
 
-	// may not exist for legacy sessions
+	// may not exist for legacy 3.0 sessions
 	if ((prop = node.property ("name")) != 0) {
 		set_name(prop->value());
+	}
+
+	// may not exist for legacy 3.0 sessions
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value();
 	}
 
 	XMLNodeList nlist = node.children();

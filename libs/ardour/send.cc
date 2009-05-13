@@ -36,17 +36,14 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Send::Send (Session& s)
-	: IOProcessor (s, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1))
+	: Delivery (s, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), Delivery::Send)
 {
-	_metering = false;
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (Session& s, const XMLNode& node)
-	: IOProcessor (s, "send")
+	: Delivery (s, "send", Delivery::Send)
 {
-	_metering = false;
-
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -96,7 +93,7 @@ Send::set_state(const XMLNode& node)
 	/* Send has regular IO automation (gain, pan) */
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "IOProcessor") {
+		if ((*niter)->name() == IOProcessor::state_node_name) {
 			insert_node = *niter;
 		} else if ((*niter)->name() == X_("Automation")) {
 			// _io->set_automation_state (*(*niter), Evoral::Parameter(GainAutomation));
@@ -106,41 +103,6 @@ Send::set_state(const XMLNode& node)
 	IOProcessor::set_state (*insert_node);
 
 	return 0;
-}
-
-void
-Send::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
-{
-	if (active()) {
-
-		_io->deliver_output (bufs, start_frame, end_frame, nframes);
-
-		if (_metering) {
-			if (_io->effective_gain() == 0) {
-				_io->peak_meter().reset();
-			} else {
-				_io->peak_meter().run_in_place(_io->output_buffers(), start_frame, end_frame, nframes);
-			}
-		}
-
-	} else {
-		_io->silence (nframes);
-		
-		if (_metering) {
-			_io->peak_meter().reset();
-		}
-	}
-}
-
-void
-Send::set_metering (bool yn)
-{
-	_metering = yn;
-
-	if (!_metering) {
-		/* XXX possible thread hazard here */
-		_io->peak_meter().reset();
-	}
 }
 
 bool

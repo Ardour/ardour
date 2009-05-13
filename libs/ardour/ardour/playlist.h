@@ -129,6 +129,8 @@ class Playlist : public SessionObject,
 
 	sigc::signal<void,bool> InUse;
 	sigc::signal<void>      Modified;
+	sigc::signal<void, boost::weak_ptr<Region> > RegionAdded;
+	sigc::signal<void, boost::weak_ptr<Region> > RegionRemoved;
 	sigc::signal<void>      NameChanged;
 	sigc::signal<void>      LengthChanged;
 	sigc::signal<void, std::list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;

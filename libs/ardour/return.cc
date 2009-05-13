@@ -106,7 +106,7 @@ Return::set_state(const XMLNode& node)
 }
 
 void
-Return::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
+Return::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	if (active()) {
 		_io->collect_input (bufs, nframes, _configured_input);

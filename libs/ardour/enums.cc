@@ -20,6 +20,7 @@
 #include "pbd/enumwriter.h"
 
 #include "ardour/types.h"
+#include "ardour/delivery.h"
 #include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/audiofilesource.h"
@@ -103,6 +104,7 @@ setup_enum_writer ()
 	ExportFormatBase::SampleRate _ExportFormatBase_SampleRate;
 	ExportFormatBase::SRCQuality _ExportFormatBase_SRCQuality;
 	ExportProfileManager::TimeFormat _ExportProfileManager_TimeFormat;
+	Delivery::Role _Delivery_Role;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -499,4 +501,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportProfileManager, Frames);
 	REGISTER_CLASS_ENUM (ExportProfileManager, Off);
 	REGISTER (_ExportProfileManager_TimeFormat);
+
+	REGISTER_CLASS_ENUM (Delivery, Solo);
+	REGISTER_CLASS_ENUM (Delivery, Send);
+	REGISTER_CLASS_ENUM (Delivery, Listen);
+	REGISTER_CLASS_ENUM (Delivery, Main);
+	REGISTER_BITS (_Delivery_Role);
 }

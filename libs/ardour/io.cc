@@ -221,7 +221,7 @@ IO::silence (nframes_t nframes)
  * to the outputs, eg applying gain or pan or whatever else needs to be done.
  */
 void
-IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
+IO::deliver_output (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	// Attach output buffers to port buffers
 	output_buffers().attach_buffers (_outputs, nframes, _output_offset);
@@ -317,7 +317,7 @@ IO::collect_input (BufferSet& outs, nframes_t nframes, ChanCount offset)
 }
 
 void
-IO::just_meter_input (nframes_t start_frame, nframes_t end_frame, nframes_t nframes)
+IO::just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	BufferSet& bufs = _session.get_scratch_buffers (n_inputs());
 	collect_input (bufs, nframes);
@@ -866,7 +866,6 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 {
 	bool in_changed     = false;
 	bool out_changed    = false;
-	bool need_pan_reset = false;
 
 	assert(in != ChanCount::INFINITE);
 	assert(out != ChanCount::INFINITE);
@@ -886,10 +885,6 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 		Glib::Mutex::Lock lm (io_lock);
 
 		Port* port;
-		
-		if (n_outputs() != out) {
-			need_pan_reset = true;
-		}
 		
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 

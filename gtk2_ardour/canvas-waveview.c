@@ -764,6 +764,7 @@ gnome_canvas_waveview_set_property (GObject      *object,
 		waveview->length_function = g_value_get_pointer(value);
 		redraw = TRUE;
 		break;
+
 	case PROP_SOURCEFILE_LENGTH_FUNCTION:
 		waveview->sourcefile_length_function = g_value_get_pointer(value);
 		redraw = TRUE;

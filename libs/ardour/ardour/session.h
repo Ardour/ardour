@@ -1020,12 +1020,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool                    _silent;
 	volatile double         _transport_speed;
 	double                  _last_transport_speed;
-	// fixed point transport speed for varispeed playback
-	uint64_t                phi; 
-	// fixed point target transport speed for varispeed playback when tempo changes
-	uint64_t                target_phi;
-	// fixed point phase for varispeed playback
-	uint64_t                phase;
+                            	 // varispeed playback
+	uint64_t                 phi; 	     // fixed point transport speed
+	uint64_t                 target_phi; // fixed point target transport speed
+	uint64_t                 phase;      // fixed point phase 
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;

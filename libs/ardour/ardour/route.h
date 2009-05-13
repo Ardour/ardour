@@ -45,7 +45,7 @@
 namespace ARDOUR {
 
 class Amp;
-class ControlOutputs;
+class Delivery;
 class IOProcessor;
 class Processor;
 class RouteGroup;
@@ -84,6 +84,8 @@ class Route : public IO
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
+	bool set_name (const std::string& str);
+
 	long order_key (const char* name) const;
 	void set_order_key (const char* name, long n);
 
@@ -94,13 +96,13 @@ class Route : public IO
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 
-	virtual int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 			  int declick, bool can_record, bool rec_monitors_input);
 
-	virtual int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 			     bool state_changing, bool can_record, bool rec_monitors_input);
 
-	virtual int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+	virtual int silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 				 bool can_record, bool rec_monitors_input);
 
 	virtual void toggle_monitor_input ();
@@ -173,9 +175,16 @@ class Route : public IO
 			return *i;
 		}
 	}
+
+	uint32_t fader_sort_key() const;
 	
 	ChanCount max_processor_streams () const { return processor_max_streams; }
 	ChanCount pre_fader_streams() const;
+
+	/* special processors */
+
+	boost::shared_ptr<Delivery> control_outs() const { return _control_outs; }
+	boost::shared_ptr<Delivery> main_outs() const { return _main_outs; }
 	
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.
@@ -187,8 +196,8 @@ class Route : public IO
 		ChanCount count; ///< Input requested of processor
 	};
 
-	int add_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, ProcessorList::iterator* iter=0, Placement=PreFader);
-	int add_processors (const ProcessorList&, ProcessorStreams* err = 0, Placement placement=PreFader);
+	int add_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, ProcessorList::iterator* iter=0);
+	int add_processors (const ProcessorList&, ProcessorStreams* err = 0, uint32_t first_sort_key = 0);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
 	int sort_processors (ProcessorStreams* err = 0);
 	void disable_processors (Placement);
@@ -237,9 +246,9 @@ class Route : public IO
 	int save_as_template (const std::string& path, const std::string& name);
 
 	sigc::signal<void,void*> SelectedChanged;
-
-	int set_control_outs (const std::vector<std::string>& ports);
-	boost::shared_ptr<ControlOutputs> control_outs() { return _control_outs; }
+	
+	int listen_via (boost::shared_ptr<IO>, const std::string& name);
+	void drop_listen (boost::shared_ptr<IO>);
 
 	bool feeds (boost::shared_ptr<Route>);
 	std::set<boost::shared_ptr<Route> > fed_by;
@@ -288,11 +297,11 @@ class Route : public IO
   protected:
 	nframes_t check_initial_delay (nframes_t, nframes_t&);
 	
-	void passthru (nframes_t start_frame, nframes_t end_frame,
-			nframes_t nframes, int declick);
+	void passthru (sframes_t start_frame, sframes_t end_frame,
+		       nframes_t nframes, int declick);
 
 	virtual void process_output_buffers (BufferSet& bufs,
-					     nframes_t start_frame, nframes_t end_frame,
+					     sframes_t start_frame, sframes_t end_frame,
 					     nframes_t nframes, bool with_processors, int declick);
 	
 	Flag           _flags;
@@ -308,7 +317,8 @@ class Route : public IO
 	nframes_t      _roll_delay;
 	ProcessorList  _processors;
 	Glib::RWLock   _processor_lock;
-	boost::shared_ptr<ControlOutputs> _control_outs;
+	boost::shared_ptr<Delivery> _main_outs;
+	boost::shared_ptr<Delivery> _control_outs; // XXX to be removed/generalized by listen points
 	RouteGroup    *_edit_group;
 	RouteGroup    *_mix_group;
 	std::string    _comment;
@@ -336,7 +346,7 @@ class Route : public IO
 
 	virtual XMLNode& state(bool);
 
-	void passthru_silence (nframes_t start_frame, nframes_t end_frame,
+	void passthru_silence (sframes_t start_frame, sframes_t end_frame,
 	                       nframes_t nframes, int declick);
 	
 	void silence (nframes_t nframes);
@@ -353,6 +363,8 @@ class Route : public IO
 
 	virtual int  _set_state (const XMLNode&, bool call_base);
 	virtual void _set_processor_states (const XMLNodeList&);
+
+	boost::shared_ptr<Delivery> add_listener (boost::shared_ptr<IO>, const std::string&);
 
   private:
 	void init ();

@@ -41,6 +41,9 @@
 #include "ardour/utils.h"
 #include "ardour/event_type_map.h"
 #include "ardour/io.h"
+#include "ardour/amp.h"
+#include "ardour/port_set.h"
+#include "ardour/buffer_set.h"
 
 #include "ardour/timestamps.h"
 
@@ -420,7 +423,7 @@ AudioEngine::process_callback (nframes_t nframes)
 				port->get_buffer(nframes).silence(nframes);
 			}
 		}
-	}
+	} 
 
 	// Finalize ports
 

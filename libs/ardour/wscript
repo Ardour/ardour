@@ -99,12 +99,12 @@ def build(bld):
 		chan_count.cc
 		chan_mapping.cc
 		configuration.cc
-		control_outputs.cc
 		control_protocol_manager.cc
 		control_protocol_search_path.cc
 		crossfade.cc
 		cycle_timer.cc
 		default_click.cc
+                delivery.cc
 		directory_names.cc
 		diskstream.cc
 		element_import_handler.cc

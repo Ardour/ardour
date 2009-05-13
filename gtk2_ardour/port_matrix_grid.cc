@@ -141,6 +141,8 @@ PortMatrixGrid::render (cairo_t* cr)
 				case PortMatrixNode::PARTIAL:
 					draw_association_indicator (cr, bx, by, 0.5);
 					break;
+				default:
+					break;
 				}
 				
 				by += row_height();
@@ -178,6 +180,9 @@ PortMatrixGrid::render (cairo_t* cr)
 							break;
 							
 						case PortMatrixNode::NOT_ASSOCIATED:
+							break;
+
+						default:
 							break;
 						}
 						
@@ -482,6 +487,9 @@ PortMatrixGrid::bundle_to_bundle_state (boost::shared_ptr<ARDOUR::Bundle> a, boo
 				if (i == j) {
 					have_diagonal_not_association = true;
 				}
+				break;
+
+			default:
 				break;
 			}
 		}

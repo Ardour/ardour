@@ -433,7 +433,9 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			processor->activate ();
 		}
 
-		if (_route->add_processor (processor, &err_streams, 0, _placement)) {
+		assign_default_sort_key (processor);
+
+		if (_route->add_processor (processor, &err_streams)) {
 			weird_plugin_dialog (**p, err_streams, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
 		} else {
@@ -497,7 +499,9 @@ ProcessorBox::choose_insert ()
 	processor->ActiveChanged.connect (bind (
 			mem_fun(*this, &ProcessorBox::show_processor_active),
 			boost::weak_ptr<Processor>(processor)));
-	_route->add_processor (processor, 0, 0, _placement);
+
+	assign_default_sort_key (processor);
+	_route->add_processor (processor);
 }
 
 void
@@ -549,7 +553,8 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 		break;
 
 	case IOSelector::Accepted:
-		_route->add_processor (processor, 0, 0, _placement);
+		assign_default_sort_key (processor);
+		_route->add_processor (processor);
 		if (Profile->get_sae()) {
 			processor->activate ();
 		}
@@ -606,7 +611,8 @@ ProcessorBox::return_io_finished (IOSelector::Result r, boost::weak_ptr<Processo
 		break;
 
 	case IOSelector::Accepted:
-		_route->add_processor (processor, 0, 0, _placement);
+		assign_default_sort_key (processor);
+		_route->add_processor (processor);
 		if (Profile->get_sae()) {
 			processor->activate ();
 		}
@@ -636,10 +642,10 @@ ProcessorBox::redisplay_processors ()
 
 	switch (_placement) {
 	case PreFader:
-		build_processor_tooltip(processor_eventbox, _("Pre-fader inserts, sends & plugins:"));
+		build_processor_tooltip (processor_eventbox, _("Pre-fader inserts, sends & plugins:"));
 		break;
 	case PostFader:
-		build_processor_tooltip(processor_eventbox, _("Post-fader inserts, sends & plugins:"));
+		build_processor_tooltip (processor_eventbox, _("Post-fader inserts, sends & plugins:"));
 		break;
 	}
 }
@@ -790,8 +796,14 @@ ProcessorBox::row_deleted (const Gtk::TreeModel::Path& path)
 void
 ProcessorBox::compute_processor_sort_keys ()
 {
-	uint32_t sort_key = 0;
+	uint32_t sort_key;
 	Gtk::TreeModel::Children children = model->children();
+
+	if (_placement == PreFader) {
+		sort_key = 0;
+	} else {
+		sort_key = _route->fader_sort_key() + 1;
+	}
 
 	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		boost::shared_ptr<Processor> r = (*iter)[columns.processor];
@@ -1013,6 +1025,17 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 			} else if (type->value() == "meter") {
 				p = _route->shared_peak_meter();
 
+			} else if (type->value() == "main-outs") {
+				/* do not copy-n-paste main outs */
+				continue;
+
+			} else if (type->value() == "amp") {
+				/* do not copy-n-paste amp */
+				continue;
+
+			} else if (type->value() == "listen") {
+				p.reset (new Delivery (_session, **niter));
+				
 			} else {
 				p.reset (new PluginInsert (_session, **niter));
 			}
@@ -1024,7 +1047,13 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 		}
 	}
 
-	if (_route->add_processors (copies, 0, _placement)) {
+	if (copies.empty()) {
+		return;
+	}
+
+	assign_default_sort_key (copies.front());
+
+	if (_route->add_processors (copies, 0, copies.front()->sort_key())) {
 
 		string msg = _(
 			"Copying the set of processors on the clipboard failed,\n\
@@ -1539,3 +1568,12 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);
 }
 
+void
+ProcessorBox::assign_default_sort_key (boost::shared_ptr<Processor> p)
+{
+	p->set_sort_key (_placement == PreFader ? 0 : 9999);
+	cerr << "default sort key for "
+	     << _placement << " = " << p->sort_key()
+	     << endl;
+}
+	

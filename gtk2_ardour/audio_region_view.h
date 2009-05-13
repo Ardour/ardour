@@ -28,6 +28,7 @@
 
 #include "region_view.h"
 #include "route_time_axis.h"
+
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"

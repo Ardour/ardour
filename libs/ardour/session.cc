@@ -136,7 +136,6 @@ Session::Session (AudioEngine &eng,
 	  midi_requests (128), // the size of this should match the midi request pool size
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
-	  auditioner ((Auditioner*) 0),
 	  _total_free_4k_blocks (0),
 	  _bundles (new BundleList),
 	  _bundle_xml_node (0),
@@ -223,7 +222,6 @@ Session::Session (AudioEngine &eng,
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
-	  auditioner ((Auditioner *) 0),
 	  _total_free_4k_blocks (0),
 	  _bundles (new BundleList),
 	  _bundle_xml_node (0),
@@ -281,6 +279,7 @@ Session::Session (AudioEngine &eng,
 
 		if (master_out_channels) {
 			ChanCount count(DataType::AUDIO, master_out_channels);
+			cerr << "new MO with " << count << endl;
 			shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut,
 						DataType::AUDIO, count, count));
 			r->set_remote_control_id (control_id);
@@ -526,8 +525,6 @@ Session::when_engine_running ()
 {
 	string first_physical_output;
 
-	/* we don't want to run execute this again */
-
 	BootMessage (_("Set block size and sample rate"));
 
 	set_block_size (_engine.frames_per_cycle());
@@ -609,7 +606,8 @@ Session::when_engine_running ()
 	   mono and stereo bundles, so that the common cases of mono
 	   and stereo tracks get bundles to put in their mixer strip
 	   in / out menus.  There may be a nicer way of achieving that;
-	   it doesn't really scale that well to higher channel counts */
+	   it doesn't really scale that well to higher channel counts 
+	*/
 
 	for (uint32_t np = 0; np < n_physical_outputs; ++np) {
 		char buf[32];
@@ -662,28 +660,37 @@ Session::when_engine_running ()
 		}
 	}
 
+	/* create master/control ports */
+	
 	if (_master_out) {
 
-		/* create master/control ports */
+		/* force the master to ignore any later call to this 
+		 */
+		if (_master_out->pending_state_node) {
+			_master_out->ports_became_legal();
+		}
+		
+		/* create ports, without any connections 
+		 */
+		_master_out->ensure_io (_master_out->input_minimum (), _master_out->output_minimum (), true, this);
 
-		if (_master_out) {
-			/* force the master to ignore any later call to this */
-			if (_master_out->pending_state_node) {
-				_master_out->ports_became_legal();
+		/* if requested auto-connect the outputs to the first N physical ports.
+		*/
+		if (Config->get_auto_connect_master()) {
+			uint32_t limit = _master_out->n_outputs().n_total();
+
+			for (uint32_t n = 0; n < limit; ++n) {
+				Port* p = _master_out->output (n);
+				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
+
+				if (!connect_to.empty()) {
+					if (_master_out->connect_output (p, connect_to, this)) {
+						error << string_compose (_("cannot connect master output %1 to %2"), n, connect_to) 
+						      << endmsg;
+						break;
+					}
+				}
 			}
-
-			/* no panner resets till we are through */
-			_master_out->defer_pan_reset ();
-
-			/* create ports */
-			_master_out->set_input_minimum(ChanCount(DataType::AUDIO, n_physical_inputs));
-			_master_out->set_output_minimum(ChanCount(DataType::AUDIO, n_physical_outputs));
-			_master_out->ensure_io (
-					_master_out->input_minimum (), _master_out->output_minimum (),
-					true, this);
-
-			_master_out->allow_pan_reset ();
-
 		}
 	}
 
@@ -739,7 +746,7 @@ Session::hookup_io ()
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InitialConnecting);
 
 
-	if (auditioner == 0) {
+	if (!auditioner) {
 
 		/* we delay creating the auditioner till now because
 		   it makes its own connections to ports.
@@ -759,23 +766,21 @@ Session::hookup_io ()
 
 	IO::enable_ports ();
 
+	/* Connect track to listen/solo etc. busses XXX generalize this beyond control_out */
+
 	if (_control_out) {
-		vector<string> cports;
 
-		_control_out->ensure_io(
-				_control_out->input_minimum(), _control_out->output_minimum(),
-				false, this);
-
-		uint32_t ni = _control_out->n_inputs().get (DataType::AUDIO);
-
-		for (uint32_t n = 0; n < ni; ++n) {
-			cports.push_back (_control_out->input(n)->name());
-		}
+		_control_out->ensure_io (_control_out->input_minimum(), _control_out->output_minimum(), false, this);
 
 		boost::shared_ptr<RouteList> r = routes.reader ();
-
+		
 		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
-			(*x)->set_control_outs (cports);
+
+			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*x);
+
+			if (t) {
+				t->listen_via (_control_out, X_("listen"));
+			}
 		}
 	}
 
@@ -2081,15 +2086,8 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 	if (_control_out && IO::connecting_legal) {
 
-		vector<string> cports;
-		uint32_t ni = _control_out->n_inputs().n_audio();
-
-		for (uint32_t n = 0; n < ni; ++n) {
-			cports.push_back (_control_out->input(n)->name());
-		}
-
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			(*x)->set_control_outs (cports);
+			(*x)->listen_via (_control_out, "control");
 		}
 	}
 
@@ -2146,15 +2144,13 @@ Session::remove_route (shared_ptr<Route> route)
 		}
 
 		if (route == _control_out) {
-			_control_out = shared_ptr<Route> ();
-
 			/* cancel control outs for all routes */
 
-			vector<string> empty;
-
 			for (RouteList::iterator r = rs->begin(); r != rs->end(); ++r) {
-				(*r)->set_control_outs (empty);
+				(*r)->drop_listen (_control_out);
 			}
+
+			_control_out = shared_ptr<Route> ();
 		}
 
 		update_route_solo_state ();

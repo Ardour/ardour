@@ -36,6 +36,7 @@
 #include "ardour/port_insert.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/io.h"
+#include "ardour/route.h"
 
 #include "i18n.h"
 
@@ -43,24 +44,22 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+/* create an IOProcessor that proxies to a new IO object */
+
 IOProcessor::IOProcessor (Session& s, const string& proc_name, const string io_name, DataType dtype)
 	: Processor(s, proc_name)
-	, _io (new IO(s, io_name != "" ? io_name : proc_name, dtype))
+	, _io (new IO(s, io_name.empty() ? proc_name : io_name, dtype))
 {
-	_active = false;
-	_sort_key = 0;
-	_gui = 0;
-	_extra_xml = 0;
+	_own_io = true;
 }
+
+/* create an IOProcessor that proxies to an existing IO object */
 
 IOProcessor::IOProcessor (Session& s, IO* io, const string& proc_name, DataType dtype)
 	: Processor(s, proc_name)
 	, _io (io)
 {
-	_active = false;
-	_sort_key = 0;
-	_gui = 0;
-	_extra_xml = 0;
+	_own_io = false;
 }
 
 IOProcessor::~IOProcessor ()
@@ -68,12 +67,27 @@ IOProcessor::~IOProcessor ()
 	notify_callbacks ();
 }
 
+void
+IOProcessor::set_io (boost::shared_ptr<IO> io)
+{
+	/* CALLER MUST HOLD PROCESS LOCK */
+
+	_io = io;
+	_own_io = false;
+}
+
 XMLNode&
 IOProcessor::state (bool full_state)
 {
-	XMLNode& node = Processor::state(full_state);
+	XMLNode& node (Processor::state (full_state));
 	
-	node.add_child_nocopy (_io->state (full_state));
+	if (_own_io) {
+		node.add_child_nocopy (_io->state (full_state));
+		node.add_property ("own-io", "yes");
+	} else {
+		node.add_property ("own-io", "no");
+		node.add_property ("io", _io->name());
+	}
 
 	return node;
 }
@@ -85,6 +99,35 @@ IOProcessor::set_state (const XMLNode& node)
 	const XMLNode *io_node = 0;
 
 	Processor::set_state(node);
+
+	if ((prop = node.property ("own-io")) != 0) {
+		_own_io = prop->value() == "yes";
+	}
+
+	/* don't attempt to set state for a proxied IO that we don't own */
+
+	if (!_own_io) {
+
+		/* look up the IO object we're supposed to proxy to */
+
+		if ((prop = node.property ("io")) == 0) {
+			fatal << "IOProcessor has no named IO object" << endmsg;
+			/*NOTREACHED*/
+		}
+
+		boost::shared_ptr<Route> r = _session.route_by_name (prop->value());
+
+		if (!r) {
+			fatal << string_compose ("IOProcessor uses an unknown IO object called %1", prop->value()) << endmsg;
+			/*NOTREACHED*/
+		}
+
+		/* gotcha */
+
+		_io = boost::static_pointer_cast<IO> (r);
+
+		return 0;
+	}
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
@@ -112,7 +155,7 @@ IOProcessor::set_state (const XMLNode& node)
 
 		// legacy sessions: use IO name
 		if ((prop = node.property ("name")) == 0) {
-			set_name(_io->name());
+			set_name (_io->name());
 		}
 
 	} else {
@@ -126,7 +169,9 @@ IOProcessor::set_state (const XMLNode& node)
 void
 IOProcessor::silence (nframes_t nframes)
 {
-	_io->silence (nframes);
+	if (_own_io) {
+		_io->silence (nframes);
+	}
 }
 
 ChanCount
@@ -156,6 +201,19 @@ IOProcessor::natural_input_streams () const
 void
 IOProcessor::automation_snapshot (nframes_t now, bool force)
 {
-	_io->automation_snapshot(now, force);
+	if (_own_io) {
+		_io->automation_snapshot(now, force);
+	}
 }
 
+bool
+IOProcessor::set_name (const std::string& name)
+{
+	bool ret = SessionObject::set_name (name);
+
+	if (ret && _own_io) {
+		ret = _io->set_name (name);
+	}
+
+	return ret;
+}

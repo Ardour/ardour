@@ -19,6 +19,7 @@
 
 /* IO connection */
 
+CONFIG_VARIABLE (bool, auto_connect_master, "auto-connect-master", true)
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectOption (0))
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectOption (0))
 
