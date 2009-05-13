@@ -30,7 +30,7 @@ using namespace sigc;
 using namespace PBD;
 using namespace ARDOUR;
 
-OSCControllable::OSCControllable (lo_address a, const string& p, boost::shared_ptr<Controllable> c)
+OSCControllable::OSCControllable (lo_address a, const std::string& p, boost::shared_ptr<Controllable> c)
 	: controllable (c)
 	, addr (a)
 	, path (p)
@@ -71,7 +71,7 @@ OSCControllable::send_change ()
 
 /*------------------------------------------------------------*/	
 
-OSCRouteControllable::OSCRouteControllable (lo_address a, const string& p, 
+OSCRouteControllable::OSCRouteControllable (lo_address a, const std::string& p, 
 					    boost::shared_ptr<Controllable> c, boost::shared_ptr<Route> r)
 	: OSCControllable (a, p, c)
 	, _route (r)
@@ -92,7 +92,7 @@ OSCRouteControllable::send_change ()
 
 	/* XXX thread issues */
 
-	cerr << "ORC: send " << path << " = " << controllable->get_value() << endl;
+	std::cerr << "ORC: send " << path << " = " << controllable->get_value() << std::endl;
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
 }

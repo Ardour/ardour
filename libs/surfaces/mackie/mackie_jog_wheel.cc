@@ -101,7 +101,7 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 		break;
 	
 	case select:
-		cout << "JogWheel select not implemented" << endl;
+		std::cout << "JogWheel select not implemented" << std::endl;
 		break;
 	}
 }

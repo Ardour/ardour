@@ -33,7 +33,7 @@ float
 debug_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current) 
 {
 	if ( ((intptr_t)buf % 16) != 0) {
-		cerr << "compute_peak(): buffer unaligned!" << endl;
+		std::cerr << "compute_peak(): buffer unaligned!" << std::endl;
 	}
 
 	return x86_sse_compute_peak(buf, nsamples, current);
@@ -43,7 +43,7 @@ void
 debug_apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
 {
 	if ( ((intptr_t)buf % 16) != 0) {
-		cerr << "apply_gain_to_buffer(): buffer unaligned!" << endl;
+		std::cerr << "apply_gain_to_buffer(): buffer unaligned!" << std::endl;
 	}
 
 	x86_sse_apply_gain_to_buffer(buf, nframes, gain);
@@ -53,11 +53,11 @@ void
 debug_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain)
 {
 	if ( ((intptr_t)dst & 15) != 0) {
-		cerr << "mix_buffers_with_gain(): dst unaligned!" << endl;
+		std::cerr << "mix_buffers_with_gain(): dst unaligned!" << std::endl;
 	}
 
 	if ( ((intptr_t)dst & 15) != ((intptr_t)src & 15) ) {
-		cerr << "mix_buffers_with_gain(): dst & src don't have the same alignment!" << endl;
+		std::cerr << "mix_buffers_with_gain(): dst & src don't have the same alignment!" << std::endl;
 		mix_buffers_with_gain(dst, src, nframes, gain);
 	} else {
 		x86_sse_mix_buffers_with_gain(dst, src, nframes, gain);
@@ -68,11 +68,11 @@ void
 debug_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes)
 {
 	if ( ((intptr_t)dst & 15) != 0) {
-		cerr << "mix_buffers_no_gain(): dst unaligned!" << endl;
+		std::cerr << "mix_buffers_no_gain(): dst unaligned!" << std::endl;
 	}
 
 	if ( ((intptr_t)dst & 15) != ((intptr_t)src & 15) ) {
-		cerr << "mix_buffers_no_gain(): dst & src don't have the same alignment!" << endl;
+		std::cerr << "mix_buffers_no_gain(): dst & src don't have the same alignment!" << std::endl;
 		mix_buffers_no_gain(dst, src, nframes);
 	} else {
 		x86_sse_mix_buffers_no_gain(dst, src, nframes);

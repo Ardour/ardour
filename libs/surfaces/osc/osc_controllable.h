@@ -38,7 +38,7 @@ class Route;
 class OSCControllable : public PBD::Stateful
 {
   public:
-	OSCControllable (lo_address addr, const string& path, boost::shared_ptr<PBD::Controllable>);
+	OSCControllable (lo_address addr, const std::string& path, boost::shared_ptr<PBD::Controllable>);
 	virtual ~OSCControllable ();
 
 	lo_address address() const { return addr; }
@@ -49,7 +49,7 @@ class OSCControllable : public PBD::Stateful
   protected:
 	boost::shared_ptr<PBD::Controllable> controllable;
 	lo_address addr;
-	string path;
+	std::string path;
 
 	virtual void send_change ();
 };
@@ -58,7 +58,7 @@ class OSCRouteControllable : public OSCControllable
 {
 
   public:
-	OSCRouteControllable (lo_address addr, const string& path, 
+	OSCRouteControllable (lo_address addr, const std::string& path, 
 			      boost::shared_ptr<PBD::Controllable>, 
 			      boost::shared_ptr<ARDOUR::Route>);
 	~OSCRouteControllable ();
