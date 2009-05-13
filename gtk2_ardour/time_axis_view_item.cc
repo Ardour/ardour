@@ -54,6 +54,37 @@ double TimeAxisViewItem::NAME_Y_OFFSET;
 double TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 
+inline guint8
+convert_color_channel (guint8 src,
+		       guint8 alpha)
+{
+	return alpha ? ((guint (src) << 8) - src) / alpha : 0;
+}
+
+void
+convert_bgra_to_rgba (guint8 const* src,
+		      guint8*       dst,
+		      int           width,
+		      int           height)
+{
+	guint8 const* src_pixel = src;
+	guint8*       dst_pixel = dst;
+	
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++)
+		{
+			dst_pixel[0] = convert_color_channel (src_pixel[2],
+							      src_pixel[3]);
+			dst_pixel[1] = convert_color_channel (src_pixel[1],
+							      src_pixel[3]);
+			dst_pixel[2] = convert_color_channel (src_pixel[0],
+							      src_pixel[3]);
+			dst_pixel[3] = src_pixel[3];
+			
+			dst_pixel += 4;
+			src_pixel += 4;
+		}
+}
 
 //---------------------------------------------------------------------------------------//
 // Constructor / Desctructor
@@ -124,13 +155,10 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	init (other.item_name, other.samples_per_unit, c, other.frame_position, other.item_duration, other.visibility);
 }
 
-
 void
 TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis)
 {
 	item_name = it_name ;
-	name_text_width = ::pixel_width (it_name, *NAME_FONT);
-	last_name_text_width = 0;
 	samples_per_unit = spu ;
 	should_show_selection = true;
 	frame_position = start ;
@@ -148,22 +176,14 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		warning << "Time Axis Item Duration == 0" << endl ;
 	}
 
-	vestigial_frame = new ArdourCanvas::SimpleRect (*group);
-	vestigial_frame->property_x1() = (double) 0.0;
-	vestigial_frame->property_y1() = (double) 1.0;
-	vestigial_frame->property_x2() = (double) 2.0;
-	vestigial_frame->property_y2() = (double) trackview.current_height();
+	vestigial_frame = new ArdourCanvas::SimpleRect (*group, 0.0, 1.0, 2.0, trackview.current_height());
+	vestigial_frame->hide ();
 	vestigial_frame->property_outline_what() = 0xF;
 	vestigial_frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
 	vestigial_frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
-	vestigial_frame->hide ();
 
 	if (visibility & ShowFrame) {
-		frame = new ArdourCanvas::SimpleRect (*group);
-		frame->property_x1() = (double) 0.0;
-		frame->property_y1() = (double) 1.0;
-		frame->property_x2() = (double) trackview.editor().frame_to_pixel(duration);
-		frame->property_y2() = (double) trackview.current_height();
+		frame = new ArdourCanvas::SimpleRect (*group, 0.0, 1.0, trackview.editor().frame_to_pixel(duration), trackview.current_height());
 		frame->property_outline_pixels() = 1;
 		frame->property_outline_what() = 0xF;
 		frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
@@ -191,17 +211,11 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	}
 
 	if (visibility & ShowNameHighlight) {
-		name_highlight = new ArdourCanvas::SimpleRect (*group);
 		if (visibility & FullWidthNameHighlight) {
-			name_highlight->property_x1() = (double) 0.0;
-			name_highlight->property_x2() = (double) (trackview.editor().frame_to_pixel(item_duration));
+			name_highlight = new ArdourCanvas::SimpleRect (*group, 0.0, trackview.editor().frame_to_pixel(item_duration), trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height() - 1);
 		} else {
-			name_highlight->property_x1() = (double) 1.0;
-			name_highlight->property_x2() = (double) (trackview.editor().frame_to_pixel(item_duration)) - 1;
+			name_highlight = new ArdourCanvas::SimpleRect (*group, 1.0, trackview.editor().frame_to_pixel(item_duration) - 1, trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height() - 1);
 		}
-		name_highlight->property_y1() = (double) (trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
-		name_highlight->property_y2() = (double) (trackview.current_height() - 1);
-
 		name_highlight->set_data ("timeaxisviewitem", this);
 
 	} else {
@@ -209,36 +223,20 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	}
 
 	if (visibility & ShowNameText) {
-		name_text = new ArdourCanvas::Text (*group);
-		name_text->property_x() = (double) TimeAxisViewItem::NAME_X_OFFSET;
-		/* trackview.current_height() is the bottom of the trackview. subtract 1 to get back to the bottom of the highlight,
-		   then NAME_Y_OFFSET to position the text in the vertical center of the highlight
-		*/
-		name_text->property_y() = (double) trackview.current_height() - 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
-		name_text->property_font_desc() = *NAME_FONT;
-		name_text->property_anchor() = Gtk::ANCHOR_NW;
-
-		name_text->set_data ("timeaxisviewitem", this);
-		
-	} else {
-		name_text = 0;
+		name_pixbuf = new ArdourCanvas::Pixbuf(*group);
+		name_pixbuf->property_x() = NAME_X_OFFSET;
+		name_pixbuf->property_y() = trackview.current_height() - 1.0 - NAME_Y_OFFSET;
+	
 	}
 
 	/* create our grab handles used for trimming/duration etc */
 
 	if (visibility & ShowHandles) {
-		frame_handle_start = new ArdourCanvas::SimpleRect (*group);
-		frame_handle_start->property_x1() = (double) 0.0;
-		frame_handle_start->property_x2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH;
-		frame_handle_start->property_y1() = (double) 1.0;
-		frame_handle_start->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH+1;
+	
+		frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 1.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH+1);
 		frame_handle_start->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
 
-		frame_handle_end = new ArdourCanvas::SimpleRect (*group);
-		frame_handle_end->property_x1() = (double) (trackview.editor().frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
-		frame_handle_end->property_x2() = (double) trackview.editor().frame_to_pixel(get_duration());
-		frame_handle_end->property_y1() = (double) 1;
-		frame_handle_end->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1;
+		frame_handle_end = new ArdourCanvas::SimpleRect (*group, trackview.editor().frame_to_pixel(get_duration()) - TimeAxisViewItem::GRAB_HANDLE_LENGTH, trackview.editor().frame_to_pixel(get_duration()), 1.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1);
 		frame_handle_end->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
 
 	} else {
@@ -492,7 +490,6 @@ TimeAxisViewItem::set_item_name(std::string new_name, void* src)
 	if (new_name != item_name) {
 		std::string temp_name = item_name ;
 		item_name = new_name ;
-		name_text_width = ::pixel_width (new_name, *NAME_FONT);
 		NameChanged (item_name, temp_name, src) ; /* EMIT_SIGNAL */
 	}
 }
@@ -560,11 +557,44 @@ TimeAxisViewItem::get_time_axis_view()
 void
 TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
-	if (name_text) {
-		name_text->property_text() = new_name;
-		name_text_width = pixel_width (new_name, *NAME_FONT);
-		name_text_size_cache.clear ();
+	uint32_t pb_width, it_width;
+	double font_size;
+
+	font_size = NAME_FONT->get_size() / Pango::SCALE;
+	it_width = trackview.editor().frame_to_pixel(item_duration);
+	pb_width = new_name.length() * font_size;
+
+	if (pb_width > it_width - NAME_X_OFFSET) {
+		pb_width = it_width - NAME_X_OFFSET;
 	}
+
+	if (pb_width <= 0 || it_width < NAME_X_OFFSET) {
+		name_pixbuf->hide();
+		return;
+	} else {
+		name_pixbuf->show();
+	}
+
+	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, pb_width, NAME_HIGHLIGHT_SIZE);
+
+	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pb_width, NAME_HIGHLIGHT_SIZE );
+	cairo_t *cr = cairo_create (surface);
+	cairo_text_extents_t te;
+	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+	cairo_select_font_face (cr, NAME_FONT->get_family().c_str(),
+				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr, 10);
+	cairo_text_extents (cr, new_name.c_str(), &te);
+	
+	cairo_move_to (cr, 0.5,
+		       0.5 - te.height / 2 - te.y_bearing + NAME_HIGHLIGHT_SIZE / 2);
+	cairo_show_text (cr, new_name.c_str());
+	
+	unsigned char* src = cairo_image_surface_get_data (surface);
+	convert_bgra_to_rgba(src, buf->get_pixels(), pb_width, NAME_HIGHLIGHT_SIZE);
+	
+	cairo_destroy(cr);
+	name_pixbuf->property_pixbuf() = buf;
 }
 
 /**
@@ -578,14 +608,12 @@ TimeAxisViewItem::set_height (double height)
 	if (name_highlight) {
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_highlight->hide();
-			if (name_text) {
-				name_text->hide();
-			}
+			name_pixbuf->hide();
+			
 		} else {
 			name_highlight->show();
-			if (name_text) {
-				name_text->show();
-			}
+			name_pixbuf->show();
+			
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
@@ -599,14 +627,8 @@ TimeAxisViewItem::set_height (double height)
 		}
 	}
 
-	if (name_text) {
-		name_text->property_y() = height+1 - NAME_Y_OFFSET;
-		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_text->property_fill_color_rgba() =  fill_color;
-		}
-		else {
-			name_text->property_fill_color_rgba() = label_color;
-		}
+	if (visibility & ShowNameText) {
+		name_pixbuf->property_y() = height+1 - NAME_Y_OFFSET;
 	}
 
 	if (frame) {
@@ -656,10 +678,10 @@ TimeAxisViewItem::get_name_highlight()
 /**
  * 
  */
-ArdourCanvas::Text*
-TimeAxisViewItem::get_name_text()
+ArdourCanvas::Pixbuf*
+TimeAxisViewItem::get_name_pixbuf()
 {
-	return (name_text) ;
+	return (name_pixbuf) ;
 }
 
 /**
@@ -763,20 +785,6 @@ void
 TimeAxisViewItem::set_colors()
 {
 	set_frame_color() ;
-	if (name_text) {
-		double height = NAME_HIGHLIGHT_THRESH;
-
-		if (frame) {
-			height = frame->property_y2();
-		}
-
-		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_text->property_fill_color_rgba() =  fill_color;
-		}
-		else {
-			name_text->property_fill_color_rgba() = label_color;
-		}
-	}
 
 	if (name_highlight) {
 		name_highlight->property_fill_color_rgba() = fill_color;
@@ -859,9 +867,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (name_highlight) {
 			name_highlight->hide();
-			if (name_text) {
-				name_text->hide();
-			}
+			name_pixbuf->hide();
 		}
 
 		if (frame) {
@@ -882,13 +888,10 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 			if (height < NAME_HIGHLIGHT_THRESH) {
 				name_highlight->hide();
-				if (name_text) {
-					name_text->hide();
-				}
+				name_pixbuf->hide();
 			} else {
 				name_highlight->show();
-				if (name_text && !get_item_name().empty()) {
-					name_text->show();
+				if (!get_item_name().empty()) {
 					reset_name_width (pixel_width);
 				}
 			}
@@ -922,90 +925,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 void
 TimeAxisViewItem::reset_name_width (double pixel_width)
 {
-	if (name_text == 0) {
-		return;
-	}
-
-	int limit = (int) floor (pixel_width - NAME_X_OFFSET);
-	bool shrinking = (last_name_text_width > pixel_width);
-	int actual_width;
-	ustring ustr;
-	ustring::size_type n;
-
-	if ((last_name_text_width &&                                       // we did this once
-	     shrinking &&                                                  // we're getting smaller
-	     (name_text_width <= limit) &&                                 // fits the new size
-	     (name_text_width <= last_name_text_width - NAME_X_OFFSET))) { // fit into the old size too
-		last_name_text_width = pixel_width;
-		return;
-	}
-
-	/* now check the cache of existing truncations */
-
-	Gtk::Label foo;
-	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
-
-	for (n = item_name.length(); n > 0; --n) {
-		
-		map<ustring::size_type,int>::iterator i;
-
-		if ((i = name_text_size_cache.find (n)) != name_text_size_cache.end()) {
-
-			/* we know the length of this substring already */
-			
-			if ((actual_width = (*i).second) < limit) {
-
-				/* it fits, use it */
-				
-				ustr = item_name.substr (0, n);
-				break;
-			}
-						
-		} else {
-			
-			/* we don't know the length of this substring already, so compute
-			   it and put it into the cache.
-			 */
-
-			layout->set_text (item_name.substr (0, n));
-			
-			int width, height;
-			Gtkmm2ext::get_ink_pixel_size (layout, width, height);
-			
-			name_text_size_cache[n] = width;
-
-			if ((actual_width = width) < limit) {
-				ustr = item_name.substr (0, n);
-				break;
-			}
-		}
-	}
-
-	if (n == 0) {
-		name_text->property_text() = "";
-		last_name_text_width = pixel_width;
-		return;
-	} 
-
-	/* don't use name for event handling if it leaves no room
-	   for trimming to work.
-	*/
-	
-	if (pixel_width - actual_width < (NAME_X_OFFSET * 2.0)) {
-		if (name_connected) {
-			name_connected = false;
-		}
-	} else {
-		if (!name_connected) {
-			name_connected = true;
-		}
-	}
-	
-	name_text->property_text() = ustr;
-	name_text_width = actual_width;
-	name_text->show();
-	last_name_text_width = pixel_width;
-
+	set_name_text (item_name);
 }
 
 

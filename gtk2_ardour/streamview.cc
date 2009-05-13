@@ -133,6 +133,7 @@ StreamView::set_height (double h)
 	}
 
 	height = h;
+	canvas_rect->property_y2() = height;
 	update_contents_height ();
 	return 0;
 }
@@ -173,7 +174,9 @@ StreamView::add_region_view (boost::shared_ptr<Region> r)
 	// ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
 
 	add_region_view_internal (r, true);
-	update_contents_height ();
+	if (_layer_display == Stacked) {
+		update_contents_height ();
+	}
 }
 
 void
@@ -519,7 +522,6 @@ StreamView::child_height () const
 void
 StreamView::update_contents_height ()
 {
-	canvas_rect->property_y2() = height;
 
 	const double h = child_height ();
 

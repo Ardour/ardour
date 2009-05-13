@@ -700,8 +700,8 @@ MidiRegionView::set_height (double height)
 	                 midi_stream_view()->highest_note(),
 	                 height != old_height + FUDGE);
 	
-	if (name_text) {
-		name_text->raise_to_top();
+	if (name_pixbuf) {
+		name_pixbuf->raise_to_top();
 	}
 }
 
