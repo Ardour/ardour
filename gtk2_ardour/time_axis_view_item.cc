@@ -171,6 +171,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	show_vestigial = true;
 	visibility = vis;
 	_sensitive = true;
+	name_pixbuf = 0;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
@@ -559,6 +560,8 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
 	uint32_t pb_width, it_width;
 	double font_size;
+
+	if (!name_pixbuf) return;
 
 	font_size = NAME_FONT->get_size() / Pango::SCALE;
 	it_width = trackview.editor().frame_to_pixel(item_duration);
