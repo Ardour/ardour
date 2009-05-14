@@ -23,9 +23,6 @@ CONFIG_VARIABLE (bool, auto_connect_master, "auto-connect-master", true)
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectOption (0))
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectOption (0))
 
-CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
-CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
-
 /* MIDI and MIDI related */
 
 CONFIG_VARIABLE (std::string, mtc_port_name, "mtc-port-name", "default")
@@ -57,8 +54,6 @@ CONFIG_VARIABLE (float, midi_readahead,  "midi-readahead", 1.0)
 CONFIG_VARIABLE (float, audio_track_buffer_seconds, "track-buffer-seconds", 5.0)
 CONFIG_VARIABLE (float, midi_track_buffer_seconds, "midi-track-buffer-seconds", 1.0)
 CONFIG_VARIABLE (uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
-CONFIG_VARIABLE (SampleFormat, native_file_data_format,  "native-file-data-format", ARDOUR::FormatFloat)
-CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
 CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
 
 /* OSC */
@@ -66,21 +61,9 @@ CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
 CONFIG_VARIABLE (uint32_t, osc_port, "osc-port", 3819)
 CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
-/* fades, crossfades */
-
-CONFIG_VARIABLE (CrossfadeModel, xfade_model, "xfade-model", FullCrossfade)
-CONFIG_VARIABLE (bool, auto_xfade, "auto-xfade", true)
-CONFIG_VARIABLE (float, short_xfade_seconds, "short-xfade-seconds", 0.015)
-CONFIG_VARIABLE (bool, xfades_active, "xfades-active", true)
-CONFIG_VARIABLE (bool, xfades_visible, "xfades-visible", true)
-CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
-CONFIG_VARIABLE (bool, use_region_fades, "use-region-fades", true)
-CONFIG_VARIABLE (bool, show_region_fades, "show-region-fades", true)
-
 /* editing related */
 
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
-CONFIG_VARIABLE (LayerModel, layer_model, "layer-model", MoveAddHigher)
 CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)
 CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", false)
@@ -110,11 +93,6 @@ CONFIG_VARIABLE (std::string, click_emphasis_sound, "click-emphasis-sound", "")
 
 /* transport control and related */
 
-CONFIG_VARIABLE (bool, auto_play, "auto-play", false)
-CONFIG_VARIABLE (bool, auto_return, "auto-return", false)
-CONFIG_VARIABLE (bool, auto_input, "auto-input", true)
-CONFIG_VARIABLE (bool, punch_in, "punch-in", false)
-CONFIG_VARIABLE (bool, punch_out, "punch-out", false)
 CONFIG_VARIABLE (bool, plugins_stop_with_transport, "plugins-stop-with-transport", false)
 CONFIG_VARIABLE (bool, do_not_record_plugins, "do-not-record-plugins", false)
 CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
@@ -138,17 +116,13 @@ CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-
 /* timecode and sync */
 
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
-CONFIG_VARIABLE (SmpteFormat, smpte_format, "smpte-format", smpte_30)
 CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
-CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
 CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
 
 /* metering */
 
 CONFIG_VARIABLE (float, meter_hold, "meter-hold", 100.0f)
 CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 27.0f)
-CONFIG_VARIABLE (nframes_t, over_length_short, "over-length-short", 2)
-CONFIG_VARIABLE (nframes_t, over_length_long, "over-length-long", 10)
 
 /* miscellany */
 
@@ -156,7 +130,6 @@ CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactiva
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 CONFIG_VARIABLE (bool, use_vst, "use-vst", true)
-CONFIG_VARIABLE (uint32_t, subframes_per_frame, "subframes-per-frame", 100)
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
 CONFIG_VARIABLE (int32_t, history_depth, "history-depth", 20)
@@ -179,13 +152,4 @@ CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-paren
 
 CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)
 CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalNone)
-
-/* BWAV */
-
-CONFIG_VARIABLE (std::string, bwf_country_code, "bwf-country-code", "US")
-CONFIG_VARIABLE (std::string, bwf_organization_code, "bwf-organization-code", "US")
-
-/* these variables have custom set() methods (e.g. path globbing) */
-
-CONFIG_VARIABLE_SPECIAL(Glib::ustring, raid_path, "raid-path", "", path_expand)
 
