@@ -29,7 +29,7 @@
 #include "ardour_ui.h"
 #include "location_ui.h"
 #include "mixer_ui.h"
-#include "option_editor.h"
+#include "rc_option_editor.h"
 #include "public_editor.h"
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
@@ -97,10 +97,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	if (route_params) {
 		route_params->set_session (s);
-	}
-
-	if (option_editor) {
-		option_editor->set_session (s);
 	}
 
 	setup_session_options ();
@@ -202,10 +198,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	preroll_clock.set_session (0);
 	postroll_clock.set_session (0);
 
-	if (option_editor) {
-		option_editor->set_session (0);
-	}
-
 	delete session;
 	session = 0;
 
@@ -231,12 +223,12 @@ ARDOUR_UI::toggle_big_clock_window ()
 }
 
 void
-ARDOUR_UI::toggle_options_window ()
+ARDOUR_UI::toggle_rc_options_window ()
 {
-	if (option_editor == 0) {
-		option_editor = new OptionEditor (*this, *editor, *mixer);
-		option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsEditor")));
-		option_editor->set_session (session);
+	if (rc_option_editor == 0) {
+		rc_option_editor = new RCOptionEditor;
+		rc_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsEditor")));
+		rc_option_editor->set_session (session);
 	} 
 
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleOptionsEditor"));
@@ -244,10 +236,10 @@ ARDOUR_UI::toggle_options_window ()
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 	
 		if (tact->get_active()) {
-			option_editor->show_all ();
-			option_editor->present ();
+			rc_option_editor->show_all ();
+			rc_option_editor->present ();
 		} else {
-			option_editor->hide ();
+			rc_option_editor->hide ();
 		} 
 	}
 }

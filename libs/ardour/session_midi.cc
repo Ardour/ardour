@@ -801,7 +801,7 @@ Session::send_full_time_code(nframes_t nframes)
 	// I don't understand this bit yet.. [DR]
 	if (((mtc_smpte_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_smpte_time.frames % 2)) {
 		// start MTC quarter frame transmission on an even frame
-		SMPTE::increment( transmitting_smpte_time );
+		SMPTE::increment( transmitting_smpte_time, config.get_subframes_per_frame() );
 		outbound_mtc_smpte_frame += (nframes_t) _frames_per_smpte_frame;
 	}
 
@@ -928,8 +928,8 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			// Wrap quarter frame counter
 			next_quarter_frame_to_send = 0;
 			// Increment smpte time twice
-			SMPTE::increment( transmitting_smpte_time );
-			SMPTE::increment( transmitting_smpte_time );
+			SMPTE::increment( transmitting_smpte_time, config.get_subframes_per_frame() );
+			SMPTE::increment( transmitting_smpte_time, config.get_subframes_per_frame() );
 			// Re-calculate timing of first quarter frame
 			//smpte_to_sample( transmitting_smpte_time, outbound_mtc_smpte_frame, true /* use_offset */, false );
 			outbound_mtc_smpte_frame += 8 * quarter_frame_duration;

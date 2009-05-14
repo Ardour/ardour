@@ -26,8 +26,9 @@
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/silentfilesource.h"
-#include "ardour/configuration.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/smf_source.h"
+#include "ardour/session.h"
 
 #ifdef  HAVE_COREAUDIO
 #define USE_COREAUDIO_FOR_FILES
@@ -246,8 +247,8 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 	
 	if (type == DataType::AUDIO) {
 		boost::shared_ptr<Source> ret (new SndFileSource (s, path, embedded,
-				Config->get_native_file_data_format(),
-				Config->get_native_file_header_format(),
+				s.config.get_native_file_data_format(),
+				s.config.get_native_file_header_format(),
 				rate,
 				(destructive
 				 	? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)

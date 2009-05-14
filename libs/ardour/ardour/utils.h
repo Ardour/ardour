@@ -63,6 +63,20 @@ ARDOUR::SlaveSource string_to_slave_source (std::string str);
 const char* edit_mode_to_string (ARDOUR::EditMode);
 ARDOUR::EditMode string_to_edit_mode (std::string);
 
+
+/* I don't really like hard-coding these falloff rates here
+ * Probably should use a map of some kind that could be configured
+ * These rates are db/sec.
+*/
+
+#define METER_FALLOFF_OFF     0.0f
+#define METER_FALLOFF_SLOWEST 6.6f // BBC standard
+#define METER_FALLOFF_SLOW    8.6f // BBC standard
+#define METER_FALLOFF_MEDIUM  20.0f
+#define METER_FALLOFF_FAST    32.0f
+#define METER_FALLOFF_FASTER  46.0f
+#define METER_FALLOFF_FASTEST 70.0f
+
 float meter_falloff_to_float (ARDOUR::MeterFalloff);
 ARDOUR::MeterFalloff meter_falloff_from_float (float);
 float meter_falloff_to_db_per_sec (float);

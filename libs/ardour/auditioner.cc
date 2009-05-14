@@ -41,8 +41,8 @@ using namespace PBD;
 Auditioner::Auditioner (Session& s)
 	: AudioTrack (s, "auditioner", Route::Hidden)
 {
-	string left = Config->get_auditioner_output_left();
-	string right = Config->get_auditioner_output_right();
+	string left = _session.config.get_auditioner_output_left();
+	string right = _session.config.get_auditioner_output_right();
 
 	if (left == "default") {
 		left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);	
@@ -209,12 +209,12 @@ Auditioner::output_changed (IOChange change, void* src)
 		if (output (0)->get_connections (connections)) {
 			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
 			if (phys != connections[0]) {
-				Config->set_auditioner_output_left (connections[0]);
+				_session.config.set_auditioner_output_left (connections[0]);
 			} else {
-				Config->set_auditioner_output_left ("default");
+				_session.config.set_auditioner_output_left ("default");
 			}
 		} else {
-			Config->set_auditioner_output_left ("");
+			_session.config.set_auditioner_output_left ("");
 		}
 		
 		connections.clear ();
@@ -222,12 +222,12 @@ Auditioner::output_changed (IOChange change, void* src)
 		if (output (1)->get_connections (connections)) {
 			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
 			if (phys != connections[0]) {
-				Config->set_auditioner_output_right (connections[0]);
+				_session.config.set_auditioner_output_right (connections[0]);
 			} else {
-				Config->set_auditioner_output_right ("default");
+				_session.config.set_auditioner_output_right ("default");
 			}
 		} else {
-			Config->set_auditioner_output_right ("");
+			_session.config.set_auditioner_output_right ("");
 		}
 	}
 }

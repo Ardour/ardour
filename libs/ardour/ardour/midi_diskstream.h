@@ -36,7 +36,6 @@
 #include "pbd/ringbufferNPT.h"
 
 #include "ardour/ardour.h"
-#include "ardour/configuration.h"
 #include "ardour/diskstream.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_ring_buffer.h"

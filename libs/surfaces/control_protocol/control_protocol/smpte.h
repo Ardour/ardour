@@ -53,13 +53,13 @@ struct Time {
 	}
 };
 
-Wrap increment( Time& smpte );
-Wrap decrement( Time& smpte );
-Wrap increment_subframes( Time& smpte );
-Wrap decrement_subframes( Time& smpte );
-Wrap increment_seconds( Time& smpte );
-Wrap increment_minutes( Time& smpte );
-Wrap increment_hours( Time& smpte );
+Wrap increment( Time& smpte, uint32_t );
+Wrap decrement( Time& smpte, uint32_t );
+Wrap increment_subframes( Time& smpte, uint32_t );
+Wrap decrement_subframes( Time& smpte, uint32_t );
+Wrap increment_seconds( Time& smpte, uint32_t );
+Wrap increment_minutes( Time& smpte, uint32_t );
+Wrap increment_hours( Time& smpte, uint32_t );
 void frames_floor( Time& smpte );
 void seconds_floor( Time& smpte );
 void minutes_floor( Time& smpte );

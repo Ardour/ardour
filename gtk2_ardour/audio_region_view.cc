@@ -200,7 +200,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	setup_fade_handle_positions ();
 
- 	if (!Config->get_show_region_fades()) {
+ 	if (!trackview.session().config.get_show_region_fades()) {
  		set_fade_visibility (false);
  	}
 
@@ -415,7 +415,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 				fade_in_handle->hide();
 				fade_out_handle->hide();
 			} else {
-				if (Config->get_show_region_fades()) {
+				if (trackview.session().config.get_show_region_fades()) {
 					fade_in_handle->show();
 					fade_out_handle->show();
 				}
@@ -575,7 +575,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 		return;
 	}
 
-	if (Config->get_show_region_fades()) {
+	if (trackview.session().config.get_show_region_fades()) {
 		fade_in_shape->show();
 	}
 
@@ -663,7 +663,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 		return;
 	} 
 	
-	if (Config->get_show_region_fades()) {
+	if (trackview.session().config.get_show_region_fades()) {
 		fade_out_shape->show();
 	}
 

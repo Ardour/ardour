@@ -77,7 +77,7 @@ BroadcastInfo::set_from_session (Session const & session, int64_t time_ref)
 	set_time_reference (time_ref);
 	set_origination_time ();
 	set_originator ();
-	set_originator_ref ();
+	set_originator_ref (session);
 }
 
 bool
@@ -242,7 +242,7 @@ BroadcastInfo::set_originator (std::string const & str)
 }
 
 void
-BroadcastInfo::set_originator_ref (std::string const & str)
+BroadcastInfo::set_originator_ref (Session const & session, std::string const & str)
 {
 	_has_info = true;
 	
@@ -261,8 +261,8 @@ BroadcastInfo::set_originator_ref (std::string const & str)
 	serial_number << "ARDOUR" << "r" <<  std::setfill('0') << std::right << std::setw(5) << svn_revision;
 	
 	snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
-		  Config->get_bwf_country_code().c_str(),
-		  Config->get_bwf_organization_code().c_str(),
+		  session.config.get_bwf_country_code().c_str(),
+		  session.config.get_bwf_organization_code().c_str(),
 		  serial_number.str().c_str(),
 		  _time.tm_hour,
 		  _time.tm_min,

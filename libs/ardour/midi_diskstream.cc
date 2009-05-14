@@ -367,7 +367,7 @@ MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframe
 			if (_alignment_style == ExistingMaterial) {
 
 
-				if (!Config->get_punch_in()) {
+				if (!_session.config.get_punch_in()) {
 
 					/* manual punch in happens at the correct transport frame
 					   because the user hit a button. but to get alignment correct 
@@ -396,7 +396,7 @@ MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframe
 
 			} else {
 
-				if (Config->get_punch_in()) {
+				if (_session.config.get_punch_in()) {
 					first_recordable_frame += _roll_delay;
 				} else {
 					capture_start_frame -= _roll_delay;
@@ -634,7 +634,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 	commit_should_unlock = true;
 	adjust_capture_position = 0;
 
-	if (nominally_recording || (_session.get_record_enabled() && Config->get_punch_in())) {
+	if (nominally_recording || (_session.get_record_enabled() && _session.config.get_punch_in())) {
 		OverlapType ot;
 
 		ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
@@ -1325,7 +1325,7 @@ MidiDiskstream::engage_record_enable ()
 	g_atomic_int_set (&_record_enabled, 1);
 	
 	if (_source_port && Config->get_monitoring_model() == HardwareMonitoring) {
-		_source_port->request_monitor_input (!(Config->get_auto_input() && rolling));
+		_source_port->request_monitor_input (!(_session.config.get_auto_input() && rolling));
 	}
 
 	// FIXME: Why is this necessary?  Isn't needed for AudioDiskstream...
@@ -1387,7 +1387,7 @@ MidiDiskstream::get_state ()
 
 		Location* pi;
 
-		if (Config->get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
+		if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRIu32, pi->start());
 		} else {
 			snprintf (buf, sizeof (buf), "%" PRIu32, _session.transport_frame());

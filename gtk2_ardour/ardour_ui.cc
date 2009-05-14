@@ -198,7 +198,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	_will_create_new_session_automatically = false;
 	add_route_dialog = 0;
 	route_params = 0;
-	option_editor = 0;
+	rc_option_editor = 0;
 	location_ui = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
@@ -252,7 +252,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		}
 
 		setup_gtk_ardour_enums ();
-		Config->set_current_owner (ConfigVariableBase::Interface);
 		setup_profile ();
 
 		GainMeter::setup_slider_pix ();
@@ -360,10 +359,6 @@ ARDOUR_UI::post_engine ()
 	}
 
 	blink_timeout_tag = -1;
-
-	/* the global configuration object is now valid */
-
-	use_config ();
 
 	/* this being a GUI and all, we want peakfiles */
 
@@ -654,6 +649,8 @@ ARDOUR_UI::startup ()
 	if (get_session_parameters (ARDOUR_COMMAND_LINE::new_session)) {
 		exit (1);
 	}
+
+	use_config ();
 
 	goto_editor_window ();
 	
@@ -2466,8 +2463,6 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 
 	connect_to_session (new_session);
 
-	Config->set_current_owner (ConfigVariableBase::Interface);
-
 	session_loaded = true;
 	
 	goto_editor_window ();
@@ -3172,7 +3167,9 @@ ARDOUR_UI::use_config ()
 {
 	Glib::RefPtr<Action> act;
 
-	switch (Config->get_native_file_data_format ()) {
+	assert (session);
+
+	switch (session->config.get_native_file_data_format ()) {
 	case FormatFloat:
 		act = ActionManager::get_action (X_("options"), X_("FileDataFormatFloat"));
 		break;
@@ -3189,7 +3186,7 @@ ARDOUR_UI::use_config ()
 		ract->set_active ();
 	}	
 
-	switch (Config->get_native_file_header_format ()) {
+	switch (session->config.get_native_file_header_format ()) {
 	case BWF:
 		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatBWF"));
 		break;

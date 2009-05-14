@@ -179,6 +179,7 @@ def build(bld):
 		processor_box.cc
 		prompter.cc
 		public_editor.cc
+		rc_option_editor.cc
 		region_gain_line.cc
 		region_selection.cc
 		region_view.cc

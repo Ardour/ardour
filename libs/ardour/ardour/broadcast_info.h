@@ -68,7 +68,7 @@ class BroadcastInfo
 	void set_time_reference (int64_t when);
 	void set_origination_time (struct tm * now = 0); // if 0, use time generated at construction
 	void set_originator (std::string const & str = "");
-	void set_originator_ref (std::string const & str = "");
+	void set_originator_ref (Session const &, std::string const & str = "");
 	
 	/* State info */
 	

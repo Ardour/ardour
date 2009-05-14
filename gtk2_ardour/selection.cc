@@ -23,6 +23,7 @@
 #include "pbd/stacktrace.h"
 
 #include "ardour/playlist.h"
+#include "ardour/rc_configuration.h"
 
 #include "region_view.h"
 #include "selection.h"

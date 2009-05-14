@@ -163,7 +163,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_transport_frame = 0;
 	end_location = new Location (0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
 	start_location = new Location (0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
-	_end_location_is_free = true;
 	g_atomic_int_set (&_record_status, Disabled);
 	loop_changing = false;
 	play_loop = false;
@@ -214,8 +213,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* default short fade = 15ms */
 
-	Crossfade::set_short_xfade_length ((nframes_t) floor (Config->get_short_xfade_seconds() * frame_rate()));
-	SndFileSource::setup_standard_crossfades (frame_rate());
+	Crossfade::set_short_xfade_length ((nframes_t) floor (config.get_short_xfade_seconds() * frame_rate()));
+	SndFileSource::setup_standard_crossfades (*this, frame_rate());
 
 	last_mmc_step.tv_sec = 0;
 	last_mmc_step.tv_usec = 0;
@@ -363,11 +362,7 @@ Session::second_stage_init (bool new_session)
 
 	ControlProtocolManager::instance().set_session (*this);
 
-	if (new_session) {
-		_end_location_is_free = true;
-	} else {
-		_end_location_is_free = false;
-	}
+	config.set_end_marker_is_free (new_session);
 
 	_state_of_the_state = Clean;
 	
@@ -861,7 +856,7 @@ Session::load_options (const XMLNode& node)
 	XMLProperty* prop;
 	LocaleGuard lg (X_("POSIX"));
 
-	Config->set_variables (node, ConfigVariableBase::Session);
+	config.set_variables (node);
 
 	/* now reset MIDI ports because the session can have its own 
 	   MIDI configuration.
@@ -869,36 +864,7 @@ Session::load_options (const XMLNode& node)
 
 	setup_midi ();
 
-	if ((child = find_named_node (node, "end-marker-is-free")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			_end_location_is_free = (prop->value() == "yes");
-		}
-	}
-
 	return 0;
-}
-
-bool
-Session::save_config_options_predicate (ConfigVariableBase::Owner owner) const
-{
-	const ConfigVariableBase::Owner modified_by_session_or_user = (ConfigVariableBase::Owner)
-		(ConfigVariableBase::Session|ConfigVariableBase::Interface);
-
-	return owner & modified_by_session_or_user;
-}
-
-XMLNode&
-Session::get_options () const
-{
-	XMLNode* child;
-	LocaleGuard lg (X_("POSIX"));
-
-	XMLNode& option_root = Config->get_variables (mem_fun (*this, &Session::save_config_options_predicate));
-
-	child = option_root.add_child ("end-marker-is-free");
-	child->add_property ("val", _end_location_is_free ? "yes" : "no");
-
-	return option_root;
 }
 
 XMLNode&
@@ -976,7 +942,7 @@ Session::state(bool full_state)
 
 	/* various options */
 
-	node->add_child_nocopy (get_options());
+	node->add_child_nocopy (config.get_variables ());
 
 	node->add_child_nocopy (_metadata->get_state());
 
@@ -3055,7 +3021,7 @@ Session::config_changed (const char* parameter_name)
 			
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
-					(*i)->monitor_input (!Config->get_auto_input());
+					(*i)->monitor_input (!config.get_auto_input());
 				}
 			}
 		}
@@ -3066,7 +3032,7 @@ Session::config_changed (const char* parameter_name)
 		
 		if ((location = _locations.auto_punch_location()) != 0) {
 			
-			if (Config->get_punch_in ()) {
+			if (config.get_punch_in ()) {
 				replace_event (Event::PunchIn, location->start());
 			} else {
 				remove_event (location->start(), Event::PunchIn);
@@ -3079,7 +3045,7 @@ Session::config_changed (const char* parameter_name)
 		
 		if ((location = _locations.auto_punch_location()) != 0) {
 			
-			if (Config->get_punch_out()) {
+			if (config.get_punch_out()) {
 				replace_event (Event::PunchOut, location->end());
 			} else {
 				clear_events (Event::PunchOut);
@@ -3120,7 +3086,7 @@ Session::config_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("raid-path")) {
 
-		setup_raid_path (Config->get_raid_path());
+		setup_raid_path (config.get_raid_path());
 
 	} else if (PARAM_IS ("smpte-format")) {
 

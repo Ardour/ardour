@@ -60,7 +60,6 @@
 #include <gtkmm2ext/bindable_button.h>
 #include "ardour/ardour.h"
 #include "ardour/session.h"
-#include "ardour/configuration.h"
 #include "ardour/types.h"
 
 #include "audio_clock.h"
@@ -71,7 +70,7 @@
 class AudioClock;
 class PublicEditor;
 class Keyboard;
-class OptionEditor;
+class RCOptionEditor;
 class KeyEditor;
 class Mixer_UI;
 class ConnectionEditor;
@@ -257,7 +256,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void toggle_session_auto_loop ();
 
-	void toggle_options_window ();
+	void toggle_rc_options_window ();
 
   private:
 	ArdourStartup*      _startup;
@@ -597,9 +596,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	KeyEditor *key_editor;
 
-	/* Options window */
+	/* RC Options window */
 
-	OptionEditor *option_editor;
+	RCOptionEditor *rc_option_editor;
 
 	/* route dialog */
 

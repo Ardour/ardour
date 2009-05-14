@@ -366,7 +366,7 @@ Session::process_event (Event* ev)
 		
 	case Event::PunchIn:
 		// cerr << "PunchIN at " << transport_frame() << endl;
-		if (Config->get_punch_in() && record_status() == Enabled) {
+		if (config.get_punch_in() && record_status() == Enabled) {
 			enable_record ();
 		}
 		remove = false;
@@ -375,7 +375,7 @@ Session::process_event (Event* ev)
 		
 	case Event::PunchOut:
 		// cerr << "PunchOUT at " << transport_frame() << endl;
-		if (Config->get_punch_out()) {
+		if (config.get_punch_out()) {
 			step_back_from_record ();
 		}
 		remove = false;

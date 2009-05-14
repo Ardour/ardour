@@ -325,7 +325,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	declick = _pending_declick;
 	
 	const bool recording_without_monitoring = no_monitor && record_enabled()
-			&& (!Config->get_auto_input() || _session.actively_recording());
+			&& (!_session.config.get_auto_input() || _session.actively_recording());
 	
 
 	/* -------------------------------------------------------------------------------------------

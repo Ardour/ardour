@@ -988,7 +988,7 @@ Editor::set_smpte_ruler_scale (gdouble lower, gdouble upper)
 	if (range < (2 * session->frames_per_smpte_frame())) { /* 0 - 2 frames */
 		smpte_ruler_scale = smpte_show_bits;
 		smpte_mark_modulo = 20;
-		smpte_nmarks = 2 + (2 * Config->get_subframes_per_frame());
+		smpte_nmarks = 2 + (2 * session->config.get_subframes_per_frame());
 	} else if (range <= (fr / 4)) { /* 2 frames - 0.250 second */
 		smpte_ruler_scale = smpte_show_frames;
 		smpte_mark_modulo = 1;
@@ -1111,7 +1111,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			(*marks)[n].position = pos;
 
 			// Increment subframes by one
-			SMPTE::increment_subframes( smpte );
+			SMPTE::increment_subframes( smpte, session->config.get_subframes_per_frame() );
 		}
 	  break;
 	case smpte_show_seconds:
@@ -1138,7 +1138,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
         
 			}
 			(*marks)[n].label = g_strdup (buf);
-			SMPTE::increment_seconds( smpte );
+			SMPTE::increment_seconds( smpte, session->config.get_subframes_per_frame() );
 		}
 	  break;
 	case smpte_show_minutes:
@@ -1163,7 +1163,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
-			SMPTE::increment_minutes( smpte );
+			SMPTE::increment_minutes( smpte, session->config.get_subframes_per_frame() );
 		}
 
 	  break;
@@ -1186,7 +1186,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
 
-			SMPTE::increment_hours( smpte );
+			SMPTE::increment_hours( smpte, session->config.get_subframes_per_frame() );
 		}
 	  break;
 	case smpte_show_frames:
@@ -1212,7 +1212,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
         
 			}
 			(*marks)[n].label = g_strdup (buf);
-			SMPTE::increment( smpte );
+			SMPTE::increment( smpte, session->config.get_subframes_per_frame() );
 		}
 
 	  break;

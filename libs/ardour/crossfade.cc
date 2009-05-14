@@ -83,7 +83,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 	_anchor_point = ap;
 	_follow_overlap = false;
 
-	_active = Config->get_xfades_active ();
+	_active = _session.config.get_xfades_active ();
 	_fixed = true;
 
 	initialize ();
@@ -428,7 +428,7 @@ Crossfade::refresh ()
 		if (_follow_overlap) {
 
 			try {
-				compute (_in, _out, Config->get_xfade_model());
+				compute (_in, _out, _session.config.get_xfade_model());
 			} 
 
 			catch (NoCrossfadeHere& err) {

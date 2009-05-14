@@ -438,7 +438,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 
 			if (_alignment_style == ExistingMaterial) {
 
-				if (!Config->get_punch_in()) {
+				if (!_session.config.get_punch_in()) {
 
 					/* manual punch in happens at the correct transport frame
 					   because the user hit a button. but to get alignment correct 
@@ -467,7 +467,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 
 			} else {
 
-				if (Config->get_punch_in()) {
+				if (_session.config.get_punch_in()) {
 					first_recordable_frame += _roll_delay;
 				} else {
 					capture_start_frame -= _roll_delay;
@@ -570,7 +570,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 		(*chan)->current_playback_buffer = 0;
 	}
 
-	if (nominally_recording || (_session.get_record_enabled() && Config->get_punch_in())) {
+	if (nominally_recording || (_session.get_record_enabled() && _session.config.get_punch_in())) {
 		OverlapType ot;
 		
 		// Safeguard against situations where process() goes haywire when autopunching and last_recordable_frame < first_recordable_frame
@@ -1867,7 +1867,7 @@ AudioDiskstream::engage_record_enable ()
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			if ((*chan)->source) {
-				(*chan)->source->ensure_monitor_input (!(Config->get_auto_input() && rolling));
+				(*chan)->source->ensure_monitor_input (!(_session.config.get_auto_input() && rolling));
 			}
 			capturing_sources.push_back ((*chan)->write_source);
 			(*chan)->write_source->mark_streaming_write_started ();
@@ -1936,7 +1936,7 @@ AudioDiskstream::get_state ()
 
 		Location* pi;
 
-		if (Config->get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
+		if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRIu32, pi->start());
 		} else {
 			snprintf (buf, sizeof (buf), "%" PRIu32, _session.transport_frame());

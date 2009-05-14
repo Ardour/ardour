@@ -171,6 +171,7 @@ def build(bld):
 		port_set.cc
 		processor.cc
 		quantize.cc
+	        rc_configuration.cc
 		recent_sessions.cc
 		region.cc
 		region_factory.cc
@@ -184,6 +185,7 @@ def build(bld):
 		session_butler.cc
 		session_click.cc
 		session_command.cc
+		session_configuration.cc
 		session_directory.cc
 		session_events.cc
 		session_export.cc

@@ -36,12 +36,14 @@
 #include <gtkmm/filechooserwidget.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
+#include <gtkmm/textview.h>
 
 #include "ardour/session.h"
 #include "ardour/audiofilesource.h"
 
 #include "ardour_dialog.h"
 #include "editing.h"
+#include "audio_clock.h"
 
 namespace ARDOUR {
 	class Session;

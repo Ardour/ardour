@@ -421,8 +421,7 @@ Playlist::flush_notifications ()
 	// pending_bounds.sort (cmp);
 
 	for (RegionList::iterator r = pending_bounds.begin(); r != pending_bounds.end(); ++r) {
-
-		if (Config->get_layer_model() == MoveAddHigher) {
+		if (_session.config.get_layer_model() == MoveAddHigher) {
 			timestamp_layer_op (*r);
 		}
 
@@ -1277,7 +1276,7 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 		if (holding_state ()) {
 			pending_bounds.push_back (region);
 		} else {
-			if (Config->get_layer_model() == MoveAddHigher) {
+			if (_session.config.get_layer_model() == MoveAddHigher) {
 				/* it moved or changed length, so change the timestamp */
 				timestamp_layer_op (region);
 			}
@@ -1964,7 +1963,7 @@ Playlist::relayer ()
 
 	/* sort according to the model */
 
-	if (Config->get_layer_model() == MoveAddHigher || Config->get_layer_model() == AddHigher) {
+	if (_session.config.get_layer_model() == MoveAddHigher || _session.config.get_layer_model() == AddHigher) {
 		RegionSortByLastLayerOp cmp;
 		copy.sort (cmp);
 	}
@@ -2054,8 +2053,8 @@ void
 Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
 	/* does nothing useful if layering mode is later=higher */
-	if ((Config->get_layer_model() == MoveAddHigher) ||
-	    (Config->get_layer_model() == AddHigher)) {
+	if ((_session.config.get_layer_model() == MoveAddHigher) ||
+	    (_session.config.get_layer_model() == AddHigher)) {
 		timestamp_layer_op (region);
 		relayer ();
 	}
@@ -2065,8 +2064,8 @@ void
 Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
 	/* does nothing useful if layering mode is later=higher */
-	if ((Config->get_layer_model() == MoveAddHigher) ||
-	    (Config->get_layer_model() == AddHigher)) {
+	if ((_session.config.get_layer_model() == MoveAddHigher) ||
+	    (_session.config.get_layer_model() == AddHigher)) {
 		region->set_last_layer_op (0);
 		relayer ();
 	}

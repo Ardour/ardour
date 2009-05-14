@@ -19,8 +19,8 @@
 #define SMPTE_IS_AROUND_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours)
 #define SMPTE_IS_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours && !(sm.subframes))
 
-#include <control_protocol/smpte.h>
-#include <ardour/configuration.h>
+#include "control_protocol/smpte.h"
+#include "ardour/rc_configuration.h"
 
 namespace SMPTE {
 
@@ -32,20 +32,20 @@ float Time::default_rate = 30.0;
  * @return true if seconds wrap.
  */
 Wrap
-increment( Time& smpte )
+increment( Time& smpte, uint32_t subframes_per_frame )
 {
 	Wrap wrap = NONE;
 
 	if (smpte.negative) {
 		if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
 			// We have a zero transition involving only subframes
-			smpte.subframes = ARDOUR::Config->get_subframes_per_frame() - smpte.subframes;
+			smpte.subframes = subframes_per_frame - smpte.subframes;
 			smpte.negative = false;
 			return SECONDS;
 		}
     
 		smpte.negative = false;
-		wrap = decrement( smpte );
+		wrap = decrement( smpte, subframes_per_frame );
 		if (!SMPTE_IS_ZERO( smpte )) {
 			smpte.negative = true;
 		}
@@ -118,19 +118,19 @@ increment( Time& smpte )
  * Realtime safe.
  * @return true if seconds wrap. */
 Wrap
-decrement( Time& smpte )
+decrement( Time& smpte, uint32_t subframes_per_frame )
 {
 	Wrap wrap = NONE;
   
   
 	if (smpte.negative || SMPTE_IS_ZERO(smpte)) {
 		smpte.negative = false;
-		wrap = increment( smpte );
+		wrap = increment( smpte, subframes_per_frame );
 		smpte.negative = true;
 		return wrap;
 	} else if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
 		// We have a zero transition involving only subframes
-		smpte.subframes = ARDOUR::Config->get_subframes_per_frame() - smpte.subframes;
+		smpte.subframes = subframes_per_frame - smpte.subframes;
 		smpte.negative = true;
 		return SECONDS;
 	}
@@ -215,13 +215,13 @@ frames_floor( Time& smpte )
 
 /** Increment @a smpte by one subframe */
 Wrap
-increment_subframes( Time& smpte )
+increment_subframes( Time& smpte, uint32_t subframes_per_frame )
 {
 	Wrap wrap = NONE;
   
 	if (smpte.negative) {
 		smpte.negative = false;
-		wrap = decrement_subframes( smpte );
+		wrap = decrement_subframes( smpte, subframes_per_frame );
 		if (!SMPTE_IS_ZERO(smpte)) {
 			smpte.negative = true;
 		}
@@ -229,9 +229,9 @@ increment_subframes( Time& smpte )
 	}
   
 	smpte.subframes++;
-	if (smpte.subframes >= ARDOUR::Config->get_subframes_per_frame()) {
+	if (smpte.subframes >= subframes_per_frame) {
 		smpte.subframes = 0;
-		increment( smpte );
+		increment( smpte, subframes_per_frame );
 		return FRAMES;
 	}
 	return NONE;
@@ -240,13 +240,13 @@ increment_subframes( Time& smpte )
 
 /** Decrement @a smpte by one subframe */
 Wrap
-decrement_subframes( Time& smpte )
+decrement_subframes( Time& smpte, uint32_t subframes_per_frame )
 {
 	Wrap wrap = NONE;
   
 	if (smpte.negative) {
 		smpte.negative = false;
-		wrap = increment_subframes( smpte );
+		wrap = increment_subframes( smpte, subframes_per_frame );
 		smpte.negative = true;
 		return wrap;
 	}
@@ -258,7 +258,7 @@ decrement_subframes( Time& smpte )
 			smpte.subframes = 1;
 			return FRAMES;
 		} else {
-			decrement( smpte );
+			decrement( smpte, subframes_per_frame );
 			smpte.subframes = 79;
 			return FRAMES;
 		}
@@ -274,7 +274,7 @@ decrement_subframes( Time& smpte )
 
 /** Go to next whole second (frames == 0 or frames == 2) */
 Wrap
-increment_seconds( Time& smpte )
+increment_seconds( Time& smpte, uint32_t subframes_per_frame )
 {
 	Wrap wrap = NONE;
   
@@ -283,7 +283,7 @@ increment_seconds( Time& smpte )
   
 	if (smpte.negative) {
 		// Wrap second if on second boundary
-		wrap = increment(smpte);
+		wrap = increment(smpte, subframes_per_frame);
 		// Go to lowest absolute frame value
 		seconds_floor( smpte );
 		if (SMPTE_IS_ZERO(smpte)) {
@@ -307,7 +307,7 @@ increment_seconds( Time& smpte )
 		}
     
 		// Increment by one frame
-		wrap = increment( smpte );
+		wrap = increment( smpte, subframes_per_frame );
 	}
   
 	return wrap;
@@ -349,7 +349,7 @@ seconds_floor( Time& smpte )
 
 /** Go to next whole minute (seconds == 0, frames == 0 or frames == 2) */
 Wrap
-increment_minutes( Time& smpte )
+increment_minutes( Time& smpte, uint32_t subframes_per_frame )
 {
 	Wrap wrap = NONE;
   
@@ -358,14 +358,14 @@ increment_minutes( Time& smpte )
   
 	if (smpte.negative) {
 		// Wrap if on minute boundary
-		wrap = increment_seconds( smpte );
+		wrap = increment_seconds( smpte, subframes_per_frame );
 		// Go to lowest possible value in this minute
 		minutes_floor( smpte );
 	} else {
 		// Go to highest possible second
 		smpte.seconds = 59;
 		// Wrap minute by incrementing second
-		wrap = increment_seconds( smpte );
+		wrap = increment_seconds( smpte, subframes_per_frame );
 	}
   
 	return wrap;
@@ -389,7 +389,7 @@ minutes_floor( Time& smpte )
 
 /** Go to next whole hour (minute = 0, second = 0, frame = 0) */
 Wrap
-increment_hours( Time& smpte )
+increment_hours( Time& smpte, uint32_t subframes_per_frame )
 {
 	Wrap wrap = NONE;
   
@@ -398,12 +398,12 @@ increment_hours( Time& smpte )
   
 	if (smpte.negative) {
 		// Wrap if on hour boundary
-		wrap = increment_minutes( smpte );
+		wrap = increment_minutes( smpte, subframes_per_frame );
 		// Go to lowest possible value in this hour
 		hours_floor( smpte );
 	} else {
 		smpte.minutes = 59;
-		wrap = increment_minutes( smpte );
+		wrap = increment_minutes( smpte, subframes_per_frame );
 	}
   
 	return wrap;

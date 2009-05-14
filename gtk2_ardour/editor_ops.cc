@@ -5301,7 +5301,7 @@ Editor::toggle_selected_region_fades (int dir)
 void
 Editor::update_region_fade_visibility ()
 {
-	bool _fade_visibility = Config->get_show_region_fades ();
+	bool _fade_visibility = session->config.get_show_region_fades ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
@@ -5319,7 +5319,7 @@ Editor::update_region_fade_visibility ()
 void
 Editor::update_xfade_visibility ()
 {
-	_xfade_visibility = Config->get_xfades_visible ();
+	_xfade_visibility = session->config.get_xfades_visible ();
 	
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);

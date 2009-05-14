@@ -18,6 +18,7 @@
 */
 
 #include "pbd/error.h"
+#include "pbd/xml++.h"
 
 #include "ardour/playlist.h"
 #include "ardour/audioplaylist.h"

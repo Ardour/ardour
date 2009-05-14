@@ -220,13 +220,13 @@ BasicUI::toggle_all_rec_enables ()
 void
 BasicUI::toggle_punch_in ()
 {
-	Config->set_punch_in (!Config->get_punch_in());
+	session->config.set_punch_in (!session->config.get_punch_in());
 }
 
 void
 BasicUI::toggle_punch_out ()
 {
-	Config->set_punch_out (!Config->get_punch_out());
+	session->config.set_punch_out (!session->config.get_punch_out());
 }
 
 bool

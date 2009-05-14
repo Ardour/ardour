@@ -275,7 +275,7 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			   they monitor input always when stopped.and auto-input is engaged. 
 			*/
 			if ((Config->get_monitoring_model() == SoftwareMonitoring)
-					&& (Config->get_auto_input () || _diskstream->record_enabled())) {
+					&& (_session.config.get_auto_input () || _diskstream->record_enabled())) {
 				send_silence = false;
 			} else {
 				send_silence = true;

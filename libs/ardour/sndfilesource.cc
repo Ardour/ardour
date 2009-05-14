@@ -32,6 +32,8 @@
 #include "ardour/sndfile_helpers.h"
 #include "ardour/utils.h"
 #include "ardour/version.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 
@@ -517,7 +519,7 @@ SndFileSource::setup_broadcast_info (sframes_t when, struct tm& now, time_t tnow
 		return 0;
 	}
 
-	_broadcast_info->set_originator_ref ();
+	_broadcast_info->set_originator_ref (_session);
 	_broadcast_info->set_origination_time (&now);
 	
 	/* now update header position taking header offset into account */
@@ -773,13 +775,13 @@ SndFileSource::handle_header_position_change ()
 }
 
 void
-SndFileSource::setup_standard_crossfades (nframes_t rate)
+SndFileSource::setup_standard_crossfades (Session const & s, nframes_t rate)
 {
 	/* This static method is assumed to have been called by the Session
 	   before any DFS's are created.
 	*/
 
-	xfade_frames = (nframes_t) floor ((Config->get_destructive_xfade_msecs () / 1000.0) * rate);
+	xfade_frames = (nframes_t) floor ((s.config.get_destructive_xfade_msecs () / 1000.0) * rate);
 
 	delete [] out_coefficient;
 	delete [] in_coefficient;

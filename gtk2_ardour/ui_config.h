@@ -26,15 +26,14 @@
 
 #include "pbd/stateful.h" 
 #include "pbd/xml++.h"
+#include "ardour/configuration_variable.h"
 
 template<class T>
-class UIConfigVariable 
+class UIConfigVariable : public ARDOUR::ConfigVariableBase
 {
   public:
-	UIConfigVariable (std::string str) : _name (str) {}
-	UIConfigVariable (std::string str, T val) : _name (str), value(val) {}
-
-	std::string name() const { return _name; }
+	UIConfigVariable (std::string str) : ARDOUR::ConfigVariableBase (str) {}
+	UIConfigVariable (std::string str, T val) : ARDOUR::ConfigVariableBase (str), value (val) {}
 
 	bool set (T val) {
 		if (val == value) {
@@ -48,54 +47,25 @@ class UIConfigVariable
 		return value;
 	}
 
-	void add_to_node (XMLNode& node) {
+	std::string get_as_string () const {
 		std::stringstream ss;
 		ss << std::hex;
 		ss.fill('0');
 		ss.width(8);
 		ss << value;
-		XMLNode* child = new XMLNode ("Option");
-		child->add_property ("name", _name);
-		child->add_property ("value", ss.str());
-		node.add_child_nocopy (*child);
+		return ss.str ();
 	}
-	
-	bool set_from_node (const XMLNode& node) {
 
-		const XMLProperty* prop;
-		XMLNodeList nlist;
-		XMLNodeConstIterator niter;
-		XMLNode* child;
-			
-		nlist = node.children();
-			
-		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-				
-			child = *niter;
-				
-			if (child->name() == "Option") {
-				if ((prop = child->property ("name")) != 0) {
-					if (prop->value() == _name) {
-						if ((prop = child->property ("value")) != 0) {
-							std::stringstream ss;
-							ss << std::hex;
-							ss << prop->value();
-							ss >> value;
-
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
+	void set_from_string (std::string const & s) {
+		std::stringstream ss;
+		ss << std::hex;
+		ss << s;
+		ss >> value;
 	}
 
   protected:
 	T get_for_save() { return value; }
-	std::string _name;
 	T value;
-	
 };
 
 class UIConfiguration : public PBD::Stateful

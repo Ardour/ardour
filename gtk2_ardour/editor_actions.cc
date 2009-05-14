@@ -1036,7 +1036,7 @@ Editor::set_crossfade_model (CrossfadeModel model)
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		if (ract && ract->get_active()) {
-			Config->set_xfade_model (model);
+			session->config.set_xfade_model (model);
 		}
 	}
 }
@@ -1046,7 +1046,7 @@ Editor::update_crossfade_model ()
 {
 	RefPtr<Action> act;
 
-	switch (Config->get_xfade_model()) {
+	switch (session->config.get_xfade_model()) {
 	case FullCrossfade:
 		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
 		break;
@@ -1072,7 +1072,7 @@ Editor::update_smpte_mode ()
 	RefPtr<Action> act;
 	const char* action = 0;
 
-	switch (Config->get_smpte_format()) {
+	switch (session->config.get_smpte_format()) {
 	case smpte_23976:
 		action = X_("Smpte23976");
 		break;
@@ -1160,7 +1160,9 @@ Editor::update_layering_model ()
 {
 	RefPtr<Action> act;
 
-	switch (Config->get_layer_model()) {
+	assert (session);
+
+	switch (session->config.get_layer_model()) {
 	case LaterHigher:
 		act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
 		break;
@@ -1188,6 +1190,8 @@ Editor::set_layer_model (LayerModel model)
 	   active.
 	*/
 
+	assert (session);
+
 	RefPtr<Action> act;
 
 	switch (model) {
@@ -1204,8 +1208,8 @@ Editor::set_layer_model (LayerModel model)
 	
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && ract->get_active() && Config->get_layer_model() != model) {
-			Config->set_layer_model (model);
+		if (ract && ract->get_active() && session->config.get_layer_model() != model) {
+			session->config.set_layer_model (model);
 		}
 	}
 }
@@ -1668,7 +1672,7 @@ Editor::update_subframes_per_frame ()
 	RefPtr<Action> act;
 	const char* action = 0;
 
-	uint32_t sfpf = Config->get_subframes_per_frame();
+	uint32_t const sfpf = session->config.get_subframes_per_frame();
 
 	if (sfpf == 80) {
 		action = X_("Subframes80");
@@ -1716,7 +1720,7 @@ Editor::subframes_per_frame_chosen (uint32_t sfpf)
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		if (ract && ract->get_active()) {
-			Config->set_subframes_per_frame ((uint32_t) rint (sfpf));
+			session->config.set_subframes_per_frame ((uint32_t) rint (sfpf));
 		}
 		
 	} else  {
@@ -1727,43 +1731,43 @@ Editor::subframes_per_frame_chosen (uint32_t sfpf)
 void
 Editor::toggle_region_fades ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-region-fades", &Configuration::set_use_region_fades, &Configuration::get_use_region_fades);
+	ActionManager::toggle_config_state_foo ("Editor", "toggle-region-fades", mem_fun (session->config, &SessionConfiguration::set_use_region_fades), mem_fun (session->config, &SessionConfiguration::get_use_region_fades));
 }
 
 void
 Editor::toggle_region_fades_visible ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-region-fades-visible", &Configuration::set_show_region_fades, &Configuration::get_show_region_fades);
+	ActionManager::toggle_config_state_foo ("Editor", "toggle-region-fades-visible", mem_fun (session->config, &SessionConfiguration::set_show_region_fades), mem_fun (session->config, &SessionConfiguration::get_show_region_fades));
 }
 
 void
 Editor::toggle_auto_xfade ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-auto-xfades", &Configuration::set_auto_xfade, &Configuration::get_auto_xfade);
+	ActionManager::toggle_config_state_foo ("Editor", "toggle-auto-xfades", mem_fun (session->config, &SessionConfiguration::set_auto_xfade), mem_fun (session->config, &SessionConfiguration::get_auto_xfade));
 }
 
 void
 Editor::toggle_xfades_active ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-xfades-active", &Configuration::set_xfades_active, &Configuration::get_xfades_active);
+	ActionManager::toggle_config_state_foo ("Editor", "toggle-xfades-active", mem_fun (session->config, &SessionConfiguration::set_xfades_active), mem_fun (session->config, &SessionConfiguration::get_xfades_active));
 }
 
 void
 Editor::toggle_xfade_visibility ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-xfades-visible", &Configuration::set_xfades_visible, &Configuration::get_xfades_visible);
+	ActionManager::toggle_config_state_foo ("Editor", "toggle-xfades-visible", mem_fun (session->config, &SessionConfiguration::set_xfades_visible), mem_fun (session->config, &SessionConfiguration::get_xfades_visible));
 }
 
 void
 Editor::toggle_link_region_and_track_selection ()
 {
-	ActionManager::toggle_config_state ("Editor", "link-region-and-track-selection", &Configuration::set_link_region_and_track_selection, &Configuration::get_link_region_and_track_selection);
+	ActionManager::toggle_config_state ("Editor", "link-region-and-track-selection", &RCConfiguration::set_link_region_and_track_selection, &RCConfiguration::get_link_region_and_track_selection);
 }
 
 void
 Editor::toggle_automation_follows_regions ()
 {
-	ActionManager::toggle_config_state ("Editor", "automation-follows-regions", &Configuration::set_automation_follows_regions, &Configuration::get_automation_follows_regions);
+	ActionManager::toggle_config_state ("Editor", "automation-follows-regions", &RCConfiguration::set_automation_follows_regions, &RCConfiguration::get_automation_follows_regions);
 }
 
 /** A Configuration parameter has changed.
@@ -1790,17 +1794,17 @@ Editor::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("video-pullup")) {
 		update_video_pullup ();
 	} else if (PARAM_IS ("xfades-active")) {
-		ActionManager::map_some_state ("Editor", "toggle-xfades-active", &Configuration::get_xfades_active);
+		ActionManager::map_some_state ("Editor", "toggle-xfades-active", mem_fun (session->config, &SessionConfiguration::get_xfades_active));
 	} else if (PARAM_IS ("xfades-visible")) {
-		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_xfades_visible);
+		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", mem_fun (session->config, &SessionConfiguration::get_xfades_visible));
 		update_xfade_visibility ();
 	} else if (PARAM_IS ("show-region-fades")) {
-		ActionManager::map_some_state ("Editor", "toggle-region-fades-visible", &Configuration::get_show_region_fades);
+		ActionManager::map_some_state ("Editor", "toggle-region-fades-visible", mem_fun (session->config, &SessionConfiguration::get_show_region_fades));
 		update_region_fade_visibility ();
 	} else if (PARAM_IS ("use-region-fades")) {
-		ActionManager::map_some_state ("Editor", "toggle-region-fades", &Configuration::get_use_region_fades);
+		ActionManager::map_some_state ("Editor", "toggle-region-fades", mem_fun (session->config, &SessionConfiguration::get_use_region_fades));
 	} else if (PARAM_IS ("auto-xfade")) {
-		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_auto_xfade);
+		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", mem_fun (session->config, &SessionConfiguration::get_auto_xfade));
 	} else if (PARAM_IS ("xfade-model")) {
 		update_crossfade_model ();
 	} else if (PARAM_IS ("edit-mode")) {
@@ -1811,9 +1815,9 @@ Editor::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("show-track-meters")) {
 		toggle_meter_updating();
 	} else if (PARAM_IS ("link-region-and-track-selection")) {
-		ActionManager::map_some_state ("Editor", "link-region-and-track-selection", &Configuration::get_link_region_and_track_selection);
+		ActionManager::map_some_state ("Editor", "link-region-and-track-selection", &RCConfiguration::get_link_region_and_track_selection);
 	} else if (PARAM_IS ("automation-follows-regions")) {
-		ActionManager::map_some_state ("Editor", "automation-follows-regions", &Configuration::get_automation_follows_regions);
+		ActionManager::map_some_state ("Editor", "automation-follows-regions", &RCConfiguration::get_automation_follows_regions);
 	}
 
 #undef PARAM_IS

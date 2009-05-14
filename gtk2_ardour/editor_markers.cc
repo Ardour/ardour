@@ -1140,15 +1140,15 @@ Editor::update_punch_range_view (bool visibility)
 
 	Location* tpl;
 
-	if ((Config->get_punch_in() || Config->get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
+	if ((session->config.get_punch_in() || session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
 		guint track_canvas_width,track_canvas_height;
 		track_canvas->get_size(track_canvas_width,track_canvas_height);
-		if (Config->get_punch_in()) {
+		if (session->config.get_punch_in()) {
 			transport_punch_range_rect->property_x1() = frame_to_pixel (tpl->start());
-			transport_punch_range_rect->property_x2() = (Config->get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
+			transport_punch_range_rect->property_x2() = (session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
 		} else {
 			transport_punch_range_rect->property_x1() = 0;
-			transport_punch_range_rect->property_x2() = (Config->get_punch_out() ? frame_to_pixel (tpl->end()) : track_canvas_width);
+			transport_punch_range_rect->property_x2() = (session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : track_canvas_width);
 		}
 		
 		if (visibility) {

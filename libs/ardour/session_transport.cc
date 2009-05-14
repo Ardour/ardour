@@ -184,7 +184,7 @@ Session::realtime_stop (bool abort)
 		waiting_for_sync_offset = true;
 	}
 
-	transport_sub_state = ((Config->get_slave_source() == None && Config->get_auto_return()) ? AutoReturning : 0);
+	transport_sub_state = ((Config->get_slave_source() == None && config.get_auto_return()) ? AutoReturning : 0);
 }
 
 void
@@ -345,7 +345,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 			/* stopped recording before current end */
 
-			if (_end_location_is_free) {
+			if (config.get_end_marker_is_free()) {
 
 				/* first capture for this session, move end back to where we are */
 
@@ -366,7 +366,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
                         add_command (new MementoCommand<Location>(*loc, &before, &after));
 		}
 
-		_end_location_is_free = false;
+		config.set_end_marker_is_free (false);
 		_have_captured = true;
 	}
 
@@ -391,7 +391,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	bool const auto_return_enabled =
-		(Config->get_slave_source() == None && Config->get_auto_return());
+		(Config->get_slave_source() == None && config.get_auto_return());
 	
 	if (auto_return_enabled ||
 	    (post_transport_work & PostTransportLocate) ||
@@ -705,7 +705,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		}
 	}
 
-	if (transport_rolling() && (!auto_play_legal || !Config->get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
+	if (transport_rolling() && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false);
 	}
 
@@ -744,7 +744,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (!Config->get_auto_input());
+					(*i)->monitor_input (!config.get_auto_input());
 				}
 			}
 		}
@@ -851,7 +851,7 @@ Session::set_transport_speed (double speed, bool abort)
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if (Config->get_auto_input() && (*i)->record_enabled ()) {
+				if (config.get_auto_input() && (*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (false);
 				}
@@ -969,7 +969,7 @@ Session::start_transport ()
 
 	switch (record_status()) {
 	case Enabled:
-		if (!Config->get_punch_in()) {
+		if (!config.get_punch_in()) {
 			enable_record ();
 		}
 		break;
@@ -1022,7 +1022,7 @@ Session::post_transport ()
 
 	if (post_transport_work & PostTransportLocate) {
 
-		if (((Config->get_slave_source() == None && (auto_play_legal && Config->get_auto_play())) && !_exporting) || (post_transport_work & PostTransportRoll)) {
+		if (((Config->get_slave_source() == None && (auto_play_legal && config.get_auto_play())) && !_exporting) || (post_transport_work & PostTransportRoll)) {
 			start_transport ();
 
 		} else {

@@ -56,7 +56,7 @@
 #include "ardour/ardour.h"
 #include "ardour/analyser.h"
 #include "ardour/audio_library.h"
-#include "ardour/configuration.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/profile.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/audiosource.h"
@@ -76,7 +76,7 @@
 
 #include "i18n.h"
 
-ARDOUR::Configuration* ARDOUR::Config = 0;
+ARDOUR::RCConfiguration* ARDOUR::Config = 0;
 ARDOUR::RuntimeProfile* ARDOUR::Profile = 0;
 ARDOUR::AudioLibrary* ARDOUR::Library = 0;
 
@@ -303,7 +303,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	BootMessage (_("Loading configuration"));
 
-	Config = new Configuration;
+	Config = new RCConfiguration;
 
 	if (Config->load_state ()) {
 		return -1;

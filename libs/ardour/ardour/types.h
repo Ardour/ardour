@@ -336,6 +336,7 @@ namespace ARDOUR {
 	};
 
 	enum AutoConnectOption {
+		ManualConnect = 0x0,
 		AutoConnectPhysical = 0x1,
 		AutoConnectMaster = 0x2
 	};

@@ -508,7 +508,7 @@ Session::follow_slave (nframes_t nframes)
 		slave_speed = 0.0f;
 	}
 
-	if (_slave->is_always_synced() || Config->get_timecode_source_is_synced()) {
+	if (_slave->is_always_synced() || config.get_timecode_source_is_synced()) {
 
 		/* if the TC source is synced, then we assume that its 
 		   speed is binary: 0.0 or 1.0
@@ -530,7 +530,7 @@ Session::follow_slave (nframes_t nframes)
 	
 	track_slave_state(slave_speed, slave_transport_frame, this_delta, starting);
 
-	if (slave_state == Running && !_slave->is_always_synced() && !Config->get_timecode_source_is_synced()) {
+	if (slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
 
 		if (_transport_speed != 0.0f) {
 			

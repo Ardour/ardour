@@ -29,6 +29,8 @@ gtk2_ardour/ergonomic-us.bindings
 gtk2_ardour/mnemonic-us.bindings
 gtk2_ardour/version.cc
 gtk2_ardour/version.h
+gtk2_ardour/test/*.cpp
+gtk2_ardour/test/test_ui_config
 libs/ardour/ardour/version.h
 libs/ardour/svn_revision.cc
 libs/ardour/version.cc

@@ -30,29 +30,23 @@ namespace ARDOUR {
 
 class ConfigVariableBase {
   public:
-	enum Owner {
-		Default = 0x1,
-		System = 0x2,
-		Config = 0x4,
-		Session = 0x8,
-		Interface = 0x10
-	};
 
-	ConfigVariableBase (std::string str) : _name (str), _owner (Default) {}
+	ConfigVariableBase (std::string str) : _name (str) {}
 	virtual ~ConfigVariableBase() {}
 
-	std::string name() const { return _name; }
-	Owner owner() const { return _owner; }
-
-	virtual void add_to_node (XMLNode& node) = 0;
-	virtual bool set_from_node (const XMLNode& node, Owner owner) = 0;
+	std::string name () const { return _name; }
+	void add_to_node (XMLNode&);
+	bool set_from_node (XMLNode const &);
+	
+	virtual std::string get_as_string () const = 0;
+	virtual void set_from_string (std::string const &) = 0;
 
 	void show_stored_value (const std::string&);
-	static void set_show_stored_values (bool yn);
+	
+	static void set_show_stored_values (bool);
 
   protected:
 	std::string _name;
-	Owner _owner;
 	static bool show_stores;
 
 	void notify ();
@@ -63,94 +57,34 @@ template<class T>
 class ConfigVariable : public ConfigVariableBase
 {
   public:
+
 	ConfigVariable (std::string str) : ConfigVariableBase (str) {}
 	ConfigVariable (std::string str, T val) : ConfigVariableBase (str), value (val) {}
-
-	virtual bool set (T val, Owner owner = ARDOUR::ConfigVariableBase::Config) {
-		if (val == value) {
-			miss ();
-			return false;
-		}
-		value = val;
-		_owner = (ConfigVariableBase::Owner)(_owner |owner);
-		notify ();
-		return true;
-	}
 
 	T get() const {
 		return value;
 	}
 
-	void add_to_node (XMLNode& node) {
+	std::string get_as_string () const {
 		std::stringstream ss;
 		ss << value;
-		show_stored_value (ss.str());
-		XMLNode* child = new XMLNode ("Option");
-		child->add_property ("name", _name);
-		child->add_property ("value", ss.str());
-		node.add_child_nocopy (*child);
+		return ss.str ();
 	}
-	
-	bool set_from_node (const XMLNode& node, Owner owner) {
 
-		if (node.name() == "Config") {
-
-			/* ardour.rc */
-
-			const XMLProperty* prop;
-			XMLNodeList nlist;
-			XMLNodeConstIterator niter;
-			XMLNode* child;
-			
-			nlist = node.children();
-			
-			for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-				
-				child = *niter;
-				
-				if (child->name() == "Option") {
-					if ((prop = child->property ("name")) != 0) {
-						if (prop->value() == _name) {
-							if ((prop = child->property ("value")) != 0) {
-								std::stringstream ss;
-								ss << prop->value();
-								ss >> value;
-								_owner = (ConfigVariableBase::Owner)(_owner |owner);
-								return true;
-							}
-						}
-					}
-				}
-			}
-			
-		} else if (node.name() == "Options") {
-
-			/* session file */
-
-			XMLNodeList olist;
-			XMLNodeConstIterator oiter;
-			XMLNode* option;
-			const XMLProperty* opt_prop;
-			
-			olist = node.children();
-			
-			for (oiter = olist.begin(); oiter != olist.end(); ++oiter) {
-				
-				option = *oiter;
-				
-				if (option->name() == _name) {
-					if ((opt_prop = option->property ("val")) != 0) {
-						std::stringstream ss;
-						ss << opt_prop->value();
-						ss >> value;
-						_owner = (ConfigVariableBase::Owner)(_owner |owner);
-						return true;
-					}
-				}
-			}
+	virtual bool set (T val) {
+		if (val == value) {
+			miss ();
+			return false;
 		}
+		value = val;
+		notify ();
+		return true;
+	}
 
-		return false;
+	void set_from_string (std::string const & s) {
+		std::stringstream ss;
+		ss << s;
+		ss >> value;
 	}
 
   protected:
@@ -165,10 +99,10 @@ class ConfigVariableWithMutation : public ConfigVariable<T>
 	ConfigVariableWithMutation (std::string name, T val, T (*m)(T)) 
 		: ConfigVariable<T> (name, val), mutator (m) {}
 
-	bool set (T val, ConfigVariableBase::Owner owner) {
+	bool set (T val) {
 		if (unmutated_value != val) {
 			unmutated_value = val;
-			return ConfigVariable<T>::set (mutator (val), owner);
+			return ConfigVariable<T>::set (mutator (val));
 		} 
 		return false;
 	}

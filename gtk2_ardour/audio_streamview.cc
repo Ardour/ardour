@@ -356,7 +356,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 	cv->set_valid (true);
 	crossfade->Invalidated.connect (mem_fun (*this, &AudioStreamView::remove_crossfade));
 	crossfade_views.push_back (cv);
-	if (!Config->get_xfades_visible() || !crossfades_visible || _layer_display == Stacked) {
+	if (!_trackview.session().config.get_xfades_visible() || !crossfades_visible || _layer_display == Stacked) {
 		cv->hide ();
 	}
 }

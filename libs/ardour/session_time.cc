@@ -52,7 +52,7 @@ Session::bbt_time (nframes_t when, BBT_Time& bbt)
 float
 Session::smpte_frames_per_second() const
 {
-	switch (Config->get_smpte_format()) {
+	switch (config.get_smpte_format()) {
 		case smpte_23976: 
 			return 23.976;
 
@@ -101,7 +101,7 @@ Session::smpte_frames_per_second() const
 bool
 Session::smpte_drop_frames() const
 {
-	switch (Config->get_smpte_format()) {
+	switch (config.get_smpte_format()) {
 		case smpte_23976: 
 			return false;
 
@@ -185,7 +185,7 @@ int
 Session::set_smpte_format (SmpteFormat format)
 {
 	/* this will trigger any other changes needed */
-	Config->set_smpte_format (format);
+	config.set_smpte_format (format);
 	return 0;
 }
 
@@ -272,7 +272,7 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 	}
   
 	if (use_subframes) {
-		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / Config->get_subframes_per_frame());
+		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / config.get_subframes_per_frame());
 	}
   
 	if (use_offset) {
@@ -334,10 +334,10 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 	// Calculate exact number of (exceeding) smpte frames and fractional frames
 	smpte_frames_left_exact = (double) offset_sample / _frames_per_smpte_frame;
 	smpte_frames_fraction = smpte_frames_left_exact - floor( smpte_frames_left_exact );
-	smpte.subframes = (long) rint(smpte_frames_fraction * Config->get_subframes_per_frame());
+	smpte.subframes = (long) rint(smpte_frames_fraction * config.get_subframes_per_frame());
   
 	// XXX Not sure if this is necessary anymore...
-	if (smpte.subframes == Config->get_subframes_per_frame()) {
+	if (smpte.subframes == config.get_subframes_per_frame()) {
 		// This can happen with 24 fps (and 29.97 fps ?)
 		smpte_frames_left_exact = ceil( smpte_frames_left_exact );
 		smpte.subframes = 0;

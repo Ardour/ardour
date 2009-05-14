@@ -34,6 +34,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/rc_configuration.h"
 
 #include "actions.h"
 #include "i18n.h"
@@ -359,7 +360,7 @@ ActionManager::uncheck_toggleaction (const char * name)
  * @param Method to get the state of the Configuration setting.
  */
 void
-ActionManager::toggle_config_state (const char* group, const char* action, bool (Configuration::*set)(bool), bool (Configuration::*get)(void) const)
+ActionManager::toggle_config_state (const char* group, const char* action, bool (RCConfiguration::*set)(bool), bool (RCConfiguration::*get)(void) const)
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
 	if (act) {
@@ -376,13 +377,16 @@ ActionManager::toggle_config_state (const char* group, const char* action, bool 
 }
 
 void
-ActionManager::toggle_config_state (const char* group, const char* action, sigc::slot<void> theSlot)
+ActionManager::toggle_config_state_foo (const char* group, const char* action, sigc::slot<bool, bool> set, sigc::slot<bool> get)
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		if (tact->get_active()) {
-			theSlot ();
+			bool const x = get ();
+			if (x != tact->get_active ()) {
+				set (x);
+			}
 		}
 	}
 }
@@ -394,7 +398,7 @@ ActionManager::toggle_config_state (const char* group, const char* action, sigc:
  * @param get Method to obtain the state that the ToggleAction should have.
  */
 void
-ActionManager::map_some_state (const char* group, const char* action, bool (Configuration::*get)() const)
+ActionManager::map_some_state (const char* group, const char* action, bool (RCConfiguration::*get)() const)
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
 	if (act) {
@@ -412,5 +416,23 @@ ActionManager::map_some_state (const char* group, const char* action, bool (Conf
 		}
 	} else {
 		cerr << group << ':' << action << " not an action\n";
+	}
+}
+
+void
+ActionManager::map_some_state (const char* group, const char* action, sigc::slot<bool> get)
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact) {
+			
+			bool const x = get ();
+
+			if (tact->get_active() != x) {
+				tact->set_active (x);
+			}
+		}
 	}
 }

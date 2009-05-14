@@ -39,7 +39,6 @@
 #include "pbd/statefuldestructible.h" 
 
 #include "ardour/ardour.h"
-#include "ardour/configuration.h"
 #include "ardour/location.h"
 #include "ardour/session_object.h"
 #include "ardour/types.h"

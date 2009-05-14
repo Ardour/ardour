@@ -27,7 +27,7 @@
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/accelkey.h>
 
-#include "ardour/configuration.h"
+#include "ardour/rc_configuration.h"
 
 namespace Gtk {
 	class UIManager;
@@ -59,9 +59,10 @@ class ActionManager
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_opposite_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > edit_point_in_region_sensitive_actions;
 
-	static void map_some_state (const char* group, const char* action, bool (ARDOUR::Configuration::*get)() const);
-	static void toggle_config_state (const char* group, const char* action, bool (ARDOUR::Configuration::*set)(bool), bool (ARDOUR::Configuration::*get)(void) const);
-	static void toggle_config_state (const char* group, const char* action, sigc::slot<void> theSlot);
+	static void map_some_state (const char* group, const char* action, bool (ARDOUR::RCConfiguration::*get)() const);
+	static void map_some_state (const char* group, const char* action, sigc::slot<bool>);
+	static void toggle_config_state (const char* group, const char* action, bool (ARDOUR::RCConfiguration::*set)(bool), bool (ARDOUR::RCConfiguration::*get)(void) const);
+	static void toggle_config_state_foo (const char* group, const char* action, sigc::slot<bool, bool>, sigc::slot<bool>);
 
 	static void set_sensitive (std::vector<Glib::RefPtr<Gtk::Action> >& actions, bool);
 

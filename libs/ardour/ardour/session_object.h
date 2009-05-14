@@ -27,7 +27,6 @@ namespace ARDOUR {
 
 class Session;
 
-
 /** An object associated with a Session.
  *
  * This is a few common things factored out of IO which weren't IO specific

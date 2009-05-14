@@ -262,7 +262,8 @@ SoundFileBox::setup_labels (const ustring& filename)
 		samplerate.set_name ("NewSessionSR2Label");
 	}
 
-	double src_coef = (double) _session->nominal_frame_rate() / sf_info.samplerate;
+	nframes_t const nfr = _session ? _session->nominal_frame_rate() : 25;
+	double src_coef = (double) nfr / sf_info.samplerate;
 
 	length_clock.set (sf_info.length * src_coef + 0.5, true);
 	timecode_clock.set (sf_info.timecode * src_coef + 0.5, true);

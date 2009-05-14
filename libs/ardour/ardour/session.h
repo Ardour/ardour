@@ -51,7 +51,8 @@
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
-#include "ardour/configuration.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/session_configuration.h"
 #include "ardour/location.h"
 #include "ardour/smpte.h"
 
@@ -388,7 +389,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void goto_end ()   { request_locate (end_location->start(), false);}
 	void goto_start () { request_locate (start_location->start(), false); }
 	void set_session_start (nframes_t start) { start_location->set_start(start); }
-	void set_session_end (nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
+	void set_session_end (nframes_t end) { end_location->set_start(end); config.set_end_marker_is_free (false); }
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed);
@@ -967,6 +968,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	SessionMetadata & metadata () { return *_metadata; }
 
+	SessionConfiguration config;
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
@@ -1038,7 +1041,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool                    _have_captured;
 	float                   _meter_hold;
 	float                   _meter_falloff;
-	bool                    _end_location_is_free;
 
 	void set_worst_io_latencies ();
 	void set_worst_io_latencies_x (IOChange asifwecare, void *ignored) {
@@ -1111,7 +1113,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		if (actively_recording()) {
 			return true;
 		} else {
-			if (Config->get_auto_input()) {
+			if (config.get_auto_input()) {
 				return false;
 			} else {
 				return true;
@@ -1173,9 +1175,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void     auto_save();
 	int      load_options (const XMLNode&);
-	XMLNode& get_options () const;
 	int      load_state (std::string snapshot_name);
-	bool     save_config_options_predicate (ConfigVariableBase::Owner owner) const;
 
 	nframes_t _last_roll_location;
 	nframes_t _last_record_location;

@@ -46,55 +46,55 @@ using namespace sigc;
 void
 ARDOUR_UI::toggle_time_master ()
 {
-	ActionManager::toggle_config_state ("Transport", "ToggleTimeMaster", &Configuration::set_jack_time_master, &Configuration::get_jack_time_master);
+	ActionManager::toggle_config_state ("Transport", "ToggleTimeMaster", &RCConfiguration::set_jack_time_master, &RCConfiguration::get_jack_time_master);
 }
 
 void
 ARDOUR_UI::toggle_send_mtc ()
 {
-	ActionManager::toggle_config_state ("options", "SendMTC", &Configuration::set_send_mtc, &Configuration::get_send_mtc);
+	ActionManager::toggle_config_state ("options", "SendMTC", &RCConfiguration::set_send_mtc, &RCConfiguration::get_send_mtc);
 }
 
 void
 ARDOUR_UI::toggle_send_mmc ()
 {
-	ActionManager::toggle_config_state ("options", "SendMMC", &Configuration::set_send_mmc, &Configuration::get_send_mmc);
+	ActionManager::toggle_config_state ("options", "SendMMC", &RCConfiguration::set_send_mmc, &RCConfiguration::get_send_mmc);
 }
 
 void
 ARDOUR_UI::toggle_send_midi_clock ()
 {
-	ActionManager::toggle_config_state ("options", "SendMidiClock", &Configuration::set_send_midi_clock, &Configuration::get_send_midi_clock);
+	ActionManager::toggle_config_state ("options", "SendMidiClock", &RCConfiguration::set_send_midi_clock, &RCConfiguration::get_send_midi_clock);
 }
 
 void
 ARDOUR_UI::toggle_use_mmc ()
 {
-	ActionManager::toggle_config_state ("options", "UseMMC", &Configuration::set_mmc_control, &Configuration::get_mmc_control);
+	ActionManager::toggle_config_state ("options", "UseMMC", &RCConfiguration::set_mmc_control, &RCConfiguration::get_mmc_control);
 }
 
 void
 ARDOUR_UI::toggle_use_osc ()
 {
-	ActionManager::toggle_config_state ("options", "UseOSC", &Configuration::set_use_osc, &Configuration::get_use_osc);
+	ActionManager::toggle_config_state ("options", "UseOSC", &RCConfiguration::set_use_osc, &RCConfiguration::get_use_osc);
 }
 
 void
 ARDOUR_UI::toggle_send_midi_feedback ()
 {
-	ActionManager::toggle_config_state ("options", "SendMIDIfeedback", &Configuration::set_midi_feedback, &Configuration::get_midi_feedback);
+	ActionManager::toggle_config_state ("options", "SendMIDIfeedback", &RCConfiguration::set_midi_feedback, &RCConfiguration::get_midi_feedback);
 }
 
 void
 ARDOUR_UI::toggle_denormal_protection ()
 {
-	ActionManager::toggle_config_state ("options", "DenormalProtection", &Configuration::set_denormal_protection, &Configuration::get_denormal_protection);
+	ActionManager::toggle_config_state ("options", "DenormalProtection", &RCConfiguration::set_denormal_protection, &RCConfiguration::get_denormal_protection);
 }
 
 void
 ARDOUR_UI::toggle_only_copy_imported_files ()
 {
-	ActionManager::toggle_config_state ("options", "OnlyCopyImportedFiles", &Configuration::set_only_copy_imported_files, &Configuration::get_only_copy_imported_files);
+	ActionManager::toggle_config_state ("options", "OnlyCopyImportedFiles", &RCConfiguration::set_only_copy_imported_files, &RCConfiguration::get_only_copy_imported_files);
 }
 
 
@@ -134,8 +134,8 @@ ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 
 	if (act) {
 		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && ract->get_active() && Config->get_native_file_header_format() != hf) {
-			Config->set_native_file_header_format (hf);
+		if (ract && ract->get_active() && session->config.get_native_file_header_format() != hf) {
+			session->config.set_native_file_header_format (hf);
 		}
 	}
 }
@@ -164,8 +164,8 @@ ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
 
 	if (act) {
 		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && ract->get_active() && Config->get_native_file_data_format() != sf) {
-			Config->set_native_file_data_format (sf);
+		if (ract && ract->get_active() && session->config.get_native_file_data_format() != sf) {
+			session->config.set_native_file_data_format (sf);
 		}
 	}
 }
@@ -360,25 +360,25 @@ ARDOUR_UI::set_denormal_model (DenormalModel model)
 void
 ARDOUR_UI::toggle_auto_input ()
 {
-	ActionManager::toggle_config_state ("Transport", "ToggleAutoInput", &Configuration::set_auto_input, &Configuration::get_auto_input);
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoInput", mem_fun (session->config, &SessionConfiguration::set_auto_input), mem_fun (session->config, &SessionConfiguration::get_auto_input));
 }
 
 void
 ARDOUR_UI::toggle_auto_play ()
 {
-	ActionManager::toggle_config_state ("Transport", "ToggleAutoPlay", &Configuration::set_auto_play, &Configuration::get_auto_play);
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoPlay", mem_fun (session->config, &SessionConfiguration::set_auto_play), mem_fun (session->config, &SessionConfiguration::get_auto_play));
 }
 
 void
 ARDOUR_UI::toggle_auto_return ()
 {
-	ActionManager::toggle_config_state ("Transport", "ToggleAutoReturn", &Configuration::set_auto_return, &Configuration::get_auto_return);
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoReturn", mem_fun (session->config, &SessionConfiguration::set_auto_return), mem_fun (session->config, &SessionConfiguration::get_auto_return));
 }
 
 void
 ARDOUR_UI::toggle_click ()
 {
-	ActionManager::toggle_config_state ("Transport", "ToggleClick", &Configuration::set_clicking, &Configuration::get_clicking);
+	ActionManager::toggle_config_state ("Transport", "ToggleClick", &RCConfiguration::set_clicking, &RCConfiguration::get_clicking);
 }
 
 void
@@ -446,13 +446,13 @@ ARDOUR_UI::toggle_punch ()
 void
 ARDOUR_UI::toggle_punch_in ()
 {
-	ActionManager::toggle_config_state ("Transport", "TogglePunchIn", &Configuration::set_punch_in, &Configuration::get_punch_in);
+	ActionManager::toggle_config_state_foo ("Transport", "TogglePunchIn", mem_fun (session->config, &SessionConfiguration::set_punch_in), mem_fun (session->config, &SessionConfiguration::get_punch_in));
 }
 
 void
 ARDOUR_UI::toggle_punch_out ()
 {
-	ActionManager::toggle_config_state ("Transport", "TogglePunchOut", &Configuration::set_punch_out, &Configuration::get_punch_out);
+	ActionManager::toggle_config_state_foo ("Transport", "TogglePunchOut", mem_fun (session->config, &SessionConfiguration::set_punch_out), mem_fun (session->config, &SessionConfiguration::get_punch_out));
 }
 
 void
@@ -482,139 +482,139 @@ ARDOUR_UI::toggle_editing_space()
 void
 ARDOUR_UI::toggle_new_plugins_active ()
 {
-	ActionManager::toggle_config_state ("options", "NewPluginsActive", &Configuration::set_new_plugins_active, &Configuration::get_new_plugins_active);
+	ActionManager::toggle_config_state ("options", "NewPluginsActive", &RCConfiguration::set_new_plugins_active, &RCConfiguration::get_new_plugins_active);
 }
 
 void
 ARDOUR_UI::toggle_StopPluginsWithTransport()
 {
-	ActionManager::toggle_config_state ("options", "StopPluginsWithTransport", &Configuration::set_plugins_stop_with_transport, &Configuration::get_plugins_stop_with_transport);
+	ActionManager::toggle_config_state ("options", "StopPluginsWithTransport", &RCConfiguration::set_plugins_stop_with_transport, &RCConfiguration::get_plugins_stop_with_transport);
 }
 
 void
 ARDOUR_UI::toggle_LatchedRecordEnable()
 {
-	ActionManager::toggle_config_state ("options", "LatchedRecordEnable", &Configuration::set_latched_record_enable, &Configuration::get_latched_record_enable);
+	ActionManager::toggle_config_state ("options", "LatchedRecordEnable", &RCConfiguration::set_latched_record_enable, &RCConfiguration::get_latched_record_enable);
 }
 
 void
 ARDOUR_UI::toggle_RegionEquivalentsOverlap()
 {
-	ActionManager::toggle_config_state ("options", "RegionEquivalentsOverlap", &Configuration::set_use_overlap_equivalency, &Configuration::get_use_overlap_equivalency);
+	ActionManager::toggle_config_state ("options", "RegionEquivalentsOverlap", &RCConfiguration::set_use_overlap_equivalency, &RCConfiguration::get_use_overlap_equivalency);
 }
 
 void
 ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording()
 {
-	ActionManager::toggle_config_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::set_do_not_record_plugins, &Configuration::get_do_not_record_plugins);
+	ActionManager::toggle_config_state ("options", "DoNotRunPluginsWhileRecording", &RCConfiguration::set_do_not_record_plugins, &RCConfiguration::get_do_not_record_plugins);
 }
 
 void
 ARDOUR_UI::toggle_VerifyRemoveLastCapture()
 {
-	ActionManager::toggle_config_state ("options", "VerifyRemoveLastCapture", &Configuration::set_verify_remove_last_capture, &Configuration::get_verify_remove_last_capture);
+	ActionManager::toggle_config_state ("options", "VerifyRemoveLastCapture", &RCConfiguration::set_verify_remove_last_capture, &RCConfiguration::get_verify_remove_last_capture);
 }
 
 void
 ARDOUR_UI::toggle_PeriodicSafetyBackups()
 {
-	ActionManager::toggle_config_state ("options", "PeriodicSafetyBackups", &Configuration::set_periodic_safety_backups, &Configuration::get_periodic_safety_backups);
+	ActionManager::toggle_config_state ("options", "PeriodicSafetyBackups", &RCConfiguration::set_periodic_safety_backups, &RCConfiguration::get_periodic_safety_backups);
 }
 
 void
 ARDOUR_UI::toggle_StopRecordingOnXrun()
 {
-	ActionManager::toggle_config_state ("options", "StopRecordingOnXrun", &Configuration::set_stop_recording_on_xrun, &Configuration::get_stop_recording_on_xrun);
+	ActionManager::toggle_config_state ("options", "StopRecordingOnXrun", &RCConfiguration::set_stop_recording_on_xrun, &RCConfiguration::get_stop_recording_on_xrun);
 }
 
 void
 ARDOUR_UI::toggle_CreateXrunMarker()
 {
-	ActionManager::toggle_config_state ("options", "CreateXrunMarker", &Configuration::set_create_xrun_marker, &Configuration::get_create_xrun_marker);
+	ActionManager::toggle_config_state ("options", "CreateXrunMarker", &RCConfiguration::set_create_xrun_marker, &RCConfiguration::get_create_xrun_marker);
 }
 
 void
 ARDOUR_UI::toggle_sync_order_keys ()
 {
-	ActionManager::toggle_config_state ("options", "SyncEditorAndMixerTrackOrder", &Configuration::set_sync_all_route_ordering, &Configuration::get_sync_all_route_ordering);
+	ActionManager::toggle_config_state ("options", "SyncEditorAndMixerTrackOrder", &RCConfiguration::set_sync_all_route_ordering, &RCConfiguration::get_sync_all_route_ordering);
 }
 
 void
 ARDOUR_UI::toggle_StopTransportAtEndOfSession()
 {
-	ActionManager::toggle_config_state ("options", "StopTransportAtEndOfSession", &Configuration::set_stop_at_session_end, &Configuration::get_stop_at_session_end);
+	ActionManager::toggle_config_state ("options", "StopTransportAtEndOfSession", &RCConfiguration::set_stop_at_session_end, &RCConfiguration::get_stop_at_session_end);
 }
 
 void
 ARDOUR_UI::toggle_GainReduceFastTransport()
 {
-	ActionManager::toggle_config_state ("options", "GainReduceFastTransport", &Configuration::set_quieten_at_speed, &Configuration::get_quieten_at_speed);
+	ActionManager::toggle_config_state ("options", "GainReduceFastTransport", &RCConfiguration::set_quieten_at_speed, &RCConfiguration::get_quieten_at_speed);
 }
 
 void
 ARDOUR_UI::toggle_LatchedSolo()
 {
-	ActionManager::toggle_config_state ("options", "LatchedSolo", &Configuration::set_solo_latched, &Configuration::get_solo_latched);
+	ActionManager::toggle_config_state ("options", "LatchedSolo", &RCConfiguration::set_solo_latched, &RCConfiguration::get_solo_latched);
 }
 
 void
 ARDOUR_UI::toggle_ShowSoloMutes()
 {
-	ActionManager::toggle_config_state ("options", "ShowSoloMutes", &Configuration::set_show_solo_mutes, &Configuration::get_show_solo_mutes);
+	ActionManager::toggle_config_state ("options", "ShowSoloMutes", &RCConfiguration::set_show_solo_mutes, &RCConfiguration::get_show_solo_mutes);
 }
 
 void
 ARDOUR_UI::toggle_SoloMuteOverride()
 {
-	ActionManager::toggle_config_state ("options", "SoloMuteOverride", &Configuration::set_solo_mute_override, &Configuration::get_solo_mute_override);
+	ActionManager::toggle_config_state ("options", "SoloMuteOverride", &RCConfiguration::set_solo_mute_override, &RCConfiguration::get_solo_mute_override);
 }
 
 void
 ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor()
 {
-	ActionManager::toggle_config_state ("options", "PrimaryClockDeltaEditCursor", &Configuration::set_primary_clock_delta_edit_cursor, &Configuration::get_primary_clock_delta_edit_cursor);
+	ActionManager::toggle_config_state ("options", "PrimaryClockDeltaEditCursor", &RCConfiguration::set_primary_clock_delta_edit_cursor, &RCConfiguration::get_primary_clock_delta_edit_cursor);
 }
 
 void
 ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor()
 {
-	ActionManager::toggle_config_state ("options", "SecondaryClockDeltaEditCursor", &Configuration::set_secondary_clock_delta_edit_cursor, &Configuration::get_secondary_clock_delta_edit_cursor);
+	ActionManager::toggle_config_state ("options", "SecondaryClockDeltaEditCursor", &RCConfiguration::set_secondary_clock_delta_edit_cursor, &RCConfiguration::get_secondary_clock_delta_edit_cursor);
 }
 
 void
 ARDOUR_UI::toggle_ShowTrackMeters()
 {
-	ActionManager::toggle_config_state ("options", "ShowTrackMeters", &Configuration::set_show_track_meters, &Configuration::get_show_track_meters);
+	ActionManager::toggle_config_state ("options", "ShowTrackMeters", &RCConfiguration::set_show_track_meters, &RCConfiguration::get_show_track_meters);
 }
 
 void
 ARDOUR_UI::toggle_TapeMachineMode ()
 {
-	ActionManager::toggle_config_state ("options", "ToggleTapeMachineMode", &Configuration::set_tape_machine_mode, &Configuration::get_tape_machine_mode);
+	ActionManager::toggle_config_state ("options", "ToggleTapeMachineMode", &RCConfiguration::set_tape_machine_mode, &RCConfiguration::get_tape_machine_mode);
 }
 
 void
 ARDOUR_UI::toggle_use_narrow_ms()
 {
-	ActionManager::toggle_config_state ("options", "DefaultNarrowMS", &Configuration::set_default_narrow_ms, &Configuration::get_default_narrow_ms);
+	ActionManager::toggle_config_state ("options", "DefaultNarrowMS", &RCConfiguration::set_default_narrow_ms, &RCConfiguration::get_default_narrow_ms);
 }
 
 void
 ARDOUR_UI::toggle_NameNewMarkers()
 {
-	ActionManager::toggle_config_state ("options", "NameNewMarkers", &Configuration::set_name_new_markers, &Configuration::get_name_new_markers);
+	ActionManager::toggle_config_state ("options", "NameNewMarkers", &RCConfiguration::set_name_new_markers, &RCConfiguration::get_name_new_markers);
 }
 
 void
 ARDOUR_UI::toggle_rubberbanding_snaps_to_grid ()
 {
-	ActionManager::toggle_config_state ("options", "RubberbandingSnapsToGrid", &Configuration::set_rubberbanding_snaps_to_grid, &Configuration::get_rubberbanding_snaps_to_grid);
+	ActionManager::toggle_config_state ("options", "RubberbandingSnapsToGrid", &RCConfiguration::set_rubberbanding_snaps_to_grid, &RCConfiguration::get_rubberbanding_snaps_to_grid);
 }
 
 void
 ARDOUR_UI::toggle_auto_analyse_audio ()
 {
-	ActionManager::toggle_config_state ("options", "AutoAnalyseAudio", &Configuration::set_auto_analyse_audio, &Configuration::get_auto_analyse_audio);
+	ActionManager::toggle_config_state ("options", "AutoAnalyseAudio", &RCConfiguration::set_auto_analyse_audio, &RCConfiguration::get_auto_analyse_audio);
 }
 
 void
@@ -784,7 +784,7 @@ ARDOUR_UI::map_file_header_format ()
 {
 	const char* action = 0;
 
-	switch (Config->get_native_file_header_format()) {
+	switch (session->config.get_native_file_header_format()) {
 	case BWF:
 		action = X_("FileHeaderFormatBWF");
 		break;
@@ -811,7 +811,7 @@ ARDOUR_UI::map_file_header_format ()
 
 	default:
 		fatal << string_compose (_("programming error: unknown file header format passed to ARDOUR_UI::map_file_data_format: %1"),
-					 Config->get_native_file_header_format()) << endmsg;
+					 session->config.get_native_file_header_format()) << endmsg;
 		/*NOTREACHED*/
 	}
 
@@ -832,7 +832,7 @@ ARDOUR_UI::map_file_data_format ()
 {
 	const char* action = 0;
 
-	switch (Config->get_native_file_data_format()) {
+	switch (session->config.get_native_file_data_format()) {
 	case FormatFloat:
 		action = X_("FileDataFormatFloat");
 		break;
@@ -847,7 +847,7 @@ ARDOUR_UI::map_file_data_format ()
 
 	default:
 		fatal << string_compose (_("programming error: unknown file data format passed to ARDOUR_UI::map_file_data_format: %1"),
-					 Config->get_native_file_data_format()) << endmsg;
+					 session->config.get_native_file_data_format()) << endmsg;
 		/*NOTREACHED*/
 	}
 
@@ -1100,11 +1100,11 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("send-mtc")) {
 
-		ActionManager::map_some_state ("options", "SendMTC", &Configuration::get_send_mtc);
+		ActionManager::map_some_state ("options", "SendMTC", &RCConfiguration::get_send_mtc);
 
 	} else if (PARAM_IS ("send-mmc")) {
 
-		ActionManager::map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
+		ActionManager::map_some_state ("options", "SendMMC", &RCConfiguration::get_send_mmc);
 
 	} else if (PARAM_IS ("use-osc")) {
 
@@ -1116,64 +1116,64 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		}
 #endif
 
-		ActionManager::map_some_state ("options", "UseOSC", &Configuration::get_use_osc);
+		ActionManager::map_some_state ("options", "UseOSC", &RCConfiguration::get_use_osc);
 
 	} else if (PARAM_IS ("mmc-control")) {
-		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
+		ActionManager::map_some_state ("options", "UseMMC", &RCConfiguration::get_mmc_control);
 	} else if (PARAM_IS ("midi-feedback")) {
-		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
+		ActionManager::map_some_state ("options", "SendMIDIfeedback", &RCConfiguration::get_midi_feedback);
 	} else if (PARAM_IS ("do-not-record-plugins")) {
-		ActionManager::map_some_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::get_do_not_record_plugins);
+		ActionManager::map_some_state ("options", "DoNotRunPluginsWhileRecording", &RCConfiguration::get_do_not_record_plugins);
 	} else if (PARAM_IS ("latched-record-enable")) {
-		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
+		ActionManager::map_some_state ("options", "LatchedRecordEnable", &RCConfiguration::get_latched_record_enable);
 	} else if (PARAM_IS ("solo-latched")) {
-		ActionManager::map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
+		ActionManager::map_some_state ("options", "LatchedSolo", &RCConfiguration::get_solo_latched);
 	} else if (PARAM_IS ("show-solo-mutes")) {
-		ActionManager::map_some_state ("options", "ShowSoloMutes", &Configuration::get_show_solo_mutes);
+		ActionManager::map_some_state ("options", "ShowSoloMutes", &RCConfiguration::get_show_solo_mutes);
 	} else if (PARAM_IS ("solo-mute-override")) {
-		ActionManager::map_some_state ("options", "SoloMuteOverride", &Configuration::get_solo_mute_override);
+		ActionManager::map_some_state ("options", "SoloMuteOverride", &RCConfiguration::get_solo_mute_override);
 	} else if (PARAM_IS ("solo-model")) {
 		map_solo_model ();
 	} else if (PARAM_IS ("auto-play")) {
-		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", &Configuration::get_auto_play);
+		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", mem_fun (session->config, &SessionConfiguration::get_auto_play));
 	} else if (PARAM_IS ("auto-return")) {
-		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", &Configuration::get_auto_return);
+		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", mem_fun (session->config, &SessionConfiguration::get_auto_return));
 	} else if (PARAM_IS ("auto-input")) {
-		ActionManager::map_some_state ("Transport", "ToggleAutoInput", &Configuration::get_auto_input);
+		ActionManager::map_some_state ("Transport", "ToggleAutoInput", mem_fun (session->config, &SessionConfiguration::get_auto_input));
 	} else if (PARAM_IS ("tape-machine-mode")) {
-		ActionManager::map_some_state ("options", "ToggleTapeMachineMode", &Configuration::get_tape_machine_mode);
+		ActionManager::map_some_state ("options", "ToggleTapeMachineMode", &RCConfiguration::get_tape_machine_mode);
 	} else if (PARAM_IS ("punch-out")) {
-		ActionManager::map_some_state ("Transport", "TogglePunchOut", &Configuration::get_punch_out);
-		if (!Config->get_punch_out()) {
+		ActionManager::map_some_state ("Transport", "TogglePunchOut", mem_fun (session->config, &SessionConfiguration::get_punch_out));
+		if (!session->config.get_punch_out()) {
 			unset_dual_punch ();
 		}
 	} else if (PARAM_IS ("punch-in")) {
-		ActionManager::map_some_state ("Transport", "TogglePunchIn", &Configuration::get_punch_in);
-		if (!Config->get_punch_in()) {
+		ActionManager::map_some_state ("Transport", "TogglePunchIn", mem_fun (session->config, &SessionConfiguration::get_punch_in));
+		if (!session->config.get_punch_in()) {
 			unset_dual_punch ();
 		}
 	} else if (PARAM_IS ("clicking")) {
-		ActionManager::map_some_state ("Transport", "ToggleClick", &Configuration::get_clicking);
+		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
 	} else if (PARAM_IS ("jack-time-master")) {
-		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", &Configuration::get_jack_time_master);
+		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", &RCConfiguration::get_jack_time_master);
 	} else if (PARAM_IS ("plugins-stop-with-transport")) {
-		ActionManager::map_some_state ("options",  "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport);
+		ActionManager::map_some_state ("options",  "StopPluginsWithTransport", &RCConfiguration::get_plugins_stop_with_transport);
 	} else if (PARAM_IS ("new-plugins-active")) {
-		ActionManager::map_some_state ("options",  "NewPluginsActive", &Configuration::get_new_plugins_active);
+		ActionManager::map_some_state ("options",  "NewPluginsActive", &RCConfiguration::get_new_plugins_active);
 	} else if (PARAM_IS ("latched-record-enable")) {
-		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
+		ActionManager::map_some_state ("options", "LatchedRecordEnable", &RCConfiguration::get_latched_record_enable);
 	} else if (PARAM_IS ("verify-remove-last-capture")) {
-		ActionManager::map_some_state ("options",  "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
+		ActionManager::map_some_state ("options",  "VerifyRemoveLastCapture", &RCConfiguration::get_verify_remove_last_capture);
 	} else if (PARAM_IS ("periodic-safety-backups")) {
-		ActionManager::map_some_state ("options",  "PeriodicSafetyBackups", &Configuration::get_periodic_safety_backups);
+		ActionManager::map_some_state ("options",  "PeriodicSafetyBackups", &RCConfiguration::get_periodic_safety_backups);
 	} else if (PARAM_IS ("stop-recording-on-xrun")) {
-		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun);
+		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &RCConfiguration::get_stop_recording_on_xrun);
 	} else if (PARAM_IS ("create-xrun-marker")) {
-		ActionManager::map_some_state ("options",  "CreateXrunMarker", &Configuration::get_create_xrun_marker);
+		ActionManager::map_some_state ("options",  "CreateXrunMarker", &RCConfiguration::get_create_xrun_marker);
 	} else if (PARAM_IS ("sync-all-route-ordering")) {
-		ActionManager::map_some_state ("options",  "SyncEditorAndMixerTrackOrder", &Configuration::get_sync_all_route_ordering);
+		ActionManager::map_some_state ("options",  "SyncEditorAndMixerTrackOrder", &RCConfiguration::get_sync_all_route_ordering);
 	} else if (PARAM_IS ("stop-at-session-end")) {
-		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
+		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &RCConfiguration::get_stop_at_session_end);
 	} else if (PARAM_IS ("monitoring-model")) {
 		map_monitor_model ();
 	} else if (PARAM_IS ("denormal-model")) {
@@ -1183,9 +1183,9 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("remote-model")) {
 		map_remote_model ();
 	} else if (PARAM_IS ("use-video-sync")) {
-		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", &Configuration::get_use_video_sync);
+		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", &RCConfiguration::get_use_video_sync);
 	} else if (PARAM_IS ("quieten-at-speed")) {
-		ActionManager::map_some_state ("options",  "GainReduceFastTransport", &Configuration::get_quieten_at_speed);
+		ActionManager::map_some_state ("options",  "GainReduceFastTransport", &RCConfiguration::get_quieten_at_speed);
 	} else if (PARAM_IS ("shuttle-behaviour")) {
 
 		switch (Config->get_shuttle_behaviour ()) {
@@ -1236,20 +1236,20 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			secondary_clock.set (0, true);
 		}
 	} else if (PARAM_IS ("use-overlap-equivalency")) {
-		ActionManager::map_some_state ("options", "RegionEquivalentsOverlap", &Configuration::get_use_overlap_equivalency);
+		ActionManager::map_some_state ("options", "RegionEquivalentsOverlap", &RCConfiguration::get_use_overlap_equivalency);
 	} else if (PARAM_IS ("primary-clock-delta-edit-cursor")) {
-		ActionManager::map_some_state ("options",  "PrimaryClockDeltaEditCursor", &Configuration::get_primary_clock_delta_edit_cursor);
+		ActionManager::map_some_state ("options",  "PrimaryClockDeltaEditCursor", &RCConfiguration::get_primary_clock_delta_edit_cursor);
 	} else if (PARAM_IS ("secondary-clock-delta-edit-cursor")) {
-		ActionManager::map_some_state ("options",  "SecondaryClockDeltaEditCursor", &Configuration::get_secondary_clock_delta_edit_cursor);
+		ActionManager::map_some_state ("options",  "SecondaryClockDeltaEditCursor", &RCConfiguration::get_secondary_clock_delta_edit_cursor);
 	} else if (PARAM_IS ("only-copy-imported-files")) {
 		map_only_copy_imported_files ();
 	} else if (PARAM_IS ("show-track-meters")) {
-		ActionManager::map_some_state ("options",  "ShowTrackMeters", &Configuration::get_show_track_meters);
+		ActionManager::map_some_state ("options",  "ShowTrackMeters", &RCConfiguration::get_show_track_meters);
 		editor->toggle_meter_updating();
 	} else if (PARAM_IS ("default-narrow_ms")) {
-		ActionManager::map_some_state ("options",  "DefaultNarrowMS", &Configuration::get_default_narrow_ms);
+		ActionManager::map_some_state ("options",  "DefaultNarrowMS", &RCConfiguration::get_default_narrow_ms);
 	} else if (PARAM_IS ("rubberbanding-snaps-to-grid")) {
-		ActionManager::map_some_state ("options", "RubberbandingSnapsToGrid", &Configuration::get_rubberbanding_snaps_to_grid);
+		ActionManager::map_some_state ("options", "RubberbandingSnapsToGrid", &RCConfiguration::get_rubberbanding_snaps_to_grid);
 	}
 
 

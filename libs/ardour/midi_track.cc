@@ -414,7 +414,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		just_meter_input (start_frame, end_frame, nframes);
 	}
 
-	if (diskstream->record_enabled() && !can_record && !Config->get_auto_input()) {
+	if (diskstream->record_enabled() && !can_record && !_session.config.get_auto_input()) {
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)

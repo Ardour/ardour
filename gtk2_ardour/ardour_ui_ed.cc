@@ -202,7 +202,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (common_actions, X_("goto-editor"), _("Show Editor"),  mem_fun(*this, &ARDOUR_UI::goto_editor_window));
 	ActionManager::register_action (common_actions, X_("goto-mixer"), _("Show Mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer-on-top"), _("Toggle Editor Mixer on Top"),  mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer_on_top));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Preferences"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Preferences"), mem_fun(*this, &ARDOUR_UI::toggle_rc_options_window));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -425,8 +425,8 @@ ARDOUR_UI::install_actions ()
 
 	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
 
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), hide_return (bind (mem_fun (*Config, &Configuration::set_shuttle_units), Percentage)));
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), hide_return (bind (mem_fun (*Config, &Configuration::set_shuttle_units), Semitones)));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), hide_return (bind (mem_fun (*Config, &RCConfiguration::set_shuttle_units), Percentage)));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), hide_return (bind (mem_fun (*Config, &RCConfiguration::set_shuttle_units), Semitones)));
 
 	Glib::RefPtr<ActionGroup> option_actions = ActionGroup::create ("options");
 

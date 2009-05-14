@@ -368,7 +368,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 	}
 
 
-	if (!Config->get_auto_xfade()) {
+	if (!_session.config.get_auto_xfade()) {
 		return;
 	}
 
@@ -450,19 +450,19 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				 *   [---- bottom -------------------] 
 				 */
 
-				if (Config->get_xfade_model() == FullCrossfade) {
+				if (_session.config.get_xfade_model() == FullCrossfade) {
 					touched_regions = regions_touched (top->first_frame(), bottom->last_frame());
 					if (touched_regions->size() <= 2) {
-						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, Config->get_xfade_model(), Config->get_xfades_active()));
+						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, _session.config.get_xfade_model(), _session.config.get_xfades_active()));
 						add_crossfade (xfade);
 					}
 				} else {
 
 					touched_regions = regions_touched (top->first_frame(), 
-									   top->first_frame() + min ((nframes_t)Config->get_short_xfade_seconds() * _session.frame_rate(), 
+									   top->first_frame() + min ((nframes_t)_session.config.get_short_xfade_seconds() * _session.frame_rate(), 
 												     top->length()));
 					if (touched_regions->size() <= 2) {
-						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, Config->get_xfade_model(), Config->get_xfades_active()));
+						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, _session.config.get_xfade_model(), _session.config.get_xfades_active()));
 						add_crossfade (xfade);
 					}
 				}
@@ -474,28 +474,28 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				 *                { ==== bottom ============ } 
 				 */ 
 
-				if (Config->get_xfade_model() == FullCrossfade) {
+				if (_session.config.get_xfade_model() == FullCrossfade) {
 
 					touched_regions = regions_touched (bottom->first_frame(), top->last_frame());
 					if (touched_regions->size() <= 2) {
 						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, 
-												     Config->get_xfade_model(), Config->get_xfades_active()));
+												     _session.config.get_xfade_model(), _session.config.get_xfades_active()));
 						add_crossfade (xfade);
 					}
 
 				} else {
 					touched_regions = regions_touched (bottom->first_frame(), 
-									   bottom->first_frame() + min ((nframes_t)Config->get_short_xfade_seconds() * _session.frame_rate(), 
+									   bottom->first_frame() + min ((nframes_t)_session.config.get_short_xfade_seconds() * _session.frame_rate(), 
 													bottom->length()));
 					if (touched_regions->size() <= 2) {
-						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, Config->get_xfade_model(), Config->get_xfades_active()));
+						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, _session.config.get_xfade_model(), _session.config.get_xfades_active()));
 						add_crossfade (xfade);
 					}
 				}
 				break;
 			default:
 				xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, 
-										     Config->get_xfade_model(), Config->get_xfades_active()));
+										     _session.config.get_xfade_model(), _session.config.get_xfades_active()));
 				add_crossfade (xfade);
 			}
 		}

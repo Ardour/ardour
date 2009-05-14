@@ -865,7 +865,7 @@ Session::reset_input_monitor_state ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-				(*i)->monitor_input (Config->get_monitoring_model() == HardwareMonitoring && !Config->get_auto_input());
+				(*i)->monitor_input (Config->get_monitoring_model() == HardwareMonitoring && !config.get_auto_input());
 			}
 		}
 	} else {
@@ -885,7 +885,7 @@ Session::auto_punch_start_changed (Location* location)
 {
 	replace_event (Event::PunchIn, location->start());
 
-	if (get_record_enabled() && Config->get_punch_in()) {
+	if (get_record_enabled() && config.get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
 	}
@@ -1091,7 +1091,7 @@ Session::enable_record ()
 		_last_record_location = _transport_frame;
 		deliver_mmc(MIDI::MachineControl::cmdRecordStrobe, _last_record_location);
 
-		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
@@ -1125,7 +1125,7 @@ Session::disable_record (bool rt_context, bool force)
 		if (rt_context)
 			deliver_mmc (MIDI::MachineControl::cmdRecordExit, _transport_frame);
 
-		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -1150,7 +1150,7 @@ Session::step_back_from_record ()
 	if (g_atomic_int_get (&_record_status) == Recording) {
 		g_atomic_int_set (&_record_status, Enabled);
 
-		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -1175,7 +1175,7 @@ Session::maybe_enable_record ()
 	save_state ("", true);
 
 	if (_transport_speed) {
-		if (!Config->get_punch_in()) {
+		if (!config.get_punch_in()) {
 			enable_record ();
 		}
 	} else {
@@ -3726,7 +3726,7 @@ Session::available_capture_duration ()
 {
 	float sample_bytes_on_disk = 4.0; // keep gcc happy
 
-	switch (Config->get_native_file_data_format()) {
+	switch (config.get_native_file_data_format()) {
 	case FormatFloat:
 		sample_bytes_on_disk = 4.0;
 		break;
