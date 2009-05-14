@@ -51,6 +51,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	
 	pack_start (preset_box, false, false);
 	pack_start (socket, true, true);
+	pack_start (plugin_analysis_expander, true, true);
 }
 
 VSTPluginUI::~VSTPluginUI ()
