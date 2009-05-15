@@ -307,7 +307,7 @@ public:
 	OptionEditor (ARDOUR::Configuration *, std::string const &);
 	~OptionEditor ();
 
-	void add (std::string const &, OptionEditorComponent *);
+	void add_option (std::string const &, OptionEditorComponent *);
 
 protected:
 	

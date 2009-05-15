@@ -362,7 +362,6 @@ public:
 			_save_undo_button.set_active (x);
 			_save_undo_spin.set_sensitive (x);
 		} else if (p == "save-history-depth") {
-			int32_t const d = _rc_config->get_saved_history_depth();
 			_save_undo_spin.set_value (_rc_config->get_saved_history_depth());
 		}
 	}
@@ -696,7 +695,7 @@ RCOptionEditor::RCOptionEditor ()
 {
 	/* MISC */
 
-	add (_("Misc"), new OptionEditorHeading (_("Metering")));
+	add_option (_("Misc"), new OptionEditorHeading (_("Metering")));
 	
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
@@ -710,7 +709,7 @@ RCOptionEditor::RCOptionEditor ()
 	mht->add (MeterHoldMedium, _("medium"));
 	mht->add (MeterHoldLong, _("long"));
 	
-	add (_("Misc"), mht);
+	add_option (_("Misc"), mht);
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
@@ -727,13 +726,13 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_FASTER, _("faster"));
 	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
 
-	add (_("Misc"), mfo);
+	add_option (_("Misc"), mfo);
 
-	add (_("Misc"), new OptionEditorHeading (_("Undo")));
+	add_option (_("Misc"), new OptionEditorHeading (_("Undo")));
 	
-	add (_("Misc"), new UndoOptions (_rc_config));
+	add_option (_("Misc"), new UndoOptions (_rc_config));
 
-	add (_("Misc"), new OptionEditorHeading (_("Misc")));
+	add_option (_("Misc"), new OptionEditorHeading (_("Misc")));
 	
 	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
 		"remote-model",
@@ -746,14 +745,14 @@ RCOptionEditor::RCOptionEditor ()
 	rm->add (MixerOrdered, _("follows order of mixer"));
 	rm->add (EditorOrdered, _("follows order of editor"));
 
-	add (_("Misc"), rm);
+	add_option (_("Misc"), rm);
 
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
-	add (_("Misc"), new FontScalingOptions (_rc_config));
+	add_option (_("Misc"), new FontScalingOptions (_rc_config));
 #endif	
 
-	add (_("Misc"),
+	add_option (_("Misc"),
 	     new BoolOption (
 		     "verify-remove-last-capture",
 		     _("Verify removal of last capture"),
@@ -761,7 +760,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
 		     ));
 	
-	add (_("Misc"),
+	add_option (_("Misc"),
 	     new BoolOption (
 		     "periodic-safety-backups",
 		     _("Make periodic backups of the session file"),
@@ -769,7 +768,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
 		     ));
 
-	add (_("Misc"),
+	add_option (_("Misc"),
 	     new BoolOption (
 		     "sync-all-route-ordering",
 		     _("Syncronise editor and mixer track order"),
@@ -777,7 +776,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_sync_all_route_ordering)
 		     ));
 
-	add (_("Misc"),
+	add_option (_("Misc"),
 	     new BoolOption (
 		     "only-copy-imported-files",
 		     _("Always copy imported files"),
@@ -785,7 +784,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_only_copy_imported_files)
 		     ));
 
-	add (_("Misc"),
+	add_option (_("Misc"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow mixer strips"),
@@ -793,7 +792,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
 
-	add (_("Misc"),
+	add_option (_("Misc"),
 	     new BoolOption (
 		     "name-new-markers",
 		     _("Name new markers"),
@@ -803,7 +802,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* TRANSPORT */
 
-	add (_("Transport"),
+	add_option (_("Transport"),
 	     new BoolOption (
 		     "latched-record-enable",
 		     _("Keep record-enable engaged on stop"),
@@ -811,7 +810,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
 		     ));
 
-	add (_("Transport"),
+	add_option (_("Transport"),
 	     new BoolOption (
 		     "stop-recording-on-xrun",
 		     _("Stop recording when an xrun occurs"),
@@ -819,7 +818,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
 		     ));
 
-	add (_("Transport"),
+	add_option (_("Transport"),
 	     new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
@@ -827,7 +826,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
 		     ));
 
-	add (_("Transport"),
+	add_option (_("Transport"),
 	     new BoolOption (
 		     "quieten-at-speed",
 		     _("Reduce output level by 12dB during fast forward / rewind"),
@@ -835,7 +834,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
 		     ));
 
-	add (_("Transport"),
+	add_option (_("Transport"),
 	     new BoolOption (
 		     "stop-at-session-end",
 		     _("Stop at the end of the session"),
@@ -843,7 +842,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
 		     ));
 
-	add (_("Transport"),
+	add_option (_("Transport"),
 	     new BoolOption (
 		     "primary-clock-delta-edit-cursor",
 		     _("Primary clock delta to edit cursor"),
@@ -851,7 +850,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_primary_clock_delta_edit_cursor)
 		     ));
 
-	add (_("Transport"),
+	add_option (_("Transport"),
 	     new BoolOption (
 		     "secondary-clock-delta-edit-cursor",
 		     _("Secondary clock delta to edit cursor"),
@@ -861,7 +860,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* EDITOR */
 
-	add (_("Editor"),
+	add_option (_("Editor"),
 	     new BoolOption (
 		     "link-region-and-track-selection",
 		     _("Link selection of regions and tracks"),
@@ -869,7 +868,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_link_region_and_track_selection)
 		     ));
 
-	add (_("Editor"),
+	add_option (_("Editor"),
 	     new BoolOption (
 		     "automation-follows-regions",
 		     _("Move relevant automation when regions are moved"),
@@ -877,7 +876,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
 
-	add (_("Editor"),
+	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-track-meters",
 		     _("Show meters on tracks in the editor"),
@@ -885,7 +884,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
 		     ));
 
-	add (_("Editor"),
+	add_option (_("Editor"),
 	     new BoolOption (
 		     "use-overlap-equivalency",
 		     _("Use overlap equivalency for regions"),
@@ -893,7 +892,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
 		     ));
 
-	add (_("Editor"),
+	add_option (_("Editor"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
 		     _("Make rubberband selection rectangle snap to the grid"),
@@ -903,7 +902,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* AUDIO */
 
-	add (_("Audio"), new OptionEditorHeading (_("Solo")));
+	add_option (_("Audio"), new OptionEditorHeading (_("Solo")));
 
 	ComboOption<SoloModel>* sm = new ComboOption<SoloModel> (
 		"solo-model",
@@ -915,9 +914,9 @@ RCOptionEditor::RCOptionEditor ()
 	sm->add (InverseMute, _("in place"));
 	sm->add (SoloBus, _("via bus"));
 
-	add (_("Audio"), sm);
+	add_option (_("Audio"), sm);
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "solo-latched",
 		     _("Latched solo"),
@@ -925,7 +924,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_solo_latched)
 		     ));
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "show-solo-mutes",
 		     _("Show solo muting"),
@@ -933,7 +932,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
 		     ));
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "solo-mute-override",
 		     _("Override muting"),
@@ -941,7 +940,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
 		     ));
 
-	add (_("Audio"), new OptionEditorHeading (_("Monitoring")));
+	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
 
 	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
 		"monitoring-model",
@@ -954,9 +953,9 @@ RCOptionEditor::RCOptionEditor ()
 	mm->add (SoftwareMonitoring, _("ardour"));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
-	add (_("Audio"), mm);
+	add_option (_("Audio"), mm);
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "tape-machine-mode",
 		     _("Tape machine mode"),
@@ -964,7 +963,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
 		     ));
 
-	add (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
+	add_option (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
 
 	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
 		"input-auto-connect",
@@ -976,7 +975,7 @@ RCOptionEditor::RCOptionEditor ()
 	iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
 	iac->add (ManualConnect, _("manually"));
 
-	add (_("Audio"), iac);
+	add_option (_("Audio"), iac);
 
 	ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
 		"output-auto-connect",
@@ -989,11 +988,11 @@ RCOptionEditor::RCOptionEditor ()
 	oac->add (AutoConnectMaster, _("automatically to master outputs"));
 	oac->add (ManualConnect, _("manually"));
 
-	add (_("Audio"), oac);
+	add_option (_("Audio"), oac);
 
-	add (_("Audio"), new OptionEditorHeading (_("Denormals")));
+	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "denormal-protection",
 		     _("Use DC bias to protect against denormals"),
@@ -1024,11 +1023,11 @@ RCOptionEditor::RCOptionEditor ()
 		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZerO"));
 	}
 	
-	add (_("Audio"), dm);
+	add_option (_("Audio"), dm);
 
-	add (_("Audio"), new OptionEditorHeading (_("Plugins")));
+	add_option (_("Audio"), new OptionEditorHeading (_("Plugins")));
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "plugins-stop-with-transport",
 		     _("Stop plugins when the transport is stopped"),
@@ -1036,7 +1035,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
 		     ));
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "do-not-record-plugins",
 		     _("Disable plugins during recording"),
@@ -1044,7 +1043,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_do_not_record_plugins)
 		     ));
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "new-plugins-active",
 		     _("Make new plugins active"),
@@ -1052,7 +1051,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
 		     ));
 
-	add (_("Audio"),
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "auto-analyse-audio",
 		     _("Enable automatic analysis of audio"),
@@ -1062,9 +1061,9 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* MIDI CONTROL */
 
-	add (_("MIDI control"), new MIDIPorts (_rc_config));
+	add_option (_("MIDI control"), new MIDIPorts (_rc_config));
 
-	add (_("MIDI control"),
+	add_option (_("MIDI control"),
 	     new SpinOption<uint8_t> (
 		     "mmc-receive-device-id",
 		     _("Inbound MMC device ID"),
@@ -1073,7 +1072,7 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 128, 1, 10
 		     ));
 
-	add (_("MIDI control"),
+	add_option (_("MIDI control"),
 	     new SpinOption<uint8_t> (
 		     "mmc-send-device-id",
 		     _("Outbound MMC device ID"),
@@ -1082,7 +1081,7 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 128, 1, 10
 		     ));
 
-	add (_("MIDI control"),
+	add_option (_("MIDI control"),
 	     new SpinOption<int32_t> (
 		     "initial-program-change",
 		     _("Initial program change"),
@@ -1093,11 +1092,11 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* CLICK */
 
-	add (_("Click"), new ClickOptions (_rc_config, this));
+	add_option (_("Click"), new ClickOptions (_rc_config, this));
 
 	/* KEYBOARD */
 
-	add (_("Keyboard"), new KeyboardOptions);
+	add_option (_("Keyboard"), new KeyboardOptions);
 }
 
 

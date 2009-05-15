@@ -110,7 +110,7 @@ static void gnome_canvas_waveview_set_data_src   (GnomeCanvasWaveView *,
 static void gnome_canvas_waveview_set_channel    (GnomeCanvasWaveView *,
 						   guint32);
 
-static gint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview,
+static guint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview,
 						   gulong               start_sample,
 						   gulong               end_sample);
 
@@ -393,7 +393,7 @@ gnome_canvas_waveview_destroy (GtkObject *object)
 #undef CACHE_MEMMOVE_OPTIMIZATION
 
 /** @return cache index of start_sample within the cache */
-static gint32
+static guint32
 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_sample, gulong end_sample)
 {
 	gulong required_cache_entries;
@@ -665,9 +665,9 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
   out:
 #if DEBUG_CACHE
 	fprintf (stderr, "return cache index = %d\n", 
-		 (gint32) floor ((((double) (start_sample - cache->start)) / waveview->samples_per_unit) + 0.5));
+		 (guint32) floor ((((double) (start_sample - cache->start)) / waveview->samples_per_unit) + 0.5));
 #endif
-	return (gint32) floor ((((double) (start_sample - cache->start)) / waveview->samples_per_unit) + 0.5);
+	return (guint32) floor ((((double) (start_sample - cache->start)) / waveview->samples_per_unit) + 0.5);
 
 }
 
@@ -1091,7 +1091,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 	gulong s1, s2;
 	int clip_length = 0;
 	int pymin, pymax;
-	int cache_index;
+	guint cache_index;
 	double half_height;
 	int x;
 	char rectify;
@@ -1235,7 +1235,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		}
 		if(last_pymax != last_pymin) {
 			/* take the index of one sample right of what we render */
-			int index = cache_index + (end - begin);
+			guint index = cache_index + (end - begin);
 
 			if (index >= waveview->cache->data_size) {
 				
@@ -1611,7 +1611,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		unsigned char zero_r, zero_g, zero_b, zero_a;
 		UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a );
 		int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
-		PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, zbegin, end, zeroline_y);
+		PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, zbegin, zend, zeroline_y);
 	}
 #undef origin
 

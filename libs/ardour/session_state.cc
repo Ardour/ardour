@@ -852,8 +852,6 @@ Session::load_state (string snapshot_name)
 int
 Session::load_options (const XMLNode& node)
 {
-	XMLNode* child;
-	XMLProperty* prop;
 	LocaleGuard lg (X_("POSIX"));
 
 	config.set_variables (node);

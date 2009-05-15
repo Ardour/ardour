@@ -169,7 +169,7 @@ OptionEditor::parameter_changed (std::string const & p)
  *  @param o Component.
  */
 void
-OptionEditor::add (std::string const & pn, OptionEditorComponent* o)
+OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
 {
 	if (_pages.find (pn) == _pages.end()) {
 		_pages[pn] = new OptionEditorPage (_notebook, pn);

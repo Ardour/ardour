@@ -55,10 +55,10 @@ struct _GnomeCanvasWaveViewCacheEntry
 struct _GnomeCanvasWaveViewCache
 {
     GnomeCanvasWaveViewCacheEntry* data;
-    gint32                       allocated;
-    gint64                       data_size;
-    gulong                       start;
-    gulong                       end;
+    guint32                       allocated;
+    guint64                       data_size;
+    gulong                        start;
+    gulong                        end;
 };    
 
 GnomeCanvasWaveViewCache* gnome_canvas_waveview_cache_new ();
