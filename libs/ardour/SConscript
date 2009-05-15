@@ -131,6 +131,7 @@ port_insert.cc
 port_set.cc
 processor.cc
 quantize.cc
+rc_configuration.cc
 recent_sessions.cc
 region.cc
 region_factory.cc
