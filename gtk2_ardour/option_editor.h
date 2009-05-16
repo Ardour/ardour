@@ -145,15 +145,36 @@ public:
 	
 	BoolOption (std::string const &, std::string const &, sigc::slot<bool>, sigc::slot<bool, bool>);
 	void set_state_from_config ();
-	void toggled ();
 	void add_to_page (OptionEditorPage*);
 	
 private:
+
+	void toggled ();
 	
 	sigc::slot<bool> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, bool> _set;  ///< slot to set the configuration variable's value
 	Gtk::CheckButton* _button; ///< UI button
 };
+
+/** Component which provides the UI to handle a string option using a GTK Entry */
+class EntryOption : public Option {
+
+public:
+
+	EntryOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
+	void set_state_from_config ();
+	void add_to_page (OptionEditorPage*);
+	
+private:
+
+	void activated ();
+	
+	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
+	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
+	Gtk::Label* _label; ///< UI label
+	Gtk::Entry* _entry; ///< UI entry
+};
+	
 
 /** Component which provides the UI to handle an enumerated option using a GTK CheckButton.
  *  The template parameter is the enumeration.
@@ -241,6 +262,8 @@ public:
 	 *  @param max Variable maximum value.
 	 *  @param step Step for the spin button.
 	 *  @param page Page step for the spin button.
+	 *  @param unit Unit name.
+	 *  @param scale Scaling factor (such that for a value x in the spinbutton, x * scale is written to the config)
 	 */
 	SpinOption (
 		std::string const & i,
@@ -250,39 +273,53 @@ public:
 		T min,
 		T max,
 		T step,
-		T page
+		T page,
+		std::string const & unit = "",
+		float scale = 1
 		)
 		: Option (i, n),
 		  _get (g),
-		  _set (s)
+		  _set (s),
+		  _scale (scale)
 	{
 		_label = manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (1, 0.5);
+
 		_spin = manage (new Gtk::SpinButton);
 		_spin->set_range (min, max);
 		_spin->set_increments (step, page);
+		
+		_box = manage (new Gtk::HBox);
+		_box->pack_start (*_spin, true, true);
+		_box->set_spacing (4);
+		if (unit.length()) {
+			_box->pack_start (*manage (new Gtk::Label (unit)), false, false);
+		}
+		
 		_spin->signal_value_changed().connect (sigc::mem_fun (*this, &SpinOption::changed));
 	}
 
 	void set_state_from_config ()
 	{
-		_spin->set_value (_get ());
+		_spin->set_value (_get () / _scale);
 	}
 
 	void add_to_page (OptionEditorPage* p)
 	{
-		add_widgets_to_page (p, _label, _spin);
+		add_widgets_to_page (p, _label, _box);
 	}
 	
 	void changed ()
 	{
-		_set (static_cast<T> (_spin->get_value ()));
+		_set (static_cast<T> (_spin->get_value ()) * _scale);
 	}
 	
 private:
 	sigc::slot<T> _get;
 	sigc::slot<bool, T> _set;
+	float _scale;
 	Gtk::Label* _label;
+	Gtk::HBox* _box;
 	Gtk::SpinButton* _spin;
 };
 
@@ -314,6 +351,7 @@ protected:
 	ARDOUR::Configuration* _config;
 	
 private:
+
 	void parameter_changed (std::string const &);
 
 	Gtk::Notebook _notebook;

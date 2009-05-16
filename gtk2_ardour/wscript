@@ -193,6 +193,7 @@ def build(bld):
 		send_ui.cc
 		session_import_dialog.cc
 		session_metadata_dialog.cc
+                session_option_editor.cc
 		sfdb_ui.cc
 		simpleline.cc
 		simplerect.cc

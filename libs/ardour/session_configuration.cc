@@ -111,7 +111,7 @@ SessionConfiguration::set_variables (const XMLNode& node)
 	
 }
 void
-SessionConfiguration::map_parameters (sigc::slot<void,const char*> theSlot)
+SessionConfiguration::map_parameters (sigc::slot<void, std::string> theSlot)
 {
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	

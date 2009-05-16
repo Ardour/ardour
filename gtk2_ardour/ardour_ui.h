@@ -71,6 +71,7 @@ class AudioClock;
 class PublicEditor;
 class Keyboard;
 class RCOptionEditor;
+class SessionOptionEditor;
 class KeyEditor;
 class Mixer_UI;
 class ConnectionEditor;
@@ -257,6 +258,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_session_auto_loop ();
 
 	void toggle_rc_options_window ();
+	void toggle_session_options_window ();
 
   private:
 	ArdourStartup*      _startup;
@@ -600,6 +602,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	RCOptionEditor *rc_option_editor;
 
+	SessionOptionEditor *session_option_editor;
+
 	/* route dialog */
 
 	AddRouteDialog *add_route_dialog;
@@ -726,7 +730,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_input_auto_connect ();
 	void map_output_auto_connect ();
 	void map_only_copy_imported_files ();
-	void parameter_changed (const char*);
+	void parameter_changed (std::string);
 
 	void set_meter_hold (ARDOUR::MeterHold);
 	void set_meter_falloff (ARDOUR::MeterFalloff);

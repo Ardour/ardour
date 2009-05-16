@@ -96,7 +96,7 @@ class LevelMeter : public Gtk::HBox
 	void hide_all_meters ();
 	gint meter_button_release (GdkEventButton*, uint32_t);
 
-	void parameter_changed (const char*);
+	void parameter_changed (std::string);
 	void configuration_changed (ARDOUR::ChanCount in, ARDOUR::ChanCount out);
 
 	void on_theme_changed ();

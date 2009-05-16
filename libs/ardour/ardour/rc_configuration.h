@@ -36,7 +36,7 @@ class RCConfiguration : public Configuration
   public:
 	RCConfiguration();
 
-	void map_parameters (sigc::slot<void,const char*>);
+	void map_parameters (sigc::slot<void, std::string>);
 	int set_state (XMLNode const &);
 	XMLNode& get_state ();
 	XMLNode& get_variables ();

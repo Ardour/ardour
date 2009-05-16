@@ -29,8 +29,10 @@
                <menuitem action='FlushWastebasket'/>
            </menu>
            <separator/>
+           <menuitem action='ToggleSessionOptionsEditor'/>
+           <separator/>
 #ifdef GTKOSX
-           <menuitem action='ToggleOptionsEditor'/>
+           <menuitem action='ToggleRCOptionsEditor'/>
            <menuitem action='About'/>
 #endif
            <menuitem action='Quit'/>
@@ -220,7 +222,7 @@
              </menu>
 #ifndef GTKOSX
 	     <separator/>
-             <menuitem action='ToggleOptionsEditor'/>
+             <menuitem action='ToggleRCOptionsEditor'/>
 #endif
         </menu>         
 

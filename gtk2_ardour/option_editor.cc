@@ -99,6 +99,35 @@ BoolOption::toggled ()
 	_set (_button->get_active ());
 }
 
+EntryOption::EntryOption (string const & i, string const & n, slot<string> g, slot<bool, string> s)
+	: Option (i, n),
+	  _get (g),
+	  _set (s)
+{
+	_label = manage (new Label (n + ":"));
+	_label->set_alignment (1, 0.5);
+	_entry = manage (new Entry);
+	_entry->signal_activate().connect (mem_fun (*this, &EntryOption::activated));
+}
+
+void
+EntryOption::add_to_page (OptionEditorPage* p)
+{
+	add_widgets_to_page (p, _label, _entry);
+}
+
+void
+EntryOption::set_state_from_config ()
+{
+	_entry->set_text (_get ());
+}
+
+void
+EntryOption::activated ()
+{
+	_set (_entry->get_text ());
+}
+
 OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
 	: table (1, 3)
 {

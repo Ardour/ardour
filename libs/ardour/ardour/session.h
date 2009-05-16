@@ -1733,7 +1733,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool first_file_data_format_reset;
 	bool first_file_header_format_reset;
 
-	void config_changed (const char*);
+	void config_changed (std::string, bool);
 
 	XMLNode& get_control_protocol_state ();
 

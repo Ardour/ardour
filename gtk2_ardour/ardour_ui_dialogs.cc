@@ -30,6 +30,7 @@
 #include "location_ui.h"
 #include "mixer_ui.h"
 #include "rc_option_editor.h"
+#include "session_option_editor.h"
 #include "public_editor.h"
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
@@ -227,11 +228,11 @@ ARDOUR_UI::toggle_rc_options_window ()
 {
 	if (rc_option_editor == 0) {
 		rc_option_editor = new RCOptionEditor;
-		rc_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleOptionsEditor")));
+		rc_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleRCOptionsEditor")));
 		rc_option_editor->set_session (session);
 	} 
 
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleOptionsEditor"));
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleRCOptionsEditor"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 	
@@ -240,6 +241,27 @@ ARDOUR_UI::toggle_rc_options_window ()
 			rc_option_editor->present ();
 		} else {
 			rc_option_editor->hide ();
+		} 
+	}
+}
+
+void
+ARDOUR_UI::toggle_session_options_window ()
+{
+	if (session_option_editor == 0) {
+		session_option_editor = new SessionOptionEditor (session);
+		session_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSessionOptionsEditor")));
+	} 
+
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleSessionOptionsEditor"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+	
+		if (tact->get_active()) {
+			session_option_editor->show_all ();
+			session_option_editor->present ();
+		} else {
+			session_option_editor->hide ();
 		} 
 	}
 }

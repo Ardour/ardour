@@ -180,7 +180,8 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
+	Config->ParameterChanged.connect (bind (mem_fun (*this, &Session::config_changed), false));
+	config.ParameterChanged.connect (bind (mem_fun (*this, &Session::config_changed), true));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -308,7 +309,7 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
+	Config->ParameterChanged.connect (bind (mem_fun (*this, &Session::config_changed), false));
 }
 
 Session::~Session ()
@@ -532,7 +533,7 @@ Session::when_engine_running ()
 
 	BootMessage (_("Using configuration"));
 
-	Config->map_parameters (mem_fun (*this, &Session::config_changed));
+	Config->map_parameters (bind (mem_fun (*this, &Session::config_changed), false));
 
 	/* every time we reconnect, recompute worst case output latencies */
 

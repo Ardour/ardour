@@ -199,6 +199,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	add_route_dialog = 0;
 	route_params = 0;
 	rc_option_editor = 0;
+	session_option_editor = 0;
 	location_ui = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;

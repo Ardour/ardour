@@ -1289,6 +1289,7 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
 	session_connections.push_back (session->Located.connect (mem_fun (*this, &Editor::located)));
+	session_connections.push_back (session->config.ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed)));
 
 	edit_groups_changed ();
 

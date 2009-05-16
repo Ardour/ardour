@@ -1075,13 +1075,11 @@ ARDOUR_UI::set_meter_falloff (MeterFalloff val)
 }
 
 void
-ARDOUR_UI::parameter_changed (const char* parameter_name)
+ARDOUR_UI::parameter_changed (std::string p)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), parameter_name));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), p));
 
-#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-
-	if (PARAM_IS ("slave-source")) {
+	if (p == "slave-source") {
 
 		sync_option_combo.set_active_text (slave_source_to_string (Config->get_slave_source()));
 
@@ -1098,15 +1096,15 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			break;
 		}
 
-	} else if (PARAM_IS ("send-mtc")) {
+	} else if (p == "send-mtc") {
 
 		ActionManager::map_some_state ("options", "SendMTC", &RCConfiguration::get_send_mtc);
 
-	} else if (PARAM_IS ("send-mmc")) {
+	} else if (p == "send-mmc") {
 
 		ActionManager::map_some_state ("options", "SendMMC", &RCConfiguration::get_send_mmc);
 
-	} else if (PARAM_IS ("use-osc")) {
+	} else if (p == "use-osc") {
 
 #ifdef HAVE_LIBLO
 		if (Config->get_use_osc()) {
@@ -1118,75 +1116,75 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 		ActionManager::map_some_state ("options", "UseOSC", &RCConfiguration::get_use_osc);
 
-	} else if (PARAM_IS ("mmc-control")) {
+	} else if (p == "mmc-control") {
 		ActionManager::map_some_state ("options", "UseMMC", &RCConfiguration::get_mmc_control);
-	} else if (PARAM_IS ("midi-feedback")) {
+	} else if (p == "midi-feedback") {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &RCConfiguration::get_midi_feedback);
-	} else if (PARAM_IS ("do-not-record-plugins")) {
+	} else if (p == "do-not-record-plugins") {
 		ActionManager::map_some_state ("options", "DoNotRunPluginsWhileRecording", &RCConfiguration::get_do_not_record_plugins);
-	} else if (PARAM_IS ("latched-record-enable")) {
+	} else if (p == "latched-record-enable") {
 		ActionManager::map_some_state ("options", "LatchedRecordEnable", &RCConfiguration::get_latched_record_enable);
-	} else if (PARAM_IS ("solo-latched")) {
+	} else if (p == "solo-latched") {
 		ActionManager::map_some_state ("options", "LatchedSolo", &RCConfiguration::get_solo_latched);
-	} else if (PARAM_IS ("show-solo-mutes")) {
+	} else if (p == "show-solo-mutes") {
 		ActionManager::map_some_state ("options", "ShowSoloMutes", &RCConfiguration::get_show_solo_mutes);
-	} else if (PARAM_IS ("solo-mute-override")) {
+	} else if (p == "solo-mute-override") {
 		ActionManager::map_some_state ("options", "SoloMuteOverride", &RCConfiguration::get_solo_mute_override);
-	} else if (PARAM_IS ("solo-model")) {
+	} else if (p == "solo-model") {
 		map_solo_model ();
-	} else if (PARAM_IS ("auto-play")) {
+	} else if (p == "auto-play") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", mem_fun (session->config, &SessionConfiguration::get_auto_play));
-	} else if (PARAM_IS ("auto-return")) {
+	} else if (p == "auto-return") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", mem_fun (session->config, &SessionConfiguration::get_auto_return));
-	} else if (PARAM_IS ("auto-input")) {
+	} else if (p == "auto-input") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoInput", mem_fun (session->config, &SessionConfiguration::get_auto_input));
-	} else if (PARAM_IS ("tape-machine-mode")) {
+	} else if (p == "tape-machine-mode") {
 		ActionManager::map_some_state ("options", "ToggleTapeMachineMode", &RCConfiguration::get_tape_machine_mode);
-	} else if (PARAM_IS ("punch-out")) {
+	} else if (p == "punch-out") {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", mem_fun (session->config, &SessionConfiguration::get_punch_out));
 		if (!session->config.get_punch_out()) {
 			unset_dual_punch ();
 		}
-	} else if (PARAM_IS ("punch-in")) {
+	} else if (p == "punch-in") {
 		ActionManager::map_some_state ("Transport", "TogglePunchIn", mem_fun (session->config, &SessionConfiguration::get_punch_in));
 		if (!session->config.get_punch_in()) {
 			unset_dual_punch ();
 		}
-	} else if (PARAM_IS ("clicking")) {
+	} else if (p == "clicking") {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
-	} else if (PARAM_IS ("jack-time-master")) {
+	} else if (p == "jack-time-master") {
 		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", &RCConfiguration::get_jack_time_master);
-	} else if (PARAM_IS ("plugins-stop-with-transport")) {
+	} else if (p == "plugins-stop-with-transport") {
 		ActionManager::map_some_state ("options",  "StopPluginsWithTransport", &RCConfiguration::get_plugins_stop_with_transport);
-	} else if (PARAM_IS ("new-plugins-active")) {
+	} else if (p == "new-plugins-active") {
 		ActionManager::map_some_state ("options",  "NewPluginsActive", &RCConfiguration::get_new_plugins_active);
-	} else if (PARAM_IS ("latched-record-enable")) {
+	} else if (p == "latched-record-enable") {
 		ActionManager::map_some_state ("options", "LatchedRecordEnable", &RCConfiguration::get_latched_record_enable);
-	} else if (PARAM_IS ("verify-remove-last-capture")) {
+	} else if (p == "verify-remove-last-capture") {
 		ActionManager::map_some_state ("options",  "VerifyRemoveLastCapture", &RCConfiguration::get_verify_remove_last_capture);
-	} else if (PARAM_IS ("periodic-safety-backups")) {
+	} else if (p == "periodic-safety-backups") {
 		ActionManager::map_some_state ("options",  "PeriodicSafetyBackups", &RCConfiguration::get_periodic_safety_backups);
-	} else if (PARAM_IS ("stop-recording-on-xrun")) {
+	} else if (p == "stop-recording-on-xrun") {
 		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &RCConfiguration::get_stop_recording_on_xrun);
-	} else if (PARAM_IS ("create-xrun-marker")) {
+	} else if (p == "create-xrun-marker") {
 		ActionManager::map_some_state ("options",  "CreateXrunMarker", &RCConfiguration::get_create_xrun_marker);
-	} else if (PARAM_IS ("sync-all-route-ordering")) {
+	} else if (p == "sync-all-route-ordering") {
 		ActionManager::map_some_state ("options",  "SyncEditorAndMixerTrackOrder", &RCConfiguration::get_sync_all_route_ordering);
-	} else if (PARAM_IS ("stop-at-session-end")) {
+	} else if (p == "stop-at-session-end") {
 		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &RCConfiguration::get_stop_at_session_end);
-	} else if (PARAM_IS ("monitoring-model")) {
+	} else if (p == "monitoring-model") {
 		map_monitor_model ();
-	} else if (PARAM_IS ("denormal-model")) {
+	} else if (p == "denormal-model") {
 		map_denormal_model ();
-	} else if (PARAM_IS ("denormal-protection")) {
+	} else if (p == "denormal-protection") {
 		map_denormal_protection ();
-	} else if (PARAM_IS ("remote-model")) {
+	} else if (p == "remote-model") {
 		map_remote_model ();
-	} else if (PARAM_IS ("use-video-sync")) {
+	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", &RCConfiguration::get_use_video_sync);
-	} else if (PARAM_IS ("quieten-at-speed")) {
+	} else if (p == "quieten-at-speed") {
 		ActionManager::map_some_state ("options",  "GainReduceFastTransport", &RCConfiguration::get_quieten_at_speed);
-	} else if (PARAM_IS ("shuttle-behaviour")) {
+	} else if (p == "shuttle-behaviour") {
 
 		switch (Config->get_shuttle_behaviour ()) {
 		case Sprung:
@@ -1205,7 +1203,7 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			break;
 		}
 
-	} else if (PARAM_IS ("shuttle-units")) {
+	} else if (p == "shuttle-units") {
 
 		switch (Config->get_shuttle_units()) {
 		case Percentage:
@@ -1215,19 +1213,19 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			shuttle_units_button.set_label(_("ST"));
 			break;
 		}
-	} else if (PARAM_IS ("input-auto-connect")) {
+	} else if (p == "input-auto-connect") {
 		map_input_auto_connect ();
-	} else if (PARAM_IS ("output-auto-connect")) {
+	} else if (p == "output-auto-connect") {
 		map_output_auto_connect ();
-	} else if (PARAM_IS ("native-file-header-format")) {
+	} else if (p == "native-file-header-format") {
 		map_file_header_format ();
-	} else if (PARAM_IS ("native-file-data-format")) {
+	} else if (p == "native-file-data-format") {
 		map_file_data_format ();
-	} else if (PARAM_IS ("meter-hold")) {
+	} else if (p == "meter-hold") {
 		map_meter_hold ();
-	} else if (PARAM_IS ("meter-falloff")) {
+	} else if (p == "meter-falloff") {
 		map_meter_falloff ();
-	} else if (PARAM_IS ("video-pullup") || PARAM_IS ("smpte-format")) {
+	} else if (p == "video-pullup" || p == "smpte-format") {
 		if (session) {
 			primary_clock.set (session->audible_frame(), true);
 			secondary_clock.set (session->audible_frame(), true);
@@ -1235,24 +1233,20 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			primary_clock.set (0, true);
 			secondary_clock.set (0, true);
 		}
-	} else if (PARAM_IS ("use-overlap-equivalency")) {
+	} else if (p == "use-overlap-equivalency") {
 		ActionManager::map_some_state ("options", "RegionEquivalentsOverlap", &RCConfiguration::get_use_overlap_equivalency);
-	} else if (PARAM_IS ("primary-clock-delta-edit-cursor")) {
+	} else if (p == "primary-clock-delta-edit-cursor") {
 		ActionManager::map_some_state ("options",  "PrimaryClockDeltaEditCursor", &RCConfiguration::get_primary_clock_delta_edit_cursor);
-	} else if (PARAM_IS ("secondary-clock-delta-edit-cursor")) {
+	} else if (p == "secondary-clock-delta-edit-cursor") {
 		ActionManager::map_some_state ("options",  "SecondaryClockDeltaEditCursor", &RCConfiguration::get_secondary_clock_delta_edit_cursor);
-	} else if (PARAM_IS ("only-copy-imported-files")) {
+	} else if (p == "only-copy-imported-files") {
 		map_only_copy_imported_files ();
-	} else if (PARAM_IS ("show-track-meters")) {
+	} else if (p == "show-track-meters") {
 		ActionManager::map_some_state ("options",  "ShowTrackMeters", &RCConfiguration::get_show_track_meters);
 		editor->toggle_meter_updating();
-	} else if (PARAM_IS ("default-narrow_ms")) {
+	} else if (p == "default-narrow_ms") {
 		ActionManager::map_some_state ("options",  "DefaultNarrowMS", &RCConfiguration::get_default_narrow_ms);
-	} else if (PARAM_IS ("rubberbanding-snaps-to-grid")) {
+	} else if (p =="rubberbanding-snaps-to-grid") {
 		ActionManager::map_some_state ("options", "RubberbandingSnapsToGrid", &RCConfiguration::get_rubberbanding_snaps_to_grid);
 	}
-
-
-
-#undef PARAM_IS
 }

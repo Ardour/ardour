@@ -307,7 +307,7 @@ RCConfiguration::set_variables (const XMLNode& node)
 	
 }
 void
-RCConfiguration::map_parameters (sigc::slot<void,const char*> theSlot)
+RCConfiguration::map_parameters (sigc::slot<void, std::string> theSlot)
 {
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	

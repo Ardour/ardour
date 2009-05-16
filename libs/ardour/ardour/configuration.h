@@ -33,13 +33,13 @@ class Configuration : public PBD::Stateful
 	Configuration();
 	virtual ~Configuration();
 
-	virtual void map_parameters (sigc::slot<void, const char *> s) = 0;
+	virtual void map_parameters (sigc::slot<void, std::string> s) = 0;
 	virtual int set_state (XMLNode const &) = 0;
 	virtual XMLNode & get_state () = 0;
 	virtual XMLNode & get_variables () = 0;
 	virtual void set_variables (XMLNode const &) = 0;
 
-	sigc::signal<void,const char*> ParameterChanged;
+	sigc::signal<void, std::string> ParameterChanged;
 };
 
 } // namespace ARDOUR

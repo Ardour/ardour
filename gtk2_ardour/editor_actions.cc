@@ -1774,53 +1774,49 @@ Editor::toggle_automation_follows_regions ()
  * @param parameter_name Name of the changed parameter.
  */
 void
-Editor::parameter_changed (const char* parameter_name)
+Editor::parameter_changed (std::string p)
 {
-#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-	//cerr << "Editor::parameter_changed: " << parameter_name << endl;
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::parameter_changed), parameter_name));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::parameter_changed), p));
 
-	if (PARAM_IS ("auto-loop")) {
+	if (p == "auto-loop") {
 		update_loop_range_view (true);
-	} else if (PARAM_IS ("punch-in")) {
+	} else if (p == "punch-in") {
 		update_punch_range_view (true);
-	} else if (PARAM_IS ("punch-out")) {
+	} else if (p == "punch-out") {
 		update_punch_range_view (true);
-	} else if (PARAM_IS ("layer-model")) {
+	} else if (p == "layer-model") {
 		update_layering_model ();
-	} else if (PARAM_IS ("smpte-format")) {
+	} else if (p == "smpte-format") {
 	        update_smpte_mode ();
 		update_just_smpte ();
-	} else if (PARAM_IS ("video-pullup")) {
+	} else if (p == "video-pullup") {
 		update_video_pullup ();
-	} else if (PARAM_IS ("xfades-active")) {
+	} else if (p == "xfades-active") {
 		ActionManager::map_some_state ("Editor", "toggle-xfades-active", mem_fun (session->config, &SessionConfiguration::get_xfades_active));
-	} else if (PARAM_IS ("xfades-visible")) {
+	} else if (p == "xfades-visible") {
 		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", mem_fun (session->config, &SessionConfiguration::get_xfades_visible));
 		update_xfade_visibility ();
-	} else if (PARAM_IS ("show-region-fades")) {
+	} else if (p == "show-region-fades") {
 		ActionManager::map_some_state ("Editor", "toggle-region-fades-visible", mem_fun (session->config, &SessionConfiguration::get_show_region_fades));
 		update_region_fade_visibility ();
-	} else if (PARAM_IS ("use-region-fades")) {
+	} else if (p == "use-region-fades") {
 		ActionManager::map_some_state ("Editor", "toggle-region-fades", mem_fun (session->config, &SessionConfiguration::get_use_region_fades));
-	} else if (PARAM_IS ("auto-xfade")) {
+	} else if (p == "auto-xfade") {
 		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", mem_fun (session->config, &SessionConfiguration::get_auto_xfade));
-	} else if (PARAM_IS ("xfade-model")) {
+	} else if (p == "xfade-model") {
 		update_crossfade_model ();
-	} else if (PARAM_IS ("edit-mode")) {
+	} else if (p == "edit-mode") {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
-	} else if (PARAM_IS ("subframes-per-frame")) {
+	} else if (p == "subframes-per-frame") {
 		update_subframes_per_frame ();
 		update_just_smpte ();
-	} else if (PARAM_IS ("show-track-meters")) {
+	} else if (p == "show-track-meters") {
 		toggle_meter_updating();
-	} else if (PARAM_IS ("link-region-and-track-selection")) {
+	} else if (p == "link-region-and-track-selection") {
 		ActionManager::map_some_state ("Editor", "link-region-and-track-selection", &RCConfiguration::get_link_region_and_track_selection);
-	} else if (PARAM_IS ("automation-follows-regions")) {
+	} else if (p == "automation-follows-regions") {
 		ActionManager::map_some_state ("Editor", "automation-follows-regions", &RCConfiguration::get_automation_follows_regions);
 	}
-
-#undef PARAM_IS
 }
 
 void

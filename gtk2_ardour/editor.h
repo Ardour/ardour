@@ -620,7 +620,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Text* verbose_canvas_cursor;
 	bool                 verbose_cursor_visible;
 
-	void parameter_changed (const char *);
+	void parameter_changed (std::string);
 	
 	bool track_canvas_motion (GdkEvent*);
 

@@ -112,13 +112,11 @@ LevelMeter::update_meters ()
 }
 
 void
-LevelMeter::parameter_changed(const char* parameter_name)
+LevelMeter::parameter_changed (string p)
 {
-#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &LevelMeter::parameter_changed), p));
 
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &LevelMeter::parameter_changed), parameter_name));
-
-	if (PARAM_IS ("meter-hold")) {
+	if (p == "meter-hold") {
 	
 		vector<MeterInfo>::iterator i;
 		uint32_t n;
@@ -128,8 +126,6 @@ LevelMeter::parameter_changed(const char* parameter_name)
 			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
 		}
 	}
-
-#undef PARAM_IS
 }
 
 void

@@ -3000,18 +3000,20 @@ Session::restore_history (string snapshot_name)
 }
 
 void
-Session::config_changed (const char* parameter_name)
+Session::config_changed (std::string p, bool ours)
 {
-#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-
-	if (PARAM_IS ("seamless-loop")) {
+	if (ours) {
+		set_dirty ();
+	}
+	
+	if (p == "seamless-loop") {
 		
-	} else if (PARAM_IS ("rf-speed")) {
+	} else if (p == "rf-speed") {
 		
-	} else if (PARAM_IS ("auto-loop")) {
+	} else if (p == "auto-loop") {
 		
-	} else if (PARAM_IS ("auto-input")) {
-
+	} else if (p == "auto-input") {
+		
 		if (Config->get_monitoring_model() == HardwareMonitoring && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
 			
@@ -3024,7 +3026,7 @@ Session::config_changed (const char* parameter_name)
 			}
 		}
 
-	} else if (PARAM_IS ("punch-in")) {
+	} else if (p == "punch-in") {
 
 		Location* location;
 		
@@ -3037,7 +3039,7 @@ Session::config_changed (const char* parameter_name)
 			}
 		}
 		
-	} else if (PARAM_IS ("punch-out")) {
+	} else if (p == "punch-out") {
 
 		Location* location;
 		
@@ -3050,7 +3052,7 @@ Session::config_changed (const char* parameter_name)
 			}
 		}
 
-	} else if (PARAM_IS ("edit-mode")) {
+	} else if (p == "edit-mode") {
 
 		Glib::Mutex::Lock lm (playlist_lock);
 		
@@ -3058,63 +3060,63 @@ Session::config_changed (const char* parameter_name)
 			(*i)->set_edit_mode (Config->get_edit_mode ());
 		}
 
-	} else if (PARAM_IS ("use-video-sync")) {
+	} else if (p == "use-video-sync") {
 
 		waiting_for_sync_offset = Config->get_use_video_sync();
 
-	} else if (PARAM_IS ("mmc-control")) {
+	} else if (p == "mmc-control") {
 
 		//poke_midi_thread ();
 
-	} else if (PARAM_IS ("mmc-device-id") || PARAM_IS ("mmc-receive-id")) {
+	} else if (p == "mmc-device-id" || p == "mmc-receive-id") {
 
 		if (mmc) {
 			mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
 		}
 
-	} else if (PARAM_IS ("mmc-send-id")) {
+	} else if (p == "mmc-send-id") {
 
 		if (mmc) {
 			mmc->set_send_device_id (Config->get_mmc_send_device_id());
 		}
 
-	} else if (PARAM_IS ("midi-control")) {
+	} else if (p == "midi-control") {
 		
 		//poke_midi_thread ();
 
-	} else if (PARAM_IS ("raid-path")) {
+	} else if (p == "raid-path") {
 
 		setup_raid_path (config.get_raid_path());
 
-	} else if (PARAM_IS ("smpte-format")) {
+	} else if (p == "smpte-format") {
 
 		sync_time_vars ();
 
-	} else if (PARAM_IS ("video-pullup")) {
+	} else if (p == "video-pullup") {
 
 		sync_time_vars ();
 
-	} else if (PARAM_IS ("seamless-loop")) {
+	} else if (p == "seamless-loop") {
 
 		if (play_loop && transport_rolling()) {
 			// to reset diskstreams etc
 			request_play_loop (true);
 		}
 
-	} else if (PARAM_IS ("rf-speed")) {
+	} else if (p == "rf-speed") {
 
 		cumulative_rf_motion = 0;
 		reset_rf_scale (0);
 
-	} else if (PARAM_IS ("click-sound")) {
+	} else if (p == "click-sound") {
 
 		setup_click_sounds (1);
 
-	} else if (PARAM_IS ("click-emphasis-sound")) {
+	} else if (p == "click-emphasis-sound") {
 
 		setup_click_sounds (-1);
 
-	} else if (PARAM_IS ("clicking")) {
+	} else if (p == "clicking") {
 
 		if (Config->get_clicking()) {
 			if (_click_io && click_data) { // don't require emphasis data
@@ -3124,7 +3126,7 @@ Session::config_changed (const char* parameter_name)
 			_clicking = false;
 		}
 
-	} else if (PARAM_IS ("send-mtc")) {
+	} else if (p == "send-mtc") {
 		
 		/* only set the internal flag if we have
 		   a port.
@@ -3140,7 +3142,7 @@ Session::config_changed (const char* parameter_name)
 			session_send_mtc = false;
 		}
 
-	} else if (PARAM_IS ("send-mmc")) {
+	} else if (p == "send-mmc") {
 		
 		/* only set the internal flag if we have
 		   a port.
@@ -3153,7 +3155,7 @@ Session::config_changed (const char* parameter_name)
 			session_send_mmc = false; 
 		}
 
-	} else if (PARAM_IS ("midi-feedback")) {
+	} else if (p == "midi-feedback") {
 		
 		/* only set the internal flag if we have
 		   a port.
@@ -3163,11 +3165,11 @@ Session::config_changed (const char* parameter_name)
 			session_midi_feedback = Config->get_midi_feedback();
 		}
 
-	} else if (PARAM_IS ("jack-time-master")) {
+	} else if (p == "jack-time-master") {
 
 		engine().reset_timebase ();
 
-	} else if (PARAM_IS ("native-file-header-format")) {
+	} else if (p == "native-file-header-format") {
 
 		if (!first_file_header_format_reset) {
 			reset_native_file_format ();
@@ -3175,7 +3177,7 @@ Session::config_changed (const char* parameter_name)
 
 		first_file_header_format_reset = false;
 
-	} else if (PARAM_IS ("native-file-data-format")) {
+	} else if (p == "native-file-data-format") {
 
 		if (!first_file_data_format_reset) {
 			reset_native_file_format ();
@@ -3183,17 +3185,17 @@ Session::config_changed (const char* parameter_name)
 
 		first_file_data_format_reset = false;
 
-	} else if (PARAM_IS ("slave-source")) {
-		set_slave_source (Config->get_slave_source());
-	} else if (PARAM_IS ("remote-model")) {
+	} else if (p == "slave-source") {
+				set_slave_source (Config->get_slave_source());
+	} else if (p == "remote-model") {
 		set_remote_control_ids ();
-	}  else if (PARAM_IS ("denormal-model")) {
+	}  else if (p == "denormal-model") {
 		setup_fpu ();
-	} else if (PARAM_IS ("history-depth")) {
+	} else if (p == "history-depth") {
 		set_history_depth (Config->get_history_depth());
-	} else if (PARAM_IS ("sync-all-route-ordering")) {
+	} else if (p == "sync-all-route-ordering") {
 		sync_order_keys ("session");
-	} else if (PARAM_IS ("initial-program-change")) {
+	} else if (p == "initial-program-change") {
 
 		if (_mmc_port && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
@@ -3203,7 +3205,7 @@ Session::config_changed (const char* parameter_name)
 
 			_mmc_port->midimsg (buf, sizeof (buf), 0);
 		}
-	} else if (PARAM_IS ("initial-program-change")) {
+	} else if (p == "initial-program-change") {
 
 		if (_mmc_port && Config->get_initial_program_change() >= 0) {
 			MIDI::byte* buf = new MIDI::byte[2];
@@ -3212,14 +3214,11 @@ Session::config_changed (const char* parameter_name)
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 			// deliver_midi (_mmc_port, buf, 2);
 		}
-	} else if (PARAM_IS ("solo-mute-override")) {
+	} else if (p == "solo-mute-override") {
 		catch_up_on_solo_mute_override ();
 	}
 
 	set_dirty ();
-		   
-#undef PARAM_IS
-
 }
 
 void
