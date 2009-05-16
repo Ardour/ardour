@@ -181,14 +181,6 @@ Session::sync_time_vars ()
 	};
 }
 
-int
-Session::set_smpte_format (SmpteFormat format)
-{
-	/* this will trigger any other changes needed */
-	config.set_smpte_format (format);
-	return 0;
-}
-
 void
 Session::set_smpte_offset (nframes_t off)
 {

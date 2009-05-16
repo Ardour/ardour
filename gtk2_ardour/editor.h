@@ -334,36 +334,12 @@ class Editor : public PublicEditor
 	double physical_screen_width;
 	double physical_screen_height;
 
-	/* SMPTE timecode & video sync */
-
-	void smpte_fps_chosen (ARDOUR::SmpteFormat format);
-	void video_pullup_chosen (ARDOUR::Session::PullupFormat pullup);
-	void subframes_per_frame_chosen (uint32_t);
-
-	void update_smpte_mode ();
-	void update_video_pullup ();
-	void update_subframes_per_frame ();
-
 	/* fades/xfades */
 
-	void toggle_region_fades ();
- 	void toggle_region_fades_visible ();
  	void toggle_selected_region_fades (int dir);
  	void update_region_fade_visibility ();
-	void toggle_auto_xfade ();
-	void toggle_xfades_active ();
-	void toggle_xfade_visibility ();
 	bool xfade_visibility() const { return _xfade_visibility; }
 	void update_xfade_visibility ();
-	void update_crossfade_model ();
-	void set_crossfade_model (ARDOUR::CrossfadeModel);
-
-	/* layers */
-	void set_layer_model (ARDOUR::LayerModel);
-	void update_layering_model ();
-	
-	void toggle_link_region_and_track_selection ();
-	void toggle_automation_follows_regions ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 

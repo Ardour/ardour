@@ -3166,55 +3166,6 @@ ARDOUR_UI::reconnect_to_jack ()
 void
 ARDOUR_UI::use_config ()
 {
-	Glib::RefPtr<Action> act;
-
-	assert (session);
-
-	switch (session->config.get_native_file_data_format ()) {
-	case FormatFloat:
-		act = ActionManager::get_action (X_("options"), X_("FileDataFormatFloat"));
-		break;
-	case FormatInt24:
-		act = ActionManager::get_action (X_("options"), X_("FileDataFormat24bit"));
-		break;
-	case FormatInt16:
-		act = ActionManager::get_action (X_("options"), X_("FileDataFormat16bit"));
-		break;
-	}
-
-	if (act) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
-		ract->set_active ();
-	}	
-
-	switch (session->config.get_native_file_header_format ()) {
-	case BWF:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatBWF"));
-		break;
-	case WAVE:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE"));
-		break;
-	case WAVE64:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE64"));
-		break;
-	case iXML:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatiXML"));
-		break;
-	case RF64:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatRF64"));
-		break;
-	case CAF:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatCAF"));
-		break;
-	case AIFF:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatAIFF"));
-		break;
-	}
-
-	if (act) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
-		ract->set_active ();
-	}	
 
 	XMLNode* node = Config->extra_xml (X_("TransportControllables"));
 	if (node) {

@@ -233,9 +233,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void maximise_editing_space ();
 	void restore_editing_space ();
 
-	void set_native_file_header_format (ARDOUR::HeaderFormat sf);
-	void set_native_file_data_format (ARDOUR::SampleFormat sf);
-
 	void setup_profile ();
 	void setup_theme ();
 
@@ -685,57 +682,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void toggle_use_osc ();
 
-	void toggle_denormal_protection ();
-
-	void set_input_auto_connect (ARDOUR::AutoConnectOption);
-	void set_output_auto_connect (ARDOUR::AutoConnectOption);
-	void set_solo_model (ARDOUR::SoloModel);
-	void set_monitor_model (ARDOUR::MonitorModel);
-	void set_remote_model (ARDOUR::RemoteModel);
-	void set_denormal_model (ARDOUR::DenormalModel);
-
-	void toggle_sync_order_keys ();
-	void toggle_new_plugins_active();
-	void toggle_StopPluginsWithTransport();
-	void toggle_DoNotRunPluginsWhileRecording();
-	void toggle_VerifyRemoveLastCapture();
-	void toggle_PeriodicSafetyBackups();
-	void toggle_StopRecordingOnXrun();
-	void toggle_CreateXrunMarker();
-	void toggle_StopTransportAtEndOfSession();
-	void toggle_GainReduceFastTransport();
-	void toggle_LatchedSolo();
-	void toggle_ShowSoloMutes();
-	void toggle_SoloMuteOverride();
-	void toggle_LatchedRecordEnable ();
-	void toggle_RegionEquivalentsOverlap ();
-	void toggle_PrimaryClockDeltaEditCursor ();
-	void toggle_SecondaryClockDeltaEditCursor ();
-	void toggle_ShowTrackMeters ();
-	void toggle_only_copy_imported_files ();
-	void toggle_use_narrow_ms();
-	void toggle_NameNewMarkers ();
-	void toggle_rubberbanding_snaps_to_grid ();
-	void toggle_auto_analyse_audio ();
-	void toggle_TapeMachineMode();
-
 	void mtc_port_changed ();
-	void map_solo_model ();
-	void map_monitor_model ();
-	void map_denormal_model ();
-	void map_denormal_protection ();
-	void map_remote_model ();
-	void map_file_header_format ();
-	void map_file_data_format ();
-	void map_input_auto_connect ();
-	void map_output_auto_connect ();
-	void map_only_copy_imported_files ();
 	void parameter_changed (std::string);
-
-	void set_meter_hold (ARDOUR::MeterHold);
-	void set_meter_falloff (ARDOUR::MeterFalloff);
-	void map_meter_hold ();
-	void map_meter_falloff ();
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, std::string action_name);

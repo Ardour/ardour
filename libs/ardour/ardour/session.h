@@ -550,7 +550,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		pullup_Minus4Minus1
 	};
 
-	int  set_smpte_format (SmpteFormat);
 	void sync_time_vars();
 
 	void bbt_time (nframes_t when, BBT_Time&);
@@ -1721,9 +1720,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
-
-	LayerModel layer_model;
-	CrossfadeModel xfade_model;
 
 	typedef std::set<boost::shared_ptr<PBD::Controllable> > Controllables;
 	Glib::Mutex controllables_lock;

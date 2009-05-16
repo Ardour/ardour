@@ -427,22 +427,6 @@ meter_falloff_from_float (float val)
 	}
 }
 
-float
-meter_hold_to_float (MeterHold hold)
-{
-	switch (hold) {
-	case MeterHoldOff:
-		return 0.0f;
-	case MeterHoldShort:
-		return 40.0f;
-	case MeterHoldMedium:
-		return 100.0f;
-	case MeterHoldLong:
-	default:
-		return 200.0f;
-	}
-}
-
 AutoState
 ARDOUR::string_to_auto_state (std::string str)
 {

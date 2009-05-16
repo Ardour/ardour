@@ -326,21 +326,6 @@
 		   <menuitem action='snap-to-region-sync'/>
 		   <menuitem action='snap-to-region-boundary'/>
                </menu>
-               <menu name='MeterFalloff' action='MeterFalloff'>
-                    <menuitem action='MeterFalloffOff'/>
-                    <menuitem action='MeterFalloffSlowest'/>
-                    <menuitem action='MeterFalloffSlow'/>
-                    <menuitem action='MeterFalloffMedium'/>
-                    <menuitem action='MeterFalloffFast'/>
-                    <menuitem action='MeterFalloffFaster'/>
-                    <menuitem action='MeterFalloffFastest'/>
-               </menu>
-               <menu name='MeterHold' action='MeterHold'>
-                   <menuitem action='MeterHoldOff'/>
-                   <menuitem action='MeterHoldShort'/>
-                   <menuitem action='MeterHoldMedium'/>
-                   <menuitem action='MeterHoldLong'/>
-               </menu>
 	       <menu action="PrimaryClockMenu">
 	       	     <menuitem action="primary-clock-bbt"/>
 	       	     <menuitem action="primary-clock-minsec"/>
@@ -403,8 +388,6 @@
                <menuitem action='ToggleMeasureVisibility'/>
                <menuitem action='toggle-waveform-visible'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
-	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
-	       <menuitem action='toggle-region-fades-visible'/>
         </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
@@ -440,19 +423,6 @@
    	       <separator/>
         </menu>
         <menu name='Options' action='Options'>
-	       <menu action='AudioFileFormat'>
-                   <menu action='AudioFileFormatData'>
-		        <menuitem action='FileDataFormatFloat'/>
-		        <menuitem action='FileDataFormat24bit'/>
-		        <menuitem action='FileDataFormat16bit'/>
-		   </menu>
-                   <menu action='AudioFileFormatHeader'>
-		        <menuitem action='FileHeaderFormatBWF'/>
-		        <menuitem action='FileHeaderFormatWAVE'/>
-		        <menuitem action='FileHeaderFormatWAVE64'/>
-		        <menuitem action='FileHeaderFormatCAF'/>
-		   </menu>
-               </menu>
 	       <menu action='SyncMenu'>
                	     <menuitem action='SendMTC'/>
                	     <menuitem action='SendMMC'/>
@@ -463,127 +433,6 @@
 	       	      <menuitem action='set-tempo-from-region'/>
 		      <menuitem action='set-tempo-from-edit-range'/>
 	       </menu>
-	       <menu action='Timecode'>
-		   <menuitem action='Smpte23976'/>
-		   <menuitem action='Smpte24'/>
-		   <menuitem action='Smpte24976'/>
-		   <menuitem action='Smpte25'/>
-		   <menuitem action='Smpte2997'/>
-		   <menuitem action='Smpte2997drop'/>
-		   <menuitem action='Smpte30'/>
-		   <menuitem action='Smpte30drop'/>
-		   <menuitem action='Smpte5994'/>
-		   <menuitem action='Smpte60'/>
-               </menu>
-	       <menu action='Pullup'>
-		   <menuitem action='PullupPlus4Plus1'/>
-		   <menuitem action='PullupPlus4'/>
-		   <menuitem action='PullupPlus4Minus1'/>
-		   <menuitem action='PullupPlus1'/>
-		   <menuitem action='PullupNone'/>
-		   <menuitem action='PullupMinus1'/>
-		   <menuitem action='PullupMinus4Plus1'/>
-		   <menuitem action='PullupMinus4'/>
-		   <menuitem action='PullupMinus4Minus1'/>
-               </menu>
-	       <menu action='Subframes'>
-		   <menuitem action='Subframes80'/>
-		   <menuitem action='Subframes100'/>
-               </menu>
-               <separator/>
-               <menu action='Autoconnect'>
-                   <menuitem action='InputAutoConnectPhysical'/>
-                   <menuitem action='InputAutoConnectManual'/>
-    	           <separator/>
-                   <menuitem action='OutputAutoConnectPhysical'/>
-                   <menuitem action='OutputAutoConnectMaster'/>
-                   <menuitem action='OutputAutoConnectManual'/>
-               </menu>
-	       <menu action='ControlSurfaces'>
-                   <menuitem action='RemoteUserDefined'/>
-                   <menuitem action='RemoteMixerDefined'/>
-                   <menuitem action='RemoteEditorDefined'/>
-    	           <separator/>
-                   <menuitem action='AutoRebinding'/>
-               </menu>
-               <menu action='Monitoring'>
-                   <menuitem action='UseExternalMonitoring'/>
-                   <menuitem action='UseSoftwareMonitoring'/>
-                   <menuitem action='UseHardwareMonitoring'/>
-    	           <separator/>
-               	   <menuitem action='ToggleTapeMachineMode'/>
-               </menu>
-	       <menu action='Metering'>
-			<menuitem action='ShowTrackMeters'/>
-                   <menu action='MeteringFallOffRate'>
-		        <menuitem action='MeterFalloffOff'/>
-   		        <menuitem action='MeterFalloffSlowest'/>
-			<menuitem action='MeterFalloffSlow'/>
-	                <menuitem action='MeterFalloffMedium'/>
-	                <menuitem action='MeterFalloffFast'/>
-	                <menuitem action='MeterFalloffFaster'/>
-	                <menuitem action='MeterFalloffFastest'/>
-                   </menu>
-                   <menu action='MeteringHoldTime'>
-	                <menuitem action='MeterHoldOff'/>
-	                <menuitem action='MeterHoldShort'/>
-	                <menuitem action='MeterHoldMedium'/>
-	                <menuitem action='MeterHoldLong'/>
-                   </menu>
-               </menu>
-               <menu action='Solo'>
-                   <menuitem action='LatchedSolo'/>
-                   <menuitem action='SoloInPlace'/>
-                   <menuitem action='SoloViaBus'/>
-                   <menuitem action='ShowSoloMutes'/>
-                   <menuitem action='SoloMuteOverride'/>
-               </menu>
-	       <menu action='Crossfades'>
-		   <menuitem action='toggle-xfades-active'/>
-		   <menuitem action='toggle-xfades-visible'/>
-		   <menuitem action='toggle-auto-xfades'/>
-		   <separator/>
-		   <menuitem action='CrossfadesFull'/>
-		   <menuitem action='CrossfadesShort'/>
-	       </menu>
-	       <menu action='Layering'>
-		     <menuitem action='LayerLaterHigher'/>
-		     <menuitem action='LayerMoveAddHigher'/>
-		     <menuitem action='LayerAddHigher'/>
-	       </menu>
-	       <menu name='Denormals' action='Denormals'>
-                      <menuitem action='DenormalProtection'/>
-		      <separator/>
-                      <menuitem action='DenormalNone'/>
-                      <menuitem action='DenormalFTZ'/>
-                      <menuitem action='DenormalDAZ'/>
-	              <menuitem action='DenormalFTZDAZ'/>
-               </menu>
-               <separator/>
-	       <menu action='MiscOptions'>
-               	     <menuitem action='StopPluginsWithTransport'/>
-               	     <menuitem action='NewPluginsActive'/>
-               	     <menuitem action='DoNotRunPluginsWhileRecording'/>
-               	     <menuitem action='LatchedRecordEnable'/>
-               	     <menuitem action='RegionEquivalentsOverlap'/>
-               	     <menuitem action='PeriodicSafetyBackups'/>
-               	     <menuitem action='VerifyRemoveLastCapture'/>
-               	     <menuitem action='StopRecordingOnXrun'/>
-		     <menuitem action='CreateXrunMarker'/>
-		     <menuitem action='StopTransportAtEndOfSession'/>
-		     <menuitem action='GainReduceFastTransport'/>
-	       	     <menuitem action='PrimaryClockDeltaEditCursor'/>
-	       	     <menuitem action='SecondaryClockDeltaEditCursor'/>
-	       	     <menuitem action='OnlyCopyImportedFiles'/>
-	       	     <menuitem action='ShowTrackMeters'/>
-	       	     <menuitem action='DefaultNarrowMS'/>
-               	     <menuitem action='link-region-and-track-selection'/>
-	             <menuitem action='NameNewMarkers'/>
-               	     <menuitem action='RubberbandingSnapsToGrid'/>
-               	     <menuitem action='AutoAnalyseAudio'/>
-               	     <menuitem action='toggle-region-fades'/>
-                     <menuitem action='automation-follows-regions'/>
-		</menu>
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>

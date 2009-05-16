@@ -828,14 +828,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"),
 	     new BoolOption (
-		     "quieten-at-speed",
-		     _("Reduce output level by 12dB during fast forward / rewind"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
-		     mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
-		     ));
-
-	add_option (_("Transport"),
-	     new BoolOption (
 		     "stop-at-session-end",
 		     _("Stop at the end of the session"),
 		     mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
