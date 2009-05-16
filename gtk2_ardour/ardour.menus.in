@@ -432,8 +432,6 @@
                <menuitem action='toggle-midi-connection-manager'/>
    	       <separator/>
         </menu>
-        <menu name='Options' action='Options'>
-         </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>
 	</menu>

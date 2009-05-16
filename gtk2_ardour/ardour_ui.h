@@ -494,7 +494,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void use_menubar_as_top_menubar ();
 	void build_menu_bar ();
-	void build_control_surface_menu ();
 
 	Gtk::Label   wall_clock_label;
 	Gtk::EventBox wall_clock_box;
@@ -684,9 +683,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void mtc_port_changed ();
 	void parameter_changed (std::string);
-
-	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
-	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, std::string action_name);
 
 	bool first_idle ();
 

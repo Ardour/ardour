@@ -91,7 +91,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Files"), _("Import/Export"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
-	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
 	ActionManager::register_action (main_actions, X_("Help"), _("Help"));
  	ActionManager::register_action (main_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
@@ -451,52 +450,6 @@ ARDOUR_UI::install_actions ()
 }
 
 void
-ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
-{
-	if (!session) {
-		/* this happens when we build the menu bar when control protocol support
-		   has been used in the past for some given protocol - the item needs
-		   to be made active, but there is no session yet.
-		*/
-		return;
-	}
-
-	if (cpi->protocol == 0) {
-		ControlProtocolManager::instance().instantiate (*cpi);
-	} else {
-		ControlProtocolManager::instance().teardown (*cpi);
-	}
-}
-
-void
-ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const char* group, string action)
-{
-	if (!session) {
-		/* this happens when we build the menu bar when control protocol support
-		   has been used in the past for some given protocol - the item needs
-		   to be made active, but there is no session yet.
-		*/
-		return;
-	}
-
-	if (cpi->protocol) {
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action.c_str());
-
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
-			if (tact) {
-				bool x = tact->get_active();
-
-				if (x != cpi->protocol->get_feedback()) {
-					cpi->protocol->set_feedback (x);
-				}
-			}
-		}
-	}
-}
-
-void
 ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
 {
 	Glib::RefPtr<Action> action;
@@ -548,83 +501,8 @@ ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
 }
 
 void
-ARDOUR_UI::build_control_surface_menu ()
-{
-	list<ControlProtocolInfo*>::iterator i;
-	bool with_feedback;
-
-	/* !!! this has to match the top level entry from ardour.menus */
-
-	string ui = "<menubar name='Main' action='MainMenu'>\n"
-		"<menu name='Options' action='Options'>\n"
-		"<menu action='ControlSurfaces'><separator/>\n";
-
-	for (i = ControlProtocolManager::instance().control_protocol_info.begin();
-			i != ControlProtocolManager::instance().control_protocol_info.end(); ++i) {
-
-		if (!(*i)->mandatory) {
-
-			// Enable surface
-
-			string action_name = "Toggle";
-			action_name += legalize_for_path ((*i)->name);
-			action_name += "Surface";
-
-			string action_label = (*i)->name;
-
-			Glib::RefPtr<Action> act = ActionManager::register_toggle_action (
-					editor->editor_actions, action_name.c_str(), action_label.c_str(), (bind (
-							mem_fun (*this, &ARDOUR_UI::toggle_control_protocol),
-							*i)));
-
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
-			with_feedback = false;
-
-			if ((*i)->protocol || (*i)->requested) {
-				tact->set_active ();
-			}
-
-			ui += "<menuitem action='";
-			ui += action_name;
-			ui += "'/>\n";
-
-			// Enable feedback
-
-			if ((*i)->supports_feedback) {
-
-				action_name += "Feedback";
-				string feedback_label = action_label + " " + _("Feedback");
-
-				Glib::RefPtr<Action> act = ActionManager::register_toggle_action (
-						editor->editor_actions, action_name.c_str(), feedback_label.c_str(), (bind (
-								mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback),
-								*i, "Editor", action_name)));
-			
-				ui += "<menuitem action='";
-				ui += action_name;
-				ui += "'/>\n";
-
-				if ((*i)->protocol) {
-					Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-					tact->set_active ((*i)->protocol->get_feedback ());
-				}
-			}
-		}
-	}
-
-	ui += "</menu>\n</menu>\n</menubar>\n";
-
-	ActionManager::ui_manager->add_ui_from_string (ui);
-}
-
-void
 ARDOUR_UI::build_menu_bar ()
 {
-	if (!Profile->get_sae()) {
-		build_control_surface_menu ();
-	}
-
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
 	menu_bar->set_name ("MainMenuBar");
 

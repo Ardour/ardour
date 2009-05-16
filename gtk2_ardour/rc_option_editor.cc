@@ -6,6 +6,8 @@
 #include "midi++/manager.h"
 #include "midi++/factory.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/control_protocol_manager.h"
+#include "control_protocol/control_protocol.h"
 #include "rc_option_editor.h"
 #include "utils.h"
 #include "midi_port_dialog.h"
@@ -30,6 +32,8 @@ public:
 		_store = ListStore::create (_model);
 		_view.set_model (_store);
 		_view.append_column (_("Name"), _model.name);
+		_view.get_column(0)->set_resizable (true);
+		_view.get_column(0)->set_expand (true);
 		_view.append_column_editable (_("Online"), _model.online);
 		_view.append_column_editable (_("Trace input"), _model.trace_input);
 		_view.append_column_editable (_("Trace output"), _model.trace_output);
@@ -689,6 +693,101 @@ private:
 	HScale _dpi_slider;
 };
 
+
+class ControlSurfacesOptions : public OptionEditorBox
+{
+public:
+	ControlSurfacesOptions ()
+	{
+		_store = ListStore::create (_model);
+		_view.set_model (_store);
+		_view.append_column (_("Name"), _model.name);
+		_view.get_column(0)->set_resizable (true);
+		_view.get_column(0)->set_expand (true);
+		_view.append_column_editable (_("Enabled"), _model.enabled);
+		_view.append_column_editable (_("Feedback"), _model.feedback);
+
+		_box->pack_start (_view, false, false);
+
+		_store->signal_row_changed().connect (mem_fun (*this, &ControlSurfacesOptions::model_changed));
+	}
+
+	void parameter_changed (std::string const &)
+	{
+
+	}
+
+	void set_state_from_config ()
+	{
+		_store->clear ();
+		
+		ControlProtocolManager& m = ControlProtocolManager::instance ();
+		for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+
+			if (!(*i)->mandatory) {
+				TreeModel::Row r = *_store->append ();
+				r[_model.name] = (*i)->name;
+				r[_model.enabled] = ((*i)->protocol || (*i)->requested);
+				r[_model.feedback] = ((*i)->protocol && (*i)->protocol->get_feedback ());
+				r[_model.protocol_info] = *i;
+			}
+		}
+	}
+
+private:
+
+	void model_changed (TreeModel::Path const & p, TreeModel::iterator const & i)
+	{
+		TreeModel::Row r = *i;
+
+		ControlProtocolInfo* cpi = r[_model.protocol_info];
+		if (!cpi) {
+			return;
+		}
+
+		bool const was_enabled = (cpi->protocol != 0);
+		bool const is_enabled = r[_model.enabled];
+
+		if (was_enabled != is_enabled) {
+			if (!was_enabled) {
+				ControlProtocolManager::instance().instantiate (*cpi);
+			} else {
+				ControlProtocolManager::instance().teardown (*cpi);
+			}
+		}
+
+		bool const was_feedback = (cpi->protocol && cpi->protocol->get_feedback ());
+		bool const is_feedback = r[_model.feedback];
+
+		if (was_feedback != is_feedback && cpi->protocol) {
+			cpi->protocol->set_feedback (is_feedback);
+		}
+	}
+
+        class ControlSurfacesModelColumns : public TreeModelColumnRecord
+	{
+	public:
+		
+		ControlSurfacesModelColumns ()
+		{
+			add (name);
+			add (enabled);
+			add (feedback);
+			add (protocol_info);
+		}
+
+		TreeModelColumn<string> name;
+		TreeModelColumn<bool> enabled;
+		TreeModelColumn<bool> feedback;
+		TreeModelColumn<ControlProtocolInfo*> protocol_info;
+	};
+
+	Glib::RefPtr<ListStore> _store;
+	ControlSurfacesModelColumns _model;
+	TreeView _view;
+};
+
+
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditor (Config, _("Ardour Preferences")),
 	  _rc_config (Config)
@@ -734,19 +833,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Misc")));
 	
-	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
-		"remote-model",
-		_("Control surface remote ID"),
-		mem_fun (*_rc_config, &RCConfiguration::get_remote_model),
-		mem_fun (*_rc_config, &RCConfiguration::set_remote_model)
-		);
-
-	rm->add (UserOrdered, _("assigned by user"));
-	rm->add (MixerOrdered, _("follows order of mixer"));
-	rm->add (EditorOrdered, _("follows order of editor"));
-
-	add_option (_("Misc"), rm);
-
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (_("Misc"), new FontScalingOptions (_rc_config));
@@ -1081,6 +1167,23 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_initial_program_change),
 		     -1, 65536, 1, 10
 		     ));
+
+	/* CONTROL SURFACES */
+
+	add_option (_("Control surfaces"), new ControlSurfacesOptions);
+
+	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
+		"remote-model",
+		_("Control surface remote ID"),
+		mem_fun (*_rc_config, &RCConfiguration::get_remote_model),
+		mem_fun (*_rc_config, &RCConfiguration::set_remote_model)
+		);
+
+	rm->add (UserOrdered, _("assigned by user"));
+	rm->add (MixerOrdered, _("follows order of mixer"));
+	rm->add (EditorOrdered, _("follows order of editor"));
+
+	add_option (_("Control surfaces"), rm);
 
 	/* CLICK */
 
