@@ -74,12 +74,6 @@ ARDOUR_UI::toggle_use_mmc ()
 }
 
 void
-ARDOUR_UI::toggle_use_osc ()
-{
-	ActionManager::toggle_config_state ("options", "UseOSC", &RCConfiguration::set_use_osc, &RCConfiguration::get_use_osc);
-}
-
-void
 ARDOUR_UI::toggle_send_midi_feedback ()
 {
 	ActionManager::toggle_config_state ("options", "SendMIDIfeedback", &RCConfiguration::set_midi_feedback, &RCConfiguration::get_midi_feedback);
@@ -289,8 +283,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 			osc->stop ();
 		}
 #endif
-
-		ActionManager::map_some_state ("options", "UseOSC", &RCConfiguration::get_use_osc);
 
 	} else if (p == "mmc-control") {
 		ActionManager::map_some_state ("options", "UseMMC", &RCConfiguration::get_mmc_control);

@@ -121,6 +121,12 @@
 	       </menu>
 
 	       <separator/>
+	       <menu action='SyncMenu'>
+               	     <menuitem action='SendMTC'/>
+               	     <menuitem action='SendMMC'/>
+               	     <menuitem action='UseMMC'/>
+               	     <menuitem action='SendMidiClock'/>
+	       </menu>
 	       <menuitem action='ToggleTimeMaster'/>
                <menuitem action='TogglePunch'/>
                <menuitem action='TogglePunchIn'/>
@@ -220,6 +226,10 @@
 		   <separator/>
 		   <menuitem action='break-drag'/>
              </menu>
+	       <menu action="TempoMenu">
+	       	      <menuitem action='set-tempo-from-region'/>
+		      <menuitem action='set-tempo-from-edit-range'/>
+	       </menu>
 #ifndef GTKOSX
 	     <separator/>
              <menuitem action='ToggleRCOptionsEditor'/>
@@ -423,16 +433,6 @@
    	       <separator/>
         </menu>
         <menu name='Options' action='Options'>
-	       <menu action='SyncMenu'>
-               	     <menuitem action='SendMTC'/>
-               	     <menuitem action='SendMMC'/>
-               	     <menuitem action='UseMMC'/>
-               	     <menuitem action='SendMidiClock'/>
-	       </menu>
-	       <menu action="TempoMenu">
-	       	      <menuitem action='set-tempo-from-region'/>
-		      <menuitem action='set-tempo-from-edit-range'/>
-	       </menu>
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>
