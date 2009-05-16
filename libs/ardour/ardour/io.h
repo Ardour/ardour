@@ -71,24 +71,11 @@ class IO : public SessionObject, public AutomatableControls, public Latent
   public:
 	static const std::string state_node_name;
 
-	IO (Session&, const std::string& name, DataType default_type = DataType::AUDIO,
-		ChanCount in_min=ChanCount::ZERO, ChanCount in_max=ChanCount::INFINITE,
-		ChanCount out_min=ChanCount::ZERO, ChanCount out_max=ChanCount::INFINITE);
-	
+	IO (Session&, const std::string& name, DataType default_type = DataType::AUDIO);
 	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	
 	virtual ~IO();
 
-	ChanCount input_minimum() const { return _input_minimum; }
-	ChanCount input_maximum() const { return _input_maximum; }
-	ChanCount output_minimum() const { return _output_minimum; }
-	ChanCount output_maximum() const { return _output_maximum; }
-	
-	void set_input_minimum (ChanCount n);
-	void set_input_maximum (ChanCount n);
-	void set_output_minimum (ChanCount n);
-	void set_output_maximum (ChanCount n);
-	
 	bool active() const { return _active; }
 	void set_active (bool yn);
 	
@@ -283,8 +270,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	XMLNode*             deferred_state;
 	DataType            _default_type;
 	nframes_t           _output_offset;
-	ChanCount           _configured_inputs;
-	ChanCount           _configured_outputs;
 	
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;
@@ -327,11 +312,6 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	sigc::connection port_legal_c;
 	sigc::connection panner_legal_c;
 
-	ChanCount _input_minimum; ///< minimum number of input channels (0 for no minimum)
-	ChanCount _input_maximum; ///< maximum number of input channels (ChanCount::INFINITE for no maximum)
-	ChanCount _output_minimum; ///< minimum number of output channels (0 for no minimum)
-	ChanCount _output_maximum; ///< maximum number of output channels (ChanCount::INFINITE for no maximum)
-
 	boost::shared_ptr<Bundle> _bundle_for_inputs; ///< a bundle representing our inputs
 	boost::shared_ptr<Bundle> _bundle_for_outputs; ///< a bundle representing our outputs
 
@@ -361,7 +341,9 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	void bundle_changed (Bundle::Change);
 
-	int get_port_counts (const XMLNode& node);
+
+	int get_port_counts (const XMLNode& node, ChanCount& in, ChanCount& out,
+			     boost::shared_ptr<Bundle>& ic, boost::shared_ptr<Bundle>& oc);
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
 	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name, const std::string &default_name, const std::string &connection_type_name);

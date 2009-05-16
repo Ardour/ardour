@@ -139,11 +139,6 @@ AudioTrack::deprecated_use_diskstream_connections ()
 
 	diskstream->deprecated_io_node = 0;
 
-	set_input_minimum (ChanCount::ZERO);
-	set_input_maximum (ChanCount::INFINITE);
-	set_output_minimum (ChanCount::ZERO);
-	set_output_maximum (ChanCount::INFINITE);
-	
 	if ((prop = node.property ("gain")) != 0) {
 		set_gain (atof (prop->value().c_str()), this);
 		_gain = _gain_control->user_float();

@@ -63,15 +63,12 @@ using namespace PBD;
 uint32_t Route::order_key_cnt = 0;
 sigc::signal<void,const char*> Route::SyncOrderKeys;
 
-Route::Route (Session& sess, string name, Flag flg,
-	      DataType default_type, ChanCount in, ChanCount out)
-	: IO (sess, name, default_type, in, ChanCount::INFINITE, out, ChanCount::INFINITE)
+Route::Route (Session& sess, string name, Flag flg, DataType default_type)
+	: IO (sess, name, default_type)
 	, _flags (flg)
 	, _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl))
 	, _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
 {
-	_configured_inputs = in;
-	_configured_outputs = out;
 	init ();
 
 }
@@ -129,14 +126,11 @@ Route::init ()
 
 	/* amp & meter belong to IO but need to be added to our processor list */
 
-	_amp->set_sort_key (0);
-	_meter->set_sort_key (1);
-	add_processor (_amp);
-	add_processor (_meter);
+	add_processor (_amp, PostFader);
+	add_processor (_meter, PreFader);
 	
 	_main_outs.reset (new Delivery (_session, this, _name, Delivery::Main));
-	ProcessorList::iterator i = _processors.end();
-	add_processor (_main_outs, 0, &i);
+	add_processor (_main_outs, PostFader);
 }
 
 Route::~Route ()
@@ -598,23 +592,51 @@ dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& p
 	cerr << name << " {" << endl;
 	for (list<boost::shared_ptr<Processor> >::const_iterator p = procs.begin();
 			p != procs.end(); ++p) {
-		cerr << "\t" << (*p)->sort_key() << ": " << (*p)->name() << endl;
+		cerr << "\t" << (*p)->name() << endl;
 	}
 	cerr << "}" << endl;
 }
 
-
-struct ProcessorSortByKey {
-    bool operator() (boost::shared_ptr<Processor> a, boost::shared_ptr<Processor> b) {
-	    return a->sort_key() < b->sort_key();
-    }
-};
-
-uint32_t
-Route::fader_sort_key() const
+Route::ProcessorList::iterator
+Route::prefader_iterator() 
 {
-	return _amp->sort_key();
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+	return find (_processors.begin(), _processors.end(), _amp);
 }
+
+int
+Route::add_processor (boost::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err)
+{
+	ProcessorList::iterator loc;
+
+	/* XXX this is not thread safe - we don't hold the lock across determining the iter
+	   to add before and actually doing the insertion. dammit.
+	*/
+
+	if (placement == PreFader) {
+		/* generic pre-fader: insert immediately before the amp */
+		loc = find(_processors.begin(), _processors.end(), _amp);
+	} else {
+		/* generic post-fader: insert at end */
+		loc = _processors.end();
+
+		if (processor->visible() && !_processors.empty()) {
+			/* check for invisible processors stacked at the end and leave them there */
+			ProcessorList::iterator p;
+			p = _processors.end();
+			--p;
+			cerr << "Let's check " << (*p)->name() << " vis ? " << (*p)->visible() << endl;
+			while (!(*p)->visible() && p != _processors.begin()) {
+				--p;
+			}
+			++p;
+			loc = p;
+		}
+	}
+
+	return add_processor (processor, loc, err);
+}
+
 
 /** Add a processor to the route.
  * If @a iter is not NULL, it must point to an iterator in _processors and the new
@@ -622,7 +644,7 @@ Route::fader_sort_key() const
  * @a position is used.
  */
 int
-Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, ProcessorList::iterator* iter)
+Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::iterator iter, ProcessorStreams* err)
 {
 	ChanCount old_pms = processor_max_streams;
 
@@ -630,9 +652,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		return 1;
 	}
 
-	cerr << "Adding a processor called " << processor->name() << " sk = " << processor->sort_key() 
-	     << ((iter == 0) ? " NO given position " : " with given position")
-	     << endl;
+	cerr << "Adding a processor called " << processor->name() << endl;
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
@@ -645,15 +665,10 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		if (processor == _amp || processor == _meter || processor == _main_outs) {
 			// Ensure only one of these are in the list at any time
 			if (loc != _processors.end()) {
-			   	if (iter) {
-					if (*iter == loc) { // Already in place, do nothing
-						return 0;
-					} else { // New position given, relocate
-						_processors.erase(loc);
-					}
-				} else { // Insert at end
-					_processors.erase(loc);
-					loc = _processors.end();
+				if (iter == loc) { // Already in place, do nothing
+					return 0;
+				} else { // New position given, relocate
+					_processors.erase (loc);
 				}
 			}
 
@@ -662,41 +677,26 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 				cerr << "ERROR: Processor added to route twice!" << endl;
 				return 1;
 			}
+
+			loc = iter;
 		}
 
-		if (iter) {
-			// Use position given by user
-			loc = *iter;
-		} else {
-			if (processor->sort_key() == 0) {
-				/* generic pre-fader: insert immediately before the amp */
-				loc = find(_processors.begin(), _processors.end(), _amp);
-			} else if (processor->sort_key() > _processors.size()) {
-				/* generic post-fader: insert at end */
-				loc = _processors.end();
-			} else {
-				/* find insert point */
-				ProcessorSortByKey cmp;
-				loc = upper_bound (_processors.begin(), _processors.end(), processor, cmp);
-			}
-		}
-		
-		// Update sort keys
-		if (loc == _processors.end()) {
-			processor->set_sort_key(_processors.size());
-		} else {
-			processor->set_sort_key((*loc)->sort_key());
-			for (ProcessorList::iterator p = loc; p != _processors.end(); ++p) {
-				(*p)->set_sort_key((*p)->sort_key() + 1);
-			}
-		}
+		cerr << "Adding " << processor->name() << endl;
 
-		_processors.insert(loc, processor);
+		_processors.insert (loc, processor);
 
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
-		if (configure_processors_unlocked (err)) {
+		
+		ProcessorStreams rerr;
+
+		if (configure_processors_unlocked (&rerr)) {
+			
 			dump_processors(_name + "bad config", _processors);
+			if (err) {
+				*err = rerr;
+			}
+			cerr << "Error at proc " << rerr.index << " with input of " << rerr.count << endl;
 			ProcessorList::iterator ploc = loc;
 			--ploc;
 			_processors.erase(ploc);
@@ -736,8 +736,146 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 	return 0;
 }
 
+bool
+Route::add_processor_from_xml (const XMLNode& node, Placement placement)
+{
+	ProcessorList::iterator loc;
+	if (placement == PreFader) {
+		/* generic pre-fader: insert immediately before the amp */
+		loc = find(_processors.begin(), _processors.end(), _amp);
+	} else {
+		/* generic post-fader: insert at end */
+		loc = _processors.end();
+	}
+
+	return add_processor_from_xml (node, loc);
+}
+
+bool
+Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter)
+{
+	const XMLProperty *prop;
+
+	// legacy sessions use a different node name for sends
+	if (node.name() == "Send") {
+	
+		try {
+			boost::shared_ptr<Send> send (new Send (_session, node));
+			add_processor (send, iter); 
+			return true;
+		} 
+		
+		catch (failed_constructor &err) {
+			error << _("Send construction failed") << endmsg;
+			return false;
+		}
+		
+	} else if (node.name() == "Processor") {
+		
+		try {
+			if ((prop = node.property ("type")) != 0) {
+
+				boost::shared_ptr<Processor> processor;
+				bool have_insert = false;
+
+				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+				    prop->value() == "lv2" ||
+				    prop->value() == "vst" ||
+				    prop->value() == "audiounit") {
+					
+					processor.reset (new PluginInsert(_session, node));
+					have_insert = true;
+					
+				} else if (prop->value() == "port") {
+
+					processor.reset (new PortInsert (_session, node));
+				
+				} else if (prop->value() == "send") {
+
+					processor.reset (new Send (_session, node));
+					have_insert = true;
+				
+				} else if (prop->value() == "meter") {
+
+					processor = _meter;
+				
+				} else if (prop->value() == "amp") {
+					
+					processor = _amp;
+					
+				} else if (prop->value() == "listen" || prop->value() == "deliver") {
+
+					/* XXX need to generalize */
+
+					processor = _control_outs;
+					
+				} else if (prop->value() == "main-outs") {
+					
+					processor = _main_outs;
+					
+				} else {
+
+					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
+				}
+				
+				if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
+					/* check for invisible processors stacked at the end and leave them there */
+					ProcessorList::iterator p;
+					p = _processors.end();
+					--p;
+					cerr << "Let's check " << (*p)->name() << " vis ? " << (*p)->visible() << endl;
+					while (!(*p)->visible() && p != _processors.begin()) {
+						--p;
+					}
+					++p;
+					iter = p;
+				}
+
+				return (add_processor (processor, iter) == 0);
+				
+			} else {
+				error << _("Processor XML node has no type property") << endmsg;
+			}
+		}
+
+		catch (failed_constructor &err) {
+			warning << _("processor could not be created. Ignored.") << endmsg;
+			return false;
+		}
+	}
+	return false;
+}
+
 int
-Route::add_processors (const ProcessorList& others, ProcessorStreams* err, uint32_t first_sort_key)
+Route::add_processors (const ProcessorList& others, Placement placement, ProcessorStreams* err)
+{
+	ProcessorList::iterator loc;
+	if (placement == PreFader) {
+		/* generic pre-fader: insert immediately before the amp */
+		loc = find(_processors.begin(), _processors.end(), _amp);
+	} else {
+		/* generic post-fader: insert at end */
+		loc = _processors.end();
+
+		if (!_processors.empty()) {
+			/* check for invisible processors stacked at the end and leave them there */
+			ProcessorList::iterator p;
+			p = _processors.end();
+			--p;
+			cerr << "Let's check " << (*p)->name() << " vis ? " << (*p)->visible() << endl;
+			while (!(*p)->visible() && p != _processors.begin()) {
+				--p;
+			}
+			++p;
+			loc = p;
+		}
+	}
+
+	return add_processors (others, loc, err);
+}
+
+int
+Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter, ProcessorStreams* err)
 {
 	/* NOTE: this is intended to be used ONLY when copying
 	   processors from another Route. Hence the subtle
@@ -750,29 +888,16 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err, uint3
 		return 1;
 	}
 
+	if (others.empty()) {
+		return 0;
+	}
+
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
-
-		ProcessorList::iterator loc;
 		ProcessorList::iterator existing_end = _processors.end();
 		--existing_end;
 
-		ChanCount potential_max_streams = ChanCount::max(input_minimum(), output_minimum());
-		
-		if (first_sort_key == 0) {
-			/* generic pre-fader: insert immediately before the amp */
-			cerr << "Add new procs at amp, sk = " << first_sort_key << endl;
-			loc = find(_processors.begin(), _processors.end(), _amp);
-		} else if (first_sort_key > _processors.size()) {
-			/* generic post-fader: insert at end */
-			cerr << "Add new procs at end, sk = " << first_sort_key << endl;
-			loc = _processors.end();
-		} else {
-			/* find insert point */
-			ProcessorSortByKey cmp;
-			cerr << "Add new procs at sk = " << first_sort_key << endl;
-			loc = upper_bound (_processors.begin(), _processors.end(), others.front(), cmp);
-		}
+		ChanCount potential_max_streams = ChanCount::max (n_inputs(), n_outputs());
 
 		for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
 			
@@ -797,7 +922,7 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err, uint3
 			// Ensure peak vector sizes before the plugin is activated
 			_meter->configure_io (potential_max_streams, potential_max_streams);
 			
-			_processors.insert (loc, *i);
+			_processors.insert (iter, *i);
 			
 			if (configure_processors_unlocked (err)) {
 				++existing_end;
@@ -1150,16 +1275,18 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	_in_configure_processors = true;
 
 	// Check each processor in order to see if we can configure as requested
-	ChanCount in = _configured_inputs;
+	ChanCount in = n_inputs();
 	ChanCount out;
 	list< pair<ChanCount,ChanCount> > configuration;
 	uint32_t index = 0;
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
-		(*p)->set_sort_key(index);
+		cerr << "Can " << (*p)->name() << " support in= " << in << " out= " << out;
 		if ((*p)->can_support_io_configuration(in, out)) {
+			cerr << " yes\n";
 			configuration.push_back(make_pair(in, out));
 			in = out;
 		} else {
+			cerr << " no\n";
 			if (err) {
 				err->index = index;
 				err->count = in;
@@ -1181,7 +1308,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	// Ensure route outputs match last processor's outputs
 	if (out != n_outputs()) {
-		ensure_io(_configured_inputs, out, false, this);
+		ensure_io (n_inputs(), out, false, this);
 	}
 
 	_in_configure_processors = false;
@@ -1244,21 +1371,68 @@ Route::all_processors_active (Placement p, bool state)
 }
 
 int
-Route::sort_processors (ProcessorStreams* err)
+Route::reorder_processors (const ProcessorList& new_order, Placement placement, ProcessorStreams* err)
 {
 	{
-		ProcessorSortByKey comparator;
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ChanCount old_pms = processor_max_streams;
-
-		/* the sweet power of C++ ... */
-
+		ProcessorList::iterator oiter;
+		ProcessorList::const_iterator niter;
 		ProcessorList as_it_was_before = _processors;
+		ProcessorList as_it_will_be;
+		ProcessorList::iterator start, end;
 
-		dump_processors (_name + " PRESORT", _processors);
+		dump_processors (_name + " PreReorder", _processors);
+		placement_range (placement, start, end);
 
-		_processors.sort (comparator);
-	
+		oiter = start;
+		niter = new_order.begin(); 
+
+		while (oiter != end && niter !=  new_order.end()) {
+			
+			/* if the next processor in the old list is invisible (i.e. should not be in the new order)
+			   then append it to the temp list. 
+
+			   Otherwise, see if the next processor in the old list is in the new list. if not,
+			   its been deleted. If its there, append it to the temp list.
+			*/
+			
+			if (oiter == end) {
+
+				/* no more elements in the old list, so just stick the rest of 
+				   the new order onto the temp list.
+				*/
+
+				as_it_will_be.insert (as_it_will_be.end(), niter, new_order.end());
+
+			} else {
+				
+				if (!(*oiter)->visible()) {
+
+					as_it_will_be.push_back (*oiter);
+
+				} else {
+
+					/* visible processor: check that its in the new order */
+
+					if (find (new_order.begin(), new_order.end(), (*oiter)) == new_order.end()) {
+						/* deleted: do nothing */
+					} else {
+						/* ignore this one, and add the next item from the new order instead */
+						as_it_will_be.push_back (*niter);
+						++niter;
+					}
+				}
+				
+                                /* now remove from old order - its taken care of no matter what */
+				oiter = _processors.erase (oiter);
+			}
+		}
+
+		_processors.insert (end, as_it_will_be.begin(), as_it_will_be.end());
+
+		dump_processors (_name + " PostReorder", _processors);
+
 		if (configure_processors_unlocked (err)) {
 			_processors = as_it_was_before;
 			processor_max_streams = old_pms;
@@ -1267,6 +1441,7 @@ Route::sort_processors (ProcessorStreams* err)
 	} 
 
 	dump_processors (_name + " sorted", _processors);
+	/* do we really need to do this every time? */
 	reset_panner ();
 	processors_changed (); /* EMIT SIGNAL */
 
@@ -1440,94 +1615,10 @@ Route::set_deferred_state ()
 
 	nlist = deferred_state->children();
 
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-		add_processor_from_xml (**niter);
-	}
+	_set_processor_states (nlist);
 
 	delete deferred_state;
 	deferred_state = 0;
-}
-
-bool
-Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator* iter)
-{
-	const XMLProperty *prop;
-
-	// legacy sessions use a different node name for sends
-	if (node.name() == "Send") {
-	
-		try {
-			boost::shared_ptr<Send> send (new Send (_session, node));
-			add_processor (send, 0, iter);
-			return true;
-		} 
-		
-		catch (failed_constructor &err) {
-			error << _("Send construction failed") << endmsg;
-			return false;
-		}
-		
-	} else if (node.name() == "Processor") {
-		
-		try {
-			if ((prop = node.property ("type")) != 0) {
-
-				boost::shared_ptr<Processor> processor;
-				bool have_insert = false;
-
-				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
-				    prop->value() == "lv2" ||
-				    prop->value() == "vst" ||
-				    prop->value() == "audiounit") {
-					
-					processor.reset (new PluginInsert(_session, node));
-					have_insert = true;
-					
-				} else if (prop->value() == "port") {
-
-					processor.reset (new PortInsert (_session, node));
-				
-				} else if (prop->value() == "send") {
-
-					processor.reset (new Send (_session, node));
-					have_insert = true;
-				
-				} else if (prop->value() == "meter") {
-
-					processor = _meter;
-				
-				} else if (prop->value() == "amp") {
-					
-					processor = _amp;
-					
-				} else if (prop->value() == "listen" || prop->value() == "deliver") {
-
-					/* XXX need to generalize */
-
-					processor = _control_outs;
-					
-				} else if (prop->value() == "main-outs") {
-					
-					processor = _main_outs;
-					
-				} else {
-
-					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
-				}
-				
-				return (add_processor (processor, 0, iter) == 0);
-				
-			} else {
-				error << _("Processor XML node has no type property") << endmsg;
-			}
-		}
-
-		catch (failed_constructor &err) {
-			warning << _("processor could not be created. Ignored.") << endmsg;
-			return false;
-		}
-	}
-	return false;
 }
 
 int
@@ -1671,31 +1762,23 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		}
 	}
 
-	XMLNodeList processor_nodes;
-	bool has_meter_processor = false; // legacy sessions don't
-			
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-
+		
 		child = *niter;
 			
 		if (child->name() == X_("Send") || child->name() == X_("Processor")) {
-			processor_nodes.push_back(child);
-			if ((prop = child->property (X_("type"))) != 0 && prop->value() == "meter")  {
-				has_meter_processor = true;
-			}
+			deferred_state->add_child_copy (*child);
 		}
-
 	}
 
-	_set_processor_states(processor_nodes);
-	if (!has_meter_processor) {
-		set_meter_point(_meter_point, NULL);
+	if (ports_legal) {
+		_set_processor_states (deferred_state->children());
+		delete deferred_state;
+		deferred_state = 0;
 	}
-	processors_changed ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
-		// All processors have been applied already
 
 		if (child->name() == X_("Automation")) {
 			
@@ -1752,8 +1835,10 @@ void
 Route::_set_processor_states(const XMLNodeList &nlist)
 {
 	XMLNodeConstIterator niter;
-
+	bool has_meter_processor = false; // legacy sessions don't
 	ProcessorList::iterator i, o;
+
+	cerr << "Setting processor states with in = " << n_inputs() << endl;
 
 	// Iterate through existing processors, remove those which are not in the state list
 	for (i = _processors.begin(); i != _processors.end(); ) {
@@ -1785,7 +1870,11 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter, ++i) {
 		
 		XMLProperty* prop = (*niter)->property ("type");
-		
+
+		if (prop && prop->value() == "meter")  {
+			has_meter_processor = true;
+		}
+
 		o = i;
 
 		if (prop->value() != "meter" && prop->value() != "amp" && prop->value() != "main-outs") {
@@ -1806,7 +1895,7 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 		// create it and move it to the correct location
 		if (o == _processors.end()) {
 
-			if (add_processor_from_xml (**niter, &i)) {
+			if (add_processor_from_xml (**niter, i)) {
 				--i; // move iterator to the newly inserted processor
 			} else {
 				cerr << "Error restoring route: unable to restore processor" << endl;
@@ -1818,7 +1907,6 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 
 			if (i != o) {
 				boost::shared_ptr<Processor> tmp = (*o);
-				cerr << "move proc from state\n";
 				_processors.erase (o); // remove the old copy
 				_processors.insert (i, tmp); // insert the processor at the correct location
 				--i; // move iterator to the correct processor
@@ -1827,6 +1915,19 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 			(*i)->set_state (**niter);
 		}
 	}
+
+	/* note: there is no configure_processors() call because we figure that
+	   the XML state represents a working signal route.
+	*/
+
+	if (!has_meter_processor) {
+		set_meter_point (_meter_point, NULL);
+	}
+
+	processors_changed ();
+
+	
+
 }
 
 void
@@ -1887,8 +1988,7 @@ Route::add_listener (boost::shared_ptr<IO> io, const string& listen_name)
 		return boost::shared_ptr<Delivery>();
 	}
 	
-	listener->set_sort_key (_meter->sort_key() + 1);
-	add_processor (listener, NULL);
+	add_processor (listener, PostFader);
 
 	return listener;
 }
@@ -2360,16 +2460,6 @@ Route::set_meter_point (MeterPoint p, void *src)
 		}
 		_processors.insert(loc, _meter);
 		
-		// Update sort key
-		if (loc == _processors.end()) {
-			_meter->set_sort_key(_processors.size());
-		} else {
-			_meter->set_sort_key((*loc)->sort_key());
-			for (ProcessorList::iterator p = loc; p != _processors.end(); ++p) {
-				(*p)->set_sort_key((*p)->sort_key() + 1);
-			}
-		}
-
 		 meter_change (src); /* EMIT SIGNAL */
 		processors_changed (); /* EMIT SIGNAL */
 		_session.set_dirty ();

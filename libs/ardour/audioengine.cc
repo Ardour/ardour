@@ -329,6 +329,7 @@ int
 AudioEngine::process_callback (nframes_t nframes)
 {
 	// CycleTimer ct ("AudioEngine::process");
+
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
 
 	/// The number of frames that will have been processed when we've finished

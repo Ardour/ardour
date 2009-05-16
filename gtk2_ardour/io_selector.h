@@ -45,8 +45,6 @@ class IOSelector : public PortMatrix
 	}
 	
 	uint32_t n_io_ports () const;
-	uint32_t maximum_io_ports () const;
-	uint32_t minimum_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
 	void setup_ports (int);
 	bool list_is_global (int) const;

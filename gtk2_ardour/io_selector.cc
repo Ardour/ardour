@@ -153,27 +153,6 @@ IOSelector::n_io_ports () const
 	}
 }
 
-uint32_t
-IOSelector::maximum_io_ports () const
-{
-	if (!_find_inputs_for_io_outputs) {
-		return _io->input_maximum ().get (_io->default_type());
-	} else {
-		return _io->output_maximum ().get (_io->default_type());
-	}
-}
-
-
-uint32_t
-IOSelector::minimum_io_ports () const
-{
-	if (!_find_inputs_for_io_outputs) {
-		return _io->input_minimum ().get (_io->default_type());
-	} else {
-		return _io->output_minimum ().get (_io->default_type());
-	}
-}
-
 void
 IOSelector::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 {
@@ -249,12 +228,10 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	get_action_area()->pack_start (disconnect_button, false, false);
 
 	/* Add Port button */
-	if (_selector.maximum_io_ports() > _selector.n_io_ports()) {
-		add_button.set_name ("IOSelectorButton");
-		add_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
-		get_action_area()->pack_start (add_button, false, false);
-		add_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (_selector, &IOSelector::add_channel), boost::shared_ptr<Bundle> ()));
-	} 
+	add_button.set_name ("IOSelectorButton");
+	add_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
+	get_action_area()->pack_start (add_button, false, false);
+	add_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (_selector, &IOSelector::add_channel), boost::shared_ptr<Bundle> ()));
 
 	/* Rescan button */
  	rescan_button.set_name ("IOSelectorButton");
@@ -299,11 +276,11 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 void
 IOSelectorWindow::ports_changed ()
 {
-	if (_selector.maximum_io_ports() > _selector.n_io_ports()) {
-		add_button.set_sensitive (true);
-	} else {
-		add_button.set_sensitive (false);
-	}
+	/* XXX make this insensitive based on port connectivity, not
+	   port counts.
+	*/
+
+	add_button.set_sensitive (true);
 }
 
 void

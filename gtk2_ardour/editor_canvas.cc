@@ -543,7 +543,8 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 		      guint info, guint time)
 {
 	std::list<boost::shared_ptr<Region> > regions;
-	region_list_display.get_object_drag_data (regions);
+	Gtk::TreeView* source;
+	region_list_display.get_object_drag_data (regions, &source);
 
 	for (list<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r) {
 

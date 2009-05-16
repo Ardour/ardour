@@ -60,11 +60,9 @@ enum mute_type {
 
 class Route : public IO
 {
-  protected:
+  public:
 
 	typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
-
-  public:
 
 	enum Flag {
 		Hidden = 0x1,
@@ -73,9 +71,7 @@ class Route : public IO
 	};
 
 	Route (Session&, std::string name, Flag flags = Flag(0),
-			DataType default_type = DataType::AUDIO,
-			ChanCount in=ChanCount::ZERO, ChanCount out=ChanCount::ZERO);
-
+	       DataType default_type = DataType::AUDIO);
 	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
@@ -176,7 +172,7 @@ class Route : public IO
 		}
 	}
 
-	uint32_t fader_sort_key() const;
+	ProcessorList::iterator prefader_iterator();
 	
 	ChanCount max_processor_streams () const { return processor_max_streams; }
 	ChanCount pre_fader_streams() const;
@@ -196,10 +192,12 @@ class Route : public IO
 		ChanCount count; ///< Input requested of processor
 	};
 
-	int add_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, ProcessorList::iterator* iter=0);
-	int add_processors (const ProcessorList&, ProcessorStreams* err = 0, uint32_t first_sort_key = 0);
+	int add_processor (boost::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0);
+	int add_processor (boost::shared_ptr<Processor>, ProcessorList::iterator iter, ProcessorStreams* err = 0);
+	int add_processors (const ProcessorList&, Placement placement, ProcessorStreams* err = 0);
+	int add_processors (const ProcessorList&, ProcessorList::iterator iter, ProcessorStreams* err = 0);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
-	int sort_processors (ProcessorStreams* err = 0);
+	int reorder_processors (const ProcessorList& new_order, Placement placement, ProcessorStreams* err = 0);
 	void disable_processors (Placement);
 	void disable_processors ();
 	void disable_plugins (Placement);
@@ -389,12 +387,10 @@ class Route : public IO
 	int configure_processors_unlocked (ProcessorStreams*);
 	
 	void set_deferred_state ();
-	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator* iter=0);	
+	bool add_processor_from_xml (const XMLNode&, Placement);
+	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);	
 
-	void placement_range(
-			Placement                p,
-			ProcessorList::iterator& start,
-			ProcessorList::iterator& end);
+	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
 };
 
 } // namespace ARDOUR

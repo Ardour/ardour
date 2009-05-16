@@ -128,7 +128,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Processor> > processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 
-	void object_drop (const std::list<boost::shared_ptr<ARDOUR::Processor> >&);
+	void object_drop (const std::list<boost::shared_ptr<ARDOUR::Processor> >&, Gtk::TreeView*,
+			  Glib::RefPtr<Gdk::DragContext>& context);
 
 	Width _width;
 	
@@ -168,7 +169,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
-	void assign_default_sort_key (boost::shared_ptr<ARDOUR::Processor>);
 	std::vector<sigc::connection> processor_active_connections;
 	std::vector<sigc::connection> processor_name_connections;
 	
@@ -183,6 +183,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void copy_processors ();
 	void paste_processors ();
 	void delete_processors ();
+	void delete_dragged_processors (const std::list<boost::shared_ptr<ARDOUR::Processor> >&);
 	void clear_processors ();
 	void rename_processors ();
 

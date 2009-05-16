@@ -108,8 +108,7 @@ Send::set_state(const XMLNode& node)
 bool
 Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	if (_io->input_maximum() == ChanCount::INFINITE
-			&& _io->output_maximum() == ChanCount::INFINITE) {
+	if (_io->n_inputs() == ChanCount::ZERO && _io->n_outputs() == ChanCount::ZERO) {
 
 		/* not configured yet, we can support anything */
 
@@ -120,10 +119,8 @@ Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 
 		/* for a send, processor input corresponds to IO output */
 
-		if (_io->output_maximum() == in) {
-			out = in;
-			return true;
-		} 
+		out = in;
+		return true;
 	}
 
 	return false;
@@ -137,11 +134,6 @@ Send::configure_io (ChanCount in, ChanCount out)
 	if (out != in) {
 		return false;
 	}
-
-	/*_io->set_output_maximum (in);
-	_io->set_output_minimum (in);
-	_io->set_input_maximum (ChanCount::ZERO);
-	_io->set_input_minimum (ChanCount::ZERO);*/
 
 	if (_io->ensure_io (ChanCount::ZERO, in, false, this) != 0) {
 		return false;

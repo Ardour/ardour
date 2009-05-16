@@ -64,17 +64,10 @@ Processor::Processor(Session& session, const string& name)
 	, _active(false)
 	, _next_ab_is_active(false)
 	, _configured(false)
-	, _sort_key (0)
 	, _gui(0)
 {
 }
 
-void
-Processor::set_sort_key (uint32_t key)
-{
-	_sort_key = key;
-}
-	
 XMLNode&
 Processor::get_state (void)
 {
@@ -102,14 +95,10 @@ Processor::state (bool full_state)
 	stringstream sstr;
 	char buf[64];
 	
-	// NOTE: This conflicts with "id" used by plugin for name in legacy sessions
-
 	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 	node->add_property("name", _name);
 	node->add_property("active", active() ? "yes" : "no");	
-	snprintf (buf, sizeof (buf), "%u", _sort_key);
-	node->add_property("sort-key", buf);
 
 	if (_extra_xml){
 		node->add_child_copy (*_extra_xml);

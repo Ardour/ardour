@@ -118,7 +118,8 @@ ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, PluginSelector &plug
 	RefPtr<TreeSelection> selection = processor_display.get_selection();
 	selection->set_mode (Gtk::SELECTION_MULTIPLE);
 	selection->signal_changed().connect (mem_fun (*this, &ProcessorBox::selection_changed));
-
+	
+	processor_display.set_data ("processorbox", this);
 	processor_display.set_model (model);
 	processor_display.append_column (X_("notshown"), columns.text);
 	processor_display.set_name ("ProcessorSelector");
@@ -186,16 +187,31 @@ ProcessorBox::route_going_away ()
 
 
 void
-ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs)
+ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk::TreeView* source, Glib::RefPtr<Gdk::DragContext>& context)
 {
-	for (std::list<boost::shared_ptr<Processor> >::const_iterator i = procs.begin();
-			i != procs.end(); ++i) {
+	cerr << "Drop from " << source << " (mine is " << &processor_display << ") action = " << hex << context->get_suggested_action() << dec << endl;
+		
+	for (list<boost::shared_ptr<Processor> >::const_iterator i = procs.begin(); i != procs.end(); ++i) {
 		XMLNode& state = (*i)->get_state ();
 		XMLNodeList nlist;
 		nlist.push_back (&state);
 		paste_processor_state (nlist);
 		delete &state;
 	}
+	
+	/* since the treeview doesn't take care of this properly, we have to delete the originals
+	   ourselves.
+	*/
+
+	if ((context->get_suggested_action() == Gdk::ACTION_MOVE) && source) {
+		ProcessorBox* other = reinterpret_cast<ProcessorBox*> (source->get_data ("processorbox"));
+		if (other) {
+			cerr << "source was another processor box, delete the selected items\n";
+			other->delete_dragged_processors (procs);
+		}
+	}
+
+	context->drag_finish (true, (context->get_suggested_action() == Gdk::ACTION_MOVE), 0);
 }
 
 void
@@ -433,9 +449,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			processor->activate ();
 		}
 
-		assign_default_sort_key (processor);
-
-		if (_route->add_processor (processor, &err_streams)) {
+		if (_route->add_processor (processor, _placement, &err_streams)) {
 			weird_plugin_dialog (**p, err_streams, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
 		} else {
@@ -500,8 +514,7 @@ ProcessorBox::choose_insert ()
 			mem_fun(*this, &ProcessorBox::show_processor_active),
 			boost::weak_ptr<Processor>(processor)));
 
-	assign_default_sort_key (processor);
-	_route->add_processor (processor);
+	_route->add_processor (processor, _placement);
 }
 
 void
@@ -553,8 +566,7 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 		break;
 
 	case IOSelector::Accepted:
-		assign_default_sort_key (processor);
-		_route->add_processor (processor);
+		_route->add_processor (processor, _placement);
 		if (Profile->get_sae()) {
 			processor->activate ();
 		}
@@ -611,8 +623,7 @@ ProcessorBox::return_io_finished (IOSelector::Result r, boost::weak_ptr<Processo
 		break;
 
 	case IOSelector::Accepted:
-		assign_default_sort_key (processor);
-		_route->add_processor (processor);
+		_route->add_processor (processor, _placement);
 		if (Profile->get_sae()) {
 			processor->activate ();
 		}
@@ -658,7 +669,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		return;
 	}
 
-	if (processor == _route->amp()) {
+	if (processor == _route->amp() || !processor->visible()) {
 		return;
 	}
 
@@ -796,22 +807,16 @@ ProcessorBox::row_deleted (const Gtk::TreeModel::Path& path)
 void
 ProcessorBox::compute_processor_sort_keys ()
 {
-	uint32_t sort_key;
 	Gtk::TreeModel::Children children = model->children();
-
-	if (_placement == PreFader) {
-		sort_key = 0;
-	} else {
-		sort_key = _route->fader_sort_key() + 1;
-	}
+	Route::ProcessorList our_processors;
 
 	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-		boost::shared_ptr<Processor> r = (*iter)[columns.processor];
-		r->set_sort_key (sort_key);
-		sort_key++;
+		our_processors.push_back ((*iter)[columns.processor]);
 	}
 
-	if (_route->sort_processors ()) {
+	if (_route->reorder_processors (our_processors, _placement)) {
+
+		/* reorder failed, so redisplay */
 
 		redisplay_processors ();
 
@@ -928,6 +933,8 @@ ProcessorBox::delete_processors ()
 		return;
 	}
 
+	no_processor_redisplay = true;
+
 	for (ProcSelection::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
 
 		void* gui = (*i)->get_gui ();
@@ -937,6 +944,27 @@ ProcessorBox::delete_processors ()
 		}
 
 		_route->remove_processor(*i);
+	}
+
+	no_processor_redisplay = false;
+	redisplay_processors ();
+}
+
+void
+ProcessorBox::delete_dragged_processors (const list<boost::shared_ptr<Processor> >& procs)
+{
+	list<boost::shared_ptr<Processor> >::const_iterator x;
+
+	no_processor_redisplay = true;
+	for (x = procs.begin(); x != procs.end(); ++x) {
+
+		void* gui = (*x)->get_gui ();
+
+		if (gui) {
+			static_cast<Gtk::Widget*>(gui)->hide ();
+		}
+		
+		_route->remove_processor(*x);
 	}
 
 	no_processor_redisplay = false;
@@ -1051,9 +1079,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 		return;
 	}
 
-	assign_default_sort_key (copies.front());
-
-	if (_route->add_processors (copies, 0, copies.front()->sort_key())) {
+	if (_route->add_processors (copies, _placement)) {
 
 		string msg = _(
 			"Copying the set of processors on the clipboard failed,\n\
@@ -1568,12 +1594,3 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);
 }
 
-void
-ProcessorBox::assign_default_sort_key (boost::shared_ptr<Processor> p)
-{
-	p->set_sort_key (_placement == PreFader ? 0 : 9999);
-	cerr << "default sort key for "
-	     << _placement << " = " << p->sort_key()
-	     << endl;
-}
-	

@@ -271,8 +271,8 @@ Session::Session (AudioEngine &eng,
 
 		if (control_out_channels) {
 			ChanCount count(DataType::AUDIO, control_out_channels);
-			shared_ptr<Route> r (new Route (*this, _("monitor"), Route::ControlOut,
-						DataType::AUDIO, count, count));
+			shared_ptr<Route> r (new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO));
+			r->ensure_io (count, count, false, this);
 			r->set_remote_control_id (control_id++);
 
 			rl.push_back (r);
@@ -281,8 +281,8 @@ Session::Session (AudioEngine &eng,
 		if (master_out_channels) {
 			ChanCount count(DataType::AUDIO, master_out_channels);
 			cerr << "new MO with " << count << endl;
-			shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut,
-						DataType::AUDIO, count, count));
+			shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
+			r->ensure_io (count, count, false, this);
 			r->set_remote_control_id (control_id);
 
 			rl.push_back (r);
@@ -671,12 +671,9 @@ Session::when_engine_running ()
 			_master_out->ports_became_legal();
 		}
 		
-		/* create ports, without any connections 
-		 */
-		_master_out->ensure_io (_master_out->input_minimum (), _master_out->output_minimum (), true, this);
-
 		/* if requested auto-connect the outputs to the first N physical ports.
 		*/
+
 		if (Config->get_auto_connect_master()) {
 			uint32_t limit = _master_out->n_outputs().n_total();
 
@@ -771,7 +768,7 @@ Session::hookup_io ()
 
 	if (_control_out) {
 
-		_control_out->ensure_io (_control_out->input_minimum(), _control_out->output_minimum(), false, this);
+		// _control_out->ensure_io (_control_out->input_minimum(), _control_out->output_minimum(), false, this);
 
 		boost::shared_ptr<RouteList> r = routes.reader ();
 		

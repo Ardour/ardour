@@ -63,9 +63,6 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 
 	virtual bool visible() const { return true; }
 	
-	uint32_t sort_key() const { return _sort_key; }
-	void set_sort_key (uint32_t key);
-
 	bool active () const { return _active; }
 	
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
@@ -129,7 +126,6 @@ protected:
 	bool      _configured;
 	ChanCount _configured_input;
 	ChanCount _configured_output;
-	uint32_t  _sort_key;
 	void*     _gui;  /* generic, we don't know or care what this is */
 	Mapping   _mapping;
 };

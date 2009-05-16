@@ -57,9 +57,6 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	_freeze_record.state = NoFreeze;
 	_saved_meter_point = _meter_point;
 	_mode = mode;
-
-	set_input_minimum(ChanCount(DataType::MIDI, 1));
-	set_input_maximum(ChanCount(DataType::MIDI, 1));
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
@@ -68,9 +65,6 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	, _note_mode(Sustained)
 {
 	_set_state(node, false);
-	
-	set_input_minimum(ChanCount(DataType::MIDI, 1));
-	set_input_maximum(ChanCount(DataType::MIDI, 1));
 }
 
 MidiTrack::~MidiTrack ()

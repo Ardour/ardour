@@ -86,7 +86,7 @@ class DnDTreeView : public DnDTreeViewBase
 	DnDTreeView() {} 
 	~DnDTreeView() {}
 
-	sigc::signal<void,const std::list<DataType>& > signal_drop;
+	sigc::signal<void,const std::list<DataType>&,Gtk::TreeView*,Glib::RefPtr<Gdk::DragContext>&> signal_drop;
 
 	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time) {
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
@@ -123,7 +123,7 @@ class DnDTreeView : public DnDTreeViewBase
 
 		} else if (selection_data.get_target() == object_type) {
 			
-			end_object_drag ();
+			end_object_drag (const_cast<Glib::RefPtr<Gdk::DragContext>& > (context));
 
 		} else {
 			/* some kind of target type added by the app, which will be handled by a signal handler */
@@ -135,7 +135,7 @@ class DnDTreeView : public DnDTreeViewBase
 	 * object that wants to get the list of dragged items.
 	 */
 
-	void get_object_drag_data (std::list<DataType>& l) {
+	void get_object_drag_data (std::list<DataType>& l, Gtk::TreeView** source) {
 		Glib::RefPtr<Gtk::TreeModel> model = drag_data.source->get_model();
 		DataType v;
 		Gtk::TreeSelection::ListHandle_Path selection = drag_data.source->get_selection()->get_selected_rows ();
@@ -144,13 +144,16 @@ class DnDTreeView : public DnDTreeViewBase
 			model->get_iter (*x)->get_value (drag_data.data_column, v);
 			l.push_back (v);
 		}
+		
+		*source = drag_data.source;
 	}
 
   private:
-	void end_object_drag () {
+	void end_object_drag (Glib::RefPtr<Gdk::DragContext>& context) {
 		std::list<DataType> l;
-		get_object_drag_data (l);
-		signal_drop (l);
+		Gtk::TreeView* source;
+		get_object_drag_data (l, &source);
+		signal_drop (l, source, context);
 	}
 
 };

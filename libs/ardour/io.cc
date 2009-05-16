@@ -100,9 +100,7 @@ static double direct_gain_to_control (gain_t gain) {
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
  */
-IO::IO (Session& s, const string& name,
-		DataType default_type,
-		ChanCount in_min, ChanCount in_max, ChanCount out_min, ChanCount out_max)
+IO::IO (Session& s, const string& name, DataType default_type)
 	: SessionObject (s, name)
 	, AutomatableControls (s)
   	, _output_buffers (new BufferSet())
@@ -111,16 +109,7 @@ IO::IO (Session& s, const string& name,
 	, _amp (new Amp(s, *this))
 	, _meter (new PeakMeter(s))
 	, _panner (new Panner(name, s))
-	, _input_minimum (ChanCount::ZERO)
-	, _input_maximum (ChanCount::INFINITE)
-	, _output_minimum (ChanCount::ZERO)
-	, _output_maximum (ChanCount::INFINITE)
 {
-	_input_minimum  = in_min;
-	_output_minimum = out_min;
-	_input_maximum  = in_max;
-	_output_maximum = out_max;
-
 	_gain = 1.0;
 	pending_state_node = 0;
 	no_panner_reset = false;
@@ -521,17 +510,8 @@ IO::set_input (Port* other_port, void* src)
 	   to the specified source.
 	*/
 
-	if (_input_minimum.n_total() > 1) {
-		/* sorry, you can't do this */
+	if (!other_port) {
 		return -1;
-	}
-
-	if (other_port == 0) {
-		if (_input_minimum == ChanCount::ZERO) {
-			return ensure_inputs (ChanCount::ZERO, false, true, src);
-		} else {
-			return -1;
-		}
 	}
 
 	if (ensure_inputs (ChanCount(other_port->type(), 1), true, true, src)) {
@@ -552,11 +532,6 @@ IO::remove_output_port (Port* port, void* src)
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
-
-			if (n_outputs() <= _output_minimum) {
-				/* sorry, you can't do this */
-				return -1;
-			}
 
 			if (_outputs.remove(port)) {
 				change = IOChange (change|ConfigurationChanged);
@@ -610,10 +585,6 @@ IO::add_output_port (string destination, void* src, DataType type)
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
 			
-			if (n_outputs() >= _output_maximum) {
-				return -1;
-			}
-		
 			/* Create a new output port */
 			
 			string portname = build_legal_port_name (type, false);
@@ -656,11 +627,6 @@ IO::remove_input_port (Port* port, void* src)
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
-
-			if (n_inputs() <= _input_minimum) {
-				/* sorry, you can't do this */
-				return -1;
-			}
 
 			if (_inputs.remove(port)) {
 				change = IOChange (change|ConfigurationChanged);
@@ -713,10 +679,6 @@ IO::add_input_port (string source, void* src, DataType type)
 		
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
-
-			if (n_inputs().get (type) >= _input_maximum.get (type)) {
-				return -1;
-			}
 
 			/* Create a new input port */
 			
@@ -801,8 +763,6 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 	Port* input_port = 0;
 	bool  changed    = false;
 	
-	_configured_inputs = count;
-
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		
 		const size_t n = count.get(*t);
@@ -869,12 +829,6 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 
 	assert(in != ChanCount::INFINITE);
 	assert(out != ChanCount::INFINITE);
-
-	in = ChanCount::min (_input_maximum, in);
-	out = ChanCount::min (_output_maximum, out);
-	
-	_configured_inputs = in;
-	_configured_outputs = out;
 
 	if (in == n_inputs() && out == n_outputs() && !clear) {
 		return 0;
@@ -1007,8 +961,6 @@ IO::ensure_inputs (ChanCount count, bool clear, bool lockit, void* src)
 {
 	bool changed = false;
 
-	count = min (_input_maximum, count);
-
 	if (count == n_inputs() && !clear) {
 		return 0;
 	}
@@ -1036,8 +988,6 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 	bool  changed        = false;
 	bool  need_pan_reset = false;
 	
-	_configured_outputs = count;
-
 	if (n_outputs() != count) {
 		need_pan_reset = true;
 	}
@@ -1097,13 +1047,6 @@ int
 IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 {
 	bool changed = false;
-
-	if (_output_maximum != ChanCount::INFINITE) {
-		count = min (_output_maximum, count);
-		if (count == n_outputs() && !clear) {
-			return 0;
-		}
-	}
 
 	/* XXX caller should hold io_lock, but generally doesn't */
 
@@ -1276,7 +1219,7 @@ IO::state (bool full_state)
 	node->add_property ("gain", buf);
 
 	/* port counts */
-	
+
 	node->add_child_nocopy(*n_inputs().state("Inputs"));
 	node->add_child_nocopy(*n_outputs().state("Outputs"));
 
@@ -1313,44 +1256,6 @@ IO::set_state (const XMLNode& node)
 		_id = prop->value ();
 	}
 
-	int in_min = -1;
-	int in_max = -1;
-	int out_min = -1;
-	int out_max = -1;
-
-	if ((prop = node.property ("iolimits")) != 0) {
-		sscanf (prop->value().c_str(), "%d,%d,%d,%d",
-			&in_min, &in_max, &out_min, &out_max);
-
-		// Legacy numbers:
-		// minimum == -1  =>  minimum == 0
-		// maximum == -1  =>  maximum == infinity
-
-		if (in_min < 0) {
-			_input_minimum = ChanCount::ZERO;
-		} else {
-			_input_minimum = ChanCount (_default_type, in_min);
-		}
-
-		if (in_max < 0) {
-			_input_maximum = ChanCount::INFINITE;
-		} else {
-			_input_maximum = ChanCount (_default_type, in_max);
-		}
-
-		if (out_min < 0) {
-			_output_minimum = ChanCount::ZERO;
-		} else {
-			_output_minimum = ChanCount (_default_type, out_min);
-		}
-		
-		if (out_max < 0) {
-			_output_maximum = ChanCount::INFINITE;
-		} else {
-			_output_maximum = ChanCount (_default_type, out_max);
-		}
-	}
-	
 	if ((prop = node.property ("gain")) != 0) {
 		set_gain (atof (prop->value().c_str()), this);
 		_gain = _gain_control->user_float();
@@ -1390,8 +1295,6 @@ IO::set_state (const XMLNode& node)
 			}
 		}
 	}
-
-	get_port_counts (node);
 
 	if (ports_legal) {
 
@@ -1541,7 +1444,6 @@ IO::ports_became_legal ()
 
 	port_legal_c.disconnect ();
 
-	get_port_counts (*pending_state_node);
 	ret = create_ports (*pending_state_node);
 
 	if (connecting_legal) {
@@ -1645,54 +1547,48 @@ IO::find_possible_bundle (const string &desired_name, const string &default_name
 }
 
 int
-IO::get_port_counts (const XMLNode& node)
+IO::get_port_counts (const XMLNode& node, ChanCount& in, ChanCount& out,
+		     boost::shared_ptr<Bundle>& ic, boost::shared_ptr<Bundle>& oc)
 {
 	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
-	ChanCount num_inputs = n_inputs();
-	ChanCount num_outputs = n_outputs();
+
+	in = n_inputs();
+	out = n_outputs();
 
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
 		if ((*iter)->name() == X_("Inputs")) {
-			num_inputs = ChanCount::max(num_inputs, ChanCount(**iter));
+			in = ChanCount::max(in, ChanCount(**iter));
 		} else if ((*iter)->name() == X_("Outputs")) {
-			num_outputs = ChanCount::max(num_inputs, ChanCount(**iter));
+			out = ChanCount::max(out, ChanCount(**iter));
 		}
 	}
 
 	if ((prop = node.property ("input-connection")) != 0) {
 
-		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("in"), _("input"));
-		if (c) {
-			num_inputs = ChanCount::max(num_inputs, ChanCount(c->type(), c->nchannels()));
+		ic = find_possible_bundle (prop->value(), _("in"), _("input"));
+		if (ic) {
+			in = ChanCount::max(in, ChanCount(ic->type(), ic->nchannels()));
 		}
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 
-		num_inputs = ChanCount::max(num_inputs, ChanCount(_default_type,
-				count (prop->value().begin(), prop->value().end(), '{')));
+		in = ChanCount::max(in, ChanCount(_default_type,
+						  count (prop->value().begin(), prop->value().end(), '{')));
 	}
 	
 	if ((prop = node.property ("output-connection")) != 0) {
-
-		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("out"), _("output"));
-		if (c) {
-			num_outputs = ChanCount::max(num_outputs, ChanCount(c->type(), c->nchannels()));
+		
+		oc = find_possible_bundle (prop->value(), _("out"), _("output"));
+		if (oc) {
+			out = ChanCount::max(out, ChanCount(oc->type(), oc->nchannels()));
 		}
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
-
-		num_outputs = ChanCount::max(num_outputs, ChanCount(_default_type,
-				count (prop->value().begin(), prop->value().end(), '{')));
+		
+		out = ChanCount::max(out, ChanCount(_default_type,
+						    count (prop->value().begin(), prop->value().end(), '{')));
 	}
-	
-	_configured_inputs = num_inputs;
-	_configured_outputs = num_outputs;
-
-	_input_minimum = ChanCount::min(_input_minimum, num_inputs);
-	_input_maximum = ChanCount::max(_input_maximum, num_inputs);
-	_output_minimum = ChanCount::min(_output_minimum, num_outputs);
-	_output_maximum = ChanCount::max(_output_maximum, num_outputs);
 	
 	return 0;
 }
@@ -1700,14 +1596,25 @@ IO::get_port_counts (const XMLNode& node)
 int
 IO::create_ports (const XMLNode& node)
 {
+	ChanCount in;
+	ChanCount out;
+	boost::shared_ptr<Bundle> ic;
+	boost::shared_ptr<Bundle> oc;
+
 	no_panner_reset = true;
 
-	if (ensure_io (_input_minimum, _output_minimum, true, this)) {
+	get_port_counts (*pending_state_node, in, out, ic, oc);
+
+	if (ensure_io (in, out, true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
 	}
 
+	/* XXX use ic and oc if relevant */
+
 	no_panner_reset = false;
+	
+	cerr << "IO " << name() << " created ports, ci = " << n_inputs() << endl;
 
 	set_deferred_state ();
 
@@ -1843,7 +1750,7 @@ IO::set_outputs (const string& str)
 		return 0;
 	}
 
-	// FIXME: audio-only
+	// FIXME: audio-only - need a way to identify port types from XML/string
 	if (ensure_outputs (ChanCount(DataType::AUDIO, nports), true, true, this)) {
 		return -1;
 	}
@@ -1968,30 +1875,6 @@ IO::set_name (const string& requested_name)
 	setup_bundles_for_inputs_and_outputs ();
 
 	return r;
-}
-
-void
-IO::set_input_minimum (ChanCount n)
-{
-	_input_minimum = n;
-}
-
-void
-IO::set_input_maximum (ChanCount n)
-{
-	_input_maximum = n;
-}
-
-void
-IO::set_output_minimum (ChanCount n)
-{
-	_output_minimum = n;
-}
-
-void
-IO::set_output_maximum (ChanCount n)
-{
-	_output_maximum = n;
 }
 
 void
@@ -2411,7 +2294,6 @@ IO::build_legal_port_name (DataType type, bool in)
 	const int name_size = jack_port_name_size();
 	int limit;
 	string suffix;
-	int maxports;
 
 	if (type == DataType::AUDIO) {
 		suffix = _("audio");
@@ -2423,20 +2305,10 @@ IO::build_legal_port_name (DataType type, bool in)
 	
 	if (in) {
 		suffix += _("_in");
-		maxports = _input_maximum.get(type);
 	} else {
 		suffix += _("_out");
-		maxports = _output_maximum.get(type);
 	}
-	
-	if (maxports == 1) {
-		// allow space for the slash + the suffix
-		limit = name_size - _session.engine().client_name().length() - (suffix.length() + 1);
-		char buf[name_size+1];
-		snprintf (buf, name_size+1, ("%.*s/%s"), limit, _name.c_str(), suffix.c_str());
-		return string (buf);
-	} 
-	
+
 	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space
 
 	limit = name_size - _session.engine().client_name().length() - (suffix.length() + 5);
