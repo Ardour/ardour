@@ -558,7 +558,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	session().ensure_buffer_set (_signal_analysis_outputs, out);
 	//_signal_analysis_outputs.set_count (out);
 
-	std::cerr << "set counts to i" << in.n_audio() << "/o" << out.n_audio() << std::endl;
+	// std::cerr << "set counts to i" << in.n_audio() << "/o" << out.n_audio() << std::endl;
 
 	return Processor::configure_io (in, out);
 }

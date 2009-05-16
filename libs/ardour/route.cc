@@ -652,8 +652,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		return 1;
 	}
 
-	cerr << "Adding a processor called " << processor->name() << endl;
-
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 
@@ -681,27 +679,17 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			loc = iter;
 		}
 
-		cerr << "Adding " << processor->name() << endl;
-
 		_processors.insert (loc, processor);
 
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
 		
-		ProcessorStreams rerr;
 
-		if (configure_processors_unlocked (&rerr)) {
-			
-			dump_processors(_name + "bad config", _processors);
-			if (err) {
-				*err = rerr;
-			}
-			cerr << "Error at proc " << rerr.index << " with input of " << rerr.count << endl;
+		if (configure_processors_unlocked (err)) {
 			ProcessorList::iterator ploc = loc;
 			--ploc;
 			_processors.erase(ploc);
 			configure_processors_unlocked (0); // it worked before we tried to add it ...
-			cerr << "Bad IO config\n";
 			return -1;
 		}
 	
@@ -730,7 +718,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		reset_panner ();
 	}
 
-	dump_processors (_name + " added one", _processors);
 	processors_changed (); /* EMIT SIGNAL */
 	
 	return 0;
@@ -941,7 +928,6 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 		reset_panner ();
 	}
 	
-	dump_processors (_name + " added several", _processors);
 	processors_changed (); /* EMIT SIGNAL */
 
 	return 0;
@@ -1245,8 +1231,6 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 	}
 
 	processor->drop_references ();
-	
-	dump_processors (_name + " removed one", _processors);
 	processors_changed (); /* EMIT SIGNAL */
 
 	return 0;
@@ -1280,13 +1264,10 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	list< pair<ChanCount,ChanCount> > configuration;
 	uint32_t index = 0;
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
-		cerr << "Can " << (*p)->name() << " support in= " << in << " out= " << out;
 		if ((*p)->can_support_io_configuration(in, out)) {
-			cerr << " yes\n";
 			configuration.push_back(make_pair(in, out));
 			in = out;
 		} else {
-			cerr << " no\n";
 			if (err) {
 				err->index = index;
 				err->count = in;
@@ -1382,13 +1363,12 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 		ProcessorList as_it_will_be;
 		ProcessorList::iterator start, end;
 
-		dump_processors (_name + " PreReorder", _processors);
 		placement_range (placement, start, end);
 
 		oiter = start;
 		niter = new_order.begin(); 
 
-		while (oiter != end && niter !=  new_order.end()) {
+		while (niter !=  new_order.end()) {
 			
 			/* if the next processor in the old list is invisible (i.e. should not be in the new order)
 			   then append it to the temp list. 
@@ -1396,7 +1376,7 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 			   Otherwise, see if the next processor in the old list is in the new list. if not,
 			   its been deleted. If its there, append it to the temp list.
 			*/
-			
+
 			if (oiter == end) {
 
 				/* no more elements in the old list, so just stick the rest of 
@@ -1404,6 +1384,7 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 				*/
 
 				as_it_will_be.insert (as_it_will_be.end(), niter, new_order.end());
+				break;
 
 			} else {
 				
@@ -1427,11 +1408,10 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
                                 /* now remove from old order - its taken care of no matter what */
 				oiter = _processors.erase (oiter);
 			}
+			
 		}
 
-		_processors.insert (end, as_it_will_be.begin(), as_it_will_be.end());
-
-		dump_processors (_name + " PostReorder", _processors);
+		_processors.insert (oiter, as_it_will_be.begin(), as_it_will_be.end());
 
 		if (configure_processors_unlocked (err)) {
 			_processors = as_it_was_before;
@@ -1440,7 +1420,6 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 		} 
 	} 
 
-	dump_processors (_name + " sorted", _processors);
 	/* do we really need to do this every time? */
 	reset_panner ();
 	processors_changed (); /* EMIT SIGNAL */
@@ -1837,8 +1816,6 @@ Route::_set_processor_states(const XMLNodeList &nlist)
 	XMLNodeConstIterator niter;
 	bool has_meter_processor = false; // legacy sessions don't
 	ProcessorList::iterator i, o;
-
-	cerr << "Setting processor states with in = " << n_inputs() << endl;
 
 	// Iterate through existing processors, remove those which are not in the state list
 	for (i = _processors.begin(); i != _processors.end(); ) {

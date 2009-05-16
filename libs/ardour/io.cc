@@ -1613,9 +1613,6 @@ IO::create_ports (const XMLNode& node)
 	/* XXX use ic and oc if relevant */
 
 	no_panner_reset = false;
-	
-	cerr << "IO " << name() << " created ports, ci = " << n_inputs() << endl;
-
 	set_deferred_state ();
 
 	return 0;
