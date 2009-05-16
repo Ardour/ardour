@@ -81,6 +81,8 @@ public:
 
 		ports_changed ();
 
+		_store->signal_row_changed().connect (mem_fun (*this, &MIDIPorts::model_changed));
+
 		_add_port_button.signal_clicked().connect (mem_fun (*this, &MIDIPorts::add_port_clicked));
 		_mtc_combo.signal_changed().connect (mem_fun (*this, &MIDIPorts::mtc_combo_changed));
 		_mmc_combo.signal_changed().connect (mem_fun (*this, &MIDIPorts::mmc_combo_changed));
@@ -131,6 +133,38 @@ public:
 	
 private:
 
+	void model_changed (TreeModel::Path const & p, TreeModel::iterator const & i)
+	{
+		TreeModel::Row r = *i;
+
+		MIDI::Port* port = r[_model.port];
+		if (!port) {
+			return;
+		}
+
+		if (port->input()) {
+			
+			if (r[_model.online] == port->input()->offline()) {
+				port->input()->set_offline (!r[_model.online]);
+			}
+
+			if (r[_model.trace_input] != port->input()->tracing()) {
+				port->input()->trace (r[_model.trace_input], &cerr, string (port->name()) + _(" input: "));
+			}
+		}
+
+		if (port->output()) {
+
+			if (r[_model.trace_output] != port->output()->tracing()) {
+				port->output()->trace (r[_model.trace_output], &cerr, string (port->name()) + _(" output: "));
+			}
+			
+		}
+
+		
+				
+	}
+
 	void setup_ports_combo (ComboBoxText& c)
 	{
 		c.clear_items ();
@@ -148,17 +182,41 @@ private:
 		_store->clear ();
 
 		for (MIDI::Manager::PortMap::const_iterator i = ports.begin(); i != ports.end(); ++i) {
+
 			TreeModel::Row r = *_store->append ();
+
 			r[_model.name] = i->first;
-			r[_model.online] = !i->second->input()->offline();
-			r[_model.trace_input] = i->second->input()->tracing();
-			r[_model.trace_output] = i->second->output()->tracing();
+
+			if (i->second->input()) {
+				r[_model.online] = !i->second->input()->offline();
+				i->second->input()->OfflineStatusChanged.connect (bind (mem_fun (*this, &MIDIPorts::port_offline_changed), i->second));
+				r[_model.trace_input] = i->second->input()->tracing();
+			}
+
+			if (i->second->output()) {
+				r[_model.trace_output] = i->second->output()->tracing();
+			}
+
+			r[_model.port] = i->second;
 		}
 
 		setup_ports_combo (_mtc_combo);
 		setup_ports_combo (_midi_clock_combo);
 		setup_ports_combo (_mmc_combo);
 		setup_ports_combo (_mpc_combo);
+	}
+
+	void port_offline_changed (MIDI::Port* p)
+	{
+		if (!p->input()) {
+			return;
+		}
+
+		for (TreeModel::Children::iterator i = _store->children().begin(); i != _store->children().end(); ++i) {
+			if ((*i)[_model.port] == p) {
+				(*i)[_model.online] = !p->input()->offline();
+			}
+		}
 	}
 
 	void add_port_clicked ()
@@ -211,12 +269,14 @@ private:
 			add (online);
 			add (trace_input);
 			add (trace_output);
+			add (port);
 		}
 
 		TreeModelColumn<string> name;
 		TreeModelColumn<bool> online;
 		TreeModelColumn<bool> trace_input;
 		TreeModelColumn<bool> trace_output;
+		TreeModelColumn<MIDI::Port*> port;
 	};
 
 	RCConfiguration* _rc_config;
