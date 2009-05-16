@@ -1123,7 +1123,7 @@ Editor::update_video_pullup ()
 	RefPtr<Action> act;
 	const char* action = 0;
 
-	float pullup = Config->get_video_pullup();
+	float pullup = session->config.get_video_pullup();
 
 	if ( pullup < (-4.1667 - 0.1) * 0.99) {
 		action = X_("PullupMinus4Minus1");
@@ -1656,7 +1656,7 @@ Editor::video_pullup_chosen (Session::PullupFormat pullup)
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		if (ract && ract->get_active()) {
-			Config->set_video_pullup ( pull );
+			session->config.set_video_pullup ( pull );
 		}
 		
 	} else  {

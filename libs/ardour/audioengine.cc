@@ -178,7 +178,7 @@ AudioEngine::start ()
 		jack_set_sync_callback (_jack, _jack_sync_callback, this);
 		jack_set_freewheel_callback (_jack, _freewheel_callback, this);
 
-		if (Config->get_jack_time_master()) {
+		if (session && session->config.get_jack_time_master()) {
 			jack_set_timebase_callback (_jack, 0, _jack_timebase_callback, this);
 		}
 
@@ -1090,8 +1090,8 @@ AudioEngine::transport_state ()
 int
 AudioEngine::reset_timebase ()
 {
-	if (_jack) {
-		if (Config->get_jack_time_master()) {
+	if (_jack && session) {
+		if (session->config.get_jack_time_master()) {
 			return jack_set_timebase_callback (_jack, 0, _jack_timebase_callback, this);
 		} else {
 			return jack_release_timebase (_jack);
@@ -1285,7 +1285,7 @@ AudioEngine::reconnect_to_jack ()
 	jack_set_sync_callback (_jack, _jack_sync_callback, this);
 	jack_set_freewheel_callback (_jack, _freewheel_callback, this);
 	
-	if (Config->get_jack_time_master()) {
+	if (session && session->config.get_jack_time_master()) {
 		jack_set_timebase_callback (_jack, 0, _jack_timebase_callback, this);
 	} 
 	

@@ -230,7 +230,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	process_function = &Session::process_with_events;
 
-	if (Config->get_use_video_sync()) {
+	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
 	} else {
 		waiting_for_sync_offset = false;
@@ -3062,7 +3062,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "use-video-sync") {
 
-		waiting_for_sync_offset = Config->get_use_video_sync();
+		waiting_for_sync_offset = config.get_use_video_sync();
 
 	} else if (p == "mmc-control") {
 

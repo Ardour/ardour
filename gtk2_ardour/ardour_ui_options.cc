@@ -46,7 +46,7 @@ using namespace sigc;
 void
 ARDOUR_UI::toggle_time_master ()
 {
-	ActionManager::toggle_config_state ("Transport", "ToggleTimeMaster", &RCConfiguration::set_jack_time_master, &RCConfiguration::get_jack_time_master);
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleTimeMaster", mem_fun (session->config, &SessionConfiguration::set_jack_time_master), mem_fun (session->config, &SessionConfiguration::get_jack_time_master));
 }
 
 void
@@ -461,7 +461,7 @@ ARDOUR_UI::toggle_video_sync()
 	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "ToggleVideoSync");
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		Config->set_use_video_sync (tact->get_active());
+		session->config.set_use_video_sync (tact->get_active());
 	}
 }
 
@@ -1153,7 +1153,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "clicking") {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
 	} else if (p == "jack-time-master") {
-		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", &RCConfiguration::get_jack_time_master);
+		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", mem_fun (session->config, &SessionConfiguration::get_jack_time_master));
 	} else if (p == "plugins-stop-with-transport") {
 		ActionManager::map_some_state ("options",  "StopPluginsWithTransport", &RCConfiguration::get_plugins_stop_with_transport);
 	} else if (p == "new-plugins-active") {
@@ -1181,7 +1181,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "remote-model") {
 		map_remote_model ();
 	} else if (p == "use-video-sync") {
-		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", &RCConfiguration::get_use_video_sync);
+		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", mem_fun (session->config, &SessionConfiguration::get_use_video_sync));
 	} else if (p == "quieten-at-speed") {
 		ActionManager::map_some_state ("options",  "GainReduceFastTransport", &RCConfiguration::get_quieten_at_speed);
 	} else if (p == "shuttle-behaviour") {

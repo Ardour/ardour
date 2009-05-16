@@ -116,6 +116,25 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
 			    mem_fun (*_session_config, &SessionConfiguration::set_timecode_source_is_synced)
 			    ));
+
+	ComboOption<float>* vpu = new ComboOption<float> (
+		"video-pullup",
+		_("Pull-up / pull-down"),
+		mem_fun (*_session_config, &SessionConfiguration::get_video_pullup),
+		mem_fun (*_session_config, &SessionConfiguration::set_video_pullup)
+		);
+
+	vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
+	vpu->add (4.1667, _("4.1667"));
+	vpu->add (4.1667 - 0.1, _("4.1667 - 0.1%"));
+	vpu->add (0.1, _("0.1"));
+	vpu->add (0, _("none"));
+	vpu->add (-0.1, _("-0.1"));
+	vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
+	vpu->add (-4.1667, _("-4.1667"));
+	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
+		
+	add_option (_("Sync"), vpu);
 	
 	/* MISC */
 

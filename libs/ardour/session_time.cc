@@ -150,7 +150,7 @@ Session::smpte_drop_frames() const
 void
 Session::sync_time_vars ()
 {
-	_current_frame_rate = (nframes_t) round (_base_frame_rate * (1.0 + (Config->get_video_pullup()/100.0)));
+	_current_frame_rate = (nframes_t) round (_base_frame_rate * (1.0 + (config.get_video_pullup()/100.0)));
 	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second();
 	if (smpte_drop_frames()) {
 	  _frames_per_hour = (long)(107892 * _frames_per_smpte_frame);

@@ -509,7 +509,7 @@ AudioClock::set_frames (nframes_t when, bool force)
 			frames_upper_info_label->set_text (buf);
 		}
 		
-		float vid_pullup = Config->get_video_pullup();
+		float vid_pullup = session->config.get_video_pullup();
 		
 		if (vid_pullup == 0.0) {
 			if (frames_lower_info_label->get_text () != _("none")) {

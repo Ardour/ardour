@@ -113,12 +113,6 @@ CONFIG_VARIABLE (bool, secondary_clock_delta_edit_cursor, "secondary-clock-delta
 CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 
-/* timecode and sync */
-
-CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
-CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
-CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
-
 /* metering */
 
 CONFIG_VARIABLE (float, meter_hold, "meter-hold", 100.0f)

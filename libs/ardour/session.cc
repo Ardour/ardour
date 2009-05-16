@@ -543,7 +543,7 @@ Session::when_engine_running ()
 		_engine.transport_stop ();
 	}
 
-	if (Config->get_jack_time_master()) {
+	if (config.get_jack_time_master()) {
 		_engine.transport_locate (_transport_frame);
 	}
 

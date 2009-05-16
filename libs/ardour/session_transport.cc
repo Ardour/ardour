@@ -180,7 +180,7 @@ Session::realtime_stop (bool abort)
 	target_phi = 0;
 	phase = 0;
 
-	if (Config->get_use_video_sync()) {
+	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
 	}
 
