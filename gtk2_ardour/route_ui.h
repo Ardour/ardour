@@ -83,6 +83,9 @@ class RouteUI : public virtual AxisView
 	BindableToggleButton* solo_button;
 	BindableToggleButton* rec_enable_button; /* audio tracks */
 	BindableToggleButton* show_sends_button; /* busses */
+
+	void send_blink (bool);
+	sigc::connection send_blink_connection;
 	
 	virtual std::string solo_button_name () const { return "SoloButton"; }
 	virtual std::string safe_solo_button_name () const { return "SafeSoloButton"; }

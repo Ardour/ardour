@@ -294,7 +294,6 @@ MixerStrip::init ()
 
 	/* ditto for this button and busses */
 
-	show_sends_button->set_name ("MixerRecordEnableButton");
 	show_sends_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::show_sends_press), false);
 	show_sends_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::show_sends_release));
 
@@ -1506,10 +1505,12 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 		/* don't change the display for the target or the master bus */
 		return;
 	} else if (!is_track() && show_sends_button) {
-		/* make sure our show sends button is inactive, 
+		/* make sure our show sends button is inactive, and we no longer blink,
 		   since we're not the target.
 		*/
+		send_blink_connection.disconnect ();
 		show_sends_button->set_active (false);
+		show_sends_button->set_state (STATE_NORMAL);
 	}
 
 	if (!target) {
@@ -1537,9 +1538,12 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 	panner_ui().setup_pan ();
 }
 
+
 void
 MixerStrip::revert_to_default_display ()
 {
+	show_sends_button->set_active (false);
+	
 	if (_current_send) {
 		_current_send->set_metering (false);
 		_current_send.reset();
@@ -1550,3 +1554,4 @@ MixerStrip::revert_to_default_display ()
 	panner_ui().set_io (_route);
 	panner_ui().setup_pan ();
 }
+

@@ -1063,6 +1063,16 @@ style "flashing_alert" = "very_small_text"
 	bg[ACTIVE] = { 1.0, 0, 0}
 }
 
+
+style "green_flashing_alert" = "very_small_text"
+{
+	fg[NORMAL] = { 0.80, 0.80, 0.80 }
+	bg[NORMAL] = { 0.26, 0.26, 0.31 }
+
+	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	bg[ACTIVE] = { 0.52, 1.0, 0}
+}
+
 style "selected_io_selector_port_list" = "medium_bold_text"
 {
 
@@ -1479,6 +1489,8 @@ widget "*BypassButton" style:highest "red_when_active"
 widget "*BypassButton*" style:highest "red_when_active"
 widget "*TransportSoloAlert" style:highest "flashing_alert"
 widget "*TransportSoloAlert.*" style:highest "flashing_alert"
+widget "*SendAlert" style:highest "green_flashing_alert"
+widget "*SendAlert.*" style:highest "green_flashing_alert"
 widget "*TransportAuditioningAlert" style:highest "flashing_alert"
 widget "*TransportAuditioningAlert.*" style:highest "flashing_alert"
 widget "*FadeCurve" style:highest "medium_bold_entry"

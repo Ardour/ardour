@@ -31,6 +31,7 @@
 #include "pbd/shiva.h"
 #include "pbd/controllable.h"
 
+#include "ardour_ui.h"
 #include "route_ui.h"
 #include "keyboard.h"
 #include "utils.h"
@@ -122,7 +123,7 @@ RouteUI::init ()
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	show_sends_button = manage (new BindableToggleButton (""));
-	show_sends_button->set_name ("ShowSendsButton");
+	show_sends_button->set_name ("SendAlert");
 	show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
@@ -562,11 +563,15 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 
 			show_sends_button->set_active (!show_sends_button->get_active());
 
+			/* start blinking */
+
 			if (show_sends_button->get_active()) {
 				/* show sends to this bus */
 				MixerStrip::SwitchIO (_route);
+				send_blink_connection = ARDOUR_UI::instance()->Blink.connect (mem_fun(*this, &RouteUI::send_blink));
 			} else {
 				/* everybody back to normal */
+				send_blink_connection.disconnect ();
 				MixerStrip::SwitchIO (boost::shared_ptr<Route>());
 			}
 
@@ -580,6 +585,20 @@ bool
 RouteUI::show_sends_release (GdkEventButton* ev)
 {
 	return true;
+}
+
+void
+RouteUI::send_blink (bool onoff)
+{
+	if (!show_sends_button) {
+		return;
+	}
+		
+	if (onoff) {
+		show_sends_button->set_state (STATE_ACTIVE);
+	} else {
+		show_sends_button->set_state (STATE_NORMAL);
+	}
 }
 
 void

@@ -63,6 +63,7 @@ class GainMeterBase : virtual public sigc::trackable
 	virtual ~GainMeterBase ();
 
 	virtual void set_io (boost::shared_ptr<ARDOUR::IO>);
+	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
 
 	void update_gain_sensitive ();
 	void update_meters ();

@@ -52,6 +52,8 @@ class Send : public Delivery
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
+	bool set_name (const std::string& str);
+
 	static uint32_t how_many_sends();
 	static void make_unique (XMLNode &, Session &);
 

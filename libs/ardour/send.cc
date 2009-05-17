@@ -167,3 +167,16 @@ Send::make_unique (XMLNode &state, Session &session)
 		io->property("name")->set_value (name);
 	}
 }
+
+bool
+Send::set_name (const std::string& new_name)
+{
+	char buf[32];
+	std::string unique_name;
+
+	snprintf (buf, sizeof (buf), "%u", _bitslot);
+	unique_name = new_name;
+	unique_name += buf;
+
+	return Delivery::set_name (unique_name);
+}
