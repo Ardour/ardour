@@ -52,6 +52,7 @@ class MotionController;
 class PluginSelector;
 class PluginUIWindow;
 class RouteRedirectSelection;
+class MixerStrip;
 
 namespace ARDOUR {
 	class Connection;
@@ -68,7 +69,7 @@ namespace ARDOUR {
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 {
   public:
-	ProcessorBox (ARDOUR::Placement, ARDOUR::Session&, PluginSelector &, RouteRedirectSelection &, bool owner_is_mixer = false);
+	ProcessorBox (ARDOUR::Placement, ARDOUR::Session&, PluginSelector &, RouteRedirectSelection &, MixerStrip* parent, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
@@ -90,6 +91,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
   private:
 	boost::shared_ptr<ARDOUR::Route>  _route;
 	ARDOUR::Session &   _session;
+	MixerStrip*         _parent_strip; // null if in RouteParamsUI
 	bool                _owner_is_mixer;
 	bool                 ab_direction;
 	std::vector<sigc::connection> connections;

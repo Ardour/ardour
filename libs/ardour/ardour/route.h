@@ -91,7 +91,6 @@ class Route : public IO
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
-
 	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 			  int declick, bool can_record, bool rec_monitors_input);
 
@@ -181,6 +180,8 @@ class Route : public IO
 
 	boost::shared_ptr<Delivery> control_outs() const { return _control_outs; }
 	boost::shared_ptr<Delivery> main_outs() const { return _main_outs; }
+
+	boost::shared_ptr<IO> send_io_for (boost::shared_ptr<const IO> target) const;
 	
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.
@@ -248,7 +249,7 @@ class Route : public IO
 	int listen_via (boost::shared_ptr<IO>, const std::string& name);
 	void drop_listen (boost::shared_ptr<IO>);
 
-	bool feeds (boost::shared_ptr<Route>);
+	bool feeds (boost::shared_ptr<IO>);
 	std::set<boost::shared_ptr<Route> > fed_by;
 
 	struct ToggleControllable : public PBD::Controllable {
@@ -314,7 +315,7 @@ class Route : public IO
 	nframes_t      _initial_delay;
 	nframes_t      _roll_delay;
 	ProcessorList  _processors;
-	Glib::RWLock   _processor_lock;
+	mutable Glib::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
 	boost::shared_ptr<Delivery> _control_outs; // XXX to be removed/generalized by listen points
 	RouteGroup    *_edit_group;

@@ -133,7 +133,7 @@ PannerUI::PannerUI (Session& s)
 void
 PannerUI::set_io (boost::shared_ptr<IO> io)
 {
-	if (!io->panner()) {
+	if (io && !io->panner()) {
 		cerr << "PannerUI::set_io IO has no panners" << endl;
 		return;
 	}
@@ -148,15 +148,16 @@ PannerUI::set_io (boost::shared_ptr<IO> io)
  			
  	_io = io;
  
- 	connections.push_back (_io->panner()->Changed.connect (
-			mem_fun(*this, &PannerUI::panner_changed)));
- 	connections.push_back (_io->panner()->LinkStateChanged.connect (
-			mem_fun(*this, &PannerUI::update_pan_linkage)));
- 	connections.push_back (_io->panner()->StateChanged.connect (
-			mem_fun(*this, &PannerUI::update_pan_state)));
- 
 	delete panner;
 	panner = 0;
+
+	if (!_io) {
+		return;
+	}
+ 
+ 	connections.push_back (_io->panner()->Changed.connect (mem_fun(*this, &PannerUI::panner_changed)));
+ 	connections.push_back (_io->panner()->LinkStateChanged.connect (mem_fun(*this, &PannerUI::update_pan_linkage)));
+ 	connections.push_back (_io->panner()->StateChanged.connect (mem_fun(*this, &PannerUI::update_pan_state)));
  
 	setup_pan ();
 
@@ -338,7 +339,7 @@ PannerUI::update_pan_state ()
 void
 PannerUI::setup_pan ()
 {
-	if (!_io->panner()) {
+	if (!_io || !_io->panner()) {
 		return;
 	}
 

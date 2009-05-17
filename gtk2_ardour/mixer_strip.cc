@@ -67,6 +67,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
 
+sigc::signal<void,boost::shared_ptr<Route> > MixerStrip::SwitchIO;
+
 int MixerStrip::scrollbar_height = 0;
 
 #ifdef VARISPEED_IN_MIXER_STRIP
@@ -88,8 +90,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 	, RouteUI (sess, _("Mute"), _("Solo"), _("Record"))
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
- 	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), in_mixer)
-	, post_processor_box (PostFader, sess, mx.plugin_selector(), mx.selection(), in_mixer)
+ 	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
+	, post_processor_box (PostFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
 	, gpm (sess)
 	, panners (sess)
 	, button_table (3, 2)
@@ -117,8 +119,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	, RouteUI (sess, _("Mute"), _("Solo"), _("Record"))
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
- 	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), in_mixer)
-	, post_processor_box (PostFader, sess, mx.plugin_selector(), mx.selection(), in_mixer)
+ 	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
+	, post_processor_box (PostFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
 	, gpm (sess)
 	, panners (sess)
 	, button_table (3, 2)
@@ -290,6 +292,12 @@ MixerStrip::init ()
 	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
 	rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
 
+	/* ditto for this button and busses */
+
+	show_sends_button->set_name ("MixerRecordEnableButton");
+	show_sends_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::show_sends_press), false);
+	show_sends_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::show_sends_release));
+
 	name_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::name_button_button_press), false);
 	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
 
@@ -309,6 +317,9 @@ MixerStrip::init ()
 		set_name ("AudioTrackStripBase");
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
+
+	SwitchIO.connect (mem_fun (*this, &MixerStrip::switch_io));
+	
 }
 
 MixerStrip::~MixerStrip ()
@@ -324,6 +335,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	if (rec_enable_button->get_parent()) {
 		button_table.remove (*rec_enable_button);
+	}
+
+	if (show_sends_button->get_parent()) {
+		button_table.remove (*show_sends_button);
 	}
 
 #ifdef VARISPEED_IN_MIXER_STRIP
@@ -384,6 +399,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 		rec_enable_button->show();
+
+	} else if (!is_track()) {
+		/* bus */
+
+		button_table.attach (*show_sends_button, 0, 2, 2, 3);
+		show_sends_button->show();
 	}
 
 	if (_route->phase_invert()) {
@@ -562,6 +583,9 @@ MixerStrip::set_width (Width w, void* owner)
 		if (rec_enable_button)  {
 			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Record"));
 		}
+		if (show_sends_button)  {
+			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Sends"));
+		}
 		((Gtk::Label*)mute_button->get_child())->set_text  (_("Mute"));
 		((Gtk::Label*)solo_button->get_child())->set_text (_("Solo"));
 
@@ -592,6 +616,9 @@ MixerStrip::set_width (Width w, void* owner)
 	case Narrow:
 		if (rec_enable_button) {
 			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Rec"));
+		}
+		if (show_sends_button) {
+			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Snd"));
 		}
 		((Gtk::Label*)mute_button->get_child())->set_text (_("M"));
 		((Gtk::Label*)solo_button->get_child())->set_text (_("S"));
@@ -1462,3 +1489,24 @@ MixerStrip::meter_changed (void *src)
 	set_width(_width, this);
 }
 
+void
+MixerStrip::switch_io (boost::shared_ptr<Route> target)
+{
+	boost::shared_ptr<IO> to_display;
+
+	if (_route == target) {
+		/* don't change the display for the target */
+		return;
+	}
+
+	if (!target) {
+		to_display = _route;
+	} else {
+		to_display = _route->send_io_for (target);
+	}
+	
+	gain_meter().set_io (to_display);
+	gain_meter().setup_meters ();
+	panner_ui().set_io (to_display);
+	panner_ui().setup_pan ();
+}

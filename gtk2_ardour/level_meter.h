@@ -55,7 +55,7 @@ class LevelMeter : public Gtk::HBox
 	LevelMeter (ARDOUR::Session&);
 	~LevelMeter ();
 
-	virtual void set_meter (ARDOUR::PeakMeter& meter);
+	virtual void set_meter (ARDOUR::PeakMeter* meter);
 
 	void update_gain_sensitive ();
 

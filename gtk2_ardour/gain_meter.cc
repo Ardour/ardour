@@ -165,7 +165,13 @@ GainMeterBase::set_io (boost::shared_ptr<IO> io)
 	
  	_io = io;
 	
- 	level_meter->set_meter (_io->peak_meter());
+	if (!_io) {
+		level_meter->set_meter (0);
+		gain_slider->set_controllable (boost::shared_ptr<PBD::Controllable>());
+		return;
+	} 
+
+ 	level_meter->set_meter (&_io->peak_meter());
  	gain_slider->set_controllable (_io->gain_control());
 
 	boost::shared_ptr<Route> r;
@@ -836,6 +842,14 @@ GainMeter::set_io (boost::shared_ptr<IO> io)
 		if (!r->is_hidden()) {
 			fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 		}
+
+	} else {
+
+		/* we're managing a non-Route IO (e.g. Send) */
+
+		gain_display_box.pack_end (peak_display, true, true);
+		hbox.pack_end (*level_meter, true, true);
+		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 	}
 }
 

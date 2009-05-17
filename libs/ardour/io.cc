@@ -1596,25 +1596,28 @@ IO::get_port_counts (const XMLNode& node, ChanCount& in, ChanCount& out,
 int
 IO::create_ports (const XMLNode& node)
 {
-	ChanCount in;
-	ChanCount out;
-	boost::shared_ptr<Bundle> ic;
-	boost::shared_ptr<Bundle> oc;
+	if (pending_state_node) {
 
-	no_panner_reset = true;
-
-	get_port_counts (*pending_state_node, in, out, ic, oc);
-
-	if (ensure_io (in, out, true, this)) {
-		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
-		return -1;
+		ChanCount in;
+		ChanCount out;
+		boost::shared_ptr<Bundle> ic;
+		boost::shared_ptr<Bundle> oc;
+		
+		no_panner_reset = true;
+		
+		get_port_counts (*pending_state_node, in, out, ic, oc);
+		
+		if (ensure_io (in, out, true, this)) {
+			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
+			return -1;
+		}
+		
+		/* XXX use ic and oc if relevant */
+		
+		no_panner_reset = false;
 	}
 
-	/* XXX use ic and oc if relevant */
-
-	no_panner_reset = false;
 	set_deferred_state ();
-
 	return 0;
 }
 
@@ -2661,5 +2664,24 @@ void
 IO::increment_output_offset (nframes_t n)
 {
 	_output_offset += n;
+}
+
+bool
+IO::connected_to (boost::shared_ptr<const IO> other) const
+{
+	uint32_t i, j;
+	
+	uint32_t no = n_outputs().n_total();
+	uint32_t ni = other->n_inputs ().n_total();
+	
+	for (i = 0; i < no; ++i) {
+		for (j = 0; j < ni; ++j) {
+			if (output(i)->connected_to (other->input(j)->name())) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 

@@ -81,7 +81,8 @@ class RouteUI : public virtual AxisView
 
 	BindableToggleButton* mute_button;
 	BindableToggleButton* solo_button;
-	BindableToggleButton* rec_enable_button;
+	BindableToggleButton* rec_enable_button; /* audio tracks */
+	BindableToggleButton* show_sends_button; /* busses */
 	
 	virtual std::string solo_button_name () const { return "SoloButton"; }
 	virtual std::string safe_solo_button_name () const { return "SafeSoloButton"; }
@@ -89,6 +90,7 @@ class RouteUI : public virtual AxisView
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
 	Gtk::Menu* remote_control_menu;
+	Gtk::Menu* sends_menu;
 
 	XMLNode *xml_node;
 	void ensure_xml_node ();
@@ -101,6 +103,13 @@ class RouteUI : public virtual AxisView
 	bool solo_release(GdkEventButton*);
 	bool rec_enable_press(GdkEventButton*);
 	bool rec_enable_release(GdkEventButton*);
+	bool show_sends_press(GdkEventButton*);
+	bool show_sends_release(GdkEventButton*);
+
+	void build_sends_menu ();
+	void set_sends_gain_from_track ();
+	void set_sends_gain_to_zero ();
+	void set_sends_gain_to_unity ();
 
 	void solo_changed(void*);
 	void solo_changed_so_update_mute ();

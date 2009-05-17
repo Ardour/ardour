@@ -59,6 +59,7 @@
 #include "io_selector.h"
 #include "keyboard.h"
 #include "mixer_ui.h"
+#include "mixer_strip.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
 #include "processor_box.h"
@@ -89,8 +90,9 @@ Gdk::Color* ProcessorBox::active_processor_color;
 Gdk::Color* ProcessorBox::inactive_processor_color;
 
 ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, PluginSelector &plugsel,
-			    RouteRedirectSelection & rsel, bool owner_is_mixer)
+			    RouteRedirectSelection & rsel, MixerStrip* parent, bool owner_is_mixer)
 	: _session(sess)
+	, _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)
 	, _placement(pcmnt)
 	, _plugin_selector(plugsel)
@@ -1193,12 +1195,10 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 			return;
 		}
 
-		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
-
+#ifdef OLD_SEND_EDITING
 		SendUIWindow *send_ui;
 
 		if (send->get_gui() == 0) {
-
 			send_ui = new SendUIWindow (send, _session);
 
 			WindowTitle title(Glib::get_application_name());
@@ -1212,6 +1212,12 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		}
 
 		gidget = send_ui;
+#else
+		if (_parent_strip) {
+			_parent_strip->gain_meter().set_io (send->io());
+			_parent_strip->panner_ui().set_io (send->io());
+		}
+#endif
 	
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 

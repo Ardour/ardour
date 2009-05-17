@@ -2112,39 +2112,21 @@ Route::set_comment (string cmt, void *src)
 }
 
 bool
-Route::feeds (boost::shared_ptr<Route> other)
+Route::feeds (boost::shared_ptr<IO> other)
 {
-	uint32_t i, j;
-
-	IO& self = *this;
-	uint32_t no = self.n_outputs().n_total();
-	uint32_t ni = other->n_inputs ().n_total();
-
-	for (i = 0; i < no; ++i) {
-		for (j = 0; j < ni; ++j) {
-			if (self.output(i)->connected_to (other->input(j)->name())) {
-				return true;
-			}
-		}
+	if (connected_to (other)) {
+		return true;
 	}
 
 	/* check IOProcessors which may also interconnect Routes */
 
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); r++) {
 
-		boost::shared_ptr<IOProcessor> proc = boost::dynamic_pointer_cast<IOProcessor>(*r);
-		
-		if (!proc) {
-			continue;
-		}
-		
-		no = proc->io()->n_outputs().n_total();
-		
-		for (i = 0; i < no; ++i) {
-			for (j = 0; j < ni; ++j) {
-				if (proc->io()->output(i)->connected_to (other->input (j)->name())) {
-					return true;
-				}
+		boost::shared_ptr<IOProcessor> proc;
+
+		if ((proc = boost::dynamic_pointer_cast<IOProcessor>(*r)) != 0) {
+			if (proc->io()->connected_to (other)) {
+				return true;
 			}
 		}
 	}
@@ -2699,4 +2681,22 @@ Route::set_name (const string& str)
 	}
 
 	return ret;
+}
+
+boost::shared_ptr<IO>
+Route::send_io_for (boost::shared_ptr<const IO> target) const
+{
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Send> send;
+		
+		if ((send = boost::dynamic_pointer_cast<Send>(*i)) != 0) {
+			if (send->io()->connected_to (target)) {
+				return send->io();
+			}
+		}
+	}
+	
+	return boost::shared_ptr<IO>();
 }

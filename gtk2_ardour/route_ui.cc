@@ -38,6 +38,7 @@
 #include "gui_thread.h"
 #include "ardour_dialog.h"
 #include "latency_gui.h"
+#include "mixer_strip.h"
 #include "automation_time_axis.h"
 
 #include "ardour/route.h"
@@ -84,6 +85,7 @@ RouteUI::~RouteUI()
 	delete solo_menu;
 	delete mute_menu;
 	delete remote_control_menu;
+	delete sends_menu;
 }
 
 void
@@ -94,6 +96,7 @@ RouteUI::init ()
 	mute_menu = 0;
 	solo_menu = 0;
 	remote_control_menu = 0;
+	sends_menu = 0;
 	ignore_toggle = false;
 	wait_for_release = false;
 	route_active_menu_item = 0;
@@ -117,6 +120,11 @@ RouteUI::init ()
 	rec_enable_button->set_name ("RecordEnableButton");
 	rec_enable_button->set_self_managed (true);
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
+
+	show_sends_button = manage (new BindableToggleButton (""));
+	show_sends_button->set_name ("ShowSendsButton");
+	show_sends_button->set_self_managed (true);
+	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
 	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
 }
@@ -493,6 +501,83 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 bool
 RouteUI::rec_enable_release (GdkEventButton* ev)
+{
+	return true;
+}
+
+void
+RouteUI::build_sends_menu ()
+{
+	using namespace Menu_Helpers;
+	
+	sends_menu = new Menu;
+	sends_menu->set_name ("ArdourContextMenu");
+	MenuList& items = sends_menu->items();
+	
+	items.push_back (MenuElem(_("Copy track gains to sends"), mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
+	items.push_back (MenuElem(_("Set sends gain to -inf"), mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
+	items.push_back (MenuElem(_("Set sends gain to 0dB"), mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
+}
+
+void
+RouteUI::set_sends_gain_from_track ()
+{
+}
+
+void
+RouteUI::set_sends_gain_to_zero ()
+{
+}
+
+void
+RouteUI::set_sends_gain_to_unity ()
+{
+}
+
+bool
+RouteUI::show_sends_press(GdkEventButton* ev)
+{
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+
+	if (!ignore_toggle && !is_track() && show_sends_button) {
+
+		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+			// do nothing on midi bind event
+			return false;
+
+		} else if (Keyboard::is_context_menu_event (ev)) {
+
+			if (sends_menu == 0) {
+				build_sends_menu ();
+			}
+
+			sends_menu->popup (0, ev->time);
+
+		} else {
+
+			/* change button state */
+
+			show_sends_button->set_active (!show_sends_button->get_active());
+
+			if (show_sends_button->get_active()) {
+				/* show sends to this bus */
+				MixerStrip::SwitchIO (_route);
+			} else {
+				/* everybody back to normal */
+				MixerStrip::SwitchIO (boost::shared_ptr<Route>());
+			}
+
+		}
+	}
+
+	return true;
+}
+
+bool
+RouteUI::show_sends_release (GdkEventButton* ev)
 {
 	return true;
 }

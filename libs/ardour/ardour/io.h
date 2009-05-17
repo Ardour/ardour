@@ -141,6 +141,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	int disconnect_inputs (void *src);
 	int disconnect_outputs (void *src);
 
+	bool connected_to (boost::shared_ptr<const IO>) const;
+
 	nframes_t signal_latency() const { return _own_latency; }
 	nframes_t output_latency() const;
 	nframes_t input_latency() const;

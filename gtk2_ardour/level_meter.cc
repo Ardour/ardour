@@ -80,12 +80,14 @@ LevelMeter::~LevelMeter ()
 }
 
 void
-LevelMeter::set_meter (PeakMeter& meter)
+LevelMeter::set_meter (PeakMeter* meter)
 {
 	_configuration_connection.disconnect();
-	_meter = &meter;
-	_configuration_connection = _meter->ConfigurationChanged.connect(
+	_meter = meter;
+	if (_meter) {
+		_configuration_connection = _meter->ConfigurationChanged.connect(
 			mem_fun(*this, &LevelMeter::configuration_changed));
+	}
 }
 
 float
@@ -94,6 +96,10 @@ LevelMeter::update_meters ()
 	vector<MeterInfo>::iterator i;
 	uint32_t n;
 	float peak, mpeak;
+
+	if (!_meter) {
+		return 0.0f;
+	}
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
@@ -149,8 +155,10 @@ LevelMeter::hide_all_meters ()
 void
 LevelMeter::setup_meters (int len, int initial_width)
 {
+	hide_all_meters ();
+
  	if (!_meter) {
- 		return; /* do it later */
+ 		return; /* do it later or never */
  	}
  
 	int32_t nmidi = _meter->input_streams().n_midi();
@@ -159,8 +167,6 @@ LevelMeter::setup_meters (int len, int initial_width)
 	meter_length = len;
 
 	guint16 width;
-
-	hide_all_meters ();
 
 	if (nmeters == 0) {
 		return;
