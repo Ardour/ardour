@@ -698,7 +698,7 @@ RouteUI::build_solo_menu (void)
 	MenuList& items = solo_menu->items();
 	CheckMenuItem* check;
 
-	check = new CheckMenuItem(_("Solo Locked"));
+	check = new CheckMenuItem(_("Solo Lock"));
 	check->set_active (_route->solo_safe());
 	check->signal_toggled().connect (bind (mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	_route->solo_safe_changed.connect(bind (mem_fun (*this, &RouteUI::solo_safe_toggle), check));
