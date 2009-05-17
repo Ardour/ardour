@@ -451,20 +451,20 @@ if gtkardour['GTKOSX']:
 	#  NSCommand (aka "Command" aka "Apple" aka "Cauliflower") -> Meta
 	#  NSAlternate (aka "Option")  -> Mod1
 	#
-	keybindings_dict['%PRIMARY%'] = 'Meta'
-	keybindings_dict['%SECONDARY%'] = 'Mod1'
-	keybindings_dict['%TERTIARY%'] = 'Shift'
-	keybindings_dict['%LEVEL4%'] = 'Ctrl'
-	keybindings_dict['%WINDOW%'] = 'Mod1'
+	keybindings_dict['@PRIMARY@'] = 'Meta'
+	keybindings_dict['@SECONDARY@'] = 'Mod1'
+	keybindings_dict['@TERTIARY@'] = 'Shift'
+	keybindings_dict['@LEVEL4@'] = 'Ctrl'
+	keybindings_dict['@WINDOW@'] = 'Mod1'
 else:
 	#
 	# Ctrl, Alt, Shift, Mod4(Super/Windows/Hyper)
 	#
-	keybindings_dict['%PRIMARY%'] = 'Ctrl'
-	keybindings_dict['%SECONDARY%'] = 'Alt'
-	keybindings_dict['%TERTIARY%'] = 'Shift'
-	keybindings_dict['%LEVEL4%'] = env['WINDOWS_KEY']
-	keybindings_dict['%WINDOW%'] = 'Alt'
+	keybindings_dict['@PRIMARY@'] = 'Ctrl'
+	keybindings_dict['@SECONDARY@'] = 'Alt'
+	keybindings_dict['@TERTIARY@'] = 'Shift'
+	keybindings_dict['@LEVEL4@'] = env['WINDOWS_KEY']
+	keybindings_dict['@WINDOW@'] = 'Alt'
 
 for b in [ 'SAE-de-keypad',  'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad', 'mnemonic-us', 'ergonomic-us' ]:
 	target_file = b + '.bindings'

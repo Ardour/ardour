@@ -349,17 +349,17 @@ def build(bld):
 	# Keybindings
 	keybindings_dict = {}
 	if bld.env['GTKOSX']:
-		keybindings_dict['%PRIMARY%']   = 'Meta'
-		keybindings_dict['%SECONDARY%'] = 'Mod1'
-		keybindings_dict['%TERTIARY%']  = 'Shift'
-		keybindings_dict['%LEVEL4%']    = 'Ctrl'
-		keybindings_dict['%WINDOW%']    = 'Mod1'
+		keybindings_dict['PRIMARY']   = 'Meta'
+		keybindings_dict['SECONDARY'] = 'Mod1'
+		keybindings_dict['TERTIARY']  = 'Shift'
+		keybindings_dict['LEVEL4']    = 'Ctrl'
+		keybindings_dict['WINDOW']    = 'Mod1'
 	else:
-		keybindings_dict['%PRIMARY%']   = 'Ctrl'
-		keybindings_dict['%SECONDARY%'] = 'Alt'
-		keybindings_dict['%TERTIARY%']  = 'Shift'
-		keybindings_dict['%LEVEL4%']    = bld.env['WINDOWS_KEY']
-		keybindings_dict['%WINDOW%']    = 'Alt'
+		keybindings_dict['PRIMARY']   = 'Ctrl'
+		keybindings_dict['SECONDARY'] = 'Alt'
+		keybindings_dict['TERTIARY']  = 'Shift'
+		keybindings_dict['LEVEL4']    = bld.env['WINDOWS_KEY']
+		keybindings_dict['WINDOW']    = 'Alt'
 
 	for b in [ 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad',
 	           'mnemonic-us', 'ergonomic-us' ]:
