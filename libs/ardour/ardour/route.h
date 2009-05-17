@@ -181,7 +181,7 @@ class Route : public IO
 	boost::shared_ptr<Delivery> control_outs() const { return _control_outs; }
 	boost::shared_ptr<Delivery> main_outs() const { return _main_outs; }
 
-	boost::shared_ptr<IO> send_io_for (boost::shared_ptr<const IO> target) const;
+	boost::shared_ptr<Send> send_for (boost::shared_ptr<const IO> target) const;
 	
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.

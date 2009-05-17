@@ -2683,8 +2683,8 @@ Route::set_name (const string& str)
 	return ret;
 }
 
-boost::shared_ptr<IO>
-Route::send_io_for (boost::shared_ptr<const IO> target) const
+boost::shared_ptr<Send>
+Route::send_for (boost::shared_ptr<const IO> target) const
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 
@@ -2693,10 +2693,10 @@ Route::send_io_for (boost::shared_ptr<const IO> target) const
 		
 		if ((send = boost::dynamic_pointer_cast<Send>(*i)) != 0) {
 			if (send->io()->connected_to (target)) {
-				return send->io();
+				return send;
 			}
 		}
 	}
 	
-	return boost::shared_ptr<IO>();
+	return boost::shared_ptr<Send>();
 }

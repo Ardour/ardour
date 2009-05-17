@@ -355,6 +355,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	delete output_selector;
 	output_selector = 0;
 
+	if (_current_send) {
+		_current_send->set_metering (false);
+	}
+
+	_current_send.reset ();
+
 	panners.set_io (rt);
 	gpm.set_io (rt);
 	pre_processor_box.set_route (rt);
@@ -401,10 +407,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		rec_enable_button->show();
 
 	} else if (!is_track()) {
-		/* bus */
+		/* non-master bus */
 
-		button_table.attach (*show_sends_button, 0, 2, 2, 3);
-		show_sends_button->show();
+		if (!_route->is_master()) {
+			button_table.attach (*show_sends_button, 0, 2, 2, 3);
+			show_sends_button->show();
+		}
 	}
 
 	if (_route->phase_invert()) {
@@ -1494,19 +1502,51 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 {
 	boost::shared_ptr<IO> to_display;
 
-	if (_route == target) {
-		/* don't change the display for the target */
+	if (_route == target || _route->is_master()) {
+		/* don't change the display for the target or the master bus */
 		return;
+	} else if (!is_track() && show_sends_button) {
+		/* make sure our show sends button is inactive, 
+		   since we're not the target.
+		*/
+		show_sends_button->set_active (false);
 	}
 
 	if (!target) {
-		to_display = _route;
-	} else {
-		to_display = _route->send_io_for (target);
+		/* switch back to default */
+		revert_to_default_display ();
+		return;
+	}
+	
+	if (_current_send) {
+		_current_send->set_metering (false);
+	}
+	
+	_current_send = _route->send_for (target);
+
+	if (_current_send) {
+		to_display = _current_send->io();
+
+		_current_send->set_metering (true);
+		_current_send->GoingAway.connect (mem_fun (*this, &MixerStrip::revert_to_default_display));
 	}
 	
 	gain_meter().set_io (to_display);
 	gain_meter().setup_meters ();
 	panner_ui().set_io (to_display);
+	panner_ui().setup_pan ();
+}
+
+void
+MixerStrip::revert_to_default_display ()
+{
+	if (_current_send) {
+		_current_send->set_metering (false);
+		_current_send.reset();
+	}
+
+	gain_meter().set_io (_route);
+	gain_meter().setup_meters ();
+	panner_ui().set_io (_route);
 	panner_ui().setup_pan ();
 }
