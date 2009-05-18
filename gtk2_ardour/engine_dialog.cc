@@ -276,23 +276,8 @@ EngineControl::EngineControl ()
 	++row;
 #endif
 
-	find_jack_servers (server_strings);
-
-	if (server_strings.empty()) {
-		fatal << _("No JACK server found anywhere on this system. Please install JACK and restart") << endmsg;
-		/*NOTREACHED*/
-	}
-	
-	set_popdown_strings (serverpath_combo, server_strings);
-	serverpath_combo.set_active_text (server_strings.front());
-
-	if (server_strings.size() > 1) {
-		label = manage (new Label (_("Server:")));
-		options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		label->set_alignment (0.0, 0.5);
-		options_packer.attach (serverpath_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-		++row;
-	}
+	/* defer server stuff till later */
+	server_row = row++;
 
 	/* device settings */
 
@@ -351,6 +336,27 @@ EngineControl::EngineControl ()
 EngineControl::~EngineControl ()
 {
 
+}
+
+void
+EngineControl::discover_servers ()
+{
+	find_jack_servers (server_strings);
+
+	if (server_strings.empty()) {
+		fatal << _("No JACK server found anywhere on this system. Please install JACK and restart") << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	set_popdown_strings (serverpath_combo, server_strings);
+	serverpath_combo.set_active_text (server_strings.front());
+
+	if (server_strings.size() > 1) {
+		Gtk::Label* label = manage (new Label (_("Server:")));
+		options_packer.attach (*label, 0, 1, server_row, server_row + 1, FILL|EXPAND, (AttachOptions) 0);
+		label->set_alignment (0.0, 0.5);
+		options_packer.attach (serverpath_combo, 1, 2, server_row, server_row + 1, FILL|EXPAND, (AttachOptions) 0);
+	}
 }
 
 void

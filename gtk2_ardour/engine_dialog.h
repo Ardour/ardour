@@ -22,6 +22,7 @@ class EngineControl : public Gtk::VBox {
 
 	static bool engine_running ();
 	int setup_engine ();
+	void discover_servers ();
 
 	bool was_used() const { return _used; }
 	XMLNode& get_state ();
@@ -99,6 +100,7 @@ class EngineControl : public Gtk::VBox {
 	uint32_t get_rate();
 	void audio_mode_changed ();
 	std::vector<std::string> server_strings;
+	int server_row;
 	void find_jack_servers (std::vector<std::string>&);
 	std::string get_device_name (const std::string& driver, const std::string& human_readable_name);
 };

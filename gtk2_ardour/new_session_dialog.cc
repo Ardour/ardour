@@ -493,6 +493,7 @@ NewSessionDialog::set_have_engine (bool yn)
 		page_set = Pages (page_set & ~EnginePage);
 	} else {
 		if (!(page_set & EnginePage)) {
+			engine_control.discover_servers ();
 			m_notebook->append_page (engine_control, _("Audio Setup"));
 			m_notebook->show_all_children();
 			page_set = Pages (page_set | EnginePage);
