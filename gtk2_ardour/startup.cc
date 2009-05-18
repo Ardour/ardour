@@ -71,7 +71,8 @@ Ardour will play NO role in monitoring"))
 
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
-
+	set_border_width (12);
+	
 	sys::path icon_file;
 
 	if (!find_file_in_search_path (ardour_search_path() + system_data_search_path().add_subdirectory_to_paths("icons"), "ardour_icon_48px.png", icon_file)) {
