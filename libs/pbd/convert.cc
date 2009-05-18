@@ -20,6 +20,7 @@
 #include <cmath>
 #include <stdint.h>
 #include <stdlib.h>
+#include <cstdio>
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif

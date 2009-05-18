@@ -18,6 +18,7 @@
 
 */
 
+#include <cstdio>
 #include "ardour/types.h"
 #include "ardour/event_type_map.h"
 #include "evoral/Parameter.hpp"

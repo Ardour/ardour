@@ -23,6 +23,7 @@
 #include <limits>
 #include <stdexcept>
 #include <stdint.h>
+#include <cstdio>
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"

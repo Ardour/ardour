@@ -18,6 +18,7 @@
 #ifndef __gnome_canvas_lineset_h__
 #define __gnome_canvas_lineset_h__
 
+#include <stdint.h>
 #include <libgnomecanvasmm/item.h>
 
 namespace Gnome {

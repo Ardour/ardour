@@ -3,6 +3,7 @@
 #define __ardour_directory_names_h__
 
 #include <string>
+#include <stdint.h>
 
 namespace ARDOUR {
 

@@ -20,6 +20,7 @@
 #ifndef __pbd_convert_h__
 #define __pbd_convert_h__
 
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <sstream>

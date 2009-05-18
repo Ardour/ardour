@@ -1,6 +1,7 @@
 
 #include "pbd/error.h"
 
+#include <stdint.h>
 #include "ardour/session_directory.h"
 
 #include "i18n.h"

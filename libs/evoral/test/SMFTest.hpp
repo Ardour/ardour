@@ -17,6 +17,7 @@
  */
 
 #include <cassert>
+#include <stdint.h>
 #include <sigc++/sigc++.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>

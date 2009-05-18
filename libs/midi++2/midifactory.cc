@@ -18,6 +18,7 @@
 */
 
 #include <cassert>
+#include <stdint.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"

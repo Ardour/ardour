@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <stdint.h>
 
 #include <sndfile.h>
 #include <samplerate.h>

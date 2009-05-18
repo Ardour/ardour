@@ -20,6 +20,7 @@
 #ifndef __gtk_ardour_port_matrix_component_h__
 #define __gtk_ardour_port_matrix_component_h__
 
+#include <stdint.h>
 #include <gtkmm/eventbox.h>
 
 class PortMatrix;

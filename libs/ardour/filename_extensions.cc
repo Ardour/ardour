@@ -1,5 +1,6 @@
 #include "ardour/filename_extensions.h"
 
+#include <stdint.h>
 #include "i18n.h"
 
 namespace ARDOUR {                       
