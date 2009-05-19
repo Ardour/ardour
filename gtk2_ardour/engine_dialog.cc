@@ -1249,24 +1249,35 @@ EngineControl::set_state (const XMLNode& root)
 		} else if (child->name() == "periodsize") {
 			period_size_combo.set_active_text(strval);
 		} else if (child->name() == "serverpath") {
-			/* do not allow us to use a server path that doesn't
-			   exist on this system. this handles cases where
-			   the user has an RC file listing a serverpath
-			   from some other machine.
+
+			/* only attempt to set this if we have bothered to look
+			   up server names already. otherwise this is all
+			   redundant (actually, all of this dialog/widget 
+			   is redundant in that case ...)
 			*/
-			vector<string>::iterator x;
-			for (x = server_strings.begin(); x != server_strings.end(); ++x) {
-				if (*x == strval) {
-					break;
+		       
+
+			if (!server_strings.empty()) {
+				/* do not allow us to use a server path that doesn't
+				   exist on this system. this handles cases where
+				   the user has an RC file listing a serverpath
+				   from some other machine.
+				*/
+				vector<string>::iterator x;
+				for (x = server_strings.begin(); x != server_strings.end(); ++x) {
+					if (*x == strval) {
+						break;
+					}
+				}
+				if (x != server_strings.end()) {
+					serverpath_combo.set_active_text (strval);
+				} else {
+					warning << string_compose (_("configuration files contain a JACK server path that doesn't exist (%1)"),
+								   strval)
+						<< endmsg;
 				}
 			}
-			if (x != server_strings.end()) {
-				serverpath_combo.set_active_text (strval);
-			} else {
-				warning << string_compose (_("configuration files contain a JACK server path that doesn't exist (%1)"),
-							     strval)
-					<< endmsg;
-			}
+
 		} else if (child->name() == "driver") {
 			driver_combo.set_active_text(strval);
 		} else if (child->name() == "interface") {
