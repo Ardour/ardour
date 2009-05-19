@@ -294,7 +294,6 @@ Editor::Editor ()
 	_show_measures = true;
 	_show_waveforms = true;
 	_show_waveforms_recording = true;
-	first_action_message = 0;
 	export_dialog = 0;
 	export_range_markers_dialog = 0;
 	show_gain_after_trim = false;
@@ -1192,10 +1191,6 @@ Editor::connect_to_session (Session *t)
 	/* catch up with the playhead */
 
 	session->request_locate (playhead_cursor->current_frame);
-
-	if (first_action_message) {
-	        first_action_message->hide();
-	}
 
 	update_title ();
 
@@ -4450,6 +4445,8 @@ Editor::post_zoom ()
 	if (playhead_cursor) {
 		playhead_cursor->set_position (playhead_cursor->current_frame);
 	}
+
+	leftmost_frame = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
 	ZoomChanged (); /* EMIT_SIGNAL */
 

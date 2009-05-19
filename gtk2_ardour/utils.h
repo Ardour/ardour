@@ -87,4 +87,10 @@ bool key_is_legal_for_numeric_entry (guint keyval);
 void reset_dpi ();
 void set_pango_fontsize ();
 
+inline guint8 convert_color_channel (guint8 src, guint8 alpha);
+void convert_bgra_to_rgba (guint8 const* src,
+		      guint8*       dst,
+		      int           width,
+		      int           height);
+
 #endif /* __ardour_gtk_utils_h__ */

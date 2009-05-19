@@ -27,6 +27,8 @@
 #include "ardour_ui.h"
 #include "simpleline.h"
 
+#include <gtkmm2ext/utils.h>
+
 #include "i18n.h"
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
@@ -35,7 +37,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	: editor (ed), _parent(&parent), _type(type)
 {
 	double label_offset = 0;
-	bool annotate_left = false;
 
 	/* Shapes we use:
 
@@ -177,7 +178,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 		
 		shift = 13;
 		label_offset = 6.0;
-		annotate_left = true;
 		break;
 
 	case LoopStart:
@@ -200,7 +200,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 		
 		shift = 13;
 		label_offset = 0.0;
-		annotate_left = true;
 		break;
 
 	case  PunchIn:
@@ -223,7 +222,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 		shift = 13;
 		label_offset = 0.0;
-		annotate_left = true;
 		break;
 		
 	}
@@ -242,22 +240,26 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	mark->property_fill_color_rgba() = rgba;
 	mark->property_outline_color_rgba() = rgba;
 	mark->property_width_pixels() = 1;
-	Pango::FontDescription* font = get_font_for_style (N_("MarkerText"));
-	//cerr << " font->get_size() = " << font->get_size() << " is_absolute = " << pango_font_description_get_size_is_absolute(font->gobj()) << " to_string = " << font->to_string() << endl;
-	text = new Text (*group);
-	text->property_font_desc() = *font;
-	text->property_text() = annotation.c_str();
 
-	delete font;
+	/* setup name pixbuf sizes */
+	name_font = get_font_for_style (N_("MarkerText"));
+
+	Gtk::Window win;
+	Gtk::Label foo;
+	win.add (foo);
 	
-	if (annotate_left) {
-		text->property_x() = -(text->property_text_width());
-	} else {
-		text->property_x() = label_offset;
-	}
-	text->property_y() = 0.0;
-	text->property_anchor() = Gtk::ANCHOR_NW;
-	text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerLabel.get();
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
+	int width;
+	int height;
+	
+	layout->set_font_description (*name_font);
+	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+	name_height = height + 6;
+
+	name_pixbuf = new ArdourCanvas::Pixbuf(*group);
+	name_pixbuf->property_x() = label_offset;
+
+	set_name (annotation.c_str());
 
 	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
 
@@ -277,7 +279,7 @@ Marker::~Marker ()
 	drop_references ();
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
-	delete text;
+	delete name_pixbuf;
 	delete mark;
 	delete points;
 
@@ -345,11 +347,37 @@ Marker::the_item() const
 }
 
 void
-Marker::set_name (const string& name)
+Marker::set_name (const string& new_name)
 {
-	text->property_text() = name.c_str();
-	if (_type == End) {
-	  text->property_x() = -(text->property_text_width());
+	uint32_t pb_width;
+	double font_size;
+
+	font_size = name_font->get_size() / Pango::SCALE;
+	pb_width = new_name.length() * font_size;
+
+	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, pb_width, name_height);
+
+	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pb_width, name_height);
+	cairo_t *cr = cairo_create (surface);
+	cairo_text_extents_t te;
+	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+	cairo_select_font_face (cr, name_font->get_family().c_str(),
+				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr, font_size);
+	cairo_text_extents (cr, new_name.c_str(), &te);
+	
+	cairo_move_to (cr, 0.5,
+		       0.5 - te.height / 2 - te.y_bearing + name_height / 2);
+	cairo_show_text (cr, new_name.c_str());
+	
+	unsigned char* src = cairo_image_surface_get_data (surface);
+	convert_bgra_to_rgba(src, buf->get_pixels(), pb_width, name_height);
+	
+	cairo_destroy(cr);
+	name_pixbuf->property_pixbuf() = buf;
+
+	if (_type == End || _type == LoopEnd || _type == PunchOut) {
+		name_pixbuf->property_x() = -(te.width);
 	}
 }
 

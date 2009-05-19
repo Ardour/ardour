@@ -589,8 +589,6 @@ class Editor : public PublicEditor
 	Gdk::Cursor* which_grabber_cursor ();
 
 	ArdourCanvas::Canvas* track_canvas;
-
-	ArdourCanvas::Text* first_action_message;
 	ArdourCanvas::Text* verbose_canvas_cursor;
 	bool                 verbose_cursor_visible;
 
@@ -861,8 +859,6 @@ class Editor : public PublicEditor
 	void tie_vertical_scrolling ();
 	void scroll_canvas_horizontally ();
 	void scroll_canvas_vertically ();
-	void canvas_horizontally_scrolled ();
-	void canvas_scroll_to (nframes64_t);
 
 	struct VisualChange {
 	    enum Type { 

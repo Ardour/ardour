@@ -25,6 +25,8 @@
 #include <ardour/ardour.h>
 #include <pbd/destructible.h>
 
+#include <libgnomecanvasmm/pixbuf.h>
+
 #include "canvas.h"
 
 namespace ARDOUR {
@@ -79,10 +81,12 @@ class Marker : public PBD::Destructible
   protected:
 	PublicEditor& editor;
 
+	Pango::FontDescription* name_font;
+
 	ArdourCanvas::Group * _parent;
 	ArdourCanvas::Group *group;
 	ArdourCanvas::Polygon *mark;
-	ArdourCanvas::Text *text;
+	ArdourCanvas::Pixbuf *name_pixbuf;
 	ArdourCanvas::Points *points;
 	ArdourCanvas::SimpleLine *line;
 	ArdourCanvas::Points *line_points;
@@ -90,8 +94,9 @@ class Marker : public PBD::Destructible
 	double        unit_position;
 	nframes64_t   frame_position;
 	unsigned char shift; /* should be double, but its always small and integral */
-	Type         _type;
-	
+	Type          _type;
+	int           name_height;
+
 	void reposition ();
 };
 
