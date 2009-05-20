@@ -32,12 +32,10 @@ namespace Gtkmm2ext {
 class BarController : public Gtk::Frame
 {
   public:
-	typedef sigc::slot<void,char*,unsigned int> LabelCallback;
-
-	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>, LabelCallback lc = LabelCallback());
+	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);
 
 	virtual ~BarController () {}
-	
+
 	enum Style {
 		LeftToRight,
 		RightToLeft,
@@ -50,12 +48,9 @@ class BarController : public Gtk::Frame
 
 	Style style() const { return _style; }
 	void set_style (Style);
-	void set_with_text (bool yn);
 	void set_use_parent (bool yn);
 
 	void set_sensitive (bool yn);
-
-	Gtk::SpinButton& get_spin_button() { return spinner; }
 
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;
@@ -71,25 +66,29 @@ class BarController : public Gtk::Frame
 	Gtk::Adjustment&    adjustment;
 	BindingProxy        binding_proxy;
 	Gtk::DrawingArea    darea;
-	LabelCallback       label_callback;
 	Glib::RefPtr<Pango::Layout> layout;
 	Style              _style;
 	bool                grabbed;
 	bool                switching;
 	bool                switch_on_release;
-	bool                with_text;
 	double              initial_value;
 	double              grab_x;
 	GdkWindow*          grab_window;
 	Gtk::SpinButton     spinner;
 	bool                use_parent;
 
+	virtual std::string get_label (int& x) {
+		return "";
+	}
+	
 	virtual bool button_press (GdkEventButton *);
 	virtual bool button_release (GdkEventButton *);
 	virtual bool motion (GdkEventMotion *);
 	virtual bool expose (GdkEventExpose *);
 	virtual bool scroll (GdkEventScroll *);
 	virtual bool entry_focus_out (GdkEventFocus*);
+	virtual bool entry_input (double *);
+	virtual bool entry_output ();
 
 	gint mouse_control (double x, GdkWindow* w, double scaling);
 

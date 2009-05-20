@@ -36,12 +36,10 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 BarController::BarController (Gtk::Adjustment& adj,
-			      boost::shared_ptr<PBD::Controllable> mc,
-			      sigc::slot<void,char*,unsigned int> lc) 
+			      boost::shared_ptr<PBD::Controllable> mc)
 
 	: adjustment (adj),
 	  binding_proxy (mc),
-	  label_callback (lc),
 	  spinner (adjustment)
 
 {			  
@@ -49,7 +47,6 @@ BarController::BarController (Gtk::Adjustment& adj,
 	grabbed = false;
 	switching = false;
 	switch_on_release = false;
-	with_text = true;
 	use_parent = false;
 
 	layout = darea.create_pango_layout("");
@@ -76,6 +73,8 @@ BarController::BarController (Gtk::Adjustment& adj,
 
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
 	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
+	spinner.signal_input().connect (mem_fun (*this, &BarController::entry_input));
+	spinner.signal_output().connect (mem_fun (*this, &BarController::entry_output));
 	spinner.set_digits (3);
 
 	add (darea);
@@ -343,44 +342,30 @@ BarController::expose (GdkEventExpose* event)
 		break;
 	}
 
-	if (with_text) {
-		/* draw label */
+	/* draw label */
+
+	int xpos = -1;
+	std::string const label = get_label (xpos);
+
+	if (!label.empty()) {
 		
-		char buf[64];
-		buf[0] = '\0';
+		layout->set_text (label);
+		
+		int width, height;
+		layout->get_pixel_size (width, height);
 
-		if (label_callback)
-			label_callback (buf, 64);
-
-		if (buf[0] != '\0') {
-
-			layout->set_text (buf);			
-
-			int width, height;
-			layout->get_pixel_size (width, height);
-
-			int xpos;
-
+		if (xpos == -1) {
 			xpos = max (3, 1 + (x2 - (width/2)));
 			xpos = min (darea.get_width() - width - 3, xpos);
-			
-			win->draw_layout (get_style()->get_text_gc (get_state()),
-					  xpos,
-					  (darea.get_height()/2) - (height/2),
-					  layout);
 		}
+		
+		win->draw_layout (get_style()->get_text_gc (get_state()),
+				  xpos,
+				  (darea.get_height()/2) - (height/2),
+				  layout);
 	}
-
+	
 	return true;
-}
-
-void
-BarController::set_with_text (bool yn)
-{
-	if (with_text != yn) {
-		with_text = yn;
-		queue_draw ();
-	}
 }
 
 void
@@ -467,3 +452,17 @@ BarController::set_sensitive (bool yn)
 	Frame::set_sensitive (yn);
 	darea.set_sensitive (yn);
 }
+
+bool
+BarController::entry_input (double* v)
+{
+	return false;
+}
+
+bool
+BarController::entry_output ()
+{
+	return false;
+}
+
+	

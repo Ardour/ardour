@@ -46,12 +46,13 @@ public:
 
 	Gtk::Adjustment* adjustment() { return _adjustment; }
 	
-	void update_label(char* label, int label_len);
 	void display_effective_value();
 	void value_adjusted();
 
 private:
-	AutomationController(boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
+	AutomationController (boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
+	std::string get_label (int&);
+	
 	void start_touch();
 	void end_touch();
 

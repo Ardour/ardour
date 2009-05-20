@@ -1,6 +1,7 @@
 #define __STDC_FORMAT_MACROS 1
 #include <inttypes.h>
 
+#include <iomanip>
 #include "ardour/latent.h"
 #include <gtkmm2ext/utils.h>
 
@@ -24,16 +25,19 @@ static const gchar *_unit_strings[] = {
 
 std::vector<std::string> LatencyGUI::unit_strings;
 
-void
-LatencyGUI::latency_printer (char *buf, unsigned int bufsize)
+std::string
+LatencyGUI::get_label (int&)
 {
-	double nframes = adjustment.get_value();
+	double const nframes = adjustment.get_value();
+	std::stringstream s;
 
 	if (nframes < (sample_rate / 1000.0)) {
-		snprintf (buf, bufsize, "%" PRId64 " samples", (nframes64_t) rint (nframes));
+		s << ((nframes64_t) rint (nframes)) << " samples";
 	} else {
-		snprintf (buf, bufsize, "%.2g msecs" , nframes / (sample_rate / 1000.0));
+		s << std::fixed << std::setprecision (2) << (nframes / (sample_rate / 1000.0)) << " msecs";
 	}
+	
+	return s.str ();
 }
 
 LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
@@ -44,7 +48,7 @@ LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
 	  ignored (new PBD::IgnorableControllable()),
 	  /* max 1 second, step by frames, page by msecs */
 	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
-	  bc (adjustment, ignored, sigc::mem_fun (*this, &LatencyGUI::latency_printer)),
+	  bc (adjustment, ignored),
 	  reset_button (_("Reset"))
 {
 	Widget* w;

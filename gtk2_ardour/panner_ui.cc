@@ -393,7 +393,7 @@ PannerUI::setup_pan ()
 				x = rx;
 			}
 
-			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.05, 0.1));
+			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.005, 0.05));
 			bc = new PannerBar (*pan_adjustments[asz],
 				boost::static_pointer_cast<PBD::Controllable>( _io->panner()->pan_control( asz )) );
 
@@ -694,23 +694,6 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 	}
 
 	in_pan_update = false;
-}
-
-void
-PannerUI::pan_printer (char *buf, uint32_t len, Adjustment* adj)
-{
-	float val = adj->get_value();
-
-	if (val == 0.0f) {
-		snprintf (buf, len, X_("L"));
-	} else if (val == 1.0f) {
-		snprintf (buf, len, X_("R"));
-	} else if (Panner::equivalent (val, 0.5f)) {
-		snprintf (buf, len, X_("C"));
-	} else {
-		/* don't print anything */
-		buf[0] = '\0';
-	}
 }
 
 void

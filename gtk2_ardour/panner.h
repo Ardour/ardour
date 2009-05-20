@@ -33,6 +33,12 @@ class PannerBar : public Gtkmm2ext::BarController
 	bool expose (GdkEventExpose*);
 	bool button_press (GdkEventButton*);
 	bool button_release (GdkEventButton*);
+	bool entry_input (double *);
+	bool entry_output ();
+
+  private:
+	std::string get_label (int&);
+	std::string value_as_string (double v) const;
 };
 
 #endif /* __gtk_ardour_panner_h__ */

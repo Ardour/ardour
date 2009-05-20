@@ -18,6 +18,7 @@
 
 */
 
+#include <iomanip>
 #include "pbd/error.h"
 #include "ardour/automation_list.h"
 #include "ardour/automation_control.h"
@@ -35,7 +36,7 @@ using namespace Gtk;
 
 
 AutomationController::AutomationController(boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
-	: BarController(*adj, ac)
+	: BarController (*adj, ac)
 	, _ignore_change(false)
 	, _controllable(ac)
 	, _adjustment(adj)
@@ -43,8 +44,6 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 	set_name (X_("PluginSlider")); // FIXME: get yer own name!
 	set_style (BarController::LeftToRight);
 	set_use_parent (true);
-	
-	label_callback = sigc::mem_fun(this, &AutomationController::update_label);
 	
 	StartGesture.connect (mem_fun(*this, &AutomationController::start_touch));
 	StopGesture.connect (mem_fun(*this, &AutomationController::end_touch));
@@ -78,16 +77,19 @@ AutomationController::create(
 	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment));
 }
 
-void
-AutomationController::update_label(char* label, int label_len)
+std::string
+AutomationController::get_label (int&)
 {
-	if (label && label_len) {
-		// Hack to display CC rounded to int
-		if (_controllable->parameter().type() == MidiCCAutomation)
-			snprintf(label, label_len, "%d", (int)_controllable->get_value());
-		else
-			snprintf(label, label_len, "%.3f", _controllable->get_value());
+	std::stringstream s;
+
+	// Hack to display CC rounded to int
+	if (_controllable->parameter().type() == MidiCCAutomation) {
+		s << (int)_controllable->get_value();
+	} else {
+		s << std::fixed << std::setprecision(3) << _controllable->get_value();
 	}
+	
+	return s.str ();
 }
 
 void

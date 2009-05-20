@@ -31,6 +31,8 @@ class LatencyGUI : public Gtk::VBox
 	void refresh ();
 
   private:
+	std::string get_label (int&);
+
 	ARDOUR::Latent& _latent;
 	nframes64_t initial_value;
 	nframes64_t sample_rate;
@@ -48,7 +50,6 @@ class LatencyGUI : public Gtk::VBox
 	Gtk::ComboBoxText units_combo;
 
 	void change_latency_from_button (int dir);
-	void latency_printer (char* buf, unsigned int bufsize);
 
 	static std::vector<std::string> unit_strings;
 };

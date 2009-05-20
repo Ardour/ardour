@@ -119,7 +119,6 @@ class PannerUI : public Gtk::HBox
 
 	void pan_adjustment_changed (uint32_t which);
 	void pan_value_changed (uint32_t which);
-	void pan_printer (char* buf, uint32_t, Gtk::Adjustment*);
 	void update_pan_bars (bool only_if_aplay);
 	void update_pan_linkage ();
 	void update_pan_state ();
