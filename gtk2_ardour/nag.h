@@ -15,6 +15,7 @@ class NagScreen : public ArdourDialog
 	static NagScreen* maybe_nag (std::string context);
 	void nag ();
 
+	static bool open_uri (const char*);
   private:
 	NagScreen (std::string context, bool maybe_subscriber);
 
@@ -32,7 +33,6 @@ class NagScreen : public ArdourDialog
 	void mark_affirmed_subscriber ();
 	void offer_to_donate ();
 	void offer_to_subscribe ();
-	bool open_uri (const char*);
 	static bool is_subscribed (bool& really);
 };
 

@@ -79,6 +79,7 @@ typedef uint64_t microseconds_t;
 #include "new_session_dialog.h"
 #include "about.h"
 #include "splash.h"
+#include "nag.h"
 #include "utils.h"
 #include "gui_thread.h"
 #include "theme_manager.h"
@@ -2597,6 +2598,16 @@ ARDOUR_UI::show_about ()
 	}
 
 	about->show_all ();
+}
+
+void
+ARDOUR_UI::launch_chat ()
+{
+#ifdef __APPLE__
+	NagScreen::open_uri("http://widget.mibbit.com/?settings=c06958ab4aa3b0c077669dd47e0c138e&server=irc.freenode.net&channel=%23ardour-osx&noServerNotices=true&noServerMotd=true");
+#else
+	NagScreen::open_uri("http://widget.mibbit.com/?settings=c06958ab4aa3b0c077669dd47e0c138e&server=irc.freenode.net&channel=%23ardour&noServerNotices=true&noServerMotd=true");
+#endif
 }
 
 void

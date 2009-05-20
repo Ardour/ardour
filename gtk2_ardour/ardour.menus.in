@@ -573,6 +573,7 @@
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>
+	     <menuitem action='Chat'/>
 	</menu>
      </menubar>
 
