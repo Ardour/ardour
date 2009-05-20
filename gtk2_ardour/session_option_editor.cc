@@ -1,9 +1,141 @@
 #include "ardour/session.h"
+#include "ardour/io.h"
+#include "ardour/auditioner.h"
+#include "ardour/audioengine.h"
+#include "ardour/port.h"
 #include "session_option_editor.h"
+#include "port_matrix.h"
 #include "i18n.h"
 
+using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
+
+class OptionsPortMatrix : public PortMatrix
+{
+public:
+	OptionsPortMatrix (ARDOUR::Session& session)
+		: PortMatrix (session, DataType::AUDIO)
+	{
+		_port_group.reset (new PortGroup (""));
+		_ports[OURS].add_group (_port_group);
+		
+		setup_all_ports ();
+	}
+
+	void setup_ports (int dim)
+	{
+		cerr << _session.the_auditioner()->outputs().num_ports() << "\n";
+		
+		if (dim == OURS) {
+			_port_group->clear ();
+			_port_group->add_bundle (_session.click_io()->bundle_for_outputs());
+			_port_group->add_bundle (_session.the_auditioner()->bundle_for_outputs());
+		} else {
+			_ports[OTHER].gather (_session, true);
+		}
+	}
+
+	void set_state (ARDOUR::BundleChannel c[2], bool s)
+	{
+		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
+		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
+		
+		if (c[OURS].bundle == _session.click_io()->bundle_for_outputs()) {
+
+			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
+				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
+
+					Port* f = _session.engine().get_port_by_name (*i);
+					assert (f);
+					
+					if (s) {
+						_session.click_io()->connect_output (f, *j, 0);
+					} else {
+						_session.click_io()->disconnect_output (f, *j, 0);
+					}
+				}
+			}
+		}
+	}
+
+	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const
+	{
+		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
+		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
+		
+		if (c[OURS].bundle == _session.click_io()->bundle_for_outputs()) {
+			
+			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
+				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
+					Port* f = _session.engine().get_port_by_name (*i);
+					assert (f);
+					
+					if (f->connected_to (*j)) {
+						return PortMatrixNode::ASSOCIATED;
+					} else {
+						return PortMatrixNode::NOT_ASSOCIATED;
+					}
+				}
+			}
+
+		} else {
+
+			/* XXX */
+
+		}
+
+		return PortMatrixNode::NOT_ASSOCIATED;
+	}
+
+	bool list_is_global (int dim) const
+	{
+		return (dim == OTHER);
+	}
+
+	void add_channel (boost::shared_ptr<ARDOUR::Bundle>) {}
+	bool can_remove_channels (int) const {
+		return false;
+	}
+	void remove_channel (ARDOUR::BundleChannel) {}
+	bool can_rename_channels (int) const {
+		return false;
+	}
+	
+private:
+	/* see PortMatrix: signal flow from 0 to 1 (out to in) */
+	enum {
+		OURS = 0,
+		OTHER = 1,
+	};
+
+	boost::shared_ptr<PortGroup> _port_group;
+
+};
+
+
+class ConnectionOptions : public OptionEditorBox
+{
+public:
+	ConnectionOptions (ARDOUR::Session* s)
+		: _port_matrix (*s)
+	{
+		_box->pack_start (_port_matrix);
+	}
+
+	void parameter_changed (string const & p)
+	{
+
+	}
+
+	void set_state_from_config ()
+	{
+
+	}
+
+private:
+	OptionsPortMatrix _port_matrix;
+};
 
 SessionOptionEditor::SessionOptionEditor (Session* s)
 	: OptionEditor (&(s->config), _("Session Preferences")),
@@ -197,4 +329,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    mem_fun (*_session_config, &SessionConfiguration::get_bwf_organization_code),
 			    mem_fun (*_session_config, &SessionConfiguration::set_bwf_organization_code)
 			    ));
+
+	add_option (_("Connections"), new ConnectionOptions (s));
 }

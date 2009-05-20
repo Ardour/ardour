@@ -55,7 +55,7 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 		_ours = 1;
 	}
 
-	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
+	_port_group.reset (new PortGroup (""));
 	_ports[_ours].add_group (_port_group);
 	
 	setup_all_ports ();
