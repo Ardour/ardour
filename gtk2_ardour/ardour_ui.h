@@ -95,12 +95,6 @@ namespace ARDOUR {
 	class ControlProtocolInfo;
 }
 
-namespace ALSA {
-	class MultiChannelDevice;
-}
-
-#define FRAME_NAME "BaseFrame"
-
 extern sigc::signal<void>  ColorsChanged;
 extern sigc::signal<void>  DPIReset;
 
