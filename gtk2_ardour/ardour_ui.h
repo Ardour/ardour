@@ -89,7 +89,6 @@ namespace Gtkmm2ext {
 }
 
 namespace ARDOUR {
-	class AudioEngine;
 	class Route;
 	class Port;
 	class IO;
@@ -167,8 +166,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
-
-	ARDOUR::AudioEngine& the_engine() const { return *engine; }
 
 	void toggle_key_editor ();
 	void toggle_location_window ();
