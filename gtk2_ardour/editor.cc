@@ -300,7 +300,6 @@ Editor::Editor ()
 	_show_measures = true;
 	_show_waveforms = true;
 	_show_waveforms_recording = true;
-	first_action_message = 0;
 	show_gain_after_trim = false;
 	route_redisplay_does_not_sync_order_keys = false;
 	route_redisplay_does_not_reset_order_keys = false;
@@ -1254,10 +1253,6 @@ Editor::connect_to_session (Session *t)
 	/* catch up with the playhead */
 
 	session->request_locate (playhead_cursor->current_frame);
-
-	if (first_action_message) {
-		first_action_message->hide();
-	}
 
 	update_title ();
 
@@ -4721,6 +4716,7 @@ Editor::post_zoom ()
 		}
 	}
 
+	leftmost_frame = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
 	ZoomChanged (); /* EMIT_SIGNAL */
 

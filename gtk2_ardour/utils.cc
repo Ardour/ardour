@@ -824,3 +824,35 @@ possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
 	return false;
 }
 		
+
+inline guint8
+convert_color_channel (guint8 src,
+		       guint8 alpha)
+{
+	return alpha ? ((guint (src) << 8) - src) / alpha : 0;
+}
+
+void
+convert_bgra_to_rgba (guint8 const* src,
+		      guint8*       dst,
+		      int           width,
+		      int           height)
+{
+	guint8 const* src_pixel = src;
+	guint8*       dst_pixel = dst;
+	
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++)
+		{
+			dst_pixel[0] = convert_color_channel (src_pixel[2],
+							      src_pixel[3]);
+			dst_pixel[1] = convert_color_channel (src_pixel[1],
+							      src_pixel[3]);
+			dst_pixel[2] = convert_color_channel (src_pixel[0],
+							      src_pixel[3]);
+			dst_pixel[3] = src_pixel[3];
+			
+			dst_pixel += 4;
+			src_pixel += 4;
+		}
+}
