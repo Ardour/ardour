@@ -242,8 +242,7 @@ Editor::update_current_screen ()
 			if (frame != last_update_frame) {
 
 
-#undef CONTINUOUS_SCROLL
-#ifndef  CONTINUOUS_SCROLL
+		if ( !_stationary_playhead ) {
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 
 #ifdef DEBUG_CURRENT_SCREEN
@@ -262,7 +261,7 @@ Editor::update_current_screen ()
 
 				playhead_cursor->set_position (frame);
 
-#else  // CONTINUOUS_SCROLL
+		} else {
 				
 				/* don't do continuous scroll till the new position is in the rightmost quarter of the 
 				   editor canvas
@@ -283,7 +282,7 @@ Editor::update_current_screen ()
 				
 				playhead_cursor->set_position (frame);
 
-#endif // CONTINUOUS_SCROLL
+				}
 
 			}
 

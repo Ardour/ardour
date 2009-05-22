@@ -143,6 +143,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView& tv, bool temporary = false) = 0;
 	virtual void show_track_in_display (TimeAxisView& tv) = 0;
+	virtual void set_stationary_playhead (bool yn) = 0;
+	virtual void toggle_stationary_playhead () = 0;
+	virtual bool stationary_playhead() const = 0;
 	virtual void set_follow_playhead (bool yn) = 0;
 	virtual void toggle_follow_playhead () = 0;
 	virtual bool follow_playhead() const = 0;

@@ -309,6 +309,7 @@ Editor::Editor ()
 	region_list_sort_type = (Editing::RegionListSortType) 0;
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
+	_stationary_playhead = false;
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
@@ -2512,6 +2513,18 @@ Editor::set_state (const XMLNode& node)
 		}
 	}
 
+	if ((prop = node.property ("stationary-playhead"))) {
+		bool yn = (prop->value() == "yes");
+		set_stationary_playhead (yn);
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
+		}
+	}
+
 	if ((prop = node.property ("region-list-sort-type"))) {
 		region_list_sort_type = (Editing::RegionListSortType) -1; // force change 
 		reset_region_list_sort_type(str2regionlistsorttype(prop->value()));
@@ -2599,6 +2612,7 @@ Editor::get_state ()
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
+	node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
 	node->add_property ("xfades-visible", _xfade_visibility ? "yes" : "no");
 	node->add_property ("region-list-sort-type", enum2str(region_list_sort_type));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
@@ -3805,6 +3819,28 @@ Editor::set_follow_playhead (bool yn)
 {
 	if (_follow_playhead != yn) {
 		if ((_follow_playhead = yn) == true) {
+			/* catch up */
+			update_current_screen ();
+		}
+		instant_save ();
+	}
+}
+
+void
+Editor::toggle_stationary_playhead ()
+{
+	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+		set_stationary_playhead (tact->get_active());
+	}
+}
+
+void
+Editor::set_stationary_playhead (bool yn)
+{
+	if (_stationary_playhead != yn) {
+		if ((_stationary_playhead = yn) == true) {
 			/* catch up */
 			update_current_screen ();
 		}

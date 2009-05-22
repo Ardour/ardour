@@ -125,6 +125,7 @@
                <menuitem action='ToggleAutoReturn'/>
                <menuitem action='ToggleClick'/>
                <menuitem action='toggle-follow-playhead'/>
+               <menuitem action='toggle-stationary-playhead'/>
 	       <separator/>
        </menu>
 

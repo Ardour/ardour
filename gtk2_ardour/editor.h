@@ -308,6 +308,10 @@ class Editor : public PublicEditor
 
 	/* playhead/screen stuff */
 	
+	void set_stationary_playhead (bool yn);
+	void toggle_stationary_playhead ();
+	bool stationary_playhead() const { return _stationary_playhead; }
+
 	void set_follow_playhead (bool yn);
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
@@ -1470,6 +1474,7 @@ public:
 	
 	bool _show_measures;
 	bool _show_waveforms;
+	bool _stationary_playhead;
 	bool _follow_playhead;
 	bool _show_waveforms_recording;
 	
