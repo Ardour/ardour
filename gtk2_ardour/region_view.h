@@ -29,7 +29,6 @@
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
-#include "waveview.h"
 #include "canvas.h"
 
 class TimeAxisView;

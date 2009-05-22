@@ -44,6 +44,7 @@ using namespace ArdourCanvas;
 const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility
 	= TimeAxisViewItem::Visibility (
 		TimeAxisViewItem::ShowNameHighlight |
+		TimeAxisViewItem::ShowNameText |
 		TimeAxisViewItem::ShowFrame |
 		TimeAxisViewItem::HideFrameRight |
 		TimeAxisViewItem::FullWidthNameHighlight);

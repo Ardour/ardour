@@ -137,7 +137,6 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	show_vestigial = true;
 	visibility = vis;
 	_sensitive = true;
-	name_pixbuf = 0;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
@@ -227,7 +226,10 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		name_pixbuf->property_x() = NAME_X_OFFSET;
 		name_pixbuf->property_y() = trackview.current_height() - 1.0 - NAME_Y_OFFSET;
 	
+	} else {
+		name_pixbuf = 0;
 	}
+
 	set_color (base_color) ;
 	
 	set_duration (item_duration, this) ;
