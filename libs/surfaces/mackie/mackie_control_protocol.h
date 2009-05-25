@@ -118,7 +118,7 @@ class MackieControlProtocol
 	void notify_record_state_changed();
    void notify_transport_state_changed();
    // mainly to pick up punch-in and punch-out
-	void notify_parameter_changed( const char * );
+	void notify_parameter_changed( std::string const & );
    void notify_solo_active_changed( bool );
 
 	/// Turn smpte on and beats off, or vice versa, depending

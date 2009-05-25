@@ -571,6 +571,7 @@ void MackieControlProtocol::connect_session_signals()
 	connections_back = session->TransportStateChange.connect( ( mem_fun (*this, &MackieControlProtocol::notify_transport_state_changed) ) );
 	// receive punch-in and punch-out
 	connections_back = Config->ParameterChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_parameter_changed) ) );
+	session->config.ParameterChanged.connect ( ( mem_fun (*this, &MackieControlProtocol::notify_parameter_changed) ) );
 	// receive rude solo changed
 	connections_back = session->SoloActive.connect( ( mem_fun (*this, &MackieControlProtocol::notify_solo_active_changed) ) );
 	
@@ -1364,26 +1365,26 @@ LedState MackieControlProtocol::loop_release( Button & button )
 
 LedState MackieControlProtocol::punch_in_press( Button & button )
 {
-	bool state = !Config->get_punch_in();
-	Config->set_punch_in( state );
+	bool state = !session->config.get_punch_in();
+	session->config.set_punch_in( state );
 	return state;
 }
 
 LedState MackieControlProtocol::punch_in_release( Button & button )
 {
-	return Config->get_punch_in();
+	return session->config.get_punch_in();
 }
 
 LedState MackieControlProtocol::punch_out_press( Button & button )
 {
-	bool state = !Config->get_punch_out();
-	Config->set_punch_out( state );
+	bool state = !session->config.get_punch_out();
+	session->config.set_punch_out( state );
 	return state;
 }
 
 LedState MackieControlProtocol::punch_out_release( Button & button )
 {
-	return Config->get_punch_out();
+	return session->config.get_punch_out();
 }
 
 LedState MackieControlProtocol::home_press( Button & button )
@@ -1436,25 +1437,24 @@ LedState MackieControlProtocol::global_solo_release( Button & button )
 // Session signals
 ///////////////////////////////////////////
 
-void MackieControlProtocol::notify_parameter_changed( const char * name_str )
+void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 {
-	string name( name_str );
-	if ( name == "punch-in" )
+	if ( p == "punch-in" )
 	{
-		update_global_button( "punch_in", Config->get_punch_in() );
+		update_global_button( "punch_in", session->config.get_punch_in() );
 	}
-	else if ( name == "punch-out" )
+	else if ( p == "punch-out" )
 	{
-		update_global_button( "punch_out", Config->get_punch_out() );
+		update_global_button( "punch_out", session->config.get_punch_out() );
 	}
-	else if ( name == "clicking" )
+	else if ( p == "clicking" )
 	{
 		update_global_button( "clicking", Config->get_clicking() );
 	}
 	else
 	{
 #ifdef DEBUG
-		cout << "parameter changed: " << name << endl;
+		cout << "parameter changed: " << p << endl;
 #endif
 	}
 }

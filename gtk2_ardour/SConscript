@@ -224,6 +224,7 @@ port_matrix_row_labels.cc
 processor_box.cc
 prompter.cc
 public_editor.cc
+rc_option_editor.cc
 region_gain_line.cc
 region_selection.cc
 region_view.cc
@@ -237,6 +238,7 @@ selection.cc
 send_ui.cc
 session_import_dialog.cc
 session_metadata_dialog.cc
+session_option_editor.cc
 sfdb_ui.cc
 simpleline.cc
 simplerect.cc
