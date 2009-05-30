@@ -42,6 +42,7 @@
 #include "canvas_impl.h"
 #include "simplerect.h"
 #include "interactive-item.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -188,8 +189,10 @@ Editor::track_canvas_button_press_event (GdkEventButton *event)
 bool
 Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
-	if (drag_info.item) {
-		end_grab (drag_info.item, (GdkEvent*) event);
+	if (_drag) {
+		_drag->end_grab ((GdkEvent*) event);
+		delete _drag;
+		_drag = 0;
 	}
 	return false;
 }
@@ -229,7 +232,7 @@ Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 		ret = button_release_handler (item, event, type);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, type);
+		ret = motion_handler (item, event);
 		break;
 
 	case GDK_ENTER_NOTIFY:
@@ -272,7 +275,7 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 		break;
 
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, RegionItem);
+		ret = motion_handler (item, event);
 		break;
 
 	case GDK_ENTER_NOTIFY:
@@ -353,7 +356,7 @@ Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item
 		break;
 
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, AutomationTrackItem);
+		ret = motion_handler (item, event);
 		break;
 
 	case GDK_ENTER_NOTIFY:
@@ -432,7 +435,7 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 		break;
 
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, FadeInHandleItem);
+		ret = motion_handler (item, event);
 		break;
 
 	case GDK_ENTER_NOTIFY:
@@ -511,7 +514,7 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 		break;
 
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, FadeOutHandleItem);
+		ret = motion_handler (item, event);
 		break;
 
 	case GDK_ENTER_NOTIFY:
@@ -662,7 +665,7 @@ Editor::canvas_selection_rect_event (GdkEvent *event, ArdourCanvas::Item* item, 
 		ret = button_release_handler (item, event, SelectionItem);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, SelectionItem);
+		ret = motion_handler (item, event);
 		break;
 		/* Don't need these at the moment. */
 	case GDK_ENTER_NOTIFY:
@@ -696,7 +699,7 @@ Editor::canvas_selection_start_trim_event (GdkEvent *event, ArdourCanvas::Item* 
 		ret = button_release_handler (item, event, StartSelectionTrimItem);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, StartSelectionTrimItem);
+		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
 		ret = enter_handler (item, event, StartSelectionTrimItem);
@@ -729,7 +732,7 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 		ret = button_release_handler (item, event, EndSelectionTrimItem);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, EndSelectionTrimItem);
+		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
 		ret = enter_handler (item, event, EndSelectionTrimItem);
@@ -770,7 +773,7 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 		ret = button_release_handler (item, event, RegionViewNameHighlight);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, RegionViewNameHighlight);
+		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
 		ret = enter_handler (item, event, RegionViewNameHighlight);
@@ -810,7 +813,7 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 		ret = button_release_handler (item, event, RegionViewName);
 		break;
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, RegionViewName);
+		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
 		ret = enter_handler (item, event, RegionViewName);

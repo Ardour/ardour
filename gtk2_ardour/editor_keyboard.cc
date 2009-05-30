@@ -27,6 +27,7 @@
 #include "region_view.h"
 #include "selection.h"
 #include "keyboard.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -51,9 +52,10 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 	/* any use of "keyboard mouse buttons" invalidates an existing grab
 	*/
 	
-	if (drag_info.item) {
-		drag_info.item->ungrab (GDK_CURRENT_TIME);
-		drag_info.item = 0;
+	if (_drag) {
+		_drag->item()->ungrab (GDK_CURRENT_TIME);
+		delete _drag;
+		_drag = 0;
 	}
 
 	if (doit) {

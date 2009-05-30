@@ -74,6 +74,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "utils.h"
+#include "editor_drag.h"
 #include "strip_silence_dialog.h"
 
 #include "i18n.h"
@@ -859,7 +860,7 @@ Editor::cursor_to_previous_region_boundary (bool with_selection)
 }
 
 void
-Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
+Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Region> r;
 	nframes64_t pos = cursor->current_frame;
@@ -928,19 +929,19 @@ Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 }
 
 void
-Editor::cursor_to_next_region_point (Cursor* cursor, RegionPoint point)
+Editor::cursor_to_next_region_point (EditorCursor* cursor, RegionPoint point)
 {
 	cursor_to_region_point (cursor, point, 1);
 }
 
 void
-Editor::cursor_to_previous_region_point (Cursor* cursor, RegionPoint point)
+Editor::cursor_to_previous_region_point (EditorCursor* cursor, RegionPoint point)
 {
 	cursor_to_region_point (cursor, point, -1);
 }
 
 void
-Editor::cursor_to_selection_start (Cursor *cursor)
+Editor::cursor_to_selection_start (EditorCursor *cursor)
 {
 	nframes64_t pos = 0;
 	RegionSelection rs; 
@@ -972,7 +973,7 @@ Editor::cursor_to_selection_start (Cursor *cursor)
 }
 
 void
-Editor::cursor_to_selection_end (Cursor *cursor)
+Editor::cursor_to_selection_end (EditorCursor *cursor)
 {
 	nframes64_t pos = 0;
 	RegionSelection rs; 
@@ -2759,7 +2760,7 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 
 		internal_start = start - current->position();
 		session->region_name (new_name, current->name(), true);
-		
+
 		new_regions.push_back (RegionFactory::create (current,
 					internal_start, end - start + 1, new_name));
 	}
@@ -3882,9 +3883,10 @@ Editor::cut_copy (CutCopyOp op)
 	*/
 
 	if (op == Cut || op == Clear) {
-		if (drag_info.item) {
-			drag_info.item->ungrab (0);
-			drag_info.item = 0;
+		if (_drag) {
+			_drag->item()->ungrab (0);
+			delete _drag;
+			_drag = 0;
 		}
 	}
 	
@@ -3902,6 +3904,8 @@ Editor::cut_copy (CutCopyOp op)
 		}
 
 		break_drag ();
+		delete _drag;
+		_drag = 0;
 
 		return;
 	}
@@ -3971,6 +3975,8 @@ Editor::cut_copy (CutCopyOp op)
 
 	if (op == Cut || op == Clear) {
 		break_drag ();
+		delete _drag;
+		_drag = 0;
 	}
 }
 

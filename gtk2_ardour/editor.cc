@@ -90,6 +90,7 @@
 #include "analysis_window.h"
 #include "bundle_manager.h"
 #include "global_port_matrix.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -196,15 +197,6 @@ show_me_the_size (Requisition* r, const char* what)
 	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
 }
 
-void
-DragInfo::clear_copied_locations ()
-{
-	for (list<Location*>::iterator i = copied_locations.begin(); i != copied_locations.end(); ++i) {
-		delete *i;
-	}
-	copied_locations.clear ();
-}
-
 Editor::Editor ()
 	: 
 	  /* time display buttons */
@@ -270,7 +262,7 @@ Editor::Editor ()
 	clicked_crossfadeview = 0;
 	clicked_control_point = 0;
 	last_update_frame = 0;
-	drag_info.item = 0;
+	_drag = 0;
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
 	tempo_lines = 0;
@@ -373,8 +365,6 @@ Editor::Editor ()
 	location_loop_color = ARDOUR_UI::config()->canvasvar_LocationLoop.get();
 	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
 
-	range_marker_drag_rect = 0;
-	marker_drag_line = 0;
 	set_midi_edit_mode (MidiEditPencil, true);
 	_edit_point = EditAtMouse;
 	set_mouse_mode (MouseObject, true);
@@ -894,7 +884,7 @@ Editor::~Editor()
 #endif
 
 	delete track_canvas;
-	track_canvas = 0;
+	delete _drag;
 }
 
 void
@@ -911,8 +901,10 @@ Editor::catch_vanishing_regionview (RegionView *rv)
 	   audioregionview by itself.
 	*/
 
-	if (rv->get_canvas_group() == drag_info.item) {
-		end_grab (drag_info.item, 0);
+	if (_drag && rv->get_canvas_group() == _drag->item() && !_drag->ending()) {
+		_drag->end_grab (0);
+		delete _drag;
+		_drag = 0;
 	}
 
 	if (clicked_regionview == rv) {

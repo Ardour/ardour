@@ -30,7 +30,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-Editor::Cursor::Cursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
+EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: editor (ed),
 	  canvas_item (*editor.cursor_group),
 	  length(1.0)
@@ -51,13 +51,13 @@ Editor::Cursor::Cursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanv
 	current_frame = 1; /* force redraw at 0 */
 }
 
-Editor::Cursor::~Cursor ()
+EditorCursor::~EditorCursor ()
 
 {
 }
 
 void
-Editor::Cursor::set_position (nframes64_t frame)
+EditorCursor::set_position (nframes64_t frame)
 {
 	double new_pos =  editor.frame_to_unit (frame);
 
@@ -72,7 +72,7 @@ Editor::Cursor::set_position (nframes64_t frame)
 }
 
 void
-Editor::Cursor::set_length (double units)
+EditorCursor::set_length (double units)
 {
 	length = units; 
 	points.back().set_y (points.front().get_y() + length);
@@ -80,7 +80,7 @@ Editor::Cursor::set_length (double units)
 }
 
 void 
-Editor::Cursor::set_y_axis (double position)
+EditorCursor::set_y_axis (double position)
 {
         points.front().set_y (position);
 	points.back().set_y (position + length);

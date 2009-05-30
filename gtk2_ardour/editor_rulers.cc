@@ -377,7 +377,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	
 	snap_to (where);
 
-	Cursor* cursor = 0;
+	EditorCursor* cursor = 0;
 	
 	switch (ruler_pressed_button) {
 	case 1:

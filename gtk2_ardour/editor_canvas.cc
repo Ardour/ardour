@@ -41,6 +41,7 @@
 #include "utils.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -152,9 +153,6 @@ Editor::initialize_canvas ()
 	_background_group = new ArdourCanvas::Group (*track_canvas->root());
 	_master_group = new ArdourCanvas::Group (*track_canvas->root());
 
-	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
-	range_marker_drag_rect->hide ();
-
 	_trackview_group = new ArdourCanvas::Group (*_master_group);
 	_region_motion_group = new ArdourCanvas::Group (*_trackview_group);
 
@@ -228,14 +226,6 @@ Editor::initialize_canvas ()
 	marker_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height);
 	cd_marker_group = new ArdourCanvas::Group (*timebar_group, 0.0, 0.0);
 
-	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
-	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, physical_screen_height));
-
-	marker_drag_line = new ArdourCanvas::Line (*timebar_group);
-	marker_drag_line->property_width_pixels() = 1;
-	marker_drag_line->property_points() = marker_drag_line_points;
-	marker_drag_line->hide();
-
 	cd_marker_bar_drag_rect = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, 100, timebar_height);
 	cd_marker_bar_drag_rect->property_outline_pixels() = 0;
 	cd_marker_bar_drag_rect->hide ();
@@ -282,7 +272,7 @@ Editor::initialize_canvas ()
 	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
-	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
+	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
@@ -561,9 +551,8 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (GdkEventMotion* event)
 {
-
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
-	nframes64_t frame = drag_info.current_pointer_frame;
+	nframes64_t frame = _drag->current_pointer_frame();
 	bool startit = false;
 
 	autoscroll_y = 0;
@@ -607,43 +596,6 @@ Editor::maybe_autoscroll (GdkEventMotion* event)
 	last_autoscroll_y = autoscroll_y;
 }
 
-void
-Editor::maybe_autoscroll_horizontally (GdkEventMotion* event)
-{
-	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
-	nframes64_t frame = drag_info.current_pointer_frame;
-	bool startit = false;
-
-	autoscroll_y = 0;
-	autoscroll_x = 0;
-
-	if (frame > rightmost_frame) {
-
-		if (rightmost_frame < max_frames) {
-			autoscroll_x = 1;
-			startit = true;
-		}
-
-	} else if (frame < leftmost_frame) {
-		if (leftmost_frame > 0) {
-			autoscroll_x = -1;
-			startit = true;
-		}
-
-	}
-
-	if ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0)) {
-		stop_canvas_autoscroll ();
-	}
-	
-	if (startit && autoscroll_timeout_tag < 0) {
-		start_canvas_autoscroll (autoscroll_x, autoscroll_y);
-	}
-
-	last_autoscroll_x = autoscroll_x;
-	last_autoscroll_y = autoscroll_y;
-}
-
 gint
 Editor::_autoscroll_canvas (void *arg)
 {
@@ -661,19 +613,19 @@ Editor::autoscroll_canvas ()
 
 	if (autoscroll_x_distance != 0) {
 		if (autoscroll_x > 0) {
-			autoscroll_x_distance = (unit_to_frame (drag_info.current_pointer_x) - (leftmost_frame + current_page_frames())) / 3;
+			autoscroll_x_distance = (unit_to_frame (_drag->current_pointer_x()) - (leftmost_frame + current_page_frames())) / 3;
 		} else if (autoscroll_x < 0) {
-			autoscroll_x_distance = (leftmost_frame - unit_to_frame (drag_info.current_pointer_x)) / 3;
+			autoscroll_x_distance = (leftmost_frame - unit_to_frame (_drag->current_pointer_x())) / 3;
 
 		}
 	}
 
 	if (autoscroll_y_distance != 0) {
 		if (autoscroll_y > 0) {
-			autoscroll_y_distance = (drag_info.current_pointer_y - (get_trackview_group_vertical_offset() + canvas_height)) / 3;
+			autoscroll_y_distance = (_drag->current_pointer_y() - (get_trackview_group_vertical_offset() + canvas_height)) / 3;
 		} else if (autoscroll_y < 0) {
 
-			autoscroll_y_distance = (vertical_adjustment.get_value () - drag_info.current_pointer_y) / 3;
+			autoscroll_y_distance = (vertical_adjustment.get_value () - _drag->current_pointer_y()) / 3;
 		}
 	}
 
@@ -703,7 +655,7 @@ Editor::autoscroll_canvas ()
 			new_pixel = vertical_pos - autoscroll_y_distance;
 		}
 
-		target_pixel = drag_info.current_pointer_y - autoscroll_y_distance;
+		target_pixel = _drag->current_pointer_y() - autoscroll_y_distance;
 		target_pixel = max (target_pixel, 0.0);
 
  	} else if (autoscroll_y > 0) {
@@ -718,7 +670,7 @@ Editor::autoscroll_canvas ()
 
 		new_pixel = min (top_of_bottom_of_canvas, new_pixel);
 
-		target_pixel = drag_info.current_pointer_y + autoscroll_y_distance;
+		target_pixel = _drag->current_pointer_y() + autoscroll_y_distance;
 		
 		/* don't move to the full canvas height because the item will be invisible
 		   (its top edge will line up with the bottom of the visible canvas.
@@ -727,7 +679,7 @@ Editor::autoscroll_canvas ()
 		target_pixel = min (target_pixel, full_canvas_height - 10);
 		
 	} else {
-	  	target_pixel = drag_info.current_pointer_y;
+	  	target_pixel = _drag->current_pointer_y();
 		new_pixel = vertical_pos;
 	}
 
@@ -753,7 +705,7 @@ Editor::autoscroll_canvas ()
 	ev.x = x;
 	ev.y = y;
 
-	motion_handler (drag_info.item, (GdkEvent*) &ev, drag_info.item_type, true);
+	motion_handler (_drag->item(), (GdkEvent*) &ev, true);
 
 	autoscroll_cnt++;
 
@@ -910,11 +862,6 @@ Editor::color_handler()
 
 	transport_bar_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportDragRect.get();
 	transport_bar_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportDragRect.get();
-
-	marker_drag_line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerDragLine.get();
-
-	range_marker_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragRect.get();
-	range_marker_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragRect.get();
 
 	transport_loop_range_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportLoopRect.get();
 	transport_loop_range_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportLoopRect.get();

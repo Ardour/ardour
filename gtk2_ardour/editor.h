@@ -63,7 +63,6 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
-#include "draginfo.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -98,6 +97,7 @@ class AutomationTimeAxisView;
 class BundleManager;
 class ControlPoint;
 class CrossfadeView;
+class Drag;
 class GlobalPortMatrixWindow;
 class GroupedButtons;
 class Marker;
@@ -124,6 +124,20 @@ class ImageFrameSocketHandler ;
 class TimeAxisViewItem ;
 /* </CMT Additions> */
 
+struct EditorCursor {
+	Editor&               editor;
+	ArdourCanvas::Points  points;
+	ArdourCanvas::Line    canvas_item;
+	nframes64_t           current_frame;
+	double		  length;
+	
+	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
+	~EditorCursor ();
+	
+	void set_position (nframes64_t);
+	void set_length (double units);
+	void set_y_axis (double position);
+};
 
 class Editor : public PublicEditor
 {
@@ -795,22 +809,9 @@ class Editor : public PublicEditor
 	Gtk::VBox          time_button_vbox;
 	Gtk::HBox          time_button_hbox;
 
-	struct Cursor {
-	    Editor&               editor;
-	    ArdourCanvas::Points  points;
-	    ArdourCanvas::Line    canvas_item;
-	    nframes64_t           current_frame;
-	    double		  length;
-
-	    Cursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
-	    ~Cursor ();
-
-	    void set_position (nframes64_t);
-	    void set_length (double units);
-	    void set_y_axis (double position);
-	};
-
-	Cursor*              playhead_cursor;
+	friend class EditorCursor;
+	
+	EditorCursor*        playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
 
 	nframes64_t get_region_boundary (nframes64_t pos, int32_t dir, bool with_selection, bool only_onscreen);
@@ -818,11 +819,11 @@ class Editor : public PublicEditor
 	void    cursor_to_region_boundary (bool with_selection, int32_t dir);
 	void    cursor_to_next_region_boundary (bool with_selection);
 	void    cursor_to_previous_region_boundary (bool with_selection);
-	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
-	void    cursor_to_previous_region_point (Cursor*, ARDOUR::RegionPoint);
-	void    cursor_to_region_point (Cursor*, ARDOUR::RegionPoint, int32_t dir);
-	void    cursor_to_selection_start (Cursor *);
-	void    cursor_to_selection_end   (Cursor *);
+	void    cursor_to_next_region_point (EditorCursor*, ARDOUR::RegionPoint);
+	void    cursor_to_previous_region_point (EditorCursor*, ARDOUR::RegionPoint);
+	void    cursor_to_region_point (EditorCursor*, ARDOUR::RegionPoint, int32_t dir);
+	void    cursor_to_selection_start (EditorCursor *);
+	void    cursor_to_selection_end   (EditorCursor *);
 
 	void    selected_marker_to_region_boundary (bool with_selection, int32_t dir);
 	void    selected_marker_to_next_region_boundary (bool with_selection);
@@ -833,7 +834,7 @@ class Editor : public PublicEditor
 	void    selected_marker_to_selection_start ();
 	void    selected_marker_to_selection_end   ();
 
-	void    select_all_selectables_using_cursor (Cursor *, bool);
+	void    select_all_selectables_using_cursor (EditorCursor *, bool);
 	void    select_all_selectables_using_edit (bool);
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
@@ -1089,7 +1090,7 @@ class Editor : public PublicEditor
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
-	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, ItemType, bool from_autoscroll = false);
+	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
 	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	
@@ -1390,26 +1391,12 @@ class Editor : public PublicEditor
 
 	void    hide_all_tracks (bool with_select);
 
-	DragInfo drag_info;
-	LineDragInfo current_line_drag_info;
+	Drag* _drag;
 
-	void start_grab (GdkEvent*, Gdk::Cursor* cursor = 0);
-	bool end_grab (ArdourCanvas::Item*, GdkEvent*);
-	void swap_grab (ArdourCanvas::Item*, Gdk::Cursor* cursor, uint32_t time);
 	void break_drag ();
-	void finalize_drag ();
 
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
-
-	void region_gain_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-
-	void start_fade_in_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_fade_out_grab (ArdourCanvas::Item*, GdkEvent*);
-	void fade_in_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void fade_out_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void fade_in_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void fade_out_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
 	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
@@ -1421,51 +1408,20 @@ class Editor : public PublicEditor
 	
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 	RegionSelection pre_drag_region_selection;
-	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void create_region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void create_region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	bool check_region_drag_possible (RouteTimeAxisView**, ARDOUR::layer_t*);
-	void possibly_copy_regions_during_grab (GdkEvent*);
-	void region_drag_splice_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void region_drag_splice_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	bool _dragging_playhead;
 	bool _dragging_edit_point;
 
-	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void cursor_drag_finished_ensure_locate_callback (ArdourCanvas::Item*, GdkEvent*);
-	void marker_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void marker_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void control_point_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void control_point_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void line_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void line_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-
-	void tempo_marker_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void tempo_marker_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void meter_marker_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void meter_marker_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+	void marker_drag_motion_callback (GdkEvent*);
+	void marker_drag_finished_callback (GdkEvent*);
 
 	gint mouse_rename_region (ArdourCanvas::Item*, GdkEvent*);
 
-	void start_region_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_region_grab (ArdourCanvas::Item*, GdkEvent*, RegionView*);
 	void start_create_region_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_region_copy_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_region_brush_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_region_copy_grab (ArdourCanvas::Item*, GdkEvent*, RegionView*);
+	void start_region_brush_grab (ArdourCanvas::Item*, GdkEvent*, RegionView*);
 	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_cursor_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_cursor_grab_no_stop (ArdourCanvas::Item*, GdkEvent*);
-	void start_marker_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_control_point_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_line_grab_from_regionview (ArdourCanvas::Item*, GdkEvent*);
-	void start_line_grab_from_line (ArdourCanvas::Item*, GdkEvent*);
-	void start_line_grab (AutomationLine *, GdkEvent*);
-	void start_tempo_marker_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_tempo_marker_copy_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_meter_marker_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_meter_marker_copy_grab (ArdourCanvas::Item*, GdkEvent*);
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 
@@ -1761,16 +1717,6 @@ public:
 	void point_selection_changed ();
 	void marker_selection_changed ();
 
-	enum SelectionOp {
-		CreateSelection,
-		SelectionStartTrim,
-		SelectionEndTrim,
-		SelectionMove
-	} selection_op;
-
-	void start_selection_op (ArdourCanvas::Item* item, GdkEvent* event, SelectionOp);
-	void drag_selection (ArdourCanvas::Item* item, GdkEvent* event);
-	void end_selection_op (ArdourCanvas::Item* item, GdkEvent* event);
 	void cancel_selection ();
 
 	void region_selection_op (void (ARDOUR::Region::*pmf)(void));
@@ -1780,24 +1726,11 @@ public:
 	bool audio_region_selection_covers (nframes64_t where);
 
 	/* transport range select process */
-	enum RangeMarkerOp {
-		CreateRangeMarker,
-		CreateTransportMarker,
-		CreateCDMarker
-	} range_marker_op;
-
-	void start_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event, RangeMarkerOp);
-	void drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
-	void end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
 
 	ArdourCanvas::SimpleRect*  cd_marker_bar_drag_rect;
 	ArdourCanvas::SimpleRect*  range_bar_drag_rect;
 	ArdourCanvas::SimpleRect*  transport_bar_drag_rect;
-	ArdourCanvas::Line*        marker_drag_line;
- 	ArdourCanvas::Points       marker_drag_line_points;
-	ArdourCanvas::SimpleRect*  range_marker_drag_rect;
 
-	void update_marker_drag_item (ARDOUR::Location *);
 #ifdef GTKOSX
 	ArdourCanvas::SimpleRect     *bogus_background_rect;
 #endif
@@ -1818,19 +1751,11 @@ public:
 	
 	/* object rubberband select process */
 	
-	void start_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
-	void drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
-	void end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
-
 	bool select_all_within (nframes64_t start, nframes64_t end, gdouble topy, gdouble boty, const TrackViewList&, Selection::Operation op);
 	
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 	
 	/* mouse zoom process */
-
-	void start_mouse_zoom (ArdourCanvas::Item* item, GdkEvent* event);
-	void drag_mouse_zoom (ArdourCanvas::Item* item, GdkEvent* event);
-	void end_mouse_zoom (ArdourCanvas::Item* item, GdkEvent* event);
 
 	ArdourCanvas::SimpleRect   *zoom_rect;
 	void reposition_zoom_rect (nframes64_t start, nframes64_t end);
@@ -1957,24 +1882,14 @@ public:
 	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
 	void maybe_autoscroll (GdkEventMotion*);
-	void maybe_autoscroll_horizontally (GdkEventMotion*);
 	bool allow_vertical_scroll;
 
 	/* trimming */
-	enum TrimOp {
-		StartTrim,
-		EndTrim,
-		ContentsTrim,
-	} trim_op;
-
-	void start_trim (ArdourCanvas::Item*, GdkEvent*);
 	void point_trim (GdkEvent*);
-	void trim_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void single_contents_trim (RegionView&, nframes64_t, bool, bool, bool);
 	void single_start_trim (RegionView&, nframes64_t, bool, bool, bool);
 	void single_end_trim (RegionView&, nframes64_t, bool, bool, bool);
 
-	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void thaw_region_after_trim (RegionView& rv);
 
 	void trim_region_front();
@@ -2104,10 +2019,6 @@ public:
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */
 	bool mouse_frame (nframes64_t&, bool& in_track_canvas) const;
-
-	void time_fx_motion (ArdourCanvas::Item*, GdkEvent*);
-	void start_time_fx (ArdourCanvas::Item*, GdkEvent*);
-	void end_time_fx (ArdourCanvas::Item*, GdkEvent*);
 
 	/* "whats mine is yours" */
 
@@ -2309,10 +2220,30 @@ public:
 	std::vector<TimeAxisView*> pending_resizes;
 
 	void visible_order_range (int*, int*) const;
-	bool y_movement_disallowed (int, int, int, int, int, std::bitset<512> const &, std::vector<int32_t> const &) const;
 
 	void located ();
 	bool _pending_locate_request;
+
+	friend class Drag;
+	friend class RegionDrag;
+	friend class RegionMoveDrag;
+	friend class RegionSpliceDrag;
+	friend class TrimDrag;
+	friend class MeterMarkerDrag;
+	friend class TempoMarkerDrag;
+	friend class CursorDrag;
+	friend class FadeInDrag;
+	friend class FadeOutDrag;
+	friend class MarkerDrag;
+	friend class RegionGainDrag;
+	friend class ControlPointDrag;
+	friend class LineDrag;
+	friend class RubberbandSelectDrag;
+        friend class TimeFXDrag;
+	friend class SelectionDrag;
+	friend class RangeMarkerBarDrag;
+	friend class MouseZoomDrag;
+	friend class RegionCreateDrag;
 };
 
 #endif /* __ardour_editor_h__ */

@@ -357,7 +357,7 @@ Editor::session_going_away ()
 	entered_regionview = 0;
 	entered_track = 0;
 	last_update_frame = 0;
-	drag_info.item = 0;
+	_drag = 0;
 
 	playhead_cursor->canvas_item.hide ();
 

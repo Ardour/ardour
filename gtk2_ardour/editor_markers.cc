@@ -1090,7 +1090,8 @@ Editor::new_transport_marker_menu_popdown ()
 {
 	// hide rects
 	transport_bar_drag_rect->hide();
-	range_marker_drag_rect->hide();
+
+	break_drag ();
 }
 
 void

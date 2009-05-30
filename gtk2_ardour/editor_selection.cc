@@ -1185,7 +1185,7 @@ Editor::select_all_selectables_using_loop()
 }
 
 void
-Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
+Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 {
         nframes64_t start;
 	nframes64_t end;
