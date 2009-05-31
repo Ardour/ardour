@@ -80,7 +80,8 @@ GainMeterBase::GainMeterBase (Session& s,
 	  // 0.781787 is the value needed for gain to be set to 0.
 	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
 	  gain_automation_style_button (""),
-	  gain_automation_state_button ("")
+	  gain_automation_state_button (""),
+	  dpi_changed (false)
 	
 {
 	using namespace Menu_Helpers;
