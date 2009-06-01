@@ -133,8 +133,6 @@ Drag::end_grab (GdkEvent* event)
 {
 	_ending = true;
 	
-	bool did_drag = false;
-
 	_editor->stop_canvas_autoscroll ();
 
 	_item->ungrab (event ? event->button.time : 0);
@@ -145,14 +143,14 @@ Drag::end_grab (GdkEvent* event)
 		finished (event);
 	}
 
-	did_drag = !_first_move;
+	bool const did_drag = !_first_move;
 
 	_editor->hide_verbose_canvas_cursor();
 
-	_ending = false;
-
 	update_selection ();
 	
+	_ending = false;
+
 	return did_drag;
 }
 
@@ -253,15 +251,15 @@ RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p,
 	_want_move_threshold = true;
 	_copy = c;
 	
-	_source_trackview = &_primary->get_time_axis_view ();
-	_source_layer = _primary->region()->layer ();
-	_dest_trackview = _source_trackview;
-	_dest_layer = _source_layer;
+	TimeAxisView* const tv = &_primary->get_time_axis_view ();
+	
+	_dest_trackview = tv;
+	_dest_layer = _primary->region()->layer ();
 
 	double speed = 1;
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*> (_source_trackview);
-	if (tv && tv->is_track()) {
-		speed = tv->get_diskstream()->speed ();
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	if (rtv && rtv->is_track()) {
+		speed = rtv->get_diskstream()->speed ();
 	}
 
 	_last_frame_position = static_cast<nframes64_t> (_primary->region()->position() / speed);
@@ -1274,9 +1272,7 @@ RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisVi
 void
 RegionCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
-	_source_trackview = _view;
 	_dest_trackview = _view;
-	_dest_layer = _source_layer;
 	
 	Drag::start_grab (event);
 }

@@ -176,8 +176,6 @@ protected:
 
 	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
 
-	TimeAxisView* _source_trackview;
-	ARDOUR::layer_t _source_layer;
 	TimeAxisView* _dest_trackview;
 	ARDOUR::layer_t _dest_layer;
 
@@ -211,11 +209,7 @@ public:
 
 private:
 	TimeAxisView* _view;
-
-	TimeAxisView* _source_trackview;
-	ARDOUR::layer_t _source_layer;
 	TimeAxisView* _dest_trackview;
-	ARDOUR::layer_t _dest_layer;
 };
 
 /** Drag of region gain */
