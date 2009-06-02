@@ -133,7 +133,6 @@ class RegionView : public TimeAxisViewItem
 
     bool     valid; ///< see StreamView::redisplay_diskstream() 
     double  _pixel_width;
-    double  _height;
     bool    in_destructor;
     
     bool             wait_for_data;

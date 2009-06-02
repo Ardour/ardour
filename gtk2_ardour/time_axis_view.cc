@@ -136,7 +136,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	resizer.signal_expose_event().connect (mem_fun (*this, &TimeAxisView::resizer_expose));
 	resizer.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_press));
 	resizer.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_release));
-	resizer.signal_motion_notify_event().connect (mem_fun (*this, &TimeAxisView::resizer_motion));
 	resizer.set_events (Gdk::BUTTON_PRESS_MASK|
 			    Gdk::BUTTON_RELEASE_MASK|
 			    Gdk::POINTER_MOTION_MASK|
@@ -1212,6 +1211,10 @@ TimeAxisView::resizer_button_press (GdkEventButton* event)
 	resize_drag_start = event->y_root;
 	resize_idle_target = current_height();
 	editor.start_resize_line_ops ();
+	if (resizer_motion_signal) {
+		resizer_motion_signal.disconnect ();
+	}
+	resizer_motion_signal = resizer.signal_motion_notify_event().connect (mem_fun (*this, &TimeAxisView::resizer_motion));
 	return true;
 }
 
@@ -1220,6 +1223,7 @@ TimeAxisView::resizer_button_release (GdkEventButton* ev)
 {
 	resize_drag_start = -1;
 	editor.end_resize_line_ops ();
+	resizer_motion_signal.disconnect ();
 	return true;
 }
 
@@ -1237,11 +1241,13 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 	}
 
 	int32_t delta = (int32_t) floor (resize_drag_start - ev->y_root);
+	int32_t target = resize_idle_target - delta;
 
-	resize_idle_target = std::max (resize_idle_target - delta, (int) hSmall);
+	resize_idle_target = std::max (target, (int) hSmall);
 	editor.add_to_idle_resize (this, resize_idle_target);
-	
-	resize_drag_start = ev->y_root;
+	if (target >= (int) hSmall ) {
+		resize_drag_start = ev->y_root;
+	}
 
 	return true;
 }

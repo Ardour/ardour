@@ -92,5 +92,9 @@ void convert_bgra_to_rgba (guint8 const* src,
 		      guint8*       dst,
 		      int           width,
 		      int           height);
+Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
+					       Pango::FontDescription* font,
+					       int clip_width,
+					       int clip_height);
 
 #endif /* __ardour_gtk_utils_h__ */

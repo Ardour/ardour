@@ -432,9 +432,6 @@ AudioRegionView::set_height (gdouble height)
 	height -= 2;
 	TimeAxisViewItem::set_height (height);
 	
-	
-	_height = height;
-
 	for (uint32_t n=0; n < wcnt; ++n) {
 		gdouble ht;
 
@@ -463,10 +460,6 @@ AudioRegionView::set_height (gdouble height)
 
 	manage_zero_line ();
 	reset_fade_shapes ();
-
-	if (name_pixbuf) {
-		name_pixbuf->raise_to_top();
-	}
 
 }
 

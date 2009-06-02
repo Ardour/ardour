@@ -1615,7 +1615,7 @@ Editor::temporal_zoom (gdouble fpu)
 
 	/* XXX this limit is also in ::set_frames_per_unit() */
 
-	if (frames_per_unit <= 2.0 && fpu <= frames_per_unit) {
+	if (frames_per_unit < 1.0 && fpu <= frames_per_unit) {
 		return;
 	}
 
@@ -2583,8 +2583,8 @@ Editor::rename_region()
 	d.get_vbox()->set_border_width (12);
 	d.get_vbox()->pack_start (hbox, false, false);
 
-	d.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 	d.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	d.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	d.set_size_request (300, -1);
 	d.set_position (Gtk::WIN_POS_MOUSE);

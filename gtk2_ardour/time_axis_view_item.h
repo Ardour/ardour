@@ -200,7 +200,7 @@ class TimeAxisViewItem : public Selectable
      * @param new_name the new name text to display
      */
     void set_name_text(const Glib::ustring& new_name) ;
-    
+
     /**
      * Set the height of this item
      *
@@ -273,6 +273,7 @@ class TimeAxisViewItem : public Selectable
     /* these are not constant, but vary with the pixel size
        of the font used to display the item name.
     */
+    static int NAME_HEIGHT ;
     static double NAME_Y_OFFSET ;
     static double NAME_HIGHLIGHT_SIZE ;
     static double NAME_HIGHLIGHT_THRESH ;
@@ -434,7 +435,7 @@ class TimeAxisViewItem : public Selectable
      */
 
     bool show_vestigial;
-	uint32_t fill_opacity;
+    uint32_t fill_opacity;
     uint32_t fill_color ;
     uint32_t frame_color_r ;
     uint32_t frame_color_g ;
@@ -450,7 +451,9 @@ class TimeAxisViewItem : public Selectable
     uint32_t lock_handle_color_r ;
     uint32_t lock_handle_color_g ;
     uint32_t lock_handle_color_b ;
-    
+    uint32_t last_item_width;
+    int name_pixbuf_width;
+
     ArdourCanvas::Group*      group;
     ArdourCanvas::SimpleRect* vestigial_frame;
     ArdourCanvas::SimpleRect* frame;
@@ -459,6 +462,7 @@ class TimeAxisViewItem : public Selectable
     ArdourCanvas::SimpleRect* frame_handle_start;
     ArdourCanvas::SimpleRect* frame_handle_end;
 
+    double  _height;
     Visibility visibility;
     bool _recregion;
 

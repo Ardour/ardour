@@ -244,20 +244,17 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));
 
-	Gtk::Window win;
 	Gtk::Label foo;
-	win.add (foo);
-	
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
 	int width;
 	int height;
 	
 	layout->set_font_description (*name_font);
-	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
-	name_height = height + 6;
+	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 
 	name_pixbuf = new ArdourCanvas::Pixbuf(*group);
 	name_pixbuf->property_x() = label_offset;
+	name_pixbuf->property_y() = (13 / 2) - (name_height / 2);
 
 	set_name (annotation.c_str());
 
@@ -349,35 +346,12 @@ Marker::the_item() const
 void
 Marker::set_name (const string& new_name)
 {
-	uint32_t pb_width;
-	double font_size;
+	int name_width = pixel_width (new_name, *name_font) + 2;
 
-	font_size = name_font->get_size() / Pango::SCALE;
-	pb_width = new_name.length() * font_size;
-
-	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, pb_width, name_height);
-
-	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pb_width, name_height);
-	cairo_t *cr = cairo_create (surface);
-	cairo_text_extents_t te;
-	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
-	cairo_select_font_face (cr, name_font->get_family().c_str(),
-				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, font_size);
-	cairo_text_extents (cr, new_name.c_str(), &te);
-	
-	cairo_move_to (cr, 0.5,
-		       0.5 - te.height / 2 - te.y_bearing + name_height / 2);
-	cairo_show_text (cr, new_name.c_str());
-	
-	unsigned char* src = cairo_image_surface_get_data (surface);
-	convert_bgra_to_rgba(src, buf->get_pixels(), pb_width, name_height);
-	
-	cairo_destroy(cr);
-	name_pixbuf->property_pixbuf() = buf;
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, name_font, name_width, name_height);
 
 	if (_type == End || _type == LoopEnd || _type == PunchOut) {
-		name_pixbuf->property_x() = -(te.width);
+		name_pixbuf->property_x() = - (name_width);
 	}
 }
 

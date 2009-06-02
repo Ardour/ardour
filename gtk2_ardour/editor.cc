@@ -4430,8 +4430,8 @@ Editor::set_frames_per_unit (double fpu)
 		return;
 	}
 
-	if (fpu < 2.0) {
-		fpu = 2.0;
+	if (fpu < 1.0) {
+		fpu = 1.0;
 	}
 
 	
@@ -5055,7 +5055,7 @@ Editor::idle_resize ()
 		(*i)->idle_resize (resize_idle_target);
 	}
 	pending_resizes.clear();
-	flush_canvas ();
+	//flush_canvas ();
 	resize_idle_id = -1;
 	return false;
 }

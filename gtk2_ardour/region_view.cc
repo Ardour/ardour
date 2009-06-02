@@ -75,7 +75,6 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 	  , current_visible_sync_position(0.0)
 	  , valid(false)
 	  , _pixel_width(1.0)
-	  , _height(1.0)
 	  , in_destructor(false)
 	  , wait_for_data(false)
 {
@@ -90,7 +89,6 @@ RegionView::RegionView (const RegionView& other)
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
-	_height = other._height;
 }
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
@@ -106,7 +104,6 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
-	_height = other._height;
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent, 
@@ -124,7 +121,6 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	, current_visible_sync_position(0.0)
 	, valid(false)
 	, _pixel_width(1.0)
-	, _height(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
 {
@@ -136,7 +132,6 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	editor        = 0;
 	valid         = true;
 	in_destructor = false;
-	_height       = 0;
 	wait_for_data = wfd;
 	sync_mark     = 0;
 	sync_line     = 0;

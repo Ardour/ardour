@@ -49,6 +49,7 @@ bool TimeAxisViewItem::have_name_font = false;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
 const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
 
+int TimeAxisViewItem::NAME_HEIGHT;
 double TimeAxisViewItem::NAME_Y_OFFSET;
 double TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
@@ -70,7 +71,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 				   nframes_t start, nframes_t duration, bool recording,
 				   Visibility vis)
-	: trackview (tv), _recregion(recording)
+	: trackview (tv), _height(1.0), _recregion(recording)
 {
 	if (!have_name_font) {
 
@@ -89,7 +90,8 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		layout->set_font_description (*NAME_FONT);
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
-		NAME_Y_OFFSET = height + 6;
+		NAME_HEIGHT = height;
+		NAME_Y_OFFSET = (height / 2) + 8;
 		NAME_HIGHLIGHT_SIZE = height + 6;
 		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
 
@@ -104,6 +106,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 
 TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	: trackview (other.trackview)
+	, _height (other._height)
 {
 
 	Gdk::Color c;
@@ -137,6 +140,8 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	show_vestigial = true;
 	visibility = vis;
 	_sensitive = true;
+	name_pixbuf_width = 0;
+	last_item_width = 0;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
@@ -543,46 +548,13 @@ TimeAxisViewItem::get_time_axis_view()
 void
 TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
-	uint32_t pb_width, it_width;
-	double font_size;
-
-	font_size = NAME_FONT->get_size() / Pango::SCALE;
-	it_width = trackview.editor.frame_to_pixel(item_duration);
-	pb_width = new_name.length() * font_size;
-
-	if (pb_width > it_width - NAME_X_OFFSET) {
-		pb_width = it_width - NAME_X_OFFSET;
-	}
-
-	if (pb_width <= 0 || it_width < NAME_X_OFFSET) {
-		if (name_pixbuf) {
-			name_pixbuf->hide();
-		}
+	if (!name_pixbuf) {
 		return;
-	} else {
-		name_pixbuf->show();
 	}
 
-	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, pb_width, NAME_HIGHLIGHT_SIZE);
-
-	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pb_width, NAME_HIGHLIGHT_SIZE );
-	cairo_t *cr = cairo_create (surface);
-	cairo_text_extents_t te;
-	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
-	cairo_select_font_face (cr, NAME_FONT->get_family().c_str(),
-				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, font_size);
-	cairo_text_extents (cr, new_name.c_str(), &te);
-	
-	cairo_move_to (cr, 0.5,
-		       0.5 - te.height / 2 - te.y_bearing + NAME_HIGHLIGHT_SIZE / 2);
-	cairo_show_text (cr, new_name.c_str());
-	
-	unsigned char* src = cairo_image_surface_get_data (surface);
-	convert_bgra_to_rgba(src, buf->get_pixels(), pb_width, NAME_HIGHLIGHT_SIZE);
-	
-	cairo_destroy(cr);
-	name_pixbuf->property_pixbuf() = buf;
+	last_item_width = trackview.editor.frame_to_pixel(item_duration);
+	name_pixbuf_width = pixel_width (new_name, *NAME_FONT) + 2;
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT);
 }
 
 /**
@@ -593,15 +565,13 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 void
 TimeAxisViewItem::set_height (double height)
 {
+	_height = height;
+
 	if (name_highlight) {
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_highlight->hide();
-			name_pixbuf->hide();
-			
 		} else {
-			name_highlight->show();
-			name_pixbuf->show();
-			
+			name_highlight->show();	
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
@@ -614,8 +584,13 @@ TimeAxisViewItem::set_height (double height)
 		}
 	}
 
-	if (visibility & ShowNameText) {
-		name_pixbuf->property_y() = height+1 - NAME_Y_OFFSET;
+	if (name_pixbuf) {
+		if (height < NAME_HIGHLIGHT_THRESH) {
+			name_pixbuf->hide();
+		} else {
+			name_pixbuf->property_y() = height+1 - NAME_Y_OFFSET;
+			name_pixbuf->show();
+		}
 	}
 
 	if (frame) {
@@ -847,6 +822,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (name_highlight) {
 			name_highlight->hide();
+		}
+
+		if (name_pixbuf) {
 			name_pixbuf->hide();
 		}
 
@@ -864,16 +842,10 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (name_highlight) {
 
-			double height = name_highlight->property_y2 ();
-
-			if (height < NAME_HIGHLIGHT_THRESH) {
+			if (_height < NAME_HIGHLIGHT_THRESH) {
 				name_highlight->hide();
-				name_pixbuf->hide();
 			} else {
 				name_highlight->show();
-				if (!get_item_name().empty()) {
-					reset_name_width (pixel_width);
-				}
 			}
 
 			if (visibility & FullWidthNameHighlight) {
@@ -882,6 +854,14 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				name_highlight->property_x2() = pixel_width - 1.0;
 			}
 
+		}
+
+		if (name_pixbuf) {
+			if (_height < NAME_HIGHLIGHT_THRESH) {
+				name_pixbuf->hide();
+			} else {
+				reset_name_width (pixel_width);
+			}
 		}
 
 		if (frame) {
@@ -904,9 +884,42 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 }
 
 void
-TimeAxisViewItem::reset_name_width (double pixel_width)
+TimeAxisViewItem::reset_name_width (double pix_width)
 {
-	set_name_text (item_name);
+	uint32_t it_width;
+	int pb_width;
+	bool pixbuf_holds_full_name;
+
+	if (!name_pixbuf) {
+		return;
+	}
+
+	it_width = trackview.editor.frame_to_pixel(item_duration);
+	pb_width = name_pixbuf_width;
+
+	pixbuf_holds_full_name = last_item_width > pb_width + NAME_X_OFFSET;
+	last_item_width = it_width;
+
+	if (pixbuf_holds_full_name && (it_width >= pb_width + NAME_X_OFFSET)) {
+		/*
+		  we've previously had the full name length showing 
+		  and its still showing.
+		*/
+		return;
+	}
+	
+	if (pb_width > it_width - NAME_X_OFFSET) {
+		pb_width = it_width - NAME_X_OFFSET;
+	}
+	
+	if (pb_width <= 0 || it_width <= NAME_X_OFFSET) {
+		name_pixbuf->hide();
+		return;
+	} else {
+		name_pixbuf->show();
+	}
+
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, pb_width, NAME_HEIGHT);
 }
 
 

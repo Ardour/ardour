@@ -122,6 +122,7 @@ class TimeAxisView : public virtual AxisView, public Stateful
 	
 	bool resizer_button_press (GdkEventButton*);
 	bool resizer_button_release (GdkEventButton*);
+	sigc::connection resizer_motion_signal;
 	bool resizer_motion (GdkEventMotion*);
 	bool resizer_expose (GdkEventExpose*);
 
