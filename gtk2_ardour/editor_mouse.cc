@@ -1102,6 +1102,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	/* first, see if we're finishing a drag ... */
 
+	bool were_dragging = false;
 	if (_drag) {
 		bool const r = _drag->end_grab (event);
 		delete _drag;
@@ -1110,6 +1111,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			/* grab dragged, so do nothing else */
 			return true;
 		}
+
+		were_dragging = true;
 	}
 	
 	button_selection (item, event, item_type);
@@ -1349,7 +1352,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				   its really annoying to create new control
 				   points when doing this.
 				*/
-				if (_drag->first_move ()) { 
+				if (were_dragging) {
 					dynamic_cast<AudioRegionView*>(clicked_regionview)->add_gain_point_event (item, event);
 				}
 				return true;

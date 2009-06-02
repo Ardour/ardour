@@ -61,11 +61,6 @@ public:
 		return _ending;
 	}
 
-	/** @return true if the first move (past any move threshold) has occurred */
-	bool first_move () const {
-		return _first_move;
-	}
-
 	/** @return current pointer x position in item coordinates */
 	double current_pointer_x () const {
 		return _current_pointer_x;
@@ -91,19 +86,28 @@ public:
 
 	/** Called when a drag motion has occurred.
 	 *  @param e Event describing the motion.
+	 *  @param f true if this is the first movement, otherwise false.
 	 */
-	virtual void motion (GdkEvent* e) = 0;
+	virtual void motion (GdkEvent* e, bool f) = 0;
 
 	/** Called when a drag has finished.
 	 *  @param e Event describing the finish.
+	 *  @param m true if some movement occurred, otherwise false.
 	 */
-	virtual void finished (GdkEvent *) = 0;
+	virtual void finished (GdkEvent* e, bool m) = 0;
 
 	/** @param m Mouse mode.
 	 *  @return true if this drag should happen in this mouse mode.
 	 */
 	virtual bool active (Editing::MouseMode m) {
 		return (m != Editing::MouseGain);
+	}
+
+	/** @return true if a small threshold should be applied before a mouse movement
+	 *  is considered a drag, otherwise false.
+	 */
+	virtual bool apply_move_threshold () const {
+		return false;
 	}
 
 	/** Called when a subclass should update the editor's selection following a drag */
@@ -132,13 +136,12 @@ protected:
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _copy; ///< true if we're copying the things that we're dragging
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
-	bool _first_move; ///< true if some movement has occurred, otherwise false
-	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
-	bool _want_move_threshold; ///< true if a move threshold should be applied, otherwise false
 
 private:
 	
 	bool _ending; ///< true if end_grab is in progress, otherwise false
+	bool _had_movement; ///< true if movement has occurred, otherwise false
+	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 };
 
 
@@ -169,8 +172,11 @@ public:
 	virtual ~RegionMoveDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
-	virtual void motion (GdkEvent *);
-	virtual void finished (GdkEvent *);
+	virtual void motion (GdkEvent *, bool);
+	virtual void finished (GdkEvent *, bool);
+	bool apply_move_threshold () const {
+		return true;
+	}
 
 protected:
 
@@ -193,8 +199,8 @@ class RegionSpliceDrag : public RegionMoveDrag
 public:
 	RegionSpliceDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 };
 
 /** Drags to create regions */
@@ -204,8 +210,8 @@ public:
 	RegionCreateDrag (Editor *, ArdourCanvas::Item *, TimeAxisView *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	TimeAxisView* _view;
@@ -218,8 +224,8 @@ class RegionGainDrag : public Drag
 public:
 	RegionGainDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
 
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 	bool active (Editing::MouseMode m) {
 		return (m == Editing::MouseGain);
 	}
@@ -238,8 +244,8 @@ public:
 	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 
@@ -253,8 +259,8 @@ public:
 	MeterMarkerDrag (Editor *, ArdourCanvas::Item *, bool);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	MeterMarker* _marker;
@@ -267,8 +273,8 @@ public:
 	TempoMarkerDrag (Editor *, ArdourCanvas::Item *, bool);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	TempoMarker* _marker;
@@ -282,8 +288,8 @@ public:
 	CursorDrag (Editor *, ArdourCanvas::Item *, bool);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	EditorCursor* _cursor; ///< cursor being dragged
@@ -298,8 +304,8 @@ public:
 	FadeInDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 };
 
 /** Region fade-out drag */
@@ -309,8 +315,8 @@ public:
 	FadeOutDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 };
 
 /** Marker drag */
@@ -321,8 +327,8 @@ public:
 	~MarkerDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	void update_item (ARDOUR::Location *);
@@ -340,8 +346,8 @@ public:
 	ControlPointDrag (Editor *, ArdourCanvas::Item *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	
@@ -358,8 +364,8 @@ public:
 	LineDrag (Editor *e, ArdourCanvas::Item *i);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 
@@ -376,8 +382,8 @@ public:
 	RubberbandSelectDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 };
 
 /** Region drag in time-FX mode */
@@ -387,8 +393,8 @@ public:
 	TimeFXDrag (Editor *e, ArdourCanvas::Item *i, RegionView* p, std::list<RegionView*> const & v) : RegionDrag (e, i, p, v) {}
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 };
 
 /** Drag in range selection mode */
@@ -405,8 +411,8 @@ public:
 	SelectionDrag (Editor *, ArdourCanvas::Item *, Operation);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	Operation _operation;
@@ -425,8 +431,8 @@ public:
 	RangeMarkerBarDrag (Editor *, ArdourCanvas::Item *, Operation);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 
 private:
 	void update_item (ARDOUR::Location *);
@@ -442,8 +448,8 @@ public:
 	MouseZoomDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *);
-	void finished (GdkEvent *);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
