@@ -24,7 +24,7 @@
     <Option name="shuttle-speed-threshold" value="5"/>
     <Option name="meter-hold" value="10"/>
     <Option name="meter-falloff" value="1.5"/>
-    <end-marker-is-free val="no"/>
+    <Option name="end-marker-is-free" value="0"/>
   </Config>
   <Sources/>
   <Regions/>

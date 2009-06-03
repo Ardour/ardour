@@ -26,7 +26,7 @@
     <Option name="save-history-depth" value="100"/>
     <Option name="history-depth" value="100"/>
     <Option name="default-narrow_ms" value="0"/>
-    <end-marker-is-free val="no"/>
+    <Option name="end-marker-is-free" value="0"/>
   </Config>
   <Sources>
     <Source name="Guitar clean-1.wav" id="14361" captured-for="Guitar clean" flags="" channel="0"/>
