@@ -2397,15 +2397,6 @@ Playlist::update_after_tempo_map_change ()
 }
 
 void
-Playlist::foreach_region (sigc::slot<void, boost::shared_ptr<Region>, void *> s, void* arg)
-{
-	RegionLock rl (this, false);
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		s (*i, arg);
-	}
-}
-
-void
 Playlist::foreach_region (sigc::slot<void, boost::shared_ptr<Region> > s)
 {
 	RegionLock rl (this, false);

@@ -120,7 +120,6 @@ class Playlist : public SessionObject,
 
 	nframes64_t find_next_transient (nframes64_t position, int dir);
 
-	void foreach_region (sigc::slot<void, boost::shared_ptr<Region>, void *>, void *);
 	void foreach_region (sigc::slot<void, boost::shared_ptr<Region> >);
 
 	XMLNode& get_state ();
