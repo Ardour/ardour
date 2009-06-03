@@ -45,6 +45,8 @@
 
 #include <cmath>
 
+#include <cstdlib>
+
 /*
   A bug in OS X's cmath that causes isnan() and isinf() to be 
   "undeclared". the following works around that
@@ -93,9 +95,37 @@ static double direct_gain_to_control (gain_t gain) {
 	return pow((6.0*log(gain)/log(2.0)+192.0)/198.0, 8.0);
 }
 
-static bool sort_ports_by_name (Port* a, Port* b)
-{
-	return a->name() < b->name();
+static bool sort_ports_by_name (Port* a, Port* b) {
+
+	unsigned int	last_digit_position_a = a->name().size();
+	std::string::const_reverse_iterator	r_iterator = a->name().rbegin();
+
+	while (r_iterator!=a->name().rend() and Glib::Unicode::isdigit(*r_iterator)) {
+		r_iterator++; last_digit_position_a--;
+	}
+
+	unsigned int	last_digit_position_b = b->name().size();
+	r_iterator = b->name().rbegin();
+
+	while (r_iterator!=b->name().rend() and Glib::Unicode::isdigit(*r_iterator)) {
+		r_iterator++; last_digit_position_b--;
+	}
+
+	// if some of the names don't have a number as posfix, compare as strings
+	if (last_digit_position_a == a->name().size() or last_digit_position_b == b->name().size()) {
+		return a->name() < b->name();
+	}
+
+	const std::string 	prefix_a = a->name().substr(0, last_digit_position_a - 1);
+	const unsigned int 	posfix_a = std::atoi(a->name().substr(last_digit_position_a, a->name().size() - last_digit_position_a).c_str());
+	const std::string 	prefix_b = b->name().substr(0, last_digit_position_b - 1);
+	const unsigned int 	posfix_b = std::atoi(b->name().substr(last_digit_position_b, b->name().size() - last_digit_position_b).c_str());
+
+	if (prefix_a != prefix_b) {
+		return a->name() < b->name();
+	} else {
+		return posfix_a < posfix_b;
+	}
 }
 
 
