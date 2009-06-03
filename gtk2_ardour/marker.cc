@@ -247,8 +247,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	Gtk::Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
 	int width;
-	int height;
-	
+
 	layout->set_font_description (*name_font);
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 

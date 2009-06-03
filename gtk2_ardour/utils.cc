@@ -793,7 +793,6 @@ convert_bgra_to_rgba (guint8 const* src,
 Glib::RefPtr<Gdk::Pixbuf>
 pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_width, int clip_height)
 {
-
 	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
 	cairo_t *cr = cairo_create (surface);
