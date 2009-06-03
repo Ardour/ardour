@@ -54,7 +54,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	sigc::signal<void,boost::shared_ptr<Crossfade> > NewCrossfade; 
 
-	template<class T> void foreach_crossfade (T *t, void (T::*func)(boost::shared_ptr<Crossfade>));
+	void foreach_crossfade (sigc::slot<void, boost::shared_ptr<Crossfade> >);
 	void crossfades_at (nframes_t frame, Crossfades&);
 
 	bool destroy_region (boost::shared_ptr<Region>);

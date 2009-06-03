@@ -29,7 +29,6 @@
 #include "ardour/audiofilesource.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
-#include "ardour/playlist_templates.h"
 #include "ardour/source.h"
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
@@ -401,13 +400,16 @@ AudioStreamView::redisplay_diskstream ()
 
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region(
-				static_cast<StreamView*>(this),
-				&StreamView::add_region_view);
+			sigc::mem_fun (*this, &StreamView::add_region_view)
+			);
 
 		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(
-				_trackview.get_diskstream()->playlist());
-		if (apl)
-			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
+				_trackview.get_diskstream()->playlist()
+			);
+		
+		if (apl) {
+			apl->foreach_crossfade (sigc::mem_fun (*this, &AudioStreamView::add_crossfade));
+		}
 	}
 	
 	// Remove invalid crossfade views

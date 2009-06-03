@@ -34,7 +34,6 @@
 #include "ardour/auditioner.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audiosource.h"
-#include "ardour/playlist_templates.h"
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
 
@@ -1234,7 +1233,7 @@ CrossfadeEditor::audition (Audition which)
 	}
 
 	/* there is only one ... */
-	pl.foreach_crossfade (this, &CrossfadeEditor::setup);
+	pl.foreach_crossfade (sigc::mem_fun (*this, &CrossfadeEditor::setup));
 
 	session.audition_playlist ();
 }

@@ -786,3 +786,11 @@ AudioPlaylist::crossfades_at (nframes_t frame, Crossfades& clist)
 	}
 }
 
+void
+AudioPlaylist::foreach_crossfade (sigc::slot<void, boost::shared_ptr<Crossfade> > s)
+{
+	RegionLock rl (this, false);
+	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
+		s (*i);
+	}
+}

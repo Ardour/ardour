@@ -243,8 +243,8 @@ MidiStreamView::redisplay_diskstream ()
 	_data_note_min = 127;
 	_data_note_max = 0;
 	_trackview.get_diskstream()->playlist()->foreach_region(
-			static_cast<StreamView*>(this),
-			&StreamView::update_contents_metrics);
+		sigc::mem_fun (*this, &StreamView::update_contents_metrics)
+		);
 
 	// No notes, use default range
 	if (!_range_dirty) {
@@ -266,8 +266,8 @@ MidiStreamView::redisplay_diskstream ()
 
 	// Add and display region views, and flag them as valid
 	_trackview.get_diskstream()->playlist()->foreach_region(
-			static_cast<StreamView*>(this),
-			&StreamView::add_region_view);
+		sigc::mem_fun (*this, &StreamView::add_region_view)
+		);
 
 	// Stack regions by layer, and remove invalid regions
 	layer_regions();
