@@ -319,7 +319,7 @@ ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 void
 ActionManager::uncheck_toggleaction (const char * name)
 {
-	char *last_slash = strrchr (name, '/');
+	const char *last_slash = strrchr (name, '/');
 
 	if (last_slash == 0) {
 		fatal << string_compose (_("programmer error: %1 %2"), X_("illegal toggle action name"), name) << endmsg;
@@ -334,7 +334,7 @@ ActionManager::uncheck_toggleaction (const char * name)
 	memcpy (group_name, name + 10, len);
 	group_name[len] = '\0';
 
-	char* action_name = last_slash + 1;
+	const char* action_name = last_slash + 1;
 
         RefPtr<Action> act = get_action (group_name, action_name);
 	if (act) {
