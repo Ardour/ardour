@@ -71,6 +71,7 @@ opts.AddOptions(
 class LibraryInfo(Environment):
     def __init__(self,*args,**kw):
         Environment.__init__ (self,*args,**kw)
+        self.ENV_update(os.environ)
     
     def Merge (self,others):
         for other in others:
@@ -87,7 +88,7 @@ class LibraryInfo(Environment):
     def ENV_update(self, src_ENV):
         for k in src_ENV.keys():
             if k in self['ENV'].keys() and k in [ 'PATH', 'LD_LIBRARY_PATH',
-                                                  'LIB', 'INCLUDE' ]:
+                                                  'LIB', PKG_CONFIG_PATH', 'INCLUDE' ]:
                 self['ENV'][k]=SCons.Util.AppendPath(self['ENV'][k], src_ENV[k])
             else:
                 self['ENV'][k]=src_ENV[k]
