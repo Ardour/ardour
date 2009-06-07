@@ -88,7 +88,7 @@ class LibraryInfo(Environment):
     def ENV_update(self, src_ENV):
         for k in src_ENV.keys():
             if k in self['ENV'].keys() and k in [ 'PATH', 'LD_LIBRARY_PATH',
-                                                  'LIB', PKG_CONFIG_PATH', 'INCLUDE' ]:
+                                                  'LIB', 'PKG_CONFIG_PATH', 'INCLUDE' ]:
                 self['ENV'][k]=SCons.Util.AppendPath(self['ENV'][k], src_ENV[k])
             else:
                 self['ENV'][k]=src_ENV[k]
