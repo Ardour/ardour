@@ -789,8 +789,7 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	changed_position = (_last_frame_position != (nframes64_t) (_primary->region()->position()));
-	tvp = _editor->trackview_by_y_position (_current_pointer_y);
-	changed_tracks = (tvp.first != &_primary->get_time_axis_view());
+	changed_tracks = (_dest_trackview != &_primary->get_time_axis_view());
 
 	drag_delta = _primary->region()->position() - _last_frame_position;
 
