@@ -148,6 +148,7 @@ editor_audiotrack.cc
 editor_canvas.cc
 editor_canvas_events.cc
 editor_cursors.cc
+editor_drag.cc
 editor_edit_groups.cc
 editor_export_audio.cc
 editor_hscroller.cc
