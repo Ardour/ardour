@@ -1172,7 +1172,7 @@ class Editor : public PublicEditor
 	void quantize_region ();
 
 	void do_insert_time ();
-	void insert_time (nframes64_t pos, nframes64_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too);
+	void insert_time (nframes64_t, nframes64_t, Editing::InsertTimeOption, bool, bool, bool);
 
 	void tab_to_transient (bool forward);
 

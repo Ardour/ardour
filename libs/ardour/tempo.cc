@@ -1536,3 +1536,17 @@ TempoMap::n_meters() const
 
 	return cnt;
 }
+
+void
+TempoMap::insert_time (nframes_t where, nframes_t amount)
+{
+	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
+		if ((*i)->frame() >= where) {
+			(*i)->set_frame ((*i)->frame() + amount);
+		}
+	}
+
+	timestamp_metrics (false);
+	
+	StateChanged (Change (0));
+}

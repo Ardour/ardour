@@ -6218,6 +6218,8 @@ Editor::do_insert_time ()
 	d.get_vbox()->pack_start (move_glued);
 	CheckButton move_markers (_("Move markers"));
 	d.get_vbox()->pack_start (move_markers);
+	CheckButton move_tempos (_("Move tempo and meter changes"));
+	d.get_vbox()->pack_start (move_tempos);
 	
 	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	d.add_button (_("Insert time"), Gtk::RESPONSE_OK);
@@ -6249,12 +6251,12 @@ Editor::do_insert_time ()
 		break;
 	}
 
-	insert_time (pos, distance, opt, move_glued.get_active(), move_markers.get_active());
+	insert_time (pos, distance, opt, move_glued.get_active(), move_markers.get_active(), move_tempos.get_active());
 }
 
 void
 Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt, 
-		     bool ignore_music_glue, bool markers_too)
+		     bool ignore_music_glue, bool markers_too, bool tempo_too)
 {
 	bool commit = false;
 
@@ -6315,6 +6317,10 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 			XMLNode& after (session->locations()->get_state());
 			session->add_command (new MementoCommand<Locations>(*session->locations(), &before, &after));
 		}
+	}
+
+	if (tempo_too) {
+		session->tempo_map().insert_time (pos, frames);
 	}
 
 	if (commit) {
