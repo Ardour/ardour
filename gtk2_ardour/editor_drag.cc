@@ -496,7 +496,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	   multiple regions, much detail must be computed per-region */
 
 	/* current_pointer_view will become the TimeAxisView that we're currently pointing at, and
-	   current_pointer_layer the current layer on that TimeAxisView */
+	   current_pointer_layer the current layer on that TimeAxisView; in this code layer numbers
+	   are with respect to how the view's layers are displayed; if we are in Overlaid mode, layer
+	   is always 0 regardless of what the region's "real" layer is */
 	RouteTimeAxisView* current_pointer_view;
 	layer_t current_pointer_layer;
 	if (!check_possible (&current_pointer_view, &current_pointer_layer)) {
@@ -1072,6 +1074,10 @@ RegionMotionDrag::check_possible (RouteTimeAxisView** tv, layer_t* layer)
 	(*tv) = dynamic_cast<RouteTimeAxisView*> (tvp.first);
 	(*layer) = tvp.second;
 
+	if (*tv && (*tv)->layer_display() == Overlaid) {
+		*layer = 0;
+	}
+
 	/* The region motion is only processed if the pointer is over
 	   an audio track.
 	*/
@@ -1180,7 +1186,11 @@ RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p,
 	TimeAxisView* const tv = &_primary->get_time_axis_view ();
 	
 	_dest_trackview = tv;
-	_dest_layer = _primary->region()->layer ();
+	if (tv->layer_display() == Overlaid) {
+		_dest_layer = 0;
+	} else {
+		_dest_layer = _primary->region()->layer ();
+	}
 
 	double speed = 1;
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
