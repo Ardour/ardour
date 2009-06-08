@@ -6183,61 +6183,52 @@ Editor::do_insert_time ()
 		return;
 	}
 
-	nframes64_t pos = get_preferred_edit_position ();
 	ArdourDialog d (*this, _("Insert Time"));
-	VButtonBox button_box;
-	VBox option_box;
-	RadioButtonGroup group;
-	RadioButton leave_button (group, _("Stay in position"));
-	RadioButton move_button (group, _("Move"));
-	RadioButton split_button (group, _("Split & Later Section Moves"));
-	Label intersect_option_label (_("Intersected regions should:"));
-	CheckButton glue_button (_("Move Glued Regions"));
-	CheckButton marker_button (_("Move Markers"));
-	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
-	HBox clock_box;
 
+	nframes64_t const pos = get_preferred_edit_position ();
+	
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->set_spacing (4);
+
+	Table table (2, 2);
+	table.set_spacings (4);
+
+	Label time_label (_("Time to insert:"));
+	time_label.set_alignment (1, 0.5);
+	table.attach (time_label, 0, 1, 0, 1, FILL | EXPAND);
+	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
 	clock.set (0);
 	clock.set_session (session);
-	clock.set_bbt_reference (pos);
+	clock.set_bbt_reference (pos);	
+	table.attach (clock, 1, 2, 0, 1);
 
-	clock_box.pack_start (clock, false, true);
+	Label intersected_label (_("Intersected regions should:"));
+	intersected_label.set_alignment (1, 0.5);
+	table.attach (intersected_label, 0, 1, 1, 2, FILL | EXPAND);
+	ComboBoxText intersected_combo;
+	intersected_combo.append_text (_("stay in position"));
+	intersected_combo.append_text (_("move"));
+	intersected_combo.append_text (_("be split"));
+	intersected_combo.set_active (0);
+	table.attach (intersected_combo, 1, 2, 1, 2);
 
-	option_box.set_spacing (6);
-	option_box.pack_start (intersect_option_label, false, false);
-	option_box.pack_start (button_box, false, false);
-	option_box.pack_start (glue_button, false, false);
-	option_box.pack_start (marker_button, false, false);
+	d.get_vbox()->pack_start (table);
 
-	button_box.pack_start (leave_button, false, false);
-	button_box.pack_start (move_button, false, false);
-	button_box.pack_start (split_button, false, false);
-				      
-	d.get_vbox()->set_border_width (12);
-	d.get_vbox()->pack_start (clock_box, false, false);
-	d.get_vbox()->pack_start (option_box, false, false);
+	CheckButton move_glued (_("Move glued regions"));
+	d.get_vbox()->pack_start (move_glued);
+	CheckButton move_markers (_("Move markers"));
+	d.get_vbox()->pack_start (move_markers);
 	
-	leave_button.show ();
-	move_button.show ();
-	split_button.show ();
-	intersect_option_label.show ();
-	option_box.show ();
-	button_box.show ();
-	glue_button.show ();
-	clock.show_all();
-	clock_box.show ();
-	marker_button.show ();
-
 	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	d.show ();
+	d.add_button (_("Insert time"), Gtk::RESPONSE_OK);
+	d.show_all ();
 
 	int response = d.run ();
 
 	if (response != RESPONSE_OK) {
 		return;
 	}
-	
+
 	nframes64_t distance = clock.current_duration (pos);
 
 	if (distance == 0) {
@@ -6246,15 +6237,19 @@ Editor::do_insert_time ()
 
 	InsertTimeOption opt;
 
-	if (leave_button.get_active()) {
+	switch (intersected_combo.get_active_row_number ()) {
+	case 0:
 		opt = LeaveIntersected;
-	} else if (move_button.get_active()) {
+		break;
+	case 1:
 		opt = MoveIntersected;
-	} else {
+		break;
+	case 2:
 		opt = SplitIntersected;
+		break;
 	}
 
-	insert_time (pos, distance, opt, glue_button.get_active(), marker_button.get_active());
+	insert_time (pos, distance, opt, move_glued.get_active(), move_markers.get_active());
 }
 
 void
