@@ -739,7 +739,6 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 	pair<PlaylistSet::iterator,bool> insert_result, frozen_insert_result;
 	nframes64_t drag_delta;
 	bool changed_tracks, changed_position;
-	pair<TimeAxisView*, int> tvp;
 	map<RegionView*, RouteTimeAxisView*> final;
 
 	if (!movement_occurred) {
