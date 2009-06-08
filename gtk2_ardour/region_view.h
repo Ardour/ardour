@@ -45,14 +45,14 @@ class RegionView : public TimeAxisViewItem
 	            TimeAxisView&        time_view,
 	            boost::shared_ptr<ARDOUR::Region> region,
 	            double               samples_per_unit,
-	            Gdk::Color&          basic_color);
+	            Gdk::Color const &   basic_color);
 
 	RegionView (const RegionView& other);
 	RegionView (const RegionView& other, boost::shared_ptr<ARDOUR::Region> other_region);
 
 	~RegionView ();
 	
-	virtual void init (Gdk::Color& base_color, bool wait_for_data);
+	virtual void init (Gdk::Color const & base_color, bool wait_for_data);
     
 	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }
 	
@@ -99,8 +99,8 @@ class RegionView : public TimeAxisViewItem
     RegionView (ArdourCanvas::Group *, 
 		TimeAxisView&,
 		boost::shared_ptr<ARDOUR::Region>,
-		double      samples_per_unit,
-		Gdk::Color& basic_color,
+		double samples_per_unit,
+		Gdk::Color const & basic_color,
 		bool recording,
 		TimeAxisViewItem::Visibility);
     
@@ -117,7 +117,6 @@ class RegionView : public TimeAxisViewItem
     void        lock_toggle ();
 
     virtual void set_colors ();
-    virtual void compute_colors (Gdk::Color&);
     virtual void set_frame_color ();
     virtual void reset_width_dependent_items (double pixel_width);
 

@@ -68,7 +68,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
  * @param start the start point of this item
  * @param duration the duration of this item
  */
-TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
+TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color, 
 				   nframes_t start, nframes_t duration, bool recording,
 				   Visibility vis)
 	: trackview (tv), _recregion(recording)
@@ -124,7 +124,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 }
 
 void
-TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis)
+TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & base_color, nframes_t start, nframes_t duration, Visibility vis)
 {
 	item_name = it_name ;
 	samples_per_unit = spu ;
@@ -614,7 +614,7 @@ TimeAxisViewItem::set_height (double height)
  * 
  */
 void
-TimeAxisViewItem::set_color(Gdk::Color& base_color)
+TimeAxisViewItem::set_color (Gdk::Color const & base_color)
 {
 	compute_colors (base_color);
 	set_colors ();
@@ -662,7 +662,7 @@ TimeAxisViewItem::get_name_pixbuf()
  * @param color the base color of the item
  */
 void
-TimeAxisViewItem::compute_colors(Gdk::Color& base_color)
+TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 {
 	unsigned char radius ;
 	char minor_shift ;

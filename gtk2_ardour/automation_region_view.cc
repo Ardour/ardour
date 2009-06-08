@@ -33,7 +33,7 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
                                            const Evoral::Parameter&                  param,
                                            boost::shared_ptr<ARDOUR::AutomationList> list,
                                            double                                    spu,
-                                           Gdk::Color&                               basic_color)
+                                           Gdk::Color const &                        basic_color)
 	: RegionView(parent, time_axis, region, spu, basic_color)
 	, _parameter(param)
 { 
@@ -46,7 +46,7 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
 }
 
 void
-AutomationRegionView::init (Gdk::Color& basic_color, bool wfd)
+AutomationRegionView::init (Gdk::Color const & basic_color, bool wfd)
 {
 	_enable_display = false;
 	

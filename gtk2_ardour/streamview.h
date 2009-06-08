@@ -103,6 +103,10 @@ public:
 	virtual void redisplay_diskstream () = 0;
 	double child_height () const;
 	ARDOUR::layer_t layers () const { return _layers; }
+
+	virtual RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool) {
+		return 0;
+	}
 	
 	sigc::signal<void,RegionView*> RegionViewAdded;
 

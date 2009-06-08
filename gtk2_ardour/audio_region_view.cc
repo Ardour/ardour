@@ -66,7 +66,7 @@ using namespace ArdourCanvas;
 static const int32_t sync_mark_width = 9;
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
-				  Gdk::Color& basic_color)
+				  Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, sync_mark(0)
 	, zero_line(0)
@@ -83,7 +83,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu, 
-				  Gdk::Color& basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
+				  Gdk::Color const & basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
 	, zero_line(0)
@@ -145,7 +145,7 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 }
 
 void
-AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
+AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 {
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
@@ -731,9 +731,9 @@ AudioRegionView::set_amplitude_above_axis (gdouble spp)
 }
 
 void
-AudioRegionView::compute_colors (Gdk::Color& basic_color)
+AudioRegionView::compute_colors (Gdk::Color const & basic_color)
 {
-	RegionView::compute_colors(basic_color);
+	RegionView::compute_colors (basic_color);
 	
 	uint32_t r, g, b, a;
 

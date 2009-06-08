@@ -22,7 +22,6 @@
 #include <jack/types.h>
 #include <gtkmm2ext/utils.h>
 
-#include "ardour/audioregion.h"
 #include "ardour/profile.h"
 
 #include "ardour_ui.h"
@@ -39,9 +38,9 @@
 #include "editing.h"
 #include "rgb_macros.h"
 #include "utils.h"
-#include "time_axis_view.h"
 #include "audio_time_axis.h"
 #include "editor_drag.h"
+#include "region_view.h"
 
 #include "i18n.h"
 
@@ -283,6 +282,7 @@ Editor::initialize_canvas ()
 	track_canvas->signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
 	track_canvas->signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
 	track_canvas->signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
+	track_canvas->signal_drag_motion().connect (mem_fun (*this, &Editor::track_canvas_drag_motion));
 
 	track_canvas->set_name ("EditorMainCanvas");
 	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
@@ -532,20 +532,10 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 		      const SelectionData& data,
 		      guint info, guint time)
 {
-	std::list<boost::shared_ptr<Region> > regions;
-	Gtk::TreeView* source;
-	region_list_display.get_object_drag_data (regions, &source);
-
-	for (list<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r) {
-
-		boost::shared_ptr<AudioRegion> ar;
-
-		if ((ar = boost::dynamic_pointer_cast<AudioRegion>(*r)) != 0) {
-			insert_region_list_drag (ar, x, y);
-		}
-	}
-
-	context->drag_finish (true, false, time);
+	assert (_drag);
+	_drag->end_grab (0);
+	delete _drag;
+	_drag = 0;
 }
 
 void

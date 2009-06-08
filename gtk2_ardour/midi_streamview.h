@@ -98,6 +98,8 @@ class MidiStreamView : public StreamView
 	
 	sigc::signal<void> NoteRangeChanged;
 
+	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
+
   private:
 	void setup_rec_box ();
 

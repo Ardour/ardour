@@ -45,6 +45,11 @@ class DnDTreeViewBase : public Gtk::TreeView
 
 	void add_drop_targets (std::list<Gtk::TargetEntry>&);
 	void add_object_drag (int column, std::string type_name);
+
+	void on_drag_begin (Glib::RefPtr<Gdk::DragContext> const & context) {
+		Gtk::TreeView::on_drag_begin (context);
+		start_object_drag ();
+	}
 	
 	void on_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {
 		suggested_action = context->get_suggested_action();
@@ -94,8 +99,6 @@ class DnDTreeView : public DnDTreeViewBase
 			TreeView::on_drag_data_get (context, selection_data, info, time);
 
 		} else if (selection_data.get_target() == object_type) {
-
-			start_object_drag ();
 
 			/* we don't care about the data passed around by DnD, but
 			   we have to provide something otherwise it will stop.

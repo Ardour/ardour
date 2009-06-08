@@ -64,10 +64,10 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
                         TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
-                        Gdk::Color&                       basic_color)
+                        Gdk::Color const &                basic_color)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false,
-			TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
-				TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame))
+			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
+							  TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame))
 	, _region (r)
 	, sync_mark(0)
 	, sync_line(0)
@@ -118,7 +118,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
                         TimeAxisView&                tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
-                        Gdk::Color&                  basic_color,
+                        Gdk::Color const &           basic_color,
 						bool recording,
                         TimeAxisViewItem::Visibility visibility)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, visibility)
@@ -137,7 +137,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 }
 
 void
-RegionView::init (Gdk::Color& basic_color, bool wfd)
+RegionView::init (Gdk::Color const & basic_color, bool wfd)
 {
 	editor        = 0;
 	valid         = true;
@@ -348,12 +348,6 @@ RegionView::set_duration (nframes_t frames, void *src)
 	}
 
 	return true;
-}
-
-void
-RegionView::compute_colors (Gdk::Color& basic_color)
-{
-	TimeAxisViewItem::compute_colors (basic_color);
 }
 
 void

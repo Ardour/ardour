@@ -52,7 +52,7 @@ const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility
 TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, 
 					  boost::shared_ptr<AudioRegion> r, 
 					  double spu, 
-					  Gdk::Color& basic_color)
+					  Gdk::Color const & basic_color)
 
 	: AudioRegionView (parent, tv, r, spu, basic_color, false,
 			   TimeAxisViewItem::Visibility ((r->position() != 0) ? default_tape_visibility : 
@@ -61,7 +61,7 @@ TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTime
 }
 
 void
-TapeAudioRegionView::init (Gdk::Color& basic_color, bool wfw)
+TapeAudioRegionView::init (Gdk::Color const & basic_color, bool wfw)
 {
 	/* never wait for data: always just create the waves, connect once and then
 	   we'll update whenever we need to.

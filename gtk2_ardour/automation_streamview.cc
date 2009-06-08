@@ -167,7 +167,7 @@ AutomationStreamView::redisplay_diskstream ()
 	// Add and display region views, and flag them as valid
 	if (_trackview.is_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (
-			sigc::mem_fun (*this, &StreamView::add_region_view)
+			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 			);
 	}
 	

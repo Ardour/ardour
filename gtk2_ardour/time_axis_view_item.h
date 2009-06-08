@@ -213,7 +213,7 @@ class TimeAxisViewItem : public Selectable
     /**
      * 
      */
-    void set_color(Gdk::Color& color) ;
+    void set_color (Gdk::Color const &);
     
     /**
      * 
@@ -341,19 +341,19 @@ class TimeAxisViewItem : public Selectable
      * @param start the start point of this item
      * @param duration the duration of this item
      */
-    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
+    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color, 
 		     nframes_t start, nframes_t duration, bool recording = false, Visibility v = Visibility (0));
 
     TimeAxisViewItem (const TimeAxisViewItem& other);
 
-    void init (const std::string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis);
+    void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes_t start, nframes_t duration, Visibility vis);
     
     /**
      * Calculates some contrasting color for displaying various parts of this item, based upon the base color
      *
      * @param color the base color of the item
      */
-    virtual void compute_colors(Gdk::Color& color) ;
+    virtual void compute_colors (Gdk::Color const & color);
     
     /**
      * convenience method to set the various canvas item colors

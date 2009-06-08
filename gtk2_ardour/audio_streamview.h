@@ -80,6 +80,8 @@ class AudioStreamView : public StreamView
 	void hide_xfades_involving (AudioRegionView&);
 	void reveal_xfades_involving (AudioRegionView&);
 
+	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
+
   private:
 	void setup_rec_box ();
 	void rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<ARDOUR::Source> src); 

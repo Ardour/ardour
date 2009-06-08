@@ -66,7 +66,7 @@ using namespace Editing;
 using namespace ArdourCanvas;
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
-		boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color)
+		boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
@@ -150,7 +150,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 }
 
 void
-MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
+MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 {
 	if (wfd) {
 		midi_region()->midi_source(0)->load_model();

@@ -130,18 +130,32 @@ veto_note_range(uint8_t& min, uint8_t& max)
 }
 
 RegionView*
+MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool wfd, bool)
+{
+	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
+
+	if (region == 0) {
+		return 0;
+	}
+
+	RegionView* region_view = new MidiRegionView (canvas_group, _trackview, region, 
+						      _samples_per_unit, region_color);
+		
+	region_view->init (region_color, false);
+			
+	return region_view;
+}
+
+RegionView*
 MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd, bool recording)
 {
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (region == 0) {
-		return NULL;
+		return 0;
 	}
 
-	MidiRegionView *region_view;
-	list<RegionView *>::iterator i;
-
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region() == r) {
 			
 			/* great. we already have a MidiRegionView for this Region. use it again. */
@@ -150,18 +164,19 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 			
 			display_region(dynamic_cast<MidiRegionView*>(*i), wfd);
 
-			return NULL;
+			return 0;
 		}
 	}
+
+	MidiRegionView* region_view = dynamic_cast<MidiRegionView*> (create_region_view (r, wfd, recording));
+	if (region_view == 0) {
+		return 0;
+	}
 	
-	region_view = new MidiRegionView (canvas_group, _trackview, region, 
-			_samples_per_unit, region_color);
-		
-	region_view->init (region_color, false);
 	region_views.push_front (region_view);
 			
 	/* display events and find note range */
-	display_region(region_view, wfd);
+	display_region (region_view, wfd);
 
 	/* catch regionview going away */
 	region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_region_view), region));
@@ -266,7 +281,7 @@ MidiStreamView::redisplay_diskstream ()
 
 	// Add and display region views, and flag them as valid
 	_trackview.get_diskstream()->playlist()->foreach_region(
-		sigc::mem_fun (*this, &StreamView::add_region_view)
+		sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 		);
 
 	// Stack regions by layer, and remove invalid regions

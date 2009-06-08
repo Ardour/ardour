@@ -33,6 +33,8 @@
 #include "utils.h"
 #include "region_gain_line.h"
 #include "editor_drag.h"
+#include "audio_time_axis.h"
+#include "midi_time_axis.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -50,7 +52,6 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i) :
 	_grab_frame (0),
 	_last_pointer_frame (0),
 	_current_pointer_frame (0),
-	_copy (false),
 	_had_movement (false),
 	_move_threshold_passed (false)
 {
@@ -138,11 +139,9 @@ Drag::end_grab (GdkEvent* event)
 
 	_item->ungrab (event ? event->button.time : 0);
 
-	if (event) {
-		_last_pointer_x = _current_pointer_x;
-		_last_pointer_y = _current_pointer_y;
-		finished (event, _had_movement);
-	}
+	_last_pointer_x = _current_pointer_x;
+	_last_pointer_y = _current_pointer_y;
+	finished (event, _had_movement);
 
 	_editor->hide_verbose_canvas_cursor();
 
@@ -256,51 +255,243 @@ RegionDrag::update_selection ()
 	_editor->selection->set (s);
 }
 
-RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
+RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
 	: RegionDrag (e, i, p, v),
+	  _dest_trackview (0),
+	  _dest_layer (0),
 	  _brushing (b)
 {
-	_copy = c;
 	
-	TimeAxisView* const tv = &_primary->get_time_axis_view ();
-	
-	_dest_trackview = tv;
-	_dest_layer = _primary->region()->layer ();
-
-	double speed = 1;
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
-	if (rtv && rtv->is_track()) {
-		speed = rtv->get_diskstream()->speed ();
-	}
-
-	_last_frame_position = static_cast<nframes64_t> (_primary->region()->position() / speed);
 }
 
+
 void
-RegionMoveDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
+RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
 	
-	_pointer_frame_offset = _grab_frame - _last_frame_position;
 	_editor->show_verbose_time_cursor (_last_frame_position, 10);
 }
 
-void
-RegionMoveDrag::motion (GdkEvent* event, bool first_move)
+RegionMotionDrag::TimeAxisViewSummary
+RegionMotionDrag::get_time_axis_view_summary ()
 {
-	double x_delta = 0;
-	double y_delta = 0;
-	nframes64_t pending_region_position = 0;
-	int32_t pointer_order_span = 0, canvas_pointer_order_span = 0;
-	int32_t pointer_layer_span = 0;
-	
-	bool clamp_y_axis = false;
-	vector<int32_t>::iterator j;
+	int32_t children = 0;
+	TimeAxisViewSummary sum;
 
-	if (_copy && first_move) {
-		copy_regions (event);
+	_editor->visible_order_range (&sum.visible_y_low, &sum.visible_y_high);
+		
+	/* get a bitmask representing the visible tracks */
+
+	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		TimeAxisView::Children children_list;
+		
+		/* zeroes are audio/MIDI tracks. ones are other types. */
+		
+		if (!rtv->hidden()) {
+			
+			if (!rtv->is_track()) {
+				/* not an audio nor MIDI track */
+				sum.tracks = sum.tracks |= (0x01 << rtv->order());
+			}
+			
+			sum.height_list[rtv->order()] = (*i)->current_height();
+			children = 1;
+
+			if ((children_list = rtv->get_child_list()).size() > 0) {
+				for (TimeAxisView::Children::iterator j = children_list.begin(); j != children_list.end(); ++j) { 
+					sum.tracks = sum.tracks |= (0x01 << (rtv->order() + children));
+					sum.height_list[rtv->order() + children] = (*j)->current_height();
+					children++;	
+				}
+			}
+		}
+	}
+
+	return sum;
+}
+
+bool
+RegionMotionDrag::compute_y_delta (
+	TimeAxisView const * last_pointer_view, TimeAxisView* current_pointer_view,
+	int32_t last_pointer_layer, int32_t current_pointer_layer,
+	TimeAxisViewSummary const & tavs,
+	int32_t* pointer_order_span, int32_t* pointer_layer_span,
+	int32_t* canvas_pointer_order_span
+	)
+{
+	if (_brushing) {
+		*pointer_order_span = 0;
+		*pointer_layer_span = 0;
+		return true;
+	}
+
+	bool clamp_y_axis = false;
+		
+	/* the change in track order between this callback and the last */
+	*pointer_order_span = last_pointer_view->order() - current_pointer_view->order();
+	/* the change in layer between this callback and the last;
+	   only meaningful if pointer_order_span == 0 (ie we've not moved tracks) */
+	*pointer_layer_span = last_pointer_layer - current_pointer_layer;
+
+	if (*pointer_order_span != 0) {
+
+		/* find the actual pointer span, in terms of the number of visible tracks;
+		   to do this, we reduce |pointer_order_span| by the number of hidden tracks
+		   over the span */
+
+		*canvas_pointer_order_span = *pointer_order_span;
+		if (last_pointer_view->order() >= current_pointer_view->order()) {
+			for (int32_t y = current_pointer_view->order(); y < last_pointer_view->order(); y++) {
+				if (tavs.height_list[y] == 0) {
+					*canvas_pointer_order_span--;
+				}
+			}
+		} else {
+			for (int32_t y = last_pointer_view->order(); y <= current_pointer_view->order(); y++) {
+				if (tavs.height_list[y] == 0) {
+					*canvas_pointer_order_span++;
+				}
+			}
+		}
+
+		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			
+			RegionView* rv = (*i);
+
+			if (rv->region()->locked()) {
+				continue;
+			}
+
+			double ix1, ix2, iy1, iy2;
+			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			rv->get_canvas_frame()->i2w (ix1, iy1);
+			iy1 += _editor->vertical_adjustment.get_value() - _editor->canvas_timebars_vsize;
+
+			/* get the new trackview for this particular region */
+			pair<TimeAxisView*, int> const tvp = _editor->trackview_by_y_position (iy1);
+			assert (tvp.first);
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
+
+			/* XXX: not sure that we should be passing canvas_pointer_order_span in here,
+			   as surely this is a per-region thing... */
+			
+			clamp_y_axis = y_movement_disallowed (
+				rtv->order(), last_pointer_view->order(), *canvas_pointer_order_span, tavs
+				);
+
+			if (clamp_y_axis) {
+				break;
+			}
+		}
+
+	} else if (_dest_trackview == current_pointer_view) {
+
+		if (current_pointer_layer == last_pointer_layer) {
+			/* No movement; clamp */
+			clamp_y_axis = true;
+		} 
+	}
+
+	if (!clamp_y_axis) {
+		_dest_trackview = current_pointer_view;
+		_dest_layer = current_pointer_layer;
+	}
+
+	return clamp_y_axis;
+}
+
+
+double
+RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_region_position)
+{
+	*pending_region_position = 0;
+	
+	/* compute the amount of pointer motion in frames, and where
+	   the region would be if we moved it by that much.
+	*/
+	if (_current_pointer_frame >= _pointer_frame_offset) {
+
+		nframes64_t sync_frame;
+		nframes64_t sync_offset;
+		int32_t sync_dir;
+		
+		*pending_region_position = _current_pointer_frame - _pointer_frame_offset;
+		
+		sync_offset = _primary->region()->sync_offset (sync_dir);
+		
+		/* we don't handle a sync point that lies before zero.
+		 */
+		if (sync_dir >= 0 || (sync_dir < 0 && *pending_region_position >= sync_offset)) {
+			
+			sync_frame = *pending_region_position + (sync_dir*sync_offset);
+			
+			/* we snap if the snap modifier is not enabled.
+			 */
+			
+			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+				_editor->snap_to (sync_frame);	
+			}
+			
+			*pending_region_position = _primary->region()->adjust_to_sync (sync_frame);
+			
+		} else {
+			*pending_region_position = _last_frame_position;
+		}
+		
 	}
 	
+	if (*pending_region_position > max_frames - _primary->region()->length()) {
+		*pending_region_position = _last_frame_position;
+	}
+
+	double x_delta = 0;
+	
+	if ((*pending_region_position != _last_frame_position) && x_move_allowed ()) {
+		
+		/* now compute the canvas unit distance we need to move the regionview
+		   to make it appear at the new location.
+		*/
+
+		x_delta = (static_cast<double> (*pending_region_position) - _last_frame_position) / _editor->frames_per_unit;
+		
+		if (*pending_region_position <= _last_frame_position) {
+			
+			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				
+				RegionView* rv = (*i);
+				
+				// If any regionview is at zero, we need to know so we can stop further leftward motion.
+				
+				double ix1, ix2, iy1, iy2;
+				rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+				rv->get_canvas_frame()->i2w (ix1, iy1);
+				
+				if (-x_delta > ix1 + _editor->horizontal_adjustment.get_value()) {
+					x_delta = 0;
+					*pending_region_position = _last_frame_position;
+					break;
+				}
+			}
+			
+		}
+		
+		_last_frame_position = *pending_region_position;
+	}
+
+	return x_delta;
+}
+
+void
+RegionMotionDrag::motion (GdkEvent* event, bool first_move)
+{
+	double y_delta = 0;
+
+	TimeAxisViewSummary tavs = get_time_axis_view_summary ();
+
+	vector<int32_t>::iterator j;
+
 	/* *pointer* variables reflect things about the pointer; as we may be moving
 	   multiple regions, much detail must be computed per-region */
 
@@ -319,226 +510,20 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 	/* the layer that we were pointing at last time we entered this method */
 	layer_t const last_pointer_layer = _dest_layer;
 
-	/************************************************************
-	     Y DELTA COMPUTATION
-	************************************************************/	
-
-	/* Height of TimeAxisViews, indexed by order */
-	/* XXX: hard-coded limit of TimeAxisViews */
-	vector<int32_t> height_list (512);
+	int32_t pointer_order_span;
+	int32_t pointer_layer_span;
+	int32_t canvas_pointer_order_span;
 	
-	if (_brushing) {
-		clamp_y_axis = true;
-		pointer_order_span = 0;
-		goto y_axis_done;
-	}
+	bool const clamp_y_axis = compute_y_delta (
+		last_pointer_view, current_pointer_view,
+		last_pointer_layer, current_pointer_layer, tavs,
+		&pointer_order_span, &pointer_layer_span,
+		&canvas_pointer_order_span
+		);
 
-	/* the change in track order between this callback and the last */
-	pointer_order_span = last_pointer_view->order() - current_pointer_view->order();
-	/* the change in layer between this callback and the last;
-	   only meaningful if pointer_order_span == 0 (ie we've not moved tracks) */
-	pointer_layer_span = last_pointer_layer - current_pointer_layer;
+	nframes64_t pending_region_position;
+	double const x_delta = compute_x_delta (event, &pending_region_position);
 
-	if (pointer_order_span != 0) {
-
-		int32_t children = 0;
-		/* XXX: hard-coded limit of tracks */
-		bitset <512> tracks (0x00);
-
-		int visible_y_high;
-		int visible_y_low;
-		_editor->visible_order_range (&visible_y_low, &visible_y_high);
-		
-		/* get a bitmask representing the visible tracks */
-
-		for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-			TimeAxisView::Children children_list;
-	      
-			/* zeroes are audio/MIDI tracks. ones are other types. */
-	      
-			if (!rtv->hidden()) {
-				
-				if (!rtv->is_track()) {
-					/* not an audio nor MIDI track */
-					tracks = tracks |= (0x01 << rtv->order());
-				}
-	
-				height_list[rtv->order()] = (*i)->current_height();
-				children = 1;
-
-				if ((children_list = rtv->get_child_list()).size() > 0) {
-					for (TimeAxisView::Children::iterator j = children_list.begin(); j != children_list.end(); ++j) { 
-						tracks = tracks |= (0x01 << (rtv->order() + children));
-						height_list[rtv->order() + children] = (*j)->current_height();
-						children++;	
-					}
-				}
-			}
-		}
-		
-		/* find the actual pointer span, in terms of the number of visible tracks;
-		   to do this, we reduce |pointer_order_span| by the number of hidden tracks
-		   over the span */
-
-		canvas_pointer_order_span = pointer_order_span;
-		if (last_pointer_view->order() >= current_pointer_view->order()) {
-			for (int32_t y = current_pointer_view->order(); y < last_pointer_view->order(); y++) {
-				if (height_list[y] == 0) {
-					canvas_pointer_order_span--;
-				}
-			}
-		} else {
-			for (int32_t y = last_pointer_view->order(); y <= current_pointer_view->order(); y++) {
-				if (height_list[y] == 0) {
-					canvas_pointer_order_span++;
-				}
-			}
-		}
-
-		for (list<RegionView*>::const_iterator i = _editor->selection->regions.by_layer().begin(); i != _editor->selection->regions.by_layer().end(); ++i) {
-			
-			RegionView* rv = (*i);
-
-			if (rv->region()->locked()) {
-				continue;
-			}
-
-			double ix1, ix2, iy1, iy2;
-			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			rv->get_canvas_frame()->i2w (ix1, iy1);
-			iy1 += _editor->vertical_adjustment.get_value() - _editor->canvas_timebars_vsize;
-
-			/* get the new trackview for this particular region */
-			pair<TimeAxisView*, int> const tvp = _editor->trackview_by_y_position (iy1);
-			assert (tvp.first);
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-
-			/* I know this method has a slightly excessive argument list, but I think
-			   it's nice to separate the code out all the same, since it has such a
-			   simple result, and it makes it clear that there are no other
-			   side-effects.
-			*/
-
-			/* XXX: not sure that we should be passing canvas_pointer_order_span in here,
-			   as surely this is a per-region thing... */
-			
-			clamp_y_axis = y_movement_disallowed (
-				rtv->order(), last_pointer_order, canvas_pointer_order_span, visible_y_low, visible_y_high,
-				tracks, height_list
-				);
-
-			if (clamp_y_axis) {
-				break;
-			}
-		}
-
-	} else if (_dest_trackview == current_pointer_view) {
-
-		if (current_pointer_layer == last_pointer_layer) {
-			/* No movement; clamp */
-			clamp_y_axis = true;
-		} 
-	}
-
-  y_axis_done:
-	if (!clamp_y_axis) {
-		_dest_trackview = current_pointer_view;
-		_dest_layer = current_pointer_layer;
-	}
-	  
-	/************************************************************
-	    X DELTA COMPUTATION
-	************************************************************/
-
-	/* compute the amount of pointer motion in frames, and where
-	   the region would be if we moved it by that much.
-	*/
-	if (_current_pointer_frame >= _pointer_frame_offset) {
-
-		nframes64_t sync_frame;
-		nframes64_t sync_offset;
-		int32_t sync_dir;
-		
-		pending_region_position = _current_pointer_frame - _pointer_frame_offset;
-		
-		sync_offset = _primary->region()->sync_offset (sync_dir);
-		
-		/* we don't handle a sync point that lies before zero.
-		 */
-		if (sync_dir >= 0 || (sync_dir < 0 && pending_region_position >= sync_offset)) {
-			sync_frame = pending_region_position + (sync_dir*sync_offset);
-			
-			/* we snap if the snap modifier is not enabled.
-			 */
-			
-			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-				_editor->snap_to (sync_frame);	
-			}
-			
-			pending_region_position = _primary->region()->adjust_to_sync (sync_frame);
-			
-		} else {
-			pending_region_position = _last_frame_position;
-		}
-		
-	} else {
-		pending_region_position = 0;
-	}
-	
-	if (pending_region_position > max_frames - _primary->region()->length()) {
-		pending_region_position = _last_frame_position;
-	}
-	
-	bool x_move_allowed;
-		
-	if (Config->get_edit_mode() == Lock) {
-		if (_copy) {
-			x_move_allowed = !_x_constrained;
-		} else {
-			/* in locked edit mode, reverse the usual meaning of _x_constrained */
-			x_move_allowed = _x_constrained;
-		}
-	} else {
-		x_move_allowed = !_x_constrained;
-	}
-	
-	if (( pending_region_position != _last_frame_position) && x_move_allowed ) {
-		
-		/* now compute the canvas unit distance we need to move the regionview
-		   to make it appear at the new location.
-		*/
-		
-		if (pending_region_position > _last_frame_position) {
-			x_delta = ((double) (pending_region_position - _last_frame_position) / _editor->frames_per_unit);
-		} else {
-			x_delta = -((double) (_last_frame_position - pending_region_position) / _editor->frames_per_unit);
-			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				
-				RegionView* rv = (*i);
-				
-				// If any regionview is at zero, we need to know so we can stop further leftward motion.
-				
-				double ix1, ix2, iy1, iy2;
-				rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-				rv->get_canvas_frame()->i2w (ix1, iy1);
-				
-				if (-x_delta > ix1 + _editor->horizontal_adjustment.get_value()) {
-					x_delta = 0;
-					pending_region_position = _last_frame_position;
-					break;
-				}
-			}
-			
-		}
-		
-		_last_frame_position = pending_region_position;
-		
-	} else {
-		x_delta = 0;
-	}
-
-	
 	/*************************************************************
 	    PREPARE TO MOVE
 	************************************************************/
@@ -614,9 +599,9 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			/* INTER-TRACK MOVEMENT */
 			
 			/* move through the height list to the track that the region is currently on */
-			vector<int32_t>::iterator j = height_list.begin ();
+			vector<int32_t>::iterator j = tavs.height_list.begin ();
 			int32_t x = 0;
-			while (j != height_list.end () && x != rtv->order ()) {
+			while (j != tavs.height_list.end () && x != rtv->order ()) {
 				++x;
 				++j;
 			}
@@ -624,7 +609,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			y_delta = 0;
 			int32_t temp_pointer_order_span = canvas_pointer_order_span;
 			
-			if (j != height_list.end ()) {
+			if (j != tavs.height_list.end ()) {
 				
 				/* Account for layers in the original and
 				   destination tracks.  If we're moving around in layers we assume
@@ -654,7 +639,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 					/* we're moving up canvas-wise,
 					   so we need to find the next track height
 					*/
-					if (j != height_list.begin()) {		  
+					if (j != tavs.height_list.begin()) {		  
 						j--;
 					}
 					
@@ -678,7 +663,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 						}
 					}
 					
-					if (j != height_list.end()) {		      
+					if (j != tavs.height_list.end()) {		      
 						j++;
 					}
 					
@@ -724,7 +709,17 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 	if (x_delta != 0 && !_brushing) {
 		_editor->show_verbose_time_cursor (_last_frame_position, 10);
 	}
-} 
+}
+
+void
+RegionMoveDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (_copy && first_move) {
+		copy_regions (event);
+	}
+
+	RegionMotionDrag::motion (event, first_move);
+}
 
 void
 RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
@@ -769,8 +764,6 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 		goto out;
 	}
 
-	char* op_string;
-
 	/* reverse this here so that we have the correct logic to finalize
 	   the drag.
 	*/
@@ -781,19 +774,18 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	if (_copy) {
 		if (_x_constrained) {
-			op_string = _("fixed time region copy");
+			_editor->begin_reversible_command (_("fixed time region copy"));
 		} else {
-			op_string = _("region copy");
+			_editor->begin_reversible_command (_("region copy"));
 		} 
 	} else {
 		if (_x_constrained) {
-			op_string = _("fixed time region drag");
+			_editor->begin_reversible_command (_("fixed time region drag"));
 		} else {
-			op_string = _("region drag");
+			_editor->begin_reversible_command (_("region drag"));
 		}
 	}
 
-	_editor->begin_reversible_command (op_string);
 	changed_position = (_last_frame_position != (nframes64_t) (_primary->region()->position()));
 	tvp = _editor->trackview_by_y_position (_current_pointer_y);
 	changed_tracks = (tvp.first != &_primary->get_time_axis_view());
@@ -803,16 +795,7 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->track_canvas->update_now ();
 
 	/* make a list of where each region ended up */
-	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-
-		double ix1, ix2, iy1, iy2;
-		(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-		(*i)->get_canvas_frame()->i2w (ix1, iy1);
-		iy1 += _editor->vertical_adjustment.get_value() - _editor->canvas_timebars_vsize;
-
-		pair<TimeAxisView*, int> tv = _editor->trackview_by_y_position (iy1);
-		final[*i] = dynamic_cast<RouteTimeAxisView*> (tv.first);
-	}
+	final = find_time_axis_views ();
 
 	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
@@ -999,10 +982,35 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 		delete *x;
 	}
 }
+
+
+bool
+RegionMoveDrag::x_move_allowed () const
+{
+	if (Config->get_edit_mode() == Lock) {
+		if (_copy) {
+			return !_x_constrained;
+		} else {
+			/* in locked edit mode, reverse the usual meaning of _x_constrained */
+			return _x_constrained;
+		}
+	}
 	
+	return !_x_constrained;
+}
+
+bool
+RegionInsertDrag::x_move_allowed () const
+{
+	if (Config->get_edit_mode() == Lock) {
+		return _x_constrained;
+	}
+
+	return !_x_constrained;
+}
 
 void
-RegionMoveDrag::copy_regions (GdkEvent* event)
+RegionMotionDrag::copy_regions (GdkEvent* event)
 {
 	/* duplicate the regionview(s) and region(s) */
 
@@ -1043,7 +1051,8 @@ RegionMoveDrag::copy_regions (GdkEvent* event)
 	_primary = new_regionviews.front();
 	_views = new_regionviews;
 		
-	swap_grab (new_regionviews.front()->get_canvas_group (), 0, event->motion.time);
+	swap_grab (new_regionviews.front()->get_canvas_group (), 0, event ? event->motion.time : 0);
+	
 	/* 
 	   sync the canvas to what we think is its current state 
 	   without it, the canvas seems to 
@@ -1055,7 +1064,7 @@ RegionMoveDrag::copy_regions (GdkEvent* event)
 }
 
 bool
-RegionMoveDrag::check_possible (RouteTimeAxisView** tv, layer_t* layer)
+RegionMotionDrag::check_possible (RouteTimeAxisView** tv, layer_t* layer)
 {
 	/* Which trackview is this ? */
 
@@ -1081,16 +1090,10 @@ RegionMoveDrag::check_possible (RouteTimeAxisView** tv, layer_t* layer)
 /** @param new_order New track order.
  *  @param old_order Old track order.
  *  @param visible_y_low Lowest visible order.
- *  @param visible_y_high Highest visible order.
- *  @param tracks Bitset of tracks indexed by order; 0 means a audio/MIDI track, 1 means something else.
- *  @param heigh_list Heights of tracks indexed by order.
  *  @return true if y movement should not happen, otherwise false.
  */
 bool
-RegionMoveDrag::y_movement_disallowed (
-	int new_order, int old_order, int y_span, int visible_y_low, int visible_y_high,
-	bitset<512> const & tracks, vector<int32_t> const & height_list
-	) const
+RegionMotionDrag::y_movement_disallowed (int new_order, int old_order, int y_span, TimeAxisViewSummary const & tavs) const
 {
 	if (new_order != old_order) {
 
@@ -1099,7 +1102,7 @@ RegionMoveDrag::y_movement_disallowed (
 		if (y_span > 0) {
 
 			/* moving up the canvas */
-			if ( (new_order - y_span) >= visible_y_low) {
+			if ( (new_order - y_span) >= tavs.visible_y_low) {
 
 				int32_t n = 0;
 
@@ -1107,13 +1110,13 @@ RegionMoveDrag::y_movement_disallowed (
 				int32_t visible_tracks = 0;
 				while (visible_tracks < y_span ) {
 					visible_tracks++;
-					while (height_list[new_order - (visible_tracks - n)] == 0) {
+					while (tavs.height_list[new_order - (visible_tracks - n)] == 0) {
 						/* passing through a hidden track */
 						n--;
 					}		  
 				}
 		 
-				if (tracks[new_order - (y_span - n)] != 0x00) {
+				if (tavs.tracks[new_order - (y_span - n)] != 0x00) {
 					/* moving to a non-track; disallow */
 					return true;
 				}
@@ -1127,20 +1130,20 @@ RegionMoveDrag::y_movement_disallowed (
 		} else if (y_span < 0) {
 
 			/* moving down the canvas */
-			if ((new_order - y_span) <= visible_y_high) {
+			if ((new_order - y_span) <= tavs.visible_y_high) {
 
 				int32_t visible_tracks = 0;
 				int32_t n = 0;
 				while (visible_tracks > y_span ) {
 					visible_tracks--;
 		      
-					while (height_list[new_order - (visible_tracks - n)] == 0) {
+					while (tavs.height_list[new_order - (visible_tracks - n)] == 0) {
 						/* passing through a hidden track */
 						n++;
 					}		 
 				}
 						
-				if (tracks[new_order - (y_span - n)] != 0x00) {
+				if (tavs.tracks[new_order - (y_span - n)] != 0x00) {
 					/* moving to a non-track; disallow */
 					return true;
 				}
@@ -1157,16 +1160,107 @@ RegionMoveDrag::y_movement_disallowed (
 		
 		/* this is the pointer's track */
 		
-		if ((new_order - y_span) > visible_y_high) {
+		if ((new_order - y_span) > tavs.visible_y_high) {
 			/* we will overflow */
 			return true;
-		} else if ((new_order - y_span) < visible_y_low) {
+		} else if ((new_order - y_span) < tavs.visible_y_low) {
 			/* we will overflow */
 			return true;
 		}
 	}
 
 	return false;
+}
+
+
+RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
+	: RegionMotionDrag (e, i, p, v, b),
+	  _copy (c)
+{
+	TimeAxisView* const tv = &_primary->get_time_axis_view ();
+	
+	_dest_trackview = tv;
+	_dest_layer = _primary->region()->layer ();
+
+	double speed = 1;
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	if (rtv && rtv->is_track()) {
+		speed = rtv->get_diskstream()->speed ();
+	}
+
+	_last_frame_position = static_cast<nframes64_t> (_primary->region()->position() / speed);
+}
+
+void
+RegionMoveDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
+{
+	RegionMotionDrag::start_grab (event, c);
+	
+	_pointer_frame_offset = _grab_frame - _last_frame_position;
+}
+
+RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, nframes64_t pos)
+	: RegionMotionDrag (e, 0, 0, list<RegionView*> (), false)
+{
+	assert ((boost::dynamic_pointer_cast<AudioRegion> (r) && dynamic_cast<AudioTimeAxisView*> (v)) ||
+		(boost::dynamic_pointer_cast<MidiRegion> (r) && dynamic_cast<MidiTimeAxisView*> (v)));
+
+	_primary = v->view()->create_region_view (r, false, false);
+	
+	_primary->get_canvas_group()->show ();
+	_primary->set_position (pos, 0);
+	_views.push_back (_primary);
+
+	_last_frame_position = pos;
+
+	_item = _primary->get_canvas_group ();
+	_dest_trackview = v;
+	_dest_layer = _primary->region()->layer ();
+}
+
+map<RegionView*, RouteTimeAxisView*>
+RegionMotionDrag::find_time_axis_views ()
+{
+	map<RegionView*, RouteTimeAxisView*> tav;
+	
+	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+
+		double ix1, ix2, iy1, iy2;
+		(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+		(*i)->get_canvas_frame()->i2w (ix1, iy1);
+		iy1 += _editor->vertical_adjustment.get_value() - _editor->canvas_timebars_vsize;
+
+		pair<TimeAxisView*, int> tv = _editor->trackview_by_y_position (iy1);
+		tav[*i] = dynamic_cast<RouteTimeAxisView*> (tv.first);
+	}
+
+	return tav;
+}
+
+
+void
+RegionInsertDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	_editor->track_canvas->update_now ();
+
+	map<RegionView*, RouteTimeAxisView*> final = find_time_axis_views ();
+	
+	RouteTimeAxisView* dest_rtv = final[_primary];
+
+	_primary->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
+	_primary->get_canvas_group()->property_y() = 0;
+
+	boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
+
+	_editor->begin_reversible_command (_("insert region"));
+	XMLNode& before = playlist->get_state ();
+	playlist->add_region (_primary->region (), _last_frame_position);
+	_editor->session->add_command (new MementoCommand<Playlist> (*playlist, &before, &playlist->get_state()));
+	_editor->commit_reversible_command ();
+
+	delete _primary;
+	_primary = 0;
+	_views.clear ();
 }
 
 RegionSpliceDrag::RegionSpliceDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
@@ -1550,10 +1644,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i)
+	: Drag (e, i),
+	  _copy (c)
 {
-	_copy = c;
-
 	_marker = reinterpret_cast<MeterMarker*> (_item->get_data ("marker"));
 	assert (_marker);
 }
@@ -1645,10 +1738,9 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i)
+	: Drag (e, i),
+	  _copy (c)
 {
-	_copy = c;
-
 	TempoMarker* _marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	assert (_marker);
 }
@@ -2731,7 +2823,8 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i),
-	  _operation (o)
+	  _operation (o),
+	  _copy (false)
 {
 
 }
@@ -2944,7 +3037,8 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i),
-	  _operation (o)
+	  _operation (o),
+	  _copy (false)
 {
 	_drag_rect = new ArdourCanvas::SimpleRect (*_editor->time_line_group, 0.0, 0.0, 0.0, _editor->physical_screen_height);
 	_drag_rect->hide ();

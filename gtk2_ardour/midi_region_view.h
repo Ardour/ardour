@@ -66,14 +66,14 @@ class MidiRegionView : public RegionView
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double initial_samples_per_unit,
-	                Gdk::Color& basic_color);
+	                Gdk::Color const & basic_color);
 	
 	MidiRegionView (const MidiRegionView& other);
 	MidiRegionView (const MidiRegionView& other, boost::shared_ptr<ARDOUR::MidiRegion>);
 
 	~MidiRegionView ();
 
-	virtual void init (Gdk::Color& basic_color, bool wfd);
+	virtual void init (Gdk::Color const & basic_color, bool wfd);
 
 	inline const boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const
 		{ return boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region); }

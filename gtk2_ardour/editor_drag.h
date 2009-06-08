@@ -134,7 +134,6 @@ protected:
 	double _last_pointer_y; ///< item y of the pointer last time a motion occurred
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
-	bool _copy; ///< true if we're copying the things that we're dragging
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
 
 private:
@@ -164,33 +163,80 @@ private:
 };
 
 
-/** Drags to move regions */
-class RegionMoveDrag : public RegionDrag
+/** Drags involving region motion from somewhere */
+class RegionMotionDrag : public RegionDrag
+{
+public:
+	
+	RegionMotionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool);
+	virtual ~RegionMotionDrag () {}
+
+	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
+	virtual void motion (GdkEvent *, bool);
+	virtual void finished (GdkEvent *, bool) = 0;
+
+protected:
+	struct TimeAxisViewSummary {
+		TimeAxisViewSummary () : height_list(512) {}
+		
+		std::bitset<512> tracks;
+		std::vector<int32_t> height_list;
+		int visible_y_low;
+		int visible_y_high;
+	};
+	
+	void copy_regions (GdkEvent *);
+	bool y_movement_disallowed (int, int, int, TimeAxisViewSummary const &) const;
+	std::map<RegionView*, RouteTimeAxisView*> find_time_axis_views ();
+	double compute_x_delta (GdkEvent const *, nframes64_t *);
+	bool compute_y_delta (
+		TimeAxisView const *, TimeAxisView*, int32_t, int32_t, TimeAxisViewSummary const &,
+		int32_t *, int32_t *, int32_t *
+		);
+
+	TimeAxisViewSummary get_time_axis_view_summary ();
+	virtual bool x_move_allowed () const = 0;
+	
+	TimeAxisView* _dest_trackview;
+	ARDOUR::layer_t _dest_layer;
+	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
+	bool _brushing;
+};
+
+
+/** Drags to move (or copy) regions that are already shown in the GUI to
+ *  somewhere different.
+ */
+class RegionMoveDrag : public RegionMotionDrag
 {
 public:
 	RegionMoveDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool, bool);
 	virtual ~RegionMoveDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
-	virtual void motion (GdkEvent *, bool);
-	virtual void finished (GdkEvent *, bool);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	
 	bool apply_move_threshold () const {
 		return true;
 	}
 
-protected:
-
-	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
-
-	TimeAxisView* _dest_trackview;
-	ARDOUR::layer_t _dest_layer;
-
 private:
+	bool x_move_allowed () const;
 
-	void copy_regions (GdkEvent *);
-	bool y_movement_disallowed (int, int, int, int, int, std::bitset<512> const &, std::vector<int32_t> const &) const;
+	bool _copy;
+};
 
-	bool _brushing;
+/** Drag to insert a region from somewhere */
+class RegionInsertDrag : public RegionMotionDrag
+{
+public:
+	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, nframes64_t);
+
+	void finished (GdkEvent *, bool);
+	
+private:
+	bool x_move_allowed () const;
 };
 
 /** Region drag in splice mode */
@@ -264,6 +310,7 @@ public:
 
 private:
 	MeterMarker* _marker;
+	bool _copy;
 };
 
 /** Tempo marker drag */
@@ -278,6 +325,7 @@ public:
 
 private:
 	TempoMarker* _marker;
+	bool _copy;
 };
 
 
@@ -416,6 +464,7 @@ public:
 
 private:
 	Operation _operation;
+	bool _copy;
 };
 
 /** Range marker drag */
@@ -439,6 +488,7 @@ private:
 
 	Operation _operation;
 	ArdourCanvas::SimpleRect* _drag_rect;
+	bool _copy;
 };
 
 /* Drag of rectangle to set zoom */

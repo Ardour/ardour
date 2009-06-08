@@ -45,11 +45,11 @@ public:
 	                     const Evoral::Parameter& parameter,
 	                     boost::shared_ptr<ARDOUR::AutomationList>,
 	                     double initial_samples_per_unit,
-	                     Gdk::Color& basic_color);
+	                     Gdk::Color const & basic_color);
 
 	~AutomationRegionView() {}
 	
-	void init (Gdk::Color& basic_color, bool wfd);
+	void init (Gdk::Color const & basic_color, bool wfd);
 	
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }

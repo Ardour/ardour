@@ -104,35 +104,14 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 }
 
 RegionView*
-AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves, bool recording)
+AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_waves, bool recording)
 {
 	AudioRegionView *region_view = 0;
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (region == 0) {
-		return NULL;
+		return 0;
 	}
-
-//	if(!recording){
-//		for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-//			if ((*i)->region() == r) {
-//				cerr << "audio_streamview in add_region_view_internal region found" << endl;
-				/* great. we already have a AudioRegionView for this Region. use it again. */
-				
-//				(*i)->set_valid (true);
-
-				// this might not be necessary
-//				AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-
-//				if (arv) {
-//					arv->set_waveform_scale (_waveform_scale);
-//					arv->set_waveform_shape (_waveform_shape);
-//				}
-					
-//				return NULL;
-//			}
-//		}
-//	}
 
 	switch (_trackview.audio_track()->mode()) {
 	
@@ -160,7 +139,6 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	region_view->init (region_color, wait_for_waves);
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_view->set_height (child_height ());
-	region_views.push_front (region_view);
 
 	/* if its the special single-sample length that we use for rec-regions, make it 
 	   insensitive to events 
@@ -195,8 +173,42 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	/* follow global waveform setting */
 	region_view->set_waveform_visible(_trackview.editor().show_waveforms());
 
+	return region_view;	
+}
+
+RegionView*
+AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves, bool recording)
+{
+	RegionView *region_view = create_region_view (r, wait_for_waves, recording);
+	if (region_view == 0) {
+		return 0;
+	}
+
+//	if(!recording){
+//		for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+//			if ((*i)->region() == r) {
+//				cerr << "audio_streamview in add_region_view_internal region found" << endl;
+				/* great. we already have a AudioRegionView for this Region. use it again. */
+				
+//				(*i)->set_valid (true);
+
+				// this might not be necessary
+//				AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+
+//				if (arv) {
+//					arv->set_waveform_scale (_waveform_scale);
+//					arv->set_waveform_shape (_waveform_shape);
+//				}
+					
+//				return NULL;
+//			}
+//		}
+//	}
+
+	region_views.push_front (region_view);
+
 	/* catch regionview going away */
-	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
+	r->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
 
 	RegionViewAdded (region_view);
 
@@ -400,7 +412,7 @@ AudioStreamView::redisplay_diskstream ()
 
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region(
-			sigc::mem_fun (*this, &StreamView::add_region_view)
+			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 			);
 
 		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(

@@ -1495,6 +1495,7 @@ public:
 	Gtk::Allocation canvas_allocation;
 	void track_canvas_allocate (Gtk::Allocation alloc);
 	bool track_canvas_size_allocated ();
+	bool track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int, int, guint);
 
 	void set_playhead_cursor ();
 
@@ -2014,7 +2015,7 @@ public:
 
 	void duplicate_dialog (bool with_dialog);
 	
-	nframes64_t event_frame (GdkEvent*, double* px = 0, double* py = 0) const;
+	nframes64_t event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */
@@ -2244,6 +2245,8 @@ public:
 	friend class RangeMarkerBarDrag;
 	friend class MouseZoomDrag;
 	friend class RegionCreateDrag;
+	friend class RegionMotionDrag;
+	friend class RegionInsertDrag;
 };
 
 #endif /* __ardour_editor_h__ */

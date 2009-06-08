@@ -31,11 +31,11 @@ class TapeAudioRegionView : public AudioRegionView
 			     RouteTimeAxisView&,
 			     boost::shared_ptr<ARDOUR::AudioRegion>,
 			     double initial_samples_per_unit,
-			     Gdk::Color& base_color);
+			     Gdk::Color const & base_color);
 	~TapeAudioRegionView ();
 
   protected:
-	void init (Gdk::Color& base_color, bool wait_for_waves);
+	void init (Gdk::Color const & base_color, bool wait_for_waves);
 
 	void set_frame_color ();
 	void update (uint32_t n);

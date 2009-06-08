@@ -26,6 +26,9 @@
 
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/midi_region.h"
+#include "ardour/audioregion.h"
+#include "ardour/region_factory.h"
 
 #include "editor.h"
 #include "keyboard.h"
@@ -43,6 +46,7 @@
 #include "simplerect.h"
 #include "interactive-item.h"
 #include "editor_drag.h"
+#include "midi_time_axis.h"
 
 #include "i18n.h"
 
@@ -896,3 +900,63 @@ Editor::canvas_zoom_rect_event (GdkEvent *event, ArdourCanvas::Item* item)
 	return typed_event (item, event, NoItem);
 }
 
+bool
+Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & c, int x, int y, guint time)
+{
+	double wx;
+	double wy;
+	track_canvas->window_to_world (x, y, wx, wy);
+
+	GdkEvent event;
+	event.type = GDK_MOTION_NOTIFY;
+	event.button.x = wx;
+	event.button.y = wy;
+	/* assume we're dragging with button 1 */
+	event.motion.state = Gdk::BUTTON1_MASK;
+
+	if (_drag == 0) {
+
+		double px;
+		double py;
+		nframes64_t const pos = event_frame (&event, &px, &py);
+	
+		std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
+		if (tv.first == 0) {
+			return true;
+		}
+
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
+		if (rtav == 0 || !rtav->is_track ()) {
+			return true;
+		}
+
+		list<boost::shared_ptr<Region> > regions;
+		TreeView* source;
+		region_list_display.get_object_drag_data (regions, &source);
+		assert (regions.size() == 1);
+		boost::shared_ptr<Region> region = regions.front ();
+
+		boost::shared_ptr<Region> region_copy = RegionFactory::create (region);
+
+		if (boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && 
+		    dynamic_cast<AudioTimeAxisView*> (tv.first) == 0) {
+
+			/* audio -> non-audio */
+			return true;
+		}
+
+		if (boost::dynamic_pointer_cast<MidiRegion> (region_copy) == 0 && 
+		    dynamic_cast<MidiTimeAxisView*> (tv.first) != 0) {
+
+			/* MIDI -> non-MIDI */
+			return true;
+		}
+		
+		_drag = new RegionInsertDrag (this, region_copy, rtav, pos);
+		_drag->start_grab (&event);
+	}
+
+	_drag->motion_handler (&event, false);
+
+	return true;
+}

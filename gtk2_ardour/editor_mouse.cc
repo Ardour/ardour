@@ -112,7 +112,7 @@ Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
 }
 
 nframes64_t
-Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
+Editor::event_frame (GdkEvent const * event, double* pcx, double* pcy) const
 {
 	double cx, cy;
 
