@@ -1749,7 +1749,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i),
 	  _copy (c)
 {
-	TempoMarker* _marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
+	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	assert (_marker);
 }
 

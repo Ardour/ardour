@@ -695,7 +695,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return true;
 
 			case TempoMarkerItem:
-				assert (_drag);
+				assert (_drag == 0);
 				_drag = new TempoMarkerDrag (
 					this,
 					item,
