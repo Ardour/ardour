@@ -149,7 +149,7 @@ PortGroupList::set_type (DataType t)
 }
 
 void
-PortGroupList::maybe_add_processor_to_bundle (boost::weak_ptr<Processor> wp, boost::shared_ptr<RouteBundle> rb, bool inputs)
+PortGroupList::maybe_add_processor_to_bundle (boost::weak_ptr<Processor> wp, boost::shared_ptr<RouteBundle> rb, bool inputs, set<boost::shared_ptr<IO> >& used_io)
 {
 	boost::shared_ptr<Processor> p (wp.lock());
 
@@ -160,18 +160,13 @@ PortGroupList::maybe_add_processor_to_bundle (boost::weak_ptr<Processor> wp, boo
 	boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (p);
 	
 	if (iop) {
+
+		boost::shared_ptr<IO> io = inputs ? iop->input() : iop->output();
 		
-		if (inputs) {
-			if (!iop->output()) {
-				return;
-			}
-		} else {
-			if (!iop->input()) {
-				return;
-			}
+		if (io && used_io.find (io) == used_io.end()) {
+			rb->add_processor_bundle (io->bundle ());
+			used_io.insert (io);
 		}
-		
-		rb->add_processor_bundle (inputs ? iop->output()->bundle() : iop->input()->bundle());
 	}
 }
 
@@ -188,16 +183,23 @@ PortGroupList::gather (Session& session, bool inputs)
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
 	/* Find the bundles for routes.  We use the RouteBundle class to join
-	   the route's IO bundles and processor bundles together so that they
+	   the route's input/output and processor bundles together so that they
 	   are presented as one bundle in the matrix. */
 
 	boost::shared_ptr<RouteList> routes = session.get_routes ();
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
-		boost::shared_ptr<RouteBundle> rb (new RouteBundle (inputs ? (*i)->output()->bundle() : (*i)->input()->bundle()));
+		/* keep track of IOs that we have taken bundles from, so that maybe_add_processor... below
+		   can avoid taking the same IO from both Route::output() and the main_outs Delivery */
+		   
+		set<boost::shared_ptr<IO> > used_io;
+		boost::shared_ptr<IO> io = inputs ? (*i)->input() : (*i)->output();
+		used_io.insert (io);
+		
+		boost::shared_ptr<RouteBundle> rb (new RouteBundle (io->bundle()));
 
-		(*i)->foreach_processor (bind (mem_fun (*this, &PortGroupList::maybe_add_processor_to_bundle), rb, inputs));
+		(*i)->foreach_processor (bind (mem_fun (*this, &PortGroupList::maybe_add_processor_to_bundle), rb, inputs, used_io));
 
 		/* Work out which group to put this bundle in */
 		boost::shared_ptr<PortGroup> g;

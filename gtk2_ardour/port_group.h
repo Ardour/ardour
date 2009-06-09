@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include <gtkmm/widget.h>
 #include <gtkmm/checkbutton.h>
 #include <boost/shared_ptr.hpp>
@@ -32,6 +33,7 @@ namespace ARDOUR {
 	class Session;
 	class Bundle;
 	class Processor;
+	class IO;
 }
 
 class PortMatrix;
@@ -121,7 +123,7 @@ class PortGroupList : public sigc::trackable
 	std::string common_prefix_before (std::vector<std::string> const &, std::string const &) const;
 	void emit_changed ();
 	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, bool) const;
-	void maybe_add_processor_to_bundle (boost::weak_ptr<ARDOUR::Processor>, boost::shared_ptr<RouteBundle>, bool);
+	void maybe_add_processor_to_bundle (boost::weak_ptr<ARDOUR::Processor>, boost::shared_ptr<RouteBundle>, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &);
 
 	ARDOUR::DataType _type;
 	mutable ARDOUR::BundleList _bundles;
