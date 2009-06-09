@@ -59,8 +59,6 @@ MidiPatchManager::refresh()
 	
 	path path_to_patches = _session->session_directory().midi_patch_path();
 	
-	info << string_compose(_("looking for MIDI patches in %1"), path_to_patches.to_string()) << endmsg;
-	
 	if (!exists(path_to_patches)) {
 		return;
 	}
