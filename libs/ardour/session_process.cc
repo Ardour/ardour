@@ -385,6 +385,7 @@ Session::process_with_events (nframes_t nframes)
 		while (nframes) {
 
 			this_nframes = nframes; /* real (jack) time relative */
+			frames_moved = (long) floor (_transport_speed * nframes); /* transport relative */
 
 			/* running an event, position transport precisely to its time */
 			if (this_event && this_event->action_frame <= end_frame && this_event->action_frame >= _transport_frame) {
