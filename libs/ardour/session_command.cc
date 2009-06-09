@@ -103,7 +103,9 @@ Session::memento_command_factory(XMLNode *n)
 		    return new MementoCommand<Playlist>(*(pl.get()), before, after);
 	    }
     } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name() || obj_T == typeid(MidiTrack).name()) { 
-	    return new MementoCommand<Route>(*route_by_id(id), before, after);
+		if (boost::shared_ptr<Route> r = route_by_id(id)) {
+			return new MementoCommand<Route>(*r, before, after);
+		}
     } else if (obj_T == typeid (Evoral::Curve).name() || obj_T == typeid (AutomationList).name()) {
 		std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);
 		if (i != automation_lists.end()) {
