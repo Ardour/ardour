@@ -118,6 +118,7 @@ midi_stretch.cc
 midi_track.cc
 mix.cc
 mtc_slave.cc
+mute_master.cc
 named_selection.cc
 onset_detector.cc
 panner.cc

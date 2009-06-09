@@ -24,8 +24,11 @@
 #include <errno.h>
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
+
 #include "midi++/names.h"
+
 #include "ardour/automatable.h"
+#include "ardour/amp.h"
 #include "ardour/event_type_map.h"
 #include "ardour/midi_track.h"
 #include "ardour/panner.h"
@@ -382,7 +385,7 @@ Automatable::automation_snapshot (nframes_t now, bool force)
 }
 
 void
-Automatable::transport_stopped (nframes_t now)
+Automatable::transport_stopped (sframes_t now)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		
@@ -409,7 +412,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == PluginAutomation) {
 		control = new PluginInsert::PluginControl((PluginInsert*)this, param);
 	} else if (param.type() == GainAutomation) {
-		control = new IO::GainControl( X_("gaincontrol"), (IO*)this, param);
+		control = new Amp::GainControl( X_("gaincontrol"), _a_session, (Amp*)this, param);
 	} else if (param.type() == PanAutomation) {
 		Panner* me = dynamic_cast<Panner*>(this);
 		if (me) {

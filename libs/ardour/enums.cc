@@ -19,20 +19,21 @@
 
 #include "pbd/enumwriter.h"
 
-#include "ardour/types.h"
-#include "ardour/delivery.h"
-#include "ardour/session.h"
-#include "ardour/location.h"
 #include "ardour/audiofilesource.h"
-#include "ardour/diskstream.h"
 #include "ardour/audioregion.h"
-#include "ardour/route_group.h"
-#include "ardour/panner.h"
-#include "ardour/track.h"
-#include "ardour/midi_track.h"
+#include "ardour/delivery.h"
+#include "ardour/diskstream.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_format_base.h"
 #include "ardour/export_profile_manager.h"
+#include "ardour/io.h"
+#include "ardour/location.h"
+#include "ardour/midi_track.h"
+#include "ardour/panner.h"
+#include "ardour/route_group.h"
+#include "ardour/session.h"
+#include "ardour/track.h"
+#include "ardour/types.h"
 
 using namespace std;
 using namespace PBD;
@@ -70,7 +71,6 @@ setup_enum_writer ()
 	SlaveSource _SlaveSource;
 	ShuttleBehaviour _ShuttleBehaviour;
 	ShuttleUnits _ShuttleUnits;
-	mute_type _mute_type;
 	Session::RecordState _Session_RecordState;
 	Session::Event::Type _Session_Event_Type;
 	SmpteFormat _Session_SmpteFormat;
@@ -105,6 +105,7 @@ setup_enum_writer ()
 	ExportFormatBase::SRCQuality _ExportFormatBase_SRCQuality;
 	ExportProfileManager::TimeFormat _ExportProfileManager_TimeFormat;
 	Delivery::Role _Delivery_Role;
+	IO::Direction _IO_Direction;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -328,12 +329,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, pullup_Minus4Minus1);
 	REGISTER (_Session_PullupFormat);
 
-	REGISTER_ENUM (PRE_FADER);
-	REGISTER_ENUM (POST_FADER);
-	REGISTER_ENUM (CONTROL_OUTS);
-	REGISTER_ENUM (MAIN_OUTS);
-	REGISTER (_mute_type);
-
 	REGISTER_CLASS_ENUM (Route, Hidden);
 	REGISTER_CLASS_ENUM (Route, MasterOut);
 	REGISTER_CLASS_ENUM (Route, ControlOut);
@@ -502,9 +497,13 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportProfileManager, Off);
 	REGISTER (_ExportProfileManager_TimeFormat);
 
-	REGISTER_CLASS_ENUM (Delivery, Solo);
+	REGISTER_CLASS_ENUM (Delivery, Insert);
 	REGISTER_CLASS_ENUM (Delivery, Send);
 	REGISTER_CLASS_ENUM (Delivery, Listen);
 	REGISTER_CLASS_ENUM (Delivery, Main);
 	REGISTER_BITS (_Delivery_Role);
+
+	REGISTER_CLASS_ENUM (IO, Input);
+	REGISTER_CLASS_ENUM (IO, Output);
+	REGISTER (_IO_Direction);
 }

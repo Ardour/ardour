@@ -21,14 +21,15 @@
 
 #include "pbd/xml++.h"
 
-#include "ardour/return.h"
-#include "ardour/session.h"
-#include "ardour/port.h"
+#include "ardour/amp.h"
 #include "ardour/audio_port.h"
 #include "ardour/buffer_set.h"
+#include "ardour/io.h"
 #include "ardour/meter.h"
 #include "ardour/panner.h"
-#include "ardour/io.h"
+#include "ardour/port.h"
+#include "ardour/return.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 
@@ -36,14 +37,26 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Return::Return (Session& s)
-	: IOProcessor (s, string_compose (_("return %1"), (_bitslot = s.next_return_id()) + 1))
+	: IOProcessor (s, true, false, string_compose (_("return %1"), (_bitslot = s.next_return_id()) + 1))
+	, _metering (false)
 {
+	/* never muted */
+
+	_amp.reset (new Amp (_session, boost::shared_ptr<MuteMaster>()));
+	_meter.reset (new PeakMeter (_session));
+
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Return::Return (Session& s, const XMLNode& node)
-	: IOProcessor (s, "return")
+	: IOProcessor (s, true, false, "return")
+	, _metering (false)
 {
+	/* never muted */
+
+	_amp.reset (new Amp (_session, boost::shared_ptr<MuteMaster>()));
+	_meter.reset (new PeakMeter (_session));
+
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -108,23 +121,38 @@ Return::set_state(const XMLNode& node)
 void
 Return::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (active()) {
-		_io->collect_input (bufs, nframes, _configured_input);
-		bufs.set_count(_configured_output);
+	if (!active() || _input->n_ports() == ChanCount::ZERO) {
+		return;
+	}
+	
+	_input->collect_input (bufs, nframes, _configured_input);
+	bufs.set_count(_configured_output);
+
+	// Can't automate gain for sends or returns yet because we need different buffers
+	// so that we don't overwrite the main automation data for the route amp
+	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
+	_amp->run_in_place (bufs, start_frame, end_frame, nframes);
+	
+	if (_metering) {
+		if (_amp->gain_control()->get_value() == 0) {
+			_meter->reset();
+		} else {
+			_meter->run_in_place (bufs, start_frame, end_frame, nframes);
+		}
 	}
 }
 
 bool
 Return::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	out = in + _io->n_inputs();
+	out = in + _input->n_ports();
 	return true;
 }
 
 bool
 Return::configure_io (ChanCount in, ChanCount out)
 {
-	if (out != in + _io->n_inputs()) {
+	if (out != in + _input->n_ports()) {
 		return false;
 	}
 
@@ -161,4 +189,5 @@ Return::make_unique (XMLNode &state, Session &session)
 		io->property("name")->set_value (name);
 	}
 }
+
 

@@ -1835,44 +1835,6 @@ ARDOUR_UI::stop_blinking ()
 	}
 }
 
-void
-ARDOUR_UI::name_io_setup (AudioEngine& engine, 
-			  string& buf,
-			  IO& io,
-			  bool in)
-{
-	vector<string> connections;
-
-	if (in) {
-		if (io.n_inputs().n_total() == 0) {
-			buf = _("none");
-			return;
-		}
-		
-		/* XXX we're not handling multiple ports yet. */
-
-		if (io.input(0)->get_connections(connections) == 0) {
-			buf = _("off");
-		} else {
-			buf = connections.front();
-		}
-
-	} else {
-
-		if (io.n_outputs().n_total() == 0) {
-			buf = _("none");
-			return;
-		}
-		
-		/* XXX we're not handling multiple ports yet. */
-
-		if (io.output(0)->get_connections(connections) == 0) {
-			buf = _("off");
-		} else {
-			buf = connections.front();
-		}
-	}
-}
 
 /** Ask the user for the name of a new shapshot and then take it.
  */

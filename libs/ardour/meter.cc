@@ -29,8 +29,41 @@
 
 using namespace std;
 
-namespace ARDOUR {
+using namespace ARDOUR;
 
+sigc::signal<void> Metering::Meter;
+Glib::StaticMutex  Metering::m_meter_signal_lock;
+
+sigc::connection
+Metering::connect (sigc::slot<void> the_slot)
+{
+	// SignalProcessor::Meter is emitted from another thread so the
+	// Meter signal must be protected.
+	Glib::Mutex::Lock guard (m_meter_signal_lock);
+	return Meter.connect (the_slot);
+}
+
+void
+Metering::disconnect (sigc::connection& c)
+{
+	Glib::Mutex::Lock guard (m_meter_signal_lock);
+	c.disconnect ();
+}
+
+/**
+    Update the meters.
+
+    The meter signal lock is taken to prevent modification of the 
+    Meter signal while updating the meters, taking the meter signal
+    lock prior to taking the io_lock ensures that all IO will remain 
+    valid while metering.
+*/   
+void
+Metering::update_meters()
+{
+	Glib::Mutex::Lock guard (m_meter_signal_lock);
+	Meter(); /* EMIT SIGNAL */
+}
 
 /** Get peaks from @a bufs
  * Input acceptance is lenient - the first n buffers from @a bufs will
@@ -128,8 +161,10 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 }
 
 /** To be driven by the Meter signal from IO.
- * Caller MUST hold io_lock!
+ * Caller MUST hold its own processor_lock to prevent reconfiguration
+ * of meter size during this call.
  */
+
 void
 PeakMeter::meter ()
 {
@@ -139,12 +174,10 @@ PeakMeter::meter ()
 
 	for (size_t n = 0; n < limit; ++n) {
 
-		/* XXX we should use atomic exchange here */
-
 		/* grab peak since last read */
 
- 		float new_peak = _peak_power[n];
-		_peak_power[n] = 0;
+ 		float new_peak = _peak_power[n]; /* XXX we should use atomic exchange from here ... */
+		_peak_power[n] = 0;              /* ... to here */
 		
 		/* compute new visible value using falloff */
 
@@ -176,4 +209,3 @@ PeakMeter::state (bool full_state)
 	return node;
 }
 
-} // namespace ARDOUR

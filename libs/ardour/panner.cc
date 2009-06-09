@@ -703,7 +703,8 @@ Multi2dPanner::set_state (const XMLNode& node)
 /*---------------------------------------------------------------------- */
 
 Panner::Panner (string name, Session& s)
-	: Processor(s, name)
+	: SessionObject (s, name)
+	, AutomatableControls (s)
 {
 	//set_name_old_auto (name);
 	set_name (name);
@@ -828,6 +829,8 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	uint32_t n;
 	bool changed = false;
 	bool do_not_and_did_not_need_panning = ((nouts < 2) && (outputs.size() < 2));
+
+	cerr << "panner " << _name << " reset to " << nouts << " / " << npans << endl;
 
 	/* if new and old config don't need panning, or if 
 	   the config hasn't changed, we're done.
@@ -1058,15 +1061,13 @@ Panner::get_state (void)
 XMLNode&
 Panner::state (bool full)
 {
-	XMLNode& node = Processor::state(full);
-
-	node.add_property ("type", "panner");
+	XMLNode* node = new XMLNode ("Panner");
 
 	char buf[32];
 
-	node.add_property (X_("linked"), (_linked ? "yes" : "no"));
-	node.add_property (X_("link_direction"), enum_2_string (_link_direction));
-	node.add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
+	node->add_property (X_("linked"), (_linked ? "yes" : "no"));
+	node->add_property (X_("link_direction"), enum_2_string (_link_direction));
+	node->add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
 
 	for (vector<Panner::Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
 		XMLNode* onode = new XMLNode (X_("Output"));
@@ -1074,15 +1075,15 @@ Panner::state (bool full)
 		onode->add_property (X_("x"), buf);
 		snprintf (buf, sizeof (buf), "%.12g", (*o).y);
 		onode->add_property (X_("y"), buf);
-		node.add_child_nocopy (*onode);
+		node->add_child_nocopy (*onode);
 	}
-
+	
 	for (vector<StreamPanner*>::const_iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
-		node.add_child_nocopy ((*i)->state (full));
+		node->add_child_nocopy ((*i)->state (full));
 	}
 
 
-	return node;
+	return *node;
 }
 
 int
@@ -1097,8 +1098,6 @@ Panner::set_state (const XMLNode& node)
 	LocaleGuard lg (X_("POSIX"));
 
 	clear_panners ();
-
-	Processor::set_state(node);
 
 	ChanCount ins = ChanCount::ZERO;
 	ChanCount outs = ChanCount::ZERO;
@@ -1419,7 +1418,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 }
 
 void
-Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {	
 	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug
@@ -1432,16 +1431,16 @@ Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, sframes_t start
 	assert(!empty());
 
 	// If we shouldn't play automation defer to distribute_no_automation
-	if ( !( automation_state() & Play ||
-			 ((automation_state() & Touch) && !touching()) ) ) {
+	if (!(automation_state() & Play || ((automation_state() & Touch) && !touching()))) {
 
 		// Speed quietning
 		gain_t gain_coeff = 1.0;
+
 		if (fabsf(_session.transport_speed()) > 1.5f) {
 			gain_coeff = speed_quietning;
 		}
 
-		distribute_no_automation(inbufs, outbufs, nframes, gain_coeff);
+		distribute_no_automation (inbufs, outbufs, nframes, gain_coeff);
 		return;
 	}
 

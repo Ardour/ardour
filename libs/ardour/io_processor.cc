@@ -46,20 +46,36 @@ using namespace PBD;
 
 /* create an IOProcessor that proxies to a new IO object */
 
-IOProcessor::IOProcessor (Session& s, const string& proc_name, const string io_name, DataType dtype)
+IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
+			  const string& proc_name, const string io_name, DataType dtype)
 	: Processor(s, proc_name)
-	, _io (new IO(s, io_name.empty() ? proc_name : io_name, dtype))
 {
-	_own_io = true;
+	/* these are true in this constructor whether we actually create the associated
+	   IO objects or not.
+	*/
+
+	_own_input = true;
+	_own_output = true;
+
+	if (with_input) {
+		_input.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Input, dtype));
+	}
+
+	if (with_output) {
+		_output.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Output, dtype));
+	}
 }
 
 /* create an IOProcessor that proxies to an existing IO object */
 
-IOProcessor::IOProcessor (Session& s, IO* io, const string& proc_name, DataType dtype)
+IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_ptr<IO> out, 
+			  const string& proc_name, DataType dtype)
 	: Processor(s, proc_name)
-	, _io (io)
+	, _input (in)
+	, _output (out)
 {
-	_own_io = false;
+	_own_input = false;
+	_own_output = false;
 }
 
 IOProcessor::~IOProcessor ()
@@ -68,12 +84,21 @@ IOProcessor::~IOProcessor ()
 }
 
 void
-IOProcessor::set_io (boost::shared_ptr<IO> io)
+IOProcessor::set_input (boost::shared_ptr<IO> io)
 {
 	/* CALLER MUST HOLD PROCESS LOCK */
 
-	_io = io;
-	_own_io = false;
+	_input = io;
+	_own_input = false;
+}
+
+void
+IOProcessor::set_output (boost::shared_ptr<IO> io)
+{
+	/* CALLER MUST HOLD PROCESS LOCK */
+
+	_output = io;
+	_own_output = false;
 }
 
 XMLNode&
@@ -81,12 +106,28 @@ IOProcessor::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
 	
-	if (_own_io) {
-		node.add_child_nocopy (_io->state (full_state));
-		node.add_property ("own-io", "yes");
+	if (_own_input) {
+		XMLNode& i (_input->state (full_state));
+		// i.name() = X_("output");
+		node.add_child_nocopy (i);
+		node.add_property ("own-input", "yes");
 	} else {
-		node.add_property ("own-io", "no");
-		node.add_property ("io", _io->name());
+		node.add_property ("own-input", "no");
+		if (_input) {
+			node.add_property ("input", _input->name());
+		}
+	}
+	
+	if (_own_output) {
+		XMLNode& o (_output->state (full_state));
+		// o.name() = X_("output");
+		node.add_child_nocopy (o);
+		node.add_property ("own-output", "yes");
+	} else {
+		node.add_property ("own-output", "no");
+		if (_output) {
+			node.add_property ("output", _output->name());
+		}
 	}
 
 	return node;
@@ -100,67 +141,59 @@ IOProcessor::set_state (const XMLNode& node)
 
 	Processor::set_state(node);
 
-	if ((prop = node.property ("own-io")) != 0) {
-		_own_io = prop->value() == "yes";
+	if ((prop = node.property ("own-input")) != 0) {
+		_own_input = (prop->value() == "yes");
 	}
 
+	if ((prop = node.property ("own-output")) != 0) {
+		_own_output = (prop->value() == "yes");
+	}
+
+	cerr << _name << " own input = " << _own_input << " output = " << _own_output << endl;
+	
 	/* don't attempt to set state for a proxied IO that we don't own */
-
-	if (!_own_io) {
-
-		/* look up the IO object we're supposed to proxy to */
-
-		if ((prop = node.property ("io")) == 0) {
-			fatal << "IOProcessor has no named IO object" << endmsg;
-			/*NOTREACHED*/
-		}
-
-		boost::shared_ptr<Route> r = _session.route_by_name (prop->value());
-
-		if (!r) {
-			fatal << string_compose ("IOProcessor uses an unknown IO object called %1", prop->value()) << endmsg;
-			/*NOTREACHED*/
-		}
-
-		/* gotcha */
-
-		_io = boost::static_pointer_cast<IO> (r);
-
-		return 0;
-	}
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == IO::state_node_name) {
-			io_node = (*niter);
-			break;
-		} else if ((*niter)->name() == "Redirect") {
-			XMLNodeList rlist = (*niter)->children();
-			XMLNodeIterator riter;
-
-			for (riter = rlist.begin(); riter != rlist.end(); ++riter) {
-				if ( (*riter)->name() == IO::state_node_name) {
-					warning << _("Found legacy IO in a redirect") << endmsg;
-					io_node = (*riter);
-					break;
-				}
+	
+	if (_own_input) {
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			if ((*niter)->name() == "input") {
+				io_node = (*niter);
+				break;
 			}
 		}
-	}
-
-	if (io_node) {
-		_io->set_state(*io_node);
-
-		// legacy sessions: use IO name
-		if ((prop = node.property ("name")) == 0) {
-			set_name (_io->name());
+		
+		if (io_node) {
+			_input->set_state(*io_node);
+			
+			// legacy sessions: use IO name
+			if ((prop = node.property ("name")) == 0) {
+				set_name (_input->name());
+			}
+			
+		} else {
+			error << _("XML node describing an IOProcessor is missing an IO node") << endmsg;
+			return -1;
 		}
-
-	} else {
-		error << _("XML node describing a redirect is missing an IO node") << endmsg;
-		return -1;
+	}
+	
+	if (_own_output) {
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			if ((*niter)->name() == "output") {
+				io_node = (*niter);
+				break;
+			}
+		}
+		
+		if (io_node) {
+			_output->set_state(*io_node);
+			
+			// legacy sessions: use IO name
+			if ((prop = node.property ("name")) == 0) {
+				set_name (_output->name());
+			}
+		} 
 	}
 
 	return 0;
@@ -169,41 +202,33 @@ IOProcessor::set_state (const XMLNode& node)
 void
 IOProcessor::silence (nframes_t nframes)
 {
-	if (_own_io) {
-		_io->silence (nframes);
+	if (_own_output && _output) {
+		_output->silence (nframes);
 	}
 }
 
 ChanCount
 IOProcessor::output_streams() const
 {
-	return _io->n_outputs();
+	return _output ? _output->n_ports() : ChanCount::ZERO;
 }
 
 ChanCount
 IOProcessor::input_streams () const
 {
-	return _io->n_inputs();
+	return _input ? _input->n_ports() : ChanCount::ZERO;
 }
 
 ChanCount
 IOProcessor::natural_output_streams() const
 {
-	return _io->n_outputs();
+	return _output ? _output->n_ports() : ChanCount::ZERO;
 }
 
 ChanCount
 IOProcessor::natural_input_streams () const
 {
-	return _io->n_inputs();
-}
-
-void
-IOProcessor::automation_snapshot (nframes_t now, bool force)
-{
-	if (_own_io) {
-		_io->automation_snapshot(now, force);
-	}
+	return _input ? _input->n_ports() : ChanCount::ZERO;
 }
 
 bool
@@ -211,8 +236,12 @@ IOProcessor::set_name (const std::string& name)
 {
 	bool ret = SessionObject::set_name (name);
 
-	if (ret && _own_io) {
-		ret = _io->set_name (name);
+	if (ret && _own_input && _input) {
+		ret = _input->set_name (name);
+	}
+
+	if (ret && _own_output && _output) {
+		ret = _output->set_name (name);
 	}
 
 	return ret;

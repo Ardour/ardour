@@ -138,6 +138,8 @@ void
 Diskstream::set_io (IO& io)
 {
 	_io = &io;
+	input_change_pending = ConfigurationChanged;
+	non_realtime_input_change ();
 	set_align_style_from_io ();
 }
 
@@ -233,7 +235,7 @@ Diskstream::set_capture_offset ()
 		return;
 	}
 
-	_capture_offset = _io->input_latency();
+	_capture_offset = _io->latency();
 }
 
 void
@@ -420,6 +422,11 @@ Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 void
 Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & movements_frames)
 {
+#if 0
+	
+	XXX THIS HAS TO BE FIXED FOR 3.0
+
+
 	if (Config->get_automation_follows_regions () == false) {
 		return;
 	}
@@ -431,7 +438,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 	}
 	
 	/* move gain automation */
-	boost::shared_ptr<AutomationList> gain_alist = _io->gain_control()->alist();
+	boost::shared_ptr<AutomationList> gain_alist = _io->gain_control()->list();
 	XMLNode & before = gain_alist->get_state ();
 	gain_alist->move_ranges (movements);
 	_session.add_command (
@@ -458,11 +465,12 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 	if (route) {
 		route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Diskstream::move_processor_automation), movements_frames));
 	}
+#endif
 }
 
 void
 Diskstream::move_processor_automation (boost::weak_ptr<Processor> p,
-		list< Evoral::RangeMove<nframes_t> > const & movements_frames)
+				       list< Evoral::RangeMove<nframes_t> > const & movements_frames)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 	if (!processor) {

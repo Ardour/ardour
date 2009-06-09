@@ -32,6 +32,9 @@
 
 namespace ARDOUR {
 
+class Amp;
+class PeakMeter;
+
 class Return : public IOProcessor 
 {
 public:	
@@ -43,9 +46,12 @@ public:
 
 	void run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 	
-	void activate() {}
-	void deactivate () {}
+	boost::shared_ptr<Amp> amp() const { return _amp; }
+	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
 
+	bool metering() const { return _metering; }
+	void set_metering (bool yn) { _metering = yn; }
+	
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int      set_state(const XMLNode& node);
@@ -55,14 +61,22 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
-	static uint32_t how_many_sends();
+	static uint32_t how_many_returns();
 	static void make_unique (XMLNode &, Session &);
+
+  protected:
+	bool _metering;
+	boost::shared_ptr<Amp> _amp;
+	boost::shared_ptr<PeakMeter> _meter;
 
 private:
 	/* disallow copy construction */
 	Return (const Return&);
 	
 	uint32_t  _bitslot;
+
+	void collect_input  (BufferSet& bufs, nframes_t nframes, ChanCount offset=ChanCount::ZERO);
+	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 };
 
 } // namespace ARDOUR

@@ -24,6 +24,7 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioregion.h"
 #include "ardour/audioengine.h"
+#include "ardour/delivery.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/auditioner.h"
@@ -57,22 +58,21 @@ Auditioner::Auditioner (Session& s)
 		return;
 	}
 
-	defer_pan_reset ();
+	_main_outs->defer_pan_reset ();
 
 	if (left.length()) {
-		add_output_port (left, this, DataType::AUDIO);
+		_output->add_port (left, this, DataType::AUDIO);
 	}
 
 	if (right.length()) {
 		audio_diskstream()->add_channel (1);
-		add_output_port (right, this, DataType::AUDIO);
+		_output->add_port (right, this, DataType::AUDIO);
 	}
-
-	allow_pan_reset ();
 	
-	reset_panner ();
+	_main_outs->allow_pan_reset ();
+	_main_outs->reset_panner ();
 
-	IO::output_changed.connect (mem_fun (*this, &Auditioner::output_changed));
+	_output->changed.connect (mem_fun (*this, &Auditioner::output_changed));
 
 	the_region.reset ((AudioRegion*) 0);
 	g_atomic_int_set (&_active, 0);
@@ -110,7 +110,7 @@ Auditioner::audition_current_playlist ()
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs().n_audio(), _diskstream->n_channels().n_audio());
+	_main_outs->panner()->reset (n_outputs().n_audio(), _diskstream->n_channels().n_audio());
 
 	g_atomic_int_set (&_active, 1);
 }
@@ -148,7 +148,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 	/* force a panner reset now that we have all channels */
 
-	reset_panner();
+	_main_outs->reset_panner();
 
 	length = the_region->length();
 
@@ -206,7 +206,7 @@ Auditioner::output_changed (IOChange change, void* src)
 
 	if (change & ConnectionsChanged) {
 		vector<string> connections;
-		if (output (0)->get_connections (connections)) {
+		if (_output->nth (0)->get_connections (connections)) {
 			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
 			if (phys != connections[0]) {
 				_session.config.set_auditioner_output_left (connections[0]);
@@ -219,7 +219,7 @@ Auditioner::output_changed (IOChange change, void* src)
 		
 		connections.clear ();
 
-		if (output (1)->get_connections (connections)) {
+		if (_output->nth (1)->get_connections (connections)) {
 			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
 			if (phys != connections[0]) {
 				_session.config.set_auditioner_output_right (connections[0]);

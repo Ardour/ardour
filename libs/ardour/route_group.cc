@@ -27,6 +27,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 
+#include "ardour/amp.h"
 #include "ardour/route_group.h"
 #include "ardour/audio_track.h"
 #include "ardour/audio_diskstream.h"
@@ -87,7 +88,7 @@ RouteGroup::get_min_factor(gain_t factor)
 	gain_t g;
 	
 	for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-		g = (*i)->gain();
+		g = (*i)->amp()->gain();
 
 		if ( (g+g*factor) >= 0.0f)
 			continue;
@@ -106,7 +107,7 @@ RouteGroup::get_max_factor(gain_t factor)
 	gain_t g;
 	
 	for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-		g = (*i)->gain();
+		g = (*i)->amp()->gain();
 		
 		// if the current factor woulnd't raise this route above maximum
 		if ( (g+g*factor) <= 1.99526231f) 

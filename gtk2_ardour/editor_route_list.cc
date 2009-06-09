@@ -67,10 +67,12 @@ Editor::handle_new_route (RouteList& routes)
 		if (route->is_hidden()) {
 			continue;
 		}
-		
-		if (route->default_type() == ARDOUR::DataType::AUDIO)
+
+		DataType dt = route->input()->default_type();
+
+		if (dt == ARDOUR::DataType::AUDIO)
 			tv = new AudioTimeAxisView (*this, *session, route, *track_canvas);
-		else if (route->default_type() == ARDOUR::DataType::MIDI)
+		else if (dt == ARDOUR::DataType::MIDI)
 			tv = new MidiTimeAxisView (*this, *session, route, *track_canvas);
 		else
 			throw unknown_type();

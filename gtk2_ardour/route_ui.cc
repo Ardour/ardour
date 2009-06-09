@@ -101,7 +101,6 @@ RouteUI::init ()
 	ignore_toggle = false;
 	wait_for_release = false;
 	route_active_menu_item = 0;
-	was_solo_safe = false;
 	polarity_menu_item = 0;
 	denormal_menu_item = 0;
 	multiple_mute_change = false;
@@ -192,7 +191,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	connections.push_back (_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed)));
 	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
 	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
-	connections.push_back (_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
+	connections.push_back (_route->solo_isolated_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
   
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
@@ -396,7 +395,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 							Config->set_solo_latched (false);
 						}
 					} else {
-						_route->set_solo_safe (!_route->solo_safe(), this);
+						_route->set_solo_isolated (!_route->solo_isolated(), this);
 						wait_for_release = false;
 					}
 
@@ -621,7 +620,7 @@ RouteUI::update_solo_display ()
 		ignore_toggle = false;
 	} 
 	
-	if (_route->solo_safe()) {
+	if (_route->solo_isolated()) {
 		solo_button->set_visual_state (2);
 	} else if (_route->soloed()) {
 		solo_button->set_visual_state (1);
@@ -663,8 +662,7 @@ RouteUI::update_mute_display ()
 	if (Config->get_show_solo_mutes()) {
 		if (_route->muted()) {
 			mute_button->set_visual_state (2);
-		} else if (!_route->soloed() && _route->solo_muted()) {
-			
+		} else if (!_route->soloed() && _session.soloing()) {
 			mute_button->set_visual_state (1);
 		} else {
 			mute_button->set_visual_state (0);
@@ -804,10 +802,10 @@ RouteUI::build_solo_menu (void)
 	MenuList& items = solo_menu->items();
 	CheckMenuItem* check;
 
-	check = new CheckMenuItem(_("Solo Lock"));
-	check->set_active (_route->solo_safe());
-	check->signal_toggled().connect (bind (mem_fun (*this, &RouteUI::toggle_solo_safe), check));
-	_route->solo_safe_changed.connect(bind (mem_fun (*this, &RouteUI::solo_safe_toggle), check));
+	check = new CheckMenuItem(_("Solo Isolate"));
+	check->set_active (_route->solo_isolated());
+	check->signal_toggled().connect (bind (mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
+	_route->solo_isolated_changed.connect(bind (mem_fun (*this, &RouteUI::solo_isolated_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
@@ -823,9 +821,11 @@ RouteUI::build_mute_menu(void)
 	
 	mute_menu = new Menu;
 	mute_menu->set_name ("ArdourContextMenu");
+
+#if FIX_ME_IN_3_0	
 	MenuList& items = mute_menu->items();
 	CheckMenuItem* check;
-	
+
 	check = new CheckMenuItem(_("Pre Fader"));
 	init_mute_menu(PRE_FADER, check);
 	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), PRE_FADER, check));
@@ -853,29 +853,27 @@ RouteUI::build_mute_menu(void)
 	_route->main_outs_changed.connect(bind (mem_fun (*this, &RouteUI::main_outs_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
-
+#endif
 	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 }
 
 void
-RouteUI::init_mute_menu(mute_type type, CheckMenuItem* check)
+RouteUI::init_mute_menu(MuteMaster::MutePoint mp, CheckMenuItem* check)
 {
-	if (_route->get_mute_config (type)) {
-		check->set_active (true);
-	}
+	check->set_active (_route->mute_master()->muted_at (mp));
 }
 
 void
-RouteUI::toggle_mute_menu(mute_type type, Gtk::CheckMenuItem* check)
+RouteUI::toggle_mute_menu(MuteMaster::MutePoint mp, Gtk::CheckMenuItem* check)
 {
-	_route->set_mute_config(type, check->get_active(), this);
+	// _route->set_mute_config(type, check->get_active(), this);
 }
 
 void
-RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
+RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 {
-	_route->set_solo_safe (check->get_active(), this);
+	_route->set_solo_isolated (check->get_active(), this);
 }
 
 void
@@ -1166,16 +1164,17 @@ RouteUI::denormal_protection_changed ()
 	/* no signal for this yet */
 }
 
-
 void
-RouteUI::solo_safe_toggle(void* src, Gtk::CheckMenuItem* check)
+RouteUI::solo_isolated_toggle(void* src, Gtk::CheckMenuItem* check)
 {
-	bool yn = _route->solo_safe ();
+	bool yn = _route->solo_isolated ();
 
 	if (check->get_active() != yn) {
 		check->set_active (yn);
 	}
 }
+
+#ifdef FIX_THIS_FOR_3_0
 void
 RouteUI::pre_fader_toggle(void* src, Gtk::CheckMenuItem* check)
 {
@@ -1219,17 +1218,18 @@ RouteUI::main_outs_toggle(void* src, Gtk::CheckMenuItem* check)
 		check->set_active (yn);
 	}
 }
+#endif
 
 void
 RouteUI::disconnect_input ()
 {
-	_route->disconnect_inputs (this);
+	_route->input()->disconnect (this);
 }
 
 void
 RouteUI::disconnect_output ()
 {
-	_route->disconnect_outputs (this);
+	_route->output()->disconnect (this);
 }
 
 bool
@@ -1308,7 +1308,7 @@ RouteUI::map_frozen ()
 void
 RouteUI::adjust_latency ()
 {
-	LatencyDialog dialog (_route->name() + _("latency"), *(_route.get()), _session.frame_rate(), _session.engine().frames_per_cycle());
+	LatencyDialog dialog (_route->name() + _("latency"), *(_route->output()), _session.frame_rate(), _session.engine().frames_per_cycle());
 }
 
 void

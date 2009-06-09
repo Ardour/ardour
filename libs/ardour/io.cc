@@ -30,8 +30,10 @@
 #include "pbd/xml++.h"
 #include "pbd/replace_all.h"
 #include "pbd/unknown_type.h"
+#include "pbd/enumwriter.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/buffer.h"
 #include "ardour/io.h"
 #include "ardour/route.h"
 #include "ardour/port.h"
@@ -67,131 +69,46 @@ using namespace PBD;
 
 const string                 IO::state_node_name = "IO";
 bool                         IO::connecting_legal = false;
-bool                         IO::ports_legal = false;
-bool                         IO::panners_legal = false;
-sigc::signal<void>           IO::Meter;
 sigc::signal<int>            IO::ConnectingLegal;
-sigc::signal<int>            IO::PortsLegal;
-sigc::signal<int>            IO::PannersLegal;
 sigc::signal<void,ChanCount> IO::PortCountChanged;
-sigc::signal<void,nframes_t> IO::CycleStart;
-
-Glib::StaticMutex IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
-
-/* this is a default mapper of [0 .. 1.0] control values to a gain coefficient.
-   others can be imagined. 
-*/
-
-#if 0
-static gain_t direct_control_to_gain (double fract) { 
-	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
-	/* this maxes at +6dB */
-	return pow (2.0,(sqrt(sqrt(sqrt(fract)))*198.0-192.0)/6.0);
-}
-
-static double direct_gain_to_control (gain_t gain) { 
-	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
-	if (gain == 0) return 0.0;
-	
-	return pow((6.0*log(gain)/log(2.0)+192.0)/198.0, 8.0);
-}
-#endif
 
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
  */
-IO::IO (Session& s, const string& name, DataType default_type)
+IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
 	: SessionObject (s, name)
-	, AutomatableControls (s)
-  	, _output_buffers (new BufferSet())
-	, _active (true)
+	, _direction (dir)
 	, _default_type (default_type)
-	, _amp (new Amp(s, *this))
-	, _meter (new PeakMeter(s))
-	, _panner (new Panner(name, s))
 {
-	_gain = 1.0;
+	_active = true;
 	pending_state_node = 0;
-	no_panner_reset = false;
-	_phase_invert = false;
-	deferred_state = 0;
-
-	boost::shared_ptr<AutomationList> gl(
-			new AutomationList(Evoral::Parameter(GainAutomation)));
-
-	_gain_control = boost::shared_ptr<GainControl>( new GainControl( X_("gaincontrol"), this, Evoral::Parameter(GainAutomation), gl ));
-
-	add_control(_gain_control);
-	
-	{
-		// IO::Meter is emitted from another thread so the
-		// Meter signal must be protected.
-		Glib::Mutex::Lock guard (m_meter_signal_lock);
-		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
-	}
-	
-	_output_offset = 0;
-	CycleStart.connect (mem_fun (*this, &IO::cycle_start));
-
-	_session.add_controllable (_gain_control);
-
-	setup_bundles_for_inputs_and_outputs ();
+	setup_bundles ();
+	cerr << "+++ IO created with name = " << _name << endl;
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
 	: SessionObject(s, "unnamed io")
-	, AutomatableControls (s)
-	, _output_buffers (new BufferSet())
-	, _active(true)
+	, _direction (Input)
 	, _default_type (dt)
-	, _amp (new Amp(s, *this))
-	, _meter(new PeakMeter (_session))
 {
-	deferred_state = 0;
-	no_panner_reset = false;
-	_gain = 1.0;
-
-	boost::shared_ptr<AutomationList> gl(
-			new AutomationList(Evoral::Parameter(GainAutomation)));
-
-	_gain_control = boost::shared_ptr<GainControl>(
-			new GainControl( X_("gaincontrol"), this, Evoral::Parameter(GainAutomation), gl));
-
-	add_control(_gain_control);
+	_active = true;
+	pending_state_node = 0;
 
 	set_state (node);
 
-	{
-		// IO::Meter is emitted from another thread so the
-		// Meter signal must be protected.
-		Glib::Mutex::Lock guard (m_meter_signal_lock);
-		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
-	}
-	
-	_output_offset = 0;
-	CycleStart.connect (mem_fun (*this, &IO::cycle_start));
-
-	_session.add_controllable (_gain_control);
-
-	setup_bundles_for_inputs_and_outputs ();
+	setup_bundles ();
+	cerr << "+++ IO created from XML with name = " << _name << endl;
 }
 
 IO::~IO ()
 {
-	Glib::Mutex::Lock guard (m_meter_signal_lock);
 	Glib::Mutex::Lock lm (io_lock);
 
 	BLOCK_PROCESS_CALLBACK ();
 
-	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		_session.engine().unregister_port (*i);
 	}
-
-	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		_session.engine().unregister_port (*i);
-	}
-
-	m_meter_connection.disconnect();
 }
 
 void
@@ -199,131 +116,15 @@ IO::silence (nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		i->get_buffer(nframes).silence (nframes);
 	}
 }
 
-/** Deliver bufs to the IO's output ports
- *
- * This function should automatically do whatever it necessary to correctly deliver bufs
- * to the outputs, eg applying gain or pan or whatever else needs to be done.
- */
 void
-IO::deliver_output (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+IO::check_bundles_connected ()
 {
-	// Attach output buffers to port buffers
-	output_buffers().attach_buffers (_outputs, nframes, _output_offset);
-
-	// Use the panner to distribute audio to output port buffers
-	if (_panner && _panner->npanners() && !_panner->bypassed()) {
-
-		_panner->run_out_of_place(bufs, output_buffers(), start_frame, end_frame, nframes);
-
-	// Do a 1:1 copy of data to output ports
-	} else {
-		if (bufs.count().n_audio() > 0 && _outputs.count().n_audio () > 0) {
-			copy_to_outputs (bufs, DataType::AUDIO, nframes);
-		}
-		if (bufs.count().n_midi() > 0 && _outputs.count().n_midi () > 0) {
-			copy_to_outputs (bufs, DataType::MIDI, nframes);
-		}
-	}
-	
-	// Apply gain to output buffers if gain automation isn't playing
-	if ( ! _amp->apply_gain_automation()) {
-		
-		gain_t dg = _gain; // desired gain
-
-		{
-			Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
-
-			if (dm.locked()) {
-				dg = _gain_control->user_float();
-			}
-
-		}
-
-		if (dg != _gain || dg != 1.0) {
-			Amp::apply_gain(output_buffers(), nframes, _gain, dg, _phase_invert);
-			_gain = dg;
-		}
-	}
-	
-}
-
-void
-IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes)
-{
-	// Copy any buffers 1:1 to outputs
-	
-	PortSet::iterator o = _outputs.begin(type);
-	BufferSet::iterator i = bufs.begin(type);
-	BufferSet::iterator prev = i;
-
-	while (i != bufs.end(type) && o != _outputs.end (type)) {
-		Buffer& port_buffer (o->get_buffer (nframes));
-		port_buffer.read_from (*i, nframes, _output_offset);
-		prev = i;
-		++i;
-		++o;
-	}
-	
-	// Copy last buffer to any extra outputs
-	while (o != _outputs.end(type)) {
-		Buffer& port_buffer (o->get_buffer (nframes));
-		port_buffer.read_from (*prev, nframes, _output_offset);
-		++o;
-	}
-}
-
-void
-IO::collect_input (BufferSet& outs, nframes_t nframes, ChanCount offset)
-{
-	assert(outs.available() >= n_inputs());
-	
-	if (n_inputs() == ChanCount::ZERO) {
-		return;
-	}
-
-	outs.set_count(n_inputs());
-
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		PortSet::iterator   i = _inputs.begin(*t);
-		BufferSet::iterator o = outs.begin(*t);
-
-		for (uint32_t off = 0; off < offset.get(*t); ++off, ++o) {
-			if (o == outs.end(*t)) {
-				continue;
-			}
-		}
-
-		for ( ; i != _inputs.end(*t); ++i, ++o) {
-			Buffer& b (i->get_buffer (nframes));
-			o->read_from (b, nframes);
-		}
-	}
-}
-
-void
-IO::just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
-{
-	BufferSet& bufs = _session.get_scratch_buffers (n_inputs());
-	collect_input (bufs, nframes);
-	_meter->run_in_place (bufs, start_frame, end_frame, nframes);
-}
-
-
-void
-IO::check_bundles_connected_to_inputs ()
-{
-	check_bundles (_bundles_connected_to_inputs, inputs());
-}
-
-void
-IO::check_bundles_connected_to_outputs ()
-{
-	check_bundles (_bundles_connected_to_outputs, outputs());
+	check_bundles (_bundles_connected, ports());
 }
 
 void
@@ -335,7 +136,7 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 
 		uint32_t const N = i->bundle->nchannels ();
 
-		if (ports.num_ports (default_type()) < N) {
+		if (_ports.num_ports (default_type()) < N) {
 			continue;
 		}
 
@@ -368,7 +169,7 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 
 
 int
-IO::disconnect_input (Port* our_port, string other_port, void* src)
+IO::disconnect (Port* our_port, string other_port, void* src)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -382,29 +183,29 @@ IO::disconnect_input (Port* our_port, string other_port, void* src)
 			
 			/* check that our_port is really one of ours */
 			
-			if ( ! _inputs.contains(our_port)) {
+			if ( ! _ports.contains(our_port)) {
 				return -1;
 			}
 			
 			/* disconnect it from the source */
 			
 			if (our_port->disconnect (other_port)) {
-				error << string_compose(_("IO: cannot disconnect input port %1 from %2"), our_port->name(), other_port) << endmsg;
+				error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
 				return -1;
 			}
 
-			check_bundles_connected_to_inputs ();
+			check_bundles_connected ();
 		}
 	}
 
-	input_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	changed (ConnectionsChanged, src); /* EMIT SIGNAL */
 	_session.set_dirty ();
 
 	return 0;
 }
 
 int
-IO::connect_input (Port* our_port, string other_port, void* src)
+IO::connect (Port* our_port, string other_port, void* src)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -418,7 +219,7 @@ IO::connect_input (Port* our_port, string other_port, void* src)
 			
 			/* check that our_port is really one of ours */
 			
-			if ( ! _inputs.contains(our_port) ) {
+			if ( ! _ports.contains(our_port) ) {
 				return -1;
 			}
 			
@@ -430,99 +231,13 @@ IO::connect_input (Port* our_port, string other_port, void* src)
 		}
 	}
 
-	input_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	changed (ConnectionsChanged, src); /* EMIT SIGNAL */
 	_session.set_dirty ();
 	return 0;
 }
 
 int
-IO::disconnect_output (Port* our_port, string other_port, void* src)
-{
-	if (other_port.length() == 0 || our_port == 0) {
-		return 0;
-	}
-
-	{
-		BLOCK_PROCESS_CALLBACK ();
-		
-		{
-			Glib::Mutex::Lock lm (io_lock);
-			
-			/* check that our_port is really one of ours */
-			
-			if ( ! _outputs.contains(our_port) ) {
-				return -1;
-			}
-			
-			/* disconnect it from the destination */
-			
-			if (our_port->disconnect (other_port)) {
-				error << string_compose(_("IO: cannot disconnect output port %1 from %2"), our_port->name(), other_port) << endmsg;
-				return -1;
-			}
-
-			check_bundles_connected_to_outputs ();
-		}
-	}
-
-	output_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
-	_session.set_dirty ();
-	return 0;
-}
-
-int
-IO::connect_output (Port* our_port, string other_port, void* src)
-{
-	if (other_port.length() == 0 || our_port == 0) {
-		return 0;
-	}
-
-	{
-		BLOCK_PROCESS_CALLBACK ();
-
-		
-		{
-			Glib::Mutex::Lock lm (io_lock);
-			
-			/* check that our_port is really one of ours */
-			
-			if ( ! _outputs.contains(our_port) ) {
-				return -1;
-			}
-			
-			/* connect it to the destination */
-			
-			if (our_port->connect (other_port)) {
-				return -1;
-			}
-		}
-	}
-
-	output_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
-	_session.set_dirty ();
-	return 0;
-}
-
-int
-IO::set_input (Port* other_port, void* src)
-{
-	/* this removes all but one ports, and connects that one port
-	   to the specified source.
-	*/
-
-	if (!other_port) {
-		return -1;
-	}
-
-	if (ensure_inputs (ChanCount(other_port->type(), 1), true, true, src)) {
-		return -1;
-	}
-
-	return connect_input (_inputs.port(0), other_port->name(), src);
-}
-
-int
-IO::remove_output_port (Port* port, void* src)
+IO::remove_port (Port* port, void* src)
 {
 	IOChange change (NoChange);
 
@@ -533,7 +248,7 @@ IO::remove_output_port (Port* port, void* src)
 		{
 			Glib::Mutex::Lock lm (io_lock);
 
-			if (_outputs.remove(port)) {
+			if (_ports.remove(port)) {
 				change = IOChange (change|ConfigurationChanged);
 
 				if (port->connected()) {
@@ -541,22 +256,19 @@ IO::remove_output_port (Port* port, void* src)
 				} 
 
 				_session.engine().unregister_port (*port);
-				check_bundles_connected_to_outputs ();
-				
-				setup_peak_meters ();
-				reset_panner ();
+				check_bundles_connected ();
 			}
 		}
 
-		PortCountChanged (n_outputs()); /* EMIT SIGNAL */
+		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 	}
 
 	if (change == ConfigurationChanged) {
-		setup_bundle_for_outputs ();
+		setup_bundles ();
 	}
 
 	if (change != NoChange) {
-		output_changed (change, src);
+		changed (change, src);
 		_session.set_dirty ();
 		return 0;
 	}
@@ -571,12 +283,13 @@ IO::remove_output_port (Port* port, void* src)
  * @param type Data type of port.  Default value (NIL) will use this IO's default type.
  */
 int
-IO::add_output_port (string destination, void* src, DataType type)
+IO::add_port (string destination, void* src, DataType type)
 {
 	Port* our_port;
 
-	if (type == DataType::NIL)
+	if (type == DataType::NIL) {
 		type = _default_type;
+	}
 
 	{
 		BLOCK_PROCESS_CALLBACK ();
@@ -587,19 +300,24 @@ IO::add_output_port (string destination, void* src, DataType type)
 			
 			/* Create a new output port */
 			
-			string portname = build_legal_port_name (type, false);
-			
-			if ((our_port = _session.engine().register_output_port (type, portname)) == 0) {
-				error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
-				return -1;
+			string portname = build_legal_port_name (type);
+
+			if (_direction == Input) {
+				if ((our_port = _session.engine().register_input_port (type, portname)) == 0) {
+					error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
+					return -1;
+				}
+			} else {
+				if ((our_port = _session.engine().register_output_port (type, portname)) == 0) {
+					error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
+					return -1;
+				}
 			}
-			
-			_outputs.add (our_port);
-			setup_peak_meters ();
-			reset_panner ();
+
+			_ports.add (our_port);
 		}
 
-		PortCountChanged (n_outputs()); /* EMIT SIGNAL */
+		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 	}
 
 	if (destination.length()) {
@@ -609,111 +327,15 @@ IO::add_output_port (string destination, void* src, DataType type)
 	}
 	
 	// pan_changed (src); /* EMIT SIGNAL */
-	output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-	setup_bundle_for_outputs ();
+	changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+	setup_bundles ();
 	_session.set_dirty ();
 
 	return 0;
 }
 
 int
-IO::remove_input_port (Port* port, void* src)
-{
-	IOChange change (NoChange);
-
-	{
-		BLOCK_PROCESS_CALLBACK ();
-
-		
-		{
-			Glib::Mutex::Lock lm (io_lock);
-
-			if (_inputs.remove(port)) {
-				change = IOChange (change|ConfigurationChanged);
-
-				if (port->connected()) {
-					change = IOChange (change|ConnectionsChanged);
-				} 
-
-				_session.engine().unregister_port (*port);
-				check_bundles_connected_to_inputs ();
-				
-				setup_peak_meters ();
-				reset_panner ();
-			}
-		}
-		
-		PortCountChanged (n_inputs ()); /* EMIT SIGNAL */
-	}
-
-	if (change == ConfigurationChanged) {
-		setup_bundle_for_inputs ();
-	}
-
-	if (change != NoChange) {
-		input_changed (change, src);
-		_session.set_dirty ();
-		return 0;
-	} 
-	
-	return -1;
-}
-
-
-/** Add an input port.
- *
- * @param type Data type of port.  The appropriate port type, and @ref Port will be created.
- * @param destination Name of input port to connect new port to.
- * @param src Source for emitted ConfigurationChanged signal.
- */
-int
-IO::add_input_port (string source, void* src, DataType type)
-{
-	Port* our_port;
-	
-	if (type == DataType::NIL)
-		type = _default_type;
-
-	{
-		BLOCK_PROCESS_CALLBACK ();
-		
-		{ 
-			Glib::Mutex::Lock lm (io_lock);
-
-			/* Create a new input port */
-			
-			string portname = build_legal_port_name (type, true);
-
-			if ((our_port = _session.engine().register_input_port (type, portname)) == 0) {
-				error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
-				return -1;
-			}
-
-			_inputs.add (our_port);
-			setup_peak_meters ();
-			reset_panner ();
-		}
-
-		PortCountChanged (n_inputs()); /* EMIT SIGNAL */
-	}
-
-	if (source.length()) {
-
-		if (our_port->connect (source)) {
-			return -1;
-		}
-	} 
-
-	// pan_changed (src); /* EMIT SIGNAL */
-	input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-	setup_bundle_for_inputs ();
-	_session.set_dirty ();
-	
-	return 0;
-}
-
-int
-IO::disconnect_inputs (void* src)
+IO::disconnect (void* src)
 {
 	{ 
 		BLOCK_PROCESS_CALLBACK ();
@@ -721,46 +343,23 @@ IO::disconnect_inputs (void* src)
 		{
 			Glib::Mutex::Lock lm (io_lock);
 			
-			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+			for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 				i->disconnect_all ();
 			}
 
-			check_bundles_connected_to_inputs ();
+			check_bundles_connected ();
 		}
 	}
 	
-	input_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
-	
-	return 0;
-}
-
-int
-IO::disconnect_outputs (void* src)
-{
-	{
-		BLOCK_PROCESS_CALLBACK ();
-		
-		{
-			Glib::Mutex::Lock lm (io_lock);
-			
-			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-				i->disconnect_all ();
-			}
-
-			check_bundles_connected_to_outputs ();
-		}
-	}
-
-	output_changed (ConnectionsChanged, src); /* EMIT SIGNAL */
-	_session.set_dirty ();
+	changed (ConnectionsChanged, src); /* EMIT SIGNAL */
 	
 	return 0;
 }
 
 bool
-IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
+IO::ensure_ports_locked (ChanCount count, bool clear, void* src)
 {
-	Port* input_port = 0;
+	Port* port = 0;
 	bool  changed    = false;
 	
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -768,274 +367,55 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 		const size_t n = count.get(*t);
 	
 		/* remove unused ports */
-		for (size_t i = n_inputs().get(*t); i > n; --i) {
-			input_port = _inputs.port(*t, i-1);
-
-			assert(input_port);
-			_inputs.remove(input_port);
-			_session.engine().unregister_port (*input_port);
+		for (size_t i = n_ports().get(*t); i > n; --i) {
+			port = _ports.port(*t, i-1);
+			
+			assert(port);
+			_ports.remove(port);
+			_session.engine().unregister_port (*port);
 
 			changed = true;
 		}
 
 		/* create any necessary new ports */
-		while (n_inputs().get(*t) < n) {
+		while (n_ports().get(*t) < n) {
 
-			string portname = build_legal_port_name (*t, true);
+			string portname = build_legal_port_name (*t);
 
 			try {
 
-				if ((input_port = _session.engine().register_input_port (*t, portname)) == 0) {
-					error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
-					return -1;
-				}
-			}
-
-			catch (AudioEngine::PortRegistrationFailure& err) {
-				setup_peak_meters ();
-				reset_panner ();
-				/* pass it on */
-				throw AudioEngine::PortRegistrationFailure();
-			}
-
-			_inputs.add (input_port);
-			changed = true;
-		}
-	}
-	
-	if (changed) {
-		check_bundles_connected_to_inputs ();
-		setup_peak_meters ();
-		reset_panner ();
-		PortCountChanged (n_inputs()); /* EMIT SIGNAL */
-		_session.set_dirty ();
-	}
-	
-	if (clear) {
-		/* disconnect all existing ports so that we get a fresh start */
-		for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-			i->disconnect_all ();
-		}
-	}
-
-	return changed;
-}
-
-int
-IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
-{
-	bool in_changed     = false;
-	bool out_changed    = false;
-
-	assert(in != ChanCount::INFINITE);
-	assert(out != ChanCount::INFINITE);
-
-	if (in == n_inputs() && out == n_outputs() && !clear) {
-		return 0;
-	}
-
-	{
-		BLOCK_PROCESS_CALLBACK ();
-		Glib::Mutex::Lock lm (io_lock);
-
-		Port* port;
-		
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-
-			const size_t nin = in.get(*t);
-			const size_t nout = out.get(*t);
-
-			Port* output_port = 0;
-			Port* input_port = 0;
-
-			/* remove unused output ports */
-			for (size_t i = n_outputs().get(*t); i > nout; --i) {
-				output_port = _outputs.port(*t, i-1);
-
-				assert(output_port);
-				_outputs.remove(output_port);
-				_session.engine().unregister_port (*output_port);
-
-				out_changed = true;
-			}
-
-			/* remove unused input ports */
-			for (size_t i = n_inputs().get(*t); i > nin; --i) {
-				input_port = _inputs.port(*t, i-1);
-
-				assert(input_port);
-				_inputs.remove(input_port);
-				_session.engine().unregister_port (*input_port);
-
-				in_changed = true;
-			}
-
-			/* create any necessary new input ports */
-			while (n_inputs().get(*t) < nin) {
-				string portname = build_legal_port_name (*t, true);
-
-				try {
+				if (_direction == Input) {
 					if ((port = _session.engine().register_input_port (*t, portname)) == 0) {
 						error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
 						return -1;
 					}
-				}
-				
-				catch (AudioEngine::PortRegistrationFailure& err) {
-					setup_peak_meters ();
-					reset_panner ();
-					/* pass it on */
-					throw err;
-				}
-
-				_inputs.add (port);
-				in_changed = true;
-			}
-
-			/* create any necessary new output ports */
-
-			while (n_outputs().get(*t) < nout) {
-
-				string portname = build_legal_port_name (*t, false);
-				
-				try { 
+				} else {
 					if ((port = _session.engine().register_output_port (*t, portname)) == 0) {
 						error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
 						return -1;
 					}
 				}
-
-				catch (AudioEngine::PortRegistrationFailure& err) {
-					setup_peak_meters ();
-					reset_panner ();
-					/* pass it on */
-					throw err;
-				}
-
-				_outputs.add (port);
-				out_changed = true;
 			}
-		}
-		
-		if (clear) {
-			
-			/* disconnect all existing ports so that we get a fresh start */
-			
-			for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-				i->disconnect_all ();
+
+			catch (AudioEngine::PortRegistrationFailure& err) {
+				/* pass it on */
+				throw AudioEngine::PortRegistrationFailure();
 			}
-			
-			for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-				i->disconnect_all ();
-			}
-		}
-		
-		if (in_changed || out_changed) {
-			setup_peak_meters ();
-			reset_panner ();
-		}
-	}
 
-	if (out_changed) {
-		check_bundles_connected_to_outputs ();
-		output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-		setup_bundle_for_outputs ();
-	}
-	
-	if (in_changed) {
-		check_bundles_connected_to_inputs ();
-		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-		setup_bundle_for_inputs ();
-	}
-
-	if (in_changed || out_changed) {
-		PortCountChanged (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
-		_session.set_dirty ();
-	}
-
-	return 0;
-}
-
-int
-IO::ensure_inputs (ChanCount count, bool clear, bool lockit, void* src)
-{
-	bool changed = false;
-
-	if (count == n_inputs() && !clear) {
-		return 0;
-	}
-
-	if (lockit) {
-		BLOCK_PROCESS_CALLBACK ();
-		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_inputs_locked (count, clear, src);
-	} else {
-		changed = ensure_inputs_locked (count, clear, src);
-	}
-
-	if (changed) {
-		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-		setup_bundle_for_inputs ();
-		_session.set_dirty ();
-	}
-	return 0;
-}
-
-bool
-IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
-{
-	Port* output_port    = 0;
-	bool  changed        = false;
-	bool  need_pan_reset = false;
-	
-	if (n_outputs() != count) {
-		need_pan_reset = true;
-	}
-	
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-
-		const size_t n = count.get(*t);
-
-		/* remove unused ports */
-		for (size_t i = n_outputs().get(*t); i > n; --i) {
-			output_port = _outputs.port(*t, i-1);
-
-			assert(output_port);
-			_outputs.remove(output_port);
-			_session.engine().unregister_port (*output_port);
-
+			_ports.add (port);
 			changed = true;
-		}
-
-		/* create any necessary new ports */
-		while (n_outputs().get(*t) < n) {
-
-			string portname = build_legal_port_name (*t, false);
-
-			if ((output_port = _session.engine().register_output_port (*t, portname)) == 0) {
-				error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
-				return -1;
-			}
-
-			_outputs.add (output_port);
-			changed = true;
-			setup_peak_meters ();
-
-			if (need_pan_reset) {
-				reset_panner ();
-			}
 		}
 	}
 	
 	if (changed) {
-		check_bundles_connected_to_outputs ();
-		PortCountChanged (n_outputs()); /* EMIT SIGNAL */
+		check_bundles_connected ();
+		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
-		for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 			i->disconnect_all ();
 		}
 	}
@@ -1043,70 +423,44 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 	return changed;
 }
 
+
 int
-IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
+IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 {
 	bool changed = false;
 
-	/* XXX caller should hold io_lock, but generally doesn't */
+	cerr << "Ensure that IO " << _name << '/' << (_direction == Input ? "input" : "output") 
+	     << " has " << count << endl;
+
+	if (count == n_ports() && !clear) {
+		cerr << "\talready has " << n_ports() << endl;
+		return 0;
+	}
 
 	if (lockit) {
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_outputs_locked (count, clear, src);
+		changed = ensure_ports_locked (count, clear, src);
 	} else {
-		changed = ensure_outputs_locked (count, clear, src);
+		changed = ensure_ports_locked (count, clear, src);
 	}
 
 	if (changed) {
-		 output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-		 setup_bundle_for_outputs ();
+		this->changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+		setup_bundles ();
+		_session.set_dirty ();
 	}
 
+	cerr << "\t@" << this << "  established with " << n_ports() << endl;
+	
 	return 0;
-}
-
-gain_t
-IO::effective_gain () const
-{
-	return _gain_control->get_value();
-}
-
-void
-IO::reset_panner ()
-{
-	if (panners_legal) {
-		if (!no_panner_reset) {
-			_panner->reset (n_outputs().n_audio(), pans_required());
-		}
-	} else {
-		panner_legal_c.disconnect ();
-		panner_legal_c = PannersLegal.connect (mem_fun (*this, &IO::panners_became_legal));
-	}
 }
 
 int
-IO::panners_became_legal ()
+IO::ensure_io (ChanCount count, bool clear, void* src)
 {
-	_panner->reset (n_outputs().n_audio(), pans_required());
-	_panner->load (); // automation
-	panner_legal_c.disconnect ();
-	return 0;
+	return ensure_ports (count, clear, true, src);
 }
-
-void
-IO::defer_pan_reset ()
-{
-	no_panner_reset = true;
-}
-
-void
-IO::allow_pan_reset ()
-{
-	no_panner_reset = false;
-	reset_panner ();
-}
-
 
 XMLNode&
 IO::get_state (void)
@@ -1128,44 +482,26 @@ IO::state (bool full_state)
 	node->add_property("name", _name);
 	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
+	node->add_property ("direction", enum_2_string (_direction));
+	node->add_property ("default-type", _default_type.to_string());
 
-	for (
-	  std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_inputs.begin();
-	  i != _bundles_connected_to_inputs.end();
-	  ++i
-	  )
-	{
-		XMLNode* n = new XMLNode ("InputBundle");
+	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
+		XMLNode* n = new XMLNode ("Bundle");
 		n->add_property ("name", i->bundle->name ());
 		node->add_child_nocopy (*n);
 	}
 
-	for (
-	  std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_outputs.begin();
-	  i != _bundles_connected_to_outputs.end();
-	  ++i
-	  )
-	{
-		XMLNode* n = new XMLNode ("OutputBundle");
-		n->add_property ("name", i->bundle->name ());
-		node->add_child_nocopy (*n);
-	}
-	
-	str = "";
-
-	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-			
+	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		
 		vector<string> connections;
+
+		XMLNode* pnode = new XMLNode (X_("port"));
+		pnode->add_property (X_("type"), i->type().to_string());
 
 		if (i->get_connections (connections)) {
 
-			str += '{';
-			
 			for (n = 0, ci = connections.begin(); ci != connections.end(); ++ci, ++n) {
-				if (n) {
-					str += ',';
-				}
-				
+
 				/* if its a connection to our own port,
 				   return only the port name, not the
 				   whole thing. this allows connections
@@ -1173,60 +509,12 @@ IO::state (bool full_state)
 				   client name is different.
 				*/
 				
-				str += _session.engine().make_port_name_relative (*ci);
+				pnode->add_property (X_("connection"), _session.engine().make_port_name_relative (*ci));
 			}	
-			
-			str += '}';
-
-		} else {
-			str += "{}";
 		}
-	}
-	
-	node->add_property ("inputs", str);
-
-	str = "";
-	
-	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		
-		vector<string> connections;
-
-		if (i->get_connections (connections)) {
-			
-			str += '{';
-			
-			for (n = 0, ci = connections.begin(); ci != connections.end(); ++ci, ++n) {
-				if (n) {
-					str += ',';
-				}
-				
-				str += _session.engine().make_port_name_relative (*ci);
-			}
-			
-			str += '}';
-
-		} else {
-			str += "{}";
-		}
+		node->add_child_nocopy (*pnode);
 	}
-	
-	node->add_property ("outputs", str);
-
-	node->add_child_nocopy (_panner->state (full_state));
-	node->add_child_nocopy (_gain_control->get_state ());
-
-	snprintf (buf, sizeof(buf), "%2.12f", gain());
-	node->add_property ("gain", buf);
-
-	/* port counts */
-
-	node->add_child_nocopy(*n_inputs().state("Inputs"));
-	node->add_child_nocopy(*n_outputs().state("Outputs"));
-
-	/* automation */
-	
-	if (full_state)
-		node->add_child_nocopy (get_automation_state());
 
 	return *node;
 }
@@ -1246,79 +534,34 @@ IO::set_state (const XMLNode& node)
 		error << string_compose(_("incorrect XML node \"%1\" passed to IO object"), node.name()) << endmsg;
 		return -1;
 	}
-
+	
 	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
-		/* used to set panner name with this, but no more */
+		set_name (prop->value());
+	}
+
+	if ((prop = node.property (X_("default-type"))) != 0) {
+		_default_type = DataType(prop->value());
+		assert(_default_type != DataType::NIL);
 	}
 
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value ();
 	}
 
-	if ((prop = node.property ("gain")) != 0) {
-		set_gain (atof (prop->value().c_str()), this);
-		_gain = _gain_control->user_float();
+	if ((prop = node.property ("direction")) != 0) {
+		_direction = (Direction) string_2_enum (prop->value(), _direction);
 	}
 
-	if ((prop = node.property ("automation-state")) != 0 || (prop = node.property ("automation-style")) != 0) {
-		/* old school automation handling */
-	}
+	if (!connecting_legal) {
+		pending_state_node = new XMLNode (node);
+	} 
 
-	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
-
-		// Old school Panner.
-		if ((*iter)->name() == "Panner") {
-			if (!_panner) {
-				_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
-			}
-			_panner->set_state (**iter);
-		}
-
-		if ((*iter)->name() == "Processor") {
-			if ((*iter)->property ("type") && ((*iter)->property ("type")->value() == "panner" ) ) {
-				if (!_panner) {
-					_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
-				}
-				_panner->set_state (**iter);
-			}
-		}
-
-		if ((*iter)->name() == X_("Automation")) {
-
-			set_automation_state (*(*iter), Evoral::Parameter(GainAutomation));
-		}
-
-		if ((*iter)->name() == X_("Controllable")) {
-			if ((prop = (*iter)->property("name")) != 0 && prop->value() == "gaincontrol") {
-				_gain_control->set_state (**iter);
-			}
-		}
-	}
-
-	if (ports_legal) {
-
-		if (create_ports (node)) {
-			return -1;
-		}
-
-	} else {
-
-		port_legal_c = PortsLegal.connect (mem_fun (*this, &IO::ports_became_legal));
-	}
-
-	if (!_panner) {
-		_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
-	}
-
-	if (panners_legal) {
-		reset_panner ();
-	} else {
-		panner_legal_c = PannersLegal.connect (mem_fun (*this, &IO::panners_became_legal));
+	if (create_ports (node)) {
+		return -1;
 	}
 
 	if (connecting_legal) {
-
+		
 		if (make_connections (node)) {
 			return -1;
 		}
@@ -1328,83 +571,6 @@ IO::set_state (const XMLNode& node)
 		connection_legal_c = ConnectingLegal.connect (mem_fun (*this, &IO::connecting_became_legal));
 	}
 
-	if (!ports_legal || !connecting_legal) {
-		pending_state_node = new XMLNode (node);
-	}
-
-	return 0;
-}
-
-int
-IO::load_automation (string path)
-{
-	string fullpath;
-	ifstream in;
-	char line[128];
-	uint32_t linecnt = 0;
-	float version;
-	LocaleGuard lg (X_("POSIX"));
-
-	fullpath = Glib::build_filename(_session.automation_dir(), path);
-
-	in.open (fullpath.c_str());
-
-	if (!in) {
-		fullpath = Glib::build_filename(_session.automation_dir(), _session.snap_name() + '-' + path);
-
-		in.open (fullpath.c_str());
-
-		if (!in) {
-			error << string_compose(_("%1: cannot open automation event file \"%2\""), _name, fullpath) << endmsg;
-			return -1;
-		}
-	}
-
-	clear_automation ();
-
-	while (in.getline (line, sizeof(line), '\n')) {
-		char type;
-		nframes_t when;
-		double value;
-
-		if (++linecnt == 1) {
-			if (memcmp (line, "version", 7) == 0) {
-				if (sscanf (line, "version %f", &version) != 1) {
-					error << string_compose(_("badly formed version number in automation event file \"%1\""), path) << endmsg;
-					return -1;
-				}
-			} else {
-				error << string_compose(_("no version information in automation event file \"%1\""), path) << endmsg;
-				return -1;
-			}
-
-			continue;
-		}
-
-		if (sscanf (line, "%c %" PRIu32 " %lf", &type, &when, &value) != 3) {
-			warning << string_compose(_("badly formatted automation event record at line %1 of %2 (ignored)"), linecnt, path) << endmsg;
-			continue;
-		}
-
-		switch (type) {
-		case 'g':
-			_gain_control->list()->fast_simple_add (when, value);
-			break;
-
-		case 's':
-			break;
-
-		case 'm':
-			break;
-
-		case 'p':
-			/* older (pre-1.0) versions of ardour used this */
-			break;
-
-		default:
-			warning << _("dubious automation event found (and ignored)") << endmsg;
-		}
-	}
 
 	return 0;
 }
@@ -1414,51 +580,25 @@ IO::connecting_became_legal ()
 {
 	int ret;
 
-	if (pending_state_node == 0) {
-		fatal << _("IO::connecting_became_legal() called without a pending state node") << endmsg;
-		/*NOTREACHED*/
-		return -1;
-	}
+	assert (pending_state_node);
 
 	connection_legal_c.disconnect ();
 
 	ret = make_connections (*pending_state_node);
-
-	if (ports_legal) {
-		delete pending_state_node;
-		pending_state_node = 0;
-	}
-
-	return ret;
-}
-int
-IO::ports_became_legal ()
-{
-	int ret;
-
-	if (pending_state_node == 0) {
-		fatal << _("IO::ports_became_legal() called without a pending state node") << endmsg;
-		/*NOTREACHED*/
-		return -1;
-	}
-
-	port_legal_c.disconnect ();
-
-	ret = create_ports (*pending_state_node);
-
-	if (connecting_legal) {
-		delete pending_state_node;
-		pending_state_node = 0;
-	}
+	
+	delete pending_state_node;
+	pending_state_node = 0;
 
 	return ret;
 }
 
 boost::shared_ptr<Bundle>
-IO::find_possible_bundle (const string &desired_name, const string &default_name, const string &bundle_type_name) 
+IO::find_possible_bundle (const string &desired_name)
 {
 	static const string digits = "0123456789";
-
+	const string &default_name = (_direction == Input ? _("in") : _("out"));
+	const string &bundle_type_name = (_direction == Input ? _("input") : _("output"));
+	
 	boost::shared_ptr<Bundle> c = _session.bundle_by_name (desired_name);
 
 	if (!c) {
@@ -1547,77 +687,71 @@ IO::find_possible_bundle (const string &desired_name, const string &default_name
 }
 
 int
-IO::get_port_counts (const XMLNode& node, ChanCount& in, ChanCount& out,
-		     boost::shared_ptr<Bundle>& ic, boost::shared_ptr<Bundle>& oc)
+IO::get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle>& c)
 {
 	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
+	uint32_t n_audio = 0;
+	uint32_t n_midi = 0;
+	ChanCount cnt;
 
-	in = n_inputs();
-	out = n_outputs();
+	n = n_ports();
 
+	if ((prop = node.property ("connection")) != 0) {
+
+		if ((c = find_possible_bundle (prop->value())) != 0) {
+			n = ChanCount::max (n, ChanCount(c->type(), c->nchannels()));
+		}
+		return 0;
+	}
+	
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
-		if ((*iter)->name() == X_("Inputs")) {
-			in = ChanCount::max(in, ChanCount(**iter));
-		} else if ((*iter)->name() == X_("Outputs")) {
-			out = ChanCount::max(out, ChanCount(**iter));
-		}
-	}
 
-	if ((prop = node.property ("input-connection")) != 0) {
-
-		ic = find_possible_bundle (prop->value(), _("in"), _("input"));
-		if (ic) {
-			in = ChanCount::max(in, ChanCount(ic->type(), ic->nchannels()));
+		if ((*iter)->name() == X_("Bundle")) {
+			if ((c = find_possible_bundle (prop->value())) != 0) {
+				n = ChanCount::max (n, ChanCount(c->type(), c->nchannels()));
+				return 0;
+			} else {
+				return -1;
+			}
 		}
 
-	} else if ((prop = node.property ("inputs")) != 0) {
+		if ((*iter)->name() == X_("port")) {
+			prop = (*iter)->property (X_("type"));
 
-		in = ChanCount::max(in, ChanCount(_default_type,
-						  count (prop->value().begin(), prop->value().end(), '{')));
+			if (!prop) {
+				continue;
+			}
+
+			if (prop->value() == X_("audio")) {
+				cnt.set_audio (++n_audio);
+			} else if (prop->value() == X_("midi")) {
+				cnt.set_midi (++n_midi);
+			}
+		}
 	}
 	
-	if ((prop = node.property ("output-connection")) != 0) {
-		
-		oc = find_possible_bundle (prop->value(), _("out"), _("output"));
-		if (oc) {
-			out = ChanCount::max(out, ChanCount(oc->type(), oc->nchannels()));
-		}
-		
-	} else if ((prop = node.property ("outputs")) != 0) {
-		
-		out = ChanCount::max(out, ChanCount(_default_type,
-						    count (prop->value().begin(), prop->value().end(), '{')));
-	}
-	
+	n = ChanCount::max (n, cnt);
 	return 0;
 }
 
 int
 IO::create_ports (const XMLNode& node)
 {
-	if (pending_state_node) {
+	ChanCount n;
+	boost::shared_ptr<Bundle> c;
+	
+	get_port_counts (node, n, c);
+	
+	cerr << _name << " got " << n << " from XML node" << endl;
 
-		ChanCount in;
-		ChanCount out;
-		boost::shared_ptr<Bundle> ic;
-		boost::shared_ptr<Bundle> oc;
-		
-		no_panner_reset = true;
-		
-		get_port_counts (*pending_state_node, in, out, ic, oc);
-		
-		if (ensure_io (in, out, true, this)) {
-			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
-			return -1;
-		}
-		
-		/* XXX use ic and oc if relevant */
-		
-		no_panner_reset = false;
+	if (ensure_ports (n, true, true, this)) {
+		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
+		return -1;
 	}
 
-	set_deferred_state ();
+	/* XXX use c */
+
 	return 0;
 }
 
@@ -1626,60 +760,41 @@ IO::make_connections (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
-	if ((prop = node.property ("input-connection")) != 0) {
-		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("in"), _("input"));
+	if ((prop = node.property ("connection")) != 0) {
+		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value());
 		
 		if (!c) {
 			return -1;
 		}
 
-		if (n_inputs().get(c->type()) == c->nchannels() && c->ports_are_outputs()) {
-			connect_input_ports_to_bundle (c, this);
+		if (n_ports().get(c->type()) == c->nchannels() && c->ports_are_outputs()) {
+			connect_ports_to_bundle (c, this);
 		}
 
-	} else if ((prop = node.property ("inputs")) != 0) {
-		if (set_inputs (prop->value())) {
-			error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
-			return -1;
-		}
-	}
+		return 0;
+	} 
 
-	if ((prop = node.property ("output-connection")) != 0) {
-		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("out"), _("output"));
-		
-		if (!c) {
-			return -1;
-		} 
-		
-		if (n_outputs().get(c->type()) == c->nchannels() && c->ports_are_inputs()) {
-			connect_output_ports_to_bundle (c, this);
-		}
-
-	} else if ((prop = node.property ("outputs")) != 0) {
-		if (set_outputs (prop->value())) {
-			error << string_compose(_("improper output channel list in XML node (%1)"), prop->value()) << endmsg;
-			return -1;
-		}
-	}
+	uint32_t n = 0;
 
 	for (XMLNodeConstIterator i = node.children().begin(); i != node.children().end(); ++i) {
 
-		if ((*i)->name() == "InputBundle") {
+		if ((*i)->name() == "Bundle") {
 			XMLProperty const * prop = (*i)->property ("name");
 			if (prop) {
-				boost::shared_ptr<Bundle> b = find_possible_bundle (prop->value(), _("in"), _("input"));
+				boost::shared_ptr<Bundle> b = find_possible_bundle (prop->value());
 				if (b) {
-					connect_input_ports_to_bundle (b, this);
+					connect_ports_to_bundle (b, this);
 				}
 			}
-			
-		} else if ((*i)->name() == "OutputBundle") {
-			XMLProperty const * prop = (*i)->property ("name");
-			if (prop) {
-				boost::shared_ptr<Bundle> b = find_possible_bundle (prop->value(), _("out"), _("output"));
-				if (b) {
-					connect_output_ports_to_bundle (b, this);
-				} 
+
+			return 0;
+		}
+
+		if ((*i)->name() == "port") {
+			Port* p = nth (n++);
+			XMLProperty* prop = (*i)->property ("connection");
+			if (p && prop) {
+				p->connect (prop->value());
 			}
 		}
 	}
@@ -1688,7 +803,7 @@ IO::make_connections (const XMLNode& node)
 }
 
 int
-IO::set_inputs (const string& str)
+IO::set_ports (const string& str)
 {
 	vector<string> ports;
 	int i;
@@ -1700,7 +815,7 @@ IO::set_inputs (const string& str)
 	}
 
 	// FIXME: audio-only
-	if (ensure_inputs (ChanCount(DataType::AUDIO, nports), true, true, this)) {
+	if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, true, this)) {
 		return -1;
 	}
 
@@ -1727,58 +842,7 @@ IO::set_inputs (const string& str)
 		} else if (n > 0) {
 
 			for (int x = 0; x < n; ++x) {
-				connect_input (input (i), ports[x], this);
-			}
-		}
-
-		ostart = end+1;
-		i++;
-	}
-
-	return 0;
-}
-
-int
-IO::set_outputs (const string& str)
-{
-	vector<string> ports;
-	int i;
-	int n;
-	uint32_t nports;
-	
-	if ((nports = count (str.begin(), str.end(), '{')) == 0) {
-		return 0;
-	}
-
-	// FIXME: audio-only - need a way to identify port types from XML/string
-	if (ensure_outputs (ChanCount(DataType::AUDIO, nports), true, true, this)) {
-		return -1;
-	}
-
-	string::size_type start, end, ostart;
-
-	ostart = 0;
-	start = 0;
-	end = 0;
-	i = 0;
-
-	while ((start = str.find_first_of ('{', ostart)) != string::npos) {
-		start += 1;
-
-		if ((end = str.find_first_of ('}', start)) == string::npos) {
-			error << string_compose(_("IO: badly formed string in XML node for outputs \"%1\""), str) << endmsg;
-			return -1;
-		}
-
-		if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
-			error << string_compose(_("IO: bad output string in XML node \"%1\""), str) << endmsg;
-
-			return -1;
-			
-		} else if (n > 0) {
-
-			for (int x = 0; x < n; ++x) {
-				connect_output (output (i), ports[x], this);
+				connect (nth (i), ports[x], this);
 			}
 		}
 
@@ -1858,13 +922,7 @@ IO::set_name (const string& requested_name)
 		warning << _("you cannot use colons to name objects with I/O connections") << endmsg;
 	}
 
-	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		string current_name = i->name();
-		current_name.replace (current_name.find (_name), _name.length(), name);
-		i->set_name (current_name);
-	}
-
-	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		string current_name = i->name();
 		current_name.replace (current_name.find (_name), _name.length(), name);
 		i->set_name (current_name);
@@ -1872,7 +930,7 @@ IO::set_name (const string& requested_name)
 
 	bool const r = SessionObject::set_name(name);
 
-	setup_bundles_for_inputs_and_outputs ();
+	setup_bundles ();
 
 	return r;
 }
@@ -1882,13 +940,13 @@ IO::set_port_latency (nframes_t nframes)
 {
 	Glib::Mutex::Lock lm (io_lock);
 
-	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		i->set_latency (nframes);
 	}
 }
 
 nframes_t
-IO::output_latency () const
+IO::latency () const
 {
 	nframes_t max_latency;
 	nframes_t latency;
@@ -1897,26 +955,7 @@ IO::output_latency () const
 
 	/* io lock not taken - must be protected by other means */
 
-	for (PortSet::const_iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		if ((latency = i->total_latency ()) > max_latency) {
-			max_latency = latency;
-		}
-	}
-
-	return max_latency;
-}
-
-nframes_t
-IO::input_latency () const
-{
-	nframes_t max_latency;
-	nframes_t latency;
-
-	max_latency = 0;
-
-	/* io lock not taken - must be protected by other means */
-
-	for (PortSet::const_iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		if ((latency = i->total_latency ()) > max_latency) {
 			max_latency = latency;
 		} 
@@ -1925,14 +964,24 @@ IO::input_latency () const
 	return max_latency;
 }
 
+void
+IO::update_port_total_latencies ()
+{
+	/* io_lock, not taken: function must be called from Session::process() calltree */
+
+	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		_session.engine().update_total_latency (*i);
+	}
+}
+
 int
-IO::connect_input_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
+IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
 	{
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
-		c->connect (_bundle_for_inputs, _session.engine());
+		c->connect (_bundle, _session.engine());
 
 		/* If this is a UserBundle, make a note of what we've done */
 
@@ -1940,109 +989,48 @@ IO::connect_input_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		if (ub) {
 
 			/* See if we already know about this one */
-			std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_inputs.begin();
-			while (i != _bundles_connected_to_inputs.end() && i->bundle != ub) {
+			std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin();
+			while (i != _bundles_connected.end() && i->bundle != ub) {
 				++i;
 			}
 
-			if (i == _bundles_connected_to_inputs.end()) {
+			if (i == _bundles_connected.end()) {
 				/* We don't, so make a note */
-				_bundles_connected_to_inputs.push_back (UserBundleInfo (this, ub));
+				_bundles_connected.push_back (UserBundleInfo (this, ub));
 			}
 		}
 	}
 
-	input_changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
 	return 0;
 }
 
 int
-IO::disconnect_input_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
+IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
 	{
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
-		c->disconnect (_bundle_for_inputs, _session.engine());
+		c->disconnect (_bundle, _session.engine());
 			
 		/* If this is a UserBundle, make a note of what we've done */
 
 		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
 		if (ub) {
 
-			std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_inputs.begin();
-			while (i != _bundles_connected_to_inputs.end() && i->bundle != ub) {
+			std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin();
+			while (i != _bundles_connected.end() && i->bundle != ub) {
 				++i;
 			}
 
-			if (i != _bundles_connected_to_inputs.end()) {
-				_bundles_connected_to_inputs.erase (i);
+			if (i != _bundles_connected.end()) {
+				_bundles_connected.erase (i);
 			}
 		}
 	}
 
-	input_changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
-	return 0;
-}
-
-int
-IO::connect_output_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
-{
-	{
-		BLOCK_PROCESS_CALLBACK ();
-		Glib::Mutex::Lock lm2 (io_lock);
-
-		c->connect (_bundle_for_outputs, _session.engine());
-
-		/* If this is a UserBundle, make a note of what we've done */
-
-		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
-		if (ub) {
-
-			/* See if we already know about this one */
-			std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_outputs.begin();
-			while (i != _bundles_connected_to_outputs.end() && i->bundle != ub) {
-				++i;
-			}
-
-			if (i == _bundles_connected_to_outputs.end()) {
-				/* We don't, so make a note */
-				_bundles_connected_to_outputs.push_back (UserBundleInfo (this, ub));
-			}
-		}
-	}
-
-	output_changed (IOChange (ConnectionsChanged|ConfigurationChanged), src); /* EMIT SIGNAL */
-
-	return 0;
-}
-
-int
-IO::disconnect_output_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
-{
-	{
-		BLOCK_PROCESS_CALLBACK ();
-		Glib::Mutex::Lock lm2 (io_lock);
-
-		c->disconnect (_bundle_for_outputs, _session.engine());
-			
-		/* If this is a UserBundle, make a note of what we've done */
-
-		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
-		if (ub) {
-
-			std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_outputs.begin();
-			while (i != _bundles_connected_to_outputs.end() && i->bundle != ub) {
-				++i;
-			}
-
-			if (i != _bundles_connected_to_outputs.end()) {
-				_bundles_connected_to_outputs.erase (i);
-			}
-		}
-	}
-
-	output_changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
 	return 0;
 }
 
@@ -2061,34 +1049,6 @@ IO::enable_connecting ()
 	return ConnectingLegal ();
 }
 
-int
-IO::disable_ports ()
-{
-	ports_legal = false;
-	return 0;
-}
-
-int
-IO::enable_ports ()
-{
-	ports_legal = true;
-	return PortsLegal ();
-}
-
-int
-IO::disable_panners (void)
-{
-	panners_legal = false;
-	return 0;
-}
-
-int
-IO::reset_panners ()
-{
-	panners_legal = true;
-	return PannersLegal ();
-}
-
 void
 IO::bundle_changed (Bundle::Change c)
 {
@@ -2096,200 +1056,9 @@ IO::bundle_changed (Bundle::Change c)
 //	connect_input_ports_to_bundle (_input_bundle, this);
 }
 
-void
-IO::GainControl::set_value (float val)
-{
-	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231f)
-		val = 1.99526231f;
-
-	_io->set_gain (val, this);
-	
-	AutomationControl::set_value(val);
-}
-
-float
-IO::GainControl::get_value (void) const
-{
-	return AutomationControl::get_value();
-}
-
-void
-IO::setup_peak_meters()
-{
-	ChanCount max_streams = std::max (_inputs.count(), _outputs.count());
-	_meter->configure_io (max_streams, max_streams);
-}
-
-/**
-    Update the peak meters.
-
-    The meter signal lock is taken to prevent modification of the 
-    Meter signal while updating the meters, taking the meter signal
-    lock prior to taking the io_lock ensures that all IO will remain 
-    valid while metering.
-*/   
-void
-IO::update_meters()
-{
-	Glib::Mutex::Lock guard (m_meter_signal_lock);
-	Meter(); /* EMIT SIGNAL */
-}
-
-void
-IO::meter ()
-{
-	// FIXME: Ugly.  Meter should manage the lock, if it's necessary
-	
-	Glib::Mutex::Lock lm (io_lock); // READER: meter thread.
-	_meter->meter();
-}
-
-void
-IO::clear_automation ()
-{
-	data().clear_controls (); // clears gain automation
-	_panner->data().clear_controls ();
-}
-
-void
-IO::set_parameter_automation_state (Evoral::Parameter param, AutoState state)
-{
-	// XXX: would be nice to get rid of this special hack
-
-	if (param.type() == GainAutomation) {
-
-		bool changed = false;
-
-		{ 
-			Glib::Mutex::Lock lm (control_lock());
-
-			boost::shared_ptr<AutomationList> gain_auto
-				= boost::dynamic_pointer_cast<AutomationList>(_gain_control->list());
-
-			if (state != gain_auto->automation_state()) {
-				changed = true;
-				_last_automation_snapshot = 0;
-				gain_auto->set_automation_state (state);
-
-				if (state != Off) {
-					// FIXME: shouldn't this use Curve?
-					set_gain (gain_auto->eval (_session.transport_frame()), this);
-				}
-			}
-		}
-
-		if (changed) {
-			_session.set_dirty ();
-		}
-
-	} else {
-		AutomatableControls::set_parameter_automation_state(param, state);
-	}
-}
-
-void
-IO::inc_gain (gain_t factor, void *src)
-{
-	float desired_gain = _gain_control->user_float();
-	if (desired_gain == 0.0f) {
-		set_gain (0.000001f + (0.000001f * factor), src);
-	} else {
-		set_gain (desired_gain + (desired_gain * factor), src);
-	}
-}
-
-void
-IO::set_gain (gain_t val, void *src)
-{
-	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231f) {
-		val = 1.99526231f;
-	}
-
-	//cerr << "set desired gain to " << val << " when curgain = " << _gain_control->get_value () << endl;
-
-	if (src != _gain_control.get()) {
-		_gain_control->set_value(val);
-		// bit twisty, this will come back and call us again
-		// (this keeps control in sync with reality)
-		return;
-	}
-
-	{
-		Glib::Mutex::Lock dm (declick_lock);
-		_gain_control->set_float(val, false);
-	}
-
-	if (_session.transport_stopped()) {
-		// _gain = val;
-	}
-	
-	/*
-	if (_session.transport_stopped() && src != 0 && src != this && _gain_control->automation_write()) {
-		_gain_control->list()->add (_session.transport_frame(), val);
-		
-	}
-	*/
-
-	_session.set_dirty();
-}
-
-void
-IO::start_pan_touch (uint32_t which)
-{
-	if (which < _panner->npanners()) {
-		(*_panner).pan_control(which)->start_touch();
-	}
-}
-
-void
-IO::end_pan_touch (uint32_t which)
-{
-	if (which < _panner->npanners()) {
-		(*_panner).pan_control(which)->stop_touch();
-	}
-
-}
-
-void
-IO::automation_snapshot (nframes_t now, bool force)
-{
-	AutomatableControls::automation_snapshot (now, force);
-	// XXX: This seems to be wrong. 
-	// drobilla: shouldnt automation_snapshot for panner be called
-	//           "automagically" because its an Automatable now ?
-	//
-	//           we could dump this whole method then. <3
-
-	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
-		_panner->automation_snapshot (now, force);
-	}
-	
-	_panner->automation_snapshot (now, force);
-	_last_automation_snapshot = now;
-}
-
-void
-IO::transport_stopped (nframes_t frame)
-{
-	_gain_control->list()->reposition_for_rt_add (frame);
-
-	if (_gain_control->automation_state() != Off) {
-		
-		/* the src=0 condition is a special signal to not propagate 
-		   automation gain changes into the mix group when locating.
-		*/
-
-		// FIXME: shouldn't this use Curve?
-		set_gain (_gain_control->list()->eval (frame), 0);
-	}
-
-	_panner->transport_stopped (frame);
-}
 
 string
-IO::build_legal_port_name (DataType type, bool in)
+IO::build_legal_port_name (DataType type)
 {
 	const int name_size = jack_port_name_size();
 	int limit;
@@ -2303,7 +1072,7 @@ IO::build_legal_port_name (DataType type, bool in)
 		throw unknown_type();
 	}
 	
-	if (in) {
+	if (_direction == Input) {
 		suffix += _("_in");
 	} else {
 		suffix += _("_out");
@@ -2318,27 +1087,20 @@ IO::build_legal_port_name (DataType type, bool in)
 	
 	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, _name.c_str(), suffix.c_str());
 	
-	int port_number;
-	
-	if (in) {
-		port_number = find_input_port_hole (buf1);
-	} else {
-		port_number = find_output_port_hole (buf1);
-	}
-	
+	int port_number = find_port_hole (buf1);
 	snprintf (buf2, name_size+1, "%s %d", buf1, port_number);
 
 	return string (buf2);
 }
 
 int32_t
-IO::find_input_port_hole (const char* base)
+IO::find_port_hole (const char* base)
 {
 	/* CALLER MUST HOLD IO LOCK */
 
 	uint32_t n;
 
-	if (_inputs.empty()) {
+	if (_ports.empty()) {
 		return 1;
 	}
 
@@ -2347,246 +1109,109 @@ IO::find_input_port_hole (const char* base)
 
 	for (n = 1; n < 9999; ++n) {
 		char buf[jack_port_name_size()];
-		PortSet::iterator i = _inputs.begin();
+		PortSet::iterator i = _ports.begin();
 
 		snprintf (buf, jack_port_name_size(), _("%s %u"), base, n);
 
-		for ( ; i != _inputs.end(); ++i) {
+		for ( ; i != _ports.end(); ++i) {
 			if (i->name() == buf) {
 				break;
 			}
 		}
 
-		if (i == _inputs.end()) {
+		if (i == _ports.end()) {
 			break;
 		}
 	}
 	return n;
 }
 
-int32_t
-IO::find_output_port_hole (const char* base)
-{
-	/* CALLER MUST HOLD IO LOCK */
-
-	uint32_t n;
-
-	if (_outputs.empty()) {
-		return 1;
-	}
-
-	/* we only allow up to 4 characters for the port number
-	 */
-
-	for (n = 1; n < 9999; ++n) {
-		char buf[jack_port_name_size()];
-		PortSet::iterator i = _outputs.begin();
-
-		snprintf (buf, jack_port_name_size(), _("%s %u"), base, n);
-
-		for ( ; i != _outputs.end(); ++i) {
-			if (i->name() == buf) {
-				break;
-			}
-		}
-
-		if (i == _outputs.end()) {
-			break;
-		}
-	}
-	
-	return n;
-}
-
-void
-IO::set_active (bool yn)
-{
-	_active = yn; 
-	 active_changed(); /* EMIT SIGNAL */
-}
 
 AudioPort*
-IO::audio_input(uint32_t n) const
+IO::audio(uint32_t n) const
 {
-	return dynamic_cast<AudioPort*>(input(n));
-}
+	return _ports.nth_audio_port (n);
 
-AudioPort*
-IO::audio_output(uint32_t n) const
-{
-	return dynamic_cast<AudioPort*>(output(n));
 }
 
 MidiPort*
-IO::midi_input(uint32_t n) const
+IO::midi(uint32_t n) const
 {
-	return dynamic_cast<MidiPort*>(input(n));
+	return _ports.nth_midi_port (n);
 }
-
-MidiPort*
-IO::midi_output(uint32_t n) const
-{
-	return dynamic_cast<MidiPort*>(output(n));
-}
-
-void
-IO::set_phase_invert (bool yn, void *src)
-{
-	if (_phase_invert != yn) {
-		_phase_invert = yn;
-		//  phase_invert_changed (src); /* EMIT SIGNAL */
-	}
-}
-
-void
-IO::set_denormal_protection (bool yn, void *src)
-{
-	if (_denormal_protection != yn) {
-		_denormal_protection = yn;
-		//  denormal_protection_changed (src); /* EMIT SIGNAL */
-	}
-}
-
-void
-IO::update_port_total_latencies ()
-{
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		_session.engine().update_total_latency (*i);
-	}
-
-	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		_session.engine().update_total_latency (*i);
-	}
-}
-
 
 /**
  *  Setup bundles that describe our inputs and outputs. Also creates bundles if necessary.
  */
 
 void
-IO::setup_bundles_for_inputs_and_outputs ()
-{
-	setup_bundle_for_inputs ();
-	setup_bundle_for_outputs ();
-}
-
-
-void
-IO::setup_bundle_for_inputs ()
+IO::setup_bundles ()
 {
         char buf[32];
 
-	if (!_bundle_for_inputs) {
-		_bundle_for_inputs.reset (new Bundle (true));
+	if (!_bundle) {
+		_bundle.reset (new Bundle (true));
 	}
 
-	_bundle_for_inputs->suspend_signals ();
+	_bundle->suspend_signals ();
 
-	_bundle_for_inputs->set_type (default_type ());
+	_bundle->set_type (default_type ());
 
-	_bundle_for_inputs->remove_channels ();
+	_bundle->remove_channels ();
 
-        snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
-        _bundle_for_inputs->set_name (buf);
-	uint32_t const ni = inputs().num_ports();
+	if (_direction == Input) {
+		snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
+	} else {
+		snprintf(buf, sizeof (buf), _("%s out"), _name.c_str());
+	}
+        _bundle->set_name (buf);
+	uint32_t const ni = _ports.num_ports();
 	for (uint32_t i = 0; i < ni; ++i) {
-		_bundle_for_inputs->add_channel (bundle_channel_name (i, ni));
-		_bundle_for_inputs->set_port (i, _session.engine().make_port_name_non_relative (inputs().port(i)->name()));
+		_bundle->add_channel (bundle_channel_name (i, ni));
+		_bundle->set_port (i, _session.engine().make_port_name_non_relative (_ports.port(i)->name()));
 	}
 
-	_bundle_for_inputs->resume_signals ();
+	_bundle->resume_signals ();
 }
 
-
-void
-IO::setup_bundle_for_outputs ()
-{
-        char buf[32];
-
-	if (!_bundle_for_outputs) {
-		_bundle_for_outputs.reset (new Bundle (false));
-	}
-
-	_bundle_for_outputs->suspend_signals ();
-
-	_bundle_for_outputs->set_type (default_type ());
-
-	_bundle_for_outputs->remove_channels ();
-
-        snprintf(buf, sizeof (buf), _("%s out"), _name.c_str());
-        _bundle_for_outputs->set_name (buf);
-	uint32_t const no = outputs().num_ports();
-	for (uint32_t i = 0; i < no; ++i) {
-		_bundle_for_outputs->add_channel (bundle_channel_name (i, no));
-		_bundle_for_outputs->set_port (i, _session.engine().make_port_name_non_relative (outputs().port(i)->name()));
-	}
-
-	_bundle_for_outputs->resume_signals ();
-}
-
-
-/** @return Bundles connected to our inputs */
+/** @return Bundles connected to our ports */
 BundleList
-IO::bundles_connected_to_inputs ()
+IO::bundles_connected ()
 {
 	BundleList bundles;
 	
 	/* User bundles */
-	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_inputs.begin(); i != _bundles_connected_to_inputs.end(); ++i) {
+	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
 		bundles.push_back (i->bundle);
 	}
 
 	/* Session bundles */
 	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->connected_to (_bundle_for_inputs, _session.engine())) {
+		if ((*i)->connected_to (_bundle, _session.engine())) {
 			bundles.push_back (*i);
 		}
 	}
 
 	/* Route bundles */
+
 	boost::shared_ptr<ARDOUR::RouteList> r = _session.get_routes ();
-	for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->bundle_for_outputs()->connected_to (_bundle_for_inputs, _session.engine())) {
-			bundles.push_back ((*i)->bundle_for_outputs());
+
+	if (_direction == Input) {
+		for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if ((*i)->output()->bundle()->connected_to (_bundle, _session.engine())) {
+				bundles.push_back ((*i)->output()->bundle());
+			}
+		}
+	} else {
+		for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			if ((*i)->input()->bundle()->connected_to (_bundle, _session.engine())) {
+				bundles.push_back ((*i)->input()->bundle());
+			}
 		}
 	}
 	  
 	return bundles;
-}
-
-
-/* @return Bundles connected to our outputs */
-BundleList
-IO::bundles_connected_to_outputs ()
-{
-	BundleList bundles;
-
-	/* User bundles */
-	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected_to_outputs.begin(); i != _bundles_connected_to_outputs.end(); ++i) {
-		bundles.push_back (i->bundle);
-	}
-
-	/* Session bundles */
-	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
-	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->connected_to (_bundle_for_outputs, _session.engine())) {
-			bundles.push_back (*i);
-		}
-	}
-
-	/* Route bundles */
-	boost::shared_ptr<ARDOUR::RouteList> r = _session.get_routes ();
-	for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->bundle_for_inputs()->connected_to (_bundle_for_outputs, _session.engine())) {
-			bundles.push_back ((*i)->bundle_for_inputs());
-		}
-	}
-
-	return bundles;	
 }
 
 
@@ -2596,22 +1221,6 @@ IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 	changed = b->Changed.connect (
 		sigc::mem_fun (*io, &IO::bundle_changed)
 		);
-}
-
-void
-IO::prepare_inputs (nframes_t nframes)
-{
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-}
-
-void
-IO::flush_outputs (nframes_t nframes)
-{
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		(*i).flush_buffers (nframes, _output_offset);
-	}
 }
 
 std::string
@@ -2654,29 +1263,18 @@ IO::set_name_in_state (XMLNode& node, const string& new_name)
 	} 
 }
 
-void
-IO::cycle_start (nframes_t nframes)
-{
-	_output_offset = 0;
-}
-
-void
-IO::increment_output_offset (nframes_t n)
-{
-	_output_offset += n;
-}
-
 bool
 IO::connected_to (boost::shared_ptr<const IO> other) const
 {
+	assert (_direction != other->direction());
+
 	uint32_t i, j;
-	
-	uint32_t no = n_outputs().n_total();
-	uint32_t ni = other->n_inputs ().n_total();
+	uint32_t no = n_ports().n_total();
+	uint32_t ni = other->n_ports ().n_total();
 	
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
-			if (output(i)->connected_to (other->input(j)->name())) {
+			if (nth(i)->connected_to (other->nth(j)->name())) {
 				return true;
 			}
 		}
@@ -2685,3 +1283,67 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 	return false;
 }
 
+void
+IO::process_input (boost::shared_ptr<Processor> proc, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+{
+	BufferSet bufs;
+
+	/* don't read the data into new buffers - just use the port buffers directly */
+
+	bufs.attach_buffers (_ports, nframes, 0);
+	proc->run_in_place (bufs, start_frame, end_frame, nframes);
+}
+
+void
+IO::collect_input (BufferSet& bufs, nframes_t nframes, ChanCount offset)
+{
+	assert(bufs.available() >= _ports.count());
+	
+	if (_ports.count() == ChanCount::ZERO) {
+		return;
+	}
+
+	bufs.set_count (_ports.count());
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		PortSet::iterator   i = _ports.begin(*t);
+		BufferSet::iterator b = bufs.begin(*t);
+
+		for (uint32_t off = 0; off < offset.get(*t); ++off, ++b) {
+			if (b == bufs.end(*t)) {
+				continue;
+			}
+		}
+
+		for ( ; i != _ports.end(*t); ++i, ++b) {
+			Buffer& bb (i->get_buffer (nframes));
+			b->read_from (bb, nframes);
+		}
+	}
+}
+
+void
+IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset)
+{
+	// Copy any buffers 1:1 to outputs
+	
+	PortSet::iterator o = _ports.begin(type);
+	BufferSet::iterator i = bufs.begin(type);
+	BufferSet::iterator prev = i;
+
+	while (i != bufs.end(type) && o != _ports.end (type)) {
+		Buffer& port_buffer (o->get_buffer (nframes));
+		port_buffer.read_from (*i, nframes, offset);
+		prev = i;
+		++i;
+		++o;
+	}
+	
+	// Copy last buffer to any extra outputs
+
+	while (o != _ports.end(type)) {
+		Buffer& port_buffer (o->get_buffer (nframes));
+		port_buffer.read_from (*prev, nframes, offset);
+		++o;
+	}
+}

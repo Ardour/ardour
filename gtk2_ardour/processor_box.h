@@ -205,7 +205,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	gint idle_delete_processor (boost::weak_ptr<ARDOUR::Processor>);
 
-	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::ProcessorStreams streams, boost::shared_ptr<ARDOUR::IO> io);
+	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::ProcessorStreams streams);
 
 	static ProcessorBox* _current_processor_box;
 	static bool enter_box (GdkEventCrossing*, ProcessorBox*);

@@ -33,9 +33,11 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/buffer.h"
+#include "ardour/delivery.h"
 #include "ardour/port.h"
 #include "ardour/audio_port.h"
 #include "ardour/midi_port.h"
+#include "ardour/meter.h"
 #include "ardour/session.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/utils.h"
@@ -358,9 +360,9 @@ AudioEngine::process_callback (nframes_t nframes)
 		return 0;
 	}
 
-	/* tell all IO objects that we're starting a new cycle */
+	/* tell all relevant objects that we're starting a new cycle */
 
-	IO::CycleStart (nframes);
+	Delivery::CycleStart (nframes);
 	Port::set_port_offset (0);
 
 	/* tell all Ports that we're starting a new cycle */
@@ -519,7 +521,7 @@ AudioEngine::meter_thread ()
 		if (g_atomic_int_get(&m_meter_exit)) {
 			break;
 		}
-		IO::update_meters ();
+		Metering::update_meters ();
 	}
 }
 

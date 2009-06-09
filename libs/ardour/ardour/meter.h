@@ -20,6 +20,7 @@
 #define __ardour_meter_h__
 
 #include <vector>
+#include <sigc++/slot.h>
 #include "ardour/types.h"
 #include "ardour/processor.h"
 #include "pbd/fastlog.h"
@@ -30,12 +31,28 @@ class BufferSet;
 class ChanCount;
 class Session;
 
+class Metering {
+  public:
+	static void               update_meters ();
+	static sigc::signal<void> Meter;
+
+	static sigc::connection   connect (sigc::slot<void> the_slot);
+	static void               disconnect (sigc::connection& c);
+
+  private:
+	/* this object is not meant to be instantiated */
+	virtual void foo() = 0;
+
+	static Glib::StaticMutex    m_meter_signal_lock;
+};
 
 /** Meters peaks on the input and stores them for access.
  */
 class PeakMeter : public Processor {
 public:
 	PeakMeter(Session& s) : Processor(s, "Meter") {}
+
+	void meter();
 
 	void reset ();
 	void reset_max ();
@@ -66,7 +83,6 @@ public:
 
 private:
 	friend class IO;
-	void meter();
 
 	std::vector<float> _peak_power;
 	std::vector<float> _visible_peak_power;

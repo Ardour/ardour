@@ -55,134 +55,83 @@ class AudioPort;
 class BufferSet;
 class Bundle;
 class MidiPort;
-class Panner;
 class PeakMeter;
 class Port;
+class Processor;
 class Session;
 class UserBundle;
 
-/** A collection of input and output ports with connections.
+/** A collection of ports (all input or all output) with connections.
  *
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public SessionObject, public AutomatableControls, public Latent
+class IO : public SessionObject, public Latent
 {
   public:
 	static const std::string state_node_name;
 
-	IO (Session&, const std::string& name, DataType default_type = DataType::AUDIO);
+	enum Direction {
+		Input,
+		Output
+	};
+
+	IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO);
 	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	
 	virtual ~IO();
 
-	bool active() const { return _active; }
-	void set_active (bool yn);
-	
+	Direction direction() const { return _direction; }
+
 	DataType default_type() const         { return _default_type; }
 	void     set_default_type(DataType t) { _default_type = t; }
+
+	bool active() const { return _active; }
+	void set_active(bool yn) { _active = yn; }
 	
 	bool set_name (const std::string& str);
 
 	virtual void silence  (nframes_t);
 
-	void collect_input  (BufferSet& bufs, nframes_t nframes, ChanCount offset=ChanCount::ZERO);
-	void deliver_output (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
-	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	int ensure_io (ChanCount cnt, bool clear, void *src);
 
-	BufferSet& output_buffers() { return *_output_buffers; }
+	int connect_ports_to_bundle (boost::shared_ptr<Bundle>, void *);
+	int disconnect_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
 
-	gain_t         gain () const { return _gain_control->user_float(); }
-	virtual gain_t effective_gain () const;
+	BundleList bundles_connected ();
+
+	boost::shared_ptr<Bundle> bundle () { return _bundle; }
 	
-	void set_denormal_protection (bool yn, void *src);
-	bool denormal_protection() const { return _denormal_protection; }
-	
-	void set_phase_invert (bool yn, void *src);
-	bool phase_invert() const { return _phase_invert; }
-
-	void reset_panner ();
-	
-	boost::shared_ptr<Amp> amp() const { return _amp; }
-
-	PeakMeter&       peak_meter()       { return *_meter.get(); }
-	const PeakMeter& peak_meter() const { return *_meter.get(); }
-	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
-
-	boost::shared_ptr<Panner> panner() const { return _panner; }
-	
-	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
-
-	int connect_input_ports_to_bundle (boost::shared_ptr<Bundle>, void *);
-	int disconnect_input_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
-	int connect_output_ports_to_bundle (boost::shared_ptr<Bundle>, void *);
-	int disconnect_output_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
-
-	BundleList bundles_connected_to_inputs ();
-	BundleList bundles_connected_to_outputs ();
-
-	boost::shared_ptr<Bundle> bundle_for_inputs () { return _bundle_for_inputs; }
-	boost::shared_ptr<Bundle> bundle_for_outputs () { return _bundle_for_outputs; }
-	
-	int add_input_port (std::string source, void *src, DataType type = DataType::NIL);
-	int add_output_port (std::string destination, void *src, DataType type = DataType::NIL);
-
-	int remove_input_port (Port *, void *src);
-	int remove_output_port (Port *, void *src);
-
-	int set_input (Port *, void *src);
-
-	int connect_input (Port *our_port, std::string other_port, void *src);
-	int connect_output (Port *our_port, std::string other_port, void *src);
-
-	int disconnect_input (Port *our_port, std::string other_port, void *src);
-	int disconnect_output (Port *our_port, std::string other_port, void *src);
-
-	int disconnect_inputs (void *src);
-	int disconnect_outputs (void *src);
-
+	int add_port (std::string connection, void *src, DataType type = DataType::NIL);
+	int remove_port (Port *, void *src);
+	int connect (Port *our_port, std::string other_port, void *src);
+	int disconnect (Port *our_port, std::string other_port, void *src);
+	int disconnect (void *src);
 	bool connected_to (boost::shared_ptr<const IO>) const;
 
 	nframes_t signal_latency() const { return _own_latency; }
-	nframes_t output_latency() const;
-	nframes_t input_latency() const;
+	nframes_t latency() const;
 	void      set_port_latency (nframes_t);
 
 	void update_port_total_latencies ();
 
-	const PortSet& inputs()  const { return _inputs; }
-	const PortSet& outputs() const { return _outputs; }
+	PortSet& ports() { return _ports; }
+	const PortSet& ports() const { return _ports; }
 
-	Port *output (uint32_t n) const {
-		if (n < _outputs.num_ports()) {
-			return _outputs.port(n);
+	Port *nth (uint32_t n) const {
+		if (n < _ports.num_ports()) {
+			return _ports.port(n);
 		} else {
 			return 0;
 		}
 	}
 
-	Port *input (uint32_t n) const {
-		if (n < _inputs.num_ports()) {
-			return _inputs.port(n);
-		} else {
-			return 0;
-		}
-	}
+	AudioPort* audio(uint32_t n) const;
+	MidiPort*  midi(uint32_t n) const;
 
-	AudioPort* audio_input(uint32_t n) const;
-	AudioPort* audio_output(uint32_t n) const;
-	MidiPort*  midi_input(uint32_t n) const;
-	MidiPort*  midi_output(uint32_t n) const;
+	const ChanCount& n_ports ()  const { return _ports.count(); }
 
-	const ChanCount& n_inputs ()  const { return _inputs.count(); }
-	const ChanCount& n_outputs () const { return _outputs.count(); }
-
-	void attach_buffers(ChanCount ignored);
-	
-	sigc::signal<void>                active_changed;
-
-	sigc::signal<void,IOChange,void*> input_changed;
-	sigc::signal<void,IOChange,void*> output_changed;
+	sigc::signal<void,IOChange,void*> changed;
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
@@ -192,130 +141,45 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	static int  enable_connecting (void);
 	static int  disable_ports (void);
 	static int  enable_ports (void);
-	static int  disable_panners (void);
-	static int  reset_panners (void);
 	
-	static sigc::signal<int>            PortsLegal;
-	static sigc::signal<int>            PannersLegal;
-	static sigc::signal<int>            ConnectingLegal;
-	/// raised when the number of input or output ports changes
-	static sigc::signal<void,ChanCount> PortCountChanged;
-	static sigc::signal<void,nframes_t> CycleStart;
+	static sigc::signal<void,ChanCount> PortCountChanged; // emitted when the number of ports changes
 
-	static void update_meters();
 	static std::string name_from_state (const XMLNode&);
 	static void set_name_in_state (XMLNode&, const std::string&);
 
-  private: 
-	
-	static sigc::signal<void>   Meter;
-	static Glib::StaticMutex    m_meter_signal_lock;
-	sigc::connection            m_meter_connection;
-
-  public:
-    
-	/* automation */
-
-	struct GainControl : public AutomationControl {
-	    GainControl (std::string name, IO* i, const Evoral::Parameter &param,
-		    boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>() )
-			: AutomationControl (i->_session, param, al, name )
-			, _io (i)
-		{}
-	 
-	    void set_value (float val);
-	    float get_value (void) const;
-   
-	    IO* _io;
-	};
-
-	boost::shared_ptr<GainControl> gain_control() {
-		return _gain_control;
-	}
-	boost::shared_ptr<const GainControl> gain_control() const {
-		return _gain_control;
-	}
-
-	void clear_automation ();
-	
-	void set_parameter_automation_state (Evoral::Parameter, AutoState);
-
-	virtual void transport_stopped (nframes_t now);
-	virtual void automation_snapshot (nframes_t now, bool force);
-
-	void start_pan_touch (uint32_t which);
-	void end_pan_touch (uint32_t which);
-
-	void defer_pan_reset ();
-	void allow_pan_reset ();
-
-	/* the session calls this for master outs before
-	   anyone else. controls outs too, at some point.
+	/* we have to defer/order port connection. this is how we do it.
 	*/
 
+	static sigc::signal<int> ConnectingLegal;
+	static bool              connecting_legal;
+
 	XMLNode *pending_state_node;
-	int ports_became_legal ();
+	
+	/* three utility functions - this just seems to be simplest place to put them */
+
+	void collect_input (BufferSet& bufs, nframes_t nframes, ChanCount offset);
+	void process_input (boost::shared_ptr<Processor>, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset);
+
+	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
+
+	int set_ports (const std::string& str);
 
   private:
 	mutable Glib::Mutex io_lock;
 
   protected:
-	BufferSet*          _output_buffers; //< Set directly to output port buffers
-	bool                _active;
-	gain_t              _gain;
-	Glib::Mutex          declick_lock;
-	PortSet             _outputs;
-	PortSet             _inputs;
-	bool                 no_panner_reset;
-	bool                _phase_invert;
-	bool                _denormal_protection;
-	XMLNode*             deferred_state;
-	DataType            _default_type;
-	nframes_t           _output_offset;
-	
-	boost::shared_ptr<Amp>       _amp;
-	boost::shared_ptr<PeakMeter> _meter;
-	boost::shared_ptr<Panner>    _panner;
-
-	virtual void prepare_inputs (nframes_t nframes);
-	virtual void flush_outputs (nframes_t nframes);
-
-	virtual void set_deferred_state() {}
-
-	virtual uint32_t pans_required() const
-		{ return _inputs.count().n_audio(); }
-
-	boost::shared_ptr<GainControl> _gain_control;
-
-	virtual void   set_gain (gain_t g, void *src);
-	void           inc_gain (gain_t delta, void *src);
-
-	virtual int load_automation (std::string path);
-
-	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
-
-	int set_inputs (const std::string& str);
-	int set_outputs (const std::string& str);
-
-	void increment_output_offset (nframes_t);
-	void cycle_start (nframes_t);
-
-	static bool connecting_legal;
-	static bool ports_legal;
-
+	PortSet   _ports;
+	Direction _direction;
+	DataType _default_type;
+	bool     _active;
+            
   private:
-	static bool panners_legal;
-
-	void copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes);
 
 	int connecting_became_legal ();
-	int panners_became_legal ();
 	sigc::connection connection_legal_c;
-	sigc::connection port_legal_c;
-	sigc::connection panner_legal_c;
 
-	boost::shared_ptr<Bundle> _bundle_for_inputs; ///< a bundle representing our inputs
-	boost::shared_ptr<Bundle> _bundle_for_outputs; ///< a bundle representing our outputs
+	boost::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
 
 	struct UserBundleInfo {
 		UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
@@ -324,45 +188,31 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 		sigc::connection changed;
 	};
 	
-	std::vector<UserBundleInfo> _bundles_connected_to_outputs; ///< user bundles connected to our outputs
-	std::vector<UserBundleInfo> _bundles_connected_to_inputs; ///< user bundles connected to our inputs
+	std::vector<UserBundleInfo> _bundles_connected; ///< user bundles connected to our ports
 
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
-
 	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
 	
-	int set_sources (std::vector<std::string>&, void *src, bool add);
-	int set_destinations (std::vector<std::string>&, void *src, bool add);
+	int ensure_ports (ChanCount, bool clear, bool lockit, void *src);
 
-	int ensure_inputs (ChanCount, bool clear, bool lockit, void *src);
-	int ensure_outputs (ChanCount, bool clear, bool lockit, void *src);
-
-	void check_bundles_connected_to_inputs ();
-	void check_bundles_connected_to_outputs ();
+	void check_bundles_connected ();
 	void check_bundles (std::vector<UserBundleInfo>&, const PortSet&);
 
 	void bundle_changed (Bundle::Change);
 
 
-	int get_port_counts (const XMLNode& node, ChanCount& in, ChanCount& out,
-			     boost::shared_ptr<Bundle>& ic, boost::shared_ptr<Bundle>& oc);
+	int get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle>& c);
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
-	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name, const std::string &default_name, const std::string &connection_type_name);
 
-	virtual void setup_peak_meters ();
-	void meter ();
+	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name);
 
-	bool ensure_inputs_locked (ChanCount, bool clear, void *src);
-	bool ensure_outputs_locked (ChanCount, bool clear, void *src);
+	bool ensure_ports_locked (ChanCount, bool clear, void *src);
 
-	std::string build_legal_port_name (DataType type, bool for_input);
-	int32_t find_input_port_hole (const char* base);
-	int32_t find_output_port_hole (const char* base);
+	std::string build_legal_port_name (DataType type);
+	int32_t find_port_hole (const char* base);
 
-	void setup_bundles_for_inputs_and_outputs ();
-	void setup_bundle_for_inputs ();
-	void setup_bundle_for_outputs ();
+	void setup_bundles ();
 	std::string bundle_channel_name (uint32_t, uint32_t) const;
 };
 

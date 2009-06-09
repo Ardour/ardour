@@ -36,6 +36,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/io_processor.h"
 #include "ardour/panner.h"
+#include "ardour/meter.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
@@ -140,8 +141,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 	diskstream->deprecated_io_node = 0;
 
 	if ((prop = node.property ("gain")) != 0) {
-		set_gain (atof (prop->value().c_str()), this);
-		_gain = _gain_control->user_float();
+		_amp->set_gain (atof (prop->value().c_str()), this);
 	}
 
 	if ((prop = node.property ("input-connection")) != 0) {
@@ -160,10 +160,10 @@ AudioTrack::deprecated_use_diskstream_connections ()
 			}
 		}
 
-		connect_input_ports_to_bundle (c, this);
+		_input->connect_ports_to_bundle (c, this);
 
 	} else if ((prop = node.property ("inputs")) != 0) {
-		if (set_inputs (prop->value())) {
+		if (_input->set_ports (prop->value())) {
 		  	error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
 			return -1;
 		}
@@ -176,14 +176,14 @@ int
 AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void *src)
 {
 	_diskstream = ds;
-	_diskstream->set_io (*this);
+	_diskstream->set_io (*(_input.get()));
 	_diskstream->set_destructive (_mode == Destructive);
 	_diskstream->set_non_layered (_mode == NonLayered);
 
 	if (audio_diskstream()->deprecated_io_node) {
 
-		if (!connecting_legal) {
-			ConnectingLegal.connect (mem_fun (*this, &AudioTrack::deprecated_use_diskstream_connections));
+		if (!IO::connecting_legal) {
+			IO::ConnectingLegal.connect (mem_fun (*this, &AudioTrack::deprecated_use_diskstream_connections));
 		} else {
 			deprecated_use_diskstream_connections ();
 		}
@@ -193,7 +193,7 @@ AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void *src)
 	_diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
-	ic_connection = input_changed.connect (mem_fun (*_diskstream, &Diskstream::handle_input_change));
+	ic_connection = _input->changed.connect (mem_fun (*_diskstream, &Diskstream::handle_input_change));
 
 	DiskstreamChanged (); /* EMIT SIGNAL */
 
@@ -479,8 +479,6 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 
 	transport_frame = _session.transport_frame();
 
-	prepare_inputs (nframes);
-
 	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
 
 		/* need to do this so that the diskstream sets its
@@ -501,7 +499,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 	/* special condition applies */
 	
 	if (_meter_point == MeterInput) {
-		just_meter_input (start_frame, end_frame, nframes);
+		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
 
 	if (diskstream->record_enabled() && !can_record && !_session.config.get_auto_input()) {
@@ -599,6 +597,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
+#ifdef XXX_MOVE_THIS_TO_AMP
 			Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
 			
 			if (am.locked() && gain_control()->automation_playback()) {
@@ -606,6 +605,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 						gain_control()->list()->curve().rt_safe_get_vector (
 							start_frame, end_frame, _session.gain_automation_buffer(), nframes));
 			}
+#endif
 		}
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick);
@@ -759,9 +759,9 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	new_playlist = PlaylistFactory::create (DataType::AUDIO, _session, new_playlist_name, false);
 
-	_freeze_record.gain = _gain;
-	_freeze_record.gain_automation_state = _gain_control->automation_state();
-	_freeze_record.pan_automation_state = _panner->automation_state();
+	_freeze_record.gain = _amp->gain();
+	_freeze_record.gain_automation_state = _amp->gain_control()->automation_state();
+	/* XXX need main outs automation state _freeze_record.pan_automation_state = _mainpanner->automation_state(); */
 
 	region_name = new_playlist_name;
 
@@ -784,8 +784,8 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	/* reset stuff that has already been accounted for in the freeze process */
 	
 	set_gain (1.0, this);
-	_gain_control->set_automation_state (Off);
-	_panner->set_automation_state (Off);
+	_amp->gain_control()->set_automation_state (Off);
+	/* XXX need to use _main_outs _panner->set_automation_state (Off); */
 
 	_freeze_record.state = Frozen;
 	FreezeChange(); /* EMIT SIGNAL */
@@ -811,8 +811,8 @@ AudioTrack::unfreeze ()
 		
 		_freeze_record.playlist.reset ();
 		set_gain (_freeze_record.gain, this);
-		_gain_control->set_automation_state (_freeze_record.gain_automation_state);
-		_panner->set_automation_state (_freeze_record.pan_automation_state);
+		_amp->gain_control()->set_automation_state (_freeze_record.gain_automation_state);
+		/* XXX need to use _main_outs _panner->set_automation_state (_freeze_record.pan_automation_state); */
 	}
 
 	_freeze_record.state = UnFrozen;

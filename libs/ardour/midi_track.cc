@@ -27,6 +27,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/buffer_set.h"
+#include "ardour/delivery.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
 #include "ardour/midi_diskstream.h"
@@ -94,14 +95,14 @@ int
 MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
 {
 	_diskstream = ds;
-	_diskstream->set_io (*this);
+	_diskstream->set_io (*(_input.get()));
 	_diskstream->set_destructive (_mode == Destructive);
 
 	_diskstream->set_record_enabled (false);
 	//_diskstream->monitor_input (false);
 
 	ic_connection.disconnect();
-	ic_connection = input_changed.connect (mem_fun (*_diskstream, &MidiDiskstream::handle_input_change));
+	ic_connection = _input->changed.connect (mem_fun (*_diskstream, &MidiDiskstream::handle_input_change));
 
 	DiskstreamChanged (); /* EMIT SIGNAL */
 
@@ -113,11 +114,14 @@ MidiTrack::use_diskstream (string name)
 {
 	boost::shared_ptr<MidiDiskstream> dstream;
 
+	cerr << "\n\n\nMIDI use diskstream\n";
+
 	if ((dstream = boost::dynamic_pointer_cast<MidiDiskstream>(_session.diskstream_by_name (name))) == 0) {
 		error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
 	
+	cerr << "\n\n\nMIDI found DS\n";
 	return set_diskstream (dstream);
 }
 
@@ -191,6 +195,8 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 		   that means "you should create a new diskstream here, not look for
 		   an old one.
 		*/
+
+		cerr << "\n\n\n\n MIDI track " << name() << " found DS id " << id << endl;
 		
 		if (id == zero) {
 			use_new_diskstream ();
@@ -363,8 +369,6 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 	
-	prepare_inputs (nframes);
-
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
@@ -405,7 +409,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 	/* special condition applies */
 
 	if (_meter_point == MeterInput) {
-		just_meter_input (start_frame, end_frame, nframes);
+		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
 
 	if (diskstream->record_enabled() && !can_record && !_session.config.get_auto_input()) {
@@ -438,7 +442,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 	
 	}
 
-	flush_outputs (nframes);
+	_main_outs->flush (nframes);
 
 	return 0;
 }

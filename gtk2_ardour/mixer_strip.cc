@@ -34,6 +34,7 @@
 #include <gtkmm2ext/bindable_button.h>
 
 #include "ardour/ardour.h"
+#include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/route.h"
@@ -71,20 +72,6 @@ sigc::signal<void,boost::shared_ptr<Route> > MixerStrip::SwitchIO;
 
 int MixerStrip::scrollbar_height = 0;
 
-#ifdef VARISPEED_IN_MIXER_STRIP
-static void 
-speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
-{
-	float val = adj.get_value ();
-
-	if (val == 1.0) {
-		strcpy (buf, "1");
-	} else {
-		snprintf (buf, 32, "%.3f", val);
-	}
-}
-#endif 
-
 MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
  	: AxisView(sess)
 	, RouteUI (sess, _("Mute"), _("Solo"), _("Record"))
@@ -99,8 +86,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
  	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
  	, comment_button (_("Comments"))
-	, speed_adjustment (1.0, 0.001, 4.0, 0.001, 0.1)
-	, speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
 			 
 {
 	init ();
@@ -128,8 +113,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
  	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
  	, comment_button (_("Comments"))
-	, speed_adjustment (1.0, 0.001, 4.0, 0.001, 0.1)
-	, speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
 			 
 {
 	init ();
@@ -146,7 +129,6 @@ MixerStrip::init ()
 	route_ops_menu = 0;
 	ignore_comment_edit = false;
 	ignore_toggle = false;
-	ignore_speed_adjustment = false;
 	comment_window = 0;
 	comment_area = 0;
 	_width_owner = 0;
@@ -340,12 +322,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		button_table.remove (*show_sends_button);
 	}
 
-#ifdef VARISPEED_IN_MIXER_STRIP
-	if (speed_frame->get_parent()) {
-		button_table.remove (*speed_frame);
-	}
-#endif
-
 	RouteUI::set_route (rt);
 
 	delete input_selector;
@@ -354,14 +330,16 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	delete output_selector;
 	output_selector = 0;
 
-	if (_current_send) {
-		_current_send->set_metering (false);
+	boost::shared_ptr<Send> send;
+
+	if (_current_delivery && (send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
+		send->set_metering (false);
 	}
 
-	_current_send.reset ();
+	_current_delivery = _route->main_outs ();
 
-	panners.set_io (rt);
-	gpm.set_io (rt);
+	panners.set_panner (rt->main_outs()->panner());
+	gpm.set_controls (rt, rt->shared_peak_meter(), rt->gain_control(), rt->amp());
 	pre_processor_box.set_route (rt);
 	post_processor_box.set_route (rt);
 
@@ -387,20 +365,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		boost::shared_ptr<AudioTrack> at = audio_track();
 
 		connections.push_back (at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen)));
-
-#ifdef VARISPEED_IN_MIXER_STRIP
-		speed_adjustment.signal_value_changed().connect (mem_fun(*this, &MixerStrip::speed_adjustment_changed));
-		
-		speed_frame.set_name ("BaseFrame");
-		speed_frame.set_shadow_type (Gtk::SHADOW_IN);
-		speed_frame.add (speed_spinner);
-		
-		speed_spinner.set_print_func (speed_printer, 0);
-
-		ARDOUR_UI::instance()->tooltips().set_tip (speed_spinner, _("Varispeed"));
-
-		button_table.attach (speed_frame, 0, 2, 5, 6);
-#endif /* VARISPEED_IN_MIXER_STRIP */
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 		rec_enable_button->show();
@@ -443,9 +407,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	connections.push_back (_route->meter_change.connect (
 			mem_fun(*this, &MixerStrip::meter_changed)));
-	connections.push_back (_route->input_changed.connect (
+	connections.push_back (_route->input()->changed.connect (
 			mem_fun(*this, &MixerStrip::input_changed)));
-	connections.push_back (_route->output_changed.connect (
+	connections.push_back (_route->output()->changed.connect (
 			mem_fun(*this, &MixerStrip::output_changed)));
 	connections.push_back (_route->mix_group_changed.connect (
 			mem_fun(*this, &MixerStrip::mix_group_changed)));
@@ -458,8 +422,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (is_audio_track()) {
 		connections.push_back (audio_track()->DiskstreamChanged.connect (
 			mem_fun(*this, &MixerStrip::diskstream_changed)));
-		connections.push_back (get_diskstream()->SpeedChanged.connect (
-			mem_fun(*this, &MixerStrip::speed_changed)));
 	}
 
 	connections.push_back (_route->NameChanged.connect (
@@ -484,10 +446,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	connect_to_pan ();
 
 	panners.setup_pan ();
-
-	if (is_audio_track()) {
-		speed_changed ();
-	}
 
 	update_diskstream_display ();
 	update_input_display ();
@@ -530,9 +488,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	comment_button.show();
 	group_button.show();
 	group_label.show();
-	speed_spinner.show();
-	speed_label.show();
-	speed_frame.show();
 
 	show ();
 }
@@ -703,7 +658,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 		citems.push_back (SeparatorElem());
 
-		ARDOUR::BundleList current = _route->bundles_connected_to_outputs ();
+		ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
@@ -712,7 +667,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
 		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
-			maybe_add_bundle_to_output_menu ((*i)->bundle_for_inputs(), current);
+			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current);
 		}
 
 		if (citems.size() == 2) {
@@ -734,7 +689,7 @@ void
 MixerStrip::edit_output_configuration ()
 {
 	if (output_selector == 0) {
-		output_selector = new IOSelectorWindow (_session, _route, false);
+		output_selector = new IOSelectorWindow (_session, _route->output());
 	} 
 
 	if (output_selector->is_visible()) {
@@ -748,7 +703,7 @@ void
 MixerStrip::edit_input_configuration ()
 {
 	if (input_selector == 0) {
-		input_selector = new IOSelectorWindow (_session, _route, true);
+		input_selector = new IOSelectorWindow (_session, _route->input());
 	} 
 
 	if (input_selector->is_visible()) {
@@ -784,7 +739,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
 
-		ARDOUR::BundleList current = _route->bundles_connected_to_inputs ();
+		ARDOUR::BundleList current = _route->input()->bundles_connected ();
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
@@ -793,7 +748,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
 		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
-			maybe_add_bundle_to_input_menu ((*i)->bundle_for_outputs(), current);
+			maybe_add_bundle_to_input_menu ((*i)->output()->bundle(), current);
 		}
 
 		if (citems.size() == 2) {
@@ -817,12 +772,12 @@ MixerStrip::bundle_input_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
 		return;
 	}
 
-	ARDOUR::BundleList current = _route->bundles_connected_to_inputs ();
+	ARDOUR::BundleList current = _route->input()->bundles_connected ();
 
 	if (std::find (current.begin(), current.end(), c) == current.end()) {
-		_route->connect_input_ports_to_bundle (c, this);
+		_route->input()->connect_ports_to_bundle (c, this);
 	} else {
-		_route->disconnect_input_ports_from_bundle (c, this);
+		_route->input()->disconnect_ports_from_bundle (c, this);
 	}
 }
 
@@ -833,12 +788,12 @@ MixerStrip::bundle_output_toggled (boost::shared_ptr<ARDOUR::Bundle> c)
 		return;
 	}
 
-	ARDOUR::BundleList current = _route->bundles_connected_to_outputs ();
+	ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
 	if (std::find (current.begin(), current.end(), c) == current.end()) {
-		_route->connect_output_ports_to_bundle (c, this);
+		_route->output()->connect_ports_to_bundle (c, this);
 	} else {
-		_route->disconnect_output_ports_from_bundle (c, this);
+		_route->output()->disconnect_ports_from_bundle (c, this);
 	}
 }
 
@@ -848,7 +803,7 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 	using namespace Menu_Helpers;
 
  	if (b->ports_are_outputs() == false ||
-	    route()->default_type() != b->type() ||
+	    route()->input()->default_type() != b->type() ||
 	    b->nchannels() != _route->n_inputs().get (b->type ())) {
 		
  		return;
@@ -874,7 +829,7 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 	using namespace Menu_Helpers;
 
  	if (b->ports_are_inputs() == false ||
-	    route()->default_type() != b->type() ||
+	    route()->output()->default_type() != b->type() ||
 	    b->nchannels() != _route->n_outputs().get (b->type ())) {
 		
  		return;
@@ -938,7 +893,7 @@ MixerStrip::connect_to_pan ()
 void
 MixerStrip::update_input_display ()
 {
-	ARDOUR::BundleList const c = _route->bundles_connected_to_inputs ();
+	ARDOUR::BundleList const c = _route->input()->bundles_connected();
 
 	if (c.size() > 1) {
 		input_label.set_text (_("Inputs"));
@@ -960,7 +915,7 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-	ARDOUR::BundleList const c = _route->bundles_connected_to_outputs ();
+	ARDOUR::BundleList const c = _route->output()->bundles_connected ();
 
 	/* XXX: how do we represent >1 connected bundle? */
 	if (c.size() > 1) {
@@ -1269,43 +1224,6 @@ MixerStrip::list_route_operations ()
 	refresh_remote_control_menu();
 }
 
-
-void
-MixerStrip::speed_adjustment_changed ()
-{
-	/* since there is a usable speed adjustment, there has to be a diskstream */
-	if (!ignore_speed_adjustment) {
-		get_diskstream()->set_speed (speed_adjustment.get_value());
-	}
-}
-
-void
-MixerStrip::speed_changed ()
-{
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_speed_display));
-}
-
-void
-MixerStrip::update_speed_display ()
-{
-	float val;
-	
-	val = get_diskstream()->speed();
-
-	if (val != 1.0) {
-		speed_spinner.set_name ("MixerStripSpeedBaseNotOne");
-	} else {
-		speed_spinner.set_name ("MixerStripSpeedBase");
-	}
-
-	if (speed_adjustment.get_value() != val) {
-		ignore_speed_adjustment = true;
-		speed_adjustment.set_value (val);
-		ignore_speed_adjustment = false;
-	}
-}			
-
-
 void
 MixerStrip::set_selected (bool yn)
 {
@@ -1383,12 +1301,10 @@ MixerStrip::map_frozen ()
 		case AudioTrack::Frozen:
 			pre_processor_box.set_sensitive (false);
 			post_processor_box.set_sensitive (false);
-			speed_spinner.set_sensitive (false);
 			break;
 		default:
 			pre_processor_box.set_sensitive (true);
 			post_processor_box.set_sensitive (true);
-			speed_spinner.set_sensitive (true);
 			// XXX need some way, maybe, to retoggle redirect editors
 			break;
 		}
@@ -1499,8 +1415,6 @@ MixerStrip::meter_changed (void *src)
 void
 MixerStrip::switch_io (boost::shared_ptr<Route> target)
 {
-	boost::shared_ptr<IO> to_display;
-
 	if (_route == target || _route->is_master()) {
 		/* don't change the display for the target or the master bus */
 		return;
@@ -1519,22 +1433,28 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 		return;
 	}
 	
-	if (_current_send) {
-		_current_send->set_metering (false);
+	boost::shared_ptr<Send> send;
+
+	if (_current_delivery && (send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
+		send->set_metering (false);
 	}
 	
-	_current_send = _route->send_for (target);
+	_current_delivery = _route->send_for (target->input());
 
-	if (_current_send) {
-		to_display = _current_send->io();
+	if (_current_delivery) {
+		send = boost::dynamic_pointer_cast<Send>(_current_delivery);
+		send->set_metering (true);
+		_current_delivery->GoingAway.connect (mem_fun (*this, &MixerStrip::revert_to_default_display));
+		gain_meter().set_controls (_route, send->meter(), send->amp()->gain_control(), send->amp());
+		panner_ui().set_panner (_current_delivery->panner());
 
-		_current_send->set_metering (true);
-		_current_send->GoingAway.connect (mem_fun (*this, &MixerStrip::revert_to_default_display));
+	} else {
+		_current_delivery = _route->main_outs ();
+		gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->gain_control(), _route->amp());
+		panner_ui().set_panner (_route->main_outs()->panner());
 	}
 	
-	gain_meter().set_io (to_display);
 	gain_meter().setup_meters ();
-	panner_ui().set_io (to_display);
 	panner_ui().setup_pan ();
 }
 
@@ -1544,14 +1464,17 @@ MixerStrip::revert_to_default_display ()
 {
 	show_sends_button->set_active (false);
 	
-	if (_current_send) {
-		_current_send->set_metering (false);
-		_current_send.reset();
-	}
+	boost::shared_ptr<Send> send;
 
-	gain_meter().set_io (_route);
+	if (_current_delivery && (send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
+		send->set_metering (false);
+	}
+	
+	_current_delivery = _route->main_outs();
+
+	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->gain_control(), _route->amp());
 	gain_meter().setup_meters ();
-	panner_ui().set_io (_route);
+	panner_ui().set_panner (_route->main_outs()->panner());
 	panner_ui().setup_pan ();
 }
 

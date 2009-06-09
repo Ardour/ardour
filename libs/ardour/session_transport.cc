@@ -1335,11 +1335,12 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
 		}
 
-		nframes_t old_latency = (*i)->signal_latency ();
+		nframes_t old_latency = (*i)->output()->signal_latency ();
 		nframes_t track_latency = (*i)->update_total_latency ();
 
 		if (old_latency != track_latency) {
-			(*i)->update_port_total_latencies ();
+			(*i)->input()->update_port_total_latencies ();
+			(*i)->output()->update_port_total_latencies ();
 			update_jack = true;
 		}
 

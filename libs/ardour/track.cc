@@ -26,7 +26,7 @@
 #include "ardour/audiosource.h"
 #include "ardour/diskstream.h"
 #include "ardour/io_processor.h"
-#include "ardour/panner.h"
+#include "ardour/meter.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/route_group_specialized.h"
@@ -84,7 +84,7 @@ Track::get_template ()
 void
 Track::toggle_monitor_input ()
 {
-	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
 		i->ensure_monitor_input(!i->monitoring_input());
 	}
 }
@@ -92,32 +92,28 @@ Track::toggle_monitor_input ()
 ARDOUR::nframes_t
 Track::update_total_latency ()
 {
-	nframes_t old = _own_latency;
-
-	if (_user_latency) {
-		_own_latency = _user_latency;
-	} else {
-		_own_latency = 0;
-
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if ((*i)->active ()) {
-				_own_latency += (*i)->signal_latency ();
-			}
+	nframes_t old = _output->effective_latency();
+	nframes_t own_latency = _output->user_latency();
+	
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((*i)->active ()) {
+			own_latency += (*i)->signal_latency ();
 		}
 	}
 
 #undef DEBUG_LATENCY
 #ifdef DEBUG_LATENCY
-	cerr << _name << ": internal redirect (final) latency = " << _own_latency << endl;
+	cerr << _name << ": internal redirect (final) latency = " << own_latency << endl;
 #endif
 
-	set_port_latency (_own_latency);
-
-	if (old != _own_latency) {
+	_output->set_port_latency (own_latency);
+	
+	if (old != own_latency) {
+		_output->set_latency_delay (own_latency);
 		signal_latency_changed (); /* EMIT SIGNAL */
 	}
 
-	return _own_latency;
+	return _output->effective_latency();
 }
 
 Track::FreezeRecord::~FreezeRecord ()
@@ -155,14 +151,14 @@ Track::RecEnableControllable::get_value (void) const
 bool
 Track::record_enabled () const
 {
-	return _diskstream->record_enabled ();
+	return _diskstream && _diskstream->record_enabled ();
 }
 
 bool
 Track::can_record()
 {
 	bool will_record = true;
-	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end() && will_record; ++i) {
+	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end() && will_record; ++i) {
 		if (!i->connected())
 			will_record = false;
 	}
@@ -307,7 +303,7 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			passthru_silence (start_frame, end_frame, nframes, 0);
 		} else {
 			if (_meter_point == MeterInput) {
-				just_meter_input (start_frame, end_frame, nframes);
+				_input->process_input (_meter, start_frame, end_frame, nframes);
 			}
 			passthru_silence (start_frame, end_frame, nframes, 0);
 		}

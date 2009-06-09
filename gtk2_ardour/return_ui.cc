@@ -19,6 +19,7 @@
 
 #include <gtkmm2ext/doi.h>
 
+#include "ardour/amp.h"
 #include "ardour/io.h"
 #include "ardour/return.h"
 
@@ -37,7 +38,7 @@ ReturnUI::ReturnUI (boost::shared_ptr<Return> r, Session& se)
 	, _session (se)
 	, _gpm (se)
 {
- 	_gpm.set_io (r->io());
+ 	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp()->gain_control(), r->amp());
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name ("ReturnUIFrame");
@@ -47,7 +48,7 @@ ReturnUI::ReturnUI (boost::shared_ptr<Return> r, Session& se)
 
 	_vbox.pack_start (_hbox, false, false, false);
 
-	io = manage (new IOSelector (se, r->io(), true));
+	io = manage (new IOSelector (se, r->output()));
 	
 	pack_start (_vbox, false, false);
 
@@ -55,21 +56,19 @@ ReturnUI::ReturnUI (boost::shared_ptr<Return> r, Session& se)
 
 	show_all ();
 
-	//_return->set_metering (true);
-
-	_return->io()->input_changed.connect (mem_fun (*this, &ReturnUI::ins_changed));
-	//_return->io()->output_changed.connect (mem_fun (*this, &ReturnUI::outs_changed));
+	_return->set_metering (true);
+	_return->input()->changed.connect (mem_fun (*this, &ReturnUI::ins_changed));
 	
 	_gpm.setup_meters ();
 	_gpm.set_fader_name ("ReturnUIFrame");
-
+	
 	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::update));
 	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::fast_update));
 }
 
 ReturnUI::~ReturnUI ()
 {
-	//_return->set_metering (false);
+	_return->set_metering (false);
 
 	/* XXX not clear that we need to do this */
 
@@ -111,12 +110,8 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
 
 	set_name ("ReturnUIWindow");
 	
-	going_away_connection = s->GoingAway.connect (
-			mem_fun (*this, &ReturnUIWindow::return_going_away));
-
-	signal_delete_event().connect (bind (
-					       sigc::ptr_fun (just_hide_it),
-					       reinterpret_cast<Window *> (this)));
+	going_away_connection = s->GoingAway.connect (mem_fun (*this, &ReturnUIWindow::return_going_away));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 
 ReturnUIWindow::~ReturnUIWindow ()

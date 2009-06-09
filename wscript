@@ -95,7 +95,7 @@ def set_options(opt):
 			help='Compile with support for LV2 (if slv2 is available)')
 	opt.add_option('--nls', action='store_true', default=True, dest='nls',
 			help='Enable i18n (native language support)')
-	opt.add_option('--surfaces', action='store_true', default=True, dest='surfaces',
+	opt.add_option('--surfaces', action='store_true', default=False, dest='surfaces',
 			help='Build support for control surfaces')
 	opt.add_option('--syslibs', action='store_true', default=True, dest='syslibs',
 			help='Use existing system versions of various libraries instead of internal ones')

@@ -160,6 +160,8 @@ AudioDiskstream::free_working_buffers()
 void
 AudioDiskstream::non_realtime_input_change ()
 {
+	cerr << "AD::NRIC ... " << name() << endl;
+
 	{
 		Glib::Mutex::Lock lm (state_lock);
 
@@ -173,10 +175,10 @@ AudioDiskstream::non_realtime_input_change ()
 			
 			_n_channels.set(DataType::AUDIO, c->size());
 			
-			if (_io->n_inputs().n_audio() > _n_channels.n_audio()) {
-				add_channel_to (c, _io->n_inputs().n_audio() - _n_channels.n_audio());
-			} else if (_io->n_inputs().n_audio() < _n_channels.n_audio()) {
-				remove_channel_from (c, _n_channels.n_audio() - _io->n_inputs().n_audio());
+			if (_io->n_ports().n_audio() > _n_channels.n_audio()) {
+				add_channel_to (c, _io->n_ports().n_audio() - _n_channels.n_audio());
+			} else if (_io->n_ports().n_audio() < _n_channels.n_audio()) {
+				remove_channel_from (c, _n_channels.n_audio() - _io->n_ports().n_audio());
 			}
 		}
 		
@@ -227,14 +229,14 @@ AudioDiskstream::get_input_sources ()
 
 	uint32_t n;
 	ChannelList::iterator chan;
-	uint32_t ni = _io->n_inputs().n_audio();
+	uint32_t ni = _io->n_ports().n_audio();
 	vector<string> connections;
 
 	for (n = 0, chan = c->begin(); chan != c->end() && n < ni; ++chan, ++n) {
 		
 		connections.clear ();
 
-		if (_io->input(n)->get_connections (connections) == 0) {
+		if (_io->nth (n)->get_connections (connections) == 0) {
 		
 			if ((*chan)->source) {
 				// _source->disable_metering ();
@@ -633,7 +635,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 
 	if (nominally_recording || rec_nframes) {
 
-		uint32_t limit = _io->n_inputs ().n_audio();
+		uint32_t limit = _io->n_ports ().n_audio();
 
 		/* one or more ports could already have been removed from _io, but our
 		   channel setup hasn't yet been updated. prevent us from trying to
@@ -656,7 +658,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 				   for recording, and use rec_offset
 				*/
 
-				AudioPort* const ap = _io->audio_input(n);
+				AudioPort* const ap = _io->audio (n);
 				assert(ap);
 				assert(rec_nframes <= ap->get_audio_buffer(nframes).capacity());
 				memcpy (chaninfo->current_capture_buffer, ap->get_audio_buffer (rec_nframes).data(rec_offset), sizeof (Sample) * rec_nframes);
@@ -671,7 +673,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 					goto out;
 				}
 
-				AudioPort* const ap = _io->audio_input(n);
+				AudioPort* const ap = _io->audio (n);
 				assert(ap);
 
 				Sample* buf = ap->get_audio_buffer(nframes).data();
@@ -1822,7 +1824,7 @@ AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<Chan
 void
 AudioDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal() || _io->n_inputs().n_audio() == 0) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0) {
 		return;
 	}
 
@@ -2109,6 +2111,8 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
+
+	cerr << _name << " RWS!!!\n";
 
 	if (!recordable()) {
 		return;

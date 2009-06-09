@@ -41,12 +41,14 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool in)
+IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io)
 	: PortMatrix (session, io->default_type())
 	, _io (io)
-	, _find_inputs_for_io_outputs (in)
 {
 	/* signal flow from 0 to 1 */
+
+	_find_inputs_for_io_outputs = (_io->direction() == IO::Output);
+
 	if (_find_inputs_for_io_outputs) {
 		_other = 1;
 		_ours = 0;
@@ -73,9 +75,7 @@ IOSelector::setup_ports (int dim)
 	} else {
 
 		_port_group->clear ();
-		_port_group->add_bundle (
-			_find_inputs_for_io_outputs ? _io->bundle_for_outputs() : _io->bundle_for_inputs()
-			);
+		_port_group->add_bundle (_io->bundle ());
 	}
 
 	_ports[dim].resume_signals ();
@@ -96,17 +96,9 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 			}
 
 			if (s) {
-				if (!_find_inputs_for_io_outputs) {
-					_io->connect_input (f, *j, 0);
-				} else {
-					_io->connect_output (f, *j, 0);
-				}
+				_io->connect (f, *j, 0);
 			} else {
-				if (!_find_inputs_for_io_outputs) {
-					_io->disconnect_input (f, *j, 0);
-				} else {
-					_io->disconnect_output (f, *j, 0);
-				}
+				_io->disconnect (f, *j, 0);
 			}
 		}
 	}
@@ -147,9 +139,9 @@ uint32_t
 IOSelector::n_io_ports () const
 {
 	if (!_find_inputs_for_io_outputs) {
-		return _io->inputs().num_ports (_io->default_type());
+		return _io->n_ports().get (_io->default_type());
 	} else {
-		return _io->outputs().num_ports (_io->default_type());
+		return _io->n_ports().get (_io->default_type());
 	}
 }
 
@@ -161,27 +153,13 @@ IOSelector::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 
-	if (!_find_inputs_for_io_outputs) {
-
-		try {
-			_io->add_input_port ("", this);
-		}
-
-		catch (AudioEngine::PortRegistrationFailure& err) {
-			MessageDialog msg (_("There are no more JACK ports available."));
-			msg.run ();
-		}
-
-	} else {
-
-		try {
-			_io->add_output_port ("", this);
-		}
-
-		catch (AudioEngine::PortRegistrationFailure& err) {
-			MessageDialog msg (_("There are no more JACK ports available."));
-			msg.run ();
-		}
+	try {
+		_io->add_port ("", this);
+	}
+	
+	catch (AudioEngine::PortRegistrationFailure& err) {
+		MessageDialog msg (_("There are no more JACK ports available."));
+		msg.run ();
 	}
 }
 
@@ -193,11 +171,7 @@ IOSelector::remove_channel (ARDOUR::BundleChannel bc)
 		return;
 	}
 	
-	if (_find_inputs_for_io_outputs) {
-		_io->remove_output_port (f, this);
-	} else {
-		_io->remove_input_port (f, this);
-	}
+	_io->remove_port (f, this);
 }
 
 bool
@@ -206,9 +180,9 @@ IOSelector::list_is_global (int dim) const
 	return (dim == _other);
 }
 
-IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel)
+IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool can_cancel)
 	: ArdourDialog ("I/O selector")
-	, _selector (session, io, !for_input)
+	, _selector (session, io)
 	, add_button (_("Add Port"))
 	, disconnect_button (_("Disconnect All"))
 	, ok_button (can_cancel ? _("OK"): _("Close"))
@@ -327,8 +301,8 @@ IOSelectorWindow::io_name_changed (void* src)
 }
 
 PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
-	: input_selector (sess, pi->io(), true),
-	  output_selector (sess, pi->io(), false)
+	: input_selector (sess, pi->input())
+	, output_selector (sess, pi->output())
 {
 	output_selector.set_min_height_divisor (2);
 	input_selector.set_min_height_divisor (2);

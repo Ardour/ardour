@@ -158,7 +158,7 @@ MIDI::byte
 MIDI::decode_controller_name (const char *name)
 
 {
-	char *lparen;
+	const char *lparen;
 	size_t len;
 
 	if ((lparen = strrchr (name, '(')) != 0) {

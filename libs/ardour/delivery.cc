@@ -20,58 +20,102 @@
 #include <algorithm>
 
 #include "pbd/enumwriter.h"
+#include "pbd/convert.h"
+
 #include "ardour/delivery.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/amp.h"
 #include "ardour/buffer_set.h"
 #include "ardour/configuration.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
+#include "ardour/mute_master.h"
+#include "ardour/panner.h"
+#include "ardour/port.h"
 #include "ardour/session.h"
 
+#include "i18n.h"
+
 using namespace std;
+using namespace PBD;
 using namespace ARDOUR;
+
+sigc::signal<void,nframes_t> Delivery::CycleStart;
+sigc::signal<int>            Delivery::PannersLegal;
+bool                         Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
 
-Delivery::Delivery (Session& s, IO* io, const string& name, Role r)
-	: IOProcessor(s, io, name)
+Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
+	: IOProcessor(s, boost::shared_ptr<IO>(), io, name)
 	, _role (r)
-	, _metering (false)
-	, _muted_by_self (false)
-	, _muted_by_others (false)
+	, _output_buffers (new BufferSet())
+	, _solo_level (0)
+	, _solo_isolated (false)
+	, _mute_master (mm)
 {
+	_output_offset = 0;
+	_current_gain = 1.0;
+	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	
+	_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 }
 
 /* deliver to a new IO object */
 
-Delivery::Delivery (Session& s, const string& name, Role r)
-	: IOProcessor(s, name)
+Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
+	: IOProcessor(s, false, true, name)
 	, _role (r)
-	, _metering (false)
-	, _muted_by_self (false)
-	, _muted_by_others (false)
+	, _output_buffers (new BufferSet())
+	, _solo_level (0)
+	, _solo_isolated (false)
+	, _mute_master (mm)
 {
+	_output_offset = 0;
+	_current_gain = 1.0;
+	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+
+	_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 }
 
-/* reconstruct from XML */
+/* deliver to a new IO object, reconstruct from XML */
 
-Delivery::Delivery (Session& s, const XMLNode& node)
-	: IOProcessor (s, "reset")
+Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
+	: IOProcessor (s, false, true, "reset")
 	, _role (Role (0))
-	, _metering (false)
-	, _muted_by_self (false)
-	, _muted_by_others (false)
+	, _output_buffers (new BufferSet())
+	, _solo_level (0)
+	, _solo_isolated (false)
+	, _mute_master (mm)
 {
+	_output_offset = 0;
+	_current_gain = 1.0;
+	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+
 	if (set_state (node)) {
 		throw failed_constructor ();
 	}
+
+	_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 }
 
+void
+Delivery::cycle_start (nframes_t nframes)
+{
+	_output_offset = 0;
+	_no_outs_cuz_we_no_monitor = false;
+}
+
+void
+Delivery::increment_output_offset (nframes_t n)
+{
+	_output_offset += n;
+}
 
 bool
 Delivery::visible () const
 {
-	if (_role & (Main|Solo)) {
+	if (_role & Main) {
 		return false;
 	}
 
@@ -91,6 +135,8 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 	if (out != in) { // always 1:1
 		return false;
 	}
+
+	reset_panner ();
 	
 	return Processor::configure_io (in, out);
 }
@@ -98,64 +144,46 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 void
 Delivery::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (_io->n_outputs().get (_io->default_type()) == 0) {
+	if (_output->n_ports ().get (_output->default_type()) == 0) {
 		return;
 	}
 
-	if (!active() || _muted_by_self || _muted_by_others) {
-		silence (nframes);
-		if (_metering) {
-			_io->peak_meter().reset();
-		}
-	} else {
+	// this Delivery processor is not a derived type, and thus we assume
+	// we really can modify the buffers passed in (it is almost certainly
+	// the main output stage of a Route). Contrast with Send::run_in_place()
+	// which cannot do this.
 
-		// we have to copy the input, because IO::deliver_output may alter the buffers
-		// in-place, which a send must never do.
-
-		BufferSet& sendbufs = _session.get_mix_buffers (bufs.count());
-
-		sendbufs.read_from(bufs, nframes);
-		assert(sendbufs.count() == bufs.count());
-
-		_io->deliver_output (sendbufs, start_frame, end_frame, nframes);
-		
-		if (_metering) {
-			if (_io->effective_gain() == 0) {
-				_io->peak_meter().reset();
-			} else {
-				_io->peak_meter().run_in_place(_io->output_buffers(), start_frame, end_frame, nframes);
-			}
-		}
-	}
-}
-
-void
-Delivery::set_metering (bool yn)
-{
-	_metering = yn;
+	gain_t tgain = target_gain ();
 	
-	if (!_metering) {
-		/* XXX possible thread hazard here */
-		_io->peak_meter().reset();
+	if (tgain != _current_gain) {
+		Amp::apply_gain (bufs, nframes, _current_gain, tgain);
+		_current_gain = tgain;
 	}
-}
-void
-Delivery::set_self_mute (bool yn)
-{
-	if (yn != _muted_by_self) {
-		_muted_by_self = yn;
-		SelfMuteChange (); // emit signal
+
+	// Attach output buffers to port buffers
+
+	PortSet& ports (_output->ports());
+	output_buffers().attach_buffers (ports, nframes, _output_offset);
+
+	if (_panner && _panner->npanners() && !_panner->bypassed()) {
+
+		// Use the panner to distribute audio to output port buffers
+
+		_panner->run (bufs, output_buffers(), start_frame, end_frame, nframes);
+
+	} else {
+		// Do a 1:1 copy of data to output ports
+
+		if (bufs.count().n_audio() > 0 && ports.count().n_audio () > 0) {
+			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, _output_offset);
+		}
+
+		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
+			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, _output_offset);
+		}
 	}
 }
 
-void
-Delivery::set_nonself_mute (bool yn)
-{
-	if (yn != _muted_by_others) {
-		_muted_by_others = yn;
-		OtherMuteChange (); // emit signal
-	}
-}
 
 XMLNode&
 Delivery::state (bool full_state)
@@ -170,10 +198,8 @@ Delivery::state (bool full_state)
 		node.add_property("type", "delivery");
 	}
 
-	node.add_property("metering", (_metering ? "yes" : "no"));
-	node.add_property("self-muted", (_muted_by_self ? "yes" : "no"));
-	node.add_property("other-muted", (_muted_by_others ? "yes" : "no"));
 	node.add_property("role", enum_2_string(_role));
+	node.add_child_nocopy (_panner->state (full_state));
 
 	return node;
 }
@@ -182,22 +208,236 @@ int
 Delivery::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
+
+	if (IOProcessor::set_state (node)) {
+		return -1;
+	}
 	
 	if ((prop = node.property ("role")) != 0) {
 		_role = Role (string_2_enum (prop->value(), _role));
 	}
 
-	if ((prop = node.property ("metering")) != 0) {
-		set_metering (prop->value() == "yes");
+	if ((prop = node.property ("solo_level")) != 0) {
+		_solo_level = 0; // needed for the reset to work
+		mod_solo_level (atoi (prop->value()));
 	}
 
-	if ((prop = node.property ("self-muted")) != 0) {
-		set_self_mute (prop->value() == "yes");
+	if ((prop = node.property ("solo-isolated")) != 0) {
+		set_solo_isolated (prop->value() == "yes");
 	}
 
-	if ((prop = node.property ("other-muted")) != 0) {
-		set_nonself_mute (prop->value() == "yes");
-	}
+	XMLNode* pan_node = node.child (X_("Panner"));
+	
+	if (pan_node) {
+		cerr << _name << " reset pan state from XML\n";
+		_panner->set_state (*pan_node);
+	} 
+
+	reset_panner ();
 
 	return 0;
+}
+
+void
+Delivery::reset_panner ()
+{
+	cerr << _name << " reset panner - plegal ? " << panners_legal << endl;
+
+	if (panners_legal) {
+		if (!no_panner_reset) {
+			cerr << "\treset panner with " << _output->name() << " = " << _output->n_ports()
+			     << " vs. " << pans_required () << endl;
+			_panner->reset (_output->n_ports().n_audio(), pans_required());
+		}
+	} else {
+		cerr << "\tdefer pan reset till later\n";
+		panner_legal_c.disconnect ();
+		panner_legal_c = PannersLegal.connect (mem_fun (*this, &Delivery::panners_became_legal));
+	}
+}
+
+int
+Delivery::panners_became_legal ()
+{
+	cerr << _name << " panners now legal, outputs @ " << _output << " on " << _output->name()
+	     << " = " << _output->n_ports() << " vs. " << pans_required() << endl;
+	_panner->reset (_output->n_ports().n_audio(), pans_required());
+	_panner->load (); // automation
+	panner_legal_c.disconnect ();
+	return 0;
+}
+
+void
+Delivery::defer_pan_reset ()
+{
+	no_panner_reset = true;
+}
+
+void
+Delivery::allow_pan_reset ()
+{
+	no_panner_reset = false;
+	reset_panner ();
+}
+
+
+int
+Delivery::disable_panners (void)
+{
+	panners_legal = false;
+	return 0;
+}
+
+int
+Delivery::reset_panners ()
+{
+	panners_legal = true;
+	return PannersLegal ();
+}
+
+
+void
+Delivery::start_pan_touch (uint32_t which)
+{
+	if (which < _panner->npanners()) {
+		_panner->pan_control(which)->start_touch();
+	}
+}
+
+void
+Delivery::end_pan_touch (uint32_t which)
+{
+	if (which < _panner->npanners()) {
+		_panner->pan_control(which)->stop_touch();
+	}
+
+}
+
+void
+Delivery::transport_stopped (sframes_t frame)
+{
+	_panner->transport_stopped (frame);
+}
+
+void
+Delivery::flush (nframes_t nframes)
+{
+	/* io_lock, not taken: function must be called from Session::process() calltree */
+	
+	PortSet& ports (_output->ports());
+
+	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
+		(*i).flush_buffers (nframes, _output_offset);
+	}
+}
+
+gain_t
+Delivery::target_gain ()
+{
+	/* if we've been told not to output because its a monitoring situation and
+	   we're not monitoring, then be quiet.
+	*/
+
+	if (_no_outs_cuz_we_no_monitor) {
+		return 0.0;
+	}
+
+	gain_t desired_gain;
+	MuteMaster::MutePoint mp;
+
+	if (_solo_level) {
+		desired_gain = 1.0;
+	} else {
+		if (_solo_isolated) {
+
+			switch (_role) {
+			case Main:
+				mp = MuteMaster::Main;
+				break;
+			case Listen:
+				mp = MuteMaster::Listen;
+				break;
+			case Send:
+			case Insert:
+				if (_placement == PreFader) {
+					mp = MuteMaster::PreFader;
+				} else {
+					mp = MuteMaster::PostFader;
+				}
+				break;
+			}
+
+			desired_gain = _mute_master->mute_gain_at (mp);
+		} else if (_session.soloing()) {
+
+			switch (_role) {
+			case Main:
+				mp = MuteMaster::Main;
+				break;
+			case Listen:
+				mp = MuteMaster::Listen;
+				break;
+			case Send:
+			case Insert:
+				if (_placement == PreFader) {
+					mp = MuteMaster::PreFader;
+				} else {
+					mp = MuteMaster::PostFader;
+				}
+				break;
+			}
+
+			desired_gain = min (Config->get_solo_mute_gain(), _mute_master->mute_gain_at (mp));
+		} else {
+			desired_gain = 1.0;
+		}
+	}
+
+	return desired_gain;
+}
+
+void
+Delivery::mod_solo_level (int32_t delta)
+{
+	if (delta < 0) {
+		if (_solo_level >= (uint32_t) delta) {
+			_solo_level += delta;
+		} else {
+			_solo_level = 0;
+		}
+	} else {
+		_solo_level += delta;
+	}
+}
+
+void
+Delivery::set_solo_isolated (bool yn)
+{
+	_solo_isolated = yn;
+}
+
+void
+Delivery::no_outs_cuz_we_no_monitor (bool yn)
+{
+	_no_outs_cuz_we_no_monitor = yn;
+}
+
+bool
+Delivery::set_name (const std::string& name)
+{
+	bool ret = IOProcessor::set_name (name);
+
+	if (ret) {
+		ret = _panner->set_name (name);
+	}
+
+	return ret;
+}
+
+void
+Delivery::output_changed (IOChange change, void* src)
+{
+	if (change & ARDOUR::ConfigurationChanged) {
+		reset_panner ();
+	}
 }

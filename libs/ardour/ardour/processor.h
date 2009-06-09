@@ -53,24 +53,26 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	
 	virtual ~Processor() { }
 	
-	/** Configuration of a processor on a bus
-	 * (i.e. how to apply to a BufferSet)
-	 */
-	struct Mapping {
-	    ChanCount in;
-	    ChanCount out;
-	};
-
 	virtual bool visible() const { return true; }
 	
 	bool active () const { return _active; }
+
+	/* we keep loose tabs on the "placement" of a Processor. Ultimately,
+	   they are all executed as a single list, but there are some
+	   semantics that require knowing whether a Processor is before
+	   or after the fader, or panner etc. See Route::reorder_processors()
+	   to see where this gets set.
+	*/
+
+	Placement placement() const { return _placement; }
+	void set_placement (Placement p) { _placement = p; }
 	
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
 	
 	virtual nframes_t signal_latency() const { return 0; }
 	
-	virtual void transport_stopped (nframes_t frame) {}
+	virtual void transport_stopped (sframes_t frame) {}
 	
 	virtual void set_block_size (nframes_t nframes) {}
 
@@ -127,7 +129,7 @@ protected:
 	ChanCount _configured_input;
 	ChanCount _configured_output;
 	void*     _gui;  /* generic, we don't know or care what this is */
-	Mapping   _mapping;
+	Placement _placement;
 };
 
 } // namespace ARDOUR

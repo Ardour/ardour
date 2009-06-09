@@ -160,57 +160,58 @@ GainMeterBase::~GainMeterBase ()
 }
 
 void
-GainMeterBase::set_io (boost::shared_ptr<IO> io)
+GainMeterBase::set_controls (boost::shared_ptr<Route> r,
+			     boost::shared_ptr<PeakMeter> pm, 
+			     boost::shared_ptr<AutomationControl> gc,
+			     boost::shared_ptr<Automatable> gc_owner)
 {
  	connections.clear ();
 	
- 	_io = io;
-	
-	if (!_io) {
+	if (!pm && !gc) {
 		level_meter->set_meter (0);
 		gain_slider->set_controllable (boost::shared_ptr<PBD::Controllable>());
+		_meter.reset ();
+		_gain_control.reset ();
+		_route.reset ();
 		return;
 	} 
 
- 	level_meter->set_meter (&_io->peak_meter());
- 	gain_slider->set_controllable (_io->gain_control());
+	_meter = pm;
+	_gain_control = gc;
+	_route = r;
 
-	boost::shared_ptr<Route> r;
-
-	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
-
-		if (!r->is_hidden()) {
-
-			using namespace Menu_Helpers;
+ 	level_meter->set_meter (pm.get());
+	gain_slider->set_controllable (gc);
 	
- 			gain_astate_menu.items().clear ();
-
-			gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
-								      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-									    Evoral::Parameter(GainAutomation), (AutoState) Off)));
-			gain_astate_menu.items().push_back (MenuElem (_("Play"),
-								      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-									    Evoral::Parameter(GainAutomation), (AutoState) Play)));
-			gain_astate_menu.items().push_back (MenuElem (_("Write"),
-								      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-									    Evoral::Parameter(GainAutomation), (AutoState) Write)));
-			gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-								      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-									    Evoral::Parameter(GainAutomation), (AutoState) Touch)));
-			
-			connections.push_back (gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
-			connections.push_back (gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
-			
-			connections.push_back (r->gain_control()->alist()->automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed)));
-			connections.push_back (r->gain_control()->alist()->automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed)));
-
-			gain_automation_state_changed ();
-		}
+	if (!_route || !_route->is_hidden()) {
+		
+		using namespace Menu_Helpers;
+		
+		gain_astate_menu.items().clear ();
+		
+		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
+							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+								    Evoral::Parameter(GainAutomation), (AutoState) Off)));
+		gain_astate_menu.items().push_back (MenuElem (_("Play"),
+							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+								    Evoral::Parameter(GainAutomation), (AutoState) Play)));
+		gain_astate_menu.items().push_back (MenuElem (_("Write"),
+							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+								    Evoral::Parameter(GainAutomation), (AutoState) Write)));
+		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
+							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+								    Evoral::Parameter(GainAutomation), (AutoState) Touch)));
+		
+		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
+		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
+		
+		connections.push_back (gc->alist()->automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed)));
+		connections.push_back (gc->alist()->automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed)));
+		
+		gain_automation_state_changed ();
 	}
 
-	//cerr << "Connect " << this << " to gain change for " << _io->name() << endl;
-
-	connections.push_back (_io->gain_control()->Changed.connect (mem_fun(*this, &GainMeterBase::gain_changed)));
+	connections.push_back (gc->Changed.connect (mem_fun (*this, &GainMeterBase::gain_changed)));
 
 	gain_changed ();
 	show_gain ();
@@ -272,10 +273,8 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 		ResetAllPeakDisplays ();
 	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		boost::shared_ptr<Route> r;
-
-		if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
-			ResetGroupPeakDisplays (r->mix_group());
+		if (_route) {
+			ResetGroupPeakDisplays (_route->mix_group());
 		}
 	} else {
 		reset_peak_display ();
@@ -287,12 +286,7 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 void
 GainMeterBase::reset_peak_display ()
 {
-	boost::shared_ptr<Route> r;
-
-	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
-		r->peak_meter().reset_max();
-	}
-
+	_meter->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
 	peak_display.set_label (_("-Inf"));
@@ -302,13 +296,9 @@ GainMeterBase::reset_peak_display ()
 void
 GainMeterBase::reset_group_peak_display (RouteGroup* group)
 {
-	boost::shared_ptr<Route> r;
-	
-	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
-		if (group == r->mix_group()) {
-			reset_peak_display ();
+	if (_route && group == _route->mix_group()) {
+		reset_peak_display ();
 		}
-	}
 }
 
 void
@@ -354,7 +344,7 @@ GainMeterBase::gain_activated ()
 
 		f = min (f, 6.0f);
 
-		_io->gain_control()->set_value (dB_to_coefficient(f));
+		_gain_control->set_value (dB_to_coefficient(f));
 
 		if (gain_display.has_focus()) {
 			PublicEditor::instance().reset_focus();
@@ -384,7 +374,7 @@ GainMeterBase::gain_adjusted ()
 	//cerr << this << " for " << _io->name() << " GAIN ADJUSTED\n";
 	if (!ignore_toggle) {
 		//cerr << "Set GC\n";
-		_io->gain_control()->set_value (slider_position_to_gain (gain_adjustment.get_value()));
+		_gain_control->set_value (slider_position_to_gain (gain_adjustment.get_value()));
 		//cerr << "Set GC OUT\n";
 	}
 	show_gain ();
@@ -393,7 +383,7 @@ GainMeterBase::gain_adjusted ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	gfloat value = gain_to_slider_position (_io->effective_gain());
+	gfloat value = gain_to_slider_position (_gain_control->get_value());
 	
 	//cerr << this << " for " << _io->name() << " EGAIN = " << value
 	//		<< " AGAIN = " << gain_adjustment.get_value () << endl;
@@ -428,7 +418,7 @@ void
 GainMeterBase::update_gain_sensitive ()
 {
 	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (
-			!(_io->gain_control()->alist()->automation_state() & Play));
+			!(_gain_control->alist()->automation_state() & Play));
 }
 
 
@@ -459,7 +449,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 
 	wait_for_release = false;
 	
-	if ((_route = boost::dynamic_pointer_cast<Route>(_io)) == 0) {
+	if (!_route) {
 		return FALSE;
 	}
 
@@ -482,10 +472,10 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 				}
 			}
 
-			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
+			if (_route && (ev->button == 1 || Keyboard::is_button2_event (ev))) {
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-
+					
 					/* Primary+Tertiary-click applies change to all routes */
 
 					_session.begin_reversible_command (_("meter point change"));
@@ -534,10 +524,8 @@ GainMeterBase::meter_release(GdkEventButton* ev)
 		if (wait_for_release){
 			wait_for_release = false;
 			
-			boost::shared_ptr<Route> r;
-			
-			if ((r = boost::dynamic_pointer_cast<Route>(_io)) != 0) {
-				set_meter_point (*r, old_meter_point);
+			if (_route) {
+				set_meter_point (*_route, old_meter_point);
 			}
 		}
 	}
@@ -566,9 +554,7 @@ GainMeterBase::set_mix_group_meter_point (Route& route, MeterPoint mp)
 void
 GainMeterBase::meter_point_clicked ()
 {
-	boost::shared_ptr<Route> r;
-
-	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
+	if (_route) {
 		/* WHAT? */
 	}
 }
@@ -576,14 +562,14 @@ GainMeterBase::meter_point_clicked ()
 gint
 GainMeterBase::start_gain_touch (GdkEventButton* ev)
 {
-	_io->gain_control()->start_touch ();
+	_gain_control->start_touch ();
 	return FALSE;
 }
 
 gint
 GainMeterBase::end_gain_touch (GdkEventButton* ev)
 {
-	_io->gain_control()->stop_touch ();
+	_gain_control->stop_touch ();
 	return FALSE;
 }
 
@@ -686,10 +672,10 @@ GainMeterBase::gain_automation_style_changed ()
 {
 	switch (_width) {
 	case Wide:
-		gain_automation_style_button.set_label (astyle_string(_io->gain_control()->alist()->automation_style()));
+		gain_automation_style_button.set_label (astyle_string(_gain_control->alist()->automation_style()));
 		break;
 	case Narrow:
-		gain_automation_style_button.set_label  (short_astyle_string(_io->gain_control()->alist()->automation_style()));
+		gain_automation_style_button.set_label  (short_astyle_string(_gain_control->alist()->automation_style()));
 		break;
 	}
 }
@@ -703,14 +689,14 @@ GainMeterBase::gain_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		gain_automation_state_button.set_label (astate_string(_io->gain_control()->alist()->automation_state()));
+		gain_automation_state_button.set_label (astate_string(_gain_control->alist()->automation_state()));
 		break;
 	case Narrow:
-		gain_automation_state_button.set_label (short_astate_string(_io->gain_control()->alist()->automation_state()));
+		gain_automation_state_button.set_label (short_astate_string(_gain_control->alist()->automation_state()));
 		break;
 	}
 
-	x = (_io->gain_control()->alist()->automation_state() != Off);
+	x = (_gain_control->alist()->automation_state() != Off);
 	
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;
@@ -811,8 +797,11 @@ GainMeter::GainMeter (Session& s)
 	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
 }
 
-void
-GainMeter::set_io (boost::shared_ptr<IO> io)
+void 
+GainMeter::set_controls (boost::shared_ptr<Route> r,
+			 boost::shared_ptr<PeakMeter> meter,
+			 boost::shared_ptr<AutomationControl> gain_control,
+			 boost::shared_ptr<Automatable> gc_owner)
 {
 	if (level_meter->get_parent()) {
 		hbox.remove (*level_meter);
@@ -826,30 +815,17 @@ GainMeter::set_io (boost::shared_ptr<IO> io)
 		fader_vbox->remove (gain_automation_state_button);
 	}
 
-	GainMeterBase::set_io (io);
+	GainMeterBase::set_controls (r, meter, gain_control, gc_owner);
 
-	boost::shared_ptr<Route> r;
-
-	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
-		
-		/* 
-		   if we have a non-hidden route (ie. we're not the click or the auditioner), 
-		   pack some route-dependent stuff.
-		*/
-
-		gain_display_box.pack_end (peak_display, true, true);
-		hbox.pack_end (*level_meter, true, true);
-
-		if (!r->is_hidden()) {
-			fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
-		}
-
-	} else {
-
-		/* we're managing a non-Route IO (e.g. Send) */
-
-		gain_display_box.pack_end (peak_display, true, true);
-		hbox.pack_end (*level_meter, true, true);
+	/* 
+	   if we have a non-hidden route (ie. we're not the click or the auditioner), 
+	   pack some route-dependent stuff.
+	*/
+	
+	gain_display_box.pack_end (peak_display, true, true);
+	hbox.pack_end (*level_meter, true, true);
+	
+	if (!r->is_hidden()) {
 		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 	}
 }
@@ -941,7 +917,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 boost::shared_ptr<PBD::Controllable>
 GainMeterBase::get_controllable()
 {
-	return _io->gain_control();
+	return _gain_control;
 }
 
 

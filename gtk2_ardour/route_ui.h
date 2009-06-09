@@ -24,6 +24,7 @@
 
 #include "pbd/xml++.h"
 #include "ardour/ardour.h"
+#include "ardour/mute_master.h"
 #include "ardour/route.h"
 #include "ardour/track.h"
 
@@ -125,17 +126,17 @@ class RouteUI : public virtual AxisView
 	void build_remote_control_menu (void);
 	void refresh_remote_control_menu ();
 
-	void solo_safe_toggle (void*, Gtk::CheckMenuItem*);
-	void toggle_solo_safe (Gtk::CheckMenuItem*);
+	void solo_isolated_toggle (void*, Gtk::CheckMenuItem*);
+	void toggle_solo_isolated (Gtk::CheckMenuItem*);
 
-	void toggle_mute_menu(ARDOUR::mute_type, Gtk::CheckMenuItem*);
+	void toggle_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 	void pre_fader_toggle(void*, Gtk::CheckMenuItem*);
 	void post_fader_toggle(void*, Gtk::CheckMenuItem*);
 	void control_outs_toggle(void*, Gtk::CheckMenuItem*);
 	void main_outs_toggle(void*, Gtk::CheckMenuItem*);
 
 	void build_mute_menu(void);
-	void init_mute_menu(ARDOUR::mute_type, Gtk::CheckMenuItem*);
+	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 	
 	void set_mix_group_solo(boost::shared_ptr<ARDOUR::Route>, bool);
 	void set_mix_group_mute(boost::shared_ptr<ARDOUR::Route>, bool);
@@ -169,7 +170,6 @@ class RouteUI : public virtual AxisView
 	virtual void update_rec_display ();
 	void update_mute_display ();
 
-	bool was_solo_safe;
 	void update_solo_display ();
 
 	virtual void map_frozen ();

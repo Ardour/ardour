@@ -183,7 +183,7 @@ class Multi2dPanner : public StreamPanner
 };
 
 
-class Panner : public Processor
+class Panner : public SessionObject, public AutomatableControls
 {
   public:
 	struct Output {
@@ -204,18 +204,16 @@ class Panner : public Processor
 	void clear_panners ();
 	bool empty() const { return _streampanners.empty(); }
 
-	/// The fundamental Panner function
 	void set_automation_state (AutoState);
 	AutoState automation_state() const;
 	void set_automation_style (AutoStyle);
 	AutoStyle automation_style() const;
 	bool touching() const;
 
-	bool is_in_place () const { return false; }
-	bool is_out_of_place () const { return true; }
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return true; };
 
-	void run_out_of_place(BufferSet& src, BufferSet& dest, sframes_t start_frame, sframes_t end_frames, nframes_t nframes);
+	/// The fundamental Panner function
+	void run (BufferSet& src, BufferSet& dest, sframes_t start_frame, sframes_t end_frames, nframes_t nframes);
 
 	//void* get_inline_gui() const = 0;
 	//void* get_full_gui() const = 0;

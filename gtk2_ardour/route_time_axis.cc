@@ -40,6 +40,7 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
+#include "ardour/amp.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/diskstream.h"
 #include "ardour/event_type_map.h"
@@ -110,7 +111,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  visual_button (_("v")),
 	  gm (sess, slider, true)
 {
-	gm.set_io (rt);
+	gm.set_controls (_route, _route->shared_peak_meter(), _route->gain_control(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
 
@@ -187,8 +188,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
 	_route->meter_change.connect (mem_fun(*this, &RouteTimeAxisView::meter_changed));
-	_route->input_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
-	_route->output_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
+	_route->input()->changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
+	_route->output()->changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
 
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
@@ -231,7 +232,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	_route->processors_changed.connect (mem_fun(*this, &RouteTimeAxisView::processors_changed));
 	_route->NameChanged.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
-	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->solo_isolated_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 
 
 	if (is_track()) {

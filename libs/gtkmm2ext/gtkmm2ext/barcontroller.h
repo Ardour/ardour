@@ -23,9 +23,6 @@
 #include <gtkmm/drawingarea.h>
 #include <gtkmm2ext/binding_proxy.h>
 
-namespace ARDOUR {
-	class Controllable;
-}
 
 namespace Gtkmm2ext {
 

@@ -272,7 +272,8 @@ Session::Session (AudioEngine &eng,
 		if (control_out_channels) {
 			ChanCount count(DataType::AUDIO, control_out_channels);
 			shared_ptr<Route> r (new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO));
-			r->ensure_io (count, count, false, this);
+			r->input()->ensure_io (count, false, this);
+			r->output()->ensure_io (count, false, this);
 			r->set_remote_control_id (control_id++);
 
 			rl.push_back (r);
@@ -280,9 +281,9 @@ Session::Session (AudioEngine &eng,
 
 		if (master_out_channels) {
 			ChanCount count(DataType::AUDIO, master_out_channels);
-			cerr << "new MO with " << count << endl;
 			shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
-			r->ensure_io (count, count, false, this);
+			r->input()->ensure_io (count, false, this);
+			r->output()->ensure_io (count, false, this);
 			r->set_remote_control_id (control_id);
 
 			rl.push_back (r);
@@ -516,8 +517,8 @@ Session::set_worst_io_latencies ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		_worst_output_latency = max (_worst_output_latency, (*i)->output_latency());
-		_worst_input_latency = max (_worst_input_latency, (*i)->input_latency());
+		_worst_output_latency = max (_worst_output_latency, (*i)->output()->latency());
+		_worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
 	}
 }
 
@@ -574,15 +575,15 @@ Session::when_engine_running ()
 
                        for (int physport = 0; physport < 2; ++physport) {
                                string physical_output = _engine.get_nth_physical_output (DataType::AUDIO, physport);
-
+			       
                                if (physical_output.length()) {
-                                       if (_click_io->add_output_port (physical_output, this)) {
+                                       if (_click_io->add_port (physical_output, this)) {
                                                // relax, even though its an error
 				       }
 			       }
 		       }
 		       
-                       if (_click_io->n_outputs () > ChanCount::ZERO) {
+                       if (_click_io->n_ports () > ChanCount::ZERO) {
                                _clicking = Config->get_clicking ();
                        }
 		}
@@ -665,12 +666,6 @@ Session::when_engine_running ()
 	
 	if (_master_out) {
 
-		/* force the master to ignore any later call to this 
-		 */
-		if (_master_out->pending_state_node) {
-			_master_out->ports_became_legal();
-		}
-		
 		/* if requested auto-connect the outputs to the first N physical ports.
 		*/
 
@@ -678,11 +673,11 @@ Session::when_engine_running ()
 			uint32_t limit = _master_out->n_outputs().n_total();
 
 			for (uint32_t n = 0; n < limit; ++n) {
-				Port* p = _master_out->output (n);
+				Port* p = _master_out->output()->nth (n);
 				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
 
 				if (!connect_to.empty()) {
-					if (_master_out->connect_output (p, connect_to, this)) {
+					if (_master_out->output()->connect (p, connect_to, this)) {
 						error << string_compose (_("cannot connect master output %1 to %2"), n, connect_to) 
 						      << endmsg;
 						break;
@@ -760,10 +755,6 @@ Session::hookup_io ()
 		}
 	}
 
-	/* Tell all IO objects to create their ports */
-
-	IO::enable_ports ();
-
 	/* Connect track to listen/solo etc. busses XXX generalize this beyond control_out */
 
 	if (_control_out) {
@@ -777,7 +768,7 @@ Session::hookup_io ()
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*x);
 
 			if (t) {
-				t->listen_via (_control_out, X_("listen"));
+				t->listen_via (_control_out->input(), X_("listen"));
 			}
 		}
 	}
@@ -794,7 +785,7 @@ Session::hookup_io ()
 
 	/* Now reset all panners */
 
-	IO::reset_panners ();
+	Delivery::reset_panners ();
 
 	/* Anyone who cares about input state, wake up and do something */
 
@@ -1468,7 +1459,7 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 				continue;
 			}
 
-			if ((*j)->feeds (*i)) {
+			if ((*j)->feeds ((*i)->input())) {
 				(*i)->fed_by.insert (*j);
 			}
 		}
@@ -1553,7 +1544,13 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 		try {
 			track = boost::shared_ptr<MidiTrack>((new MidiTrack (*this, track_name, Route::Flag (0), mode)));
 
-			if (track->ensure_io (ChanCount(DataType::MIDI, 1), ChanCount(DataType::AUDIO, 1), false, this)) {
+			if (track->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
+				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+				goto failed;
+			}
+
+
+			if (track->output()->ensure_io (ChanCount(DataType::AUDIO, 1), false, this)) {
 				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
 				goto failed;
 			}
@@ -1711,7 +1708,14 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		try {
 			track = boost::shared_ptr<AudioTrack>((new AudioTrack (*this, track_name, Route::Flag (0), mode)));
 
-			if (track->ensure_io (ChanCount(DataType::AUDIO, input_channels), ChanCount(DataType::AUDIO, output_channels), false, this)) {
+			if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+							 input_channels, output_channels)
+				      << endmsg;
+				goto failed;
+			}
+			
+			if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
@@ -1729,7 +1733,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 						port = physinputs[(channels_used+x)%nphysical_in];
 					}
 
-					if (port.length() && track->connect_input (track->input (x), port, this)) {
+					if (port.length() && track->input()->connect (track->input()->nth(x), port, this)) {
 						break;
 					}
 				}
@@ -1745,11 +1749,11 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 						port = physoutputs[(channels_used+x)%nphysical_out];
 					} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 						if (_master_out && _master_out->n_inputs().n_audio() > 0) {
-							port = _master_out->input (x % _master_out->n_inputs().n_audio())->name();
+							port = _master_out->input()->nth (x % _master_out->input()->n_ports().n_audio())->name();
 						}
 					}
 					
-					if (port.length() && track->connect_output (track->output (x), port, this)) {
+					if (port.length() && track->output()->connect (track->output()->nth(x), port, this)) {
 						break;
 					}
 				}
@@ -1889,7 +1893,15 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		try {
 			shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO));
 
-			if (bus->ensure_io (ChanCount(DataType::AUDIO, input_channels), ChanCount(DataType::AUDIO, output_channels), false, this)) {
+			if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+							 input_channels, output_channels)
+				      << endmsg;
+				goto failure;
+			}
+
+
+			if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
@@ -1920,11 +1932,11 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 					port = physoutputs[((n+x)%n_physical_outputs)];
 				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
-						port = _master_out->input (x%_master_out->n_inputs().n_audio())->name();
+						port = _master_out->input()->nth (x%_master_out->input()->n_ports().n_audio())->name();
 					}
 				}
 
-				if (port.length() && bus->connect_output (bus->output (x), port, this)) {
+				if (port.length() && bus->output()->connect (bus->output()->nth(x), port, this)) {
 					break;
 				}
 			}
@@ -2023,8 +2035,8 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				   picks up the configuration of the route. During session
 				   loading this normally happens in a different way.
 				*/
-				route->input_changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
-				route->output_changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
+				route->input()->changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
+				route->output()->changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
 			}
 			
 			route->set_remote_control_id (control_id);
@@ -2070,7 +2082,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
-		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
+		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->processors_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
 
 		if ((*x)->is_master()) {
@@ -2085,7 +2097,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 	if (_control_out && IO::connecting_legal) {
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			(*x)->listen_via (_control_out, "control");
+			(*x)->listen_via (_control_out->input(), "control");
 		}
 	}
 
@@ -2145,7 +2157,7 @@ Session::remove_route (shared_ptr<Route> route)
 			/* cancel control outs for all routes */
 
 			for (RouteList::iterator r = rs->begin(); r != rs->end(); ++r) {
-				(*r)->drop_listen (_control_out);
+				(*r)->drop_listen (_control_out->input());
 			}
 
 			_control_out = shared_ptr<Route> ();
@@ -2176,8 +2188,8 @@ Session::remove_route (shared_ptr<Route> route)
 
 	// We need to disconnect the routes inputs and outputs
 
-	route->disconnect_inputs (0);
-	route->disconnect_outputs (0);
+	route->input()->disconnect (0);
+	route->output()->disconnect (0);
 
 	update_latency_compensation (false, false);
 	set_dirty();
@@ -2215,7 +2227,6 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		return;
 	}
 
-	bool is_track;
 	boost::shared_ptr<Route> route = wpr.lock ();
 
 	if (!route) {
@@ -2224,86 +2235,39 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		return;
 	}
 
-	is_track = (boost::dynamic_pointer_cast<AudioTrack>(route) != 0);
-
 	shared_ptr<RouteList> r = routes.reader ();
+	int32_t delta;
+
+	if (route->soloed()) {
+		delta = 1;
+	} else {
+		delta = -1;
+	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
-		/* soloing a track mutes all other tracks, soloing a bus mutes all other busses */
-
-		if (is_track) {
-
-			/* don't mess with busses */
-
-			if (boost::dynamic_pointer_cast<Track>(*i) == 0) {
-				continue;
-			}
-
-		} else {
-
-			/* don't mess with tracks */
-
-			if (boost::dynamic_pointer_cast<Track>(*i) != 0) {
-				continue;
-			}
-		}
-
-		if ((*i) != route &&
-		    ((*i)->mix_group () == 0 ||
-		     (*i)->mix_group () != route->mix_group () ||
-		     !route->mix_group ()->is_active())) {
-
-			if ((*i)->soloed()) {
-
-				/* if its already soloed, and solo latching is enabled,
-				   then leave it as it is.
-				*/
-
-				if (Config->get_solo_latched()) {
-					continue;
-				}
-			}
-
+		if ((*i)->feeds (route->input())) {
 			/* do it */
-
+			
 			solo_update_disabled = true;
-			(*i)->set_solo (false, src);
+			(*i)->main_outs()->mod_solo_level (delta);
 			solo_update_disabled = false;
 		}
 	}
 
-	bool something_soloed = false;
-	bool same_thing_soloed = false;
-	bool signal = false;
+	/* now figure out if anything is soloed */
 
-        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	bool something_soloed = false;
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			something_soloed = true;
-			if (boost::dynamic_pointer_cast<Track>(*i)) {
-				if (is_track) {
-					same_thing_soloed = true;
-					break;
-				}
-			} else {
-				if (!is_track) {
-					same_thing_soloed = true;
-					break;
-				}
-			}
 			break;
 		}
 	}
 
-	if (something_soloed != currently_soloing) {
-		signal = true;
-		currently_soloing = something_soloed;
-	}
-
-	modify_solo_mute (is_track, same_thing_soloed);
-
-	if (signal) {
-		SoloActive (currently_soloing); /* EMIT SIGNAL */
+	if (something_soloed != _non_soloed_outs_muted) {
+		_non_soloed_outs_muted = something_soloed;
+		SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
 	}
 
 	SoloChanged (); /* EMIT SIGNAL */
@@ -2343,67 +2307,15 @@ Session::update_route_solo_state ()
 
 		/* nothing is soloed */
 
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->set_solo_mute (false);
-		}
-
 		if (signal) {
 			SoloActive (false);
 		}
 
 		return;
 	}
-
-	modify_solo_mute (is_track, mute);
-
+	
 	if (signal) {
 		SoloActive (currently_soloing);
-	}
-}
-
-void
-Session::modify_solo_mute (bool is_track, bool mute)
-{
-	shared_ptr<RouteList> r = routes.reader ();
-
-        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
-		if (is_track) {
-
-			/* only alter track solo mute */
-
-			if (boost::dynamic_pointer_cast<Track>(*i)) {
-				if ((*i)->soloed()) {
-					(*i)->set_solo_mute (!mute);
-				} else {
-					(*i)->set_solo_mute (mute);
-				}
-			}
-
-		} else {
-
-			/* only alter bus solo mute */
-
-			if (!boost::dynamic_pointer_cast<Track>(*i)) {
-
-				if ((*i)->soloed()) {
-
-					(*i)->set_solo_mute (false);
-
-				} else {
-
-					/* don't mute master or control outs
-					   in response to another bus solo
-					*/
-
-					if ((*i) != _master_out &&
-					    (*i) != _control_out) {
-						(*i)->set_solo_mute (mute);
-					}
-				}
-			}
-
-		}
 	}
 }
 
@@ -2432,7 +2344,7 @@ Session::catch_up_on_solo_mute_override ()
 	shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->catch_up_on_solo_mute_override ();
+		// (*i)->catch_up_on_solo_mute_override ();
 	}
 }	
 

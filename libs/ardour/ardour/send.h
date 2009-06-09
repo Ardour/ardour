@@ -23,39 +23,51 @@
 #include <sigc++/signal.h>
 #include <string>
 
-
 #include "pbd/stateful.h" 
+
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/delivery.h"
 
 namespace ARDOUR {
 
+class PeakMeter;
+class Amp;
+
 class Send : public Delivery
 {
   public:	
-	Send (Session&);
-	Send (Session&, const XMLNode&);
+	Send (Session&, boost::shared_ptr<MuteMaster>);
+	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&);
 	virtual ~Send ();
 
 	uint32_t bit_slot() const { return _bitslot; }
-	
-	void activate() {}
-	void deactivate () {}
 
+	boost::shared_ptr<Amp> amp() const { return _amp; }
+	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
+
+	bool metering() const { return _metering; }
+	void set_metering (bool yn) { _metering = yn; }
+	
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 
+	void run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
-	bool configure_io (ChanCount in, ChanCount out);
 
 	bool set_name (const std::string& str);
 
 	static uint32_t how_many_sends();
 	static void make_unique (XMLNode &, Session &);
+
+  protected:
+	bool _metering;
+	boost::shared_ptr<Amp> _amp;
+	boost::shared_ptr<PeakMeter> _meter;
 
   private:
 	/* disallow copy construction */

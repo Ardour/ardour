@@ -40,8 +40,9 @@ class PannerBar;
 class Panner2dWindow;
 
 namespace ARDOUR {
-	class IO;
 	class Session;
+	class Panner;
+	class Delivery;
 }
 namespace Gtkmm2ext {
 	class FastMeter;
@@ -58,7 +59,7 @@ class PannerUI : public Gtk::HBox
 	PannerUI (ARDOUR::Session&);
 	~PannerUI ();
 
-	virtual void set_io (boost::shared_ptr<ARDOUR::IO>);
+	virtual void set_panner (boost::shared_ptr<ARDOUR::Panner>);
 
 	void pan_changed (void *);
 
@@ -76,7 +77,7 @@ class PannerUI : public Gtk::HBox
   private:
 	friend class MixerStrip;
 
-	boost::shared_ptr<ARDOUR::IO> _io;
+	boost::shared_ptr<ARDOUR::Panner> _panner;
 	ARDOUR::Session& _session;
 	std::vector<sigc::connection> connections;
 

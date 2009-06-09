@@ -41,24 +41,19 @@
 #include "ardour/ardour.h"
 #include "ardour/io.h"
 #include "ardour/types.h"
+#include "ardour/mute_master.h"
 
 namespace ARDOUR {
 
 class Amp;
 class Delivery;
 class IOProcessor;
+class Panner;
 class Processor;
 class RouteGroup;
 class Send;
 
-enum mute_type {
-    PRE_FADER =    0x1,
-    POST_FADER =   0x2,
-    CONTROL_OUTS = 0x4,
-    MAIN_OUTS =    0x8
-};
-
-class Route : public IO
+class Route : public SessionObject, public AutomatableControls
 {
   public:
 
@@ -74,6 +69,16 @@ class Route : public IO
 	       DataType default_type = DataType::AUDIO);
 	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
+
+	boost::shared_ptr<IO> input() const { return _input; }
+	boost::shared_ptr<IO> output() const { return _output; }
+
+	ChanCount n_inputs() const { return _input->n_ports(); }
+	ChanCount n_outputs() const { return _output->n_ports(); }
+
+	bool active() const { return _active; }
+	void set_active (bool yn);
+
 
 	static std::string ensure_track_or_route_name(std::string, Session &);
 
@@ -102,6 +107,7 @@ class Route : public IO
 
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
+
 	virtual void set_record_enable (bool yn, void *src) {}
 	virtual bool record_enabled() const { return false; }
 	virtual void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
@@ -110,37 +116,43 @@ class Route : public IO
 	/* end of vfunc-based API */
 
 	void shift (nframes64_t, nframes64_t);
-
-	/* override IO::set_gain() to provide group control */
-
+	
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
-	
+
+	void set_mute (bool yn, void* src);
+	bool muted () const;
+
 	void set_solo (bool yn, void *src);
-	bool soloed() const { return _soloed; }
+	bool soloed() const;
 
-	void set_solo_safe (bool yn, void *src);
-	bool solo_safe() const { return _solo_safe; }
+	void set_solo_isolated (bool yn, void *src);
+	bool solo_isolated() const;
 	
-	void set_mute (bool yn, void *src);
-	bool muted() const { return _muted; }
-	bool solo_muted() const { return desired_solo_gain == 0.0; }
+	void set_phase_invert (bool yn, void* src);
+	bool phase_invert() const;
 
-	void set_mute_config (mute_type, bool, void *src);
-	bool get_mute_config (mute_type);
+	void set_denormal_protection (bool yn, void* src);
+	bool denormal_protection() const;
 
 	void       set_edit_group (RouteGroup *, void *);
 	void       drop_edit_group (void *);
-	RouteGroup *edit_group () { return _edit_group; }
+	RouteGroup *edit_group () const { return _edit_group; }
 
 	void       set_mix_group (RouteGroup *, void *);
 	void       drop_mix_group (void *);
-	RouteGroup *mix_group () { return _mix_group; }
+	RouteGroup *mix_group () const { return _mix_group; }
 
 	virtual void set_meter_point (MeterPoint, void *src);
 	MeterPoint   meter_point() const { return _meter_point; }
+	void         meter ();
 
 	/* Processors */
+
+	boost::shared_ptr<Amp> amp() const  { return _amp; }
+	PeakMeter&       peak_meter()       { return *_meter.get(); }
+	const PeakMeter& peak_meter() const { return *_meter.get(); }
+	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
 
 	void flush_processors ();
 
@@ -180,7 +192,7 @@ class Route : public IO
 
 	boost::shared_ptr<Delivery> control_outs() const { return _control_outs; }
 	boost::shared_ptr<Delivery> main_outs() const { return _main_outs; }
-
+	
 	boost::shared_ptr<Send> send_for (boost::shared_ptr<const IO> target) const;
 	
 	/** A record of the stream configuration at some point in the processor list.
@@ -213,8 +225,10 @@ class Route : public IO
 	void set_user_latency (nframes_t);
 	nframes_t initial_delay() const { return _initial_delay; }
 
+	sigc::signal<void>       active_changed;
 	sigc::signal<void,void*> solo_changed;
 	sigc::signal<void,void*> solo_safe_changed;
+	sigc::signal<void,void*> solo_isolated_changed;
 	sigc::signal<void,void*> comment_changed;
 	sigc::signal<void,void*> mute_changed;
 	sigc::signal<void,void*> pre_fader_changed;
@@ -240,8 +254,8 @@ class Route : public IO
 	virtual XMLNode& get_template();
 
 	XMLNode& get_processor_state ();
-	int set_processor_state (const XMLNode&);
-
+	virtual void set_processor_state (const XMLNode&);
+	
 	int save_as_template (const std::string& path, const std::string& name);
 
 	sigc::signal<void,void*> SelectedChanged;
@@ -252,28 +266,38 @@ class Route : public IO
 	bool feeds (boost::shared_ptr<IO>);
 	std::set<boost::shared_ptr<Route> > fed_by;
 
-	struct ToggleControllable : public PBD::Controllable {
-	    enum ToggleType {
-		    MuteControl = 0,
-		    SoloControl
-	    };
-	    
-	    ToggleControllable (std::string name, Route&, ToggleType);
-	    void set_value (float);
-	    float get_value (void) const;
+	/* Controls (not all directly owned by the Route */
 
-	    Route& route;
-	    ToggleType type;
+	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
+
+	struct SoloControllable : public AutomationControl {
+		SoloControllable (std::string name, Route&);
+		void set_value (float);
+		float get_value (void) const;
+		
+		Route& route;
 	};
 
-	boost::shared_ptr<PBD::Controllable> solo_control() {
+	boost::shared_ptr<AutomationControl> solo_control() const {
 		return _solo_control;
 	}
 
-	boost::shared_ptr<PBD::Controllable> mute_control() {
-		return _mute_control;
+	boost::shared_ptr<AutomationControl> mute_control() const {
+		return _mute_master;
 	}
-	
+
+	boost::shared_ptr<MuteMaster> mute_master() const { 
+		return _mute_master; 
+	}
+
+	/* Route doesn't own these items, but sub-objects that it does own have them
+	   and to make UI code a bit simpler, we provide direct access to them
+	   here.
+	*/
+
+	boost::shared_ptr<Panner> panner() const;
+	boost::shared_ptr<AutomationControl> gain_control() const;
+
 	void automation_snapshot (nframes_t now, bool force=false);
 	void protect_automation ();
 	
@@ -288,10 +312,11 @@ class Route : public IO
 	friend class Session;
 
 	void catch_up_on_solo_mute_override ();
-	void set_solo_mute (bool yn);
+	void mod_solo_level (int32_t);
 	void set_block_size (nframes_t nframes);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
+	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
   protected:
 	nframes_t check_initial_delay (nframes_t, nframes_t&);
@@ -303,43 +328,37 @@ class Route : public IO
 					     sframes_t start_frame, sframes_t end_frame,
 					     nframes_t nframes, bool with_processors, int declick);
 	
-	Flag           _flags;
-	int            _pending_declick;
-	MeterPoint     _meter_point;
+	boost::shared_ptr<IO> _input;
+	boost::shared_ptr<IO> _output;
 
-	gain_t          solo_gain;
-	gain_t          mute_gain;
-	gain_t          desired_solo_gain;
-	gain_t          desired_mute_gain;
-	
+	bool           _active;
 	nframes_t      _initial_delay;
 	nframes_t      _roll_delay;
+
 	ProcessorList  _processors;
 	mutable Glib::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
 	boost::shared_ptr<Delivery> _control_outs; // XXX to be removed/generalized by listen points
-	RouteGroup    *_edit_group;
-	RouteGroup    *_mix_group;
-	std::string    _comment;
-	bool           _have_internal_generator;
+
+	Flag           _flags;
+	int            _pending_declick;
+	MeterPoint     _meter_point;
+	uint32_t       _phase_invert;
+	bool           _denormal_protection;
 	
-	boost::shared_ptr<ToggleControllable> _solo_control;
-	boost::shared_ptr<ToggleControllable> _mute_control;
-
-	/* tight cache-line access here is more important than sheer speed of access.
-	   keep these after things that should be aligned
-	*/
-
-	bool _muted : 1;
-	bool _soloed : 1;
-	bool _solo_safe : 1;
 	bool _recordable : 1;
-	bool _mute_affects_pre_fader : 1;
-	bool _mute_affects_post_fader : 1;
-	bool _mute_affects_control_outs : 1;
-	bool _mute_affects_main_outs : 1;
 	bool _silent : 1;
 	bool _declickable : 1;
+
+	boost::shared_ptr<SoloControllable> _solo_control;
+	boost::shared_ptr<MuteMaster> _mute_master;
+
+	RouteGroup*    _edit_group;
+	RouteGroup*    _mix_group;
+	std::string    _comment;
+	bool           _have_internal_generator;
+	bool           _solo_safe;
+	DataType       _default_type;
 
   protected:
 
@@ -358,12 +377,13 @@ class Route : public IO
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 	
-	void setup_peak_meters ();
-
 	virtual int  _set_state (const XMLNode&, bool call_base);
-	virtual void _set_processor_states (const XMLNodeList&);
 
 	boost::shared_ptr<Delivery> add_listener (boost::shared_ptr<IO>, const std::string&);
+
+	boost::shared_ptr<Amp>       _amp;
+	boost::shared_ptr<PeakMeter> _meter;
+	sigc::connection _meter_connection;
 
   private:
 	void init ();
@@ -386,8 +406,7 @@ class Route : public IO
 
 	int configure_processors (ProcessorStreams*);
 	int configure_processors_unlocked (ProcessorStreams*);
-	
-	void set_deferred_state ();
+
 	bool add_processor_from_xml (const XMLNode&, Placement);
 	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);	
 

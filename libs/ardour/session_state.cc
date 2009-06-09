@@ -151,7 +151,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
 
 
-
+	_non_soloed_outs_muted = false;
 	g_atomic_int_set (&processing_prohibited, 0);
 	insert_cnt = 0;
 	_transport_speed = 0;
@@ -272,8 +272,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
-	IO::disable_panners ();
-	IO::disable_ports ();
+	Delivery::disable_panners ();
 	IO::disable_connecting ();
 }
 
@@ -1155,7 +1154,6 @@ Session::set_state (const XMLNode& node)
 	}
 
 	
-	IO::disable_ports ();
 	IO::disable_connecting ();
 
 	/* Object loading order:
@@ -3215,7 +3213,7 @@ Session::config_changed (std::string p, bool ours)
 			// deliver_midi (_mmc_port, buf, 2);
 		}
 	} else if (p == "solo-mute-override") {
-		catch_up_on_solo_mute_override ();
+		// catch_up_on_solo_mute_override ();
 	}
 
 	set_dirty ();

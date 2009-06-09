@@ -21,6 +21,7 @@
 
 #include "pbd/xml++.h"
 
+#include "ardour/amp.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/port.h"
@@ -35,15 +36,23 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Send::Send (Session& s)
-	: Delivery (s, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), Delivery::Send)
+Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm)
+	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), Delivery::Send)
+	, _metering (false)
 {
+	_amp.reset (new Amp (_session, _mute_master));
+	_meter.reset (new PeakMeter (_session));
+
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Send::Send (Session& s, const XMLNode& node)
-	: Delivery (s, "send", Delivery::Send)
+Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
+	: Delivery (s, mm, "send", Delivery::Send)
+	, _metering (false)
 {
+	_amp.reset (new Amp (_session, _mute_master));
+	_meter.reset (new PeakMeter (_session));
+
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -54,6 +63,43 @@ Send::Send (Session& s, const XMLNode& node)
 Send::~Send ()
 {
 	GoingAway ();
+}
+
+void
+Send::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+{
+	if (!_active || _output->n_ports() == ChanCount::ZERO) {
+		_meter->reset ();
+		return;
+	}
+
+	// we have to copy the input, because deliver_output() may alter the buffers
+	// in-place, which a send must never do.
+	
+	BufferSet& sendbufs = _session.get_mix_buffers (bufs.count());
+	sendbufs.read_from (bufs, nframes);
+	assert(sendbufs.count() == bufs.count());
+
+	/* gain control */
+
+	// Can't automate gain for sends or returns yet because we need different buffers
+	// so that we don't overwrite the main automation data for the route amp
+	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
+	_amp->run_in_place (sendbufs, start_frame, end_frame, nframes);
+
+	/* deliver to outputs */
+
+	Delivery::run_in_place (sendbufs, start_frame, end_frame, nframes);
+
+	/* consider metering */
+	
+	if (_metering) {
+		if (_amp->gain_control()->get_value() == 0) {
+			_meter->reset();
+		} else {
+			_meter->run_in_place (*_output_buffers, start_frame, end_frame, nframes);
+		}
+	}
 }
 
 XMLNode&
@@ -90,17 +136,9 @@ Send::set_state(const XMLNode& node)
 
 	const XMLNode* insert_node = &node;
 
-	/* Send has regular IO automation (gain, pan) */
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == IOProcessor::state_node_name) {
-			insert_node = *niter;
-		} else if ((*niter)->name() == X_("Automation")) {
-			// _io->set_automation_state (*(*niter), Evoral::Parameter(GainAutomation));
-		}
-	}
+	/* XXX need to load automation state & data for amp */
 	
-	IOProcessor::set_state (*insert_node);
+	Delivery::set_state (*insert_node);
 
 	return 0;
 }
@@ -108,7 +146,7 @@ Send::set_state(const XMLNode& node)
 bool
 Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	if (_io->n_inputs() == ChanCount::ZERO && _io->n_outputs() == ChanCount::ZERO) {
+	if (_output->n_ports() == ChanCount::ZERO) {
 
 		/* not configured yet, we can support anything */
 
@@ -124,25 +162,6 @@ Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 	}
 
 	return false;
-}
-
-bool
-Send::configure_io (ChanCount in, ChanCount out)
-{
-	/* we're transparent no matter what.  fight the power. */
-
-	if (out != in) {
-		return false;
-	}
-
-	if (_io->ensure_io (ChanCount::ZERO, in, false, this) != 0) {
-		return false;
-	}
-
-	Processor::configure_io(in, out);
-	_io->reset_panner();
-
-	return true;
 }
 
 /** Set up the XML description of a send so that its name is unique.

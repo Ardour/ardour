@@ -18,11 +18,12 @@
 
 */
 
-#include <ardour/session.h>
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/meter.h>
-#include <control_protocol/control_protocol.h>
+#include "ardour/session.h"
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/meter.h"
+#include "ardour/amp.h"
+#include "control_protocol/control_protocol.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -212,7 +213,7 @@ ControlProtocol::route_get_gain (uint32_t table_index)
 		return 0.0f;
 	}
 
-	return r->gain ();
+	return r->amp()->gain ();
 }
 
 void
@@ -242,7 +243,7 @@ ControlProtocol::route_get_effective_gain (uint32_t table_index)
 		return 0.0f;
 	}
 
-	return r->effective_gain ();
+	return r->amp()->gain_control()->get_value();
 }
 
 

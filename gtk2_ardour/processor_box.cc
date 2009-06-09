@@ -452,7 +452,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 		}
 
 		if (_route->add_processor (processor, _placement, &err_streams)) {
-			weird_plugin_dialog (**p, err_streams, _route);
+			weird_plugin_dialog (**p, err_streams);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
 		} else {
 
@@ -467,7 +467,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 }
 
 void
-ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams, boost::shared_ptr<IO> io)
+ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 {
 	ArdourDialog dialog (_("ardour: weird plugin dialog"));
 	Label label;
@@ -511,7 +511,7 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams, b
 void
 ProcessorBox::choose_insert ()
 {
-	boost::shared_ptr<Processor> processor (new PortInsert (_session));
+	boost::shared_ptr<Processor> processor (new PortInsert (_session, _route->mute_master()));
 	processor->ActiveChanged.connect (bind (
 			mem_fun(*this, &ProcessorBox::show_processor_active),
 			boost::weak_ptr<Processor>(processor)));
@@ -522,7 +522,7 @@ ProcessorBox::choose_insert ()
 void
 ProcessorBox::choose_send ()
 {
-	boost::shared_ptr<Send> send (new Send (_session));
+	boost::shared_ptr<Send> send (new Send (_session, _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
 	ChanCount outs = (_session.master_out())
@@ -531,14 +531,14 @@ ProcessorBox::choose_send ()
 
 	/* XXX need processor lock on route */
 	try {
-		send->io()->ensure_io (ChanCount::ZERO, outs, false, this);
+		send->output()->ensure_io (outs, false, this);
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		error << string_compose (_("Cannot set up new send: %1"), err.what()) << endmsg;
 		return;
 	}
 
 	/* let the user adjust the IO setup before creation */
-	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->io(), false, true);
+	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->output(), true);
 	ios->show_all ();
 
 	/* keep a reference to the send so it doesn't get deleted while
@@ -588,14 +588,14 @@ ProcessorBox::choose_return ()
 
 	/* XXX need processor lock on route */
 	try {
-		retrn->io()->ensure_io (ins, ChanCount::ZERO, false, this);
+		retrn->input()->ensure_io (ins, false, this);
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		error << string_compose (_("Cannot set up new return: %1"), err.what()) << endmsg;
 		return;
 	}
 
 	/* let the user adjust the IO setup before creation */
-	IOSelectorWindow *ios = new IOSelectorWindow (_session, retrn->io(), true, true);
+	IOSelectorWindow *ios = new IOSelectorWindow (_session, retrn->output(), true);
 	ios->show_all ();
 
 	/* keep a reference to the send so it doesn't get deleted while
@@ -1050,7 +1050,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 			if (type->value() == "send") {
 				XMLNode n (**niter);
 				Send::make_unique (n, _session);
-				p.reset (new Send (_session, n));
+				p.reset (new Send (_session, _route->mute_master(), n));
 
 			} else if (type->value() == "meter") {
 				p = _route->shared_peak_meter();
@@ -1064,7 +1064,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 				continue;
 
 			} else if (type->value() == "listen") {
-				p.reset (new Delivery (_session, **niter));
+				p.reset (new Delivery (_session, _route->mute_master(), **niter));
 				
 			} else {
 				p.reset (new PluginInsert (_session, **niter));
@@ -1214,8 +1214,8 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		gidget = send_ui;
 #else
 		if (_parent_strip) {
-			_parent_strip->gain_meter().set_io (send->io());
-			_parent_strip->panner_ui().set_io (send->io());
+			_parent_strip->gain_meter().set_controls (_route, send->meter(), send->amp()->gain_control(), send->amp());
+			_parent_strip->panner_ui().set_panner (send->panner());
 		}
 #endif
 	

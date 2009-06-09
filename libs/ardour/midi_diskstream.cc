@@ -159,8 +159,8 @@ MidiDiskstream::non_realtime_input_change ()
 		}
 
 		if (input_change_pending & ConfigurationChanged) {
-			if (_io->n_inputs().n_midi() != _n_channels.n_midi()) {
-				error << "Can not feed IO " << _io->n_inputs()
+			if (_io->n_ports().n_midi() != _n_channels.n_midi()) {
+				error << "Can not feed IO " << _io->n_ports()
 					<< " with diskstream " << _n_channels << endl;
 			}
 		} 
@@ -199,7 +199,7 @@ MidiDiskstream::non_realtime_input_change ()
 void
 MidiDiskstream::get_input_sources ()
 {
-	uint32_t ni = _io->n_inputs().n_midi();
+	uint32_t ni = _io->n_ports().n_midi();
 
 	if (ni == 0) {
 		return;
@@ -208,7 +208,7 @@ MidiDiskstream::get_input_sources ()
 	// This is all we do for now at least
 	assert(ni == 1);
 
-	_source_port = _io->midi_input(0);
+	_source_port = _io->midi(0);
 
 	// do... stuff?
 }		
@@ -421,6 +421,7 @@ MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframe
 	last_possibly_recording = possibly_recording;
 }
 
+#if 0
 static void
 trace_midi (ostream& o, MIDI::byte *msg, size_t len)
 {
@@ -587,6 +588,7 @@ trace_midi (ostream& o, MIDI::byte *msg, size_t len)
 		break;
 	}
 }
+#endif
 
 int
 MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input)

@@ -46,6 +46,8 @@ namespace ARDOUR {
 	class Session;
 	class Route;
 	class RouteGroup;
+	class PeakMeter;
+	class Automatable;
 }
 namespace Gtkmm2ext {
 	class FastMeter;
@@ -62,8 +64,10 @@ class GainMeterBase : virtual public sigc::trackable
 		       bool horizontal);
 	virtual ~GainMeterBase ();
 
-	virtual void set_io (boost::shared_ptr<ARDOUR::IO>);
-	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
+	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
+				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
+				   boost::shared_ptr<ARDOUR::AutomationControl> gain_control,
+				   boost::shared_ptr<ARDOUR::Automatable> gc_owner);
 
 	void update_gain_sensitive ();
 	void update_meters ();
@@ -83,7 +87,9 @@ class GainMeterBase : virtual public sigc::trackable
   protected:
 
 	friend class MixerStrip;
-	boost::shared_ptr<ARDOUR::IO> _io;
+	boost::shared_ptr<ARDOUR::Route> _route;
+	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
+	boost::shared_ptr<ARDOUR::AutomationControl> _gain_control;
 	ARDOUR::Session& _session;
 	std::vector<sigc::connection> connections;
 
@@ -176,7 +182,10 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	GainMeter (ARDOUR::Session&);
 	~GainMeter () {}
 
-	void set_io (boost::shared_ptr<ARDOUR::IO>);
+	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
+				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
+				   boost::shared_ptr<ARDOUR::AutomationControl> gain_control,
+				   boost::shared_ptr<ARDOUR::Automatable> gc_owner);
 
 	int get_gm_width ();
 	void setup_meters (int len=0);

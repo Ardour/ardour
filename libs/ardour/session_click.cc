@@ -127,7 +127,7 @@ Session::click (nframes_t start, nframes_t nframes)
 		i = next;
 	}
 	
-	_click_io->deliver_output (bufs, start, end, nframes);
+	_click_io->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
 }
 
 void

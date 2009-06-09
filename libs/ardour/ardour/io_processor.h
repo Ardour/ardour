@@ -38,15 +38,16 @@ namespace ARDOUR {
 class Session;
 class IO;
 
-/** A mixer strip element (Processor) with Jack ports (IO).
+/** A mixer strip element (Processor) with 1 or 2 IO elements.
  */
 class IOProcessor : public Processor
 {
   public:
-	IOProcessor (Session&, const std::string& proc_name, const std::string io_name="",
+	IOProcessor (Session&, bool with_input, bool with_output,
+		     const std::string& proc_name, const std::string io_name="",
 		     ARDOUR::DataType default_type = DataType::AUDIO);
-	IOProcessor (Session&, IO* io, const std::string& proc_name,
-		     ARDOUR::DataType default_type = DataType::AUDIO);
+	IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
+		     const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
 	virtual ~IOProcessor ();
 	
 	bool set_name (const std::string& str);
@@ -56,13 +57,14 @@ class IOProcessor : public Processor
 	virtual ChanCount natural_output_streams() const;
 	virtual ChanCount natural_input_streams () const;
 
-	boost::shared_ptr<IO>       io()       { return _io; }
-	boost::shared_ptr<const IO> io() const { return _io; }
-	void set_io (boost::shared_ptr<IO>);
+	boost::shared_ptr<IO>       input()       { return _input; }
+	boost::shared_ptr<const IO> input() const { return _input; }
+	boost::shared_ptr<IO>       output()       { return _output; }
+	boost::shared_ptr<const IO> output() const { return _output; }
+	void set_input (boost::shared_ptr<IO>);
+	void set_output (boost::shared_ptr<IO>);
 	
-	virtual void automation_snapshot (nframes_t now, bool force);
-
-	virtual void run_in_place (BufferSet& in, sframes_t start, sframes_t end, nframes_t nframes) = 0;
+	void run_in_place (BufferSet& in, sframes_t start, sframes_t end, nframes_t nframes) = 0;
 	void silence (nframes_t nframes);
 
 	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;
@@ -72,12 +74,14 @@ class IOProcessor : public Processor
 	int set_state (const XMLNode&);
 	
   protected:
-	boost::shared_ptr<IO> _io;
+	boost::shared_ptr<IO> _input;
+	boost::shared_ptr<IO> _output;
 
   private:
 	/* disallow copy construction */
 	IOProcessor (const IOProcessor&);
-	bool _own_io;
+	bool _own_input;
+	bool _own_output;
 
 };
 

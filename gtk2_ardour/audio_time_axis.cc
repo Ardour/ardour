@@ -37,6 +37,7 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
+#include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/event_type_map.h"
@@ -347,13 +348,14 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 			return;
 		}
 
-		boost::shared_ptr<AutomationTimeAxisView> gain_track(new AutomationTimeAxisView (_session,
-				_route, _route, c,
-				_editor,
-				*this,
-				false,
-				parent_canvas,
-				_route->describe_parameter(param)));
+		boost::shared_ptr<AutomationTimeAxisView> 
+			gain_track(new AutomationTimeAxisView (_session,
+							       _route, _route->amp(), c,
+							       _editor,
+							       *this,
+							       false,
+							       parent_canvas,
+							       _route->amp()->describe_parameter(param)));
 
 		add_automation_child(Evoral::Parameter(GainAutomation), gain_track, show);
 
@@ -396,11 +398,11 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 
 			/* we don't already have an AutomationTimeAxisView for this parameter */
 
-			std::string const name = _route->describe_parameter (pan_control->parameter ());
+			std::string const name = _route->panner()->describe_parameter (pan_control->parameter ());
 
 			boost::shared_ptr<AutomationTimeAxisView> pan_track (
 				new AutomationTimeAxisView (_session,
-							    _route, _route, pan_control, 
+							    _route, _route->panner(), pan_control, 
 							    _editor,
 							    *this,
 							    false,

@@ -176,8 +176,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void>      SuperRapidScreenUpdate;
 	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
 
-	void name_io_setup (ARDOUR::AudioEngine&, std::string&, ARDOUR::IO& io, bool in);
-
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
 	XMLNode* keyboard_settings () const;

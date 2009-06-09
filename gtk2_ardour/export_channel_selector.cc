@@ -112,14 +112,14 @@ PortExportChannelSelector::fill_route_list ()
 
 	/* Add master bus and then everything else */
 	
-	ARDOUR::IO * master = session->master_out().get();
+	ARDOUR::IO* master = session->master_out()->output().get();
 	channel_view.add_route (master);
 	
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		if (it->get() == master) {
+		if ((*it)->output().get() == master) {
 			continue;
 		}
-		channel_view.add_route (it->get());
+		channel_view.add_route ((*it)->output().get());
 	}
 	
 	update_channel_count ();
@@ -261,27 +261,27 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 }
 
 void
-PortExportChannelSelector::ChannelTreeView::add_route (ARDOUR::IO * route)
+PortExportChannelSelector::ChannelTreeView::add_route (ARDOUR::IO * io)
 {
 	Gtk::TreeModel::iterator iter = route_list->append();
 	Gtk::TreeModel::Row row = *iter;
 
 	row[route_cols.selected] = false;
-	row[route_cols.name] = route->name();
-	row[route_cols.io] = route;
+	row[route_cols.name] = io->name();
+	row[route_cols.io] = io;
 	
 	/* Initialize port list */
 	
 	Glib::RefPtr<Gtk::ListStore> port_list = Gtk::ListStore::create (route_cols.port_cols);
 	row[route_cols.port_list_col] = port_list;
 	
-	uint32_t outs = route->n_outputs().n_audio();
+	uint32_t outs = io->n_ports().n_audio();
 	for (uint32_t i = 0; i < outs; ++i) {
 		iter = port_list->append();
 		row = *iter;
 		
 		row[route_cols.port_cols.selected] = false;
-		row[route_cols.port_cols.port] = route->audio_output (i);
+		row[route_cols.port_cols.port] = io->audio (i);
 		
 		std::ostringstream oss;
 		oss << "Out-" << (i + 1);

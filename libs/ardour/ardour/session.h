@@ -730,8 +730,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* session-wide solo/mute/rec-enable */
 
-	bool soloing() const { return currently_soloing; }
-
+	bool soloing() const { return _non_soloed_outs_muted; }
+	
 	void set_all_solo (bool);
 	void set_all_mute (bool);
 
@@ -743,8 +743,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* control/master out */
 
-	boost::shared_ptr<IO> control_out() const { return _control_out; }
-	boost::shared_ptr<IO> master_out() const { return _master_out; }
+	boost::shared_ptr<Route> control_out() const { return _control_out; }
+	boost::shared_ptr<Route> master_out() const { return _master_out; }
 
 	/* insert/send management */
 
@@ -1040,6 +1040,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool                    _have_captured;
 	float                   _meter_hold;
 	float                   _meter_falloff;
+	bool                    _non_soloed_outs_muted;
 
 	void set_worst_io_latencies ();
 	void set_worst_io_latencies_x (IOChange asifwecare, void *ignored) {
@@ -1688,8 +1689,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* main outs */
 	uint32_t main_outs;
 
-	boost::shared_ptr<IO> _master_out;
-	boost::shared_ptr<IO> _control_out;
+	boost::shared_ptr<Route> _master_out;
+	boost::shared_ptr<Route> _control_out;
 
 	gain_t* _gain_automation_buffer;
 	pan_t** _pan_automation_buffer;

@@ -242,15 +242,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void route_active_changed ();
 
-	/* speed control (for tracks only) */
-
-	Gtk::Adjustment    speed_adjustment;
-	Gtkmm2ext::ClickBox speed_spinner;
-	Gtk::Label         speed_label;
-	Gtk::Frame         speed_frame;
-
-	void speed_adjustment_changed ();
-	void speed_changed ();
 	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();
@@ -263,7 +254,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void engine_stopped();
 
 	void switch_io (boost::shared_ptr<ARDOUR::Route>);
-	boost::shared_ptr<ARDOUR::Send> _current_send;
+	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 	void revert_to_default_display ();
 
 	static int scrollbar_height;

@@ -34,25 +34,28 @@ class XMLNode;
 namespace ARDOUR {
 
 class Session;
+class IO;
+class Delivery;
+class MuteMaster;
 
 /** Port inserts: send output to a Jack port, pick up input at a Jack port
  */
 class PortInsert : public IOProcessor
 {
   public:
-	PortInsert (Session&);
-	PortInsert (Session&, const XMLNode&);
+	PortInsert (Session&, boost::shared_ptr<MuteMaster> mm);
+	PortInsert (Session&, boost::shared_ptr<MuteMaster> mm, const XMLNode&);
 	~PortInsert ();
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&);
 
-	void init ();
-	
 	void run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	nframes_t signal_latency() const;
+
+	bool set_name (const std::string& name);
 	
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
@@ -62,6 +65,8 @@ class PortInsert : public IOProcessor
   private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);
+
+	boost::shared_ptr<Delivery> _out;
 	
 	uint32_t bitslot;
 };

@@ -135,7 +135,7 @@ def build(bld):
 		gdither.cc
 		globals.cc
 		import.cc
-		io.cc
+                io.cc
 		io_processor.cc
 		jack_slave.cc
 		ladspa_plugin.cc
@@ -157,6 +157,7 @@ def build(bld):
 		midi_track.cc
 		mix.cc
 		mtc_slave.cc
+                mute_master.cc
 		named_selection.cc
 		onset_detector.cc
 		panner.cc
@@ -178,7 +179,7 @@ def build(bld):
 		resampled_source.cc
 		return.cc
 		reverse.cc
-		route.cc
+                route.cc
 		route_group.cc
 		send.cc
 		session.cc

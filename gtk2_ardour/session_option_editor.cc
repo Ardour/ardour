@@ -25,12 +25,12 @@ public:
 
 	void setup_ports (int dim)
 	{
-		cerr << _session.the_auditioner()->outputs().num_ports() << "\n";
+		cerr << _session.the_auditioner()->output()->n_ports() << "\n";
 		
 		if (dim == OURS) {
 			_port_group->clear ();
-			_port_group->add_bundle (_session.click_io()->bundle_for_outputs());
-			_port_group->add_bundle (_session.the_auditioner()->bundle_for_outputs());
+			_port_group->add_bundle (_session.click_io()->bundle());
+			_port_group->add_bundle (_session.the_auditioner()->output()->bundle());
 		} else {
 			_ports[OTHER].gather (_session, true);
 		}
@@ -41,7 +41,7 @@ public:
 		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
 		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 		
-		if (c[OURS].bundle == _session.click_io()->bundle_for_outputs()) {
+		if (c[OURS].bundle == _session.click_io()->bundle()) {
 
 			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
@@ -50,9 +50,9 @@ public:
 					assert (f);
 					
 					if (s) {
-						_session.click_io()->connect_output (f, *j, 0);
+						_session.click_io()->connect (f, *j, 0);
 					} else {
-						_session.click_io()->disconnect_output (f, *j, 0);
+						_session.click_io()->disconnect (f, *j, 0);
 					}
 				}
 			}
@@ -64,7 +64,7 @@ public:
 		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
 		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 		
-		if (c[OURS].bundle == _session.click_io()->bundle_for_outputs()) {
+		if (c[OURS].bundle == _session.click_io()->bundle()) {
 			
 			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {

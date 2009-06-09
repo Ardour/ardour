@@ -19,6 +19,7 @@
 
 #include <gtkmm2ext/doi.h>
 
+#include "ardour/amp.h"
 #include "ardour/io.h"
 #include "ardour/send.h"
 
@@ -38,8 +39,8 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	, _gpm (se)
 	, _panners (se)
 {
- 	_panners.set_io (s->io());
- 	_gpm.set_io (s->io());
+ 	_panners.set_panner (s->panner());
+ 	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp()->gain_control(), s->amp());
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name ("SendUIFrame");
@@ -50,7 +51,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	_vbox.pack_start (_hbox, false, false, false);
 	_vbox.pack_start (_panners, false,false);
 
-	io = manage (new IOSelector (se, s->io(), true));
+	io = manage (new IOSelector (se, s->output()));
 	
 	pack_start (_vbox, false, false);
 
@@ -60,8 +61,8 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 
 	_send->set_metering (true);
 
-	_send->io()->input_changed.connect (mem_fun (*this, &SendUI::ins_changed));
-	_send->io()->output_changed.connect (mem_fun (*this, &SendUI::outs_changed));
+	_send->input()->changed.connect (mem_fun (*this, &SendUI::ins_changed));
+	_send->output()->changed.connect (mem_fun (*this, &SendUI::outs_changed));
 	
 	_panners.set_width (Wide);
 	_panners.setup_pan ();

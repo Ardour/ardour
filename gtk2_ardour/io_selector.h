@@ -30,7 +30,7 @@ namespace ARDOUR {
 class IOSelector : public PortMatrix
 {
   public:
-	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
+	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
@@ -74,7 +74,7 @@ class IOSelector : public PortMatrix
 class IOSelectorWindow : public ArdourDialog
 {
   public:
-	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool for_input, bool can_cancel = false);
+	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
 
 	IOSelector& selector() { return _selector; }
 

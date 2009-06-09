@@ -211,7 +211,8 @@ Processor::configure_io (ChanCount in, ChanCount out)
 {
 	/* This class assumes 1:1 input:output.static output stream count.
 	   Derived classes must override and set _configured_output appropriately
-	   if this is not the case */
+	   if this is not the case 
+	*/
 
 	_configured_input = in; 
 	_configured_output = out; 

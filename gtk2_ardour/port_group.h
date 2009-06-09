@@ -31,9 +31,11 @@
 namespace ARDOUR {
 	class Session;
 	class Bundle;
+	class Processor;
 }
 
 class PortMatrix;
+class RouteBundle;
 
 /** A list of bundles and ports, grouped by some aspect of their
  *  type e.g. busses, tracks, system.  Each group has 0 or more bundles
@@ -119,7 +121,8 @@ class PortGroupList : public sigc::trackable
 	std::string common_prefix_before (std::vector<std::string> const &, std::string const &) const;
 	void emit_changed ();
 	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, bool) const;
-	
+	void maybe_add_processor_to_bundle (boost::weak_ptr<ARDOUR::Processor>, boost::shared_ptr<RouteBundle>, bool);
+
 	ARDOUR::DataType _type;
 	mutable ARDOUR::BundleList _bundles;
 	List _groups;

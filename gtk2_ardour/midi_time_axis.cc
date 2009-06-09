@@ -506,13 +506,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	if (existing != _automation_tracks.end())
 		return;
 
-	boost::shared_ptr<AutomationControl> c
-		= boost::dynamic_pointer_cast<AutomationControl>(_route->data().control(param));
-
-	if (!c) {
-		c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(param));
-		_route->add_control(c);
-	}
+	boost::shared_ptr<AutomationControl> c = _route->get_control (param);
 	
 	assert(c);
 

@@ -24,6 +24,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 
+#include "ardour/delivery.h"
 #include "ardour/port_insert.h"
 #include "ardour/plugin.h"
 #include "ardour/port.h"
@@ -40,15 +41,17 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PortInsert::PortInsert (Session& s)
-	: IOProcessor (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), "")
+PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm)
+	: IOProcessor (s, true, true, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), "")
+	, _out (new Delivery (s, _output, mm, _name, Delivery::Insert))
 {
-	init ();
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-PortInsert::PortInsert (Session& s, const XMLNode& node)
-	: IOProcessor (s, "unnamed port insert")
+PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
+	: IOProcessor (s, true, true, "unnamed port insert")
+	, _out (new Delivery (s, _output, mm, _name, Delivery::Insert))
+
 {
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -63,29 +66,20 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::init ()
-{
-	if (_io->ensure_io(output_streams(), input_streams(), false, this)) { // sic
-		error << _("PortInsert: cannot create ports") << endmsg;
-		throw failed_constructor();
-	}
-}
-
-void
 PortInsert::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (_io->n_outputs().n_total() == 0) {
+	if (_output->n_ports().n_total() == 0) {
 		return;
 	}
 
 	if (!active()) {
 		/* deliver silence */
-		_io->silence (nframes);
+		silence (nframes);
 		return;
 	}
 
-	_io->deliver_output (bufs, start_frame, end_frame, nframes);
-	_io->collect_input (bufs, nframes);
+	_out->run_in_place (bufs, start_frame, end_frame, nframes);
+	_input->collect_input (bufs, nframes, ChanCount::ZERO);
 }
 
 XMLNode&
@@ -97,7 +91,7 @@ PortInsert::get_state(void)
 XMLNode&
 PortInsert::state (bool full)
 {
-	XMLNode& node = IOProcessor::state(full);
+	XMLNode& node = Processor::state(full);
 	char buf[32];
 	node.add_property ("type", "port");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
@@ -141,7 +135,7 @@ PortInsert::set_state(const XMLNode& node)
 		}
 	}
 	
-	IOProcessor::set_state (*insert_node);
+	Processor::set_state (*insert_node);
 
 	return 0;
 }
@@ -156,7 +150,7 @@ PortInsert::signal_latency() const
 	   need to take that into account too.
 	*/
 
-	return _session.engine().frames_per_cycle() + _io->input_latency();
+	return _session.engine().frames_per_cycle() + _input->signal_latency();
 }
 
 bool
@@ -164,7 +158,11 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 {
 	/* for an insert, processor input corresponds to IO output, and vice versa */
 
-	if (_io->ensure_io (out, in, false, this) != 0) {
+	if (_input->ensure_io (in, false, this) != 0) {
+		return false;
+	}
+
+	if (_output->ensure_io (out, false, this) != 0) {
 		return false;
 	}
 
@@ -178,3 +176,12 @@ PortInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out) c
 	return true;
 }
 
+bool
+PortInsert::set_name (const std::string& name)
+{
+	bool ret = Processor::set_name (name);
+
+	ret = (_input->set_name (name) || _output->set_name (name));
+
+	return ret;
+}
