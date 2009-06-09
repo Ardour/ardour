@@ -495,7 +495,7 @@ IO::state (bool full_state)
 		
 		vector<string> connections;
 
-		XMLNode* pnode = new XMLNode (X_("port"));
+		XMLNode* pnode = new XMLNode (X_("Port"));
 		pnode->add_property (X_("type"), i->type().to_string());
 
 		if (i->get_connections (connections)) {
@@ -716,7 +716,7 @@ IO::get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle
 			}
 		}
 
-		if ((*iter)->name() == X_("port")) {
+		if ((*iter)->name() == X_("Port")) {
 			prop = (*iter)->property (X_("type"));
 
 			if (!prop) {
@@ -790,7 +790,7 @@ IO::make_connections (const XMLNode& node)
 			return 0;
 		}
 
-		if ((*i)->name() == "port") {
+		if ((*i)->name() == "Port") {
 			Port* p = nth (n++);
 			XMLProperty* prop = (*i)->property ("connection");
 			if (p && prop) {
