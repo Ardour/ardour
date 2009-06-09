@@ -739,6 +739,7 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 	nframes64_t drag_delta;
 	bool changed_tracks, changed_position;
 	map<RegionView*, RouteTimeAxisView*> final;
+	RouteTimeAxisView* source_tv;
 
 	if (!movement_occurred) {
 		/* just a click */
