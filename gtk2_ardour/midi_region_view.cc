@@ -764,9 +764,7 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 GhostRegion*
 MidiRegionView::add_ghost (TimeAxisView& tv)
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
 	CanvasNote* note;
-	assert(rtv);
 
 	double unit_position = _region->position () / samples_per_unit;
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);

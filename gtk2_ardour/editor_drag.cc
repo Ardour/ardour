@@ -728,7 +728,6 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	bool nocommit = true;
 	vector<RegionView*> copies;
-	RouteTimeAxisView* source_tv;
 	boost::shared_ptr<Diskstream> ds;
 	boost::shared_ptr<Playlist> from_playlist;
 	list<RegionView*> new_views;
@@ -2462,7 +2461,7 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	  _cumulative_x_drag (0),
 	  _cumulative_y_drag (0)
 {
-	ControlPoint* _point = reinterpret_cast<ControlPoint*> (_item->get_data ("control_point"));
+	_point = reinterpret_cast<ControlPoint*> (_item->get_data ("control_point"));
 	assert (_point);
 }
 
