@@ -90,7 +90,6 @@ private:
 	friend class iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >;
 	friend class iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> >;
 	
-	size_t   _size; ///< Size in bytes of used portion of _data
 	uint8_t* _data; ///< timestamp, event, timestamp, event, ...
 };
 

@@ -27,7 +27,6 @@ using namespace ARDOUR;
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
 	: Buffer(DataType::MIDI, capacity)
-	, _size(0)
 	, _data(0)
 {
 	if (capacity) {
