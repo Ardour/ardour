@@ -172,14 +172,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	 */
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region> r) = 0;
 
-	/** Set whether waveforms should be shown for audio tracks.
-	 * @param yn true to show waveforms, otherwise false.
-	 */
-	virtual void set_show_waveforms (bool yn) = 0;
-
-	/** @return true if waveforms are being shown, otherwise false */
-	virtual bool show_waveforms () const = 0;
-
 	/** Set whether waveforms should be shown while recording audio tracks.
 	 * @param yn true to show waveforms, otherwise false.
 	 */

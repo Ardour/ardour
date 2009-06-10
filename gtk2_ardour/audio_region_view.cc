@@ -1125,7 +1125,7 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 void
 AudioRegionView::set_waveform_scale (WaveformScale scale)
 {
-	bool yn = (scale == LogWaveform);
+	bool yn = (scale == Logarithmic);
 
 	if (yn != (bool) (_flags & WaveformLogScaled)) {
 		for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {

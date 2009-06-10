@@ -198,11 +198,6 @@ class Editor : public PublicEditor
 
 	/* option editor-access */
 
-	void set_show_waveforms (bool yn);
-	bool show_waveforms() const { return _show_waveforms; }
-
-	void set_waveform_scale (Editing::WaveformScale);
-
 	void set_show_waveforms_recording (bool yn);
 	bool show_waveforms_recording() const { return _show_waveforms_recording; }
 	
@@ -338,7 +333,6 @@ class Editor : public PublicEditor
 	bool follow_playhead() const { return _follow_playhead; }
 	bool dragging_playhead () const { return _dragging_playhead; }
 
-	void toggle_waveform_visibility ();
 	void toggle_zero_line_visibility ();
 	void toggle_waveforms_while_recording ();
 	void toggle_measure_visibility ();
@@ -1511,8 +1505,6 @@ public:
 	/* display control */
 	
 	bool _show_measures;
-	/// true to show waveforms, otherwise false
-	bool _show_waveforms;
 	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
 	/// true if waveforms should be shown while recording audio tracks, otherwise false
@@ -2210,7 +2202,6 @@ public:
 
 	void remove_tracks ();
 	void toggle_tracks_active ();
-	void waveform_scale_chosen (Editing::WaveformScale);
 
 	bool _have_idled;
 	int resize_idle_id;

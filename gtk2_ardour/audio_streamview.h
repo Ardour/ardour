@@ -57,11 +57,6 @@ class AudioStreamView : public StreamView
 	AudioStreamView (AudioTimeAxisView&);
 	~AudioStreamView ();
 
-	void set_waveform_shape (Editing::WaveformShape);
-	Editing::WaveformShape get_waveform_shape () const { return _waveform_shape; }
-	void set_waveform_scale (Editing::WaveformScale);
-	Editing::WaveformScale get_waveform_scale () const { return _waveform_scale; }
-
 	int set_samples_per_unit (gdouble spp);
 
 	int     set_amplitude_above_axis (gdouble app);
@@ -105,6 +100,10 @@ class AudioStreamView : public StreamView
 	void color_handler ();
 
 	void update_contents_height ();
+
+	void parameter_changed (std::string const &);
+	void set_waveform_shape (ARDOUR::WaveformShape);
+	void set_waveform_scale (ARDOUR::WaveformScale);
 	
 	double _amplitude_above_axis;
 	
@@ -112,15 +111,11 @@ class AudioStreamView : public StreamView
 	CrossfadeViewList crossfade_views;
 	bool              crossfades_visible;
 
-
 	std::list<sigc::connection>                  rec_data_ready_connections;
 	nframes_t                                    last_rec_data_frame;
 	std::map<boost::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
 
 	bool outline_region;
-
-	Editing::WaveformShape     _waveform_shape;
-	Editing::WaveformScale     _waveform_scale;
 };
 
 #endif /* __ardour_audio_streamview_h__ */

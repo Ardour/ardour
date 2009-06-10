@@ -28,6 +28,7 @@
 #include "time_axis_view.h"
 #include "utils.h"
 #include "i18n.h"
+#include "audio_time_axis.h"
 
 using namespace Gtk;
 using namespace Glib;
@@ -94,7 +95,6 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Tools"), _("Tools"));
 	ActionManager::register_action (editor_actions, X_("TrimMenu"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
-	ActionManager::register_action (editor_actions, X_("WaveformMenu"), _("Waveforms"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_actions, X_("ZoomMenu"), _("Zoom"));
 
@@ -805,19 +805,9 @@ Editor::register_actions ()
 	
 	ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), mem_fun(*this, &Editor::session_import_dialog));
 
-	act = ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
-
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 	
-
-	RadioAction::Group waveform_scale_group;
-	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("linear-waveforms"), _("Linear"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LinearWaveform));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("logarithmic-waveforms"), _("Logarithmic"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LogWaveform));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
-
 	/* if there is a logo in the editor canvas, its always visible at startup */
 
 	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleLogoVisibility"), _("Show Logo"), mem_fun (*this, &Editor::toggle_logo_visibility));
@@ -883,16 +873,6 @@ Editor::toggle_ruler_visibility (RulerType rt)
 }
 
 void
-Editor::toggle_waveform_visibility ()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-visible"));
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		set_show_waveforms (tact->get_active());
-	}
-}
-
-void
 Editor::toggle_waveforms_while_recording ()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
@@ -925,33 +905,6 @@ Editor::toggle_logo_visibility ()
 			} else {
 				logo_item->hide ();
 			}
-		}
-	}
-}
-
-void
-Editor::waveform_scale_chosen (Editing::WaveformScale ws)
-{
-	RefPtr<Action> act;
-
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	switch (ws) {
-	case LinearWaveform:
-		act = ActionManager::get_action (X_("Editor"), X_("linear-waveforms"));
-		break;
-	case LogWaveform:
-		act = ActionManager::get_action (X_("Editor"), X_("logarithmic-waveforms"));
-		break;
-	}
-	
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && ract->get_active()) {
-			set_waveform_scale (ws);
 		}
 	}
 }

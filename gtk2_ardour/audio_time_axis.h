@@ -71,7 +71,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	
 	AudioStreamView* audio_view();
 
-	void set_show_waveforms (bool yn);
 	void set_show_waveforms_recording (bool yn);
 	void show_all_xfades ();
 	void hide_all_xfades ();
@@ -88,9 +87,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	XMLNode* get_child_xml_node (const std::string & childname);
 
-	void set_waveform_shape (Editing::WaveformShape);
-	void set_waveform_scale (Editing::WaveformScale);
-
   private:
 	friend class AudioStreamView;
 	friend class AudioRegionView;
@@ -100,9 +96,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void append_extra_display_menu_items ();
 	Gtk::Menu* build_mode_menu();
 	
-	void toggle_show_waveforms ();
-	void toggle_waveforms ();
-
 	void show_all_automation ();
 	void show_existing_automation ();
 	void hide_all_automation ();
@@ -112,12 +105,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void ensure_pan_views (bool show = true);
 	void update_control_names ();
-
-	Gtk::CheckMenuItem* waveform_item;
-	Gtk::RadioMenuItem* traditional_item;
-	Gtk::RadioMenuItem* rectified_item;
-	Gtk::RadioMenuItem* linearscale_item;
-	Gtk::RadioMenuItem* logscale_item;
 };
 
 #endif /* __ardour_audio_time_axis_h__ */

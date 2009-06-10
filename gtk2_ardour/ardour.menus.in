@@ -282,11 +282,6 @@
 		     <menuitem action='track-height-smaller'/>
 		     <menuitem action='track-height-small'/>
 		</menu>
-		<menu action='WaveformMenu'>
-		      <menuitem action='toggle-waveform-visible'/>
-		      <menuitem action='linear-waveforms'/>
-		      <menuitem action='logarithmic-waveforms'/>
-		</menu>
 		<menuitem action='toggle-track-active'/>	
 		<menuitem action='remove-track'/>	
 	</menu>
@@ -396,7 +391,6 @@
 	       <menuitem action='show-editor-mixer'/>
 	       <menuitem action='show-editor-list'/>
                <menuitem action='ToggleMeasureVisibility'/>
-               <menuitem action='toggle-waveform-visible'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
         </menu>
         <menu name='JACK' action='JACK'>

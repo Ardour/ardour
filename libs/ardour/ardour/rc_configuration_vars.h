@@ -141,6 +141,9 @@ CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
 CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
 CONFIG_VARIABLE (long, font_scale, "font-scale", 102400)
 CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", "~")
+CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
+CONFIG_VARIABLE (WaveformScale, waveform_scale, "waveform-scale", Linear)
+CONFIG_VARIABLE (WaveformShape, waveform_shape, "waveform-shape", Traditional)
 
 /* denormal management */
 

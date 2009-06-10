@@ -182,28 +182,6 @@ enum EditPoint {
 #undef EDITPOINT
 #define EDITPOINT(a) /*empty*/
 
-// WAVEFORMSCALE
-#undef WAVEFORMSCALE
-#define WAVEFORMSCALE(a) a,
-enum WaveformScale {
-	#include "editing_syms.h"
-};
-
-#undef WAVEFORMSCALE
-#define WAVEFORMSCALE(a) /*empty*/
-
-
-// WAVEFORMSHAPE
-#undef WAVEFORMSHAPE
-#define WAVEFORMSHAPE(a) a,
-enum WaveformShape {
-	#include "editing_syms.h"
-};
-
-#undef WAVEFORMSHAPE
-#define WAVEFORMSHAPE(a) /*empty*/
-
-
 // INSERTTIMEOPT
 #undef INSERTTIMEOPT
 #define INSERTTIMEOPT(a) a,

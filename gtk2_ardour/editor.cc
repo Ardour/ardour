@@ -290,7 +290,6 @@ Editor::Editor ()
 
 	current_interthread_info = 0;
 	_show_measures = true;
-	_show_waveforms = true;
 	_show_waveforms_recording = true;
 	show_gain_after_trim = false;
 	route_redisplay_does_not_sync_order_keys = false;
@@ -2554,18 +2553,6 @@ Editor::set_state (const XMLNode& node)
 		set_mouse_mode (MouseObject, true);
 	}
 
-	if ((prop = node.property ("show-waveforms"))) {
-		bool yn = (prop->value() == "yes");
-		_show_waveforms = !yn;
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-visible"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
-	}
-
 	if ((prop = node.property ("show-waveforms-recording"))) {
 		bool yn = (prop->value() == "yes");
 		_show_waveforms_recording = !yn;
@@ -2701,7 +2688,6 @@ Editor::get_state ()
 	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame);
 	node->add_property ("playhead", buf);
 
-	node->add_property ("show-waveforms", _show_waveforms ? "yes" : "no");
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");

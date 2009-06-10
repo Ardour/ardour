@@ -59,12 +59,12 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
 {
 	crossfades_visible = true;
-	_waveform_scale = LinearWaveform;
-	_waveform_shape = Traditional;
 	color_handler ();
 	_amplitude_above_axis = 1.0;
 
 	use_rec_regions = tv.editor().show_waveforms_recording ();
+
+	Config->ParameterChanged.connect (sigc::mem_fun (*this, &AudioStreamView::parameter_changed));
 }
 
 AudioStreamView::~AudioStreamView ()
@@ -148,30 +148,9 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 		region_view->set_sensitive (false);
 	}
 
-	/* if this was the first one, then lets query the waveform scale and shape.
-	   otherwise, we set it to the current value */
-	   
-	if (region_views.size() == 1) {
-
-		if (region_view->waveform_logscaled()) {
-			_waveform_scale = LogWaveform;
-		} else {
-			_waveform_scale = LinearWaveform;
-		}
-
-		if (region_view->waveform_rectified()) {
-			_waveform_shape = Rectified;
-		} else {
-			_waveform_shape = Traditional;
-		}
-	}
-	else {
-		region_view->set_waveform_scale(_waveform_scale);
-		region_view->set_waveform_shape(_waveform_shape);
-	}
-	
-	/* follow global waveform setting */
-	region_view->set_waveform_visible(_trackview.editor().show_waveforms());
+	region_view->set_waveform_scale (Config->get_waveform_scale ());
+	region_view->set_waveform_shape (Config->get_waveform_shape ());
+	region_view->set_waveform_visible (Config->get_show_waveforms ());
 
 	return region_view;	
 }
@@ -460,7 +439,6 @@ AudioStreamView::set_waveform_shape (WaveformShape shape)
 		if (arv)
 			arv->set_waveform_shape (shape);
 	}
-	_waveform_shape = shape;
 }		
 
 void
@@ -468,10 +446,10 @@ AudioStreamView::set_waveform_scale (WaveformScale scale)
 {
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) 
+		if (arv) {
 			arv->set_waveform_scale (scale);
+		}
 	}
-	_waveform_scale = scale;
 }		
 
 void
@@ -830,5 +808,17 @@ AudioStreamView::update_contents_height ()
 		} else {
 			(*i)->hide ();
 		}
+	}
+}
+
+void
+AudioStreamView::parameter_changed (string const & p)
+{
+	if (p == "show-waveforms") {
+		set_show_waveforms (Config->get_show_waveforms ());
+	} else if (p == "waveform-scale") {
+		set_waveform_scale (Config->get_waveform_scale ());
+	} else if (p == "waveform-shape") {
+		set_waveform_shape (Config->get_waveform_shape ());
 	}
 }

@@ -436,6 +436,16 @@ namespace ARDOUR {
 	class Bundle;
 	typedef std::vector<boost::shared_ptr<Bundle> > BundleList;
 
+	enum WaveformScale {
+		Linear,
+		Logarithmic
+	};
+
+	enum WaveformShape {
+		Traditional,
+		Rectified
+	};
+
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
@@ -452,6 +462,8 @@ std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SmpteFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 
 using ARDOUR::nframes_t;
 

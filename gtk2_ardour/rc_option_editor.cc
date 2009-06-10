@@ -1038,6 +1038,38 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_rubberbanding_snaps_to_grid)
 		     ));
 
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "show-waveforms",
+		     _("Show waveforms in regions"),
+		     mem_fun (*_rc_config, &RCConfiguration::get_show_waveforms),
+		     mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms)
+		     ));
+
+	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
+		"waveform-scale",
+		_("Waveform scale"),
+		mem_fun (*_rc_config, &RCConfiguration::get_waveform_scale),
+		mem_fun (*_rc_config, &RCConfiguration::set_waveform_scale)
+		);
+
+	wfs->add (Linear, _("linear"));
+	wfs->add (Logarithmic, _("logarithmic"));
+
+	add_option (_("Editor"), wfs);
+	
+	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
+		"waveform-shape",
+		_("Waveform shape"),
+		mem_fun (*_rc_config, &RCConfiguration::get_waveform_shape),
+		mem_fun (*_rc_config, &RCConfiguration::set_waveform_shape)
+		);
+
+	wfsh->add (Traditional, _("traditional"));
+	wfsh->add (Rectified, _("rectified"));
+
+	add_option (_("Editor"), wfsh);
+
 	/* AUDIO */
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Solo")));

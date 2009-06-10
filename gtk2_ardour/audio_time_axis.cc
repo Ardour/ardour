@@ -84,7 +84,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	assert(!is_track() || is_audio_track());
 
 	subplugin_menu.set_name ("ArdourContextMenu");
-	waveform_item = 0;
 
 	_view = new AudioStreamView (*this);
 
@@ -130,7 +129,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 			/* first idle will do what we need */
 		} else {
 			first_idle ();
-		} 
+		}
 
 	} else {
 		post_construct ();
@@ -185,60 +184,6 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 		items.push_back (MenuElem (_("Hide all crossfades"), mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
 		items.push_back (MenuElem (_("Show all crossfades"), mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
 	}
-
-	// waveform menu
-	Menu *waveform_menu = manage(new Menu);
-	MenuList& waveform_items = waveform_menu->items();
-	waveform_menu->set_name ("ArdourContextMenu");
-	
-	waveform_items.push_back (CheckMenuElem (_("Show waveforms"), mem_fun(*this, &AudioTimeAxisView::toggle_waveforms)));
-	waveform_item = static_cast<CheckMenuItem *> (&waveform_items.back());
-	ignore_toggle = true;
-	waveform_item->set_active (_editor.show_waveforms());
-	ignore_toggle = false;
-
-	waveform_items.push_back (SeparatorElem());
-	
-	RadioMenuItem::Group group;
-	
-	waveform_items.push_back (RadioMenuElem (group, _("Traditional"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Traditional)));
-	traditional_item = static_cast<RadioMenuItem *> (&waveform_items.back());
-
-	if (!Profile->get_sae()) {
-		waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
-		rectified_item = static_cast<RadioMenuItem *> (&waveform_items.back());
-	} else {
-		rectified_item = 0;
-	}
-
-	waveform_items.push_back (SeparatorElem());
-	
-	RadioMenuItem::Group group2;
-
-	waveform_items.push_back (RadioMenuElem (group2, _("Linear"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_scale), LinearWaveform)));
-	linearscale_item = static_cast<RadioMenuItem *> (&waveform_items.back());
-
-	waveform_items.push_back (RadioMenuElem (group2, _("Logarithmic"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_scale), LogWaveform)));
-	logscale_item = static_cast<RadioMenuItem *> (&waveform_items.back());
-
-	// setting initial item state
-	AudioStreamView* asv = audio_view();
-	if (asv) {
-		ignore_toggle = true;
-		if (asv->get_waveform_shape() == Rectified && rectified_item) {
-			rectified_item->set_active(true);
-		} else {
-			traditional_item->set_active(true);
-		}
-
-		if (asv->get_waveform_scale() == LogWaveform) 
-			logscale_item->set_active(true);
-		else linearscale_item->set_active(true);
-		ignore_toggle = false;
-	}
-
-	items.push_back (MenuElem (_("Waveform"), *waveform_menu));
-
 }
 	
 Gtk::Menu*
@@ -280,30 +225,6 @@ AudioTimeAxisView::build_mode_menu()
 }
 
 void
-AudioTimeAxisView::toggle_waveforms ()
-{
-	AudioStreamView* asv = audio_view();
-	assert(asv);
-
-	if (asv && waveform_item && !ignore_toggle) {
-		asv->set_show_waveforms (waveform_item->get_active());
-	}
-}
-
-void
-AudioTimeAxisView::set_show_waveforms (bool yn)
-{
-	AudioStreamView* asv = audio_view();
-	assert(asv);
-
-	if (waveform_item) {
-		waveform_item->set_active (yn);
-	} else {
-		asv->set_show_waveforms (yn);
-	}
-}
-
-void
 AudioTimeAxisView::set_show_waveforms_recording (bool yn)
 {
 	AudioStreamView* asv = audio_view();
@@ -312,30 +233,6 @@ AudioTimeAxisView::set_show_waveforms_recording (bool yn)
 		asv->set_show_waveforms_recording (yn);
 	}
 }
-
-void
-AudioTimeAxisView::set_waveform_shape (WaveformShape shape)
-{
-	AudioStreamView* asv = audio_view();
-
-	if (asv && !ignore_toggle) {
-		asv->set_waveform_shape (shape);
-	}
-
-	map_frozen ();
-}	
-
-void
-AudioTimeAxisView::set_waveform_scale (WaveformScale scale)
-{
-	AudioStreamView* asv = audio_view();
-
-	if (asv && !ignore_toggle) {
-		asv->set_waveform_scale (scale);
-	}
-
-	map_frozen ();
-}	
 
 void
 AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
@@ -591,4 +488,3 @@ AudioTimeAxisView::update_control_names ()
 		controls_ebox.set_name (controls_base_unselected_name);
 	}
 }
-
