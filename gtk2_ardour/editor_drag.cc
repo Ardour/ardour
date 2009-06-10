@@ -2829,6 +2829,27 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 }
 
+void
+ScrubDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
+{
+	Drag::start_grab (event);
+}
+
+void
+ScrubDrag::motion (GdkEvent* event, bool)
+{
+	_editor->scrub ();
+}
+
+void
+ScrubDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (movement_occurred && _editor->session) {
+		/* make sure we stop */
+		_editor->session->request_transport_speed (0.0);
+	} 
+}
+
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i),
 	  _operation (o),

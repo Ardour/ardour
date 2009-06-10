@@ -453,7 +453,18 @@ public:
 	void finished (GdkEvent *, bool);
 };
 
-/** Drag in range selection mode */
+/** Scrub drag in audition mode */
+class ScrubDrag : public Drag
+{
+public:
+	ScrubDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
+	
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+};
+
+/** Drag in range select(gc_owner.get()) moAutomatable */
 class SelectionDrag : public Drag
 {
 public:

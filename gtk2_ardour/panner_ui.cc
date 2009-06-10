@@ -25,7 +25,6 @@
 #include <gtkmm2ext/barcontroller.h>
 #include "midi++/manager.h"
 #include "pbd/fastlog.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour_ui.h"
 #include "panner_ui.h"
@@ -337,15 +336,12 @@ void
 PannerUI::setup_pan ()
 {
 	cerr << "Setup pan for " << _panner->name() << endl;
-	// PBD::stacktrace (cerr, 5);
 
 	if (!_panner) {
 		return;
 	}
 
 	uint32_t nouts = _panner->nouts();
-
-	cerr << "\tnouts = " << nouts << endl;
 
 	if (nouts == 0 || nouts == 1) {
 

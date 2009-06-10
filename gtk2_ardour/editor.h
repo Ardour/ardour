@@ -2241,6 +2241,7 @@ public:
 	friend class LineDrag;
 	friend class RubberbandSelectDrag;
         friend class TimeFXDrag;
+        friend class ScrubDrag;
 	friend class SelectionDrag;
 	friend class RangeMarkerBarDrag;
 	friend class MouseZoomDrag;

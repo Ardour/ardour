@@ -987,13 +987,13 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 
 		case MouseAudition:
-			_scrubbing = true;
+			_drag = new ScrubDrag (this, item);
+			_drag->start_grab (event);
 			scrub_reversals = 0;
 			scrub_reverse_distance = 0;
 			last_scrub_x = event->button.x;
 			scrubbing_direction = 0;
 			track_canvas->get_window()->set_cursor (*transparent_cursor);
-			/* rest handled in motion & release */
 			break;
 
 		case MouseNote:
@@ -1876,17 +1876,6 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 	bool handled = false;
 	if (_drag) {
 		handled = _drag->motion_handler (event, from_autoscroll);
-	}
-
-	switch (mouse_mode) {
-	case MouseAudition:
-		if (_scrubbing) {
-			scrub ();
-		}
-		break;
-
-	default:
-		break;
 	}
 
 	if (!handled) {
