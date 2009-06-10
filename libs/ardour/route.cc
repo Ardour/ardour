@@ -383,6 +383,19 @@ Route::process_output_buffers (BufferSet& bufs,
 				} 
 			}
 		}
+
+	} else {
+
+		if (_denormal_protection || Config->get_denormal_protection()) {
+			
+			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+				Sample* const sp = i->data();
+				for (nframes_t nx = 0; nx < nframes; ++nx) {
+					sp[nx] += 1.0e-27f;
+				}
+			}
+
+		} 
 	}
 
 	/* -------------------------------------------------------------------------------------------
@@ -394,7 +407,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	if (rm.locked()) {
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			bufs.set_count (ChanCount::max(bufs.count(), (*i)->input_streams()));
-			(*i)->run_in_place (bufs, start_frame, end_frame, nframes);
+			(*i)->run (bufs, start_frame, end_frame, nframes);
 			bufs.set_count (ChanCount::max(bufs.count(), (*i)->output_streams()));
 		}
 
@@ -1471,11 +1484,11 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 	
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert (prop->value()=="yes"?true:false, this);
+		set_phase_invert (prop->value()=="yes"?true:false);
 	}
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
-		set_denormal_protection (prop->value()=="yes"?true:false, this);
+		set_denormal_protection (prop->value()=="yes"?true:false);
 	}
 	
 	if ((prop = node.property (X_("active"))) != 0) {
@@ -1589,7 +1602,10 @@ Route::_set_state (const XMLNode& node, bool call_base)
 				sscanf (prop->value().c_str(), "%d", &x);
 				set_remote_control_id (x);
 			}
-		} 
+
+		} else if (child->name() == X_("MuteMaster")) {
+			_mute_master->set_state (*child);
+		}
 	}
 
 	if ((prop = node.property (X_("mix-group"))) != 0) {
@@ -2414,11 +2430,11 @@ Route::send_for (boost::shared_ptr<const IO> target) const
 }
 
 void
-Route::set_phase_invert (bool yn, void *src)
+Route::set_phase_invert (bool yn)
 {
 	if (_phase_invert != yn) {
-		_phase_invert = yn;
-		//  phase_invert_changed (src); /* EMIT SIGNAL */
+		_phase_invert = 0xffff; // XXX all channels
+		phase_invert_changed (); /* EMIT SIGNAL */
 	}
 }
 
@@ -2429,11 +2445,11 @@ Route::phase_invert () const
 }
 
 void
-Route::set_denormal_protection (bool yn, void *src)
+Route::set_denormal_protection (bool yn)
 {
 	if (_denormal_protection != yn) {
 		_denormal_protection = yn;
-		//  denormal_protection_changed (src); /* EMIT SIGNAL */
+		denormal_protection_changed (); /* EMIT SIGNAL */
 	}
 }
 

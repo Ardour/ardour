@@ -76,14 +76,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	
 	virtual void set_block_size (nframes_t nframes) {}
 
-	virtual void run_in_place (BufferSet& bufs,
-				   sframes_t start_frame, sframes_t end_frame,
-				   nframes_t nframes) { assert(is_in_place()); }
-	
-	virtual void run_out_of_place (BufferSet& input, BufferSet& output,
-				       sframes_t start_frame, sframes_t end_frame,
-				       nframes_t nframes) { assert(is_out_of_place()); }
-	
+	virtual void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes) {}
 	virtual void silence (nframes_t nframes) {}
 	
 	void activate ()   { _active = true; ActiveChanged(); }
@@ -92,13 +85,6 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual bool configure_io (ChanCount in, ChanCount out);
 
 	/* Derived classes should override these, or processor appears as an in-place pass-through */
-
-	/** In-place processors implement run_in_place and modify thee input buffer parameter */
-	virtual bool is_in_place () const { return true; }
-
-	/* Out-Of-Place processors implement run_out_of_place, don't modify the input parameter
-	 * and write to their output parameter */
-	virtual bool is_out_of_place () const { return false; }
 
 	virtual bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const = 0;
 	virtual ChanCount input_streams () const { return _configured_input; }

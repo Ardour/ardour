@@ -66,7 +66,7 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+PortInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	if (_output->n_ports().n_total() == 0) {
 		return;
@@ -78,7 +78,7 @@ PortInsert::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_
 		return;
 	}
 
-	_out->run_in_place (bufs, start_frame, end_frame, nframes);
+	_out->run (bufs, start_frame, end_frame, nframes);
 	_input->collect_input (bufs, nframes, ChanCount::ZERO);
 }
 

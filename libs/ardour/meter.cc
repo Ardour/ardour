@@ -71,7 +71,7 @@ Metering::update_meters()
  * be set to 0.
  */
 void
-PeakMeter::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+PeakMeter::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	const uint32_t n_audio = min(_configured_input.n_audio(), bufs.count().n_audio());
 	const uint32_t n_midi  = min(_configured_input.n_midi(), bufs.count().n_midi());

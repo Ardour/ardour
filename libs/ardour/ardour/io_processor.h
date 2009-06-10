@@ -64,7 +64,6 @@ class IOProcessor : public Processor
 	void set_input (boost::shared_ptr<IO>);
 	void set_output (boost::shared_ptr<IO>);
 	
-	void run_in_place (BufferSet& in, sframes_t start, sframes_t end, nframes_t nframes) = 0;
 	void silence (nframes_t nframes);
 
 	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;

@@ -142,18 +142,22 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	if (_output->n_ports ().get (_output->default_type()) == 0) {
 		return;
 	}
+
+	/* this setup is not just for our purposes, but for anything that comes after us in the 
+	   processing pathway that wants to use this->output_buffers() for some reason.
+	*/
 
 	PortSet& ports (_output->ports());
 	output_buffers().attach_buffers (ports, nframes, _output_offset);
 
 	// this Delivery processor is not a derived type, and thus we assume
 	// we really can modify the buffers passed in (it is almost certainly
-	// the main output stage of a Route). Contrast with Send::run_in_place()
+	// the main output stage of a Route). Contrast with Send::run()
 	// which cannot do this.
 
 	gain_t tgain = target_gain ();

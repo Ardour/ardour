@@ -667,7 +667,7 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Processor> processor;
 		if ((processor = boost::dynamic_pointer_cast<Processor>(*i)) != 0) {
-			processor->run_in_place (buffers, start, start+nframes, nframes);
+			processor->run (buffers, start, start+nframes, nframes);
 		}
 	}
 	

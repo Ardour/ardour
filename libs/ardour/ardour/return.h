@@ -44,7 +44,7 @@ public:
 	
 	uint32_t bit_slot() const { return _bitslot; }
 
-	void run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 	
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }

@@ -16,6 +16,7 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <iostream>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -64,7 +65,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Amp::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	gain_t mute_gain;
 
@@ -137,25 +138,15 @@ Amp::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 				Amp::apply_gain (bufs, nframes, _current_gain, dg);
 				_current_gain = dg;
 				
-			} else if ((_current_gain != 0.0f) && (_current_gain != 1.0f)) {
+			} else if (_current_gain != 1.0f) {
 				
-				/* gain has not changed, but its non-unity, so apply it unless
-				   its zero.
+				/* gain has not changed, but its non-unity
 				*/
 
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					apply_gain_to_buffer(sp, nframes, _current_gain);
+					apply_gain_to_buffer (i->data(), nframes, _current_gain);
 				}
-
-			} else if (_current_gain == 0.0f) {
-				
-				/* silence! */
-
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					i->clear();
-				}
-			}
+			} 
 		}
 	}
 }

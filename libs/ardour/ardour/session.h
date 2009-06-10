@@ -1466,13 +1466,12 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* mixer stuff */
 
 	bool       solo_update_disabled;
-	bool       currently_soloing;
 
 	void route_mute_changed (void *src);
 	void route_solo_changed (void *src, boost::weak_ptr<Route>);
 	void catch_up_on_solo ();
 	void catch_up_on_solo_mute_override ();
-	void update_route_solo_state ();
+	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
 	void modify_solo_mute (bool, bool);
 	void strip_portname_for_solo (std::string& portname);
 

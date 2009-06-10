@@ -17,7 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#include <iostream>
+
+#include "pbd/enumwriter.h"
 
 #include "ardour/mute_master.h"
 #include "ardour/rc_configuration.h"
@@ -104,11 +105,19 @@ MuteMaster::get_value () const
 int
 MuteMaster::set_state (const XMLNode& node)
 {
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("mute-point")) != 0) {
+		_mute_point = (MutePoint) string_2_enum (prop->value(), _mute_point);
+	}
+
 	return 0;
 }
 
 XMLNode&
 MuteMaster::get_state()
 {
-	return *(new XMLNode (X_("MuteMaster")));
+	XMLNode* node = new XMLNode (X_("MuteMaster"));
+	node->add_property ("mute-point", enum_2_string (_mute_point));
+	return *node;
 }

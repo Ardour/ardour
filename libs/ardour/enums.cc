@@ -509,7 +509,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (MuteMaster, PostFader);
 	REGISTER_CLASS_ENUM (MuteMaster, Listen);
 	REGISTER_CLASS_ENUM (MuteMaster, Main);
-	REGISTER (_MuteMaster_MutePoint);
+	REGISTER_BITS (_MuteMaster_MutePoint);
 
 	REGISTER_CLASS_ENUM (IO, Input);
 	REGISTER_CLASS_ENUM (IO, Output);

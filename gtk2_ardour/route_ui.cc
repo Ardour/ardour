@@ -1127,7 +1127,7 @@ RouteUI::toggle_polarity ()
 		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_polarity));
 		
 		if ((x = polarity_menu_item->get_active()) != _route->phase_invert()) {
-			_route->set_phase_invert (x, this);
+			_route->set_phase_invert (x);
 			if (x) {
 			        name_label.set_text (X_("Ø ") + name_label.get_text());
 			} else {
@@ -1140,7 +1140,11 @@ RouteUI::toggle_polarity ()
 void
 RouteUI::polarity_changed ()
 {
-	/* no signal for this yet */
+	if (_route->phase_invert()) {
+		name_label.set_text (X_("Ø ") + name_label.get_text());
+	} else {
+		name_label.set_text (_route->name());
+	}
 }
 
 void
@@ -1153,7 +1157,7 @@ RouteUI::toggle_denormal_protection ()
 		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_denormal_protection));
 		
 		if ((x = denormal_menu_item->get_active()) != _route->denormal_protection()) {
-			_route->set_denormal_protection (x, this);
+			_route->set_denormal_protection (x);
 		}
 	}
 }
@@ -1161,7 +1165,9 @@ RouteUI::toggle_denormal_protection ()
 void
 RouteUI::denormal_protection_changed ()
 {
-	/* no signal for this yet */
+	if (denormal_menu_item) {
+		denormal_menu_item->set_active (_route->denormal_protection());
+	}
 }
 
 void

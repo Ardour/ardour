@@ -129,10 +129,10 @@ class Route : public SessionObject, public AutomatableControls
 	void set_solo_isolated (bool yn, void *src);
 	bool solo_isolated() const;
 	
-	void set_phase_invert (bool yn, void* src);
+	void set_phase_invert (bool yn);
 	bool phase_invert() const;
 
-	void set_denormal_protection (bool yn, void* src);
+	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
 
 	void       set_edit_group (RouteGroup *, void *);
@@ -226,6 +226,8 @@ class Route : public SessionObject, public AutomatableControls
 	nframes_t initial_delay() const { return _initial_delay; }
 
 	sigc::signal<void>       active_changed;
+	sigc::signal<void>       phase_invert_changed;
+	sigc::signal<void>       denormal_protection_changed;
 	sigc::signal<void,void*> solo_changed;
 	sigc::signal<void,void*> solo_safe_changed;
 	sigc::signal<void,void*> solo_isolated_changed;

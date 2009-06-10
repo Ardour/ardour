@@ -1889,7 +1889,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		try {
 			shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO));
 
-			if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+			if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
@@ -1904,22 +1904,17 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				goto failure;
 			}
 
-
-
-			/*
-			for (uint32_t x = 0; n_physical_audio_inputs && x < bus->n_inputs(); ++x) {
-					
+			for (uint32_t x = 0; n_physical_audio_inputs && x < bus->input()->n_ports().n_audio(); ++x) {
 				port = "";
 				
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 					port = physinputs[((n+x)%n_physical_audio_inputs)];
 				} 
 				
-				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
+				if (port.length() && bus->input()->connect (bus->input()->nth (x), port, this)) {
 					break;
 				}
 			}
-			*/
 
 			for (uint32_t x = 0; n_physical_audio_outputs && x < bus->n_outputs().n_audio(); ++x) {
 				port = "";
@@ -2218,8 +2213,6 @@ Session::route_mute_changed (void* src)
 void
 Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 {
-	cerr << "RSC sud = " << solo_update_disabled << endl;
-
 	if (solo_update_disabled) {
 		// We know already
 		return;
@@ -2242,16 +2235,13 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		delta = -1;
 	}
 
-	cerr << "\tshift solo level by " << delta << endl;
-
+	solo_update_disabled = true;
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		if ((*i)->feeds (route->input())) {
 			/* do it */
 			
-			solo_update_disabled = true;
 			(*i)->main_outs()->mod_solo_level (delta);
-			solo_update_disabled = false;
 		}
 	}
 
@@ -2261,9 +2251,22 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		_master_out->main_outs()->mod_solo_level (1);
 	}
 
+	solo_update_disabled = false;
+	update_route_solo_state (r);
+	SoloChanged (); /* EMIT SIGNAL */
+	set_dirty();
+}
+
+void
+Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
+{
 	/* now figure out if anything that matters is soloed */
 
 	bool something_soloed = false;
+
+	if (!r) {
+		r = routes.reader();
+	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_master() && !(*i)->is_hidden() && (*i)->soloed()) {
@@ -2276,56 +2279,7 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		_non_soloed_outs_muted = something_soloed;
 		SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
 	}
-
-	SoloChanged (); /* EMIT SIGNAL */
-
-	set_dirty();
 }
-
-void
-Session::update_route_solo_state ()
-{
-	bool mute = false;
-	bool is_track = false;
-	bool signal = false;
-
-	/* this is where we actually implement solo by changing
-	   the solo mute setting of each track.
-	*/
-
-	shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->soloed()) {
-			mute = true;
-			if (boost::dynamic_pointer_cast<Track>(*i)) {
-				is_track = true;
-			}
-			break;
-		}
-	}
-
-	if (mute != currently_soloing) {
-		signal = true;
-		currently_soloing = mute;
-	}
-
-	if (!is_track && !mute) {
-
-		/* nothing is soloed */
-
-		if (signal) {
-			SoloActive (false);
-		}
-
-		return;
-	}
-	
-	if (signal) {
-		SoloActive (currently_soloing);
-	}
-}
-
 
 void
 Session::catch_up_on_solo ()

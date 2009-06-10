@@ -179,7 +179,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	next_quarter_frame_to_send = -1;
 	current_block_size = 0;
 	solo_update_disabled = false;
-	currently_soloing = false;
 	_have_captured = false;
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;

@@ -51,7 +51,7 @@ class PortInsert : public IOProcessor
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&);
 
-	void run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	nframes_t signal_latency() const;
 

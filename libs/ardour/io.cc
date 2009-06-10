@@ -1280,7 +1280,7 @@ IO::process_input (boost::shared_ptr<Processor> proc, sframes_t start_frame, sfr
 	/* don't read the data into new buffers - just use the port buffers directly */
 
 	bufs.attach_buffers (_ports, nframes, 0);
-	proc->run_in_place (bufs, start_frame, end_frame, nframes);
+	proc->run (bufs, start_frame, end_frame, nframes);
 }
 
 void
