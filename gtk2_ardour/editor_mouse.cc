@@ -1369,7 +1369,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 			
 		case MouseAudition:
-			_scrubbing = false;
 			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
@@ -1465,7 +1464,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 			fraction = 1.0 - (cp->get_y() / cp->line().height());
 
-			if (is_drawable() && !_scrubbing) {
+			if (is_drawable() && dynamic_cast<ScrubDrag*> (_drag) == 0) {
 			        track_canvas->get_window()->set_cursor (*fader_cursor);
 			}
 

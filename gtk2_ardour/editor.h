@@ -1364,7 +1364,6 @@ class Editor : public PublicEditor
 	void start_scrolling ();
 	void stop_scrolling ();
 
-	bool _scrubbing;
 	double last_scrub_x;
 	int scrubbing_direction;
 	int scrub_reversals;

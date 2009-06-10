@@ -354,7 +354,6 @@ Editor::Editor ()
 	no_region_list_redisplay = false;
 	resize_idle_id = -1;
 
-	_scrubbing = false;
 	scrubbing_direction = 0;
 
 	sfbrowser = 0;
