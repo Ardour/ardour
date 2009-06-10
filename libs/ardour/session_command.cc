@@ -105,6 +105,8 @@ Session::memento_command_factory(XMLNode *n)
     } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name() || obj_T == typeid(MidiTrack).name()) { 
 		if (boost::shared_ptr<Route> r = route_by_id(id)) {
 			return new MementoCommand<Route>(*r, before, after);
+		} else {
+			error << string_compose (X_("Route %1 not found in session"), id) << endmsg;
 		}
     } else if (obj_T == typeid (Evoral::Curve).name() || obj_T == typeid (AutomationList).name()) {
 		std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);

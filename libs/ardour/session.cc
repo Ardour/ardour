@@ -2218,6 +2218,8 @@ Session::route_mute_changed (void* src)
 void
 Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 {
+	cerr << "RSC sud = " << solo_update_disabled << endl;
+
 	if (solo_update_disabled) {
 		// We know already
 		return;
@@ -2240,7 +2242,10 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		delta = -1;
 	}
 
+	cerr << "\tshift solo level by " << delta << endl;
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+
 		if ((*i)->feeds (route->input())) {
 			/* do it */
 			
@@ -2250,12 +2255,18 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		}
 	}
 
-	/* now figure out if anything is soloed */
+	/* make sure master is never muted by solo */
+
+	if (_master_out->main_outs()->solo_level() == 0) {
+		_master_out->main_outs()->mod_solo_level (1);
+	}
+
+	/* now figure out if anything that matters is soloed */
 
 	bool something_soloed = false;
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->soloed()) {
+		if (!(*i)->is_master() && !(*i)->is_hidden() && (*i)->soloed()) {
 			something_soloed = true;
 			break;
 		}

@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <iostream>
 
 #include "ardour/mute_master.h"
 #include "ardour/rc_configuration.h"
@@ -68,7 +69,7 @@ MuteMaster::mute (bool yn)
 	/* convenience wrapper around AutomationControl method */
 
 	if (yn) {
-		set_value (1.0f);
+		set_value ((float) 0xffff);
 	} else {
 		set_value (0.0f);
 	}
@@ -87,7 +88,11 @@ MuteMaster::mute_gain_at (MutePoint mp) const
 void
 MuteMaster::set_value (float f)
 {
-	mute_at ((MutePoint) ((int) rint (f)));
+	MutePoint old = _mute_point;
+	_mute_point = (MutePoint) (rint (f));
+	if (old != _mute_point) {
+		MutePointChanged (); // EMIT SIGNAL
+	}
 }
 
 float

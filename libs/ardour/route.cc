@@ -1660,8 +1660,6 @@ Route::set_processor_state (const XMLNode& node)
 			has_meter_processor = true;
 		}
 
-		cerr << _name << " setting up proc state for " << prop->value() << endl;
-
 		o = i;
 
 		if (prop->value() != "meter" && prop->value() != "amp" && prop->value() != "main-outs") {
@@ -1682,8 +1680,6 @@ Route::set_processor_state (const XMLNode& node)
 		// create it and move it to the correct location
 		if (o == _processors.end()) {
 
-			cerr << "\tproc not in list\n";
-
 			if (add_processor_from_xml (**niter, i)) {
 				--i; // move iterator to the newly inserted processor
 			} else {
@@ -1694,8 +1690,6 @@ Route::set_processor_state (const XMLNode& node)
 		// ensure it is at the location provided in the XML state
 		} else {
 
-			cerr << "\tproc in wrong place in list\n";
-			
 			if (i != o) {
 				boost::shared_ptr<Processor> tmp = (*o);
 				_processors.erase (o); // remove the old copy
@@ -1703,7 +1697,6 @@ Route::set_processor_state (const XMLNode& node)
 				--i; // move iterator to the correct processor
 			}
 
-			cerr << "\tnow reset proc " << (*i)->name() << endl;
 			(*i)->set_state (**niter);
 		}
 	}

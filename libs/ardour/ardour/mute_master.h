@@ -47,7 +47,7 @@ class MuteMaster : public AutomationControl
 	bool muted_main () const      { return _mute_point & Main; }
 
 	bool muted_at (MutePoint mp) const { return _mute_point & mp; }
-	bool muted() const { return _mute_point != MutePoint (0) && get_value() != 0.0; }
+	bool muted() const { return _mute_point != MutePoint (0); }
 	
 	gain_t mute_gain_at (MutePoint) const;
 

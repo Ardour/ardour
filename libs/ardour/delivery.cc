@@ -148,6 +148,9 @@ Delivery::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_fr
 		return;
 	}
 
+	PortSet& ports (_output->ports());
+	output_buffers().attach_buffers (ports, nframes, _output_offset);
+
 	// this Delivery processor is not a derived type, and thus we assume
 	// we really can modify the buffers passed in (it is almost certainly
 	// the main output stage of a Route). Contrast with Send::run_in_place()
@@ -156,14 +159,30 @@ Delivery::run_in_place (BufferSet& bufs, sframes_t start_frame, sframes_t end_fr
 	gain_t tgain = target_gain ();
 	
 	if (tgain != _current_gain) {
+		
+		/* target gain has changed */
+
 		Amp::apply_gain (bufs, nframes, _current_gain, tgain);
 		_current_gain = tgain;
+
+	} else if (tgain == 0.0) {
+
+		/* we were quiet last time, and we're still supposed to be quiet.
+		   Silence the outputs, and make sure the buffers are quiet too,
+		*/
+
+		_output->silence (nframes);
+		Amp::apply_simple_gain (bufs, nframes, 0.0);
+		
+		return;
+
+	} else if (tgain != 1.0) {
+
+		/* target gain has not changed, but is not unity */
+		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
 	// Attach output buffers to port buffers
-
-	PortSet& ports (_output->ports());
-	output_buffers().attach_buffers (ports, nframes, _output_offset);
 
 	if (_panner && _panner->npanners() && !_panner->bypassed()) {
 
@@ -229,7 +248,6 @@ Delivery::set_state (const XMLNode& node)
 	XMLNode* pan_node = node.child (X_("Panner"));
 	
 	if (pan_node) {
-		cerr << _name << " reset pan state from XML\n";
 		_panner->set_state (*pan_node);
 	} 
 
@@ -241,16 +259,11 @@ Delivery::set_state (const XMLNode& node)
 void
 Delivery::reset_panner ()
 {
-	cerr << _name << " reset panner - plegal ? " << panners_legal << endl;
-
 	if (panners_legal) {
 		if (!no_panner_reset) {
-			cerr << "\treset panner with " << _output->name() << " = " << _output->n_ports()
-			     << " vs. " << pans_required () << endl;
 			_panner->reset (_output->n_ports().n_audio(), pans_required());
 		}
 	} else {
-		cerr << "\tdefer pan reset till later\n";
 		panner_legal_c.disconnect ();
 		panner_legal_c = PannersLegal.connect (mem_fun (*this, &Delivery::panners_became_legal));
 	}
@@ -259,8 +272,6 @@ Delivery::reset_panner ()
 int
 Delivery::panners_became_legal ()
 {
-	cerr << _name << " panners now legal, outputs @ " << _output << " on " << _output->name()
-	     << " = " << _output->n_ports() << " vs. " << pans_required() << endl;
 	_panner->reset (_output->n_ports().n_audio(), pans_required());
 	_panner->load (); // automation
 	panner_legal_c.disconnect ();
@@ -345,51 +356,36 @@ Delivery::target_gain ()
 	gain_t desired_gain;
 	MuteMaster::MutePoint mp;
 
+	switch (_role) {
+	case Main:
+		mp = MuteMaster::Main;
+		break;
+	case Listen:
+		mp = MuteMaster::Listen;
+		break;
+	case Send:
+	case Insert:
+		if (_placement == PreFader) {
+			mp = MuteMaster::PreFader;
+		} else {
+			mp = MuteMaster::PostFader;
+		}
+		break;
+	}
+
 	if (_solo_level) {
 		desired_gain = 1.0;
 	} else {
 		if (_solo_isolated) {
 
-			switch (_role) {
-			case Main:
-				mp = MuteMaster::Main;
-				break;
-			case Listen:
-				mp = MuteMaster::Listen;
-				break;
-			case Send:
-			case Insert:
-				if (_placement == PreFader) {
-					mp = MuteMaster::PreFader;
-				} else {
-					mp = MuteMaster::PostFader;
-				}
-				break;
-			}
-
 			desired_gain = _mute_master->mute_gain_at (mp);
+
 		} else if (_session.soloing()) {
 
-			switch (_role) {
-			case Main:
-				mp = MuteMaster::Main;
-				break;
-			case Listen:
-				mp = MuteMaster::Listen;
-				break;
-			case Send:
-			case Insert:
-				if (_placement == PreFader) {
-					mp = MuteMaster::PreFader;
-				} else {
-					mp = MuteMaster::PostFader;
-				}
-				break;
-			}
-
 			desired_gain = min (Config->get_solo_mute_gain(), _mute_master->mute_gain_at (mp));
+
 		} else {
-			desired_gain = 1.0;
+			desired_gain = _mute_master->mute_gain_at (mp);
 		}
 	}
 

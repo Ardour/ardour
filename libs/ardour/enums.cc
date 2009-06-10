@@ -29,6 +29,7 @@
 #include "ardour/io.h"
 #include "ardour/location.h"
 #include "ardour/midi_track.h"
+#include "ardour/mute_master.h"
 #include "ardour/panner.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
@@ -106,6 +107,7 @@ setup_enum_writer ()
 	ExportProfileManager::TimeFormat _ExportProfileManager_TimeFormat;
 	Delivery::Role _Delivery_Role;
 	IO::Direction _IO_Direction;
+	MuteMaster::MutePoint _MuteMaster_MutePoint;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -502,6 +504,12 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Delivery, Listen);
 	REGISTER_CLASS_ENUM (Delivery, Main);
 	REGISTER_BITS (_Delivery_Role);
+
+	REGISTER_CLASS_ENUM (MuteMaster, PreFader);
+	REGISTER_CLASS_ENUM (MuteMaster, PostFader);
+	REGISTER_CLASS_ENUM (MuteMaster, Listen);
+	REGISTER_CLASS_ENUM (MuteMaster, Main);
+	REGISTER (_MuteMaster_MutePoint);
 
 	REGISTER_CLASS_ENUM (IO, Input);
 	REGISTER_CLASS_ENUM (IO, Output);

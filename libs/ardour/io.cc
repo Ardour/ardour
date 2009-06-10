@@ -83,7 +83,6 @@ IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
 	_active = true;
 	pending_state_node = 0;
 	setup_bundles ();
-	cerr << "+++ IO created with name = " << _name << endl;
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
@@ -95,9 +94,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	pending_state_node = 0;
 
 	set_state (node);
-
 	setup_bundles ();
-	cerr << "+++ IO created from XML with name = " << _name << endl;
 }
 
 IO::~IO ()
@@ -429,11 +426,7 @@ IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 {
 	bool changed = false;
 
-	cerr << "Ensure that IO " << _name << '/' << (_direction == Input ? "input" : "output") 
-	     << " has " << count << endl;
-
 	if (count == n_ports() && !clear) {
-		cerr << "\talready has " << n_ports() << endl;
 		return 0;
 	}
 
@@ -451,8 +444,6 @@ IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 		_session.set_dirty ();
 	}
 
-	cerr << "\t@" << this << "  established with " << n_ports() << endl;
-	
 	return 0;
 }
 
@@ -743,8 +734,6 @@ IO::create_ports (const XMLNode& node)
 	
 	get_port_counts (node, n, c);
 	
-	cerr << _name << " got " << n << " from XML node" << endl;
-
 	if (ensure_ports (n, true, true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;

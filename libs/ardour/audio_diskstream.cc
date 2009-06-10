@@ -160,8 +160,6 @@ AudioDiskstream::free_working_buffers()
 void
 AudioDiskstream::non_realtime_input_change ()
 {
-	cerr << "AD::NRIC ... " << name() << endl;
-
 	{
 		Glib::Mutex::Lock lm (state_lock);
 
@@ -2064,8 +2062,6 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
-
-	cerr << _name << " RWS!!!\n";
 
 	if (!recordable()) {
 		return;
