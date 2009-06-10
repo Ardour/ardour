@@ -332,6 +332,10 @@ class Region
 	SourceList              _master_sources;
 	
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
+
+private:
+
+	void use_sources (SourceList const &);
 };
 
 } /* namespace ARDOUR */

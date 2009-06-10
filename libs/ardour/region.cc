@@ -133,22 +133,7 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
 {
-	
-	set<boost::shared_ptr<Source> > unique_srcs;
-
-	for (SourceList::const_iterator i=srcs.begin(); i != srcs.end(); ++i) {
-		_sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
-		unique_srcs.insert (*i);
-	}
-
-	for (SourceList::const_iterator i = srcs.begin(); i != srcs.end(); ++i) {
-		_master_sources.push_back (*i);
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
-		}
-	}
-	
+	use_sources (srcs);
 	assert(_sources.size() > 0);
 }
 
@@ -272,21 +257,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 		_extra_xml = 0;
 	}
 
-	set<boost::shared_ptr<Source> > unique_srcs;
-
-	for (SourceList::const_iterator i = other->_sources.begin(); i != other->_sources.end(); ++i) {
-		_sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
-		unique_srcs.insert (*i);
-	}
-
-	for (SourceList::const_iterator i = other->_master_sources.begin(); i != other->_master_sources.end(); ++i) {
-		_master_sources.push_back (*i);
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
-		}
-	}
-	
+	use_sources (other->_sources);
 	assert(_sources.size() > 0);
 }
 
@@ -401,6 +372,8 @@ Region::copy_stuff (boost::shared_ptr<const Region> other, nframes_t offset, nfr
 	_first_edit = EditChangesNothing;
 	_last_layer_op = 0;
 	_positional_lock_style = AudioTime;
+
+	use_sources (other->_sources);
 }
 
 void
@@ -1639,3 +1612,22 @@ Region::invalidate_transients ()
 }
 
 
+void
+Region::use_sources (SourceList const & s)
+{
+	set<boost::shared_ptr<Source> > unique_srcs;
+	
+	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
+		_sources.push_back (*i);
+		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), *i));
+		unique_srcs.insert (*i);
+	}
+
+	for (SourceList::const_iterator i = s.begin(); i != s.end(); ++i) {
+		_master_sources.push_back (*i);
+		if (unique_srcs.find (*i) == unique_srcs.end()) {
+			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), *i));
+		}
+	}
+}
+	
