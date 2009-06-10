@@ -114,7 +114,7 @@ public:
 	virtual void update_selection () {}
 
 protected:
-	nframes64_t adjusted_current_frame () const;
+	nframes64_t adjusted_current_frame (GdkEvent *) const;
 	
 	Editor* _editor; ///< our editor
 	ArdourCanvas::Item* _item; ///< our item

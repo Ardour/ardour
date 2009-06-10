@@ -153,13 +153,19 @@ Drag::end_grab (GdkEvent* event)
 }
 
 nframes64_t
-Drag::adjusted_current_frame () const
+Drag::adjusted_current_frame (GdkEvent* event) const
 {
+	nframes64_t pos = 0;
+	
 	if (_current_pointer_frame > _pointer_frame_offset) {
-		return _current_pointer_frame - _pointer_frame_offset;
+		pos = _current_pointer_frame - _pointer_frame_offset;
 	}
 
-	return 0;
+	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+		_editor->snap_to (pos);
+	}
+	
+	return pos;
 }
 
 bool
@@ -1693,11 +1699,7 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 MeterMarkerDrag::motion (GdkEvent* event, bool)
 {
-	nframes64_t adjusted_frame = adjusted_current_frame ();
-	
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (adjusted_frame);
-	}
+	nframes64_t const adjusted_frame = adjusted_current_frame (event);
 	
 	if (adjusted_frame == _last_pointer_frame) {
 		return;
@@ -1787,11 +1789,7 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool)
 {
-	nframes64_t adjusted_frame = adjusted_current_frame ();
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (adjusted_frame);
-	}
+	nframes64_t const adjusted_frame = adjusted_current_frame (event);
 	
 	if (adjusted_frame == _last_pointer_frame) {
 		return;
@@ -1884,14 +1882,8 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 void
 CursorDrag::motion (GdkEvent* event, bool)
 {
-	nframes64_t adjusted_frame = adjusted_current_frame ();
-	
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		if (_cursor == _editor->playhead_cursor) {
-			_editor->snap_to (adjusted_frame);
-		}
-	}
-	
+	nframes64_t const adjusted_frame = adjusted_current_frame (event);
+
 	if (adjusted_frame == _last_pointer_frame) {
 		return;
 	}
@@ -1949,11 +1941,7 @@ FadeInDrag::motion (GdkEvent* event, bool)
 {
 	nframes64_t fade_length;
 
-	nframes64_t pos = adjusted_current_frame ();
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (pos);
-	}
+	nframes64_t const pos = adjusted_current_frame (event);
 	
 	boost::shared_ptr<Region> region = _primary->region ();
 
@@ -1988,8 +1976,8 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	nframes64_t fade_length;
 
-	nframes64_t const pos = adjusted_current_frame ();
-
+	nframes64_t const pos = adjusted_current_frame (event);
+	
 	boost::shared_ptr<Region> region = _primary->region ();
 
 	if (pos < (region->position() + 64)) {
@@ -2045,11 +2033,7 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 {
 	nframes64_t fade_length;
 
-	nframes64_t pos = adjusted_current_frame ();
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (pos);
-	}
+	nframes64_t const pos = adjusted_current_frame (event);
 
 	boost::shared_ptr<Region> region = _primary->region ();
 	
@@ -2086,11 +2070,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	nframes64_t fade_length;
 
-	nframes64_t pos = adjusted_current_frame ();
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (pos);
-	}
+	nframes64_t const pos = adjusted_current_frame (event);
 
 	boost::shared_ptr<Region> region = _primary->region ();
 
@@ -2238,13 +2218,9 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	Location  *real_location;
 	Location *copy_location = 0;
 
-	nframes64_t newframe = adjusted_current_frame ();
+	nframes64_t const newframe = adjusted_current_frame (event);
 
 	nframes64_t next = newframe;
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (newframe, 0, true);
-	}
 	
 	if (_current_pointer_frame == _last_pointer_frame) { 
 		return;
@@ -2922,12 +2898,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t end = 0;
 	nframes64_t length;
 
-	nframes64_t pending_position = adjusted_current_frame ();
+	nframes64_t const pending_position = adjusted_current_frame (event);
 	
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (pending_position);
-	}
-
 	/* only alter selection if the current frame is 
 	   different from the last frame position (adjusted)
 	 */
