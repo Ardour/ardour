@@ -1,49 +1,32 @@
 #include <math.h>
-//#include "ardour/types.h"
+#include "ardour/types.h"
 
-typedef float Sample;
-#define nframes_t uint32_t
+#ifndef __interpolation_h__
+#define __interpolation_h__
 
-// 40.24 fixpoint math
-#define FIXPOINT_ONE 0x1000000
+namespace ARDOUR {
 
 class Interpolation {
-    protected:
-    /// speed in fixed point math
-    uint64_t      phi;
+protected:
+	double   _speed, _target_speed;
+    	    
+public:
+        Interpolation () : _speed(0.0L) {}
     
-    /// target speed in fixed point math
-    uint64_t      target_phi;
-    
-    uint64_t      last_phase;
+        void set_speed (double new_speed)          { _speed = new_speed; }
+        void set_target_speed (double new_speed)   { _target_speed = new_speed; }
 
-	// Fixed point is just an integer with an implied scaling factor. 
-	// In 40.24 the scaling factor is 2^24 = 16777216,  
-	// so a value of 10*2^24 (in integer space) is equivalent to 10.0. 
-	//
-	// The advantage is that addition and modulus [like x = (x + y) % 2^40]  
-	// have no rounding errors and no drift, and just require a single integer add.
-	// (swh)
-	
-	static const int64_t fractional_part_mask  = 0xFFFFFF;
-	static const Sample  binary_scaling_factor = 16777216.0f;
-    
-    public:
-        Interpolation () : phi (FIXPOINT_ONE), target_phi (FIXPOINT_ONE), last_phase (0) {}
-    
-        void set_speed (double new_speed) {
-            target_phi = (uint64_t) (FIXPOINT_ONE * fabs(new_speed));
-            phi = target_phi;
-        }
-        
-        uint64_t get_phi () const { return phi; }
-        uint64_t get_target_phi () const { return target_phi; }
-        uint64_t get_last_phase () const { return last_phase; }
+        double target_speed()          const { return _target_speed; }
+        double speed()                 const { return _speed; }
  
         virtual nframes_t interpolate (nframes_t nframes, Sample* input, Sample* output) = 0;
 };
 
 class LinearInterpolation : public Interpolation {
-    public:
+public:
         nframes_t interpolate (nframes_t nframes, Sample* input, Sample* output);
 };
+
+} // namespace ARDOUR
+
+#endif

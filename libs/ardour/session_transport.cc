@@ -176,9 +176,7 @@ Session::realtime_stop (bool abort)
 	reset_slave_state ();
 
 	_transport_speed = 0;
-	phi = 0;
-	target_phi = 0;
-	phase = 0;
+	_target_transport_speed = 0;
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
@@ -804,7 +802,7 @@ Session::set_transport_speed (double speed, bool abort)
 		return;
 	}
 
-	target_phi = (uint64_t) (0x1000000 * fabs(speed));
+	_target_transport_speed = fabs(speed);
 
 	/* 8.0 max speed is somewhat arbitrary but based on guestimates regarding disk i/o capability
 	   and user needs. We really need CD-style "skip" playback for ffwd and rewind.
@@ -987,9 +985,7 @@ Session::start_transport ()
 	transport_sub_state |= PendingDeclickIn;
 	
 	_transport_speed = 1.0;
-	target_phi       = 0x1000000; // speed = 1
-	phi              = target_phi;
-	phase            = 0;
+	_target_transport_speed = 1.0;
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {

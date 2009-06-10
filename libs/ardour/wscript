@@ -136,7 +136,8 @@ def build(bld):
 		gdither.cc
 		globals.cc
 		import.cc
-                io.cc
+		interpolation.cc
+        io.cc
 		io_processor.cc
 		jack_slave.cc
 		ladspa_plugin.cc
@@ -245,16 +246,16 @@ def build(bld):
 		
 	if bld.env['HAVE_CPPUNIT']:
 		# Unit tests
-		obj              = bld.new_task_gen('cxx', 'program')
-		obj.source       = '''
+		testobj              = bld.new_task_gen('cxx', 'program')
+		testobj.source       = '''
 			interpolation.cc
 			tests/interpolation-test.cc
 			tests/testrunner.cpp
 		'''
-		obj.includes     = ['.', './ardour']
-		obj.uselib       = 'CPPUNIT SIGCPP'
-		obj.target       = 'run-tests'
-		obj.install_path = ''
+		testobj.includes     = obj.includes + ['../pbd/']
+		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM'
+		testobj.target       = 'run-tests'
+		testobj.install_path = ''
 
 def shutdown():
 	autowaf.shutdown()

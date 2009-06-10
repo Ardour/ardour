@@ -23,7 +23,6 @@
 
 #include "ardour/interpolation.h"
 
-
 class InterpolationTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(InterpolationTest);
@@ -31,17 +30,18 @@ class InterpolationTest : public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE_END();
     
     #define NUM_SAMPLES 100000000
+    #define INTERVAL 100
     
-    Sample  input[NUM_SAMPLES];
-    Sample output[NUM_SAMPLES];
+    ARDOUR::Sample  input[NUM_SAMPLES];
+    ARDOUR::Sample output[NUM_SAMPLES];
     
-    LinearInterpolation linear;
+    ARDOUR::LinearInterpolation linear;
 
     public:
        	
         void setUp() {
             for (int i = 0; i < NUM_SAMPLES; ++i) {
-                if (i % 100 == 0) {
+                if (i % INTERVAL == 0) {
                     input[i] = 1.0f;
                 } else {
                     input[i] = 0.0f;

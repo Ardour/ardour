@@ -285,13 +285,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	nframes_t     wrap_buffer_size;
 	nframes_t     speed_buffer_size;
 
-	uint64_t      last_phase;
-	
-	/// diskstream speed in 40.24 fixed point math
-	uint64_t      phi;
-	
-	/// target diskstream speed in 40.24 fixed point math
-	uint64_t      target_phi;
+	double        _speed;	
+	double        _target_speed;
 	
 	nframes_t     file_frame;		
 	nframes_t     playback_sample;

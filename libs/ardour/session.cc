@@ -113,9 +113,7 @@ Session::Session (AudioEngine &eng,
 		  string mix_template)
 
 	: _engine (eng),
-	  phi (0),
-	  target_phi (0),
-	  phase (0),
+	  _target_transport_speed (0.0),
 	  _requested_return_frame (-1),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
@@ -200,9 +198,7 @@ Session::Session (AudioEngine &eng,
 		  nframes_t initial_length)
 
 	: _engine (eng),
-	  phi (0),
-	  target_phi (0),
-	  phase (0),
+	  _target_transport_speed (0.0),
 	  _requested_return_frame (-1),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),

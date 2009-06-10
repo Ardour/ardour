@@ -793,7 +793,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 			playback_distance = nframes;
 		}
 
-		phi = target_phi;
+		_speed = _target_speed;
 
 	}
 
@@ -819,63 +819,16 @@ void
 AudioDiskstream::process_varispeed_playback(nframes_t nframes, boost::shared_ptr<ChannelList> c)
 {
 	ChannelList::iterator chan;
-	
-	// the idea behind phase is that when the speed is not 1.0, we have to 
-	// interpolate between samples and then we have to store where we thought we were. 
-	// rather than being at sample N or N+1, we were at N+0.8792922
-	// so the "phase" element, if you want to think about this way, 
-	// varies from 0 to 1, representing the "offset" between samples
-	uint64_t    phase = last_phase;
-	
-	// acceleration
-	int64_t     phi_delta;
-	
-	// index in the input buffers
-	nframes_t   i = 0;
 
-	// Linearly interpolate into the speed buffer
-	// using 40.24 fixed point math
-	//
-	// Fixed point is just an integer with an implied scaling factor. 
-	// In 40.24 the scaling factor is 2^24 = 16777216,  
-	// so a value of 10*2^24 (in integer space) is equivalent to 10.0. 
-	//
-	// The advantage is that addition and modulus [like x = (x + y) % 2^40]  
-	// have no rounding errors and no drift, and just require a single integer add.
-	// (swh)
+	interpolation.set_target_speed (_target_speed);
+	interpolation.set_speed (_speed);
 	
-	const int64_t fractional_part_mask  = 0xFFFFFF;
-	const Sample  binary_scaling_factor = 16777216.0f;
-
-	// phi = fixed point speed
-	if (phi != target_phi) {
-		phi_delta = ((int64_t)(target_phi - phi)) / nframes;
-	} else {
-		phi_delta = 0;
-	}
-
 	for (chan = c->begin(); chan != c->end(); ++chan) {
-
-		Sample fractional_phase_part;
 		ChannelInfo* chaninfo (*chan);
 
-		i = 0;
-		phase = last_phase;
-
-		for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
-			i = phase >> 24;
-			fractional_phase_part = (phase & fractional_part_mask) / binary_scaling_factor;
-			chaninfo->speed_buffer[outsample] = 
-				chaninfo->current_playback_buffer[i] * (1.0f - fractional_phase_part) +
-				chaninfo->current_playback_buffer[i+1] * fractional_phase_part;
-			phase += phi + phi_delta;
-		}
-		
-		chaninfo->current_playback_buffer = chaninfo->speed_buffer;
-	}
-
-	playback_distance = i; // + 1;
-	last_phase = (phase & fractional_part_mask);
+		playback_distance = interpolation.interpolate (
+				nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer); 
+	}	
 }
 
 bool

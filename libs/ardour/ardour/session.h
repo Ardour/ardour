@@ -55,6 +55,7 @@
 #include "ardour/session_configuration.h"
 #include "ardour/location.h"
 #include "ardour/smpte.h"
+#include "ardour/interpolation.h"
 
 class XMLTree;
 class XMLNode;
@@ -1023,9 +1024,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	volatile double         _transport_speed;
 	double                  _last_transport_speed;
                             	 // varispeed playback
-	uint64_t                 phi; 	     // fixed point transport speed
-	uint64_t                 target_phi; // fixed point target transport speed
-	uint64_t                 phase;      // fixed point phase 
+	double                  _target_transport_speed;
+	LinearInterpolation     interpolation;
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
