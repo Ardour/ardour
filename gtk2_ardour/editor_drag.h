@@ -397,6 +397,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
+	bool active (Editing::MouseMode m) {
+		return (m == Editing::MouseGain);
+	}
+
 private:
 	
 	ControlPoint* _point;
@@ -414,6 +418,10 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	
+	bool active (Editing::MouseMode) {
+		return true;
+	}
 
 private:
 
