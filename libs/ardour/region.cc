@@ -71,6 +71,8 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 	, _layer(layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
+	, _ancestral_start (0)
+	, _ancestral_length (0)
 	, _stretch(1.0)
 	, _shift(1.0)
 	, _read_data_count(0)
@@ -127,6 +129,8 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 	, _layer(layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
+	, _ancestral_start (0)
+	, _ancestral_length (0)
 	, _stretch(1.0)
 	, _shift(1.0)
 	, _read_data_count(0)
@@ -1272,7 +1276,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 	/* these 3 properties never change as a result of any editing */
 
 	if ((prop = node.property ("ancestral-start")) != 0) {
-		_ancestral_start = atoi (prop->value());
+		_ancestral_start = strtoll (prop->value().c_str(), 0, 10);
 	} else {
 		_ancestral_start = _start;
 	}
