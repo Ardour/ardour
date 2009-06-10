@@ -6000,6 +6000,7 @@ Editor::do_insert_time ()
 	Label intersect_option_label (_("Intersected regions should:"));
 	CheckButton glue_button (_("Move Glued Regions"));
 	CheckButton marker_button (_("Move Markers"));
+	CheckButton tempo_button (_("Move Tempo & Meters"));
 	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
 	HBox clock_box;
 
@@ -6014,6 +6015,7 @@ Editor::do_insert_time ()
 	option_box.pack_start (button_box, false, false);
 	option_box.pack_start (glue_button, false, false);
 	option_box.pack_start (marker_button, false, false);
+	option_box.pack_start (tempo_button, false, false);
 
 	button_box.pack_start (leave_button, false, false);
 	button_box.pack_start (move_button, false, false);
@@ -6033,6 +6035,7 @@ Editor::do_insert_time ()
 	clock.show_all();
 	clock_box.show ();
 	marker_button.show ();
+	tempo_button.show ();
 
 	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
@@ -6060,12 +6063,12 @@ Editor::do_insert_time ()
 		opt = SplitIntersected;
 	}
 
-	insert_time (pos, distance, opt, glue_button.get_active(), marker_button.get_active());
+	insert_time (pos, distance, opt, glue_button.get_active(), marker_button.get_active(), tempo_button.get_active());
 }
 
 void
 Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt, 
-		     bool ignore_music_glue, bool markers_too)
+		     bool ignore_music_glue, bool markers_too, bool tempo_too)
 {
 	bool commit = false;
 
@@ -6127,6 +6130,9 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 			session->add_command (new MementoCommand<Locations>(*session->locations(), &before, &after));
 		}
 	}
+	
+	if (tempo_too)
+		session->tempo_map().insert_time (pos, frames);
 
 	if (commit) {
 		commit_reversible_command ();

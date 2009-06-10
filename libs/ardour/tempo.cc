@@ -529,6 +529,21 @@ TempoMap::change_initial_tempo (double beats_per_minute, double note_type)
 }
 
 void
+TempoMap::insert_time (nframes_t where, nframes_t amount)
+{
+	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
+		if ((*i)->frame() >= where) {
+			(*i)->set_frame ((*i)->frame() + amount);
+		}
+	}
+
+	timestamp_metrics (false);
+	
+	StateChanged (Change (0));
+}
+
+
+void
 TempoMap::change_existing_tempo_at (nframes_t where, double beats_per_minute, double note_type)
 {
 	Tempo newtempo (beats_per_minute, note_type);

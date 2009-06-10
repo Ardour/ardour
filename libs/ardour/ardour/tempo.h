@@ -281,6 +281,8 @@ class TempoMap : public PBD::StatefulDestructible
 	void change_existing_tempo_at (nframes_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);
 
+	void insert_time( nframes_t where, nframes_t amount);
+	
 	int n_tempos () const;
 	int n_meters () const;
 
