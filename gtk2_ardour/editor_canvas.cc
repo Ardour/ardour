@@ -824,19 +824,18 @@ Editor::tie_vertical_scrolling ()
 void
 Editor::scroll_canvas_horizontally ()
 {
-	nframes64_t time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-
 	/* horizontal scrolling only */
-	double x_delta;
+	double x1, y1, x2, y2, x_delta;
+	_master_group->get_bounds (x1, y1, x2, y2);
 
-	x_delta = (leftmost_frame - time_origin) / frames_per_unit;
+	x_delta = - (x1 +  horizontal_adjustment.get_value());
 
 	_master_group->move (x_delta, 0);
 	timebar_group->move (x_delta, 0);
 	time_line_group->move (x_delta, 0);
 	cursor_group->move (x_delta, 0);
 
-	leftmost_frame = time_origin;
+	leftmost_frame = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
 	update_fixed_rulers ();
 	redisplay_tempo (true);
