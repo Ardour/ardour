@@ -339,6 +339,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
+	bool active (Editing::MouseMode) {
+		return true;
+	}
+
 private:
 	EditorCursor* _cursor; ///< cursor being dragged
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
