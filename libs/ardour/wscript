@@ -48,6 +48,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
 	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
 	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
+	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
 
 	conf.env.append_value('CXXFLAGS', '-DUSE_RUBBERBAND')
 	conf.define('HAVE_RUBBERBAND', 1)
@@ -241,6 +242,19 @@ def build(bld):
 		obj.source += ' lv2_plugin.cc lv2_event_buffer.cc uri_map.cc '
 		obj.uselib += ' SLV2 '
 		obj.cxxflags += ['-DHAVE_SLV2']
+		
+	if bld.env['HAVE_CPPUNIT']:
+		# Unit tests
+		obj              = bld.new_task_gen('cxx', 'program')
+		obj.source       = '''
+			interpolation.cc
+			tests/interpolation-test.cc
+			tests/testrunner.cpp
+		'''
+		obj.includes     = ['.', './ardour']
+		obj.uselib       = 'CPPUNIT SIGCPP'
+		obj.target       = 'run-tests'
+		obj.install_path = ''
 
 def shutdown():
 	autowaf.shutdown()
