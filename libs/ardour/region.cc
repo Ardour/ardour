@@ -1282,7 +1282,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 	}
 
 	if ((prop = node.property ("ancestral-length")) != 0) {
-		_ancestral_length = atoi (prop->value());
+		_ancestral_length = strtoll (prop->value().c_str(), 0, 10);
 	} else {
 		_ancestral_length = _length;
 	}
