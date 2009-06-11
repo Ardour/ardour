@@ -343,7 +343,6 @@ Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item
 {
 	bool ret = false;
 
-	
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:

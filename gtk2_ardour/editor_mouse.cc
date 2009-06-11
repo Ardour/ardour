@@ -1326,10 +1326,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MouseObject:
 			switch (item_type) {
 			case AutomationTrackItem:
-				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_routeview);
+				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_axisview);
 				if (atv) {
 					atv->add_automation_event (item, event, where, event->button.y);
-				}
+				} 
 				return true;
 				
 				break;
