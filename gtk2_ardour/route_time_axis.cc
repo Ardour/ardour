@@ -822,7 +822,11 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		gm.get_gain_slider().show();
 		mute_button->show();
-		solo_button->show();
+		if (!_route || _route->is_master()) {
+			solo_button->hide();
+		} else {
+			solo_button->show();
+		}
 		if (rec_enable_button)
 			rec_enable_button->show();
 
@@ -844,7 +848,11 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		gm.get_gain_slider().hide();
 		mute_button->show();
-		solo_button->show();
+		if (!_route || _route->is_master()) {
+			solo_button->hide();
+		} else {
+			solo_button->show();
+		}
 		if (rec_enable_button)
 			rec_enable_button->show();
 

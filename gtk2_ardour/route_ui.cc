@@ -115,6 +115,7 @@ RouteUI::init ()
 	solo_button->set_self_managed (true);
 	solo_button->set_name ("SoloButton");
 	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
+	solo_button->set_no_show_all (true);
 
 	rec_enable_button = manage (new BindableToggleButton (""));
 	rec_enable_button->set_name ("RecordEnableButton");
@@ -210,7 +211,12 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
 	
 	mute_button->show();
-	solo_button->show();
+
+	if (_route->is_master()) {
+		solo_button->hide ();
+	} else {
+		solo_button->show();
+	}
 
 	connections.push_back (_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu)));
 
