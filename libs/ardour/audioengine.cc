@@ -716,9 +716,7 @@ AudioEngine::connect (const string& source, const string& destination)
 	}
 	
 	if (ret > 0) {
-		error << string_compose(_("AudioEngine: connection already exists: %1 (%2) to %3 (%4)"), 
-					source, s, destination, d) 
-		      << endmsg;
+		/* already exists - no error, no warning */
 	} else if (ret < 0) {
 		error << string_compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"), 
 					source, s, destination, d) 

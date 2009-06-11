@@ -1388,6 +1388,8 @@ Route::state(bool full_state)
 	ProcessorList::iterator i;
 	char buf[32];
 
+	id().print (buf, sizeof (buf));
+	node->add_property("id", buf);
 	node->add_property ("name", _name);
 	node->add_property("default-type", _default_type.to_string());
 
@@ -1476,6 +1478,10 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	if ((prop = node.property (X_("name"))) != 0) {
 		Route::set_name (prop->value());
 	} 
+
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
+	}
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
