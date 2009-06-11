@@ -7314,8 +7314,7 @@ msgstr "Ardour/GTK "
 msgid ""
 " (built using "
 msgstr ""
-"\n"
-"   (kompiliert mit Version "
+" (kompiliert mit Version "
 
 #: gtk2_ardour/main.cc:297
 msgid " and GCC version "

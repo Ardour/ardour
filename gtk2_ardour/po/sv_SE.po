@@ -4799,8 +4799,7 @@ msgstr ""
 msgid ""
 " (built using "
 msgstr ""
-"\n"
-"   (kompilerat med "
+" (kompilerat med "
 
 #: ../main.cc:401
 msgid " with libardour "

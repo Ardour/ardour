@@ -165,6 +165,7 @@ editor_rulers.cc
 editor_scrub.cc
 editor_selection.cc
 editor_selection_list.cc
+editor_summary.cc
 editor_tempodisplay.cc
 editor_timefx.cc
 engine_dialog.cc

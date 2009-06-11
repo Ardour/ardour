@@ -4531,8 +4531,7 @@ msgstr ""
 msgid ""
 " (built using "
 msgstr ""
-"\n"
-"   (compilado "
+" (compilado "
 
 #: main.cc:405
 msgid " with libardour "

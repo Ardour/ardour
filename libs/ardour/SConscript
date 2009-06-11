@@ -98,6 +98,7 @@ globals.cc
 import.cc
 io.cc
 io_processor.cc
+interpolation.cc
 jack_slave.cc
 ladspa_plugin.cc
 location.cc

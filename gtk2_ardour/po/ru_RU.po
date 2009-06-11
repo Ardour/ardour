@@ -4763,8 +4763,7 @@ msgstr "Ardour/GTK "
 msgid ""
 " (built using "
 msgstr ""
-"\n"
-"   (собран с использованием "
+" (собран с использованием "
 
 #: gtk2_ardour/main.cc:391
 msgid " and GCC version "
