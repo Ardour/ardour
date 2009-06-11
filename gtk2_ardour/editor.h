@@ -63,6 +63,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
+#include "editor_summary.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -2215,6 +2216,9 @@ public:
 	void located ();
 	bool _pending_locate_request;
 
+	EditorSummary* _summary;
+	void region_view_added (RegionView *);
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
@@ -2238,6 +2242,8 @@ public:
 	friend class RegionCreateDrag;
 	friend class RegionMotionDrag;
 	friend class RegionInsertDrag;
+
+	friend class EditorSummary;
 };
 
 #endif /* __ardour_editor_h__ */

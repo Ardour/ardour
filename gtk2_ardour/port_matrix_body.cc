@@ -508,3 +508,4 @@ PortMatrixBody::component_size_changed ()
 	_matrix->setup_scrollbars ();
 }
 
+

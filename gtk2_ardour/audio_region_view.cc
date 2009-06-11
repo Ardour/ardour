@@ -865,8 +865,6 @@ AudioRegionView::create_waves ()
 		if (wait_for_data) {
 			if (audio_region()->audio_source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				// cerr << "\tData is ready\n";
-				cerr << "\tData is ready\n";
-				// cerr << "\tData is ready\n";
 				create_one_wave (n, true);
 			} else {
 				// cerr << "\tdata is not ready\n";

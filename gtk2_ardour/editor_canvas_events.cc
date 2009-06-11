@@ -170,7 +170,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		/* what? */
 		break;
 	}
-	
+
 	return false;
 }
 

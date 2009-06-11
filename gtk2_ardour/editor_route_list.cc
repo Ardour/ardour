@@ -130,6 +130,7 @@ Editor::handle_new_route (RouteList& routes)
 		ignore_route_list_reorder = false;
 
 		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
+		tv->view()->RegionViewAdded.connect (mem_fun (*this, &Editor::region_view_added));
 		
 		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
@@ -144,6 +145,8 @@ Editor::handle_new_route (RouteList& routes)
 
 	editor_list_button.set_sensitive(true);
 	route_redisplay_does_not_sync_order_keys = false;
+
+	_summary->set_dirty ();
 }
 
 void

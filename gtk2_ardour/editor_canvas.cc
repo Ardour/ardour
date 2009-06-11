@@ -362,6 +362,7 @@ Editor::track_canvas_size_allocated ()
 	reset_hscrollbar_stepping ();
 	update_fixed_rulers();
 	redisplay_tempo (false);
+	_summary->set_bounds_dirty ();
 
 	Resized (); /* EMIT_SIGNAL */
 
@@ -773,8 +774,6 @@ Editor::tie_vertical_scrolling ()
 void
 Editor::scroll_canvas_horizontally ()
 {
-	nframes64_t time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-
 	/* horizontal scrolling only */
 	double x1, y1, x2, y2, x_delta;
 	_master_group->get_bounds (x1, y1, x2, y2);
@@ -790,6 +789,8 @@ Editor::scroll_canvas_horizontally ()
 
 	update_fixed_rulers ();
 	redisplay_tempo (true);
+
+	_summary->set_bounds_dirty ();
 
 #ifndef GTKOSX
 	if (!autoscroll_active) {
