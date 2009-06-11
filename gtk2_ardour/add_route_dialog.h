@@ -55,25 +55,31 @@ class AddRouteDialog : public Gtk::Dialog
 	Gtk::Entry name_template_entry;
 	Gtk::RadioButton track_button;
 	Gtk::RadioButton bus_button;
-	Gtk::RadioButton template_button;
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText track_mode_combo;
-	Gtk::ComboBoxText track_template_combo;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 	
 	void track_type_chosen ();
-	void refill_track_templates ();
+	void refill_channel_setups ();
 
-	Gtk::HBox* hbox3;
-	Gtk::HBox* hbox9;
-	Gtk::HBox* hbox4;
-	
 	void reset_template_option_visibility ();
 	
 	void on_show ();
+
+	struct ChannelSetup {
+	    std::string name;
+	    std::string template_path;
+	    uint32_t    channels;
+	};
+
+	typedef std::vector<ChannelSetup> ChannelSetups;
+	ChannelSetups channel_setups;
+
+	std::vector<std::string> channel_combo_strings;
+	std::vector<std::string> track_mode_strings;
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */
