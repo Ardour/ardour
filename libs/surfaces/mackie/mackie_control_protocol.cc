@@ -660,8 +660,7 @@ void MackieControlProtocol::create_ports()
 
 shared_ptr<Route> MackieControlProtocol::master_route()
 {
-	boost::shared_ptr<IO> mo = session->master_out ();
-	return boost::dynamic_pointer_cast<Route>(mo);
+	return session->master_out ();
 }
 
 Strip & MackieControlProtocol::master_strip()
@@ -1072,7 +1071,7 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal, b
 	{
 		Pot & pot = route_signal->strip().vpot();
 		boost::shared_ptr<Panner> panner = route_signal->route()->panner();
-		if ( panner && panner->npanners() == 1 || ( panner->npanners() == 2 && panner->linked() ) )
+		if ( (panner && panner->npanners() == 1) || ( panner->npanners() == 2 && panner->linked() ) )
 		{
 			float pos;
 			route_signal->route()->panner()->streampanner(0).get_effective_position( pos );
