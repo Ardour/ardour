@@ -173,8 +173,7 @@ MixerStrip::init ()
 	bottom_button_table.attach (meter_point_button, 1, 2, 0, 1);
     
 	meter_point_button.signal_button_press_event().connect (mem_fun (gpm, &GainMeter::meter_press), false);
-	/* XXX what is this meant to do? */
-	//meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
+	meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
 
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 

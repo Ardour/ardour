@@ -445,8 +445,6 @@ next_meter_point (MeterPoint mp)
 gint
 GainMeterBase::meter_press(GdkEventButton* ev)
 {
-	boost::shared_ptr<Route> _route;
-
 	wait_for_release = false;
 	
 	if (!_route) {
