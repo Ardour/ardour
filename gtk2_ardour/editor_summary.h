@@ -9,6 +9,9 @@ namespace ARDOUR {
 
 class Editor;
 
+/** Class to provide a visual summary of the contents of an editor window; represents
+ *  the whole session as a set of lines, one per region view.
+ */
 class EditorSummary : public Gtk::EventBox
 {
 public:
@@ -29,13 +32,13 @@ private:
 	GdkPixmap* get_pixmap (GdkDrawable *);
 	void render_region (RegionView*, cairo_t*, nframes_t, double) const;
 
-	Editor* _editor;
-	ARDOUR::Session* _session;
-	GdkPixmap* _pixmap;
-	bool _regions_dirty;
-	int _width;
-	int _height;
-	double _pixels_per_frame;
+	Editor* _editor; ///< our editor
+	ARDOUR::Session* _session; ///< our session
+	GdkPixmap* _pixmap; ///< pixmap containing a rendering of the region views, or 0
+	bool _regions_dirty; ///< true if _pixmap requires re-rendering, otherwise false
+	int _width; ///< pixmap width
+	int _height; ///< pixmap height
+	double _pixels_per_frame; ///< pixels per frame for the x axis of the pixmap
 };
 
 #endif

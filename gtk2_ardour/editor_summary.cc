@@ -10,6 +10,9 @@ using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
 
+/** Construct an EditorSummary.
+ *  @param e Editor to represent.
+ */
 EditorSummary::EditorSummary (Editor* e)
 	: _editor (e),
 	  _session (0),
@@ -22,6 +25,9 @@ EditorSummary::EditorSummary (Editor* e)
 	
 }
 
+/** Set the session.
+ *  @param s Session.
+ */
 void
 EditorSummary::set_session (Session* s)
 {
@@ -36,6 +42,7 @@ EditorSummary::set_session (Session* s)
 	set_dirty ();
 }
 
+/** Destroy */
 EditorSummary::~EditorSummary ()
 {
 	if (_pixmap) {
@@ -43,9 +50,14 @@ EditorSummary::~EditorSummary ()
 	}
 }
 
+/** Handle an expose event.
+ *  @param event Event from GTK.
+ */
 bool
 EditorSummary::on_expose_event (GdkEventExpose* event)
 {
+	/* Render the regions pixmap */
+	
 	Gdk::Rectangle const exposure (
 		event->area.x, event->area.y, event->area.width, event->area.height
 		);
@@ -72,6 +84,8 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 			);
 	}
 
+	/* Render the view beginning and end markers */
+	
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
 	cairo_set_source_rgb (cr, 0, 1, 0);
@@ -92,6 +106,9 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	return true;
 }
 
+/** @param drawable GDK drawable.
+ *  @return pixmap for the regions.
+ */
 GdkPixmap *
 EditorSummary::get_pixmap (GdkDrawable* drawable)
 {
@@ -112,6 +129,9 @@ EditorSummary::get_pixmap (GdkDrawable* drawable)
 	return _pixmap;
 }
 
+/** Render the required regions to a cairo context.
+ *  @param cr Context.
+ */
 void
 EditorSummary::render (cairo_t* cr)
 {
@@ -119,12 +139,15 @@ EditorSummary::render (cairo_t* cr)
 		return;
 	}
 
+	/* background */
+	
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
 
 	int N = 0;
-	
+
+	/* count tracks to render */
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 		if ((*i)->view()) {
 			++N;
@@ -137,6 +160,8 @@ EditorSummary::render (cairo_t* cr)
 
 	cairo_set_line_width (cr, track_height);
 
+	/* render regions */
+	
 	int n = 0;
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 		StreamView* s = (*i)->view ();
@@ -157,6 +182,12 @@ EditorSummary::render (cairo_t* cr)
 
 }
 
+/** Render a region for the summary.
+ *  @param r Region view.
+ *  @param cr Cairo context.
+ *  @param start Frame offset that the summary starts at.
+ *  @param y y coordinate to render at.
+ */
 void
 EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, double y) const
 {
@@ -165,6 +196,7 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, doubl
 	cairo_stroke (cr);
 }
 
+/** Set the summary so that the whole thing will be re-rendered next time it is required */
 void
 EditorSummary::set_dirty ()
 {
@@ -174,6 +206,7 @@ EditorSummary::set_dirty ()
 	queue_draw ();
 }
 
+/** Set the summary so that just the view boundary markers will be re-rendered */
 void
 EditorSummary::set_bounds_dirty ()
 {
@@ -181,13 +214,20 @@ EditorSummary::set_bounds_dirty ()
 	queue_draw ();
 }
 
+/** Handle a size request.
+ *  @param req GTK requisition
+ */
 void
 EditorSummary::on_size_request (Gtk::Requisition *req)
 {
+	/* Use a dummy, small width and the actual height that we want */
 	req->width = 64;
 	req->height = 64;
 }
 
+/** Handle a size allocation.
+ *  @param alloc GTK allocation.
+ */
 void
 EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
 {
@@ -199,11 +239,16 @@ EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
 	set_dirty ();
 }
 
+/** Handle a button press.
+ *  @param ev GTK event.
+ */
 bool
 EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
 
+		/* centre the editor view around the mouse click */
+		
 		nframes_t f = (ev->x / _pixels_per_frame) + _session->current_start_frame();
 
 		nframes_t const h = _editor->current_page_frames () / 2;
