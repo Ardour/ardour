@@ -2,14 +2,27 @@
 
 # script for pulling together a MacOSX app bundle.
 
+#
+# Ben: search the file for:
+#
+# EXTRA_PACKAGING_DIR
+# EXTERNAL_JACK
+# MIXBUS
+#
+# and correct/expand as necessary
+#
+
 GTKQUARTZ_ROOT=$HOME/gtk/inst
 
 SAE=
-WITH_JACK=1
+MIXBUS=
+INTERNAL_JACK=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
+EXTRA_PACKAGING_DIR==
+EXTERNAL_JACK=
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -19,23 +32,29 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae) WITH_NLS= ; SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
-	--public) WITH_NLS= ; SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
-	--allinone) SAE= ; WITH_NLS= ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
-	--test) SAE= ; WITH_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+	--sae) WITH_NLS= ; SAE=1 ; INTERNAL_JACK=1; WITH_LADSPA=1; STRIP= ; EXTRA_PACKAGING_DIR=1 ; shift ;;
+	--mixbus) WITH_NLS= ; SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; EXTRA_PACKAGING_DIR=1; EXTERNAL_JACK=/usr/local/Jack.dmg; shift ;;
+	--public) WITH_NLS= ; SAE= ; INTERNAL_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
+	--allinone) SAE= ; WITH_NLS= ; INTERNAL_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
 	# specific build flags
 	#
 
-	--nojack) WITH_JACK= ; shift ;;
+	--nojack) INTERNAL_JACK= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
+	--pdir) EXTRA_PACKAGING_DIR=1; shift ;;
+	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
     esac
 done
 
+if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
+    echo "It makes no sense to package JACK internally and externally. Please pick one."
+fi
 
 release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 6 | sed 's/[";]//g'`
@@ -45,7 +64,14 @@ echo "Info string is $info_string"
 
 # setup directory structure
 
-APPROOT=Ardour2.app/Contents
+if [ x$MIXBUS != x ] ; then
+    APPNAME=MixBus
+else
+    APPNAME=Ardour2
+fi
+
+APPDIR=${APPNAME}.app
+APPROOT=$APPDIR/Contents
 Frameworks=$APPROOT/Frameworks
 Resources=$APPROOT/Resources
 Plugins=$APPROOT/Plugins
@@ -55,6 +81,7 @@ Etc=$Resources/etc
 Locale=$Resources/locale
 
 SAE_PKG_DIR=ArdourSAE
+MIXBUS_PKG_DIR=MixBus
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -70,9 +97,9 @@ if [ x$PRINT_SYSDEPS != x ] ; then
     exit 0
 fi
 
-echo "Removing old Ardour2.app tree ..."
+echo "Removing old $APPDIR tree ..."
 
-rm -rf Ardour2.app
+rm -rf $APPDIR
 
 echo "Building new app directory structure ..."
 
@@ -97,6 +124,15 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui_sae.conf</string>"
     env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark_sae.rc</string>"
+elif test x$MIXBUS != x ; then
+    appname="Ardour2/MixBus"
+    env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
+    #
+    # current default for MIXBUS version is US keyboard layout without a keypad
+    #
+    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>us-nokeypad</string>"
+    env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui.conf</string>"
+    env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark.rc</string>"
 else
     appname="Ardour2"
 fi
@@ -106,8 +142,8 @@ fi
 # jack in the places where it might be
 #
 
-if test x$WITH_JACK != x ; then
-    env="$env<key>ARDOUR_WITH_JACK</key><string>true</string>"
+if test x$INTERNAL_JACK != x ; then
+    env="$env<key>ARDOUR_INTERNAL_JACK</key><string>true</string>"
 else
     env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin</string>"
     env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
@@ -137,7 +173,7 @@ cp -R Resources $APPROOT
 # installed.
 #
 
-if test x$WITH_JACK != x ; then
+if test x$INTERNAL_JACK != x ; then
     MAIN_EXECUTABLE=Ardour2
 else
     cp startup_script $APPROOT/MacOS/Ardour2
@@ -150,13 +186,15 @@ cp ../../gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
 if test x$SAE != x ; then
     # cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour2-SAE.icns $Resources/appIcon.icns
+elif test x$MIXBUS != x ; then
+    cp  MixBus.icns $Resources/appIcon.icns
 else
     cp  Ardour2.icns $Resources/appIcon.icns
 fi
 if test x$STRIP != x ; then
     strip $APPROOT/MacOS/Ardour2
 fi
-if test x$WITH_JACK != x ; then
+if test x$INTERNAL_JACK != x ; then
     if [ -f /usr/local/lib/jack/jack_coreaudio.so ] ; then 
 	cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
 	cp /usr/local/bin/jackd $APPROOT/MacOS
@@ -190,6 +228,8 @@ pwd=`pwd`
 if test x$WITH_LADSPA != x ; then
     if test x$SAE != x ; then
 	plugdir=sae_ladspa
+    elif test x$MIXBUS != x ; then
+	plugdir=mixbus_ladspa
     else
 	plugdir=ladspa
     fi
@@ -227,7 +267,7 @@ while [ true ] ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
-	if test x$WITH_JACK != x ; then
+	if test x$INTERNAL_JACK != x ; then
 	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)"`
 	else
 	    # do not include libjack
@@ -253,7 +293,7 @@ while [ true ] ; do
 done
 echo
 
-echo "Copying other stuff to Ardour2.app  ..."
+echo "Copying other stuff to $APPDIR  ..."
 
 cp ../../gtk2_ardour/ergonomic-us.bindings  $Resources
 cp ../../gtk2_ardour/mnemonic-us.bindings  $Resources
@@ -284,20 +324,28 @@ cp ../../gtk2_ardour/ardour2_ui_dark_sae.rc $Resources
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
 
+#
+# put sooper sekrit ingredients here and they will be copied
+#
+
+if [ -d specialSauce ] ; then
+    cp -r specialSauce $Resources
+fi
+
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
 cp ../../templates/*.template $Shared/templates/
 
 # go through and recursively remove any .svn dirs in the bundle
-for svndir in `find Ardour2.app -name .svn -type dir`; do
+for svndir in `find $APPDIR -name .svn -type dir`; do
     rm -rf $svndir
 done
 
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
 executables=$MAIN_EXECUTABLE
-if test x$WITH_JACK != x ; then
+if test x$INTERNAL_JACK != x ; then
     executables="$executables jackd"
 fi
 if test x$SAE != x ; then
@@ -307,7 +355,7 @@ fi
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    if test x$WITH_JACK != x ; then
+    if test x$INTERNAL_JACK != x ; then
 	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
 	    base=`basename $lib`
 	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
@@ -332,7 +380,7 @@ for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $
 	# change all the dependencies
 
 	changes=""
-	if test x$WITH_JACK != x ; then
+	if test x$INTERNAL_JACK != x ; then
 	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
 		base=`basename $lib`
 		changes="$changes -change $lib @executable_path/../Frameworks/$base"
@@ -359,14 +407,39 @@ for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $
     fi
 done
 
-if [ x$SAE != x ] ; then
-    echo "Creating SAE packaging directory"
-    rm -rf $SAE_PKG_DIR
-    mkdir $SAE_PKG_DIR
-    mv Ardour2.app $SAE_PKG_DIR/Ardour2-SAE.app
-    cp HowToInstallArdourSAE.pdf "$SAE_PKG_DIR/How To Install Ardour SAE.pdf"
-    cp SAE-de-keypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
-    cp SAE-de-nokeypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts.pdf"
+if [ x$EXTRA_PACKAGING_DIR != x ] ; then
+
+    if [ x$SAE != x ] ; then
+	
+	# SAE packaging
+
+	echo "Creating SAE packaging directory"
+	rm -rf $SAE_PKG_DIR
+	mkdir $SAE_PKG_DIR
+	mv $APPDIR $SAE_PKG_DIR/Ardour2-SAE.app
+	cp HowToInstallArdourSAE.pdf "$SAE_PKG_DIR/How To Install Ardour SAE.pdf"
+	cp SAE-de-keypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
+	cp SAE-de-nokeypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts.pdf"
+
+    elif [ x$MIXBUS != x ] ; then
+
+	# MixBus packaging
+
+	echo "Creating MixBus packaging directory"
+	rm -rf $MIXBUS_PKG_DIR
+	mkdir $MIXBUS_PKG_DIR
+	mv $APPDIR $MIXBUS_PKG_DIR/
+	cp HowToInstallArdourMIXBUS.pdf "$MIXBUS_PKG_DIR/How To Install Ardour MIXBUS.pdf"
+	
+	if [ -x$EXTERNAL_JACK != x ] ; then
+	    cp $EXTERNAL_JACK $MIXBUS_PKG_DIR
+	fi
+
+    else 
+
+	echo "public packaging in an extra folder is not implemented yet"
+
+    fi
 fi
 
 echo "Done."
