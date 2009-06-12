@@ -2550,7 +2550,7 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event, RegionView
 	begin_reversible_command (_("move region(s)"));
 
 	/* sync the canvas to what we think is its current state */
-	track_canvas->update_now();
+	update_canvas_now();
 }
 
 void

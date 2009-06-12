@@ -158,7 +158,7 @@ Editor::handle_gui_changes (const string & what, void *src)
 		/* Optional :make tracks change height while it happens, instead 
 		   of on first-idle
 		*/
-		//track_canvas->update_now ();
+		//update_canvas_now ();
 		redisplay_route_list ();
 	}
 

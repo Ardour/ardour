@@ -819,7 +819,7 @@ Editor::scroll_canvas_vertically ()
 	}
 	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	/* required to keep the controls_layout in lock step with the canvas group */
-	track_canvas->update_now ();
+	update_canvas_now ();
 }
 
 void
@@ -889,8 +889,25 @@ void
 Editor::flush_canvas ()
 {
 	if (is_mapped()) {
-		track_canvas->update_now ();
+		update_canvas_now ();
 		// gdk_window_process_updates (GTK_LAYOUT(track_canvas->gobj())->bin_window, true);
 	}
 }
 
+void
+Editor::update_canvas_now ()
+{
+	/* GnomeCanvas has a bug whereby if its idle handler is not scheduled between
+	   two calls to update_now, an assert will trip.  This wrapper works around
+	   that problem by only calling update_now if the assert will not trip.
+
+	   I think the GC bug is due to the fact that its code will reset need_update
+	   and need_redraw to FALSE without checking to see if an idle handler is scheduled.
+	   If one is scheduled, GC should probably remove it.
+	*/
+	
+	GnomeCanvas* c = track_canvas->gobj ();
+	if (c->need_update || c->need_redraw) {
+		track_canvas->update_now ();
+	}
+}

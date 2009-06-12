@@ -2219,6 +2219,8 @@ public:
 	EditorSummary* _summary;
 	void region_view_added (RegionView *);
 
+	void update_canvas_now ();
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

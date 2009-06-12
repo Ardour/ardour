@@ -798,7 +798,7 @@ RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	drag_delta = _primary->region()->position() - _last_frame_position;
 
-	_editor->track_canvas->update_now ();
+	_editor->update_canvas_now ();
 
 	/* make a list of where each region ended up */
 	final = find_time_axis_views ();
@@ -1066,7 +1066,7 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 	   ..only if the mouse is in rapid motion at the time of the grab. 
 	   something to do with regionview creation raking so long?
 	*/
-	_editor->track_canvas->update_now();
+	_editor->update_canvas_now();
 }
 
 bool
@@ -1255,7 +1255,7 @@ RegionMotionDrag::find_time_axis_views ()
 void
 RegionInsertDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	_editor->track_canvas->update_now ();
+	_editor->update_canvas_now ();
 
 	map<RegionView*, RouteTimeAxisView*> final = find_time_axis_views ();
 	
@@ -1893,7 +1893,7 @@ CursorDrag::motion (GdkEvent* event, bool)
 	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
 
 #ifdef GTKOSX
-	_editor->track_canvas->update_now ();
+	_editor->update_canvas_now ();
 #endif
 	_editor->UpdateAllTransportClocks (_cursor->current_frame);
 
@@ -2355,7 +2355,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	_editor->show_verbose_time_cursor (newframe, 10);
 
 #ifdef GTKOSX
-	_editor->track_canvas->update_now ();
+	_editor->update_canvas_now ();
 #endif
 	_editor->edit_point_clock.set (copy_location->start());
 }
