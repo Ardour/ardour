@@ -510,7 +510,7 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
-	edit_packer.attach (*_summary,               1, 2, 0, 1,    FILL|EXPAND, SHRINK, 0, 0);
+	edit_packer.attach (*_summary,               0, 2, 0, 1,    FILL|EXPAND, SHRINK, 0, 0);
 	edit_packer.attach (ruler_label_event_box,   0, 1, 1, 2,    FILL,        SHRINK, 0, 0);
 
 	edit_packer.attach (time_button_event_box,   0, 1, 2, 3,    FILL,        SHRINK, 0, 0);
