@@ -383,7 +383,7 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 					if (tags) {
 						XMLNodeList children = tags->children();
 						XMLNodeConstIterator niter;
-						vector<string> strings;
+						std::vector<std::string> strings;
 						for (niter = children.begin(); niter != children.end(); ++niter) {
 							XMLNode *node = *niter;
 							if( strcmp( node->name().c_str(), "tag") == 0 ) {
@@ -391,7 +391,7 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 								if (text) strings.push_back(text->content());
 							}
 						}
-						ARDOUR::Library->set_tags (string("//")+filename, strings);
+						ARDOUR::Library->set_tags (std::string("//")+filename, strings);
 						ARDOUR::Library->save_changes ();
 					}
 				}
