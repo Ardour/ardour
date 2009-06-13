@@ -2916,15 +2916,15 @@ msgstr "Startmarkören till nästa regionsynk.-punkten"
 
 #: ../editor_actions.cc:73
 msgid "Playhead to Previous Region Start"
-msgstr "Startmarkören till förra regionstarten"
+msgstr "Startmarkören till föregående regionstarten"
 
 #: ../editor_actions.cc:75
 msgid "Playhead to Previous Region End"
-msgstr "Startmarkören till förra regionslutet"
+msgstr "Startmarkören till föregående regionslutet"
 
 #: ../editor_actions.cc:77
 msgid "Playhead to Previous Region Sync"
-msgstr "Startmarkören till förra regionsynk.-punkten"
+msgstr "Startmarkören till föregående regionsynk.-punkten"
 
 #: ../editor_actions.cc:80
 msgid "Edit Cursor to Next Region Start"
@@ -2940,15 +2940,15 @@ msgstr "Redigeringspunkten till nästa regionssynk.-punkt"
 
 #: ../editor_actions.cc:87
 msgid "Edit Cursor to Previous Region Start"
-msgstr "Redigeringspunkten till förra regionstart"
+msgstr "Redigeringspunkten till föregående regionstart"
 
 #: ../editor_actions.cc:89
 msgid "Edit Cursor to Previous Region End"
-msgstr "Redigeringspunkten till förra regionslutet"
+msgstr "Redigeringspunkten till föregående regionslutet"
 
 #: ../editor_actions.cc:91
 msgid "Edit Cursor to Previous Region Sync"
-msgstr "Redigeringspunkten till förra regionssynk.-punkten"
+msgstr "Redigeringspunkten till föregående regionssynk.-punkten"
 
 #: ../editor_actions.cc:94
 msgid "Playhead to Range Start"
@@ -5382,12 +5382,12 @@ msgstr "V"
 #: ../panner_ui.cc:334
 #, c-format
 msgid "panner for channel %lu"
-msgstr ""
+msgstr "panorerare för kanal %lu"
 
 #: ../panner_ui.cc:336
 #, c-format
 msgid "panner for channel %u"
-msgstr "panorering för kanal %u"
+msgstr "panorerare för kanal %u"
 
 #: ../panner_ui.cc:444
 msgid "Reset all"
@@ -6478,15 +6478,15 @@ msgstr "till nästa regions synk.-punkt"
 
 #: gtk2_ardour/editor_actions.cc:113
 msgid "to Previous Region Start"
-msgstr "till förra regionens början"
+msgstr "till föregående regionens början"
 
 #: gtk2_ardour/editor_actions.cc:115
 msgid "to Previous Region End"
-msgstr "till förra regionens slut"
+msgstr "till föregående regionens slut"
 
 #: gtk2_ardour/editor_actions.cc:117
 msgid "to Previous Region Sync"
-msgstr "till förra regionens synk.-punkt"
+msgstr "till föregående regionens synk.-punkt"
 
 #: gtk2_ardour/editor_actions.cc:120
 msgid "to Range Start"
@@ -6958,7 +6958,7 @@ msgstr "Startmarkören till nästa regiongränsen"
 
 #: gtk2_ardour/editor_actions.cc:91
 msgid "Playhead to Previous Region Boundary"
-msgstr "Startmarkören till förra regiongränsen"
+msgstr "Startmarkören till föregående regiongränsen"
 
 #: gtk2_ardour/editor_actions.cc:245
 msgid "to Playhead"
@@ -7141,7 +7141,7 @@ msgstr "till nästa regionsgränsen"
 
 #: gtk2_ardour/editor_actions.cc:139
 msgid "to Previous Region Boundary"
-msgstr "till förra regionsgränsen"
+msgstr "till föregående regionsgränsen"
 
 #: gtk2_ardour/editor_actions.cc:279
 msgid "Active Mark To Playhead"
@@ -7729,8 +7729,9 @@ msgid "Track Mode"
 msgstr "Spårläge"
 
 #: gtk2_ardour/ardour_ui_ed.cc:206
-msgid "Toggle Editor Mixer on Top"
-msgstr "Växla Redigerare & Mixer överst"
+msgid "Toggle Editor or Mixer on Top"
+msgstr "Växla redigerare eller mixer överst"
+
 
 #: gtk2_ardour/ardour_ui_ed.cc:449
 msgid "New plugins are active"
@@ -7754,4 +7755,33 @@ msgstr "Åsidosätt tystning "
 
 #: gtk2_ardour/editor.cc:1965
 msgid "Add Single Range"
-msgstr "Lägg till enskilt omfång "
+msgstr "Lägg till enskilt omfång"
+
+#: gtk2_ardour/mixer_strip.cc:157
+msgid "Click to choose inputs"
+msgstr "Klicka för att välja ingångar"
+
+#: gtk2_ardour/mixer_strip.cc:163
+msgid "Click to choose outputs"
+msgstr "Klicka för att välja utgångar"
+
+#: gtk2_ardour/editor_actions.cc:133
+msgid "Playhead to Next Region Boundary (No Track Selection)"
+msgstr "Startmarkören till nästa regiongräns (ingen spårmarkering)"
+
+#: gtk2_ardour/editor_actions.cc:137
+msgid "Playhead to Previous Region Boundary (No Track Selection"
+msgstr "Startmarkören till föregående regiongräns (ingen spårmarkering)"
+
+
+#: gtk2_ardour/editor_actions.cc:595
+msgid "Stationary Playhead"
+msgstr "Stationär startmarkör"
+
+#: gtk2_ardour/editor_actions.cc:660
+msgid "Step Mouse Mode"
+msgstr "Stega musläge"
+
+#: gtk2_ardour/ardour_ui.cc:658
+msgid "Ardour is ready for use"
+msgstr "Ardour är redo att användas"

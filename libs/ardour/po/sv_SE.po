@@ -147,7 +147,7 @@ msgstr ""
 #: libs/ardour/audio_track.cc:112 libs/ardour/io.cc:1703
 #: libs/ardour/io.cc:1769
 msgid "Connection %1 was not available - \"in 1\" used instead"
-msgstr ""
+msgstr "Anslutning %1 inte tillgänglig - \"in 1\" används instället"
 
 #: libs/ardour/audio_track.cc:121 libs/ardour/io.cc:1778
 msgid "improper input channel list in XML node (%1)"
@@ -175,10 +175,6 @@ msgstr ""
 
 #: libs/ardour/audioengine.cc:539
 msgid "connect called before engine was started"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:555
-msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr ""
 
 #: libs/ardour/audioengine.cc:568 libs/ardour/audioengine.cc:597
@@ -743,7 +739,7 @@ msgstr ""
 
 #: libs/ardour/io.cc:1726 libs/ardour/io.cc:1794
 msgid "Connection %1 was not available - \"out 1\" used instead"
-msgstr ""
+msgstr "Anslutning %1 inte tillgänglig - \"out 1\" används instället"
 
 #: libs/ardour/io.cc:1740
 msgid "%1: cannot create I/O ports"
@@ -2027,3 +2023,49 @@ msgstr ""
 #: libs/ardour/audio_unit.cc:48
 msgid "AudioUnit: Could not convert CAComponent to CAAudioUnit"
 msgstr ""
+
+#: libs/ardour/session.cc:867
+msgid "Setup signal flow and plugins"
+msgstr "Ställer in signalflöde och insticksprogram"
+
+#: libs/ardour/session.cc:873
+msgid "Catch up with send/insert state"
+msgstr "Kommer ikapp sänd/anslutningstillstånd"
+
+#: libs/ardour/session.cc:904
+msgid "Connect to engine"
+msgstr "Ansluter till ljudmotorn"
+
+#: libs/ardour/session.cc:911
+msgid "OSC startup"
+msgstr "OSC-uppstart"
+
+#: libs/ardour/globals.cc:133
+msgid "Configuring MIDI ports"
+msgstr "Konfigurerar MIDI-portar"
+
+#: libs/ardour/io.cc:1819
+msgid "Unknown connection \"%1\" listed for %2 of %3"
+msgstr "Okänd anslutning \"%1\" listad för %2 av %3"
+
+#: libs/ardour/audioengine.cc:658
+msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
+msgstr "AudioEngine: kan inte ansluta %1 (%2) till %3 (%4)"
+
+
+#: libs/ardour/io.cc:1921 libs/ardour/io.cc:1971
+msgid "output"
+msgstr "utgång"
+
+
+#: libs/ardour/io.cc:1907 libs/ardour/io.cc:1955 libs/ardour/io.cc:2722
+msgid "in"
+msgstr ""
+
+#: libs/ardour/io.cc:1907 libs/ardour/io.cc:1955
+msgid "input"
+msgstr "ingång"
+
+#: libs/ardour/audio_track.cc:162 libs/ardour/io.cc:1885
+msgid "Connection %1 was not available - \"%2\" used instead"
+msgstr "Anslutning %1 inte tillgänglig - \"%2\" används istället"
