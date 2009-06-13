@@ -284,20 +284,7 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
 {
-	set<boost::shared_ptr<Source> > unique_srcs;
-
-	for (SourceList::const_iterator i=srcs.begin(); i != srcs.end(); ++i) {
-		_sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
-		unique_srcs.insert (*i);
-	}
-
-	for (SourceList::const_iterator i = srcs.begin(); i != srcs.end(); ++i) {
-		_master_sources.push_back (*i);
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
-		}
-	}
+	use_sources (srcs);
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -1627,7 +1614,7 @@ Region::use_sources (SourceList const & s)
 		unique_srcs.insert (*i);
 	}
 
-	for (SourceList::const_iterator i = s.begin(); i != s.end(); ++i) {
+	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
 			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), *i));

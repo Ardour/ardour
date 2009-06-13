@@ -40,6 +40,7 @@ int
 Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, string suffix)
 {
 	vector<string> names = region->master_source_names();
+	assert (region->n_channels() <= names.size());
 
 	for (uint32_t i = 0; i < region->n_channels(); ++i) {
 
