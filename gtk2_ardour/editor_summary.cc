@@ -261,6 +261,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_dragging = true;
 			_x_offset = ev->x - xr.first;
 			_y_offset = ev->y - yr.first;
+			_editor->_dragging_playhead = true;
 			
 		} else {
 			/* click outside the view rectangle: centre the view around the mouse click */
@@ -317,5 +318,6 @@ bool
 EditorSummary::on_button_release_event (GdkEventButton* ev)
 {
 	_dragging = false;
+	_editor->_dragging_playhead = false;
 	return true;
 }
