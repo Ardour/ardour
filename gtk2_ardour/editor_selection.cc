@@ -255,7 +255,7 @@ void
 Editor::get_onscreen_tracks (TrackViewList& tvl)
 {
  	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
- 		if ((*i)->y_position() < canvas_height) {
+ 		if ((*i)->y_position() < _canvas_height) {
  			tvl.push_back (*i);
  		}
  	}

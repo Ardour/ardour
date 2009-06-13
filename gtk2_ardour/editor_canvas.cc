@@ -321,10 +321,10 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 bool
 Editor::track_canvas_size_allocated ()
 {
-	bool height_changed = canvas_height != canvas_allocation.get_height();
+	bool height_changed = _canvas_height != canvas_allocation.get_height();
 
-	canvas_width = canvas_allocation.get_width();
-	canvas_height = canvas_allocation.get_height();
+	_canvas_width = canvas_allocation.get_width();
+	_canvas_height = canvas_allocation.get_height();
 
 	if (session) {
 		TrackViewList::iterator i;
@@ -340,21 +340,21 @@ Editor::track_canvas_size_allocated ()
 
 	if (height_changed) {
 		if (playhead_cursor) {
-			playhead_cursor->set_length (canvas_height);
+			playhead_cursor->set_length (_canvas_height);
 		}
  	
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-			(*x)->set_line_vpos (0, canvas_height);
+			(*x)->set_line_vpos (0, _canvas_height);
 		}
 
-		vertical_adjustment.set_page_size (canvas_height);
+		vertical_adjustment.set_page_size (_canvas_height);
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
-		if ((vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
+		if ((vertical_adjustment.get_value() + _canvas_height) >= vertical_adjustment.get_upper()) {
 			/* 
 			   We're increasing the size of the canvas while the bottom is visible.
 			   We scroll down to keep in step with the controls layout.
 			*/
-			vertical_adjustment.set_value (full_canvas_height - canvas_height);
+			vertical_adjustment.set_value (full_canvas_height - _canvas_height);
 		}
 	}
 
@@ -551,7 +551,7 @@ Editor::maybe_autoscroll (GdkEventMotion* event)
 	if (event->y < canvas_timebars_vsize) {
 		autoscroll_y = -1;
 		startit = true;
-	} else if (event->y > canvas_height) {
+	} else if (event->y > _canvas_height) {
 		autoscroll_y = 1;
 		startit = true;
 	}
@@ -613,7 +613,7 @@ Editor::autoscroll_canvas ()
 
 	if (autoscroll_y_distance != 0) {
 		if (autoscroll_y > 0) {
-			autoscroll_y_distance = (_drag->current_pointer_y() - (get_trackview_group_vertical_offset() + canvas_height)) / 3;
+			autoscroll_y_distance = (_drag->current_pointer_y() - (get_trackview_group_vertical_offset() + _canvas_height)) / 3;
 		} else if (autoscroll_y < 0) {
 
 			autoscroll_y_distance = (vertical_adjustment.get_value () - _drag->current_pointer_y()) / 3;
@@ -651,7 +651,7 @@ Editor::autoscroll_canvas ()
 
  	} else if (autoscroll_y > 0) {
 
-		double top_of_bottom_of_canvas = full_canvas_height - canvas_height;
+		double top_of_bottom_of_canvas = full_canvas_height - _canvas_height;
 
 		if (vertical_pos > full_canvas_height - autoscroll_y_distance) {
 			new_pixel = full_canvas_height;
@@ -769,6 +769,10 @@ Editor::tie_vertical_scrolling ()
 	/* this will do an immediate redraw */
 
 	controls_layout.get_vadjustment()->set_value (vertical_adjustment.get_value());
+
+	if (pending_visual_change.idle_handler_id < 0) {
+		_summary->set_bounds_dirty ();
+	}
 }
 
 void
@@ -790,7 +794,9 @@ Editor::scroll_canvas_horizontally ()
 	update_fixed_rulers ();
 	redisplay_tempo (true);
 
-	_summary->set_bounds_dirty ();
+	if (pending_visual_change.idle_handler_id < 0) {
+		_summary->set_bounds_dirty ();
+	}
 
 #ifndef GTKOSX
 	if (!autoscroll_active) {

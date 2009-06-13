@@ -277,8 +277,8 @@ Editor::Editor ()
 	
 	snap_threshold = 5.0;
 	bbt_beat_subdivision = 4;
-	canvas_width = 0;
-	canvas_height = 0;
+	_canvas_width = 0;
+	_canvas_height = 0;
 	last_autoscroll_x = 0;
 	last_autoscroll_y = 0;
 	autoscroll_active = false;
@@ -510,14 +510,14 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
-	edit_packer.attach (ruler_label_event_box,   0, 1, 0, 1,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (*_summary,               1, 2, 0, 1,    FILL|EXPAND, SHRINK, 0, 0);
+	edit_packer.attach (ruler_label_event_box,   0, 1, 1, 2,    FILL,        SHRINK, 0, 0);
 
-	edit_packer.attach (time_button_event_box,   0, 1, 1, 2,    FILL,        SHRINK, 0, 0);
-	edit_packer.attach (*_summary       ,        1, 2, 2, 3,    FILL|EXPAND, SHRINK, 0, 0);
-	edit_packer.attach (time_canvas_event_box,   1, 2, 0, 1,    FILL|EXPAND, FILL, 0, 0);
+	edit_packer.attach (time_button_event_box,   0, 1, 2, 3,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (time_canvas_event_box,   1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
 
 	edit_packer.attach (controls_layout,         0, 1, 3, 4,    FILL,        FILL|EXPAND, 0, 0);
-	edit_packer.attach (track_canvas_event_box,  1, 2, 1, 4,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (track_canvas_event_box,  1, 2, 2, 4,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	edit_packer.attach (zoom_box,                0, 1, 4, 5,    FILL,         FILL, 0, 0);
 	edit_packer.attach (edit_hscrollbar,         1, 2, 4, 5,    FILL|EXPAND,  FILL, 0, 0);
@@ -993,14 +993,14 @@ Editor::zoom_adjustment_changed ()
 		return;
 	}
 
-	double fpu = zoom_range_clock.current_duration() / canvas_width;
+	double fpu = zoom_range_clock.current_duration() / _canvas_width;
 
 	if (fpu < 1.0) {
 		fpu = 1.0;
-		zoom_range_clock.set ((nframes64_t) floor (fpu * canvas_width));
-	} else if (fpu > session->current_end_frame() / canvas_width) {
-		fpu = session->current_end_frame() / canvas_width;
-		zoom_range_clock.set ((nframes64_t) floor (fpu * canvas_width));
+		zoom_range_clock.set ((nframes64_t) floor (fpu * _canvas_width));
+	} else if (fpu > session->current_end_frame() / _canvas_width) {
+		fpu = session->current_end_frame() / _canvas_width;
+		zoom_range_clock.set ((nframes64_t) floor (fpu * _canvas_width));
 	}
 	
 	temporal_zoom (fpu);
@@ -1134,7 +1134,7 @@ Editor::map_position_change (nframes64_t frame)
 void
 Editor::center_screen (nframes64_t frame)
 {
-	double page = canvas_width * frames_per_unit;
+	double page = _canvas_width * frames_per_unit;
 
 	/* if we're off the page, then scroll.
 	 */
@@ -1171,8 +1171,8 @@ Editor::handle_new_duration ()
 	horizontal_adjustment.set_upper (new_end / frames_per_unit);
 	horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
 
-	if (horizontal_adjustment.get_value() + canvas_width > horizontal_adjustment.get_upper()) {
-		horizontal_adjustment.set_value (horizontal_adjustment.get_upper() - canvas_width);
+	if (horizontal_adjustment.get_value() + _canvas_width > horizontal_adjustment.get_upper()) {
+		horizontal_adjustment.set_value (horizontal_adjustment.get_upper() - _canvas_width);
 	}
 	//cerr << "Editor::handle_new_duration () called ha v:l:u:ps:lcf = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << endl;//DEBUG
 }
@@ -3645,7 +3645,7 @@ Editor::clamp_verbose_cursor_x (double x)
 	if (x < 0) {
 		x = 0;
 	} else {
-		x = min (canvas_width - 200.0, x);
+		x = min (_canvas_width - 200.0, x);
 	}
 	return x;
 }
@@ -3656,7 +3656,7 @@ Editor::clamp_verbose_cursor_y (double y)
 	if (y < canvas_timebars_vsize) {
 		y = canvas_timebars_vsize;
 	} else {
-		y = min (canvas_height - 50, y);
+		y = min (_canvas_height - 50, y);
 	}
 	return y;
 }
@@ -4519,6 +4519,12 @@ Editor::reset_x_origin (nframes64_t frame)
 }
 
 void
+Editor::reset_y_origin (double y)
+{
+	queue_visual_change_y (y);
+}
+
+void
 Editor::reset_zoom (double fpu)
 {
 	queue_visual_change (fpu);
@@ -4662,7 +4668,7 @@ Editor::post_zoom ()
 
 	// convert fpu to frame count
 
-	nframes64_t frames = (nframes64_t) floor (frames_per_unit * canvas_width);
+	nframes64_t frames = (nframes64_t) floor (frames_per_unit * _canvas_width);
 
 	if (frames_per_unit != zoom_range_clock.current_duration()) {
 		zoom_range_clock.set (frames);
@@ -4734,6 +4740,17 @@ Editor::queue_visual_change (double fpu)
 	
 }
 
+void
+Editor::queue_visual_change_y (double y)
+{
+	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::YOrigin);
+	pending_visual_change.y_origin = y;
+
+	if (pending_visual_change.idle_handler_id < 0) {
+		pending_visual_change.idle_handler_id = g_idle_add ( _idle_visual_changer, this);
+	}	
+}
+
 int
 Editor::_idle_visual_changer (void* arg)
 {
@@ -4761,7 +4778,10 @@ Editor::idle_visual_changer ()
 	if (p & VisualChange::TimeOrigin) {
 		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
 	}
-
+	if (p & VisualChange::YOrigin) {
+		vertical_adjustment.set_value (pending_visual_change.y_origin);
+	}
+	
 	nframes64_t csf=0, cef=0;
 	nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 	
@@ -4788,6 +4808,9 @@ Editor::idle_visual_changer ()
 		update_fixed_rulers();
 		redisplay_tempo (true);
 	}
+
+	_summary->set_bounds_dirty ();
+	
 	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;
 	return 0; /* this is always a one-shot call */
@@ -5154,7 +5177,7 @@ Editor::end_resize_line_ops ()
 	need_resize_line = false;
 
 	if (old_resize_line_y >= 0) {
-		Gdk::Rectangle r (0, old_resize_line_y, (int) canvas_width, 3);
+		Gdk::Rectangle r (0, old_resize_line_y, (int) _canvas_width, 3);
 		Glib::RefPtr<Gdk::Window> win = get_window();
 		cerr << "Final invalidation at " << old_resize_line_y << endl;
 		win->invalidate_rect (r, false);
@@ -5170,7 +5193,7 @@ Editor::queue_draw_resize_line (int at)
 
 	resize_line_y = at;
 
-	if (win && canvas_width) {
+	if (win && _canvas_width) {
 
 		int controls_width = controls_layout.get_width();
 		int xroot, discard;
@@ -5182,15 +5205,15 @@ Editor::queue_draw_resize_line (int at)
 			/* redraw where it used to be */
 			
 			
-			Gdk::Rectangle r (0, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
+			Gdk::Rectangle r (0, old_resize_line_y - 1, controls_width + (int) _canvas_width, 3);
 			win->invalidate_rect (r, true);
 			cerr << "invalidate " << xroot << "," << old_resize_line_y - 1 << ' ' 
-			     << controls_width + canvas_width << " x 3\n";
+			     << controls_width + _canvas_width << " x 3\n";
 		}
 
 		/* draw where it is */
 
-		Gdk::Rectangle r (0, at - 1, controls_width + (int) canvas_width, 3);
+		Gdk::Rectangle r (0, at - 1, controls_width + (int) _canvas_width, 3);
 		win->invalidate_rect (r, true);
 	}
 #endif
@@ -5227,7 +5250,7 @@ Editor::on_expose_event (GdkEventExpose* ev)
 
 		lr.x = 0;
 		lr.y = resize_line_y;
-		lr.width = controls_width + (int) canvas_width;
+		lr.width = controls_width + (int) _canvas_width;
 		lr.height = 3;
 
 		if (gdk_rectangle_intersect (&lr, &ev->area, &intersection)) {
@@ -5248,11 +5271,11 @@ Editor::on_expose_event (GdkEventExpose* ev)
 			gdk_draw_line (win, gc->gobj(), 
 				       0,
 				       resize_line_y, 
-				       (int) canvas_width + controls_width,
+				       (int) _canvas_width + controls_width,
 				       resize_line_y);
 #if 0
 			cerr << "drew line @ " << xroot << ", " << yroot + resize_line_y 
-			     << " to " << xroot + (int) canvas_width + controls_width
+			     << " to " << xroot + (int) _canvas_width + controls_width
 			     << ", " << yroot + resize_line_y
 			     << endl;
 #endif
@@ -5317,6 +5340,12 @@ Editor::located ()
 
 void
 Editor::region_view_added (RegionView *)
+{
+	_summary->set_dirty ();
+}
+
+void
+Editor::streamview_height_changed ()
 {
 	_summary->set_dirty ();
 }

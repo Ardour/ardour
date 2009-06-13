@@ -135,6 +135,9 @@ StreamView::set_height (double h)
 	height = h;
 	canvas_rect->property_y2() = height;
 	update_contents_height ();
+
+	HeightChanged ();
+	
 	return 0;
 }
 
@@ -540,7 +543,6 @@ StreamView::child_height () const
 void
 StreamView::update_contents_height ()
 {
-
 	const double h = child_height ();
 
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {

@@ -27,10 +27,13 @@ private:
 	void on_size_request (Gtk::Requisition *);
 	void on_size_allocate (Gtk::Allocation &);
 	bool on_button_press_event (GdkEventButton *);
+	bool on_button_release_event (GdkEventButton *);
+	bool on_motion_notify_event (GdkEventMotion *);
 
 	void render (cairo_t *);
 	GdkPixmap* get_pixmap (GdkDrawable *);
 	void render_region (RegionView*, cairo_t*, nframes_t, double) const;
+	void editor_view (std::pair<double, double> *, std::pair<double, double> *) const;
 
 	Editor* _editor; ///< our editor
 	ARDOUR::Session* _session; ///< our session
@@ -39,6 +42,10 @@ private:
 	int _width; ///< pixmap width
 	int _height; ///< pixmap height
 	double _pixels_per_frame; ///< pixels per frame for the x axis of the pixmap
+	double _vertical_scale;
+	bool _dragging;
+	double _x_offset;
+	double _y_offset;
 };
 
 #endif

@@ -109,6 +109,7 @@ public:
 	}
 	
 	sigc::signal<void,RegionView*> RegionViewAdded;
+	sigc::signal<void> HeightChanged;
 
 protected:
 	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* group = NULL);

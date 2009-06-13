@@ -2994,7 +2994,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	}
 	
-	if (event->button.x >= _editor->horizontal_adjustment.get_value() + _editor->canvas_width) {
+	if (event->button.x >= _editor->horizontal_adjustment.get_value() + _editor->_canvas_width) {
 		_editor->start_canvas_autoscroll (1, 0);
 	}
 
@@ -3149,7 +3149,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		break;		
 	}
 	
-	if (event->button.x >= _editor->horizontal_adjustment.get_value() + _editor->canvas_width) {
+	if (event->button.x >= _editor->horizontal_adjustment.get_value() + _editor->_canvas_width) {
 		_editor->start_canvas_autoscroll (1, 0);
 	}
 	

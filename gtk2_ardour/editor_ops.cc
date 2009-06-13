@@ -1416,7 +1416,7 @@ void
 Editor::scroll_backward (float pages)
 {
 	nframes64_t frame;
-	nframes64_t one_page = (nframes64_t) rint (canvas_width * frames_per_unit);
+	nframes64_t one_page = (nframes64_t) rint (_canvas_width * frames_per_unit);
 	bool was_floating;
 	float prefix;
 	nframes64_t cnt;
@@ -1444,7 +1444,7 @@ void
 Editor::scroll_forward (float pages)
 {
 	nframes64_t frame;
-	nframes64_t one_page = (nframes64_t) rint (canvas_width * frames_per_unit);
+	nframes64_t one_page = (nframes64_t) rint (_canvas_width * frames_per_unit);
 	bool was_floating;
 	float prefix;
 	nframes64_t cnt;
@@ -1483,8 +1483,8 @@ Editor::scroll_tracks_down ()
 
 	double vert_value = vertical_adjustment.get_value() + (cnt *
 		vertical_adjustment.get_page_size());
-	if (vert_value > vertical_adjustment.get_upper() - canvas_height) {
-		vert_value = vertical_adjustment.get_upper() - canvas_height;
+	if (vert_value > vertical_adjustment.get_upper() - _canvas_height) {
+		vert_value = vertical_adjustment.get_upper() - _canvas_height;
 	}
 	vertical_adjustment.set_value (vert_value);
 }
@@ -1512,8 +1512,8 @@ Editor::scroll_tracks_down_line ()
         Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
 	double vert_value = adj->get_value() + 60;
 
-	if (vert_value>adj->get_upper() - canvas_height) {
-		vert_value = adj->get_upper() - canvas_height;
+	if (vert_value>adj->get_upper() - _canvas_height) {
+		vert_value = adj->get_upper() - _canvas_height;
 	}
 	adj->set_value (vert_value);
 }
@@ -1570,7 +1570,7 @@ Editor::temporal_zoom (gdouble fpu)
 
 	nfpu = fpu;
 	
-	new_page_size = (nframes64_t) floor (canvas_width * nfpu);
+	new_page_size = (nframes64_t) floor (_canvas_width * nfpu);
 	half_page_size = new_page_size / 2;
 
 	switch (zoom_focus) {
@@ -1713,7 +1713,7 @@ Editor::temporal_zoom_region (bool both_axes)
 	}
 
 	nframes64_t range = end - start;
-	double new_fpu = (double)range / (double)canvas_width;
+	double new_fpu = (double)range / (double)_canvas_width;
 	nframes64_t extra_samples = (nframes64_t) floor (one_centimeter_in_pixels * new_fpu);
 
 	if (start > extra_samples) {
@@ -1739,7 +1739,7 @@ Editor::temporal_zoom_region (bool both_axes)
 	temporal_zoom_by_frame (start, end, "zoom to region");
 
 	if (both_axes) {
-		uint32_t per_track_height = (uint32_t) floor ((canvas_height - canvas_timebars_vsize - 10.0) / tracks.size());
+		uint32_t per_track_height = (uint32_t) floor ((_canvas_height - canvas_timebars_vsize - 10.0) / tracks.size());
 		
 		/* set visible track heights appropriately */
 		
@@ -1814,9 +1814,9 @@ Editor::temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string
 
 	nframes64_t range = end - start;
 
-	double new_fpu = (double)range / (double)canvas_width;
+	double new_fpu = (double)range / (double)_canvas_width;
 	
-	nframes64_t new_page = (nframes64_t) floor (canvas_width * new_fpu);
+	nframes64_t new_page = (nframes64_t) floor (_canvas_width * new_fpu);
 	nframes64_t middle = (nframes64_t) floor( (double)start + ((double)range / 2.0f ));
 	nframes64_t new_leftmost = (nframes64_t) floor( (double)middle - ((double)new_page/2.0f));
 
@@ -4483,14 +4483,14 @@ Editor::reset_point_selection ()
 void
 Editor::center_playhead ()
 {
-	float page = canvas_width * frames_per_unit;
+	float page = _canvas_width * frames_per_unit;
 	center_screen_internal (playhead_cursor->current_frame, page);
 }
 
 void
 Editor::center_edit_point ()
 {
-	float page = canvas_width * frames_per_unit;
+	float page = _canvas_width * frames_per_unit;
 	center_screen_internal (get_preferred_edit_position(), page);
 }
 
@@ -6329,7 +6329,7 @@ Editor::fit_tracks ()
 		child_heights += (*t)->effective_height() - (*t)->current_height();
 	}
 
-	uint32_t h = (uint32_t) floor ((canvas_height - child_heights - canvas_timebars_vsize)/selection->tracks.size());
+	uint32_t h = (uint32_t) floor ((_canvas_height - child_heights - canvas_timebars_vsize)/selection->tracks.size());
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::hSmall) {

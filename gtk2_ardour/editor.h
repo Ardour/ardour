@@ -152,8 +152,13 @@ class Editor : public PublicEditor
 	virtual bool     have_idled () const { return _have_idled; }
 
 	nframes64_t leftmost_position() const { return leftmost_frame; }
+
 	nframes64_t current_page_frames() const {
-		return (nframes64_t) floor (canvas_width * frames_per_unit);
+		return (nframes64_t) floor (_canvas_width * frames_per_unit);
+	}
+	
+	double canvas_height () const {
+		return _canvas_height;
 	}
 
 	void cycle_snap_mode ();
@@ -373,6 +378,7 @@ class Editor : public PublicEditor
 	void restore_editing_space();
 
 	void reset_x_origin (nframes64_t);
+	void reset_y_origin (double);
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes64_t, double);
 
@@ -863,8 +869,8 @@ class Editor : public PublicEditor
 	bool hscrollbar_button_release (GdkEventButton*);
 	void hscrollbar_allocate (Gtk::Allocation &alloc);
 
-	double canvas_width;
-	double canvas_height;
+	double _canvas_width;
+	double _canvas_height;
 	double full_canvas_height;
 
 	bool track_canvas_map_handler (GdkEventAny*);
@@ -896,12 +902,14 @@ class Editor : public PublicEditor
 	struct VisualChange {
 	    enum Type { 
 		    TimeOrigin = 0x1,
-		    ZoomLevel = 0x2
+		    ZoomLevel = 0x2,
+		    YOrigin = 0x4
 	    };
 
 	    Type pending;
 	    nframes64_t time_origin;
 	    double frames_per_unit;
+	    double y_origin;
 
 	    int idle_handler_id;
 
@@ -916,6 +924,7 @@ class Editor : public PublicEditor
 
 	void queue_visual_change (nframes64_t);
 	void queue_visual_change (double);
+	void queue_visual_change_y (double);
 
 	void end_location_changed (ARDOUR::Location*);
 
@@ -1048,7 +1057,7 @@ class Editor : public PublicEditor
 	void named_selection_display_selection_changed ();
 
 	/* track views */
-	TrackViewList  track_views;
+	TrackViewList track_views;
 	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
 
 	static Gdk::Cursor* cross_hair_cursor;
@@ -2220,6 +2229,7 @@ public:
 	void region_view_added (RegionView *);
 
 	void update_canvas_now ();
+	void streamview_height_changed ();
 
 	friend class Drag;
 	friend class RegionDrag;

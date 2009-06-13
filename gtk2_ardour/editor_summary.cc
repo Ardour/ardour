@@ -20,7 +20,10 @@ EditorSummary::EditorSummary (Editor* e)
 	  _regions_dirty (true),
 	  _width (512),
 	  _height (64),
-	  _pixels_per_frame (1)
+	  _pixels_per_frame (1),
+	  _vertical_scale (1),
+	  _dragging (false)
+	  
 {
 	
 }
@@ -84,23 +87,23 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 			);
 	}
 
-	/* Render the view beginning and end markers */
+	/* Render the view rectangle */
+	
+	pair<double, double> x;
+	pair<double, double> y;
+	editor_view (&x, &y);
 	
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
-	cairo_set_source_rgb (cr, 0, 1, 0);
-	cairo_set_line_width (cr, 2);
+	cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
 
-	double const s = (_editor->leftmost_position () - _session->current_start_frame ()) * _pixels_per_frame; 
-	cairo_move_to (cr, s, 0);
-	cairo_line_to (cr, s, _height);
+	cairo_move_to (cr, x.first, y.first);
+	cairo_line_to (cr, x.second, y.first);
+	cairo_line_to (cr, x.second, y.second);
+	cairo_line_to (cr, x.first, y.second);
+	cairo_line_to (cr, x.first, y.first);
 	cairo_stroke (cr);
 
-	double const e = s + _editor->current_page_frames() * _pixels_per_frame;
-	cairo_move_to (cr, e, 0);
-	cairo_line_to (cr, e, _height);
-	cairo_stroke (cr);
-	
 	cairo_destroy (cr);
 	
 	return true;
@@ -147,36 +150,37 @@ EditorSummary::render (cairo_t* cr)
 
 	int N = 0;
 
-	/* count tracks to render */
+	/* compute total height of all tracks */
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
-		if ((*i)->view()) {
-			++N;
-		}
+		N += (*i)->effective_height ();
 	}
 
 	nframes_t const start = _session->current_start_frame ();
 	_pixels_per_frame = static_cast<double> (_width) / (_session->current_end_frame() - start);
-	double const track_height = static_cast<double> (_height) / N;
-
-	cairo_set_line_width (cr, track_height);
+	_vertical_scale = static_cast<double> (_height) / N;
 
 	/* render regions */
-	
+
 	int n = 0;
+	double y = 0;
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 		StreamView* s = (*i)->view ();
-		if (s) {
 
+		if (s) {
+			double const h = (*i)->effective_height () * _vertical_scale;
+			cairo_set_line_width (cr, h);
+			
 			double const v = ((n % 2) == 0) ? 1 : 0.5;
 			cairo_set_source_rgb (cr, v, v, v);
-
+			
 			s->foreach_regionview (bind (
 						       mem_fun (*this, &EditorSummary::render_region),
 						       cr,
 						       start,
-						       track_height * (n + 0.5)
+						       y + h / 2
 						       ));
 			++n;
+			y += h;
 		}
 	}
 
@@ -247,19 +251,71 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
 
-		/* centre the editor view around the mouse click */
-		
-		nframes_t f = (ev->x / _pixels_per_frame) + _session->current_start_frame();
+		pair<double, double> xr;
+		pair<double, double> yr;
+		editor_view (&xr, &yr);
 
-		nframes_t const h = _editor->current_page_frames () / 2;
-		if (f > h) {
-			f -= h;
+		if (xr.first <= ev->x && ev->x <= xr.second && yr.first <= ev->y && ev->y <= yr.second) {
+
+			/* click inside the view rectangle: drag it */
+			_dragging = true;
+			_x_offset = ev->x - xr.first;
+			_y_offset = ev->y - yr.first;
+			
 		} else {
-			f = 0;
+			/* click outside the view rectangle: centre the view around the mouse click */
+
+			nframes_t x = (ev->x / _pixels_per_frame) + _session->current_start_frame();
+			nframes_t const xh = _editor->current_page_frames () / 2;
+			if (x > xh) {
+				x -= xh;
+			} else {
+				x = 0;
+			}
+			
+			_editor->reset_x_origin (x);
+
+			double y = ev->y / _vertical_scale;
+			double const yh = _editor->canvas_height () / 2;
+			if (y > yh) {
+				y -= yh;
+			} else {
+				y = 0;
+			}
+
+			_editor->reset_y_origin (y);
 		}
-		
-		_editor->reset_x_origin (f);
 	}
 
+	return true;
+}
+
+void
+EditorSummary::editor_view (pair<double, double>* x, pair<double, double>* y) const
+{
+	x->first = (_editor->leftmost_position () - _session->current_start_frame ()) * _pixels_per_frame;
+	x->second = x->first + _editor->current_page_frames() * _pixels_per_frame;
+
+	y->first = _editor->get_trackview_group_vertical_offset () * _vertical_scale;
+	y->second = y->first + _editor->canvas_height () * _vertical_scale;
+}
+
+bool
+EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
+{
+	if (!_dragging) {
+		return false;
+	}
+
+	_editor->reset_x_origin (((ev->x - _x_offset) / _pixels_per_frame) + _session->current_start_frame ());
+	_editor->reset_y_origin ((ev->y - _y_offset) / _vertical_scale);
+
+	return true;
+}
+
+bool
+EditorSummary::on_button_release_event (GdkEventButton* ev)
+{
+	_dragging = false;
 	return true;
 }

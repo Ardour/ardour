@@ -831,9 +831,9 @@ Editor::update_ruler_visibility ()
 	vertical_adjustment.set_upper(vertical_adjustment.get_upper() + vertical_pos_delta);
 	full_canvas_height += vertical_pos_delta;
 
-	if (vertical_adjustment.get_value() != 0 && (vertical_adjustment.get_value() + canvas_height >= full_canvas_height)) {
+	if (vertical_adjustment.get_value() != 0 && (vertical_adjustment.get_value() + _canvas_height >= full_canvas_height)) {
 		/*if we're at the bottom of the canvas, don't move the _trackview_group*/
-		vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
+		vertical_adjustment.set_value (full_canvas_height - _canvas_height + 1);
 	} else {
 		_trackview_group->property_y () = - get_trackview_group_vertical_offset ();
 		_background_group->property_y () = - get_trackview_group_vertical_offset ();
@@ -842,7 +842,7 @@ Editor::update_ruler_visibility ()
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
 	
-	gdouble bottom_track_pos = vertical_adjustment.get_value() + canvas_height - canvas_timebars_vsize;
+	gdouble bottom_track_pos = vertical_adjustment.get_value() + _canvas_height - canvas_timebars_vsize;
 	std::pair<TimeAxisView*, int> const p = trackview_by_y_position (bottom_track_pos);
 	if (p.first) {
 		p.first->clip_to_viewport ();
