@@ -129,6 +129,8 @@ RouteUI::init ()
 
 	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
 	_session.TransportStateChange.connect (mem_fun (*this, &RouteUI::check_rec_enable_sensitivity));
+
+	Config->ParameterChanged.connect (mem_fun (*this, &RouteUI::parameter_changed));
 }
 
 void
@@ -1364,13 +1366,19 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
-	if (Config->get_disable_disarm_during_roll () == false) {
-		return;
-	}
-
-	if (_session.transport_rolling() && rec_enable_button->get_active()) {
+	if (_session.transport_rolling() && rec_enable_button->get_active() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button->set_sensitive (false);
 	} else {
 		rec_enable_button->set_sensitive (true);
+	}
+}
+
+void
+RouteUI::parameter_changed (string const & p)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::parameter_changed), p));
+	
+	if (p == "disable-disarm-during-roll") {
+		check_rec_enable_sensitivity ();
 	}
 }
