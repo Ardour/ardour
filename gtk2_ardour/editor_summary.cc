@@ -22,7 +22,8 @@ EditorSummary::EditorSummary (Editor* e)
 	  _height (64),
 	  _pixels_per_frame (1),
 	  _vertical_scale (1),
-	  _dragging (false)
+	  _dragging (false),
+	  _moved (false)
 	  
 {
 	
@@ -148,16 +149,16 @@ EditorSummary::render (cairo_t* cr)
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
 
-	int N = 0;
-
 	/* compute total height of all tracks */
+	
+	int h = 0;
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
-		N += (*i)->effective_height ();
+		h += (*i)->effective_height ();
 	}
 
 	nframes_t const start = _session->current_start_frame ();
 	_pixels_per_frame = static_cast<double> (_width) / (_session->current_end_frame() - start);
-	_vertical_scale = static_cast<double> (_height) / N;
+	_vertical_scale = static_cast<double> (_height) / h;
 
 	/* render regions */
 
@@ -196,7 +197,7 @@ void
 EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, double y) const
 {
 	cairo_move_to (cr, (r->region()->position() - start) * _pixels_per_frame, y);
-	cairo_line_to (cr, (r->region()->position() - start + r->region()->length()) * _pixels_per_frame, y);
+	cairo_line_to (cr, ((r->region()->position() - start + r->region()->length())) * _pixels_per_frame, y);
 	cairo_stroke (cr);
 }
 
@@ -243,6 +244,30 @@ EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
 	set_dirty ();
 }
 
+void
+EditorSummary::centre_on_click (GdkEventButton* ev)
+{
+	nframes_t x = (ev->x / _pixels_per_frame) + _session->current_start_frame();
+	nframes_t const xh = _editor->current_page_frames () / 2;
+	if (x > xh) {
+		x -= xh;
+	} else {
+		x = 0;
+	}
+	
+	_editor->reset_x_origin (x);
+	
+	double y = ev->y / _vertical_scale;
+	double const yh = _editor->canvas_height () / 2;
+	if (y > yh) {
+		y -= yh;
+	} else {
+		y = 0;
+	}
+	
+	_editor->reset_y_origin (y);
+}
+
 /** Handle a button press.
  *  @param ev GTK event.
  */
@@ -259,32 +284,15 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 			/* click inside the view rectangle: drag it */
 			_dragging = true;
+			_moved = false;
 			_x_offset = ev->x - xr.first;
 			_y_offset = ev->y - yr.first;
 			_editor->_dragging_playhead = true;
 			
 		} else {
-			/* click outside the view rectangle: centre the view around the mouse click */
-
-			nframes_t x = (ev->x / _pixels_per_frame) + _session->current_start_frame();
-			nframes_t const xh = _editor->current_page_frames () / 2;
-			if (x > xh) {
-				x -= xh;
-			} else {
-				x = 0;
-			}
 			
-			_editor->reset_x_origin (x);
-
-			double y = ev->y / _vertical_scale;
-			double const yh = _editor->canvas_height () / 2;
-			if (y > yh) {
-				y -= yh;
-			} else {
-				y = 0;
-			}
-
-			_editor->reset_y_origin (y);
+			/* click outside the view rectangle: centre the view around the mouse click */
+			centre_on_click (ev);
 		}
 	}
 
@@ -308,6 +316,8 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		return false;
 	}
 
+	_moved = true;
+
 	_editor->reset_x_origin (((ev->x - _x_offset) / _pixels_per_frame) + _session->current_start_frame ());
 	_editor->reset_y_origin ((ev->y - _y_offset) / _vertical_scale);
 
@@ -317,6 +327,10 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 bool
 EditorSummary::on_button_release_event (GdkEventButton* ev)
 {
+	if (_dragging && !_moved) {
+		centre_on_click (ev);
+	}
+	
 	_dragging = false;
 	_editor->_dragging_playhead = false;
 	return true;

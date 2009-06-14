@@ -23,6 +23,7 @@ public:
 	void set_bounds_dirty ();
 
 private:
+	void centre_on_click (GdkEventButton *);
 	bool on_expose_event (GdkEventExpose *);
 	void on_size_request (Gtk::Requisition *);
 	void on_size_allocate (Gtk::Allocation &);
@@ -46,6 +47,7 @@ private:
 	bool _dragging;
 	double _x_offset;
 	double _y_offset;
+	bool _moved;
 };
 
 #endif
