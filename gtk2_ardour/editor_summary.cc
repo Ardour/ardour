@@ -5,6 +5,7 @@
 #include "gui_thread.h"
 #include "editor.h"
 #include "region_view.h"
+#include "rgb_macros.h"
 
 using namespace std;
 using namespace sigc;
@@ -96,14 +97,14 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
-	cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
+	cairo_set_source_rgba (cr, 0, 1, 0, 0.25);
 
 	cairo_move_to (cr, x.first, y.first);
 	cairo_line_to (cr, x.second, y.first);
 	cairo_line_to (cr, x.second, y.second);
 	cairo_line_to (cr, x.first, y.second);
 	cairo_line_to (cr, x.first, y.first);
-	cairo_stroke (cr);
+	cairo_fill (cr);
 
 	cairo_destroy (cr);
 	
@@ -170,9 +171,6 @@ EditorSummary::render (cairo_t* cr)
 			double const h = (*i)->effective_height () * _vertical_scale;
 			cairo_set_line_width (cr, h);
 
-			Gdk::Color const c = (*i)->color ();
-			cairo_set_source_rgb (cr, c.get_red_p (), c.get_green_p(), c.get_blue_p());
-			
 			s->foreach_regionview (bind (
 						       mem_fun (*this, &EditorSummary::render_region),
 						       cr,
@@ -194,6 +192,9 @@ EditorSummary::render (cairo_t* cr)
 void
 EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, double y) const
 {
+	uint32_t const c = r->get_fill_color ();
+	cairo_set_source_rgb (cr, UINT_RGBA_R (c) / 255.0, UINT_RGBA_G (c) / 255.0, UINT_RGBA_B (c) / 255.0);
+			
 	cairo_move_to (cr, (r->region()->position() - start) * _pixels_per_frame, y);
 	cairo_line_to (cr, ((r->region()->position() - start + r->region()->length())) * _pixels_per_frame, y);
 	cairo_stroke (cr);
