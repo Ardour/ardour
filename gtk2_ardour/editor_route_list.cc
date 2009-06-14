@@ -401,7 +401,7 @@ Editor::redisplay_route_list ()
 		   We scroll down to keep in step with the controls layout.
 		*/
 		vertical_adjustment.set_value (full_canvas_height - _canvas_height);
-	} 
+	}
 
 	if (!route_redisplay_does_not_reset_order_keys && !route_redisplay_does_not_sync_order_keys) {
 		session->sync_order_keys (_order_key);
@@ -420,6 +420,8 @@ Editor::sync_track_view_list_and_route_list ()
                TimeAxisView *tv = (*i)[route_display_columns.tv];
                track_views.push_back (tv);
        }
+
+       _summary->set_dirty ();
 
        return false; // do not call again (until needed)
 }

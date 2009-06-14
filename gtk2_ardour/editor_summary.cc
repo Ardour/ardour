@@ -97,14 +97,16 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
-	cairo_set_source_rgba (cr, 0, 1, 0, 0.25);
-
 	cairo_move_to (cr, x.first, y.first);
 	cairo_line_to (cr, x.second, y.first);
 	cairo_line_to (cr, x.second, y.second);
 	cairo_line_to (cr, x.first, y.second);
 	cairo_line_to (cr, x.first, y.first);
-	cairo_fill (cr);
+	cairo_set_source_rgba (cr, 1, 1, 1, 0.25);
+	cairo_fill_preserve (cr);
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgba (cr, 1, 1, 1, 0.5);
+	cairo_stroke (cr);
 
 	cairo_destroy (cr);
 	
