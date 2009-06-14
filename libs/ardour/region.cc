@@ -1473,6 +1473,7 @@ void
 Region::set_master_sources (const SourceList& srcs)
 {
 	_master_sources = srcs;
+	assert (_sources.size() == _master_sources.size());
 }
 
 bool

@@ -1506,7 +1506,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 		}
 	}
 
-	for (uint32_t n=1; n < nchans; ++n) {
+	for (uint32_t n = 0; n < nchans; ++n) {
 		snprintf (buf, sizeof(buf), X_("master-source-%d"), n);
 		if ((prop = node.property (buf)) != 0) {
 			
@@ -1541,7 +1541,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 		}
 
 		if (!master_sources.empty()) {
-			if (master_sources.size() == nchans) {
+			if (master_sources.size() != nchans) {
 				error << _("Session: XMLNode describing an AudioRegion is missing some master sources; ignored") << endmsg;
 			} else {
 				region->set_master_sources (master_sources);

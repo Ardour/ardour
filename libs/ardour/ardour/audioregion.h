@@ -200,7 +200,8 @@ class AudioRegion : public Region
 	void fade_out_changed ();
 	void source_offset_changed ();
 	void listen_to_my_curves ();
-	void listen_to_my_sources ();
+	void connect_to_analysis_changed ();
+	void connect_to_header_position_offset_changed ();
 
 	AutomatableControls _automatable;
 
