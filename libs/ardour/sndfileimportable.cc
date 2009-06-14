@@ -6,8 +6,9 @@ using namespace ARDOUR;
 using namespace std;
 
 SndFileImportableSource::SndFileImportableSource (const string& path)
-	: in (sf_open (path.c_str(), SFM_READ, &sf_info), sf_close)
 {
+	memset(&sf_info, 0 , sizeof(sf_info));
+	in.reset( sf_open(path.c_str(), SFM_READ, &sf_info), sf_close);
 	if (!in) throw failed_constructor();
 }
 
