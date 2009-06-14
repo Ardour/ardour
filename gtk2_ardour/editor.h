@@ -341,6 +341,7 @@ class Editor : public PublicEditor
 
 	void toggle_zero_line_visibility ();
 	void toggle_waveforms_while_recording ();
+	void set_summary ();
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 

@@ -45,3 +45,4 @@ CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", t
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
 CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
 CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
+CONFIG_VARIABLE (bool, show_summary, "show-summary", true)

@@ -806,6 +806,9 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), mem_fun(*this, &Editor::session_import_dialog));
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
+
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleSummary"), _("Show Summary"), mem_fun (*this, &Editor::set_summary));
+	
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 	
 	/* if there is a logo in the editor canvas, its always visible at startup */
@@ -879,6 +882,16 @@ Editor::toggle_waveforms_while_recording ()
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_waveforms_recording (tact->get_active());
+	}
+}
+
+void
+Editor::set_summary ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleSummary"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		session->config.set_show_summary (tact->get_active ());
 	}
 }
 
@@ -1260,6 +1273,22 @@ Editor::parameter_changed (std::string p)
 		update_just_smpte ();
 	} else if (p == "show-track-meters") {
 		toggle_meter_updating();
+	} else if (p == "show-summary") {
+		
+		bool const s = session->config.get_show_summary ();
+ 		if (s) {
+ 			_summary->show ();
+ 		} else {
+ 			_summary->hide ();
+ 		}
+
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleSummary"));
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			if (tact->get_active () != s) {
+				tact->set_active (s);
+			}
+		}
 	}
 }
 

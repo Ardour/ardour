@@ -933,8 +933,11 @@ Editor::show_window ()
 	if (! is_visible ()) {
 		show_all ();
 
-		 /* re-hide editor list if necessary */
-		 editor_list_button_toggled ();
+		/* re-hide editor list if necessary */
+		editor_list_button_toggled ();
+
+		/* re-hide summary widget if necessary */
+		parameter_changed ("show-summary");
 
 		/* now reset all audio_time_axis heights, because widgets might need
 		   to be re-hidden
@@ -1317,6 +1320,7 @@ Editor::connect_to_session (Session *t)
 	}
 
 	Config->map_parameters (mem_fun (*this, &Editor::parameter_changed));
+	session->config.map_parameters (mem_fun (*this, &Editor::parameter_changed));
 	
 	session->StateSaved.connect (mem_fun(*this, &Editor::session_state_saved));
 	
