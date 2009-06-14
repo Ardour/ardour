@@ -162,7 +162,6 @@ EditorSummary::render (cairo_t* cr)
 
 	/* render regions */
 
-	int n = 0;
 	double y = 0;
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 		StreamView* s = (*i)->view ();
@@ -170,9 +169,9 @@ EditorSummary::render (cairo_t* cr)
 		if (s) {
 			double const h = (*i)->effective_height () * _vertical_scale;
 			cairo_set_line_width (cr, h);
-			
-			double const v = ((n % 2) == 0) ? 1 : 0.5;
-			cairo_set_source_rgb (cr, v, v, v);
+
+			Gdk::Color const c = (*i)->color ();
+			cairo_set_source_rgb (cr, c.get_red_p (), c.get_green_p(), c.get_blue_p());
 			
 			s->foreach_regionview (bind (
 						       mem_fun (*this, &EditorSummary::render_region),
@@ -180,7 +179,6 @@ EditorSummary::render (cairo_t* cr)
 						       start,
 						       y + h / 2
 						       ));
-			++n;
 			y += h;
 		}
 	}
