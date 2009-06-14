@@ -110,6 +110,10 @@ public:
 		return false;
 	}
 
+	virtual bool allow_vertical_autoscroll () const {
+		return true;
+	}
+
 	/** Called when a subclass should update the editor's selection following a drag */
 	virtual void update_selection () {}
 
@@ -341,6 +345,10 @@ public:
 
 	bool active (Editing::MouseMode) {
 		return true;
+	}
+
+	bool allow_vertical_autoscroll () const {
+		return false;
 	}
 
 private:

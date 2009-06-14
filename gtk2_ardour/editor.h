@@ -1882,7 +1882,7 @@ public:
 	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
-	void maybe_autoscroll (GdkEventMotion*);
+	void maybe_autoscroll (GdkEventMotion*, bool);
 	bool allow_vertical_scroll;
 
 	/* trimming */

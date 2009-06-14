@@ -540,7 +540,7 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 }
 
 void
-Editor::maybe_autoscroll (GdkEventMotion* event)
+Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 {
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
 	nframes64_t frame = _drag->current_pointer_frame();
@@ -548,7 +548,7 @@ Editor::maybe_autoscroll (GdkEventMotion* event)
 
 	autoscroll_y = 0;
 	autoscroll_x = 0;
-	if (event->y < canvas_timebars_vsize) {
+	if (event->y < canvas_timebars_vsize && allow_vert) {
 		autoscroll_y = -1;
 		startit = true;
 	} else if (event->y > _canvas_height) {
