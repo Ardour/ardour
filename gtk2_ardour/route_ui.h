@@ -183,6 +183,8 @@ class RouteUI : public virtual AxisView
 	void save_as_template ();
  
    protected:
+	void check_rec_enable_sensitivity ();
+	
  	std::vector<sigc::connection> connections;
  	std::string s_name;
  	std::string m_name;

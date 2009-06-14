@@ -996,6 +996,14 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::set_secondary_clock_delta_edit_cursor)
 		     ));
 
+	add_option (_("Transport"),
+	     new BoolOption (
+		     "disable-disarm-during-roll",
+		     _("Disable record disarm when transport is rolling"),
+		     mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
+		     mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
+		     ));
+
 	/* EDITOR */
 
 	add_option (_("Editor"),

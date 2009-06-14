@@ -128,6 +128,7 @@ RouteUI::init ()
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
 	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
+	_session.TransportStateChange.connect (mem_fun (*this, &RouteUI::check_rec_enable_sensitivity));
 }
 
 void
@@ -482,6 +483,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				_session.record_disenable_all ();
 			} else {
 				_session.record_enable_all ();
+				check_rec_enable_sensitivity ();
 			}
 
                         cmd->mark();
@@ -499,6 +501,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		} else {
 
 			reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !track()->record_enabled(), this);
+			check_rec_enable_sensitivity ();
 		}
 	}
 
@@ -1356,4 +1359,18 @@ RouteUI::save_as_template ()
 	path /= safe_name;
 	
 	_route->save_as_template (path.to_string(), name);
+}
+
+void
+RouteUI::check_rec_enable_sensitivity ()
+{
+	if (Config->get_disable_disarm_during_roll () == false) {
+		return;
+	}
+
+	if (_session.transport_rolling() && rec_enable_button->get_active()) {
+		rec_enable_button->set_sensitive (false);
+	} else {
+		rec_enable_button->set_sensitive (true);
+	}
 }
