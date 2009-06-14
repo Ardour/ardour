@@ -34,6 +34,7 @@
 #include "gtk-custom-hruler.h"
 #include "gui_thread.h"
 #include "time_axis_view.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -159,7 +160,6 @@ Editor::initialize_rulers ()
 	minsec_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
 
 	visible_timebars = 0; /*this will be changed below */
-	ruler_pressed_button = 0;
 	canvas_timebars_vsize = 0;
 }
 
@@ -217,50 +217,37 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		return FALSE;
 	}
 
-	ruler_pressed_button = ev->button;
-
 	// jlc: grab ev->window ?
 	//Gtk::Main::grab_add (*minsec_ruler);
 	Widget * grab_widget = 0;
 
-	if (smpte_ruler->is_realized() && ev->window == smpte_ruler->get_window()->gobj()) grab_widget = smpte_ruler;
-	else if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) grab_widget = bbt_ruler;
-	else if (frames_ruler->is_realized() && ev->window == frames_ruler->get_window()->gobj()) grab_widget = frames_ruler;
-	else if (minsec_ruler->is_realized() && ev->window == minsec_ruler->get_window()->gobj()) grab_widget = minsec_ruler;
+	if (smpte_ruler->is_realized() && ev->window == smpte_ruler->get_window()->gobj()) {
+		grab_widget = smpte_ruler;
+	} else if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) {
+		grab_widget = bbt_ruler;
+	} else if (frames_ruler->is_realized() && ev->window == frames_ruler->get_window()->gobj()) {
+		grab_widget = frames_ruler;
+	} else if (minsec_ruler->is_realized() && ev->window == minsec_ruler->get_window()->gobj()) {
+		grab_widget = minsec_ruler;
+	}
 
 	if (grab_widget) {
 		grab_widget->add_modal_grab ();
 		ruler_grabbed_widget = grab_widget;
 	}
 
-	gint x,y;
-	Gdk::ModifierType state;
-
-	/* need to use the correct x,y, the event lies */
-	time_canvas_event_box.get_window()->get_pointer (x, y, state);
-
-	nframes64_t where = leftmost_frame + pixel_to_frame (x);
-
-	switch (ev->button) {
-	case 1:
+	if (ev->button == 1) {
 		// Since we will locate the playhead on button release, cancel any running
 		// auditions.
 		if (session->is_auditioning()) {
 			session->cancel_audition ();
 		}
+		
 		/* playhead cursor */
-		snap_to (where);
-		playhead_cursor->set_position (where);
+		assert (_drag == 0);
+		_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
+		_drag->start_grab (reinterpret_cast<GdkEvent *> (ev));
 		_dragging_playhead = true;
-		break;
-
-	case 2:
-		/* edit point */
-		snap_to (where);
-		break;
-
-	default:
-		break;
 	}
 
 	return TRUE;
@@ -269,45 +256,30 @@ Editor::ruler_button_press (GdkEventButton* ev)
 gint
 Editor::ruler_button_release (GdkEventButton* ev)
 {
-	gint x,y;
-	Gdk::ModifierType state;
-
-	/* need to use the correct x,y, the event lies */
-	time_canvas_event_box.get_window()->get_pointer (x, y, state);
-
-	ruler_pressed_button = 0;
-	
 	if (session == 0) {
 		return FALSE;
 	}
-
-	stop_canvas_autoscroll();
 	
-	nframes64_t where = leftmost_frame + pixel_to_frame (x);
+	gint x,y;
+	Gdk::ModifierType state;
 
-	switch (ev->button) {
-	case 1:
-		/* transport playhead */
+	if (_drag) {
+		_drag->end_grab (reinterpret_cast<GdkEvent*> (ev));
+		delete _drag;
+		_drag = 0;
 		_dragging_playhead = false;
-		snap_to (where);
-		session->request_locate (where);
-		break;
-
-	case 2:
-		/* edit point */
-		snap_to (where);
-		break;
-
-	case 3:
-		/* popup menu */
-		snap_to (where);
-		popup_ruler_menu (where);
-		
-		break;
-	default:
-		break;
 	}
 
+	if (ev->button == 3) {
+		/* need to use the correct x,y, the event lies */
+		time_canvas_event_box.get_window()->get_pointer (x, y, state);
+
+		stop_canvas_autoscroll();
+	
+		nframes64_t where = leftmost_frame + pixel_to_frame (x);
+		snap_to (where);
+		popup_ruler_menu (where);
+	}
 
 	if (ruler_grabbed_widget) {
 		ruler_grabbed_widget->remove_modal_grab();
@@ -334,74 +306,14 @@ Editor::ruler_label_button_release (GdkEventButton* ev)
 gint
 Editor::ruler_mouse_motion (GdkEventMotion* ev)
 {
-	if (session == 0 || !ruler_pressed_button) {
+	if (session == 0) {
 		return FALSE;
 	}
 
-       	double wcx=0,wcy=0;
-	double cx=0,cy=0;
-
-	gint x,y;
-	Gdk::ModifierType state;
-
-	/* need to use the correct x,y, the event lies */
-	time_canvas_event_box.get_window()->get_pointer (x, y, state);
-
-
-	track_canvas->c2w (x, y, wcx, wcy);
-	track_canvas->w2c (wcx, wcy, cx, cy);
-	
-	nframes64_t where = leftmost_frame + pixel_to_frame (x);
-
-	/// ripped from maybe_autoscroll, and adapted to work here
-	nframes64_t rightmost_frame = leftmost_frame + current_page_frames ();
-
-	jack_nframes_t frame = pixel_to_frame (cx);
-
-	if (autoscroll_timeout_tag < 0) {
-		if (frame > rightmost_frame) {
-			if (rightmost_frame < max_frames) {
-				start_canvas_autoscroll (1, 0);
-			}
-		} else if (frame < leftmost_frame) {
-			if (leftmost_frame > 0) {
-				start_canvas_autoscroll (-1, 0);
-			}
-		} 
-	} else {
-		if (frame >= leftmost_frame && frame < rightmost_frame) {
-			stop_canvas_autoscroll ();
-		}
-	}
-	//////	
-	
-	snap_to (where);
-
-	EditorCursor* cursor = 0;
-	
-	switch (ruler_pressed_button) {
-	case 1:
-		/* transport playhead */
-		cursor = playhead_cursor;
-		break;
-
-	case 2:
-		/* edit point */
-		// EDIT CURSOR XXX do something useful
-		break;
-
-	default:
-		break;
+	if (_drag) {
+		_drag->motion_handler (reinterpret_cast<GdkEvent*> (ev), false);
 	}
 
-	if (cursor) {
-		cursor->set_position (where);
-		
-		if (cursor == playhead_cursor) {
-			UpdateAllTransportClocks (cursor->current_frame);
-		}
-	}
-	
 	return TRUE;
 }
 

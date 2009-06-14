@@ -676,7 +676,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			   not on the main track canvas or because we want
 			   them to be modeless.
 			*/
-			
+
 			switch (item_type) {
 			case PlayheadCursorItem:
 				assert (_drag == 0);
@@ -730,7 +730,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				
 			case RangeMarkerBarItem:
 				assert (_drag == 0);
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {		
+				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 					_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
 				} else {
 					_drag = new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker); 

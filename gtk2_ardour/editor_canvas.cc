@@ -602,6 +602,8 @@ Editor::autoscroll_canvas ()
 	double new_pixel;
 	double target_pixel;
 
+	assert (_drag);
+
 	if (autoscroll_x_distance != 0) {
 		if (autoscroll_x > 0) {
 			autoscroll_x_distance = (unit_to_frame (_drag->current_pointer_x()) - (leftmost_frame + current_page_frames())) / 3;

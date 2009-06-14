@@ -696,7 +696,6 @@ class Editor : public PublicEditor
 	gint ruler_mouse_motion (GdkEventMotion*);
 	bool ruler_scroll (GdkEventScroll* event);
 
-	gint          ruler_pressed_button;
 	Gtk::Widget * ruler_grabbed_widget;
 	
 	void initialize_rulers ();
