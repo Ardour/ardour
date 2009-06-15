@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2009 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #ifndef __gtk_ardour_editor_summary_h__
 #define __gtk_ardour_editor_summary_h__
 
@@ -30,6 +49,7 @@ private:
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);
+	bool on_scroll_event (GdkEventScroll *);
 
 	void render (cairo_t *);
 	GdkPixmap* get_pixmap (GdkDrawable *);
@@ -42,8 +62,8 @@ private:
 	bool _regions_dirty; ///< true if _pixmap requires re-rendering, otherwise false
 	int _width; ///< pixmap width
 	int _height; ///< pixmap height
-	double _pixels_per_frame; ///< pixels per frame for the x axis of the pixmap
-	double _vertical_scale;
+	double _x_scale; ///< pixels per frame for the x axis of the pixmap
+	double _y_scale;
 
 	bool _move_dragging;
 	double _x_offset;

@@ -4715,7 +4715,7 @@ Editor::post_zoom ()
 void
 Editor::queue_visual_change (nframes64_t where)
 {
-	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
+	pending_visual_change.add (VisualChange::TimeOrigin);
 	
 	/* if we're moving beyond the end, make sure the upper limit of the horizontal adjustment
 	   can reach.
@@ -4727,32 +4727,34 @@ Editor::queue_visual_change (nframes64_t where)
 	
 	pending_visual_change.time_origin = where;
 	
-	if (pending_visual_change.idle_handler_id < 0) {
-		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
-	}
+	ensure_visual_change_idle_handler ();
 }
 
 void
 Editor::queue_visual_change (double fpu)
 {
-	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::ZoomLevel);
+	pending_visual_change.add (VisualChange::ZoomLevel);
 	pending_visual_change.frames_per_unit = fpu;
 
-	if (pending_visual_change.idle_handler_id < 0) {
-		pending_visual_change.idle_handler_id = g_idle_add ( _idle_visual_changer, this);
-	}
+	ensure_visual_change_idle_handler ();
 	
 }
 
 void
 Editor::queue_visual_change_y (double y)
 {
-	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::YOrigin);
+	pending_visual_change.add (VisualChange::YOrigin);
 	pending_visual_change.y_origin = y;
 
+	ensure_visual_change_idle_handler ();
+}
+
+void
+Editor::ensure_visual_change_idle_handler ()
+{
 	if (pending_visual_change.idle_handler_id < 0) {
-		pending_visual_change.idle_handler_id = g_idle_add ( _idle_visual_changer, this);
-	}	
+		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
+	}
 }
 
 int

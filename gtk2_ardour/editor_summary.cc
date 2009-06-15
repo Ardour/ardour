@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2009 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include "ardour/session.h"
 #include "time_axis_view.h"
 #include "streamview.h"
@@ -22,8 +41,8 @@ EditorSummary::EditorSummary (Editor* e)
 	  _regions_dirty (true),
 	  _width (512),
 	  _height (64),
-	  _pixels_per_frame (1),
-	  _vertical_scale (1),
+	  _x_scale (1),
+	  _y_scale (1),
 	  _move_dragging (false),
 	  _moved (false),
 	  _zoom_dragging (false)
@@ -165,14 +184,14 @@ EditorSummary::render (cairo_t* cr)
 	}
 
 	nframes_t const start = _session->current_start_frame ();
-	_pixels_per_frame = static_cast<double> (_width) / (_session->current_end_frame() - start);
-	_vertical_scale = static_cast<double> (_height) / h;
+	_x_scale = static_cast<double> (_width) / (_session->current_end_frame() - start);
+	_y_scale = static_cast<double> (_height) / h;
 
 	/* tallest a region should ever be in the summary, in pixels */
 	int const tallest_region_pixels = 12;
 
-	if (max_height * _vertical_scale > tallest_region_pixels) {
-		_vertical_scale = static_cast<double> (tallest_region_pixels) / max_height;
+	if (max_height * _y_scale > tallest_region_pixels) {
+		_y_scale = static_cast<double> (tallest_region_pixels) / max_height;
 	}
 
 	/* render regions */
@@ -182,7 +201,7 @@ EditorSummary::render (cairo_t* cr)
 		StreamView* s = (*i)->view ();
 
 		if (s) {
-			double const h = (*i)->effective_height () * _vertical_scale;
+			double const h = (*i)->effective_height () * _y_scale;
 			cairo_set_line_width (cr, h);
 
 			s->foreach_regionview (bind (
@@ -209,8 +228,8 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, doubl
 	uint32_t const c = r->get_fill_color ();
 	cairo_set_source_rgb (cr, UINT_RGBA_R (c) / 255.0, UINT_RGBA_G (c) / 255.0, UINT_RGBA_B (c) / 255.0);
 			
-	cairo_move_to (cr, (r->region()->position() - start) * _pixels_per_frame, y);
-	cairo_line_to (cr, ((r->region()->position() - start + r->region()->length())) * _pixels_per_frame, y);
+	cairo_move_to (cr, (r->region()->position() - start) * _x_scale, y);
+	cairo_line_to (cr, ((r->region()->position() - start + r->region()->length())) * _x_scale, y);
 	cairo_stroke (cr);
 }
 
@@ -260,7 +279,7 @@ EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
 void
 EditorSummary::centre_on_click (GdkEventButton* ev)
 {
-	nframes_t x = (ev->x / _pixels_per_frame) + _session->current_start_frame();
+	nframes_t x = (ev->x / _x_scale) + _session->current_start_frame();
 	nframes_t const xh = _editor->current_page_frames () / 2;
 	if (x > xh) {
 		x -= xh;
@@ -270,7 +289,7 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 	
 	_editor->reset_x_origin (x);
 	
-	double y = ev->y / _vertical_scale;
+	double y = ev->y / _y_scale;
 	double const yh = _editor->canvas_height () / 2;
 	if (y > yh) {
 		y -= yh;
@@ -288,11 +307,11 @@ bool
 EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-
+		
 		pair<double, double> xr;
 		pair<double, double> yr;
 		editor_view (&xr, &yr);
-
+		
 		if (xr.first <= ev->x && ev->x <= xr.second && yr.first <= ev->y && ev->y <= yr.second) {
 
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -344,11 +363,11 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 void
 EditorSummary::editor_view (pair<double, double>* x, pair<double, double>* y) const
 {
-	x->first = (_editor->leftmost_position () - _session->current_start_frame ()) * _pixels_per_frame;
-	x->second = x->first + _editor->current_page_frames() * _pixels_per_frame;
+	x->first = (_editor->leftmost_position () - _session->current_start_frame ()) * _x_scale;
+	x->second = x->first + _editor->current_page_frames() * _x_scale;
 
-	y->first = _editor->get_trackview_group_vertical_offset () * _vertical_scale;
-	y->second = y->first + _editor->canvas_height () * _vertical_scale;
+	y->first = _editor->get_trackview_group_vertical_offset () * _y_scale;
+	y->second = y->first + _editor->canvas_height () * _y_scale;
 }
 
 bool
@@ -357,8 +376,8 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 	if (_move_dragging) {
 
 		_moved = true;
-		_editor->reset_x_origin (((ev->x - _x_offset) / _pixels_per_frame) + _session->current_start_frame ());
-		_editor->reset_y_origin ((ev->y - _y_offset) / _vertical_scale);
+		_editor->reset_x_origin (((ev->x - _x_offset) / _x_scale) + _session->current_start_frame ());
+		_editor->reset_y_origin ((ev->y - _y_offset) / _y_scale);
 		return true;
 
 	} else if (_zoom_dragging) {
@@ -371,7 +390,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		switch (_zoom_position) {
 		case LEFT:
 			f = 1 - (dx / _width_start);
-			rx += (dx / _pixels_per_frame);
+			rx += (dx / _x_scale);
 			break;
 		case RIGHT:
 			f = 1 + (dx / _width_start);
@@ -411,5 +430,43 @@ EditorSummary::on_button_release_event (GdkEventButton* ev)
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
+	return true;
+}
+
+bool
+EditorSummary::on_scroll_event (GdkEventScroll* ev)
+{
+	/* mouse wheel */
+	
+	pair<double, double> xr;
+	pair<double, double> yr;
+	editor_view (&xr, &yr);
+		
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		
+		double x = xr.first;
+		
+		if (ev->direction == GDK_SCROLL_UP) {
+			x += 16;
+		} else {
+			x -= 16;
+		}
+		
+		_editor->reset_x_origin (x / _x_scale);
+		
+	} else {
+		
+		double y = yr.first;
+		
+		if (ev->direction == GDK_SCROLL_DOWN) {
+			y += 16;
+		} else {
+			y -= 16;
+		}
+		
+		
+		_editor->reset_y_origin (y / _y_scale);
+	}
+	
 	return true;
 }

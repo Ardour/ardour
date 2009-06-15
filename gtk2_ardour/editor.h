@@ -900,20 +900,23 @@ class Editor : public PublicEditor
 	void scroll_canvas_vertically ();
 
 	struct VisualChange {
-	    enum Type { 
-		    TimeOrigin = 0x1,
-		    ZoomLevel = 0x2,
-		    YOrigin = 0x4
-	    };
-
-	    Type pending;
-	    nframes64_t time_origin;
-	    double frames_per_unit;
-	    double y_origin;
-
-	    int idle_handler_id;
-
-	    VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1) {}
+		enum Type { 
+			TimeOrigin = 0x1,
+			ZoomLevel = 0x2,
+			YOrigin = 0x4
+		};
+		
+		Type pending;
+		nframes64_t time_origin;
+		double frames_per_unit;
+		double y_origin;
+		
+		int idle_handler_id;
+		
+		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1) {}
+		void add (Type t) {
+			pending = Type (pending | t);
+		}
 	};
 
 
@@ -925,6 +928,7 @@ class Editor : public PublicEditor
 	void queue_visual_change (nframes64_t);
 	void queue_visual_change (double);
 	void queue_visual_change_y (double);
+	void ensure_visual_change_idle_handler ();
 
 	void end_location_changed (ARDOUR::Location*);
 
