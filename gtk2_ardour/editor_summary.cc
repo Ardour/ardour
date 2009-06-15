@@ -157,13 +157,23 @@ EditorSummary::render (cairo_t* cr)
 	/* compute total height of all tracks */
 	
 	int h = 0;
+	int max_height = 0;
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
-		h += (*i)->effective_height ();
+		int const t = (*i)->effective_height ();
+		h += t;
+		max_height = max (max_height, t);
 	}
 
 	nframes_t const start = _session->current_start_frame ();
 	_pixels_per_frame = static_cast<double> (_width) / (_session->current_end_frame() - start);
 	_vertical_scale = static_cast<double> (_height) / h;
+
+	/* tallest a region should ever be in the summary, in pixels */
+	int const tallest_region_pixels = 12;
+
+	if (max_height * _vertical_scale > tallest_region_pixels) {
+		_vertical_scale = static_cast<double> (tallest_region_pixels) / max_height;
+	}
 
 	/* render regions */
 
