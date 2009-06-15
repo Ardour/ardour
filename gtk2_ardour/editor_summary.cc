@@ -6,6 +6,7 @@
 #include "editor.h"
 #include "region_view.h"
 #include "rgb_macros.h"
+#include "keyboard.h"
 
 using namespace std;
 using namespace sigc;
@@ -23,8 +24,9 @@ EditorSummary::EditorSummary (Editor* e)
 	  _height (64),
 	  _pixels_per_frame (1),
 	  _vertical_scale (1),
-	  _dragging (false),
-	  _moved (false)
+	  _move_dragging (false),
+	  _moved (false),
+	  _zoom_dragging (false)
 	  
 {
 	
@@ -283,12 +285,41 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 		if (xr.first <= ev->x && ev->x <= xr.second && yr.first <= ev->y && ev->y <= yr.second) {
 
-			/* click inside the view rectangle: drag it */
-			_dragging = true;
-			_moved = false;
-			_x_offset = ev->x - xr.first;
-			_y_offset = ev->y - yr.first;
-			_editor->_dragging_playhead = true;
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+				/* modifier-click inside the view rectangle: start a zoom drag */
+				_zoom_position = NONE;
+
+				double const x1 = xr.first + (xr.second - xr.first) * 0.33;
+				double const x2 = xr.first + (xr.second - xr.first) * 0.67;
+
+				if (ev->x < x1) {
+					_zoom_position = LEFT;
+				} else if (ev->x > x2) {
+					_zoom_position = RIGHT;
+				} else {
+					_zoom_position = NONE;
+				}
+						
+				if (_zoom_position != NONE) {
+					_zoom_dragging = true;
+					_mouse_x_start = ev->x;
+					_width_start = xr.second - xr.first;
+					_zoom_start = _editor->get_current_zoom ();
+					_frames_start = _editor->leftmost_position ();
+					_editor->_dragging_playhead = true;
+				}
+					
+			} else {
+
+				/* ordinary click inside the view rectangle: start a move drag */
+				
+				_move_dragging = true;
+				_moved = false;
+				_x_offset = ev->x - xr.first;
+				_y_offset = ev->y - yr.first;
+				_editor->_dragging_playhead = true;
+			}
 			
 		} else {
 			
@@ -313,26 +344,62 @@ EditorSummary::editor_view (pair<double, double>* x, pair<double, double>* y) co
 bool
 EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 {
-	if (!_dragging) {
-		return false;
+	if (_move_dragging) {
+
+		_moved = true;
+		_editor->reset_x_origin (((ev->x - _x_offset) / _pixels_per_frame) + _session->current_start_frame ());
+		_editor->reset_y_origin ((ev->y - _y_offset) / _vertical_scale);
+		return true;
+
+	} else if (_zoom_dragging) {
+
+		double const dx = ev->x - _mouse_x_start;
+
+		nframes64_t rx = _frames_start;
+		double f = 1;
+		
+		switch (_zoom_position) {
+		case LEFT:
+			f = 1 - (dx / _width_start);
+			rx += (dx / _pixels_per_frame);
+			break;
+		case RIGHT:
+			f = 1 + (dx / _width_start);
+			break;
+		case NONE:
+			break;
+		}
+
+		if (_editor->pending_visual_change.idle_handler_id < 0) {
+			
+			/* As a side-effect, the Editor's visual change idle handler processes
+			   pending GTK events.  Hence this motion notify handler can be called
+			   in the middle of a visual change idle handler, and if this happens,
+			   the queue_visual_change calls below modify the variables that the
+			   idle handler is working with.  This causes problems.  Hence the
+			   check above.  It ensures that we won't modify the pending visual change
+			   while a visual change idle handler is in progress.  It's not perfect,
+			   as it also means that we won't change these variables if an idle handler
+			   is merely pending but not executing.  But c'est la vie.
+			*/
+			   
+			_editor->queue_visual_change (rx);
+			_editor->queue_visual_change (_zoom_start * f);
+		}
 	}
-
-	_moved = true;
-
-	_editor->reset_x_origin (((ev->x - _x_offset) / _pixels_per_frame) + _session->current_start_frame ());
-	_editor->reset_y_origin ((ev->y - _y_offset) / _vertical_scale);
-
+		
 	return true;
 }
 
 bool
 EditorSummary::on_button_release_event (GdkEventButton* ev)
 {
-	if (_dragging && !_moved) {
+	if (_move_dragging && !_moved) {
 		centre_on_click (ev);
 	}
-	
-	_dragging = false;
+
+	_move_dragging = false;
+	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
 	return true;
 }

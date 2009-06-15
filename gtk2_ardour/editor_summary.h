@@ -44,10 +44,25 @@ private:
 	int _height; ///< pixmap height
 	double _pixels_per_frame; ///< pixels per frame for the x axis of the pixmap
 	double _vertical_scale;
-	bool _dragging;
+
+	bool _move_dragging;
 	double _x_offset;
 	double _y_offset;
 	bool _moved;
+
+	bool _zoom_dragging;
+	double _mouse_x_start;
+	double _width_start;
+	double _zoom_start;
+	nframes64_t _frames_start;
+
+	enum ZoomPosition {
+		LEFT,
+		RIGHT,
+		NONE
+	};
+
+	ZoomPosition _zoom_position;
 };
 
 #endif
