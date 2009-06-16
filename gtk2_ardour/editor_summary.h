@@ -54,7 +54,8 @@ private:
 	void render (cairo_t *);
 	GdkPixmap* get_pixmap (GdkDrawable *);
 	void render_region (RegionView*, cairo_t*, nframes_t, double) const;
-	void editor_view (std::pair<double, double> *, std::pair<double, double> *) const;
+	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
+	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
 
 	Editor* _editor; ///< our editor
 	ARDOUR::Session* _session; ///< our session
@@ -65,20 +66,27 @@ private:
 	double _x_scale; ///< pixels per frame for the x axis of the pixmap
 	double _y_scale;
 
+	std::pair<double, double> _start_editor_x;
+	std::pair<double, double> _start_editor_y;
+	double _start_mouse_x;
+	double _start_mouse_y;
+
 	bool _move_dragging;
 	double _x_offset;
 	double _y_offset;
 	bool _moved;
 
 	bool _zoom_dragging;
-	double _mouse_x_start;
-	double _width_start;
-	double _zoom_start;
-	nframes64_t _frames_start;
 
 	enum ZoomPosition {
-		LEFT,
+		TOP_LEFT,
+		TOP,
+		TOP_RIGHT,
 		RIGHT,
+		BOTTOM_RIGHT,
+		BOTTOM,
+		BOTTOM_LEFT,
+		LEFT,
 		NONE
 	};
 

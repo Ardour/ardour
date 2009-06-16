@@ -114,7 +114,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	
 	pair<double, double> x;
 	pair<double, double> y;
-	editor_view (&x, &y);
+	get_editor (&x, &y);
 	
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
@@ -279,25 +279,35 @@ EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
 void
 EditorSummary::centre_on_click (GdkEventButton* ev)
 {
-	nframes_t x = (ev->x / _x_scale) + _session->current_start_frame();
-	nframes_t const xh = _editor->current_page_frames () / 2;
-	if (x > xh) {
-		x -= xh;
-	} else {
-		x = 0;
+	pair<double, double> xr;
+	pair<double, double> yr;
+	get_editor (&xr, &yr);
+
+	double const w = xr.second - xr.first;
+	double const h = yr.second - yr.first;
+	
+	xr.first = ev->x - w / 2;
+	xr.second = ev->x + w / 2;
+	yr.first = ev->y - h / 2;
+	yr.second = ev->y + h / 2;
+
+	if (xr.first < 0) {
+		xr.first = 0;
+		xr.second = w;
+	} else if (xr.second > _width) {
+		xr.second = _width;
+		xr.first = _width - w;
 	}
-	
-	_editor->reset_x_origin (x);
-	
-	double y = ev->y / _y_scale;
-	double const yh = _editor->canvas_height () / 2;
-	if (y > yh) {
-		y -= yh;
-	} else {
-		y = 0;
+
+	if (yr.first < 0) {
+		yr.first = 0;
+		yr.second = h;
+	} else if (yr.second > _height) {
+		yr.second = _height;
+		yr.first = _height - h;
 	}
-	
-	_editor->reset_y_origin (y);
+
+	set_editor (xr, yr);
 }
 
 /** Handle a button press.
@@ -310,9 +320,14 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		
 		pair<double, double> xr;
 		pair<double, double> yr;
-		editor_view (&xr, &yr);
+		get_editor (&xr, &yr);
 		
 		if (xr.first <= ev->x && ev->x <= xr.second && yr.first <= ev->y && ev->y <= yr.second) {
+			
+			_start_editor_x = xr;
+			_start_editor_y = yr;
+			_start_mouse_x = ev->x;
+			_start_mouse_y = ev->y;
 
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -321,21 +336,41 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 				double const x1 = xr.first + (xr.second - xr.first) * 0.33;
 				double const x2 = xr.first + (xr.second - xr.first) * 0.67;
+				double const y1 = yr.first + (yr.second - yr.first) * 0.33;
+				double const y2 = yr.first + (yr.second - yr.first) * 0.67;
 
 				if (ev->x < x1) {
-					_zoom_position = LEFT;
+
+					if (ev->y < y1) {
+						_zoom_position = TOP_LEFT;
+					} else if (ev->y > y2) {
+						_zoom_position = BOTTOM_LEFT;
+					} else {
+						_zoom_position = LEFT;
+					}
+							
 				} else if (ev->x > x2) {
-					_zoom_position = RIGHT;
+
+					if (ev->y < y1) {
+						_zoom_position = TOP_RIGHT;
+					} else if (ev->y > y2) {
+						_zoom_position = BOTTOM_RIGHT;
+					} else {
+						_zoom_position = RIGHT;
+					}
+					
 				} else {
-					_zoom_position = NONE;
+
+					if (ev->y < y1) {
+						_zoom_position = TOP;
+					} else if (ev->y > y2) {
+						_zoom_position = BOTTOM;
+					}
+						
 				}
 						
 				if (_zoom_position != NONE) {
 					_zoom_dragging = true;
-					_mouse_x_start = ev->x;
-					_width_start = xr.second - xr.first;
-					_zoom_start = _editor->get_current_zoom ();
-					_frames_start = _editor->leftmost_position ();
 					_editor->_dragging_playhead = true;
 				}
 					
@@ -345,8 +380,6 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 				
 				_move_dragging = true;
 				_moved = false;
-				_x_offset = ev->x - xr.first;
-				_y_offset = ev->y - yr.first;
 				_editor->_dragging_playhead = true;
 			}
 			
@@ -361,60 +394,45 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 }
 
 void
-EditorSummary::editor_view (pair<double, double>* x, pair<double, double>* y) const
+EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) const
 {
 	x->first = (_editor->leftmost_position () - _session->current_start_frame ()) * _x_scale;
 	x->second = x->first + _editor->current_page_frames() * _x_scale;
 
-	y->first = _editor->get_trackview_group_vertical_offset () * _y_scale;
+	y->first = _editor->vertical_adjustment.get_value() * _y_scale;
 	y->second = y->first + _editor->canvas_height () * _y_scale;
 }
 
 bool
 EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 {
+	pair<double, double> xr = _start_editor_x;
+	pair<double, double> yr = _start_editor_y;
+	
 	if (_move_dragging) {
 
 		_moved = true;
-		_editor->reset_x_origin (((ev->x - _x_offset) / _x_scale) + _session->current_start_frame ());
-		_editor->reset_y_origin ((ev->y - _y_offset) / _y_scale);
-		return true;
+
+		xr.first += ev->x - _start_mouse_x;
+		xr.second += ev->x - _start_mouse_x;
+		yr.first += ev->y - _start_mouse_y;
+		yr.second += ev->y - _start_mouse_y;
+		
+		set_editor (xr, yr);
 
 	} else if (_zoom_dragging) {
 
-		double const dx = ev->x - _mouse_x_start;
+		double const dx = ev->x - _start_mouse_x;
 
-		nframes64_t rx = _frames_start;
-		double f = 1;
-		
-		switch (_zoom_position) {
-		case LEFT:
-			f = 1 - (dx / _width_start);
-			rx += (dx / _x_scale);
-			break;
-		case RIGHT:
-			f = 1 + (dx / _width_start);
-			break;
-		case NONE:
-			break;
+		if (_zoom_position == TOP_LEFT || _zoom_position == LEFT || _zoom_position == BOTTOM_LEFT) {
+			xr.first += dx;
 		}
 
-		if (_editor->pending_visual_change.idle_handler_id < 0) {
-			
-			/* As a side-effect, the Editor's visual change idle handler processes
-			   pending GTK events.  Hence this motion notify handler can be called
-			   in the middle of a visual change idle handler, and if this happens,
-			   the queue_visual_change calls below modify the variables that the
-			   idle handler is working with.  This causes problems.  Hence the
-			   check above.  It ensures that we won't modify the pending visual change
-			   while a visual change idle handler is in progress.  It's not perfect,
-			   as it also means that we won't change these variables if an idle handler
-			   is merely pending but not executing.  But c'est la vie.
-			*/
-			   
-			_editor->queue_visual_change (rx);
-			_editor->queue_visual_change (_zoom_start * f);
+		if (_zoom_position == TOP_RIGHT || _zoom_position == RIGHT || _zoom_position == BOTTOM_RIGHT) {
+			xr.second += dx;
 		}
+
+		set_editor (xr, yr);
 	}
 		
 	return true;
@@ -440,33 +458,61 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	
 	pair<double, double> xr;
 	pair<double, double> yr;
-	editor_view (&xr, &yr);
+	get_editor (&xr, &yr);
+
+	double const amount = 8;
 		
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 		
-		double x = xr.first;
-		
 		if (ev->direction == GDK_SCROLL_UP) {
-			x += 16;
+			xr.first += amount;
+			xr.second += amount;
 		} else {
-			x -= 16;
+			xr.first -= amount;
+			xr.second -= amount;
 		}
-		
-		_editor->reset_x_origin (x / _x_scale);
-		
+
 	} else {
 		
-		double y = yr.first;
-		
 		if (ev->direction == GDK_SCROLL_DOWN) {
-			y += 16;
+			yr.first += amount;
+			yr.second += amount;
 		} else {
-			y -= 16;
+			yr.first -= amount;
+			yr.second -= amount;
 		}
-		
-		
-		_editor->reset_y_origin (y / _y_scale);
 	}
 	
+	set_editor (xr, yr);
 	return true;
+}
+
+void
+EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> const & y)
+{
+	if (_editor->pending_visual_change.idle_handler_id < 0) {
+
+		/* As a side-effect, the Editor's visual change idle handler processes
+		   pending GTK events.  Hence this motion notify handler can be called
+		   in the middle of a visual change idle handler, and if this happens,
+		   the queue_visual_change calls below modify the variables that the
+		   idle handler is working with.  This causes problems.  Hence the
+		   check above.  It ensures that we won't modify the pending visual change
+		   while a visual change idle handler is in progress.  It's not perfect,
+		   as it also means that we won't change these variables if an idle handler
+		   is merely pending but not executing.  But c'est la vie.
+		*/
+
+		_editor->reset_x_origin (x.first / _x_scale);
+		_editor->reset_y_origin (y.first / _y_scale);
+
+		double const nx = (
+			((x.second - x.first) / _x_scale) /
+			_editor->frame_to_unit (_editor->current_page_frames())
+			);
+
+		if (nx != _editor->get_current_zoom ()) {
+			_editor->reset_zoom (nx);
+		}
+	}
 }
