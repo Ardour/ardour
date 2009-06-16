@@ -415,8 +415,9 @@ MidiStreamView::setup_rec_box ()
 				}
 				
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
-					(RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
+					(RegionFactory::create (sources, start, 1 , "", 0, Region::DefaultFlags, false)));
 				assert(region);
+				region->block_property_changes ();
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (make_pair(region, (RegionView*)0));
 				

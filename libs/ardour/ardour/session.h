@@ -747,12 +747,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	boost::shared_ptr<Route> control_out() const { return _control_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
 
-	/* insert/send management */
-
-	uint32_t n_port_inserts() const { return _port_inserts.size(); }
-	uint32_t n_plugin_inserts() const { return _plugin_inserts.size(); }
-	uint32_t n_sends() const { return _sends.size(); }
-
 	static void set_disable_all_loaded_plugins (bool yn) {
 		_disable_all_loaded_plugins = yn;
 	}
@@ -1558,16 +1552,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* INSERT AND SEND MANAGEMENT */
 
-	std::list<PortInsert *>              _port_inserts;
-	std::list<PluginInsert *>            _plugin_inserts;
-	std::list<Send *>                    _sends;
-	std::list<Return *>                  _returns;
 	boost::dynamic_bitset<uint32_t> send_bitset;
 	boost::dynamic_bitset<uint32_t> return_bitset;
 	boost::dynamic_bitset<uint32_t> insert_bitset;
-	uint32_t                        send_cnt;
-	uint32_t                        insert_cnt;
-
 
 	void add_processor (Processor *);
 	void remove_processor (Processor *);

@@ -52,6 +52,7 @@ class Panner;
 class Processor;
 class RouteGroup;
 class Send;
+class InternalReturn;
 
 class Route : public SessionObject, public AutomatableControls
 {
@@ -183,18 +184,17 @@ class Route : public SessionObject, public AutomatableControls
 		}
 	}
 
-	ProcessorList::iterator prefader_iterator();
-	
 	ChanCount max_processor_streams () const { return processor_max_streams; }
-	ChanCount pre_fader_streams() const;
 
 	/* special processors */
 
-	boost::shared_ptr<Delivery> control_outs() const { return _control_outs; }
-	boost::shared_ptr<Delivery> main_outs() const { return _main_outs; }
-	
-	boost::shared_ptr<Send> send_for (boost::shared_ptr<const IO> target) const;
-	
+	boost::shared_ptr<Delivery>       control_outs() const { return _control_outs; }
+	boost::shared_ptr<Delivery>       main_outs() const { return _main_outs; }
+	boost::shared_ptr<InternalReturn> internal_return() const { return _intreturn; }
+	boost::shared_ptr<Send>           internal_send_for (boost::shared_ptr<const Route> target) const;
+	BufferSet* get_return_buffer () const;
+	void release_return_buffer () const;
+
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.
 	 */
@@ -262,10 +262,10 @@ class Route : public SessionObject, public AutomatableControls
 
 	sigc::signal<void,void*> SelectedChanged;
 	
-	int listen_via (boost::shared_ptr<IO>, const std::string& name);
-	void drop_listen (boost::shared_ptr<IO>);
+	int listen_via (boost::shared_ptr<Route>, const std::string& name);
+	void drop_listen (boost::shared_ptr<Route>);
 
-	bool feeds (boost::shared_ptr<IO>);
+	bool feeds (boost::shared_ptr<Route>);
 	std::set<boost::shared_ptr<Route> > fed_by;
 
 	/* Controls (not all directly owned by the Route */
@@ -341,6 +341,7 @@ class Route : public SessionObject, public AutomatableControls
 	mutable Glib::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
 	boost::shared_ptr<Delivery> _control_outs; // XXX to be removed/generalized by listen points
+	boost::shared_ptr<InternalReturn> _intreturn;
 
 	Flag           _flags;
 	int            _pending_declick;
@@ -380,8 +381,6 @@ class Route : public SessionObject, public AutomatableControls
 	ChanCount n_process_buffers ();
 	
 	virtual int  _set_state (const XMLNode&, bool call_base);
-
-	boost::shared_ptr<Delivery> add_listener (boost::shared_ptr<IO>, const std::string&);
 
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;

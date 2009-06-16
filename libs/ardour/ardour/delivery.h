@@ -40,7 +40,13 @@ public:
 		Main   = 0x8
 	};
 
+	/* Delivery to an existing output */
+
 	Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);
+	Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<MuteMaster> mm, const XMLNode&);
+
+	/* Delivery to a new output owned by this object */
+
 	Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);
 	Delivery (Session&, boost::shared_ptr<MuteMaster> mm, const XMLNode&);
 

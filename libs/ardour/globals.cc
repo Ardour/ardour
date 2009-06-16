@@ -430,6 +430,12 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 	}
 }
 
+bool
+ARDOUR::no_auto_connect() 
+{
+	return getenv ("ARDOUR_NO_AUTOCONNECT") != 0;
+}
+
 ARDOUR::LocaleGuard::LocaleGuard (const char* str)
 {
 	old = strdup (setlocale (LC_NUMERIC, NULL));

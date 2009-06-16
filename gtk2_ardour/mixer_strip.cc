@@ -1438,7 +1438,7 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 		send->set_metering (false);
 	}
 	
-	_current_delivery = _route->send_for (target->input());
+	_current_delivery = _route->internal_send_for (target);
 
 	if (_current_delivery) {
 		send = boost::dynamic_pointer_cast<Send>(_current_delivery);

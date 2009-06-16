@@ -99,6 +99,17 @@ MidiBuffer::read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offse
 	_silent = src.silent();
 }
 
+void
+MidiBuffer::merge_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset, nframes_t src_offset)
+{
+	const MidiBuffer* mbuf = dynamic_cast<const MidiBuffer*>(&src);
+	assert (mbuf);
+	assert (mbuf != this);
+
+	/* XXX use nframes, and possible offsets */
+	merge_in_place (*mbuf);
+}
+
 /** Push an event into the buffer.
  *
  * Note that the raw MIDI pointed to by ev will be COPIED and unmodified.

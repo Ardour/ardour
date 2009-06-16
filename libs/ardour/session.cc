@@ -294,6 +294,11 @@ Session::Session (AudioEngine &eng,
 
 	}
 
+	if (no_auto_connect()) {
+		input_ac = AutoConnectOption (0);
+		output_ac = AutoConnectOption (0);
+	}
+
 	Config->set_input_auto_connect (input_ac);
 	Config->set_output_auto_connect (output_ac);
 
@@ -607,6 +612,8 @@ Session::when_engine_running ()
 	   it doesn't really scale that well to higher channel counts 
 	*/
 
+	/* mono output bundles */
+
 	for (uint32_t np = 0; np < n_physical_outputs; ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
@@ -617,6 +624,8 @@ Session::when_engine_running ()
 
  		add_bundle (c);
 	}
+
+	/* stereo output bundles */
 
 	for (uint32_t np = 0; np < n_physical_outputs; np += 2) {
 		if (np + 1 < n_physical_outputs) {
@@ -632,6 +641,8 @@ Session::when_engine_running ()
 		}
 	}
 
+	/* mono input bundles */
+
 	for (uint32_t np = 0; np < n_physical_inputs; ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
@@ -642,6 +653,8 @@ Session::when_engine_running ()
 
  		add_bundle (c);
 	}
+
+	/* stereo input bundles */
 
 	for (uint32_t np = 0; np < n_physical_inputs; np += 2) {
 		if (np + 1 < n_physical_inputs) {
@@ -658,16 +671,15 @@ Session::when_engine_running ()
 		}
 	}
 
-	/* create master/control ports */
-	
-	if (_master_out) {
+	if (Config->get_auto_connect_standard_busses() && !no_auto_connect()) {
 
-		/* if requested auto-connect the outputs to the first N physical ports.
-		*/
+		if (_master_out) {
+			
+			/* if requested auto-connect the outputs to the first N physical ports.
+			 */
 
-		if (Config->get_auto_connect_master()) {
 			uint32_t limit = _master_out->n_outputs().n_total();
-
+			
 			for (uint32_t n = 0; n < limit; ++n) {
 				Port* p = _master_out->output()->nth (n);
 				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
@@ -681,6 +693,24 @@ Session::when_engine_running ()
 				}
 			}
 		}
+
+		if (_control_out) {
+
+			uint32_t limit = _control_out->n_outputs().n_total();
+			
+			for (uint32_t n = 0; n < limit; ++n) {
+				Port* p = _control_out->output()->nth (n);
+				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
+				
+				if (!connect_to.empty()) {
+					if (_control_out->output()->connect (p, connect_to, this)) {
+						error << string_compose (_("cannot connect control output %1 to %2"), n, connect_to) 
+						      << endmsg;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	BootMessage (_("Setup signal flow and plugins"));
@@ -688,33 +718,6 @@ Session::when_engine_running ()
 	hookup_io ();
 
 	/* catch up on send+insert cnts */
-
-	BootMessage (_("Catch up with send/insert state"));
-
-	insert_cnt = 0;
-
-	for (list<PortInsert*>::iterator i = _port_inserts.begin(); i != _port_inserts.end(); ++i) {
-		uint32_t id;
-
-		if (sscanf ((*i)->name().c_str(), "%*s %u", &id) == 1) {
-			if (id > insert_cnt) {
-				insert_cnt = id;
-			}
-		}
-	}
-
-	send_cnt = 0;
-
-	for (list<Send*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
-		uint32_t id;
-
-		if (sscanf ((*i)->name().c_str(), "%*s %u", &id) == 1) {
-			if (id > send_cnt) {
-				send_cnt = id;
-			}
-		}
-	}
-
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
@@ -751,24 +754,6 @@ Session::hookup_io ()
 		}
 	}
 
-	/* Connect track to listen/solo etc. busses XXX generalize this beyond control_out */
-
-	if (_control_out) {
-
-		// _control_out->ensure_io (_control_out->input_minimum(), _control_out->output_minimum(), false, this);
-
-		boost::shared_ptr<RouteList> r = routes.reader ();
-		
-		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
-
-			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*x);
-
-			if (t) {
-				t->listen_via (_control_out->input(), X_("listen"));
-			}
-		}
-	}
-
 	/* load bundles, which we may have postponed earlier on */
 	if (_bundle_xml_node) {
 		load_bundles (*_bundle_xml_node);
@@ -782,6 +767,22 @@ Session::hookup_io ()
 	/* Now reset all panners */
 
 	Delivery::reset_panners ();
+
+	/* Connect tracks to listen/solo etc. busses XXX generalize this beyond control_out */
+
+	if (_control_out) {
+
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		
+		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
+
+			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*x);
+
+			if (t) {
+				t->listen_via (_control_out, X_("listen"));
+			}
+		}
+	}
 
 	/* Anyone who cares about input state, wake up and do something */
 
@@ -1455,7 +1456,7 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 				continue;
 			}
 
-			if ((*j)->feeds ((*i)->input())) {
+			if ((*j)->feeds (*i)) {
 				(*i)->fed_by.insert (*j);
 			}
 		}
@@ -2064,7 +2065,10 @@ Session::add_routes (RouteList& new_routes, bool save)
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> r = writer.get_copy ();
 		r->insert (r->end(), new_routes.begin(), new_routes.end());
-		resort_routes_using (r);
+
+		if (!_control_out && IO::connecting_legal) {
+			resort_routes_using (r);
+		}
 	}
 
 	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
@@ -2088,8 +2092,10 @@ Session::add_routes (RouteList& new_routes, bool save)
 	if (_control_out && IO::connecting_legal) {
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			(*x)->listen_via (_control_out->input(), "control");
+			(*x)->listen_via (_control_out, "control");
 		}
+
+		resort_routes ();
 	}
 
 	set_dirty();
@@ -2145,13 +2151,14 @@ Session::remove_route (shared_ptr<Route> route)
 		}
 
 		if (route == _control_out) {
+
 			/* cancel control outs for all routes */
 
 			for (RouteList::iterator r = rs->begin(); r != rs->end(); ++r) {
-				(*r)->drop_listen (_control_out->input());
+				(*r)->drop_listen (_control_out);
 			}
 
-			_control_out = shared_ptr<Route> ();
+			_control_out.reset ();
 		}
 
 		update_route_solo_state ();
@@ -2238,7 +2245,7 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 	solo_update_disabled = true;
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-		if ((*i)->feeds (route->input())) {
+		if ((*i)->feeds (route)) {
 			/* do it */
 			
 			(*i)->main_outs()->mod_solo_level (delta);
@@ -3533,26 +3540,7 @@ Session::record_enable_change_all (bool yn)
 void
 Session::add_processor (Processor* processor)
 {
-	Send* send;
-	Return* retrn;
-	PortInsert* port_insert;
-	PluginInsert* plugin_insert;
-
-	if ((port_insert = dynamic_cast<PortInsert *> (processor)) != 0) {
-		_port_inserts.insert (_port_inserts.begin(), port_insert);
-	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (processor)) != 0) {
-		_plugin_inserts.insert (_plugin_inserts.begin(), plugin_insert);
-	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
-		_sends.insert (_sends.begin(), send);
-	} else if ((retrn = dynamic_cast<Return *> (processor)) != 0) {
-		_returns.insert (_returns.begin(), retrn);
-	} else {
-		fatal << _("programming error: unknown type of Insert created!") << endmsg;
-		/*NOTREACHED*/
-	}
-
 	processor->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_processor), processor));
-
 	set_dirty();
 }
 
@@ -3562,31 +3550,13 @@ Session::remove_processor (Processor* processor)
 	Send* send;
 	Return* retrn;
 	PortInsert* port_insert;
-	PluginInsert* plugin_insert;
 
 	if ((port_insert = dynamic_cast<PortInsert *> (processor)) != 0) {
-		list<PortInsert*>::iterator x = find (_port_inserts.begin(), _port_inserts.end(), port_insert);
-		if (x != _port_inserts.end()) {
-			insert_bitset[port_insert->bit_slot()] = false;
-			_port_inserts.erase (x);
-		}
-	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (processor)) != 0) {
-		_plugin_inserts.remove (plugin_insert);
+		insert_bitset[port_insert->bit_slot()] = false;
 	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
-		list<Send*>::iterator x = find (_sends.begin(), _sends.end(), send);
-		if (x != _sends.end()) {
-			send_bitset[send->bit_slot()] = false;
-			_sends.erase (x);
-		}
+		send_bitset[send->bit_slot()] = false;
 	} else if ((retrn = dynamic_cast<Return *> (processor)) != 0) {
-		list<Return*>::iterator x = find (_returns.begin(), _returns.end(), retrn);
-		if (x != _returns.end()) {
-			return_bitset[send->bit_slot()] = false;
-			_returns.erase (x);
-		}
-	} else {
-		fatal << _("programming error: unknown type of Insert deleted!") << endmsg;
-		/*NOTREACHED*/
+		return_bitset[send->bit_slot()] = false;
 	}
 
 	set_dirty();

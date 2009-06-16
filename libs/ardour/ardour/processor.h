@@ -50,7 +50,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	static const std::string state_node_name;
 
 	Processor(Session&, const std::string& name);
-	
+	Processor(Session&, const XMLNode& node);
+
 	virtual ~Processor() { }
 	
 	virtual bool visible() const { return true; }

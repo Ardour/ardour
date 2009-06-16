@@ -68,6 +68,7 @@ public:
 
 	void is_silent(bool yn) { _is_silent = yn; }
 	bool is_silent() const  { return _is_silent; }
+	void silence (nframes_t nframes, nframes_t offset);
 
 	void set_count(const ChanCount& count) { assert(count <= _available); _count = count; }
 	
@@ -94,6 +95,7 @@ public:
 #endif
 
 	void read_from(BufferSet& in, nframes_t nframes);
+	void merge_from(BufferSet& in, nframes_t nframes);
 
 	// ITERATORS
 	// FIXME: possible to combine these?  templates?

@@ -64,6 +64,8 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 	if (with_output) {
 		_output.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Output, dtype));
 	}
+
+	cerr << "fresh create IOP name = " << proc_name << " in = " << _input << " out = " << _output << endl;
 }
 
 /* create an IOProcessor that proxies to an existing IO object */
@@ -74,8 +76,18 @@ IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_pt
 	, _input (in)
 	, _output (out)
 {
-	_own_input = false;
-	_own_output = false;
+	cerr << "XML create IOP name = " << proc_name << " in = " << in << " out = " << out << endl;
+	if (in) {
+		_own_input = false;
+	} else {
+		_own_input = true;
+	}
+
+	if (out) {
+		_own_output = false;
+	} else {
+		_own_output = true;
+	}
 }
 
 IOProcessor::~IOProcessor ()
@@ -107,10 +119,12 @@ IOProcessor::state (bool full_state)
 	XMLNode& node (Processor::state (full_state));
 	
 	if (_own_input) {
-		XMLNode& i (_input->state (full_state));
-		// i.name() = X_("output");
-		node.add_child_nocopy (i);
 		node.add_property ("own-input", "yes");
+		if (_input) {
+			XMLNode& i (_input->state (full_state));
+			// i.name() = X_("output");
+			node.add_child_nocopy (i);
+		}
 	} else {
 		node.add_property ("own-input", "no");
 		if (_input) {
@@ -119,10 +133,12 @@ IOProcessor::state (bool full_state)
 	}
 	
 	if (_own_output) {
-		XMLNode& o (_output->state (full_state));
-		// o.name() = X_("output");
-		node.add_child_nocopy (o);
 		node.add_property ("own-output", "yes");
+		if (_output) {
+			XMLNode& o (_output->state (full_state));
+			// o.name() = X_("output");
+			node.add_child_nocopy (o);
+		}
 	} else {
 		node.add_property ("own-output", "no");
 		if (_output) {
@@ -173,9 +189,9 @@ IOProcessor::set_state (const XMLNode& node)
 			}
 			
 		} else {
-			error << _("XML node describing an IOProcessor is missing an IO node") << endmsg;
-			return -1;
+			/* no input */
 		}
+
 	}
 	
 	if (_own_output) {
@@ -193,7 +209,9 @@ IOProcessor::set_state (const XMLNode& node)
 			if ((prop = node.property ("name")) == 0) {
 				set_name (_output->name());
 			}
-		} 
+		} else {
+			/* no output */
+		}
 	}
 
 	return 0;
@@ -245,4 +263,10 @@ IOProcessor::set_name (const std::string& name)
 	}
 
 	return ret;
+}
+
+bool
+IOProcessor::feeds (boost::shared_ptr<Route> other) const
+{
+	return _output && _output->connected_to (other->input());
 }

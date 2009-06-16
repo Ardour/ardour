@@ -37,6 +37,7 @@ namespace ARDOUR {
 
 class Session;
 class IO;
+class Route;
 
 /** A mixer strip element (Processor) with 1 or 2 IO elements.
  */
@@ -65,6 +66,8 @@ class IOProcessor : public Processor
 	void set_output (boost::shared_ptr<IO>);
 	
 	void silence (nframes_t nframes);
+
+	virtual bool feeds (boost::shared_ptr<Route> other) const;
 
 	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;
 	sigc::signal<void,IOProcessor*,uint32_t> AutomationChanged;

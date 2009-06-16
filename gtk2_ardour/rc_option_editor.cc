@@ -1143,6 +1143,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
 
+	add_option (_("Audio"),
+		    new BoolOption (
+			    "auto-connect-standard-busses",
+			    _("Auto-connect master/monitor busses"),
+			    mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
+			    mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
+			    ));
+
 	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
 		"input-auto-connect",
 		_("Connect track and bus inputs"),

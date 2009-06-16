@@ -47,7 +47,7 @@ bool                         Delivery::panners_legal = false;
 /* deliver to an existing IO object */
 
 Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, boost::shared_ptr<IO>(), io, name)
+	: IOProcessor(s, boost::shared_ptr<IO>(), (r == Listen ? boost::shared_ptr<IO>() : io), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _solo_level (0)
@@ -58,13 +58,15 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	_current_gain = 1.0;
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 	
-	_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+	if (_output) {
+		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+	}
 }
 
 /* deliver to a new IO object */
 
 Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, false, true, name)
+	: IOProcessor(s, false, (r == Listen ? false : true), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _solo_level (0)
@@ -75,7 +77,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	_current_gain = 1.0;
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
-	_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+	if (_output) {
+		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+	}
 }
 
 /* deliver to a new IO object, reconstruct from XML */
@@ -96,7 +100,32 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 		throw failed_constructor ();
 	}
 
-	_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+	if (_output) {
+		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+	}
+}
+
+/* deliver to an existing IO object, reconstruct from XML */
+
+Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
+	: IOProcessor (s, boost::shared_ptr<IO>(), out, "reset")
+	, _role (Role (0))
+	, _output_buffers (new BufferSet())
+	, _solo_level (0)
+	, _solo_isolated (false)
+	, _mute_master (mm)
+{
+	_output_offset = 0;
+	_current_gain = 1.0;
+	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+
+	if (set_state (node)) {
+		throw failed_constructor ();
+	}
+
+	if (_output) {
+		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+	}
 }
 
 void
@@ -265,7 +294,16 @@ Delivery::reset_panner ()
 {
 	if (panners_legal) {
 		if (!no_panner_reset) {
-			_panner->reset (_output->n_ports().n_audio(), pans_required());
+
+			uint32_t ntargets;
+			
+			if (_output) {
+				ntargets = _output->n_ports().n_audio();
+			} else {
+				ntargets = _configured_output.n_audio();
+			}
+
+			_panner->reset (ntargets, pans_required());
 		}
 	} else {
 		panner_legal_c.disconnect ();
@@ -276,7 +314,15 @@ Delivery::reset_panner ()
 int
 Delivery::panners_became_legal ()
 {
-	_panner->reset (_output->n_ports().n_audio(), pans_required());
+	uint32_t ntargets;
+
+	if (_output) {
+		ntargets = _output->n_ports().n_audio();
+	} else {
+		ntargets = _configured_output.n_audio();
+	}
+
+	_panner->reset (ntargets, pans_required());
 	_panner->load (); // automation
 	panner_legal_c.disconnect ();
 	return 0;
@@ -441,3 +487,4 @@ Delivery::output_changed (IOChange change, void* src)
 		reset_panner ();
 	}
 }
+

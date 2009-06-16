@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,63 +17,39 @@
 
 */
 
-#ifndef __ardour_send_h__
-#define __ardour_send_h__
-
-#include <sigc++/signal.h>
-#include <string>
-
-#include "pbd/stateful.h" 
+#ifndef __ardour_internal_send_h__
+#define __ardour_internal_send_h__
 
 #include "ardour/ardour.h"
-#include "ardour/audioengine.h"
-#include "ardour/delivery.h"
+#include "ardour/send.h"
 
 namespace ARDOUR {
 
-class PeakMeter;
-class Amp;
-
-class Send : public Delivery
+class InternalSend : public Send
 {
   public:	
-	Send (Session&, boost::shared_ptr<MuteMaster>, bool internal = false);
-	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, bool internal = false);
-	virtual ~Send ();
+	InternalSend (Session&, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to);
+	InternalSend (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&);
+	virtual ~InternalSend ();
 
-	uint32_t bit_slot() const { return _bitslot; }
-
-	boost::shared_ptr<Amp> amp() const { return _amp; }
-	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
-
-	bool metering() const { return _metering; }
-	void set_metering (bool yn) { _metering = yn; }
-	
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
-
-	uint32_t pans_required() const { return _configured_input.n_audio(); }
-
+	
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
-
+	bool feeds (boost::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 
-	bool set_name (const std::string& str);
-
-	static uint32_t how_many_sends();
-	static void make_unique (XMLNode &, Session &);
-
-  protected:
-	bool _metering;
-	boost::shared_ptr<Amp> _amp;
-	boost::shared_ptr<PeakMeter> _meter;
+	boost::shared_ptr<Route> target_route() const { return _send_to; }
 
   private:
-	/* disallow copy construction */
-	Send (const Send&);
-	
-	uint32_t  _bitslot;
+	BufferSet* target;
+	boost::shared_ptr<Route> _send_to;
+	PBD::ID _send_to_id;
+	sigc::connection connect_c;
+
+	void send_to_going_away ();
+	int  connect_when_legal ();
 };
 
 } // namespace ARDOUR

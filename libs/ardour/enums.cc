@@ -396,7 +396,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Region, LeftOfSplit);
 	REGISTER_CLASS_ENUM (Region, RightOfSplit);
 	REGISTER_CLASS_ENUM (Region, Hidden);
-	REGISTER_CLASS_ENUM (Region, DoNotSaveState);
+	REGISTER_CLASS_ENUM (Region, DoNotSendPropertyChanges);
 	REGISTER_BITS (_Region_Flag);
 
 	REGISTER_CLASS_ENUM (Region, AudioTime);

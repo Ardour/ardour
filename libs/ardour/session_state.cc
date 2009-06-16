@@ -153,7 +153,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	_non_soloed_outs_muted = false;
 	g_atomic_int_set (&processing_prohibited, 0);
-	insert_cnt = 0;
 	_transport_speed = 0;
 	_last_transport_speed = 0;
 	_target_transport_speed = 0;

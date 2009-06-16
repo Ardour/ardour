@@ -38,6 +38,8 @@
 #include "ardour/configuration.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/dB.h"
+#include "ardour/internal_send.h"
+#include "ardour/internal_return.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/meter.h"
 #include "ardour/mix.h"
@@ -73,6 +75,24 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	  
 {
 	init ();
+	
+	/* add standard processors other than amp (added by ::init()) */
+	
+	_meter.reset (new PeakMeter (_session));
+	add_processor (_meter, PreFader);
+
+	if (_flags & ControlOut) {
+		/* where we listen to tracks */
+		_intreturn.reset (new InternalReturn (_session));
+		add_processor (_intreturn, PreFader);
+	}
+	
+	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
+	add_processor (_main_outs, PostFader);
+
+	/* now that we have _meter, its safe to connect to this */
+
+	_meter_connection = Metering::connect (mem_fun (*this, &Route::meter));
 }
 
 Route::Route (Session& sess, const XMLNode& node, DataType default_type)
@@ -83,7 +103,12 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 	, _default_type (default_type)
 {
 	init ();
+
 	_set_state (node, false);
+
+	/* now that we have _meter, its safe to connect to this */
+	
+	_meter_connection = Metering::connect (mem_fun (*this, &Route::meter));
 }
 
 void
@@ -123,20 +148,10 @@ Route::init ()
 	_input->changed.connect (mem_fun (this, &Route::input_change_handler));
 	_output->changed.connect (mem_fun (this, &Route::output_change_handler));
 
-	/* add standard processors */
+	/* add amp processor  */
 
 	_amp.reset (new Amp (_session, _mute_master));
 	add_processor (_amp, PostFader);
-
-	_meter.reset (new PeakMeter (_session));
-	add_processor (_meter, PreFader);
-	
-	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
-	add_processor (_main_outs, PostFader);
-
-	/* now we can meter */
-	
-	_meter_connection = Metering::connect (mem_fun (*this, &Route::meter));
 }
 
 Route::~Route ()
@@ -316,7 +331,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	switch (Config->get_monitoring_model()) {
 	case HardwareMonitoring:
 	case ExternalMonitoring:
-		monitor = record_enabled() && (_session.config.get_auto_input() || _session.actively_recording());
+		monitor = !record_enabled() || (_session.config.get_auto_input() && !_session.actively_recording());
 		break;
 	default:
 		monitor = true;
@@ -327,12 +342,12 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	/* figure out if we're going to use gain automation */
-
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);
 	
-	/* tell main outs what to do about monitoring */
 
+	/* tell main outs what to do about monitoring */
 	_main_outs->no_outs_cuz_we_no_monitor (!monitor);
+
 
 	/* -------------------------------------------------------------------------------------------
 	   GLOBAL DECLICK (for transport changes etc.)
@@ -520,24 +535,15 @@ Route::muted() const
 	return _mute_master->muted ();
 }
 
-#if DEFINE_IF_YOU_NEED_THIS
 static void
 dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& procs)
 {
 	cerr << name << " {" << endl;
 	for (list<boost::shared_ptr<Processor> >::const_iterator p = procs.begin();
 			p != procs.end(); ++p) {
-		cerr << "\t" << (*p)->name() << endl;
+		cerr << "\t" << (*p)->name() << " ID = " << (*p)->id() << endl;
 	}
 	cerr << "}" << endl;
-}
-#endif
-
-Route::ProcessorList::iterator
-Route::prefader_iterator() 
-{
-	Glib::RWLock::ReaderLock lm (_processor_lock);
-	return find (_processors.begin(), _processors.end(), _amp);
 }
 
 int
@@ -615,6 +621,8 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			loc = iter;
 		}
 
+		cerr << "Adding " << processor->name() << " @ " << processor << endl;
+
 		_processors.insert (loc, processor);
 
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
@@ -626,6 +634,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			--ploc;
 			_processors.erase(ploc);
 			configure_processors_unlocked (0); // it worked before we tried to add it ...
+			cerr << "configure failed\n";
 			return -1;
 		}
 	
@@ -660,6 +669,7 @@ bool
 Route::add_processor_from_xml (const XMLNode& node, Placement placement)
 {
 	ProcessorList::iterator loc;
+
 	if (placement == PreFader) {
 		/* generic pre-fader: insert immediately before the amp */
 		loc = find(_processors.begin(), _processors.end(), _amp);
@@ -699,7 +709,6 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				cerr << _name << " : got processor type " << prop->value() << endl;
 
 				boost::shared_ptr<Processor> processor;
-				bool have_insert = false;
 
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
 				    prop->value() == "lv2" ||
@@ -707,7 +716,6 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				    prop->value() == "audiounit") {
 					
 					processor.reset (new PluginInsert(_session, node));
-					have_insert = true;
 					
 				} else if (prop->value() == "port") {
 
@@ -716,32 +724,66 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				} else if (prop->value() == "send") {
 
 					processor.reset (new Send (_session, _mute_master, node));
-					have_insert = true;
-				
+
 				} else if (prop->value() == "meter") {
 
+					if (_meter) {
+						if (_meter->set_state (node)) {
+							return false;
+						} else {
+							return true;
+						}
+					}
+
+					_meter.reset (new PeakMeter (_session, node));						
 					processor = _meter;
-					processor->set_state (node);
 				
 				} else if (prop->value() == "amp") {
+
+					/* amp always exists */
 					
 					processor = _amp;
-					processor->set_state (node);
+					if (processor->set_state (node)) {
+						return false;
+					} else {
+						/* never any reason to add it */
+						return true;
+					}
 					
 				} else if (prop->value() == "listen" || prop->value() == "deliver") {
 
 					/* XXX need to generalize */
 
-					processor = _control_outs;
-					processor->set_state (node);
+				} else if (prop->value() == "intsend") {
+
+					processor.reset (new InternalSend (_session, _mute_master, node));
+				
+				} else if (prop->value() == "intreturn") {
 					
+					if (_intreturn) {
+						if (_intreturn->set_state (node)) {
+							return false;
+						} else {
+							return true;
+						}
+					}
+					_intreturn.reset (new InternalReturn (_session, node));
+					processor = _intreturn;
+
 				} else if (prop->value() == "main-outs") {
 					
+					if (_main_outs) {
+						if (_main_outs->set_state (node)) {
+							return false;
+						} else {
+							return true;
+						}
+					}
+
+					_main_outs.reset (new Delivery (_session, _output, _mute_master, node));
 					processor = _main_outs;
-					processor->set_state (node);
 
 				} else {
-
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 				}
 				
@@ -997,31 +1039,6 @@ Route::ab_plugins (bool forward)
 }
 	
 	
-/* Figure out the streams that will feed into PreFader */
-ChanCount
-Route::pre_fader_streams() const
-{
-	boost::shared_ptr<Processor> processor;
-
-	/* Find the last pre-fader redirect that isn't a send; sends don't affect the number
-	 * of streams. */
-	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i) == _amp) {
-			break;
-		}
-		if (boost::dynamic_pointer_cast<Send> (*i) == 0) {
-			processor = *i;
-		}
-	}
-	
-	if (processor) {
-		return processor->output_streams();
-	} else {
-		return _input->n_ports ();
-	}
-}
-
-
 /** Remove processors with a given placement.
  * @param p Placement of processors to remove.
  */
@@ -1195,7 +1212,11 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	ChanCount out;
 	list< pair<ChanCount,ChanCount> > configuration;
 	uint32_t index = 0;
+	
+	cerr << "Processor check with " << _processors.size() << endl;
+
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
+		cerr << "Checking out " << (*p)->name() << " type = " << endl;
 		if ((*p)->can_support_io_configuration(in, out)) {
 			configuration.push_back(make_pair(in, out));
 			in = out;
@@ -1488,6 +1509,34 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	} else {
 		_flags = Flag (0);
 	}
+
+	/* add all processors (except amp, which is always present) */
+
+	nlist = node.children();
+	XMLNode processor_state (X_("processor_state"));
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
+		
+		child = *niter;
+
+		if (child->name() == IO::state_node_name) {
+			if ((prop = child->property (X_("direction"))) == 0) {
+				continue;
+			}
+			
+			if (prop->value() == "Input") {
+				_input->set_state (*child);
+			} else if (prop->value() == "Output") {
+				_output->set_state (*child);
+			}
+		}
+			
+		if (child->name() == X_("Processor")) {
+			processor_state.add_child_copy (*child);
+		}
+	}
+
+	set_processor_state (processor_state);
 	
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
 		set_phase_invert (prop->value()=="yes"?true:false);
@@ -1555,32 +1604,6 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		}
 	}
 
-	nlist = node.children();
-	XMLNode processor_state (X_("processor_state"));
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-		
-		child = *niter;
-
-		if (child->name() == IO::state_node_name) {
-			if ((prop = child->property (X_("direction"))) == 0) {
-				continue;
-			}
-			
-			if (prop->value() == "Input") {
-				_input->set_state (*child);
-			} else if (prop->value() == "Output") {
-				_output->set_state (*child);
-			}
-		}
-			
-		if (child->name() == X_("Processor")) {
-			processor_state.add_child_copy (*child);
-		}
-	}
-
-	set_processor_state (processor_state);
-	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
@@ -1642,21 +1665,30 @@ Route::set_processor_state (const XMLNode& node)
 {
 	const XMLNodeList &nlist = node.children();
 	XMLNodeConstIterator niter;
-	bool has_meter_processor = false; // legacy sessions don't
 	ProcessorList::iterator i, o;
 
-	cerr << _name << " _set_processor_states\n";
+	dump_processors ("set processor states", _processors);
 
 	// Iterate through existing processors, remove those which are not in the state list
+
 	for (i = _processors.begin(); i != _processors.end(); ) {
+
+		/* leave amp alone, always */
+
+		if ((*i) == _amp) {
+			++i;
+			continue;
+		}
+
 		ProcessorList::iterator tmp = i;
 		++tmp;
 
 		bool processorInStateList = false;
-	
+
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 			XMLProperty* id_prop = (*niter)->property(X_("id"));
+			cerr << "\tchecking " << id_prop->value() << endl;
 			if (id_prop && (*i)->id() == id_prop->value()) {
 				processorInStateList = true;
 				break;
@@ -1672,26 +1704,24 @@ Route::set_processor_state (const XMLNode& node)
 
 	// Iterate through state list and make sure all processors are on the track and in the correct order,
 	// set the state of existing processors according to the new state on the same go
+
 	i = _processors.begin();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter, ++i) {
 		
 		XMLProperty* prop = (*niter)->property ("type");
 
-		if (prop && prop->value() == "meter")  {
-			has_meter_processor = true;
-		}
-
 		o = i;
 
-		if (prop->value() != "meter" && prop->value() != "amp" && prop->value() != "main-outs") {
-
-			// Check whether the next processor in the list 
-			
+		// Check whether the next processor in the list is the right one,
+		// except for "amp" which is always there and may not have the
+		// old ID since it is always created anew in every Route
+		
+		if (prop->value() != "amp") {
 			while (o != _processors.end()) {
 				XMLProperty* id_prop = (*niter)->property(X_("id"));
 				if (id_prop && (*o)->id() == id_prop->value()) {
-					break;
+				break;
 				}
 				
 				++o;
@@ -1700,6 +1730,7 @@ Route::set_processor_state (const XMLNode& node)
 
 		// If the processor (*niter) is not on the route,
 		// create it and move it to the correct location
+
 		if (o == _processors.end()) {
 
 			if (add_processor_from_xml (**niter, i)) {
@@ -1708,9 +1739,10 @@ Route::set_processor_state (const XMLNode& node)
 				cerr << "Error restoring route: unable to restore processor" << endl;
 			}
 
-		// Otherwise, the processor already exists; just
-		// ensure it is at the location provided in the XML state
 		} else {
+
+			// Otherwise, the processor already exists; just
+			// ensure it is at the location provided in the XML state
 
 			if (i != o) {
 				boost::shared_ptr<Processor> tmp = (*o);
@@ -1719,6 +1751,8 @@ Route::set_processor_state (const XMLNode& node)
 				--i; // move iterator to the correct processor
 			}
 
+			// and make it (just) so
+
 			(*i)->set_state (**niter);
 		}
 	}
@@ -1726,10 +1760,6 @@ Route::set_processor_state (const XMLNode& node)
 	/* note: there is no configure_processors() call because we figure that
 	   the XML state represents a working signal route.
 	*/
-
-	if (!has_meter_processor) {
-		set_meter_point (_meter_point, NULL);
-	}
 
 	processors_changed ();
 }
@@ -1772,33 +1802,38 @@ Route::silence (nframes_t nframes)
 	}
 }	
 
-boost::shared_ptr<Delivery>
-Route::add_listener (boost::shared_ptr<IO> io, const string& listen_name)
+BufferSet*
+Route::get_return_buffer () const
 {
- 	string name = _name;
-	name += '[';
- 	name += listen_name;
-	name += ']';
- 	
-	boost::shared_ptr<Delivery> listener (new Delivery (_session, _mute_master, name, Delivery::Listen)); 
-
-	/* As an IO, our control outs need as many IO outputs as we have outputs
-	 *   (we track the changes in ::output_change_handler()).
-	 * As a processor, the listener is an identity processor
-	 *   (i.e. it does not modify its input buffers whatsoever)
-	 */
-
-	if (listener->output()->ensure_io (n_outputs(), true, this)) {
-		return boost::shared_ptr<Delivery>();
+	Glib::RWLock::ReaderLock rm (_processor_lock);
+	
+	for (ProcessorList::const_iterator x = _processors.begin(); x != _processors.end(); ++x) {
+		boost::shared_ptr<InternalReturn> d = boost::dynamic_pointer_cast<InternalReturn>(*x);
+		
+		if (d) {
+			return d->get_buffers ();
+		}
 	}
 	
-	add_processor (listener, PostFader);
+	return 0;
+}
 
-	return listener;
+void
+Route::release_return_buffer () const
+{
+	Glib::RWLock::ReaderLock rm (_processor_lock);
+	
+	for (ProcessorList::const_iterator x = _processors.begin(); x != _processors.end(); ++x) {
+		boost::shared_ptr<InternalReturn> d = boost::dynamic_pointer_cast<InternalReturn>(*x);
+		
+		if (d) {
+			return d->release_buffers ();
+		}
+	}
 }
 
 int
-Route::listen_via (boost::shared_ptr<IO> io, const string& listen_name)
+Route::listen_via (boost::shared_ptr<Route> route, const string& listen_name)
 {
 	vector<string> ports;
 	vector<string>::const_iterator i;
@@ -1807,71 +1842,58 @@ Route::listen_via (boost::shared_ptr<IO> io, const string& listen_name)
 		Glib::RWLock::ReaderLock rm (_processor_lock);
 		
 		for (ProcessorList::const_iterator x = _processors.begin(); x != _processors.end(); ++x) {
-			boost::shared_ptr<const Delivery> d = boost::dynamic_pointer_cast<const Delivery>(*x);
+			boost::shared_ptr<const InternalSend> d = boost::dynamic_pointer_cast<const InternalSend>(*x);
 
-			if (d && d->output() == io) {
+			if (d && d->target_route() == route) {
 				/* already listening via the specified IO: do nothing */
 				return 0;
 			}
 		}
 	}
+	
+	boost::shared_ptr<InternalSend> listener;
 
-	uint32_t ni = io->n_ports().n_total();
+	try {
+		listener.reset (new InternalSend (_session, _mute_master, route));
 
-	for (uint32_t n = 0; n < ni; ++n) {
-		ports.push_back (io->nth (n)->name());
+	} catch (failed_constructor& err) {
+
+		return -1;
 	}
 
- 	if (ports.empty()) {
- 		return 0;
- 	}
-	
-	boost::shared_ptr<Delivery> listen_point = add_listener (io, listen_name);
-	
-	/* XXX hack for now .... until we can generalize listen points */
-
-	_control_outs = listen_point;
-
-	/* now connect to the named ports */
-	
-	ni = listen_point->output()->n_ports().n_total();
-	size_t psize = ports.size();
-
-	for (size_t n = 0; n < ni; ++n) {
-		if (listen_point->output()->connect (listen_point->output()->nth (n), ports[n % psize], this)) {
-			error << string_compose (_("could not connect %1 to %2"),
-						 listen_point->output()->nth (n)->name(), ports[n % psize]) << endmsg;
-			return -1;
-		}
-	}
-
+	add_processor (listener, PreFader);
 	
  	return 0;
 }	
 
 void
-Route::drop_listen (boost::shared_ptr<IO> io)
+Route::drop_listen (boost::shared_ptr<Route> route)
 {
 	ProcessorStreams err;
 	ProcessorList::iterator tmp;
 
-	Glib::RWLock::ReaderLock rm (_processor_lock);
+	Glib::RWLock::ReaderLock rl(_processor_lock);
+	rl.acquire ();
 	
+  again:
 	for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ) {
 		
-		tmp = x;
-		++tmp;
+		boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
 		
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(*x);
-		
-		if (d && d->output() == io) {
-			/* already listening via the specified IO: do nothing */
+		if (d && d->target_route() == route) {
+			rl.release ();
 			remove_processor (*x, &err);
-			
+			rl.acquire ();
+
+                        /* list could have been demolished while we dropped the lock
+			   so start over.
+			*/
+
+			goto again; 
 		} 
-		
-		x = tmp;
 	}
+
+	rl.release ();
 }
 
 void
@@ -1939,25 +1961,30 @@ Route::set_comment (string cmt, void *src)
 }
 
 bool
-Route::feeds (boost::shared_ptr<IO> other)
+Route::feeds (boost::shared_ptr<Route> other)
 {
-	if (_output->connected_to (other)) {
+	// cerr << _name << endl;
+
+	if (_output->connected_to (other->input())) {
+		// cerr << "\tdirect FEEDS " << other->name() << endl;
 		return true;
 	}
 
-	/* check IOProcessors which may also interconnect Routes */
-
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); r++) {
-
+		
 		boost::shared_ptr<IOProcessor> iop;
 		
 		if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*r)) != 0) {
-			if (iop->output() && iop->output()->connected_to (other)) {
+			if (iop->feeds (other)) {
+				// cerr << "\tIOP " << iop->name() << " feeds " << other->name() << endl;
 				return true;
+			} else {
+				// cerr << "\tIOP " << iop->name() << " does NOT feeds " << other->name() << endl;
 			}
 		}
 	}
 
+	// cerr << "\tdoes NOT FEED " << other->name() << endl;
 	return false;
 }
 
@@ -2418,15 +2445,15 @@ Route::set_name (const string& str)
 }
 
 boost::shared_ptr<Send>
-Route::send_for (boost::shared_ptr<const IO> target) const
+Route::internal_send_for (boost::shared_ptr<const Route> target) const
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Send> send;
+		boost::shared_ptr<InternalSend> send;
 		
-		if ((send = boost::dynamic_pointer_cast<Send>(*i)) != 0) {
-			if (send->output()->connected_to (target)) {
+		if ((send = boost::dynamic_pointer_cast<InternalSend>(*i)) != 0) {
+			if (send->target_route() == target) {
 				return send;
 			}
 		}

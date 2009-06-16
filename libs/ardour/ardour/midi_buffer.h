@@ -39,6 +39,7 @@ public:
 
 	void silence (nframes_t nframes, nframes_t offset = 0);
 	void read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset = 0, nframes_t src_offset = 0);
+	void merge_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset = 0, nframes_t src_offset = 0);
 	
 	void copy(const MidiBuffer& copy);
 

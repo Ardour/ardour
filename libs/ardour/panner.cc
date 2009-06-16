@@ -1379,7 +1379,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 			if (inbufs.count().n_audio() > 0) {
 				BufferSet::audio_iterator i = inbufs.audio_begin();
 				for (++i; i != inbufs.audio_end(); ++i) {
-					dst.accumulate_from(*i, nframes);
+					dst.merge_from(*i, nframes);
 				}
 			}
 
@@ -1456,7 +1456,7 @@ Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sfram
 		// accumulate starting with the second
 		BufferSet::audio_iterator i = inbufs.audio_begin();
 		for (++i; i != inbufs.audio_end(); ++i) {
-			dst.accumulate_from(*i, nframes);
+			dst.merge_from(*i, nframes);
 		}
 
 		return;

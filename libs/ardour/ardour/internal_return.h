@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,65 +17,44 @@
 
 */
 
-#ifndef __ardour_send_h__
-#define __ardour_send_h__
+#ifndef __ardour_internal_return_h__
+#define __ardour_internal_return_h__
 
 #include <sigc++/signal.h>
-#include <string>
-
-#include "pbd/stateful.h" 
 
 #include "ardour/ardour.h"
-#include "ardour/audioengine.h"
-#include "ardour/delivery.h"
+#include "ardour/return.h"
+#include "ardour/buffer_set.h"
 
 namespace ARDOUR {
 
-class PeakMeter;
-class Amp;
-
-class Send : public Delivery
+class InternalReturn : public Return
 {
   public:	
-	Send (Session&, boost::shared_ptr<MuteMaster>, bool internal = false);
-	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, bool internal = false);
-	virtual ~Send ();
+	InternalReturn (Session&);
+	InternalReturn (Session&, const XMLNode&);
 
-	uint32_t bit_slot() const { return _bitslot; }
-
-	boost::shared_ptr<Amp> amp() const { return _amp; }
-	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
-
-	bool metering() const { return _metering; }
-	void set_metering (bool yn) { _metering = yn; }
-	
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
 
-	uint32_t pans_required() const { return _configured_input.n_audio(); }
-
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
-
+	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	void set_block_size (nframes_t);
 
-	bool set_name (const std::string& str);
+	BufferSet* get_buffers();
+	void release_buffers();
 
-	static uint32_t how_many_sends();
-	static void make_unique (XMLNode &, Session &);
-
-  protected:
-	bool _metering;
-	boost::shared_ptr<Amp> _amp;
-	boost::shared_ptr<PeakMeter> _meter;
+	static sigc::signal<void,nframes_t> CycleStart;
 
   private:
-	/* disallow copy construction */
-	Send (const Send&);
-	
-	uint32_t  _bitslot;
+	BufferSet buffers;
+	uint32_t  user_count;
+	void allocate_buffers (nframes_t);
+	void cycle_start (nframes_t);
 };
 
 } // namespace ARDOUR
 
-#endif /* __ardour_send_h__ */
+#endif /* __ardour_internal_return_h__ */

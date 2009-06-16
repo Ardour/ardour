@@ -109,6 +109,11 @@ PeakMeter::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfr
 	}
 }
 
+PeakMeter::PeakMeter (Session& s, const XMLNode& node)
+	: Processor (s, node)
+{
+}
+
 void
 PeakMeter::reset ()
 {

@@ -74,7 +74,7 @@ class Region
 		LeftOfSplit = 0x4000,
 		RightOfSplit = 0x8000,
 		Hidden = 0x10000,
-		DoNotSaveState = 0x20000,
+		DoNotSendPropertyChanges = 0x20000,
 		PositionLocked = 0x40000,
 		//
 		range_guarantoor = USHRT_MAX
@@ -97,6 +97,8 @@ class Region
 
 	sigc::signal<void,Change> StateChanged;
 	static sigc::signal<void,boost::shared_ptr<ARDOUR::Region> > RegionPropertyChanged;
+	void unlock_property_changes () { _flags = Flag (_flags & ~DoNotSendPropertyChanges); }
+	void block_property_changes () { _flags = Flag (_flags | DoNotSendPropertyChanges); }
 
 	virtual ~Region();
 
@@ -159,8 +161,6 @@ class Region
 	PositionLockStyle positional_lock_style() const { return _positional_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style ();
-
-	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
 	void freeze ();
 	void thaw (const std::string& why);

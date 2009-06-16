@@ -225,5 +225,32 @@ BufferSet::read_from (BufferSet& in, nframes_t nframes)
 	set_count(in.count());
 }
 
+// FIXME: make 'in' const
+void
+BufferSet::merge_from (BufferSet& in, nframes_t nframes)
+{
+	assert(available() >= in.count());
+
+	/* merge all input buffers into out existing buffers */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		BufferSet::iterator o = begin(*t);
+		for (BufferSet::iterator i = in.begin(*t); i != in.end(*t); ++i, ++o) {
+			o->merge_from (*i, nframes);
+		}
+	}
+
+	set_count (in.count());
+}
+
+void
+BufferSet::silence (nframes_t nframes, nframes_t offset)
+{
+	for (std::vector<BufferVec>::iterator i = _buffers.begin(); i != _buffers.end(); ++i) {
+		for (BufferVec::iterator b = i->begin(); b != i->end(); ++b) {
+			(*b)->silence (nframes, offset);
+		}
+	}
+}
+
 } // namespace ARDOUR
 

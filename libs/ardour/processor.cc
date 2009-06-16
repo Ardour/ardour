@@ -68,6 +68,17 @@ Processor::Processor(Session& session, const string& name)
 {
 }
 
+Processor::Processor (Session& session, const XMLNode& node)
+	: SessionObject(session, "renameMe")
+	, AutomatableControls(session)
+	, _active(false)
+	, _next_ab_is_active(false)
+	, _configured(false)
+	, _gui(0)
+{
+	set_state (node);
+}
+
 XMLNode&
 Processor::get_state (void)
 {
@@ -141,6 +152,9 @@ Processor::set_state (const XMLNode& node)
 	// may not exist for legacy 3.0 sessions
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value();
+		cerr << "---------------- ID for processor " << name() << " = " << _id << endl;
+	} else {
+		cerr << "---------------- NO ID for processor " << name() << endl;
 	}
 
 	XMLNodeList nlist = node.children();

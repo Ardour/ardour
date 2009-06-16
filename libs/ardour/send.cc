@@ -36,8 +36,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm)
-	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), Delivery::Send)
+Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, bool internal)
+	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), 
+		    (internal ? Delivery::Listen : Delivery::Send))
 	, _metering (false)
 {
 	_amp.reset (new Amp (_session, _mute_master));
@@ -46,8 +47,8 @@ Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
-	: Delivery (s, mm, "send", Delivery::Send)
+Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, bool internal)
+        : Delivery (s, mm, "send", (internal ? Delivery::Listen : Delivery::Send))
 	, _metering (false)
 {
 	_amp.reset (new Amp (_session, _mute_master));
@@ -113,6 +114,7 @@ Send::state(bool full)
 {
 	XMLNode& node = IOProcessor::state(full);
 	char buf[32];
+
 	node.add_property ("type", "send");
 	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
 	node.add_property ("bitslot", buf);

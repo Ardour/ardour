@@ -56,6 +56,13 @@ public:
 		}
 		_written = true;
 	}
+
+	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
+	void merge_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
+		const AudioBuffer* ab = dynamic_cast<const AudioBuffer*>(&src);
+		assert (ab);
+		accumulate_from (*ab, len, dst_offset, src_offset);
+	}
 	
 	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
 	void accumulate_from (const AudioBuffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {

@@ -31,23 +31,23 @@
 
 #include "midi++/jack.h"
 
+#include "ardour/amp.h"
+#include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/buffer.h"
-#include "ardour/delivery.h"
-#include "ardour/port.h"
-#include "ardour/audio_port.h"
-#include "ardour/midi_port.h"
-#include "ardour/meter.h"
-#include "ardour/session.h"
-#include "ardour/cycle_timer.h"
-#include "ardour/utils.h"
-#include "ardour/event_type_map.h"
-#include "ardour/io.h"
-#include "ardour/amp.h"
-#include "ardour/port_set.h"
 #include "ardour/buffer_set.h"
-
+#include "ardour/cycle_timer.h"
+#include "ardour/delivery.h"
+#include "ardour/event_type_map.h"
+#include "ardour/internal_return.h"
+#include "ardour/io.h"
+#include "ardour/meter.h"
+#include "ardour/midi_port.h"
+#include "ardour/port.h"
+#include "ardour/port_set.h"
+#include "ardour/session.h"
 #include "ardour/timestamps.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 
@@ -364,6 +364,7 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	Delivery::CycleStart (nframes);
 	Port::set_port_offset (0);
+	InternalReturn::CycleStart (nframes);
 
 	/* tell all Ports that we're starting a new cycle */
 
@@ -822,10 +823,15 @@ AudioEngine::frames_per_cycle ()
 Port *
 AudioEngine::get_port_by_name (const string& portname)
 {
-	assert (portname.find_first_of (':') != string::npos);
+	string s;
+	if (portname.find_first_of (':') == string::npos) {
+		s = make_port_name_non_relative (portname);
+	} else {
+		s = portname;
+	}
 	
 	Glib::Mutex::Lock lm (_process_lock);
-	return get_port_by_name_locked (portname);
+	return get_port_by_name_locked (s);
 }
 
 Port *

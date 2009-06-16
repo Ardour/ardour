@@ -136,8 +136,10 @@ def build(bld):
 		gdither.cc
 		globals.cc
 		import.cc
+                internal_return.cc
+                internal_send.cc
 		interpolation.cc
-        io.cc
+                io.cc
 		io_processor.cc
 		jack_slave.cc
 		ladspa_plugin.cc

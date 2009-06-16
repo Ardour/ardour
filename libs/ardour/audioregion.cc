@@ -655,6 +655,14 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 		_flags = Flag (_flags & ~Region::RightOfSplit);
 	}
 
+	/* leave this flag setting in place, no matter what */
+
+	if ((old_flags & DoNotSendPropertyChanges)) {
+		_flags = Flag (_flags | DoNotSendPropertyChanges);
+	}
+
+	/* find out if any flags changed that we signal about */
+
 	if ((old_flags ^ _flags) & Muted) {
 		what_changed = Change (what_changed|MuteChanged);
 	}

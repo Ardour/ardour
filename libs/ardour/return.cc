@@ -36,8 +36,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Return::Return (Session& s)
-	: IOProcessor (s, true, false, string_compose (_("return %1"), (_bitslot = s.next_return_id()) + 1))
+Return::Return (Session& s, bool internal)
+	: IOProcessor (s, (internal ? false : true), false, 
+		       string_compose (_("return %1"), (_bitslot = s.next_return_id()) + 1))
 	, _metering (false)
 {
 	/* never muted */
@@ -48,8 +49,8 @@ Return::Return (Session& s)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Return::Return (Session& s, const XMLNode& node)
-	: IOProcessor (s, true, false, "return")
+Return::Return (Session& s, const XMLNode& node, bool internal)
+	: IOProcessor (s, (internal ? false : true), false, "return")
 	, _metering (false)
 {
 	/* never muted */

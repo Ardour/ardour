@@ -61,7 +61,7 @@ sigc::signal<void,boost::shared_ptr<ARDOUR::Region> > Region::RegionPropertyChan
 Region::Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: SessionObject(s, name)
 	, _type(type)
-	, _flags(flags)
+	, _flags(Flag (flags|DoNotSendPropertyChanges))
 	, _start(start) 
 	, _length(length) 
 	, _position(0) 
@@ -86,7 +86,7 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: SessionObject(src->session(), name)
 	, _type(type)
-	, _flags(flags)
+	, _flags(Flag (flags|DoNotSendPropertyChanges))
 	, _start(start) 
 	, _length(length) 
 	, _position(0) 
@@ -119,7 +119,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: SessionObject(srcs.front()->session(), name)
 	, _type(type)
-	, _flags(flags)
+	, _flags(Flag (flags|DoNotSendPropertyChanges))
 	, _start(start) 
 	, _length(length) 
 	, _position(0) 
@@ -149,6 +149,8 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 {
 	_start = other->_start + offset;
 	copy_stuff (other, offset, length, name, layer, flags);
+
+	_flags = Flag (_flags | DoNotSendPropertyChanges);
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -187,6 +189,8 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const s
 
 	_start = 0;
 	copy_stuff (other, 0, length, name, layer, flags);
+
+	_flags = Flag (_flags | DoNotSendPropertyChanges);
 
 	/* sync pos is relative to start of file. our start-in-file is now zero,
 	   so set our sync position to whatever the the difference between
@@ -253,6 +257,8 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _pending_changed(Change(0))
 	, _last_layer_op(other->_last_layer_op)
 {
+	_flags = Flag (_flags | DoNotSendPropertyChanges);
+
 	other->_first_edit = EditChangesName;
 
 	if (other->_extra_xml) {
@@ -268,7 +274,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 Region::Region (const SourceList& srcs, const XMLNode& node)
 	: SessionObject(srcs.front()->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL) // to be loaded from XML
-	, _flags(Flag(0))
+	, _flags(DoNotSendPropertyChanges)
 	, _start(0) 
 	, _length(0) 
 	, _position(0) 
@@ -297,7 +303,7 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	: SessionObject(src->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL)
-	, _flags(Flag(0))
+	, _flags(DoNotSendPropertyChanges)
 	, _start(0) 
 	, _length(0) 
 	, _position(0) 
@@ -1400,7 +1406,7 @@ Region::send_change (Change what_changed)
 
 	StateChanged (what_changed);
 	
-	if (!(_flags & DoNotSaveState)) {
+	if (!(_flags & DoNotSendPropertyChanges)) {
 		
 		/* Try and send a shared_pointer unless this is part of the constructor.
 		   If so, do nothing.

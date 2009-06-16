@@ -76,6 +76,7 @@ public:
 	virtual void clear() { silence(_capacity, 0); }
 	
 	virtual void read_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) = 0;
+	virtual void merge_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) = 0;
 
   protected:
 	Buffer(DataType type, size_t capacity)
