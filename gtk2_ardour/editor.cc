@@ -510,18 +510,31 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
+	/* summary */
 	edit_packer.attach (*_summary,               0, 2, 0, 1,    FILL|EXPAND, SHRINK, 0, 0);
+
+	/* labels for rulers (mins:secs, timecode, samples, bars:beats) */
 	edit_packer.attach (ruler_label_event_box,   0, 1, 1, 2,    FILL,        SHRINK, 0, 0);
 
+	/* labels for time lines (meter, tempo, markers) */
 	edit_packer.attach (time_button_event_box,   0, 1, 2, 3,    FILL,        SHRINK, 0, 0);
+
+	/* rulers */
 	edit_packer.attach (time_canvas_event_box,   1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
 
+	/* LHS controls for tracks */
 	edit_packer.attach (controls_layout,         0, 1, 3, 4,    FILL,        FILL|EXPAND, 0, 0);
+
+	/* main canvas (which has the time line canvas items at the top of it) */
 	edit_packer.attach (track_canvas_event_box,  1, 2, 2, 4,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
+	/* zoom controls */
 	edit_packer.attach (zoom_box,                0, 1, 4, 5,    FILL,         FILL, 0, 0);
+
+	/* h scroller */
 	edit_packer.attach (edit_hscrollbar,         1, 2, 4, 5,    FILL|EXPAND,  FILL, 0, 0);
 
+	/* v scroller */
 	edit_packer.attach (edit_vscrollbar,         3, 4, 3, 4,    FILL,        FILL|EXPAND, 0, 0);
 
 	bottom_hbox.set_border_width (2);
