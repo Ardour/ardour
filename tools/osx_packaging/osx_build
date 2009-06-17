@@ -33,7 +33,7 @@ while [ $# -gt 0 ] ; do
 	#
 
 	--sae) WITH_NLS= ; SAE=1 ; INTERNAL_JACK=1; WITH_LADSPA=1; STRIP= ; EXTRA_PACKAGING_DIR=1 ; shift ;;
-	--mixbus) WITH_NLS= ; SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; EXTRA_PACKAGING_DIR=1; EXTERNAL_JACK=/usr/local/Jack.dmg; shift ;;
+	--mixbus) MIXBUS=1; WITH_NLS= ; SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; EXTRA_PACKAGING_DIR=1; EXTERNAL_JACK=/usr/local/Jack.dmg; shift ;;
 	--public) WITH_NLS= ; SAE= ; INTERNAL_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
 	--allinone) SAE= ; WITH_NLS= ; INTERNAL_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
 	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
@@ -429,7 +429,7 @@ if [ x$EXTRA_PACKAGING_DIR != x ] ; then
 	rm -rf $MIXBUS_PKG_DIR
 	mkdir $MIXBUS_PKG_DIR
 	mv $APPDIR $MIXBUS_PKG_DIR/
-	cp HowToInstallArdourMIXBUS.pdf "$MIXBUS_PKG_DIR/How To Install Ardour MIXBUS.pdf"
+	# cp HowToInstallArdourMIXBUS.pdf "$MIXBUS_PKG_DIR/How To Install Ardour MIXBUS.pdf"
 	
 	if [ -x$EXTERNAL_JACK != x ] ; then
 	    cp $EXTERNAL_JACK $MIXBUS_PKG_DIR
