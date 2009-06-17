@@ -261,7 +261,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret) = 0;
 	virtual void mouse_add_new_marker (nframes64_t where, bool is_cd=false, bool is_xrun=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
-	virtual void add_to_idle_resize (TimeAxisView*,uint32_t) = 0;
+	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 
 #ifdef WITH_CMT
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
@@ -321,10 +321,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 #endif
-
-	virtual void queue_draw_resize_line (int at) = 0;
-	virtual void start_resize_line_ops () = 0;
-	virtual void end_resize_line_ops () = 0;
 
 	static const int window_border_width;
 	static const int container_border_width;

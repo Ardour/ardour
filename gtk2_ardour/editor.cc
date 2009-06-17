@@ -19,11 +19,14 @@
 
 /* Note: public Editor methods are documented in public_editor.h */
 
+#define __STDC_LIMIT_MACROS 1
+#include <stdint.h>
 #include <unistd.h>
 #include <cstdlib>
 #include <cmath>
 #include <string>
 #include <algorithm>
+#include <map>
 
 #include <boost/none.hpp>
 
@@ -347,9 +350,6 @@ Editor::Editor ()
 	}
 	allow_vertical_scroll = false;
 	no_save_visual = false;
-	need_resize_line = false;
-	resize_line_y = 0;
-	old_resize_line_y = -1;
 	no_region_list_redisplay = false;
 	resize_idle_id = -1;
 
@@ -5171,169 +5171,67 @@ Editor::first_idle ()
 	_have_idled = true;
 }
 
-void
-Editor::start_resize_line_ops ()
-{
-#if 0
-	old_resize_line_y = -1;
-	resize_line_y = -1;
-	need_resize_line = true;
-#endif	
-}
-
-void
-Editor::end_resize_line_ops ()
-{
-#if 0
-	need_resize_line = false;
-
-	if (old_resize_line_y >= 0) {
-		Gdk::Rectangle r (0, old_resize_line_y, (int) _canvas_width, 3);
-		Glib::RefPtr<Gdk::Window> win = get_window();
-		cerr << "Final invalidation at " << old_resize_line_y << endl;
-		win->invalidate_rect (r, false);
-	}
-#endif
-}
-
-void
-Editor::queue_draw_resize_line (int at)
-{
-#if 0	
-	Glib::RefPtr<Gdk::Window> win = get_window();
-
-	resize_line_y = at;
-
-	if (win && _canvas_width) {
-
-		int controls_width = controls_layout.get_width();
-		int xroot, discard;
-		
-		controls_layout.get_window()->get_origin (xroot, discard);
-
-		if (old_resize_line_y >= 0) {
-			
-			/* redraw where it used to be */
-			
-			
-			Gdk::Rectangle r (0, old_resize_line_y - 1, controls_width + (int) _canvas_width, 3);
-			win->invalidate_rect (r, true);
-			cerr << "invalidate " << xroot << "," << old_resize_line_y - 1 << ' ' 
-			     << controls_width + _canvas_width << " x 3\n";
-		}
-
-		/* draw where it is */
-
-		Gdk::Rectangle r (0, at - 1, controls_width + (int) _canvas_width, 3);
-		win->invalidate_rect (r, true);
-	}
-#endif
-}
-
-bool
-Editor::on_expose_event (GdkEventExpose* ev)
-{
-	/* cerr << "+++ editor expose "
-	     << ev->area.x << ',' << ev->area.y
-	     << ' '
-	     << ev->area.width << " x " << ev->area.height
-	     << " need reize ? " << need_resize_line
-	     << endl;
-	*/
-	bool ret = Window::on_expose_event (ev);
-
-#if 0
-	if (need_resize_line) {
-		
-		int xroot, yroot, discard;
-		int controls_width;
-
-		/* Our root coordinates for drawing the line will be the left edge 
-		   of the track controls, and the upper left edge of our own window.
-		*/
-
-		get_window()->get_origin (discard, yroot);
-		controls_layout.get_window()->get_origin (xroot, discard);
-		controls_width = controls_layout.get_width();
-		
-		GdkRectangle lr;
-		GdkRectangle intersection;
-
-		lr.x = 0;
-		lr.y = resize_line_y;
-		lr.width = controls_width + (int) _canvas_width;
-		lr.height = 3;
-
-		if (gdk_rectangle_intersect (&lr, &ev->area, &intersection)) {
-			
-			Glib::RefPtr<Gtk::Style> style (get_style());
-			Glib::RefPtr<Gdk::GC> black_gc (style->get_black_gc ());
-			Glib::RefPtr<Gdk::GC> gc = wrap (black_gc->gobj_copy(), false);
-
-			/* draw on root window */
-
-			GdkWindow* win = gdk_get_default_root_window();
-			
-			gc->set_subwindow (Gdk::INCLUDE_INFERIORS);
-			gc->set_line_attributes (3, Gdk::LINE_SOLID, 
-						 Gdk::CAP_NOT_LAST,
-						 Gdk::JOIN_MITER);
-			
-			gdk_draw_line (win, gc->gobj(), 
-				       0,
-				       resize_line_y, 
-				       (int) _canvas_width + controls_width,
-				       resize_line_y);
-#if 0
-			cerr << "drew line @ " << xroot << ", " << yroot + resize_line_y 
-			     << " to " << xroot + (int) _canvas_width + controls_width
-			     << ", " << yroot + resize_line_y
-			     << endl;
-#endif
-			old_resize_line_y = resize_line_y;
-			cerr << "NEXT EXPOSE SHOULD BE AT " << old_resize_line_y << endl;
-		} else {
-			cerr << "no intersect with "
-			     << lr.x << ',' << lr.y
-			     << ' '
-			     << lr.width << " x " << lr.height
-			     << endl;
-		}
-	}
-
-	//cerr << "--- editor expose\n";
-#endif
-
-	return ret;
-}
-
 static gboolean
 _idle_resizer (gpointer arg)
 {
 	return ((Editor*)arg)->idle_resize ();
 }
 
+/** Add a view and change to the idle track resize list.
+ *  @param view View.
+ *  @param h Change in height (+ve is bigger).
+ *  @return Resulting height of the view.
+ */
+int32_t
+Editor::add_single_to_idle_resize (TimeAxisView* view, int32_t h)
+{
+	if (pending_resizes.find (view) != pending_resizes.end()) {
+		pending_resizes[view] += h;
+	} else {
+		pending_resizes[view] = h;
+	}
+
+	return view->current_height() + pending_resizes[view];
+}
+
 void
-Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
+Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 {
 	if (resize_idle_id < 0) {
 		resize_idle_id = g_idle_add (_idle_resizer, this);
-	} 
+	}
 
-	resize_idle_target = h;
+	/* make a note of the smallest resulting height, so that we can clamp the
+	   lower limit at TimeAxisView::hSmall */
 
-	pending_resizes.push_back (view);
+	int32_t min_resulting = INT32_MAX;
 
-	if (selection->selected (view) && !selection->tracks.empty()) {
-		pending_resizes.insert (pending_resizes.end(), selection->tracks.begin(), selection->tracks.end());
+	if (selection->selected (view)) {
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			min_resulting = min (min_resulting, add_single_to_idle_resize (*i, h));
+		}
+	} else {
+		min_resulting = min (min_resulting, add_single_to_idle_resize (view, h));
+	}
+
+	if (min_resulting < 0) {
+		min_resulting = 0;
+	}
+
+	/* clamp */
+	if (uint32_t (min_resulting) < TimeAxisView::hSmall) {
+		for (std::map<TimeAxisView*, int32_t>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
+			i->second += TimeAxisView::hSmall - min_resulting;
+		}
 	}
 }
 
+/** Handle pending resizing of tracks */
 bool
 Editor::idle_resize ()
 {
-	for (vector<TimeAxisView*>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
-		(*i)->idle_resize (resize_idle_target);
+	for (std::map<TimeAxisView*, int32_t>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
+		i->first->idle_resize (i->first->current_height() + i->second);
 	}
 	pending_resizes.clear();
 	flush_canvas ();

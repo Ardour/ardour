@@ -192,7 +192,7 @@ class Editor : public PublicEditor
 
 	TimeAxisView* get_named_time_axis(const std::string & name) ;
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
-	void add_to_idle_resize (TimeAxisView*, uint32_t);
+	void add_to_idle_resize (TimeAxisView*, int32_t);
 
 	RouteTimeAxisView* get_route_view_by_id (PBD::ID& id);
 
@@ -399,16 +399,11 @@ class Editor : public PublicEditor
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
 
-	void queue_draw_resize_line (int at);
-	void start_resize_line_ops ();
-	void end_resize_line_ops ();
-
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);
 
 	void on_realize();
-	bool on_expose_event (GdkEventExpose*);
 
   private:
 
@@ -599,10 +594,6 @@ class Editor : public PublicEditor
 	Gtk::HBox           global_hpacker;
 	Gtk::VBox           global_vpacker;
 	Gtk::VBox           vpacker;
-
-	bool need_resize_line;
-	int  resize_line_y;
-	int  old_resize_line_y;
 
 	Gdk::Cursor*          current_canvas_cursor;
 	void set_canvas_cursor ();
@@ -2222,10 +2213,9 @@ public:
 
 	bool _have_idled;
 	int resize_idle_id;
-	int32_t resize_idle_target;
 	bool idle_resize();
 	friend gboolean _idle_resize (gpointer);
-	std::vector<TimeAxisView*> pending_resizes;
+	std::map<TimeAxisView*, int32_t> pending_resizes;
 
 	void visible_order_range (int*, int*) const;
 
@@ -2237,6 +2227,7 @@ public:
 
 	void update_canvas_now ();
 	void streamview_height_changed ();
+	int32_t add_single_to_idle_resize (TimeAxisView*, int32_t);
 
 	friend class Drag;
 	friend class RegionDrag;

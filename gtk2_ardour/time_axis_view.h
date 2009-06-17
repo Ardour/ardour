@@ -347,7 +347,6 @@ private:
 	int _order;
 	uint32_t _effective_height;
 	double _resize_drag_start;
-	int32_t _resize_idle_target;
 	ArdourCanvas::Group* _ghost_group;
 
 	static int const _max_order;

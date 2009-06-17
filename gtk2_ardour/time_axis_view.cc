@@ -1284,8 +1284,6 @@ bool
 TimeAxisView::resizer_button_press (GdkEventButton* event)
 {
 	_resize_drag_start = event->y_root;
-	_resize_idle_target = current_height ();
-	_editor.start_resize_line_ops ();
 	return true;
 }
 
@@ -1293,7 +1291,6 @@ bool
 TimeAxisView::resizer_button_release (GdkEventButton* ev)
 {
 	_resize_drag_start = -1;
-	_editor.end_resize_line_ops ();
 	return true;
 }
 
@@ -1310,11 +1307,8 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 		return true;
 	}
 
-	int32_t const delta = (int32_t) floor (_resize_drag_start - ev->y_root);
-
-	_resize_idle_target = std::max (_resize_idle_target - delta, (int) hSmall);
-	_editor.add_to_idle_resize (this, _resize_idle_target);
-	
+	int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
+	_editor.add_to_idle_resize (this, delta);
 	_resize_drag_start = ev->y_root;
 
 	return true;
