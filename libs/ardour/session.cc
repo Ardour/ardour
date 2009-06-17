@@ -790,7 +790,6 @@ Session::hookup_io ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~InitialConnecting);
 
-
 	/* now handle the whole enchilada as if it was one
 	   graph reorder event.
 	*/
@@ -2247,15 +2246,20 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 
 		if ((*i)->feeds (route)) {
 			/* do it */
-			
-			(*i)->main_outs()->mod_solo_level (delta);
+			(*i)->mod_solo_level (delta);
 		}
 	}
 
 	/* make sure master is never muted by solo */
 
-	if (_master_out->main_outs()->solo_level() == 0) {
-		_master_out->main_outs()->mod_solo_level (1);
+	if (_master_out->solo_level() == 0) {
+		_master_out->mod_solo_level (1);
+	}
+
+	/* ditto for control outs make sure master is never muted by solo */
+
+	if (_control_out && _control_out->solo_level() == 0) {
+		_control_out->mod_solo_level (1);
 	}
 
 	solo_update_disabled = false;
@@ -2276,7 +2280,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_master() && !(*i)->is_hidden() && (*i)->soloed()) {
+		if (!(*i)->is_master() && !(*i)->is_control() && !(*i)->is_hidden() && (*i)->soloed()) {
 			something_soloed = true;
 			break;
 		}
@@ -2302,7 +2306,7 @@ Session::catch_up_on_solo ()
 void
 Session::catch_up_on_solo_mute_override ()
 {
-	if (Config->get_solo_model() != InverseMute) {
+	if (Config->get_solo_model() != SoloInPlace) {
 		return;
 	}
 

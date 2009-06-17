@@ -124,8 +124,11 @@ class Route : public SessionObject, public AutomatableControls
 	void set_mute (bool yn, void* src);
 	bool muted () const;
 
+	/* controls use set_solo() to modify this route's solo state
+	 */
+
 	void set_solo (bool yn, void *src);
-	bool soloed() const;
+	bool soloed () const { return (bool) _solo_level; }
 
 	void set_solo_isolated (bool yn, void *src);
 	bool solo_isolated() const;
@@ -315,6 +318,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	void catch_up_on_solo_mute_override ();
 	void mod_solo_level (int32_t);
+	uint32_t solo_level () const { return _solo_level; }
 	void set_block_size (nframes_t nframes);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
@@ -340,13 +344,16 @@ class Route : public SessionObject, public AutomatableControls
 	ProcessorList  _processors;
 	mutable Glib::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
-	boost::shared_ptr<Delivery> _control_outs; // XXX to be removed/generalized by listen points
+	boost::shared_ptr<Delivery> _control_outs;
 	boost::shared_ptr<InternalReturn> _intreturn;
 
 	Flag           _flags;
 	int            _pending_declick;
 	MeterPoint     _meter_point;
 	uint32_t       _phase_invert;
+	uint32_t       _solo_level;
+	bool           _solo_isolated;
+
 	bool           _denormal_protection;
 	
 	bool _recordable : 1;

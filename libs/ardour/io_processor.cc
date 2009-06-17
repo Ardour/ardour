@@ -64,8 +64,6 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 	if (with_output) {
 		_output.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Output, dtype));
 	}
-
-	cerr << "fresh create IOP name = " << proc_name << " in = " << _input << " out = " << _output << endl;
 }
 
 /* create an IOProcessor that proxies to an existing IO object */
@@ -76,7 +74,6 @@ IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_pt
 	, _input (in)
 	, _output (out)
 {
-	cerr << "XML create IOP name = " << proc_name << " in = " << in << " out = " << out << endl;
 	if (in) {
 		_own_input = false;
 	} else {
@@ -165,8 +162,6 @@ IOProcessor::set_state (const XMLNode& node)
 		_own_output = (prop->value() == "yes");
 	}
 
-	cerr << _name << " own input = " << _own_input << " output = " << _own_output << endl;
-	
 	/* don't attempt to set state for a proxied IO that we don't own */
 
 	XMLNodeList nlist = node.children();

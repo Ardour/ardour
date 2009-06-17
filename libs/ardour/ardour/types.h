@@ -331,7 +331,7 @@ namespace ARDOUR {
 	};
 
 	enum SoloModel {
-		InverseMute,
+		SoloInPlace,
 		SoloBus
 	};
 

@@ -1677,6 +1677,7 @@ public:
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	Gtk::HBox           zoom_box;
+	Gtk::VBox           zoom_vbox;
 
 	void                zoom_adjustment_changed();
 

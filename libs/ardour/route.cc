@@ -37,6 +37,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/configuration.h"
 #include "ardour/cycle_timer.h"
+#include "ardour/delivery.h"
 #include "ardour/dB.h"
 #include "ardour/internal_send.h"
 #include "ardour/internal_return.h"
@@ -114,6 +115,8 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 void
 Route::init ()
 {
+	_solo_level = 0;
+	_solo_isolated = false;
 	_active = true;
 	processor_max_streams.reset();
 	_solo_safe = false;
@@ -475,7 +478,7 @@ Route::passthru_silence (sframes_t start_frame, sframes_t end_frame, nframes_t n
 void
 Route::set_solo (bool yn, void *src)
 {
-	if (_solo_safe) {
+	if (_solo_safe || _solo_isolated) {
 		return;
 	}
 
@@ -484,17 +487,52 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
-	if (_main_outs->soloed() != yn) {
-		_main_outs->mod_solo_level (yn ? 1 : -1);
+	if (soloed() != yn) {
+		mod_solo_level (yn ? 1 : -1);
 		solo_changed (src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}	
 }
 
-bool
-Route::soloed() const
+void
+Route::mod_solo_level (int32_t delta)
 {
-	return _main_outs->soloed ();
+	if (delta < 0) {
+		if (_solo_level >= (uint32_t) delta) {
+			_solo_level += delta;
+		} else {
+			_solo_level = 0;
+		}
+	} else {
+		_solo_level += delta;
+	}
+
+	/* tell "special" delivery units what the solo situation is
+	 */
+
+	switch (Config->get_solo_model()) {
+	case SoloInPlace:
+		/* main outs are used for soloing */
+		_main_outs->set_solo_level (_solo_level);
+		_main_outs->set_solo_isolated (_solo_isolated);
+		if (_control_outs) {
+			/* control outs just keep on playing */
+			_control_outs->set_solo_level (0);
+			_control_outs->set_solo_isolated (true);
+		}
+		break;
+
+	case SoloBus:
+		/* control outs are used for soloing */
+		if (_control_outs) {
+			_control_outs->set_solo_level (_solo_level);
+			_control_outs->set_solo_isolated (_solo_isolated);
+		}
+		/* main outs just keep on playing */
+		_main_outs->set_solo_level (0);
+		_main_outs->set_solo_isolated (true);
+		break;
+	}
 }
 
 void
@@ -505,14 +543,39 @@ Route::set_solo_isolated (bool yn, void *src)
 		return;
 	}
 
-	_main_outs->set_solo_isolated (yn);
-	solo_isolated_changed (src);
+	if (yn != _solo_isolated) {
+		_solo_isolated = yn;
+
+		/* tell "special" delivery units what the solo situation is
+		 */
+		
+		switch (Config->get_solo_model()) {
+		case SoloInPlace:
+			_main_outs->set_solo_level (_solo_level);
+			_main_outs->set_solo_isolated (_solo_isolated);
+			if (_control_outs) {
+				_main_outs->set_solo_level (1);
+				_main_outs->set_solo_isolated (false);
+			}
+			break;
+		case SoloBus:
+			if (_control_outs) {
+				_control_outs->set_solo_level (_solo_level);
+				_control_outs->set_solo_isolated (_solo_isolated);
+			}
+			_main_outs->set_solo_level (1);
+			_main_outs->set_solo_isolated (false);
+			break;
+		}
+
+		solo_isolated_changed (src);
+	}
 }
 
 bool
 Route::solo_isolated () const 
 {
-	return _main_outs->solo_isolated();
+	return _solo_isolated;
 }
 
 void
@@ -535,6 +598,7 @@ Route::muted() const
 	return _mute_master->muted ();
 }
 
+#if 0
 static void
 dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& procs)
 {
@@ -545,6 +609,7 @@ dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& p
 	}
 	cerr << "}" << endl;
 }
+#endif
 
 int
 Route::add_processor (boost::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err)
@@ -567,7 +632,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
 			ProcessorList::iterator p;
 			p = _processors.end();
 			--p;
-			cerr << "Let's check " << (*p)->name() << " vis ? " << (*p)->visible() << endl;
 			while (!(*p)->visible() && p != _processors.begin()) {
 				--p;
 			}
@@ -620,8 +684,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 			loc = iter;
 		}
-
-		cerr << "Adding " << processor->name() << " @ " << processor << endl;
 
 		_processors.insert (loc, processor);
 
@@ -705,9 +767,6 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 		try {
 			if ((prop = node.property ("type")) != 0) {
 
-
-				cerr << _name << " : got processor type " << prop->value() << endl;
-
 				boost::shared_ptr<Processor> processor;
 
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
@@ -757,7 +816,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				} else if (prop->value() == "intsend") {
 
 					processor.reset (new InternalSend (_session, _mute_master, node));
-				
+
 				} else if (prop->value() == "intreturn") {
 					
 					if (_intreturn) {
@@ -792,7 +851,6 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 					ProcessorList::iterator p;
 					p = _processors.end();
 					--p;
-					cerr << "Let's check " << (*p)->name() << " vis ? " << (*p)->visible() << endl;
 					while (!(*p)->visible() && p != _processors.begin()) {
 						--p;
 					}
@@ -1213,10 +1271,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	list< pair<ChanCount,ChanCount> > configuration;
 	uint32_t index = 0;
 	
-	cerr << "Processor check with " << _processors.size() << endl;
-
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
-		cerr << "Checking out " << (*p)->name() << " type = " << endl;
 		if ((*p)->can_support_io_configuration(in, out)) {
 			configuration.push_back(make_pair(in, out));
 			in = out;
@@ -1538,6 +1593,15 @@ Route::_set_state (const XMLNode& node, bool call_base)
 
 	set_processor_state (processor_state);
 	
+	if ((prop = node.property ("solo_level")) != 0) {
+		_solo_level = 0; // needed for mod_solo_level() to work
+		mod_solo_level (atoi (prop->value()));
+	}
+
+	if ((prop = node.property ("solo-isolated")) != 0) {
+		set_solo_isolated (prop->value() == "yes", this);
+	}
+
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
 		set_phase_invert (prop->value()=="yes"?true:false);
 	}
@@ -1666,8 +1730,6 @@ Route::set_processor_state (const XMLNode& node)
 	const XMLNodeList &nlist = node.children();
 	XMLNodeConstIterator niter;
 	ProcessorList::iterator i, o;
-
-	dump_processors ("set processor states", _processors);
 
 	// Iterate through existing processors, remove those which are not in the state list
 
@@ -1841,11 +1903,21 @@ Route::listen_via (boost::shared_ptr<Route> route, const string& listen_name)
 	{
 		Glib::RWLock::ReaderLock rm (_processor_lock);
 		
-		for (ProcessorList::const_iterator x = _processors.begin(); x != _processors.end(); ++x) {
-			boost::shared_ptr<const InternalSend> d = boost::dynamic_pointer_cast<const InternalSend>(*x);
+		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
+			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
 
 			if (d && d->target_route() == route) {
+				
+				/* if the target is the control outs, then make sure
+				   we take note of which i-send is doing that.
+				*/
+
+				if (route == _session.control_out()) {
+					_control_outs = boost::dynamic_pointer_cast<Delivery>(d);
+				}
+
 				/* already listening via the specified IO: do nothing */
+
 				return 0;
 			}
 		}
@@ -1894,6 +1966,10 @@ Route::drop_listen (boost::shared_ptr<Route> route)
 	}
 
 	rl.release ();
+
+	if (route == _session.control_out()) {
+		_control_outs.reset ();
+	}
 }
 
 void

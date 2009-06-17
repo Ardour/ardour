@@ -112,7 +112,7 @@ Send::get_state(void)
 XMLNode&
 Send::state(bool full)
 {
-	XMLNode& node = IOProcessor::state(full);
+	XMLNode& node = Delivery::state(full);
 	char buf[32];
 
 	node.add_property ("type", "send");

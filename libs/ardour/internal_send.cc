@@ -81,12 +81,38 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	BufferSet& sendbufs = _session.get_mix_buffers (bufs.count());
 	sendbufs.read_from (bufs, nframes);
 	assert(sendbufs.count() == bufs.count());
-
+	
 	/* gain control */
 
+	gain_t tgain = target_gain ();
+	
+	if (tgain != _current_gain) {
+		
+		/* target gain has changed */
+
+		Amp::apply_gain (sendbufs, nframes, _current_gain, tgain);
+		_current_gain = tgain;
+
+	} else if (tgain == 0.0) {
+
+		/* we were quiet last time, and we're still supposed to be quiet.
+		*/
+
+		_meter->reset ();
+		Amp::apply_simple_gain (sendbufs, nframes, 0.0);
+		
+		return;
+
+	} else if (tgain != 1.0) {
+
+		/* target gain has not changed, but is not unity */
+		Amp::apply_simple_gain (sendbufs, nframes, tgain);
+	}
+	
 	// Can't automate gain for sends or returns yet because we need different buffers
 	// so that we don't overwrite the main automation data for the route amp
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
+
 	_amp->run (sendbufs, start_frame, end_frame, nframes);
 
 	/* consider metering */
@@ -137,6 +163,8 @@ InternalSend::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
+	Send::set_state (node);
+
 	if ((prop = node.property ("target")) != 0) {
 
 		_send_to_id = prop->value();
@@ -148,9 +176,7 @@ InternalSend::set_state (const XMLNode& node)
 
 		if (!IO::connecting_legal) {
 			connect_c = IO::ConnectingLegal.connect (mem_fun (*this, &InternalSend::connect_when_legal));
-			std::cerr << "connect later!\n";
 		} else {
-			std::cerr << "connect NOW!\n";
 			connect_when_legal ();
 		}
 	}
@@ -161,8 +187,6 @@ InternalSend::set_state (const XMLNode& node)
 int
 InternalSend::connect_when_legal ()
 {
-	std::cerr << "IOP/send connecting now that its legal\n";
-	
 	connect_c.disconnect ();
 
 	if (_send_to_id == "0") {
@@ -172,13 +196,12 @@ InternalSend::connect_when_legal ()
 
 	if ((_send_to = _session.route_by_id (_send_to_id)) == 0) {
 		error << X_("cannot find route to connect to") << endmsg;
-		std::cerr << "cannot find route with ID " << _send_to_id << std::endl;
-	} else {
-		std::cerr << "got target send as " << _send_to << std::endl;
-	}
+		return -1;
+	} 
 	
 	if ((target = _send_to->get_return_buffer ()) == 0) {
 		error << X_("target for internal send has no return buffer") << endmsg;
+		return -1;
 	}
 
 	return 0;

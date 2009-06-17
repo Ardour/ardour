@@ -53,6 +53,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
+
 {
 	_output_offset = 0;
 	_current_gain = 1.0;
@@ -267,15 +268,9 @@ Delivery::set_state (const XMLNode& node)
 	
 	if ((prop = node.property ("role")) != 0) {
 		_role = Role (string_2_enum (prop->value(), _role));
-	}
-
-	if ((prop = node.property ("solo_level")) != 0) {
-		_solo_level = 0; // needed for the reset to work
-		mod_solo_level (atoi (prop->value()));
-	}
-
-	if ((prop = node.property ("solo-isolated")) != 0) {
-		set_solo_isolated (prop->value() == "yes");
+		// std::cerr << this << ' ' << _name << " set role to " << enum_2_string (_role) << std::endl;
+	} else {
+		// std::cerr << this << ' ' << _name << " NO ROLE INFO\n";
 	}
 
 	XMLNode* pan_node = node.child (X_("Panner"));
@@ -423,11 +418,15 @@ Delivery::target_gain ()
 		break;
 	}
 
+
 	if (_solo_level) {
 		desired_gain = 1.0;
 	} else {
-		if (_solo_isolated) {
 
+		if (_solo_isolated) {
+		
+			/* ... but we are isolated from all that nonsense */
+			
 			desired_gain = _mute_master->mute_gain_at (mp);
 
 		} else if (_session.soloing()) {
@@ -440,26 +439,6 @@ Delivery::target_gain ()
 	}
 
 	return desired_gain;
-}
-
-void
-Delivery::mod_solo_level (int32_t delta)
-{
-	if (delta < 0) {
-		if (_solo_level >= (uint32_t) delta) {
-			_solo_level += delta;
-		} else {
-			_solo_level = 0;
-		}
-	} else {
-		_solo_level += delta;
-	}
-}
-
-void
-Delivery::set_solo_isolated (bool yn)
-{
-	_solo_isolated = yn;
 }
 
 void

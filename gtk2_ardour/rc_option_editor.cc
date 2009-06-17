@@ -1089,7 +1089,7 @@ RCOptionEditor::RCOptionEditor ()
 		mem_fun (*_rc_config, &RCConfiguration::set_solo_model)
 		);
 
-	sm->add (InverseMute, _("in place"));
+	sm->add (SoloInPlace, _("in place"));
 	sm->add (SoloBus, _("via bus"));
 
 	add_option (_("Audio"), sm);

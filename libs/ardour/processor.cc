@@ -152,10 +152,7 @@ Processor::set_state (const XMLNode& node)
 	// may not exist for legacy 3.0 sessions
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value();
-		cerr << "---------------- ID for processor " << name() << " = " << _id << endl;
-	} else {
-		cerr << "---------------- NO ID for processor " << name() << endl;
-	}
+	} 
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;

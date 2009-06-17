@@ -228,7 +228,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (AddHigher);
 	REGISTER (_LayerModel);
 
-	REGISTER_ENUM (InverseMute);
+	REGISTER_ENUM (SoloInPlace);
 	REGISTER_ENUM (SoloBus);
 	REGISTER (_SoloModel);
 

@@ -64,12 +64,8 @@ public:
 
 	void no_outs_cuz_we_no_monitor(bool);
 
-	void mod_solo_level (int32_t);
-	uint32_t solo_level() const { return _solo_level; }
-	bool soloed () const { return (bool) _solo_level; }
-
-	bool solo_isolated() const { return _solo_isolated; }
-	void set_solo_isolated (bool);
+	void set_solo_level (int32_t sl) { _solo_level = sl; }
+	void set_solo_isolated (bool yn) { _solo_isolated = yn; }
 
 	void cycle_start (nframes_t);
 	void increment_output_offset (nframes_t);

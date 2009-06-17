@@ -407,7 +407,7 @@ Editor::Editor ()
 	tempo_label.set_no_show_all();
 	meter_label.set_name ("EditorTimeButton");
 	meter_label.set_size_request (-1, (int)timebar_height);
-	meter_label.set_alignment (1.0, 0.5);
+	meter_label.set_alignment (0.0, 0.5);
 	meter_label.set_padding (5,0);
 	meter_label.hide();
 	meter_label.set_no_show_all();
@@ -487,11 +487,9 @@ Editor::Editor ()
 
 	ruler_label_event_box.add (ruler_label_vbox);	
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	ruler_label_event_box.set_name ("TimebarLabelBase");
 	ruler_label_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
 
 	time_button_event_box.add (time_button_vbox);
-	time_button_event_box.set_name ("TimebarLabelBase");
 	time_button_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_button_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
 
@@ -510,32 +508,15 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
-	/* summary */
-	edit_packer.attach (*_summary,               0, 2, 0, 1,    FILL|EXPAND, SHRINK, 0, 0);
+	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (time_button_event_box,   1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
 
-	/* labels for rulers (mins:secs, timecode, samples, bars:beats) */
-	edit_packer.attach (ruler_label_event_box,   0, 1, 1, 2,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
-	/* labels for time lines (meter, tempo, markers) */
-	edit_packer.attach (time_button_event_box,   0, 1, 2, 3,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (controls_layout,         1, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
-	/* rulers */
-	edit_packer.attach (time_canvas_event_box,   1, 2, 1, 2,    FILL|EXPAND, FILL, 0, 0);
-
-	/* LHS controls for tracks */
-	edit_packer.attach (controls_layout,         0, 1, 3, 4,    FILL,        FILL|EXPAND, 0, 0);
-
-	/* main canvas (which has the time line canvas items at the top of it) */
-	edit_packer.attach (track_canvas_event_box,  1, 2, 2, 4,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-
-	/* zoom controls */
-	edit_packer.attach (zoom_box,                0, 1, 4, 5,    FILL,         FILL, 0, 0);
-
-	/* h scroller */
-	edit_packer.attach (edit_hscrollbar,         1, 2, 4, 5,    FILL|EXPAND,  FILL, 0, 0);
-
-	/* v scroller */
-	edit_packer.attach (edit_vscrollbar,         3, 4, 3, 4,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (*_summary,               0, 3, 3, 4,    FILL|EXPAND, SHRINK, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -3143,10 +3124,14 @@ Editor::setup_toolbar ()
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
-	zoom_box.pack_start (zoom_focus_selector, true, true);
 	zoom_box.pack_start (zoom_out_button, false, false);
 	zoom_box.pack_start (zoom_in_button, false, false);
 	zoom_box.pack_start (zoom_out_full_button, false, false);
+
+	HBox* zbc = manage (new HBox);
+	zbc->pack_start (zoom_focus_selector, false, false);
+	zoom_vbox.pack_start (*zbc, false, false);
+	zoom_vbox.pack_start (zoom_box, false, false);
 
 	snap_box.set_spacing (1);
 	snap_box.set_border_width (2);
