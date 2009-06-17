@@ -331,54 +331,64 @@ bool
 EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-		
-		pair<double, double> xr;
-		pair<double, double> yr;
-		get_editor (&xr, &yr);
-		
-		if (xr.first <= ev->x && ev->x <= xr.second && yr.first <= ev->y && ev->y <= yr.second) {
-			
-			_start_editor_x = xr;
-			_start_editor_y = yr;
-			_start_mouse_x = ev->x;
-			_start_mouse_y = ev->y;
 
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
-				/* modifier-click inside the view rectangle: start a zoom drag */
-				
-				double const hx = (xr.first + xr.second) * 0.5;
-				_zoom_left = ev->x < hx;
-				_zoom_dragging = true;
-				_editor->_dragging_playhead = true;
-
-				/* In theory, we could support vertical dragging, which logically
-				   might scale track heights in order to make the editor reflect
-				   the dragged viewbox.  However, having tried this:
-				   a) it's hard to do
-				   b) it's quite slow
-				   c) it doesn't seem particularly useful, especially with the
-				   limited height of the summary
-
-				   So at the moment we don't support that...
-				*/
-					
-			} else {
-
-				/* ordinary click inside the view rectangle: start a move drag */
-				
-				_move_dragging = true;
-				_moved = false;
-				_editor->_dragging_playhead = true;
+			/* secondary-modifier-click: locate playhead */
+			if (_session) {
+				_session->request_locate (ev->x / _x_scale + _session->current_start_frame());
 			}
-			
+
 		} else {
+		
+			pair<double, double> xr;
+			pair<double, double> yr;
+			get_editor (&xr, &yr);
 			
-			/* click outside the view rectangle: centre the view around the mouse click */
-			centre_on_click (ev);
+			if (xr.first <= ev->x && ev->x <= xr.second && yr.first <= ev->y && ev->y <= yr.second) {
+				
+				_start_editor_x = xr;
+				_start_editor_y = yr;
+				_start_mouse_x = ev->x;
+				_start_mouse_y = ev->y;
+				
+				if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+					
+					/* modifier-click inside the view rectangle: start a zoom drag */
+					
+					double const hx = (xr.first + xr.second) * 0.5;
+					_zoom_left = ev->x < hx;
+					_zoom_dragging = true;
+					_editor->_dragging_playhead = true;
+					
+					/* In theory, we could support vertical dragging, which logically
+					   might scale track heights in order to make the editor reflect
+					   the dragged viewbox.  However, having tried this:
+					   a) it's hard to do
+					   b) it's quite slow
+					   c) it doesn't seem particularly useful, especially with the
+					   limited height of the summary
+					   
+					   So at the moment we don't support that...
+					*/
+					
+				} else {
+					
+					/* ordinary click inside the view rectangle: start a move drag */
+					
+					_move_dragging = true;
+					_moved = false;
+					_editor->_dragging_playhead = true;
+				}
+				
+			} else {
+			
+				/* click outside the view rectangle: centre the view around the mouse click */
+				centre_on_click (ev);
+			}
 		}
 	}
-
+	
 	return true;
 }
 
