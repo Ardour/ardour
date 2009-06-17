@@ -362,7 +362,7 @@ Editor::track_canvas_size_allocated ()
 	reset_hscrollbar_stepping ();
 	update_fixed_rulers();
 	redisplay_tempo (false);
-	_summary->set_bounds_dirty ();
+	_summary->set_overlays_dirty ();
 
 	Resized (); /* EMIT_SIGNAL */
 
@@ -773,7 +773,7 @@ Editor::tie_vertical_scrolling ()
 	controls_layout.get_vadjustment()->set_value (vertical_adjustment.get_value());
 
 	if (pending_visual_change.idle_handler_id < 0) {
-		_summary->set_bounds_dirty ();
+		_summary->set_overlays_dirty ();
 	}
 }
 
@@ -797,7 +797,7 @@ Editor::scroll_canvas_horizontally ()
 	redisplay_tempo (true);
 
 	if (pending_visual_change.idle_handler_id < 0) {
-		_summary->set_bounds_dirty ();
+		_summary->set_overlays_dirty ();
 	}
 
 #ifndef GTKOSX

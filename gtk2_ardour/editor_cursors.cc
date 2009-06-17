@@ -59,6 +59,8 @@ EditorCursor::~EditorCursor ()
 void
 EditorCursor::set_position (nframes64_t frame)
 {
+	PositionChanged (frame);
+	
 	double new_pos =  editor.frame_to_unit (frame);
 
 	if (new_pos != points.front().get_x()) {

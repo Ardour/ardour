@@ -43,6 +43,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _height (64),
 	  _x_scale (1),
 	  _y_scale (1),
+	  _last_playhead (-1),
 	  _move_dragging (false),
 	  _moved (false),
 	  _zoom_dragging (false)
@@ -64,6 +65,7 @@ EditorSummary::set_session (Session* s)
 	_session->RegionRemoved.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty)));
 	_session->EndTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty));
 	_session->StartTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty));
+	_editor->playhead_cursor->PositionChanged.connect (mem_fun (*this, &EditorSummary::playhead_position_changed));
 
 	set_dirty ();
 }
@@ -110,14 +112,14 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 			);
 	}
 
+	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+
 	/* Render the view rectangle */
 	
 	pair<double, double> x;
 	pair<double, double> y;
 	get_editor (&x, &y);
 	
-	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
-
 	cairo_move_to (cr, x.first, y.first);
 	cairo_line_to (cr, x.second, y.first);
 	cairo_line_to (cr, x.second, y.second);
@@ -128,6 +130,18 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	cairo_set_line_width (cr, 1);
 	cairo_set_source_rgba (cr, 1, 1, 1, 0.5);
 	cairo_stroke (cr);
+
+	/* Playhead */
+
+	cairo_set_line_width (cr, 1);
+	/* XXX: colour should be set from configuration file */
+	cairo_set_source_rgba (cr, 1, 0, 0, 1);
+
+	double const p = _editor->playhead_cursor->current_frame * _x_scale;
+	cairo_move_to (cr, p, 0);
+	cairo_line_to (cr, p, _height);
+	cairo_stroke (cr);
+	_last_playhead = p;
 
 	cairo_destroy (cr);
 	
@@ -243,11 +257,11 @@ EditorSummary::set_dirty ()
 	queue_draw ();
 }
 
-/** Set the summary so that just the view boundary markers will be re-rendered */
+/** Set the summary so that just the overlays (viewbox, playhead etc.) will be re-rendered */
 void
-EditorSummary::set_bounds_dirty ()
+EditorSummary::set_overlays_dirty ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &EditorSummary::set_bounds_dirty));
+	ENSURE_GUI_THREAD (mem_fun (*this, &EditorSummary::set_overlays_dirty));
 	queue_draw ();
 }
 
@@ -454,6 +468,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 			yr.first -= amount;
 			yr.second -= amount;
 		}
+		
 	}
 	
 	set_editor (xr, yr);
@@ -489,3 +504,13 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
 		}
 	}
 }
+
+void
+EditorSummary::playhead_position_changed (nframes64_t p)
+{
+	if (int (p * _x_scale) != int (_last_playhead)) {
+		set_overlays_dirty ();
+	}
+}
+
+	

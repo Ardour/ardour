@@ -39,7 +39,7 @@ public:
 
 	void set_session (ARDOUR::Session *);
 	void set_dirty ();
-	void set_bounds_dirty ();
+	void set_overlays_dirty ();
 
 private:
 	void centre_on_click (GdkEventButton *);
@@ -56,6 +56,7 @@ private:
 	void render_region (RegionView*, cairo_t*, nframes_t, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
 	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
+	void playhead_position_changed (nframes64_t);
 
 	Editor* _editor; ///< our editor
 	ARDOUR::Session* _session; ///< our session
@@ -65,6 +66,7 @@ private:
 	int _height; ///< pixmap height
 	double _x_scale; ///< pixels per frame for the x axis of the pixmap
 	double _y_scale;
+	double _last_playhead;
 
 	std::pair<double, double> _start_editor_x;
 	std::pair<double, double> _start_editor_y;

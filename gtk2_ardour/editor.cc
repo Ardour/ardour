@@ -4720,7 +4720,7 @@ Editor::post_zoom ()
 		playhead_cursor->set_position (playhead_cursor->current_frame);
 	}
 
-	_summary->set_bounds_dirty ();
+	_summary->set_overlays_dirty ();
 
 	instant_save ();
 }
@@ -4828,7 +4828,7 @@ Editor::idle_visual_changer ()
 		redisplay_tempo (true);
 	}
 
-	_summary->set_bounds_dirty ();
+	_summary->set_overlays_dirty ();
 	
 	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;

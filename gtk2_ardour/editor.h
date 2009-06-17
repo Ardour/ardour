@@ -138,6 +138,8 @@ struct EditorCursor {
 	void set_position (nframes64_t);
 	void set_length (double units);
 	void set_y_axis (double position);
+
+	sigc::signal<void, nframes64_t> PositionChanged;
 };
 
 class Editor : public PublicEditor
