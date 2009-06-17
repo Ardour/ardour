@@ -519,8 +519,6 @@ Editor::Editor ()
 	edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
 	/* main canvas */
 	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-	/* summary widget at bottom */
-	edit_packer.attach (*_summary,               0, 3, 3, 4,    FILL|EXPAND, SHRINK, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -747,7 +745,12 @@ Editor::Editor ()
 
 	post_maximal_editor_width = 0;
 	post_maximal_pane_position = 0;
-	edit_pane.pack1 (edit_packer, true, true);
+
+	VPaned *editor_summary_pane = manage(new VPaned());
+	editor_summary_pane->pack1(edit_packer);
+	editor_summary_pane->pack2(*_summary);
+
+	edit_pane.pack1 (*editor_summary_pane, true, true);
 	edit_pane.pack2 (the_notebook, false, true);
 	
 	edit_pane.signal_size_allocate().connect (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
