@@ -40,7 +40,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _pixmap (0),
 	  _regions_dirty (true),
 	  _width (512),
-	  _height (64),
+	  _height (32),
 	  _x_scale (1),
 	  _y_scale (1),
 	  _last_playhead (-1),
@@ -202,7 +202,7 @@ EditorSummary::render (cairo_t* cr)
 	_y_scale = static_cast<double> (_height) / h;
 
 	/* tallest a region should ever be in the summary, in pixels */
-	int const tallest_region_pixels = 12;
+	int const tallest_region_pixels = 4;
 
 	if (max_height * _y_scale > tallest_region_pixels) {
 		_y_scale = static_cast<double> (tallest_region_pixels) / max_height;
@@ -273,7 +273,7 @@ EditorSummary::on_size_request (Gtk::Requisition *req)
 {
 	/* Use a dummy, small width and the actual height that we want */
 	req->width = 64;
-	req->height = 64;
+	req->height = _height;
 }
 
 /** Handle a size allocation.
