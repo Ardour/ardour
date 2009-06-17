@@ -2215,7 +2215,8 @@ public:
 	int resize_idle_id;
 	bool idle_resize();
 	friend gboolean _idle_resize (gpointer);
-	std::map<TimeAxisView*, int32_t> pending_resizes;
+	int32_t _pending_resize_amount;
+	TimeAxisView* _pending_resize_view;
 
 	void visible_order_range (int*, int*) const;
 
@@ -2227,7 +2228,6 @@ public:
 
 	void update_canvas_now ();
 	void streamview_height_changed ();
-	int32_t add_single_to_idle_resize (TimeAxisView*, int32_t);
 
 	friend class Drag;
 	friend class RegionDrag;

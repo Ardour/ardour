@@ -5177,28 +5177,12 @@ _idle_resizer (gpointer arg)
 	return ((Editor*)arg)->idle_resize ();
 }
 
-/** Add a view and change to the idle track resize list.
- *  @param view View.
- *  @param h Change in height (+ve is bigger).
- *  @return Resulting height of the view.
- */
-int32_t
-Editor::add_single_to_idle_resize (TimeAxisView* view, int32_t h)
-{
-	if (pending_resizes.find (view) != pending_resizes.end()) {
-		pending_resizes[view] += h;
-	} else {
-		pending_resizes[view] = h;
-	}
-
-	return view->current_height() + pending_resizes[view];
-}
-
 void
 Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 {
 	if (resize_idle_id < 0) {
 		resize_idle_id = g_idle_add (_idle_resizer, this);
+		_pending_resize_amount = 0;
 	}
 
 	/* make a note of the smallest resulting height, so that we can clamp the
@@ -5206,12 +5190,13 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 
 	int32_t min_resulting = INT32_MAX;
 
-	if (selection->selected (view)) {
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			min_resulting = min (min_resulting, add_single_to_idle_resize (*i, h));
-		}
-	} else {
-		min_resulting = min (min_resulting, add_single_to_idle_resize (view, h));
+	_pending_resize_amount += h;
+	_pending_resize_view = view;
+
+	min_resulting = min (min_resulting, int32_t (_pending_resize_view->current_height()) + _pending_resize_amount);
+
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		min_resulting = min (min_resulting, int32_t ((*i)->current_height()) + _pending_resize_amount);
 	}
 
 	if (min_resulting < 0) {
@@ -5220,9 +5205,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 
 	/* clamp */
 	if (uint32_t (min_resulting) < TimeAxisView::hSmall) {
-		for (std::map<TimeAxisView*, int32_t>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
-			i->second += TimeAxisView::hSmall - min_resulting;
-		}
+		_pending_resize_amount += TimeAxisView::hSmall - min_resulting;
 	}
 }
 
@@ -5230,10 +5213,13 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 bool
 Editor::idle_resize ()
 {
-	for (std::map<TimeAxisView*, int32_t>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
-		i->first->idle_resize (i->first->current_height() + i->second);
+	_pending_resize_view->idle_resize (_pending_resize_view->current_height() + _pending_resize_amount);
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		if (*i != _pending_resize_view) {
+			(*i)->idle_resize ((*i)->current_height() + _pending_resize_amount);
+		}
+			
 	}
-	pending_resizes.clear();
 	flush_canvas ();
 	resize_idle_id = -1;
 	return false;
