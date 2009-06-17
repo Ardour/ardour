@@ -77,20 +77,7 @@ private:
 	bool _moved;
 
 	bool _zoom_dragging;
-
-	enum ZoomPosition {
-		TOP_LEFT,
-		TOP,
-		TOP_RIGHT,
-		RIGHT,
-		BOTTOM_RIGHT,
-		BOTTOM,
-		BOTTOM_LEFT,
-		LEFT,
-		NONE
-	};
-
-	ZoomPosition _zoom_position;
+	bool _zoom_left;
 };
 
 #endif

@@ -332,47 +332,22 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 				/* modifier-click inside the view rectangle: start a zoom drag */
-				_zoom_position = NONE;
+				
+				double const hx = (xr.first + xr.second) * 0.5;
+				_zoom_left = ev->x < hx;
+				_zoom_dragging = true;
+				_editor->_dragging_playhead = true;
 
-				double const x1 = xr.first + (xr.second - xr.first) * 0.33;
-				double const x2 = xr.first + (xr.second - xr.first) * 0.67;
-				double const y1 = yr.first + (yr.second - yr.first) * 0.33;
-				double const y2 = yr.first + (yr.second - yr.first) * 0.67;
+				/* In theory, we could support vertical dragging, which logically
+				   might scale track heights in order to make the editor reflect
+				   the dragged viewbox.  However, having tried this:
+				   a) it's hard to do
+				   b) it's quite slow
+				   c) it doesn't seem particularly useful, especially with the
+				   limited height of the summary
 
-				if (ev->x < x1) {
-
-					if (ev->y < y1) {
-						_zoom_position = TOP_LEFT;
-					} else if (ev->y > y2) {
-						_zoom_position = BOTTOM_LEFT;
-					} else {
-						_zoom_position = LEFT;
-					}
-							
-				} else if (ev->x > x2) {
-
-					if (ev->y < y1) {
-						_zoom_position = TOP_RIGHT;
-					} else if (ev->y > y2) {
-						_zoom_position = BOTTOM_RIGHT;
-					} else {
-						_zoom_position = RIGHT;
-					}
-					
-				} else {
-
-					if (ev->y < y1) {
-						_zoom_position = TOP;
-					} else if (ev->y > y2) {
-						_zoom_position = BOTTOM;
-					}
-						
-				}
-						
-				if (_zoom_position != NONE) {
-					_zoom_dragging = true;
-					_editor->_dragging_playhead = true;
-				}
+				   So at the moment we don't support that...
+				*/
 					
 			} else {
 
@@ -424,11 +399,9 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 		double const dx = ev->x - _start_mouse_x;
 
-		if (_zoom_position == TOP_LEFT || _zoom_position == LEFT || _zoom_position == BOTTOM_LEFT) {
+		if (_zoom_left) {
 			xr.first += dx;
-		}
-
-		if (_zoom_position == TOP_RIGHT || _zoom_position == RIGHT || _zoom_position == BOTTOM_RIGHT) {
+		} else {
 			xr.second += dx;
 		}
 
