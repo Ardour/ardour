@@ -407,7 +407,7 @@ Editor::Editor ()
 	tempo_label.set_no_show_all();
 	meter_label.set_name ("EditorTimeButton");
 	meter_label.set_size_request (-1, (int)timebar_height);
-	meter_label.set_alignment (0.0, 0.5);
+	meter_label.set_alignment (1.0, 0.5);
 	meter_label.set_padding (5,0);
 	meter_label.hide();
 	meter_label.set_no_show_all();
@@ -482,8 +482,8 @@ Editor::Editor ()
 	pad_line_1->show();
 	time_pad->show();
 
-	//time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
-	//time_canvas_vbox.set_size_request (-1, -1);
+	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
+	time_canvas_vbox.set_size_request (-1, -1);
 
 	ruler_label_event_box.add (ruler_label_vbox);	
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -508,14 +508,18 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
+	edit_packer.attach (zoom_vbox,               0, 1, 0, 2,    SHRINK,        FILL, 0, 0);
+	/* labels for the rulers */
 	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
+	/* labels for the marker "tracks" */
 	edit_packer.attach (time_button_event_box,   1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
-
+	/* the rulers */
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
-
-	edit_packer.attach (controls_layout,         1, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
+	/* track controls */
+	edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
+	/* main canvas */
 	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-
+	/* summary widget at bottom */
 	edit_packer.attach (*_summary,               0, 3, 3, 4,    FILL|EXPAND, SHRINK, 0, 0);
 
 	bottom_hbox.set_border_width (2);
@@ -3129,9 +3133,9 @@ Editor::setup_toolbar ()
 	zoom_box.pack_start (zoom_out_full_button, false, false);
 
 	HBox* zbc = manage (new HBox);
-	zbc->pack_start (zoom_focus_selector, false, false);
-	zoom_vbox.pack_start (*zbc, false, false);
-	zoom_vbox.pack_start (zoom_box, false, false);
+	zbc->pack_start (zoom_focus_selector, PACK_SHRINK);
+	zoom_vbox.pack_start (*zbc, PACK_SHRINK);
+	zoom_vbox.pack_start (zoom_box, PACK_SHRINK);
 
 	snap_box.set_spacing (1);
 	snap_box.set_border_width (2);

@@ -347,6 +347,7 @@ def build(bld):
 	obj.argv = menus_argv
 	obj.stdin = 'ardour.menus.in'
 	obj.stdout = 'ardour.menus'
+	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
 	# Keybindings
 	keybindings_dict = {}

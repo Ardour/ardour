@@ -407,8 +407,8 @@ Editor::controls_layout_size_request (Requisition* req)
 		controls_layout.property_width () = vbox_width;
 		controls_layout.property_width_request () = vbox_width;
 
-		time_button_event_box.property_width_request () = vbox_width;
-		zoom_box.property_width_request () = vbox_width;
+		// time_button_event_box.property_width_request () = vbox_width;
+		// zoom_box.property_width_request () = vbox_width;
 	}
 
 	if (req->height != height) {

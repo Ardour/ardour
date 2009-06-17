@@ -90,6 +90,7 @@ ActionManager::init ()
 	}
 
 	if (!loaded) {
+		cerr << _("ardour will not work without a valid ardour.menus file") << endl;
 		error << _("ardour will not work without a valid ardour.menus file") << endmsg;
 		exit(1);
 	}
