@@ -229,7 +229,8 @@ setup_enum_writer ()
 	REGISTER (_LayerModel);
 
 	REGISTER_ENUM (SoloInPlace);
-	REGISTER_ENUM (SoloBus);
+	REGISTER_ENUM (SoloAFL);
+	REGISTER_ENUM (SoloPFL);
 	REGISTER (_SoloModel);
 
 	REGISTER_ENUM (AutoConnectPhysical);

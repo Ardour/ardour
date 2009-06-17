@@ -332,7 +332,8 @@ namespace ARDOUR {
 
 	enum SoloModel {
 		SoloInPlace,
-		SoloBus
+		SoloAFL,
+		SoloPFL
 	};
 
 	enum AutoConnectOption {

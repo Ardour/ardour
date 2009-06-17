@@ -4218,3 +4218,28 @@ Session::update_have_rec_enabled_diskstream ()
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 }
+
+void
+Session::solo_model_changed ()
+{
+	Placement p;
+
+	switch (Config->get_solo_model()) {
+	case SoloInPlace:
+		return;
+		
+	case SoloAFL:
+		p = PostFader;
+		break;
+
+	case SoloPFL:
+		p = PreFader;
+		break;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->put_control_outs_at (p);
+	}
+}

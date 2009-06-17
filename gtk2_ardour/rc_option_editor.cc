@@ -1090,7 +1090,8 @@ RCOptionEditor::RCOptionEditor ()
 		);
 
 	sm->add (SoloInPlace, _("in place"));
-	sm->add (SoloBus, _("via bus"));
+	sm->add (SoloAFL, _("post-fader listen via monitor bus"));
+	sm->add (SoloPFL, _("pre-fader listen via monitor bus"));
 
 	add_option (_("Audio"), sm);
 

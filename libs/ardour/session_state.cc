@@ -3211,6 +3211,8 @@ Session::config_changed (std::string p, bool ours)
 		}
 	} else if (p == "solo-mute-override") {
 		// catch_up_on_solo_mute_override ();
+	} else if (p == "solo-model") {
+		solo_model_changed ();
 	}
 
 	set_dirty ();

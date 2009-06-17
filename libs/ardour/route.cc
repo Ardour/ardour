@@ -522,7 +522,8 @@ Route::mod_solo_level (int32_t delta)
 		}
 		break;
 
-	case SoloBus:
+	case SoloAFL:
+	case SoloPFL:
 		/* control outs are used for soloing */
 		if (_control_outs) {
 			_control_outs->set_solo_level (_solo_level);
@@ -558,7 +559,8 @@ Route::set_solo_isolated (bool yn, void *src)
 				_main_outs->set_solo_isolated (false);
 			}
 			break;
-		case SoloBus:
+		case SoloAFL:
+		case SoloPFL:
 			if (_control_outs) {
 				_control_outs->set_solo_level (_solo_level);
 				_control_outs->set_solo_isolated (_solo_isolated);
@@ -2286,6 +2288,38 @@ Route::set_meter_point (MeterPoint p, void *src)
 		processors_changed (); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
+}
+void
+Route::put_control_outs_at (Placement p)
+{
+	if (!_control_outs) {
+		return;
+	}
+
+	// Move meter in the processors list
+	ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _control_outs);
+	_processors.erase(loc);
+
+	switch (p) {
+	case PreFader:
+		loc = find(_processors.begin(), _processors.end(), _amp);
+		if (loc != _processors.begin()) {
+			--loc;
+		}
+		break;
+	case PostFader:
+		loc = find(_processors.begin(), _processors.end(), _amp);
+		assert (loc != _processors.end());
+		loc++;
+		break;
+	}
+
+	_processors.insert(loc, _control_outs);
+
+	cerr << _name << " moved control outs to " << enum_2_string (p) << endl;
+
+	processors_changed (); /* EMIT SIGNAL */
+	_session.set_dirty ();
 }
 
 nframes_t
