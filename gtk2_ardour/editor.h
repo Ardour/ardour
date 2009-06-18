@@ -399,6 +399,8 @@ class Editor : public PublicEditor
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
 
+	void update_rec_display ();
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);
@@ -1761,21 +1763,29 @@ public:
 	void reposition_zoom_rect (nframes64_t start, nframes64_t end);
 	
 	/* diskstream/route display management */
+	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;
+	Glib::RefPtr<Gdk::Pixbuf> rec_disabled_icon;
 
 	struct RouteDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RouteDisplayModelColumns() { 
 		    add (text);
 		    add (visible);
+		    add (rec_enabled);
 		    add (temporary_visible);
+		    add (is_track);
 		    add (tv);
 		    add (route);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring>  text;
 	    Gtk::TreeModelColumn<bool>           visible;
+	    Gtk::TreeModelColumn<bool>           rec_enabled;
 	    Gtk::TreeModelColumn<bool>           temporary_visible;
+	    Gtk::TreeModelColumn<bool>           is_track;
 	    Gtk::TreeModelColumn<TimeAxisView*>  tv;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 	};
+
+	void on_tv_rec_enable_toggled(const Glib::ustring& path_string);
 
 	RouteDisplayModelColumns         route_display_columns;
 	Glib::RefPtr<Gtk::ListStore>     route_display_model;

@@ -40,6 +40,7 @@ def build(bld):
 		auto_spin.cc
 		barcontroller.cc
 		binding_proxy.cc
+		cell_renderer_pixbuf_toggle.cc
 		choice.cc
 		click_box.cc
 		dndtreeview.cc

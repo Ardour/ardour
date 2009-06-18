@@ -2316,8 +2316,6 @@ Route::put_control_outs_at (Placement p)
 
 	_processors.insert(loc, _control_outs);
 
-	cerr << _name << " moved control outs to " << enum_2_string (p) << endl;
-
 	processors_changed (); /* EMIT SIGNAL */
 	_session.set_dirty ();
 }

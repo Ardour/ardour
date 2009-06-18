@@ -32,6 +32,7 @@
 #include "mixer_strip.h"
 #include "gui_thread.h"
 #include "actions.h"
+#include "utils.h"
 
 #include "pbd/unknown_type.h"
 
@@ -114,6 +115,7 @@ Editor::handle_new_route (RouteList& routes)
 		row[route_display_columns.visible] = tv->marked_for_display();
 		row[route_display_columns.tv] = tv;
 		row[route_display_columns.route] = route;
+		row[route_display_columns.is_track] = (boost::dynamic_pointer_cast<Track>(route) != 0);
 
 		track_views.push_back (tv);
 		
@@ -381,9 +383,8 @@ Editor::redisplay_route_list ()
 			tv->set_marked_for_display (false);
 			tv->hide ();
 		}
-
-		n++;
 		
+		n++;
 	}
 
 	/* whenever we go idle, update the track view list to reflect the new order.
@@ -395,6 +396,7 @@ Editor::redisplay_route_list ()
 	
 	full_canvas_height = position + canvas_timebars_vsize;
 	vertical_adjustment.set_upper (full_canvas_height);
+
 	if ((vertical_adjustment.get_value() + _canvas_height) > vertical_adjustment.get_upper()) {
 		/* 
 		   We're increasing the size of the canvas while the bottom is visible.
@@ -595,7 +597,11 @@ Editor::route_list_display_button_press (GdkEventButton* ev)
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
+
 	case 0:
+		/* allow normal processing to occur */
+		return false;
+	case 1:
 		if ((iter = route_display_model->get_iter (path))) {
 			TimeAxisView* tv = (*iter)[route_display_columns.tv];
 			if (tv) {
@@ -605,7 +611,7 @@ Editor::route_list_display_button_press (GdkEventButton* ev)
 		}
 		return true;
 
-	case 1:
+	case 2:
 		/* allow normal processing to occur */
 		return false;
 
@@ -687,6 +693,7 @@ Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 	redisplay_route_list ();
 	ignore_route_list_reorder = false;
 }
+
 
 void  
 Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
@@ -835,4 +842,24 @@ Editor::move_selected_tracks (bool up)
 	route_display_model->reorder (neworder);
 
 	session->sync_order_keys (_order_key);
+}
+
+void
+Editor::update_rec_display ()
+{
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator i;
+	
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<Route> route = (*i)[route_display_columns.route];
+
+		if (boost::dynamic_pointer_cast<Track>(route)) {
+
+			if (route->record_enabled()){
+				(*i)[route_display_columns.rec_enabled] = true;
+			} else {
+				(*i)[route_display_columns.rec_enabled] = false;
+			}
+		} 
+	}
 }

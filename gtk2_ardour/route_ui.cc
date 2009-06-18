@@ -32,6 +32,7 @@
 #include "pbd/controllable.h"
 
 #include "ardour_ui.h"
+#include "editor.h"
 #include "route_ui.h"
 #include "keyboard.h"
 #include "utils.h"
@@ -201,6 +202,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 		connections.push_back (t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed)));
+		connections.push_back (t->diskstream()->RecordEnableChanged.connect (mem_fun (PublicEditor::instance(), &PublicEditor::update_rec_display)));
 		connections.push_back (_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed)));
 
 		rec_enable_button->show();
@@ -501,7 +503,6 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			set_mix_group_rec_enable (_route, !_route->record_enabled());
 
 		} else {
-
 			reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !track()->record_enabled(), this);
 			check_rec_enable_sensitivity ();
 		}
@@ -714,6 +715,9 @@ RouteUI::update_rec_display ()
 		ignore_toggle = true;
 		rec_enable_button->set_active (model);
 		ignore_toggle = false;
+	}
+	else {
+		return;
 	}
 	
 	/* now make sure its color state is correct */

@@ -48,6 +48,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/choice.h>
+#include <gtkmm2ext/cell_renderer_pixbuf_toggle.h>
 
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
@@ -523,20 +524,38 @@ Editor::Editor ()
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
 
+
+	CellRendererPixbufToggle* rec_col_renderer = Gtk::manage( new CellRendererPixbufToggle() );
+
+	rec_col_renderer->set_active_pixbuf(::get_icon("record_normal_red"));
+	rec_col_renderer->set_inactive_pixbuf(::get_icon("record_disabled_grey"));
+
+	rec_col_renderer->signal_toggled().connect(mem_fun(*this, &Editor::on_tv_rec_enable_toggled));
+
+	Gtk::TreeViewColumn* rec_state_column = Gtk::manage(new Gtk::TreeViewColumn("Rec", *rec_col_renderer));
+	rec_state_column->add_attribute(rec_col_renderer->property_active(), route_display_columns.rec_enabled);
+	rec_state_column->add_attribute(rec_col_renderer->property_visible(), route_display_columns.is_track);
+
 	route_display_model = ListStore::create(route_display_columns);
 	route_list_display.set_model (route_display_model);
+	
+	route_list_display.append_column (*rec_state_column);
 	route_list_display.append_column (_("Show"), route_display_columns.visible);
 	route_list_display.append_column (_("Name"), route_display_columns.text);
+	
 	route_list_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	route_list_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	route_list_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
+	
 	route_list_display.set_headers_visible (true);
 	route_list_display.set_name ("TrackListDisplay");
-	route_list_display.get_selection()->set_mode (SELECTION_SINGLE);
+	route_list_display.get_selection()->set_mode (SELECTION_NONE);
 	route_list_display.set_reorderable (true);
 	route_list_display.set_size_request (100,-1);
 	route_list_display.add_object_drag (route_display_columns.route.index(), "routes");
 
-	CellRendererToggle* route_list_visible_cell = dynamic_cast<CellRendererToggle*>(route_list_display.get_column_cell_renderer (0));
+	CellRendererToggle* route_list_visible_cell = dynamic_cast<CellRendererToggle*>(route_list_display.get_column_cell_renderer (1));
+	
 	route_list_visible_cell->property_activatable() = true;
 	route_list_visible_cell->property_radio() = false;
 
@@ -870,6 +889,21 @@ Editor::~Editor()
 	delete track_canvas;
 	delete _drag;
 }
+
+void 
+Editor::on_tv_rec_enable_toggled(const Glib::ustring& path_string){
+
+	// Get the model row that has been toggled.
+	Gtk::TreeModel::Row row = *route_display_model->get_iter(Gtk::TreeModel::Path(path_string));
+
+	TimeAxisView *tv = row[route_display_columns.tv];
+	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
+
+	if(atv != 0 && atv->is_audio_track()){
+	      atv->get_diskstream()->set_record_enabled(!atv->get_diskstream()->record_enabled());
+	}
+}
+
 
 void
 Editor::add_toplevel_controls (Container& cont)
