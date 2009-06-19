@@ -175,11 +175,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_hbox.pack_start (controls_ebox,true,true);
 	controls_hbox.show ();
 
-	// controls_frame.add (controls_hbox);
-	// controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
-	// controls_vbox.set_name ("TimeAxisViewControlsBaseUnselected");
-	// controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-
 	ColorsChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
 }
 
@@ -355,7 +350,6 @@ TimeAxisView::hide ()
 
 	_canvas_display->hide ();
 	_canvas_background->hide ();
-	controls_frame.hide ();
 
 	if (control_parent) {
 		control_parent->remove (controls_hbox);

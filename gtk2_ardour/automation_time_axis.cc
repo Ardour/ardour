@@ -190,8 +190,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
 	controls_ebox.set_name (controls_base_unselected_name);
 
-	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-
 	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (
 			_control->parameter());
 
