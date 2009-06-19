@@ -799,7 +799,7 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	} else {
 		type = _("snapshot");
 	}
-	prompt = string_compose(_("The %1\"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
+	prompt = string_compose(_("The %1 \"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"), 
 			 type, session->snap_name());
 	
 	prompt_label.set_text (prompt);
