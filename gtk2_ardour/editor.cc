@@ -95,6 +95,7 @@
 #include "bundle_manager.h"
 #include "global_port_matrix.h"
 #include "editor_drag.h"
+#include "editor_group_tabs.h"
 
 #include "i18n.h"
 
@@ -452,7 +453,12 @@ Editor::Editor ()
 	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	track_canvas->signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
 
-	controls_layout.add (edit_controls_vbox);
+	HBox* h = manage (new HBox);
+	_group_tabs = new EditorGroupTabs (this);
+	h->pack_start (*_group_tabs, PACK_SHRINK);
+	h->pack_start (edit_controls_vbox);
+	controls_layout.add (*h);
+	
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::SCROLL_MASK);
 	controls_layout.signal_scroll_event().connect (mem_fun(*this, &Editor::control_layout_scroll), false);
@@ -974,6 +980,8 @@ Editor::show_window ()
 		/* re-hide summary widget if necessary */
 		parameter_changed ("show-summary");
 
+		parameter_changed ("show-edit-group-tabs");
+
 		/* now reset all audio_time_axis heights, because widgets might need
 		   to be re-hidden
 		*/
@@ -1428,6 +1436,7 @@ Editor::connect_to_session (Session *t)
 	session->register_with_memento_command_factory(_id, this);
 
 	_summary->set_session (session);
+	_group_tabs->set_session (session);
 	
 	start_updating ();
 }

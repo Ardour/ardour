@@ -113,11 +113,43 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 	return txt;
 }
 
+std::pair<std::string, double>
+fit_to_pixels (cairo_t* cr, std::string name, double avail)
+{
+	/* XXX hopefully there exists a more efficient way of doing this */
+
+	bool abbreviated = false;
+	uint32_t width = 0;
+		
+	while (1) {
+		if (name.length() <= 4) {
+			break;
+		}
+			
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, name.c_str(), &ext);
+		if (ext.width < avail) {
+			width = ext.width;
+			break;
+		}
+			
+		if (abbreviated) {
+			name = name.substr (0, name.length() - 4) + "...";
+		} else {
+			name = name.substr (0, name.length() - 3) + "...";
+			abbreviated = true;
+		}
+	}
+
+	return std::make_pair (name, width);
+}
+
+
 gint
 just_hide_it (GdkEventAny *ev, Gtk::Window *win)
 {
 	win->hide ();
-	return TRUE;
+	return 0;
 }
 
 /* xpm2rgb copied from nixieclock, which bore the legend:

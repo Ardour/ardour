@@ -37,10 +37,6 @@ using namespace ARDOUR;
 EditorSummary::EditorSummary (Editor* e)
 	: _editor (e),
 	  _session (0),
-	  _pixmap (0),
-	  _regions_dirty (true),
-	  _width (512),
-	  _height (32),
 	  _x_scale (1),
 	  _y_scale (1),
 	  _last_playhead (-1),
@@ -70,47 +66,13 @@ EditorSummary::set_session (Session* s)
 	set_dirty ();
 }
 
-/** Destroy */
-EditorSummary::~EditorSummary ()
-{
-	if (_pixmap) {
-		gdk_pixmap_unref (_pixmap);
-	}
-}
-
 /** Handle an expose event.
  *  @param event Event from GTK.
  */
 bool
 EditorSummary::on_expose_event (GdkEventExpose* event)
 {
-	/* Render the regions pixmap */
-	
-	Gdk::Rectangle const exposure (
-		event->area.x, event->area.y, event->area.width, event->area.height
-		);
-
-	Gdk::Rectangle r = exposure;
-	Gdk::Rectangle content (0, 0, _width, _height);
-	bool intersects;
-	r.intersect (content, intersects);
-	
-	if (intersects) {
-
-		GdkPixmap* p = get_pixmap (get_window()->gobj ());
-
-		gdk_draw_drawable (
-			get_window()->gobj(),
-			get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
-			p,
- 			r.get_x(),
- 			r.get_y(),
- 			r.get_x(),
- 			r.get_y(),
- 			r.get_width(),
- 			r.get_height()
-			);
-	}
+	CairoWidget::on_expose_event (event);
 
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
@@ -148,29 +110,6 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	return true;
 }
 
-/** @param drawable GDK drawable.
- *  @return pixmap for the regions.
- */
-GdkPixmap *
-EditorSummary::get_pixmap (GdkDrawable* drawable)
-{
-	if (_regions_dirty) {
-
-		if (_pixmap) {
-			gdk_pixmap_unref (_pixmap);
-		}
-		_pixmap = gdk_pixmap_new (drawable, _width, _height, -1);
-
-		cairo_t* cr = gdk_cairo_create (_pixmap);
-		render (cr);
-		cairo_destroy (cr);
-
-		_regions_dirty = false;
-	}
-
-	return _pixmap;
-}
-
 /** Render the required regions to a cairo context.
  *  @param cr Context.
  */
@@ -206,6 +145,7 @@ EditorSummary::render (cairo_t* cr)
 
 	if (max_height * _y_scale > tallest_region_pixels) {
 		_y_scale = static_cast<double> (tallest_region_pixels) / max_height;
+
 	}
 
 	/* render regions */
@@ -247,16 +187,6 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, doubl
 	cairo_stroke (cr);
 }
 
-/** Set the summary so that the whole thing will be re-rendered next time it is required */
-void
-EditorSummary::set_dirty ()
-{
-	ENSURE_GUI_THREAD (mem_fun (*this, &EditorSummary::set_dirty));
-
-	_regions_dirty = true;
-	queue_draw ();
-}
-
 /** Set the summary so that just the overlays (viewbox, playhead etc.) will be re-rendered */
 void
 EditorSummary::set_overlays_dirty ()
@@ -273,22 +203,9 @@ EditorSummary::on_size_request (Gtk::Requisition *req)
 {
 	/* Use a dummy, small width and the actual height that we want */
 	req->width = 64;
-	req->height = _height;
+	req->height = 32;
 }
 
-/** Handle a size allocation.
- *  @param alloc GTK allocation.
- */
-void
-EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
-{
-	Gtk::EventBox::on_size_allocate (alloc);
-
-	_width = alloc.get_width ();
-	_height = alloc.get_height ();
-
-	set_dirty ();
-}
 
 void
 EditorSummary::centre_on_click (GdkEventButton* ev)

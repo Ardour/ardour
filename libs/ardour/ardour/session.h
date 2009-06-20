@@ -377,6 +377,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	sigc::signal<void> Located;
 
 	sigc::signal<void,RouteList&> RouteAdded;
+	sigc::signal<void> RouteEditGroupChanged;
 
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
@@ -1484,6 +1485,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void remove_region (boost::weak_ptr<Region>);
 
 	int load_regions (const XMLNode& node);
+
+	void route_edit_group_changed ();
 
 	/* SOURCES */
 

@@ -25,6 +25,7 @@
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 #include "i18n.h"
+#include "utils.h"
 
 PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* m, PortMatrixBody* b)
 	: PortMatrixLabels (m, b)
@@ -131,7 +132,8 @@ PortMatrixRowLabels::render (cairo_t* cr)
 		cairo_fill (cr);
 		    
 		/* hence what abbreviation (or not) we need for the group name */
-		std::pair<std::string, double> display = display_port_name (cr, (*i)->name, h);
+		std::string const upper = Glib::ustring ((*i)->name).uppercase ();
+		std::pair<std::string, double> display = fit_to_pixels (cr, upper, h);
 
 		/* plot it */
 		set_source_rgb (cr, text_colour());

@@ -2078,6 +2078,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->processors_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
+		(*x)->edit_group_changed.connect (hide (mem_fun (*this, &Session::route_edit_group_changed)));
 
 		if ((*x)->is_master()) {
 			_master_out = (*x);
@@ -4242,4 +4243,10 @@ Session::solo_model_changed ()
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->put_control_outs_at (p);
 	}
+}
+
+void
+Session::route_edit_group_changed ()
+{
+	RouteEditGroupChanged (); /* EMIT SIGNAL */
 }

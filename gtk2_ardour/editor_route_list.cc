@@ -33,6 +33,7 @@
 #include "gui_thread.h"
 #include "actions.h"
 #include "utils.h"
+#include "editor_group_tabs.h"
 
 #include "pbd/unknown_type.h"
 
@@ -424,6 +425,7 @@ Editor::sync_track_view_list_and_route_list ()
        }
 
        _summary->set_dirty ();
+       _group_tabs->set_dirty ();
 
        return false; // do not call again (until needed)
 }

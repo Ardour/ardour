@@ -81,6 +81,7 @@ def build(bld):
 		automation_time_axis.cc
 		axis_view.cc
 		bundle_manager.cc
+		cairo_widget.cc
 		canvas-flag.cc
 		canvas-note-event.cc
 		canvas-note.cc
@@ -106,6 +107,7 @@ def build(bld):
 		editor_drag.cc
 		editor_edit_groups.cc
 		editor_export_audio.cc
+		editor_group_tabs.cc
 		editor_hscroller.cc
 		editor_keyboard.cc
 		editor_keys.cc

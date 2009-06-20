@@ -23,6 +23,7 @@
 #include "port_matrix_column_labels.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
+#include "utils.h"
 
 PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b)
 	: PortMatrixLabels (m, b)
@@ -162,8 +163,9 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 			cairo_rectangle (cr, x, _height - rh, w, rh);
 		}
 		cairo_fill (cr);
-		
-		std::pair<std::string, double> const display = display_port_name (cr, (*i)->name, w);
+
+		std::string const upper = Glib::ustring ((*i)->name).uppercase ();
+		std::pair<std::string, double> const display = fit_to_pixels (cr, upper, w);
 
 		/* plot it */
 		set_source_rgb (cr, text_colour());

@@ -114,6 +114,7 @@ class TimeAxisView;
 class TimeFXDialog;
 class TimeSelection;
 class TrackSelection;
+class EditorGroupTabs;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -344,6 +345,7 @@ class Editor : public PublicEditor
 	void toggle_zero_line_visibility ();
 	void toggle_waveforms_while_recording ();
 	void set_summary ();
+	void set_edit_group_tabs ();
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 
@@ -2239,6 +2241,8 @@ public:
 	void update_canvas_now ();
 	void streamview_height_changed ();
 
+	EditorGroupTabs* _group_tabs;
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
@@ -2264,6 +2268,7 @@ public:
 	friend class RegionInsertDrag;
 
 	friend class EditorSummary;
+	friend class EditorGroupTabs;
 };
 
 #endif /* __ardour_editor_h__ */

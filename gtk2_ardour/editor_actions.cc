@@ -29,6 +29,7 @@
 #include "utils.h"
 #include "i18n.h"
 #include "audio_time_axis.h"
+#include "editor_group_tabs.h"
 
 using namespace Gtk;
 using namespace Glib;
@@ -808,6 +809,8 @@ Editor::register_actions ()
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleSummary"), _("Show Summary"), mem_fun (*this, &Editor::set_summary));
+
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleEditGroupTabs"), _("Show Edit Group Tabs"), mem_fun (*this, &Editor::set_edit_group_tabs));
 	
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 	
@@ -892,6 +895,16 @@ Editor::set_summary ()
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		session->config.set_show_summary (tact->get_active ());
+	}
+}
+
+void
+Editor::set_edit_group_tabs ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleEditGroupTabs"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		session->config.set_show_edit_group_tabs (tact->get_active ());
 	}
 }
 
@@ -1283,6 +1296,22 @@ Editor::parameter_changed (std::string p)
  		}
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleSummary"));
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			if (tact->get_active () != s) {
+				tact->set_active (s);
+			}
+		}
+	} else if (p == "show-edit-group-tabs") {
+
+		bool const s = session->config.get_show_edit_group_tabs ();
+		if (s) {
+			_group_tabs->show ();
+		} else {
+			_group_tabs->hide ();
+		}
+
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleEditGroupTabs"));
 		if (act) {
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 			if (tact->get_active () != s) {

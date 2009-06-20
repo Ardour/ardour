@@ -30,6 +30,7 @@
 #include "time_axis_view.h"
 #include "prompter.h"
 #include "gui_thread.h"
+#include "editor_group_tabs.h"
 
 #include "ardour/route.h"
 
@@ -248,6 +249,8 @@ Editor::add_edit_group (RouteGroup* group)
 	}
 
 	in_edit_group_row_change = false;
+
+	_group_tabs->set_dirty ();
 }
 
 void
@@ -288,6 +291,8 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 	}
 
 	in_edit_group_row_change = false;
+
+	_group_tabs->set_dirty ();
 }
 
 void
