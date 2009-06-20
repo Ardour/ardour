@@ -26,6 +26,8 @@
 
 #include <sigc++/signal.h>
 #include "ardour/ardour.h"
+#include "ardour/session.h"
+#include "ardour/audioengine.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
@@ -34,8 +36,6 @@ namespace MIDI {
 }
 
 namespace ARDOUR {
-class Session;
-
 /**
  * @class Slave
  * 
@@ -155,6 +155,38 @@ class Slave {
 	virtual bool give_slave_full_control_over_transport_speed() const { return false; }
 };
 
+/// We need this wrapper for testability, it's just too hard to mock up a session class
+class ISlaveSessionProxy {
+  public:
+	virtual TempoMap& tempo_map()                 const   { return *((TempoMap *) 0); }
+	virtual nframes_t frame_rate()                const   { return 0; }
+	virtual nframes_t audible_frame ()            const   { return 0; }
+	virtual nframes_t transport_frame ()          const   { return 0; }
+	virtual nframes_t frames_since_cycle_start () const   { return 0; }
+	virtual nframes_t frame_time ()               const   { return 0; }
+
+	virtual void request_locate (nframes_t frame, bool with_roll = false) {}
+	virtual void request_transport_speed (double speed)                   {}
+};
+
+
+/// The Session Proxy for use in real Ardour
+class SlaveSessionProxy : public ISlaveSessionProxy {
+	Session&    session;
+
+  public:
+	SlaveSessionProxy(Session &s) : session(s) {};
+	TempoMap& tempo_map()                 const   { return session.tempo_map();                         }
+	nframes_t frame_rate()                const   { return session.frame_rate();                        }
+	nframes_t audible_frame ()            const   { return session.audible_frame();                     }
+	nframes_t transport_frame ()          const   { return session.transport_frame();                   }
+	nframes_t frames_since_cycle_start () const   { return session.engine().frames_since_cycle_start(); }
+	nframes_t frame_time ()               const   { return session.engine().frame_time();               }
+
+	void request_locate (nframes_t frame, bool with_roll = false) { session.request_locate(frame, with_roll); }
+	void request_transport_speed (double speed)                   { session.request_transport_speed(speed);   }
+};
+
 struct SafeTime {
     int guard1;
     nframes_t   position;
@@ -213,6 +245,9 @@ class MTC_Slave : public Slave, public sigc::trackable {
 class MIDIClock_Slave : public Slave, public sigc::trackable {
   public:
 	MIDIClock_Slave (Session&, MIDI::Port&, int ppqn = 24);
+
+	/// Constructor for unit tests
+	MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn = 24);
 	~MIDIClock_Slave ();
 
 	void rebind (MIDI::Port&);
@@ -225,9 +260,11 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	nframes_t resolution() const;
 	bool requires_seekahead () const { return false; }
 	bool give_slave_full_control_over_transport_speed() const { return true; }
+
+	void set_bandwidth (double a_bandwith) { bandwidth = a_bandwith; }
 	
   private:
-	Session&    session;
+	ISlaveSessionProxy* session;
 	MIDI::Port* port;
 	std::vector<sigc::connection> connections;
 

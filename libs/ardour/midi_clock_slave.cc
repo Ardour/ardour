@@ -44,16 +44,26 @@ using namespace MIDI;
 using namespace PBD;
 
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
-	: session (s)
+	: ppqn (ppqn)
+	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
+{
+	session = (ISlaveSessionProxy *) new SlaveSessionProxy(s);
+	rebind (p);
+	reset ();
+}
+
+MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
+	: session(session_proxy)
 	, ppqn (ppqn)
 	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
-	rebind (p);
+	session = session_proxy;
 	reset ();
 }
 
 MIDIClock_Slave::~MIDIClock_Slave()
 {
+  delete session;
 }
 
 void
@@ -79,10 +89,10 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 void 
 MIDIClock_Slave::calculate_one_ppqn_in_frames_at(nframes_t time)
 {
-	const Tempo& current_tempo = session.tempo_map().tempo_at(time);
-	const Meter& current_meter = session.tempo_map().meter_at(time);
+	const Tempo& current_tempo = session->tempo_map().tempo_at(time);
+	const Meter& current_meter = session->tempo_map().meter_at(time);
 	double frames_per_beat =
-		current_tempo.frames_per_beat(session.frame_rate(),
+		current_tempo.frames_per_beat(session->frame_rate(),
 		                              current_meter);
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
@@ -108,7 +118,7 @@ void
 MIDIClock_Slave::calculate_filter_coefficients()
 {
 	// omega = 2 * PI * Bandwidth / MIDI clock frame frequency in Hz
-	omega = 2.0 * 3.14159265358979323846 * bandwidth * one_ppqn_in_frames / session.frame_rate();
+	omega = 2.0 * 3.14159265358979323846 * bandwidth * one_ppqn_in_frames / session->frame_rate();
 	b = 1.4142135623730950488 * omega;
 	c = omega * omega;	
 }
@@ -136,8 +146,8 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 		calculate_filter_coefficients();
 		
 		// initialize DLL
-		e2 = double(one_ppqn_in_frames) / double(session.frame_rate());
-		t0 = double(elapsed_since_start) / double(session.frame_rate());
+		e2 = double(one_ppqn_in_frames) / double(session->frame_rate());
+		t0 = double(elapsed_since_start) / double(session->frame_rate());
 		t1 = t0 + e2;
 		
 		// let ardour go after first MIDI Clock Event
@@ -148,11 +158,11 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 		calculate_filter_coefficients();
 
 		// calculate loop error
-		// we use session.transport_frame() instead of t1 here
+		// we use session->transport_frame() instead of t1 here
 		// because t1 is used to calculate the transport speed,
 		// so the loop will compensate for accumulating rounding errors
-		error = (double(should_be_position) - double(session.audible_frame())); 
-		e = error / double(session.frame_rate());
+		error = (double(should_be_position) - double(session->audible_frame())); 
+		e = error / double(session->frame_rate());
 		
 		// update DLL
 		t0 = t1;
@@ -166,19 +176,19 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 				  //<< "@" << timestamp  
 				  << " arrived at: " << elapsed_since_start << " (elapsed time) " 
 				  << " should-be transport: " << should_be_position 
-				  << " audible: " << session.audible_frame()
-				  << " real transport: " << session.transport_frame()
+				  << " audible: " << session->audible_frame()
+				  << " real transport: " << session->transport_frame()
 				  << " error: " << error
-				  //<< " engine: " << session.engine().frame_time() 
+				  //<< " engine: " << session->frame_time() 
 				  << " real delta: " << timestamp - last_timestamp 
 				  << " should-be delta: " << one_ppqn_in_frames
-				  << " t1-t0: " << (t1 -t0) * session.frame_rate()
-				  << " t0: " << t0 * session.frame_rate()
-				  << " t1: " << t1 * session.frame_rate() 
-				  << " frame-rate: " << session.frame_rate() 
+				  << " t1-t0: " << (t1 -t0) * session->frame_rate()
+				  << " t0: " << t0 * session->frame_rate()
+				  << " t1: " << t1 * session->frame_rate() 
+				  << " frame-rate: " << session->frame_rate() 
 				  << endl;
 		
-		cerr      << "frames since cycle start: " << session.engine().frames_since_cycle_start() << endl;
+		cerr      << "frames since cycle start: " << session->frames_since_cycle_start() << endl;
 	#endif // DEBUG_MIDI_CLOCK
 
 	last_timestamp = timestamp;
@@ -188,7 +198,7 @@ void
 MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 {	
 	#ifdef DEBUG_MIDI_CLOCK	
-		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " engine time: " << session.engine().frame_time() << endl;
+		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " engine time: " << session->frame_time() << endl;
 	#endif
 	
 	if (!_started) {
@@ -209,7 +219,7 @@ MIDIClock_Slave::reset ()
 	_starting = false;
 	_started  = false;
 	
-	session.request_locate(0, false);
+	session->request_locate(0, false);
 }
 
 void
@@ -236,7 +246,7 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 		_starting = false;
 		_started  = false;
 		// locate to last MIDI clock position
-		session.request_transport_speed(0.0);
+		session->request_transport_speed(0.0);
 		
 		// we need to go back to the last MIDI beat (6 ppqn)
 		// and lets hope the tempo didnt change in the meantime :)
@@ -251,7 +261,7 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 		// and lets hope the tempo didnt change in those last 6 beats :)
 		stop_position -= (midi_clock_count % 6) * one_ppqn_in_frames;
 		
-		session.request_locate(stop_position, false);
+		session->request_locate(stop_position, false);
 		should_be_position = stop_position;
 		last_timestamp = 0;
 	}
@@ -278,7 +288,7 @@ MIDIClock_Slave::position (Parser& parser, byte* message, size_t size)
 	cerr << "Song Position: " << position_in_sixteenth_notes << " frames: " << position_in_frames << endl; 
 	#endif
 	
-	session.request_locate(position_in_frames, false);
+	session->request_locate(position_in_frames, false);
 	should_be_position  = position_in_frames;
 	last_timestamp = 0;
 	
@@ -308,13 +318,13 @@ MIDIClock_Slave::stop_if_no_more_clock_events(nframes_t& pos, nframes_t now)
 	/* no timecode for 1/4 second ? conclude that its stopped */
 	if (last_timestamp && 
 	    now > last_timestamp && 
-	    now - last_timestamp > session.frame_rate() / 4) {
+	    now - last_timestamp > session->frame_rate() / 4) {
         #ifdef DEBUG_MIDI_CLOCK			
 			cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
         #endif		
 		pos = should_be_position;
-		session.request_transport_speed (0);
-		session.request_locate (should_be_position, false);
+		session->request_transport_speed (0);
+		session->request_locate (should_be_position, false);
 		return true;
 	} else {
 		return false;
@@ -330,14 +340,14 @@ MIDIClock_Slave::speed_and_position (double& speed, nframes_t& pos)
 		return true;
 	}
 		
-	nframes_t engine_now = session.engine().frame_time();
+	nframes_t engine_now = session->frame_time();
 	
 	if (stop_if_no_more_clock_events(pos, engine_now)) {
 		return false;
 	}
 
 	// calculate speed
-	speed = ((t1 - t0) * session.frame_rate()) / one_ppqn_in_frames;
+	speed = ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames;
 	
 	// calculate position
 	if (engine_now > last_timestamp) {
@@ -351,7 +361,7 @@ MIDIClock_Slave::speed_and_position (double& speed, nframes_t& pos)
 	}
 	
 	#ifdef DEBUG_MIDI_CLOCK			
-	cerr << "speed_and_position: " << speed << " & " << pos << " <-> " << session.transport_frame() << " (transport)" << endl;
+	cerr << "speed_and_position: " << speed << " & " << pos << " <-> " << session->transport_frame() << " (transport)" << endl;
 	#endif	
 	
 	return true;
