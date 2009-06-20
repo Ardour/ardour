@@ -4575,15 +4575,32 @@ Editor::remove_last_capture ()
 void
 Editor::normalize_region ()
 {
-	RegionSelection rs; 
-
-	get_regions_for_action (rs);
-	
 	if (!session) {
 		return;
 	}
 
+	RegionSelection rs; 
+	get_regions_for_action (rs);
+
 	if (rs.empty()) {
+		return;
+	}
+	
+	Dialog dialog (rs.size() > 1 ? _("Normalize regions") : _("Normalize region"));
+	HBox hbox;
+	hbox.pack_start (*manage (new Label (_("Normalize to:"))));
+	SpinButton spin (0.2, 2);
+	spin.set_range (-112, 0);
+	spin.set_increments (0.1, 1);
+	spin.set_value (0);
+	hbox.pack_start (spin);
+	hbox.pack_start (*manage (new Label (_("dbFS"))));
+	hbox.show_all ();
+	dialog.get_vbox()->pack_start (hbox);
+	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	dialog.add_button (_("Normalize"), RESPONSE_ACCEPT);
+
+	if (dialog.run () == RESPONSE_CANCEL) {
 		return;
 	}
 
@@ -4597,7 +4614,7 @@ Editor::normalize_region ()
 		if (!arv)
 			continue;
  		XMLNode &before = arv->region()->get_state();
-		arv->audio_region()->normalize_to (0.0f);
+		arv->audio_region()->normalize_to (spin.get_value());
 		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
 	}
 
