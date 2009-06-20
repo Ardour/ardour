@@ -127,7 +127,11 @@ MixerGroupTabs::on_button_press_event (GdkEventButton* ev)
 	int32_t x = 0;
 	list<MixerStrip*>::iterator i = _mixer->strips.begin();
 	while (x < ev->x && i != _mixer->strips.end()) {
-		x += (*i)->get_width ();
+
+		if (!(*i)->route()->is_master() && !(*i)->route()->is_control() && (*i)->marked_for_display()) {
+			x += (*i)->get_width ();
+		}
+		
 		if (x < ev->x) {
 			++i;
 		}

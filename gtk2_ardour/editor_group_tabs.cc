@@ -128,7 +128,11 @@ EditorGroupTabs::on_button_press_event (GdkEventButton* ev)
 	int32_t y = 0;
 	Editor::TrackViewList::iterator i = _editor->track_views.begin();
 	while (y < ev->y && i != _editor->track_views.end()) {
-		y += (*i)->effective_height ();
+
+		if ((*i)->marked_for_display()) {
+			y += (*i)->effective_height ();
+		}
+		
 		if (y < ev->y) {
 			++i;
 		}
