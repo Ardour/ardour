@@ -48,6 +48,7 @@ namespace ARDOUR {
 
 class MixerStrip;
 class PluginSelector;
+class MixerGroupTabs;
 
 class Mixer_UI : public Gtk::Window
 {
@@ -104,6 +105,8 @@ class Mixer_UI : public Gtk::Window
 	Gtk::HBox				strip_packer;
 	Gtk::HBox				out_packer;
 	Gtk::HPaned				list_hpane;
+
+	MixerGroupTabs* _group_tabs;
 
 	// for restoring window geometry.
 	int m_root_x, m_root_y, m_width, m_height;
@@ -249,8 +252,12 @@ class Mixer_UI : public Gtk::Window
 	bool strip_redisplay_does_not_sync_order_keys;
 	bool ignore_sync;
 
+	void parameter_changed (std::string const &);
+
 	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;
+
+	friend class MixerGroupTabs;
 };
 
 #endif /* __ardour_mixer_ui_h__ */

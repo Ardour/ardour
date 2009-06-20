@@ -159,6 +159,7 @@ def build(bld):
 		midi_scroomer.cc
 		midi_streamview.cc
 		midi_time_axis.cc
+		mixer_group_tabs.cc
 		mixer_strip.cc
 		mixer_ui.cc
 		nag.cc

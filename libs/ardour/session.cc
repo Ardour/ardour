@@ -2083,6 +2083,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->processors_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
 		(*x)->edit_group_changed.connect (hide (mem_fun (*this, &Session::route_edit_group_changed)));
+		(*x)->mix_group_changed.connect (hide (mem_fun (*this, &Session::route_mix_group_changed)));
 
 		if ((*x)->is_master()) {
 			_master_out = (*x);
@@ -4253,4 +4254,10 @@ void
 Session::route_edit_group_changed ()
 {
 	RouteEditGroupChanged (); /* EMIT SIGNAL */
+}
+
+void
+Session::route_mix_group_changed ()
+{
+	RouteMixGroupChanged (); /* EMIT SIGNAL */
 }

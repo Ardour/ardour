@@ -120,7 +120,7 @@ Editor::show_editor_mixer (bool yn)
 			current_mixer_strip->set_route (r);
 
 			if (created) {
-				current_mixer_strip->set_width (editor_mixer_strip_width, (void*) this);
+				current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 			}
 		}
 		
@@ -213,7 +213,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 	
 	if (created) {
-		current_mixer_strip->set_width (editor_mixer_strip_width, (void*) this);
+		current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 	}
 
 	current_mixer_strip->set_route (at->route());

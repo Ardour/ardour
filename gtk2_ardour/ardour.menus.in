@@ -393,7 +393,7 @@
                <menuitem action='ToggleMeasureVisibility'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
                <menuitem action='ToggleSummary'/>
-               <menuitem action='ToggleEditGroupTabs'/>
+               <menuitem action='ToggleGroupTabs'/>
         </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>

@@ -2004,7 +2004,6 @@ Route::drop_edit_group (void *src)
 
 void
 Route::set_mix_group (RouteGroup *mg, void *src)
-
 {
 	if (mg == _mix_group) {
 		return;

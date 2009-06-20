@@ -58,6 +58,7 @@
 #include "io_selector.h"
 #include "utils.h"
 #include "gui_thread.h"
+#include "route_group_dialog.h"
 
 #include "i18n.h"
 
@@ -501,7 +502,7 @@ MixerStrip::set_stuff_from_route ()
 	/* if width is not set, it will be set by the MixerUI or editor */
 
 	if ((prop = xml_node->property ("strip-width")) != 0) {
-		set_width (Width (string_2_enum (prop->value(), _width)), this);
+		set_width_enum (Width (string_2_enum (prop->value(), _width)), this);
 	}
 
 	if ((prop = xml_node->property ("shown-mixer")) != 0) {
@@ -517,7 +518,7 @@ MixerStrip::set_stuff_from_route ()
 }
 
 void
-MixerStrip::set_width (Width w, void* owner)
+MixerStrip::set_width_enum (Width w, void* owner)
 {
 	/* always set the gpm width again, things may be hidden */
 
@@ -952,14 +953,14 @@ void
 MixerStrip::input_changed (IOChange change, void *src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_input_display));
-	set_width(_width, this);
+	set_width_enum (_width, this);
 }
 
 void
 MixerStrip::output_changed (IOChange change, void *src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
-	set_width(_width, this);
+	set_width_enum (_width, this);
 }
 
 
@@ -1099,6 +1100,11 @@ MixerStrip::select_mix_group (GdkEventButton *ev)
 	case 1:
 
 		items.clear ();
+		
+		items.push_back (MenuElem (_("New group..."), mem_fun (*this, &MixerStrip::set_mix_group_to_new)));
+		
+		items.push_back (SeparatorElem ());
+		
 		items.push_back (RadioMenuElem (group, _("No group"), bind (mem_fun(*this, &MixerStrip::set_mix_group), (RouteGroup *) 0)));
 
 		_session.foreach_mix_group (bind (mem_fun (*this, &MixerStrip::add_mix_group_to_menu), &group));
@@ -1258,10 +1264,10 @@ MixerStrip::width_clicked ()
 {
 	switch (_width) {
 	case Wide:
-		set_width (Narrow, this);
+		set_width_enum (Narrow, this);
 		break;
 	case Narrow:
-		set_width (Wide, this);
+		set_width_enum (Wide, this);
 		break;
 	}
 }
@@ -1408,7 +1414,7 @@ MixerStrip::meter_changed (void *src)
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();
-	set_width(_width, this);
+	set_width_enum (_width, this);
 }
 
 void
@@ -1477,3 +1483,19 @@ MixerStrip::revert_to_default_display ()
 	panner_ui().setup_pan ();
 }
 
+void
+MixerStrip::set_mix_group_to_new ()
+{
+	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
+	g->set_active (true, this);
+
+	RouteGroupDialog d (g);
+	int const r = d.do_run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		_session.add_mix_group (g);
+		_route->set_mix_group (g, this);
+	} else {
+		delete g;
+	}
+}

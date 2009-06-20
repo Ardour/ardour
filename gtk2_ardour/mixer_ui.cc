@@ -46,6 +46,7 @@
 #include "utils.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "mixer_group_tabs.h"
 
 #include "i18n.h"
 
@@ -81,7 +82,13 @@ Mixer_UI::Mixer_UI ()
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
 
-	scroller.add (strip_packer);
+	_group_tabs = new MixerGroupTabs (this);
+	VBox* b = manage (new VBox);
+	b->pack_start (*_group_tabs, PACK_SHRINK);
+	b->pack_start (strip_packer);
+	b->show_all ();
+
+	scroller.add (*b);
 	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
 	track_model = ListStore::create (track_columns);
@@ -281,7 +288,7 @@ Mixer_UI::show_window ()
 		
 		for (ri = rows.begin(); ri != rows.end(); ++ri) {
 			ms = (*ri)[track_columns.strip];
-			ms->set_width (ms->get_width(), ms->width_owner());
+			ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
 		}
 	}
 	_visible = true;
@@ -322,7 +329,7 @@ Mixer_UI::add_strip (RouteList& routes)
 		Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 
 		if (strip->width_owner() != strip) {
-			strip->set_width (_strip_width, this);
+			strip->set_width_enum (_strip_width, this);
 		}
 
 		show_strip (strip);
@@ -463,7 +470,6 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 void
 Mixer_UI::connect_to_session (Session* sess)
 {
-
 	session = sess;
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
@@ -481,6 +487,7 @@ Mixer_UI::connect_to_session (Session* sess)
 	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
 	session->mix_group_added.connect (mem_fun(*this, &Mixer_UI::add_mix_group));
 	session->mix_group_removed.connect (mem_fun(*this, &Mixer_UI::mix_groups_changed));
+	session->config.ParameterChanged.connect (mem_fun (*this, &Mixer_UI::parameter_changed));
 
 	mix_groups_changed ();
 	
@@ -489,6 +496,8 @@ Mixer_UI::connect_to_session (Session* sess)
 	if (_visible) {
 	       show_window();
 	}
+
+	_group_tabs->set_session (sess);
 
 	start_updating ();
 }
@@ -768,6 +777,8 @@ Mixer_UI::redisplay_track_list ()
 	
 	if (auto_rebinding)
 		auto_rebind_midi_controls ();
+
+	_group_tabs->set_dirty ();
 }
 
 #ifdef GTKOSX
@@ -1296,7 +1307,7 @@ Mixer_UI::set_strip_width (Width w)
 	_strip_width = w;
 
 	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		(*i)->set_width (w, this);
+		(*i)->set_width_enum (w, this);
 	}
 }
 
@@ -1491,3 +1502,17 @@ Mixer_UI::on_key_press_event (GdkEventKey* ev)
 {
 	return key_press_focus_accelerator_handler (*this, ev);
 }
+
+void
+Mixer_UI::parameter_changed (string const & p)
+{
+	if (p == "show-group-tabs") {
+		bool const s = session->config.get_show_group_tabs ();
+		if (s) {
+			_group_tabs->show ();
+		} else {
+			_group_tabs->hide ();
+		}
+	}
+}
+		

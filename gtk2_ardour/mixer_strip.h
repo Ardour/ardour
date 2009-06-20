@@ -84,9 +84,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	MixerStrip (Mixer_UI&, ARDOUR::Session&, bool in_mixer = true);
 	~MixerStrip ();
 
-	void set_width (Width, void* owner);
-	Width get_width() const { return _width; }
-	void* width_owner() const { return _width_owner; }
+	void set_width_enum (Width, void* owner);
+	Width get_width_enum () const { return _width; }
+	void* width_owner () const { return _width_owner; }
 
 	GainMeter& gain_meter() { return gpm; }
 	PannerUI&  panner_ui()  { return panners; }
@@ -256,6 +256,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void switch_io (boost::shared_ptr<ARDOUR::Route>);
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 	void revert_to_default_display ();
+
+	void set_mix_group_to_new ();
 
 	static int scrollbar_height;
 };
