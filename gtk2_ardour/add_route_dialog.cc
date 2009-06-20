@@ -23,12 +23,14 @@
 #include <sigc++/bind.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/separator.h>
+#include <gtkmm/table.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "gtkmm2ext/utils.h"
 #include "ardour/profile.h"
 #include "ardour/template_utils.h"
+#include "ardour/route_group.h"
 #include "ardour/session.h"
 
 #include "utils.h"
@@ -49,8 +51,9 @@ static const char* track_mode_names[] = {
 	0
 };
 
-AddRouteDialog::AddRouteDialog ()
+AddRouteDialog::AddRouteDialog (Session & s)
 	: Dialog (_("ardour: add track/bus")),
+	  _session (s),
 	  track_button (_("Tracks")),
 	  bus_button (_("Busses")),
 	  routes_adjustment (1, 1, 128, 1, 4),
@@ -77,65 +80,65 @@ AddRouteDialog::AddRouteDialog ()
 	track_button.set_name ("AddRouteDialogRadioButton");
 	bus_button.set_name ("AddRouteDialogRadioButton");
 	routes_spinner.set_name ("AddRouteDialogSpinner");
-	
-	RadioButton::Group g = track_button.get_group();
-	bus_button.set_group (g);
-	track_button.set_active (true);
-
-	/* add */
-
-	HBox* hbox1 = manage (new HBox);
-	hbox1->set_spacing (6);
-	Label* label1 = manage (new Label (_("Add this many:")));
-	hbox1->pack_start (*label1, PACK_SHRINK);
-	hbox1->pack_start (routes_spinner, PACK_SHRINK);
-
-	HBox* hbox2 = manage (new HBox);
-	hbox2->set_spacing (6);
-	hbox2->set_border_width (6);
-	hbox2->pack_start (*hbox1, PACK_EXPAND_WIDGET);
-
-	/* track/bus choice & modes */
-
-	HBox* hbox5 = manage (new HBox);
-	hbox5->set_spacing (6);
-	hbox5->pack_start (track_button, PACK_EXPAND_PADDING);
-	hbox5->pack_start (bus_button, PACK_EXPAND_PADDING);
-
-	channel_combo.set_name (X_("ChannelCountSelector"));
-	track_mode_combo.set_name (X_("ChannelCountSelector"));
 
 	refill_channel_setups ();
 	set_popdown_strings (track_mode_combo, track_mode_strings, true);
 
+	edit_group_combo.append_text (_("No group"));
+	_session.foreach_edit_group (mem_fun (*this, &AddRouteDialog::add_edit_group));
+	
 	channel_combo.set_active_text (channel_combo_strings.front());
 	track_mode_combo.set_active_text (track_mode_strings.front());
+	edit_group_combo.set_active (0);
+
+	RadioButton::Group g = track_button.get_group();
+	bus_button.set_group (g);
+	track_button.set_active (true);
+
+	Table* table = manage (new Table (5, 2));
+	table->set_spacings (4);
+
+	/* add */
+
+	Label* l = manage (new Label (_("Add this many:")));
+	l->set_alignment (1, 0.5);
+	table->attach (*l, 0, 1, 0, 1);
+	table->attach (routes_spinner, 1, 2, 0, 1, FILL | EXPAND);
+
+	/* track/bus choice & modes */
+
+	HBox* hbox = manage (new HBox);
+	hbox->set_spacing (6);
+	hbox->pack_start (track_button, PACK_EXPAND_PADDING);
+	hbox->pack_start (bus_button, PACK_EXPAND_PADDING);
+	table->attach (*hbox, 0, 2, 1, 2);
+
+	channel_combo.set_name (X_("ChannelCountSelector"));
+	track_mode_combo.set_name (X_("ChannelCountSelector"));
 
 	track_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
 	bus_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
-	
-	VBox* vbox1 = manage (new VBox);
-	vbox1->set_spacing (6);
-	vbox1->set_border_width (6);
 
-	Frame* frame1 = manage (new Frame (_("Channel Configuration")));
-	frame1->add (channel_combo);
-	Frame* frame2 = manage (new Frame (_("Track Mode")));
-	frame2->add (track_mode_combo);
+	l = manage (new Label (_("Channel configuration:")));
+	l->set_alignment (1, 0.5);
+	table->attach (*l, 0, 1, 2, 3);
+	table->attach (channel_combo, 1, 2, 2, 3, FILL | EXPAND);
 
-	vbox1->pack_start (*hbox5, PACK_SHRINK);
-	vbox1->pack_start (*frame1, PACK_SHRINK);
-
-	if (!ARDOUR::Profile->get_sae()) {
-		vbox1->pack_start (*frame2, PACK_SHRINK);
+	if (!ARDOUR::Profile->get_sae ()) {
+		l = manage (new Label (_("Track mode:")));
+		l->set_alignment (1, 0.5);
+		table->attach (*l, 0, 1, 3, 4);
+		table->attach (track_mode_combo, 1, 2, 3, 4, FILL | EXPAND);
 	}
+	
+	l = manage (new Label (_("Add to edit group:")));
+	l->set_alignment (1, 0.5);
+	table->attach (*l, 0, 1, 4, 5);
+	table->attach (edit_group_combo, 1, 2, 4, 5, FILL | EXPAND);
+	get_vbox()->pack_start (*table);
 
 	get_vbox()->set_spacing (6);
 	get_vbox()->set_border_width (6);
-
-	get_vbox()->pack_start (*hbox2, PACK_SHRINK);
-	get_vbox()->pack_start (*vbox1, PACK_SHRINK);
-
 	get_vbox()->show_all ();
 
 	/* track template info will be managed whenever
@@ -319,4 +322,20 @@ AddRouteDialog::refill_channel_setups ()
 
 	set_popdown_strings (channel_combo, channel_combo_strings, true);
 	channel_combo.set_active_text (channel_combo_strings.front());
+}
+
+void
+AddRouteDialog::add_edit_group (RouteGroup* g)
+{
+	edit_group_combo.append_text (g->name ());
+}
+
+RouteGroup*
+AddRouteDialog::edit_group ()
+{
+	if (edit_group_combo.get_active_row_number () == 0) {
+		return 0;
+	}
+
+	return _session.edit_group_by_name (edit_group_combo.get_active_text());
 }

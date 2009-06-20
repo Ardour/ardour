@@ -198,16 +198,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void add_route (Gtk::Window* float_window);
 
-	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many) {
-		session_add_audio_route (true, input_channels, output_channels, mode, how_many);
+	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode, ARDOUR::RouteGroup* edit_group, uint32_t how_many) {
+		session_add_audio_route (true, input_channels, output_channels, mode, edit_group, how_many);
 	}
 
-	void session_add_audio_bus (int input_channels, int32_t output_channels, uint32_t how_many) {
-		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, how_many);
+	void session_add_audio_bus (int input_channels, int32_t output_channels, ARDOUR::RouteGroup* edit_group, uint32_t how_many) {
+		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, edit_group, how_many);
 	}
 
-	void session_add_midi_track (uint32_t how_many) {
-		session_add_midi_route (true, how_many);
+	void session_add_midi_track (ARDOUR::RouteGroup* edit_group, uint32_t how_many) {
+		session_add_midi_route (true, edit_group, how_many);
 	}
 
 	/*void session_add_midi_bus () {
@@ -524,8 +524,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void edit_metadata ();
 	void import_metadata ();
 
-	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many);
-	void session_add_midi_route (bool disk, uint32_t how_many);
+	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, ARDOUR::RouteGroup *, uint32_t how_many);
+	void session_add_midi_route (bool disk, ARDOUR::RouteGroup *, uint32_t how_many);
 
 	void set_transport_sensitivity (bool);
 

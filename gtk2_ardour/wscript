@@ -189,6 +189,7 @@ def build(bld):
 		region_view.cc
 		return_ui.cc
 		rhythm_ferret.cc
+		route_group_dialog.cc
 		route_params_ui.cc
 		route_processor_selection.cc
 		route_time_axis.cc

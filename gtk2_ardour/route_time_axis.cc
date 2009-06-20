@@ -75,6 +75,7 @@
 #include "simplerect.h"
 #include "streamview.h"
 #include "utils.h"
+#include "route_group_dialog.h"
 
 #include "ardour/track.h"
 
@@ -320,13 +321,18 @@ RouteTimeAxisView::edit_click (GdkEventButton *ev)
 	RadioMenuItem::Group group;
 
 	items.clear ();
+
+	items.push_back (MenuElem (_("New group..."), mem_fun (*this, &RouteTimeAxisView::set_edit_group_to_new)));
+
+	items.push_back (SeparatorElem ());
+	
 	items.push_back (RadioMenuElem (group, _("No group"), 
 					bind (mem_fun(*this, &RouteTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
 	
 	if (_route->edit_group() == 0) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
-	
+
 	_session.foreach_edit_group (bind (mem_fun (*this, &RouteTimeAxisView::add_edit_group_menu_item), &group));
 	edit_group_menu.popup (ev->button, ev->time);
 
@@ -2401,3 +2407,19 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 	}
 }
 
+void
+RouteTimeAxisView::set_edit_group_to_new ()
+{
+	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
+	g->set_active (true, this);
+
+	RouteGroupDialog d (g);
+	int const r = d.do_run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		_session.add_edit_group (g);
+		_route->set_edit_group (g, this);
+	} else {
+		delete g;
+	}
+}

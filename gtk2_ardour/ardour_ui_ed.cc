@@ -215,11 +215,11 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Keybindings"), mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
 
-	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal, 1));
+	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal, (ARDOUR::RouteGroup *) 0, 1));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("Add Audio Bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1, 1));
+	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("Add Audio Bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1, (ARDOUR::RouteGroup *) 0, 1));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("AddMIDITrack"), _("Add MIDI Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_midi_track), 1));
+	act = ActionManager::register_action (common_actions, X_("AddMIDITrack"), _("Add MIDI Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_midi_track), (ARDOUR::RouteGroup *) 0, 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	//act = ActionManager::register_action (common_actions, X_("AddMidiBus"), _("Add Midi Bus"), mem_fun(*this, &ARDOUR_UI::session_add_midi_bus));
 	//ActionManager::session_sensitive_actions.push_back (act);

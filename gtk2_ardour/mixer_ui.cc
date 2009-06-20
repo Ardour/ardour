@@ -1125,7 +1125,7 @@ Mixer_UI::mix_groups_changed ()
 void
 Mixer_UI::new_mix_group ()
 {
-	session->add_mix_group ("");
+	session->add_mix_group (new RouteGroup (*session, ""));
 }
 
 void

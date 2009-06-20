@@ -224,6 +224,7 @@ protected:
 	
 	void add_edit_group_menu_item (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
 	void set_edit_group_from_menu (ARDOUR::RouteGroup *);
+	void set_edit_group_to_new ();
 
 	void reset_samples_per_unit ();
 

@@ -486,8 +486,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
 
-	RouteGroup* add_edit_group (std::string);
-	RouteGroup* add_mix_group (std::string);
+	void add_edit_group (RouteGroup *);
+	void add_mix_group (RouteGroup *);
 
 	void remove_edit_group (RouteGroup&);
 	void remove_mix_group (RouteGroup&);
@@ -515,12 +515,14 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* fundamental operations. duh. */
 
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (
-			int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
+		int input_channels, int output_channels, TrackMode mode = Normal, RouteGroup* edit_group = 0, uint32_t how_many = 1
+		);
 	
-	RouteList new_audio_route (int input_channels, int output_channels, uint32_t how_many);
+	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* edit_group, uint32_t how_many);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
-			TrackMode mode = Normal, uint32_t how_many = 1);
+		TrackMode mode = Normal, RouteGroup* edit_group = 0, uint32_t how_many = 1
+		);
 
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();

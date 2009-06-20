@@ -1480,7 +1480,7 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 }
 
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (TrackMode mode, uint32_t how_many)
+Session::new_midi_track (TrackMode mode, RouteGroup* edit_group, uint32_t how_many)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1589,6 +1589,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 			*/
 
 			track->midi_diskstream()->non_realtime_input_change();
+			track->set_edit_group (edit_group, 0);
 
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			//track->set_remote_control_id (control_id);
@@ -1645,7 +1646,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 }
 
 list<boost::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, uint32_t how_many)
+Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* edit_group,  uint32_t how_many)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1757,6 +1758,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			channels_used += track->n_inputs ().n_audio();
 
+			track->set_edit_group (edit_group, 0);
+
 			track->audio_diskstream()->non_realtime_input_change();
 
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
@@ -1835,7 +1838,7 @@ Session::set_remote_control_ids ()
 
 
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, uint32_t how_many)
+Session::new_audio_route (int input_channels, int output_channels, RouteGroup* edit_group, uint32_t how_many)
 {
 	char bus_name[32];
 	uint32_t bus_id = 1;
@@ -1934,6 +1937,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 			channels_used += bus->n_inputs ().n_audio();
 
+			bus->set_edit_group (edit_group, 0);
 			bus->set_remote_control_id (control_id);
 			++control_id;
 

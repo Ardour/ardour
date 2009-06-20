@@ -2058,17 +2058,17 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeConstIterator niter;
-	RouteGroup* rg;
 
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "RouteGroup") {
+			RouteGroup* rg = new RouteGroup (*this, "");
 			if (edit) {
-				rg = add_edit_group ("");
+				add_edit_group (rg);
 				rg->set_state (**niter);
 			} else {
-				rg = add_mix_group ("");
+				add_mix_group (rg);
 				rg->set_state (**niter);
 			}
 		}
@@ -2133,24 +2133,20 @@ Session::possible_states () const
 	return possible_states(_path);
 }
 
-RouteGroup *
-Session::add_edit_group (string name)
+void
+Session::add_edit_group (RouteGroup* g)
 {
-	RouteGroup* rg = new RouteGroup (*this, name);
-	edit_groups.push_back (rg);
-	edit_group_added (rg); /* EMIT SIGNAL */
-	set_dirty();
-	return rg;
+	edit_groups.push_back (g);
+	edit_group_added (g); /* EMIT SIGNAL */
+	set_dirty ();
 }
 
-RouteGroup *
-Session::add_mix_group (string name)
+void
+Session::add_mix_group (RouteGroup* g)
 {
-	RouteGroup* rg = new RouteGroup (*this, name, RouteGroup::Relative);
-	mix_groups.push_back (rg);
-	mix_group_added (rg); /* EMIT SIGNAL */
-	set_dirty();
-	return rg;
+	mix_groups.push_back (g);
+	mix_group_added (g); /* EMIT SIGNAL */
+	set_dirty ();
 }
 
 void

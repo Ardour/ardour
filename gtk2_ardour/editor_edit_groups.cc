@@ -79,7 +79,7 @@ Editor::disable_all_edit_groups ()
 void
 Editor::new_edit_group ()
 {
-	session->add_edit_group ("");
+	session->add_edit_group (new RouteGroup (*session, ""));
 }
 
 void
