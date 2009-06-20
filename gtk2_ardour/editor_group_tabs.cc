@@ -66,6 +66,11 @@ EditorGroupTabs::render (cairo_t* cr)
 
 	int32_t y = 0;
 	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+
+		if ((*i)->marked_for_display() == false) {
+			continue;
+		}
+		
 		RouteGroup* g = (*i)->edit_group ();
 
 		if (g != curr_group) {
