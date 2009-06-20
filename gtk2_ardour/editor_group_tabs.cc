@@ -121,12 +121,10 @@ bool
 EditorGroupTabs::on_button_press_event (GdkEventButton* ev)
 {
 	int32_t y = 0;
-	cout << y << "\n";
 	Editor::TrackViewList::iterator i = _editor->track_views.begin();
 	while (y < ev->y && i != _editor->track_views.end()) {
 		y += (*i)->effective_height ();
 		if (y < ev->y) {
-			cout << "skip past " << (*i)->name() << "\n";
 			++i;
 		}
 	}
