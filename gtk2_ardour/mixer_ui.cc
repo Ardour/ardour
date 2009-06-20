@@ -1199,6 +1199,8 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 	}
 
 	in_group_row_change = false;
+
+	_group_tabs->set_dirty ();
 }
 
 void
