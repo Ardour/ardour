@@ -41,6 +41,7 @@
 #include "audio_time_axis.h"
 #include "editor_drag.h"
 #include "region_view.h"
+#include "editor_group_tabs.h"
 
 #include "i18n.h"
 
@@ -386,7 +387,13 @@ Editor::controls_layout_size_request (Requisition* req)
 	}
 
 	gint height = min ((gint) pos, (gint) (physical_screen_height - 600));
-	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
+
+	gint w = edit_controls_vbox.get_width();
+	if (_group_tabs->is_mapped()) {
+		w += _group_tabs->get_width ();
+	}
+		
+	gint width = max (w, controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */
 
@@ -399,6 +406,9 @@ Editor::controls_layout_size_request (Requisition* req)
 
 	if (req->width != width) {
 		gint vbox_width = edit_controls_vbox.get_width();
+		if (_group_tabs->is_mapped()) {
+			vbox_width += _group_tabs->get_width();
+		}
 		req->width = width;
 
 		/* this one is important: it determines how big the layout thinks it really is, as 
