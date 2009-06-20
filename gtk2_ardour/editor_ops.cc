@@ -4594,6 +4594,7 @@ Editor::normalize_region ()
 	spin.set_increments (0.1, 1);
 	spin.set_value (0);
 	hbox.pack_start (spin);
+	spin.set_value (_last_normalization_value);
 	hbox.pack_start (*manage (new Label (_("dbFS"))));
 	hbox.show_all ();
 	dialog.get_vbox()->pack_start (hbox);
@@ -4620,6 +4621,8 @@ Editor::normalize_region ()
 
 	commit_reversible_command ();
 	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+
+	_last_normalization_value = spin.get_value ();
 }
 
 

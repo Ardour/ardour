@@ -874,6 +874,8 @@ Editor::Editor ()
 	Config->ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed));
 	Route::SyncOrderKeys.connect (mem_fun (*this, &Editor::sync_order_keys));
 
+	_last_normalization_value = 0;
+
 	constructed = true;
 	instant_save ();
 }
