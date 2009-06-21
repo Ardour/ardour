@@ -20,7 +20,7 @@
 #include "ardour/route_group.h"
 #include "editor_group_tabs.h"
 #include "editor.h"
-#include "time_axis_view.h"
+#include "route_time_axis.h"
 #include "utils.h"
 
 using namespace std;
@@ -32,18 +32,14 @@ EditorGroupTabs::EditorGroupTabs (Editor* e)
 	
 }
 
-void
-EditorGroupTabs::render (cairo_t* cr)
+list<GroupTabs::Tab>
+EditorGroupTabs::compute_tabs () const
 {
-	/* background */
-	
-	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_rectangle (cr, 0, 0, _width, _height);
-	cairo_fill (cr);
+	list<Tab> tabs;
 
-	int32_t curr_start = 0;
-	RouteGroup* curr_group = 0;
-	Gdk::Color curr_colour;
+	Tab tab;
+	tab.from = 0;
+	tab.group = 0;
 
 	int32_t y = 0;
 	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
@@ -54,74 +50,103 @@ EditorGroupTabs::render (cairo_t* cr)
 		
 		RouteGroup* g = (*i)->route_group ();
 
-		if (g != curr_group) {
-			if (curr_group) {
-				draw_group (cr, curr_start, y, curr_group, curr_colour);
+		if (g != tab.group) {
+			if (tab.group) {
+				tab.to = y;
+				tabs.push_back (tab);
 			}
 
-			curr_start = y;
-			curr_group = g;
-			curr_colour = (*i)->color ();
+			tab.from = y;
+			tab.group = g;
+			tab.colour = (*i)->color ();
 		}
 
 		y += (*i)->effective_height ();
 	}
 
-	if (curr_group) {
-		draw_group (cr, curr_start, y, curr_group, curr_colour);
+	if (tab.group) {
+		tab.to = y;
+		tabs.push_back (tab);
 	}
+
+	return tabs;
 }
 
 void
-EditorGroupTabs::draw_group (cairo_t* cr, int32_t y1, int32_t y2, RouteGroup* g, Gdk::Color const & colour)
+EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = _width;
 
-	if (g->is_active()) {
-		cairo_set_source_rgba (cr, colour.get_red_p (), colour.get_green_p (), colour.get_blue_p (), 1);
+	if (tab.group->is_active()) {
+		cairo_set_source_rgba (cr, tab.colour.get_red_p (), tab.colour.get_green_p (), tab.colour.get_blue_p (), 1);
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
 	
-	cairo_move_to (cr, 0, y1 + arc_radius);
-	cairo_arc (cr, _width, y1 + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
-	cairo_line_to (cr, _width, y2);
-	cairo_arc (cr, _width, y2 - arc_radius, arc_radius, M_PI / 2, M_PI);
-	cairo_line_to (cr, 0, y1 + arc_radius);
+	cairo_move_to (cr, 0, tab.from + arc_radius);
+	cairo_arc (cr, _width, tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
+	cairo_line_to (cr, _width, tab.to);
+	cairo_arc (cr, _width, tab.to - arc_radius, arc_radius, M_PI / 2, M_PI);
+	cairo_line_to (cr, 0, tab.from + arc_radius);
 	cairo_fill (cr);
 
-	pair<string, double> const f = fit_to_pixels (cr, g->name(), y2 - y1 - arc_radius * 2);
+	pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
 
 	cairo_text_extents_t ext;
-	cairo_text_extents (cr, g->name().c_str(), &ext);
+	cairo_text_extents (cr, tab.group->name().c_str(), &ext);
 
 	cairo_set_source_rgb (cr, 1, 1, 1);
-	cairo_move_to (cr, _width - ext.height / 2, y1 + (f.second + y2 - y1) / 2);
+	cairo_move_to (cr, _width - ext.height / 2, tab.from + (f.second + tab.to - tab.from) / 2);
 	cairo_save (cr);
 	cairo_rotate (cr, - M_PI / 2);
 	cairo_show_text (cr, f.first.c_str());
 	cairo_restore (cr);
 }
 
-RouteGroup*
-EditorGroupTabs::click_to_route_group (GdkEventButton* ev)
+double
+EditorGroupTabs::primary_coordinate (double, double y) const
 {
-	int32_t y = 0;
-	Editor::TrackViewList::iterator i = _editor->track_views.begin();
-	while (y < ev->y && i != _editor->track_views.end()) {
+	return y;
+}
 
-		if ((*i)->marked_for_display()) {
-			y += (*i)->effective_height ();
-		}
-		
-		if (y < ev->y) {
-			++i;
-		}
-	}
+void
+EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
+{
+	list<Tab>::const_iterator j = tabs.begin ();
 	
-	if (i == _editor->track_views.end()) {
-		return 0;
+	int32_t y = 0;
+	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+
+		if ((*i)->marked_for_display() == false) {
+			continue;
+		}
+
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv) {
+
+			if (j == tabs.end()) {
+				
+				/* already run out of tabs, so no edit group */
+				rtv->route()->set_route_group (0, this);
+				
+			} else {
+				
+				if (y >= j->to) {
+					/* this tab finishes before this track starts, so onto the next tab */
+					++j;
+				}
+
+				double const h = y + (*i)->effective_height() / 2;
+
+				if (j->from < h && j->to > h) {
+					rtv->route()->set_route_group (j->group, this);
+				} else {
+					rtv->route()->set_route_group (0, this);
+				}
+				
+			}
+		}
+
+		y += (*i)->effective_height ();
 	}
-	
-	return (*i)->route_group ();
 }

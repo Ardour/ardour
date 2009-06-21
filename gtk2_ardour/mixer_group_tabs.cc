@@ -34,18 +34,14 @@ MixerGroupTabs::MixerGroupTabs (Mixer_UI* m)
 }
 
 
-void
-MixerGroupTabs::render (cairo_t* cr)
+list<GroupTabs::Tab>
+MixerGroupTabs::compute_tabs () const
 {
-	/* background */
+	list<Tab> tabs;
 	
-	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_rectangle (cr, 0, 0, _width, _height);
-	cairo_fill (cr);
-
-	int32_t curr_start = 0;
-	RouteGroup* curr_group = 0;
-	Gdk::Color curr_colour;
+	Tab tab;
+	tab.from = 0;
+	tab.group = 0;
 
 	int32_t x = 0;
 	for (list<MixerStrip*>::iterator i = _mixer->strips.begin(); i != _mixer->strips.end(); ++i) {
@@ -56,72 +52,98 @@ MixerGroupTabs::render (cairo_t* cr)
 
 		RouteGroup* g = (*i)->route_group ();
 
-		if (g != curr_group) {
-			if (curr_group) {
-				draw_group (cr, curr_start, x, curr_group, curr_colour);
+		if (g != tab.group) {
+			if (tab.group) {
+				tab.to = x;
+				tabs.push_back (tab);
 			}
 
-			curr_start = x;
-			curr_group = g;
-			curr_colour = (*i)->color ();
+			tab.from = x;
+			tab.group = g;
+			tab.colour = (*i)->color ();
 		}
 
 		x += (*i)->get_width ();
 	}
 
-	if (curr_group) {
-		draw_group (cr, curr_start, x, curr_group, curr_colour);
+	if (tab.group) {
+		tab.to = x;
+		tabs.push_back (tab);
 	}
+
+	return tabs;
 }
 
 void
-MixerGroupTabs::draw_group (cairo_t* cr, int32_t x1, int32_t x2, RouteGroup* g, Gdk::Color const & colour)
+MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = _height;
 
-	if (g->is_active()) {
-		cairo_set_source_rgba (cr, colour.get_red_p (), colour.get_green_p (), colour.get_blue_p (), 1);
+	if (tab.group->is_active()) {
+		cairo_set_source_rgba (cr, tab.colour.get_red_p (), tab.colour.get_green_p (), tab.colour.get_blue_p (), 1);
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
 	
-	cairo_arc (cr, x1 + arc_radius, _height, arc_radius, M_PI, 3 * M_PI / 2);
-	cairo_line_to (cr, x2 - arc_radius, 0);
-	cairo_arc (cr, x2 - arc_radius, _height, arc_radius, 3 * M_PI / 2, 2 * M_PI);
-	cairo_line_to (cr, x1, _height);
+	cairo_arc (cr, tab.from + arc_radius, _height, arc_radius, M_PI, 3 * M_PI / 2);
+	cairo_line_to (cr, tab.to - arc_radius, 0);
+	cairo_arc (cr, tab.to - arc_radius, _height, arc_radius, 3 * M_PI / 2, 2 * M_PI);
+	cairo_line_to (cr, tab.from, _height);
 	cairo_fill (cr);
 
-	pair<string, double> const f = fit_to_pixels (cr, g->name(), x2 - x1 - arc_radius * 2);
+	pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
 
 	cairo_text_extents_t ext;
-	cairo_text_extents (cr, g->name().c_str(), &ext);
+	cairo_text_extents (cr, tab.group->name().c_str(), &ext);
 
 	cairo_set_source_rgb (cr, 1, 1, 1);
-	cairo_move_to (cr, x1 + (x2 - x1 - f.second) / 2, _height - ext.height / 2);
+	cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, _height - ext.height / 2);
 	cairo_save (cr);
 	cairo_show_text (cr, f.first.c_str());
 	cairo_restore (cr);
 }
 
-RouteGroup*
-MixerGroupTabs::click_to_route_group (GdkEventButton* ev)
+double
+MixerGroupTabs::primary_coordinate (double x, double) const
 {
-	int32_t x = 0;
-	list<MixerStrip*>::iterator i = _mixer->strips.begin();
-	while (x < ev->x && i != _mixer->strips.end()) {
+	return x;
+}
 
-		if (!(*i)->route()->is_master() && !(*i)->route()->is_control() && (*i)->marked_for_display()) {
-			x += (*i)->get_width ();
+void
+MixerGroupTabs::reflect_tabs (list<Tab> const & tabs)
+{
+	list<Tab>::const_iterator j = tabs.begin ();
+	
+	int32_t x = 0;
+	for (list<MixerStrip*>::iterator i = _mixer->strips.begin(); i != _mixer->strips.end(); ++i) {
+
+		if ((*i)->route()->is_master() || (*i)->route()->is_control() || !(*i)->marked_for_display()) {
+			continue;
 		}
 		
-		if (x < ev->x) {
-			++i;
+		if (j == tabs.end()) {
+			
+			/* already run out of tabs, so no edit group */
+			(*i)->route()->set_route_group (0, this);
+			
+		} else {
+			
+			if (x >= j->to) {
+				/* this tab finishes before this track starts, so onto the next tab */
+				++j;
+			}
+			
+			double const h = x + (*i)->get_width() / 2;
+			
+			if (j->from < h && j->to > h) {
+				(*i)->route()->set_route_group (j->group, this);
+			} else {
+				(*i)->route()->set_route_group (0, this);
+			}
+			
 		}
-	}
 
-	if (i == _mixer->strips.end()) {
-		return 0;
+		x += (*i)->get_width ();
 	}
-	
-	return (*i)->route_group ();
 }
+

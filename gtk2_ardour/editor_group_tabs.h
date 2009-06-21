@@ -28,10 +28,13 @@ public:
 	EditorGroupTabs (Editor *);
 
 private:
-	ARDOUR::RouteGroup* click_to_route_group (GdkEventButton *);
-	void render (cairo_t *);
-	
-	void draw_group (cairo_t *, int32_t, int32_t, ARDOUR::RouteGroup* , Gdk::Color const &);
+	std::list<Tab> compute_tabs () const;
+	void draw_tab (cairo_t *, Tab const &) const;
+	double primary_coordinate (double, double) const;
+	void reflect_tabs (std::list<Tab> const &);
+	double extent () const {
+		return _height;
+	}
 	
 	Editor* _editor;
 };

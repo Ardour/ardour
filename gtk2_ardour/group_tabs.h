@@ -34,16 +34,38 @@ public:
 
 	void set_session (ARDOUR::Session *);
 
+protected:
+
+	struct Tab {
+		double from;
+		double to;
+		Gdk::Color colour;
+		ARDOUR::RouteGroup* group;
+	};
+
 private:
-	virtual ARDOUR::RouteGroup* click_to_route_group (GdkEventButton* ev) = 0;
-	virtual void render (cairo_t *) = 0;
-	
+	virtual std::list<Tab> compute_tabs () const = 0;
+	virtual void draw_tab (cairo_t *, Tab const &) const = 0;
+	virtual double primary_coordinate (double, double) const = 0;
+	virtual void reflect_tabs (std::list<Tab> const &) = 0;
+	virtual double extent () const = 0;
+
+	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
+	bool on_motion_notify_event (GdkEventMotion *);
+	bool on_button_release_event (GdkEventButton *);
 
+	Tab * click_to_tab (double, Tab**, Tab**);
 	void edit_group (ARDOUR::RouteGroup *);
 	void remove_group (ARDOUR::RouteGroup *);
 
 	ARDOUR::Session* _session;
 	Gtk::Menu* _menu;
+	std::list<Tab> _tabs;
+	Tab* _dragging;
+	bool _drag_moved;
+	bool _drag_from;
+	double _drag_last;
+	double _drag_limit;
 };
