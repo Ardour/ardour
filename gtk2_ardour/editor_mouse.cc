@@ -2412,12 +2412,12 @@ Editor::thaw_region_after_trim (RegionView& rv)
 	}
 
 	region->thaw (_("trimmed region"));
-	XMLNode &after = region->playlist()->get_state();
-	session->add_command (new MementoCommand<Playlist>(*(region->playlist()), 0, &after));
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(&rv);
-	if (arv)
+	
+	if (arv) {
 		arv->unhide_envelope ();
+	}
 }
 
 void

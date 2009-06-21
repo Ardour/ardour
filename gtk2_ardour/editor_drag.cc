@@ -1518,12 +1518,8 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		_editor->snap_to (_current_pointer_frame);
 	}
 
-	if (_current_pointer_frame == _last_pointer_frame) {
-		return;
-	}
-
 	if (first_move) {
-	
+
 		string trim_type;
 
 		switch (_operation) {
@@ -1558,6 +1554,10 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				pl->freeze();
 			}
 		}
+	}
+
+	if (_current_pointer_frame == _last_pointer_frame) {
+		return;
 	}
 
 	if (left_direction) {
