@@ -138,7 +138,7 @@ public:
 	
 	std::string         name() const;
 	StreamView*         view() const { return _view; }
-	ARDOUR::RouteGroup* edit_group() const;
+	ARDOUR::RouteGroup* route_group() const;
 	boost::shared_ptr<ARDOUR::Playlist> playlist() const;
 
 	void fast_update ();
@@ -222,9 +222,9 @@ protected:
 
 	virtual void label_view ();
 	
-	void add_edit_group_menu_item (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
-	void set_edit_group_from_menu (ARDOUR::RouteGroup *);
-	void set_edit_group_to_new ();
+	void add_route_group_menu_item (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
+	void set_route_group_from_menu (ARDOUR::RouteGroup *);
+	void set_route_group_to_new ();
 
 	void reset_samples_per_unit ();
 
@@ -271,7 +271,7 @@ protected:
 	Gtk::HBox   other_button_hbox;
 	Gtk::Table  button_table;
 	Gtk::Button processor_button;
-	Gtk::Button edit_group_button;
+	Gtk::Button route_group_button;
 	Gtk::Button playlist_button;
 	Gtk::Button size_button;
 	Gtk::Button automation_button;
@@ -280,7 +280,7 @@ protected:
 	
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
-	Gtk::Menu           edit_group_menu;
+	Gtk::Menu           route_group_menu;
 	Gtk::RadioMenuItem* align_existing_item;
 	Gtk::RadioMenuItem* align_capture_item;
 	Gtk::RadioMenuItem* normal_track_mode_item;

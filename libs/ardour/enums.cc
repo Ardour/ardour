@@ -89,6 +89,7 @@ setup_enum_writer ()
 	Diskstream::Flag _Diskstream_Flag;
 	Location::Flags _Location_Flags;
 	RouteGroup::Flag _RouteGroup_Flag;
+	RouteGroup::Property _RouteGroup_Property;
 	Region::Flag _Region_Flag;
 	Region::PositionLockStyle _Region_PositionLockStyle;
 	Track::FreezeState _Track_FreezeState;
@@ -369,11 +370,18 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsStart);
 	REGISTER_BITS (_Location_Flags);
 
-
 	REGISTER_CLASS_ENUM (RouteGroup, Relative);
 	REGISTER_CLASS_ENUM (RouteGroup, Active);
 	REGISTER_CLASS_ENUM (RouteGroup, Hidden);
 	REGISTER_BITS (_RouteGroup_Flag);
+
+	REGISTER_CLASS_ENUM (RouteGroup, Gain);
+	REGISTER_CLASS_ENUM (RouteGroup, Mute);
+	REGISTER_CLASS_ENUM (RouteGroup, Solo);
+	REGISTER_CLASS_ENUM (RouteGroup, RecEnable);
+	REGISTER_CLASS_ENUM (RouteGroup, Select);
+	REGISTER_CLASS_ENUM (RouteGroup, Edit);
+	REGISTER_BITS (_RouteGroup_Property);
 
 	REGISTER_CLASS_ENUM (Panner, SameDirection);
 	REGISTER_CLASS_ENUM (Panner, OppositeDirection);

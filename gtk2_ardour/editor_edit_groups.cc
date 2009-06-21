@@ -43,49 +43,49 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::build_edit_group_list_menu ()
+Editor::build_route_group_list_menu ()
 {
 	using namespace Gtk::Menu_Helpers;
 
-	edit_group_list_menu = new Menu;
-	edit_group_list_menu->set_name ("ArdourContextMenu");
-	MenuList& items = edit_group_list_menu->items();
+	route_group_list_menu = new Menu;
+	route_group_list_menu->set_name ("ArdourContextMenu");
+	MenuList& items = route_group_list_menu->items();
 
-	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_edit_groups)));
-	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Editor::disable_all_edit_groups)));
+	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_route_groups)));
+	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Editor::disable_all_route_groups)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Editor::new_edit_group)));
+	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Editor::new_route_group)));
 	
 }
 
 void
-Editor::activate_all_edit_groups ()
+Editor::activate_all_route_groups ()
 {
-        Gtk::TreeModel::Children children = group_model->children();
-	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-	        (*iter)[group_columns.is_active] = true;
-	}
+	session->foreach_route_group (bind (mem_fun (*this, &Editor::set_route_group_activation), true));
 }
 
 void
-Editor::disable_all_edit_groups ()
+Editor::disable_all_route_groups ()
 {
-        Gtk::TreeModel::Children children = group_model->children();
-	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-	        (*iter)[group_columns.is_active] = false;
-	}
+	session->foreach_route_group (bind (mem_fun (*this, &Editor::set_route_group_activation), false));
 }
 
 void
-Editor::new_edit_group ()
+Editor::set_route_group_activation (RouteGroup* g, bool a)
 {
-	session->add_edit_group (new RouteGroup (*session, ""));
+	g->set_active (a, this);
 }
 
 void
-Editor::remove_selected_edit_group ()
+Editor::new_route_group ()
 {
-	Glib::RefPtr<TreeSelection> selection = edit_group_display.get_selection();
+	session->add_route_group (new RouteGroup (*session, ""));
+}
+
+void
+Editor::remove_selected_route_group ()
+{
+	Glib::RefPtr<TreeSelection> selection = route_group_display.get_selection();
 	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
 
 	if (rows.empty()) {
@@ -102,25 +102,25 @@ Editor::remove_selected_edit_group ()
 		RouteGroup* rg = (*iter)[group_columns.routegroup];
 
 		if (rg) {
-			session->remove_edit_group (*rg);
+			session->remove_route_group (*rg);
 		}
 	}
 }
 
 void
-Editor::edit_group_list_button_clicked ()
+Editor::route_group_list_button_clicked ()
 {
-	new_edit_group ();
+	new_route_group ();
 }
 
 gint
-Editor::edit_group_list_button_press_event (GdkEventButton* ev)
+Editor::route_group_list_button_press_event (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		if (edit_group_list_menu == 0) {
-			build_edit_group_list_menu ();
+		if (route_group_list_menu == 0) {
+			build_route_group_list_menu ();
 		}
-		edit_group_list_menu->popup (1, ev->time);
+		route_group_list_menu->popup (1, ev->time);
 		return true;
 	}
 
@@ -132,7 +132,7 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 	int cellx;
 	int celly;
 
-	if (!edit_group_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+	if (!route_group_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
 
@@ -143,7 +143,7 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 				if ((group = (*iter)[group_columns.routegroup]) != 0) {
 					// edit_route_group (group);
 #ifdef GTKOSX
-					edit_group_display.queue_draw();
+					route_group_display.queue_draw();
 #endif
 					return true;
 				}
@@ -154,21 +154,10 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 
 	case 1:
 		if ((iter = group_model->get_iter (path))) {
-			bool active = (*iter)[group_columns.is_active];
-			(*iter)[group_columns.is_active] = !active;
-#ifdef GTKOSX
-			edit_group_display.queue_draw();
-#endif
-			return true;
-		}
-		break;
-		
-	case 2:
-		if ((iter = group_model->get_iter (path))) {
 			bool visible = (*iter)[group_columns.is_visible];
 			(*iter)[group_columns.is_visible] = !visible;
 #ifdef GTKOSX
-			edit_group_display.queue_draw();
+			route_group_display.queue_draw();
 #endif
 			return true;
 		}
@@ -182,11 +171,11 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
  }
 
 void 
-Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
+Editor::route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
 	RouteGroup* group;
 
-	if (in_edit_group_row_change) {
+	if (in_route_group_row_change) {
 		return;
 	}
 
@@ -196,21 +185,17 @@ Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 
 	if ((*iter)[group_columns.is_visible]) {
 		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
-			if ((*j)->edit_group() == group) {
+			if ((*j)->route_group() == group) {
 				show_track_in_display (**j);
 			}
 		}
 	} else {
 		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
-			if ((*j)->edit_group() == group) {
+			if ((*j)->route_group() == group) {
 				hide_track_in_display (**j);
 			}
 		}
 	}
-
-	bool active = (*iter)[group_columns.is_active];
-	group->set_active (active, this);
-
 
 	string name = (*iter)[group_columns.text];
 
@@ -220,16 +205,15 @@ Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 }
 
 void
-Editor::add_edit_group (RouteGroup* group)
+Editor::add_route_group (RouteGroup* group)
 {
-        ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::add_edit_group), group));
+        ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::add_route_group), group));
 	bool focus = false;
 
 	TreeModel::Row row = *(group_model->append());
-	row[group_columns.is_active] = group->is_active();
 	row[group_columns.is_visible] = !group->is_hidden();
 
-	in_edit_group_row_change = true;
+	in_route_group_row_change = true;
 
 	row[group_columns.routegroup] = group;
 
@@ -243,20 +227,20 @@ Editor::add_edit_group (RouteGroup* group)
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Editor::group_flags_changed), group));
 
 	if (focus) {
-		TreeViewColumn* col = edit_group_display.get_column (0);
-		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(edit_group_display.get_column_cell_renderer (0));
-		edit_group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
+		TreeViewColumn* col = route_group_display.get_column (0);
+		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(route_group_display.get_column_cell_renderer (0));
+		route_group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
 
-	in_edit_group_row_change = false;
+	in_route_group_row_change = false;
 
 	_group_tabs->set_dirty ();
 }
 
 void
-Editor::edit_groups_changed ()
+Editor::route_groups_changed ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::edit_groups_changed));
+	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::route_groups_changed));
 
 	/* just rebuild the while thing */
 
@@ -265,13 +249,12 @@ Editor::edit_groups_changed ()
 	{
 		TreeModel::Row row;
 		row = *(group_model->append());
-		row[group_columns.is_active] = false;
 		row[group_columns.is_visible] = true;
 		row[group_columns.text] = (_("-all-"));
 		row[group_columns.routegroup] = 0;
 	}
 
-	session->foreach_edit_group (mem_fun (*this, &Editor::add_edit_group));
+	session->foreach_route_group (mem_fun (*this, &Editor::add_route_group));
 }
 
 void
@@ -279,24 +262,23 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 {
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::group_flags_changed), src, group));
 
-	in_edit_group_row_change = true;
+	in_route_group_row_change = true;
 
         Gtk::TreeModel::Children children = group_model->children();
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		if (group == (*iter)[group_columns.routegroup]) {
-			(*iter)[group_columns.is_active] = group->is_active();
 			(*iter)[group_columns.is_visible] = !group->is_hidden();
 			(*iter)[group_columns.text] = group->name();
 		}
 	}
 
-	in_edit_group_row_change = false;
+	in_route_group_row_change = false;
 
 	_group_tabs->set_dirty ();
 }
 
 void
-Editor::edit_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+Editor::route_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
 {
 	RouteGroup* group;
 	TreeIter iter;

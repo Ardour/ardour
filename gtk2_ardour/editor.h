@@ -1060,6 +1060,7 @@ class Editor : public PublicEditor
 	/* track views */
 	TrackViewList track_views;
 	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
+	TrackSelection axis_views_from_routes (std::list<ARDOUR::Route *>) const;
 
 	static Gdk::Cursor* cross_hair_cursor;
 	static Gdk::Cursor* trimmer_cursor;
@@ -1842,12 +1843,10 @@ public:
 
         struct GroupListModelColumns : public Gtk::TreeModel::ColumnRecord {
                 GroupListModelColumns () {
-		       add (is_active);
 		       add (is_visible);
                        add (text);
 		       add (routegroup);
                 }
-	        Gtk::TreeModelColumn<bool> is_active;
 	        Gtk::TreeModelColumn<bool> is_visible;
 	        Gtk::TreeModelColumn<std::string> text;
 	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*>   routegroup;
@@ -1857,23 +1856,23 @@ public:
 	Glib::RefPtr<Gtk::ListStore> group_model;
 	Glib::RefPtr<Gtk::TreeSelection> group_selection;
 
-	Gtk::TreeView          edit_group_display;
-	Gtk::ScrolledWindow    edit_group_display_scroller;
-	Gtk::Menu*             edit_group_list_menu;
+	Gtk::TreeView          route_group_display;
+	Gtk::ScrolledWindow    route_group_display_scroller;
+	Gtk::Menu*             route_group_list_menu;
 
-	void build_edit_group_list_menu ();
-	void activate_all_edit_groups ();
-	void disable_all_edit_groups ();
+	void build_route_group_list_menu ();
+	void activate_all_route_groups ();
+	void disable_all_route_groups ();
 
-	bool in_edit_group_row_change;
-	void edit_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
-	void edit_group_name_edit (const Glib::ustring&, const Glib::ustring&);
-	void new_edit_group ();
-	void edit_group_list_button_clicked ();
-	gint edit_group_list_button_press_event (GdkEventButton* ev);
-	void add_edit_group (ARDOUR::RouteGroup* group);
-	void remove_selected_edit_group ();
-	void edit_groups_changed ();
+	bool in_route_group_row_change;
+	void route_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
+	void route_group_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void new_route_group ();
+	void route_group_list_button_clicked ();
+	gint route_group_list_button_press_event (GdkEventButton* ev);
+	void add_route_group (ARDOUR::RouteGroup* group);
+	void remove_selected_route_group ();
+	void route_groups_changed ();
 	void group_flags_changed (void*, ARDOUR::RouteGroup*);
 
 	Gtk::VBox           list_vpacker;
@@ -2018,10 +2017,10 @@ public:
 	void freeze_route ();
 	void unfreeze_route ();
 
-	/* edit-group solo + mute */
+	/* route-group solo + mute */
 
-	void set_edit_group_solo (ARDOUR::Route&, bool);
-	void set_edit_group_mute (ARDOUR::Route&, bool);
+	void set_route_group_solo (ARDOUR::Route&, bool);
+	void set_route_group_mute (ARDOUR::Route&, bool);
 
 	/* duplication */
 
@@ -2243,6 +2242,8 @@ public:
 	void streamview_height_changed ();
 
 	EditorGroupTabs* _group_tabs;
+
+	void set_route_group_activation (ARDOUR::RouteGroup *, bool);
 
 	friend class Drag;
 	friend class RegionDrag;

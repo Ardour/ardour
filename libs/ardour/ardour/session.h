@@ -377,8 +377,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	sigc::signal<void> Located;
 
 	sigc::signal<void,RouteList&> RouteAdded;
-	sigc::signal<void> RouteEditGroupChanged;
-	sigc::signal<void> RouteMixGroupChanged;
+	sigc::signal<void> RouteGroupChanged;
 
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
@@ -487,28 +486,16 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
 
-	void add_edit_group (RouteGroup *);
-	void add_mix_group (RouteGroup *);
+	void add_route_group (RouteGroup *);
+	void remove_route_group (RouteGroup&);
 
-	void remove_edit_group (RouteGroup&);
-	void remove_mix_group (RouteGroup&);
+	RouteGroup *route_group_by_name (std::string);
 
-	RouteGroup *mix_group_by_name (std::string);
-	RouteGroup *edit_group_by_name (std::string);
+	sigc::signal<void,RouteGroup*> route_group_added;
+	sigc::signal<void>             route_group_removed;
 
-	sigc::signal<void,RouteGroup*> edit_group_added;
-	sigc::signal<void,RouteGroup*> mix_group_added;
-	sigc::signal<void>             edit_group_removed;
-	sigc::signal<void>             mix_group_removed;
-
-	void foreach_edit_group (sigc::slot<void,RouteGroup*> sl) {
-		for (std::list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); i++) {
-			sl (*i);
-		}
-	}
-
-	void foreach_mix_group (sigc::slot<void,RouteGroup*> sl) {
-		for (std::list<RouteGroup *>::iterator i = mix_groups.begin(); i != mix_groups.end(); i++) {
+	void foreach_route_group (sigc::slot<void,RouteGroup*> sl) {
+		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); i++) {
 			sl (*i);
 		}
 	}
@@ -516,13 +503,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* fundamental operations. duh. */
 
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (
-		int input_channels, int output_channels, TrackMode mode = Normal, RouteGroup* edit_group = 0, uint32_t how_many = 1
+		int input_channels, int output_channels, TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1
 		);
 	
-	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* edit_group, uint32_t how_many);
+	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
-		TrackMode mode = Normal, RouteGroup* edit_group = 0, uint32_t how_many = 1
+		TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1
 		);
 
 	void   remove_route (boost::shared_ptr<Route>);
@@ -1436,13 +1423,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* edit/mix groups */
 
-	int load_route_groups (const XMLNode&, bool is_edit);
-	int load_edit_groups (const XMLNode&);
-	int load_mix_groups (const XMLNode&);
+	int load_route_groups (const XMLNode&);
 
-
-	std::list<RouteGroup *> edit_groups;
-	std::list<RouteGroup *> mix_groups;
+	std::list<RouteGroup *> _route_groups;
 
 	/* disk-streams */
 
@@ -1489,8 +1472,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	int load_regions (const XMLNode& node);
 
-	void route_edit_group_changed ();
-	void route_mix_group_changed ();
+	void route_group_changed ();
 
 	/* SOURCES */
 

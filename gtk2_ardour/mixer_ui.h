@@ -175,21 +175,21 @@ class Mixer_UI : public Gtk::Window
 	void show_all_audiotracks();
 	void hide_all_audiotracks ();
 
-	Gtk::Menu* mix_group_context_menu;
+	Gtk::Menu* route_group_context_menu;
 	bool in_group_row_change;
 
 	void group_selected (gint row, gint col, GdkEvent *ev);
 	void group_unselected (gint row, gint col, GdkEvent *ev);
 	void group_display_active_clicked();
-	void new_mix_group ();
-	void remove_selected_mix_group ();
-	void build_mix_group_context_menu ();
-	void activate_all_mix_groups ();
-	void disable_all_mix_groups ();
-	void add_mix_group (ARDOUR::RouteGroup *);
-	void mix_groups_changed ();
-	void mix_group_name_edit (const Glib::ustring&, const Glib::ustring&);
-	void mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
+	void new_route_group ();
+	void remove_selected_route_group ();
+	void build_route_group_context_menu ();
+	void activate_all_route_groups ();
+	void disable_all_route_groups ();
+	void add_route_group (ARDOUR::RouteGroup *);
+	void route_groups_changed ();
+	void route_group_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
 
 	Gtk::Menu *track_menu;
 	void track_column_click (gint);
@@ -218,12 +218,10 @@ class Mixer_UI : public Gtk::Window
 
 	struct GroupDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    GroupDisplayModelColumns() { 
-		    add (active);
 		    add (visible);
 		    add (text);
 		    add (group);
 	    }
-	    Gtk::TreeModelColumn<bool>					active;
 	    Gtk::TreeModelColumn<bool>					visible;
 	    Gtk::TreeModelColumn<Glib::ustring>			text;
 	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*>	group;
@@ -253,6 +251,7 @@ class Mixer_UI : public Gtk::Window
 	bool ignore_sync;
 
 	void parameter_changed (std::string const &);
+	void set_route_group_activation (ARDOUR::RouteGroup *, bool);
 
 	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;

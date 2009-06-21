@@ -66,7 +66,7 @@ Mixer_UI::Mixer_UI ()
 	session = 0;
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
 	track_menu = 0;
-	mix_group_context_menu = 0;
+	route_group_context_menu = 0;
 	no_track_list_redisplay = false;
 	in_group_row_change = false;
 	_visible = false;
@@ -120,14 +120,11 @@ Mixer_UI::Mixer_UI ()
 	group_model = ListStore::create (group_columns);
 	group_display.set_model (group_model);
 	group_display.append_column (_("Group"), group_columns.text);
-	group_display.append_column (_("Active"), group_columns.active);
 	group_display.append_column (_("Show"), group_columns.visible);
 	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
 	group_display.get_column (0)->set_expand(true);
 	group_display.get_column (1)->set_expand(false);
-	group_display.get_column (2)->set_expand(false);
 	group_display.set_name ("MixerGroupList");
 	group_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	group_display.set_reorderable (true);
@@ -138,7 +135,7 @@ Mixer_UI::Mixer_UI ()
 
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
 	name_cell->property_editable() = true;
-	name_cell->signal_edited().connect (mem_fun (*this, &Mixer_UI::mix_group_name_edit));
+	name_cell->signal_edited().connect (mem_fun (*this, &Mixer_UI::route_group_name_edit));
 
 	/* use checkbox for the active column */
 
@@ -146,44 +143,38 @@ Mixer_UI::Mixer_UI ()
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	/* use checkbox for the visible column */
-
-	active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (2));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	group_model->signal_row_changed().connect (mem_fun (*this, &Mixer_UI::mix_group_row_change));
+	group_model->signal_row_changed().connect (mem_fun (*this, &Mixer_UI::route_group_row_change));
 
 	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press), false);
 
 	group_display_scroller.add (group_display);
 	group_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	HBox* mix_group_display_button_box = manage (new HBox());
+	HBox* route_group_display_button_box = manage (new HBox());
 
-	Button* mix_group_add_button = manage (new Button ());
-	Button* mix_group_remove_button = manage (new Button ());
+	Button* route_group_add_button = manage (new Button ());
+	Button* route_group_remove_button = manage (new Button ());
 
 	Widget* w;
 
 	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show();
-	mix_group_add_button->add (*w);
+	route_group_add_button->add (*w);
 
 	w = manage (new Image (Stock::REMOVE, ICON_SIZE_BUTTON));
 	w->show();
-	mix_group_remove_button->add (*w);
+	route_group_remove_button->add (*w);
 
-	mix_group_display_button_box->set_homogeneous (true);
+	route_group_display_button_box->set_homogeneous (true);
 
-	mix_group_add_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::new_mix_group));
-	mix_group_remove_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::remove_selected_mix_group));
+	route_group_add_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::new_route_group));
+	route_group_remove_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::remove_selected_route_group));
 
-	mix_group_display_button_box->add (*mix_group_remove_button);
-	mix_group_display_button_box->add (*mix_group_add_button);
+	route_group_display_button_box->add (*route_group_remove_button);
+	route_group_display_button_box->add (*route_group_add_button);
 
 	group_display_vbox.pack_start (group_display_scroller, true, true);
-	group_display_vbox.pack_start (*mix_group_display_button_box, false, false);
+	group_display_vbox.pack_start (*route_group_display_button_box, false, false);
 
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -235,9 +226,9 @@ Mixer_UI::Mixer_UI ()
 
 	_selection.RoutesChanged.connect (mem_fun(*this, &Mixer_UI::follow_strip_selection));
 
-	mix_group_display_button_box->show();
-	mix_group_add_button->show();
-	mix_group_remove_button->show();
+	route_group_display_button_box->show();
+	route_group_add_button->show();
+	route_group_remove_button->show();
 
 	global_hpacker.show();
 	global_vpacker.show();
@@ -485,11 +476,11 @@ Mixer_UI::connect_to_session (Session* sess)
 
 	session->GoingAway.connect (mem_fun(*this, &Mixer_UI::disconnect_from_session));
 	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
-	session->mix_group_added.connect (mem_fun(*this, &Mixer_UI::add_mix_group));
-	session->mix_group_removed.connect (mem_fun(*this, &Mixer_UI::mix_groups_changed));
+	session->route_group_added.connect (mem_fun(*this, &Mixer_UI::add_route_group));
+	session->route_group_removed.connect (mem_fun(*this, &Mixer_UI::route_groups_changed));
 	session->config.ParameterChanged.connect (mem_fun (*this, &Mixer_UI::parameter_changed));
 
-	mix_groups_changed ();
+	route_groups_changed ();
 	
 	_plugin_selector->set_session (session);
 
@@ -1013,18 +1004,18 @@ Mixer_UI::strip_name_changed (MixerStrip* mx)
 
 
 void
-Mixer_UI::build_mix_group_context_menu ()
+Mixer_UI::build_route_group_context_menu ()
 {
 	using namespace Gtk::Menu_Helpers;
 
-	mix_group_context_menu = new Menu;
-	mix_group_context_menu->set_name ("ArdourContextMenu");
-	MenuList& items = mix_group_context_menu->items();
+	route_group_context_menu = new Menu;
+	route_group_context_menu->set_name ("ArdourContextMenu");
+	MenuList& items = route_group_context_menu->items();
 
-	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Mixer_UI::activate_all_mix_groups)));
-	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Mixer_UI::disable_all_mix_groups)));
+	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Mixer_UI::activate_all_route_groups)));
+	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Mixer_UI::disable_all_route_groups)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Mixer_UI::new_mix_group)));
+	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Mixer_UI::new_route_group)));
 	
 }
 
@@ -1032,10 +1023,10 @@ bool
 Mixer_UI::group_display_button_press (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		if (mix_group_context_menu == 0) {
-			build_mix_group_context_menu ();
+		if (route_group_context_menu == 0) {
+			build_route_group_context_menu ();
 		}
-		mix_group_context_menu->popup (1, ev->time);
+		route_group_context_menu->popup (1, ev->time);
 		return true;
 	}
 
@@ -1056,7 +1047,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		if (Keyboard::is_edit_event (ev)) {
 			if ((iter = group_model->get_iter (path))) {
 				if ((group = (*iter)[group_columns.group]) != 0) {
-					// edit_mix_group (group);
+					// edit_route_group (group);
 #ifdef GTKOSX
 					group_display.queue_draw();
 #endif
@@ -1068,17 +1059,6 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		break;
 
 	case 1:
-		if ((iter = group_model->get_iter (path))) {
-			bool active = (*iter)[group_columns.active];
-			(*iter)[group_columns.active] = !active;
-#ifdef GTKOSX
-			group_display.queue_draw();
-#endif
-			return true;
-		}
-		break;
-		
-	case 2:
 		if ((iter = group_model->get_iter (path))) {
 			bool visible = (*iter)[group_columns.visible];
 			(*iter)[group_columns.visible] = !visible;
@@ -1097,27 +1077,21 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
  }
 
 void
-Mixer_UI::activate_all_mix_groups ()
+Mixer_UI::activate_all_route_groups ()
 {
-        Gtk::TreeModel::Children children = group_model->children();
-	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-	        (*iter)[group_columns.active] = true;
-	}
+	session->foreach_route_group (bind (mem_fun (*this, &Mixer_UI::set_route_group_activation), true));
 }
 
 void
-Mixer_UI::disable_all_mix_groups ()
+Mixer_UI::disable_all_route_groups ()
 {
-        Gtk::TreeModel::Children children = group_model->children();
-	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-	        (*iter)[group_columns.active] = false;
-	}
+	session->foreach_route_group (bind (mem_fun (*this, &Mixer_UI::set_route_group_activation), false));
 }
 
 void
-Mixer_UI::mix_groups_changed ()
+Mixer_UI::route_groups_changed ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &Mixer_UI::mix_groups_changed));
+	ENSURE_GUI_THREAD (mem_fun (*this, &Mixer_UI::route_groups_changed));
 
 	/* just rebuild the while thing */
 
@@ -1126,23 +1100,22 @@ Mixer_UI::mix_groups_changed ()
 	{
 		TreeModel::Row row;
 		row = *(group_model->append());
-		row[group_columns.active] = false;
 		row[group_columns.visible] = true;
 		row[group_columns.text] = (_("-all-"));
 		row[group_columns.group] = 0;
 	}
 
-	session->foreach_mix_group (mem_fun (*this, &Mixer_UI::add_mix_group));
+	session->foreach_route_group (mem_fun (*this, &Mixer_UI::add_route_group));
 }
 
 void
-Mixer_UI::new_mix_group ()
+Mixer_UI::new_route_group ()
 {
-	session->add_mix_group (new RouteGroup (*session, ""));
+	session->add_route_group (new RouteGroup (*session, ""));
 }
 
 void
-Mixer_UI::remove_selected_mix_group ()
+Mixer_UI::remove_selected_route_group ()
 {
 	Glib::RefPtr<TreeSelection> selection = group_display.get_selection();
 	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
@@ -1161,7 +1134,7 @@ Mixer_UI::remove_selected_mix_group ()
 		RouteGroup* rg = (*iter)[group_columns.group];
 
 		if (rg) {
-			session->remove_mix_group (*rg);
+			session->remove_route_group (*rg);
 		}
 	}
 }
@@ -1180,8 +1153,8 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 	*/
 
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		if ((*i)->mix_group() == group) {
-			(*i)->mix_group_changed(0);
+		if ((*i)->route_group() == group) {
+			(*i)->route_group_changed(0);
 		}
 	}
 	
@@ -1194,7 +1167,6 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[group_columns.group] == group) {
 			(*i)[group_columns.visible] = !group->is_hidden ();
-			(*i)[group_columns.active] = group->is_active ();
 			(*i)[group_columns.text] = group->name ();
 			break;
 		}
@@ -1206,7 +1178,7 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 }
 
 void
-Mixer_UI::mix_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+Mixer_UI::route_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
 {
 	RouteGroup* group;
 	TreeIter iter;
@@ -1224,7 +1196,7 @@ Mixer_UI::mix_group_name_edit (const Glib::ustring& path, const Glib::ustring& n
 }
 
 void 
-Mixer_UI::mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
+Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
 	RouteGroup* group;
 
@@ -1238,20 +1210,17 @@ Mixer_UI::mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::Tree
 
 	if ((*iter)[group_columns.visible]) {
 		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			if ((*i)->mix_group() == group) {
+			if ((*i)->route_group() == group) {
 				show_strip (*i);
 			}
 		}
 	} else {
 		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			if ((*i)->mix_group() == group) {
+			if ((*i)->route_group() == group) {
 				hide_strip (*i);
 			}
 		}
 	} 
-
-	bool active = (*iter)[group_columns.active];
-	group->set_active (active, this);
 
 	Glib::ustring name = (*iter)[group_columns.text];
 
@@ -1262,15 +1231,14 @@ Mixer_UI::mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::Tree
 }
 
 void
-Mixer_UI::add_mix_group (RouteGroup* group)
+Mixer_UI::add_route_group (RouteGroup* group)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_mix_group), group));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_route_group), group));
 	bool focus = false;
 
 	in_group_row_change = true;
 
 	TreeModel::Row row = *(group_model->append());
-	row[group_columns.active] = group->is_active();
 	row[group_columns.visible] = true;
 	row[group_columns.group] = group;
 	if (!group->name().empty()) {
@@ -1517,5 +1485,11 @@ Mixer_UI::parameter_changed (string const & p)
 			_group_tabs->hide ();
 		}
 	}
+}
+		
+void
+Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
+{
+	g->set_active (a, this);
 }
 		

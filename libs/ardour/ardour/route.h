@@ -139,13 +139,9 @@ class Route : public SessionObject, public AutomatableControls
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
 
-	void       set_edit_group (RouteGroup *, void *);
-	void       drop_edit_group (void *);
-	RouteGroup *edit_group () const { return _edit_group; }
-
-	void       set_mix_group (RouteGroup *, void *);
-	void       drop_mix_group (void *);
-	RouteGroup *mix_group () const { return _mix_group; }
+	void       set_route_group (RouteGroup *, void *);
+	void       drop_route_group (void *);
+	RouteGroup *route_group () const { return _route_group; }
 
 	virtual void set_meter_point (MeterPoint, void *src);
 	MeterPoint   meter_point() const { return _meter_point; }
@@ -243,8 +239,7 @@ class Route : public SessionObject, public AutomatableControls
 	sigc::signal<void,void*> main_outs_changed;
 	sigc::signal<void>       processors_changed;
 	sigc::signal<void,void*> record_enable_changed;
-	sigc::signal<void,void*> edit_group_changed;
-	sigc::signal<void,void*> mix_group_changed;
+	sigc::signal<void,void*> route_group_changed;
 	sigc::signal<void,void*> meter_change;
 	sigc::signal<void>       signal_latency_changed;
 	sigc::signal<void>       initial_delay_changed;
@@ -364,8 +359,7 @@ class Route : public SessionObject, public AutomatableControls
 	boost::shared_ptr<SoloControllable> _solo_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
 
-	RouteGroup*    _edit_group;
-	RouteGroup*    _mix_group;
+	RouteGroup*    _route_group;
 	std::string    _comment;
 	bool           _have_internal_generator;
 	bool           _solo_safe;

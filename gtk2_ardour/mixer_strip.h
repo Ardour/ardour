@@ -94,7 +94,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void fast_update ();
 	void set_embedded (bool);
 	
-	ARDOUR::RouteGroup* mix_group() const;
+	ARDOUR::RouteGroup* route_group() const;
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
 #ifdef GTKOSX
@@ -226,10 +226,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void comment_edited ();
 	bool ignore_comment_edit;
 
-	void set_mix_group (ARDOUR::RouteGroup *);
-	void add_mix_group_to_menu (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
-	bool select_mix_group (GdkEventButton *);
-	void mix_group_changed (void *);
+	void set_route_group (ARDOUR::RouteGroup *);
+	void add_route_group_to_menu (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
+	bool select_route_group (GdkEventButton *);
+	void route_group_changed (void *);
 
 	IOSelectorWindow *input_selector;
 	IOSelectorWindow *output_selector;
@@ -257,7 +257,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 	void revert_to_default_display ();
 
-	void set_mix_group_to_new ();
+	void set_route_group_to_new ();
 
 	static int scrollbar_height;
 };

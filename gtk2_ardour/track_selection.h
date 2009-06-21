@@ -24,6 +24,10 @@
 
 class TimeAxisView;
 
-struct TrackSelection : public std::list<TimeAxisView*> {};
+class TrackSelection : public std::list<TimeAxisView*>
+{
+public:
+	std::list<TimeAxisView*> add (std::list<TimeAxisView*> const &);
+};
 
 #endif /* __ardour_gtk_track_selection_h__ */

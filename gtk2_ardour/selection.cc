@@ -270,18 +270,14 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 void
 Selection::add (const list<TimeAxisView*>& track_list)
 {
-	bool changed = false;
+	list<TimeAxisView*> added = tracks.add (track_list);
 
-	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
-		if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
-			void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-			(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), (*i)));
-			tracks.push_back (*i);
-			changed = true;
-		}
+	for (list<TimeAxisView*>::const_iterator i = added.begin(); i != added.end(); ++i) {
+		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
+		(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), (*i)));
 	}
 	
-	if (changed) {
+	if (!added.empty()) {
 		TracksChanged ();
 	}
 }
@@ -590,7 +586,7 @@ Selection::set (TimeAxisView* track, nframes_t start, nframes_t end)
 
 	if (track) {
 		time.track = track;
-		time.group = track->edit_group();
+		time.group = track->route_group();
 	} else {
 		time.track = 0;
 		time.group = 0;

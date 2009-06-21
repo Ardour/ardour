@@ -18,20 +18,32 @@
 */
 
 #include <gtkmm/menu.h>
-#include "group_tabs.h"
+#include "cairo_widget.h"
+
+namespace ARDOUR {
+	class Session;
+	class RouteGroup;
+}
 
 class Editor;
 
-class EditorGroupTabs : public GroupTabs
+class GroupTabs : public CairoWidget
 {
 public:
-	EditorGroupTabs (Editor *);
+	GroupTabs ();
+
+	void set_session (ARDOUR::Session *);
 
 private:
-	ARDOUR::RouteGroup* click_to_route_group (GdkEventButton *);
-	void render (cairo_t *);
+	virtual ARDOUR::RouteGroup* click_to_route_group (GdkEventButton* ev) = 0;
+	virtual void render (cairo_t *) = 0;
 	
-	void draw_group (cairo_t *, int32_t, int32_t, ARDOUR::RouteGroup* , Gdk::Color const &);
-	
-	Editor* _editor;
+	void on_size_request (Gtk::Requisition *);
+	bool on_button_press_event (GdkEventButton *);
+
+	void edit_group (ARDOUR::RouteGroup *);
+	void remove_group (ARDOUR::RouteGroup *);
+
+	ARDOUR::Session* _session;
+	Gtk::Menu* _menu;
 };

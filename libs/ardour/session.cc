@@ -469,32 +469,12 @@ Session::destroy ()
 	}
 	sources.clear ();
 
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete mix groups\n";
-#endif /* TRACK_DESTRUCTION */
-	for (list<RouteGroup *>::iterator i = mix_groups.begin(); i != mix_groups.end(); ) {
-		list<RouteGroup*>::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		delete *i;
-
-		i = tmp;
-	}
 
 #ifdef TRACK_DESTRUCTION
-	cerr << "delete edit groups\n";
+	cerr << "delete route groups\n";
 #endif /* TRACK_DESTRUCTION */
-	for (list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); ) {
-		list<RouteGroup*>::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
+	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ) {
 		delete *i;
-
-		i = tmp;
 	}
 
 	delete [] butler_mixdown_buffer;
@@ -1480,7 +1460,7 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 }
 
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (TrackMode mode, RouteGroup* edit_group, uint32_t how_many)
+Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1589,7 +1569,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* edit_group, uint32_t how_ma
 			*/
 
 			track->midi_diskstream()->non_realtime_input_change();
-			track->set_edit_group (edit_group, 0);
+			track->set_route_group (route_group, 0);
 
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			//track->set_remote_control_id (control_id);
@@ -1646,7 +1626,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* edit_group, uint32_t how_ma
 }
 
 list<boost::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* edit_group,  uint32_t how_many)
+Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group,  uint32_t how_many)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1758,7 +1738,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			channels_used += track->n_inputs ().n_audio();
 
-			track->set_edit_group (edit_group, 0);
+			track->set_route_group (route_group, 0);
 
 			track->audio_diskstream()->non_realtime_input_change();
 
@@ -1838,7 +1818,7 @@ Session::set_remote_control_ids ()
 
 
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, RouteGroup* edit_group, uint32_t how_many)
+Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
 {
 	char bus_name[32];
 	uint32_t bus_id = 1;
@@ -1937,7 +1917,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* e
 
 			channels_used += bus->n_inputs ().n_audio();
 
-			bus->set_edit_group (edit_group, 0);
+			bus->set_route_group (route_group, 0);
 			bus->set_remote_control_id (control_id);
 			++control_id;
 
@@ -2082,8 +2062,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->processors_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
-		(*x)->edit_group_changed.connect (hide (mem_fun (*this, &Session::route_edit_group_changed)));
-		(*x)->mix_group_changed.connect (hide (mem_fun (*this, &Session::route_mix_group_changed)));
+		(*x)->route_group_changed.connect (hide (mem_fun (*this, &Session::route_group_changed)));
 
 		if ((*x)->is_master()) {
 			_master_out = (*x);
@@ -4251,13 +4230,7 @@ Session::solo_model_changed ()
 }
 
 void
-Session::route_edit_group_changed ()
+Session::route_group_changed ()
 {
-	RouteEditGroupChanged (); /* EMIT SIGNAL */
-}
-
-void
-Session::route_mix_group_changed ()
-{
-	RouteMixGroupChanged (); /* EMIT SIGNAL */
+	RouteGroupChanged (); /* EMIT SIGNAL */
 }

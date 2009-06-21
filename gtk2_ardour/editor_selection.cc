@@ -274,7 +274,7 @@ Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks)
 			continue;
 		}
 
-		RouteGroup* group = rtv->route()->edit_group();
+		RouteGroup* group = rtv->route()->route_group();
 
 		if (group && group->is_active()) {
 			
@@ -286,7 +286,7 @@ Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks)
 				
 				if ((trtv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					
-					if (trtv->route()->edit_group() == group) {
+					if (trtv->route()->route_group() == group) {
 						relevant_tracks.insert (trtv);
 					}
 				}
@@ -299,7 +299,7 @@ Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks)
 
 /**
  *  Call a slot for a given `basis' track and also for any track that is in the same
- *  active edit group.
+ *  active route group with the `select' property.
  *  @param sl Slot to call.
  *  @param basis Basis track.
  */
@@ -320,13 +320,13 @@ Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisVie
 	/* always call for the basis */
 	tracks.insert (route_basis);
 
-	RouteGroup* group = route_basis->route()->edit_group();
-	if (group && group->is_active()) {
+	RouteGroup* group = route_basis->route()->route_group();
+	if (group && group->active_property (RouteGroup::Select)) {
 
 		/* the basis is a member of an active edit group; find other members */
 		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (v && v->route()->edit_group() == group) {
+			if (v && v->route()->route_group() == group) {
 				tracks.insert (v);
 			}
 		}
@@ -487,7 +487,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
-				selection->set (clicked_regionview);
+				get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {
 				/* no commit necessary: clicked on an already selected region */

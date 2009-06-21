@@ -1035,13 +1035,8 @@ Session::state(bool full_state)
 	}
 
 	
-	child = node->add_child ("EditGroups");
-	for (list<RouteGroup *>::iterator i = edit_groups.begin(); i != edit_groups.end(); ++i) {
-		child->add_child_nocopy ((*i)->get_state());
-	}
-
-	child = node->add_child ("MixGroups");
-	for (list<RouteGroup *>::iterator i = mix_groups.begin(); i != mix_groups.end(); ++i) {
+	child = node->add_child ("RouteGroups");
+	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		child->add_child_nocopy ((*i)->get_state());
 	}
 
@@ -1166,7 +1161,7 @@ Session::set_state (const XMLNode& node)
 	AudioDiskstreams
 	Connections
 	Routes
-	EditGroups
+	RouteGroups
 	MixGroups
 	Click
 	ControlProtocols
@@ -1276,17 +1271,10 @@ Session::set_state (const XMLNode& node)
 		_bundle_xml_node = new XMLNode (*child);
 	}
 	
-	if ((child = find_named_node (node, "EditGroups")) == 0) {
-		error << _("Session: XML state has no edit groups section") << endmsg;
+	if ((child = find_named_node (node, "RouteGroups")) == 0) {
+		error << _("Session: XML state has no route groups section") << endmsg;
 		goto out;
-	} else if (load_edit_groups (*child)) {
-		goto out;
-	}
-
-	if ((child = find_named_node (node, "MixGroups")) == 0) {
-		error << _("Session: XML state has no mix groups section") << endmsg;
-		goto out;
-	} else if (load_mix_groups (*child)) {
+	} else if (load_route_groups (*child)) {
 		goto out;
 	}
 
@@ -2042,35 +2030,18 @@ Session::load_bundles (XMLNode const & node)
 }				
 
 int
-Session::load_edit_groups (const XMLNode& node)
-{
-	return load_route_groups (node, true);
-}
-
-int
-Session::load_mix_groups (const XMLNode& node)
-{
-	return load_route_groups (node, false);
-}
-
-int
-Session::load_route_groups (const XMLNode& node, bool edit)
+Session::load_route_groups (const XMLNode& node)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeConstIterator niter;
 
-	set_dirty();
+	set_dirty ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "RouteGroup") {
 			RouteGroup* rg = new RouteGroup (*this, "");
-			if (edit) {
-				add_edit_group (rg);
-				rg->set_state (**niter);
-			} else {
-				add_mix_group (rg);
-				rg->set_state (**niter);
-			}
+			add_route_group (rg);
+			rg->set_state (**niter);
 		}
 	}
 	
@@ -2134,68 +2105,34 @@ Session::possible_states () const
 }
 
 void
-Session::add_edit_group (RouteGroup* g)
+Session::add_route_group (RouteGroup* g)
 {
-	edit_groups.push_back (g);
-	edit_group_added (g); /* EMIT SIGNAL */
+	_route_groups.push_back (g);
+	route_group_added (g); /* EMIT SIGNAL */
 	set_dirty ();
 }
 
 void
-Session::add_mix_group (RouteGroup* g)
-{
-	mix_groups.push_back (g);
-	mix_group_added (g); /* EMIT SIGNAL */
-	set_dirty ();
-}
-
-void
-Session::remove_edit_group (RouteGroup& rg)
+Session::remove_route_group (RouteGroup& rg)
 {
 	list<RouteGroup*>::iterator i;
 
-	if ((i = find (edit_groups.begin(), edit_groups.end(), &rg)) != edit_groups.end()) {
-		(*i)->apply (&Route::drop_edit_group, this);
-		edit_groups.erase (i);
-		edit_group_removed (); /* EMIT SIGNAL */
+	if ((i = find (_route_groups.begin(), _route_groups.end(), &rg)) != _route_groups.end()) {
+		(*i)->apply (&Route::drop_route_group, this);
+		_route_groups.erase (i);
+		route_group_removed (); /* EMIT SIGNAL */
 	}
 
 	delete &rg;
 }
 
-void
-Session::remove_mix_group (RouteGroup& rg)
-{
-	list<RouteGroup*>::iterator i;
-
-	if ((i = find (mix_groups.begin(), mix_groups.end(), &rg)) != mix_groups.end()) {
-		(*i)->apply (&Route::drop_mix_group, this);
-		mix_groups.erase (i);
-		mix_group_removed (); /* EMIT SIGNAL */
-	}
-
-	delete &rg;
-}
 
 RouteGroup *
-Session::mix_group_by_name (string name)
+Session::route_group_by_name (string name)
 {
 	list<RouteGroup *>::iterator i;
 
-	for (i = mix_groups.begin(); i != mix_groups.end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
-		}
-	}
-	return 0;
-}
-
-RouteGroup *
-Session::edit_group_by_name (string name)
-{
-	list<RouteGroup *>::iterator i;
-
-	for (i = edit_groups.begin(); i != edit_groups.end(); ++i) {
+	for (i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}

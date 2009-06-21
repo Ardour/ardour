@@ -132,8 +132,7 @@ Route::init ()
 	_remote_control_id = 0;
 	_in_configure_processors = false;
 	
-	_edit_group = 0;
-	_mix_group = 0;
+	_route_group = 0;
 
 	_phase_invert = 0;
 	_denormal_protection = false;
@@ -260,9 +259,9 @@ Route::inc_gain (gain_t fraction, void *src)
 void
 Route::set_gain (gain_t val, void *src)
 {
-	if (src != 0 && _mix_group && src != _mix_group && _mix_group->is_active()) {
+	if (src != 0 && _route_group && src != _route_group && _route_group->active_property (RouteGroup::Gain)) {
 		
-		if (_mix_group->is_relative()) {
+		if (_route_group->is_relative()) {
 			
 			gain_t usable_gain = _amp->gain();
 			if (usable_gain < 0.000001f) {
@@ -282,24 +281,24 @@ Route::set_gain (gain_t val, void *src)
 			gain_t factor = delta / usable_gain;
 
 			if (factor > 0.0f) {
-				factor = _mix_group->get_max_factor(factor);
+				factor = _route_group->get_max_factor(factor);
 				if (factor == 0.0f) {
 					_amp->gain_control()->Changed(); /* EMIT SIGNAL */
 					return;
 				}
 			} else {
-				factor = _mix_group->get_min_factor(factor);
+				factor = _route_group->get_min_factor(factor);
 				if (factor == 0.0f) {
 					_amp->gain_control()->Changed(); /* EMIT SIGNAL */
 					return;
 				}
 			}
 					
-			_mix_group->apply (&Route::inc_gain, factor, _mix_group);
+			_route_group->apply (&Route::inc_gain, factor, _route_group);
 
 		} else {
 			
-			_mix_group->apply (&Route::set_gain, val, _mix_group);
+			_route_group->apply (&Route::set_gain, val, _route_group);
 		}
 
 		return;
@@ -482,8 +481,8 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
-	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
-		_mix_group->apply (&Route::set_solo, yn, _mix_group);
+	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Solo)) {
+		_route_group->apply (&Route::set_solo, yn, _route_group);
 		return;
 	}
 
@@ -539,8 +538,8 @@ Route::mod_solo_level (int32_t delta)
 void
 Route::set_solo_isolated (bool yn, void *src)
 {
-	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
-		_mix_group->apply (&Route::set_solo_isolated, yn, _mix_group);
+	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Solo)) {
+		_route_group->apply (&Route::set_solo_isolated, yn, _route_group);
 		return;
 	}
 
@@ -583,8 +582,8 @@ Route::solo_isolated () const
 void
 Route::set_mute (bool yn, void *src)
 {
-	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
-		_mix_group->apply (&Route::set_mute, yn, _mix_group);
+	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Mute)) {
+		_route_group->apply (&Route::set_mute, yn, _route_group);
 		return;
 	}
 
@@ -1480,11 +1479,8 @@ Route::state(bool full_state)
 	node->add_property("denormal-protection", _denormal_protection?"yes":"no");
 	node->add_property("meter-point", enum_2_string (_meter_point));
 
-	if (_edit_group) {
-		node->add_property("edit-group", _edit_group->name());
-	}
-	if (_mix_group) {
-		node->add_property("mix-group", _mix_group->name());
+	if (_route_group) {
+		node->add_property("route-group", _route_group->name());
 	}
 
 	string order_string;
@@ -1630,12 +1626,12 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		_meter_point = MeterPoint (string_2_enum (prop->value (), _meter_point));
 	}
 	
-	if ((prop = node.property (X_("edit-group"))) != 0) {
-		RouteGroup* edit_group = _session.edit_group_by_name(prop->value());
-		if(edit_group == 0) {
-			error << string_compose(_("Route %1: unknown edit group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
+	if ((prop = node.property (X_("route-group"))) != 0) {
+		RouteGroup* route_group = _session.route_group_by_name(prop->value());
+		if (route_group == 0) {
+			error << string_compose(_("Route %1: unknown route group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
 		} else {
-			set_edit_group(edit_group, this);
+			set_route_group (route_group, this);
 		}
 	}
 
@@ -1700,15 +1696,6 @@ Route::_set_state (const XMLNode& node, bool call_base)
 
 		} else if (child->name() == X_("MuteMaster")) {
 			_mute_master->set_state (*child);
-		}
-	}
-
-	if ((prop = node.property (X_("mix-group"))) != 0) {
-		RouteGroup* mix_group = _session.mix_group_by_name(prop->value());
-		if (mix_group == 0) {
-			error << string_compose(_("Route %1: unknown mix group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
-		}  else {
-			set_mix_group(mix_group, this);
 		}
 	}
 
@@ -1975,58 +1962,30 @@ Route::drop_listen (boost::shared_ptr<Route> route)
 }
 
 void
-Route::set_edit_group (RouteGroup *eg, void *src)
-
+Route::set_route_group (RouteGroup *rg, void *src)
 {
-	if (eg == _edit_group) {
+	if (rg == _route_group) {
 		return;
 	}
 
-	if (_edit_group) {
-		_edit_group->remove (this);
+	if (_route_group) {
+		_route_group->remove (this);
 	}
 
-	if ((_edit_group = eg) != 0) {
-		_edit_group->add (this);
+	if ((_route_group = rg) != 0) {
+		_route_group->add (this);
 	}
 
 	_session.set_dirty ();
-	edit_group_changed (src); /* EMIT SIGNAL */
+	route_group_changed (src); /* EMIT SIGNAL */
 }
 
 void
-Route::drop_edit_group (void *src)
+Route::drop_route_group (void *src)
 {
-	_edit_group = 0;
+	_route_group = 0;
 	_session.set_dirty ();
-	edit_group_changed (src); /* EMIT SIGNAL */
-}
-
-void
-Route::set_mix_group (RouteGroup *mg, void *src)
-{
-	if (mg == _mix_group) {
-		return;
-	}
-
-	if (_mix_group) {
-		_mix_group->remove (this);
-	}
-
-	if ((_mix_group = mg) != 0) {
-		_mix_group->add (this);
-	}
-
-	_session.set_dirty ();
-	mix_group_changed (src); /* EMIT SIGNAL */
-}
-
-void
-Route::drop_mix_group (void *src)
-{
-	_mix_group = 0;
-	_session.set_dirty ();
-	mix_group_changed (src); /* EMIT SIGNAL */
+	route_group_changed (src); /* EMIT SIGNAL */
 }
 
 void

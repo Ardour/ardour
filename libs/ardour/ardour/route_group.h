@@ -36,86 +36,111 @@ class AudioTrack;
 class Session;
 
 class RouteGroup : public PBD::Stateful, public sigc::trackable {
-  public:
-    enum Flag {
-	    Relative = 0x1,
-	    Active = 0x2,
-	    Hidden = 0x4
-    };
+public:
+	enum Flag {
+		Relative = 0x1,
+		Active = 0x2,
+		Hidden = 0x4
+	};
 
-    RouteGroup (Session& s, const std::string &n, Flag f = Flag(0));
+	enum Property {
+		Gain = 0x1,
+		Mute = 0x2,
+		Solo = 0x4,
+		RecEnable = 0x8,
+		Select = 0x10,
+		Edit = 0x20
+	};
+	
+	RouteGroup (Session& s, const std::string &n, Flag f = Flag(0));
+	
+	const std::string& name() { return _name; }
+	void set_name (std::string str);
+	
+	bool is_active () const { return _flags & Active; }
+	bool is_relative () const { return _flags & Relative; }
+	bool is_hidden () const { return _flags & Hidden; }
+	bool empty() const {return routes.empty();}
+	
+	gain_t get_max_factor(gain_t factor);
+	gain_t get_min_factor(gain_t factor);
+	
+	int size() { return routes.size();}
+	ARDOUR::Route * first () const { return *routes.begin();}
+	
+	void set_active (bool yn, void *src);
+	void set_relative (bool yn, void *src);
+	void set_hidden (bool yn, void *src);
 
-    const std::string& name() { return _name; }
-    void set_name (std::string str);
+	bool property (Property p) const {
+		return ((_properties & p) != 0);
+	}
+	
+	bool active_property (Property p) const {
+		return is_active() && property (p);
+	}
 
-    bool is_active () const { return _flags & Active; }
-    bool is_relative () const { return _flags & Relative; }
-    bool is_hidden () const { return _flags & Hidden; }
-    bool empty() const {return routes.empty();}
-
-    gain_t get_max_factor(gain_t factor);
-    gain_t get_min_factor(gain_t factor);
-    
-    int size() { return routes.size();}
-    ARDOUR::Route * first () const { return *routes.begin();}
-
-    void set_active (bool yn, void *src);
-    void set_relative (bool yn, void *src);
-    void set_hidden (bool yn, void *src);
-
-    int add (Route *);
-
-    int remove (Route *);
-
-    void apply (void (Route::*func)(void *), void *src) {
-	    for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-		    ((*i)->*func)(src);
-	    }
-    }
-
-    template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
-	    for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-		    ((*i)->*func)(val, src);
-	    }
-    }
-
-    template<class T> void foreach_route (T *obj, void (T::*func)(Route&)) {
-	    for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-		    (obj->*func)(**i);
-	    }
-    }
-
-    /* to use these, #include "ardour/route_group_specialized.h" */
-
-    template<class T> void apply (void (Track::*func)(T, void *), T val, void *src);
-
-    /* fills at_set with all members of the group that are AudioTracks */
-
-    void audio_track_group (std::set<AudioTrack*>& at_set);
-
-    void clear () {
-	    routes.clear ();
-	    changed();
-    }
-
-    const std::list<Route*>& route_list() { return routes; }
-    
-    sigc::signal<void> changed;
-    sigc::signal<void,void*> FlagsChanged;
-
-    XMLNode& get_state (void);
-
-    int set_state (const XMLNode&);
-
- private:
-    Session& _session;
-    std::list<Route *> routes;
-    std::string _name;
-    Flag _flags;
-
-    void remove_when_going_away (Route*);
+	void set_property (Property p, bool v) {
+		_properties = (Property) (_properties & ~p);
+		if (v) {
+			_properties = (Property) (_properties | p);
+		}
+	}
+	
+	int add (Route *);
+	
+	int remove (Route *);
+	
+	void apply (void (Route::*func)(void *), void *src) {
+		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+			((*i)->*func)(src);
+		}
+	}
+	
+	template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
+		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+			((*i)->*func)(val, src);
+		}
+	}
+	
+	template<class T> void foreach_route (T *obj, void (T::*func)(Route&)) {
+		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+			(obj->*func)(**i);
+		}
+	}
+	
+	/* to use these, #include "ardour/route_group_specialized.h" */
+	
+	template<class T> void apply (void (Track::*func)(T, void *), T val, void *src);
+	
+	/* fills at_set with all members of the group that are AudioTracks */
+	
+	void audio_track_group (std::set<AudioTrack*>& at_set);
+	
+	void clear () {
+		routes.clear ();
+		changed();
+	}
+	
+	const std::list<Route*>& route_list() { return routes; }
+	
+	sigc::signal<void> changed;
+	sigc::signal<void,void*> FlagsChanged;
+	
+	XMLNode& get_state ();
+	
+	int set_state (const XMLNode&);
+	
+private:
+	Session& _session;
+	std::list<Route *> routes;
+	std::string _name;
+	Flag _flags;
+	Property _properties;
+	
+	void remove_when_going_away (Route*);
 };
-
+	
 } /* namespace */
 
 #endif /* __ardour_route_group_h__ */

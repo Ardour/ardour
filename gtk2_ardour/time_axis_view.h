@@ -163,7 +163,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	 */
 	virtual void step_height (bool bigger);
 
-	virtual ARDOUR::RouteGroup* edit_group() const { return 0; }
+	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
 	virtual void show_feature_lines (const ARDOUR::AnalysisFeatureList&);

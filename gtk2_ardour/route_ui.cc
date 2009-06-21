@@ -284,7 +284,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 					*/
 
 					if (ev->button == 1) {
-						set_mix_group_mute (_route, !_route->muted());
+						set_route_group_mute (_route, !_route->muted());
 					}
 					
 				} else {
@@ -417,7 +417,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					*/
 
 					if (ev->button == 1) {
-						set_mix_group_solo (_route, !_route->soloed());
+						set_route_group_solo (_route, !_route->soloed());
 					}
 
 				} else {
@@ -500,7 +500,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
 
-			set_mix_group_rec_enable (_route, !_route->record_enabled());
+			set_route_group_rec_enable (_route, !_route->record_enabled());
 
 		} else {
 			reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !track()->record_enabled(), this);
@@ -892,14 +892,14 @@ RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 }
 
 void
-RouteUI::set_mix_group_solo(boost::shared_ptr<Route> route, bool yn)
+RouteUI::set_route_group_solo(boost::shared_ptr<Route> route, bool yn)
 {
-	RouteGroup* mix_group;
+	RouteGroup* route_group;
 
-	if((mix_group = route->mix_group()) != 0){
+	if((route_group = route->route_group()) != 0){
 		_session.begin_reversible_command (_("mix group solo  change"));
                 Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
-		mix_group->apply(&Route::set_solo, yn, this);
+		route_group->apply(&Route::set_solo, yn, this);
                 cmd->mark();
 		_session.add_command (cmd);
 		_session.commit_reversible_command ();
@@ -931,14 +931,14 @@ RouteUI::reversibly_apply_track_boolean (string name, void (Track::*func)(bool, 
 }
 
 void
-RouteUI::set_mix_group_mute(boost::shared_ptr<Route> route, bool yn)
+RouteUI::set_route_group_mute(boost::shared_ptr<Route> route, bool yn)
 {
-	RouteGroup* mix_group;
+	RouteGroup* route_group;
 
-	if((mix_group = route->mix_group()) != 0){
+	if((route_group = route->route_group()) != 0){
 		_session.begin_reversible_command (_("mix group mute change"));
                 Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand (_session, this);
-		mix_group->apply(&Route::set_mute, yn, this);
+		route_group->apply(&Route::set_mute, yn, this);
                 cmd->mark();
 		_session.add_command(cmd);
 		_session.commit_reversible_command ();
@@ -948,14 +948,14 @@ RouteUI::set_mix_group_mute(boost::shared_ptr<Route> route, bool yn)
 }
 
 void
-RouteUI::set_mix_group_rec_enable(boost::shared_ptr<Route> route, bool yn)
+RouteUI::set_route_group_rec_enable(boost::shared_ptr<Route> route, bool yn)
 {
-	RouteGroup* mix_group;
+	RouteGroup* route_group;
 
-	if((mix_group = route->mix_group()) != 0){
+	if((route_group = route->route_group()) != 0){
 		_session.begin_reversible_command (_("mix group rec-enable change"));
                 Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
-		mix_group->apply (&Route::set_record_enable, yn, this);
+		route_group->apply (&Route::set_record_enable, yn, this);
                 cmd->mark();
 		_session.add_command(cmd);
 		_session.commit_reversible_command ();

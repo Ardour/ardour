@@ -280,7 +280,7 @@ MixerStrip::init ()
 	show_sends_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::show_sends_release));
 
 	name_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::name_button_button_press), false);
-	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
+	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_route_group), false);
 
 	_width = (Width) -1;
 
@@ -411,8 +411,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			mem_fun(*this, &MixerStrip::input_changed)));
 	connections.push_back (_route->output()->changed.connect (
 			mem_fun(*this, &MixerStrip::output_changed)));
-	connections.push_back (_route->mix_group_changed.connect (
-			mem_fun(*this, &MixerStrip::mix_group_changed)));
+	connections.push_back (_route->route_group_changed.connect (
+			mem_fun(*this, &MixerStrip::route_group_changed)));
 
 	if (_route->panner()) {
 		connections.push_back (_route->panner()->Changed.connect (
@@ -441,7 +441,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	solo_changed (0);
 	name_changed ();
 	comment_changed (0);
-	mix_group_changed (0);
+	route_group_changed (0);
 
 	connect_to_pan ();
 
@@ -611,7 +611,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	}
 	update_input_display ();
 	update_output_display ();
-	mix_group_changed (0);
+	route_group_changed (0);
 	name_changed ();
 #ifdef GTKOSX
 	WidthChanged();
@@ -1065,27 +1065,27 @@ MixerStrip::comment_changed (void *src)
 }
 
 void
-MixerStrip::set_mix_group (RouteGroup *rg)
+MixerStrip::set_route_group (RouteGroup *rg)
 {
-	_route->set_mix_group (rg, this);
+	_route->set_route_group (rg, this);
 }
 
 void
-MixerStrip::add_mix_group_to_menu (RouteGroup *rg, RadioMenuItem::Group* group)
+MixerStrip::add_route_group_to_menu (RouteGroup *rg, RadioMenuItem::Group* group)
 {
 	using namespace Menu_Helpers;
 
 	MenuList& items = group_menu->items();
 
-	items.push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &MixerStrip::set_mix_group), rg)));
+	items.push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &MixerStrip::set_route_group), rg)));
 
-	if (_route->mix_group() == rg) {
+	if (_route->route_group() == rg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 }
 
 bool
-MixerStrip::select_mix_group (GdkEventButton *ev)
+MixerStrip::select_route_group (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
 
@@ -1101,13 +1101,13 @@ MixerStrip::select_mix_group (GdkEventButton *ev)
 
 		items.clear ();
 		
-		items.push_back (MenuElem (_("New group..."), mem_fun (*this, &MixerStrip::set_mix_group_to_new)));
+		items.push_back (MenuElem (_("New group..."), mem_fun (*this, &MixerStrip::set_route_group_to_new)));
 		
 		items.push_back (SeparatorElem ());
 		
-		items.push_back (RadioMenuElem (group, _("No group"), bind (mem_fun(*this, &MixerStrip::set_mix_group), (RouteGroup *) 0)));
+		items.push_back (RadioMenuElem (group, _("No group"), bind (mem_fun(*this, &MixerStrip::set_route_group), (RouteGroup *) 0)));
 
-		_session.foreach_mix_group (bind (mem_fun (*this, &MixerStrip::add_mix_group_to_menu), &group));
+		_session.foreach_route_group (bind (mem_fun (*this, &MixerStrip::add_route_group_to_menu), &group));
 
 		group_menu->popup (1, ev->time);
 		break;
@@ -1120,11 +1120,11 @@ MixerStrip::select_mix_group (GdkEventButton *ev)
 }	
 
 void
-MixerStrip::mix_group_changed (void *ignored)
+MixerStrip::route_group_changed (void *ignored)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MixerStrip::mix_group_changed), ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MixerStrip::route_group_changed), ignored));
 	
-	RouteGroup *rg = _route->mix_group();
+	RouteGroup *rg = _route->route_group();
 	
 	if (rg) {
 		group_label.set_text (rg->name());
@@ -1377,9 +1377,9 @@ MixerStrip::route_active_changed ()
 }
 
 RouteGroup*
-MixerStrip::mix_group() const
+MixerStrip::route_group() const
 {
-	return _route->mix_group();
+	return _route->route_group();
 }
 
 void
@@ -1484,17 +1484,17 @@ MixerStrip::revert_to_default_display ()
 }
 
 void
-MixerStrip::set_mix_group_to_new ()
+MixerStrip::set_route_group_to_new ()
 {
 	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
 	g->set_active (true, this);
 
-	RouteGroupDialog d (g);
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
 
 	if (r == Gtk::RESPONSE_OK) {
-		_session.add_mix_group (g);
-		_route->set_mix_group (g, this);
+		_session.add_route_group (g);
+		_route->set_route_group (g, this);
 	} else {
 		delete g;
 	}

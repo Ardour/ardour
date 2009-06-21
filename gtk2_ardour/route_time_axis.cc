@@ -105,7 +105,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
 	  parent_canvas (canvas),
 	  button_table (3, 3),
-	  edit_group_button (_("g")), // group
+	  route_group_button (_("g")), // group
 	  playlist_button (_("p")), 
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
@@ -134,14 +134,14 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	ignore_toggle = false;
 
-	edit_group_button.set_name ("TrackGroupButton");
+	route_group_button.set_name ("TrackGroupButton");
 	playlist_button.set_name ("TrackPlaylistButton");
 	automation_button.set_name ("TrackAutomationButton");
 	size_button.set_name ("TrackSizeButton");
 	visual_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
-	edit_group_button.unset_flags (Gtk::CAN_FOCUS);
+	route_group_button.unset_flags (Gtk::CAN_FOCUS);
 	playlist_button.unset_flags (Gtk::CAN_FOCUS);
 	automation_button.unset_flags (Gtk::CAN_FOCUS);
 	size_button.unset_flags (Gtk::CAN_FOCUS);
@@ -151,7 +151,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	hide_button.add (*(manage (new Image (::get_icon("hide")))));
 	hide_button.show_all ();
 
- 	edit_group_button.signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::edit_click), false);
+ 	route_group_button.signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::edit_click), false);
 	playlist_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::playlist_click));
 	automation_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::automation_click));
 	size_button.signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::size_click), false);
@@ -195,12 +195,12 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
-	controls_table.attach (edit_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
 	ARDOUR_UI::instance()->tooltips().set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->tooltips().set_tip(*mute_button,_("Mute"));
-	ARDOUR_UI::instance()->tooltips().set_tip(edit_group_button,_("Edit Group"));
+	ARDOUR_UI::instance()->tooltips().set_tip(route_group_button, _("Route Group"));
 	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height"));
 	ARDOUR_UI::instance()->tooltips().set_tip(playlist_button,_("Playlist"));
 	ARDOUR_UI::instance()->tooltips().set_tip(automation_button, _("Automation"));
@@ -311,51 +311,51 @@ gint
 RouteTimeAxisView::edit_click (GdkEventButton *ev)
 {
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-	        _route->set_edit_group (0, this);
+	        _route->set_route_group (0, this);
 		return FALSE;
 	} 
 
 	using namespace Menu_Helpers;
 
-	MenuList& items = edit_group_menu.items ();
+	MenuList& items = route_group_menu.items ();
 	RadioMenuItem::Group group;
 
 	items.clear ();
 
-	items.push_back (MenuElem (_("New group..."), mem_fun (*this, &RouteTimeAxisView::set_edit_group_to_new)));
+	items.push_back (MenuElem (_("New group..."), mem_fun (*this, &RouteTimeAxisView::set_route_group_to_new)));
 
 	items.push_back (SeparatorElem ());
 	
 	items.push_back (RadioMenuElem (group, _("No group"), 
-					bind (mem_fun(*this, &RouteTimeAxisView::set_edit_group_from_menu), (RouteGroup *) 0)));
+					bind (mem_fun(*this, &RouteTimeAxisView::set_route_group_from_menu), (RouteGroup *) 0)));
 	
-	if (_route->edit_group() == 0) {
+	if (_route->route_group() == 0) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 
-	_session.foreach_edit_group (bind (mem_fun (*this, &RouteTimeAxisView::add_edit_group_menu_item), &group));
-	edit_group_menu.popup (ev->button, ev->time);
+	_session.foreach_route_group (bind (mem_fun (*this, &RouteTimeAxisView::add_route_group_menu_item), &group));
+	route_group_menu.popup (ev->button, ev->time);
 
 	return FALSE;
 }
 
 void
-RouteTimeAxisView::add_edit_group_menu_item (RouteGroup *eg, RadioMenuItem::Group* group)
+RouteTimeAxisView::add_route_group_menu_item (RouteGroup *eg, RadioMenuItem::Group* group)
 {
 	using namespace Menu_Helpers;
 
-	MenuList &items = edit_group_menu.items();
+	MenuList &items = route_group_menu.items();
 
-	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &RouteTimeAxisView::set_edit_group_from_menu), eg)));
-	if (_route->edit_group() == eg) {
+	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &RouteTimeAxisView::set_route_group_from_menu), eg)));
+	if (_route->route_group() == eg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 }
 
 void
-RouteTimeAxisView::set_edit_group_from_menu (RouteGroup *eg)
+RouteTimeAxisView::set_route_group_from_menu (RouteGroup *eg)
 {
-	_route->set_edit_group (eg, this);
+	_route->set_route_group (eg, this);
 }
 
 void
@@ -733,18 +733,18 @@ RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 	}
 
 
-	/* check that the time selection was made in our route, or our edit group.
-	   remember that edit_group() == 0 implies the route is *not* in a edit group.
+	/* check that the time selection was made in our route, or our route group.
+	   remember that route_group() == 0 implies the route is *not* in a edit group.
 	*/
 
-	if (!(ts.track == this || (ts.group != 0 && ts.group == _route->edit_group()))) {
+	if (!(ts.track == this || (ts.group != 0 && ts.group == _route->route_group()))) {
 		/* this doesn't apply to us */
 		return;
 	}
 
 	/* ignore it if our edit group is not active */
 	
-	if ((ts.track != this) && _route->edit_group() && !_route->edit_group()->is_active()) {
+	if ((ts.track != this) && _route->route_group() && !_route->route_group()->is_active()) {
 		return;
 	}
 #endif
@@ -788,12 +788,12 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 
 #if 0
 	/* ignore it if our edit group is not active or if the selection was started
-	   in some other track or edit group (remember that edit_group() == 0 means
-	   that the track is not in an edit group).
+	   in some other track or route group (remember that route_group() == 0 means
+	   that the track is not in an route group).
 	*/
 
-	if (((ts.track != this && !is_child (ts.track)) && _route->edit_group() && !_route->edit_group()->is_active()) ||
-	    (!(ts.track == this || is_child (ts.track) || (ts.group != 0 && ts.group == _route->edit_group())))) {
+	if (((ts.track != this && !is_child (ts.track)) && _route->route_group() && !_route->route_group()->is_active()) ||
+	    (!(ts.track == this || is_child (ts.track) || (ts.group != 0 && ts.group == _route->route_group())))) {
 		hide_selection ();
 		return;
 	}
@@ -836,7 +836,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 		if (rec_enable_button)
 			rec_enable_button->show();
 
-		edit_group_button.show();
+		route_group_button.show();
 		hide_button.show();
 		visual_button.show();
 		size_button.show();
@@ -862,7 +862,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 		if (rec_enable_button)
 			rec_enable_button->show();
 
-		edit_group_button.hide ();
+		route_group_button.hide ();
 		hide_button.hide ();
 		visual_button.hide ();
 		size_button.hide ();
@@ -895,7 +895,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 		if (rec_enable_button)
 			rec_enable_button->hide();
 
-		edit_group_button.hide ();
+		route_group_button.hide ();
 		hide_button.hide ();
 		visual_button.hide ();
 		size_button.hide ();
@@ -1018,9 +1018,9 @@ RouteTimeAxisView::rename_current_playlist ()
 std::string 
 RouteTimeAxisView::resolve_new_group_playlist_name(std::string &basename, vector<boost::shared_ptr<Playlist> > const & playlists)
 {
-	std::string ret(basename);
+	std::string ret (basename);
 
-	std::string group_string = "."+edit_group()->name()+".";
+	std::string const group_string = "." + route_group()->name() + ".";
 
 	// iterate through all playlists
 	int maxnumber = 0;
@@ -1045,7 +1045,7 @@ RouteTimeAxisView::resolve_new_group_playlist_name(std::string &basename, vector
 	char buf[32];
 	snprintf (buf, sizeof(buf), "%d", maxnumber);
                
-	ret = this->name()+"."+edit_group()->name()+"."+buf;
+	ret = this->name() + "." + route_group()->name () + "." + buf;
 
 	return ret;
 }
@@ -1065,7 +1065,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 
 	name = pl->name();
 	
-	if (edit_group() && edit_group()->is_active()) {
+	if (route_group() && route_group()->is_active()) {
 		name = resolve_new_group_playlist_name(name, playlists_before_op);
 	}
 
@@ -1117,7 +1117,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 
 	name = pl->name();
 	
-	if (edit_group() && edit_group()->is_active()) {
+	if (route_group() && route_group()->is_active()) {
 		name = resolve_new_group_playlist_name(name,playlists_before_op);
 	}
 
@@ -1202,7 +1202,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		return;
 	} 
 
-	PublicEditor::TrackViewList* tracks = _editor.get_valid_views (this, _route->edit_group());
+	PublicEditor::TrackViewList* tracks = _editor.get_valid_views (this, _route->route_group());
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
@@ -1320,9 +1320,9 @@ RouteTimeAxisView::automation_track (AutomationType type)
 }
 
 RouteGroup*
-RouteTimeAxisView::edit_group() const
+RouteTimeAxisView::route_group () const
 {
-	return _route->edit_group();
+	return _route->route_group();
 }
 
 string
@@ -1552,7 +1552,7 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	if (!edit_group() || !edit_group()->is_active()) {
+	if (!route_group() || !route_group()->is_active()) {
 		playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(_editor, &PublicEditor::new_playlists), this)));
 		playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
@@ -1592,9 +1592,9 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 		get_diskstream()->use_playlist (apl);
 
 
-		if (edit_group() && edit_group()->is_active()) {
+		if (route_group() && route_group()->is_active()) {
 			//PBD::stacktrace(cerr, 20);
-			std::string group_string = "."+edit_group()->name()+".";
+			std::string group_string = "."+route_group()->name()+".";
 
 			std::string take_name = apl->name();
 			std::string::size_type idx = take_name.find(group_string);
@@ -1604,7 +1604,7 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 
 			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
 			
-			for (list<Route*>::const_iterator i = edit_group()->route_list().begin(); i != edit_group()->route_list().end(); ++i) {
+			for (list<Route*>::const_iterator i = route_group()->route_list().begin(); i != route_group()->route_list().end(); ++i) {
 				if ( (*i) == this->route().get()) {
 					continue;
 				}
@@ -2408,17 +2408,17 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 }
 
 void
-RouteTimeAxisView::set_edit_group_to_new ()
+RouteTimeAxisView::set_route_group_to_new ()
 {
 	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
 	g->set_active (true, this);
 
-	RouteGroupDialog d (g);
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
 
 	if (r == Gtk::RESPONSE_OK) {
-		_session.add_edit_group (g);
-		_route->set_edit_group (g, this);
+		_session.add_route_group (g);
+		_route->set_route_group (g, this);
 	} else {
 		delete g;
 	}

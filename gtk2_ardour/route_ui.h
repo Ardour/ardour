@@ -138,9 +138,9 @@ class RouteUI : public virtual AxisView
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 	
-	void set_mix_group_solo(boost::shared_ptr<ARDOUR::Route>, bool);
-	void set_mix_group_mute(boost::shared_ptr<ARDOUR::Route>, bool);
-	void set_mix_group_rec_enable(boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_route_group_solo (boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_route_group_mute (boost::shared_ptr<ARDOUR::Route>, bool);
+	void set_route_group_rec_enable (boost::shared_ptr<ARDOUR::Route>, bool);
 
 	int  set_color_from_route ();
 

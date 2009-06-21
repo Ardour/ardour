@@ -33,25 +33,6 @@ EditorGroupTabs::EditorGroupTabs (Editor* e)
 }
 
 void
-EditorGroupTabs::set_session (Session* s)
-{
-	s->RouteEditGroupChanged.connect (mem_fun (*this, &EditorGroupTabs::set_dirty));
-}
-
-
-/** Handle a size request.
- *  @param req GTK requisition
- */
-void
-EditorGroupTabs::on_size_request (Gtk::Requisition *req)
-{
-	/* Use a dummy, small height and the actual width that we want */
-	req->width = 16;
-	req->height = 16;
-}
-
-
-void
 EditorGroupTabs::render (cairo_t* cr)
 {
 	/* background */
@@ -71,7 +52,7 @@ EditorGroupTabs::render (cairo_t* cr)
 			continue;
 		}
 		
-		RouteGroup* g = (*i)->edit_group ();
+		RouteGroup* g = (*i)->route_group ();
 
 		if (g != curr_group) {
 			if (curr_group) {
@@ -122,8 +103,8 @@ EditorGroupTabs::draw_group (cairo_t* cr, int32_t y1, int32_t y2, RouteGroup* g,
 	cairo_restore (cr);
 }
 
-bool
-EditorGroupTabs::on_button_press_event (GdkEventButton* ev)
+RouteGroup*
+EditorGroupTabs::click_to_route_group (GdkEventButton* ev)
 {
 	int32_t y = 0;
 	Editor::TrackViewList::iterator i = _editor->track_views.begin();
@@ -137,15 +118,10 @@ EditorGroupTabs::on_button_press_event (GdkEventButton* ev)
 			++i;
 		}
 	}
-
+	
 	if (i == _editor->track_views.end()) {
-		return false;
+		return 0;
 	}
 	
-	RouteGroup* g = (*i)->edit_group ();
-	if (g) {
-		g->set_active (!g->is_active (), this);
-	}
-
-	return true;
+	return (*i)->route_group ();
 }

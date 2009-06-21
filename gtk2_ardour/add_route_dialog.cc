@@ -84,12 +84,12 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	refill_channel_setups ();
 	set_popdown_strings (track_mode_combo, track_mode_strings, true);
 
-	edit_group_combo.append_text (_("No group"));
-	_session.foreach_edit_group (mem_fun (*this, &AddRouteDialog::add_edit_group));
+	route_group_combo.append_text (_("No group"));
+	_session.foreach_route_group (mem_fun (*this, &AddRouteDialog::add_route_group));
 	
 	channel_combo.set_active_text (channel_combo_strings.front());
 	track_mode_combo.set_active_text (track_mode_strings.front());
-	edit_group_combo.set_active (0);
+	route_group_combo.set_active (0);
 
 	RadioButton::Group g = track_button.get_group();
 	bus_button.set_group (g);
@@ -134,7 +134,7 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	l = manage (new Label (_("Add to edit group:")));
 	l->set_alignment (1, 0.5);
 	table->attach (*l, 0, 1, 4, 5);
-	table->attach (edit_group_combo, 1, 2, 4, 5, FILL | EXPAND);
+	table->attach (route_group_combo, 1, 2, 4, 5, FILL | EXPAND);
 	get_vbox()->pack_start (*table);
 
 	get_vbox()->set_spacing (6);
@@ -325,17 +325,17 @@ AddRouteDialog::refill_channel_setups ()
 }
 
 void
-AddRouteDialog::add_edit_group (RouteGroup* g)
+AddRouteDialog::add_route_group (RouteGroup* g)
 {
-	edit_group_combo.append_text (g->name ());
+	route_group_combo.append_text (g->name ());
 }
 
 RouteGroup*
-AddRouteDialog::edit_group ()
+AddRouteDialog::route_group ()
 {
-	if (edit_group_combo.get_active_row_number () == 0) {
+	if (route_group_combo.get_active_row_number () == 0) {
 		return 0;
 	}
 
-	return _session.edit_group_by_name (edit_group_combo.get_active_text());
+	return _session.route_group_by_name (route_group_combo.get_active_text());
 }

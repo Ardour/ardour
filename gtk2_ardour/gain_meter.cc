@@ -274,7 +274,7 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 		ResetAllPeakDisplays ();
 	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 		if (_route) {
-			ResetGroupPeakDisplays (_route->mix_group());
+			ResetGroupPeakDisplays (_route->route_group());
 		}
 	} else {
 		reset_peak_display ();
@@ -296,7 +296,7 @@ GainMeterBase::reset_peak_display ()
 void
 GainMeterBase::reset_group_peak_display (RouteGroup* group)
 {
-	if (_route && group == _route->mix_group()) {
+	if (_route && group == _route->route_group()) {
 		reset_peak_display ();
 		}
 }
@@ -542,7 +542,7 @@ GainMeterBase::set_mix_group_meter_point (Route& route, MeterPoint mp)
 {
 	RouteGroup* mix_group;
 
-	if((mix_group = route.mix_group()) != 0){
+	if((mix_group = route.route_group()) != 0){
 		mix_group->apply (&Route::set_meter_point, mp, this);
 	} else {
 		route.set_meter_point (mp, this);

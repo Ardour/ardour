@@ -8,7 +8,7 @@
 class RouteGroupDialog : public Gtk::Dialog
 {
 public:
-	RouteGroupDialog (ARDOUR::RouteGroup *);
+	RouteGroupDialog (ARDOUR::RouteGroup *, Gtk::StockID const &);
 
 	int do_run ();
 
@@ -16,6 +16,12 @@ private:
 	ARDOUR::RouteGroup* _group;
 	Gtk::Entry _name;
 	Gtk::CheckButton _active;
+	Gtk::CheckButton _gain;
+	Gtk::CheckButton _mute;
+	Gtk::CheckButton _solo;
+	Gtk::CheckButton _rec_enable;
+	Gtk::CheckButton _select;
+	Gtk::CheckButton _edit;
 };
 
 

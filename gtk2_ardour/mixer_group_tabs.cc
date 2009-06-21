@@ -33,24 +33,6 @@ MixerGroupTabs::MixerGroupTabs (Mixer_UI* m)
 	
 }
 
-void
-MixerGroupTabs::set_session (Session* s)
-{
-	s->RouteMixGroupChanged.connect (mem_fun (*this, &MixerGroupTabs::set_dirty));
-}
-
-
-/** Handle a size request.
- *  @param req GTK requisition
- */
-void
-MixerGroupTabs::on_size_request (Gtk::Requisition *req)
-{
-	/* Use a dummy, small width and the actual height that we want */
-	req->width = 16;
-	req->height = 16;
-}
-
 
 void
 MixerGroupTabs::render (cairo_t* cr)
@@ -72,7 +54,7 @@ MixerGroupTabs::render (cairo_t* cr)
 			continue;
 		}
 
-		RouteGroup* g = (*i)->mix_group ();
+		RouteGroup* g = (*i)->route_group ();
 
 		if (g != curr_group) {
 			if (curr_group) {
@@ -121,8 +103,8 @@ MixerGroupTabs::draw_group (cairo_t* cr, int32_t x1, int32_t x2, RouteGroup* g, 
 	cairo_restore (cr);
 }
 
-bool
-MixerGroupTabs::on_button_press_event (GdkEventButton* ev)
+RouteGroup*
+MixerGroupTabs::click_to_route_group (GdkEventButton* ev)
 {
 	int32_t x = 0;
 	list<MixerStrip*>::iterator i = _mixer->strips.begin();
@@ -138,13 +120,8 @@ MixerGroupTabs::on_button_press_event (GdkEventButton* ev)
 	}
 
 	if (i == _mixer->strips.end()) {
-		return false;
+		return 0;
 	}
 	
-	RouteGroup* g = (*i)->mix_group ();
-	if (g) {
-		g->set_active (!g->is_active (), this);
-	}
-
-	return true;
+	return (*i)->route_group ();
 }

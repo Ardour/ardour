@@ -173,8 +173,8 @@ Track::set_record_enable (bool yn, void *src)
 		return;
 	}
 
-	if (_mix_group && src != _mix_group && _mix_group->is_active()) {
-		_mix_group->apply (&Track::set_record_enable, yn, _mix_group);
+	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::RecEnable)) {
+		_route_group->apply (&Track::set_record_enable, yn, _route_group);
 		return;
 	}
 

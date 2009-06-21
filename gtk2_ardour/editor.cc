@@ -312,7 +312,7 @@ Editor::Editor ()
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
-	edit_group_list_menu = 0;
+	route_group_list_menu = 0;
 	route_list_menu = 0;
 	region_list_menu = 0;
 	marker_menu = 0;
@@ -337,7 +337,7 @@ Editor::Editor ()
 	clear_entered_track = false;
 	_new_regionviews_show_envelope = false;
 	current_timefx = 0;
-	in_edit_group_row_change = false;
+	in_route_group_row_change = false;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
 	_dragging_playhead = false;
@@ -575,73 +575,70 @@ Editor::Editor ()
 	route_list_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
 	group_model = ListStore::create(group_columns);
-	edit_group_display.set_model (group_model);
-	edit_group_display.append_column (_("Name"), group_columns.text);
-	edit_group_display.append_column (_("Active"), group_columns.is_active);
-	edit_group_display.append_column (_("Show"), group_columns.is_visible);
-	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	edit_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	edit_group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
-	edit_group_display.get_column (0)->set_expand (true);
-	edit_group_display.get_column (1)->set_expand (false);
-	edit_group_display.get_column (2)->set_expand (false);
-	edit_group_display.set_headers_visible (true);
+	route_group_display.set_model (group_model);
+	route_group_display.append_column (_("Name"), group_columns.text);
+	route_group_display.append_column (_("Show"), group_columns.is_visible);
+	route_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	route_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	route_group_display.get_column (0)->set_expand (true);
+	route_group_display.get_column (1)->set_expand (false);
+	route_group_display.set_headers_visible (true);
 
 	/* name is directly editable */
 
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(edit_group_display.get_column_cell_renderer (0));
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(route_group_display.get_column_cell_renderer (0));
 	name_cell->property_editable() = true;
-	name_cell->signal_edited().connect (mem_fun (*this, &Editor::edit_group_name_edit));
+	name_cell->signal_edited().connect (mem_fun (*this, &Editor::route_group_name_edit));
 
 	/* use checkbox for the active + visible columns */
 
-	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (1));
+	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (1));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	active_cell = dynamic_cast<CellRendererToggle*>(edit_group_display.get_column_cell_renderer (1));
+	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (1));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::edit_group_row_change));
+	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_group_row_change));
 
-	edit_group_display.set_name ("EditGroupList");
-	edit_group_display.get_selection()->set_mode (SELECTION_SINGLE);
-	edit_group_display.set_headers_visible (true);
-	edit_group_display.set_reorderable (false);
-	edit_group_display.set_rules_hint (true);
-	edit_group_display.set_size_request (75, -1);
+	route_group_display.set_name ("EditGroupList");
+	route_group_display.get_selection()->set_mode (SELECTION_SINGLE);
+	route_group_display.set_headers_visible (true);
+	route_group_display.set_reorderable (false);
+	route_group_display.set_rules_hint (true);
+	route_group_display.set_size_request (75, -1);
 
-	edit_group_display_scroller.add (edit_group_display);
-	edit_group_display_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
+	route_group_display_scroller.add (route_group_display);
+	route_group_display_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event), false);
+	route_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::route_group_list_button_press_event), false);
 
-	VBox* edit_group_display_packer = manage (new VBox());
-	HBox* edit_group_display_button_box = manage (new HBox());
-	edit_group_display_button_box->set_homogeneous (true);
+	VBox* route_group_display_packer = manage (new VBox());
+	HBox* route_group_display_button_box = manage (new HBox());
+	route_group_display_button_box->set_homogeneous (true);
 
-	Button* edit_group_add_button = manage (new Button ());
-	Button* edit_group_remove_button = manage (new Button ());
+	Button* route_group_add_button = manage (new Button ());
+	Button* route_group_remove_button = manage (new Button ());
 
 	Widget* w;
 
 	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show();
-	edit_group_add_button->add (*w);
+	route_group_add_button->add (*w);
 
 	w = manage (new Image (Stock::REMOVE, ICON_SIZE_BUTTON));
 	w->show();
-	edit_group_remove_button->add (*w);
+	route_group_remove_button->add (*w);
 
-	edit_group_add_button->signal_clicked().connect (mem_fun (*this, &Editor::new_edit_group));
-	edit_group_remove_button->signal_clicked().connect (mem_fun (*this, &Editor::remove_selected_edit_group));
+	route_group_add_button->signal_clicked().connect (mem_fun (*this, &Editor::new_route_group));
+	route_group_remove_button->signal_clicked().connect (mem_fun (*this, &Editor::remove_selected_route_group));
 	
-	edit_group_display_button_box->pack_start (*edit_group_add_button);
-	edit_group_display_button_box->pack_start (*edit_group_remove_button);
+	route_group_display_button_box->pack_start (*route_group_add_button);
+	route_group_display_button_box->pack_start (*route_group_remove_button);
 
-	edit_group_display_packer->pack_start (edit_group_display_scroller, true, true);
-	edit_group_display_packer->pack_start (*edit_group_display_button_box, false, false);
+	route_group_display_packer->pack_start (route_group_display_scroller, true, true);
+	route_group_display_packer->pack_start (*route_group_display_button_box, false, false);
 
 	region_list_display.set_size_request (100, -1);
 	region_list_display.set_name ("RegionListDisplay");
@@ -752,9 +749,9 @@ Editor::Editor ()
 	nlabel = manage (new Label (_("Snapshots")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (snapshot_display_scroller, *nlabel);
-	nlabel = manage (new Label (_("Edit Groups")));
+	nlabel = manage (new Label (_("Route Groups")));
 	nlabel->set_angle (-90);
-	the_notebook.append_page (*edit_group_display_packer, *nlabel);
+	the_notebook.append_page (*route_group_display_packer, *nlabel);
 	
 	if (!Profile->get_sae()) {
 		nlabel = manage (new Label (_("Chunks")));
@@ -1293,8 +1290,8 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->RegionsAdded.connect (mem_fun(*this, &Editor::handle_new_regions)));
 	session_connections.push_back (session->RegionRemoved.connect (mem_fun(*this, &Editor::handle_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
-	session_connections.push_back (session->edit_group_added.connect (mem_fun(*this, &Editor::add_edit_group)));
-	session_connections.push_back (session->edit_group_removed.connect (mem_fun(*this, &Editor::edit_groups_changed)));
+	session_connections.push_back (session->route_group_added.connect (mem_fun(*this, &Editor::add_route_group)));
+	session_connections.push_back (session->route_group_removed.connect (mem_fun(*this, &Editor::route_groups_changed)));
 	session_connections.push_back (session->NamedSelectionAdded.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->NamedSelectionRemoved.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->DirtyChanged.connect (mem_fun(*this, &Editor::update_title)));
@@ -1309,7 +1306,7 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->Located.connect (mem_fun (*this, &Editor::located)));
 	session_connections.push_back (session->config.ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed)));
 
-	edit_groups_changed ();
+	route_groups_changed ();
 
 	edit_point_clock.set_mode(AudioClock::BBT);
 	edit_point_clock.set_session (session);
@@ -3560,24 +3557,24 @@ Editor::commit_reversible_command ()
 }
 
 void
-Editor::set_edit_group_solo (Route& route, bool yn)
+Editor::set_route_group_solo (Route& route, bool yn)
 {
-	RouteGroup *edit_group;
+	RouteGroup *route_group;
 
-	if ((edit_group = route.edit_group()) != 0) {
-		edit_group->apply (&Route::set_solo, yn, this);
+	if ((route_group = route.route_group()) != 0) {
+		route_group->apply (&Route::set_solo, yn, this);
 	} else {
 		route.set_solo (yn, this);
 	}
 }
 
 void
-Editor::set_edit_group_mute (Route& route, bool yn)
+Editor::set_route_group_mute (Route& route, bool yn)
 {
-	RouteGroup *edit_group = 0;
+	RouteGroup *route_group = 0;
 
-	if ((edit_group == route.edit_group()) != 0) {
-		edit_group->apply (&Route::set_mute, yn, this);
+	if ((route_group == route.route_group()) != 0) {
+		route_group->apply (&Route::set_mute, yn, this);
 	} else {
 		route.set_mute (yn, this);
 	}
@@ -3966,11 +3963,11 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 
 	} else {
 		
-		/* views for all tracks in the edit group */
+		/* views for all tracks in the route group */
 		
 		for (i  = track_views.begin(); i != track_views.end (); ++i) {
 
-			if (group == 0 || (*i)->edit_group() == group) {
+			if (group == 0 || (*i)->route_group() == group) {
 				v->push_back (*i);
 			}
 		}
@@ -5070,45 +5067,29 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 {
 	if (selection->regions.empty()) {
 
-		if (selection->tracks.empty()) {
+		/* no regions selected; get all regions at the edit point across:
+		     - tracks in the region's route's edit group, if it has the edit property
+		     - selected tracks
+		*/
 
-			/* no regions or tracks selected
-			*/
+		if (entered_regionview) {
 			
-			if (entered_regionview && mouse_mode == Editing::MouseObject) {
+			rs.add (entered_regionview);
 
-				/*  entered regionview is valid and we're in object mode - 
-				    just use entered regionview
-				*/
+			TrackSelection tracks = selection->tracks;
 
-				rs.add (entered_regionview);
+			RouteGroup* g = entered_regionview->get_time_axis_view().route_group ();
+			if (g && g->active_property (RouteGroup::Edit)) {
+				tracks.add (axis_views_from_routes (g->route_list()));
 			}
 
-			return;
-
-		} else {
-
-			/* no regions selected, so get all regions at the edit point across
-			   all selected tracks. 
-			*/
-
-			nframes64_t where = get_preferred_edit_position();
-			get_regions_at (rs, where, selection->tracks);
-
-			/* if the entered regionview wasn't selected and neither was its track
-			   then add it.
-			*/
-
-			if (entered_regionview != 0 &&
-			    !selection->selected (entered_regionview) && 
-			    !selection->selected (&entered_regionview->get_time_axis_view())) {
-				rs.add (entered_regionview);
-			}
+			nframes64_t const where = get_preferred_edit_position ();
+			get_regions_at (rs, where, tracks);
 		}
-
+		
 	} else {
 		
-		/* just use the selected regions */
+		/* use the selected regions */
 
 		rs = selection->regions;
 
@@ -5289,3 +5270,23 @@ Editor::streamview_height_changed ()
 {
 	_summary->set_dirty ();
 }
+
+TrackSelection
+Editor::axis_views_from_routes (list<Route*> r) const
+{
+	TrackSelection t;
+	
+	for (list<Route*>::const_iterator i = r.begin(); i != r.end(); ++i) {
+		TrackViewList::const_iterator j = track_views.begin ();
+		while (j != track_views.end()) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
+			if (rtv && rtv->route().get() == *i) {
+				t.push_back (rtv);
+			}
+			++j;
+		}
+	}
+
+	return t;
+}
+

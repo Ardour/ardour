@@ -370,7 +370,7 @@ Editor::session_going_away ()
 	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	route_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	named_selection_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
-	edit_group_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	route_group_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 
 	region_list_model->clear ();
 	route_display_model->clear ();
@@ -380,7 +380,7 @@ Editor::session_going_away ()
 	region_list_display.set_model (region_list_model);
 	route_list_display.set_model (route_display_model);
 	named_selection_display.set_model (named_selection_model);
-	edit_group_display.set_model (group_model);
+	route_group_display.set_model (group_model);
 
 	edit_point_clock_connection_a.disconnect();
 	edit_point_clock_connection_b.disconnect();

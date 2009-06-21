@@ -39,7 +39,7 @@ using namespace sigc;
 using namespace std;
 
 RouteGroup::RouteGroup (Session& s, const string &n, Flag f)
-	: _session (s), _name (n), _flags (f) 
+	: _session (s), _name (n), _flags (f), _properties (Property (0))
 {
 }
 
@@ -130,6 +130,7 @@ RouteGroup::get_state (void)
 	XMLNode *node = new XMLNode ("RouteGroup");
 	node->add_property ("name", _name);
 	node->add_property ("flags", enum_2_string (_flags));
+	node->add_property ("properties", enum_2_string (_properties));
 	return *node;
 }
 
@@ -146,6 +147,10 @@ RouteGroup::set_state (const XMLNode& node)
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
 
+	if ((prop = node.property ("properties")) != 0) {
+		_properties = Property (string_2_enum (prop->value(), _properties));
+	}
+	
 	return 0;
 }
 

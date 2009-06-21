@@ -50,7 +50,7 @@ class AddRouteDialog : public Gtk::Dialog
 
 	ARDOUR::DataType type();
 	ARDOUR::TrackMode mode();
-	ARDOUR::RouteGroup* edit_group ();
+	ARDOUR::RouteGroup* route_group ();
 
   private:
 	ARDOUR::Session& _session;
@@ -61,13 +61,13 @@ class AddRouteDialog : public Gtk::Dialog
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText track_mode_combo;
-	Gtk::ComboBoxText edit_group_combo;
+	Gtk::ComboBoxText route_group_combo;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 	
 	void track_type_chosen ();
 	void refill_channel_setups ();
-	void add_edit_group (ARDOUR::RouteGroup *);
+	void add_route_group (ARDOUR::RouteGroup *);
 
 	void reset_template_option_visibility ();
 	

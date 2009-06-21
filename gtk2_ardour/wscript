@@ -142,6 +142,7 @@ def build(bld):
 		generic_pluginui.cc
 		ghostregion.cc
 		global_port_matrix.cc
+                group_tabs.cc
 		gtk-custom-hruler.c
 		gtk-custom-ruler.c
 		io_selector.cc
@@ -215,6 +216,7 @@ def build(bld):
 		time_axis_view_item.cc
 		time_fx_dialog.cc
 		time_selection.cc
+		track_selection.cc
 		ui_config.cc
 		utils.cc
 		version.cc

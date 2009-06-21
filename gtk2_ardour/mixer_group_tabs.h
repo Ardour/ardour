@@ -17,21 +17,19 @@
 
 */
 
-#include "cairo_widget.h"
+#include "group_tabs.h"
 
 class Mixer_UI;
 
-class MixerGroupTabs : public CairoWidget
+class MixerGroupTabs : public GroupTabs
 {
 public:
 	MixerGroupTabs (Mixer_UI *);
 
-	void set_session (ARDOUR::Session *);
-
 private:
-	void on_size_request (Gtk::Requisition *);
-	bool on_button_press_event (GdkEventButton *);
+	ARDOUR::RouteGroup* click_to_route_group (GdkEventButton *);
 	void render (cairo_t *);
+	
 	void draw_group (cairo_t *, int32_t, int32_t, ARDOUR::RouteGroup* , Gdk::Color const &);
 	
 	Mixer_UI* _mixer;
