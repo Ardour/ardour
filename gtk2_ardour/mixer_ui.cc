@@ -758,6 +758,8 @@ Mixer_UI::redisplay_track_list ()
 
 		} else {
 
+			strip->set_marked_for_display (false);
+
 			if (strip->route()->is_master() || strip->route()->is_control()) {
 				/* do nothing, these cannot be hidden */
 			} else {
@@ -1261,7 +1263,6 @@ Mixer_UI::mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::Tree
 
 void
 Mixer_UI::add_mix_group (RouteGroup* group)
-
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_mix_group), group));
 	bool focus = false;

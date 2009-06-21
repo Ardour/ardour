@@ -68,10 +68,10 @@ MixerGroupTabs::render (cairo_t* cr)
 	int32_t x = 0;
 	for (list<MixerStrip*>::iterator i = _mixer->strips.begin(); i != _mixer->strips.end(); ++i) {
 
-		if ((*i)->route()->is_master() || (*i)->route()->is_control()) {
+		if ((*i)->route()->is_master() || (*i)->route()->is_control() || !(*i)->marked_for_display()) {
 			continue;
 		}
-		
+
 		RouteGroup* g = (*i)->mix_group ();
 
 		if (g != curr_group) {
