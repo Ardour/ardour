@@ -22,6 +22,11 @@
 
 #include <gtkmm/eventbox.h>
 
+/** A parent class for widgets that are made up of a pixmap rendered using Cairo.
+ *  The pixmap is painted to screen on GTK expose events, but the rendering
+ *  is only done after set_dirty() has been called.
+ */
+
 class CairoWidget : public Gtk::EventBox
 {
 public:
@@ -31,6 +36,7 @@ public:
 	void set_dirty ();
 
 protected:
+	/** Render the widget to the given Cairo context */
 	virtual void render (cairo_t *) = 0;
 	virtual bool on_expose_event (GdkEventExpose *);
 	void on_size_allocate (Gtk::Allocation &);
@@ -39,8 +45,8 @@ protected:
 	int _height; ///< pixmap height
 	
 private:
-	bool _dirty;
-	GdkPixmap* _pixmap;
+	bool _dirty; ///< true if the pixmap requires re-rendering
+	GdkPixmap* _pixmap; ///< our pixmap
 };
 
 #endif

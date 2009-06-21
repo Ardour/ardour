@@ -83,6 +83,10 @@ CairoWidget::on_expose_event (GdkEventExpose *event)
 	return true;
 }
 
+/** Marks the widget as dirty, so that render () will be called on
+ *  the next GTK expose event.
+ */
+
 void
 CairoWidget::set_dirty ()
 {
