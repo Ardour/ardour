@@ -422,7 +422,7 @@ void
 Editor::maybe_add_mixer_strip_width (XMLNode& node)
 {
 	if (current_mixer_strip) {
-		node.add_property ("mixer-width", enum_2_string (current_mixer_strip->get_width()));
+		node.add_property ("mixer-width", enum_2_string (current_mixer_strip->get_width_enum()));
 	}
 }
 
