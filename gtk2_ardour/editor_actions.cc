@@ -612,7 +612,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "fit-tracks", _("Fit Selected Tracks"), (mem_fun(*this, &Editor::fit_tracks)));
+	act = ActionManager::register_action (editor_actions, "fit-tracks", _("Fit Selected Tracks"), mem_fun(*this, &Editor::fit_selected_tracks));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), bind (
 			mem_fun(*this, &Editor::set_track_height), TimeAxisView::hLargest));

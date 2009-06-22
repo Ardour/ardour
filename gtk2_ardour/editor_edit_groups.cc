@@ -64,7 +64,8 @@ Editor::build_route_group_list_menu (RouteGroup* g)
 	items.push_back (MenuElem (_("New Group..."), mem_fun(*this, &Editor::new_route_group)));
 	items.push_back (MenuElem (_("New Group From"), *new_from));
 	if (g) {
-		items.push_back (MenuElem (_("Edit Group..."), bind (mem_fun(*this, &Editor::edit_route_group), g)));
+		items.push_back (MenuElem (_("Edit Group..."), bind (mem_fun (*this, &Editor::edit_route_group), g)));
+		items.push_back (MenuElem (_("Fit Group to Window"), bind (mem_fun (*this, &Editor::fit_route_group), g)));
 	}
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_route_groups)));

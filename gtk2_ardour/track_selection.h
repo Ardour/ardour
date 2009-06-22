@@ -28,6 +28,7 @@ class TrackSelection : public std::list<TimeAxisView*>
 {
 public:
 	std::list<TimeAxisView*> add (std::list<TimeAxisView*> const &);
+	bool contains (TimeAxisView const *) const;
 };
 
 #endif /* __ardour_gtk_track_selection_h__ */

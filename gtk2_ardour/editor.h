@@ -1872,6 +1872,7 @@ public:
 	void new_route_group_from_rec_enabled ();
 	void new_route_group_from_soloed ();
 	void edit_route_group (ARDOUR::RouteGroup *);
+	void fit_route_group (ARDOUR::RouteGroup *);
 	void route_group_list_button_clicked ();
 	gint route_group_list_button_press_event (GdkEventButton* ev);
 	void add_route_group (ARDOUR::RouteGroup* group);
@@ -2221,7 +2222,8 @@ public:
 	BundleManager* _bundle_manager;
 	GlobalPortMatrixWindow* _global_port_matrix[ARDOUR::DataType::num_types];
 
-	void fit_tracks ();
+	void fit_tracks (TrackSelection &);
+	void fit_selected_tracks ();
 	void set_track_height (uint32_t h);
 
 	void remove_tracks ();

@@ -232,3 +232,4 @@ GroupTabs::click_to_tab (double c, Tab** prev, Tab** next)
 
 	return &(*i);
 }
+

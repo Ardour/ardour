@@ -55,6 +55,7 @@
 #include "ardour/dB.h"
 #include "ardour/quantize.h"
 #include "ardour/strip_silence.h"
+#include "ardour/route_group.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -6328,15 +6329,28 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 }
 
 void
-Editor::fit_tracks ()
+Editor::fit_selected_tracks ()
 {
-	if (selection->tracks.empty()) {
+	fit_tracks (selection->tracks);
+}
+
+void
+Editor::fit_route_group (RouteGroup *g)
+{
+	TrackSelection ts = axis_views_from_routes (g->route_list ());
+	fit_tracks (ts);
+}
+
+void
+Editor::fit_tracks (TrackSelection & tracks)
+{
+	if (tracks.empty()) {
 		return;
 	}
 
 	uint32_t child_heights = 0;
 
-	for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
 
 		if (!(*t)->marked_for_display()) {
 			continue;
@@ -6345,11 +6359,11 @@ Editor::fit_tracks ()
 		child_heights += (*t)->effective_height() - (*t)->current_height();
 	}
 
-	uint32_t h = (uint32_t) floor ((_canvas_height - child_heights - canvas_timebars_vsize)/selection->tracks.size());
+	uint32_t h = (uint32_t) floor ((_canvas_height - child_heights - canvas_timebars_vsize) / tracks.size());
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::hSmall) {
-		MessageDialog msg (*this, _("There are too many selected tracks to fit in the current window"));
+		MessageDialog msg (*this, _("There are too many tracks to fit in the current window"));
 		/* too small to be displayed */
 		return;
 	}
@@ -6359,7 +6373,7 @@ Editor::fit_tracks ()
 	/* operate on all tracks, hide unselected ones that are in the middle of selected ones */
 	
 	bool prev_was_selected = false;
-	bool is_selected = selection->selected (track_views.front());
+	bool is_selected = tracks.contains (track_views.front());
 	bool next_is_selected;
 
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
@@ -6370,7 +6384,7 @@ Editor::fit_tracks ()
 		++next;
 		
 		if (next != track_views.end()) {
-			next_is_selected = selection->selected (*next);
+			next_is_selected = tracks.contains (*next);
 		} else {
 			next_is_selected = false;
 		}
