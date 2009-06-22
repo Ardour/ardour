@@ -30,7 +30,6 @@ using namespace ARDOUR;
 
 GroupTabs::GroupTabs ()
 	: _session (0),
-	  _menu (0),
 	  _dragging (0)
 {
 
@@ -86,14 +85,8 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 	} else if (ev->button == 3) {
 
-		delete _menu;
-		_menu = new Menu;
-		MenuList& items = _menu->items ();
-		items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &GroupTabs::edit_group), t->group)));
-		items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &GroupTabs::remove_group), t->group)));
-
-		_menu->popup (ev->button, ev->time);
-
+		get_menu(t->group)->popup (ev->button, ev->time);
+		
 	}
 
 	return true;
@@ -171,20 +164,6 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 	}
 
 	return true;
-}
-
-
-void
-GroupTabs::edit_group (RouteGroup* g)
-{
-	RouteGroupDialog d (g, Gtk::Stock::APPLY);
-	d.do_run ();
-}
-
-void
-GroupTabs::remove_group (RouteGroup *g)
-{
-	_session->remove_route_group (*g);
 }
 
 void

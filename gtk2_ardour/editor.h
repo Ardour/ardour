@@ -1858,9 +1858,9 @@ public:
 
 	Gtk::TreeView          route_group_display;
 	Gtk::ScrolledWindow    route_group_display_scroller;
-	Gtk::Menu*             route_group_list_menu;
+	Gtk::Menu*             route_group_menu;
 
-	void build_route_group_list_menu (ARDOUR::RouteGroup *);
+	void build_route_group_menu (ARDOUR::RouteGroup *);
 	void activate_all_route_groups ();
 	void disable_all_route_groups ();
 

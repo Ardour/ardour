@@ -34,6 +34,11 @@ private:
 	double extent () const {
 		return _width;
 	}
+	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
+
+	void edit_group (ARDOUR::RouteGroup *);
+	void remove_group (ARDOUR::RouteGroup *);
 	
 	Mixer_UI* _mixer;
+	Gtk::Menu* _menu;
 };

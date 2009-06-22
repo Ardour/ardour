@@ -35,6 +35,7 @@ private:
 	double extent () const {
 		return _height;
 	}
+	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
 	
 	Editor* _editor;
 };

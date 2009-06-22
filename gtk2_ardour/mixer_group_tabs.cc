@@ -23,12 +23,16 @@
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "utils.h"
+#include "i18n.h"
+#include "route_group_dialog.h"
 
 using namespace std;
+using namespace Gtk;
 using namespace ARDOUR;
 
 MixerGroupTabs::MixerGroupTabs (Mixer_UI* m)
-	: _mixer (m)
+	: _mixer (m),
+	  _menu (0)
 {
 	
 }
@@ -149,3 +153,30 @@ MixerGroupTabs::reflect_tabs (list<Tab> const & tabs)
 	}
 }
 
+Gtk::Menu*
+MixerGroupTabs::get_menu (RouteGroup* g)
+{
+	using namespace Menu_Helpers;
+	
+	delete _menu;
+	_menu = new Menu;
+	
+	MenuList& items = _menu->items ();
+	items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &MixerGroupTabs::edit_group), g)));
+	items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &MixerGroupTabs::remove_group), g)));
+
+	return _menu;
+}
+
+void
+MixerGroupTabs::edit_group (RouteGroup* g)
+{
+	RouteGroupDialog d (g, Gtk::Stock::APPLY);
+	d.do_run ();
+}
+
+void
+MixerGroupTabs::remove_group (RouteGroup *g)
+{
+	_session->remove_route_group (*g);
+}

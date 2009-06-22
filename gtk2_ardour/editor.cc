@@ -312,7 +312,7 @@ Editor::Editor ()
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
-	route_group_list_menu = 0;
+	route_group_menu = 0;
 	route_list_menu = 0;
 	region_list_menu = 0;
 	marker_menu = 0;

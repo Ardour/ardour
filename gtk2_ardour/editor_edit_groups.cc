@@ -45,11 +45,11 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::build_route_group_list_menu (RouteGroup* g)
+Editor::build_route_group_menu (RouteGroup* g)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	delete route_group_list_menu;
+	delete route_group_menu;
 
 	Menu* new_from = new Menu;
 	MenuList& f = new_from->items ();
@@ -57,15 +57,15 @@ Editor::build_route_group_list_menu (RouteGroup* g)
 	f.push_back (MenuElem (_("Record Enabled..."), mem_fun (*this, &Editor::new_route_group_from_rec_enabled)));
 	f.push_back (MenuElem (_("Soloed..."), mem_fun (*this, &Editor::new_route_group_from_soloed)));
 
-	route_group_list_menu = new Menu;
-	route_group_list_menu->set_name ("ArdourContextMenu");
-	MenuList& items = route_group_list_menu->items();
+	route_group_menu = new Menu;
+	route_group_menu->set_name ("ArdourContextMenu");
+	MenuList& items = route_group_menu->items();
 
-	items.push_back (MenuElem (_("New Group..."), mem_fun(*this, &Editor::new_route_group)));
-	items.push_back (MenuElem (_("New Group From"), *new_from));
+	items.push_back (MenuElem (_("New..."), mem_fun(*this, &Editor::new_route_group)));
+	items.push_back (MenuElem (_("New From"), *new_from));
 	if (g) {
-		items.push_back (MenuElem (_("Edit Group..."), bind (mem_fun (*this, &Editor::edit_route_group), g)));
-		items.push_back (MenuElem (_("Fit Group to Window"), bind (mem_fun (*this, &Editor::fit_route_group), g)));
+		items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &Editor::edit_route_group), g)));
+		items.push_back (MenuElem (_("Fit to Window"), bind (mem_fun (*this, &Editor::fit_route_group), g)));
 	}
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_route_groups)));
@@ -233,8 +233,8 @@ Editor::route_group_list_button_press_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		build_route_group_list_menu (group);
-		route_group_list_menu->popup (1, ev->time);
+		build_route_group_menu (group);
+		route_group_menu->popup (1, ev->time);
 		return true;
 	}
 

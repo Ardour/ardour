@@ -152,3 +152,11 @@ EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
 		y += (*i)->effective_height ();
 	}
 }
+
+
+Gtk::Menu*
+EditorGroupTabs::get_menu (RouteGroup *g)
+{
+	_editor->build_route_group_menu (g);
+	return _editor->route_group_menu;
+}
