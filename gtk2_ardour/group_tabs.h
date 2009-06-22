@@ -41,6 +41,8 @@ protected:
 		double to;
 		Gdk::Color colour;
 		ARDOUR::RouteGroup* group;
+		double first_ui_size;
+		double last_ui_size;
 	};
 
 private:

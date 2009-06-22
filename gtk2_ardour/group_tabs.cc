@@ -114,16 +114,33 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 	}
 
 	if (_drag_from) {
+		
 		double f = _dragging->from + p - _drag_last;
+		
 		if (f < _drag_limit) {
 			f = _drag_limit;
 		}
+
+		double const t = _dragging->to - _dragging->last_ui_size;
+		if (f > t) {
+			f = t;
+		}
+		
 		_dragging->from = f;
+		
 	} else {
+		
 		double t = _dragging->to + p - _drag_last;
+
 		if (t > _drag_limit) {
 			t = _drag_limit;
 		}
+
+		double const f = _dragging->from + _dragging->first_ui_size;
+		if (t < f) {
+			t = f;
+		}
+		
 		_dragging->to = t;
 	}
 

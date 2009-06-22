@@ -53,12 +53,14 @@ EditorGroupTabs::compute_tabs () const
 		if (g != tab.group) {
 			if (tab.group) {
 				tab.to = y;
+				tab.last_ui_size = (*i)->effective_height ();
 				tabs.push_back (tab);
 			}
 
 			tab.from = y;
 			tab.group = g;
 			tab.colour = (*i)->color ();
+			tab.first_ui_size = (*i)->effective_height ();
 		}
 
 		y += (*i)->effective_height ();

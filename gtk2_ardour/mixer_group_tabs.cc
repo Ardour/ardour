@@ -55,12 +55,14 @@ MixerGroupTabs::compute_tabs () const
 		if (g != tab.group) {
 			if (tab.group) {
 				tab.to = x;
+				tab.last_ui_size = (*i)->get_width ();
 				tabs.push_back (tab);
 			}
 
 			tab.from = x;
 			tab.group = g;
 			tab.colour = (*i)->color ();
+			tab.first_ui_size = (*i)->get_width ();
 		}
 
 		x += (*i)->get_width ();
