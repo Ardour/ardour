@@ -48,28 +48,31 @@ MixerGroupTabs::compute_tabs () const
 	tab.group = 0;
 
 	int32_t x = 0;
-	for (list<MixerStrip*>::iterator i = _mixer->strips.begin(); i != _mixer->strips.end(); ++i) {
+	TreeModel::Children rows = _mixer->track_model->children ();
+	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-		if ((*i)->route()->is_master() || (*i)->route()->is_control() || !(*i)->marked_for_display()) {
+		MixerStrip* s = (*i)[_mixer->track_columns.strip];
+
+		if (s->route()->is_master() || s->route()->is_control() || !s->marked_for_display()) {
 			continue;
 		}
 
-		RouteGroup* g = (*i)->route_group ();
+		RouteGroup* g = s->route_group ();
 
 		if (g != tab.group) {
 			if (tab.group) {
 				tab.to = x;
-				tab.last_ui_size = (*i)->get_width ();
+				tab.last_ui_size = s->get_width ();
 				tabs.push_back (tab);
 			}
 
 			tab.from = x;
 			tab.group = g;
-			tab.colour = (*i)->color ();
-			tab.first_ui_size = (*i)->get_width ();
+			tab.colour = s->color ();
+			tab.first_ui_size = s->get_width ();
 		}
 
-		x += (*i)->get_width ();
+		x += s->get_width ();
 	}
 
 	if (tab.group) {
@@ -121,16 +124,19 @@ MixerGroupTabs::reflect_tabs (list<Tab> const & tabs)
 	list<Tab>::const_iterator j = tabs.begin ();
 	
 	int32_t x = 0;
-	for (list<MixerStrip*>::iterator i = _mixer->strips.begin(); i != _mixer->strips.end(); ++i) {
+	TreeModel::Children rows = _mixer->track_model->children ();
+	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-		if ((*i)->route()->is_master() || (*i)->route()->is_control() || !(*i)->marked_for_display()) {
+		MixerStrip* s = (*i)[_mixer->track_columns.strip];
+		
+		if (s->route()->is_master() || s->route()->is_control() || !s->marked_for_display()) {
 			continue;
 		}
 		
 		if (j == tabs.end()) {
 			
 			/* already run out of tabs, so no edit group */
-			(*i)->route()->set_route_group (0, this);
+			s->route()->set_route_group (0, this);
 			
 		} else {
 			
@@ -139,17 +145,17 @@ MixerGroupTabs::reflect_tabs (list<Tab> const & tabs)
 				++j;
 			}
 			
-			double const h = x + (*i)->get_width() / 2;
+			double const h = x + s->get_width() / 2;
 			
 			if (j->from < h && j->to > h) {
-				(*i)->route()->set_route_group (j->group, this);
+				s->route()->set_route_group (j->group, this);
 			} else {
-				(*i)->route()->set_route_group (0, this);
+				s->route()->set_route_group (0, this);
 			}
 			
 		}
 
-		x += (*i)->get_width ();
+		x += s->get_width ();
 	}
 }
 
