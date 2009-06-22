@@ -76,7 +76,7 @@ private:
 	/** @return Size of the widget along the primary axis */
 	virtual double extent () const = 0;
 
-	/** @param g Route group.
+	/** @param g Route group, or 0.
          *  @return Menu to be popped up on right-click over the given route group.
 	 */
 	virtual Gtk::Menu* get_menu (ARDOUR::RouteGroup* g) = 0;

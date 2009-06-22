@@ -64,11 +64,8 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 	Tab* prev;
 	Tab* next;
 	Tab* t = click_to_tab (p, &prev, &next);
-	if (t == 0) {
-		return false;
-	}
 
-	if (ev->button == 1) {
+	if (ev->button == 1 && t) {
 
 		_dragging = t;
 		_drag_moved = false;
@@ -87,7 +84,8 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 	} else if (ev->button == 3) {
 
-		get_menu(t->group)->popup (ev->button, ev->time);
+		RouteGroup* g = t ? t->group : 0;
+		get_menu(g)->popup (ev->button, ev->time);
 		
 	}
 
