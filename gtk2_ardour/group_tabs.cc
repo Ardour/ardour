@@ -205,6 +205,8 @@ GroupTabs::render (cairo_t* cr)
 GroupTabs::Tab *
 GroupTabs::click_to_tab (double c, Tab** prev, Tab** next)
 {
+	*prev = 0;
+	
 	list<Tab>::iterator i = _tabs.begin ();
 	while (i != _tabs.end() && (c < i->from || c > i->to)) {
 		*prev = &(*i);
