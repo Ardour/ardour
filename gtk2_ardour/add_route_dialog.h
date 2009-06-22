@@ -67,6 +67,7 @@ class AddRouteDialog : public Gtk::Dialog
 	
 	void track_type_chosen ();
 	void refill_channel_setups ();
+	void refill_route_groups ();
 	void add_route_group (ARDOUR::RouteGroup *);
 
 	void reset_template_option_visibility ();

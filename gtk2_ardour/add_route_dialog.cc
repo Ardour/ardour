@@ -82,14 +82,11 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	routes_spinner.set_name ("AddRouteDialogSpinner");
 
 	refill_channel_setups ();
+	refill_route_groups ();
 	set_popdown_strings (track_mode_combo, track_mode_strings, true);
 
-	route_group_combo.append_text (_("No group"));
-	_session.foreach_route_group (mem_fun (*this, &AddRouteDialog::add_route_group));
-	
 	channel_combo.set_active_text (channel_combo_strings.front());
 	track_mode_combo.set_active_text (track_mode_strings.front());
-	route_group_combo.set_active (0);
 
 	RadioButton::Group g = track_button.get_group();
 	bus_button.set_group (g);
@@ -250,6 +247,8 @@ void
 AddRouteDialog::on_show ()
 {
 	refill_channel_setups ();
+	refill_route_groups ();
+	
 	Dialog::on_show ();
 }
 
@@ -339,3 +338,13 @@ AddRouteDialog::route_group ()
 
 	return _session.route_group_by_name (route_group_combo.get_active_text());
 }
+
+void
+AddRouteDialog::refill_route_groups ()
+{
+	route_group_combo.clear ();
+	route_group_combo.append_text (_("No group"));
+	_session.foreach_route_group (mem_fun (*this, &AddRouteDialog::add_route_group));
+	route_group_combo.set_active (0);
+}
+	
