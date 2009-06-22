@@ -35,6 +35,7 @@
 
 #include "utils.h"
 #include "add_route_dialog.h"
+#include "route_group_dialog.h"
 #include "i18n.h"
 
 using namespace Gtk;
@@ -57,7 +58,8 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	  track_button (_("Tracks")),
 	  bus_button (_("Busses")),
 	  routes_adjustment (1, 1, 128, 1, 4),
-	  routes_spinner (routes_adjustment)
+	  routes_spinner (routes_adjustment),
+	  new_route_group_button (_("New..."))
 {
 	if (track_mode_strings.empty()) {
 		track_mode_strings = I18N (track_mode_names);
@@ -92,7 +94,7 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	bus_button.set_group (g);
 	track_button.set_active (true);
 
-	Table* table = manage (new Table (5, 2));
+	Table* table = manage (new Table (5, 3));
 	table->set_spacings (4);
 
 	/* add */
@@ -108,13 +110,14 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	hbox->set_spacing (6);
 	hbox->pack_start (track_button, PACK_EXPAND_PADDING);
 	hbox->pack_start (bus_button, PACK_EXPAND_PADDING);
-	table->attach (*hbox, 0, 2, 1, 2);
+	table->attach (*hbox, 0, 3, 1, 2);
 
 	channel_combo.set_name (X_("ChannelCountSelector"));
 	track_mode_combo.set_name (X_("ChannelCountSelector"));
 
 	track_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
 	bus_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
+	new_route_group_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::new_route_group));
 
 	l = manage (new Label (_("Channel configuration:")));
 	l->set_alignment (1, 0.5);
@@ -132,6 +135,8 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	l->set_alignment (1, 0.5);
 	table->attach (*l, 0, 1, 4, 5);
 	table->attach (route_group_combo, 1, 2, 4, 5, FILL | EXPAND);
+	table->attach (new_route_group_button, 2, 3, 4, 5);
+		
 	get_vbox()->pack_start (*table);
 
 	get_vbox()->set_spacing (6);
@@ -348,3 +353,19 @@ AddRouteDialog::refill_route_groups ()
 	route_group_combo.set_active (0);
 }
 	
+void
+AddRouteDialog::new_route_group ()
+{
+	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
+	
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		_session.add_route_group (g);
+		add_route_group (g);
+		route_group_combo.set_active (route_group_combo.get_model()->children().size() - 1);
+	} else {
+		delete g;
+	}
+}

@@ -62,6 +62,7 @@ class AddRouteDialog : public Gtk::Dialog
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText track_mode_combo;
 	Gtk::ComboBoxText route_group_combo;
+	Gtk::Button new_route_group_button;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 	
@@ -69,6 +70,7 @@ class AddRouteDialog : public Gtk::Dialog
 	void refill_channel_setups ();
 	void refill_route_groups ();
 	void add_route_group (ARDOUR::RouteGroup *);
+	void new_route_group ();
 
 	void reset_template_option_visibility ();
 	
