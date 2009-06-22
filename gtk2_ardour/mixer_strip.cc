@@ -1125,9 +1125,14 @@ MixerStrip::route_group_changed (void *ignored)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MixerStrip::route_group_changed), ignored));
 	
 	RouteGroup *rg = _route->route_group();
-	
+
 	if (rg) {
-		group_label.set_text (rg->name());
+		/* XXX: this needs a better algorithm */
+		string truncated = rg->name ();
+		if (truncated.length () > 5) {
+			truncated = truncated.substr (0, 5);
+		}
+		group_label.set_text (truncated);
 	} else {
 		switch (_width) {
 		case Wide:
