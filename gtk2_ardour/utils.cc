@@ -122,17 +122,14 @@ fit_to_pixels (cairo_t* cr, std::string name, double avail)
 	uint32_t width = 0;
 		
 	while (1) {
-		if (name.length() <= 4) {
-			break;
-		}
-			
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, name.c_str(), &ext);
-		if (ext.width < avail) {
+
+		if (ext.width < avail || name.length() <= 4) {
 			width = ext.width;
 			break;
 		}
-			
+
 		if (abbreviated) {
 			name = name.substr (0, name.length() - 4) + "...";
 		} else {
