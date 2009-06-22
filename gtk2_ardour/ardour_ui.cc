@@ -2604,9 +2604,9 @@ void
 ARDOUR_UI::launch_chat ()
 {
 #ifdef __APPLE__
-	NagScreen::open_uri("http://widget.mibbit.com/?settings=c06958ab4aa3b0c077669dd47e0c138e&server=irc.freenode.net&channel=%23ardour-osx&noServerNotices=true&noServerMotd=true");
+	NagScreen::open_uri("http://webchat.freenode.net/?channels=ardour-osx");
 #else
-	NagScreen::open_uri("http://widget.mibbit.com/?settings=c06958ab4aa3b0c077669dd47e0c138e&server=irc.freenode.net&channel=%23ardour&noServerNotices=true&noServerMotd=true");
+	NagScreen::open_uri("http://webchat.freenode.net/?channels=ardour");
 #endif
 }
 
