@@ -1860,7 +1860,7 @@ public:
 	Gtk::ScrolledWindow    route_group_display_scroller;
 	Gtk::Menu*             route_group_list_menu;
 
-	void build_route_group_list_menu ();
+	void build_route_group_list_menu (ARDOUR::RouteGroup *);
 	void activate_all_route_groups ();
 	void disable_all_route_groups ();
 
@@ -1868,6 +1868,10 @@ public:
 	void route_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void route_group_name_edit (const Glib::ustring&, const Glib::ustring&);
 	void new_route_group ();
+	void new_route_group_from_selection ();
+	void new_route_group_from_rec_enabled ();
+	void new_route_group_from_soloed ();
+	void edit_route_group (ARDOUR::RouteGroup *);
 	void route_group_list_button_clicked ();
 	gint route_group_list_button_press_event (GdkEventButton* ev);
 	void add_route_group (ARDOUR::RouteGroup* group);

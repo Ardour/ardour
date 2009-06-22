@@ -2411,7 +2411,6 @@ void
 RouteTimeAxisView::set_route_group_to_new ()
 {
 	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
-	g->set_active (true, this);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();

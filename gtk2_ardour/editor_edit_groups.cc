@@ -31,6 +31,8 @@
 #include "prompter.h"
 #include "gui_thread.h"
 #include "editor_group_tabs.h"
+#include "route_group_dialog.h"
+#include "route_time_axis.h"
 
 #include "ardour/route.h"
 
@@ -43,19 +45,30 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::build_route_group_list_menu ()
+Editor::build_route_group_list_menu (RouteGroup* g)
 {
 	using namespace Gtk::Menu_Helpers;
+
+	delete route_group_list_menu;
+
+	Menu* new_from = new Menu;
+	MenuList& f = new_from->items ();
+	f.push_back (MenuElem (_("Selection..."), mem_fun (*this, &Editor::new_route_group_from_selection)));
+	f.push_back (MenuElem (_("Record Enabled..."), mem_fun (*this, &Editor::new_route_group_from_rec_enabled)));
+	f.push_back (MenuElem (_("Soloed..."), mem_fun (*this, &Editor::new_route_group_from_soloed)));
 
 	route_group_list_menu = new Menu;
 	route_group_list_menu->set_name ("ArdourContextMenu");
 	MenuList& items = route_group_list_menu->items();
 
+	items.push_back (MenuElem (_("New Group..."), mem_fun(*this, &Editor::new_route_group)));
+	items.push_back (MenuElem (_("New Group From"), *new_from));
+	if (g) {
+		items.push_back (MenuElem (_("Edit Group..."), bind (mem_fun(*this, &Editor::edit_route_group), g)));
+	}
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_route_groups)));
 	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Editor::disable_all_route_groups)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Editor::new_route_group)));
-	
 }
 
 void
@@ -79,7 +92,92 @@ Editor::set_route_group_activation (RouteGroup* g, bool a)
 void
 Editor::new_route_group ()
 {
-	session->add_route_group (new RouteGroup (*session, ""));
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		session->add_route_group (g);
+	} else {
+		delete g;
+	}
+}
+
+void
+Editor::new_route_group_from_selection ()
+{
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		session->add_route_group (g);
+
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (rtv) {
+				rtv->route()->set_route_group (g, this);
+			}
+		}
+		
+	} else {
+		delete g;
+	}
+}
+
+void
+Editor::new_route_group_from_rec_enabled ()
+{
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		session->add_route_group (g);
+
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (rtv && rtv->route()->record_enabled()) {
+				rtv->route()->set_route_group (g, this);
+			}
+		}
+		
+	} else {
+		delete g;
+	}
+}
+
+void
+Editor::new_route_group_from_soloed ()
+{
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		session->add_route_group (g);
+
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (rtv && !rtv->route()->is_master() && rtv->route()->soloed()) {
+				rtv->route()->set_route_group (g, this);
+			}
+		}
+		
+	} else {
+		delete g;
+	}
+}
+
+void
+Editor::edit_route_group (RouteGroup* g)
+{
+	RouteGroupDialog d (g, Gtk::Stock::APPLY);
+	d.do_run ();
 }
 
 void
@@ -116,24 +214,31 @@ Editor::route_group_list_button_clicked ()
 gint
 Editor::route_group_list_button_press_event (GdkEventButton* ev)
 {
-	if (Keyboard::is_context_menu_event (ev)) {
-		if (route_group_list_menu == 0) {
-			build_route_group_list_menu ();
-		}
-		route_group_list_menu->popup (1, ev->time);
-		return true;
-	}
-
-
-        RouteGroup* group;
-	TreeIter iter;
 	TreeModel::Path path;
+	TreeIter iter;
+        RouteGroup* group = 0;
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
 
-	if (!route_group_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		return false;
+	bool const p = route_group_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly);
+
+	if (p) {
+		iter = group_model->get_iter (path);
+	}
+	
+	if (iter) {
+		group = (*iter)[group_columns.routegroup];
+	}
+
+	if (Keyboard::is_context_menu_event (ev)) {
+		build_route_group_list_menu (group);
+		route_group_list_menu->popup (1, ev->time);
+		return true;
+	}
+
+	if (!p) {
+		return 1;
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {

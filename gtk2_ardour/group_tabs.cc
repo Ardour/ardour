@@ -86,12 +86,11 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 	} else if (ev->button == 3) {
 
-		if (!_menu) {
-			_menu = new Menu;
-			MenuList& items = _menu->items ();
-			items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &GroupTabs::edit_group), t->group)));
-			items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &GroupTabs::remove_group), t->group)));
-		}
+		delete _menu;
+		_menu = new Menu;
+		MenuList& items = _menu->items ();
+		items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &GroupTabs::edit_group), t->group)));
+		items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &GroupTabs::remove_group), t->group)));
 
 		_menu->popup (ev->button, ev->time);
 
