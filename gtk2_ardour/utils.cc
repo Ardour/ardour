@@ -113,6 +113,13 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 	return txt;
 }
 
+/** Try to fit a string into a given horizontal space by ellipsizing it.
+ *  @param cr Cairo context in which the text will be plotted.
+ *  @param name Text.
+ *  @param avail Available horizontal space.
+ *  @return (Text, possibly ellipsized) and (horizontal size of text)
+ */
+
 std::pair<std::string, double>
 fit_to_pixels (cairo_t* cr, std::string name, double avail)
 {

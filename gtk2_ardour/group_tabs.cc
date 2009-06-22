@@ -78,8 +78,10 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 		_drag_from = p < h;
 
 		if (_drag_from) {
+			/* limit is the end of the previous tab */
 			_drag_limit = prev ? prev->to : 0;
 		} else {
+			/* limit is the start of the next tab */
 			_drag_limit = next ? next->from : extent ();
 		}
 
@@ -109,13 +111,15 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 	if (_drag_from) {
 		
 		double f = _dragging->from + p - _drag_last;
-		
+
 		if (f < _drag_limit) {
+			/* limit drag in the `too big' direction */
 			f = _drag_limit;
 		}
 
 		double const t = _dragging->to - _dragging->last_ui_size;
 		if (f > t) {
+			/* limit drag in the `too small' direction */
 			f = t;
 		}
 		
@@ -126,11 +130,13 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 		double t = _dragging->to + p - _drag_last;
 
 		if (t > _drag_limit) {
+			/* limit drag in the `too big' direction */
 			t = _drag_limit;
 		}
 
 		double const f = _dragging->from + _dragging->first_ui_size;
 		if (t < f) {
+			/* limit drag in the `too small' direction */
 			t = f;
 		}
 		
@@ -154,9 +160,11 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 	}
 
 	if (!_drag_moved) {
+		/* toggle active state */
 		_dragging->group->set_active (!_dragging->group->is_active (), this);
 		_dragging = 0;
 	} else {
+		/* finish drag */
 		_dragging = 0;
 		reflect_tabs (_tabs);
 		set_dirty ();
@@ -187,6 +195,13 @@ GroupTabs::render (cairo_t* cr)
 }
 
 
+/** Convert a click position to a tab.
+ *  @param c Click position.
+ *  @param prev Filled in with the previous tab to the click, or 0.
+ *  @param next Filled in with the next tab after the click, or 0.
+ *  @return Tab under the click, or 0.
+ */
+ 
 GroupTabs::Tab *
 GroupTabs::click_to_tab (double c, Tab** prev, Tab** next)
 {
