@@ -26,15 +26,15 @@ static const gchar *_unit_strings[] = {
 std::vector<std::string> LatencyGUI::unit_strings;
 
 std::string
-LatencyGUI::get_label (int&)
+LatencyBarController::get_label (int&)
 {
-	double const nframes = adjustment.get_value();
+	double const nframes = _latency_gui->adjustment.get_value();
 	std::stringstream s;
 
-	if (nframes < (sample_rate / 1000.0)) {
+	if (nframes < (_latency_gui->sample_rate / 1000.0)) {
 		s << ((nframes64_t) rint (nframes)) << " samples";
 	} else {
-		s << std::fixed << std::setprecision (2) << (nframes / (sample_rate / 1000.0)) << " msecs";
+		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " msecs";
 	}
 	
 	return s.str ();
@@ -48,7 +48,7 @@ LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
 	  ignored (new PBD::IgnorableControllable()),
 	  /* max 1 second, step by frames, page by msecs */
 	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
-	  bc (adjustment, ignored),
+	  bc (adjustment, this),
 	  reset_button (_("Reset"))
 {
 	Widget* w;

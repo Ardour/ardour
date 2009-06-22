@@ -1329,7 +1329,7 @@ RouteUI::map_frozen ()
 void
 RouteUI::adjust_latency ()
 {
-	LatencyDialog dialog (_route->name() + _("latency"), *(_route->output()), _session.frame_rate(), _session.engine().frames_per_cycle());
+	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session.frame_rate(), _session.engine().frames_per_cycle());
 }
 
 void

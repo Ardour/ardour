@@ -20,6 +20,21 @@ namespace ARDOUR {
 	class Latent;
 }
 
+class LatencyGUI;
+
+class LatencyBarController : public Gtkmm2ext::BarController
+{
+public:
+	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)
+		: BarController (adj, boost::shared_ptr<PBD::IgnorableControllable> (new PBD::IgnorableControllable ())),
+		  _latency_gui (g) {}
+	
+private:
+	LatencyGUI* _latency_gui;
+	
+	std::string get_label (int&);
+};	
+
 class LatencyGUI : public Gtk::VBox
 {
   public:
@@ -31,8 +46,6 @@ class LatencyGUI : public Gtk::VBox
 	void refresh ();
 
   private:
-	std::string get_label (int&);
-
 	ARDOUR::Latent& _latent;
 	nframes64_t initial_value;
 	nframes64_t sample_rate;
@@ -40,7 +53,7 @@ class LatencyGUI : public Gtk::VBox
 	boost::shared_ptr<PBD::IgnorableControllable> ignored;
 
 	Gtk::Adjustment adjustment;
-	Gtkmm2ext::BarController bc;
+	LatencyBarController bc;
 	Gtk::HBox hbox1;
 	Gtk::HBox hbox2;
 	Gtk::HButtonBox hbbox;
@@ -50,6 +63,8 @@ class LatencyGUI : public Gtk::VBox
 	Gtk::ComboBoxText units_combo;
 
 	void change_latency_from_button (int dir);
+
+	friend class LatencyBarController;
 
 	static std::vector<std::string> unit_strings;
 };
