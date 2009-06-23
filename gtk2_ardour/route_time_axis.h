@@ -75,6 +75,7 @@ public:
  	virtual ~RouteTimeAxisView ();
 
 	void show_selection (TimeSelection&);
+	void set_button_names ();
 
 	void set_samples_per_unit (double);
  	void set_height (uint32_t h);

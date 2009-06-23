@@ -34,6 +34,7 @@ class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
    public:
 	BindableToggleButton (const std::string &label)
 		: Gtkmm2ext::StatefulToggleButton (label) {}
+	BindableToggleButton () {}
 
 	virtual ~BindableToggleButton() {}
 	

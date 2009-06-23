@@ -46,13 +46,13 @@ class BindableToggleButton;
 class RouteUI : public virtual AxisView
 {
   public:
-	RouteUI(ARDOUR::Session&, const char*, const char*, const char*);
-	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&, const char*, const char*, const char*);
+	RouteUI(ARDOUR::Session&);
+	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&);
 
 	virtual ~RouteUI();
 
 	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
-	void set_button_names (const char*, const char*, const char*);
+	virtual void set_button_names () = 0;
 
 	bool is_track() const;
 	bool is_audio_track() const;
@@ -84,6 +84,10 @@ class RouteUI : public virtual AxisView
 	BindableToggleButton* solo_button;
 	BindableToggleButton* rec_enable_button; /* audio tracks */
 	BindableToggleButton* show_sends_button; /* busses */
+
+	Gtk::Label solo_button_label;
+	Gtk::Label mute_button_label;
+	Gtk::Label rec_enable_button_label;
 
 	void send_blink (bool);
 	sigc::connection send_blink_connection;
@@ -184,10 +188,6 @@ class RouteUI : public virtual AxisView
  
    protected:
  	std::vector<sigc::connection> connections;
- 	std::string s_name;
- 	std::string m_name;
- 	std::string r_name;
- 
 	bool self_destruct;
 
  	void init ();
@@ -196,6 +196,7 @@ class RouteUI : public virtual AxisView
   private:
 	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
+	void relabel_solo_button ();
 };
 
 #endif /* __ardour_route_ui__ */

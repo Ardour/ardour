@@ -371,12 +371,12 @@ GainMeterBase::show_gain ()
 void
 GainMeterBase::gain_adjusted ()
 {
-	//cerr << this << " for " << _io->name() << " GAIN ADJUSTED\n";
 	if (!ignore_toggle) {
-		//cerr << "Set GC\n";
-		_gain_control->set_value (slider_position_to_gain (gain_adjustment.get_value()));
-		//cerr << "Set GC OUT\n";
+		if (_route) {
+			_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+		}
 	}
+
 	show_gain ();
 }
 

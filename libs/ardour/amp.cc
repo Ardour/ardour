@@ -240,28 +240,13 @@ Amp::set_gain (gain_t val, void *src)
 	//cerr << "set desired gain to " << val << " when curgain = " << _gain_control->get_value () << endl;
 
 	if (src != _gain_control.get()) {
-		_gain_control->set_value(val);
+		_gain_control->set_value (val);
 		// bit twisty, this will come back and call us again
 		// (this keeps control in sync with reality)
 		return;
 	}
 
-	{
-		// Glib::Mutex::Lock dm (declick_lock);
-		_gain_control->set_float(val, false);
-	}
-
-	if (_session.transport_stopped()) {
-		// _gain = val;
-	}
-	
-	/*
-	if (_session.transport_stopped() && src != 0 && src != this && _gain_control->automation_write()) {
-		_gain_control->list()->add (_session.transport_frame(), val);
-		
-	}
-	*/
-
+	_gain_control->set_float(val, false);
 	_session.set_dirty();
 }
 

@@ -62,19 +62,16 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-RouteUI::RouteUI (ARDOUR::Session& sess, const char* mute_name, const char* solo_name, const char* rec_name)
+RouteUI::RouteUI (ARDOUR::Session& sess)
 	: AxisView(sess)
 {
 	init ();
-	set_button_names (mute_name, solo_name, rec_name);
 }
 
-RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, 
-		  ARDOUR::Session& sess, const char* mute_name, const char* solo_name, const char* rec_name)
+RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess)
 	: AxisView(sess)
 {
 	init ();
-	set_button_names (mute_name, solo_name, rec_name);
 	set_route (rt);
 }
 
@@ -107,20 +104,26 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 
-	mute_button = manage (new BindableToggleButton (""));
+	mute_button = manage (new BindableToggleButton ());
 	mute_button->set_self_managed (true);
 	mute_button->set_name ("MuteButton");
+	mute_button->add (mute_button_label);
+	mute_button_label.show ();
 	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
 
-	solo_button = manage (new BindableToggleButton (""));
+	solo_button = manage (new BindableToggleButton ());
 	solo_button->set_self_managed (true);
 	solo_button->set_name ("SoloButton");
+	solo_button->add (solo_button_label);
+	solo_button_label.show ();
 	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 	solo_button->set_no_show_all (true);
 
-	rec_enable_button = manage (new BindableToggleButton (""));
+	rec_enable_button = manage (new BindableToggleButton ());
 	rec_enable_button->set_name ("RecordEnableButton");
 	rec_enable_button->set_self_managed (true);
+	rec_enable_button->add (rec_enable_button_label);
+	rec_enable_button_label.show ();
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	show_sends_button = manage (new BindableToggleButton (""));
@@ -161,14 +164,6 @@ RouteUI::reset ()
 }
 
 void
-RouteUI::set_button_names (const char* mute, const char* solo, const char* rec)
-{
-	m_name = mute;
-	s_name = solo;
-	r_name = rec;
-}
-
-void
 RouteUI::set_route (boost::shared_ptr<Route> rp)
 {
 	reset ();
@@ -188,10 +183,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	}
 
 	mute_button->set_controllable (_route->mute_control());
-	mute_button->set_label (m_name);
-	
 	solo_button->set_controllable (_route->solo_control());
-	solo_button->set_label (s_name);
   
 	connections.push_back (_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed)));
 	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
@@ -207,7 +199,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
- 		rec_enable_button->set_label (r_name);
 
 		update_rec_display ();
 	} 
@@ -1384,5 +1375,8 @@ RouteUI::parameter_changed (string const & p)
 	
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
+	} else if (p == "solo-model") {
+		set_button_names ();
 	}
 }
+

@@ -238,15 +238,20 @@ Port::reconnect ()
 	return 0;
 }
 
-/** @param n Short name */
+/** @param n Short or long name */
 int
 Port::set_name (std::string const & n)
 {
-	assert (_name.find_first_of (':') == std::string::npos);
+	if (n == _name) {
+		return 0;
+	}
 
-	int const r = jack_port_set_name (_jack_port, n.c_str());
+	string const s = _engine->make_port_name_non_relative (n);
+
+	int const r = jack_port_set_name (_jack_port, s.c_str());
+
 	if (r == 0) {
-		_name = n;
+		_name = n; // short form, probably
 	}
 
 	return r;

@@ -75,7 +75,7 @@ int MixerStrip::scrollbar_height = 0;
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
  	: AxisView(sess)
-	, RouteUI (sess, _("Mute"), _("Solo"), _("Record"))
+	, RouteUI (sess)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
  	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
@@ -102,7 +102,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt, bool in_mixer)
  	: AxisView(sess)
-	, RouteUI (sess, _("Mute"), _("Solo"), _("Record"))
+	, RouteUI (sess)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
  	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
@@ -117,6 +117,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 			 
 {
 	init ();
+	set_button_names ();
 	set_route (rt);
 }
 
@@ -1489,6 +1490,25 @@ MixerStrip::revert_to_default_display ()
 }
 
 void
+MixerStrip::set_button_names ()
+{
+	rec_enable_button_label.set_text (_("Rec"));
+	mute_button_label.set_text (_("Mute"));
+
+	switch (Config->get_solo_model()) {
+	case SoloInPlace:
+		solo_button_label.set_text (_("Solo"));
+		break;
+	case SoloAFL:
+		solo_button_label.set_text (_("AFL"));
+		break;
+	case SoloPFL:
+		solo_button_label.set_text (_("PFL"));
+		break;
+	}
+}
+
+void
 MixerStrip::set_route_group_to_new ()
 {
 	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
@@ -1504,3 +1524,4 @@ MixerStrip::set_route_group_to_new ()
 		delete g;
 	}
 }
+

@@ -100,18 +100,20 @@ RouteTimeAxisView::setup_slider_pix ()
 }
 
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
-	: AxisView(sess),
-	  RouteUI(rt, sess, _("m"), _("s"), _("r")), // mute, solo, and record
-	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
-	  parent_canvas (canvas),
-	  button_table (3, 3),
-	  route_group_button (_("g")), // group
-	  playlist_button (_("p")), 
-	  size_button (_("h")), // height
-	  automation_button (_("a")),
-	  visual_button (_("v")),
-	  gm (sess, slider, true)
+	: AxisView(sess)
+	, RouteUI(rt, sess)
+	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
+	, parent_canvas (canvas)
+	, button_table (3, 3)
+	, route_group_button (_("g"))
+	, playlist_button (_("p"))
+	, size_button (_("h"))
+	, automation_button (_("a"))
+	, visual_button (_("v"))
+	, gm (sess, slider, true)
 {
+	set_button_names ();
+
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->gain_control(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
@@ -2408,6 +2410,14 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 }
 
 void
+RouteTimeAxisView::set_button_names ()
+{
+	rec_enable_button_label.set_text (_("r"));
+	solo_button_label.set_text (_("s"));
+	mute_button_label.set_text (_("m"));
+}
+
+void
 RouteTimeAxisView::set_route_group_to_new ()
 {
 	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
@@ -2422,3 +2432,4 @@ RouteTimeAxisView::set_route_group_to_new ()
 		delete g;
 	}
 }
+
