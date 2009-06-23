@@ -162,6 +162,10 @@ MixerGroupTabs::reflect_tabs (list<Tab> const & tabs)
 Gtk::Menu*
 MixerGroupTabs::get_menu (RouteGroup* g)
 {
+	if (g == 0) {
+		return 0;
+	}
+	
 	using namespace Menu_Helpers;
 	
 	delete _menu;

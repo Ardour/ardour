@@ -86,7 +86,10 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 	} else if (ev->button == 3) {
 
 		RouteGroup* g = t ? t->group : 0;
-		get_menu(g)->popup (ev->button, ev->time);
+		Menu* m = get_menu (g);
+		if (m) {
+			m->popup (ev->button, ev->time);
+		}
 		
 	}
 

@@ -605,9 +605,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	update_output_display ();
 	route_group_changed (0);
 	name_changed ();
-#ifdef GTKOSX
-	WidthChanged();
-#endif
+	WidthChanged ();
 }
 
 void
