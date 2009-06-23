@@ -16,7 +16,7 @@ InterpolationTest::linearInterpolationTest ()
          for (int i = 0; i < NUM_SAMPLES - 1024;) {
              linear.set_speed (double(1.0)/double(3.0));
              linear.set_target_speed (double(1.0)/double(3.0));
-             printf ("Interpolate: input: %d, output: %d, i: %d\n", input + i, output + i, i);
+             //printf ("Interpolate: input: %d, output: %d, i: %d\n", input + i, output + i, i);
              result = linear.interpolate (0, 1024, input + i, output + i);
              printf ("Result: %d\n", result);
              //CPPUNIT_ASSERT_EQUAL ((uint32_t)((NUM_SAMPLES - 100) * interpolation.speed()), result);
@@ -115,7 +115,7 @@ InterpolationTest::libSamplerateInterpolationTest ()
     cout << "\nSpeed: 0.5";
     for (int i = 0; i < NUM_SAMPLES;) {
         interpolation.set_speed (0.5);
-        printf ("Interpolate: input: %d, output: %d, i: %d\n", input + i, output + i, i);
+        //printf ("Interpolate: input: %d, output: %d, i: %d\n", input + i, output + i, i);
         result = interpolation.interpolate (0, NUM_SAMPLES - 100, input + i, output + i);
         printf ("Result: %d\n", result);
         //CPPUNIT_ASSERT_EQUAL ((uint32_t)((NUM_SAMPLES - 100) * interpolation.speed()), result);

@@ -195,9 +195,12 @@ LibSamplerateInterpolation::add_channel_to (int input_buffer_size, int output_bu
 void
 LibSamplerateInterpolation::remove_channel_from () 
 {
-	delete data.back ();
+	SRC_DATA* d = data.back ();
+	delete d;
 	data.pop_back ();
-	delete state.back ();
+	if (state.back ()) {
+		src_delete (state.back ());
+	}
 	state.pop_back ();
 	reset_state ();
 }
