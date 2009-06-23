@@ -22,6 +22,7 @@
 #include "ardour/route_group.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
+#include "keyboard.h"
 #include "i18n.h"
 
 using namespace std;
@@ -158,9 +159,21 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 	}
 
 	if (!_drag_moved) {
-		/* toggle active state */
-		_dragging->group->set_active (!_dragging->group->is_active (), this);
-		_dragging = 0;
+
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+			/* edit */
+			RouteGroupDialog d (_dragging->group, Gtk::Stock::APPLY);
+			d.do_run ();
+
+		} else {
+		
+			/* toggle active state */
+			_dragging->group->set_active (!_dragging->group->is_active (), this);
+			_dragging = 0;
+			
+		}
+		
 	} else {
 		/* finish drag */
 		_dragging = 0;
