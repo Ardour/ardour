@@ -5246,8 +5246,11 @@ Editor::idle_resize ()
 		}
 			
 	}
+	
 	flush_canvas ();
+	_group_tabs->set_dirty ();
 	resize_idle_id = -1;
+	
 	return false;
 }
 
