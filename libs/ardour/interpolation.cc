@@ -64,6 +64,7 @@ Interpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sampl
 	data[channel].data_in       = input;
 	data[channel].data_out      = output;
 	
+	data[channel].input_frames = nframes * _speed;
 	data[channel].output_frames = nframes;
 	data[channel].src_ratio     = 1.0/_speed; 
 
