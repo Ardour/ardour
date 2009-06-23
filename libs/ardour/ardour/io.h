@@ -126,6 +126,8 @@ class IO : public SessionObject, public Latent
 		}
 	}
 
+	Port* port_by_name (const std::string& str) const;
+
 	AudioPort* audio(uint32_t n) const;
 	MidiPort*  midi(uint32_t n) const;
 

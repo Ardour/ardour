@@ -488,6 +488,7 @@ IO::state (bool full_state)
 
 		XMLNode* pnode = new XMLNode (X_("Port"));
 		pnode->add_property (X_("type"), i->type().to_string());
+		pnode->add_property (X_("name"), i->name());
 
 		if (i->get_connections (connections)) {
 
@@ -500,7 +501,10 @@ IO::state (bool full_state)
 				   client name is different.
 				*/
 				
-				pnode->add_property (X_("connection"), _session.engine().make_port_name_relative (*ci));
+				XMLNode* cnode = new XMLNode (X_("Connection"));
+
+				cnode->add_property (X_("other"), _session.engine().make_port_name_relative (*ci));
+				pnode->add_child_nocopy (*cnode);
 			}	
 		}
 		
@@ -543,10 +547,6 @@ IO::set_state (const XMLNode& node)
 		_direction = (Direction) string_2_enum (prop->value(), _direction);
 	}
 
-	if (!connecting_legal) {
-		pending_state_node = new XMLNode (node);
-	} 
-
 	if (create_ports (node)) {
 		return -1;
 	}
@@ -558,7 +558,8 @@ IO::set_state (const XMLNode& node)
 		}
 
 	} else {
-		
+
+		pending_state_node = new XMLNode (node);
 		connection_legal_c = ConnectingLegal.connect (mem_fun (*this, &IO::connecting_became_legal));
 	}
 
@@ -749,22 +750,6 @@ IO::make_connections (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
-	if ((prop = node.property ("connection")) != 0) {
-		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value());
-		
-		if (!c) {
-			return -1;
-		}
-
-		if (n_ports().get(c->type()) == c->nchannels() && c->ports_are_outputs()) {
-			connect_ports_to_bundle (c, this);
-		}
-
-		return 0;
-	} 
-
-	uint32_t n = 0;
-
 	for (XMLNodeConstIterator i = node.children().begin(); i != node.children().end(); ++i) {
 
 		if ((*i)->name() == "Bundle") {
@@ -780,10 +765,32 @@ IO::make_connections (const XMLNode& node)
 		}
 
 		if ((*i)->name() == "Port") {
-			Port* p = nth (n++);
-			XMLProperty* prop = (*i)->property ("connection");
-			if (p && prop) {
-				p->connect (prop->value());
+
+			prop = (*i)->property (X_("name"));
+
+			if (!prop) {
+				continue;
+			}
+			
+			Port* p = port_by_name (prop->value());
+
+			if (p) {
+				for (XMLNodeConstIterator c = (*i)->children().begin(); c != (*i)->children().end(); ++c) {	
+
+					XMLNode* cnode = (*c);
+					
+					if (cnode->name() != X_("Connection")) {
+						continue;
+					}
+					
+					if ((prop = cnode->property (X_("other"))) == 0) {
+						continue;
+					}
+					
+					if (prop) {
+						p->connect (prop->value());
+					}
+				}
 			}
 		}
 	}
@@ -1335,4 +1342,21 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_
 		port_buffer.read_from (*prev, nframes, offset);
 		++o;
 	}
+}
+
+Port*
+IO::port_by_name (const std::string& str) const
+{
+	/* to be called only from ::set_state() - no locking */
+
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+
+		const Port& p(*i);
+
+		if (p.name() == str) {
+			return const_cast<Port*>(&p);
+		}
+	}
+
+	return 0;
 }
