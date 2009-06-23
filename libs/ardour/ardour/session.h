@@ -1008,10 +1008,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool                    _silent;
 	
     // varispeed playback
-	volatile double         _transport_speed;
-	double                  _last_transport_speed;
-	double                  _target_transport_speed;
-	Interpolation            interpolation;
+	volatile double             _transport_speed;
+	double                      _last_transport_speed;
+	double                      _target_transport_speed;
+	LibSamplerateInterpolation  interpolation;
 	
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;

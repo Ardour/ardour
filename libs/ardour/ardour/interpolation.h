@@ -8,20 +8,20 @@
 
 namespace ARDOUR {
 
-class Interpolation {
+class LibSamplerateInterpolation {
 protected:
 	double   _speed;
 	
-	SRC_STATE*            state;
-	std::vector<SRC_DATA> data;
+	std::vector<SRC_STATE*>  state;
+	std::vector<SRC_DATA*>   data;
 	
 	int        error;
 	
 	void reset_state ();
 	
 public:
-        Interpolation ();
-        ~Interpolation ();
+        LibSamplerateInterpolation ();
+        ~LibSamplerateInterpolation ();
     
         void   set_speed (double new_speed);
         void   set_target_speed (double new_speed)   {}
