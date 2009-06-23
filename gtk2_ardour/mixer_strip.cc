@@ -540,17 +540,13 @@ MixerStrip::set_width_enum (Width w, void* owner)
 		xml_node->add_property ("strip-width", enum_2_string (_width));
 	}
 
+	set_button_names ();
+
 	switch (w) {
 	case Wide:
-
-		if (rec_enable_button)  {
-			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Record"));
-		}
 		if (show_sends_button)  {
 			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Sends"));
 		}
-		((Gtk::Label*)mute_button->get_child())->set_text  (_("Mute"));
-		((Gtk::Label*)solo_button->get_child())->set_text (_("Solo"));
 
 		if (_route->comment() == "") {
 			comment_button.unset_bg (STATE_NORMAL);
@@ -577,14 +573,9 @@ MixerStrip::set_width_enum (Width w, void* owner)
 		break;
 
 	case Narrow:
-		if (rec_enable_button) {
-			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Rec"));
-		}
 		if (show_sends_button) {
 			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Snd"));
 		}
-		((Gtk::Label*)mute_button->get_child())->set_text (_("M"));
-		((Gtk::Label*)solo_button->get_child())->set_text (_("S"));
 
 		if (_route->comment() == "") {
 		       comment_button.unset_bg (STATE_NORMAL);
@@ -1492,19 +1483,39 @@ MixerStrip::revert_to_default_display ()
 void
 MixerStrip::set_button_names ()
 {
-	rec_enable_button_label.set_text (_("Rec"));
-	mute_button_label.set_text (_("Mute"));
+	switch (_width) {
+	case Wide:
+		rec_enable_button_label.set_text (_("Rec"));
+		mute_button_label.set_text (_("Mute"));
+		switch (Config->get_solo_model()) {
+		case SoloInPlace:
+			solo_button_label.set_text (_("Solo"));
+			break;
+		case SoloAFL:
+			solo_button_label.set_text (_("AFL"));
+			break;
+		case SoloPFL:
+			solo_button_label.set_text (_("PFL"));
+			break;
+		}
+		break;
 
-	switch (Config->get_solo_model()) {
-	case SoloInPlace:
-		solo_button_label.set_text (_("Solo"));
+	default:
+		rec_enable_button_label.set_text (_("R"));
+		mute_button_label.set_text (_("M"));
+		switch (Config->get_solo_model()) {
+		case SoloInPlace:
+			solo_button_label.set_text (_("S"));
+			break;
+		case SoloAFL:
+			solo_button_label.set_text (_("A"));
+			break;
+		case SoloPFL:
+			solo_button_label.set_text (_("P"));
+			break;
+		}
 		break;
-	case SoloAFL:
-		solo_button_label.set_text (_("AFL"));
-		break;
-	case SoloPFL:
-		solo_button_label.set_text (_("PFL"));
-		break;
+		
 	}
 }
 

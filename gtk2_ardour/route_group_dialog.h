@@ -17,6 +17,7 @@ private:
 	Gtk::Entry _name;
 	Gtk::CheckButton _active;
 	Gtk::CheckButton _gain;
+	Gtk::CheckButton _relative;
 	Gtk::CheckButton _mute;
 	Gtk::CheckButton _solo;
 	Gtk::CheckButton _rec_enable;

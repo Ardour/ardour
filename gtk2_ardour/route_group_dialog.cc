@@ -11,6 +11,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	  _group (g),
 	  _active (_("Active")),
 	  _gain (_("Gain")),
+	  _relative (_("Relative")),
 	  _mute (_("Muting")),
 	  _solo (_("Soloing")),
 	  _rec_enable (_("Record enable")),
@@ -21,6 +22,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	_active.set_active (_group->is_active ());
 
 	_gain.set_active (_group->property (RouteGroup::Gain));
+	_relative.set_active (_group->is_relative());
 	_mute.set_active (_group->property (RouteGroup::Mute));
 	_solo.set_active (_group->property (RouteGroup::Solo));
 	_rec_enable.set_active (_group->property (RouteGroup::RecEnable));
@@ -34,6 +36,11 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	get_vbox()->pack_start (*h);
 	get_vbox()->pack_start (_active);
 	get_vbox()->pack_start (_gain);
+
+	h = manage (new HBox);
+	h->pack_start (_relative, PACK_EXPAND_PADDING);
+	get_vbox()->pack_start (*h);
+
 	get_vbox()->pack_start (_mute);
 	get_vbox()->pack_start (_solo);
 	get_vbox()->pack_start (_rec_enable);
@@ -63,6 +70,7 @@ RouteGroupDialog::do_run ()
 		_group->set_property (RouteGroup::RecEnable, _rec_enable.get_active ());
 		_group->set_property (RouteGroup::Select, _select.get_active ());
 		_group->set_property (RouteGroup::Edit, _edit.get_active ());
+		_group->set_relative (_relative.get_active(), this);
 	}
 
 	return r;

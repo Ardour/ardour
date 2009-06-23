@@ -262,7 +262,7 @@ Route::set_gain (gain_t val, void *src)
 	if (src != 0 && _route_group && src != _route_group && _route_group->active_property (RouteGroup::Gain)) {
 		
 		if (_route_group->is_relative()) {
-			
+
 			gain_t usable_gain = _amp->gain();
 			if (usable_gain < 0.000001f) {
 				usable_gain = 0.000001f;
@@ -1739,7 +1739,7 @@ Route::set_processor_state (const XMLNode& node)
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 			XMLProperty* id_prop = (*niter)->property(X_("id"));
-			cerr << "\tchecking " << id_prop->value() << endl;
+
 			if (id_prop && (*i)->id() == id_prop->value()) {
 				processorInStateList = true;
 				break;
@@ -1772,7 +1772,7 @@ Route::set_processor_state (const XMLNode& node)
 			while (o != _processors.end()) {
 				XMLProperty* id_prop = (*niter)->property(X_("id"));
 				if (id_prop && (*o)->id() == id_prop->value()) {
-				break;
+					break;
 				}
 				
 				++o;

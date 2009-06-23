@@ -222,6 +222,7 @@ void
 Amp::inc_gain (gain_t factor, void *src)
 {
 	float desired_gain = _gain_control->user_float();
+	
 	if (desired_gain == 0.0f) {
 		set_gain (0.000001f + (0.000001f * factor), src);
 	} else {
@@ -255,7 +256,31 @@ Amp::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
 	node.add_property("type", "amp");
+
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%2.12f", _gain_control->get_value());
+	node.add_property("gain", buf);
+
 	return node;
+}
+
+int
+Amp::set_state (const XMLNode& node)
+{
+	const XMLProperty* prop;
+
+	Processor::set_state (node);
+	prop = node.property ("gain");
+
+	if (prop) {
+		gain_t val;
+
+		if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
+			_gain_control->set_value (val);
+		}
+	}
+
+	return 0;
 }
 
 void

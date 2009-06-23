@@ -51,6 +51,7 @@ public:
 	void apply_gain_automation(bool yn) { _apply_gain_automation = yn; }
 
 	XMLNode& state (bool full);
+	int set_state (const XMLNode&);
 
 	static void apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target);
 	static void apply_simple_gain(BufferSet& bufs, nframes_t nframes, gain_t target);
