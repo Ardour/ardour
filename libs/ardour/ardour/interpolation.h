@@ -40,24 +40,30 @@ class FixedPointLinearInterpolation : public Interpolation {
     
     std::vector<uint64_t> last_phase;
 
-	// Fixed point is just an integer with an implied scaling factor. 
-	// In 40.24 the scaling factor is 2^24 = 16777216,  
-	// so a value of 10*2^24 (in integer space) is equivalent to 10.0. 
-	//
-	// The advantage is that addition and modulus [like x = (x + y) % 2^40]  
-	// have no rounding errors and no drift, and just require a single integer add.
-	// (swh)
-	
-	static const int64_t fractional_part_mask  = 0xFFFFFF;
-	static const Sample  binary_scaling_factor = 16777216.0f;
+    // Fixed point is just an integer with an implied scaling factor. 
+    // In 40.24 the scaling factor is 2^24 = 16777216,  
+    // so a value of 10*2^24 (in integer space) is equivalent to 10.0. 
+    //
+    // The advantage is that addition and modulus [like x = (x + y) % 2^40]  
+    // have no rounding errors and no drift, and just require a single integer add.
+    // (swh)
+    
+    static const int64_t fractional_part_mask  = 0xFFFFFF;
+    static const Sample  binary_scaling_factor = 16777216.0f;
     
     public:
-    	FixedPointLinearInterpolation () : phi (FIXPOINT_ONE), target_phi (FIXPOINT_ONE) {}
+        
+        FixedPointLinearInterpolation () : phi (FIXPOINT_ONE), target_phi (FIXPOINT_ONE) {}
     
         void set_speed (double new_speed) {
             target_phi = (uint64_t) (FIXPOINT_ONE * fabs(new_speed));
             phi = target_phi;
         }
+        
+        uint64_t get_phi() { return phi; }
+        uint64_t get_target_phi() { return target_phi; }
+        uint64_t get_last_phase() { assert(last_phase.size()); return last_phase[0]; }
+        void set_last_phase(uint64_t phase) { assert(last_phase.size()); last_phase[0] = phase; }
         
         void add_channel_to (int input_buffer_size, int output_buffer_size);
         void remove_channel_from ();
