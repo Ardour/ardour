@@ -821,11 +821,12 @@ AudioDiskstream::process_varispeed_playback(nframes_t nframes, boost::shared_ptr
 	interpolation.set_target_speed (_target_speed);
 	interpolation.set_speed (_speed);
 	
-	for (chan = c->begin(); chan != c->end(); ++chan) {
+	int channel = 0;
+	for (chan = c->begin(); chan != c->end(); ++chan, ++channel) {
 		ChannelInfo* chaninfo (*chan);
 
 		playback_distance = interpolation.interpolate (
-				nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer); 
+				channel, nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer); 
 	}	
 }
 
@@ -2204,12 +2205,14 @@ AudioDiskstream::set_align_style_from_io ()
 int
 AudioDiskstream::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
+
 	while (how_many--) {
 		c->push_back (new ChannelInfo(_session.audio_diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
+		interpolation.add_channel_to (_session.audio_diskstream_buffer_size(), speed_buffer_size);
 	}
 
 	_n_channels.set(DataType::AUDIO, c->size());
-
+	
 	return 0;
 }
 
@@ -2226,8 +2229,11 @@ int
 AudioDiskstream::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many-- && !c->empty()) {
-		//delete c->back(); // FIXME: crash (thread safe with RCU?)
+		// FIXME: crash (thread safe with RCU?)
+		// memory leak, when disabled.... :(
+		//delete c->back(); 
 		c->pop_back();
+		interpolation.remove_channel_from ();
 	}
 
 	_n_channels.set(DataType::AUDIO, c->size());

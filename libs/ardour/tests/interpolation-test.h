@@ -35,7 +35,7 @@ class InterpolationTest : public CppUnit::TestFixture
     ARDOUR::Sample  input[NUM_SAMPLES];
     ARDOUR::Sample output[NUM_SAMPLES];
     
-    ARDOUR::LinearInterpolation linear;
+    ARDOUR::Interpolation interpolation;
 
     public:
        	
@@ -48,6 +48,7 @@ class InterpolationTest : public CppUnit::TestFixture
                 }
                 output[i] = 0.0f;
             }
+            interpolation.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
         }
         
         void tearDown() {

@@ -1006,11 +1006,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	Location*                start_location;
 	Slave*                  _slave;
 	bool                    _silent;
+	
+    // varispeed playback
 	volatile double         _transport_speed;
 	double                  _last_transport_speed;
-                            	 // varispeed playback
 	double                  _target_transport_speed;
-	LinearInterpolation     interpolation;
+	Interpolation            interpolation;
+	
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;

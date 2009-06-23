@@ -1,41 +1,76 @@
 #include <stdint.h>
+
 #include "ardour/interpolation.h"
 
 using namespace ARDOUR;
 
-nframes_t
-LinearInterpolation::interpolate (nframes_t nframes, Sample *input, Sample *output)
+Interpolation::Interpolation()  : _speed (1.0L), state (0)
 {
-	// the idea is that when the speed is not 1.0, we have to 
-	// interpolate between samples and then we have to store where we thought we were. 
-	// rather than being at sample N or N+1, we were at N+0.8792922
-	
-	// index in the input buffers
-	nframes_t   i = 0;
-	
-	double acceleration;
-	double distance = 0.0;
-	
-	if (_speed != _target_speed) {
-		acceleration = _target_speed - _speed;
+}
+
+Interpolation::~Interpolation() 
+{
+	state = src_delete (state);
+}
+
+void
+Interpolation::set_speed (double new_speed)
+{ 
+	_speed = new_speed; 
+	src_set_ratio (state, 1.0/_speed); 
+}
+
+void
+Interpolation::reset_state ()
+{
+	if (state) {
+		src_reset (state);
 	} else {
-		acceleration = 0.0;
+		state = src_new (SRC_LINEAR, 1, &error);
+	}
+}
+
+void
+Interpolation::add_channel_to (int input_buffer_size, int output_buffer_size) 
+{
+	SRC_DATA newdata;
+	
+	/* Set up sample rate converter info. */
+	newdata.end_of_input = 0 ; 
+
+	newdata.input_frames  = input_buffer_size;
+	newdata.output_frames = output_buffer_size;
+
+	newdata.input_frames_used = 0 ;
+	newdata.output_frames_gen = 0 ;
+
+	newdata.src_ratio = 1.0/_speed;
+	
+	data.push_back (newdata);
+	
+	reset_state ();
+}
+
+void
+Interpolation::remove_channel_from () 
+{
+	data.pop_back ();
+	reset_state ();
+}
+
+nframes_t
+Interpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
+{	
+	data[channel].data_in       = input;
+	data[channel].data_out      = output;
+	
+	data[channel].output_frames = nframes;
+	data[channel].src_ratio     = 1.0/_speed; 
+
+	if ((error = src_process (state, &data[channel]))) {	
+		printf ("\nError : %s\n\n", src_strerror (error));
+		exit (1);
 	}
 
-	for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
-		i = distance;
-		Sample fractional_phase_part = distance - i;
-		
-		if (input && output) {
-	        // Linearly interpolate into the output buffer
-			output[outsample] = 
-				input[i] * (1.0f - fractional_phase_part) +
-				input[i+1] * fractional_phase_part;
-		}
-		distance   += _speed + acceleration;
-	}
-	
-	i = (distance + 0.5L);
-	// playback distance
-	return i;
+	return data[channel].input_frames_used;
 }
