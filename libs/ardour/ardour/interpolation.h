@@ -24,7 +24,6 @@ class Interpolation {
          void add_channel_to (int input_buffer_size, int output_buffer_size) {}
          void remove_channel_from () {}
   
-         nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output) {}
          void reset () {}
 };
 

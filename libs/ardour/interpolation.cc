@@ -63,7 +63,7 @@ FixedPointLinearInterpolation::remove_channel_from ()
 void
 FixedPointLinearInterpolation::reset() 
 {
-	for(int i = 0; i <= last_phase.size(); i++) {
+	for (size_t i = 0; i <= last_phase.size(); i++) {
 		last_phase[i] = 0;
 	}
 }
@@ -131,7 +131,7 @@ LinearInterpolation::remove_channel_from ()
 void
 LinearInterpolation::reset() 
 {
-	for(int i = 0; i <= phase.size(); i++) {
+	for (size_t i = 0; i <= phase.size(); i++) {
 		phase[i] = 0.0;
 	}
 }
@@ -143,7 +143,7 @@ LibSamplerateInterpolation::LibSamplerateInterpolation() : state (0)
 
 LibSamplerateInterpolation::~LibSamplerateInterpolation() 
 {
-	for (int i = 0; i < state.size(); i++) {
+	for (size_t i = 0; i < state.size(); i++) {
 		state[i] = src_delete (state[i]);
 	}
 }
@@ -152,7 +152,7 @@ void
 LibSamplerateInterpolation::set_speed (double new_speed)
 { 
 	_speed = new_speed; 
-	for (int i = 0; i < state.size(); i++) {
+	for (size_t i = 0; i < state.size(); i++) {
 		src_set_ratio (state[i], 1.0/_speed);
 	}
 }
@@ -161,7 +161,7 @@ void
 LibSamplerateInterpolation::reset_state ()
 {
 	printf("INTERPOLATION: reset_state()\n");
-	for (int i = 0; i < state.size(); i++) {
+	for (size_t i = 0; i < state.size(); i++) {
 		if (state[i]) {
 			src_reset (state[i]);
 		} else {
