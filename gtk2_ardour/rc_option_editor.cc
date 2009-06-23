@@ -2,9 +2,11 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/scale.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/slider_controller.h>
 #include "pbd/fpu.h"
 #include "midi++/manager.h"
 #include "midi++/factory.h"
+#include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
 #include "control_protocol/control_protocol.h"
@@ -753,6 +755,64 @@ private:
 	HScale _dpi_slider;
 };
 
+class SoloMuteOptions : public OptionEditorBox
+{
+public:
+	SoloMuteOptions (RCConfiguration* c) :
+		_rc_config (c),
+		// 0.781787 is the value needed for gain to be set to 0.
+		_db_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
+
+	{
+		if ((pix = ::get_icon ("fader_belt_h")) == 0) {
+			throw failed_constructor();
+		}
+
+		_db_slider = manage (new HSliderController (pix,
+							    &_db_adjustment,
+							    false));
+
+
+		_db_adjustment.set_value (gain_to_slider_position (_rc_config->get_solo_mute_gain ()));
+
+		Label* l = manage (new Label (_("Solo-in-front gain cut:")));
+		l->set_name ("OptionsLabel");
+
+		HBox* h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (*_db_slider, true, true);
+		
+		_box->pack_start (*h, false, false);
+
+		_db_adjustment.signal_value_changed().connect (mem_fun (*this, &SoloMuteOptions::db_changed));
+	}
+
+	void parameter_changed (string const & p)
+	{
+		if (p == "solo-mute-gain") {
+			_db_adjustment.set_value (gain_to_slider_position (_rc_config->get_solo_mute_gain()));
+		}
+	}
+
+	void set_state_from_config ()
+	{
+		parameter_changed ("solo-mute-gain");
+	}
+	
+private:
+	
+	void db_changed ()
+	{
+		_rc_config->set_solo_mute_gain (slider_position_to_gain (_db_adjustment.get_value()));
+	}
+
+	RCConfiguration* _rc_config;
+	Adjustment _db_adjustment;
+        Gtkmm2ext::HSliderController* _db_slider;
+        Glib::RefPtr<Gdk::Pixbuf> pix;
+};
+
 
 class ControlSurfacesOptions : public OptionEditorBox
 {
@@ -1088,6 +1148,8 @@ RCOptionEditor::RCOptionEditor ()
 		mem_fun (*_rc_config, &RCConfiguration::get_solo_model),
 		mem_fun (*_rc_config, &RCConfiguration::set_solo_model)
 		);
+
+	add_option (_("Audio"), new SoloMuteOptions (_rc_config));
 
 	sm->add (SoloInPlace, _("in place"));
 	sm->add (SoloAFL, _("post-fader listen via monitor bus"));

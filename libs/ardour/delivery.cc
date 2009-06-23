@@ -399,29 +399,29 @@ Delivery::target_gain ()
 	}
 
 	gain_t desired_gain;
-	MuteMaster::MutePoint mp;
-
-	switch (_role) {
-	case Main:
-		mp = MuteMaster::Main;
-		break;
-	case Listen:
-		mp = MuteMaster::Listen;
-		break;
-	case Send:
-	case Insert:
-		if (_placement == PreFader) {
-			mp = MuteMaster::PreFader;
-		} else {
-			mp = MuteMaster::PostFader;
-		}
-		break;
-	}
-
 
 	if (_solo_level) {
 		desired_gain = 1.0;
 	} else {
+
+		MuteMaster::MutePoint mp;
+		
+		switch (_role) {
+		case Main:
+			mp = MuteMaster::Main;
+			break;
+		case Listen:
+			mp = MuteMaster::Listen;
+			break;
+		case Send:
+		case Insert:
+			if (_placement == PreFader) {
+				mp = MuteMaster::PreFader;
+			} else {
+				mp = MuteMaster::PostFader;
+			}
+			break;
+		}
 
 		if (_solo_isolated) {
 		
