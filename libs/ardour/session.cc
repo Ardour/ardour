@@ -147,6 +147,8 @@ Session::Session (AudioEngine &eng,
 {
 	bool new_session;
 
+	interpolation.add_channel_to (0, 0);
+
 	if (!eng.connected()) {
 		throw failed_constructor();
 	}
@@ -230,6 +232,8 @@ Session::Session (AudioEngine &eng,
 	  _have_rec_enabled_diskstream (false)
 {
 	bool new_session;
+
+	interpolation.add_channel_to (0, 0);
 
 	if (!eng.connected()) {
 		throw failed_constructor();

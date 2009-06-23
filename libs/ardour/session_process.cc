@@ -327,8 +327,7 @@ Session::process_with_events (nframes_t nframes)
 	} else {		
 		interpolation.set_target_speed (_target_transport_speed);
 		interpolation.set_speed (_transport_speed);
-		//FIXME frames_moved = (long) interpolation.interpolate (nframes, 0, 0);
-		frames_moved = _transport_speed * nframes;
+		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
 	end_frame = _transport_frame + (nframes_t)frames_moved;
@@ -849,8 +848,7 @@ Session::process_without_events (nframes_t nframes)
 	} else {		
 		interpolation.set_target_speed (_target_transport_speed);
 		interpolation.set_speed (_transport_speed);
-		//FIXME frames_moved = (long) interpolation.interpolate (nframes, 0, 0);
-		frames_moved = _transport_speed * nframes;
+		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
 	if (process_routes (nframes)) {

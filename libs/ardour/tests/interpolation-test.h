@@ -27,15 +27,17 @@ class InterpolationTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(InterpolationTest);
     CPPUNIT_TEST(linearInterpolationTest);
+    //CPPUNIT_TEST(libSamplerateInterpolationTest);
     CPPUNIT_TEST_SUITE_END();
     
-    #define NUM_SAMPLES 100000000
+    #define NUM_SAMPLES 1000000
     #define INTERVAL 100
     
     ARDOUR::Sample  input[NUM_SAMPLES];
     ARDOUR::Sample output[NUM_SAMPLES];
     
-    ARDOUR::Interpolation interpolation;
+    ARDOUR::LinearInterpolation linear;
+    ARDOUR::LibSamplerateInterpolation interpolation;
 
     public:
        	
@@ -48,6 +50,7 @@ class InterpolationTest : public CppUnit::TestFixture
                 }
                 output[i] = 0.0f;
             }
+            linear.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
             interpolation.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
         }
         
@@ -55,5 +58,6 @@ class InterpolationTest : public CppUnit::TestFixture
         }
 
         void linearInterpolationTest();
+        void libSamplerateInterpolationTest();
 
 };
