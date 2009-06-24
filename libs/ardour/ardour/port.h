@@ -33,7 +33,7 @@ class AudioEngine;
 class Port : public sigc::trackable {
    public:
 	virtual ~Port() { 
-        // Port is an opage pointer, so should be be desallocated ??
+		// Port is an opaque pointer, so should be be deallocated ??
 	}
 
 	static nframes_t port_offset() { return _port_offset; }
@@ -179,7 +179,7 @@ class Port : public sigc::trackable {
 	Port (jack_port_t *port);
 	void reset ();
 	
-	/* engine isn't supposed to below here */
+	/* engine isn't supposed to use anything below here */
 
 	/* cache these 3 from JACK so that we can
 	   access them for reconnecting.

@@ -125,6 +125,9 @@ class AudioFileSource : public AudioSource {
 
 	bool can_be_analysed() const { return _length > 0; } 
 
+	static bool find (Glib::ustring path, bool must_exist, bool embedded, bool& is_new, uint16_t& chan,
+			  Glib::ustring& found_path, std::string& found_name);
+
   protected:
 	
 	/* constructor to be called for existing external-to-session files */
@@ -164,12 +167,11 @@ class AudioFileSource : public AudioSource {
 	virtual void set_timeline_position (int64_t pos);
 	virtual void set_header_timeline_position () = 0;
 
-	bool find (Glib::ustring& path, bool must_exist, bool& is_new, uint16_t& chan);
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
 
 	static Sample* get_interleave_buffer (nframes_t size);
-
+	
   private:
 	Glib::ustring old_peak_path (Glib::ustring audio_path);
 	Glib::ustring broken_peak_path (Glib::ustring audio_path);

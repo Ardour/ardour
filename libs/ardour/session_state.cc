@@ -2626,12 +2626,17 @@ Session::find_all_sources (string path, set<string>& result)
 			continue;
 		}
 
-		string path = _path; /* /-terminated */
-		path += sound_dir_name;
-		path += '/';
-		path += prop->value();
+		/* now we have to actually find the file */
 
-		result.insert (path);
+		bool is_new;
+		uint16_t chan;
+		Glib::ustring path;
+		std::string name;
+		
+		if (AudioFileSource::find (prop->value(), true, false, is_new, chan, path, name)) {
+			cerr << "Got " << path << " from XML source with prop = " << prop->value() << endl;
+			result.insert (path);
+		}
 	}
 
 	return 0;
@@ -2818,6 +2823,8 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 			realpath(spath.c_str(), tmppath1);
 			realpath((*i).c_str(),  tmppath2);
+
+			cerr << "comparing " << tmppath1 << " and " << tmppath2 << endl;
 
 			if (strcmp(tmppath1, tmppath2) == 0) {
 				used = true;

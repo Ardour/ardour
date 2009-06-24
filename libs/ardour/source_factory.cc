@@ -129,7 +129,6 @@ boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 {
 	try {
-
 		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();

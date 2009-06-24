@@ -20,7 +20,7 @@
     <Option name="plugins-stop-with-transport" value="no"/>
     <Option name="no-sw-monitoring" value="no"/>
     <Option name="stop-recording-on-xrun" value="no"/>
-	<Option name="create-xrun-marker" value="yes"/>
+    <Option name="create-xrun-marker" value="yes"/>
     <Option name="stop-at-session-end" value="no"/>
     <Option name="auto-xfade" value="yes"/>
     <Option name="crossfades-active" value="1"/>
@@ -38,9 +38,9 @@
     <Option name="periodic-safety-backups" value="1"/>
     <Option name="periodic-safety-backup-interval" value="120"/>
     <Option name="show-track-meters" value="1"/>
-	<Option name="default-narrow_ms" value="0"/>
+    <Option name="default-narrow_ms" value="0"/>
     <Option name="smpte-format" value="6"/>
-	<Option name="font-scale" value="102400"/>
+    <Option name="font-scale" value="102400"/>
   </Config>
   <extra>
     <RulerVisibility smpte="yes" bbt="yes" frames="no" minsec="no" tempo="yes" meter="yes" marker="yes" rangemarker="no" transportmarker="yes" cdmarker="no"/>

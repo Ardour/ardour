@@ -78,11 +78,11 @@ foreach my $tmp (keys %sources) {
 	       "-t", "raw",        # /dev/zero is raw :)
 	       "-r", $samplerate,  # set sample rate
 	       "-c", "1",	   # 1 channel
-	       "-b",		   # input in bytes
+	       "-b", "8",	   # input in 8 bit chunks
 	       "-s",               # signed
 	       "/dev/zero",        # input signal
 
-	       "-w",               # output 16 bit
+	       "-b", "16",         # output 16 bit
 	       "-t", "wav",        # format wav
 	       $audioFileDirectory."/".$sources{$tmp}->{name}, # filename
 	       "trim", "0", $sources{$tmp}->{calculated_length}."s" # trim silence to wanted sample amount
@@ -91,7 +91,7 @@ foreach my $tmp (keys %sources) {
 	if ($waveType eq "sine") {
 		@cmd = (@cmd, "synth","sin","%0", "vol", "0.2", "fade","q","0.01s", $sources{$tmp}->{calculated_length}."s" , "0.01s");
 	}
-
+	print (join (" ", @cmd));
 	system(@cmd);
 }
 

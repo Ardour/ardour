@@ -154,7 +154,7 @@ AudioFileSource::init (ustring pathstr, bool must_exist)
 	timeline_position = 0;
 	_peaks_built = false;
 
-	if (!find (pathstr, must_exist, file_is_new, _channel)) {
+	if (!find (pathstr, must_exist, is_embedded(), file_is_new, _channel, _path, _name)) {
 		throw non_existent_source ();
 	}
 
@@ -439,7 +439,9 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 }
 
 bool
-AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t& chan)
+AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
+		       bool& isnew, uint16_t& chan, 
+		       ustring& path, std::string& name)
 {
 	ustring::size_type pos;
 	bool ret = false;
@@ -541,8 +543,8 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 			}
 		}
 
-		_name = pathstr;
-		_path = keeppath;
+		name = pathstr;
+		path = keeppath;
 		ret = true;
 
 	} else {
@@ -561,12 +563,12 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 			}
 		}
 		
-		_path = pathstr;
+		path = pathstr;
 
-		if (is_embedded()) {
-			_name = pathstr;
+		if (embedded) {
+			name = pathstr;
 		} else {
-			_name = pathstr.substr (pathstr.find_last_of ('/') + 1);
+			name = pathstr.substr (pathstr.find_last_of ('/') + 1);
 		}
 
 		if (!Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
@@ -574,12 +576,12 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 			/* file does not exist or we cannot read it */
 			
 			if (must_exist) {
-				error << string_compose(_("Filesource: cannot find required file (%1): %2"), _path, strerror (errno)) << endmsg;
+				error << string_compose(_("Filesource: cannot find required file (%1): %2"), pathstr, strerror (errno)) << endmsg;
 				goto out;
 			}
 			
 			if (errno != ENOENT) {
-				error << string_compose(_("Filesource: cannot check for existing file (%1): %2"), _path, strerror (errno)) << endmsg;
+				error << string_compose(_("Filesource: cannot check for existing file (%1): %2"), pathstr, strerror (errno)) << endmsg;
 				goto out;
 			}
 			
