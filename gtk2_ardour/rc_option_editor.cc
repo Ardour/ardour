@@ -773,15 +773,18 @@ public:
 							    false));
 
 
-		_db_adjustment.set_value (gain_to_slider_position (_rc_config->get_solo_mute_gain ()));
-
-		Label* l = manage (new Label (_("Solo-in-front gain cut:")));
+		parameter_changed ("solo-mute-gain");
+		
+		Label* l = manage (new Label (_("Solo mute cut (dB):")));
 		l->set_name ("OptionsLabel");
 
 		HBox* h = manage (new HBox);
 		h->set_spacing (4);
 		h->pack_start (*l, false, false);
-		h->pack_start (*_db_slider, true, true);
+		h->pack_start (*_db_slider, false, false);
+		h->pack_start (_db_display, false, false);
+
+		set_size_request_to_display_given_text (_db_display, "-99.0", 12, 12);
 		
 		_box->pack_start (*h, false, false);
 
@@ -791,7 +794,19 @@ public:
 	void parameter_changed (string const & p)
 	{
 		if (p == "solo-mute-gain") {
-			_db_adjustment.set_value (gain_to_slider_position (_rc_config->get_solo_mute_gain()));
+			gain_t val = _rc_config->get_solo_mute_gain();
+
+			_db_adjustment.set_value (gain_to_slider_position (val));
+
+			char buf[16];
+
+			if (val == 0.0) {
+				snprintf (buf, sizeof (buf), "-inf");
+			} else {
+				snprintf (buf, sizeof (buf), "%.2f", coefficient_to_dB (val));
+			}
+
+			_db_display.set_text (buf);
 		}
 	}
 
@@ -811,6 +826,7 @@ private:
 	Adjustment _db_adjustment;
         Gtkmm2ext::HSliderController* _db_slider;
         Glib::RefPtr<Gdk::Pixbuf> pix;
+        Entry _db_display;
 };
 
 
@@ -1144,18 +1160,17 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<SoloModel>* sm = new ComboOption<SoloModel> (
 		"solo-model",
-		_("Solo"),
+		_("Solo button controls"),
 		mem_fun (*_rc_config, &RCConfiguration::get_solo_model),
 		mem_fun (*_rc_config, &RCConfiguration::set_solo_model)
 		);
 
-	add_option (_("Audio"), new SoloMuteOptions (_rc_config));
-
-	sm->add (SoloInPlace, _("in place"));
+	sm->add (SoloInPlace, _("solo in place"));
 	sm->add (SoloAFL, _("post-fader listen via monitor bus"));
 	sm->add (SoloPFL, _("pre-fader listen via monitor bus"));
 
 	add_option (_("Audio"), sm);
+	add_option (_("Audio"), new SoloMuteOptions (_rc_config));
 
 	add_option (_("Audio"),
 	     new BoolOption (
