@@ -3167,6 +3167,8 @@ what you would like to do.\n"));
 	image->show();
 	hbox->show();
 
+	pop_back_splash ();
+
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:
 		return 1;
