@@ -5236,12 +5236,12 @@ msgstr "\""
 #: gtk2_ardour/connection_editor.cc:531
 #, c-format
 msgid "in %d"
-msgstr "V %"
+msgstr "V %d"
 
 #: gtk2_ardour/connection_editor.cc:533
 #, c-format
 msgid "out %d"
-msgstr "Ven %"
+msgstr "Ven %d"
 
 #: gtk2_ardour/connection_editor.cc:657
 msgid "Name for new connection:"
