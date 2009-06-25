@@ -46,12 +46,12 @@ InternalReturn::InternalReturn (Session& s, const XMLNode& node)
 void
 InternalReturn::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (user_count == 0) {
+	/* XXX no lock here, just atomic fetch */
+
+	if (g_atomic_int_get(&user_count) == 0) {
 		/* nothing to do - nobody is feeding us anything */
 		return;
 	}
-
-	/* XXX this should be merge() */
 
 	bufs.merge_from (buffers, nframes);
 }
@@ -81,7 +81,10 @@ BufferSet*
 InternalReturn::get_buffers ()
 {
 	Glib::Mutex::Lock lm (_session.engine().process_lock());
-	user_count++;
+	/* use of g_atomic here is just for code consistency - its protected by the lock
+	   for writing.
+	*/
+	g_atomic_int_inc (&user_count);
 	return &buffers;
 }
 
@@ -90,7 +93,10 @@ InternalReturn::release_buffers ()
 {
 	Glib::Mutex::Lock lm (_session.engine().process_lock());
 	if (user_count) {
-		user_count--;
+		/* use of g_atomic here is just for code consistency - its protected by the lock
+		   for writing.
+		*/
+		(void) g_atomic_int_dec_and_test (&user_count);
 	}
 }
 

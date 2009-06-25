@@ -50,18 +50,21 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	: IOProcessor(s, boost::shared_ptr<IO>(), (r == Listen ? boost::shared_ptr<IO>() : io), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
+	, _current_gain (1.0)
+	, _output_offset (0)
+	, _no_outs_cuz_we_no_monitor (false)
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
 
 {
-	_output_offset = 0;
-	_current_gain = 1.0;
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 	
 	if (_output) {
 		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 	}
+
+	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
 }
 
 /* deliver to a new IO object */
@@ -70,17 +73,20 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	: IOProcessor(s, false, (r == Listen ? false : true), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
+	, _current_gain (1.0)
+	, _output_offset (0)
+	, _no_outs_cuz_we_no_monitor (false)
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
 {
-	_output_offset = 0;
-	_current_gain = 1.0;
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
 	if (_output) {
 		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 	}
+
+	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
 }
 
 /* deliver to a new IO object, reconstruct from XML */
@@ -89,12 +95,13 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 	: IOProcessor (s, false, true, "reset")
 	, _role (Role (0))
 	, _output_buffers (new BufferSet())
+	, _current_gain (1.0)
+	, _output_offset (0)
+	, _no_outs_cuz_we_no_monitor (false)
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
 {
-	_output_offset = 0;
-	_current_gain = 1.0;
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
 	if (set_state (node)) {
@@ -104,6 +111,8 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 	if (_output) {
 		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 	}
+
+	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
 }
 
 /* deliver to an existing IO object, reconstruct from XML */
@@ -112,12 +121,13 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	: IOProcessor (s, boost::shared_ptr<IO>(), out, "reset")
 	, _role (Role (0))
 	, _output_buffers (new BufferSet())
+	, _current_gain (1.0)
+	, _output_offset (0)
+	, _no_outs_cuz_we_no_monitor (false)
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
 {
-	_output_offset = 0;
-	_current_gain = 1.0;
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
 	if (set_state (node)) {
@@ -127,6 +137,8 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	if (_output) {
 		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 	}
+
+	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
 }
 
 void
@@ -395,6 +407,7 @@ Delivery::target_gain ()
 	*/
 
 	if (_no_outs_cuz_we_no_monitor) {
+		std::cerr << this << " no outs cuz we no monitor\n";
 		return 0.0;
 	}
 

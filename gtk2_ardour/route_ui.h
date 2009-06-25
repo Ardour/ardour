@@ -118,6 +118,7 @@ class RouteUI : public virtual AxisView
 	void set_sends_gain_from_track ();
 	void set_sends_gain_to_zero ();
 	void set_sends_gain_to_unity ();
+	void create_sends ();
 
 	void solo_changed(void*);
 	void solo_changed_so_update_mute ();

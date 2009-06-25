@@ -192,12 +192,16 @@ Send::make_unique (XMLNode &state, Session &session)
 bool
 Send::set_name (const std::string& new_name)
 {
-	char buf[32];
 	std::string unique_name;
 
-	snprintf (buf, sizeof (buf), "%u", _bitslot);
-	unique_name = new_name;
-	unique_name += buf;
+	if (_role != Listen) {
+		char buf[32];
+		snprintf (buf, sizeof (buf), "%u", _bitslot);
+		unique_name = new_name;
+		unique_name += buf;
+	} else {
+		unique_name = new_name;
+	}
 
 	return Delivery::set_name (unique_name);
 }

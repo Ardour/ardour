@@ -760,11 +760,11 @@ Session::hookup_io ()
 		
 		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
 
-			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*x);
-
-			if (t) {
-				t->listen_via (_control_out, X_("listen"));
+			if ((*x)->is_control() || (*x)->is_master()) {
+				continue;
 			}
+
+			(*x)->listen_via (_control_out, X_("listen"));
 		}
 	}
 
@@ -2053,6 +2053,13 @@ Session::add_routes (RouteList& new_routes, bool save)
 		shared_ptr<RouteList> r = writer.get_copy ();
 		r->insert (r->end(), new_routes.begin(), new_routes.end());
 
+
+		/* if there is no control out and we're not in the middle of loading,
+		   resort the graph here. if there is a control out, we will resort
+		   toward the end of this method. if we are in the middle of loading, 
+		   we will resort when done.
+		*/
+
 		if (!_control_out && IO::connecting_legal) {
 			resort_routes_using (r);
 		}
@@ -2080,6 +2087,9 @@ Session::add_routes (RouteList& new_routes, bool save)
 	if (_control_out && IO::connecting_legal) {
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+			if ((*x)->is_control() || (*x)->is_master()) {
+				continue;
+			}
 			(*x)->listen_via (_control_out, "control");
 		}
 
@@ -2093,6 +2103,44 @@ Session::add_routes (RouteList& new_routes, bool save)
 	}
 
 	RouteAdded (new_routes); /* EMIT SIGNAL */
+}
+
+void
+Session::globally_add_internal_sends (boost::shared_ptr<Route> dest)
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> t (new RouteList);
+
+	/* only send tracks */
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (boost::dynamic_pointer_cast<Track>(*i)) {
+			t->push_back (*i);
+		}
+	}
+
+	add_internal_sends (dest, t);
+}
+
+void
+Session::add_internal_sends (boost::shared_ptr<Route> dest, boost::shared_ptr<RouteList> senders)
+{
+	if (dest->is_control() || dest->is_master()) {
+		return;
+	}
+
+	if (!dest->internal_return()) {
+		dest->add_internal_return();
+	}
+
+	for (RouteList::iterator i = senders->begin(); i != senders->end(); ++i) {
+
+		if ((*i)->is_control() || (*i)->is_master() || (*i) == dest) {
+			continue;
+		}
+
+		(*i)->listen_via (dest, "aux");
+	}
 }
 
 void

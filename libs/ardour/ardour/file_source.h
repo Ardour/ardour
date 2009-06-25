@@ -52,6 +52,10 @@ public:
 	
 	static void set_search_path (DataType type, const Glib::ustring& path);
 
+	static bool find (DataType type, const Glib::ustring& path,
+			  bool must_exist, bool& is_new, uint16_t& chan,
+			  Glib::ustring& found_path);
+
 protected:
 	FileSource (Session& session, DataType type,
 			const Glib::ustring& path, bool embedded,
@@ -62,9 +66,6 @@ protected:
 	virtual int init (const Glib::ustring& idstr, bool must_exist);
 	
 	virtual int move_dependents_to_trash() { return 0; }
-	
-	bool find (DataType type, const Glib::ustring& path,
-			bool must_exist, bool& is_new, uint16_t& chan);
 	
 	bool removable () const;
 	

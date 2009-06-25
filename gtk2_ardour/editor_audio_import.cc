@@ -559,6 +559,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 	string linked_path;
 	SoundFileInfo finfo;
 	int ret = 0;
+	Glib::ustring path_to_use;
 
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	gdk_flush ();
@@ -571,6 +572,8 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 		
 		sys::path tmp = session->session_directory().sound_path() / Glib::path_get_basename(path);
 		linked_path = tmp.to_string();
+
+		path_to_use = linked_path;
 		
 		if (link (path.c_str(), linked_path.c_str()) == 0) {
 
@@ -581,6 +584,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 			*/
 			
 			path = linked_path;
+			path_to_use = Glib::path_get_basename (path);
 
 		} else {
 
@@ -592,6 +596,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				if (stat (linked_path.c_str(), &sb) == 0) {
 					if (sb.st_nlink > 1) { // its a hard link, assume its the one we want
 						path = linked_path;
+						path_to_use = Glib::path_get_basename (path);
 					}
 				}
 			}
@@ -673,7 +678,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
 							SourceFactory::createReadable (DataType::AUDIO, *session,
-									path, false, n,
+									path_to_use, false, n,
 									(mode == ImportAsTapeTrack
 										? Source::Destructive
 										: Source::Flag (0)),

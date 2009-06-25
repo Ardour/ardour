@@ -738,6 +738,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	boost::shared_ptr<Route> control_out() const { return _control_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
 
+	void globally_add_internal_sends (boost::shared_ptr<Route> dest);
+	void add_internal_sends (boost::shared_ptr<Route> dest, boost::shared_ptr<RouteList> senders);
+
 	static void set_disable_all_loaded_plugins (bool yn) {
 		_disable_all_loaded_plugins = yn;
 	}

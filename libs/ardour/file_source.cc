@@ -86,8 +86,14 @@ FileSource::init (const ustring& pathstr, bool must_exist)
 {
 	_timeline_position = 0;
 
-	if (!find (_type, pathstr, must_exist, _file_is_new, _channel)) {
+	if (!find (_type, pathstr, must_exist, _file_is_new, _channel, _path)) {
 		throw MissingSource ();
+	}
+
+	/* XXX is this necessary? or even wise? */
+
+	if (_is_embedded) {
+		_name = Glib::path_get_basename (_name);
 	}
 
 	if (_file_is_new && must_exist) {
@@ -188,15 +194,16 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 	return 0;
 }
 
-/** Find the actual source file based on \a path.
+/** Find the actual source file based on \a filename.
  * 
- * If the source is embedded, \a path should be a filename (no slashes).
- * If the source is external, \a path should be a full path.
- * In either case, _path is set to the complete absolute path of the source file.
+ * If the source is embedded, \a filename should be a simple filename (no slashes).
+ * If the source is external, \a filename should be a full path.
+ * In either case, found_path is set to the complete absolute path of the source file.
  * \return true iff the file was found.
  */
 bool
-FileSource::find (DataType type, const ustring& path, bool must_exist, bool& isnew, uint16_t& chan)
+FileSource::find (DataType type, const ustring& path, bool must_exist,
+		  bool& isnew, uint16_t& chan, ustring& found_path)
 {
 	Glib::ustring search_path = search_paths[type];
 
@@ -314,7 +321,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist, bool& isn
 			}
 		}
 
-		_path = keeppath;
+		found_path = keeppath;
 		
 		ret = true;
 
@@ -334,7 +341,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist, bool& isn
 			}
 		}
 		
-		_path = pathstr;
+		found_path = pathstr;
 
 		if (!Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 
@@ -343,14 +350,14 @@ FileSource::find (DataType type, const ustring& path, bool must_exist, bool& isn
 			if (must_exist) {
 				error << string_compose(
 						_("Filesource: cannot find required file (%1): %2"),
-						_path, strerror (errno)) << endmsg;
+						path, strerror (errno)) << endmsg;
 				goto out;
 			}
 			
 			if (errno != ENOENT) {
 				error << string_compose(
 						_("Filesource: cannot check for existing file (%1): %2"),
-						_path, strerror (errno)) << endmsg;
+						path, strerror (errno)) << endmsg;
 				goto out;
 			}
 			
@@ -363,10 +370,6 @@ FileSource::find (DataType type, const ustring& path, bool must_exist, bool& isn
 			/* already exists */
 			ret = true;
 		}
-	}
-	
-	if (_is_embedded) {
-		_name = Glib::path_get_basename (_name);
 	}
 	
 out:

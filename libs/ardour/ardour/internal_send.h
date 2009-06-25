@@ -32,6 +32,8 @@ class InternalSend : public Send
 	InternalSend (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&);
 	virtual ~InternalSend ();
 
+	bool set_name (const std::string&);
+
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);

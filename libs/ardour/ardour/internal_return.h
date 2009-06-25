@@ -34,6 +34,8 @@ class InternalReturn : public Return
 	InternalReturn (Session&);
 	InternalReturn (Session&, const XMLNode&);
 
+	bool visible() const { return false; }
+
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
@@ -50,7 +52,7 @@ class InternalReturn : public Return
 
   private:
 	BufferSet buffers;
-	uint32_t  user_count;
+	gint user_count; /* atomic */
 	void allocate_buffers (nframes_t);
 	void cycle_start (nframes_t);
 };

@@ -218,3 +218,46 @@ RouteGroup::audio_track_group (set<AudioTrack*>& ats)
 	}
 }
 
+void
+RouteGroup::make_subgroup ()
+{
+	RouteList rl;
+	uint32_t nin = 0;
+
+	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		nin = max (nin, (*i)->output()->n_ports().n_audio());
+	}
+		
+	try {
+		/* use master bus etc. to determine default nouts */
+		rl = _session.new_audio_route (nin, 2, 0, 1);
+	} catch (...) {
+		return;
+	}
+
+	subgroup_bus = rl.front();
+	subgroup_bus->set_name (_name);
+
+	boost::shared_ptr<Bundle> bundle = subgroup_bus->input()->bundle ();
+	
+	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		(*i)->output()->disconnect (this);
+		(*i)->output()->connect_ports_to_bundle (bundle, this);
+	}
+}
+
+void
+RouteGroup::destroy_subgroup ()
+{
+	if (!subgroup_bus) {
+		return;
+	}
+
+	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		(*i)->output()->disconnect (this);
+		/* XXX find a new bundle to connect to */
+	}
+
+	_session.remove_route (subgroup_bus);
+	subgroup_bus.reset ();
+}

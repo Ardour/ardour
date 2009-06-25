@@ -710,12 +710,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			
 		}
 		
-		if (_meter) {
-			// Ensure peak vector sizes before the plugin is activated
-			ChanCount potential_max_streams = ChanCount::max (processor->input_streams(), processor->output_streams());
-			_meter->configure_io (potential_max_streams, potential_max_streams);
-		}
-
 		// XXX: do we want to emit the signal here ? change call order.
 		processor->activate ();
 		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
@@ -947,9 +941,6 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 					potential_max_streams = m;
 			}
 
-			// Ensure peak vector sizes before the plugin is activated
-			_meter->configure_io (potential_max_streams, potential_max_streams);
-			
 			_processors.insert (iter, *i);
 			
 			if (configure_processors_unlocked (err)) {
@@ -1853,6 +1844,15 @@ Route::silence (nframes_t nframes)
 	}
 }	
 
+void
+Route::add_internal_return ()
+{
+	if (!_intreturn) {
+		_intreturn.reset (new InternalReturn (_session));
+		add_processor (_intreturn, PreFader);
+	}
+}
+
 BufferSet*
 Route::get_return_buffer () const
 {
@@ -1906,7 +1906,7 @@ Route::listen_via (boost::shared_ptr<Route> route, const string& listen_name)
 				}
 
 				/* already listening via the specified IO: do nothing */
-
+				
 				return 0;
 			}
 		}
@@ -1918,7 +1918,6 @@ Route::listen_via (boost::shared_ptr<Route> route, const string& listen_name)
 		listener.reset (new InternalSend (_session, _mute_master, route));
 
 	} catch (failed_constructor& err) {
-
 		return -1;
 	}
 
@@ -2478,10 +2477,12 @@ Route::set_name (const string& str)
 {
 	bool ret;
 	string ioproc_name;
+	string name;
+
+	name = Route::ensure_track_or_route_name (str, _session);
+	SessionObject::set_name (name);
 	
-	SessionObject::set_name (str);
-	
-	ret = (_input->set_name(str) && _output->set_name(str));
+	ret = (_input->set_name(name) && _output->set_name(name));
 
 	if (ret) {
 		
@@ -2494,7 +2495,7 @@ Route::set_name (const string& str)
 			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
 
 			if (iop) {
-				string iop_name = str;
+				string iop_name = name;
 				iop_name += '[';
 				iop_name += "XXX FIX ME XXX";
 				iop_name += ']';

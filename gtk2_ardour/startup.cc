@@ -70,6 +70,7 @@ Ardour will play NO role in monitoring"))
 	use_session_as_template_button.set_group (session_template_group);
 
 	set_keep_above (true);
+	set_resizable (false);
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
 	
@@ -206,6 +207,8 @@ ArdourStartup::setup_audio_page ()
 {
 	engine_dialog = manage (new EngineControl);
 
+	engine_dialog->set_border_width (12);
+
 	engine_dialog->show_all ();
 
 	audio_page_index = append_page (*engine_dialog);
@@ -235,11 +238,10 @@ using the program.</span>\
 	HBox* hbox = manage (new HBox);
 	HBox* vbox = manage (new HBox);
 
-	hbox->set_border_width (12);
-	vbox->set_border_width (12);
+	vbox->set_border_width (24);
 
-	hbox->pack_start (*foomatic, false, true);
-	vbox->pack_start (*hbox, false, true);
+	hbox->pack_start (*foomatic, true, true);
+	vbox->pack_start (*hbox, true, true);
 
 	foomatic->show ();
 	hbox->show ();
@@ -265,30 +267,29 @@ ArdourStartup::setup_first_time_config_page ()
 	default_dir_chooser = manage (new FileChooserButton (_("Default folder for Ardour sessions"), 
 							     FILE_CHOOSER_ACTION_SELECT_FOLDER));
 	Gtk::Label* txt = manage (new Label);
-	HBox* hbox1 = manage (new HBox);
+	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
 	
 	txt->set_markup (_("\
 Each project that you work on with Ardour has its own folder.\n\
 These can require a lot of disk space if you are recording audio.\n\
 \n\
-Where would you like new Ardour sessions to be stored by default?\n\
-<i>(You can put new sessions anywhere - this is just a default)</i>"));
+Where would you like new Ardour sessions to be stored by default?\n\n\
+<i>(You can put new sessions anywhere, this is just a default)</i>"));
+	txt->set_alignment (0.0, 0.0);
 
-	hbox1->set_border_width (6);
-	vbox->set_border_width (6);
+	vbox->set_spacing (18);
+	vbox->set_border_width (24);
 
-	hbox1->pack_start (*default_dir_chooser, false, true);
-	vbox->pack_start (*txt, false, true);
-	vbox->pack_start (*hbox1, false, true);
+	hbox->pack_start (*default_dir_chooser, false, true, 8);
+	vbox->pack_start (*txt, false, false);
+	vbox->pack_start (*hbox, false, true);
 
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
 
-	txt->show ();
-	hbox1->show ();
-	vbox->show ();
+	vbox->show_all ();
 
 	default_folder_page_index = append_page (*vbox);
 	set_page_title (*vbox, _("Default folder for new sessions"));
@@ -303,9 +304,11 @@ Where would you like new Ardour sessions to be stored by default?\n\
 void
 ArdourStartup::setup_monitoring_choice_page ()
 {
-	mon_vbox.set_spacing (6);
-	mon_vbox.set_border_width (6);
+	mon_vbox.set_spacing (18);
+	mon_vbox.set_border_width (24);
 	
+	HBox* hbox = manage (new HBox);
+	VBox* vbox = manage (new VBox);
 	RadioButton::Group g (monitor_via_hardware_button.get_group());
 	monitor_via_ardour_button.set_group (g);
 
@@ -315,16 +318,18 @@ signal as well as record it. This is called \"monitoring\". There are\n\
 different ways to do this depending on the equipment you have and the\n\
 configuration of that equipment. The two most common are presented here.\n\
 Please choose whichever one is right for your setup.\n\n\
-<i>You can change this preference at any time, via the Options menu</i>");
+<i>(You can change this preference at any time, via the Options menu)</i>");
+	monitor_label.set_alignment (0.0, 0.0);
 
+	vbox->set_spacing (6);
+
+	vbox->pack_start (monitor_via_hardware_button, false, true);
+	vbox->pack_start (monitor_via_ardour_button, false, true);
+	hbox->pack_start (*vbox, true, true, 8);
 	mon_vbox.pack_start (monitor_label, false, false);
-	mon_vbox.pack_start (monitor_via_hardware_button, false, false);
-	mon_vbox.pack_start (monitor_via_ardour_button, false, false);
+	mon_vbox.pack_start (*hbox, false, false);
 
-	mon_vbox.show ();
-	monitor_label.show ();
-	monitor_via_ardour_button.show ();
-	monitor_via_hardware_button.show ();
+	mon_vbox.show_all ();
 
 	monitoring_page_index = append_page (mon_vbox);
 	set_page_title (mon_vbox, _("Monitoring Choices"));
@@ -341,7 +346,7 @@ void
 ArdourStartup::setup_initial_choice_page ()
 {
 	ic_vbox.set_spacing (6);
-	ic_vbox.set_border_width (6);
+	ic_vbox.set_border_width (24);
 
 	RadioButton::Group g (ic_new_session_button.get_group());
 	ic_existing_session_button.set_group (g);
@@ -349,21 +354,19 @@ ArdourStartup::setup_initial_choice_page ()
 	HBox* centering_hbox = manage (new HBox);
 	VBox* centering_vbox = manage (new VBox);
 	
+	centering_vbox->set_spacing (6);
+
 	centering_vbox->pack_start (ic_new_session_button, false, true);
 	centering_vbox->pack_start (ic_existing_session_button, false, true);
-	centering_vbox->show ();
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
-	centering_hbox->show ();
 
 	ic_vbox.pack_start (*centering_hbox, true, true);
 
-	ic_new_session_button.show ();
-	ic_existing_session_button.show ();
-	ic_vbox.show ();
+	ic_vbox.show_all ();
 
 	initial_choice_index = append_page (ic_vbox);
-	set_page_title (ic_vbox, _("What would you like to do?"));
+	set_page_title (ic_vbox, _("What would you like to do ?"));
 	set_page_header_image (ic_vbox, icon_pixbuf);
 
 	/* user could just click on "Forward" if default
@@ -376,12 +379,10 @@ ArdourStartup::setup_initial_choice_page ()
 void
 ArdourStartup::setup_session_page ()
 {
-	session_hbox.set_border_width (12);
-	session_vbox.set_border_width (12);
+	session_vbox.set_border_width (24);
 
 	session_vbox.pack_start (session_hbox, true, true);
-	session_vbox.show ();
-	session_hbox.show ();
+	session_vbox.show_all ();
 
 	session_page_index = append_page (session_vbox);
 	/* initial setting */
@@ -483,22 +484,21 @@ ArdourStartup::setup_new_session_page ()
 		session_hbox.remove (**session_hbox.get_children().begin());
 	}
 
-	if (session_new_vbox.get_children().empty()) {
-		
-		session_new_vbox.set_spacing (12);
+	session_new_vbox.set_spacing (18);
 
+	if (session_new_vbox.get_children().empty()) {
+		VBox *vbox1 = manage (new VBox);
 		HBox* hbox1 = manage (new HBox);
 		Label* label1 = manage (new Label);
 		
+		vbox1->set_spacing (6);
+
 		hbox1->set_spacing (6);
 		hbox1->pack_start (*label1, false, false);
 		hbox1->pack_start (new_name_entry, true, true);
 		
 		label1->set_text (_("Session name:"));
 		
-		hbox1->show();
-		label1->show();
-		new_name_entry.show ();
 
 		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 			new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
@@ -509,7 +509,7 @@ ArdourStartup::setup_new_session_page ()
 		new_name_entry.signal_changed().connect (mem_fun (*this, &ArdourStartup::new_name_changed));
 		new_name_entry.signal_activate().connect (mem_fun (*this, &ArdourStartup::move_along_now));
 		
-		session_new_vbox.pack_start (*hbox1, false, false);
+		vbox1->pack_start (*hbox1, true, true);
 
 		/* --- */
 
@@ -528,30 +528,42 @@ ArdourStartup::setup_new_session_page ()
 			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		}
 		new_folder_chooser.set_title (_("Select folder for session"));
-		
-		hbox2->show();
-		label2->show();
-		new_folder_chooser.show ();
 
-		session_new_vbox.pack_start (*hbox2, false, false);
+		vbox1->pack_start (*hbox2, false, false);
+
+		session_new_vbox.pack_start (*vbox1, false, false);
 
 		/* --- */
 
+		VBox *vbox2 = manage (new VBox);
+		HBox* hbox3 = manage (new HBox);
+		Label* label3 = manage (new Label);
 		template_model = ListStore::create (session_template_columns);
 		populate_session_templates ();
 
+		vbox2->set_spacing (6);
+	
+		label3->set_markup (_("<b>Options</b>"));
+		label3->set_alignment (0.0, 0.0);
+
+		vbox2->pack_start (*label3, false, true);
+
+		VBox *vbox3 = manage (new VBox);
+
+		vbox3->set_spacing (6);
+
 		if (!template_model->children().empty()) {
 
-			HBox* hbox3 = manage (new HBox);
+			HBox* hbox4a = manage (new HBox);
 			use_template_button.set_label (_("Use this template"));
 
 			TreeModel::Row row = *template_model->prepend ();
 			row[session_template_columns.name] = (_("no template"));
 			row[session_template_columns.path] = string();
 
-			hbox3->set_spacing (6);
-			hbox3->pack_start (use_template_button, false, false);
-			hbox3->pack_start (template_chooser, true, true);
+			hbox4a->set_spacing (6);
+			hbox4a->pack_start (use_template_button, false, false);
+			hbox4a->pack_start (template_chooser, true, true);
 			
 			template_chooser.set_model (template_model);
 			
@@ -562,11 +574,10 @@ ArdourStartup::setup_new_session_page ()
 			template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
 			template_chooser.set_active (0);
 			
-			hbox3->show ();
 			use_template_button.show();
 			template_chooser.show ();
 
-			session_new_vbox.pack_start (*hbox3, false, false);
+			vbox3->pack_start (*hbox4a, false, false);
 		}
 			
 		/* --- */
@@ -574,14 +585,13 @@ ArdourStartup::setup_new_session_page ()
 		if (!new_user) {
 			session_template_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 			
-			HBox* hbox3a = manage (new HBox);
+			HBox* hbox4b = manage (new HBox);
 			use_session_as_template_button.set_label (_("Use an existing session as a template:"));
 			
-			hbox3a->set_spacing (6);
-			hbox3a->pack_start (use_session_as_template_button, false, false);
-			hbox3a->pack_start (session_template_chooser, true, true);
+			hbox4b->set_spacing (6);
+			hbox4b->pack_start (use_session_as_template_button, false, false);
+			hbox4b->pack_start (session_template_chooser, true, true);
 			
-			hbox3a->show ();
 			use_session_as_template_button.show ();
 			session_template_chooser.show ();
 			
@@ -590,26 +600,30 @@ ArdourStartup::setup_new_session_page ()
 			session_template_chooser.set_filter (*template_filter);
 			session_template_chooser.set_title (_("Select template"));
 
-			session_new_vbox.pack_start (*hbox3a, false, false);
+			vbox3->pack_start (*hbox4b, false, false);
 		}
-
 
 		/* --- */
 		
-		HBox* hbox4 = manage (new HBox);
+		HBox* hbox5 = manage (new HBox);
 	
-		hbox4->set_spacing (6);
-		hbox4->pack_start (more_new_session_options_button, false, false);
+		hbox5->set_spacing (6);
+		hbox5->pack_start (more_new_session_options_button, false, false);
 		
-		hbox4->show ();
 		more_new_session_options_button.show ();
 		more_new_session_options_button.signal_clicked().connect (mem_fun (*this, &ArdourStartup::more_new_session_options_button_clicked));
 
-		session_new_vbox.pack_start (*hbox4, false, false);
+		vbox3->pack_start (*hbox5, false, false);
+		hbox3->pack_start (*vbox3, true, true, 8);
+		vbox2->pack_start (*hbox3, false, false);
+
+		/* --- */
+
+		session_new_vbox.pack_start (*vbox2, false, false);
 	}
 
-	session_new_vbox.show ();
-	session_hbox.pack_start (session_new_vbox, false, false);
+	session_new_vbox.show_all ();
+	session_hbox.pack_start (session_new_vbox, true, true);
 	set_page_title (session_vbox, _("New Session"));
 	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
 
@@ -736,6 +750,7 @@ ArdourStartup::setup_existing_session_page ()
 		
 		recent_scroller.add (recent_session_display);
 		recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
 		
 		recent_session_display.show();
 	}
@@ -765,7 +780,7 @@ ArdourStartup::more_new_session_options_button_clicked ()
 void
 ArdourStartup::setup_more_options_page ()
 {
-	more_options_vbox.set_border_width (12);
+	more_options_vbox.set_border_width (24);
 
 	_output_limit_count.set_adjustment (_output_limit_count_adj);
 	_input_limit_count.set_adjustment (_input_limit_count_adj);

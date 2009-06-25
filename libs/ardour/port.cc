@@ -238,7 +238,7 @@ Port::reconnect ()
 	return 0;
 }
 
-/** @param n Short or long name */
+/** @param n Short port name (no JACK client name) */
 int
 Port::set_name (std::string const & n)
 {
@@ -246,12 +246,10 @@ Port::set_name (std::string const & n)
 		return 0;
 	}
 
-	string const s = _engine->make_port_name_non_relative (n);
-
-	int const r = jack_port_set_name (_jack_port, s.c_str());
+	int const r = jack_port_set_name (_jack_port, n.c_str());
 
 	if (r == 0) {
-		_name = n; // short form, probably
+		_name = n; 
 	}
 
 	return r;

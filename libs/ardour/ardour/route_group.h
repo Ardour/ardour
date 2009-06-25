@@ -121,6 +121,9 @@ public:
 		routes.clear ();
 		changed();
 	}
+
+	void make_subgroup ();
+	void destroy_subgroup ();
 	
 	const std::list<Route*>& route_list() { return routes; }
 	
@@ -134,6 +137,7 @@ public:
 private:
 	Session& _session;
 	std::list<Route *> routes;
+	boost::shared_ptr<Route> subgroup_bus;
 	std::string _name;
 	Flag _flags;
 	Property _properties;

@@ -173,6 +173,8 @@ MixerGroupTabs::get_menu (RouteGroup* g)
 	
 	MenuList& items = _menu->items ();
 	items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &MixerGroupTabs::edit_group), g)));
+	items.push_back (MenuElem (_("Subgroup"), bind (mem_fun (*this, &MixerGroupTabs::make_subgroup), g)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &MixerGroupTabs::remove_group), g)));
 
 	return _menu;
@@ -189,4 +191,16 @@ void
 MixerGroupTabs::remove_group (RouteGroup *g)
 {
 	_session->remove_route_group (*g);
+}
+
+void
+MixerGroupTabs::make_subgroup (RouteGroup* g)
+{
+	g->make_subgroup ();
+}
+
+void
+MixerGroupTabs::destroy_subgroup (RouteGroup* g)
+{
+	g->destroy_subgroup ();
 }

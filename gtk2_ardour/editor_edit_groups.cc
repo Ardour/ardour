@@ -66,10 +66,23 @@ Editor::build_route_group_menu (RouteGroup* g)
 	if (g) {
 		items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &Editor::edit_route_group), g)));
 		items.push_back (MenuElem (_("Fit to Window"), bind (mem_fun (*this, &Editor::fit_route_group), g)));
+		items.push_back (MenuElem (_("Subgroup"), bind (mem_fun (*this, &Editor::subgroup_route_group), g)));
 	}
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_route_groups)));
 	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Editor::disable_all_route_groups)));
+}
+
+void
+Editor::subgroup_route_group (RouteGroup* g)
+{
+	g->make_subgroup ();
+}
+
+void
+Editor::unsubgroup_route_group (RouteGroup* g)
+{
+	g->destroy_subgroup ();
 }
 
 void

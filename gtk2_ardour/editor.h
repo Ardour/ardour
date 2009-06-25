@@ -1863,6 +1863,8 @@ public:
 	void build_route_group_menu (ARDOUR::RouteGroup *);
 	void activate_all_route_groups ();
 	void disable_all_route_groups ();
+	void subgroup_route_group (ARDOUR::RouteGroup*);
+	void unsubgroup_route_group (ARDOUR::RouteGroup*);
 
 	bool in_route_group_row_change;
 	void route_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);

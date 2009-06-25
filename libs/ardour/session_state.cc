@@ -2296,6 +2296,12 @@ Session::find_all_sources (string path, set<string>& result)
 		
 		XMLProperty* prop;
 
+		if ((prop = (*niter)->property (X_("type"))) == 0) {
+			continue;
+		}
+
+		DataType type (prop->value());
+
 		if ((prop = (*niter)->property (X_("name"))) == 0) {
 			continue;
 		}
@@ -2304,12 +2310,14 @@ Session::find_all_sources (string path, set<string>& result)
 			/* external file, ignore */
 			continue;
 		}
+		
+		Glib::ustring found_path;
+		bool is_new;
+		uint16_t chan;
 
-		sys::path source_path = _session_dir->sound_path ();
-
-		source_path /= prop->value ();
-
-		result.insert (source_path.to_string ());
+		if (FileSource::find (type, prop->value(), true, is_new, chan, found_path)) {
+			result.insert (found_path);
+		}
 	}
 
 	return 0;

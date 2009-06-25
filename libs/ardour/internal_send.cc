@@ -41,6 +41,8 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 		throw failed_constructor();
 	}
 
+	set_name (sendto->name());
+
 	_send_to->GoingAway.connect (mem_fun (*this, &InternalSend::send_to_going_away));
 }
 
@@ -100,7 +102,6 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 
 		_meter->reset ();
 		Amp::apply_simple_gain (sendbufs, nframes, 0.0);
-		
 		return;
 
 	} else if (tgain != 1.0) {
@@ -108,6 +109,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 		/* target gain has not changed, but is not unity */
 		Amp::apply_simple_gain (sendbufs, nframes, tgain);
 	}
+
 	
 	// Can't automate gain for sends or returns yet because we need different buffers
 	// so that we don't overwrite the main automation data for the route amp
@@ -212,4 +214,11 @@ InternalSend::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;
+}
+
+bool
+InternalSend::set_name (const std::string& str)
+{
+	/* rules for external sends don't apply to us */
+	return IOProcessor::set_name (str);
 }

@@ -899,19 +899,12 @@ IO::parse_gain_string (const string& str, vector<string>& ports)
 bool
 IO::set_name (const string& requested_name)
 {
-	if (requested_name == _name) {
+	string name = requested_name;
+
+	if (name == _name) {
 		return true;
 	}
 	
-	string name;
-	Route *rt;
-	if ( (rt = dynamic_cast<Route *>(this))) {
-		name = Route::ensure_track_or_route_name(requested_name, _session);
-	} else {
-		name = requested_name;
-	}
-
-
 	/* replace all colons in the name. i wish we didn't have to do this */
 
 	if (replace_all (name, ":", "-")) {
@@ -924,7 +917,7 @@ IO::set_name (const string& requested_name)
 		i->set_name (current_name);
 	}
 
-	bool const r = SessionObject::set_name(name);
+	bool const r = SessionObject::set_name (name);
 
 	setup_bundles ();
 

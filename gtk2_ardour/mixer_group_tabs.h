@@ -38,7 +38,9 @@ private:
 
 	void edit_group (ARDOUR::RouteGroup *);
 	void remove_group (ARDOUR::RouteGroup *);
-	
+	void make_subgroup (ARDOUR::RouteGroup *);
+	void destroy_subgroup (ARDOUR::RouteGroup *);
+
 	Mixer_UI* _mixer;
 	Gtk::Menu* _menu;
 };

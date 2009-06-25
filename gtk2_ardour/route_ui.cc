@@ -517,9 +517,17 @@ RouteUI::build_sends_menu ()
 	sends_menu->set_name ("ArdourContextMenu");
 	MenuList& items = sends_menu->items();
 	
+	items.push_back (MenuElem(_("Assign all tracks"), mem_fun (*this, &RouteUI::create_sends)));
 	items.push_back (MenuElem(_("Copy track gains to sends"), mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
+
+}
+
+void
+RouteUI::create_sends ()
+{
+	_session.globally_add_internal_sends (_route);
 }
 
 void

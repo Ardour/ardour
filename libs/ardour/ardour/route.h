@@ -191,6 +191,7 @@ class Route : public SessionObject, public AutomatableControls
 	boost::shared_ptr<Delivery>       main_outs() const { return _main_outs; }
 	boost::shared_ptr<InternalReturn> internal_return() const { return _intreturn; }
 	boost::shared_ptr<Send>           internal_send_for (boost::shared_ptr<const Route> target) const;
+	void add_internal_return ();
 	BufferSet* get_return_buffer () const;
 	void release_return_buffer () const;
 	void put_control_outs_at (Placement);
