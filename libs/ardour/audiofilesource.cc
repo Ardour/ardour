@@ -154,7 +154,11 @@ AudioFileSource::init (ustring pathstr, bool must_exist)
 	timeline_position = 0;
 	_peaks_built = false;
 
-	if (!find (pathstr, must_exist, is_embedded(), file_is_new, _channel, _path, _name)) {
+	/* is_embedded() can't work yet, because our _path is not set */
+
+	bool embedded = determine_embeddedness (pathstr);
+
+	if (!find (pathstr, must_exist, embedded, file_is_new, _channel, _path, _name)) {
 		throw non_existent_source ();
 	}
 
@@ -568,7 +572,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 		if (embedded) {
 			name = pathstr;
 		} else {
-			name = pathstr.substr (pathstr.find_last_of ('/') + 1);
+			name = Glib::path_get_basename (pathstr);
 		}
 
 		if (!Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
