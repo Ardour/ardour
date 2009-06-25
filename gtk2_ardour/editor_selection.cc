@@ -261,76 +261,66 @@ Editor::get_onscreen_tracks (TrackViewList& tvl)
  	}
 }
 
+/** Given a track, find any other tracks that are in the same active route group with a given property.
+ *  @param basis Base track.
+ *  @param equivs Filled with the base track and the found tracks.
+ *  @param prop Property to look for in route groups.
+ */
+
 void
-Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks)
+Editor::get_equivalent_tracks (RouteTimeAxisView* basis, set<RouteTimeAxisView*> & equivs, RouteGroup::Property prop) const
 {
-	/* step one: get all selected tracks and all tracks in the relevant edit groups */
+	equivs.insert (basis);
 
-	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
+	RouteGroup* group = basis->route()->route_group();
+	if (group && group->active_property (prop)) {
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*ti);
-
-		if (!rtv) {
-			continue;
-		}
-
-		RouteGroup* group = rtv->route()->route_group();
-
-		if (group && group->is_active()) {
-			
-			/* active group for this track, loop over all tracks and get every member of the group */
-
-			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-				
-				RouteTimeAxisView* trtv;
-				
-				if ((trtv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
-					
-					if (trtv->route()->route_group() == group) {
-						relevant_tracks.insert (trtv);
-					}
-				}
+		/* the basis is a member of an active route group, with the appropriate
+		   properties; find other members */
+		
+		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (v && v->route()->route_group() == group) {
+				equivs.insert (v);
 			}
-		} else {
-			relevant_tracks.insert (rtv);
 		}
 	}
 }
 
-/**
- *  Call a slot for a given `basis' track and also for any track that is in the same
- *  active route group with the `select' property.
- *  @param sl Slot to call.
- *  @param basis Basis track.
+/** Find tracks that are selected, and also those that are in the same `selection'-enabled route
+ *  group as one that is selected.
+ *  @param relevant_tracks set to add tracks to.
  */
 
 void
-Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis) const
+Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks) const
+{
+	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*ti);
+		if (rtv) {
+			get_equivalent_tracks (rtv, relevant_tracks, RouteGroup::Select);
+		}
+	}
+}
+
+/** Call a slot for a given `basis' track and also for any track that is in the same
+ *  active route group with a particular set of properties.
+ *
+ *  @param sl Slot to call.
+ *  @param basis Basis track.
+ *  @param prop Properties that active edit groups must share to be included in the map.
+ */
+
+void
+Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, RouteGroup::Property prop) const
 {
 	RouteTimeAxisView* route_basis = dynamic_cast<RouteTimeAxisView*> (basis);
 	if (route_basis == 0) {
 		return;
 	}
-
-	/* work out the tracks that we will call the slot for; use
-	   a set here as it will disallow possible duplicates of the
-	   basis track */
+	
 	set<RouteTimeAxisView*> tracks;
-
-	/* always call for the basis */
-	tracks.insert (route_basis);
-
-	RouteGroup* group = route_basis->route()->route_group();
-	if (group && group->active_property (RouteGroup::Select)) {
-
-		/* the basis is a member of an active edit group; find other members */
-		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (v && v->route()->route_group() == group) {
-				tracks.insert (v);
-			}
-		}
-	}
+	get_equivalent_tracks (route_basis, tracks, prop);
 
 	/* call the slots */
 	uint32_t const sz = tracks.size ();
@@ -340,7 +330,7 @@ Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisVie
 }
 
 void
-Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, RegionView* basis, vector<RegionView*>* all_equivs) const
+Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, RegionView * basis, vector<RegionView*>* all_equivs) const
 {
 	boost::shared_ptr<Playlist> pl;
 	vector<boost::shared_ptr<Region> > results;
@@ -369,14 +359,39 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, 
 }
 
 void
-Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions) const
+Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, RouteGroup::Property prop) const
 {
-	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview());
+	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview(), prop);
 	
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 	
 	equivalent_regions.push_back (basis);
 }
+
+RegionSelection
+Editor::get_equivalent_regions (RegionSelection & basis, RouteGroup::Property prop) const
+{
+	RegionSelection equivalent;
+	
+	for (RegionSelection::const_iterator i = basis.begin(); i != basis.end(); ++i) {
+
+		vector<RegionView*> eq;
+		
+		mapover_tracks (
+			bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), *i, &eq),
+			&(*i)->get_trackview(), prop
+			);
+
+		for (vector<RegionView*>::iterator j = eq.begin(); j != eq.end(); ++j) {
+			equivalent.add (*j);
+		}
+
+		equivalent.add (*i);
+	}
+
+	return equivalent;
+}
+	
 
 int
 Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
@@ -467,7 +482,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 				if (press) {
 
 					if (selection->selected (clicked_routeview)) {
-						get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+						get_equivalent_regions (clicked_regionview, all_equivalent_regions, RouteGroup::Select);
 					} else {
 						all_equivalent_regions.push_back (clicked_regionview);
 					}
@@ -487,7 +502,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
-				get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+				get_equivalent_regions (clicked_regionview, all_equivalent_regions, RouteGroup::Select);
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {

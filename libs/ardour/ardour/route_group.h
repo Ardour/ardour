@@ -73,7 +73,7 @@ public:
 	void set_hidden (bool yn, void *src);
 
 	bool property (Property p) const {
-		return ((_properties & p) != 0);
+		return ((_properties & p) == p);
 	}
 	
 	bool active_property (Property p) const {

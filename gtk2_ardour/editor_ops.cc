@@ -111,16 +111,10 @@ Editor::redo (uint32_t n)
 void
 Editor::split_region ()
 {
-	split_region_at (get_preferred_edit_position());
-}
-
-void
-Editor::split_region_at (nframes64_t where)
-{
 	RegionSelection rs;
 
-	get_regions_for_action (rs);
-	split_regions_at (where, selection->regions);
+	get_regions_for_action (rs, true);
+	split_regions_at (get_preferred_edit_position (), selection->regions);
 }
 
 void
@@ -5413,7 +5407,7 @@ Editor::split ()
 {
 	RegionSelection rs; 
 	
-	get_regions_for_action (rs);
+	get_regions_for_action (rs, true);
 
 	nframes64_t where = get_preferred_edit_position();
 

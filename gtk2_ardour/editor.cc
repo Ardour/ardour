@@ -4485,7 +4485,7 @@ Editor::restore_editing_space ()
 
 /**
  *  Make new playlists for a given track and also any others that belong
- *  to the same active edit group.
+ *  to the same active route group with the `edit' property.
  *  @param v Track.
  */
 
@@ -4495,13 +4495,13 @@ Editor::new_playlists (TimeAxisView* v)
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	session->get_playlists(playlists);
-	mapover_tracks ( bind(mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v );
+	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
 
 /**
  *  Use a copy of the current playlist for a given track and also any others that belong
- *  to the same active edit group.
+ *  to the same active route group with the `edit' property.
  *  @param v Track.
  */
 
@@ -4511,13 +4511,12 @@ Editor::copy_playlists (TimeAxisView* v)
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	session->get_playlists(playlists);
-	mapover_tracks ( bind(mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v );
+	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
 
-/**
- *  Clear the current playlist for a given track and also any others that belong
- *  to the same active edit group.
+/** Clear the current playlist for a given track and also any others that belong
+ *  to the same active route group with the `edit' property.
  *  @param v Track.
  */
 
@@ -4527,7 +4526,7 @@ Editor::clear_playlists (TimeAxisView* v)
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	session->get_playlists(playlists);
-	mapover_tracks ( mem_fun (*this, &Editor::mapped_clear_playlist), v );
+	mapover_tracks (mem_fun (*this, &Editor::mapped_clear_playlist), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
 
@@ -5065,42 +5064,25 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSe
 void
 Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 {
-	if (selection->regions.empty()) {
+	rs = selection->regions;
 
-		/* no regions selected; get all regions at the edit point across:
-		     - tracks in the region's route's edit group, if it has the edit property
-		     - selected tracks
-		*/
+	if (allow_entered && entered_regionview) {
+		rs.add (entered_regionview);
+	}
 
-		if (entered_regionview) {
-			
-			rs.add (entered_regionview);
+	TrackSelection tracks = selection->tracks;
 
-			TrackSelection tracks = selection->tracks;
+	RegionSelection to_map = rs;
 
-			RouteGroup* g = entered_regionview->get_time_axis_view().route_group ();
-			if (g && g->active_property (RouteGroup::Edit)) {
-				tracks.add (axis_views_from_routes (g->route_list()));
-			}
+	for (RegionSelection::iterator i = to_map.begin (); i != to_map.end(); ++i) {
 
-			nframes64_t const where = get_preferred_edit_position ();
-			get_regions_at (rs, where, tracks);
-		}
-		
-	} else {
-		
-		/* use the selected regions */
-
-		rs = selection->regions;
-
-		/* if the entered regionview wasn't selected and we allow this sort of thing,
-		   then add it.
-		*/
-
-		if (allow_entered && entered_regionview && !selection->selected (entered_regionview)) {
-			rs.add (entered_regionview);
+		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
+		if (g && g->active_property (RouteGroup::Edit)) {
+			tracks.add (axis_views_from_routes (g->route_list()));
 		}
 
+		nframes64_t const where = get_preferred_edit_position ();
+		get_regions_at (rs, where, tracks);
 	}
 }
 

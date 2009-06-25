@@ -30,6 +30,8 @@
 #include <jack/types.h>
 #include <sigc++/signal.h>
 
+#include "ardour/route_group.h"
+
 #include "pbd/statefuldestructible.h" 
 
 #include "editing.h"
@@ -273,7 +275,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	virtual RouteTimeAxisView* get_route_view_by_id (PBD::ID& id) = 0;
 
-	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&) const = 0;
+	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, ARDOUR::RouteGroup::Property) const = 0;
 
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;

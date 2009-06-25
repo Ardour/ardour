@@ -53,6 +53,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
+#include "ardour/route_group.h"
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -533,13 +534,15 @@ class Editor : public PublicEditor
 
 	void sort_track_selection (TrackSelection* sel = 0);
 
-	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks);
-	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&) const;
-	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*) const;
+	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks) const;
+	void get_equivalent_tracks (RouteTimeAxisView*, std::set<RouteTimeAxisView*> &, ARDOUR::RouteGroup::Property) const;
+	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, ARDOUR::RouteGroup::Property) const;
+	RegionSelection get_equivalent_regions (RegionSelection &, ARDOUR::RouteGroup::Property) const;
+	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, ARDOUR::RouteGroup::Property) const;
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
-	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
+	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView *, std::vector<RegionView*>*) const;
 	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
@@ -1145,7 +1148,6 @@ class Editor : public PublicEditor
 	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_region ();
-	void split_region_at (nframes64_t);
 	void split_regions_at (nframes64_t, RegionSelection&);
 	void split_region_at_transients ();
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret);

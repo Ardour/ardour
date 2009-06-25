@@ -165,8 +165,6 @@ class Selection : public sigc::trackable
 	void foreach_regionview (void (RegionView::*method)(void));
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
-	void select_edit_group_regions ();
-
   private:
 	PublicEditor const * editor;
 	uint32_t next_time_id;

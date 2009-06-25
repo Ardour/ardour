@@ -114,9 +114,6 @@ public:
 		return true;
 	}
 
-	/** Called when a subclass should update the editor's selection following a drag */
-	virtual void update_selection () {}
-
 protected:
 	nframes64_t adjusted_current_frame (GdkEvent *) const;
 	
@@ -154,8 +151,6 @@ class RegionDrag : public Drag, public sigc::trackable
 public:
 	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 	virtual ~RegionDrag () {}
-
-	void update_selection ();
 
 protected:
 	

@@ -145,8 +145,6 @@ Drag::end_grab (GdkEvent* event)
 
 	_editor->hide_verbose_canvas_cursor();
 
-	update_selection ();
-	
 	_ending = false;
 
 	return _had_movement;
@@ -251,14 +249,6 @@ void
 RegionDrag::region_going_away (RegionView* v)
 {
 	_views.remove (v);
-}
-
-void
-RegionDrag::update_selection ()
-{
-	list<Selectable*> s;
-	copy (_views.begin(), _views.end(), back_inserter (s));
-	_editor->selection->set (s);
 }
 
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)

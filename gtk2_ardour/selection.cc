@@ -333,7 +333,6 @@ Selection::add (const RegionSelection& rs)
 	}
 	
 	if (changed) {
-		select_edit_group_regions ();
 		RegionsChanged ();
 	}
 }
@@ -740,24 +739,6 @@ Selection::add (vector<AutomationSelectable*>& autos)
 	}
 
 	PointsChanged ();
-}
-
-void
-Selection::select_edit_group_regions ()
-{
-	std::set<RegionView*> regions_to_add;
-	
-	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		vector<RegionView*> e;
-		editor->get_equivalent_regions (*i, e);
-		for (vector<RegionView*>::iterator j = e.begin(); j != e.end(); ++j) {
-			regions_to_add.insert(*j);
-		}
-	}
-
-	for (std::set<RegionView*>::iterator i = regions_to_add.begin(); i != regions_to_add.end(); ++i) {
-		add (*i);
-	}
 }
 
 void
