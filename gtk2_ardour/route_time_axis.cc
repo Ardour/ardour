@@ -289,7 +289,7 @@ RouteTimeAxisView::post_construct ()
 	update_diskstream_display ();
 
 	subplugin_menu.items().clear ();
-	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
+	_route->foreach_processor (bind (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu), _route));
 	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 	reset_processor_automation_curves ();
 }
@@ -469,6 +469,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 		subplugin_menu.detach();
 
 	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
+	automation_items.back().set_sensitive (!subplugin_menu.items().empty());
 	
 	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
@@ -2026,10 +2027,16 @@ RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_p
 
 
 void
-RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p)
+RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p, boost::weak_ptr<Route> r)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
-	if (!processor) {
+	boost::shared_ptr<Route> route (r.lock ());
+	if (!processor || !route) {
+		return;
+	}
+
+	if (processor == route->amp ()) {
+		/* don't add an entry for the amp processor */
 		return;
 	}
 	
@@ -2162,7 +2169,7 @@ RouteTimeAxisView::processors_changed ()
 
 	subplugin_menu.items().clear ();
 
-	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
+	_route->foreach_processor (bind (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu), _route));
 	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ) {
@@ -2432,4 +2439,3 @@ RouteTimeAxisView::set_route_group_to_new ()
 		delete g;
 	}
 }
-
