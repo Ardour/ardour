@@ -96,6 +96,7 @@
 #include "global_port_matrix.h"
 #include "editor_drag.h"
 #include "editor_group_tabs.h"
+#include "automation_time_axis.h"
 
 #include "i18n.h"
 
@@ -5221,11 +5222,14 @@ bool
 Editor::idle_resize ()
 {
 	_pending_resize_view->idle_resize (_pending_resize_view->current_height() + _pending_resize_amount);
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		if (*i != _pending_resize_view) {
-			(*i)->idle_resize ((*i)->current_height() + _pending_resize_amount);
-		}
+
+	if (dynamic_cast<AutomationTimeAxisView*> (_pending_resize_view) == 0) {
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			if (*i != _pending_resize_view) {
+				(*i)->idle_resize ((*i)->current_height() + _pending_resize_amount);
+			}
 			
+		}
 	}
 	
 	flush_canvas ();
