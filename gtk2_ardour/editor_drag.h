@@ -404,9 +404,7 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
-	bool active (Editing::MouseMode m) {
-		return (m == Editing::MouseGain);
-	}
+	bool active (Editing::MouseMode m);
 
 private:
 	

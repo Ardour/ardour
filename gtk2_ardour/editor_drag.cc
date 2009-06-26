@@ -2532,6 +2532,18 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	_point->line().end_drag (_point);
 }
 
+bool
+ControlPointDrag::active (Editing::MouseMode m)
+{
+	if (m == Editing::MouseGain) {
+		/* always active in mouse gain */
+		return true;
+	}
+
+	/* otherwise active if the point is on an automation line (ie not if its on a region gain line) */
+	return dynamic_cast<AutomationLine*> (&(_point->line())) != 0;
+}
+
 LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i),
 	  _line (0),
