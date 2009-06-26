@@ -176,7 +176,7 @@ int
 AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void *src)
 {
 	_diskstream = ds;
-	_diskstream->set_io (*(_input.get()));
+	_diskstream->set_route (*this);
 	_diskstream->set_destructive (_mode == Destructive);
 	_diskstream->set_non_layered (_mode == NonLayered);
 

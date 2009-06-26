@@ -95,7 +95,7 @@ int
 MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
 {
 	_diskstream = ds;
-	_diskstream->set_io (*(_input.get()));
+	_diskstream->set_route (*this);
 	_diskstream->set_destructive (_mode == Destructive);
 
 	_diskstream->set_record_enabled (false);

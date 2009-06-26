@@ -54,6 +54,7 @@ class IO;
 class Playlist;
 class Processor;
 class Region;
+class Route;
 class Send;
 class Session;
 
@@ -73,8 +74,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	
 	bool set_name (const std::string& str);
 
-	ARDOUR::IO* io() const { return _io; }
-	void set_io (ARDOUR::IO& io);
+	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
+	void set_route (ARDOUR::Route&);
 
 	virtual float playback_buffer_load() const = 0;
 	virtual float capture_buffer_load() const = 0;
@@ -250,7 +251,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	uint32_t i_am_the_modifier;
 
-	ARDOUR::IO*  _io;
+	boost::shared_ptr<ARDOUR::IO>  _io;
+	Route*       _route;
 	ChanCount    _n_channels;
 
 	boost::shared_ptr<Playlist> _playlist;
@@ -312,6 +314,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	sigc::connection plregion_connection;
 	
 	Flag _flags;
+
+	void route_going_away ();
 };
 
 }; /* namespace ARDOUR */

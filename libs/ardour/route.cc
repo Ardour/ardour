@@ -2490,17 +2490,12 @@ Route::set_name (const string& str)
 		
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			
-			/* rename all processors with outputs to reflect our new name */
+			/* rename all I/O processors that have inputs or outputs */
 
 			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
 
-			if (iop) {
-				string iop_name = name;
-				iop_name += '[';
-				iop_name += "XXX FIX ME XXX";
-				iop_name += ']';
-				
-				if (!iop->set_name (iop_name)) {
+			if (iop && (iop->output() || iop->input())) {
+				if (!iop->set_name (name)) {
 					ret = false;
 				}
 			}

@@ -407,7 +407,6 @@ Delivery::target_gain ()
 	*/
 
 	if (_no_outs_cuz_we_no_monitor) {
-		std::cerr << this << " no outs cuz we no monitor\n";
 		return 0.0;
 	}
 

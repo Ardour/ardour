@@ -266,7 +266,7 @@ Session::butler_thread_work ()
 
 			/* don't read inactive tracks */
 
-			IO* io = ds->io();
+			boost::shared_ptr<IO> io = ds->io();
 			
 			if (io && !io->active()) {
 				continue;

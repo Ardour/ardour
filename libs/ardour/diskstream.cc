@@ -87,7 +87,7 @@ void
 Diskstream::init (Flag f)
 {
 	_flags = f;
-	_io = 0;
+	_route = 0;
 	_alignment_style = ExistingMaterial;
 	_persistent_alignment_style = ExistingMaterial;
 	first_input_change = true;
@@ -133,12 +133,15 @@ Diskstream::~Diskstream ()
 }
 
 void
-Diskstream::set_io (IO& io)
+Diskstream::set_route (Route& r)
 {
-	_io = &io;
+	_route = &r;
+	_io = _route->input();
 	input_change_pending = ConfigurationChanged;
 	non_realtime_input_change ();
 	set_align_style_from_io ();
+
+	_route->GoingAway.connect (mem_fun (*this, &Diskstream::route_going_away));
 }
 
 void
@@ -420,12 +423,7 @@ Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 void
 Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & movements_frames)
 {
-#if 0
-	
-	XXX THIS HAS TO BE FIXED FOR 3.0
-
-
-	if (Config->get_automation_follows_regions () == false) {
+	if (!_route || Config->get_automation_follows_regions () == false) {
 		return;
 	}
 	
@@ -436,7 +434,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 	}
 	
 	/* move gain automation */
-	boost::shared_ptr<AutomationList> gain_alist = _io->gain_control()->list();
+	boost::shared_ptr<AutomationList> gain_alist = _route->gain_control()->alist();
 	XMLNode & before = gain_alist->get_state ();
 	gain_alist->move_ranges (movements);
 	_session.add_command (
@@ -446,7 +444,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 		);
 	
 	/* move panner automation */
-	boost::shared_ptr<Panner> p = _io->panner ();
+	boost::shared_ptr<Panner> p = _route->main_outs()->panner ();
 	if (p) {
 		for (uint32_t i = 0; i < p->npanners (); ++i) {
 			boost::shared_ptr<AutomationList> pan_alist = p->streampanner(i).pan_control()->alist();
@@ -459,11 +457,8 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 
 	/* move processor automation */
 	/* XXX: ewww */
-	Route * route = dynamic_cast<Route*> (_io);
-	if (route) {
-		route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Diskstream::move_processor_automation), movements_frames));
-	}
-#endif
+
+	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Diskstream::move_processor_automation), movements_frames));
 }
 
 void
@@ -495,3 +490,8 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p,
 	}
 }
 
+void
+Diskstream::route_going_away ()
+{
+	_io.reset ();
+}
