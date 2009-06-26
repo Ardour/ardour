@@ -5203,8 +5203,10 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 
 	min_resulting = min (min_resulting, int32_t (_pending_resize_view->current_height()) + _pending_resize_amount);
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		min_resulting = min (min_resulting, int32_t ((*i)->current_height()) + _pending_resize_amount);
+	if (selection->tracks.contains (_pending_resize_view)) {
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			min_resulting = min (min_resulting, int32_t ((*i)->current_height()) + _pending_resize_amount);
+		}
 	}
 
 	if (min_resulting < 0) {
@@ -5223,12 +5225,13 @@ Editor::idle_resize ()
 {
 	_pending_resize_view->idle_resize (_pending_resize_view->current_height() + _pending_resize_amount);
 
-	if (dynamic_cast<AutomationTimeAxisView*> (_pending_resize_view) == 0) {
+	if (dynamic_cast<AutomationTimeAxisView*> (_pending_resize_view) == 0 &&
+	    selection->tracks.contains (_pending_resize_view)) {
+		
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 			if (*i != _pending_resize_view) {
 				(*i)->idle_resize ((*i)->current_height() + _pending_resize_amount);
 			}
-			
 		}
 	}
 	
