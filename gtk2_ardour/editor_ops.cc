@@ -5070,19 +5070,15 @@ Editor::set_fade_length (bool in)
 {
 	RegionSelection rs; 
 
-	get_regions_for_action (rs);
+	get_regions_for_action (rs, true);
+
+	if (rs.empty()) {
+		return;
+	}
 
 	/* we need a region to measure the offset from the start */
 
-	RegionView* rv;
-
-	if (!rs.empty()) {
-		rv = rs.front();
-	} else if (entered_regionview) {
-		rv = entered_regionview;
-	} else {
-		return;
-	}
+	RegionView* rv = rs.front ();
 
 	nframes64_t pos = get_preferred_edit_position();
 	nframes64_t len;
