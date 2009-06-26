@@ -289,7 +289,7 @@ RouteTimeAxisView::post_construct ()
 	update_diskstream_display ();
 
 	subplugin_menu.items().clear ();
-	_route->foreach_processor (bind (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu), _route));
+	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 	reset_processor_automation_curves ();
 }
@@ -2027,16 +2027,14 @@ RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_p
 
 
 void
-RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p, boost::weak_ptr<Route> r)
+RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
-	boost::shared_ptr<Route> route (r.lock ());
-	if (!processor || !route) {
+	if (!processor) {
 		return;
 	}
 
-	if (processor == route->amp ()) {
-		/* don't add an entry for the amp processor */
+	if (!processor->visible ()) {
 		return;
 	}
 	
@@ -2169,7 +2167,7 @@ RouteTimeAxisView::processors_changed ()
 
 	subplugin_menu.items().clear ();
 
-	_route->foreach_processor (bind (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu), _route));
+	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ) {

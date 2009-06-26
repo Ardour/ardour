@@ -37,6 +37,8 @@ class Amp : public Processor {
 public:
 	Amp(Session& s, boost::shared_ptr<MuteMaster> m);
 
+	bool visible () const { return false; }
+
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 	
