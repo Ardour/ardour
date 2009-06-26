@@ -426,22 +426,15 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 	if (!_route || Config->get_automation_follows_regions () == false) {
 		return;
 	}
-	
+
 	list< Evoral::RangeMove<double> > movements;
+
 	for (list< Evoral::RangeMove<nframes_t> >::const_iterator i = movements_frames.begin();
-		   i != movements_frames.end(); ++i) {
+	     i != movements_frames.end();
+	     ++i) {
+
 		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
 	}
-	
-	/* move gain automation */
-	boost::shared_ptr<AutomationList> gain_alist = _route->gain_control()->alist();
-	XMLNode & before = gain_alist->get_state ();
-	gain_alist->move_ranges (movements);
-	_session.add_command (
-		new MementoCommand<AutomationList> (
-			*gain_alist.get(), &before, &gain_alist->get_state ()
-			)
-		);
 	
 	/* move panner automation */
 	boost::shared_ptr<Panner> p = _route->main_outs()->panner ();
@@ -451,13 +444,11 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 			XMLNode & before = pan_alist->get_state ();
 			pan_alist->move_ranges (movements);
 			_session.add_command (new MementoCommand<AutomationList> (
-					*pan_alist.get(), &before, &pan_alist->get_state ()));
+						      *pan_alist.get(), &before, &pan_alist->get_state ()));
 		}
 	}
 
 	/* move processor automation */
-	/* XXX: ewww */
-
 	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Diskstream::move_processor_automation), movements_frames));
 }
 
