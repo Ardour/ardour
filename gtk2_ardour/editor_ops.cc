@@ -4888,9 +4888,7 @@ Editor::brush (nframes64_t pos)
 void
 Editor::reset_region_gain_envelopes ()
 {
-	RegionSelection rs; 
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 
 	if (!session || rs.empty()) {
 		return;
@@ -4915,80 +4913,134 @@ Editor::reset_region_gain_envelopes ()
 void
 Editor::toggle_gain_envelope_visibility ()
 {
-	RegionSelection rs; 
+	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 
-	get_regions_for_action (rs);
+	if (!session || rs.empty()) {
+		return;
+	}
+
+	session->begin_reversible_command (_("region gain envelope visible"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
+			XMLNode &before = arv->region()->get_state ();
 			arv->set_envelope_visible (!arv->envelope_visible());
+			XMLNode &after = arv->region()->get_state ();
+			session->add_command (new MementoCommand<Region> (*(arv->region().get()), &before, &after));
 		}
 	}
+
+	session->commit_reversible_command ();
 }
 
 void
 Editor::toggle_gain_envelope_active ()
 {
-	RegionSelection rs; 
+	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 
-	get_regions_for_action (rs);
+	if (!session || rs.empty()) {
+		return;
+	}
+	
+	session->begin_reversible_command (_("region gain envelope active"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
+			XMLNode &before = arv->region()->get_state ();
 			arv->audio_region()->set_envelope_active (!arv->audio_region()->envelope_active());
+			XMLNode &after = arv->region()->get_state ();
+			session->add_command (new MementoCommand<Region> (*(arv->region().get()), &before, &after));
 		}
 	}
+
+	session->commit_reversible_command ();
 }
 
 void
 Editor::toggle_region_lock ()
 {
-	RegionSelection rs; 
+	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 
-	get_regions_for_action (rs);
+	if (!session || rs.empty()) {
+		return;
+	}
+	
+	session->begin_reversible_command (_("region lock"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		XMLNode &before = (*i)->region()->get_state ();
 		(*i)->region()->set_locked (!(*i)->region()->locked());
+		XMLNode &after = (*i)->region()->get_state ();
+		session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
 	}
+
+	session->commit_reversible_command ();
 }
 
 void
 Editor::set_region_lock_style (Region::PositionLockStyle ps)
 {
-	RegionSelection rs; 
+	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 
-	get_regions_for_action (rs);
+	if (!session || rs.empty()) {
+		return;
+	}
+	
+	session->begin_reversible_command (_("region lock style"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		XMLNode &before = (*i)->region()->get_state ();
 		(*i)->region()->set_position_lock_style (ps);
+		XMLNode &after = (*i)->region()->get_state ();
+		session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
 	}
+
+	session->commit_reversible_command ();
 }
 
 
 void
 Editor::toggle_region_mute ()
 {
-	RegionSelection rs; 
+	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 
-	get_regions_for_action (rs);
+	if (!session || rs.empty()) {
+		return;
+	}
+	
+	session->begin_reversible_command (_("region mute"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		XMLNode &before = (*i)->region()->get_state ();
 		(*i)->region()->set_muted (!(*i)->region()->muted());
+		XMLNode &after = (*i)->region()->get_state ();
+		session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
 	}
+
+	session->commit_reversible_command ();
 }
 
 void
 Editor::toggle_region_opaque ()
 {
-	RegionSelection rs; 
+	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 
-	get_regions_for_action (rs);
+	if (!session || rs.empty()) {
+		return;
+	}
+	
+	session->begin_reversible_command (_("region opacity"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		XMLNode &before = (*i)->region()->get_state ();
 		(*i)->region()->set_opaque (!(*i)->region()->opaque());
+		XMLNode &after = (*i)->region()->get_state ();
+		session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
 	}
+
+	session->commit_reversible_command ();
 }
 
 void
