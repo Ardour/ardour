@@ -39,6 +39,8 @@
 #include <ardour/playlist_factory.h>
 #include <ardour/transient_detector.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include "i18n.h"
 
 using namespace std;
@@ -78,7 +80,7 @@ Playlist::Playlist (Session& sess, string nom, bool hide)
 	init (hide);
 	first_set_state = false;
 	_name = nom;
-	
+	_set_sort_id();
 }
 
 Playlist::Playlist (Session& sess, const XMLNode& node, bool hide)
@@ -86,6 +88,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, bool hide)
 {
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
+	_set_sort_id();
 
 	/* set state called by derived class */
 }
@@ -270,6 +273,35 @@ Playlist::~Playlist ()
 }
 
 void
+Playlist::_set_sort_id ()
+{
+    /* 
+        Playlists are given names like <track name>.<id> 
+        or <track name>.<edit group name>.<id> where id 
+        is an integer. We extract the id and sort by that.
+    */
+
+    size_t dot_position = _name.find_last_of(".");
+    if (dot_position == string::npos)
+    {
+        _sort_id = 0;
+    }
+    else
+    {
+        string t = _name.substr(dot_position + 1);
+        
+        try
+        {
+            _sort_id = boost::lexical_cast<int>(t);
+        }
+        catch (boost::bad_lexical_cast e)
+        {
+            _sort_id = 0;
+        }
+    }
+}    
+
+void
 Playlist::set_name (string str)
 {
 	/* in a typical situation, a playlist is being used
@@ -293,6 +325,8 @@ Playlist::set_name (string str)
 	}
 
 	_name = name; 
+	_set_sort_id();
+	
 	NameChanged(); /* EMIT SIGNAL */
 }
 
@@ -1730,6 +1764,7 @@ Playlist::set_state (const XMLNode& node)
 		
 		if (prop->name() == X_("name")) {
 			_name = prop->value();
+			_set_sort_id();
 		} else if (prop->name() == X_("orig_diskstream_id")) {
 			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {

@@ -377,7 +377,7 @@ Location::set_state (const XMLNode& node)
 		*/
 		
 	_start = atoi (prop->value().c_str());
-		
+
 	if ((prop = node.property ("end")) == 0) {
 		  error << _("XML node for Location has no end information") << endmsg; 
 		  return -1;

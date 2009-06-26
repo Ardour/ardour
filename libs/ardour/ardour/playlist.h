@@ -68,6 +68,8 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 
 	std::string name() const { return _name; }
 	void set_name (std::string str);
+	
+	int sort_id() { return _sort_id; }
 
 	bool frozen() const { return _frozen; }
 	void set_frozen (bool yn);
@@ -178,6 +180,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	RegionList       regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	string          _name;
+	int             _sort_id;
 	Session&        _session;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
@@ -221,6 +224,8 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	void delay_notifications ();
 	void release_notifications ();
 	virtual void flush_notifications ();
+	
+	void _set_sort_id ();
 
 	void notify_region_removed (boost::shared_ptr<Region>);
 	void notify_region_added (boost::shared_ptr<Region>);

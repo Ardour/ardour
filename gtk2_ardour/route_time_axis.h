@@ -249,7 +249,7 @@ protected:
 	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      playlist_item;
 
-	void use_playlist (boost::weak_ptr<ARDOUR::Playlist>);
+	void use_playlist (Gtk::RadioMenuItem*, boost::weak_ptr<ARDOUR::Playlist>);
 
 	ArdourCanvas::SimpleRect* timestretch_rect;
 
