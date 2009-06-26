@@ -424,6 +424,10 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		chooser.set_select_multiple (true);
 		chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
 		chooser.signal_file_activated().connect (mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
+#ifdef GTKOSX
+		/* some broken redraw behaviour - this is a bandaid */
+		chooser.signal_selection_changed().connect (mem_fun (chooser, &Widget::queue_draw));
+#endif
 
 		if (!persistent_folder.empty()) {
 			chooser.set_current_folder (persistent_folder);
