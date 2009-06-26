@@ -3941,10 +3941,9 @@ Editor::mouse_select_button_release (GdkEventButton* ev)
 Editor::TrackViewList *
 Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 {
-	TrackViewList *v;
 	TrackViewList::iterator i;
 
-	v = new TrackViewList;
+	TrackViewList* v = new TrackViewList;
 
 	if (track == 0 && group == 0) {
 
@@ -3954,7 +3953,7 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 			v->push_back (*i);
 		}
 
-	} else if ((track != 0 && group == 0) || (track != 0 && group != 0 && !group->is_active())) {
+	} else if ((track != 0 && group == 0) || (track != 0 && group != 0 && !group->active_property (RouteGroup::Select))) {
 		
 		/* just the view for this track
 		 */
@@ -3965,9 +3964,9 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 		
 		/* views for all tracks in the route group */
 		
-		for (i  = track_views.begin(); i != track_views.end (); ++i) {
+		for (i = track_views.begin(); i != track_views.end (); ++i) {
 
-			if (group == 0 || (*i)->route_group() == group) {
+			if (group == 0 || ((*i)->route_group() == group && group->active_property (RouteGroup::Select))) {
 				v->push_back (*i);
 			}
 		}
