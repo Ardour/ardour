@@ -78,6 +78,8 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	, preserve_formants_button(_("Preserve Formants"))
 {
 	set_modal (true);
+	set_skip_taskbar_hint (true);
+	set_resizable (false);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("TimeFXDialog"));
 
@@ -89,77 +91,102 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	}
 	set_title(title.get_string());
 
-	cancel_button = add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
+	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
-	get_vbox()->set_spacing (5);
-	get_vbox()->set_border_width (12);
+	VBox* vbox = manage (new VBox);
+	Gtk::Label* l;
+
+	get_vbox()->set_spacing (4);
+
+	vbox->set_spacing (18);
+	vbox->set_border_width (5);
+
+	upper_button_box.set_spacing (6);
+
+	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
+	l->set_use_markup ();
+
+	upper_button_box.pack_start (*l, false, false);
 
 	if (pitching) {
+		Table* table = manage (new Table (4, 3, false));
+		table->set_row_spacings	(6);
+		table->set_col_spacing	(1, 6);
+		l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false )); //Common gnome way for padding
+		l->set_padding (8, 0);
+		table->attach (*l, 0, 1, 0, 4, Gtk::FILL, Gtk::FILL, 0, 0);
 
-		upper_button_box.set_spacing (5);
-		upper_button_box.set_border_width (5);
-		
-		Gtk::Label* l;
+		l = manage (new Label (_("Octaves:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		table->attach (*l, 1, 2, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table->attach (pitch_octave_spinner, 2, 3, 0, 1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 
-		l = manage (new Label (_("Octaves")));
-		upper_button_box.pack_start (*l, false, false);
-		upper_button_box.pack_start (pitch_octave_spinner, false, false);
+		l = manage (new Label (_("Semitones:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		table->attach (*l, 1, 2, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table->attach (pitch_semitone_spinner, 2, 3, 1, 2, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 
-		l = manage (new Label (_("Semitones (12TET)")));
-		upper_button_box.pack_start (*l, false, false);
-		upper_button_box.pack_start (pitch_semitone_spinner, false, false);
-
-		l = manage (new Label (_("Cents")));
-		upper_button_box.pack_start (*l, false, false);
-		upper_button_box.pack_start (pitch_cent_spinner, false, false);
-
+		l = manage (new Label (_("Cents:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		pitch_cent_spinner.set_digits (1);
+		table->attach (*l, 1, 2, 2, 3, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table->attach (pitch_cent_spinner, 2, 3, 2, 3, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 
-		upper_button_box.pack_start (preserve_formants_button, false, false);
+		table->attach (preserve_formants_button, 1, 3, 3, 4, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 
 		add_button (_("Shift"), Gtk::RESPONSE_ACCEPT);
 
-		get_vbox()->pack_start (upper_button_box, false, false);
-
+		upper_button_box.pack_start (*table, false, true);
 	} else {
+		Table* table = manage (new Table (2, 3, false));
+		table->set_row_spacings	(6);
+		table->set_col_spacing	(1, 6);
+		l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
+		l->set_padding (8, 0);
+		table->attach (*l, 0, 1, 0, 2, Gtk::FILL, Gtk::FILL, 0, 0);
 
 #ifdef USE_RUBBERBAND
-		opts_box.set_spacing (5);
-		opts_box.set_border_width (5);
 		vector<string> strings;
+
+		table->attach (stretch_opts_label, 1, 2, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 		set_popdown_strings (stretch_opts_selector, editor.rb_opt_strings);
 		/* set default */
 		stretch_opts_selector.set_active_text (editor.rb_opt_strings[4]);
+		table->attach (stretch_opts_selector, 2, 3, 0, 1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 
-		opts_box.pack_start (precise_button, false, false);
-		opts_box.pack_start (stretch_opts_label, false, false);
-		opts_box.pack_start (stretch_opts_selector, false, false);
-
-		get_vbox()->pack_start (opts_box, false, false);
+		table->attach (precise_button, 1, 3, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 #else
-		upper_button_box.set_homogeneous (true);
-		upper_button_box.set_spacing (5);
-		upper_button_box.set_border_width (5);
-
-		upper_button_box.pack_start (quick_button, true, true);
-		upper_button_box.pack_start (antialias_button, true, true);
-
 		quick_button.set_name (N_("TimeFXButton"));
-		antialias_button.set_name (N_("TimeFXButton"));
+		table->attach (quick_button, 1, 3, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
-		get_vbox()->pack_start (upper_button_box, false, false);
+		antialias_button.set_name (N_("TimeFXButton"));
+		table->attach (antialias_button, 1, 3, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 #endif	
+
 		add_button (_("Stretch/Shrink"), Gtk::RESPONSE_ACCEPT);
+
+		upper_button_box.pack_start (*table, false, true);
 	}
 
-	get_vbox()->pack_start (progress_bar);
+	VBox* progress_box = manage (new VBox);
+	progress_box->set_spacing (6);
+
+	l = manage (new Label (_("<b>Progress</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l->set_use_markup ();
 
 	progress_bar.set_name (N_("TimeFXProgress"));
+	
+	progress_box->pack_start (*l, false, false);
+	progress_box->pack_start (progress_bar, false, true);
 
+
+	vbox->pack_start (upper_button_box, false, true);
+	vbox->pack_start (*progress_box, false, true);
+
+	get_vbox()->pack_start (*vbox, false, false);
+
+	
 	show_all_children ();
 }
 

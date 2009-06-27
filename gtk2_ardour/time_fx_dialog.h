@@ -41,16 +41,15 @@ struct TimeFXDialog : public ArdourDialog {
     Gtk::ProgressBar      progress_bar;
 
     /* SoundTouch */
-    Gtk::ToggleButton     quick_button;
-    Gtk::ToggleButton     antialias_button;
-    Gtk::HBox             upper_button_box;
+    Gtk::CheckButton      quick_button;
+    Gtk::CheckButton      antialias_button;
+    Gtk::VBox             upper_button_box;
 
     /* RubberBand */
     Gtk::ComboBoxText     stretch_opts_selector;
     Gtk::Label            stretch_opts_label;
-    Gtk::ToggleButton     precise_button;
-    Gtk::ToggleButton     preserve_formants_button;
-    Gtk::HBox             opts_box;
+    Gtk::CheckButton      precise_button;
+    Gtk::CheckButton      preserve_formants_button;
 
     Gtk::Button*          cancel_button;
     Gtk::Button*          action_button;
