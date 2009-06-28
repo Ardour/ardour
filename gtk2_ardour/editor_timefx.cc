@@ -412,7 +412,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 			new_region = fx->results.front();
 
 			if (!in_command) {
-				begin_reversible_command (dialog.pitching ? _("pitch shift") : _("time stretch"));
+				session->begin_reversible_command (dialog.pitching ? _("pitch shift") : _("time stretch"));
 				in_command = true;
 			}
 
@@ -427,7 +427,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 	}
 
 	if (in_command) {
-		commit_reversible_command ();
+		session->commit_reversible_command ();
 	}
 
 	dialog.status = 0;
