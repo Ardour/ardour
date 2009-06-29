@@ -1068,7 +1068,12 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 	if (ev->button == 1) {
 
 		if (group_menu == 0) {
-			group_menu = new RouteGroupMenu (_session);
+			
+			group_menu = new RouteGroupMenu (
+				_session,
+				(RouteGroup::Property) (RouteGroup::Gain | RouteGroup::Mute | RouteGroup::Solo)
+				);
+			
 			group_menu->GroupSelected.connect (mem_fun (*this, &MixerStrip::set_route_group));
 		}
 

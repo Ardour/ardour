@@ -558,6 +558,7 @@ Editor::Editor ()
 	route_list_display.set_name ("TrackListDisplay");
 	route_list_display.get_selection()->set_mode (SELECTION_NONE);
 	route_list_display.set_reorderable (true);
+	route_list_display.set_rules_hint (true);
 	route_list_display.set_size_request (100,-1);
 	route_list_display.add_object_drag (route_display_columns.route.index(), "routes");
 
@@ -577,12 +578,36 @@ Editor::Editor ()
 
 	group_model = ListStore::create(group_columns);
 	route_group_display.set_model (group_model);
+
 	route_group_display.append_column (_("Name"), group_columns.text);
+
+	route_group_display.append_column (_("G"), group_columns.gain);
+	route_group_display.append_column (_("R"), group_columns.record);
+	route_group_display.append_column (_("M"), group_columns.mute);
+	route_group_display.append_column (_("S"), group_columns.solo);
+	route_group_display.append_column (_("Sel"), group_columns.select);
+	route_group_display.append_column (_("E"), group_columns.edits);
+
 	route_group_display.append_column (_("Show"), group_columns.is_visible);
+
 	route_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	route_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	route_group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
+	route_group_display.get_column (3)->set_data (X_("colnum"), GUINT_TO_POINTER(3));
+	route_group_display.get_column (4)->set_data (X_("colnum"), GUINT_TO_POINTER(4));
+	route_group_display.get_column (5)->set_data (X_("colnum"), GUINT_TO_POINTER(5));
+	route_group_display.get_column (6)->set_data (X_("colnum"), GUINT_TO_POINTER(6));
+	route_group_display.get_column (7)->set_data (X_("colnum"), GUINT_TO_POINTER(7));
+
 	route_group_display.get_column (0)->set_expand (true);
 	route_group_display.get_column (1)->set_expand (false);
+	route_group_display.get_column (2)->set_expand (false);
+	route_group_display.get_column (3)->set_expand (false);
+	route_group_display.get_column (4)->set_expand (false);
+	route_group_display.get_column (5)->set_expand (false);
+	route_group_display.get_column (6)->set_expand (false);
+	route_group_display.get_column (7)->set_expand (false);
+
 	route_group_display.set_headers_visible (true);
 
 	/* name is directly editable */
@@ -597,11 +622,32 @@ Editor::Editor ()
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (1));
+	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (2));
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+
+	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (3));
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+
+	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (4));
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+
+	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (5));
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+
+	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (6));
+	active_cell->property_activatable() = true;
+	active_cell->property_radio() = false;
+
+	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (7));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
 	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_group_row_change));
+
 
 	route_group_display.set_name ("EditGroupList");
 	route_group_display.get_selection()->set_mode (SELECTION_SINGLE);

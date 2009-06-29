@@ -253,7 +253,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	_editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	ColorsChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
 
-	route_group_menu = new RouteGroupMenu (_session);
+	route_group_menu = new RouteGroupMenu (
+		_session,
+		(RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit)
+		);
+	
 	route_group_menu->GroupSelected.connect (mem_fun (*this, &RouteTimeAxisView::set_route_group_from_menu));
 
 	gm.get_gain_slider().signal_scroll_event().connect(mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);

@@ -2,9 +2,11 @@
 #include "ardour/route_group.h"
 #include "route_group_dialog.h"
 #include "i18n.h"
+#include <iostream>
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace std;
 
 RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	: Dialog (_("Route group")),
@@ -35,9 +37,9 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 
 	get_vbox()->pack_start (*h);
 	get_vbox()->pack_start (_active);
-	get_vbox()->pack_start (_gain);
 
 	h = manage (new HBox);
+	h->pack_start (_gain);
 	h->pack_start (_relative, PACK_EXPAND_PADDING);
 	get_vbox()->pack_start (*h);
 
@@ -61,15 +63,14 @@ RouteGroupDialog::do_run ()
 	int const r = run ();
 
 	if (r == Gtk::RESPONSE_OK) {
-		_group->set_name (_name.get_text ());
-		_group->set_active (_active.get_active (), this);
-
 		_group->set_property (RouteGroup::Gain, _gain.get_active ());
 		_group->set_property (RouteGroup::Mute, _mute.get_active ());
 		_group->set_property (RouteGroup::Solo, _solo.get_active ());
 		_group->set_property (RouteGroup::RecEnable, _rec_enable.get_active ());
 		_group->set_property (RouteGroup::Select, _select.get_active ());
 		_group->set_property (RouteGroup::Edit, _edit.get_active ());
+		_group->set_name (_name.get_text ()); // This emits changed signal
+		_group->set_active (_active.get_active (), this);
 		_group->set_relative (_relative.get_active(), this);
 	}
 

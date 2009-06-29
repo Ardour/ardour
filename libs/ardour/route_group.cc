@@ -38,8 +38,8 @@ using namespace ARDOUR;
 using namespace sigc;
 using namespace std;
 
-RouteGroup::RouteGroup (Session& s, const string &n, Flag f)
-	: _session (s), _name (n), _flags (f), _properties (Property (0))
+RouteGroup::RouteGroup (Session& s, const string &n, Flag f, Property p)
+	: _session (s), _name (n), _flags (f), _properties (Property (p))
 {
 }
 

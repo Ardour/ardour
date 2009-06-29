@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2009 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <gtkmm/menu.h>
 #include <gtkmm/stock.h>
 #include "ardour/session.h"
@@ -9,8 +28,9 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-RouteGroupMenu::RouteGroupMenu (Session& s)
-	: _session (s)
+RouteGroupMenu::RouteGroupMenu (Session& s, RouteGroup::Property p)
+	: _session (s),
+	  _default_properties (p)
 {
 	rebuild (0);
 }
@@ -57,7 +77,7 @@ RouteGroupMenu::set_group (RouteGroup* g)
 void
 RouteGroupMenu::new_group ()
 {
-	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
+	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active, _default_properties);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();

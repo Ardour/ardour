@@ -1112,7 +1112,7 @@ Mixer_UI::route_groups_changed ()
 void
 Mixer_UI::new_route_group ()
 {
-	session->add_route_group (new RouteGroup (*session, ""));
+	session->add_route_group (new RouteGroup (*session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Gain |RouteGroup::Mute | RouteGroup::Solo)));
 }
 
 void

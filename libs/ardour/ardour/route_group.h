@@ -52,7 +52,7 @@ public:
 		Edit = 0x20
 	};
 	
-	RouteGroup (Session& s, const std::string &n, Flag f = Flag(0));
+	RouteGroup (Session& s, const std::string &n, Flag f = Flag(0), Property p = Property(0));
 	
 	const std::string& name() { return _name; }
 	void set_name (std::string str);

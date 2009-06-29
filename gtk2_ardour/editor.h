@@ -1600,7 +1600,8 @@ public:
 	void redisplay_tempo (bool immediate_redraw);
 	
 	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
-	
+	void snap_to (nframes64_t& first, nframes64_t& last, int32_t direction = 0, bool for_mark = false);
+
 	double snap_length_beats (nframes64_t start);
 
 	uint32_t bbt_beat_subdivision;
@@ -1844,17 +1845,32 @@ public:
 	/* edit group management */
 
         struct GroupListModelColumns : public Gtk::TreeModel::ColumnRecord {
+
                 GroupListModelColumns () {
-		       add (is_visible);
-                       add (text);
-		       add (routegroup);
+			add (is_visible);
+			add (gain);
+			add (record);
+			add (mute);
+			add (solo);
+			add (select);
+			add (edits);
+			add (text);
+			add (routegroup);
                 }
+
 	        Gtk::TreeModelColumn<bool> is_visible;
+		Gtk::TreeModelColumn<bool> gain;
+		Gtk::TreeModelColumn<bool> record;
+		Gtk::TreeModelColumn<bool> mute;
+		Gtk::TreeModelColumn<bool> solo;
+		Gtk::TreeModelColumn<bool> select;
+		Gtk::TreeModelColumn<bool> edits;
 	        Gtk::TreeModelColumn<std::string> text;
-	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*>   routegroup;
+	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*> routegroup;
 	};
 
 	GroupListModelColumns group_columns;
+
 	Glib::RefPtr<Gtk::ListStore> group_model;
 	Glib::RefPtr<Gtk::TreeSelection> group_selection;
 

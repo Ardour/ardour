@@ -106,7 +106,7 @@ Editor::set_route_group_activation (RouteGroup* g, bool a)
 void
 Editor::new_route_group ()
 {
-	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit));
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
@@ -121,7 +121,7 @@ Editor::new_route_group ()
 void
 Editor::new_route_group_from_selection ()
 {
-	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit | RouteGroup::Select));
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
@@ -144,7 +144,7 @@ Editor::new_route_group_from_selection ()
 void
 Editor::new_route_group_from_rec_enabled ()
 {
-	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit | RouteGroup::RecEnable));
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
@@ -167,7 +167,7 @@ Editor::new_route_group_from_rec_enabled ()
 void
 Editor::new_route_group_from_soloed ()
 {
-	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active);
+	RouteGroup* g = new RouteGroup (*session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit));
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
@@ -273,6 +273,72 @@ Editor::route_group_list_button_press_event (GdkEventButton* ev)
 
 	case 1:
 		if ((iter = group_model->get_iter (path))) {
+			bool gain = (*iter)[group_columns.gain];
+			(*iter)[group_columns.gain] = !gain;
+#ifdef GTKOSX
+			route_group_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+
+	case 2:
+		if ((iter = group_model->get_iter (path))) {
+			bool record = (*iter)[group_columns.record];
+			(*iter)[group_columns.record] = !record;
+#ifdef GTKOSX
+			route_group_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+
+	case 3:
+		if ((iter = group_model->get_iter (path))) {
+			bool mute = (*iter)[group_columns.mute];
+			(*iter)[group_columns.mute] = !mute;
+#ifdef GTKOSX
+			route_group_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+
+	case 4:
+		if ((iter = group_model->get_iter (path))) {
+			bool solo = (*iter)[group_columns.solo];
+			(*iter)[group_columns.solo] = !solo;
+#ifdef GTKOSX
+			route_group_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+
+	case 5:
+		if ((iter = group_model->get_iter (path))) {
+			bool select = (*iter)[group_columns.select];
+			(*iter)[group_columns.select] = !select;
+#ifdef GTKOSX
+			route_group_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+
+	case 6:
+		if ((iter = group_model->get_iter (path))) {
+			bool edits = (*iter)[group_columns.edits];
+			(*iter)[group_columns.edits] = !edits;
+#ifdef GTKOSX
+			route_group_display.queue_draw();
+#endif
+			return true;
+		}
+		break;
+
+	case 7:
+		if ((iter = group_model->get_iter (path))) {
 			bool visible = (*iter)[group_columns.is_visible];
 			(*iter)[group_columns.is_visible] = !visible;
 #ifdef GTKOSX
@@ -316,6 +382,90 @@ Editor::route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::Tree
 		}
 	}
 
+	if ((*iter)[group_columns.gain]) {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Gain, true);
+			}
+		}
+	} else {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Gain, false);
+			}
+		}
+	}
+
+	if ((*iter)[group_columns.record]) {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::RecEnable, true);
+			}
+		}
+	} else {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::RecEnable, false);
+			}
+		}
+	}
+
+	if ((*iter)[group_columns.mute]) {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Mute, true);
+			}
+		}
+	} else {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Mute, false);
+			}
+		}
+	}
+
+	if ((*iter)[group_columns.solo]) {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Solo, true);
+			}
+		}
+	} else {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Solo, false);
+			}
+		}
+	}
+
+	if ((*iter)[group_columns.select]) {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Select, true);
+			}
+		}
+	} else {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Select, false);
+			}
+		}
+	}
+
+	if ((*iter)[group_columns.edits]) {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Edit, true);
+			}
+		}
+	} else {
+		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
+			if ((*j)->route_group() == group) {
+				group->set_property (RouteGroup::Edit, false);
+			}
+		}
+	}
+
 	string name = (*iter)[group_columns.text];
 
 	if (name != group->name()) {
@@ -330,7 +480,14 @@ Editor::add_route_group (RouteGroup* group)
 	bool focus = false;
 
 	TreeModel::Row row = *(group_model->append());
+	
 	row[group_columns.is_visible] = !group->is_hidden();
+	row[group_columns.gain] = group->property(RouteGroup::Gain);
+	row[group_columns.record] = group->property(RouteGroup::RecEnable);
+	row[group_columns.mute] = group->property(RouteGroup::Mute);
+	row[group_columns.solo] = group->property(RouteGroup::Solo);
+	row[group_columns.select] = group->property(RouteGroup::Select);
+	row[group_columns.edits] = group->property(RouteGroup::Edit);
 
 	in_route_group_row_change = true;
 
@@ -345,7 +502,7 @@ Editor::add_route_group (RouteGroup* group)
 
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Editor::group_flags_changed), group));
 
-	if (focus) {
+	if (focus) {  
 		TreeViewColumn* col = route_group_display.get_column (0);
 		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(route_group_display.get_column_cell_renderer (0));
 		route_group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
@@ -384,10 +541,17 @@ Editor::group_flags_changed (void* src, RouteGroup* group)
 	in_route_group_row_change = true;
 
         Gtk::TreeModel::Children children = group_model->children();
+
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		if (group == (*iter)[group_columns.routegroup]) {
 			(*iter)[group_columns.is_visible] = !group->is_hidden();
 			(*iter)[group_columns.text] = group->name();
+			(*iter)[group_columns.gain] = group->property(RouteGroup::Gain);
+			(*iter)[group_columns.record] = group->property(RouteGroup::RecEnable);
+			(*iter)[group_columns.mute] = group->property(RouteGroup::Mute);
+			(*iter)[group_columns.solo] = group->property(RouteGroup::Solo);
+			(*iter)[group_columns.select] = group->property(RouteGroup::Select);
+			(*iter)[group_columns.edits] = group->property(RouteGroup::Edit);
 		}
 	}
 
