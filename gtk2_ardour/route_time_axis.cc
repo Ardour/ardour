@@ -75,7 +75,7 @@
 #include "simplerect.h"
 #include "streamview.h"
 #include "utils.h"
-#include "route_group_dialog.h"
+#include "route_group_menu.h"
 
 #include "ardour/track.h"
 
@@ -253,6 +253,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	_editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	ColorsChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
 
+	route_group_menu = new RouteGroupMenu (_session);
+	route_group_menu->GroupSelected.connect (mem_fun (*this, &RouteTimeAxisView::set_route_group_from_menu));
+
 	gm.get_gain_slider().signal_scroll_event().connect(mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 	gm.get_gain_slider().set_name ("TrackGainFader");
 }
@@ -279,6 +282,8 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 	}
 	
 	_automation_tracks.clear ();
+
+	delete route_group_menu;
 }
 
 void
@@ -315,43 +320,12 @@ RouteTimeAxisView::edit_click (GdkEventButton *ev)
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 	        _route->set_route_group (0, this);
 		return FALSE;
-	} 
-
-	using namespace Menu_Helpers;
-
-	MenuList& items = route_group_menu.items ();
-	RadioMenuItem::Group group;
-
-	items.clear ();
-
-	items.push_back (MenuElem (_("New group..."), mem_fun (*this, &RouteTimeAxisView::set_route_group_to_new)));
-
-	items.push_back (SeparatorElem ());
-	
-	items.push_back (RadioMenuElem (group, _("No group"), 
-					bind (mem_fun(*this, &RouteTimeAxisView::set_route_group_from_menu), (RouteGroup *) 0)));
-	
-	if (_route->route_group() == 0) {
-		static_cast<RadioMenuItem*>(&items.back())->set_active ();
 	}
 
-	_session.foreach_route_group (bind (mem_fun (*this, &RouteTimeAxisView::add_route_group_menu_item), &group));
-	route_group_menu.popup (ev->button, ev->time);
+	route_group_menu->rebuild (_route->route_group ());
+	route_group_menu->popup (ev->button, ev->time);
 
 	return FALSE;
-}
-
-void
-RouteTimeAxisView::add_route_group_menu_item (RouteGroup *eg, RadioMenuItem::Group* group)
-{
-	using namespace Menu_Helpers;
-
-	MenuList &items = route_group_menu.items();
-
-	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &RouteTimeAxisView::set_route_group_from_menu), eg)));
-	if (_route->route_group() == eg) {
-		static_cast<RadioMenuItem*>(&items.back())->set_active ();
-	}
 }
 
 void
@@ -2422,18 +2396,3 @@ RouteTimeAxisView::set_button_names ()
 	mute_button_label.set_text (_("m"));
 }
 
-void
-RouteTimeAxisView::set_route_group_to_new ()
-{
-	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
-
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
-
-	if (r == Gtk::RESPONSE_OK) {
-		_session.add_route_group (g);
-		_route->set_route_group (g, this);
-	} else {
-		delete g;
-	}
-}

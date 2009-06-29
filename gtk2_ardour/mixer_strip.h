@@ -53,9 +53,6 @@
 #include "processor_box.h"
 #include "ardour_dialog.h"
 
-class MotionController;
-
-
 namespace Gtkmm2ext {
 	class SliderController;
 }
@@ -76,6 +73,8 @@ namespace Gtk {
 
 class Mixer_UI;
 class IOSelectorWindow;
+class MotionController;
+class RouteGroupMenu;
 
 class MixerStrip : public RouteUI, public Gtk::EventBox
 {
@@ -176,7 +175,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	Gtk::Button   group_button;
 	Gtk::Label    group_label;
-	Gtk::Menu    *group_menu;
+	RouteGroupMenu *group_menu;
 
 	gint input_press (GdkEventButton *);
 	gint output_press (GdkEventButton *);
@@ -226,7 +225,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	bool ignore_comment_edit;
 
 	void set_route_group (ARDOUR::RouteGroup *);
-	void add_route_group_to_menu (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
 	bool select_route_group (GdkEventButton *);
 	void route_group_changed (void *);
 
@@ -255,8 +253,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void switch_io (boost::shared_ptr<ARDOUR::Route>);
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 	void revert_to_default_display ();
-
-	void set_route_group_to_new ();
 
 	static int scrollbar_height;
 };

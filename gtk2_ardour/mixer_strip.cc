@@ -58,7 +58,7 @@
 #include "io_selector.h"
 #include "utils.h"
 #include "gui_thread.h"
-#include "route_group_dialog.h"
+#include "route_group_menu.h"
 
 #include "i18n.h"
 
@@ -1060,50 +1060,19 @@ MixerStrip::set_route_group (RouteGroup *rg)
 	_route->set_route_group (rg, this);
 }
 
-void
-MixerStrip::add_route_group_to_menu (RouteGroup *rg, RadioMenuItem::Group* group)
-{
-	using namespace Menu_Helpers;
-
-	MenuList& items = group_menu->items();
-
-	items.push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &MixerStrip::set_route_group), rg)));
-
-	if (_route->route_group() == rg) {
-		static_cast<RadioMenuItem*>(&items.back())->set_active ();
-	}
-}
-
 bool
 MixerStrip::select_route_group (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
 
-	if (group_menu == 0) {
-	        group_menu = new Menu;
-	} 
-	group_menu->set_name ("ArdourContextMenu");
-	MenuList& items = group_menu->items();
-	RadioMenuItem::Group group;
+	if (ev->button == 1) {
 
-	switch (ev->button) {
-	case 1:
-
-		items.clear ();
-		
-		items.push_back (MenuElem (_("New group..."), mem_fun (*this, &MixerStrip::set_route_group_to_new)));
-		
-		items.push_back (SeparatorElem ());
-		
-		items.push_back (RadioMenuElem (group, _("No group"), bind (mem_fun(*this, &MixerStrip::set_route_group), (RouteGroup *) 0)));
-
-		_session.foreach_route_group (bind (mem_fun (*this, &MixerStrip::add_route_group_to_menu), &group));
+		if (group_menu == 0) {
+			group_menu = new RouteGroupMenu (_session);
+			group_menu->GroupSelected.connect (mem_fun (*this, &MixerStrip::set_route_group));
+		}
 
 		group_menu->popup (1, ev->time);
-		break;
-
-	default:
-		break;
 	}
 	
 	return true;
@@ -1516,21 +1485,3 @@ MixerStrip::set_button_names ()
 		
 	}
 }
-
-void
-MixerStrip::set_route_group_to_new ()
-{
-	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
-	g->set_active (true, this);
-
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
-
-	if (r == Gtk::RESPONSE_OK) {
-		_session.add_route_group (g);
-		_route->set_route_group (g, this);
-	} else {
-		delete g;
-	}
-}
-

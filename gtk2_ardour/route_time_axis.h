@@ -45,7 +45,6 @@
 #include "canvas.h"
 #include "gain_meter.h"
 
-
 namespace ARDOUR {
 	class Session;
 	class Region;
@@ -67,6 +66,7 @@ class AutomationTimeAxisView;
 class AutomationLine;
 class ProcessorAutomationLine;
 class TimeSelection;
+class RouteGroupMenu;
 
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
@@ -223,9 +223,7 @@ protected:
 
 	virtual void label_view ();
 	
-	void add_route_group_menu_item (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
 	void set_route_group_from_menu (ARDOUR::RouteGroup *);
-	void set_route_group_to_new ();
 
 	void reset_samples_per_unit ();
 
@@ -281,7 +279,7 @@ protected:
 	
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
-	Gtk::Menu           route_group_menu;
+	RouteGroupMenu*     route_group_menu;
 	Gtk::RadioMenuItem* align_existing_item;
 	Gtk::RadioMenuItem* align_capture_item;
 	Gtk::RadioMenuItem* normal_track_mode_item;
