@@ -39,11 +39,11 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
+#include "ardour/route.h"
 
 #include "pbd/fastlog.h"
 
 #include "plugin_interest.h"
-#include "route_ui.h"
 #include "io_selector.h"
 #include "send_ui.h"
 #include "enums.h"
