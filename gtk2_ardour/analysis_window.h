@@ -37,11 +37,12 @@
 
 #include <glibmm/thread.h>
 
-
-#include "ardour_dialog.h"
 #include "fft_graph.h"
 #include "fft_result.h"
 
+namespace ARDOUR {
+	class Session;
+}
 
 class AnalysisWindow : public Gtk::Window
 {

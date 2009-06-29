@@ -15,6 +15,7 @@
 #include "audio_region_view.h"
 #include "public_editor.h"
 #include "utils.h"
+#include "time_axis_view.h"
 
 #include "i18n.h"
 

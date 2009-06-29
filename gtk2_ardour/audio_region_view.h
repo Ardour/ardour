@@ -27,8 +27,6 @@
 #include "ardour/audioregion.h"
 
 #include "region_view.h"
-#include "route_time_axis.h"
-
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
@@ -45,6 +43,7 @@ class AudioRegionGainLine;
 class AudioRegionEditor;
 class GhostRegion;
 class AutomationTimeAxisView;
+class RouteTimeAxisView;
 
 class AudioRegionView : public RegionView
 {
