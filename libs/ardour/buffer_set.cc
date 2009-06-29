@@ -229,17 +229,19 @@ BufferSet::read_from (BufferSet& in, nframes_t nframes)
 void
 BufferSet::merge_from (BufferSet& in, nframes_t nframes)
 {
-	assert(available() >= in.count());
+	/* merge all input buffers into out existing buffers.
 
-	/* merge all input buffers into out existing buffers */
+	   NOTE: if "in" contains more buffers than this set,
+	   we will drop the extra buffers.
+
+	*/
+
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		BufferSet::iterator o = begin(*t);
-		for (BufferSet::iterator i = in.begin(*t); i != in.end(*t); ++i, ++o) {
+		for (BufferSet::iterator i = in.begin(*t); i != in.end(*t) && o != end (*t); ++i, ++o) {
 			o->merge_from (*i, nframes);
 		}
 	}
-
-	set_count (in.count());
 }
 
 void

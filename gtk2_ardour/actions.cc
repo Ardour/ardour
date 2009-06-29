@@ -364,6 +364,7 @@ void
 ActionManager::toggle_config_state (const char* group, const char* action, bool (RCConfiguration::*set)(bool), bool (RCConfiguration::*get)(void) const)
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		
@@ -381,12 +382,15 @@ void
 ActionManager::toggle_config_state_foo (const char* group, const char* action, sigc::slot<bool, bool> set, sigc::slot<bool> get)
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
+
+		if (tact) {
 			bool const x = get ();
+
 			if (x != tact->get_active ()) {
-				set (x);
+				set (!x);
 			}
 		}
 	}

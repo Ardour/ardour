@@ -4799,6 +4799,7 @@ Editor::post_zoom ()
 		playhead_cursor->set_position (playhead_cursor->current_frame);
 	}
 
+	refresh_location_display();
 	_summary->set_overlays_dirty ();
 
 	instant_save ();
