@@ -30,12 +30,17 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/button.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/treemodel.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
 #include "ardour/session.h"
 
-class AddRouteDialog : public Gtk::Dialog
+#include "ardour_dialog.h"
+
+class Editor;
+
+class AddRouteDialog : public ArdourDialog
 {
   public:
 	AddRouteDialog (ARDOUR::Session &);
@@ -55,14 +60,13 @@ class AddRouteDialog : public Gtk::Dialog
   private:
 	ARDOUR::Session& _session;
 	Gtk::Entry name_template_entry;
-	Gtk::RadioButton track_button;
-	Gtk::RadioButton bus_button;
+	Gtk::ComboBoxText track_bus_combo;
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
+	Gtk::Label track_mode_label;
 	Gtk::ComboBoxText track_mode_combo;
 	Gtk::ComboBoxText route_group_combo;
-	Gtk::Button new_route_group_button;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 	
@@ -70,7 +74,9 @@ class AddRouteDialog : public Gtk::Dialog
 	void refill_channel_setups ();
 	void refill_route_groups ();
 	void add_route_group (ARDOUR::RouteGroup *);
-	void new_route_group ();
+	void group_changed ();
+	bool channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
+	bool route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
 
 	void reset_template_option_visibility ();
 	

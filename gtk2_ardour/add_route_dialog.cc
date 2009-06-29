@@ -24,6 +24,7 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/table.h>
+#include <gtkmm2ext/window_title.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
@@ -53,13 +54,11 @@ static const char* track_mode_names[] = {
 };
 
 AddRouteDialog::AddRouteDialog (Session & s)
-	: Dialog (_("ardour: add track/bus")),
-	  _session (s),
-	  track_button (_("Tracks")),
-	  bus_button (_("Busses")),
-	  routes_adjustment (1, 1, 128, 1, 4),
-	  routes_spinner (routes_adjustment),
-	  new_route_group_button (_("New..."))
+	: ArdourDialog (X_("add route dialog"))
+	, _session (s)
+	, routes_adjustment (1, 1, 128, 1, 4)
+	, routes_spinner (routes_adjustment)
+	, track_mode_label (_("Track mode:"))
 {
 	if (track_mode_strings.empty()) {
 		track_mode_strings = I18N (track_mode_names);
@@ -74,14 +73,19 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	}
 	
 	set_name ("AddRouteDialog");
-	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
 	set_position (Gtk::WIN_POS_MOUSE);
+	set_modal (true);
+	set_skip_taskbar_hint (true);
 	set_resizable (false);
 
-	name_template_entry.set_name ("AddRouteDialogNameTemplateEntry");
-	track_button.set_name ("AddRouteDialogRadioButton");
-	bus_button.set_name ("AddRouteDialogRadioButton");
-	routes_spinner.set_name ("AddRouteDialogSpinner");
+	WindowTitle title(Glib::get_application_name());
+	title += _("Add Route");
+	set_title(title.get_string());
+
+	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
+	routes_spinner.set_name (X_("AddRouteDialogSpinner"));
+	channel_combo.set_name (X_("ChannelCountSelector"));
+	track_mode_combo.set_name (X_("ChannelCountSelector"));
 
 	refill_channel_setups ();
 	refill_route_groups ();
@@ -90,58 +94,77 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	channel_combo.set_active_text (channel_combo_strings.front());
 	track_mode_combo.set_active_text (track_mode_strings.front());
 
-	RadioButton::Group g = track_button.get_group();
-	bus_button.set_group (g);
-	track_button.set_active (true);
+	track_bus_combo.append_text (_("tracks"));
+	track_bus_combo.append_text (_("busses"));
+	track_bus_combo.set_active (0);
 
-	Table* table = manage (new Table (5, 3));
-	table->set_spacings (4);
+	VBox* vbox = manage (new VBox);
+	Gtk::Label* l;
 
-	/* add */
+	get_vbox()->set_spacing (4);
 
-	Label* l = manage (new Label (_("Add this many:")));
-	l->set_alignment (1, 0.5);
-	table->attach (*l, 0, 1, 0, 1);
-	table->attach (routes_spinner, 1, 2, 0, 1, FILL | EXPAND);
+	vbox->set_spacing (18);
+	vbox->set_border_width (5);
 
-	/* track/bus choice & modes */
+	HBox *type_hbox = manage (new HBox);
+	type_hbox->set_spacing (6);
+	
+	/* track/bus choice */
 
-	HBox* hbox = manage (new HBox);
-	hbox->set_spacing (6);
-	hbox->pack_start (track_button, PACK_EXPAND_PADDING);
-	hbox->pack_start (bus_button, PACK_EXPAND_PADDING);
-	table->attach (*hbox, 0, 3, 1, 2);
+	type_hbox->pack_start (*manage (new Label (_("Add:"))));
+	type_hbox->pack_start (routes_spinner);
+	type_hbox->pack_start (track_bus_combo);
+	
+	vbox->pack_start (*type_hbox, false, true);
 
-	channel_combo.set_name (X_("ChannelCountSelector"));
-	track_mode_combo.set_name (X_("ChannelCountSelector"));
+	VBox* options_box = manage (new VBox);
+	Table *table2 = manage (new Table (3, 3, false));
 
-	track_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
-	bus_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
-	new_route_group_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::new_route_group));
+	options_box->set_spacing (6);
+	table2->set_row_spacings (6);
+	table2->set_col_spacing	(1, 6);
 
-	l = manage (new Label (_("Channel configuration:")));
-	l->set_alignment (1, 0.5);
-	table->attach (*l, 0, 1, 2, 3);
-	table->attach (channel_combo, 1, 2, 2, 3, FILL | EXPAND);
+	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l->set_use_markup ();
+	options_box->pack_start (*l, false, true);
+
+	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l->set_padding (8, 0);
+	table2->attach (*l, 0, 1, 0, 3, Gtk::FILL, Gtk::FILL, 0, 0);
+
+	/* Route configuration */
+
+	l = manage (new Label (_("Configuration:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	table2->attach (*l, 1, 2, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (channel_combo, 2, 3, 0, 1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 
 	if (!ARDOUR::Profile->get_sae ()) {
-		l = manage (new Label (_("Track mode:")));
-		l->set_alignment (1, 0.5);
-		table->attach (*l, 0, 1, 3, 4);
-		table->attach (track_mode_combo, 1, 2, 3, 4, FILL | EXPAND);
-	}
-	
-	l = manage (new Label (_("Add to edit group:")));
-	l->set_alignment (1, 0.5);
-	table->attach (*l, 0, 1, 4, 5);
-	table->attach (route_group_combo, 1, 2, 4, 5, FILL | EXPAND);
-	table->attach (new_route_group_button, 2, 3, 4, 5);
-		
-	get_vbox()->pack_start (*table);
 
-	get_vbox()->set_spacing (6);
-	get_vbox()->set_border_width (6);
-	get_vbox()->show_all ();
+		/* Track mode */
+
+		track_mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+		table2->attach (track_mode_label, 1, 2, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table2->attach (track_mode_combo, 2, 3, 1, 2, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+
+	}
+
+	/* Group choise */
+
+	l = manage (new Label (_("Group:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	table2->attach (*l, 1, 2, 2, 3, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (route_group_combo, 2, 3, 2, 3, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+	
+	options_box->pack_start (*table2, false, true);
+	vbox->pack_start (*options_box, false, true);
+
+	get_vbox()->pack_start (*vbox, false, false);
+
+	track_bus_combo.signal_changed().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
+	channel_combo.set_row_separator_func (mem_fun (*this, &AddRouteDialog::channel_separator));
+	route_group_combo.set_row_separator_func (mem_fun (*this, &AddRouteDialog::route_separator));
+	route_group_combo.signal_changed ().connect (mem_fun (*this, &AddRouteDialog::group_changed));
+
+	show_all_children ();
 
 	/* track template info will be managed whenever
 	   this dialog is shown, via ::on_show()
@@ -160,17 +183,14 @@ AddRouteDialog::~AddRouteDialog ()
 void
 AddRouteDialog::track_type_chosen ()
 {
-	if (track_button.get_active()) {
-		track_mode_combo.set_sensitive (true);
-	} else {
-		track_mode_combo.set_sensitive (false);
-	}
+	track_mode_label.set_sensitive (track ());
+	track_mode_combo.set_sensitive (track ());
 }
 
 bool
 AddRouteDialog::track ()
 {
-	return track_button.get_active ();
+	return track_bus_combo.get_active_row_number () == 0;
 }
 
 ARDOUR::DataType
@@ -179,10 +199,11 @@ AddRouteDialog::type ()
 	// FIXME: ew
 	
 	const string str = channel_combo.get_active_text();
-	if (str == _("MIDI"))
+	if (str == _("MIDI")) {
 		return ARDOUR::DataType::MIDI;
-	else
+	} else {
 		return ARDOUR::DataType::AUDIO;
+	}
 }
 
 string
@@ -270,6 +291,9 @@ AddRouteDialog::refill_channel_setups ()
 	chn.channels = 0;
 	channel_setups.push_back (chn);
 
+	chn.name = "separator";
+	channel_setups.push_back (chn);
+
 	chn.name = _("Mono");
 	chn.channels = 1;
 	channel_setups.push_back (chn);
@@ -331,13 +355,13 @@ AddRouteDialog::refill_channel_setups ()
 void
 AddRouteDialog::add_route_group (RouteGroup* g)
 {
-	route_group_combo.append_text (g->name ());
+	route_group_combo.insert_text (3, g->name ());
 }
 
 RouteGroup*
 AddRouteDialog::route_group ()
 {
-	if (route_group_combo.get_active_row_number () == 0) {
+	if (route_group_combo.get_active_row_number () == 2) {
 		return 0;
 	}
 
@@ -348,24 +372,51 @@ void
 AddRouteDialog::refill_route_groups ()
 {
 	route_group_combo.clear ();
-	route_group_combo.append_text (_("No group"));
-	_session.foreach_route_group (mem_fun (*this, &AddRouteDialog::add_route_group));
-	route_group_combo.set_active (0);
-}
-	
-void
-AddRouteDialog::new_route_group ()
-{
-	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
-	
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
+	route_group_combo.append_text (_("New group..."));
 
-	if (r == Gtk::RESPONSE_OK) {
-		_session.add_route_group (g);
-		add_route_group (g);
-		route_group_combo.set_active (route_group_combo.get_model()->children().size() - 1);
-	} else {
-		delete g;
+	route_group_combo.append_text ("separator");
+
+	route_group_combo.append_text (_("No group"));
+
+	_session.foreach_route_group (mem_fun (*this, &AddRouteDialog::add_route_group));
+	
+	route_group_combo.set_active (2);
+}
+
+void
+AddRouteDialog::group_changed ()
+{
+	if (route_group_combo.get_active_text () == _("New group...")) {
+		RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
+	
+		RouteGroupDialog d (g, Gtk::Stock::NEW);
+		int const r = d.do_run ();
+
+		if (r == Gtk::RESPONSE_OK) {
+			_session.add_route_group (g);
+			add_route_group (g);
+			route_group_combo.set_active (3);
+		} else {
+			delete g;
+
+			route_group_combo.set_active (0);
+		}
 	}
 }
+
+bool
+AddRouteDialog::channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i)
+{
+	channel_combo.set_active (i);
+
+	return channel_combo.get_active_text () == "separator";
+}
+
+bool
+AddRouteDialog::route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i)
+{
+	route_group_combo.set_active (i);
+
+	return route_group_combo.get_active_text () == "separator";
+}
+
