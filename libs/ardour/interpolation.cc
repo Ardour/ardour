@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <cstdio>
 
 #include "ardour/interpolation.h"
 
