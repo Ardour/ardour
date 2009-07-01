@@ -27,6 +27,9 @@ class TimeAxisView;
 class TrackSelection : public std::list<TimeAxisView*>
 {
 public:
+	TrackSelection () {}
+		
+	TrackSelection (std::list<TimeAxisView*> const &);
 	std::list<TimeAxisView*> add (std::list<TimeAxisView*> const &);
 	bool contains (TimeAxisView const *) const;
 };

@@ -31,6 +31,7 @@
 #include "selection.h"
 #include "audio_time_axis.h"
 #include "actions.h"
+#include "editor_route_list.h"
 
 #include "i18n.h"
 
@@ -363,22 +364,20 @@ Editor::session_going_away ()
 
 	/* hide all tracks */
 
-	hide_all_tracks (false);
+	_route_list->hide_all_tracks (false);
 
 	/* rip everything out of the list displays */
 
 	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
-	route_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	_route_list->clear ();
 	named_selection_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	route_group_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 
 	region_list_model->clear ();
-	route_display_model->clear ();
 	named_selection_model->clear ();
 	group_model->clear ();
 
 	region_list_display.set_model (region_list_model);
-	route_list_display.set_model (route_display_model);
 	named_selection_display.set_model (named_selection_model);
 	route_group_display.set_model (group_model);
 

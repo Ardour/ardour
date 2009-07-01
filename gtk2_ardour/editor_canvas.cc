@@ -42,6 +42,7 @@
 #include "editor_drag.h"
 #include "region_view.h"
 #include "editor_group_tabs.h"
+#include "editor_route_list.h"
 
 #include "i18n.h"
 
@@ -373,20 +374,15 @@ Editor::track_canvas_size_allocated ()
 void
 Editor::controls_layout_size_request (Requisition* req)
 {
-	TreeModel::Children rows = route_display_model->children();
-	TreeModel::Children::iterator i;
-	double pos;
-	bool changed = false;
-
-	for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
-		TimeAxisView *tv = (*i)[route_display_columns.tv];
-		if (tv != 0) {
-			pos += tv->effective_height ();
-			tv->clip_to_viewport ();
-		}
+	double pos = 0;
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		pos += (*i)->effective_height ();
+		(*i)->clip_to_viewport ();
 	}
 
 	gint height = min ((gint) pos, (gint) (physical_screen_height - 600));
+	
+	bool changed = false;
 
 	gint w = edit_controls_vbox.get_width();
 	if (_group_tabs->is_mapped()) {

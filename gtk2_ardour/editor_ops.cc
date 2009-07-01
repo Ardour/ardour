@@ -77,6 +77,7 @@
 #include "utils.h"
 #include "editor_drag.h"
 #include "strip_silence_dialog.h"
+#include "editor_route_list.h"
 
 #include "i18n.h"
 
@@ -1743,8 +1744,8 @@ Editor::temporal_zoom_region (bool both_axes)
 		}
 		
 		/* hide irrelevant tracks */
-		
-		no_route_list_redisplay = true;
+
+		_route_list->suspend_redisplay ();
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
@@ -1752,8 +1753,7 @@ Editor::temporal_zoom_region (bool both_axes)
 			}
 		}
 
-		no_route_list_redisplay = false;
-		redisplay_route_list ();
+		_route_list->resume_redisplay ();
 
 		vertical_adjustment.set_value (0.0);
 		no_save_visual = false;

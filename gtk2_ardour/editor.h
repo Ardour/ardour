@@ -116,6 +116,7 @@ class TimeFXDialog;
 class TimeSelection;
 class TrackSelection;
 class EditorGroupTabs;
+class EditorRouteList;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -307,7 +308,6 @@ class Editor : public PublicEditor
 	/* stuff that AudioTimeAxisView and related classes use */
 
 	PlaylistSelector& playlist_selector() const;
-	void route_name_changed (TimeAxisView *);
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
 	void new_playlists (TimeAxisView* v);
@@ -324,7 +324,6 @@ class Editor : public PublicEditor
 	void show_editor_list (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
 	void hide_track_in_display (TimeAxisView& tv, bool temporary = false);
-	void show_track_in_display (TimeAxisView& tv);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
@@ -374,8 +373,6 @@ class Editor : public PublicEditor
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
 
-	void move_selected_tracks (bool up);
-
 	bool new_regionviews_display_gain () { return _new_regionviews_show_envelope; }
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
@@ -401,8 +398,6 @@ class Editor : public PublicEditor
 
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
-
-	void update_rec_display ();
 
   protected:
 	void map_transport_state ();
@@ -1394,10 +1389,7 @@ class Editor : public PublicEditor
 	/// Snap threshold in pixels
 	double snap_threshold;
 
-	void handle_gui_changes (const std::string &, void *);
 	bool ignore_gui_changes;
-
-	void    hide_all_tracks (bool with_select);
 
 	Drag* _drag;
 
@@ -1768,79 +1760,16 @@ public:
 
 	ArdourCanvas::SimpleRect   *zoom_rect;
 	void reposition_zoom_rect (nframes64_t start, nframes64_t end);
+
+	EditorRouteList* _route_list;
 	
 	/* diskstream/route display management */
 	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;
 	Glib::RefPtr<Gdk::Pixbuf> rec_disabled_icon;
 
-	struct RouteDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    RouteDisplayModelColumns() { 
-		    add (text);
-		    add (visible);
-		    add (rec_enabled);
-		    add (temporary_visible);
-		    add (is_track);
-		    add (tv);
-		    add (route);
-	    }
-	    Gtk::TreeModelColumn<Glib::ustring>  text;
-	    Gtk::TreeModelColumn<bool>           visible;
-	    Gtk::TreeModelColumn<bool>           rec_enabled;
-	    Gtk::TreeModelColumn<bool>           temporary_visible;
-	    Gtk::TreeModelColumn<bool>           is_track;
-	    Gtk::TreeModelColumn<TimeAxisView*>  tv;
-	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
-	};
-
-	void on_tv_rec_enable_toggled(const Glib::ustring& path_string);
-
-	RouteDisplayModelColumns         route_display_columns;
-	Glib::RefPtr<Gtk::ListStore>     route_display_model;
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > route_list_display; 
-	Gtk::ScrolledWindow                   route_list_scroller;
-	Gtk::Menu*                            route_list_menu;
-
-	void update_route_visibility ();
-
-	void sync_order_keys (const char*);
-	bool route_redisplay_does_not_sync_order_keys;
-	bool route_redisplay_does_not_reset_order_keys;
-
-	bool route_list_display_button_press (GdkEventButton*);
-	void route_list_display_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,
-						     gint                x,
-						     gint                y,
-						     const Gtk::SelectionData& data,
-						     guint               info,
-						     guint               time);
-
-	bool route_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
-
-	void route_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
-	void route_list_delete (const Gtk::TreeModel::Path&);
-	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
-
-	void initial_route_list_display ();
-	void redisplay_route_list();
-	void route_list_reordered (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* what);
-	bool ignore_route_list_reorder;
-	bool no_route_list_redisplay;
 	bool sync_track_view_list_and_route_list ();
-
-	void build_route_list_menu ();
-	void show_route_list_menu ();
-
-	void show_all_routes ();
-	void hide_all_routes ();
-	void show_all_audiotracks ();
-	void hide_all_audiotracks ();
-	void show_all_audiobus ();
-	void hide_all_audiobus ();
-
-	void set_all_tracks_visibility (bool yn);
-	void set_all_audio_visibility (int type, bool yn);
 
 	/* edit group management */
 
@@ -2297,6 +2226,8 @@ public:
 
 	friend class EditorSummary;
 	friend class EditorGroupTabs;
+
+	friend class EditorRouteList;
 };
 
 #endif /* __ardour_editor_h__ */

@@ -195,7 +195,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 		connections.push_back (t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed)));
-		connections.push_back (t->diskstream()->RecordEnableChanged.connect (mem_fun (PublicEditor::instance(), &PublicEditor::update_rec_display)));
 		connections.push_back (_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed)));
 
 		rec_enable_button->show();

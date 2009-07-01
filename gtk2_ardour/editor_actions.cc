@@ -30,6 +30,7 @@
 #include "i18n.h"
 #include "audio_time_axis.h"
 #include "editor_group_tabs.h"
+#include "editor_route_list.h"
 
 using namespace Gtk;
 using namespace Glib;
@@ -312,9 +313,9 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "toggle-zoom", _("Toggle Zoom State"), mem_fun(*this, &Editor::swap_visual_state));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), bind (mem_fun(*this, &Editor::move_selected_tracks), true));
+	act = ActionManager::register_action (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), bind (mem_fun(*_route_list, &EditorRouteList::move_selected_tracks), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), bind (mem_fun(*this, &Editor::move_selected_tracks), false));
+	act = ActionManager::register_action (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), bind (mem_fun(*_route_list, &EditorRouteList::move_selected_tracks), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), mem_fun(*this, &Editor::scroll_tracks_up));

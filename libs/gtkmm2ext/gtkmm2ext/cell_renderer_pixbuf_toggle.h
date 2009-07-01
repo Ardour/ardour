@@ -23,6 +23,7 @@
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/widget.h>
+#include <gtkmm/cellrenderer.h>
 #include <gdkmm.h>
 
 using namespace Gtk;

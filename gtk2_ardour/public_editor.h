@@ -218,7 +218,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
 	virtual gdouble   get_current_zoom () const = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
-	virtual void route_name_changed (TimeAxisView *) = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void new_playlists (TimeAxisView*) = 0;
 	virtual void copy_playlists (TimeAxisView*) = 0;
@@ -227,7 +226,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView& tv, bool temporary = false) = 0;
-	virtual void show_track_in_display (TimeAxisView& tv) = 0;
 
 	/** Set whether the editor should follow the playhead.
 	 * @param yn true to follow playhead, otherwise false.
@@ -323,8 +321,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 #endif
-
-	virtual void update_rec_display () = 0;
 
 	static const int window_border_width;
 	static const int container_border_width;

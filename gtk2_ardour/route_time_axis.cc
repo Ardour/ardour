@@ -363,7 +363,6 @@ RouteTimeAxisView::label_view ()
 void
 RouteTimeAxisView::route_name_changed ()
 {
-	_editor.route_name_changed (this);
 	label_view ();
 }
 

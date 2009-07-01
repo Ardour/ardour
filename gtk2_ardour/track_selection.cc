@@ -3,6 +3,12 @@
 
 using namespace std;
 
+TrackSelection::TrackSelection (list<TimeAxisView*> const &t)
+	: list<TimeAxisView*> (t)
+{
+
+}
+
 list<TimeAxisView*>
 TrackSelection::add (list<TimeAxisView*> const & t)
 {

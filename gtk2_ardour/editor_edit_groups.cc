@@ -33,6 +33,7 @@
 #include "editor_group_tabs.h"
 #include "route_group_dialog.h"
 #include "route_time_axis.h"
+#include "editor_route_list.h"
 
 #include "ardour/route.h"
 
@@ -371,7 +372,7 @@ Editor::route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::Tree
 	if ((*iter)[group_columns.is_visible]) {
 		for (TrackViewList::iterator j = track_views.begin(); j != track_views.end(); ++j) {
 			if ((*j)->route_group() == group) {
-				show_track_in_display (**j);
+				_route_list->show_track_in_display (**j);
 			}
 		}
 	} else {

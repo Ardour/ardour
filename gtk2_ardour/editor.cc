@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
+#include "pbd/unknown_type.h"
 
 #include <glibmm/miscutils.h>
 #include <gtkmm/image.h>
@@ -97,6 +98,9 @@
 #include "editor_drag.h"
 #include "editor_group_tabs.h"
 #include "automation_time_axis.h"
+#include "editor_route_list.h"
+#include "midi_time_axis.h"
+#include "mixer_strip.h"
 
 #include "i18n.h"
 
@@ -298,9 +302,6 @@ Editor::Editor ()
 	_show_measures = true;
 	_show_waveforms_recording = true;
 	show_gain_after_trim = false;
-	route_redisplay_does_not_sync_order_keys = false;
-	route_redisplay_does_not_reset_order_keys = false;
-	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
 	route_removal = false;
 	show_automatic_regions_in_region_list = true;
@@ -314,7 +315,6 @@ Editor::Editor ()
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
 	route_group_menu = 0;
-	route_list_menu = 0;
 	region_list_menu = 0;
 	marker_menu = 0;
 	start_end_marker_menu = 0;
@@ -531,51 +531,6 @@ Editor::Editor ()
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
 
-
-	CellRendererPixbufToggle* rec_col_renderer = Gtk::manage( new CellRendererPixbufToggle() );
-
-	rec_col_renderer->set_active_pixbuf(::get_icon("record_normal_red"));
-	rec_col_renderer->set_inactive_pixbuf(::get_icon("record_disabled_grey"));
-
-	rec_col_renderer->signal_toggled().connect(mem_fun(*this, &Editor::on_tv_rec_enable_toggled));
-
-	Gtk::TreeViewColumn* rec_state_column = Gtk::manage(new Gtk::TreeViewColumn("Rec", *rec_col_renderer));
-	rec_state_column->add_attribute(rec_col_renderer->property_active(), route_display_columns.rec_enabled);
-	rec_state_column->add_attribute(rec_col_renderer->property_visible(), route_display_columns.is_track);
-
-	route_display_model = ListStore::create(route_display_columns);
-	route_list_display.set_model (route_display_model);
-	
-	route_list_display.append_column (*rec_state_column);
-	route_list_display.append_column (_("Show"), route_display_columns.visible);
-	route_list_display.append_column (_("Name"), route_display_columns.text);
-	
-	route_list_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	route_list_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	route_list_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
-	
-	route_list_display.set_headers_visible (true);
-	route_list_display.set_name ("TrackListDisplay");
-	route_list_display.get_selection()->set_mode (SELECTION_NONE);
-	route_list_display.set_reorderable (true);
-	route_list_display.set_rules_hint (true);
-	route_list_display.set_size_request (100,-1);
-	route_list_display.add_object_drag (route_display_columns.route.index(), "routes");
-
-	CellRendererToggle* route_list_visible_cell = dynamic_cast<CellRendererToggle*>(route_list_display.get_column_cell_renderer (1));
-	
-	route_list_visible_cell->property_activatable() = true;
-	route_list_visible_cell->property_radio() = false;
-
-	route_display_model->signal_row_deleted().connect (mem_fun (*this, &Editor::route_list_delete));
-	route_display_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_list_change));
-	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::route_list_reordered));
-
-	route_list_display.signal_button_press_event().connect (mem_fun (*this, &Editor::route_list_display_button_press), false);
-
-	route_list_scroller.add (route_list_display);
-	route_list_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-
 	group_model = ListStore::create(group_columns);
 	route_group_display.set_model (group_model);
 
@@ -648,6 +603,7 @@ Editor::Editor ()
 
 	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_group_row_change));
 
+	_route_list = new EditorRouteList (this);
 
 	route_group_display.set_name ("EditGroupList");
 	route_group_display.get_selection()->set_mode (SELECTION_SINGLE);
@@ -792,7 +748,7 @@ Editor::Editor ()
 	the_notebook.append_page (region_list_scroller, *nlabel);
 	nlabel = manage (new Label (_("Tracks/Busses")));
 	nlabel->set_angle (-90);
-	the_notebook.append_page (route_list_scroller, *nlabel);
+	the_notebook.append_page (_route_list->widget (), *nlabel);
 	nlabel = manage (new Label (_("Snapshots")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (snapshot_display_scroller, *nlabel);
@@ -916,7 +872,6 @@ Editor::Editor ()
 	BasicUI::AccessAction.connect (mem_fun (*this, &Editor::access_action));
 
 	Config->ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed));
-	Route::SyncOrderKeys.connect (mem_fun (*this, &Editor::sync_order_keys));
 
 	_last_normalization_value = 0;
 
@@ -938,24 +893,10 @@ Editor::~Editor()
 	}
 #endif
 
+	delete _route_list;
 	delete track_canvas;
 	delete _drag;
 }
-
-void 
-Editor::on_tv_rec_enable_toggled(const Glib::ustring& path_string){
-
-	// Get the model row that has been toggled.
-	Gtk::TreeModel::Row row = *route_display_model->get_iter(Gtk::TreeModel::Path(path_string));
-
-	TimeAxisView *tv = row[route_display_columns.tv];
-	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
-
-	if(atv != 0 && atv->is_audio_track()){
-	      atv->get_diskstream()->set_record_enabled(!atv->get_diskstream()->record_enabled());
-	}
-}
-
 
 void
 Editor::add_toplevel_controls (Container& cont)
@@ -1434,7 +1375,7 @@ Editor::connect_to_session (Session *t)
 	//tempo_map_changed (Change (0));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
-	initial_route_list_display ();
+	_route_list->initial_display ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
@@ -1442,30 +1383,6 @@ Editor::connect_to_session (Session *t)
 
 	start_scrolling ();
 
-	/* don't show master bus in a new session */
-
-	if (ARDOUR_UI::instance()->session_is_new ()) {
-
-		TreeModel::Children rows = route_display_model->children();
-		TreeModel::Children::iterator i;
-	
-		no_route_list_redisplay = true;
-		
-		for (i = rows.begin(); i != rows.end(); ++i) {
-			TimeAxisView *tv =  (*i)[route_display_columns.tv];
-			RouteTimeAxisView *rtv;
-			
-			if ((rtv = dynamic_cast<RouteTimeAxisView*>(tv)) != 0) {
-				if (rtv->route()->is_master()) {
-					route_list_display.get_selection()->unselect (i);
-				}
-			}
-		}
-		
-		no_route_list_redisplay = false;
-		redisplay_route_list ();
-	}
-	
 	switch (snap_type) {
 	case SnapToRegionStart:
 	case SnapToRegionEnd:
@@ -4697,7 +4614,8 @@ void
 Editor::use_visual_state (VisualState& vs)
 {
 	no_save_visual = true;
-	no_route_list_redisplay = true;
+
+	_route_list->suspend_redisplay ();
 
 	vertical_adjustment.set_value (vs.y_position);
 
@@ -4717,11 +4635,10 @@ Editor::use_visual_state (VisualState& vs)
 
 
 	if (!vs.track_states.empty()) {
-		update_route_visibility ();
+		_route_list->update_visibility ();
 	} 
 
-	no_route_list_redisplay = false;
-	redisplay_route_list ();
+	_route_list->resume_redisplay ();
 
 	no_save_visual = false;
 }
@@ -5219,7 +5136,7 @@ Editor::first_idle ()
 	}
 
 	// first idle adds route children (automation tracks), so we need to redisplay here
-	redisplay_route_list();
+	_route_list->redisplay ();
 	
 	delete dialog;
 
@@ -5326,5 +5243,141 @@ Editor::axis_views_from_routes (list<Route*> r) const
 	}
 
 	return t;
+}
+
+
+void
+Editor::handle_new_route (RouteList& routes)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_route), routes));
+	
+	RouteTimeAxisView *rtv;
+	list<RouteTimeAxisView*> new_views;
+
+	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
+		boost::shared_ptr<Route> route = (*x);
+
+		if (route->is_hidden()) {
+			continue;
+		}
+
+		DataType dt = route->input()->default_type();
+
+		if (dt == ARDOUR::DataType::AUDIO) {
+			rtv = new AudioTimeAxisView (*this, *session, route, *track_canvas);
+		} else if (dt == ARDOUR::DataType::MIDI) {
+			rtv = new MidiTimeAxisView (*this, *session, route, *track_canvas);
+		} else {
+			throw unknown_type();
+		}
+
+		new_views.push_back (rtv);
+		track_views.push_back (rtv);
+		
+		rtv->effective_gain_display ();
+		
+		rtv->view()->RegionViewAdded.connect (mem_fun (*this, &Editor::region_view_added));
+		rtv->view()->HeightChanged.connect (mem_fun (*this, &Editor::streamview_height_changed));
+		
+		rtv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), rtv));
+	}
+
+	_route_list->routes_added (new_views);
+
+	if (show_editor_mixer_when_tracks_arrive) {
+		show_editor_mixer (true);
+	}
+
+	editor_list_button.set_sensitive (true);
+
+	_summary->set_dirty ();
+}
+
+void
+Editor::remove_route (TimeAxisView *tv)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::remove_route), tv));
+
+	TrackViewList::iterator i;
+	boost::shared_ptr<Route> route;
+	TimeAxisView* next_tv;
+
+	if (tv == entered_track) {
+		entered_track = 0;
+	}
+
+	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
+
+               i = track_views.erase (i);
+
+               if (track_views.empty()) {
+                       next_tv = 0;
+               } else if (i == track_views.end()) {
+                       next_tv = track_views.front();
+               } else {
+                      next_tv = (*i);
+               }
+	}
+	
+	if (current_mixer_strip && current_mixer_strip->route() == route) {
+
+               if (next_tv) {
+                       set_selected_mixer_strip (*next_tv);
+               } else {
+                       /* make the editor mixer strip go away setting the
+                        * button to inactive (which also unticks the menu option)
+                        */
+
+                       ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+               }
+	} 
+}
+
+void
+Editor::hide_track_in_display (TimeAxisView& tv, bool temponly)
+{
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+
+	if (rtv && current_mixer_strip && (rtv->route() == current_mixer_strip->route())) {
+		// this will hide the mixer strip
+		set_selected_mixer_strip (tv);
+	}
+
+	_route_list->hide_track_in_display (tv);
+}
+
+bool
+Editor::sync_track_view_list_and_route_list ()
+{
+	track_views = TrackSelection (_route_list->views ());
+	
+	_summary->set_dirty ();
+	_group_tabs->set_dirty ();
+       
+	return false; // do not call again (until needed)
+}
+
+void
+Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		theslot (**i);
+	}
+}
+
+RouteTimeAxisView*
+Editor::get_route_view_by_id (PBD::ID& id)
+{
+	RouteTimeAxisView* v;
+
+	for(TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		if((v = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+			if(v->route()->id() == id) {
+				return v;
+			}
+		}
+	}
+
+	return 0;
 }
 
