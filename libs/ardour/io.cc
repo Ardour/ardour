@@ -2584,8 +2584,11 @@ IO::set_gain_automation_state (AutoState state)
 			changed = true;
 			last_automation_snapshot = 0;
 			_gain_automation_curve.set_automation_state (state);
-			
-			if (state != Off) {
+
+			/* don't reset gain if we're moving to Off or Write mode;
+			   if we're moving to Write, the user may have manually set up gains
+			   that they don't want to lose */
+			if (state != Off && state != Write) {
 				set_gain (_gain_automation_curve.eval (_session.transport_frame()), this);
 			}
 		}
