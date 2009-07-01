@@ -1158,18 +1158,26 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Solo")));
 
-	ComboOption<SoloModel>* sm = new ComboOption<SoloModel> (
-		"solo-model",
-		_("Solo button controls"),
-		mem_fun (*_rc_config, &RCConfiguration::get_solo_model),
-		mem_fun (*_rc_config, &RCConfiguration::set_solo_model)
+
+	add_option (_("Audio"), 
+	     new BoolOption (
+		     "solo-control-is-listen-control",
+		     _("Solo controls are Listen controls"),
+		     mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
+		     mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
+		     ));
+
+	ComboOption<ListenPosition>* lp = new ComboOption<ListenPosition> (
+		"listen-position",
+		_("Listen Position"),
+		mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
+		mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
 		);
 
-	sm->add (SoloInPlace, _("solo in place"));
-	sm->add (SoloAFL, _("post-fader listen via monitor bus"));
-	sm->add (SoloPFL, _("pre-fader listen via monitor bus"));
+	lp->add (AfterFaderListen, _("after-fader listen"));
+	lp->add (PreFaderListen, _("pre-fader listen"));
 
-	add_option (_("Audio"), sm);
+	add_option (_("Audio"), lp);
 	add_option (_("Audio"), new SoloMuteOptions (_rc_config));
 
 	add_option (_("Audio"),

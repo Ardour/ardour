@@ -454,14 +454,26 @@ Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, 
 	}
 	
 	bufs.set_count (_input->n_ports());
-	
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		
-		BufferSet::iterator o = bufs.begin(*t);
-		PortSet& ports (_input->ports());
 
-		for (PortSet::iterator i = ports.begin(*t); i != ports.end(*t); ++i, ++o) {
-			o->read_from (i->get_buffer(nframes), nframes);
+	if (is_control() && _session.listening()) {
+		
+		/* control/monitor bus ignores input ports when something is
+		   feeding the listen "stream". data will "arrive" into the
+		   route from the intreturn processor element.
+		*/
+			
+		bufs.silence (nframes, 0);
+
+	} else {
+	
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			
+			BufferSet::iterator o = bufs.begin(*t);
+			PortSet& ports (_input->ports());
+			
+			for (PortSet::iterator i = ports.begin(*t); i != ports.end(*t); ++i, ++o) {
+				o->read_from (i->get_buffer(nframes), nframes);
+			}
 		}
 	}
 
@@ -472,6 +484,32 @@ void
 Route::passthru_silence (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, int declick)
 {
 	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, true, declick);
+}
+
+void
+Route::set_listen (bool yn, void* src)
+{
+	if (_control_outs) { 
+		if (yn != _control_outs->active()) {
+			if (yn) {
+				_control_outs->activate ();
+			} else {
+				_control_outs->deactivate ();
+			}
+
+			listen_changed (src); /* EMIT SIGNAL */
+		}
+	}
+}
+
+bool
+Route::listening () const
+{
+	if (_control_outs) {
+		return _control_outs->active ();
+	} else {
+		return false;
+	}
 }
 
 void
@@ -506,33 +544,11 @@ Route::mod_solo_level (int32_t delta)
 		_solo_level += delta;
 	}
 
-	/* tell "special" delivery units what the solo situation is
+	/* tell main outs what the solo situation is
 	 */
 
-	switch (Config->get_solo_model()) {
-	case SoloInPlace:
-		/* main outs are used for soloing */
-		_main_outs->set_solo_level (_solo_level);
-		_main_outs->set_solo_isolated (_solo_isolated);
-		if (_control_outs) {
-			/* control outs just keep on playing */
-			_control_outs->set_solo_level (0);
-			_control_outs->set_solo_isolated (true);
-		}
-		break;
-
-	case SoloAFL:
-	case SoloPFL:
-		/* control outs are used for soloing */
-		if (_control_outs) {
-			_control_outs->set_solo_level (_solo_level);
-			_control_outs->set_solo_isolated (_solo_isolated);
-		}
-		/* main outs just keep on playing */
-		_main_outs->set_solo_level (0);
-		_main_outs->set_solo_isolated (true);
-		break;
-	}
+	_main_outs->set_solo_level (_solo_level);
+	_main_outs->set_solo_isolated (_solo_isolated);
 }
 
 void
@@ -546,28 +562,11 @@ Route::set_solo_isolated (bool yn, void *src)
 	if (yn != _solo_isolated) {
 		_solo_isolated = yn;
 
-		/* tell "special" delivery units what the solo situation is
+		/* tell main outs what the solo situation is
 		 */
 		
-		switch (Config->get_solo_model()) {
-		case SoloInPlace:
-			_main_outs->set_solo_level (_solo_level);
-			_main_outs->set_solo_isolated (_solo_isolated);
-			if (_control_outs) {
-				_main_outs->set_solo_level (1);
-				_main_outs->set_solo_isolated (false);
-			}
-			break;
-		case SoloAFL:
-		case SoloPFL:
-			if (_control_outs) {
-				_control_outs->set_solo_level (_solo_level);
-				_control_outs->set_solo_isolated (_solo_isolated);
-			}
-			_main_outs->set_solo_level (1);
-			_main_outs->set_solo_isolated (false);
-			break;
-		}
+		_main_outs->set_solo_level (_solo_level);
+		_main_outs->set_solo_isolated (_solo_isolated);
 
 		solo_isolated_changed (src);
 	}
@@ -711,7 +710,9 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		}
 		
 		// XXX: do we want to emit the signal here ? change call order.
-		processor->activate ();
+		if (!boost::dynamic_pointer_cast<InternalSend>(processor)) {
+			processor->activate ();
+		}
 		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 
 		_output->set_user_latency (0);
@@ -1862,7 +1863,8 @@ Route::get_return_buffer () const
 		boost::shared_ptr<InternalReturn> d = boost::dynamic_pointer_cast<InternalReturn>(*x);
 		
 		if (d) {
-			return d->get_buffers ();
+			BufferSet* bs = d->get_buffers ();
+			return bs;
 		}
 	}
 	
@@ -1884,7 +1886,7 @@ Route::release_return_buffer () const
 }
 
 int
-Route::listen_via (boost::shared_ptr<Route> route, const string& listen_name)
+Route::listen_via (boost::shared_ptr<Route> route, bool active)
 {
 	vector<string> ports;
 	vector<string>::const_iterator i;
@@ -1893,6 +1895,7 @@ Route::listen_via (boost::shared_ptr<Route> route, const string& listen_name)
 		Glib::RWLock::ReaderLock rm (_processor_lock);
 		
 		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
+
 			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
 
 			if (d && d->target_route() == route) {
@@ -1919,6 +1922,10 @@ Route::listen_via (boost::shared_ptr<Route> route, const string& listen_name)
 
 	} catch (failed_constructor& err) {
 		return -1;
+	}
+
+	if (route == _session.control_out()) {
+		_control_outs = listener;
 	}
 
 	add_processor (listener, PreFader);

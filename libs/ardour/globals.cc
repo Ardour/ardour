@@ -604,7 +604,7 @@ std::istream& operator>>(std::istream& o, AutoConnectOption& var) { return int_t
 std::istream& operator>>(std::istream& o, MonitorModel& var) { return int_to_type<MonitorModel> (o, var); }
 std::istream& operator>>(std::istream& o, RemoteModel& var) { return int_to_type<RemoteModel> (o, var); }
 std::istream& operator>>(std::istream& o, EditMode& var) { return int_to_type<EditMode> (o, var); }
-std::istream& operator>>(std::istream& o, SoloModel& var) { return int_to_type<SoloModel> (o, var); }
+std::istream& operator>>(std::istream& o, ListenPosition& var) { return int_to_type<ListenPosition> (o, var); }
 std::istream& operator>>(std::istream& o, LayerModel& var) { return int_to_type<LayerModel> (o, var); }
 std::istream& operator>>(std::istream& o, CrossfadeModel& var) { return int_to_type<CrossfadeModel> (o, var); }
 std::istream& operator>>(std::istream& o, SlaveSource& var) { return int_to_type<SlaveSource> (o, var); }

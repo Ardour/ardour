@@ -188,6 +188,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	connections.push_back (_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed)));
 	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
 	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
+	connections.push_back (_route->listen_changed.connect (mem_fun(*this, &RouteUI::listen_changed)));
 	connections.push_back (_route->solo_isolated_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
   
 	if (is_track()) {
@@ -322,102 +323,110 @@ RouteUI::solo_press(GdkEventButton* ev)
 	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
-	multiple_solo_change = false;
-	if (!ignore_toggle) {
 
-		if (Keyboard::is_context_menu_event (ev)) {
+	if (Config->get_solo_control_is_listen_control()) {
 
-			if (solo_menu == 0) {
-				build_solo_menu ();
-			}
+		_route->set_listen (!_route->listening(), this);
 
-			solo_menu->popup (1, ev->time);
+	} else {
 
-		} else {
-
-			if (Keyboard::is_button2_event (ev)) {
-
-				// Primary-button2 click is the midi binding click
-				// button2-click is "momentary"
+		multiple_solo_change = false;
+		if (!ignore_toggle) {
+			
+			if (Keyboard::is_context_menu_event (ev)) {
 				
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
-					wait_for_release = true;
-				} else {
-					return false;
+				if (solo_menu == 0) {
+					build_solo_menu ();
 				}
-			}
-
-			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
-
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-
-					/* Primary-Tertiary-click applies change to all routes */
-					bool was_not_latched = false;
-					if (!Config->get_solo_latched ()) {
-						was_not_latched = true;
-						/*
-						  XXX it makes no sense to solo all tracks if we're 
-						  not in latched mode, but doing nothing feels like a bug, 
-						  so do it anyway 
-						*/
-						Config->set_solo_latched (true);
-					}
-					_session.begin_reversible_command (_("solo change"));
-                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
-					_session.set_all_solo (!_route->soloed());
-                                        cmd->mark();
-					_session.add_command (cmd);
-					_session.commit_reversible_command ();
-					multiple_solo_change = true;
-					if (was_not_latched) {
-						Config->set_solo_latched (false);
-					}
+				
+				solo_menu->popup (1, ev->time);
+				
+			} else {
+				
+				if (Keyboard::is_button2_event (ev)) {
 					
-				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-
-					// Primary-Secondary-click: exclusively solo this track, not a toggle */
-
-					_session.begin_reversible_command (_("solo change"));
-                                        Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (_session, this);
-					_session.set_all_solo (false);
-					_route->set_solo (true, this);
-                                        cmd->mark();
-					_session.add_command(cmd);
-					_session.commit_reversible_command ();
-
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-
-					// shift-click: set this route to solo safe
-
-					if (Profile->get_sae() && ev->button == 1) {
-						// button 1 and shift-click: disables solo_latched for this click
+					// Primary-button2 click is the midi binding click
+					// button2-click is "momentary"
+					
+					if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
+						wait_for_release = true;
+					} else {
+						return false;
+					}
+				}
+				
+				if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
+					
+					if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+						
+						/* Primary-Tertiary-click applies change to all routes */
+						bool was_not_latched = false;
 						if (!Config->get_solo_latched ()) {
+							was_not_latched = true;
+							/*
+							  XXX it makes no sense to solo all tracks if we're 
+							  not in latched mode, but doing nothing feels like a bug, 
+							  so do it anyway 
+							*/
 							Config->set_solo_latched (true);
-							reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+						}
+						_session.begin_reversible_command (_("solo change"));
+						Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
+						_session.set_all_solo (!_route->soloed());
+						cmd->mark();
+						_session.add_command (cmd);
+						_session.commit_reversible_command ();
+						multiple_solo_change = true;
+						if (was_not_latched) {
 							Config->set_solo_latched (false);
 						}
+						
+					} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
+						
+						// Primary-Secondary-click: exclusively solo this track, not a toggle */
+
+						_session.begin_reversible_command (_("solo change"));
+						Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (_session, this);
+						_session.set_all_solo (false);
+						_route->set_solo (true, this);
+						cmd->mark();
+						_session.add_command(cmd);
+						_session.commit_reversible_command ();
+
+					} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+
+						// shift-click: set this route to solo safe
+
+						if (Profile->get_sae() && ev->button == 1) {
+							// button 1 and shift-click: disables solo_latched for this click
+							if (!Config->get_solo_latched ()) {
+								Config->set_solo_latched (true);
+								reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+								Config->set_solo_latched (false);
+							}
+						} else {
+							_route->set_solo_isolated (!_route->solo_isolated(), this);
+							wait_for_release = false;
+						}
+
+					} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+						/* Primary-button1: solo mix group.
+						   NOTE: Primary-button2 is MIDI learn.
+						*/
+
+						if (ev->button == 1) {
+							set_route_group_solo (_route, !_route->soloed());
+						}
+
 					} else {
-						_route->set_solo_isolated (!_route->solo_isolated(), this);
-						wait_for_release = false;
-					}
 
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-					/* Primary-button1: solo mix group.
-					   NOTE: Primary-button2 is MIDI learn.
-					*/
-
-					if (ev->button == 1) {
-						set_route_group_solo (_route, !_route->soloed());
-					}
-
-				} else {
-
-					/* click: solo this route */
-					if (wait_for_release) {
-						_route->set_solo (!_route->soloed(), this);
-					} else {
-						reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+						/* click: solo this route */
+						if (wait_for_release) {
+							_route->set_solo (!_route->soloed(), this);
+						} else {
+							reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+						}
 					}
 				}
 			}
@@ -614,7 +623,13 @@ RouteUI::send_blink (bool onoff)
 void
 RouteUI::solo_changed(void* src)
 {
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
+}
 
+
+void
+RouteUI::listen_changed(void* src)
+{
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
 }
 
@@ -622,21 +637,30 @@ void
 RouteUI::update_solo_display ()
 {
 	bool x;
-	vector<Gdk::Color> fg_colors;
-	Gdk::Color c;
-	
-	if (solo_button->get_active() != (x = _route->soloed())){
-		ignore_toggle = true;
-		solo_button->set_active(x);
-		ignore_toggle = false;
-	} 
-	
-	if (_route->solo_isolated()) {
-		solo_button->set_visual_state (2);
-	} else if (_route->soloed()) {
-		solo_button->set_visual_state (1);
+
+	if (Config->get_solo_control_is_listen_control()) {
+
+		if (solo_button->get_active() != (x = _route->listening())) {
+			ignore_toggle = true;
+			solo_button->set_active(x);
+			ignore_toggle = false;
+		}
+
 	} else {
-		solo_button->set_visual_state (0);
+
+		if (solo_button->get_active() != (x = _route->soloed())){
+			ignore_toggle = true;
+			solo_button->set_active(x);
+			ignore_toggle = false;
+		} 
+		
+		if (_route->solo_isolated()) {
+			solo_button->set_visual_state (2);
+		} else if (_route->soloed()) {
+			solo_button->set_visual_state (1);
+		} else {
+			solo_button->set_visual_state (0);
+		}
 	}
 }
 
@@ -1383,7 +1407,9 @@ RouteUI::parameter_changed (string const & p)
 	
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
-	} else if (p == "solo-model") {
+	} else if (p == "solo-control-is-listen-control") {
+		set_button_names ();
+	} else if (p == "listen-position") {
 		set_button_names ();
 	}
 }

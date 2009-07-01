@@ -330,10 +330,9 @@ namespace ARDOUR {
 		AddHigher
 	};
 
-	enum SoloModel {
-		SoloInPlace,
-		SoloAFL,
-		SoloPFL
+	enum ListenPosition {
+		AfterFaderListen,
+		PreFaderListen
 	};
 
 	enum AutoConnectOption {
@@ -455,7 +454,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::SoloModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);

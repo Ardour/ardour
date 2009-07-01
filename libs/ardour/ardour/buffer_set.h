@@ -59,6 +59,7 @@ public:
 	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset = 0);
 
 	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);
+	void ensure_buffers(const ChanCount& chns, size_t buffer_capacity);
 
 	const ChanCount& available() const { return _available; }
 	ChanCount&       available()       { return _available; }

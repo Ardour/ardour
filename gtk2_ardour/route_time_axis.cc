@@ -2396,7 +2396,13 @@ void
 RouteTimeAxisView::set_button_names ()
 {
 	rec_enable_button_label.set_text (_("r"));
-	solo_button_label.set_text (_("s"));
+
+	if (Config->get_solo_control_is_listen_control()) {
+		solo_button_label.set_text (_("l"));
+	} else {
+		solo_button_label.set_text (_("s"));
+	}
+
 	mute_button_label.set_text (_("m"));
 }
 

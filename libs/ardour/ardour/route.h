@@ -124,6 +124,7 @@ class Route : public SessionObject, public AutomatableControls
 	void set_mute (bool yn, void* src);
 	bool muted () const;
 
+
 	/* controls use set_solo() to modify this route's solo state
 	 */
 
@@ -132,6 +133,9 @@ class Route : public SessionObject, public AutomatableControls
 
 	void set_solo_isolated (bool yn, void *src);
 	bool solo_isolated() const;
+
+	void set_listen (bool yn, void* src);
+	bool listening () const;
 	
 	void set_phase_invert (bool yn);
 	bool phase_invert() const;
@@ -229,6 +233,7 @@ class Route : public SessionObject, public AutomatableControls
 	sigc::signal<void>       active_changed;
 	sigc::signal<void>       phase_invert_changed;
 	sigc::signal<void>       denormal_protection_changed;
+	sigc::signal<void,void*> listen_changed;
 	sigc::signal<void,void*> solo_changed;
 	sigc::signal<void,void*> solo_safe_changed;
 	sigc::signal<void,void*> solo_isolated_changed;
@@ -262,7 +267,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	sigc::signal<void,void*> SelectedChanged;
 	
-	int listen_via (boost::shared_ptr<Route>, const std::string& name);
+	int listen_via (boost::shared_ptr<Route>, bool);
 	void drop_listen (boost::shared_ptr<Route>);
 
 	bool feeds (boost::shared_ptr<Route>);

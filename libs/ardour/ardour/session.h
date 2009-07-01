@@ -723,9 +723,11 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* session-wide solo/mute/rec-enable */
 
 	bool soloing() const { return _non_soloed_outs_muted; }
-	
+	bool listening() const { return _listen_cnt > 0; }
+
 	void set_all_solo (bool);
 	void set_all_mute (bool);
+	void set_all_listen (bool);
 
 	sigc::signal<void,bool> SoloActive;
 	sigc::signal<void> SoloChanged;
@@ -1031,6 +1033,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	float                   _meter_hold;
 	float                   _meter_falloff;
 	bool                    _non_soloed_outs_muted;
+	uint32_t                _listen_cnt;
 
 	void set_worst_io_latencies ();
 	void set_worst_io_latencies_x (IOChange asifwecare, void *ignored) {
@@ -1451,16 +1454,15 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* mixer stuff */
 
-	bool       solo_update_disabled;
+	bool solo_update_disabled;
 
+	void route_listen_changed (void *src, boost::weak_ptr<Route>);
 	void route_mute_changed (void *src);
 	void route_solo_changed (void *src, boost::weak_ptr<Route>);
-	void catch_up_on_solo ();
-	void catch_up_on_solo_mute_override ();
-	void solo_model_changed ();
 	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
-	void modify_solo_mute (bool, bool);
-	void strip_portname_for_solo (std::string& portname);
+
+	void listen_position_changed ();
+	void solo_control_mode_changed ();
 
 	/* REGION MANAGEMENT */
 

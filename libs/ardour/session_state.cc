@@ -152,6 +152,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 
 	_non_soloed_outs_muted = false;
+	_listen_cnt = 0;
 	g_atomic_int_set (&processing_prohibited, 0);
 	_transport_speed = 0;
 	_last_transport_speed = 0;
@@ -3152,9 +3153,12 @@ Session::config_changed (std::string p, bool ours)
 		}
 	} else if (p == "solo-mute-override") {
 		// catch_up_on_solo_mute_override ();
-	} else if (p == "solo-model") {
-		solo_model_changed ();
+	} else if (p == "listen-position") {
+		listen_position_changed ();
+	} else if (p == "solo-control-is-listen-control") {
+		solo_control_mode_changed ();
 	}
+
 
 	set_dirty ();
 }

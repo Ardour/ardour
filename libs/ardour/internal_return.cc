@@ -60,7 +60,7 @@ bool
 InternalReturn::configure_io (ChanCount in, ChanCount out)
 {
 	IOProcessor::configure_io (in, out);
-	allocate_buffers (_session.get_block_size());
+	allocate_buffers (_session.engine().frames_per_cycle());
 	return true;
 }
 
@@ -73,8 +73,8 @@ InternalReturn::set_block_size (nframes_t nframes)
 void
 InternalReturn::allocate_buffers (nframes_t nframes)
 {
-	buffers.ensure_buffers (DataType::AUDIO, _configured_input.n_audio(), nframes);
-	buffers.ensure_buffers (DataType::MIDI, _configured_input.n_midi(), nframes);
+	buffers.ensure_buffers (_configured_input, nframes);
+	buffers.set_count (_configured_input);
 }
 
 BufferSet*

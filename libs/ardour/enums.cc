@@ -64,7 +64,7 @@ setup_enum_writer ()
 	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
 	LayerModel _LayerModel;
-	SoloModel _SoloModel;
+	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
 	CDMarkerFormat _CDMarkerFormat;
 	HeaderFormat _HeaderFormat;
@@ -229,10 +229,9 @@ setup_enum_writer ()
 	REGISTER_ENUM (AddHigher);
 	REGISTER (_LayerModel);
 
-	REGISTER_ENUM (SoloInPlace);
-	REGISTER_ENUM (SoloAFL);
-	REGISTER_ENUM (SoloPFL);
-	REGISTER (_SoloModel);
+	REGISTER_ENUM (AfterFaderListen);
+	REGISTER_ENUM (PreFaderListen);
+	REGISTER (_ListenPosition);
 
 	REGISTER_ENUM (AutoConnectPhysical);
 	REGISTER_ENUM (AutoConnectMaster);

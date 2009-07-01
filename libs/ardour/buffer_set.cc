@@ -130,6 +130,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		}
 	
 		_available.set(type, num_buffers);
+		_count.set (type, num_buffers);
 	}
 
 #ifdef HAVE_SLV2
@@ -147,6 +148,76 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	assert(bufs.size() >= num_buffers);
 	assert(bufs.size() == _available.get(type));
 	assert(bufs[0]->capacity() >= buffer_capacity);
+}
+
+/** Ensure that the number of buffers of each type @a type matches @a chns
+ * and each buffer is of size at least @a buffer_capacity
+ */
+void
+BufferSet::ensure_buffers(const ChanCount& chns, size_t buffer_capacity)
+{
+	if (chns == ChanCount::ZERO) {
+		return;
+	}
+
+	// If we're a mirror just make sure we're ok
+	if (_is_mirror) {
+		assert(_count >= chns);
+		return;
+	}
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+
+		// The vector of buffers of this type
+		BufferVec& bufs = _buffers[*t];
+
+		uint32_t nbufs = chns.get (*t);
+		
+		if (nbufs == 0) {
+			// Nuke it
+			for (BufferVec::iterator i = bufs.begin(); i != bufs.end(); ++i) {
+				delete (*i);
+			}
+			bufs.clear();
+			continue;
+		}
+
+		// If there's not enough or they're too small, just nuke the whole thing and
+		// rebuild it (so I'm lazy..)
+		if (bufs.size() < nbufs
+		    || (bufs.size() > 0 && bufs[0]->capacity() < buffer_capacity)) {
+			
+			// Nuke it
+			for (BufferVec::iterator i = bufs.begin(); i != bufs.end(); ++i) {
+				delete (*i);
+			}
+			bufs.clear();
+			
+			// Rebuild it
+			for (size_t i = 0; i < nbufs; ++i) {
+				bufs.push_back(Buffer::create(*t, buffer_capacity));
+			}
+			
+			_available.set (*t, nbufs);
+		}
+		
+#ifdef HAVE_SLV2
+		// Ensure enough low level MIDI format buffers are available for conversion
+		// in both directions (input & output, out-of-place)
+		if (*t == DataType::MIDI && _lv2_buffers.size() < _buffers[DataType::MIDI].size() * 2 + 1) {
+			while (_lv2_buffers.size() < _buffers[DataType::MIDI].size() * 2) {
+				_lv2_buffers.push_back(std::make_pair(false, new LV2EventBuffer(buffer_capacity)));
+			}
+		}
+#endif
+		
+		// Post-conditions
+		assert(bufs[0]->type() == *t);
+		assert(bufs.size() == _available.get(*t));
+		assert(bufs[0]->capacity() >= buffer_capacity);
+	}
+	
+	assert (available() == chns);
 }
 
 /** Get the capacity (size) of the available buffers of the given type.

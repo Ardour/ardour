@@ -1459,32 +1459,34 @@ MixerStrip::set_button_names ()
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
 		mute_button_label.set_text (_("Mute"));
-		switch (Config->get_solo_model()) {
-		case SoloInPlace:
+		if (!Config->get_solo_control_is_listen_control()) {
 			solo_button_label.set_text (_("Solo"));
-			break;
-		case SoloAFL:
-			solo_button_label.set_text (_("AFL"));
-			break;
-		case SoloPFL:
-			solo_button_label.set_text (_("PFL"));
-			break;
+		} else {
+			switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button_label.set_text (_("AFL"));
+				break;
+			case PreFaderListen:
+				solo_button_label.set_text (_("PFL"));
+				break;
+			}
 		}
 		break;
 
 	default:
 		rec_enable_button_label.set_text (_("R"));
 		mute_button_label.set_text (_("M"));
-		switch (Config->get_solo_model()) {
-		case SoloInPlace:
+		if (!Config->get_solo_control_is_listen_control()) {
 			solo_button_label.set_text (_("S"));
-			break;
-		case SoloAFL:
-			solo_button_label.set_text (_("A"));
-			break;
-		case SoloPFL:
-			solo_button_label.set_text (_("P"));
-			break;
+		} else {
+			switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button_label.set_text (_("A"));
+				break;
+			case PreFaderListen:
+				solo_button_label.set_text (_("P"));
+				break;
+			}
 		}
 		break;
 		

@@ -1063,6 +1063,10 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 				/* do not copy-n-paste amp */
 				continue;
 
+			} else if (type->value() == "intsend" || type->value() == "intreturn") {
+				/* do not copy-n-paste internal sends&returns */
+				continue;
+
 			} else if (type->value() == "listen") {
 				p.reset (new Delivery (_session, _route->mute_master(), **niter));
 				

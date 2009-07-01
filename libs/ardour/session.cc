@@ -46,6 +46,7 @@
 #include "ardour/analyser.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_diskstream.h"
+#include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
@@ -269,16 +270,6 @@ Session::Session (AudioEngine &eng,
 		RouteList rl;
 		int control_id = 1;
 
-		if (control_out_channels) {
-			ChanCount count(DataType::AUDIO, control_out_channels);
-			shared_ptr<Route> r (new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO));
-			r->input()->ensure_io (count, false, this);
-			r->output()->ensure_io (count, false, this);
-			r->set_remote_control_id (control_id++);
-
-			rl.push_back (r);
-		}
-
 		if (master_out_channels) {
 			ChanCount count(DataType::AUDIO, master_out_channels);
 			shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
@@ -290,6 +281,16 @@ Session::Session (AudioEngine &eng,
 		} else {
 			/* prohibit auto-connect to master, because there isn't one */
 			output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
+		}
+
+		if (control_out_channels) {
+			ChanCount count(DataType::AUDIO, control_out_channels);
+			shared_ptr<Route> r (new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO));
+			r->input()->ensure_io (count, false, this);
+			r->output()->ensure_io (count, false, this);
+			r->set_remote_control_id (control_id++);
+
+			rl.push_back (r);
 		}
 
 		if (!rl.empty()) {
@@ -680,11 +681,46 @@ Session::when_engine_running ()
 
 		if (_control_out) {
 
-			uint32_t limit = _control_out->n_outputs().n_total();
+			/* AUDIO ONLY as of june 29th 2009, because listen semantics for anything else
+			   are undefined, at best.
+			 */
+
+			/* control out listens to master bus (but ignores it 
+			   under some conditions)
+			*/
+
+			uint32_t limit = _control_out->n_inputs().n_audio();
 			
+			if (_master_out) {
+				for (uint32_t n = 0; n < limit; ++n) {
+					AudioPort* p = _control_out->input()->ports().nth_audio_port (n);
+					AudioPort* o = _master_out->output()->ports().nth_audio_port (n);
+					
+					if (o) {
+						string connect_to = o->name();
+						if (_control_out->input()->connect (p, connect_to, this)) {
+							error << string_compose (_("cannot connect control input %1 to %2"), n, connect_to) 
+							      << endmsg;
+							break;
+						}
+					}
+				}
+			}
+
+			/* connect control out to physical outs, but use ones after the master
+			   if possible
+			*/
+
+			/* XXX this logic is wrong for mixed port types */
+
+			uint32_t shift = _master_out->n_outputs().n_audio();
+			uint32_t mod = _master_out->n_outputs().n_audio();
+			limit = _control_out->n_outputs().n_audio();
+
 			for (uint32_t n = 0; n < limit; ++n) {
+
 				Port* p = _control_out->output()->nth (n);
-				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
+				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), (n+shift) % mod);
 				
 				if (!connect_to.empty()) {
 					if (_control_out->output()->connect (p, connect_to, this)) {
@@ -764,7 +800,7 @@ Session::hookup_io ()
 				continue;
 			}
 
-			(*x)->listen_via (_control_out, X_("listen"));
+			(*x)->listen_via (_control_out, false);
 		}
 	}
 
@@ -780,9 +816,13 @@ Session::hookup_io ()
 
 	graph_reordered ();
 
-	/* update mixer solo state */
+	/* update the full solo state, which can't be
+	   correctly determined on a per-route basis, but
+	   needs the global overview that only the session
+	   has.
+	*/
 
-	catch_up_on_solo();
+	update_route_solo_state ();
 }
 
 void
@@ -2069,6 +2109,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		boost::weak_ptr<Route> wpr (*x);
 
+		(*x)->listen_changed.connect (sigc::bind (mem_fun (*this, &Session::route_listen_changed), wpr));
 		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
@@ -2090,7 +2131,8 @@ Session::add_routes (RouteList& new_routes, bool save)
 			if ((*x)->is_control() || (*x)->is_master()) {
 				continue;
 			}
-			(*x)->listen_via (_control_out, "control");
+			cerr << "Add listen via control outs\n";
+			(*x)->listen_via (_control_out, false);
 		}
 
 		resort_routes ();
@@ -2139,7 +2181,7 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, boost::shared_ptr<Ro
 			continue;
 		}
 
-		(*i)->listen_via (dest, "aux");
+		(*i)->listen_via (dest, true);
 	}
 }
 
@@ -2254,6 +2296,22 @@ Session::route_mute_changed (void* src)
 }
 
 void
+Session::route_listen_changed (void* src, boost::weak_ptr<Route> wpr)
+{
+	boost::shared_ptr<Route> route = wpr.lock();
+	if (!route) {
+		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_changed")) << endmsg;
+		return;
+	}
+
+	if (route->listening()) {
+		_listen_cnt++;
+	} else if (_listen_cnt > 0) {
+		_listen_cnt--;
+	}
+}
+
+void
 Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 {
 	if (solo_update_disabled) {
@@ -2328,34 +2386,6 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 		SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
 	}
 }
-
-void
-Session::catch_up_on_solo ()
-{
-	/* this is called after set_state() to catch the full solo
-	   state, which can't be correctly determined on a per-route
-	   basis, but needs the global overview that only the session
-	   has.
-	*/
-	update_route_solo_state();
-}	
-
-void
-Session::catch_up_on_solo_mute_override ()
-{
-	if (Config->get_solo_model() != SoloInPlace) {
-		return;
-	}
-
-	/* this is called whenever the param solo-mute-override is
-	   changed.
-	*/
-	shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		// (*i)->catch_up_on_solo_mute_override ();
-	}
-}	
 
 shared_ptr<Route>
 Session::route_by_name (string name)
@@ -3492,6 +3522,20 @@ Session::set_all_solo (bool yn)
 }
 
 void
+Session::set_all_listen (bool yn)
+{
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->is_hidden()) {
+			(*i)->set_listen (yn, this);
+		}
+	}
+
+	set_dirty();
+}
+
+void
 Session::set_all_mute (bool yn)
 {
 	shared_ptr<RouteList> r = routes.reader ();
@@ -4257,19 +4301,16 @@ Session::update_have_rec_enabled_diskstream ()
 }
 
 void
-Session::solo_model_changed ()
+Session::listen_position_changed ()
 {
 	Placement p;
 
-	switch (Config->get_solo_model()) {
-	case SoloInPlace:
-		return;
-		
-	case SoloAFL:
+	switch (Config->get_listen_position()) {
+	case AfterFaderListen:
 		p = PostFader;
 		break;
 
-	case SoloPFL:
+	case PreFaderListen:
 		p = PreFader;
 		break;
 	}
@@ -4278,6 +4319,18 @@ Session::solo_model_changed ()
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->put_control_outs_at (p);
+	}
+}
+
+void
+Session::solo_control_mode_changed ()
+{
+	/* cancel all solo or all listen when solo control mode changes */
+
+	if (Config->get_solo_control_is_listen_control()) {
+		set_all_solo (false);
+	} else {
+		set_all_listen (false);
 	}
 }
 
