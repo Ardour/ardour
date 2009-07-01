@@ -655,10 +655,14 @@ Session::when_engine_running ()
 			add_bundle (c);
 		}
 	}
+	
+	BootMessage (_("Setup signal flow and plugins"));
 
-	if (Config->get_auto_connect_standard_busses() && !no_auto_connect()) {
+	hookup_io ();
 
-		if (_master_out) {
+	if (!no_auto_connect()) {
+
+		if (_master_out && Config->get_auto_connect_standard_busses()) {
 			
 			/* if requested auto-connect the outputs to the first N physical ports.
 			 */
@@ -707,35 +711,51 @@ Session::when_engine_running ()
 				}
 			}
 
-			/* connect control out to physical outs, but use ones after the master
-			   if possible
+			/* if control out is not connected, 
+			   connect control out to physical outs, but use ones after the master if possible
 			*/
 
-			/* XXX this logic is wrong for mixed port types */
+			if (!_control_out->output()->connected_to (boost::shared_ptr<IO>())) {
 
-			uint32_t shift = _master_out->n_outputs().n_audio();
-			uint32_t mod = _master_out->n_outputs().n_audio();
-			limit = _control_out->n_outputs().n_audio();
+				if (!Config->get_monitor_bus_preferred_bundle().empty()) {
 
-			for (uint32_t n = 0; n < limit; ++n) {
+					boost::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
 
-				Port* p = _control_out->output()->nth (n);
-				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), (n+shift) % mod);
-				
-				if (!connect_to.empty()) {
-					if (_control_out->output()->connect (p, connect_to, this)) {
-						error << string_compose (_("cannot connect control output %1 to %2"), n, connect_to) 
-						      << endmsg;
-						break;
+					if (b) {
+						_control_out->output()->connect_ports_to_bundle (b, this);
+					} else {
+						warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
+									   Config->get_monitor_bus_preferred_bundle()) 
+							<< endmsg;
+					}
+
+				} else {
+
+					/* XXX this logic is wrong for mixed port types */
+					
+					uint32_t shift = _master_out->n_outputs().n_audio();
+					uint32_t mod = _engine.n_physical_outputs (DataType::AUDIO);
+					limit = _control_out->n_outputs().n_audio();
+
+					cerr << "Connecting " << limit << " control out ports, shift is " << shift << " mod is " << mod << endl;
+					
+					for (uint32_t n = 0; n < limit; ++n) {
+						
+						Port* p = _control_out->output()->nth (n);
+						string connect_to = _engine.get_nth_physical_output (DataType (p->type()), (n+shift) % mod);
+						
+						if (!connect_to.empty()) {
+							if (_control_out->output()->connect (p, connect_to, this)) {
+								error << string_compose (_("cannot connect control output %1 to %2"), n, connect_to) 
+								      << endmsg;
+								break;
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-
-	BootMessage (_("Setup signal flow and plugins"));
-
-	hookup_io ();
 
 	/* catch up on send+insert cnts */
 
@@ -2336,10 +2356,14 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 		delta = -1;
 	}
 
+	/* now mod the solo level of all other routes except master & control outs
+	   so that they will be silent if appropriate.
+	*/
+	
 	solo_update_disabled = true;
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-		if ((*i)->feeds (route)) {
+		if ((*i)->feeds (route) && !(*i)->is_hidden() && !(*i)->is_master() && !(*i)->is_control()) {
 			/* do it */
 			(*i)->mod_solo_level (delta);
 		}
@@ -2347,13 +2371,13 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 
 	/* make sure master is never muted by solo */
 
-	if (_master_out->solo_level() == 0) {
+	if (route != _master_out && _master_out->solo_level() == 0 && !_master_out->soloed()) {
 		_master_out->mod_solo_level (1);
 	}
 
 	/* ditto for control outs make sure master is never muted by solo */
 
-	if (_control_out && _control_out->solo_level() == 0) {
+	if (route != _control_out && _control_out && _control_out->solo_level() == 0) {
 		_control_out->mod_solo_level (1);
 	}
 

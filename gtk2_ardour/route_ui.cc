@@ -209,7 +209,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	
 	mute_button->show();
 
-	if (_route->is_master()) {
+	if (_route->is_control()) {
 		solo_button->hide ();
 	} else {
 		solo_button->show();
@@ -646,17 +646,24 @@ RouteUI::update_solo_display ()
 			ignore_toggle = false;
 		}
 
+		if (x) {
+			solo_button->set_visual_state (1);
+		} else {
+			solo_button->set_visual_state (0);
+		}
+
+
 	} else {
 
 		if (solo_button->get_active() != (x = _route->soloed())){
 			ignore_toggle = true;
-			solo_button->set_active(x);
+			solo_button->set_active (x);
 			ignore_toggle = false;
 		} 
 		
 		if (_route->solo_isolated()) {
 			solo_button->set_visual_state (2);
-		} else if (_route->soloed()) {
+		} else if (x) {
 			solo_button->set_visual_state (1);
 		} else {
 			solo_button->set_visual_state (0);

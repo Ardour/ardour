@@ -1282,7 +1282,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
 		(*p)->configure_io(c->first, c->second);
-		(*p)->activate();
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 		out = c->second;
@@ -1928,7 +1927,7 @@ Route::listen_via (boost::shared_ptr<Route> route, bool active)
 		_control_outs = listener;
 	}
 
-	add_processor (listener, PreFader);
+	add_processor (listener, (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader));
 	
  	return 0;
 }	
