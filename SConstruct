@@ -606,6 +606,10 @@ libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gmodule-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gthread-2.0')
 
+libraries['gio'] = LibraryInfo()
+libraries['gio'].ParseConfig('pkg-config --cflags --libs gio-2.0')
+libraries['gio'].ParseConfig('pkg-config --cflags --libs gio-unix-2.0')
+
 libraries['freetype2'] = LibraryInfo()
 libraries['freetype2'].ParseConfig ('pkg-config --cflags --libs freetype2')
 
