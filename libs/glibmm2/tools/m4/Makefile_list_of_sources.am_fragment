@@ -3,6 +3,6 @@ files_tools_m4 = base.m4 class_shared.m4 class_boxedtype.m4 class_boxedtype_stat
 		 class_interface.m4 class_opaque_refcounted.m4 class_opaque_copyable.m4 \
 		 gerror.m4 \
 		 compare.m4 convert.m4 convert_base.m4 convert_gtkmm.m4 convert_atk.m4 convert_gdk.m4 \
-		 convert_glib.m4 convert_gtk.m4 convert_pango.m4 ctor.m4 doc.m4 enum.m4 list.m4 member.m4 \
+		 convert_glib.m4 convert_gio.m4 convert_gtk.m4 convert_pango.m4 ctor.m4 doc.m4 enum.m4 list.m4 member.m4 \
 		 method.m4 property.m4 signal.m4 vfunc.m4
 

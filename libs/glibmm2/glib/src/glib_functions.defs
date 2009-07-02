@@ -18,13 +18,14 @@
   )
 )
 
-(define-flags ArrayFlags
-  (in-module "GBSearch")
-  (c-name "GBSearchArrayFlags")
-  (gtype-id "G_TYPE_B_SEARCH_ARRAY_FLAGS")
+(define-enum Type
+  (in-module "GChecksum")
+  (c-name "GChecksumType")
+  (gtype-id "G_TYPE_CHECKSUM_TYPE")
   (values
-    '("lign-power2" "G_BSEARCH_ARRAY_ALIGN_POWER2")
-    '("uto-shrink" "G_BSEARCH_ARRAY_AUTO_SHRINK")
+    '("md5" "G_CHECKSUM_MD5")
+    '("sha1" "G_CHECKSUM_SHA1")
+    '("sha256" "G_CHECKSUM_SHA256")
   )
 )
 
@@ -87,16 +88,6 @@
     '("october" "G_DATE_OCTOBER")
     '("november" "G_DATE_NOVEMBER")
     '("december" "G_DATE_DECEMBER")
-  )
-)
-
-(define-flags Flag
-  (in-module "GDebug")
-  (c-name "GDebugFlag")
-  (gtype-id "G_TYPE_DEBUG_FLAG")
-  (values
-    '("warnings" "G_DEBUG_FATAL_WARNINGS")
-    '("criticals" "G_DEBUG_FATAL_CRITICALS")
   )
 )
 
@@ -275,6 +266,7 @@
     '("unknown-element" "G_MARKUP_ERROR_UNKNOWN_ELEMENT")
     '("unknown-attribute" "G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE")
     '("invalid-content" "G_MARKUP_ERROR_INVALID_CONTENT")
+    '("missing-attribute" "G_MARKUP_ERROR_MISSING_ATTRIBUTE")
   )
 )
 
@@ -285,6 +277,21 @@
   (values
     '("do-not-use-this-unsupported-flag" "G_MARKUP_DO_NOT_USE_THIS_UNSUPPORTED_FLAG")
     '("treat-cdata-as-text" "G_MARKUP_TREAT_CDATA_AS_TEXT")
+    '("prefix-error-position" "G_MARKUP_PREFIX_ERROR_POSITION")
+  )
+)
+
+(define-flags CollectType
+  (in-module "GMarkup")
+  (c-name "GMarkupCollectType")
+  (gtype-id "G_TYPE_MARKUP_COLLECT_TYPE")
+  (values
+    '("invalid" "G_MARKUP_COLLECT_INVALID")
+    '("string" "G_MARKUP_COLLECT_STRING")
+    '("strdup" "G_MARKUP_COLLECT_STRDUP")
+    '("boolean" "G_MARKUP_COLLECT_BOOLEAN")
+    '("tristate" "G_MARKUP_COLLECT_TRISTATE")
+    '("optional" "G_MARKUP_COLLECT_OPTIONAL")
   )
 )
 
@@ -383,6 +390,44 @@
     '("optimize" "G_REGEX_ERROR_OPTIMIZE")
     '("replace" "G_REGEX_ERROR_REPLACE")
     '("match" "G_REGEX_ERROR_MATCH")
+    '("internal" "G_REGEX_ERROR_INTERNAL")
+    '("stray-backslash" "G_REGEX_ERROR_STRAY_BACKSLASH")
+    '("missing-control-char" "G_REGEX_ERROR_MISSING_CONTROL_CHAR")
+    '("unrecognized-escape" "G_REGEX_ERROR_UNRECOGNIZED_ESCAPE")
+    '("quantifiers-out-of-order" "G_REGEX_ERROR_QUANTIFIERS_OUT_OF_ORDER")
+    '("quantifier-too-big" "G_REGEX_ERROR_QUANTIFIER_TOO_BIG")
+    '("unterminated-character-class" "G_REGEX_ERROR_UNTERMINATED_CHARACTER_CLASS")
+    '("invalid-escape-in-character-class" "G_REGEX_ERROR_INVALID_ESCAPE_IN_CHARACTER_CLASS")
+    '("range-out-of-order" "G_REGEX_ERROR_RANGE_OUT_OF_ORDER")
+    '("nothing-to-repeat" "G_REGEX_ERROR_NOTHING_TO_REPEAT")
+    '("unrecognized-character" "G_REGEX_ERROR_UNRECOGNIZED_CHARACTER")
+    '("posix-named-class-outside-class" "G_REGEX_ERROR_POSIX_NAMED_CLASS_OUTSIDE_CLASS")
+    '("unmatched-parenthesis" "G_REGEX_ERROR_UNMATCHED_PARENTHESIS")
+    '("inexistent-subpattern-reference" "G_REGEX_ERROR_INEXISTENT_SUBPATTERN_REFERENCE")
+    '("unterminated-comment" "G_REGEX_ERROR_UNTERMINATED_COMMENT")
+    '("expression-too-large" "G_REGEX_ERROR_EXPRESSION_TOO_LARGE")
+    '("memory-error" "G_REGEX_ERROR_MEMORY_ERROR")
+    '("variable-length-lookbehind" "G_REGEX_ERROR_VARIABLE_LENGTH_LOOKBEHIND")
+    '("malformed-condition" "G_REGEX_ERROR_MALFORMED_CONDITION")
+    '("too-many-conditional-branches" "G_REGEX_ERROR_TOO_MANY_CONDITIONAL_BRANCHES")
+    '("assertion-expected" "G_REGEX_ERROR_ASSERTION_EXPECTED")
+    '("unknown-posix-class-name" "G_REGEX_ERROR_UNKNOWN_POSIX_CLASS_NAME")
+    '("posix-collating-elements-not-supported" "G_REGEX_ERROR_POSIX_COLLATING_ELEMENTS_NOT_SUPPORTED")
+    '("hex-code-too-large" "G_REGEX_ERROR_HEX_CODE_TOO_LARGE")
+    '("invalid-condition" "G_REGEX_ERROR_INVALID_CONDITION")
+    '("single-byte-match-in-lookbehind" "G_REGEX_ERROR_SINGLE_BYTE_MATCH_IN_LOOKBEHIND")
+    '("infinite-loop" "G_REGEX_ERROR_INFINITE_LOOP")
+    '("missing-subpattern-name-terminator" "G_REGEX_ERROR_MISSING_SUBPATTERN_NAME_TERMINATOR")
+    '("duplicate-subpattern-name" "G_REGEX_ERROR_DUPLICATE_SUBPATTERN_NAME")
+    '("malformed-property" "G_REGEX_ERROR_MALFORMED_PROPERTY")
+    '("unknown-property" "G_REGEX_ERROR_UNKNOWN_PROPERTY")
+    '("subpattern-name-too-long" "G_REGEX_ERROR_SUBPATTERN_NAME_TOO_LONG")
+    '("too-many-subpatterns" "G_REGEX_ERROR_TOO_MANY_SUBPATTERNS")
+    '("invalid-octal-value" "G_REGEX_ERROR_INVALID_OCTAL_VALUE")
+    '("too-many-branches-in-define" "G_REGEX_ERROR_TOO_MANY_BRANCHES_IN_DEFINE")
+    '("define-repetion" "G_REGEX_ERROR_DEFINE_REPETION")
+    '("inconsistent-newline-options" "G_REGEX_ERROR_INCONSISTENT_NEWLINE_OPTIONS")
+    '("missing-back-reference" "G_REGEX_ERROR_MISSING_BACK_REFERENCE")
   )
 )
 
@@ -528,12 +573,41 @@
   )
 )
 
+(define-flags TrapFlags
+  (in-module "GTest")
+  (c-name "GTestTrapFlags")
+  (gtype-id "G_TYPE_TEST_TRAP_FLAGS")
+  (values
+    '("silence-stdout" "G_TEST_TRAP_SILENCE_STDOUT")
+    '("silence-stderr" "G_TEST_TRAP_SILENCE_STDERR")
+    '("inherit-stdin" "G_TEST_TRAP_INHERIT_STDIN")
+  )
+)
+
+(define-enum LogType
+  (in-module "GTest")
+  (c-name "GTestLogType")
+  (gtype-id "G_TYPE_TEST_LOG_TYPE")
+  (values
+    '("none" "G_TEST_LOG_NONE")
+    '("error" "G_TEST_LOG_ERROR")
+    '("start-binary" "G_TEST_LOG_START_BINARY")
+    '("list-case" "G_TEST_LOG_LIST_CASE")
+    '("skip-case" "G_TEST_LOG_SKIP_CASE")
+    '("start-case" "G_TEST_LOG_START_CASE")
+    '("stop-case" "G_TEST_LOG_STOP_CASE")
+    '("min-result" "G_TEST_LOG_MIN_RESULT")
+    '("max-result" "G_TEST_LOG_MAX_RESULT")
+    '("message" "G_TEST_LOG_MESSAGE")
+  )
+)
+
 (define-enum Error
   (in-module "GThread")
   (c-name "GThreadError")
   (gtype-id "G_TYPE_THREAD_ERROR")
   (values
-    '("n" "G_THREAD_ERROR_AGAIN")
+    '("again" "G_THREAD_ERROR_AGAIN")
   )
 )
 
@@ -715,6 +789,17 @@
     '("phoenician" "G_UNICODE_SCRIPT_PHOENICIAN")
     '("phags-pa" "G_UNICODE_SCRIPT_PHAGS_PA")
     '("nko" "G_UNICODE_SCRIPT_NKO")
+    '("kayah-li" "G_UNICODE_SCRIPT_KAYAH_LI")
+    '("lepcha" "G_UNICODE_SCRIPT_LEPCHA")
+    '("rejang" "G_UNICODE_SCRIPT_REJANG")
+    '("sundanese" "G_UNICODE_SCRIPT_SUNDANESE")
+    '("saurashtra" "G_UNICODE_SCRIPT_SAURASHTRA")
+    '("cham" "G_UNICODE_SCRIPT_CHAM")
+    '("ol-chiki" "G_UNICODE_SCRIPT_OL_CHIKI")
+    '("vai" "G_UNICODE_SCRIPT_VAI")
+    '("carian" "G_UNICODE_SCRIPT_CARIAN")
+    '("lycian" "G_UNICODE_SCRIPT_LYCIAN")
+    '("lydian" "G_UNICODE_SCRIPT_LYDIAN")
   )
 )
 
@@ -750,10 +835,6 @@
     '("n-directories" "G_USER_N_DIRECTORIES")
   )
 )
-
-
-;; From galias.h
-
 
 
 ;; From galloca.h
@@ -1113,6 +1194,14 @@
   (c-name "g_async_queue_new")
   (is-constructor-of "GAsyncQueue")
   (return-type "GAsyncQueue*")
+)
+
+(define-function g_async_queue_new_full
+  (c-name "g_async_queue_new_full")
+  (return-type "GAsyncQueue*")
+  (parameters
+    '("GDestroyNotify" "item_free_func")
+  )
 )
 
 (define-method lock
@@ -1828,26 +1917,6 @@
 
 
 
-;; From gbsearcharray.h
-
-(define-function if
-  (c-name "if")
-  (return-type "else")
-  (parameters
-    '("cmp-<" "0")
-  )
-)
-
-(define-function MIN
-  (c-name "MIN")
-  (return-type "return")
-  (parameters
-    '("barray->n_nodes-+" "1")
-  )
-)
-
-
-
 ;; From gcache.h
 
 (define-function g_cache_new
@@ -1906,6 +1975,89 @@
   (parameters
     '("GHFunc" "func")
     '("gpointer" "user_data")
+  )
+)
+
+
+
+;; From gchecksum.h
+
+(define-method get_length
+  (of-object "GChecksumType")
+  (c-name "g_checksum_type_get_length")
+  (return-type "gssize")
+)
+
+(define-function g_checksum_new
+  (c-name "g_checksum_new")
+  (is-constructor-of "GChecksum")
+  (return-type "GChecksum*")
+  (parameters
+    '("GChecksumType" "checksum_type")
+  )
+)
+
+(define-method reset
+  (of-object "GChecksum")
+  (c-name "g_checksum_reset")
+  (return-type "none")
+)
+
+(define-method copy
+  (of-object "GChecksum")
+  (c-name "g_checksum_copy")
+  (return-type "GChecksum*")
+)
+
+(define-method free
+  (of-object "GChecksum")
+  (c-name "g_checksum_free")
+  (return-type "none")
+)
+
+(define-method update
+  (of-object "GChecksum")
+  (c-name "g_checksum_update")
+  (return-type "none")
+  (parameters
+    '("const-guchar*" "data")
+    '("gsize" "length")
+  )
+)
+
+(define-method get_string
+  (of-object "GChecksum")
+  (c-name "g_checksum_get_string")
+  (return-type "const-gchar*")
+)
+
+(define-method get_digest
+  (of-object "GChecksum")
+  (c-name "g_checksum_get_digest")
+  (return-type "none")
+  (parameters
+    '("guint8*" "buffer")
+    '("gsize*" "digest_len")
+  )
+)
+
+(define-function g_compute_checksum_for_data
+  (c-name "g_compute_checksum_for_data")
+  (return-type "gchar*")
+  (parameters
+    '("GChecksumType" "checksum_type")
+    '("const-guchar*" "data")
+    '("gsize" "length")
+  )
+)
+
+(define-function g_compute_checksum_for_string
+  (c-name "g_compute_checksum_for_string")
+  (return-type "gchar*")
+  (parameters
+    '("GChecksumType" "checksum_type")
+    '("const-gchar*" "str")
+    '("gssize" "length")
   )
 )
 
@@ -1996,6 +2148,18 @@
   (parameters
     '("const-gchar*" "to_codeset")
     '("const-gchar*" "from_codeset")
+  )
+)
+
+(define-method 
+  (of-object "GIConv")
+  (c-name "g_iconv")
+  (return-type "gsize")
+  (parameters
+    '("gchar**" "inbuf")
+    '("gsize*" "inbytes_left")
+    '("gchar**" "outbuf")
+    '("gsize*" "outbytes_left")
   )
 )
 
@@ -2278,10 +2442,6 @@
     '("gpointer" "user_data")
   )
 )
-
-
-
-;; From gdatasetprivate.h
 
 
 
@@ -2677,10 +2837,6 @@
 
 
 
-;; From gdebug.h
-
-
-
 ;; From gdir.h
 
 (define-function g_dir_open
@@ -2771,6 +2927,17 @@
   (varargs #t)
 )
 
+(define-function g_set_error_literal
+  (c-name "g_set_error_literal")
+  (return-type "none")
+  (parameters
+    '("GError**" "err")
+    '("GQuark" "domain")
+    '("gint" "code")
+    '("const-gchar*" "message")
+  )
+)
+
 (define-function g_propagate_error
   (c-name "g_propagate_error")
   (return-type "none")
@@ -2786,6 +2953,27 @@
   (parameters
     '("GError**" "err")
   )
+)
+
+(define-function g_prefix_error
+  (c-name "g_prefix_error")
+  (return-type "none")
+  (parameters
+    '("GError**" "err")
+    '("const-gchar*" "format")
+  )
+  (varargs #t)
+)
+
+(define-function g_propagate_prefixed_error
+  (c-name "g_propagate_prefixed_error")
+  (return-type "none")
+  (parameters
+    '("GError**" "dest")
+    '("GError*" "src")
+    '("const-gchar*" "format")
+  )
+  (varargs #t)
 )
 
 
@@ -2860,6 +3048,14 @@
     '("const-gchar*" "tmpl")
     '("gchar**" "name_used")
     '("GError**" "error")
+  )
+)
+
+(define-function g_format_size_for_display
+  (c-name "g_format_size_for_display")
+  (return-type "char*")
+  (parameters
+    '("goffset" "size")
   )
 )
 
@@ -3065,6 +3261,43 @@
   (of-object "GHashTable")
   (c-name "g_hash_table_get_values")
   (return-type "GList*")
+)
+
+(define-method init
+  (of-object "GHashTableIter")
+  (c-name "g_hash_table_iter_init")
+  (return-type "none")
+  (parameters
+    '("GHashTable*" "hash_table")
+  )
+)
+
+(define-method next
+  (of-object "GHashTableIter")
+  (c-name "g_hash_table_iter_next")
+  (return-type "gboolean")
+  (parameters
+    '("gpointer*" "key")
+    '("gpointer*" "value")
+  )
+)
+
+(define-method get_hash_table
+  (of-object "GHashTableIter")
+  (c-name "g_hash_table_iter_get_hash_table")
+  (return-type "GHashTable*")
+)
+
+(define-method remove
+  (of-object "GHashTableIter")
+  (c-name "g_hash_table_iter_remove")
+  (return-type "none")
+)
+
+(define-method steal
+  (of-object "GHashTableIter")
+  (c-name "g_hash_table_iter_steal")
+  (return-type "none")
 )
 
 (define-method ref
@@ -3723,6 +3956,14 @@
   (c-name "g_io_channel_win32_new_messages")
   (return-type "GIOChannel*")
   (parameters
+    '("gsize" "hwnd")
+  )
+)
+
+(define-function g_io_channel_win32_new_messages
+  (c-name "g_io_channel_win32_new_messages")
+  (return-type "GIOChannel*")
+  (parameters
     '("guint" "hwnd")
   )
 )
@@ -4142,7 +4383,7 @@
 (define-method set_comment
   (of-object "GKeyFile")
   (c-name "g_key_file_set_comment")
-  (return-type "none")
+  (return-type "gboolean")
   (parameters
     '("const-gchar*" "group_name")
     '("const-gchar*" "key")
@@ -4165,7 +4406,7 @@
 (define-method remove_comment
   (of-object "GKeyFile")
   (c-name "g_key_file_remove_comment")
-  (return-type "none")
+  (return-type "gboolean")
   (parameters
     '("const-gchar*" "group_name")
     '("const-gchar*" "key")
@@ -4176,7 +4417,7 @@
 (define-method remove_key
   (of-object "GKeyFile")
   (c-name "g_key_file_remove_key")
-  (return-type "none")
+  (return-type "gboolean")
   (parameters
     '("const-gchar*" "group_name")
     '("const-gchar*" "key")
@@ -4187,24 +4428,12 @@
 (define-method remove_group
   (of-object "GKeyFile")
   (c-name "g_key_file_remove_group")
-  (return-type "none")
+  (return-type "gboolean")
   (parameters
     '("const-gchar*" "group_name")
     '("GError**" "error")
   )
 )
-
-
-
-;; From glib.h
-
-
-
-;; From glibintl.h
-
-
-
-;; From glib-object.h
 
 
 
@@ -4932,6 +5161,18 @@
   )
 )
 
+(define-function g_timeout_add_seconds_full
+  (c-name "g_timeout_add_seconds_full")
+  (return-type "guint")
+  (parameters
+    '("gint" "priority")
+    '("guint" "interval")
+    '("GSourceFunc" "function")
+    '("gpointer" "data")
+    '("GDestroyNotify" "notify")
+  )
+)
+
 (define-function g_timeout_add_seconds
   (c-name "g_timeout_add_seconds")
   (return-type "guint")
@@ -5063,6 +5304,22 @@
   )
 )
 
+(define-method push
+  (of-object "GMarkupParseContext")
+  (c-name "g_markup_parse_context_push")
+  (return-type "none")
+  (parameters
+    '("GMarkupParser*" "parser")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method pop
+  (of-object "GMarkupParseContext")
+  (c-name "g_markup_parse_context_pop")
+  (return-type "gpointer")
+)
+
 (define-method end_parse
   (of-object "GMarkupParseContext")
   (c-name "g_markup_parse_context_end_parse")
@@ -5078,6 +5335,12 @@
   (return-type "const-gchar*")
 )
 
+(define-method get_element_stack
+  (of-object "GMarkupParseContext")
+  (c-name "g_markup_parse_context_get_element_stack")
+  (return-type "const-GSList*")
+)
+
 (define-method get_position
   (of-object "GMarkupParseContext")
   (c-name "g_markup_parse_context_get_position")
@@ -5086,6 +5349,12 @@
     '("gint*" "line_number")
     '("gint*" "char_number")
   )
+)
+
+(define-method get_user_data
+  (of-object "GMarkupParseContext")
+  (c-name "g_markup_parse_context_get_user_data")
+  (return-type "gpointer")
 )
 
 (define-function g_markup_escape_text
@@ -5115,6 +5384,20 @@
   )
 )
 
+(define-function g_markup_collect_attributes
+  (c-name "g_markup_collect_attributes")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "element_name")
+    '("const-gchar**" "attribute_names")
+    '("const-gchar**" "attribute_values")
+    '("GError**" "error")
+    '("GMarkupCollectType" "first_type")
+    '("const-gchar*" "first_attr")
+  )
+  (varargs #t)
+)
+
 
 
 ;; From gmem.h
@@ -5123,7 +5406,7 @@
   (c-name "g_malloc")
   (return-type "gpointer")
   (parameters
-    '("gulong" "n_bytes")
+    '("gsize" "n_bytes")
   )
 )
 
@@ -5131,7 +5414,7 @@
   (c-name "g_malloc0")
   (return-type "gpointer")
   (parameters
-    '("gulong" "n_bytes")
+    '("gsize" "n_bytes")
   )
 )
 
@@ -5140,7 +5423,7 @@
   (return-type "gpointer")
   (parameters
     '("gpointer" "mem")
-    '("gulong" "n_bytes")
+    '("gsize" "n_bytes")
   )
 )
 
@@ -5156,7 +5439,7 @@
   (c-name "g_try_malloc")
   (return-type "gpointer")
   (parameters
-    '("gulong" "n_bytes")
+    '("gsize" "n_bytes")
   )
 )
 
@@ -5164,7 +5447,7 @@
   (c-name "g_try_malloc0")
   (return-type "gpointer")
   (parameters
-    '("gulong" "n_bytes")
+    '("gsize" "n_bytes")
   )
 )
 
@@ -5173,7 +5456,7 @@
   (return-type "gpointer")
   (parameters
     '("gpointer" "mem")
-    '("gulong" "n_bytes")
+    '("gsize" "n_bytes")
   )
 )
 
@@ -5202,7 +5485,7 @@
   (parameters
     '("const-gchar*" "name")
     '("gint" "atom_size")
-    '("gulong" "area_size")
+    '("gsize" "area_size")
     '("gint" "type")
   )
 )
@@ -5380,6 +5663,18 @@
   )
 )
 
+(define-function g_warn_message
+  (c-name "g_warn_message")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+    '("const-char*" "file")
+    '("int" "line")
+    '("const-char*" "func")
+    '("const-char*" "warnexpr")
+  )
+)
+
 (define-function g_assert_warning
   (c-name "g_assert_warning")
   (return-type "none")
@@ -5416,10 +5711,6 @@
     '("GPrintFunc" "func")
   )
 )
-
-
-
-;; From gmirroringtable.h
 
 
 
@@ -5937,6 +6228,20 @@
 
 
 
+;; From gpoll.h
+
+(define-function g_poll
+  (c-name "g_poll")
+  (return-type "gint")
+  (parameters
+    '("GPollFD*" "fds")
+    '("guint" "nfds")
+    '("gint" "timeout")
+  )
+)
+
+
+
 ;; From gprimes.h
 
 (define-function g_spaced_primes_closest
@@ -6018,10 +6323,6 @@
     '("va_list" "args")
   )
 )
-
-
-
-;; From gprintfint.h
 
 
 
@@ -7132,10 +7433,6 @@
 
 
 
-;; From gscripttable.h
-
-
-
 ;; From gsequence.h
 
 (define-function g_sequence_new
@@ -7491,6 +7788,15 @@
   (return-type "gpointer")
   (parameters
     '("gsize" "block_size")
+  )
+)
+
+(define-function g_slice_copy
+  (c-name "g_slice_copy")
+  (return-type "gpointer")
+  (parameters
+    '("gsize" "block_size")
+    '("gconstpointer" "mem_block")
   )
 )
 
@@ -8035,6 +8341,15 @@
   )
 )
 
+(define-function g_utime
+  (c-name "g_utime")
+  (return-type "int")
+  (parameters
+    '("const-gchar*" "filename")
+    '("struct-utimbuf*" "utb")
+  )
+)
+
 
 
 ;; From gstrfuncs.h
@@ -8488,6 +8803,46 @@
   )
 )
 
+(define-function g_dgettext
+  (c-name "g_dgettext")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "domain")
+    '("const-gchar*" "msgid")
+  )
+)
+
+(define-function g_dngettext
+  (c-name "g_dngettext")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "domain")
+    '("const-gchar*" "msgid")
+    '("const-gchar*" "msgid_plural")
+    '("gulong" "n")
+  )
+)
+
+(define-function g_dpgettext
+  (c-name "g_dpgettext")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "domain")
+    '("const-gchar*" "msgctxtid")
+    '("gsize" "msgidoffset")
+  )
+)
+
+(define-function g_dpgettext2
+  (c-name "g_dpgettext2")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "domain")
+    '("const-gchar*" "context")
+    '("const-gchar*" "msgid")
+  )
+)
+
 
 
 ;; From gstring.h
@@ -8725,6 +9080,27 @@
   )
 )
 
+(define-method overwrite
+  (of-object "GString")
+  (c-name "g_string_overwrite")
+  (return-type "GString*")
+  (parameters
+    '("gsize" "pos")
+    '("const-gchar*" "val")
+  )
+)
+
+(define-method overwrite_len
+  (of-object "GString")
+  (c-name "g_string_overwrite_len")
+  (return-type "GString*")
+  (parameters
+    '("gsize" "pos")
+    '("const-gchar*" "val")
+    '("gssize" "len")
+  )
+)
+
 (define-method erase
   (of-object "GString")
   (c-name "g_string_erase")
@@ -8747,6 +9123,16 @@
   (return-type "GString*")
 )
 
+(define-method vprintf
+  (of-object "GString")
+  (c-name "g_string_vprintf")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "format")
+    '("va_list" "args")
+  )
+)
+
 (define-method printf
   (of-object "GString")
   (c-name "g_string_printf")
@@ -8755,6 +9141,16 @@
     '("const-gchar*" "format")
   )
   (varargs #t)
+)
+
+(define-method append_vprintf
+  (of-object "GString")
+  (c-name "g_string_append_vprintf")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "format")
+    '("va_list" "args")
+  )
 )
 
 (define-method append_printf
@@ -8767,10 +9163,376 @@
   (varargs #t)
 )
 
+(define-method append_uri_escaped
+  (of-object "GString")
+  (c-name "g_string_append_uri_escaped")
+  (return-type "GString*")
+  (parameters
+    '("const-char*" "unescaped")
+    '("const-char*" "reserved_chars_allowed")
+    '("gboolean" "allow_utf8")
+  )
+)
+
 (define-method up
   (of-object "GString")
   (c-name "g_string_up")
   (return-type "GString*")
+)
+
+
+
+;; From gtestutils.h
+
+(define-function g_strcmp0
+  (c-name "g_strcmp0")
+  (return-type "int")
+  (parameters
+    '("const-char*" "str1")
+    '("const-char*" "str2")
+  )
+)
+
+(define-function g_test_minimized_result
+  (c-name "g_test_minimized_result")
+  (return-type "none")
+  (parameters
+    '("double" "minimized_quantity")
+    '("const-char*" "format")
+  )
+  (varargs #t)
+)
+
+(define-function g_test_maximized_result
+  (c-name "g_test_maximized_result")
+  (return-type "none")
+  (parameters
+    '("double" "maximized_quantity")
+    '("const-char*" "format")
+  )
+  (varargs #t)
+)
+
+(define-function g_test_init
+  (c-name "g_test_init")
+  (return-type "none")
+  (parameters
+    '("int*" "argc")
+    '("char***" "argv")
+  )
+  (varargs #t)
+)
+
+(define-function g_test_run
+  (c-name "g_test_run")
+  (return-type "int")
+)
+
+(define-function g_test_add_func
+  (c-name "g_test_add_func")
+  (return-type "none")
+  (parameters
+    '("const-char*" "testpath")
+    '("void-(*" "test_func")
+  )
+)
+
+(define-function g_test_add_data_func
+  (c-name "g_test_add_data_func")
+  (return-type "none")
+  (parameters
+    '("const-char*" "testpath")
+    '("gconstpointer" "test_data")
+    '("void-(*" "test_func")
+  )
+)
+
+(define-function g_test_message
+  (c-name "g_test_message")
+  (return-type "none")
+  (parameters
+    '("const-char*" "format")
+  )
+  (varargs #t)
+)
+
+(define-function g_test_bug_base
+  (c-name "g_test_bug_base")
+  (return-type "none")
+  (parameters
+    '("const-char*" "uri_pattern")
+  )
+)
+
+(define-function g_test_bug
+  (c-name "g_test_bug")
+  (return-type "none")
+  (parameters
+    '("const-char*" "bug_uri_snippet")
+  )
+)
+
+(define-function g_test_timer_start
+  (c-name "g_test_timer_start")
+  (return-type "none")
+)
+
+(define-function g_test_timer_elapsed
+  (c-name "g_test_timer_elapsed")
+  (return-type "double")
+)
+
+(define-function g_test_timer_last
+  (c-name "g_test_timer_last")
+  (return-type "double")
+)
+
+(define-function g_test_queue_free
+  (c-name "g_test_queue_free")
+  (return-type "none")
+  (parameters
+    '("gpointer" "gfree_pointer")
+  )
+)
+
+(define-function g_test_queue_destroy
+  (c-name "g_test_queue_destroy")
+  (return-type "none")
+  (parameters
+    '("GDestroyNotify" "destroy_func")
+    '("gpointer" "destroy_data")
+  )
+)
+
+(define-function g_test_trap_fork
+  (c-name "g_test_trap_fork")
+  (return-type "gboolean")
+  (parameters
+    '("guint64" "usec_timeout")
+    '("GTestTrapFlags" "test_trap_flags")
+  )
+)
+
+(define-function g_test_trap_has_passed
+  (c-name "g_test_trap_has_passed")
+  (return-type "gboolean")
+)
+
+(define-function g_test_trap_reached_timeout
+  (c-name "g_test_trap_reached_timeout")
+  (return-type "gboolean")
+)
+
+(define-function g_test_rand_int
+  (c-name "g_test_rand_int")
+  (return-type "gint32")
+)
+
+(define-function g_test_rand_int_range
+  (c-name "g_test_rand_int_range")
+  (return-type "gint32")
+  (parameters
+    '("gint32" "begin")
+    '("gint32" "end")
+  )
+)
+
+(define-function g_test_rand_double
+  (c-name "g_test_rand_double")
+  (return-type "double")
+)
+
+(define-function g_test_rand_double_range
+  (c-name "g_test_rand_double_range")
+  (return-type "double")
+  (parameters
+    '("double" "range_start")
+    '("double" "range_end")
+  )
+)
+
+(define-function g_test_create_case
+  (c-name "g_test_create_case")
+  (return-type "GTestCase*")
+  (parameters
+    '("const-char*" "test_name")
+    '("gsize" "data_size")
+    '("gconstpointer" "test_data")
+    '("void-(*" "data_setup")
+  )
+)
+
+(define-function g_test_create_suite
+  (c-name "g_test_create_suite")
+  (return-type "GTestSuite*")
+  (parameters
+    '("const-char*" "suite_name")
+  )
+)
+
+(define-function g_test_get_root
+  (c-name "g_test_get_root")
+  (return-type "GTestSuite*")
+)
+
+(define-method add
+  (of-object "GTestSuite")
+  (c-name "g_test_suite_add")
+  (return-type "none")
+  (parameters
+    '("GTestCase*" "test_case")
+  )
+)
+
+(define-method add_suite
+  (of-object "GTestSuite")
+  (c-name "g_test_suite_add_suite")
+  (return-type "none")
+  (parameters
+    '("GTestSuite*" "nestedsuite")
+  )
+)
+
+(define-function g_test_run_suite
+  (c-name "g_test_run_suite")
+  (return-type "int")
+  (parameters
+    '("GTestSuite*" "suite")
+  )
+)
+
+(define-function g_test_trap_assertions
+  (c-name "g_test_trap_assertions")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+    '("const-char*" "file")
+    '("int" "line")
+    '("const-char*" "func")
+    '("guint64" "assertion_flags")
+    '("const-char*" "pattern")
+  )
+)
+
+(define-function g_assertion_message
+  (c-name "g_assertion_message")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+    '("const-char*" "file")
+    '("int" "line")
+    '("const-char*" "func")
+    '("const-char*" "message")
+  )
+)
+
+(define-function g_assertion_message_expr
+  (c-name "g_assertion_message_expr")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+    '("const-char*" "file")
+    '("int" "line")
+    '("const-char*" "func")
+    '("const-char*" "expr")
+  )
+)
+
+(define-function g_assertion_message_cmpstr
+  (c-name "g_assertion_message_cmpstr")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+    '("const-char*" "file")
+    '("int" "line")
+    '("const-char*" "func")
+    '("const-char*" "expr")
+    '("const-char*" "arg1")
+    '("const-char*" "cmp")
+    '("const-char*" "arg2")
+  )
+)
+
+(define-function g_assertion_message_cmpnum
+  (c-name "g_assertion_message_cmpnum")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+    '("const-char*" "file")
+    '("int" "line")
+    '("const-char*" "func")
+    '("const-char*" "expr")
+    '("long-double" "arg1")
+    '("const-char*" "cmp")
+    '("long-double" "arg2")
+    '("char" "numtype")
+  )
+)
+
+(define-function g_assertion_message_error
+  (c-name "g_assertion_message_error")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+    '("const-char*" "file")
+    '("int" "line")
+    '("const-char*" "func")
+    '("const-char*" "expr")
+    '("GError*" "error")
+    '("GQuark" "error_domain")
+    '("int" "error_code")
+  )
+)
+
+(define-function g_test_add_vtable
+  (c-name "g_test_add_vtable")
+  (return-type "none")
+  (parameters
+    '("const-char*" "testpath")
+    '("gsize" "data_size")
+    '("gconstpointer" "test_data")
+    '("void-(*" "data_setup")
+  )
+)
+
+(define-method name
+  (of-object "GTestLogType")
+  (c-name "g_test_log_type_name")
+  (return-type "const-char*")
+)
+
+(define-function g_test_log_buffer_new
+  (c-name "g_test_log_buffer_new")
+  (is-constructor-of "GTestLogBuffer")
+  (return-type "GTestLogBuffer*")
+)
+
+(define-method free
+  (of-object "GTestLogBuffer")
+  (c-name "g_test_log_buffer_free")
+  (return-type "none")
+)
+
+(define-method push
+  (of-object "GTestLogBuffer")
+  (c-name "g_test_log_buffer_push")
+  (return-type "none")
+  (parameters
+    '("guint" "n_bytes")
+    '("const-guint8*" "bytes")
+  )
+)
+
+(define-method pop
+  (of-object "GTestLogBuffer")
+  (c-name "g_test_log_buffer_pop")
+  (return-type "GTestLogMsg*")
+)
+
+(define-method free
+  (of-object "GTestLogMsg")
+  (c-name "g_test_log_msg_free")
+  (return-type "none")
 )
 
 
@@ -9003,6 +9765,23 @@
   )
 )
 
+(define-function g_once_init_enter_impl
+  (c-name "g_once_init_enter_impl")
+  (return-type "gboolean")
+  (parameters
+    '("volatile-gsize*" "value_location")
+  )
+)
+
+(define-function g_once_init_leave
+  (c-name "g_once_init_leave")
+  (return-type "none")
+  (parameters
+    '("volatile-gsize*" "value_location")
+    '("gsize" "initialization_value")
+  )
+)
+
 
 
 ;; From gthreadpool.h
@@ -9112,15 +9891,6 @@
 (define-function g_thread_pool_get_max_idle_time
   (c-name "g_thread_pool_get_max_idle_time")
   (return-type "guint")
-)
-
-
-
-;; From gthreadprivate.h
-
-(define-function g_thread_init_glib
-  (c-name "g_thread_init_glib")
-  (return-type "none")
 )
 
 
@@ -9350,14 +10120,6 @@
 
 
 
-;; From gunibreak.h
-
-
-
-;; From gunichartables.h
-
-
-
 ;; From gunicode.h
 
 (define-function g_get_charset
@@ -9510,6 +10272,12 @@
   (of-object "gunichar")
   (c-name "g_unichar_break_type")
   (return-type "GUnicodeBreakType")
+)
+
+(define-method combining_class
+  (of-object "gunichar")
+  (c-name "g_unichar_combining_class")
+  (return-type "gint")
 )
 
 (define-function g_unicode_canonical_ordering
@@ -9827,15 +10595,44 @@
 
 
 
-;; From gunicodeprivate.h
+;; From gurifuncs.h
 
+(define-function g_uri_unescape_string
+  (c-name "g_uri_unescape_string")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "escaped_string")
+    '("const-char*" "illegal_characters")
+  )
+)
 
+(define-function g_uri_unescape_segment
+  (c-name "g_uri_unescape_segment")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "escaped_string")
+    '("const-char*" "escaped_string_end")
+    '("const-char*" "illegal_characters")
+  )
+)
 
-;; From gunicomp.h
+(define-function g_uri_parse_scheme
+  (c-name "g_uri_parse_scheme")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "uri")
+  )
+)
 
-
-
-;; From gunidecomp.h
+(define-function g_uri_escape_string
+  (c-name "g_uri_escape_string")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "unescaped")
+    '("const-char*" "reserved_chars_allowed")
+    '("gboolean" "allow_utf8")
+  )
+)
 
 
 
@@ -9905,6 +10702,24 @@
 (define-function g_get_user_cache_dir
   (c-name "g_get_user_cache_dir")
   (return-type "const-gchar*")
+)
+
+(define-function g_get_system_data_dirs
+  (c-name "g_get_system_data_dirs")
+  (return-type "const-gchar**")
+)
+
+(define-function g_win32_get_system_data_dirs_for_module
+  (c-name "g_win32_get_system_data_dirs_for_module")
+  (return-type "const-gchar**")
+  (parameters
+    '("gconstpointer" "address")
+  )
+)
+
+(define-function g_get_language_names
+  (c-name "g_get_language_names")
+  (return-type "const-gchar**")
 )
 
 (define-function g_get_user_special_dir
@@ -10039,6 +10854,14 @@
   )
 )
 
+(define-function atexit
+  (c-name "atexit")
+  (return-type "int")
+  (parameters
+    '("void" "(*")
+  )
+)
+
 (define-function g_find_program_in_path
   (c-name "g_find_program_in_path")
   (return-type "gchar*")
@@ -10099,6 +10922,14 @@
     '("const-gchar*" "package")
     '("const-gchar*" "dll_name")
     '("const-gchar*" "subdir")
+  )
+)
+
+(define-function g_win32_get_package_installation_directory_of_module
+  (c-name "g_win32_get_package_installation_directory_of_module")
+  (return-type "gchar*")
+  (parameters
+    '("gpointer" "hmodule")
   )
 )
 

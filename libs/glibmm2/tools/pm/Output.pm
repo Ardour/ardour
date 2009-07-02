@@ -598,6 +598,12 @@ sub output_wrap_property($$$$$$)
     {
       # construct-only functions can be read, but not written.
       $proxy_suffix = "_ReadOnly";
+
+      if($objProperty->get_readable() ne 1)
+      {
+        $self->output_wrap_failed($name, "attempt to wrap write-only and construct-only property.");
+        return;
+      }
     }
     elsif($objProperty->get_readable() ne 1)
     {

@@ -2,21 +2,21 @@
 #ifndef _GLIBMM_CONTAINERHANDLE_SHARED_H
 #define _GLIBMM_CONTAINERHANDLE_SHARED_H
 
-/* $Id: containerhandle_shared.h 322 2006-09-19 20:36:43Z murrayc $ */
+/* $Id: containerhandle_shared.h 779 2009-01-19 17:58:50Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -29,7 +29,6 @@
 #include <list>
 
 #include <glib-object.h>
-#include <glib/gmem.h>
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <glibmm/wrap.h>
@@ -54,11 +53,16 @@ namespace Glib
 /**
  * @ingroup ContHandles
  */
+ 
+//! Ownership of the container
+/*! Defines how and if the container will release the list and 
+ * its elemens when it is destroyed 
+ */
 enum OwnershipType
 {
-  OWNERSHIP_NONE = 0,
-  OWNERSHIP_SHALLOW, //Release the list, but not its elements, when the container is deleted
-  OWNERSHIP_DEEP //Release the list, and its elements, when the container is deleted.
+  OWNERSHIP_NONE = 0, /*!< Do not release anything */
+  OWNERSHIP_SHALLOW, /*!< Release the list, but not its elements, when the container is deleted */
+  OWNERSHIP_DEEP /*!< Release the list, and its elements, when the container is deleted. */
 };
 
 
@@ -314,40 +318,22 @@ struct TypeTraits<std::string>
     { g_free(const_cast<CTypeNonConst>(str)); }
 };
 
-/** Specialization for bool
+/** Specialization for bool.
  * @ingroup ContHelpers
  */
 template <>
 struct TypeTraits<bool>
 {
-  typedef bool          CppType;
-  typedef gboolean*     CType;
-  typedef gboolean*     CTypeNonConst;
+  typedef bool     CppType;
+  typedef gboolean CType;
+  typedef gboolean CTypeNonConst;
 
-  static CType to_c_type (CppType val) { return (int*)GINT_TO_POINTER(val); }
-  static CType to_c_type (CType ptr)   { return ptr;                        }  
-
-  static CppType to_cpp_type(CType ptr)
-  { 
-    if(ptr)
-    {
-	  //We use this for gboolean too, because it is actually an int.
-	  return GPOINTER_TO_INT(ptr);
-	}
-	else
-	  return CppType();
-  }
-
-  static void release_c_type(CType /* ptr */)
-  {
-
-  }
+  static CType   to_c_type      (CppType item) { return static_cast<CType>(item); }
+  static CType   to_c_type      (CType   item) { return item; }
+  static CppType to_cpp_type    (CType   item) { return (item != 0); }
+  static void    release_c_type (CType) {}
 };
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #ifndef GLIBMM_HAVE_TEMPLATE_SEQUENCE_CTORS
 
 /* The STL containers in Sun's libCstd don't support templated sequence
@@ -368,6 +354,4 @@ void fill_container(Cont& container, In pbegin, In pend)
 
 } // namespace Glib
 
-
 #endif /* _GLIBMM_CONTAINERHANDLE_SHARED_H */
-

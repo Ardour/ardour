@@ -1,16 +1,22 @@
 ;; -*- scheme -*-
 ; object definitions ...
-(define-object TypeModule
-  (in-module "G")
+(define-object Module
+  (in-module "GType")
   (parent "GObject")
   (c-name "GTypeModule")
   (gtype-id "G_TYPE_TYPE_MODULE")
 )
 
+(define-object Plugin
+  (in-module "GType")
+  (c-name "GTypePlugin")
+  (gtype-id "G_TYPE_TYPE_PLUGIN")
+)
+
 ;; Enumerations and flags ...
 
-(define-flags ParamFlags
-  (in-module "G")
+(define-flags Flags
+  (in-module "GParam")
   (c-name "GParamFlags")
   (gtype-id "G_TYPE_PARAM_FLAGS")
   (values
@@ -19,12 +25,15 @@
     '("construct" "G_PARAM_CONSTRUCT")
     '("construct-only" "G_PARAM_CONSTRUCT_ONLY")
     '("lax-validation" "G_PARAM_LAX_VALIDATION")
+    '("static-name" "G_PARAM_STATIC_NAME")
     '("private" "G_PARAM_PRIVATE")
+    '("static-nick" "G_PARAM_STATIC_NICK")
+    '("static-blurb" "G_PARAM_STATIC_BLURB")
   )
 )
 
-(define-flags SignalFlags
-  (in-module "G")
+(define-flags Flags
+  (in-module "GSignal")
   (c-name "GSignalFlags")
   (gtype-id "G_TYPE_SIGNAL_FLAGS")
   (values
@@ -38,8 +47,8 @@
   )
 )
 
-(define-flags ConnectFlags
-  (in-module "G")
+(define-flags Flags
+  (in-module "GConnect")
   (c-name "GConnectFlags")
   (gtype-id "G_TYPE_CONNECT_FLAGS")
   (values
@@ -48,8 +57,8 @@
   )
 )
 
-(define-flags SignalMatchType
-  (in-module "G")
+(define-flags MatchType
+  (in-module "GSignal")
   (c-name "GSignalMatchType")
   (gtype-id "G_TYPE_SIGNAL_MATCH_TYPE")
   (values
@@ -62,8 +71,8 @@
   )
 )
 
-(define-flags TypeDebugFlags
-  (in-module "G")
+(define-flags DebugFlags
+  (in-module "GType")
   (c-name "GTypeDebugFlags")
   (gtype-id "G_TYPE_TYPE_DEBUG_FLAGS")
   (values
@@ -74,8 +83,8 @@
   )
 )
 
-(define-flags TypeFundamentalFlags
-  (in-module "G")
+(define-flags FundamentalFlags
+  (in-module "GType")
   (c-name "GTypeFundamentalFlags")
   (gtype-id "G_TYPE_TYPE_FUNDAMENTAL_FLAGS")
   (values
@@ -86,8 +95,8 @@
   )
 )
 
-(define-flags TypeFlags
-  (in-module "G")
+(define-flags Flags
+  (in-module "GType")
   (c-name "GTypeFlags")
   (gtype-id "G_TYPE_TYPE_FLAGS")
   (values
@@ -97,7 +106,16 @@
 )
 
 
-;; From gobject/gboxed.h
+;; From gboxed.h
+
+(define-function g_boxed_copy
+  (c-name "g_boxed_copy")
+  (return-type "gpointer")
+  (parameters
+    '("GType" "boxed_type")
+    '("gconstpointer" "src_boxed")
+  )
+)
 
 (define-function g_boxed_free
   (c-name "g_boxed_free")
@@ -148,6 +166,15 @@
   )
 )
 
+(define-method take_boxed
+  (of-object "GValue")
+  (c-name "g_value_take_boxed")
+  (return-type "none")
+  (parameters
+    '("gconstpointer" "v_boxed")
+  )
+)
+
 (define-method set_boxed_take_ownership
   (of-object "GValue")
   (c-name "g_value_set_boxed_take_ownership")
@@ -172,17 +199,38 @@
   (return-type "GType")
 )
 
+(define-function g_date_get_type
+  (c-name "g_date_get_type")
+  (return-type "GType")
+)
+
+(define-function g_strv_get_type
+  (c-name "g_strv_get_type")
+  (return-type "GType")
+)
+
 (define-function g_gstring_get_type
   (c-name "g_gstring_get_type")
   (return-type "GType")
 )
 
+(define-function g_hash_table_get_type
+  (c-name "g_hash_table_get_type")
+  (return-type "GType")
+)
+
+(define-function g_regex_get_type
+  (c-name "g_regex_get_type")
+  (return-type "GType")
+)
 
 
-;; From gobject/gclosure.h
+
+;; From gclosure.h
 
 (define-function g_cclosure_new
   (c-name "g_cclosure_new")
+  (is-constructor-of "GCclosure")
   (return-type "GClosure*")
   (parameters
     '("GCallback" "callback_func")
@@ -203,6 +251,7 @@
 
 (define-function g_signal_type_cclosure_new
   (c-name "g_signal_type_cclosure_new")
+  (is-constructor-of "GSignalTypeCclosure")
   (return-type "GClosure*")
   (parameters
     '("GType" "itype")
@@ -328,7 +377,7 @@
 
 
 
-;; From gobject/genums.h
+;; From genums.h
 
 (define-function g_enum_get_value
   (c-name "g_enum_get_value")
@@ -454,11 +503,16 @@
 
 
 
-;; From gobject/gmarshal.h
+;; From gmarshal.h
 
 
 
-;; From gobject/gobject.h
+;; From gobject.h
+
+(define-function g_initially_unowned_get_type
+  (c-name "g_initially_unowned_get_type")
+  (return-type "GType")
+)
 
 (define-method install_property
   (of-object "GObjectClass")
@@ -477,6 +531,57 @@
   (parameters
     '("const-gchar*" "property_name")
   )
+)
+
+(define-method list_properties
+  (of-object "GObjectClass")
+  (c-name "g_object_class_list_properties")
+  (return-type "GParamSpec**")
+  (parameters
+    '("guint*" "n_properties")
+  )
+)
+
+(define-method override_property
+  (of-object "GObjectClass")
+  (c-name "g_object_class_override_property")
+  (return-type "none")
+  (parameters
+    '("guint" "property_id")
+    '("const-gchar*" "name")
+  )
+)
+
+(define-function g_object_interface_install_property
+  (c-name "g_object_interface_install_property")
+  (return-type "none")
+  (parameters
+    '("gpointer" "g_iface")
+    '("GParamSpec*" "pspec")
+  )
+)
+
+(define-function g_object_interface_find_property
+  (c-name "g_object_interface_find_property")
+  (return-type "GParamSpec*")
+  (parameters
+    '("gpointer" "g_iface")
+    '("const-gchar*" "property_name")
+  )
+)
+
+(define-function g_object_interface_list_properties
+  (c-name "g_object_interface_list_properties")
+  (return-type "GParamSpec**")
+  (parameters
+    '("gpointer" "g_iface")
+    '("guint*" "n_properties_p")
+  )
+)
+
+(define-function g_object_get_type
+  (c-name "g_object_get_type")
+  (return-type "GType")
 )
 
 (define-function g_object_new
@@ -610,6 +715,22 @@
   (return-type "none")
 )
 
+(define-function g_object_is_floating
+  (c-name "g_object_is_floating")
+  (return-type "gboolean")
+  (parameters
+    '("gpointer" "object")
+  )
+)
+
+(define-function g_object_ref_sink
+  (c-name "g_object_ref_sink")
+  (return-type "gpointer")
+  (parameters
+    '("gpointer" "object")
+  )
+)
+
 (define-function g_object_ref
   (c-name "g_object_ref")
   (return-type "gpointer")
@@ -661,6 +782,26 @@
   (return-type "none")
   (parameters
     '("gpointer*" "weak_pointer_location")
+  )
+)
+
+(define-method add_toggle_ref
+  (of-object "GObject")
+  (c-name "g_object_add_toggle_ref")
+  (return-type "none")
+  (parameters
+    '("GToggleNotify" "notify")
+    '("gpointer" "data")
+  )
+)
+
+(define-method remove_toggle_ref
+  (of-object "GObject")
+  (c-name "g_object_remove_toggle_ref")
+  (return-type "none")
+  (parameters
+    '("GToggleNotify" "notify")
+    '("gpointer" "data")
   )
 )
 
@@ -796,7 +937,7 @@
 (define-method dup_object
   (of-object "GValue")
   (c-name "g_value_dup_object")
-  (return-type "GObject*")
+  (return-type "gpointer")
 )
 
 (define-function g_signal_connect_object
@@ -811,10 +952,25 @@
   )
 )
 
+(define-method force_floating
+  (of-object "GObject")
+  (c-name "g_object_force_floating")
+  (return-type "none")
+)
+
 (define-method run_dispose
   (of-object "GObject")
   (c-name "g_object_run_dispose")
   (return-type "none")
+)
+
+(define-method take_object
+  (of-object "GValue")
+  (c-name "g_value_take_object")
+  (return-type "none")
+  (parameters
+    '("gpointer" "v_object")
+  )
 )
 
 (define-method set_object_take_ownership
@@ -826,9 +982,18 @@
   )
 )
 
+(define-function g_object_compat_control
+  (c-name "g_object_compat_control")
+  (return-type "gsize")
+  (parameters
+    '("gsize" "what")
+    '("gpointer" "data")
+  )
+)
 
 
-;; From gobject/gparam.h
+
+;; From gparam.h
 
 (define-method ref
   (of-object "GParamSpec")
@@ -846,6 +1011,12 @@
   (of-object "GParamSpec")
   (c-name "g_param_spec_sink")
   (return-type "none")
+)
+
+(define-method ref_sink
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_ref_sink")
+  (return-type "GParamSpec*")
 )
 
 (define-method get_qdata
@@ -885,6 +1056,12 @@
   (parameters
     '("GQuark" "quark")
   )
+)
+
+(define-method get_redirect_target
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_get_redirect_target")
+  (return-type "GParamSpec*")
 )
 
 (define-function g_param_value_set_default
@@ -974,6 +1151,15 @@
   (return-type "GParamSpec*")
 )
 
+(define-method take_param
+  (of-object "GValue")
+  (c-name "g_value_take_param")
+  (return-type "none")
+  (parameters
+    '("GParamSpec*" "param")
+  )
+)
+
 (define-method set_param_take_ownership
   (of-object "GValue")
   (c-name "g_value_set_param_take_ownership")
@@ -992,16 +1178,6 @@
   )
 )
 
-(define-function _g_param_type_register_static_constant
-  (c-name "_g_param_type_register_static_constant")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-GParamSpecTypeInfo*" "pspec_info")
-    '("GType" "opt_type")
-  )
-)
-
 (define-function g_param_spec_internal
   (c-name "g_param_spec_internal")
   (return-type "gpointer")
@@ -1016,6 +1192,7 @@
 
 (define-function g_param_spec_pool_new
   (c-name "g_param_spec_pool_new")
+  (is-constructor-of "GParamSpecPool")
   (return-type "GParamSpecPool*")
   (parameters
     '("gboolean" "type_prefixing")
@@ -1073,7 +1250,7 @@
 
 
 
-;; From gobject/gparamspecs.h
+;; From gparamspecs.h
 
 (define-function g_param_spec_char
   (c-name "g_param_spec_char")
@@ -1336,9 +1513,30 @@
   )
 )
 
+(define-function g_param_spec_override
+  (c-name "g_param_spec_override")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("GParamSpec*" "overridden")
+  )
+)
+
+(define-function g_param_spec_gtype
+  (c-name "g_param_spec_gtype")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GType" "is_a_type")
+    '("GParamFlags" "flags")
+  )
+)
 
 
-;; From gobject/gsignal.h
+
+;; From gsignal.h
 
 (define-function g_signal_newv
   (c-name "g_signal_newv")
@@ -1382,6 +1580,23 @@
     '("GType" "itype")
     '("GSignalFlags" "signal_flags")
     '("guint" "class_offset")
+    '("GSignalAccumulator" "accumulator")
+    '("gpointer" "accu_data")
+    '("GSignalCMarshaller" "c_marshaller")
+    '("GType" "return_type")
+    '("guint" "n_params")
+  )
+  (varargs #t)
+)
+
+(define-function g_signal_new_class_handler
+  (c-name "g_signal_new_class_handler")
+  (return-type "guint")
+  (parameters
+    '("const-gchar*" "signal_name")
+    '("GType" "itype")
+    '("GSignalFlags" "signal_flags")
+    '("GCallback" "class_handler")
     '("GSignalAccumulator" "accumulator")
     '("gpointer" "accu_data")
     '("GSignalCMarshaller" "c_marshaller")
@@ -1513,7 +1728,7 @@
   (return-type "gulong")
   (parameters
     '("guint" "signal_id")
-    '("GQuark" "quark")
+    '("GQuark" "detail")
     '("GSignalEmissionHook" "hook_func")
     '("gpointer" "hook_data")
     '("GDestroyNotify" "data_destroy")
@@ -1678,6 +1893,16 @@
   )
 )
 
+(define-function g_signal_override_class_handler
+  (c-name "g_signal_override_class_handler")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "signal_name")
+    '("GType" "instance_type")
+    '("GCallback" "class_handler")
+  )
+)
+
 (define-function g_signal_chain_from_overridden
   (c-name "g_signal_chain_from_overridden")
   (return-type "none")
@@ -1687,17 +1912,46 @@
   )
 )
 
-(define-function _g_signals_destroy
-  (c-name "_g_signals_destroy")
+(define-function g_signal_chain_from_overridden_handler
+  (c-name "g_signal_chain_from_overridden_handler")
   (return-type "none")
   (parameters
-    '("GType" "itype")
+    '("gpointer" "instance")
+  )
+  (varargs #t)
+)
+
+(define-function g_signal_accumulator_true_handled
+  (c-name "g_signal_accumulator_true_handled")
+  (return-type "gboolean")
+  (parameters
+    '("GSignalInvocationHint*" "ihint")
+    '("GValue*" "return_accu")
+    '("const-GValue*" "handler_return")
+    '("gpointer" "dummy")
+  )
+)
+
+(define-function g_signal_handlers_destroy
+  (c-name "g_signal_handlers_destroy")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
   )
 )
 
 
 
-;; From gobject/gsourceclosure.h
+;; From gsourceclosure.h
+
+(define-method set_closure
+  (of-object "GSource")
+  (c-name "g_source_set_closure")
+  (return-type "none")
+  (parameters
+    '("GClosure*" "closure")
+  )
+)
 
 (define-function g_io_channel_get_type
   (c-name "g_io_channel_get_type")
@@ -1711,7 +1965,7 @@
 
 
 
-;; From gobject/gtype.h
+;; From gtype.h
 
 (define-function g_type_init
   (c-name "g_type_init")
@@ -1788,6 +2042,12 @@
   (return-type "gpointer")
 )
 
+(define-method class_peek_static
+  (of-object "GType")
+  (c-name "g_type_class_peek_static")
+  (return-type "gpointer")
+)
+
 (define-function g_type_class_unref
   (c-name "g_type_class_unref")
   (return-type "none")
@@ -1816,6 +2076,26 @@
 (define-function g_type_interface_peek_parent
   (c-name "g_type_interface_peek_parent")
   (return-type "gpointer")
+  (parameters
+    '("gpointer" "g_iface")
+  )
+)
+
+(define-method default_interface_ref
+  (of-object "GType")
+  (c-name "g_type_default_interface_ref")
+  (return-type "gpointer")
+)
+
+(define-method default_interface_peek
+  (of-object "GType")
+  (c-name "g_type_default_interface_peek")
+  (return-type "gpointer")
+)
+
+(define-function g_type_default_interface_unref
+  (c-name "g_type_default_interface_unref")
+  (return-type "none")
   (parameters
     '("gpointer" "g_iface")
   )
@@ -1878,6 +2158,20 @@
   )
 )
 
+(define-method register_static_simple
+  (of-object "GType")
+  (c-name "g_type_register_static_simple")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "type_name")
+    '("guint" "class_size")
+    '("GClassInitFunc" "class_init")
+    '("guint" "instance_size")
+    '("GInstanceInitFunc" "instance_init")
+    '("GTypeFlags" "flags")
+  )
+)
+
 (define-method register_dynamic
   (of-object "GType")
   (c-name "g_type_register_dynamic")
@@ -1930,6 +2224,33 @@
   )
 )
 
+(define-method interface_prerequisites
+  (of-object "GType")
+  (c-name "g_type_interface_prerequisites")
+  (return-type "GType*")
+  (parameters
+    '("guint*" "n_prerequisites")
+  )
+)
+
+(define-function g_type_class_add_private
+  (c-name "g_type_class_add_private")
+  (return-type "none")
+  (parameters
+    '("gpointer" "g_class")
+    '("gsize" "private_size")
+  )
+)
+
+(define-method get_private
+  (of-object "GTypeInstance")
+  (c-name "g_type_instance_get_private")
+  (return-type "gpointer")
+  (parameters
+    '("GType" "private_type")
+  )
+)
+
 (define-method get_plugin
   (of-object "GType")
   (c-name "g_type_get_plugin")
@@ -1941,7 +2262,7 @@
   (c-name "g_type_interface_get_plugin")
   (return-type "GTypePlugin*")
   (parameters
-    '("GType" "implementation_type")
+    '("GType" "interface_type")
   )
 )
 
@@ -1993,6 +2314,24 @@
   (return-type "none")
   (parameters
     '("gpointer" "g_class")
+  )
+)
+
+(define-function g_type_add_interface_check
+  (c-name "g_type_add_interface_check")
+  (return-type "none")
+  (parameters
+    '("gpointer" "check_data")
+    '("GTypeInterfaceCheckFunc" "check_func")
+  )
+)
+
+(define-function g_type_remove_interface_check
+  (c-name "g_type_remove_interface_check")
+  (return-type "none")
+  (parameters
+    '("gpointer" "check_data")
+    '("GTypeInterfaceCheckFunc" "check_func")
   )
 )
 
@@ -2096,7 +2435,7 @@
 
 
 
-;; From gobject/gtypemodule.h
+;; From gtypemodule.h
 
 (define-function g_type_module_get_type
   (c-name "g_type_module_get_type")
@@ -2147,9 +2486,29 @@
   )
 )
 
+(define-method register_enum
+  (of-object "GTypeModule")
+  (c-name "g_type_module_register_enum")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-GEnumValue*" "const_static_values")
+  )
+)
+
+(define-method register_flags
+  (of-object "GTypeModule")
+  (c-name "g_type_module_register_flags")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-GFlagsValue*" "const_static_values")
+  )
+)
 
 
-;; From gobject/gtypeplugin.h
+
+;; From gtypeplugin.h
 
 (define-function g_type_plugin_get_type
   (c-name "g_type_plugin_get_type")
@@ -2184,27 +2543,28 @@
   (c-name "g_type_plugin_complete_interface_info")
   (return-type "none")
   (parameters
-    '("GType" "interface_type")
     '("GType" "instance_type")
+    '("GType" "interface_type")
     '("GInterfaceInfo*" "info")
   )
 )
 
 
 
-;; From gobject/gvaluearray.h
+;; From gvaluearray.h
 
 (define-method get_nth
   (of-object "GValueArray")
   (c-name "g_value_array_get_nth")
   (return-type "GValue*")
   (parameters
-    '("guint" "index")
+    '("guint" "index_")
   )
 )
 
 (define-function g_value_array_new
   (c-name "g_value_array_new")
+  (is-constructor-of "GValueArray")
   (return-type "GValueArray*")
   (parameters
     '("guint" "n_prealloced")
@@ -2246,7 +2606,7 @@
   (c-name "g_value_array_insert")
   (return-type "GValueArray*")
   (parameters
-    '("guint" "index")
+    '("guint" "index_")
     '("const-GValue*" "value")
   )
 )
@@ -2256,7 +2616,7 @@
   (c-name "g_value_array_remove")
   (return-type "GValueArray*")
   (parameters
-    '("guint" "index")
+    '("guint" "index_")
   )
 )
 
@@ -2281,11 +2641,11 @@
 
 
 
-;; From gobject/gvaluecollector.h
+;; From gvaluecollector.h
 
 
 
-;; From gobject/gvalue.h
+;; From gvalue.h
 
 (define-method init
   (of-object "GValue")
@@ -2377,7 +2737,16 @@
 
 
 
-;; From gobject/gvaluetypes.h
+;; From gvaluetypes.h
+
+(define-method set_char
+  (of-object "GValue")
+  (c-name "g_value_set_char")
+  (return-type "none")
+  (parameters
+    '("gchar" "v_char")
+  )
+)
 
 (define-method get_char
   (of-object "GValue")
@@ -2580,6 +2949,26 @@
   (return-type "gpointer")
 )
 
+(define-function g_gtype_get_type
+  (c-name "g_gtype_get_type")
+  (return-type "GType")
+)
+
+(define-method set_gtype
+  (of-object "GValue")
+  (c-name "g_value_set_gtype")
+  (return-type "none")
+  (parameters
+    '("GType" "v_gtype")
+  )
+)
+
+(define-method get_gtype
+  (of-object "GValue")
+  (c-name "g_value_get_gtype")
+  (return-type "GType")
+)
+
 (define-function g_pointer_type_register_static
   (c-name "g_pointer_type_register_static")
   (return-type "GType")
@@ -2593,6 +2982,15 @@
   (return-type "gchar*")
   (parameters
     '("const-GValue*" "value")
+  )
+)
+
+(define-method take_string
+  (of-object "GValue")
+  (c-name "g_value_take_string")
+  (return-type "none")
+  (parameters
+    '("gchar*" "v_string")
   )
 )
 

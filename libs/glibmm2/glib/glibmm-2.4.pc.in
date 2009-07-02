@@ -2,6 +2,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
+gmmprocdir=@GMMPROC_DIR@
 
 Name: GLibmm
 Description: C++ wrapper for GLib

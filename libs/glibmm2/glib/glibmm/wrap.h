@@ -2,21 +2,21 @@
 #ifndef _GLIBMM_WRAP_H
 #define _GLIBMM_WRAP_H
 
-/* $Id: wrap.h 447 2007-10-03 09:51:41Z murrayc $ */
+/* $Id: wrap.h 779 2009-01-19 17:58:50Z murrayc $ */
 
 /* Copyright (C) 1998-2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -78,9 +78,15 @@ TInterface* wrap_auto_interface(GObject* object, bool take_copy = false)
   //so we at least get the expected type:
   TInterface* result = 0;
   if(pCppObject)
-     result = dynamic_cast<TInterface*>(pCppObject);
+  {
+    result = dynamic_cast<TInterface*>(pCppObject);
+    if(!result)
+    {
+      g_warning("Glib::wrap_auto_interface(): The C++ instance (%s) does not dynamic_cast to the interface.\n", typeid(*pCppObject).name());
+    }
+  }
   else
-     result = new TInterface((typename TInterface::BaseObjectType*)object);
+    result = new TInterface((typename TInterface::BaseObjectType*)object);
 
   // take_copy=true is used where the GTK+ function doesn't do
   // an extra ref for us, and always for plain struct members.

@@ -14,11 +14,7 @@
 )
 
 
-;; From /home/murrayc/cvs/gnome212/glib/gmodule/gmoduleconf.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gmodule/gmodule.h
+;; From gmodule.h
 
 (define-function g_module_supported
   (c-name "g_module_supported")

@@ -10,16 +10,16 @@
 /* Copyright (C) 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -29,7 +29,7 @@
 #include <glibmm/main.h>
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
-#include <glib/gtypes.h>
+#include <glib.h>
 
 #include <string>
 #include <glibmmconfig.h>
@@ -269,11 +269,10 @@ public:
    * @throw Glib::ConvertError
    */
   
-  /** This function cannot be called on a channel with <tt>0</tt> encoding.
+  /** Reads a Unicode character from @a channel.
+   * This function cannot be called on a channel with <tt>0</tt> encoding.
    * @param thechar A location to return a character.
-   * @param error A location to return an error of type G::ConvertError
-   * or G::IOChannelError.
-   * @return A G::IOStatus.
+   * @return A IOStatus.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   IOStatus read(gunichar& thechar);
@@ -305,8 +304,6 @@ public:
    * success if count &lt; 6 and the channel's encoding is non-<tt>0</tt>.
    * This indicates that the next UTF-8 character is too wide for
    * the buffer.
-   * @param error A location to return an error of type G::ConvertError
-   * or G::IOChannelError.
    * @return The status of the operation.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -392,12 +389,10 @@ public:
    * @param count The size of the buffer. If -1, the buffer
    * is taken to be a nul-terminated string.
    * @param bytes_written The number of bytes written. This can be nonzero
-   * even if the return value is not G::IO_STATUS_NORMAL.
-   * If the return value is G::IO_STATUS_NORMAL and the
+   * even if the return value is not IO_STATUS_NORMAL.
+   * If the return value is IO_STATUS_NORMAL and the
    * channel is blocking, this will always be equal
-   * to @a count  if @a count  &gt;= 0.
-   * @param error A location to return an error of type G::ConvertError
-   * or G::IOChannelError.
+   * to @a count if @a count &gt;= 0.
    * @return The status of the operation.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -414,11 +409,10 @@ public:
    * @throw Glib::ConvertError
    */
   
-  /** This function cannot be called on a channel with <tt>0</tt> encoding.
+  /** Writes a Unicode character to @a channel.
+   * This function cannot be called on a channel with <tt>0</tt> encoding.
    * @param thechar A character.
-   * @param error A location to return an error of type G::ConvertError
-   * or G::IOChannelError.
-   * @return A G::IOStatus.
+   * @return A IOStatus.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   IOStatus write(gunichar unichar);
@@ -438,12 +432,11 @@ public:
    */
   
   /** Replacement for g_io_channel_seek() with the new API.
-   * @param offset The offset in bytes from the position specified by @a type .
-   * @param type A G::SeekType. The type G::SEEK_CUR is only allowed in those
+   * @param offset The offset in bytes from the position specified by @a type.
+   * @param type A SeekType. The type SEEK_CUR is only allowed in those
    * cases where a call to g_io_channel_set_encoding()
    * is allowed. See the documentation for
    * g_io_channel_set_encoding() for details.
-   * @param error A location to return an error of type G::IOChannelError.
    * @return The status of the operation.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -460,10 +453,9 @@ public:
    */
   
   /** Flushes the write buffer for the GIOChannel.
-   * @param error Location to store an error of type G::IOChannelError.
    * @return The status of the operation: One of
-   * G::IO_CHANNEL_NORMAL, G::IO_CHANNEL_AGAIN, or
-   * G::IO_CHANNEL_ERROR.
+   * IO_CHANNEL_NORMAL, IO_CHANNEL_AGAIN, or
+   * IO_CHANNEL_ERROR.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   IOStatus flush();
@@ -482,10 +474,10 @@ public:
    */
   
   /** Close an IO channel. Any pending data to be written will be
-   * flushed if @a flush  is <tt>true</tt>. The channel will not be freed until the
+   * flushed if @a flush is <tt>true</tt>. The channel will not be freed until the
    * last reference is dropped using g_io_channel_unref().
    * @param flush If <tt>true</tt>, flush pending.
-   * @param err Location to store a G::IOChannelError.
+   * @param err Location to store a IOChannelError.
    * @return The status of the operation.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -509,7 +501,7 @@ public:
    */
   
   /** Sets the buffer size.
-   * @param size The size of the buffer. 0 == pick a good size.
+   * @param size The size of the buffer, or 0 to let GLib pick a good size.
    */
   void set_buffer_size(gsize size);
 
@@ -525,10 +517,10 @@ public:
    * @return Bitwise combination of the flags set on the channel.
    */
   
-  /** Gets the current flags for a G::IOChannel, including read-only
-   * flags such as G::IO_FLAG_IS_READABLE.
+  /** Gets the current flags for a IOChannel, including read-only
+   * flags such as IO_FLAG_IS_READABLE.
    * 
-   * The values of the flags G::IO_FLAG_IS_READABLE and G::IO_FLAG_IS_WRITEABLE
+   * The values of the flags IO_FLAG_IS_READABLE and IO_FLAG_IS_WRITEABLE
    * are cached for internal use by the channel when it is created.
    * If they should change at some later point (e.g. partial shutdown
    * of a socket with the UNIX shutdown() function), the user
@@ -544,9 +536,8 @@ public:
    * @throw Glib::IOChannelError
    */
   
-  /** Sets the (writeable) flags in @a channel  to ( @a flags  & G::IO_CHANNEL_SET_MASK).
+  /** Sets the (writeable) flags in @a channel to ( @a flags & IO_CHANNEL_SET_MASK).
    * @param flags The flags to set on the IO channel.
-   * @param error A location to return an error of type G::IOChannelError.
    * @return The status of the operation.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -579,11 +570,11 @@ public:
    * 
    * A buffered channel can only be set unbuffered if the channel's
    * internal buffers have been flushed. Newly created channels or
-   * channels which have returned G::IO_STATUS_EOF
+   * channels which have returned IO_STATUS_EOF
    * not require such a flush. For write-only channels, a call to
    * g_io_channel_flush() is sufficient. For all other channels,
    * the buffers may be flushed by a call to g_io_channel_seek_position().
-   * This includes the possibility of seeking with seek type G::SEEK_CUR
+   * This includes the possibility of seeking with seek type SEEK_CUR
    * and an offset of zero. Note that this means that socket-based
    * channels cannot be set unbuffered once they have had data
    * read from them.
@@ -601,8 +592,8 @@ public:
    * @return The buffering status of the channel.
    */
   
-  /** Return Value: <tt>true</tt> if the @a channel  is buffered.
-   * @return <tt>true</tt> if the @a channel  is buffered.
+  /** Return Value: <tt>true</tt> if the @a channel is buffered.
+   * @return <tt>true</tt> if the @a channel is buffered.
    */
   bool get_buffered() const;
 
@@ -612,11 +603,10 @@ public:
    * @return Bitwise combination of Glib::IOCondition flags.
    */
   
-  /** This function returns a G::IOCondition depending on whether there
-   * is data to be read/space to write data in the
-   * internal buffers in the G::IOChannel. Only the flags G::IO_IN and
-   * G::IO_OUT may be set.
-   * @return A G::IOCondition.
+  /** This function returns a IOCondition depending on whether there
+   * is data to be read/space to write data in the internal buffers in 
+   * the IOChannel. Only the flags IO_IN and IO_OUT may be set.
+   * @return A IOCondition.
    */
   IOCondition get_buffer_condition() const;
 

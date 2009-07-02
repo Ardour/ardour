@@ -1,4 +1,4 @@
-dnl $Id: base.m4 454 2007-10-12 19:58:00Z arminb $
+dnl $Id: base.m4 452 2007-10-12 19:52:11Z arminb $
 divert(-1)
 
 dnl

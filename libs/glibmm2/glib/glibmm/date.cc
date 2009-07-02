@@ -10,22 +10,23 @@
 /* Copyright (C) 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <glib/gmem.h>
-#include <glib.h>
+//#include <glib/gtestutils.h> //For g_assert() in glib >= 2.15.0
+//#include <glib/gmessages.h> //For g_assert() in glib < 2.15.0
+#include <glib.h> //For g_assert() in all versions of glib.
 
 #include <ctime>
 #include <algorithm>
@@ -60,6 +61,20 @@ Date::Date(const GDate& castitem)
 :
   gobject_ (castitem)
 {}
+
+Date::Date(const Date& other)
+{
+  g_date_clear(&gobject_, 1);
+  g_date_set_julian(&gobject_, other.get_julian());
+}
+
+Date& Date::operator=(const Date& other)
+{
+  if (&other != this)
+    g_date_set_julian(&gobject_, other.get_julian());
+
+  return *this;
+}
 
 void Date::clear()
 {

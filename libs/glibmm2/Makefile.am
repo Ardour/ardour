@@ -1,14 +1,14 @@
 ACLOCAL_AMFLAGS	= -I scripts
 
-SUBDIRS		= tools glib scripts 
+SUBDIRS		= tools glib gio examples scripts tests MSVC_Net2005 MSVC_Net2008 docs
 DIST_SUBDIRS	= $(SUBDIRS)
 
 EXTRA_DIST	= build_shared/Makefile_build.am_fragment \
 		  build_shared/Makefile_build_gensrc.am_fragment \
 		  build_shared/Makefile_gensrc.am_fragment \
-		  build_shared/Makefile_gensrc_platform.am_fragment \
-		  build_shared/Makefile_build_extra.am_fragment \
-		  CHANGES README.win32
+		  build_shared/Makefile_conditional.am_fragment \
+		  README.win32 \
+                  COPYING COPYING.tools
 
 
 all-local:
@@ -27,7 +27,7 @@ dist-hook:
 	echo; echo
 
 
-# include $(top_srcdir)/docs/Makefile_web.am_fragment
+include $(top_srcdir)/docs/Makefile_web.am_fragment
 
 doc_tarball_files = \
 	docs/images/*.gif \
@@ -60,5 +60,106 @@ doc-clean: doc-clean-recursive
 doc-rebuild:
 	(cd docs && $(MAKE) $(AM_MAKEFLAGS) doc-rebuild)
 
-.PHONY: post-html post-html-local post-html-recursive doc-clean doc-clean-recursive doc-rebuild
+SVN_REV=`svnversion -n`
+URL_KEY=URL:
+SVN_PATH=`svn info |grep "$(URL_KEY)" |sed -e "s/$(URL_KEY)\s*//"`
+ROOT_KEY=Repository Root:
+SVN_ROOT=`svn info |grep "$(ROOT_KEY)" |sed -e "s/$(ROOT_KEY)\s*//"`
+
+tag-release: distcheck
+	@svn cp -r$(SVN_REV) -m "tag $(PACKAGE) $(VERSION)" $(SVN_PATH) $(SVN_ROOT)/tags/$(PACKAGE)-$(VERSION) \
+		|| (echo "Tagging failed.  Do you have local changes that are not committed?" \
+		&& echo "Try running 'svn update'." && false)
+	@echo "Release Tagged."
+
+upload-release: tag-release
+	scp $(DIST_ARCHIVES) master.gnome.org:
+	@echo "Tarball uploaded.  Now run install-module on master.gnome.org"
+	@echo "[hint: make install-module]"
+
+RELEASE_ANNOUNCE_LIST = gnome-announce-list@gnome.org, gtkmm-list@gnome.org
+release-announce:
+	@echo "Please send the following announcement to:"
+	@echo "$(RELEASE_ANNOUNCE_LIST)"
+	@echo ""
+	@echo "Subject: ANNOUNCE: $(PACKAGE) $(VERSION) released"
+	@echo ""
+	@echo "============================== CUT HERE =============================="
+	@echo "* ABOUT $(PACKAGE) *"
+	@echo ""
+	@echo "  $(PACKAGE) is a C++ API for glib and gio.  It is useful on its own "
+	@echo "  and is a dependency of gtkmm, the C++ API for GTK+."
+	@echo ""
+	@echo "  $(PACKAGE) $(GLIBMM_RELEASE) wraps new API in glib $(GLIBMM_RELEASE), including the gio library, "
+	@echo "  and is API/ABI-compatibile with older versions of glibmm back to "
+	@echo "  version 2.4. It is a version of the glibmm-2.4 API."
+	@echo ""
+	@echo "  For more information, please visit http://gtkmm.org/"
+	@echo ""
+	@echo "* DOWNLOAD *"
+	@echo ""
+	@echo "  Source packages for $(PACKAGE) (as well as API-stable bindings for the "
+	@echo "  rest of the GNOME platform) can be downloaded from:"
+	@echo ""
+	@echo "    http://www.gtkmm.org/download.shtml"
+	@echo ""
+	@echo "* DEVELOPMENT *"
+	@echo ""
+	@echo "  There is active discussion on the mailing list: "
+	@echo "  http://www.gtkmm.org/mailinglist.shtml"
+	@echo "  and in the #c++ channel on irc.gnome.org"
+	@echo ""
+	@echo "  gtkmm and $(PACKAGE) stay in-sync with GTK+ by following the official "
+	@echo "  GNOME release schedule:"
+	@echo ""
+	@echo "    http://www.gnome.org/start/unstable/"
+	@echo ""
+	@echo "* CHANGES *"
+	@echo ""
+	@echo "  --- INSERT NEWS HERE ---"
+	@echo "============================== CUT HERE =============================="
+
+install-module:
+	ssh master.gnome.org install-module $(DIST_ARCHIVES)
+
+release: upload-release release-announce
+
+#FIXME: use generic paths, rather than my particular paths
+H2DEF = env python /opt/gnome2/share/pygobject/2.0/codegen/h2def.py
+DEFS_INC_DIR = /opt/gnome2/include
+GEN_ENUM = env perl ./tools/enum.pl
+GEN_EXTRA_DEFS_GLIB = ./tools/extra_defs_gen/generate_extra_defs
+GEN_EXTRA_DEFS_GIO = ./tools/extra_defs_gen/generate_defs_gio
+DOCEXTRACT = /home/jonathon/gnome-build/pygobject/codegen/docextract_to_xml.py
+
+defs: glib-defs gio-defs docextract
+	@echo
+	@echo "*** Make sure to examine the .defs files to make sure they look reasonable"
+	@echo
+
+glib-defs:
+	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/glib/*.h > glib/src/glib_functions.defs
+	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/gobject/*.h > glib/src/gobject_functions.defs
+	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/gmodule.h > glib/src/gmodule_functions.defs
+	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/glib/*.h > glib/src/glib_enums.defs
+	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gobject/*.h > glib/src/gobject_enums.defs
+	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gmodule.h > glib/src/gmodule_enums.defs
+
+gio-defs:
+	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/gio/*.h \
+		$(DEFS_INC_DIR)/gio-unix-2.0/gio/*.h > gio/src/gio_methods.defs
+	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gio/*.h \
+		$(DEFS_INC_DIR)/gio-unix-2.0/gio/*.h > gio/src/gio_enums.defs
+	$(GEN_EXTRA_DEFS_GIO) > gio/src/gio_signals.defs
+
+docextract:
+	$(DOCEXTRACT) -s ../glib/glib \
+		-s ../glib/docs/reference/glib \
+		-s ../glib/gobject \
+		-s ../glib/docs/reference/gobject > glib/src/glib_docs.xml
+	$(DOCEXTRACT) -s ../glib/gio \
+		-s ../glib/docs/reference/gio > gio/src/gio_docs.xml
+
+
+.PHONY: post-html post-html-local post-html-recursive doc-clean doc-clean-recursive doc-rebuild release tag-release upload-release release-announce install-module defs glib-defs gio-defs docextract
 

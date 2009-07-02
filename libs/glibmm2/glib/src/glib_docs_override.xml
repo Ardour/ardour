@@ -147,5 +147,69 @@ Since: 2.14
 </function>
 
 
+<function name="g_key_file_load_from_file">
+<description>
+Loads a key file into an empty KeyFile instance.
+If the file could not be loaded then a FileError or KeyFileError exception is thrown.
+
+@throw Glib::FileError
+@throw Glib::KeyFileError
+</description>
+<parameters>
+<parameter name="key_file">
+<parameter_description> an empty #GKeyFile struct
+</parameter_description>
+</parameter>
+<parameter name="file">
+<parameter_description> the path of a filename to load, in the GLib file name encoding
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> flags from #GKeyFileFlags
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> return location for a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if a key file could be loaded, %FALSE othewise
+Since: 2.6
+</return>
+</function>
+
+
+<function name="g_key_file_get_value">
+<description>
+Returns the value associated with @key under @group_name.
+
+@throw Glib::FileError in the event the key cannot be found (with the Glib::KEY_FILE_ERROR_KEY_NOT_FOUND code).
+@throw Glib::KeyFileError in the event that the @group_name cannot be found (with the Glib::KEY_FILE_ERROR_GROUP_NOT_FOUND).
+</description>
+<parameters>
+<parameter name="key_file">
+<parameter_description> a #GKeyFile
+</parameter_description>
+</parameter>
+<parameter name="group_name">
+<parameter_description> a group name
+</parameter_description>
+</parameter>
+<parameter name="key">
+<parameter_description> a key
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> return location for a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> The value as a string.
+
+Since: 2.6
+</return>
+</function>
+
+
 </root>
 

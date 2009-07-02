@@ -1,4 +1,2272 @@
-2.14.2:
+2.20.0
+
+2009-03-15  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* configure.in: bump rev to 2.20.0
+	* NEWS: update for release
+
+2009-03-09  Daniel Elstner  <danielk@openismus.com>
+
+	* tools/extra_defs_gen/generate_extra_defs.cc (get_properties):
+	Replace nested double quotes in the docs string by single quotes
+	to ease the parsing pain of gmmproc.
+
+2.19.8:
+
+2009-02-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_enums.defs: Regenerated, adding 
+	FILE_CREATE_REPLACE_DESTINATION and Error::TOO_MANY_OPEN_FILES.
+	* gio/src/gio_signals.defs: Regenerated.
+	* go/src/mountoperation: Added the aborted signal.
+
+2009-02-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/drive.hg: Remove extra ;s on the new signalsl, to avoid 
+	compiler warnings.
+
+2.19.3
+
+2009-02-20  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* docs/reference/Makefile.am: fix distcheck issue
+
+2009-02-20  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* NEWS:
+	* configure.in: update for 2.19.3 release
+
+2009-02-17  Daniel Elstner  <danielk@openismus.com>
+
+	* glib/glibmm/debug.h: Remove mention of G_GNUC_PRETTY_FUNCTION in
+	comment because a code maintenance tool of André Klapper complained
+	about it.
+	* glib/glibmm/objectbase.cc: Likewise.
+
+2009-02-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_methods.defs: Regenerated.
+
+	* gio/src/filterinputstream.hg: Added get/set_close_base_stream().
+	* gio/src/filteroutputstream.hg: Added get/set_close_base_stream().
+	* gio/src/unixinputstream.hg: Added get_fd() and get/set_close_fd().
+	* gio/src/unixoutputstream.hg: Added get_fd() and get/set_close_fd().
+
+	* gio/src/datainputstream.[hg|ccg]: Added read_until_async(), 
+	read_until_finish(), read_line_async() and read_line_finish().
+	Added documentation for read_until() and read_line().
+
+2009-02-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_defs_gio.cc: Added unix types.
+	* gio/src/gio_signals.defs: Regenerated.
+	* gio/src/bufferedinputstream.hg: Added buffer_size property.
+	* gio/src/bufferedoutputstream.hg: Added buffer_size and auto_grow 
+	properties.
+	* gio/src/datainputstream.hg: Added byte_order and newline_type 
+	properties.
+	* gio/src/dataoutputstream.hg: Added byte_order property.
+	* gio/src/filterinputstream.hg: Added close_base_ stream property.
+	* gio/src/filteroutputstream.hg:
+	* gio/src/unixinputstream.hg: Added fd and close_fd properties.
+	* gio/src/unixoutputstream.hg: Added fd and close_fd properties.
+
+2009-02-05  Theppitak Karoonboonyanan  <thep@linux.thai.net>	
+
+	* docs/reference/Doxyfile.in:
+	* docs/reference/Makefile.am: Allow glibmm to build outside the source 
+	tree. Bug #570216
+
+2009-02-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/regex.hg: create(): For the version when 
+	GLIBMM_EXCEPTIONS_ENABLED is not defined, do not specify default 
+	parameter values because we have an extra error parameter.
+	Bug #570648 (Bernd Buschinski)
+
+2009-01-20  Deng Xiyue  <manphiz@gmail.com>
+
+	* Change license header to mention Lesser General Public License
+	version 2.1 instead of Library General Public License, to be
+	consistent with COPYING.
+
+2.19.2:
+
+2009-01-19  Tao Wang  <dancefire@gmail.com>
+
+	* glib/src/nodetree.hg: Do not use a non-ASCII dash character, to 
+	avoid the MSVC++ warning C4819 with Visual Studio 2008.
+	Bug #568072
+
+2009-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/wrap.h: wrap_auto_interface<>(): Add a warning to give a 
+	clue when the dynamic_cast fails, for instance if you are doing some 
+	incorrect multiple inheritance.
+
+2009-01-08  Daniel Elstner  <danielk@openismus.com>
+
+	* glib/glibmm/ustring.h (ustring::compose): Add an overload which
+	takes only a format string and no arguments to be substituted.  It
+	is essentially a null-operation as long as the format string does
+	not contain any invalid argument references.  Bug #506394.
+
+2009-01-06  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* glib/src/uriutils.ccg: fix a memory leak in the uri utility functions
+	caused by not freeing the returned C string.  Bug #566845 (Jason Kasper)
+
+2009-01-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg: Added implementation of the 
+	make_directory_with_parents() method overload that takes no parameter.
+	Bug #566003 (Philip Belemezov).
+
+2008-12-24  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/spawn.ccg:
+	* glib/src/spawn.hg: Added Glib::spawn_*() alternative API for when 
+	GLIBMM_EXCEPTIONS_ENABLED is not enabled (when compiling without 
+	C++ exceptions.)
+	Bug #565487
+	(Jonathon Jongsma)
+
+2008-12-14  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* NEWS: update for follow-up release
+
+2008-12-14  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* configure.in: bump to 2.19.1
+
+2008-12-14  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* gio/src/drive.hg: Wrap new signals 'changed', 'disconnected', and
+	'eject_button' with the no_default_handler option so that we don't break ABI
+	by adding new virtual functions
+
+=== 2.19.0 ===
+
+2008-12-12  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* NEWS: update for release
+
+2008-12-12  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* tests/giomm_ioerror/main.cc:
+	* tests/giomm_simple/main.cc: use common filenames so that people other than
+	murrayc can run the tests without errors
+
+2008-12-12  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* gio/src/memoryoutputstream.hg: Fix a copy-paste error where I accidentally
+	left a FilterOutputStream type in
+
+2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* gio/src/memoryoutputstream.ccg:
+	* gio/src/memoryoutputstream.hg: Added MemoryOutputStream, but needs a bit
+	of work on the constructor yet
+
+2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/emblem.ccg:
+	* gio/src/emblem.hg:
+	* gio/src/emblemedicon.ccg:
+	* gio/src/emblemedicon.hg:
+	* tools/m4/convert_gio.m4: add Emblem and EmblemedIcon classes
+
+2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* tools/m4/convert_glib.m4: add a conversion for Glib::KeyFile&
+	* gio/src/desktopappinfo.hg: wrap the new create_from_keyfile() function.
+	In addition, I removed the _WRAP_CTOR and _WRAP_CREATE usage from the
+	desktop_id constructor and wrapped all of the static create* functions using
+	_WRAP_METHOD since these functions do a lot of error handling and can fail
+	to create an object under some circumstances.
+
+2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* docs/reference/Makefile.am: rebuild docs when a giomm header file is
+	changed (similar to how we handle glibmm)
+
+2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* gio/giomm/contenttype.cc:
+	* gio/giomm/contenttype.h: add content_type_from_mime_type()
+
+2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	Wrap a bunch of new / missed API
+
+	* gio/src/appinfo.hg:
+	* gio/src/appinfo.ccg: AppInfo::get_commandline(), can_delete(), do_delete()
+	(need better name?), reset_type_associations(), launch_default_for_uri()
+	* gio/src/cancellable.hg: add commented-out make_pollfd() since I'm not sure
+	yet whether it's useful with the C++ API or not
+	* gio/src/drive.hg: Added signals 'changed', 'disconnected', and
+	'eject_button'
+	* gio/src/icon.hg:
+	* gio/src/icon.ccg: Added Icon::create(string) and Icon::to_string()
+	* gio/src/mount.hg:
+	* gio/src/mount.ccg: Added Mount::guess_content_type_sync(), is_shadowed(),
+	shadow(), and unshadow()
+
+2008-12-01  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* configure.in: bump requirement to glib 2.19.x
+	* gio/src/gio_docs.xml:
+	* gio/src/gio_enums.defs:
+	* gio/src/gio_methods.defs:
+	* gio/src/gio_signals.defs:
+	* glib/src/glib_docs.xml:
+	* glib/src/glib_enums.defs:
+	* glib/src/glib_functions.defs:
+	* glib/src/gmodule_enums.defs:
+	* glib/src/gmodule_functions.defs:
+	* glib/src/gobject_enums.defs:
+	* glib/src/gobject_functions.defs: update the .defs to start on 2.19.x API
+
+2008-12-01  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* Makefile.am: add some convenience rules for generating the .defs files
+
+2008-09-22  Dave Foster <daf@minuslab.net>
+
+	* glib/glibmm/main.h:
+	* glib/glibmm/main.cc: Added SignalIdle::connect_once,
+	SignalTimeout::connect_once, and SignalTimeout::connect_seconds_once.
+
+2008-12-10  Przemysław Grzegorczyk  <pgrzegorczyk@gmail.com>
+
+	* Cleaned up glib includes since in the future, only glib.h (and
+	glib-object.h, etc) will be allowed to be included directly.
+	Bug #563987
+
+2008-12-01  Hubert Figuiere  <hub@figuiere.net>
+
+	* glib/src/markup.ccg: Change the way unused variables
+	are marked. Bug #562716
+
+2008-11-29  Hubert Figuiere  <hub@figuiere.net>
+
+	* glib/src/nodetree.hg: Fix -Wshadow warnings. Bug #555743.
+
+2008-10-20  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* NEWS:
+	* configure.in: bump version to 2.18.1, prepare NEWS for release
+
+2008-10-20  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* Makefile.am: updated the release-announce template
+
+2008-10-16  Armin Burgmeier  <armin@openismus.com>
+
+	* glib/glibmm/ustring.h: Fixed the const char* specialization for
+	Stringify<> by making the string_ member a const Glib::ustring instead
+	of a const Glib::ustring&. Also enabled the char[N] specialization for
+	string literals.
+
+	* tests/glibmm_ustring_compose/main.cc: Enabled the test for the
+	specialization for string literals.
+	Bug #506410 (Szilárd Pfeiffer)
+
+2008-10-15  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* tools/extra_defs_gen/generate_extra_defs.cc: Modify signal and props
+	generation tool to generate interface signals.
+
+2008-10-15  Armin Burgmeier  <armin@openismus.com>
+
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileenumerator.ccg: Made FileEnumerator::next_file not add
+	an additional reference to the return value, because the C version
+	creates a new object. Also, changed ownership of the list returned by
+	FileEnumerator::next_files_finish to be deep instead of shallow. Bug
+	#556387.
+
+2008-10-09  Armin Burgmeier  <armin@openismus.com>
+
+	* gio/src/fileinfo.hg: Rename FILE_TYPE_UNKNOWN to FILE_TYPE_NOT_KNOWN
+	because the former is a #define on Windows in winbase.h, included from
+	windows.h. Keep FILE_TYPE_UNKNOWN for compatibility if it is not
+	already defined.
+
+2008-10-09  Armin Burgmeier  <armin@openismus.com>
+
+	* MSVC_Net2008/Makefile.am: Removed README from EXTRA_DIST to fix
+	`make dist'.
+
+2008-10-08  Armin Burgmeier  <armin@openismus.com>
+
+	* MSVC_Net2005/examples/dispatcher2/dispatcher2.vcproj:
+	* MSVC_Net2005/examples/dispatcher/dispatcher.vcproj:
+	* MSVC_Net2005/examples/options/options.vcproj:
+	* MSVC_Net2005/examples/thread/thread.vcproj:
+	* MSVC_Net2005/examples/thread_pool/thread_pool.vcproj:
+	* MSVC_Net2005/giomm/giomm.vcproj:
+	* MSVC_Net2005/glibmm/glibmm.vcproj: Adapt to the new MSVC++ DLL
+	naming convention.
+
+	* MSVC_Net2008/: Added MSVC 2008 project files.
+
+	* configure.in:
+	* Makefile.am: Add the new files to the build.
+
+2008-10-04  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* gio/src/error.hg: add a workaround for the HOST_NOT_FOUND symbol
+	conflicts, as suggested by Szilárd Pfeiffer in Bug #529496
+	* tests/giomm_ioerror/main.cc: add a test for this
+
+2008-09-19  Armin Burgmeier  <armin@openismus.com>
+
+	* tools/pm/DocsParser.pm (convert_tags_to_doxygen): Keep @param and
+	@throws intact, so these can be used in *_docs_override_xml. Bug
+	#539891.
+
+2008-09-22  Armin Burgmeier  <armin@arbur.net>
+
+	* MSVC_Net2005/glibmm/glibmm.vcproj: Added uriutils.cc and nodetree.cc
+	to the project.
+
+2008-09-22  Armin Burgmeier  <armin@arbur.net>
+
+	* MSVC_Net2005/examples/dispatcher2/dispatcher2.vcproj:
+	* MSVC_Net2005/examples/dispatcher/dispatcher.vcproj:
+	* MSVC_Net2005/examples/markup/markup.vcproj:
+	* MSVC_Net2005/examples/options/options.vcproj:
+	* MSVC_Net2005/examples/thread/thread.vcproj:
+	* MSVC_Net2005/examples/thread_pool/thread_pool.vcproj:
+	* MSVC_Net2005/giomm/giomm.vcproj:
+	* MSVC_Net2005/glibmm/glibmm.vcproj:
+	* MSVC_Net2005/tests/giomm_simple/giomm_simple.vcproj:
+	* MSVC_Net2005/tests/glibmm_value/glibmm_value.vcproj: Fixed the MSVC
+	build of the examples and tests if configure did not run before.
+
+=== 2.18.0 ===
+
+2008-09-21  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* Makefile.am: fix a minor issue in the release target
+
+2008-09-21  Jonathon Jongsma  <jonathon@quotidian.org>
+
+	* NEWS: Add news for 2.18 release
+	* configure.in: bump version number for release
+	* Makefile.am: update release mail template slightly
+
+2008-09-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* COPYING.tools:
+	* Makefile.am: Added COPYING.tools with the GPL because the tools/*.cc 
+	file is GPL. Bug #550789.
+
+=== 2.17.3 ===
+
+2008-09-03  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* NEWS: update for release
+	* configure.in: bump version for release
+
+2008-08-26  Szilárd Pfeiffer  <szilard.pfeiffer@gmail.com>
+
+	* glib/src/nodetree.hg: Implemented clone function to merge the
+	constructors into that and fixed clear function the operator=
+	function.
+	* tests/glibmm_nodetree/main.cc: Simplified the test case.
+	Bug #547901.
+
+2008-08-27  Armin Burgmeier  <armin@arbur.net>
+
+	* MSVC_Net2005/glibmm/glibmm.rc.in:
+	* MSVC_Net2005/giomm/giomm.rc.in: Replaced #include "afxres.h" by
+	#include <windows.h> which does the job equally well, and allows
+	compilation with the freely available Visual Studio Express compiler.
+
+2008-08-27  Armin Burgmeier  <armin@arbur.net>
+
+	* glib/glibmm/ustring.cc: Only include config.h when HAVE_CONFIG_H is
+	defined, to allow building glibmm with MSVC without having generated
+	config.h before. The only thing config.h is used for is the
+	SIZEOF_WCHAR_T define anyway, and this is not needed for a MSVC build.
+	Bug #549343.
+
+2008-08-26  Murray Cumming  <murrayc@murrayc.com>
+
+	* tests/glibmm_nodetree/main.cc: Actually use the copy constructor (or operator=), 
+	instead of just copying the pointer.
+
+2008-08-26  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/nodetree.hg: Added an operator=() because we have a copy constructor.
+	Moved some code into a private clear() method so we can reuse it.
+
+2008-08-26  Szilárd Pfeiffer  <szilard.pfeiffer@gmail.com>
+
+	* glib/src/nodetree.hg: Added a copy constructor. Therefore, take 
+	store the data by value instead of reference, taking it by const reference.
+	* tests/glibmm_nodetree/main.cc: Test the copy constructor.
+	Bug #547909.
+
+2008-08-15  Szilárd Pfeiffer  <szilard.pfeiffer@gmail.com>
+
+	* glib/src/nodetree.hg: Fixed pointer handling problem in find_child.
+	Bug #547909.
+
+2008-08-15  Szilárd Pfeiffer  <szilard.pfeiffer@gmail.com>
+
+	* tests/glibmm_nodetree/main.cc: Implement the C++ version of GNode test
+	case.
+	Bug #547889
+
+2008-07-29  Szilárd Pfeiffer  <szilard.pfeiffer@gmail.com>
+
+	* glib/src/nodetree.hg: Use const_cast<> in the necessary const member 
+	functions instead of gobj() to fix the compilation when using these.
+	Bug #546485.
+
+2008-08-08  Armin Burgmeier  <armin@arbur.net>
+
+	* MSVC_Net2005/: Moved from MSVC_Net2003
+
+	* MSVC_Net2005/glibmm.sln:
+	* MSVC_Net2005/glibmm/glibmm.vcproj:
+	* MSVC_Net2005/examples/dispatcher/dispatcher.vcproj: Converted to
+	project files for Visual Studio 2005.
+
+	* MSVC_Net2005/glibmm/glibmm.rc.in: Removed the #include "resource.h"
+	since there is no resource.h in the project, and the resource still
+	seems to compile.
+
+	* MSVC_Net2005/giomm/giomm.rc.in:
+	* MSVC_Net2005/giomm/giomm.vcproj:
+	* MSVC_Net2005/giomm/Makefile.am: Added giomm to the MSVC project.
+
+	* MSVC_Net2005/tests/giomm_simple/giomm_simple.vcproj:
+	* MSVC_Net2005/tests/giomm_simple/Makefile.am: Added giomm_simple to
+	the MSVC project.
+
+	* MSVC_Net2005/tests/Makefile.am:
+	* MSVC_Net2005/Makefile.am:
+	* Makefile.am:
+	* configure.in: Adapted build files.
+
+=== 2.17.2 ===
+
+2008-08-06  Jonathon Jongsma  <jonathon.jongsma@collabora.co.uk>
+
+	* NEWS: update for 2.17.2
+	* configure.in: bump version
+
+2008-08-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in:
+	* tests/Makefile.am:
+	* tests/glibmm_ustring_compose/main.cc: Added a test case.
+	* glib/glibmm/ustring.h: Added a ustring::Stringify<> 
+	template specialization so that ustring::compose() works with 
+	const char* arguments, though it still needs to be fixed to 
+	work for string literals.
+	Bug #506410 (Szilárd Pfeiffer).
+
+2008-08-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/nodetree.hg: Make gobject_ and data_ private, 
+	to remove them from protected API. Patch from Szilárd Pfeiffer.
+	Bug #546485.
+	Make gobj() inline.
+
+2008-08-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/propertyproxy.h: Added some API documentation 
+	about the need to register a new GType when adding properties.
+	Bug #523043 (Moritz Ulrich).
+
+2008-08-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/reference/glibmm_header.html_fragment: Change the Main 
+	Page link to link to gtkmm.org/documentation.shtml
+
+2008-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/Makefile.am: Remove the mention of tree.cc here to 
+	fix the build. Generated files should never be menioned there.
+
+2008-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/nodetree.hg: Hand-code the TraverseType enum, to add 
+	a prefix to the values.
+	* tests/glibmm_nodetree/main.cc: Adapted.
+
+2008-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/nodetree.hg: find(), find_child(), traverse(), foreach():
+	Rearrange the parameters so we can have default values.
+	* tests/glibmm_nodetree/main.cc: Adapted.
+
+2008-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/nodetree.hg: Move the TraverseFlags enum into 
+	the class, and hand-code it to avoid problems with _WRAP_ENUM(). 
+	* tests/glibmm_nodetree/main.cc: Adapted.
+	Bug #545050 (Szilárd Pfeiffer).
+
+2008-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in:
+	* glib/glibmm.h:
+	* glib/src/Makefile_list_of_hg.am_fragment:
+	* glib/src/nodetree.hg:
+	* glib/src/tree.hg: Renamed to nodetree.hg
+	* tests/Makefile.am:
+	* tests/glibmm_tree/Makefile.am:
+	* tests/glibmm_tree/main.cc: Renamed to glibmm_nodetree/
+
+2008-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/tree.hg: Renamed Glib::Tree to Glib::NodeTree to avoid 
+	confusion with GTree, because we actually wrap GNode, but do not like 
+	that name. As discussed in bug #520778.
+	* tests/glibmm_tree/main.cc: Adapted.
+
+2008-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* Makefile.am: Build the docs at the end, after the tests, to 
+	save time when testing API changes.
+
+	* glib/src/tree.hg: Const corrections: Add const and non-const versions 
+	of many methods, instead of returning non-const objects from const methods.
+	find().
+	Changed max_height() to get_max_height() for consistency.
+	* tests/glibmm_tree/main.cc: Adapted to changed API.
+
+2008-07-29  Szilárd Pfeiffer  <szilard.pfeiffer@gmail.com>
+
+	* glib/src/tree.hg: Make the callbacks take a Tree<> instead of just 
+	the data, so they can use methods on the tree (which can be a node 
+	in the tree).
+	gobject_: Make this protected.
+	Provide the this pointer as data to g_node_new() so we can retrieve 
+	it later.
+	Removed children_ and parent_ because we don't need a separate store now that 
+	we can get the C++ instance from the gobject instance.
+	owns_gobject_: Removed because it is was always true, so the gobject was 
+	always destroyed (and still is).
+	* tests/glibmm_tree/main.cc: Updated for the changed API.
+	Bug #520778.
+
+2008-07-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/volumemonitor.hg: Added the drive_eject_button signal.
+
+2008-07-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_enums.defs: Hacked in a replacement 
+	enum for Gio::Error::HOST_NOT_FOUND as 
+	Gio::Error::HOST_WAS_NOT_FOUND, to avoid a clash with 
+	a netdb.h define.
+	Bug #529496.
+	* configure.in:
+	* tests/Makefile.am:
+	* tests/giomm_ioerror/Makefile.am:
+	* tests/giomm_ioerror/main.cc: Added a test to make sure 
+	that our hacked-in enum value stays hacked in.
+
+2008-07-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_enums.defs:
+	* gio/src/gio_methods.defs:
+	* gio/src/gio_signals.defs: Regenerated.
+	* gio/src/mount.hg: Corrected an _IGNORE().
+	* gio/giomm/contenttype.cc:
+	* gio/giomm/contenttype.h: Added content_type_guess_for_tree().
+
+2008-07-23  Damien Carbery <damien.carbery@sun.com>
+
+	* scripts/macros.m4: Change grep to use -i when checking for GNU m4.
+	  This fixes the test on Solaris. Bug #423990.
+
+=== 2.17.1 ===
+
+2008-07-16  Jonathon Jongsma  <jonathon.jongsma@collabora.co.uk>
+
+	* NEWS: update for new release
+
+2008-07-16  Jonathon Jongsma  <jonathon.jongsma@collabora.co.uk>
+
+	* configure.in: bump version and min required glib version
+
+2008-07-16  Jens Georg  <mail@jensge.org>
+
+	* MSVC_Net2003/glibmm/glibmm.vcproj: Mention new source files 
+	for regex and keyfile.
+	Bug #543292.
+
+2008-07-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added make_directory_with_parents(), 
+	query_file_type(), monitor().
+	* gio/src/fileenumerator.ccg:
+	* gio/src/fileenumerator.hg: Added get_container().
+	* gio/src/mount.hg: Added guess_content_type() and 
+	guess_content_type_finish().
+	* gio/src/themedicon.hg: Added prepend_name().
+	* gio/src/volume.hg: Added get_activation_root().
+	* tools/m4/convert_gio.m4: Added a necessary conversion.
+
+2008-07-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_methods.defs:
+	* glib/src/glib_functions.defs: Regenerated with h2def.py
+	* glib/src/checksum.hg: Added reset().
+
+2008-07-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/appinfo.ccg:
+	* gio/src/appinfo.hg: Avoid a circular include to fix the build.
+
+2008-07-15  Benjamin Herr  <ben@0x539.de>
+
+	* gio/src/volumemonitor.hg: Removed some unnecessary ; characters, 
+	to avoid warnings.
+	Bug #542929.
+
+2008-07-14  Murray Cumming,  <murrayc@murrayc.com>
+
+	* tools/m4/convert_gio.m4:
+	* gio/src/appinfo.hg: get_display(), get_startup_notify_id():
+	Take a list of Gio::File, not filepath string. Now that the C API is 
+	properly documented we know that this is correct. It's an API break 
+	but this function could nothave worked before.
+
+	* glib/src/glib_docs.xml: Regenerate.
+	* glib/src/glib_docs_override.xml: Add overrides for 
+	g_key_file_load_from_file() and g_key_file_get_value() to mention 
+	exceptions.
+
+2008-06-30  Johannes Schmid  <jhs@gnome.org>
+
+	* glib/glibmm/containerhandle_shared.h:
+	Improve documentation of Glib::OwnershipType (#540875)
+
+2008-07-02  Armin Burgmeier  <armin@arbur.net>
+
+	* gio/src/file.ccg: Pass NULL to the underlying C function for the 
+	etags parameter in the various replace_contents functions. Also bug
+	#540656.
+
+2008-06-28  Armin Burgmeier  <armin@arbur.net>
+
+	* gio/src/file.ccg: Pass NULL to the underlying C function for the
+	etags parameter in various *_replace functions. Otherwise, existing
+	files are not overwritten. Bug #540656.
+
+2008-06-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in:
+	* examples/Makefile.am:
+	* examples/keyfile/Makefile.am:
+	* examples/keyfile/example.ini:
+	* examples/keyfile/main.cc: Added a little KeyFile example. I am 
+	surprised that we do not seem to have one somewhere already.
+	I need to move all these glibmm examples into gtkmm-documentation some 
+	time.
+
+2008-06-19  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/tree.hg: Some whitespace changes. And more use of typedefs 
+	to simplify the code.
+
+2008-06-19  Levi Bard  <taktaktaktaktaktaktaktaktaktak@gmail.com>
+
+	* glib/src/tree.hg: Some minor changes to deal with TODOs.
+	Bug #538803.
+
+2008-06-17  Chris Vine <chris@cvine.freeserve.co.uk>
+
+	* glib/src/thread.hg: document that the slot object passed to
+	Glib::Thread::create() should not represent a non-static method of
+	a class derived from sigc::trackable.
+	See bug #512348.
+
+=== 2.17.0 ===
+
+2008-06-16  Jonathon Jongsma  <jonathon.jongsma@collabora.co.uk>
+
+	* NEWS:
+	* configure.in: update for new release
+
+2008-06-13  Levi Bard  <taktaktaktaktaktaktaktaktaktak@gmail.com>
+
+	* glib/glibmm.h:
+	* glib/glibmm/Makefile.am:
+	* glib/src/Makefile_list_of_hg.am_fragment:
+	* glib/src/tree.ccg:
+	* glib/src/tree.hg: Added Glib::Tree, a wrapper for GNode, providing 
+	an N-ary tree container, more or less like a standard C++ container.
+	* configure.in:
+	* tests/Makefile.am: Added some test code for this new API.
+	Bug #520778
+
+2008-06-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/date.hg: Used @newin2p18 on the new API and made some 
+	slight corrections to the new reference documentation comments.
+
+2008-06-11  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* tests/glibmm_date/Makefile.am: Contents of files in
+	tests/glibmm_date/ (main.cc and Makefile.am) were duplicated when I
+	applied patch in bug #536721 to already existing files before 6/9
+	commit. Fixed main.cc already, so now repaired Makefile.am.
+
+2008-06-10  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* tests/glibmm_date/main.cc: Removed duplicate code so test can
+	compile.
+
+2008-06-09  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* glib/src/date.ccg:
+	* glib/src/date.hg: Added copy constructor and assignment operator;
+	Made GDate constructor visible.
+
+	* configure.in:
+	* tests/Makefile.am:
+	* tests/glibmm_date/Makefile.am:
+	* tests/glibmm_date/main.cc: Added simple test to test Glib::Date.
+
+This is svn trunk for new API, wrapping glib 2.17/18. See also the glibmm-2-16 branch.
+
+2008-04-25  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/drive.hg:
+	* gio/src/volume.hg: add TypeTraits implementations for Drive and Volume
+	similar to the one added for Mount.
+
+2008-04-23  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/mount.hg: Add a TypeTraits implementation for
+	Glib::RefPtr<Gio::Mount> so that we can wrap implementor types that don't
+	have a wrapper (e.g. GHalMount in gvfs).  Fixes bug #529533
+
+2008-04-24  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* glib/glibmm/wrap.cc: Improve the error message when failing to wrap a
+	particular type of object to give a hint about initializing the library
+	since we get so many questions about this (bug #529648)
+
+2.16.2:
+
+2008-04-18  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* NEWS:
+	* configure.in: bump to 2.16.2 for release
+
+2008-04-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/spawn.hg: Moved the enum back out of the doxygen group, 
+	because that results in the enums group being inside the spawn group.
+
+2008-04-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/spawn.hg: Addded doxygen documentation based on the 
+	C documentation.
+	Bug #528271 (Jonathon Jongsma)
+
+2008-04-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optionentry.ccg: set_long_name(): Do not use NULL for an 
+	empty string, because "" has a special meaning to GOptionEntry - it 
+	is the definition of G_OPTION_REMANING.
+	* examples/options/main.cc: Add an entry with the long name 
+	G_OPTION_REMAINING, to list additional non-named arguments. More 
+	explicit API should be added for this.
+	Bug #526831 (Christian Lundgren).
+ 
+2008-04-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/ustring.cc erase(): Create an end iterator and use it, 
+	instead of just using the std::string(iterator) erase implementation, 
+	because that only removes one byte, which can make the whole string 
+	invalid UTF-8.
+	Bug #527687 (Jarro).
+
+2008-04-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/optionentry.ccg:
+	* glib/src/optionentry.hg: Hand-code set_description(), 
+	set_arg_description() and set_long_name(), to free any existing string, 
+	to maybe fix a (possible) leak found by valgrind.
+
+2008-03-29  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* Makefile.am: add some more convenience targets for making releases
+
+2.16.1:
+
+2008-03-28  Tim Retout  <tim@retout.co.uk>
+
+	* glib/glibmm/helperlist.h (operator[]): Add a newline before
+	the semicolon at the end of the 'for' loop.  Fixes g++ 4.3 warning.
+
+2008-03-29  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* NEWS: updated
+	* configure.in: bump to 2.16.1
+
+2008-03-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.hg:
+	* gio/src/file.ccg: query_default_handler(), set_display_name(), 
+	query_info(), query_filesystem_info(): Do not take an extre reference, 
+	because the C functions all provide new objects with an initial 
+	reference. I checked.
+
+2008-03-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg: create(), replace(): Do not take an extra reference, 
+	because the C function has given us a new instance with an initial 
+	reference. The leak stopped the stream from really replacing the file, 
+	because that only happens when it is closed.
+
+2008-03-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.hg:
+	* gio/src/outputstream.hg: Documentation: Remove/fix mentions of 0 when 
+	we mean something else.
+
+2008-03-24  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/desktopappinfo.hg:
+	* gio/src/unixinputstream.hg:
+	* gio/src/unixmount.hg:
+	* gio/src/unixoutputstream.hg: don't wrap these unix-specific types when
+	building on MS Windows (bug #524126)
+
+2008-03-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.hg: Include giomm/error.h Because Gio::Error is thrown 
+	by some of these methods and it is annoying to have to include it 
+	separately just to catch that.
+
+2.16.0:
+
+2008-03-10  Tim Mooney  <murrayc@murrayc.com>
+
+	* glib/glibmm/object.cc: Include string.h to fix the build with 
+	SUN CC.
+	Bug #498438.
+
+2008-03-07  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* glib/glibmm.h: add an include for checksum.h which was added in the 2.15.x
+	series.
+
+2008-03-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* MAINTAINERS: Added Jonathon Jongsma as co-maintainer.
+
+2008-03-05  Murray Cumming  <murrayc@murayc.com>
+
+	* tools/m4/convert_gio.m4: Use __CONVERT_CONST_REFPTR_TO_P_SUN() instead 
+	of __CONVERT_REFPTR_TO_P() to maybe fix the build with Sun CC.
+	(Simon Zheng)
+
+2008-03-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* Makefile.am: updated the 'release' target to give a bit more helpful error
+	messages
+
+2008-03-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_docs.xml: Regenerated with docextract_to_xml.py.
+	* gio/src/gio_docs_override.xml: Overrode g_file_query_exists() to 
+	mention an exception instead of an error. G_IO_ERROR_* now does not 
+	appear in any of our documentation.
+
+2.15.8:
+
+2008-03-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/bufferedinputstream.hg:
+	* gio/src/bufferedoutputstream.hg:
+	* gio/src/datainputstream.hg:
+	* gio/src/dataoutputstream.hg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/filterinputstream.hg:
+	* gio/src/filteroutputstream.hg:
+	* gio/src/inputstream.hg:
+	* gio/src/memoryinputstream.hg:
+	* gio/src/mount.hg:
+	* gio/src/outputstream.hg:
+	* gio/src/seekable.hg:
+	* gio/src/unixinputstream.hg:
+	* gio/src/unixoutputstream.hg: Put these in a Streams doxygen group. 
+	We should think of some more groups, maybe by looking at the C 
+	documentation.
+
+2008-03-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: load_contents(), load_contents_finish(), 
+	load_partial_contents_finish(): Use char*& instead of char** for contents, 
+	though that is not that great either. Use std::string& instead of char** 
+	for etag_out. Added method overloads without cancellable.
+	We might want other method overloads in future. 
+
+2008-02-29  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* Makefile.am: added 'release' target which will run distcheck, tag the
+	repository with the current version and upload the tarball to
+	master.gnome.org
+
+2008-02-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/asyncresult.hg:
+	* gio/src/file.hg:
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/gio_docs_override.xml:
+	* gio/src/inputstream.hg:
+	* gio/src/outputstream.hg: Correct hand-coded documentation, 
+	to talk about throwing exceptions rather than setting or returning 
+	errors.
+	* gio/src/mount.hg: Add class documentation based on the C documentation.
+
+2008-02-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_docs.xml: Regenerated with docextract_to_xml.py.
+	* gio/src/gio_docs_override.xml: Override some documentation that 
+	mentions the GCancellable being optional, or that talks about setting 
+	errors instead of throwing them.
+
+2.15.7:
+
+2008-02-26  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_methods.defs: Regenerated.
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added query_filesystem_info_async() and 
+	query_filesystem_info_finish() because these were added to the C API.
+	* gio/src/themedicon.hg: Added append_name() because this was added to 
+	the C API.
+
+2008-02-25  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Doxyfile.in: 'upgraded' the doxygen config file since
+	doxygen was complaining about obsolete options
+	* gio/giomm/contenttype.h:
+	* gio/src/bufferedinputstream.hg:
+	* gio/src/file.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/outputstream.hg:
+	* glib/src/checksum.hg:
+	* glib/src/keyfile.hg: fixed a bunch of minor doxygen warnings
+
+2008-02-25  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/doxygen_to_devhelp.xsl: add path separators between the
+	reference prefix and the link filenames
+	* docs/reference/Makefile.am: remove trailing slash from the reference
+	prefix (fixes bug #518673)
+
+2008-02-25  Wouter Bolsterlee  <wbolster@svn.gnome.org>
+
+	* gio/src/file.hg:
+	* gio/src/gio_docs.xml:
+	* gio/src/gio_methods.defs:
+	* gio/src/gio_vfuncs.defs:
+
+	Initial work for another API change:
+	g_file_contains_file() has been renamed to
+	g_file_has_prefix() (with the parameter order swapped!)
+
+2008-02-25  Wouter Bolsterlee  <wbolster@svn.gnome.org>
+
+	* glib/src/uriutils.ccg:
+	* glib/src/uriutils.hg:
+
+	g_uri_get_scheme has been renamed to g_uri_parse_scheme
+	in GLib trunk. Updated accordingly.
+
+2008-02-24  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Makefile.am: dist xml/index.xml to satisfy build-deps for
+	building the devhelp book from the tarball.  Fixes distcheck.
+
+2.15.6:
+
+2008-02-24  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/inputstream.hg: Updated the todo regarding read().
+
+2008-02-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/fileattributeinfolist.hg: Added dup().
+	* gio/src/gio_others.defs: Added signals for GMount and GVolume.
+	This deals with the gmmproc warnings.
+
+2008-02-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/desktopappinfo.hg: Revert the change from José which removed 
+	use of _WRAP_CTOR() and _WRAP_CREATE(). We really do want to use these 
+	so we instantiate derived GTypes.
+
+2008-02-21  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/desktopappinfo.hg: Made is_hidden() const.
+
+2008-02-21  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/desktopappinfo.hg: Used _WRAP_METHOD instead of _WRAP_CREATE
+	for create() to allow docs from C API to be used
+
+2008-02-21  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/desktopappinfo.hg: Renamed new_from_file() to
+	create_from_file()
+
+2008-02-21  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/desktopappinfo.hg: Added create(), create_from_file()
+	is_hidden() and set_desktop_env()
+	* tools/m4/convert_gio.m4: Added DesktopAppInfo conversion
+
+2008-02-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_methods.defs: Regenerated with h2defs.py
+
+	* gio/src/gio_signals.defs: Corrected the GMountOperation::ask-question 
+	definition.
+	* gio/src/mountoperation.hg: Wrapped the ask-question signal, though 
+	I wonder if it really works.
+
+	* gio/src/memoryinputstream.ccg:
+	* gio/src/memoryinputstream.hg:
+	Added add_data(const void* data, gssize len).
+
+	* gio/src/gio_others.defs: Added g_themed_icon_get_names() 
+	because h2defs.py cannot seem to parse it.
+	* gio/src/Makefile.am: Mention gio_methods.defs.
+	* gio/src/themedicon.hg: Attempted to wrap get_names(), but I get a 
+	gmmproc error.
+
+2008-02-20  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/desktopappinfo.hg: Removed a todo regarding
+	DesktopAppInfoLookup. We will not wrap it as it is an interface
+	that is used by backends.
+
+2008-02-20  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Makefile.am: updated some build dependencies that were
+	causing issues after adding the xml/devhelp build rules.  Also removed some
+	cruft that was supposedly setting the doxygen image path for gtk stock icons
+	(presumably copied from the gtkmm build rules).  Should Fix Bug #517423
+
+2008-02-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/appinfo.hg:
+	* gio/src/bufferedinputstream.hg:
+	* gio/src/drive.hg:
+	* gio/src/file.hg:
+	* gio/src/filemonitor.hg:
+	* gio/src/icon.hg:
+	* gio/src/seekable.hg:
+	* gio/src/volume.hg:
+	* gio/src/volumemonitor.hg: Comment out _WRAP_VFUNC() lines because 
+	we decided that they are not useful (people will not create new 
+	implementations with giomm) and are a potential source of errors.
+
+2008-02-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/convert_gio.m4:
+	* gio/src/file.hg: equal(), get_relative_file(), contains_file(): Take 
+	const File parameters.
+
+2008-02-15  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Makefile.am: I should have tested this more thoroughly --
+	we apparently need to use relative paths in the reference_prefix variable.
+	Also add the devhelp file to the all-local target so it gets built by
+	default on a simple 'make' and not just on 'make install'
+
+2008-02-15  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Makefile.am: install the stylesheet in the gmmproc dir
+	instead of the documentation directory.  This allows other libraries to get
+	a path to the stylesheet by querying the just-added gmmprocdir variable.
+	Also, it doesn't really belong in the documentation directory since it's not
+	technically documentation.
+
+2008-02-15  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/doxygen_to_devhelp.xsl: make this more general instead of
+	hard-coding the name and title and reference path into the stylesheet --
+	instead pass them as parameters on the commandline
+	* docs/reference/Makefile.am: use new GMMPROC_DIR variable.  Also install
+	the doxygen_to_devhelp.xsl stylesheet so that other libraries can use the
+	installed version instead of having everybody copy the file into their own
+	library if they want to generate a devhelp book
+
+2008-02-15  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* configure.in: add a GMMPROC_DIR variable so the individual
+	Makefile.am files don't need to duplicate the information about where
+	gmmproc is to be installed
+	* glib/glibmm-2.4.pc.in: add new gmmprocdir variable so that interested
+	libraries can query it with `pkg-config --variable gmmprocdir glibmm-2.4`
+	* tools/Makefile.am:
+	* tools/m4/Makefile.am:
+	* tools/pm/Makefile.am: use the new GMMPROC_DIR variable
+
+2008-02-14  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/dataoutputstream.hg: Removed get/set_newline_type(),
+	which doesn't exist in the C API.
+
+2008-02-13  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Doxyfile.in:
+	* docs/reference/Makefile.am:
+	* docs/reference/doxygen_to_devhelp.xsl: generate and install a devhelp book
+	for glibmm like we do for gtkmm.  It would be nice to make the xsl
+	stylesheet general and shared between gtkmm and glibmm (and eventually other
+	libraries as well), but for now I just duplicated it here
+
+2008-02-12  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/gio_methods.defs: Regenerated with h2defs.py.
+
+	* gio/src/unixinputstream.hg:
+	* gio/src/unixoutputstream.hg: Made wrapped constructors protected.
+
+	* gio/src/bufferedinputstream.hg:
+	* gio/src/datainputstream.hg:
+	* gio/src/dataoutputstream.hg: Ditto for Data*Streams,
+	and marked some hand-wrapped functions to ignore.
+
+	* gio/src/mountoperation.hg: Wrote a note about ask_question signal,
+	still to be wrapped.
+
+	* gio/src/volume.hg: Added should_automount().
+
+	* gio/giomm: Updated svn:ignore properties.
+
+2.15.5:
+
+2008-02-11  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg:
+	* gio/src/gio_enums.defs:
+	* gio/src/gio_vfuncs.defs:
+	* gio/src/mount.ccg:
+	* gio/src/mount.hg:
+	* gio/src/volume.ccg:
+	* gio/src/volume.hg:
+	* tools/m4/convert_gio.m4: update to match new gio API which adds a
+	GMountMountFlags argument to all mount operations
+
+2008-02-11  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* configure.in: bump glib requirement to 2.15.5 (bug #515727)
+
+2008-02-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_vfuncs.defs: Added hand-written vfunc .defs for 
+	GVolume and GVolumeMonitor.
+	* gio/src/volume.hg:
+	* gio/src/volumemonitor.hg: Added vfuncs, though not using all C++ types 
+	yet. I am not really sure that these will ever be useful (if anyone will 
+	ever want to implement them in C++).
+
+2008-02-09  Murray Cumming, <murrayc@murrayc.com>
+
+	* gio/giomm.h:
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/simpleasyncresult.ccg:
+	* gio/src/simpleasyncresult.hg: removed SimpleAsyncResult because I 
+	do not believe it is really public API. If we are wrong then we 
+	can resurrect it from svn later.
+
+2008-02-09  Takao Fujiwara  <Takao.Fujiwara@Sun.COM>
+
+	* glib/glibmm/Makefile.am:
+	* glib/glibmm/i18n-lib.h: Actually install this header, 
+	and make the header guards unique.
+	Bug #515133
+
+2.15.4:
+
+2008-02-07  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/Makefile.am:
+	* glib/glibmm/main.h: Moved the Priorities enum into
+	* glib/glibmm/priorities.h:
+	Though all the giomm stuff seems to already include main.h anyway. 
+	It probably shouldn't, and then we can include priorities.h only.
+
+	* gio/src/bufferedinputstream.hg:
+	* gio/src/file.hg:
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/gio_methods.defs:
+	* gio/src/inputstream.hg:
+	* gio/src/outputstream.hg: Use Glib::PRIORITY_DEFAULT instead of 
+	G_PRIORITY_DEFAULT.
+
+	* glib/src/iochannel.ccg: Add some ifdefs to avoid unused parameter 
+	warnings when exceptions are disabled, because our current trick for 
+	that is now causing another warning instead.
+
+2008-02-06  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/datainputstream.ccg:
+	* gio/src/datainputstream.hg: change the read_line() and read_until() APIs
+	so that they are actually useable.  These functions now return a boolean
+	value to indicate that the end of the stream was reached and return the
+	string data via reference argument.  See bug #514097 for more information
+
+2008-02-06  Murray Cumming <murrayc@murrayc.com>
+
+	* gio/src/gio_methods.defs: Regenerated with h2defs.py
+
+	* configure.in: Depend on gio-unix-2.0 when not on win32.
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/unixinputstream.ccg:
+	* gio/src/unixinputstream.hg:
+	* gio/src/unixoutputstream.ccg: Mentioned this as unix-specific files 
+	so they are built.
+
+	* gio/src/bufferedoutputstream.hg: Fixed a parameter type to fix the 
+	build, after a change in gio.
+
+2008-02-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added an overload of query_default_handler() 
+	without the cancellable.
+
+2008-02-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/vfs.ccg:
+	* gio/src/vfs.hg: Remove these because they are not API - they 
+	are declarations of entry points for dynamically-loadable modules.
+
+2008-02-04  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added copy_async(), with overloads without
+	slot_progress (which is optional and would run in the main loop),
+	with documentation. Wrapped copy_finish(), query_default_handler().
+
+2008-02-04  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/desktopappinfo.ccg:
+	* gio/src/desktopappinfo.hg: Added DesktopAppInfo but not to
+	Makefile_list_of_hg.am_fragment yet (need to use gio-unix-2.0.pc to
+	compile correctly)
+
+2008-02-04  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/bufferedoutputstream.ccg: Changed size param of
+	create_sized() to type gsize (in agreement with declaration) to fix
+	compilation
+
+2008-02-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/class_interface.m4: Allow _CLASS_INTERFACE() to take two 
+	extra optional paremeters to specify the base class, so that appropriate 
+	code is generated when we derive from another Interface - which seems 
+	appropriate when the GInterface has a prerequisite.
+	* gio/src/loadableicon.ccg:
+	* gio/src/loadableicon.hg: Derive from Icon, because it is a prerequisite 
+	of this interface. Use the extra _CLASS_INTERFACE() parameters.
+	* gio/src/fileicon.hg: Do not derive from Icon because that happens 
+	through LoadableIcon now. But do use _IMPLEMENTS_INTERFACE(Icon) here, 
+	because only a Glib::Object can actually implement an interface.
+
+2008-02-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/file.hg: remove an obsolete TODO
+	* gio/src/gio_vfuncs.defs: add LoadableIcon vfunc definitions
+	* gio/src/loadableicon.ccg:
+	* gio/src/loadableicon.hg: wrap some methods of LoadableIcon.  Some vfuncs
+	need to be wrapped yet
+
+2008-02-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/bufferedoutputstream.hg: switch back create_sized() size parameter
+	to gsize since glib switched their declaration due to bug #514013.
+
+2008-02-03  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/unixinputstream.ccg:
+	* gio/src/unixinputstream.hg:
+	* gio/src/unixmount.ccg:
+	* gio/src/unixmount.hg:
+	* gio/src/unixoutputstream.ccg:
+	* gio/src/unixoutputstream.hg: Added these, but not to
+	Makefile_list_of_hg.am_fragment to avoid compile errors (need
+	gio-unix-2.0.pc to compile correctly)
+	* gio/src/vfs.hg: Moved forward decs to top (was between class doc and
+	declaration)
+
+2008-02-03  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/vfs.ccg:
+	* gio/src/vfs.hg:
+	* tools/m4/convert_gio.m4: Added Vfs
+
+2008-02-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_defs_gio.cc: Added types.
+	* gio/src/gio_signals.defs: Regenerated.
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/filenamecompleter.hg:
+	* gio/src/themedicon.hg: Added FilenameCompleter and ThemedIcon.
+
+2008-02-03  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* gio/src/bufferedoutputstream.ccg: changed size param of
+	create_sized() to type guint (in agreement with declaration)
+	* gio/src/file.ccg:
+	* gio/src/file.hg: added non-cancellable set_attribute_string(),
+	set_attribute_byte_string(), set_attribute_{uint32, int32, uint64,
+	int64}
+
+2008-02-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_defs_gio.cc: Added types.
+	* gio/src/gio_signals.defs: Regenerated.
+
+	* tools/m4/convert_gio.m4:
+	* gio/src/drive.hg:
+	* gio/src/filterinputstream.hg:
+	* gio/src/filteroutputstream.hg:
+	* gio/src/mount.hg:
+	* gio/src/mountoperation.hg:
+	* gio/src/volume.hg:
+	* gio/src/volumemonitor.hg: Added signals and properties.
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added query_filesystem_info() without a cancellable.
+
+2008-02-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/filemonitor.hg: Add class documentation, now that there is 
+	some in gio.
+	* gio/src/volumemonitor.hg: Add class documentation.
+	Remove _DO_NOT_DERIVE_GTYPE because gio no longer abuses the type 
+	system - see bug #511814.
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm.h:
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/memoryinputstream.ccg:
+	* gio/src/memoryinputstream.hg: add MemoryInputStream class
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/dataoutputstream.ccg: fix copy/paste error
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/datainputstream.hg:
+	* gio/src/dataoutputstream.hg: add DataOutputStream class
+	* gio/src/dataoutputstream.ccg:
+	* gio/src/enums.ccg:
+	* gio/src/enums.hg: moved the DataStream enums to a common enums header
+	since they're needed by both the input and output data streams.
+	* gio/giomm.h: add new headers
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/bufferedoutputstream.ccg:
+	* gio/src/bufferedoutputstream.hg: add BufferedOutputStream class
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm.h:
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/filteroutputstream.ccg:
+	* gio/src/filteroutputstream.hg:
+	* tools/m4/convert_gio.m4: add FilterOutputStream class
+
+2008-02-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: find_enclosing_mout(), append_to(): Reordered 
+	parameters and added overload without cancellable. Removed superfluous 
+	monitor_file() overload.
+
+2008-02-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/convert_gio.m4:
+	* gio/src/bufferedinputstream.hg: Move a signal-specific conversion 
+	here, because these conversions are unusual and shouldn't be used by 
+	mistake elsewhere, and when they are next to the signal then it is 
+	more obvious why they take a reference (also fixed).
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm.h: add new header files to the main include
+	* gio/src/datainputstream.hg: add FIXME note about not being able to tell
+	error conditions from empty strings on read_line() / read_until()
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm/Makefile.am: add slot_async.h private header to EXTRA_DIST so
+	that it gets distributed.  I didn't add it to the
+	sublib_files_extra_general_h variable, since then it would get installed
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/datainputstream.ccg:
+	* gio/src/datainputstream.hg:
+	* tools/m4/convert_gio.m4: add DataInputStream class
+
+2008-02-02  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/gio_vfuncs.defs:
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/bufferedinputstream.ccg:
+	* gio/src/bufferedinputstream.hg: add BufferedInputStream class
+	* gio/giomm/slot_async.cc:
+	* gio/giomm/slot_async.h: split out the SlotProxy_async_callback so it
+	doesn't have to be implemented in every file
+	* gio/src/drive.ccg:
+	* gio/src/file.ccg:
+	* gio/src/file.hg:
+	* gio/src/fileenumerator.ccg:
+	* gio/src/fileinputstream.ccg:
+	* gio/src/fileoutputstream.ccg:
+	* gio/src/inputstream.ccg:
+	* gio/src/mount.ccg:
+	* gio/src/outputstream.ccg:
+	* gio/src/volume.ccg: use the common SlotProxy_async_callback function in
+	all of these files
+	* tools/m4/convert_gio.m4: add conversion for Cancellable
+	* gio/giomm/Makefile.am: indenting changes
+
+2008-02-02  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/volumemonitor.hg: Removed VolumeMonitorEvent enum def,
+	which does not exist any more in the C API.
+	* gio/src/volume.hg: Added get_identifier(), enumerate_identifiers().
+
+2008-02-02  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* gio/src/volume.hg: Added get_mount().
+	* gio/src/gio_enums.defs: Regenerated with enums.pl.
+	* gio/src/gio_methods.defs: Regenerated with h2defs.py.
+
+2008-02-02  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* tests/giomm_simple/main.cc: Fix compile with GCC 4.3.
+
+2008-02-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* build_shared/Makefile_gensrc.am_fragment: Use the local .pm files 
+	for gmmproc instead of installed ones. This was a regression that I 
+	introduced when I added gio to the build.
+	* tools/pm/DocsParser.pm: append_parameter_docs(): Ignore error 
+	parameters because they are almost always wrapped as exceptions.
+
+2008-02-01  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/Makefile.am:
+	* gio/src/appinfo.hg:
+	* gio/src/gio_vfuncs.defs:
+	* tools/m4/convert_gio.m4:
+	* tools/m4/convert_glib.m4: Add Gio::AppInfo vfuncs
+
+2008-02-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added overloads of create_file(), remove(), trash(), 
+	make_directory(), make_symbolic_link(), query_settable_attributes(), 
+	and query_writable_namespaces() without cancellable parameters.
+	The set_attribute_*() methods still need this to be done. 
+
+2008-02-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/cancellable.hg: Added the signal.
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added copy_attributes(), added mount_enclosing_volume() 
+	mount_enclosing_volume_finish(), find_enclosing_mount(), and 
+	find_enclosing_mount_finish(). 
+	Added a mount_mountable() overload with no parameters.
+	set_attributes_from_info(): Reordered parameters so we can have default 
+	values.
+
+2008-02-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/giomm/contenttype.cc:
+	* gio/giomm/contenttype.h: Use convert_return_gchar_ptr_to_ustring() 
+	because it releases the gchar* and checks for NULL.
+	Removed the ontent_type_guess() that takes a basic_string<guchar> 
+	because I doubt anybody would use that. Added one that takes a 
+	gchar* and size, and one that takes a std::string (for when the data is 
+	a string).
+
+2008-01-31  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm/contenttype.cc: put content_type functions in the Gio namespace
+	which was accidentally omitted.
+
+2008-01-31  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm.h: forgot to add new contenttype.h header
+	* gio/giomm/Makefile.am: forgot to install contenttype.h header
+
+2008-01-31  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm/Makefile.am:
+	* gio/giomm/contenttype.cc:
+	* gio/giomm/contenttype.h: wrap content_type_* functions
+
+2008-01-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.hg: get_child_for_display_name(): 
+	Change the display_name parameter to a ustring because 
+	the C documentation says it should be UTF-8.
+	* gio/src/fileinfo.hg: Add get_attribute_as_string(), which
+	returns a UTF-8 string.
+ 	(Note that no other gio documentation mentions UTF-8.)
+	Thanks to Iain Nicol.
+
+2.15.3:
+
+2008-01-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/fileattribute.ccg:
+	* gio/src/fileattribute.hg: Split into 
+	* gio/src/fileattributeinfo.ccg:
+	* gio/src/fileattributeinfo.hg: and 
+	* gio/src/fileattributeinfolist.ccg:
+	* gio/src/fileattributeinfolist.hg
+
+	* gio/giomm.h:
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/file.hg:
+	* gio/src/fileinfo.hg:
+	* gio/src/outputstream.hg:
+	* gio/src/seekable.hg:
+	* glib/src/optionentry.hg: Adapted.
+
+	* tools/pm/DocsParser.pm: substitute_identifiers(): 
+	Tried (unsuccessfully) to remove G:: prefixes in generated documentation.
+
+2008-01-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/appinfo.hg:
+	* gio/src/asyncresult.hg:
+	* gio/src/cancellable.hg:
+	* gio/src/drive.hg:
+	* gio/src/error.hg:
+	* gio/src/file.hg:
+	* gio/src/fileattribute.hg:
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileicon.hg:
+	* gio/src/fileinfo.hg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/filterinputstream.hg:
+	* gio/src/icon.hg:
+	* gio/src/inputstream.hg:
+	* gio/src/loadableicon.hg:
+	* gio/src/mount.hg:
+	* gio/src/mountoperation.hg:
+	* gio/src/outputstream.hg:
+	* gio/src/seekable.hg:
+	* gio/src/simpleasyncresult.hg:
+	* gio/src/volume.hg: Do not include gio.h from our public headers, to 
+	avoid polluting the namespace.
+ 
+2008-01-27  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/appinfo.ccg:
+	* gio/src/appinfo.hg: Make equal() non virtual - equal_vfunc() is instead.
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Make equal() non virtual - equal_vfunc() is instead.
+	replace_contents(), replace_contents_async(), replace_contents_finish():
+	Reordered parameters to allow default values, and added method overloads.
+
+2008-01-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/convert_gio.m4:
+	* gio/src/filterinputstream.hg: Added the _CLASS_* macro so this type  
+	is really wrapped.
+
+2008-01-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/class_shared.m4: Added _DO_NOT_DERIVE_GTYPE for use in .hg 
+	files when we do not want to derive a new GType, meaning of course that 
+	we cannot have default signal handlers or vfuncs.
+	* gio/src/volumemonitor.hg: Use _DO_NOT_DERIVE_GTYPE, because 
+	gio tries to call every type that derives from G_TYPE_VOLUME_MONITOR, 
+	which seems unwise to me - bug #511814.
+	This makes gtkmm-documentation/examples/book/volumes not crash.
+
+2008-01-24  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/giomm.h: add missing headers to the main include header
+
+2008-01-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/error.hg: Renamed Gio::IOError to 
+	Gio::Error.
+	* gio/src/fileenumerator.ccg:
+	* gio/src/fileenumerator.hg: Added method overloads of close() and 
+	next_file() without the cancellable parameter.
+
+2008-01-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/error.ccg:
+	* gio/src/error.hg: Wrapped GIOErrorEnum as Gio::Error exception.
+	(This is registered in wrap_init()), so that the correct exception 
+	is thrown.
+	* gio/giomm.h: Include error.h
+
+2008-01-23  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added a read() method overload with no 
+	cancellable parameter.
+	* tests/giomm_simple/main.cc: Try loading the contents of a file.
+	Seems to work, though there is an unknown GError domain when the file 
+	does not exist.
+
+2.15.2:
+
+2008-01-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/gio_methods.defs: Regenerated.
+	* gio/src/file.ccg:
+	* gio/src/file.hg:
+	* gio/src/fileinputstream.ccg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.ccg:
+	* gio/src/fileoutputstream.hg: More overloads, parameter reordering, 
+	and documentation.
+
+2008-01-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/inputstream.ccg:
+	* gio/src/inputstream.hg: Added method overloads and documentation.
+
+2008-01-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/fileinputstream.ccg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.ccg:
+	* gio/src/fileoutputstream.hg: Ignore functions that are just 
+	duplicates of the ones in Seekable, and mention Seekable more in 
+	the documentation.
+	* gio/src/seekable.hg: Expand the class documentation.
+	* gio/src/outputstream.ccg:
+	* gio/src/outputstream.hg: Added method overloads and documentation.
+
+2008-01-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/objectbase.cc:
+	* glib/glibmm/objectbase.h: Added connect_property_changed_with_return() 
+	because connect_property_changed() does not return a sigc::connection.
+	Bug #433984 (Philip Langdale, Kalle Vahlman).
+
+2008-01-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/checksum.ccg:
+	* glib/src/checksum.hg: Added class documentation. Corrected constructor 
+	documentation and added operator bool() to check for a failure in the 
+	constructor.
+
+2008-01-20  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* tools/enum.pl: Handle possible parenthesis when matching enum
+	values declared as shifted ones. Bug #498621.
+
+2008-01-20  Naveen Verma  <ernaveenverma@gmail.com>
+
+	* glib/src/checksum.[hg|ccg]:
+	* glib/src/Makefile_list_of_hg.am_fragment:
+	Added Checksum, wrapping GChecksum Bug #510235.
+
+2008-01-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/inputstream.hg: Ignore g_input_stream_clear_pending() as well as 
+	the other implementation functions.
+	* gio/src/outputstream.hg: Ignore the equivalent functions here, 
+	assuming that they are also only for implementations.
+
+2008-01-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/fileinfo.hg: FileAttributeMatcher::create(): Add a default 
+	value and documentation.
+	* gio/src/file.ccg:
+	* gio/src/file.hg:
+	* gio/src/mount.ccg:
+	* gio/src/mount.hg: const corrections for Slot* and Cancellable 
+	parameters.
+
+2008-01-20  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.hg:
+	* gio/src/file.ccg: enumerate_children(), enumerate_children_async(), 
+	query_info(), query_info_async(), query_exists(): Reorder parameters to 
+	add default values, add documentation, make const.
+
+2008-01-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/mount.ccg:
+	* gio/src/mount.hg: Added unmount(), remount(), and 
+	eject(), based on code from José Alburquerque in bug #510080.
+	* gio/src/volume.hg: Added documentation.
+
+2008-01-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/drive.ccg:
+	* gio/src/drive.hg: poll_for_media(): Added documentation.
+	Wrapped 2 vfuncs (though the .defs still need to be written).
+	* gio/src/file.ccg:
+	* gio/src/file.hg: move(), copy(), replace(): Rearranged the parameters so we 
+	can have default values, and added some documentation.
+	set_display_name(), set_display_name_async(): Take a ustring instead 
+	of a std::string. Added documentation.
+
+	* gio/src/fileattribute.ccg:
+	* gio/src/fileattribute.hg: Added FileAttributeInfoList::add().
+	Added FileAttributeInfoList::empty().
+
+	* tools/m4/convert_gio.m4: 
+	* gio/src/appinfo.hg:
+	* gio/src/fileenumerator.hg: Move the ListHandle conversions to the 
+	.hg files because the ownership is specific to each use.
+
+2008-01-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/drive.hg:
+	* gio/src/volumemonitor.hg: Wrapped functions that reurn GLists.
+
+2008-01-18  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/appinfo.hg:
+	* gio/src/icon.hg: Removed operator= and operator!= for these RefPtr<> 
+	specializations, because they are unobvious and conflict with the generic 
+	ones.
+
+2008-01-17  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/inputstream.ccg:
+	* gio/src/inputstream.hg: Fixed const-ness of Cancellables.
+	* gio/src/fileinputstream.ccg:
+	* gio/src/fileinputstream.ccg:
+	* gio/src/fileoutputstream.ccg:
+	* gio/src/fileoutputstream.hg: Added an overload of query_info_async(),
+	* gio/src/outputstream.ccg:
+	* gio/src/outputstream.hg: write_async(), splice_async() without
+	the Cancellable.
+
+	Patch from José Alburquerque, bug #510080.
+
+2008-01-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.hg:
+	* gio/src/drive.ccg:
+	* gio/src/drive.hg: eject(),
+	* gio/src/volume.ccg:
+	* gio/src/volume.hg: eject(),
+	* tools/m4/convert_gio.m4: Wrapped GMountUnmountFlags enum as 
+	MountUnmountFlags, and used it. 
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: unmount_mountable(), eject(): Reorder the 
+	parameters and add a default flag value.
+
+2008-01-17  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/filterinputstream.ccg:
+	* gio/src/filterinputstream.hg:
+	* gio/src/Makefile_list_of_hg.am_fragment: Added FilterInputStream.
+
+	Updated svn:ignore properties.
+
+2008-01-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_defs_gio.cc: Added Mount and 
+	VolumeMonitor.
+	* gio/src/gio_signals.defs: Regenerated.
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/mount.ccg:
+	* gio/src/mount.hg: Added Mount
+	* gio/src/volumemonitor.hg:
+	* gio/src/volumemonitor.ccg: Added VolumeMonitor.
+
+	* tools/m4/convert_gio.m4: Added necessary conversions.
+
+2008-01-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* tools/m4/convert_gio.m4:
+	* gio/src/filemonitor.hg:
+	* gio/src/filemonitor.hg: Added FileMonitor.
+	* gio/src/file.hg: Tried to wrap monitor_file() and 
+	monitor_directory but there is a problem with the GError in 
+	the generated code.
+
+	* tools/extra_defs_gen/generate_defs_gio.cc: Added GFileMonitor.
+
+2008-01-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/seekable.ccg:
+	* gio/src/seekable.hg: Added methods and vfuncs (though the .defs 
+	do not exist for the vfuncs yet.)
+
+2008-01-16  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.hg: Added query_file_exists().
+	* glib/src/uriutils.hg:uri_unescape_string(), uri_escape_string():
+	Change the illegal_characters and reserved_chars_allowed parameters 
+	to std::string, because they may not be UTF-8 
+	See bug #508773.
+
+2008-01-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/drive.ccg:
+	* gio/src/drive.hg:  eject(), poll_for_media()
+	* gio/src/volume.ccg:
+	* gio/src/volume.hg: mount(), eject():
+	Add method overloads that take no slot.
+
+	* glib/src/uriutils.hg: Fix a typo to fix the build.
+
+2008-01-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/uriutils.hg: Improved the documentation for uri_unescape_string(), 
+	based on the improved C documentation.
+
+2008-01-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/drive.ccg:
+	* gio/src/drive.hg:
+	* gio/src/file.ccg:
+	* gio/src/file.hg:
+	* gio/src/fileenumerator.ccg:
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileinputstream.ccg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.ccg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/inputstream.ccg:
+	* gio/src/inputstream.hg:
+	* gio/src/outputstream.ccg:
+	* gio/src/outputstream.hg:
+	* gio/src/volume.ccg:
+	* gio/src/volume.hg: *_async() functions: Rearrange the parameters, 
+	so the (optional) cancellable is always after the slot, 
+	and so flags and io_priority are always at the end, so they can have 
+	default values. 
+
+2008-01-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/Makefile_list_of_sources.am_fragment:
+	* tools/m4/convert_gio.m4:
+	* tools/m4/convert_glib.m4:
+	* tools/m4/convert_gtkmm.m4: Moved the gio conversions into 
+	their own .m4 file, to make it easier to find them.
+
+	* gio/src/cancellable.ccg:
+	* gio/src/cancellable.hg: Use _WRAP_METHOD() for get_current(), 
+	which also fixes the refcounting.
+	* glib/src/uriutils.hg: Added documentation and default parameter 
+	values.
+
+2.15.1:
+
+2008-01-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm.h: Added uriutils.h
+	* glib/glibmm/private/Makefile.am: Renamed some variables to 
+	avoid clashes with the build_shared/ variables, which caused 
+	a dist failure involving wrap_init.h
+
+2008-01-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/appinfo.hg: Added class documentation.
+	* gio/src/asyncresult.hg:
+	* gio/src/cancellable.hg:
+	* gio/src/drive.hg:
+	* gio/src/file.hg:
+	* gio/src/fileattribute.hg:
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileicon.hg:
+	* gio/src/fileinfo.hg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/icon.hg:
+	* gio/src/inputstream.hg:
+	* gio/src/loadableicon.hg:
+	* gio/src/mountoperation.hg:
+	* gio/src/outputstream.hg:
+	* gio/src/seekable.hg:
+	* gio/src/simpleasyncresult.hg:
+	* gio/src/volume.hg: Added @newin2p16 to 
+	the documentation.
+
+	* glib/src/Makefile_list_of_hg.am_fragment:
+	* glib/src/uriutils.ccg:
+	* glib/src/uriutils.hg: Added wrappers of (some) of 
+	these new g_uri_* functions. Not yet documented.
+
+2008-01-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Rename create() to create_file(), 
+	create_async() to create_file_async() and 
+	create_finish() to create_file_finish() to slightly 
+	reduce confusion with the static create*() methods.
+
+2008-01-11  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/seekable.ccg:
+	* gio/src/seekable.hg: Added the Seekable interface, though it 
+	has not methods yet.
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg: Derive/implement Seekable.
+	* gio/src/icon.hg:
+	* gio/src/inputstream.hg:
+	* gio/src/loadableicon.hg:
+	* gio/src/mountoperation.hg:
+	* gio/src/outputstream.hg:
+	* gio/src/simpleasyncresult.hg:
+	* gio/src/volume.hg: Added class documentation, based on the C 
+	documentation.
+
+2008-01-10  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/appinfo.ccg:
+	* gio/src/appinfo.hg: Wrapped AppInfo and AppLaunchContext, without
+	the vfuncs.
+	* tools/m4/convert_glib.m4: New conversions.
+	The previous comment on build was not valid.
+
+2008-01-10  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/appinfo.ccg:
+	* gio/src/appinfo.hg:
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	Added AppInfo, with only two methods before we see why it
+	doesn't get included in the build.
+
+2008-01-10  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/drive.hg:
+	* gio/src/drive.ccg: Added poll_for_media, poll_for_media_finish.
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/inputstream.hg:
+	* gio/src/volume.hg: Modified *_finish functions to take a const
+	AsyncResult.
+
+2008-01-10  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/drive.hg: Added missing capability checking functions.
+	* gio/giomm: Updated svn:ignore properties.
+
+2008-01-10  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gio/src/mountoperation.hg: api change in reply() virtual function and
+	addition of MountOperationResult enumeration
+	* tools/m4/convert_glib.m4: add MountOperationResult enum conversion
+	* gio/src/gio_enums.defs: re-generate enums
+	* gio/src/gio_methods.defs: re-generate methods
+
+2008-01-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* Makefile.am:
+	* build_shared/Makefile_build.am_fragment:
+	* build_shared/Makefile_build_extra.am_fragment:
+	* build_shared/Makefile_build_gensrc.am_fragment:
+	* build_shared/Makefile_gensrc.am_fragment:
+	* build_shared/Makefile_gensrc_platform.am_fragment:
+	Copy (and very slightly adjust) the build_shared/ files from 
+	gtkmm, which has had multiple sub-libraries for a long time.
+	* gio/giomm/Makefile.am:
+	* gio/src/Makefile.am:
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* glib/glibmm/Makefile.am:
+	* glib/glibmm/private/Makefile.am:
+	* glib/src/Makefile.am:
+	* glib/src/Makefile_list_of_hg.am_fragment:
+	Adapt to the structure (variable names, mostly) needed by the 
+	newer build_shared/ files, so that the giomm library is actually 
+	built. 
+
+	* tools/m4/convert_glib.m4:
+	* gio/giomm/init.cc:
+	* gio/giomm/init.h:
+	* gio/src/asyncresult.ccg:
+	* gio/src/drive.ccg:
+	* gio/src/drive.hg:
+	* gio/src/file.ccg:
+	* gio/src/file.hg:
+	* gio/src/fileattribute.ccg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/volume.ccg:
+	* gio/src/volume.hg: Various build fixes, including adding a flags 
+	parameter to unmount and eject methods.
+
+2008-01-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/giomm.h: Correct an include.
+	* gio/src/asyncresult.hg:
+	* gio/src/cancellable.hg:
+	* gio/src/drive.hg:
+	* gio/src/file.hg:
+	* gio/src/fileattribute.hg:
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileicon.hg:
+	* gio/src/fileinfo.hg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/outputstream.hg:
+	* gio/src/simpleasyncresult.hg:
+	* gio/src/volume.ccg:
+	* gio/src/volume.hg: Correct several includes to use giomm/ instead of 
+	glibmm/.
+
+	* configure.in:
+	* examples/Makefile.am_fragment:
+	* tests/Makefile.am_fragment: Include/Link giomm too.
+
+	* tests/Makefile.am:
+	* tests/giomm_simple/Makefile.am:
+	* tests/giomm_simple/giomm_simple.cc:
+	Added a little test, which shows that the library is not being built 
+	properly - we get undefined symbols.
+
+2008-01-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_defs_gio.cc: Added some types used so 
+	far. There are probably more that should be added here.
+	* tools/extra_defs_gen/generate_extra_defs.cc: get_properties(): 
+	Added warnings and a check to avoid a crash when 
+	g_object_interface_list_properties() returns a NULL paramspec, but a 
+	non-null properties count, as is happening with GVolume.
+	* gio/src/gio_signals.defs: Generated this from generate_defs_gio.
+
+2008-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/Makefile_list_of_hg.am_fragment:
+	* gio/src/loadableicon.ccg:
+	* gio/src/loadableicon.hg: Added this, though no methods or vfuncs are 
+	wrapped yet.
+	* tools/m4/convert_glib.m4:
+	* gio/src/fileicon.hg:
+	* gio/src/fileinfo.hg: Derive from LoadableIcon and implement it.
+	set_modification_time(): Take a const TimeVal.
+	* gio/src/fileinputstream.ccg:
+	* gio/src/fileinputstream.hg: Added documentation and a version of 
+	seek() without the cancellable parameter.
+	* gio/src/gio_docs.xml: Generated from docextract_to_xml.py so we get 
+	documentation for methods created by _WRAP_METHOD().
+
+2008-01-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/file.ccg:
+	* gio/src/file.hg: Added method documentation for most *_async methods.
+	See also GTK+ bug #508297.
+	Removed one superfluous load_partial_contents_async() method overload.
+	* gio/src/fileenumerator.hg: Corrected documentation for close_async(). 
+
+2008-01-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in: Uncomment GTKMM_DOXYGEN_INPUT_SUBDIRS to fix the 
+	reference documentation build (no idea when this happened) and add 
+	gio to the list of directories.
+
+	* glib/src/optioncontext.ccg:
+	* glib/src/optioncontext.hg: Added get_help().
+
+	* gio/src/gio_enums.defs: Regenerated with enums.pl
+	* gio/src/gio_methods.defs: Regenerated with h2defs.py.
+
+	* tools/m4/convert_glib.m4:
+	* gio/src/fileattribute.hg: Renamed FileAttributeFlags to 
+	FileAttributeInfoFlags, as it is in gio.
+
+	* gio/src/fileenumerator.hg:
+	* gio/src/asyncresult.hg:
+	* gio/src/cancellable.hg:
+	* gio/src/drive.hg:
+	* gio/src/file.hg: Added class documentation, and some method 
+	documentation, based on the C documentation.
+	Many giomm classes still need documentation.
+
+2008-01-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* gio/src/asyncresult.hg:
+	* gio/src/cancellable.hg:
+	* gio/src/fileattribute.hg:
+	* gio/src/fileenumerator.hg:
+	* gio/src/fileinputstream.hg:
+	* gio/src/fileoutputstream.hg:
+	* gio/src/icon.hg:
+	* gio/src/inputstream.hg:
+	* gio/src/mountoperation.hg:
+	* gio/src/outputstream.hg:
+	* gio/src/simpleasyncresult.hg:
+	Made some whitespace more consistent with the rest of glibmm.
+	In particular, white space alignment in .hg files will often be even worse 
+	when seen in the generated .h files.
+
+	* gio/src/drive.hg: get_icon(), 
+	* gio/src/file.hg: read(), 
+	* gio/src/fileicon.hg: get_file(), 
+	* gio/src/fileinfo.hg: get_icon(), 
+	* gio/src/volume.hg: get_drive(), get_icon():
+	For the const versions, actually return a const RefPtr.
+
+2.15.0:
+
+2007-12-28  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* tools/extra_defs_gen/generate_defs_gio.cc:
+	* tools/extra_defs_gen/Makefile.am: Build a separate extra defs
+	generating program for gio. Currently the program would crash
+	with get_defs() calls with gio types.
+	* configure.in: Define GIOMM_CFLAGS and GIOMM_LIBS.
+
+2007-12-28  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/gio_enums.defs:
+	* gio/src/gio_methods.defs: Regenerated with enums.pl and h2defs.py.
+
+2007-12-28  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/src/icon.ccg:
+	* gio/src/icon.hg:
+	* gio/src/inputstream.ccg:
+	* gio/src/inputstream.hg:
+	* gio/src/Makefile_list_of_hg.am_fragment: Added files missing from
+	the import.
+
+	Set svn:ignore properties for gio.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* configure.in: Mention the new gio/giommconfig.h in AM_CONFIG_HEADER().
+	* gio/Makefile.am: Change references to the giomm-2.0.pc to giomm-2.4.pc.
+	* gio/src/Makefile_list_of_hg.am_fragment: Remove icon.hg and inputstream.hg 
+	because they do not exist in svn.
+	* gio/src/outputstream.hg: Comment out set_pending() because gmmproc complains 
+	about the wrong number of parameters.
+
+	This fixes the build, though I don't know yet if everything is working properly.
+
+2007-12-28  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* configure.in: Fixed typo.
+
+2007-12-28  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* gio/*:
+	* configure.in:
+	* Makefile.am:
+	* tools/m4/convert_glib.m4: Checked in sources from giomm. Build
+	needs to be fixed to work with scripts in build_shared/.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/ustring.h: Added @newin2p16 to compose() and format() 
+	documentation.
+	* glib/src/keyfile.ccg:
+	* glib/src/keyfile.hg: set_double_list(): Make the ArrayHandle argument const. 
+	This could not have been used before.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/keyfile.hg: Add class documentation from the glibmm-2-14 branch.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/class_gobject.m4:
+	* tools/m4/ctor.m4:
+	_INITIALLY_UNOWNED_SINK: Rename from INITIALLY_UNOWNED_SINK, 
+	for consistency, because this could be used directly from .ccg files 
+	that use _CONSTRUCT().
+	Remove the debug code for the else case.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/class_gobject.m4:
+	* tools/m4/ctor.m4:
+	Added the _DERIVES_INITIALLY_UNOWNED macro, for use 
+	after _CLASS_GOBJECT(), if the C type derives 
+	from GInitiallyUnowned rather than just GObject.
+	(Not for use with GtkObject-derived classes).
+	This does g_object_ref_sink() so that we get a normally-behaved 
+	GObject.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* scripts/c_std.m4: Added this, to fix the build. I forgot to 
+	add this when merging the change from glibmm-2-14 on 2007-10-22.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/refptr.h: Use @newin2p16 in the reset() documentation.
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/refptr.h: Deprecate clear(), replacing it with 
+	reset(), because people often do treemodel.clear() when they 
+	mean treemodel->clear(). reset() is consistent with std::auto_ptr<>.
+
+2007-12-28  Daniel Elstner  <danielk@openismus.com>
+
+	* tools/pm/Output.pm (output_wrap_property): Refuse to generate
+	a wrapper for a construct-only property which is also write-only,
+	and display an error message accordingly. (#436789)
+
+2007-12-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/error.cc:
+	* glib/glibmm/exception.cc:
+	* glib/src/convert.ccg:
+	* glib/src/date.ccg: Include glib.h instead of gmessages.h or 
+	gtestutils.h so this builds with all versions of glib.
+
+2007-12-17  Marko Anastasov  <marko.anastasov@gmail.com>
+
+	* glib/glibmm/exception.cc:
+	* glib/glibmm/error.cc:
+	* glib/src/date.ccg:
+	* glib/src/convert.ccg: Include gtestutils.h instead of gmessages.h
+	for g_assert* adapting to glib head.
+
+2007-11-20  Sebastien Bacher  <seb128@ubuntu.com>
+
+	* glib/glibmm/object.cc: fix build issue when using gcc4.3 (#498438)
 
 2007-10-22  Murray Cumming  <murrayc@murrayc.com>
 
@@ -24,7 +2292,11 @@
 	g*mmconfig.h so the *_DISABLE_DEPRECATED define is set for deprecated
 	classes also when included from other code.
 
-2.14.1:
+2007-10-05  Philipp Kerling <philipp@gmail.com>
+
+	* tools/extra_defs_gen/generate_extra_defs.cc: 
+	Also create defs for interfaces, by refing and unrefing them 
+	temporarily.
 
 2007-09-29  Rémi Cardona  <remi@gentoo.org>
 
@@ -54,18 +2326,33 @@
 	* tools/m4/class_interface.m4: Use wrap_auto_interface<>() 
 	instead of wrap_auto() for interfaces.
 
-2.14.0:
-
 2007-09-06  Daniel Elstner  <danielk@openismus.com>
 
-        * glib/src/regex.{ccg,hg} (Regex): Some cosmetic cleanup.  Also
-        replace C-style casts in default argument values with static_cast<>.
-        (escape_string): Wrap missing function.
-        (match_full): Rename to and add as overloads of match().
-        (match_all_full): Rename to and add as overloads of match_all().
-        (split_full): Rename to and add as overloads of split().
+	* glib/src/regex.{ccg,hg} (Regex): Some cosmetic cleanup.  Also
+	replace C-style casts in default argument values with static_cast<>.
+	(escape_string): Wrap missing function.
+	(match_full): Rename to and add as overloads of match().
+	(match_all_full): Rename to and add as overloads of match_all().
+	(split_full): Rename to and add as overloads of split().
 
-	This has freeze-break approval from the release team.
+2007-09-03  Daniel Elstner  <danielk@openismus.com>
+
+	* glib/glibmm/ustring.cc (ustring::FormatStream::FormatStream): Use
+	the global C++ locale instead of forcing the environment's locale
+	onto the formatting stream.  This lifts an unnecessary restriction
+	at the cost of requiring users to call std::locale::global().
+	* glib/glibmm/ustring.h (ustring): Advertise the new compose and
+	format API in the class documentation.
+	(ustring::format): Correct a couple of cut'n'paste mistakes -- ouch.
+	Also add two more overloads so that format() now takes up to eight
+	arguments.  Extent the method documentation, too.
+	(ustring::Stringify): Explicitly declare the class as noncopyable.
+	(ustring::compose): Qualify calls to method ustring::compose_argv()
+	in order to avoid surprising name lookup results in the context of
+	the template instantiation.
+
+	* docs/reference/Doxyfile.in (PREDEFINED): Add GLIBMM_HAVE_WIDESTREAM
+	so that the wide stream I/O operators show up in the documentation.
 
 2007-08-16  Jonathon Jongsma  <jjongsma@gnome.org>
 
@@ -73,6 +2360,94 @@
 	docs/reference/glibmm_header.html_fragment: added <div> to doxygen header
 	and footer to make it easier to integrate with library.gnome.org, per a
 	request by Frederic Peters
+
+2007-08-15  Daniel Elstner  <danielk@openismus.com>
+
+	* glib/glibmm/ustring.{cc,h} (ustring::compose_argv): Rename
+	"format" argument to "fmt" to avoid name clashes with the method
+	of the same name.
+	(ustring::compose): Make the type of each substitution parameter
+	a template argument, and invoke ustring::format() implicitly for
+	non-string arguments.  Explicit invocation of ustring::format() is
+	still necessary in order to apply I/O manipulators to an argument.
+	(ustring::Stringify): New auxiliary template class used in the
+	implementation of ustring::compose().
+
+	* examples/compose/main.cc (show_examples): Omit explicit calls
+	to ustring::format() where possible.
+
+2007-08-12  Daniel Elstner  <danielk@openismus.com>
+
+	* examples/compose: New example demonstrating the message
+	compose and format features.
+	* examples/compose/main.cc: New file.
+	* examples/compose/Makefile.am: New file.
+
+	* examples/Makefile.am (example_dirs): Add compose directory.
+	* configure.in (AC_CONFIG_FILES): Add examples/compose/Makefile.
+
+2007-08-12  Daniel Elstner  <danielk@openismus.com>
+
+	* build_shared/Makefile_build.am_fragment (all_includes): Add
+	-I$(top_builddir) in order to allow <config.h> to be included.
+
+	* glib/glibmm/ustring.{cc,h}: Include <config.h> for the
+	definition of SIZEOF_WCHAR_T.
+	(ustring::FormatStream::stream): Replace accessor with template
+	method that passes its argument onto the stream.  Add overload
+	for "const char*" to enable the use of UTF-8 string literals as
+	arguments to ustring::format().
+	(ustring::FormatStream::FormatStream): Handle exceptions on
+	failure to initialize the locale gracefully.
+	(ustring::format): Adapt to the modified stream() method.
+	(operator<<): Add missing call to ustring::raw() to get the
+	number of bytes instead of code points.  Oops.
+
+2007-08-12  Daniel Elstner  <danielk@openismus.com>
+
+	* glib/glibmm/ustring.{cc,h}: Add preliminary implementation of
+	a message compose and format API (bug #399216).  The API design
+	is not final and still open for discussion.
+	(ustring::compose): New set of static methods for composing
+	internationalized text messages by substituting placeholders
+	in a template string.
+	(ustring::format): New set of static methods for locale-dependent
+	formatting of numbers and other streamable objects to strings.
+	(ustring::compose_argv): New static method which implements the
+	common functionality of the compose() overloads.
+	(ustring::FormatStream): New helper class which implements the
+	type-independent functionality of the format() templates.
+	(operator>>): New operator overload for std::wistream.
+	(operator<<): New operator overload for std::wostream.
+
+2007-08-12  Daniel Elstner  <danielk@openismus.com>
+
+	* scripts/dk-feature.m4: New file, defining M4 utility macros for
+	feature testing.  These macros are part of my personal autoconf
+	library and are not specific to glibmm, as indicated by the "DK_"
+	namespace prefix.
+
+	* configure.in (AC_INIT): Switch to the non-deprecated usage of
+	AC_INIT() by passing project name and version number as arguments.
+	This is necessary to define a couple of auxiliary macros.
+	(AC_PREREQ): Bump Autoconf version requirement to 2.58.
+	(AC_CONFIG_SRCDIR): Point to project-specific source file.
+	(AC_CONFIG_MACRO_DIR): Declare scripts/ as M4 directory.
+	(AM_INIT_AUTOMAKE): Switch to non-deprecated usage.
+	(AC_CHECK_SIZEOF): Use to determine the size of wchar_t.
+	(DK_CHECK_FEATURE): Use new feature test macro to check for
+	support of wide-character streams.
+
+	* config.h.in (SIZEOF_WCHAR_T): Add #undef template.
+	* glib/glibmmconfig.h.in (GLIBMM_HAVE_WIDE_STREAM): Likewise.
+
+2007-08-04  Daniel Elstner  <daniel.kitta@gmail.com>
+
+	* containerhandle_shared.h (TypeTraits<bool>): Rewrite completely
+	broken type adapter (bug #406960).
+	* src/keyfile.{ccg,hg}: Fix the implementation to correctly use
+	ArrayHandle<>.  Fix compilation with the new ArrayHandle<bool>
+	code.
 
 2.13.9:
 

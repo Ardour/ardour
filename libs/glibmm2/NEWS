@@ -1,3 +1,427 @@
+2.20.0 (stable):
+
+* Documentation fixes (Daniel Elstner)
+
+2.19.8 (unstable):
+(2.19.4 to 2.19.8 were skipped)
+
+* Added FILE_CREATE_REPLACE_DESTINATION enum value.
+* Added Error::TOO_MANY_OPEN_FILES error code.
+* Fix some compiler warnings about extra ;s.
+  (Murray Cumming)
+
+2.19.3 (unstable):
+
+* New API:
+  * BufferedInputStream: buffer_size property
+  * BufferedOutputStream: buffer_size, auto_grow properties
+  * DataInputStream: byte_order, newline_type properties
+  * DataOutputStream: byte_order property
+  * FilterInputStream: close_base_stream property, get/set_close_base_stream()
+  * FilterOutputStream: close_base_stream property, get/set_close_base_stream()
+  * UnixInputStream: fd and close_fd properties, get_fd(), get/set_close_fd()
+  * UnixOutputStream: fd and close_fd properties, get_fd(), get/set_close_fd()
+* Make licenses consistent with eachother (library gpl vs. lesser gpl, etc)
+  (Deng Xiyue)
+* Fixed some problems when building with exceptions disabled (Murray Cumming)
+* Build fixes (Theppitak Karoonboonyanan)
+
+2.19.2 (unstable):
+
+* File: Added make_directory_with_parents() method overload with no parameter.
+  Bug #566003 (Philip Belemezov).
+* NoteTree: Do not use a non-ASCII dash character in a comment, to 
+  avoid the MSVC++ warning C4819 with Visual Studio 2008.
+  (Tao Wang) Bug #568072
+* spawn_*() functions: Added alternative API for when 
+  GLIBMM_EXCEPTIONS_ENABLED is not enabled. (Murray Cumming)
+  Bug #565487 (Jonathon Jongsma)
+* uri_*() functions: Fix memory leak.
+  (Jonathan Jongsma) Bug #566845 (Jason Kasper)
+* ustring: Add an overload which takes only a format string and no arguments 
+  to be substituted. (Daniel Elstner) Bug #506394.
+
+2.19.1 (unstable):
+
+ * Fix accidental ABI breakage in 2.19.0 caused by adding default handlers for
+   new Gio::Drive signals
+
+2.19.0 (unstable):
+
+ * wrapped new glib 2.19.x API
+   * Gio::AppInfo: get_commandline(), can_delete(), do_delete(),
+     reset_type_associations(), launch_default_for_uri()
+   * Gio::Drive: new signals changed, disconnected, and eject_button
+   * Gio::Icon: create(std::string), to_string()(),
+   * Gio::Mount: guess_content_type_sync(), is_shadowed(), shadow(), unshadow()
+   * Gio::content_type_from_mine_type();
+   * Gio::DesktopAppInfo: create_from_keyfile()
+   * Gio::Emblem: new class
+   * Gio::EmblemedIcon: new class
+   * Gio::MemoryOutputStream: new class
+ * Bugs Fixed:
+   * 555743 - warning in glibmm
+   * 562716 - warning fixing cause more warnings.
+   * 396963 - Add Glib::signal_idle().connect_once()
+ * Thanks to contributions from Przemysław Grzegorczyk, Dave Foster, Hubert
+   Figuiere, and Jonathon Jongsma for changes in this release
+
+2.18.1 (stable):
+
+ * Many windows build improvements
+ * Bugs fixed:
+   * 506410 - Call of overloaded Stringify is ambiguous
+   * 529496 - Gio::Error::HOST_NOT_FOUND clashes with a netdb.h #define
+   * 539891 - Can't use doxygen commands in *_override.xml
+   * 555576 - name clash in fileinfo.h with winbase.h from VS2005
+   * 556315 - Extra defs generation utility forgets to generate signals for inter...
+   * 556387 - FileEnumerator::next_file reference counting problems
+ * Thanks to contributions from Armin Burgmeier, Jonathon Jongsma, José
+   Alburquerque, Murray Cumming, and Szilárd Pfeiffer
+
+2.18.0 (stable):
+
+ * Bug #550789: Fixed a licensing issue with some of the tools distributed with
+   the source tarball (Murray Cumming)
+
+2.17.3 (unstable):
+
+ * More Glib::NodeTree improvements (Szilárd Pfeiffer, Murray Cumming)
+ * Windows build fixes (Armin Burgmeier)
+
+2.17.2 (unstable):
+
+ * Changes to API that was added in this unstable series:
+   * Glib::Tree (wrapper around GNode) renamed to Glib::NodeTree  to avoid
+     confusion with GTree
+   * pass the node to the traversal the callback (Szilárd Pfeiffer)
+   * Move TraverseFlags inside the NodeTree class (Murray Cumming)
+ * New API:
+   * Added the drive_eject_button signal (Murray Cumming)
+ * Bug Fixes:
+   * #423990: glibmm et al don't recognize new GNU m4 (Damien Carbery)
+   * #529496: Gio::Error::HOST_NOT_FOUND clashes with a netdb.h #define (Murray
+     Cumming)
+   * #523043: Initialization of Glib::ObjectBase for derived types should be
+     mentioned in documentation (Moritz Ulrich)
+   * #506410: Call of overloaded Stringify is ambiguous (Szilárd Pfeiffer,
+     Murray Cumming)
+
+2.17.1 (unstable):
+
+  * New API: (Murray Cumming)
+    * Gio::File: make_directory_with_parents(), query_file_type(), monitor().
+    * Gio::FileEnumerator: get_container().
+    * Gio::Mount: guess_content_type() and guess_content_type_finish().
+    * Gio:ThemedIcon: prepend_name().
+    * Gio::Volume: get_activation_root().
+  * Bug Fixes:
+    * #512348: provide documentation about threadsafety of
+      Glib::Thread::create() when the slot object is of type sigc::trackable (Chris Vine)
+    * #538803: minor fixes to Glib::Tree (Levi Bard)
+    * #540656: Pass NULL in a couple functions instead of an empty string allow
+      files to be overwritten (Armin Burgmeier)
+    * #540875: add documentation for Glib::OwnershipType (Johannes Schmid)
+    * #542929: Fix some compiler warnings (Benjamin Herr)
+    * Fix AppLaunchContext::get_display(),
+      AppLaunchContext::get_startup_notify_id() to use a list of Gio::File, not
+      filepath string.  properly documented we know that this is correct. It's an
+      API break but this function could nothave worked before. (Murray)
+    * Bug #543292: Fix visual studio project file (Jens Georg)
+  * Added Keyfile example (Murray Cumming)
+
+2.17.0 (unstable):
+
+  * Added copy constructor and assignment operator, made GDate constructor visible (José
+    Alburquerque)
+  * Added Glib::Tree, a wrapper for GNode, providing an N-ary tree container, more or
+    less like a standard C++ container (Levi Bard)
+  * Bug #529648 - give helpful warning message when library user forgets to initialize the
+    library (Jonathon Jongsma)
+  * Bug #529533 - Fix bug that prevented for Gio::Mount, Gio::Drive, and Gio::Volume from
+    being wrapped for some backend implementations (Jonathon Jongsma)
+
+2.16.2 (stable):
+
+ * Bug 526831 – G_OPTION_REMAINING no longer works with OptionEntry (Murray
+   Cumming)
+ * Bug 527687 – ustring::erase(iterator) incorrect for non ascii character
+   (Murray Cumming)
+ * add API documentation for spawn_* functions (Murray Cumming)
+ * fix possible memory leak in OptionEntr (Murray Cumming)
+
+2.16.1 (stable):
+
+* Reference-counting bugfix in Gio::File::create() and Gio::File::replace()
+  (Murray Cumming)
+* Include Gio::Error header in headers that have API that can throw this
+  exception (Murray Cumming)
+* Improve documentation (Murray Cumming)
+* Build fixes for giomm on win32 (Jonathon Jongsma)
+* fix warning with g++ 4.3 (Tim Retout)
+
+2.16.0 (stable):
+
+Changes compared to glibmm 2.14:
+
+* New Gio API. Check for giomm-2.4 with pkg-config to use this.
+  (Marko Anastasov, Jonathon Jongsma, José Alburquerque, Murray Cumming)
+* New Glib::Checksum class.
+  (Naveen Verma, Murray Cumming)
+* New uri helper functions: uri_unescape_string(), uri_parse_scheme(), 
+  uri_escape_string().
+  (Murray Cumming)
+
+2.15.8 (unstable):
+
+* File: load_contents(), load_contents_finish(),  load_partial_contents_finish(): 
+  Use char*& instead of char** for contents.
+  Use std::string& instead of char**  for etag_out.
+  Added method overloads without cancellable.
+  (Murray Cumming)
+* Improved documentation: Mention exceptions instead of errors.
+
+2.15.7 (unstable):
+
+* File:
+  - Added query_filesystem_info_async() and 
+  query_filesystem_info_finish() because these were added to the C API.
+  (Murray Cumming)
+  - Renamed contains_file() to file_has_prefix() because this was changed in the 
+  C API.
+  (Wouter Bolsterlee)
+* ThemedIcon: Added append_name() because this was added to the C API.
+  (Murray Cumming)
+
+Glib:
+* Renamed uri_get_scheme() to uri_parse_scheme() because this was changed 
+  in the C API.
+  (Wouter Bolsterlee)
+
+Documentation:
+* Corrections to the .devhelp file generation.
+  (Jonathon Jongsma. Bug #518673)
+
+
+2.15.6 (unstable):
+
+Gio:
+* Removed most vfuncs, because they are not useful to application developers, 
+  and are a likely source of errors. (Murray Cumming)
+* DesktopAppInfo:
+  - Added Added create(), create_from_file(),
+    is_hidden() and set_desktop_env()
+    Renamed new_from_file() to create_from_file().
+    (José Alburquerque)
+* File: equal(), get_relative_file(), contains_file(): Take const File 
+  parameters.
+* FileAttributeInfoList: Added dup().
+* MemoryInputStream: Added add_data(const void* data, gssize len).
+* Mount: Really added signals.
+* MountOperation: Wrapped the ask-question signal.
+  (Murray Cumming)
+* Volume:
+  - Added should_automount().
+    (Marko Anastasov)
+  - Really added signals.
+    (Murray Cumming)
+* UnixOutputStream, DataOutputStream, DataInputStream: Made constructors 
+  protected.
+  (Marko Anastasov)
+
+
+Documentation:
+* Install a devhelp file like the existing gtkmm one.
+  (Jonathon Jongsma)
+
+2.15.5 (unstable)
+
+Gio:
+* File, Mount, Volume:
+  Updated for latest gio API changes, adding a MountFlags parameter to some 
+  methods.
+  (Jonathon Jongsma)
+* Volume, VolumeMonitor, Added some vfuncs, though we might remove these 
+  later as they seem useless and likely to be sources of problems.
+  (Murray Cumming)
+
+Glib:
+* Actually install gi18n-lib.h
+  (Takao Fujiwara. Bug #515133)
+
+2.15.4 (unstable):
+
+Glib:
+
+* AppInfo: Added  vfuncs.
+  (Jonathon Jongsma)
+* Added BufferedOutputStream, DataInputStream and DataOutputStream, and 
+  FilterOutputStream.
+  (Jonathon Jongsma)
+* Cancellable: Added the signal.
+  (Murray Cumming)
+* Added ContentType functions.
+  (Jonathon Jongsma)
+* File:
+  - Added overloads of create_file(), remove(), trash(), 
+    make_directory(), make_symbolic_link(), query_settable_attributes(), 
+    query_writable_namespaces(), query_filesystem_info(),  
+    query_default_handler() and mount_mountable(() without cancellable 
+    parameters.
+    (Murray Cumming)
+  - Added copy_attributes(), added mount_enclosing_volume(), 
+    mount_enclosing_volume_finish(), find_enclosing_mount(), and 
+    find_enclosing_mount_finish().
+    (Murray Cumming)
+  - set_attributes_from_info(): Reordered parameters so we can have default 
+    values.
+    (Murray Cumming)
+  - Added copy_async(), with overloads without slot_progress. copy_finish(), 
+    query_default_handler().
+    (Marko Anastasov)
+  - find_enclosing_mount(), append_to(): Reordered parameters and added 
+    overloads without cancellable.
+    (Murray Cumming)
+  - Added non-cancellable set_attribute_string(), set_attribute_byte_string(), 
+    set_attribute_{uint32, int32, uint64, int64}.
+    (José Alburquerque)
+* Added FilenameCompleter.
+  (Murray Cumming)
+* LoadableIcon:
+  - Derive from Icon, and no longer derive FileIcon from Icon directly.
+  (Murray Cumming)
+  - Wrapped some vfuncs and some extra methods.
+  (Jonathon Jongsma)
+* Added MemoryInputStream.
+  (Jonathon Jongsma)
+* Added ThemedIcon
+  (Murray Cumming)
+* Added UnixInputStream, UnixOutputStream, and DesktopAppInfo, available only 
+  on Unix/Linux.
+  (José Alburquerque, Murray Cumming)
+* Volume: Added get_mount(), get_identifier(), enumerate_identifiers().
+  (Marko Anastasov)
+* VolumeMonitor: Added signals and properties. 
+  (Murray Cumming)
+
+Build:
+* Use local gmmproc files again, instead of only installed ones.
+  (Murray Cumming)
+* Fix compile with GCC 4.3.
+  (Kjartan Maraas)
+
+
+2.15.3 (unstable):
+
+Gio:
+* FilterInputStream: Really wrap this.
+* VolumeMonitor: Workaround a crash in gio due to the 
+  eccentric use of the GType system to discover GVolumeMonitor 
+  implementations. See gio bug #511814.
+* Added Gio::Error exception.
+* Added more method overloads without optional parameters, and 
+  reordered more parameters to allow default values. 
+  (Murray Cumming)
+* giomm.h: Added includes.
+  (Jonathan Jongsma)
+
+* Note that there are some examples in the gtkmm-documentation module.
+
+
+2.15.2 (unstable):
+
+Glib:
+
+* Checksum: New class, wrapping GChecksum.
+  (Naveen Verma. Bug #510235)
+* ObjectBase: Added connect_property_changed_with_return() 
+  because connect_property_changed() does not return a sigc::connection.
+  Bug #433984 (Philip Langdale, Kalle Vahlman).
+* enums.pl .defs generator: Handle parantheses.
+  (Marko Anastasov. Bug #498621)
+
+Gio:
+* Added FilterInputStream, Mount, FileMonitor, VolumeMonitor.
+  (Marko Anastasov, Murray Cumming)
+* Many methods' parameters have been reordered so we can 
+  add default parameter values.
+* Many methods now have overloads with less parameters.
+  (Murray Cumming, José Alburquerque, Marko Anastasov)
+
+
+2.15.1 (unstable):
+
+Gio:
+* Actually build the giomm library.
+* Added API reference documentation.
+  (Murray Cumming)
+* Added AppInfo and AppLaunchContext.
+* Drive:
+  - Added poll_for_media() and poll_for_media_finish().
+  - Added capability-checking functions.
+  (Marko Anastasov)
+* File: Renamed create() to create_file(), 
+  create_async() to create_file_async() and 
+  create_finish() to create_file_finish() to slightly 
+  reduce confusion with the static create*() methods.
+* FileInputStream, FileOutputStream: Derive from Seekable.
+  (Murray Cumming)
+* FileInputStream, InputStream, Volume: Modified *_finish 
+  functions to take a const AsyncResult.
+  (Marko Anastasov)
+* Added LoadableIcon.
+  (Murray Cumming)
+* MountOperation: Added MountOperationResult enumeration and make 
+  reply() take this instead of a bool.
+  (Jonathon Jongsma)
+
+  (Murray Cumming)
+ 
+Glib:
+* Added uri_unescape_string(), uri_get_scheme() and uri_escape_string().
+  (Murray Cumming
+
+
+2.15.0 (unstable):
+
+* New giomm library (check for giomm-2.4 with pkg-config) 
+  in the glibmm tarball. This wraps the new gio API in glib 2.15/16.
+  However, this API could change considerably before the stable 
+  glibmm 2.16 is released.
+  (Marko Anastasov)
+* ustring:
+  - Added compose() to substitute placeholders in a format string, as an 
+  equivalent to sprintf(), to help internationalization/translation.
+  - Added format() to simplify the common task of converting a value 
+  (such as a number) to a string, with optional stream formatting 
+  parmatters. This uses the regular C++ stream API in its implementation.
+  (Daniel Elstner, Openismus)
+* Glib::RefPtr: Deprecate clear(), replacing it with 
+  reset(), because people often do treemodel.clear() when they 
+  mean treemodel->clear(). reset() is consistent with std::auto_ptr<>.
+  But the method is still there so the compiler still can't help 
+  you to avoid the mistake.
+  (Murray Cumming)
+* KeyFile: set_integer_list(),  set_boolean_list(), set_double_list() 
+  actually work now without crashing.
+  (Daniel Elstner, Openismus)
+* gmmproc:
+  - Refuse to generate a wrapper for a construct-only 
+  property which is also write-only, and display a warning.
+  (Daniel Elstner, bug #436789)
+  - Added _DERIVES_INITIALLY_UNOWNED to sink floating 
+  references in constructor of classes that wrap 
+  GInitiallyUnowned-derived GTypes. Plus _INITIALLY_UNOWNED_SINK 
+  for hand-written constructors.
+  (Murray Cumming)
+* Build:
+- Fix build for glib 2.15 by including 
+  gtestutils.h instead of gmessages.h to get g_assert(), 
+  though I am angry that this API break has been allowed.
+  (Murray Cumming)
+- Fix build for pre-releases of gcc 4.3 - also an include 
+  issue. (Sebastien Bacher, #498438)
+
 2.14.2:
 
 * Build: Hopefully fix the build on NetBSD-4.99.6/amd64.

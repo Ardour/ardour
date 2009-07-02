@@ -1,4 +1,4 @@
-dnl $Id: class_interface.m4 446 2007-09-26 15:10:44Z murrayc $
+dnl $Id: class_interface.m4 580 2008-02-04 20:27:38Z murrayc $
 
 
 define(`_CLASS_INTERFACE',`dnl
@@ -10,9 +10,9 @@ define(`__CNAME__',`$2')
 define(`__CCAST__',`$3')
 define(`__CCLASS__',`$4') dnl SomethingIface or SomethingClass, both suffixes are used.
 define(`__BASE__',_LOWER(__CPPNAME__))
-define(`__CPPPARENT__',`Glib::Interface')
-dnl define(`__CPARENT__',`GObject')
-define(`__PCAST__',`(GObject*)')
+define(`__CPPPARENT__',m4_ifelse($5,`',`Glib::Interface',$5)) #Optional parameter.
+define(`__CPARENT__',m4_ifelse($6,`',`GObject',$6)) #Optional parameter.
+define(`__PCAST__',`(__CPARENT__`'*)')
 define(`__BOOL_IS_INTERFACE__',`1')
 
 
@@ -34,7 +34,7 @@ dnl
 dnl
 dnl
 define(`_PH_CLASS_DECLARATION_INTERFACE',`dnl
-class __CPPNAME__`'_Class : public Glib::Interface_Class
+class __CPPNAME__`'_Class : public __CPPPARENT__`'_Class
 {
 public:
   typedef __CPPNAME__ CppObjectType;
@@ -187,13 +187,18 @@ Glib::ObjectBase* __CPPNAME__`'_Class::wrap_new(GObject* object)
 
 __CPPNAME__::__CPPNAME__`'()
 :
-  Glib::Interface(__BASE__`'_class_.init())
+  __CPPPARENT__`'(__BASE__`'_class_.init())
 {}
 
 __CPPNAME__::__CPPNAME__`'(__CNAME__* castitem)
 :
   __CPPPARENT__`'(__PCAST__`'(castitem))
 {}
+
+__CPPNAME__::__CPPNAME__`'(const Glib::Interface_Class& interface_class)
+: __CPPPARENT__`'(interface_class)
+{
+}
 
 __CPPNAME__::~__CPPNAME__`'()
 {}
@@ -237,6 +242,14 @@ private:
 
 protected:
   __CPPNAME__`'(); // you must derive from this class
+
+  /** Called by constructors of derived classes. Provide the result of 
+   * the Class init() function to ensure that it is properly 
+   * initialized.
+   * 
+   * @param interface_class The Class object for the derived type.
+   */
+  explicit __CPPNAME__`'(const Glib::Interface_Class& interface_class);
 
 public:
   // This is public so that C++ wrapper instances can be

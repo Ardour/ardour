@@ -7,16 +7,16 @@
 /* Copyright (C) 2007 The glibmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -26,7 +26,7 @@
 #include <glibmm/ustring.h>
 #include <glibmm/error.h>
 #include <glibmm/arrayhandle.h>
-#include <glib/gregex.h>
+#include <glib.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef struct _GRegex GRegex;
@@ -155,10 +155,48 @@ class RegexError : public Glib::Error
 public:
   enum Code
   {
-    COMPILE,
-    OPTIMIZE,
-    REPLACE,
-    MATCH
+    COMPILE = 0,
+    OPTIMIZE = 1,
+    REPLACE = 2,
+    MATCH = 3,
+    INTERNAL = 4,
+    STRAY_BACKSLASH = 101,
+    MISSING_CONTROL_CHAR = 102,
+    UNRECOGNIZED_ESCAPE = 103,
+    QUANTIFIERS_OUT_OF_ORDER = 104,
+    QUANTIFIER_TOO_BIG = 105,
+    UNTERMINATED_CHARACTER_CLASS = 106,
+    INVALID_ESCAPE_IN_CHARACTER_CLASS = 107,
+    RANGE_OUT_OF_ORDER = 108,
+    NOTHING_TO_REPEAT = 109,
+    UNRECOGNIZED_CHARACTER = 112,
+    POSIX_NAMED_CLASS_OUTSIDE_CLASS = 113,
+    UNMATCHED_PARENTHESIS = 114,
+    INEXISTENT_SUBPATTERN_REFERENCE = 115,
+    UNTERMINATED_COMMENT = 118,
+    EXPRESSION_TOO_LARGE = 120,
+    MEMORY_ERROR = 121,
+    VARIABLE_LENGTH_LOOKBEHIND = 125,
+    MALFORMED_CONDITION = 126,
+    TOO_MANY_CONDITIONAL_BRANCHES = 127,
+    ASSERTION_EXPECTED = 128,
+    UNKNOWN_POSIX_CLASS_NAME = 130,
+    POSIX_COLLATING_ELEMENTS_NOT_SUPPORTED = 131,
+    HEX_CODE_TOO_LARGE = 134,
+    INVALID_CONDITION = 135,
+    SINGLE_BYTE_MATCH_IN_LOOKBEHIND = 136,
+    INFINITE_LOOP = 140,
+    MISSING_SUBPATTERN_NAME_TERMINATOR = 142,
+    DUPLICATE_SUBPATTERN_NAME = 143,
+    MALFORMED_PROPERTY = 146,
+    UNKNOWN_PROPERTY = 147,
+    SUBPATTERN_NAME_TOO_LONG = 148,
+    TOO_MANY_SUBPATTERNS = 149,
+    INVALID_OCTAL_VALUE = 151,
+    TOO_MANY_BRANCHES_IN_DEFINE = 154,
+    DEFINE_REPETION = 155,
+    INCONSISTENT_NEWLINE_OPTIONS = 156,
+    MISSING_BACK_REFERENCE = 157
   };
 
   RegexError(Code error_code, const Glib::ustring& error_message);
@@ -270,13 +308,13 @@ public:
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   static Glib::RefPtr<Glib::Regex> create(const Glib::ustring& pattern, RegexCompileFlags compile_options = static_cast<RegexCompileFlags>(0), RegexMatchFlags match_options = static_cast<RegexMatchFlags>(0));
 #else
-  static Glib::RefPtr<Glib::Regex> create(const Glib::ustring& pattern, RegexCompileFlags compile_options = static_cast<RegexCompileFlags>(0), RegexMatchFlags match_options = static_cast<RegexMatchFlags>(0), std::auto_ptr<Glib::Error>& error);
+  static Glib::RefPtr<Glib::Regex> create(const Glib::ustring& pattern, RegexCompileFlags compile_options, RegexMatchFlags match_options, std::auto_ptr<Glib::Error>& error);
 #endif /* !GLIBMM_EXCEPTIONS_ENABLED */
   
   
-  /** Gets the pattern string associated with @a regex , i.e.\ a copy of 
+  /** Gets the pattern string associated with @a regex, i.e.\ a copy of 
    * the string passed to g_regex_new().
-   * @return The pattern of @a regex 
+   * @return The pattern of @a regex
    * 
    * @newin2p14.
    */
@@ -296,9 +334,9 @@ public:
    */
   int get_capture_count() const;
   
-  /** Retrieves the number of the subexpression named @a name .
+  /** Retrieves the number of the subexpression named @a name.
    * @param name Name of the subexpression.
-   * @return The number of the subexpression or -1 if @a name  
+   * @return The number of the subexpression or -1 if @a name 
    * does not exists
    * 
    * @newin2p14.
@@ -308,21 +346,21 @@ public:
   static Glib::ustring escape_string(const Glib::ustring& string);
 
   
-  /** Scans for a match in @a string  for @a pattern .
+  /** Scans for a match in @a string for @a pattern.
    * 
    * This function is equivalent to g_regex_match() but it does not
    * require to compile the pattern with g_regex_new(), avoiding some
    * lines of code when you need just to do a match without extracting
    * substrings, capture counts, and so on.
    * 
-   * If this function is to be called on the same @a pattern  more than
+   * If this function is to be called on the same @a pattern more than
    * once, it's more efficient to compile the pattern once with
    * g_regex_new() and then use g_regex_match().
    * @param pattern The regular expression.
    * @param string The string to scan for matches.
-   * @param compile_options Compile options for the regular expression.
-   * @param match_options Match options.
-   * @return <tt>true</tt> is the string matched, <tt>false</tt> otherwise
+   * @param compile_options Compile options for the regular expression, or 0.
+   * @param match_options Match options, or 0.
+   * @return <tt>true</tt> if the string matched, <tt>false</tt> otherwise
    * 
    * @newin2p14.
    */
@@ -375,7 +413,7 @@ public:
    * some lines of code when you need just to do a split without 
    * extracting substrings, capture counts, and so on.
    * 
-   * If this function is to be called on the same @a pattern  more than
+   * If this function is to be called on the same @a pattern more than
    * once, it's more efficient to compile the pattern once with
    * g_regex_new() and then use g_regex_split().
    * 
@@ -387,15 +425,15 @@ public:
    * you'll need to check for the empty string before calling this 
    * function.
    * 
-   * A pattern that can match empty strings splits @a string  into 
+   * A pattern that can match empty strings splits @a string into 
    * separate characters wherever it matches the empty string between 
    * characters. For example splitting "ab c" using as a separator 
    * "\s*", you will get "a", "b" and "c".
    * @param pattern The regular expression.
    * @param string The string to scan for matches.
-   * @param compile_options Compile options for the regular expression.
-   * @param match_options Match options.
-   * @return A <tt>0</tt>-terminated gchar ** array. Free it using g_strfreev()
+   * @param compile_options Compile options for the regular expression, or 0.
+   * @param match_options Match options, or 0.
+   * @return A <tt>0</tt>-terminated array of strings. Free it using g_strfreev()
    * 
    * @newin2p14.
    */
@@ -414,7 +452,7 @@ public:
    * you do need to represent empty elements, you'll need to check for the
    * empty string before calling this function.
    * 
-   * A pattern that can match empty strings splits @a string  into separate
+   * A pattern that can match empty strings splits @a string into separate
    * characters wherever it matches the empty string between characters.
    * For example splitting "ab c" using as a separator "\s*", you will get
    * "a", "b" and "c".
@@ -440,21 +478,20 @@ public:
    * you do need to represent empty elements, you'll need to check for the
    * empty string before calling this function.
    * 
-   * A pattern that can match empty strings splits @a string  into separate
+   * A pattern that can match empty strings splits @a string into separate
    * characters wherever it matches the empty string between characters.
    * For example splitting "ab c" using as a separator "\s*", you will get
    * "a", "b" and "c".
    * 
-   * Setting @a start_position  differs from just passing over a shortened 
-   * string and setting G::REGEX_MATCH_NOTBOL in the case of a pattern 
+   * Setting @a start_position differs from just passing over a shortened 
+   * string and setting REGEX_MATCH_NOTBOL in the case of a pattern 
    * that begins with any kind of lookbehind assertion, such as "\b".
    * @param string The string to split with the pattern.
-   * @param string_len The length of @a string , or -1 if @a string  is nul-terminated.
+   * @param string_len The length of @a string, or -1 if @a string is nul-terminated.
    * @param start_position Starting index of the string to match.
    * @param match_options Match time option flags.
-   * @param max_tokens The maximum number of tokens to split @a string  into. 
+   * @param max_tokens The maximum number of tokens to split @a string into. 
    * If this is less than 1, the string is split completely.
-   * @param error Return location for a G::Error.
    * @return A <tt>0</tt>-terminated gchar ** array. Free it using g_strfreev()
    * 
    * @newin2p14.
@@ -473,7 +510,7 @@ public:
 #endif /* !GLIBMM_EXCEPTIONS_ENABLED */
 
   
-  /** Replaces all occurances of the pattern in @a regex  with the
+  /** Replaces all occurances of the pattern in @a regex with the
    * replacement text. Backreferences of the form '\number' or 
    * '\g&lt;number&gt;' in the replacement text are interpolated by the 
    * number-th captured subexpression of the match, '\g&lt;name&gt;' refers 
@@ -512,19 +549,18 @@ public:
    * 
    * If you do not need to use backreferences use g_regex_replace_literal().
    * 
-   * The @a replacement  string must be UTF-8 encoded even if G::REGEX_RAW was
+   * The @a replacement string must be UTF-8 encoded even if REGEX_RAW was
    * passed to g_regex_new(). If you want to use not UTF-8 encoded stings
    * you can use g_regex_replace_literal().
    * 
-   * Setting @a start_position  differs from just passing over a shortened 
-   * string and setting G::REGEX_MATCH_NOTBOL in the case of a pattern that 
+   * Setting @a start_position differs from just passing over a shortened 
+   * string and setting REGEX_MATCH_NOTBOL in the case of a pattern that 
    * begins with any kind of lookbehind assertion, such as "\b".
    * @param string The string to perform matches against.
-   * @param string_len The length of @a string , or -1 if @a string  is nul-terminated.
+   * @param string_len The length of @a string, or -1 if @a string is nul-terminated.
    * @param start_position Starting index of the string to match.
    * @param replacement Text to replace each match with.
    * @param match_options Options for the match.
-   * @param error Location to store the error occuring, or <tt>0</tt> to ignore errors.
    * @return A newly allocated string containing the replacements
    * 
    * @newin2p14.
@@ -542,20 +578,19 @@ public:
 #endif /* !GLIBMM_EXCEPTIONS_ENABLED */
 
   
-  /** Replaces all occurances of the pattern in @a regex  with the
-   * replacement text. @a replacement  is replaced literally, to
+  /** Replaces all occurances of the pattern in @a regex with the
+   * replacement text. @a replacement is replaced literally, to
    * include backreferences use g_regex_replace().
    * 
-   * Setting @a start_position  differs from just passing over a 
-   * shortened string and setting G::REGEX_MATCH_NOTBOL in the 
+   * Setting @a start_position differs from just passing over a 
+   * shortened string and setting REGEX_MATCH_NOTBOL in the 
    * case of a pattern that begins with any kind of lookbehind 
    * assertion, such as "\b".
    * @param string The string to perform matches against.
-   * @param string_len The length of @a string , or -1 if @a string  is nul-terminated.
+   * @param string_len The length of @a string, or -1 if @a string is nul-terminated.
    * @param start_position Starting index of the string to match.
    * @param replacement Text to replace each match with.
    * @param match_options Options for the match.
-   * @param error Location to store the error occuring, or <tt>0</tt> to ignore errors.
    * @return A newly allocated string containing the replacements
    * 
    * @newin2p14.
@@ -574,18 +609,17 @@ public:
 
   
   /** Replaces occurances of the pattern in regex with the output of 
-   *  @a eval  for that occurance.
+   *  @a eval for that occurance.
    * 
-   * Setting @a start_position  differs from just passing over a shortened 
-   * string and setting G::REGEX_MATCH_NOTBOL in the case of a pattern 
+   * Setting @a start_position differs from just passing over a shortened 
+   * string and setting REGEX_MATCH_NOTBOL in the case of a pattern 
    * that begins with any kind of lookbehind assertion, such as "\b".
    * @param string String to perform matches against.
-   * @param string_len The length of @a string , or -1 if @a string  is nul-terminated.
+   * @param string_len The length of @a string, or -1 if @a string is nul-terminated.
    * @param start_position Starting index of the string to match.
    * @param match_options Options for the match.
    * @param eval A function to call for each match.
    * @param user_data User data to pass to the function.
-   * @param error Location to store the error occuring, or <tt>0</tt> to ignore errors.
    * @return A newly allocated string containing the replacements
    * 
    * @newin2p14.
@@ -597,20 +631,19 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
-  /** Checks whether @a replacement  is a valid replacement string 
+  /** Checks whether @a replacement is a valid replacement string 
    * (see g_regex_replace()), i.e.\ that all escape sequences in 
    * it are valid.
    * 
-   * If @a has_references  is not <tt>0</tt> then @a replacement  is checked 
+   * If @a has_references is not <tt>0</tt> then @a replacement is checked 
    * for pattern references. For instance, replacement text 'foo<tt>\\n</tt>'
    * does not contain references and may be evaluated without information
    * about actual match, but '\0\1' (whole match followed by first 
-   * subpattern) requires valid G::MatchInfo object.
+   * subpattern) requires valid MatchInfo object.
    * @param replacement The replacement string.
    * @param has_references Location to store information about
-   * references in @a replacement  or <tt>0</tt>.
-   * @param error Location to store error.
-   * @return Whether @a replacement  is a valid replacement string
+   * references in @a replacement or <tt>0</tt>.
+   * @return Whether @a replacement is a valid replacement string
    * 
    * @newin2p14.
    */

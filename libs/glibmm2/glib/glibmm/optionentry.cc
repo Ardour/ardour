@@ -10,23 +10,22 @@
 /* Copyright (C) 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 #include <glibmm/utility.h>
-#include <glib/goption.h>
-#include <glib/gmem.h>
+#include <glib.h>
 
 namespace Glib
 {
@@ -80,6 +79,42 @@ OptionEntry& OptionEntry::operator=(const OptionEntry& src)
   return *this;
 }
 
+void OptionEntry::set_long_name(const Glib::ustring& value)
+{
+  if(gobject_->long_name)
+  {
+    g_free((gchar*)(gobject_->long_name));
+    gobject_->long_name = NULL;
+  }
+
+  //Note that we do not use NULL for an empty string, 
+  //because G_OPTION_REMAINING is actually a "", so it actually has a distinct meaning:
+  //TODO: Wrap G_OPTION_REMAINING in C++ somehow, maybe as an explicit set_long_name(void) or set_is_remaining()? murrayc. 
+  gobj()->long_name = (value).c_str() ? g_strdup((value).c_str()) : NULL;
+}
+
+void OptionEntry::set_description(const Glib::ustring& value)
+{
+  if(gobject_->description)
+  {
+    g_free((gchar*)(gobject_->description));
+    gobject_->description = NULL;
+  }
+
+  gobj()->description = (value).empty() ? NULL : g_strdup((value).c_str());
+}
+
+void OptionEntry::set_arg_description(const Glib::ustring& value)
+{
+  if(gobject_->arg_description)
+  {
+    g_free((gchar*)(gobject_->arg_description));
+    gobject_->arg_description = NULL;
+  }
+
+  gobj()->arg_description = (value).empty() ? NULL : g_strdup((value).c_str());
+}
+ 
 
 } // namespace Glib
 
@@ -96,11 +131,6 @@ namespace Glib
  Glib::ustring OptionEntry::get_long_name() const
 {
   return Glib::convert_const_gchar_ptr_to_ustring(gobj()->long_name);
-}
- 
- void OptionEntry::set_long_name(const Glib::ustring& value)
-{
-  gobj()->long_name = g_strdup((value).c_str());
 }
  
  gchar OptionEntry::get_short_name() const
@@ -128,19 +158,9 @@ namespace Glib
   return Glib::convert_const_gchar_ptr_to_ustring(gobj()->description);
 }
  
- void OptionEntry::set_description(const Glib::ustring& value)
-{
-  gobj()->description = g_strdup((value).c_str());
-}
- 
  Glib::ustring OptionEntry::get_arg_description() const
 {
   return Glib::convert_const_gchar_ptr_to_ustring(gobj()->arg_description);
-}
- 
- void OptionEntry::set_arg_description(const Glib::ustring& value)
-{
-  gobj()->arg_description = g_strdup((value).c_str());
 }
  
 

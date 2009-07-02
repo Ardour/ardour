@@ -1,21 +1,21 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_OBJECT_H
 #define _GLIBMM_OBJECT_H
-/* $Id: object.h 369 2007-01-20 10:19:33Z daniel $ */
+/* $Id: object.h 779 2009-01-19 17:58:50Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -26,7 +26,7 @@
 # error "X11/Xlib.h seems to have been included before this header. Due to some commonly-named macros in X11/Xlib.h, it may only be included after any glibmm, gdkmm, or gtkmm headers."
 #endif
 
-#include <glib/gmacros.h> /* for G_GNUC_NULL_TERMINATED */
+#include <glib.h> /* for G_GNUC_NULL_TERMINATED */
 #include <glibmm/objectbase.h>
 #include <glibmm/wrap.h>
 #include <glibmm/quark.h>

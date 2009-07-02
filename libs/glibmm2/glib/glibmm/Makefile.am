@@ -5,8 +5,11 @@ SUBDIRS = private
 
 sublib_name = glibmm
 sublib_libname = glibmm-2.4
+sublib_libversion = $(LIBGLIBMM_SO_VERSION)
 sublib_namespace = Glib
 sublib_cflags = $(GLIBMM_CFLAGS)
+sublib_topdir = glib
+sublib_win32_dlls_libs	=
 
 sublib_files_extra_posix_cc =
 sublib_files_extra_win32_cc =
@@ -59,6 +62,7 @@ sublib_files_extra_general_h = \
   exceptionhandler.h \
   helperlist.h \
   init.h \
+  i18n-lib.h \
   i18n.h \
   interface.h \
   iochannel.h \
@@ -69,6 +73,7 @@ sublib_files_extra_general_h = \
   object.h \
   objectbase.h \
   pattern.h \
+  priorities.h \
   property.h \
   propertyproxy.h \
   propertyproxy_base.h \
@@ -89,17 +94,13 @@ sublib_files_extra_general_h = \
   value_custom.h \
   wrap.h
 
-include $(top_srcdir)/build_shared/Makefile_build_gensrc.am_fragment
+include $(top_srcdir)/build_shared/Makefile_build.am_fragment
 
-files_built_general_cc  += value_basictypes.cc
-files_built_general_h  += signalproxy.h value_basictypes.h
+sublib_files_extra_general_cc += value_basictypes.cc
+sublib_files_extra_general_h += signalproxy.h value_basictypes.h
 
 lib_LTLIBRARIES = libglibmm-2.4.la
-if OS_WIN32
-libglibmm_2_4_la_SOURCES = $(files_all_general_cc) $(files_all_win32_cc)
-else
-libglibmm_2_4_la_SOURCES = $(files_all_general_cc) $(files_all_posix_cc)
-endif
+libglibmm_2_4_la_SOURCES = $(files_built_cc) $(files_extra_cc)
 libglibmm_2_4_la_LDFLAGS = $(common_ldflags)
 libglibmm_2_4_la_LIBADD = $(GLIBMM_LIBS)
 

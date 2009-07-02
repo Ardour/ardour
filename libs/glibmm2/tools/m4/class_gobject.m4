@@ -1,4 +1,4 @@
-dnl $Id: class_gobject.m4 413 2007-05-14 19:28:31Z murrayc $
+dnl $Id: class_gobject.m4 479 2007-12-28 11:51:47Z murrayc $
 
 
 define(`_CLASS_GOBJECT',`dnl
@@ -58,6 +58,17 @@ dnl Define this macro to be tested for later.
 dnl define(`__BOOL_NO_WRAP_FUNCTION__',`$1')
 dnl _POP()
 dnl ')
+
+dnl Some gobjects actually derive from GInitiallyUnowned, which does some odd reference-counting that is useful to C coders.
+dnl We don't want to expose that base class in our API, 
+dnl but we do want to reverse what it does:
+define(`_DERIVES_INITIALLY_UNOWNED',`dnl
+_PUSH()
+dnl Define this macro to be tested for later.
+define(`__BOOL_DERIVES_INITIALLY_UNOWNED__',`$1')
+_POP()
+')
+
 
 dnl
 dnl _CREATE_METHOD(args_type_and_name_hpp, args_type_and_name_cpp,args_name_only);
@@ -161,7 +172,9 @@ __CNAME__* __CPPNAME__::gobj_copy()
 __CPPNAME__::__CPPNAME__`'(const Glib::ConstructParams& construct_params)
 :
   __CPPPARENT__`'(construct_params)
-{}
+{
+_INITIALLY_UNOWNED_SINK
+}
 
 __CPPNAME__::__CPPNAME__`'(__CNAME__* castitem)
 :

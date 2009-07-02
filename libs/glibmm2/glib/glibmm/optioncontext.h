@@ -9,16 +9,16 @@
 /* Copyright (C) 2004 The glibmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -80,6 +80,7 @@ class OptionContext
 
 private:
 
+  
 public:
 
   /** Creates a new option context.
@@ -112,7 +113,7 @@ public:
   bool get_help_enabled() const;
   
   /** Sets whether to ignore unknown options or not. If an argument is 
-   * ignored, it is left in the @a argv  array after parsing. By default, 
+   * ignored, it is left in the @a argv array after parsing. By default, 
    * g_option_context_parse() treats unknown options as error.
    * 
    * This setting does not affect non-option arguments (i.e. arguments 
@@ -134,20 +135,20 @@ public:
 
  
   /** Parses the command line arguments, recognizing options
-   * which have been added to @a context . A side-effect of 
+   * which have been added to @a context. A side-effect of 
    * calling this function is that g_set_prgname() will be
    * called.
    * 
    * If the parsing is successful, any parsed arguments are
-   * removed from the array and @a argc  and @a argv  are updated 
-   * accordingly. A '--' option is stripped from @a argv 
+   * removed from the array and @a argc and @a argv are updated 
+   * accordingly. A '--' option is stripped from @a argv
    * unless there are unparsed options before and after it, 
    * or some of the options after it start with '-'. In case 
-   * of an error, @a argc  and @a argv  are left unmodified. 
+   * of an error, @a argc and @a argv are left unmodified. 
    * 
    * If automatic &lt;option&gt;--help&lt;/option&gt; support is enabled
    * (see g_option_context_set_help_enabled()), and the 
-   *  @a argv  array contains one of the recognized help options,
+   *  @a argv array contains one of the recognized help options,
    * this function will produce help output to stdout and
    * call <tt>exit (0)</tt>.
    * 
@@ -157,7 +158,6 @@ public:
    * arguments.
    * @param argc A pointer to the number of command line arguments.
    * @param argv A pointer to the array of command line arguments.
-   * @param error A return location for errors.
    * @return <tt>true</tt> if the parsing was successful, 
    * <tt>false</tt> if an error occurred
    * 
@@ -195,6 +195,18 @@ public:
   //OptionGroup& get_main_group();
   //const OptionGroup& get_main_group() const;
   
+
+  /** Returns: A newly allocated string containing the help text
+   * @param main_help If <tt>true</tt>, only include the main group.
+   * @param group The OptionGroup to create help for, or <tt>0</tt>.
+   * @return A newly allocated string containing the help text
+   * 
+   * @newin2p14.
+   */
+  Glib::ustring get_help(bool main_help, const OptionGroup& group) const;
+ 
+  //TODO: Documentation.
+  Glib::ustring get_help(bool main_help = true) const;
 
   GOptionContext*       gobj()       { return gobject_; }
   const GOptionContext* gobj() const { return gobject_; }

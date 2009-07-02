@@ -1,19 +1,19 @@
 // -*- c++ -*-
-/* $Id: object.cc 369 2007-01-20 10:19:33Z daniel $ */
+/* $Id: object.cc 779 2009-01-19 17:58:50Z murrayc $ */
 
 /* Copyright 1998-2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -22,12 +22,13 @@
 #include <glibmm/private/object_p.h>
 #include <glibmm/property.h>
 
-#include <glib.h>
 #include <glib-object.h>
 #include <gobject/gvaluecollector.h>
 
 #include <cstdarg>
 #include <cstring>
+
+#include <string.h>
 
 //Weak references:
 //I'm not sure what the point of these are apart from being a hacky way out of circular references,

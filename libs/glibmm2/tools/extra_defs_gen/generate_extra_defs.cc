@@ -1,26 +1,27 @@
-/* $Id: generate_extra_defs.cc 204 2005-02-13 14:30:19Z murrayc $ */
+/* $Id: generate_extra_defs.cc 792 2009-03-09 17:43:04Z daniel $ */
 
 /* generate_extra_defs.cc
  *
  * Copyright (C) 2001 The Free Software Foundation
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 
 #include "generate_extra_defs.h"
+#include <algorithm>
 
 std::string get_properties(GType gtype)
 {
@@ -28,10 +29,37 @@ std::string get_properties(GType gtype)
   std::string strObjectName = g_type_name(gtype);
 
   //Get the list of properties:
-  GObjectClass* pGClass = G_OBJECT_CLASS(g_type_class_ref(gtype));
-
+  GParamSpec** ppParamSpec = 0;
   guint iCount = 0;
-  GParamSpec** ppParamSpec = g_object_class_list_properties (pGClass, &iCount);
+  if(G_TYPE_IS_OBJECT(gtype))
+  {
+    GObjectClass* pGClass = G_OBJECT_CLASS(g_type_class_ref(gtype));
+    ppParamSpec = g_object_class_list_properties (pGClass, &iCount);
+    g_type_class_unref(pGClass);
+
+    if(!ppParamSpec)
+    {
+      strResult += ";; Warning: g_object_class_list_properties() returned NULL for " + std::string(g_type_name(gtype)) + "\n";
+    }
+  }
+  else if (G_TYPE_IS_INTERFACE(gtype))
+  {
+    gpointer pGInterface = g_type_default_interface_ref(gtype);
+    if(pGInterface) //We check because this fails for G_TYPE_VOLUME, for some reason.
+    {
+      ppParamSpec = g_object_interface_list_properties(pGInterface, &iCount);
+      g_type_default_interface_unref(pGInterface);
+
+      if(!ppParamSpec)
+      {
+        strResult +=  ";; Warning: g_object_interface_list_properties() returned NULL for " + std::string(g_type_name(gtype)) + "\n";
+      }
+    }
+  }
+
+  //This extra check avoids an occasional crash, for instance for GVolume
+  if(!ppParamSpec)
+    iCount = 0;
 
   for(guint i = 0; i < iCount; i++)
   {
@@ -39,11 +67,13 @@ std::string get_properties(GType gtype)
     if(pParamSpec)
     {
       //Name and type:
-      std::string strName = g_param_spec_get_name(pParamSpec);
-      std::string strTypeName = G_PARAM_SPEC_TYPE_NAME(pParamSpec);
-      
+      const std::string strName = g_param_spec_get_name(pParamSpec);
+      const std::string strTypeName = G_PARAM_SPEC_TYPE_NAME(pParamSpec);
+
       const gchar* pchBlurb = g_param_spec_get_blurb(pParamSpec);
-      std::string strDocs = (pchBlurb ? pchBlurb : std::string());
+      std::string strDocs = (pchBlurb) ? pchBlurb : "";
+      // Quick hack to get rid of nested double quotes:
+      std::replace(strDocs.begin(), strDocs.end(), '"', '\'');
 
       strResult += "(define-property " + strName + "\n";
       strResult += "  (of-object \"" + strObjectName + "\")\n";
@@ -69,7 +99,6 @@ std::string get_properties(GType gtype)
   }
 
   g_free(ppParamSpec);
-  g_type_class_unref(pGClass); //to match the g_type_class_ref() above.	
 
   return strResult;
 }
@@ -109,9 +138,12 @@ std::string get_signals(GType gtype)
   std::string strObjectName = g_type_name(gtype);
 
   gpointer gclass_ref = 0;
+  gpointer ginterface_ref = 0;
 
   if(G_TYPE_IS_OBJECT(gtype))
     gclass_ref = g_type_class_ref(gtype); //Ensures that class_init() is called.
+  else if(G_TYPE_IS_INTERFACE(gtype))
+    ginterface_ref = g_type_default_interface_ref(gtype); //install signals.
 
   //Get the list of signals:
   guint iCount = 0;
@@ -194,6 +226,8 @@ std::string get_signals(GType gtype)
 
   if(gclass_ref)
     g_type_class_unref(gclass_ref); //to match the g_type_class_ref() above.
+  else if(ginterface_ref)
+    g_type_default_interface_unref(ginterface_ref); // for interface ref above.
 
   return strResult;
 }
@@ -205,10 +239,11 @@ std::string get_defs(GType gtype)
   std::string strObjectName = g_type_name(gtype);
   std::string strDefs = ";; From " + strObjectName + "\n\n";
 
-  strDefs += get_signals(gtype);
-
-  if(G_TYPE_IS_OBJECT(gtype))
+  if(G_TYPE_IS_OBJECT(gtype) || G_TYPE_IS_INTERFACE(gtype))
+  {
+    strDefs += get_signals(gtype);
     strDefs += get_properties(gtype);
+  }
 
   return strDefs;
 }

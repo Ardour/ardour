@@ -2,21 +2,21 @@
 #ifndef _GLIBMM_REFPTR_H
 #define _GLIBMM_REFPTR_H
 
-/* $Id: refptr.h 216 2005-04-07 08:28:46Z murrayc $ */
+/* $Id: refptr.h 779 2009-01-19 17:58:50Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -116,9 +116,15 @@ public:
    */
   inline operator bool() const;
 
-  /// Set underlying instance to 0, decrementing reference count of existing instance appropriately.
+#ifndef GLIBMM_DISABLE_DEPRECATED
+  /// @deprecated Use reset() instead because this leads to confusion with clear() methods on the underlying class. For instance, people use .clear() when they mean ->clear().
   inline void clear();
+#endif //GLIBMM_DISABLE_DEPRECATED
 
+  /** Set underlying instance to 0, decrementing reference count of existing instance appropriately.
+   * @newin2p16
+   */
+  inline void reset();
 
   /** Dynamic cast to derived class.
    *
@@ -279,8 +285,16 @@ RefPtr<T_CppObject>::operator bool() const
   return (pCppObject_ != 0);
 }
 
+#ifndef GLIBMM_DISABLE_DEPRECATED
 template <class T_CppObject> inline
 void RefPtr<T_CppObject>::clear()
+{
+  reset();
+}
+#endif //GLIBMM_DISABLE_DEPRECATED
+
+template <class T_CppObject> inline
+void RefPtr<T_CppObject>::reset()
 {
   RefPtr<T_CppObject> temp; // swap with an empty RefPtr<> to clear *this
   this->swap(temp);

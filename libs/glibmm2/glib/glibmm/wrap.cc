@@ -1,28 +1,27 @@
 // -*- c++ -*-
-/* $Id: wrap.cc 447 2007-10-03 09:51:41Z murrayc $ */
+/* $Id: wrap.cc 779 2009-01-19 17:58:50Z murrayc $ */
 
 /* wrap.cc
  *
  * Copyright (C) 1998-2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 #include <glib-object.h>
-#include <glib/gtypes.h>
-#include <glib/gmacros.h>
+#include <glib.h>
 
 #include <vector>
 #include <glibmm/object.h>
@@ -187,7 +186,7 @@ ObjectBase* wrap_auto(GObject* object, bool take_copy)
 
     if(!pCppObject)
     {
-      g_warning("failed to wrap type of '%s'", G_OBJECT_TYPE_NAME(object));
+      g_warning("Failed to wrap object of type '%s'. Hint: this error is commonly caused by failing to call a library init() function.", G_OBJECT_TYPE_NAME(object));
       return 0;
     }
   }

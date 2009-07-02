@@ -1,19 +1,19 @@
 // -*- c++ -*-
-/* $Id: objectbase.cc 337 2006-11-10 02:24:49Z murrayc $ */
+/* $Id: objectbase.cc 785 2009-02-17 19:03:06Z daniel $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -82,8 +82,6 @@ void ObjectBase::initialize(GObject* castitem)
 
     return; // Don't initialize the wrapper twice.
   }
-
-  //g_print("%s : %s\n", G_GNUC_PRETTY_FUNCTION, G_OBJECT_TYPE_NAME(castitem));
 
   gobject_ = castitem;
   _set_current_wrapper(castitem);
@@ -258,6 +256,11 @@ void ObjectBase::get_property_value(const Glib::ustring& property_name, Glib::Va
 
 void ObjectBase::connect_property_changed(const Glib::ustring& property_name, const sigc::slot<void>& slot)
 {
+  connect_property_changed_with_return(property_name, slot);
+}
+
+sigc::connection ObjectBase::connect_property_changed_with_return(const Glib::ustring& property_name, const sigc::slot<void>& slot)
+{
   // Create a proxy to hold our connection info
   // This will be deleted by destroy_notify_handler.
   PropertyProxyConnectionNode* pConnectionNode = new PropertyProxyConnectionNode(slot, gobj());
@@ -271,7 +274,10 @@ void ObjectBase::connect_property_changed(const Glib::ustring& property_name, co
          notify_signal_name.c_str(), (GCallback)(&PropertyProxyConnectionNode::callback), pConnectionNode, 
          &PropertyProxyConnectionNode::destroy_notify_handler,
          G_CONNECT_AFTER);
+
+  return sigc::connection(pConnectionNode->slot_);
 }
+
 
 
 bool _gobject_cppinstance_already_deleted(GObject* gobject)

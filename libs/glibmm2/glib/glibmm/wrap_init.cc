@@ -12,6 +12,7 @@
 
 // #include the widget headers so that we can call the get_type() static methods:
 
+#include "checksum.h"
 #include "convert.h"
 #include "date.h"
 #include "fileutils.h"
@@ -26,7 +27,9 @@
 #include "shell.h"
 #include "spawn.h"
 #include "thread.h"
+#include "nodetree.h"
 #include "unicode.h"
+#include "uriutils.h"
 
 extern "C"
 {

@@ -7,16 +7,16 @@
 /* Copyright(C) 2006 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or(at your option) any later version.
+ * version 2.1 of the License, or(at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -26,7 +26,7 @@
 #include <glibmm/arrayhandle.h>
 #include <glibmm/error.h>
 #include <glibmm/utility.h>
-#include <glib/gkeyfile.h>
+#include <glib.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C" { typedef struct _GKeyFile GKeyFile; }
@@ -153,8 +153,8 @@ private:
  * 
  * Key-value pairs generally have the form key=value, with the exception of localized strings, which have the form 
  * key[locale]=value. Space before and after the '=' character are ignored. Newline, tab, carriage return and 
- * backslash characters in value are escaped as \n, \t, \r, and \\, respectively. To preserve leading spaces in 
- * values, these can also be escaped as \s.
+ * backslash characters in value are escaped as \\n, \\t, \\r, and \\\\, respectively. To preserve leading spaces in 
+ * values, these can also be escaped as \\s.
  * 
  * Key files can store strings (possibly with localized variants), integers, booleans and lists of these. Lists are 
  * separated by a separator character, typically ';' or ','. To use the list separator character in a value in a 
@@ -207,12 +207,13 @@ public:
 public:
 	
   
-  /** Loads a key file into an empty G::KeyFile structure.
-   * If the file could not be loaded then %error is set to 
-   * either a G::FileError or G::KeyFileError.
+  /** Loads a key file into an empty KeyFile instance.
+   * If the file could not be loaded then a FileError or KeyFileError exception is thrown.
+   * 
+   *  @a throw Glib::FileError
+   *  @a throw Glib::KeyFileError
    * @param file The path of a filename to load, in the GLib file name encoding.
-   * @param flags Flags from G::KeyFileFlags.
-   * @param error Return location for a G::Error, or <tt>0</tt>.
+   * @param flags Flags from KeyFileFlags.
    * @return <tt>true</tt> if a key file could be loaded, <tt>false</tt> othewise
    * @newin2p6.
    */
@@ -283,20 +284,19 @@ public:
   Glib::ArrayHandle<Glib::ustring> get_keys(const Glib::ustring& group_name) const;
   
 
-  /** Looks whether the key file has the group @a group_name .
+  /** Looks whether the key file has the group @a group_name.
    * @param group_name A group name.
-   * @return <tt>true</tt> if @a group_name  is a part of @a key_file , <tt>false</tt>
+   * @return <tt>true</tt> if @a group_name is a part of @a key_file, <tt>false</tt>
    * otherwise.
    * @newin2p6.
    */
   bool has_group(const Glib::ustring& group_name) const;
   
-  /** Looks whether the key file has the key @a key  in the group
-   *  @a group_name .
+  /** Looks whether the key file has the key @a key in the group
+   *  @a group_name.
    * @param group_name A group name.
    * @param key A key name.
-   * @param error Return location for a G::Error.
-   * @return <tt>true</tt> if @a key  is a part of @a group_name , <tt>false</tt>
+   * @return <tt>true</tt> if @a key is a part of @a group_name, <tt>false</tt>
    * otherwise.
    * 
    * @newin2p6.
@@ -308,12 +308,13 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
 	
-  /** Return value: a newly allocated string or <tt>0</tt> if the specified
+  /** Returns the value associated with @a key under @a group_name.
+   * 
+   *  @a throw Glib::FileError in the event the key cannot be found (with the Glib::KEY_FILE_ERROR_KEY_NOT_FOUND code).
+   *  @a throw Glib::KeyFileError in the event that the @a group_name cannot be found (with the Glib::KEY_FILE_ERROR_GROUP_NOT_FOUND).
    * @param group_name A group name.
    * @param key A key.
-   * @param error Return location for a G::Error, or <tt>0</tt>.
-   * @return A newly allocated string or <tt>0</tt> if the specified 
-   * key cannot be found.
+   * @return The value as a string.
    * 
    * @newin2p6.
    */
@@ -327,7 +328,6 @@ public:
   /** Return value: a newly allocated string or <tt>0</tt> if the specified
    * @param group_name A group name.
    * @param key A key.
-   * @param error Return location for a G::Error, or <tt>0</tt>.
    * @return A newly allocated string or <tt>0</tt> if the specified 
    * key cannot be found.
    * 
@@ -349,8 +349,7 @@ public:
   /** Return value: a newly allocated string or <tt>0</tt> if the specified
    * @param group_name A group name.
    * @param key A key.
-   * @param locale A locale or <tt>0</tt>.
-   * @param error Return location for a G::Error, or <tt>0</tt>.
+   * @param locale A locale identifier or <tt>0</tt>.
    * @return A newly allocated string or <tt>0</tt> if the specified 
    * key cannot be found.
    * 
@@ -363,12 +362,11 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
-  /** Return value: the value associated with the key as a boolean, or
+  /** Return value: the value associated with the key as a boolean,
    * @param group_name A group name.
    * @param key A key.
-   * @param error Return location for a G::Error.
-   * @return The value associated with the key as a boolean, or
-   * <tt>false</tt> if the key was not found or could not be parsed.
+   * @return The value associated with the key as a boolean, 
+   * or <tt>false</tt> if the key was not found or could not be parsed.
    * 
    * @newin2p6.
    */
@@ -391,7 +389,6 @@ public:
   /** Return value: the value associated with the key as an integer, or
    * @param group_name A group name.
    * @param key A key.
-   * @param error Return location for a G::Error.
    * @return The value associated with the key as an integer, or
    * 0 if the key was not found or could not be parsed.
    * 
@@ -418,7 +415,6 @@ public:
   /** Return value: the value associated with the key as a double, or
    * @param group_name A group name.
    * @param key A key.
-   * @param error Return location for a G::Error.
    * @return The value associated with the key as a double, or
    * 0.0 if the key was not found or could not be parsed.
    * 
@@ -431,8 +427,8 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
 
-  /** Associates a new double value with @a key  under @a group_name .
-   * If @a key  cannot be found then it is created. 
+  /** Associates a new double value with @a key under @a group_name.
+   * If @a key cannot be found then it is created. 
    * 
    * @newin2p14
    * @param group_name A group name.
@@ -518,14 +514,12 @@ public:
   Glib::ustring get_comment(const Glib::ustring& group_name) const;
 
   
-  /** Retrieves a comment above @a key  from @a group_name .
-   *  @a group_name . If @a key  is <tt>0</tt> then @a comment  will
-   * be read from above @a group_name .  If both @a key 
-   * and @a group_name  are <tt>0</tt>, then @a comment  will
-   * be read from above the first group in the file.
+  /** Retrieves a comment above @a key from @a group_name.
+   * If @a key is <tt>0</tt> then @a comment will be read from above 
+   *  @a group_name. If both @a key and @a group_name are <tt>0</tt>, then 
+   *  @a comment will be read from above the first group in the file.
    * @param group_name A group name, or <tt>0</tt>.
    * @param key A key.
-   * @param error Return location for a G::Error.
    * @return A comment that should be freed with g_free()
    * 
    * @newin2p6.
@@ -546,9 +540,9 @@ public:
    */
   void set_list_separator(gchar separator);
   
-  /** Associates a new value with @a key  under @a group_name .  If @a key 
-   * cannot be found then it is created. If @a group_name  cannot be
-   * found then it is created.
+  /** Associates a new value with @a key under @a group_name.  
+   * If @a key cannot be found then it is created. 
+   * If @a group_name cannot be found then it is created.
    * 
    * @newin2p6
    * @param group_name A group name.
@@ -557,9 +551,9 @@ public:
    */
   void set_value(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& value);
   
-  /** Associates a new string value with @a key  under @a group_name .  If
-   *  @a key  cannot be found then it is created.  If @a group_name 
-   * cannot be found then it is created.
+  /** Associates a new string value with @a key under @a group_name.  
+   * If @a key cannot be found then it is created.  
+   * If @a group_name cannot be found then it is created.
    * 
    * @newin2p6
    * @param group_name A group name.
@@ -568,20 +562,19 @@ public:
    */
   void set_string(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& string);
   
-  /** Associates a string value for @a key  and @a locale  under
-   *  @a group_name .  If the translation for @a key  cannot be found 
-   * then it is created.
+  /** Associates a string value for @a key and @a locale under @a group_name.  
+   * If the translation for @a key cannot be found then it is created.
    * 
    * @newin2p6
    * @param group_name A group name.
    * @param key A key.
-   * @param locale A locale.
+   * @param locale A locale identifier.
    * @param string A string.
    */
   void set_locale_string(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& locale, const Glib::ustring& string);
   
-  /** Associates a new boolean value with @a key  under @a group_name .
-   * If @a key  cannot be found then it is created. 
+  /** Associates a new boolean value with @a key under @a group_name.
+   * If @a key cannot be found then it is created. 
    * 
    * @newin2p6
    * @param group_name A group name.
@@ -590,8 +583,8 @@ public:
    */
   void set_boolean(const Glib::ustring& group_name, const Glib::ustring& key, bool value);
   
-  /** Associates a new integer value with @a key  under @a group_name .
-   * If @a key  cannot be found then it is created.
+  /** Associates a new integer value with @a key under @a group_name.
+   * If @a key cannot be found then it is created.
    * 
    * @newin2p6
    * @param group_name A group name.
@@ -627,7 +620,7 @@ public:
    * @param key The name of a key
    * @param list A list holding object of type bool
    */
-  void set_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<bool>& list);
+  void set_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ArrayHandle<bool>& list);
   
 	
   /** Sets a list of integers for the @a key under @a group_name.
@@ -636,7 +629,7 @@ public:
    * @param key The name of a key
    * @param list A list holding object of type int
    */
-  void set_integer_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<int>& list);
+  void set_integer_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ArrayHandle<int>& list);
   
 
   /** Sets a list of doubles for the @a key under @a group_name.
@@ -647,7 +640,7 @@ public:
    *
    * @newin2p14
    */
-  void set_double_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<double>& list);
+  void set_double_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ArrayHandle<double>& list);
   
 
   /** Places @a comment at the start of the file, before the first group.
@@ -667,17 +660,16 @@ public:
    * @param comment The comment
    */
   
-  /** Places a comment above @a key  from @a group_name .
-   *  @a group_name . If @a key  is <tt>0</tt> then @a comment  will
-   * be written above @a group_name .  If both @a key 
-   * and @a group_name  are <tt>0</tt>, then @a comment  will
-   * be written above the first group in the file.
-   * 
-   * @newin2p6
+  /** Places a comment above @a key from @a group_name.
+   * If @a key is <tt>0</tt> then @a comment will be written above @a group_name.  
+   * If both @a key and @a group_name  are <tt>0</tt>, then @a comment will be 
+   * written above the first group in the file.
    * @param group_name A group name, or <tt>0</tt>.
    * @param key A key.
    * @param comment A comment.
-   * @param error Return location for a G::Error.
+   * @return <tt>true</tt> if the comment was written, <tt>false</tt> otherwise
+   * 
+   * @newin2p6.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void set_comment(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& comment);
@@ -686,16 +678,15 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
 
-  /** Removes a comment above @a key  from @a group_name .
-   *  @a group_name . If @a key  is <tt>0</tt> then @a comment  will
-   * be written above @a group_name .  If both @a key 
-   * and @a group_name  are <tt>0</tt>, then @a comment  will
-   * be written above the first group in the file.
-   * 
-   * @newin2p6
+  /** Removes a comment above @a key from @a group_name.
+   * If @a key is <tt>0</tt> then @a comment will be removed above @a group_name. 
+   * If both @a key and @a group_name are <tt>0</tt>, then @a comment will
+   * be removed above the first group in the file.
    * @param group_name A group name, or <tt>0</tt>.
    * @param key A key.
-   * @param error Return location for a G::Error.
+   * @return <tt>true</tt> if the comment was removed, <tt>false</tt> otherwise
+   * 
+   * @newin2p6.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void remove_comment(const Glib::ustring& group_name, const Glib::ustring& key);
@@ -704,12 +695,12 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
-  /** Removes @a key  in @a group_name  from the key file. 
-   * 
-   * @newin2p6
+  /** Removes @a key in @a group_name from the key file.
    * @param group_name A group name.
    * @param key A key name to remove.
-   * @param error Return location for a G::Error or <tt>0</tt>.
+   * @return <tt>true</tt> if the key was removed, <tt>false</tt> otherwise
+   * 
+   * @newin2p6.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void remove_key(const Glib::ustring& group_name, const Glib::ustring& key);
@@ -718,12 +709,12 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
-  /** Removes the specified group, @a group_name , 
-   * from the key file. 
-   * 
-   * @newin2p6
+  /** Removes the specified group, @a group_name, 
+   * from the key file.
    * @param group_name A group name.
-   * @param error Return location for a G::Error or <tt>0</tt>.
+   * @return <tt>true</tt> if the group was removed, <tt>false</tt> otherwise
+   * 
+   * @newin2p6.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void remove_group(const Glib::ustring& group_name);

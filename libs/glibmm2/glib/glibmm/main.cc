@@ -1,19 +1,19 @@
 // -*- c++ -*-
-/* $Id: main.cc 420 2007-06-22 15:29:58Z murrayc $ */
+/* $Id: main.cc 779 2009-01-19 17:58:50Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -24,7 +24,6 @@
 #include <glibmm/wrap.h>
 #include <glibmm/iochannel.h>
 
-#include <glib.h>
 #include <algorithm>
 
 GLIBMM_USING_STD(min)
@@ -311,6 +310,12 @@ sigc::connection SignalTimeout::connect(const sigc::slot<bool>& slot,
   return connection;
 }
 
+void SignalTimeout::connect_once(const sigc::slot<void>& slot, 
+                                 unsigned int interval, int priority)
+{
+    connect(sigc::bind_return(slot, false), interval, priority);
+}
+
 /* Note that this is our equivalent of g_timeout_add_seconds(). */
 sigc::connection SignalTimeout::connect_seconds(const sigc::slot<bool>& slot,
                                         unsigned int interval, int priority)
@@ -332,6 +337,12 @@ sigc::connection SignalTimeout::connect_seconds(const sigc::slot<bool>& slot,
 
   conn_node->install(source);
   return connection;
+}
+
+void SignalTimeout::connect_seconds_once(const sigc::slot<void>& slot, 
+                                         unsigned int interval, int priority)
+{
+    connect_seconds(sigc::bind_return(slot, false), interval, priority);
 }
 
 SignalTimeout signal_timeout()
@@ -367,6 +378,11 @@ sigc::connection SignalIdle::connect(const sigc::slot<bool>& slot, int priority)
 
   conn_node->install(source);
   return connection;
+}
+
+void SignalIdle::connect_once(const sigc::slot<void>& slot, int priority)
+{
+    connect(sigc::bind_return(slot, false), priority);
 }
 
 SignalIdle signal_idle()

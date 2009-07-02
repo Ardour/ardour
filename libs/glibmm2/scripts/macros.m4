@@ -10,7 +10,7 @@ AC_CHECK_PROGS(M4, gm4 m4, m4)
 
 if test "$M4" = "m4"; then
   AC_MSG_CHECKING(whether m4 is GNU m4)
-  if $M4 --version </dev/null 2>/dev/null | grep '^GNU [Mm]4 ' >/dev/null ; then
+  if $M4 --version </dev/null 2>/dev/null | grep -i '^GNU M4 ' >/dev/null ; then
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)

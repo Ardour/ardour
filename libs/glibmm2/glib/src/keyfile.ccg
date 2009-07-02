@@ -1,16 +1,16 @@
 /* Copyright 2006 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -35,61 +35,94 @@ KeyFile::KeyFile(GKeyFile* castitem, bool takes_ownership)
 KeyFile::~KeyFile()
 {
   if (owns_gobject_)
-  	g_key_file_free(gobject_);
+    g_key_file_free(gobject_);
 }
 
 bool KeyFile::load_from_data(const Glib::ustring& data, KeyFileFlags flags)
 {
-  GError *error = 0;
-  bool retvalue = g_key_file_load_from_data(gobj(), data.c_str(), data.bytes(), ((GKeyFileFlags)(flags)), &(error));
-  if(error) :: Glib::Error::throw_exception(error);
-  return retvalue;
+  GError* error = 0;
+
+  const gboolean result = g_key_file_load_from_data(
+      gobj(), data.c_str(), data.bytes(),
+      static_cast<GKeyFileFlags>(unsigned(flags)),
+      &error);
+
+  if(error)
+    Glib::Error::throw_exception(error);
+
+  return (result != 0);
 }
 
-bool KeyFile::load_from_data_dirs(const std::string& file, std::string& full_path, KeyFileFlags flags)
+bool KeyFile::load_from_data_dirs(const std::string& file, std::string& full_path,
+                                  KeyFileFlags flags)
 {
-  GError *error = 0;
-  char *full_path_c;
-  bool retvalue = g_key_file_load_from_data_dirs(gobj(), file.c_str(), &full_path_c, ((GKeyFileFlags)(flags)), &(error));
-  full_path = Glib::convert_return_gchar_ptr_to_ustring(full_path_c);
-  if(error) :: Glib::Error::throw_exception(error);
-  return retvalue;
+  GError* error = 0;
+  char* full_path_c = 0;
+
+  const gboolean result = g_key_file_load_from_data_dirs(
+      gobj(), file.c_str(), &full_path_c,
+      static_cast<GKeyFileFlags>(unsigned(flags)),
+      &error);
+
+  if(error)
+    Glib::Error::throw_exception(error);
+
+  if(full_path_c)
+    full_path = Glib::ScopedPtr<char>(full_path_c).get();
+  else
+    full_path.erase();
+
+  return (result != 0);
 }
 
 Glib::ustring KeyFile::to_data()
 {
-  GError *error = 0;
-  gsize size;
-  Glib::ustring retvalue = Glib::convert_return_gchar_ptr_to_ustring(g_key_file_to_data(gobj(), &size, &error));
-  if(error) :: Glib::Error::throw_exception(error);
-  return retvalue;
+  GError* error = 0;
+  char *const str = g_key_file_to_data(gobj(), 0, &error);
+
+  if(error)
+    Glib::Error::throw_exception(error);
+
+  return Glib::convert_return_gchar_ptr_to_ustring(str);
 }
 
 Glib::ArrayHandle<Glib::ustring> KeyFile::get_groups() const
 {
-  gchar** group_names      = 0;
-  gsize   number_of_groups = 0;
-  group_names = g_key_file_get_groups(const_cast<GKeyFile*>(gobj()), &number_of_groups);
-  return Glib::ArrayHandle<Glib::ustring>(group_names, number_of_groups, Glib::OWNERSHIP_DEEP);
+  gsize length = 0;
+  char** const array = g_key_file_get_groups(const_cast<GKeyFile*>(gobj()), &length);
+
+  return Glib::ArrayHandle<Glib::ustring>(array, length, Glib::OWNERSHIP_DEEP);
 }
 
 Glib::ArrayHandle<Glib::ustring> KeyFile::get_keys(const Glib::ustring& group_name) const
 {
-  gchar** key_names      = 0;
-  gsize   number_of_keys = 0;
-  GError* error          = 0;
-  key_names = g_key_file_get_keys(const_cast<GKeyFile*>(gobj()), group_name.c_str(), &number_of_keys, &error);
+  gsize length  = 0;
+  GError* error = 0;
+
+  char** const array = g_key_file_get_keys(
+      const_cast<GKeyFile*>(gobj()),
+      (group_name.empty()) ? 0 : group_name.c_str(),
+      &length, &error);
+
   if(error)
     Glib::Error::throw_exception(error);
-  return Glib::ArrayHandle<Glib::ustring>(key_names, number_of_keys, Glib::OWNERSHIP_DEEP);
+
+  return Glib::ArrayHandle<Glib::ustring>(array, length, Glib::OWNERSHIP_DEEP);
 }
 
-Glib::ustring KeyFile::get_locale_string(const Glib::ustring& group_name, const Glib::ustring& key) const
+Glib::ustring KeyFile::get_locale_string(const Glib::ustring& group_name,
+                                         const Glib::ustring& key) const
 {
-  GError *error = 0;
-  Glib::ustring retvalue = Glib::convert_return_gchar_ptr_to_ustring(g_key_file_get_locale_string(const_cast<GKeyFile*>(gobj()), group_name.c_str(), key.c_str(), 0, &(error)));
-  if(error) ::Glib::Error::throw_exception(error);
-  return retvalue;
+  GError* error = 0;
+  char *const str = g_key_file_get_locale_string(
+      const_cast<GKeyFile*>(gobj()),
+      (group_name.empty()) ? 0 : group_name.c_str(),
+      key.c_str(), 0, &error);
+
+  if(error)
+    Glib::Error::throw_exception(error);
+
+  return Glib::convert_return_gchar_ptr_to_ustring(str);
 }
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -99,18 +132,16 @@ int KeyFile::get_integer(const Glib::ustring& key, std::auto_ptr<Glib::Error>& e
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 {
   GError* gerror = 0;
-  int retvalue = g_key_file_get_integer(const_cast<GKeyFile*>(gobj()), NULL, key.c_str(), &(gerror));
+  const int value = g_key_file_get_integer(const_cast<GKeyFile*>(gobj()),
+                                           0, key.c_str(), &gerror);
+  if(gerror)
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-  if(gerror)
-    ::Glib::Error::throw_exception(gerror);
+    Glib::Error::throw_exception(gerror);
 #else
-  if(gerror)
-    error = ::Glib::Error::throw_exception(gerror);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
-
-  return retvalue;
+    error = Glib::Error::throw_exception(gerror);
+#endif
+  return value;
 }
-
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
 double KeyFile::get_double(const Glib::ustring& key) const
@@ -136,49 +167,76 @@ void KeyFile::set_double(const Glib::ustring& key, double value)
   g_key_file_set_double(gobj(), 0, key.c_str(), value); 
 }
 
-
-Glib::ArrayHandle<Glib::ustring> KeyFile::get_string_list(const Glib::ustring& group_name, const Glib::ustring& key) const
+// TODO: alternative code path with exceptions disabled
+Glib::ArrayHandle<Glib::ustring> KeyFile::get_string_list(const Glib::ustring& group_name,
+                                                          const Glib::ustring& key) const
 {
-  gchar** string_list  = 0;
-  gsize length_of_list = 0;
-  GError* error        = 0;
-  string_list = g_key_file_get_string_list(const_cast<GKeyFile*>(gobj()), group_name.c_str(), key.c_str(),  &length_of_list, &error);
+  gsize length  = 0;
+  GError* error = 0;
+
+  char** const array = g_key_file_get_string_list(
+      const_cast<GKeyFile*>(gobj()),
+      (group_name.empty()) ? 0 : group_name.c_str(),
+      key.c_str(), &length, &error);
+
   if(error)
     Glib::Error::throw_exception(error);
-  return Glib::ArrayHandle<Glib::ustring>(string_list, length_of_list, Glib::OWNERSHIP_DEEP);
+
+  return Glib::ArrayHandle<Glib::ustring>(array, length, Glib::OWNERSHIP_DEEP);
 }
 
-Glib::ArrayHandle<Glib::ustring> KeyFile::get_locale_string_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& locale) const
+// TODO: alternative code path with exceptions disabled
+Glib::ArrayHandle<Glib::ustring> KeyFile::get_locale_string_list(const Glib::ustring& group_name,
+                                                                 const Glib::ustring& key,
+                                                                 const Glib::ustring& locale) const
 {
-  gchar** string_list  = 0;
-  gsize length_of_list = 0; 
-  GError* error        = 0;
-  string_list = g_key_file_get_locale_string_list(const_cast<GKeyFile*>(gobj()), group_name.c_str(), key.c_str(), locale.c_str(), &length_of_list, &error);
+  gsize length  = 0;
+  GError* error = 0;
+
+  char** const array = g_key_file_get_locale_string_list(
+      const_cast<GKeyFile*>(gobj()),
+      (group_name.empty()) ? 0 : group_name.c_str(),
+      key.c_str(), locale.c_str(), &length, &error);
+
   if(error)
     Glib::Error::throw_exception(error);
-  return Glib::ArrayHandle<Glib::ustring>(string_list, length_of_list, Glib::OWNERSHIP_DEEP);
+
+  return Glib::ArrayHandle<Glib::ustring>(array, length, Glib::OWNERSHIP_DEEP);
 }
 
-Glib::ArrayHandle<bool> KeyFile::get_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key) const
+// TODO: alternative code path with exceptions disabled
+Glib::ArrayHandle<bool> KeyFile::get_boolean_list(const Glib::ustring& group_name,
+                                                  const Glib::ustring& key) const
 {
-  gboolean* bool_list  = 0;
-  gsize length_of_list = 0; 
-  GError* error        = 0;
-  bool_list = g_key_file_get_boolean_list(const_cast<GKeyFile*>(gobj()), group_name.c_str(), key.c_str(), &length_of_list, &error);
+  gsize length  = 0;
+  GError* error = 0;
+
+  gboolean *const array = g_key_file_get_boolean_list(
+      const_cast<GKeyFile*>(gobj()),
+      (group_name.empty()) ? 0 : group_name.c_str(),
+      key.c_str(), &length, &error);
+
   if(error)
     Glib::Error::throw_exception(error);
-  return Glib::ArrayHandle<bool>(&bool_list, length_of_list, Glib::OWNERSHIP_DEEP);
+
+  return Glib::ArrayHandle<bool>(array, length, Glib::OWNERSHIP_SHALLOW);
 }
 
-Glib::ArrayHandle<int> KeyFile::get_integer_list(const Glib::ustring& group_name, const Glib::ustring& key) const
+Glib::ArrayHandle<int> KeyFile::get_integer_list(const Glib::ustring& group_name,
+                                                 const Glib::ustring& key) const
 {
-  gint* integer_list   = 0;
-  gsize length_of_list = 0; 
-  GError* error        = 0;
-  integer_list = g_key_file_get_integer_list(const_cast<GKeyFile*>(gobj()), group_name.c_str(), key.c_str(), &length_of_list, &error);
+  gsize length  = 0;
+  GError* error = 0;
+
+  int *const array = g_key_file_get_integer_list(
+      const_cast<GKeyFile*>(gobj()),
+      (group_name.empty()) ? 0 : group_name.c_str(),
+      key.c_str(), &length, &error);
+
   if(error)
     Glib::Error::throw_exception(error);
-  return Glib::ArrayHandle<int>(integer_list, length_of_list, Glib::OWNERSHIP_DEEP);
+
+  return Glib::ArrayHandle<int>(array, length, Glib::OWNERSHIP_SHALLOW);
 }
 
 Glib::ArrayHandle<double> KeyFile::get_double_list(const Glib::ustring& group_name, const Glib::ustring& key) const
@@ -192,64 +250,81 @@ Glib::ArrayHandle<double> KeyFile::get_double_list(const Glib::ustring& group_na
   return Glib::ArrayHandle<double>(integer_list, length_of_list, Glib::OWNERSHIP_DEEP);
 }
 
-void KeyFile::set_string_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ArrayHandle<Glib::ustring>& list)
+void KeyFile::set_string_list(const Glib::ustring& group_name, const Glib::ustring& key,
+                              const Glib::ArrayHandle<Glib::ustring>& list)
 {
-  gsize length_of_list = list.size();
-  g_key_file_set_string_list(gobj(), group_name.c_str(), key.c_str(), list.data(), length_of_list);
+  g_key_file_set_string_list(gobj(), (group_name.empty()) ? 0 : group_name.c_str(),
+                             key.c_str(), list.data(), list.size());
 }
 
-void KeyFile::set_locale_string_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& locale, const Glib::ArrayHandle<Glib::ustring>& list)
+void KeyFile::set_locale_string_list(const Glib::ustring& group_name,
+                                     const Glib::ustring& key, const Glib::ustring& locale,
+                                     const Glib::ArrayHandle<Glib::ustring>& list)
 {
-  gsize length_of_list = list.size();
-  g_key_file_set_locale_string_list(gobj(), group_name.c_str(), key.c_str(), locale.c_str(), list.data(), length_of_list);
+  g_key_file_set_locale_string_list(gobj(), (group_name.empty()) ? 0 : group_name.c_str(),
+                                    key.c_str(), locale.c_str(), list.data(), list.size());
 }
 
-void KeyFile::set_integer_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<int>& list)
+void KeyFile::set_integer_list(const Glib::ustring& group_name, const Glib::ustring& key,
+                               const Glib::ArrayHandle<int>& list)
 {
-  gsize length_of_list = list.size();
-  g_key_file_set_integer_list(gobj(), group_name.c_str(), key.c_str(), const_cast<int*>(list.data()), length_of_list);
+  g_key_file_set_integer_list(gobj(), (group_name.empty()) ? 0 : group_name.c_str(),
+                              key.c_str(), const_cast<int*>(list.data()), list.size());
 }
 
-void KeyFile::set_double_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<double>& list)
+void KeyFile::set_double_list(const Glib::ustring& group_name, const Glib::ustring& key,
+                              const Glib::ArrayHandle<double>& list)
 {
-  gsize length_of_list = list.size();
-  g_key_file_set_double_list(gobj(), group_name.c_str(), key.c_str(), const_cast<double*>(list.data()), length_of_list);
+  g_key_file_set_double_list(gobj(), group_name.c_str(), key.c_str(),
+                             const_cast<double*>(list.data()), list.size());
 }
 
-void KeyFile::set_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<bool>& list)
+void KeyFile::set_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key,
+                               const Glib::ArrayHandle<bool>& list)
 {
-  gsize length_of_list = list.size();
-  g_key_file_set_boolean_list(gobj(), group_name.c_str(), key.c_str(), *(list.data()), length_of_list);
+  g_key_file_set_boolean_list(gobj(), (group_name.empty()) ? 0 : group_name.c_str(),
+                              key.c_str(), const_cast<gboolean*>(list.data()), list.size());
 }
 
 Glib::ustring KeyFile::get_comment() const
 {
-  GError *error = 0;
-  Glib::ustring retvalue = Glib::convert_return_gchar_ptr_to_ustring(g_key_file_get_comment(const_cast<GKeyFile*>(gobj()), 0, 0, &(error)));
-  if(error) ::Glib::Error::throw_exception(error);
-  return retvalue;
+  GError* error = 0;
+  char *const str = g_key_file_get_comment(const_cast<GKeyFile*>(gobj()), 0, 0, &error);
+
+  if(error)
+    Glib::Error::throw_exception(error);
+
+  return Glib::convert_return_gchar_ptr_to_ustring(str);
 }
 
 Glib::ustring KeyFile::get_comment(const Glib::ustring& group_name) const
 {
-  GError *error = 0;
-  Glib::ustring retvalue = Glib::convert_return_gchar_ptr_to_ustring(g_key_file_get_comment(const_cast<GKeyFile*>(gobj()), group_name.c_str(), 0, &(error)));
-  if(error) ::Glib::Error::throw_exception(error);
-  return retvalue;
+  GError* error = 0;
+  char *const str = g_key_file_get_comment(const_cast<GKeyFile*>(gobj()),
+                                           (group_name.empty()) ? 0 : group_name.c_str(),
+                                           0, &error);
+  if(error)
+    Glib::Error::throw_exception(error);
+
+  return Glib::convert_return_gchar_ptr_to_ustring(str);
 }
 
 void KeyFile::set_comment(const Glib::ustring& comment)
 {
-  GError *error = 0;
-  g_key_file_set_comment(gobj(), 0, 0, comment.c_str(), &(error));
-  if(error) ::Glib::Error::throw_exception(error);
+  GError* error = 0;
+  g_key_file_set_comment(gobj(), 0, 0, comment.c_str(), &error);
+
+  if(error)
+    Glib::Error::throw_exception(error);
 }
 
 void KeyFile::set_comment(const Glib::ustring& group_name, const Glib::ustring& comment)
 {
-  GError *error = 0;
-  g_key_file_set_comment(gobj(), group_name.c_str(), 0, comment.c_str(), &(error));
-  if(error) ::Glib::Error::throw_exception(error);
+  GError* error = 0;
+  g_key_file_set_comment(gobj(), (group_name.empty()) ? 0 : group_name.c_str(),
+                         0, comment.c_str(), &error);
+  if(error)
+    Glib::Error::throw_exception(error);
 }
 
-}
+} // namespace Glib

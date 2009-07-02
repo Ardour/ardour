@@ -10,5 +10,3 @@ glibmm_config_DATA	= glibmmconfig.h
 
 pkgconfigdir		= $(libdir)/pkgconfig
 pkgconfig_DATA		= glibmm-2.4.pc
-
-                                       

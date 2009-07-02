@@ -2,35 +2,33 @@
 #ifndef _GLIBMM_DEBUG_H
 #define _GLIBMM_DEBUG_H
 
-/* $Id: debug.h 17 2003-01-22 12:09:02Z murrayc $ */
+/* $Id: debug.h 785 2009-02-17 19:03:06Z daniel $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
+ * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <glib/gmacros.h>
+#include <glib.h>
 #include <glibmmconfig.h>
 
 // Some stuff that's useful when debugging gtkmm internals:
 
 #ifdef GLIBMM_DEBUG_REFCOUNTING
 
-#include <glib.h>
-
-/* We can't use G_GNUC_PRETTY_FUNCTION because it's always disabled in C++,
+/* We can't use the equivalent GLib macro because it's always disabled in C++,
  * even though __PRETTY_FUNCTION__ works fine in C++ as well if you use it
  * right (i.e. concatenation with string literals isn't allowed).
  */

@@ -291,14 +291,17 @@ sub append_parameter_docs($$)
 
   foreach my $param (@param_names)
   {
-    my $desc = $$param_descriptions->{$param};
-    
-    $param =~ s/([a-zA-Z0-9]*(_[a-zA-Z0-9]+)*)_?/$1/g;
-    DocsParser::convert_docs_to_cpp($obj_function, \$desc);
-    if(length($desc) > 0)
+    if ($param ne "error" ) #We wrap GErrors as exceptions, so ignore these.
     {
-      $desc  .= '.' unless($desc =~ /(?:^|\.)$/);
-      $$text .= "\n\@param ${param} \u${desc}";
+      my $desc = $$param_descriptions->{$param};
+    
+      $param =~ s/([a-zA-Z0-9]*(_[a-zA-Z0-9]+)*)_?/$1/g;
+      DocsParser::convert_docs_to_cpp($obj_function, \$desc);
+      if(length($desc) > 0)
+      {
+        $desc  .= '.' unless($desc =~ /(?:^|\.)$/);
+        $$text .= "\n\@param ${param} \u${desc}";
+      }
     }
   }
 }
@@ -350,7 +353,11 @@ sub convert_tags_to_doxygen($)
 
     # Some argument names are suffixed by "_" -- strip this.
     # gtk-doc uses @thearg, but doxygen uses @a thearg.
-    s" ?\@([a-zA-Z0-9]*(_[a-zA-Z0-9]+)*)_?\b" \@a $1 "g;
+    s" ?\@([a-zA-Z0-9]*(_[a-zA-Z0-9]+)*)_?\b" \@a $1"g;
+
+    # Don't convert doxygen's @throws and @param, so these can be used in the
+    # docs_override.xml:
+    s" \@a (throws|param)" \@$1"g;
     s"^Note ?\d?: "\@note "mg;
 
     s"&lt;/?programlisting&gt;""g;
@@ -410,6 +417,7 @@ sub substitute_identifiers($$)
     # Undo wrong substitutions.
     s/\bHas::/HAS_/g;
     s/\bNo::/NO_/g;
+    s/\bG:://g; #Rename G::Something to Something. Doesn't seem to work. murrayc.
 
     # Replace C function names with C++ counterparts.
     s/\b([a-z]+_[a-z][a-z\d_]+) ?\(\)/&DocsParser::substitute_function($doc_func, $1)/eg;

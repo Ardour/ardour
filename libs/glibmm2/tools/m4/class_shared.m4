@@ -1,4 +1,4 @@
-dnl $Id: class_shared.m4 320 2006-09-19 20:07:31Z murrayc $
+dnl $Id: class_shared.m4 540 2008-01-25 20:29:42Z murrayc $
 
 define(`_CLASS_START',`dnl
 _PUSH(SECTION_CLASS1)
@@ -42,7 +42,13 @@ ifelse(`$2',,,`
 _POP()
 ')
 
-
+dnl GVolumeMonitor can be broken/impeded by defining a sub-type.
+define(`_DO_NOT_DERIVE_GTYPE',`dnl
+_PUSH()
+dnl Define this macro to be tested for later.
+define(`__BOOL_DO_NOT_DERIVE_GTYPE__',`$1')
+_POP()
+')
 
 dnl
 dnl
@@ -54,7 +60,8 @@ public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   typedef __CPPNAME__ CppObjectType;
   typedef __REAL_CNAME__ BaseObjectType;
-ifdef(`__BOOL_NO_DERIVED_CLASS__',`dnl
+ifdef(`__BOOL_DO_NOT_DERIVE_GTYPE__',`dnl
+  typedef __CPPPARENT__`'_Class CppClassParent;
 ',`dnl
   typedef __REAL_CNAME__`'Class BaseClassType;
   typedef __CPPPARENT__`'_Class CppClassParent;
@@ -66,7 +73,7 @@ ifdef(`__BOOL_NO_DERIVED_CLASS__',`dnl
 
   const Glib::Class& init();
 
-ifdef(`__BOOL_NO_DERIVED_CLASS__',`dnl
+ifdef(`__BOOL_DO_NOT_DERIVE_GTYPE__',`dnl
 ',`dnl
   static void class_init_function(void* g_class, void* class_data);
 ')dnl
@@ -98,6 +105,10 @@ const Glib::Class& __CPPNAME__`'_Class::init()
 {
   if(!gtype_) // create the GType if necessary
   {
+ifdef(`__BOOL_DO_NOT_DERIVE_GTYPE__',`dnl
+    // Do not derive a GType, or use a derived klass:
+    gtype_ = CppClassParent::CppObjectType::get_type();
+',`dnl
     // Glib::Class has to know the class init function to clone custom types.
     class_init_func_ = &__CPPNAME__`'_Class::class_init_function;
 
@@ -110,11 +121,12 @@ const Glib::Class& __CPPNAME__`'_Class::init()
 
     // Add derived versions of interfaces, if the C type implements any interfaces:
 _IMPORT(SECTION_CC_IMPLEMENTS_INTERFACES)
+')
   }
 
   return *this;
 }
-ifdef(`__BOOL_NO_DERIVED_CLASS__',`dnl
+ifdef(`__BOOL_DO_NOT_DERIVE_GTYPE__',`dnl
 ',`dnl
 
 void __CPPNAME__`'_Class::class_init_function(void* g_class, void* class_data)

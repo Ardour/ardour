@@ -26,6 +26,7 @@ _CONV_GLIB_ENUM(KeyFileFlags)
 _CONV_GLIB_ENUM(RegexCompileFlags)
 _CONV_GLIB_ENUM(RegexMatchFlags)
 
+
 _CONVERSION(`gunichar&',`gunichar*',`&($3)')
 _CONVERSION(`gsize&',`gsize*',`&($3)')
 
@@ -35,16 +36,23 @@ define(`__GCHARP_TO_USTRING',`Glib::convert_const_gchar_ptr_to_ustring($`'3)')
 define(`__GCHARP_TO_STDSTRING',`Glib::convert_const_gchar_ptr_to_stdstring($`'3)')
 
 _CONVERSION(`const Glib::ustring&',`const char*',`$3.c_str()')
+_CONVERSION(`const Glib::ustring&', `const guchar*', `(($2)$3.c_str())')
 _CONVERSION(`const std::string&',`const char*',`$3.c_str()')
+_CONVERSION(`std::string',`const char*',`$3.c_str()')
 _CONVERSION(`const Glib::ustring&',`gchar*',`const_cast<gchar*>($3.c_str())')
 _CONVERSION(`gchar*',`Glib::ustring',__GCHARP_TO_USTRING)
 _CONVERSION(`const-gchar*',`Glib::ustring',__GCHARP_TO_USTRING)
+_CONVERSION(`const-guchar*',`Glib::ustring',__GCHARP_TO_USTRING)
 _CONVERSION(`const gchar*',`Glib::ustring',__GCHARP_TO_USTRING)
 _CONVERSION(`const char*',`Glib::ustring',__GCHARP_TO_USTRING)
 _CONVERSION(`const char*',`std::string',__GCHARP_TO_STDSTRING)
-_CONVERSION(`const gchar*',`const Glib::ustring&',__GCHARP_TO_USTRING)
 _CONVERSION(`const char*',`const-gchar*',`$3')
 _CONVERSION(`const-gchar*',`const char*',`$3')
+_CONVERSION(`const char*',`const std::string&',__GCHARP_TO_STDSTRING)
+_CONVERSION(`char*',`std::string',__GCHARP_TO_STDSTRING)
+_CONVERSION(`std::string', `char*', `g_strdup(($3).c_str())')
+_CONVERSION(`const std::string&', `char*', `g_strdup(($3).c_str())')
+_CONVERSION(`Glib::ustring', `char*', `g_strdup(($3).c_str())')
 
 _CONVERSION(`return-gchar*',`Glib::ustring',`Glib::convert_return_gchar_ptr_to_ustring($3)')
 _CONVERSION(`return-gchar*',`std::string',`Glib::convert_return_gchar_ptr_to_stdstring($3)')
@@ -67,3 +75,4 @@ _CONVERSION(`const GValue*', `const Glib::ValueBase&', `*reinterpret_cast<const 
 _CONVERSION(`OptionGroup&',`GOptionGroup*',`($3).gobj()')
 #_CONVERSION(`GOptionGroup*',`OptionGroup',`Glib::wrap(($3), true /* take_copy */)')
 
+_CONVERSION(`Glib::KeyFile&',`GKeyFile*',`($3).gobj()')
