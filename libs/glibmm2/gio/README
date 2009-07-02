@@ -1,0 +1,7 @@
+Base directory for giomm.
+
+Here is the layout:
+
+  src - actual sources used to build
+  giomm - built sources (do not edit)
+

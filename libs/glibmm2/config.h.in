@@ -3,3 +3,4 @@
 #undef HAVE_FUNLOCKFILE
 #undef GETC_UNLOCKED
 #undef HAVE_MKFIFO
+#undef SIZEOF_WCHAR_T

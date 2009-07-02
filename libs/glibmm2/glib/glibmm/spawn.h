@@ -9,16 +9,16 @@
 /* Copyright (C) 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
+ * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 2 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
+ * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -291,7 +291,6 @@ private:
  * to users. If an error occurs, @a child_pid, @a standard_input, @a standard_output,
  * and @a standard_error will not be filled with valid values.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 void spawn_async_with_pipes(const std::string& working_directory,
                             const Glib::ArrayHandle<std::string>& argv,
                             const Glib::ArrayHandle<std::string>& envp,
@@ -301,17 +300,6 @@ void spawn_async_with_pipes(const std::string& working_directory,
                             int* standard_input = 0,
                             int* standard_output = 0,
                             int* standard_error = 0);
-#else
-void spawn_async_with_pipes(const std::string& working_directory,
-                            const Glib::ArrayHandle<std::string>& argv,
-                            const Glib::ArrayHandle<std::string>& envp,
-                            SpawnFlags flags,
-                            const sigc::slot<void>& child_setup,
-                            Pid* child_pid,
-                            int* standard_input,
-                            int* standard_output,
-                            int* standard_error, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Like the main spawn_async_with_pipes() method, but inheriting the parent's environment.
  *
@@ -330,7 +318,7 @@ void spawn_async_with_pipes(const std::string& working_directory,
  * to users. If an error occurs, @a child_pid, @a standard_input, @a standard_output,
  * and @a standard_error will not be filled with valid values.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
+
 void spawn_async_with_pipes(const std::string& working_directory,
                             const Glib::ArrayHandle<std::string>& argv,
                             SpawnFlags flags = SpawnFlags(0),
@@ -339,16 +327,6 @@ void spawn_async_with_pipes(const std::string& working_directory,
                             int* standard_input = 0,
                             int* standard_output = 0,
                             int* standard_error = 0);
-#else
-void spawn_async_with_pipes(const std::string& working_directory,
-                            const Glib::ArrayHandle<std::string>& argv,
-                            SpawnFlags flags,
-                            const sigc::slot<void>& child_setup,
-                            Pid* child_pid,
-                            int* standard_input,
-                            int* standard_output,
-                            int* standard_error, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** See pawn_async_with_pipes() for a full description. This function
  * simply calls the spawn_async_with_pipes() without any pipes.
@@ -371,21 +349,12 @@ void spawn_async_with_pipes(const std::string& working_directory,
  * the message field of returned errors should be displayed
  * to users.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 void spawn_async(const std::string& working_directory,
                  const Glib::ArrayHandle<std::string>& argv,
                  const Glib::ArrayHandle<std::string>& envp,
                  SpawnFlags flags = SpawnFlags(0),
                  const sigc::slot<void>& child_setup = sigc::slot<void>(),
                  Pid* child_pid = 0);
-#else
-void spawn_async(const std::string& working_directory,
-                 const Glib::ArrayHandle<std::string>& argv,
-                 const Glib::ArrayHandle<std::string>& envp,
-                 SpawnFlags flags,
-                 const sigc::slot<void>& child_setup,
-                 Pid* child_pid, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Like the main spawn_async() method, but inheriting the parent's environment.
  *
@@ -401,19 +370,11 @@ void spawn_async(const std::string& working_directory,
  * the message field of returned errors should be displayed
  * to users.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 void spawn_async(const std::string& working_directory,
                  const Glib::ArrayHandle<std::string>& argv,
                  SpawnFlags flags = SpawnFlags(0),
                  const sigc::slot<void>& child_setup = sigc::slot<void>(),
                  Pid* child_pid = 0);
-#else
-void spawn_async(const std::string& working_directory,
-                 const Glib::ArrayHandle<std::string>& argv,
-                 SpawnFlags flags,
-                 const sigc::slot<void>& child_setup,
-                 Pid* child_pid, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Executes a child synchronously (waits for the child to exit before returning).
  * All output from the child is stored in @a standard_output and @a standard_error,
@@ -447,7 +408,6 @@ void spawn_async(const std::string& working_directory,
  * to users. If an error occurs, @a child_pid, @a standard_input, @a standard_output,
  * and @a standard_error will not be filled with valid values.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 void spawn_sync(const std::string& working_directory,
                 const Glib::ArrayHandle<std::string>& argv,
                 const Glib::ArrayHandle<std::string>& envp,
@@ -456,16 +416,6 @@ void spawn_sync(const std::string& working_directory,
                 std::string* standard_output = 0,
                 std::string* standard_error = 0,
                 int* exit_status = 0);
-#else
-void spawn_sync(const std::string& working_directory,
-                const Glib::ArrayHandle<std::string>& argv,
-                const Glib::ArrayHandle<std::string>& envp,
-                SpawnFlags flags,
-                const sigc::slot<void>& child_setup,
-                std::string* standard_output,
-                std::string* standard_error,
-                int* exit_status, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Like the main spawn_sync() method, but inheriting the parent's environment.
  * 
@@ -483,7 +433,6 @@ void spawn_sync(const std::string& working_directory,
  * to users. If an error occurs, @a child_pid, @a standard_input, @a standard_output,
  * and @a standard_error will not be filled with valid values.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 void spawn_sync(const std::string& working_directory,
                 const Glib::ArrayHandle<std::string>& argv,
                 SpawnFlags flags = SpawnFlags(0),
@@ -491,15 +440,6 @@ void spawn_sync(const std::string& working_directory,
                 std::string* standard_output = 0,
                 std::string* standard_error = 0,
                 int* exit_status = 0);
-#else
-void spawn_sync(const std::string& working_directory,
-                const Glib::ArrayHandle<std::string>& argv,
-                SpawnFlags flags,
-                const sigc::slot<void>& child_setup,
-                std::string* standard_output,
-                std::string* standard_error ,
-                int* exit_status, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** A simple version of spawn_async() that parses a command line with
  * shell_parse_argv() and passes it to spawn_async(). It runs a
@@ -518,11 +458,7 @@ void spawn_sync(const std::string& working_directory,
  * to users.
  * @throws ShellError If the command line could not be parsed.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 void spawn_command_line_async(const std::string& command_line);
-#else
-void spawn_command_line_async(const std::string& command_line, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** A simple version of spawn_sync() with little-used parameters
  * removed, taking a command line instead of an argument vector.  See
@@ -557,17 +493,10 @@ void spawn_command_line_async(const std::string& command_line, std::auto_ptr<Gli
  * to users.
  * @throws ShellError If the command line could not be parsed.
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 void spawn_command_line_sync(const std::string& command_line,
                              std::string* standard_output = 0,
                              std::string* standard_error = 0,
                              int* exit_status = 0);
-#else
-void spawn_command_line_sync(const std::string& command_line,
-                             std::string* standard_output,
-                             std::string* standard_error,
-                             int* exit_status, std::auto_ptr<Glib::Error>& error;
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** On some platforms, notably WIN32, the Pid type represents a resource
  * which must be closed to prevent resource leaking. close_pid()

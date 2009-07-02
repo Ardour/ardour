@@ -1,0 +1,6 @@
+(include gio_methods.defs)
+(include gio_others.defs)
+(include gio_enums.defs)
+(include gio_signals.defs)
+(include gio_vfuncs.defs)
+

@@ -2,21 +2,21 @@
 #ifndef _GLIBMM_MAIN_H
 #define _GLIBMM_MAIN_H
 
-/* $Id: main.h 779 2009-01-19 17:58:50Z murrayc $ */
+/* $Id: main.h 749 2008-12-10 14:23:33Z jjongsma $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
+ * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 2 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
+ * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -160,20 +160,6 @@ public:
   sigc::connection connect(const sigc::slot<bool>& slot, unsigned int interval,
                            int priority = PRIORITY_DEFAULT);
 
- /** Connects an timeout handler that runs only once.
-  * This method takes a function pointer to a function with a void return
-  * and no parameters. After running once it is not called again.
-  *
-  * @see connect
-  * @param slot A slot to call when @a interval has elapsed. For example:
-  * @code
-  * void on_timeout_once()
-  * @endcode
-  * @param interval The timeout in milliseconds.
-  * @param priority The priority of the new event source. 
-  */
-  void connect_once(const sigc::slot<void>& slot, unsigned int interval,
-                    int priority = PRIORITY_DEFAULT);
 
   /** Connects a timeout handler with whole second granularity.
    *
@@ -205,23 +191,6 @@ public:
   sigc::connection connect_seconds(const sigc::slot<bool>& slot, unsigned int interval,
                            int priority = PRIORITY_DEFAULT);
 
- /** Connects an timeout handler that runs only once with whole second
-  *  granularity.
-  *
-  * This method takes a function pointer to a function with a void return
-  * and no parameters. After running once it is not called again.
-  *
-  * @see connect_seconds
-  * @param slot A slot to call when @a interval has elapsed. For example:
-  * @code
-  * void on_timeout_once()
-  * @endcode
-  * @param interval The timeout in milliseconds.
-  * @param priority The priority of the new event source. 
-  */
-  void connect_seconds_once(const sigc::slot<void>& slot, unsigned int interval,
-                            int priority = PRIORITY_DEFAULT);
-
 private:
   GMainContext* context_;
 
@@ -252,12 +221,6 @@ public:
    * @return A connection handle, which can be used to disconnect the handler.
    */
   sigc::connection connect(const sigc::slot<bool>& slot, int priority = PRIORITY_DEFAULT_IDLE);
-
- /** Connects an idle handler that runs only once.
-  * This method takes a function pointer to a function with a void return
-  * and no parameters. After running once it is not called again.
-  */
-  void connect_once(const sigc::slot<void>& slot, int priority = PRIORITY_DEFAULT_IDLE);
 
 private:
   GMainContext* context_;

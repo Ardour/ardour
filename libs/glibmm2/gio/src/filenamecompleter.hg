@@ -1,0 +1,54 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+//#include <giomm/file.h>
+#include <glibmm/object.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/object_p.h)
+_PINCLUDE(gio/gio.h)
+
+namespace Gio
+{
+
+class File;
+
+/** Completes partial file and directory names given a partial string by looking in the file system for clues. 
+ * Can return a list of possible completion strings for widget implementation.
+ *
+ * @newin2p16
+ */
+class FilenameCompleter : public Glib::Object
+{
+  _CLASS_GOBJECT(FilenameCompleter, GFilenameCompleter, G_FILENAME_COMPLETER, Glib::Object, GObject)
+protected:
+  _CTOR_DEFAULT
+  _IGNORE(g_filename_completer_new)
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(std::string get_completion_suffix(const std::string& initial_text) const, g_filename_completer_get_completion_suffix)
+  _WRAP_METHOD(Glib::StringArrayHandle get_completions(const std::string& initial_text) const, g_filename_completer_get_completions)
+  _WRAP_METHOD(void set_dirs_only(bool dirs_only = true), g_filename_completer_set_dirs_only)
+
+  _WRAP_SIGNAL(void got_completion_data(), got_completion_data)
+};
+
+} // namespace Gio
+

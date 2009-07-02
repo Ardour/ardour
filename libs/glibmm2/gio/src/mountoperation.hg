@@ -1,0 +1,99 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/object_p.h)
+_PINCLUDE(gio/gio.h)
+
+namespace Gio
+{
+
+_WRAP_ENUM(AskPasswordFlags, GAskPasswordFlags, NO_GTYPE)
+_WRAP_ENUM(PasswordSave, GPasswordSave, NO_GTYPE)
+_WRAP_ENUM(MountOperationResult, GMountOperationResult, NO_GTYPE)
+
+/** Authentication methods for mountable locations.
+ *
+ * MountOperation provides a mechanism for authenticating mountable operations, such as loop mounting files, hard drive partitions or server locations.
+ * 
+ * Mounting operations are handed a MountOperation that they can use if they require any privileges or authentication for their volumes to be mounted (e.g. 
+ * a hard disk partition or an encrypted filesystem), or if they are implementing a remote server protocol which requires user credentials such as FTP or 
+ * WebDAV.
+ *
+ * Developers should instantiate a subclass of this that implements all the various callbacks to show the required dialogs.
+ *
+ * @newin2p16
+ */
+class MountOperation : public Glib::Object
+{
+  _CLASS_GOBJECT(MountOperation, GMountOperation, G_MOUNT_OPERATION, Glib::Object, GObject)
+
+protected:
+  _CTOR_DEFAULT
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(Glib::ustring get_username() const,
+               g_mount_operation_get_username)
+  _WRAP_METHOD(void set_username(const Glib::ustring& username),
+               g_mount_operation_set_username)
+  _WRAP_METHOD(Glib::ustring get_password() const,
+               g_mount_operation_get_password)
+  _WRAP_METHOD(void set_password(const Glib::ustring& password),
+               g_mount_operation_set_password)
+  _WRAP_METHOD(bool get_anonymous() const,
+               g_mount_operation_get_anonymous)
+  _WRAP_METHOD(void set_anonymous(bool anonymous = true),
+               g_mount_operation_set_anonymous)
+  _WRAP_METHOD(Glib::ustring get_domain() const,
+               g_mount_operation_get_domain)
+  _WRAP_METHOD(void set_domain(const Glib::ustring& domain),
+               g_mount_operation_set_domain)
+  _WRAP_METHOD(PasswordSave get_password_save() const,
+               g_mount_operation_get_password_save)
+  _WRAP_METHOD(void set_password_save(PasswordSave password_save),
+               g_mount_operation_set_password_save)
+  _WRAP_METHOD(int get_choice() const, g_mount_operation_get_choice)
+  _WRAP_METHOD(void set_choice(int choice), g_mount_operation_set_choice)
+  _WRAP_METHOD(void reply(MountOperationResult result), g_mount_operation_reply)
+
+
+#m4 _CONVERSION(`const char*',`const Glib::ustring&',__GCHARP_TO_USTRING)
+  _WRAP_SIGNAL(void ask_password(const Glib::ustring& message, const Glib::ustring& default_user, const Glib::ustring& default_domain, AskPasswordFlags flags), ask_password)
+
+  //TODO: We really need some test to make sure that our use of StringArrayHandle is correct. murrayc.
+#m4 _CONVERSION(`const Glib::StringArrayHandle&',`const gchar**',`const_cast<const gchar**>(($3).data())')
+#m4 _CONVERSION(`const gchar**',`const Glib::StringArrayHandle&',`Glib::StringArrayHandle($3, Glib::OWNERSHIP_DEEP)')
+  _WRAP_SIGNAL(void ask_question(const Glib::ustring& message, const Glib::StringArrayHandle& choices), ask_question)
+
+  _WRAP_SIGNAL(void reply(MountOperationResult result), reply)
+
+
+  _WRAP_PROPERTY("username", Glib::ustring)
+  _WRAP_PROPERTY("password", Glib::ustring)
+  _WRAP_PROPERTY("anonymous", bool)
+  _WRAP_PROPERTY("domain", Glib::ustring)
+  _WRAP_PROPERTY("password-save", PasswordSave)
+  _WRAP_PROPERTY("choice", int)
+};
+
+} // namespace Gio

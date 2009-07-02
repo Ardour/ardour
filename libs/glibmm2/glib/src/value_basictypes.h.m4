@@ -1,22 +1,22 @@
 divert(-1)
 
-dnl $Id: value_basictypes.h.m4 779 2009-01-19 17:58:50Z murrayc $
+dnl $Id: value_basictypes.h.m4 2 2003-01-07 16:59:16Z murrayc $
 
 dnl  Glib::Value specializations for fundamental types
 dnl
 dnl  Copyright 2002 The gtkmm Development Team
 dnl
 dnl  This library is free software; you can redistribute it and/or
-dnl  modify it under the terms of the GNU Lesser General Public
+dnl  modify it under the terms of the GNU Library General Public
 dnl  License as published by the Free Software Foundation; either
-dnl  version 2.1 of the License, or (at your option) any later version.
+dnl  version 2 of the License, or (at your option) any later version.
 dnl
 dnl  This library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-dnl  Lesser General Public License for more details.
+dnl  Library General Public License for more details.
 dnl
-dnl  You should have received a copy of the GNU Lesser General Public
+dnl  You should have received a copy of the GNU Library General Public
 dnl  License along with this library; if not, write to the Free
 dnl  Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 

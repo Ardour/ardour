@@ -1,0 +1,125 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/fileinfo.h>
+#include <giomm/inputstream.h>
+#include <giomm/seekable.h>
+#include <glibmm/iochannel.h>
+#include <glibmm/object.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(giomm/private/inputstream_p.h)
+
+namespace Gio
+{
+
+/** FileInputStream provides input streams that take their content from a file.
+ *
+ * FileInputStream implements Seekable, which allows the input stream to jump to arbitrary positions in the file, 
+ * provided the file system of the file allows it.
+ * Use the methods of the Seekable base class for seeking and positioning.
+ *
+ * @ingroup Streams
+ *
+ * @newin2p16
+ */
+class FileInputStream 
+: public Gio::InputStream, 
+  public Seekable
+{
+  _CLASS_GOBJECT(FileInputStream, GFileInputStream, G_FILE_INPUT_STREAM, Gio::InputStream, GInputStream)
+  _IMPLEMENTS_INTERFACE(Seekable)
+
+public:
+
+  /** Queries a file input stream the given @a attributes. This function blocks 
+   * while querying the stream. For the asynchronous (non-blocking) version 
+   * of this function, see query_info_async(). While the 
+   * stream is blocked, the stream will set the pending flag internally, and 
+   * any other operations on the stream will throw a Gio::Error with PENDING.
+   *
+   * @param attributes A file attribute query string.
+   * @param cancellable A Cancellable object.
+   * @return A FileInfo, or an empty RefPtr on error.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  Glib::RefPtr<FileInfo> query_info(const Glib::RefPtr<Cancellable>& cancellable, const std::string& attributes = "*");
+#else
+  Glib::RefPtr<FileInfo> query_info(const Glib::RefPtr<Cancellable>& cancellable, const std::string& attributes, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** Queries a file input stream the given @a attributes. This function blocks 
+   * while querying the stream. For the asynchronous (non-blocking) version 
+   * of this function, see query_info_async(). While the 
+   * stream is blocked, the stream will set the pending flag internally, and 
+   * any other operations on the stream will throw a Gio::Error with PENDING.
+   *
+   * @param attributes A file attribute query string.
+   * @return A FileInfo, or an empty RefPtr on error.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  Glib::RefPtr<FileInfo> query_info(const std::string& attributes = "*");
+#else
+  Glib::RefPtr<FileInfo> query_info(const std::string& attributes, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+  _IGNORE(g_file_input_stream_query_info)
+
+
+  /** Queries the stream information asynchronously. For the synchronous version of this function, see query_info().
+   *
+   * The operation can be cancelled by triggering the cancellable object from another thread. If the operation was cancelled, 
+   * a Gio::Error with CANCELLED will be thrown.
+   *
+   * When the operation is finished, @a slot will be called. You can then call query_info_finish() to get the result of the operation.
+   *
+   * @param slot A callback slot which will be called when the request is satisfied.
+   * @param cancellable A Cancellable object which can be used to cancel the operation.
+   * @param attributes A file attribute query string.
+   * @param io_priority The I/O priority of the request.
+   */
+  void query_info_async(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, const std::string& attributes = "*", int io_priority = Glib::PRIORITY_DEFAULT);
+
+  /** Queries the stream information asynchronously. For the synchronous version of this function, see query_info().
+   *
+   * When the operation is finished, @a slot will be called. You can then call query_info_finish() to get the result of the operation.
+   *
+   * @param slot A callback slot which will be called when the request is satisfied.
+   * @param attributes A file attribute query string.
+   * @param io_priority The I/O priority of the request.
+   */
+  void query_info_async(const SlotAsyncReady& slot, const std::string& attributes = "*", int io_priority = Glib::PRIORITY_DEFAULT);
+
+  _IGNORE(g_file_input_stream_query_info_async)
+
+  _WRAP_METHOD(Glib::RefPtr<FileInfo> query_info_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_file_input_stream_query_info_finish,
+               errthrow)
+
+  //These seem to be just C convenience functions - they are already in the Seekable base class:
+  //See http://bugzilla.gnome.org/show_bug.cgi?id=509990
+  _IGNORE(g_file_input_stream_tell, g_file_input_stream_can_seek, g_file_input_stream_seek)
+//  _WRAP_METHOD(goffset tell() const, g_file_input_stream_tell)
+//  _WRAP_METHOD(bool can_seek() const, g_file_input_stream_can_seek)
+//  _WRAP_METHOD(bool seek(goffset offset, Glib::SeekType type, const Glib::RefPtr<Cancellable>& cancellable),
+//               g_file_input_stream_seek,
+//               errthrow)
+};
+
+} // namespace Gio
+

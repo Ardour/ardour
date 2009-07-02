@@ -1,0 +1,67 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+//#include <giomm/file.h>
+#include <glibmm/object.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/object_p.h)
+_PINCLUDE(gio/gio.h)
+
+namespace Gio
+{
+
+_WRAP_ENUM(FileMonitorEvent, GFileMonitorEvent, NO_GTYPE)
+
+class File;
+
+/** Monitors a file or directory for changes.
+ * To obtain a FileMonitor for a file or directory, use File::monitor_file() or 
+ * File::monitor_directory().
+ * 
+ * To get informed about changes to the file or directory you are monitoring, 
+ * connect to signal_changed.
+ *
+ * @newin2p16
+ */
+class FileMonitor : public Glib::Object
+{
+  _CLASS_GOBJECT(FileMonitor, GFileMonitor, G_FILE_MONITOR, Glib::Object, GObject)
+protected:
+
+public:
+  
+  _WRAP_METHOD(bool cancel(), g_file_monitor_cancel)
+  _WRAP_METHOD(bool is_cancelled() const, g_file_monitor_is_cancelled)
+  _WRAP_METHOD(void set_rate_limit(int limit_msecs), g_file_monitor_set_rate_limit)
+
+  //g_file_monitor_emit_event is for implementations.
+  _IGNORE(g_file_monitor_emit_event)
+
+#m4 _CONVERSION(`GFile*',`const Glib::RefPtr<File>&',`Glib::wrap($3, true)')
+  _WRAP_SIGNAL(void changed(const Glib::RefPtr<File>& file, const Glib::RefPtr<File>& other_file, FileMonitorEvent event_type), "changed")
+  
+  //_WRAP_VFUNC(bool cancel(), cancel);
+
+  _WRAP_PROPERTY("rate-limit", int)
+  _WRAP_PROPERTY("cancelled", bool)
+};
+
+} // namespace Gio
+

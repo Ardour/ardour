@@ -1,0 +1,84 @@
+#ifndef _GIOMM_CONFIG_H
+#define _GIOMM_CONFIG_H 1
+
+/* version numbers */
+#undef GIOMM_MAJOR_VERSION
+#undef GIOMM_MINOR_VERSION
+#undef GIOMM_MICRO_VERSION
+
+// detect common platforms
+#if defined(_WIN32)
+// Win32 compilers have a lot of varation
+#if defined(_MSC_VER)
+#define GIOMM_MSC
+#define GIOMM_WIN32
+#define GIOMM_DLL
+#elif defined(__CYGWIN__)
+#define GIOMM_CONFIGURE
+#elif defined(__MINGW32__)
+#define GIOMM_WIN32
+#define GIOMM_CONFIGURE
+#else
+//AIX clR compiler complains about this even though it doesn't get this far:
+//#warning "Unknown architecture (send me gcc --dumpspecs or equiv)"
+#endif
+#else
+#define GIOMM_CONFIGURE
+#endif /* _WIN32 */
+
+#ifdef GIOMM_CONFIGURE
+/* compiler feature tests that are used during compile time and run-time
+   by gtk-- only. tests used by gdk-- and gtk-- should go into
+   gdk--config.h.in */
+#undef GIOMM_CXX_HAVE_MUTABLE
+#undef GIOMM_CXX_HAVE_NAMESPACES
+//#undef GIOMM_CXX_GAUB
+//#undef GIOMM_CXX_AMBIGUOUS_TEMPLATES
+#undef GIOMM_HAVE_NAMESPACE_STD
+#undef GIOMM_HAVE_STD_ITERATOR_TRAITS
+#undef GIOMM_HAVE_SUN_REVERSE_ITERATOR
+#undef GIOMM_HAVE_TEMPLATE_SEQUENCE_CTORS
+#undef GIOMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
+#undef GIOMM_COMPILER_SUN_FORTE
+#undef GIOMM_DEBUG_REFCOUNTING
+#undef GIOMM_CAN_USE_DYNAMIC_CAST_IN_UNUSED_TEMPLATE_WITHOUT_DEFINITION
+#undef GIOMM_CAN_ASSIGN_NON_EXTERN_C_FUNCTIONS_TO_EXTERN_C_CALLBACKS
+#undef GIOMM_CAN_USE_NAMESPACES_INSIDE_EXTERNC
+#undef GIOMM_HAVE_ALLOWS_STATIC_INLINE_NPOS
+#endif
+
+#ifdef GIOMM_MSC
+  #define GIOMM_CXX_HAVE_MUTABLE 1
+  #define GIOMM_CXX_HAVE_NAMESPACES 1
+  #define GIOMM_HAVE_NAMESPACE_STD 1
+  #define GIOMM_HAVE_STD_ITERATOR_TRAITS 1
+  #define GIOMM_HAVE_TEMPLATE_SEQUENCE_CTORS 2
+  #define GIOMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS 1
+  #define GIOMM_CAN_USE_DYNAMIC_CAST_IN_UNUSED_TEMPLATE_WITHOUT_DEFINITION 1
+  #define GIOMM_CAN_ASSIGN_NON_EXTERN_C_FUNCTIONS_TO_EXTERN_C_CALLBACKS 1
+  #define GIOMM_CAN_USE_NAMESPACES_INSIDE_EXTERNC 1
+  #pragma warning (disable: 4786 4355 4800 4181)
+#endif
+
+#ifndef GIOMM_HAVE_NAMESPACE_STD
+#  define GIOMM_USING_STD(Symbol) namespace std { using ::Symbol; }
+#else
+#  define GIOMM_USING_STD(Symbol) /* empty */
+#endif
+
+#ifdef GIOMM_DLL
+  #if defined(GIOMM_BUILD) && defined(_WINDLL)
+    /* Do not dllexport as it is handled by gendef on MSVC */
+    #define GIOMM_API 
+  #elif !defined(GIOMM_BUILD)
+    #define GIOMM_API __declspec(dllimport)
+  #else
+    /* Build a static library */
+    #define GIOMM_API
+  #endif /* GIOMM_BUILD - _WINDLL */
+#else
+  #define GIOMM_API
+#endif /* GIOMM_DLL */
+
+#endif /* _GIOMM_CONFIG_H */
+

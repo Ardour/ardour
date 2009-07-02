@@ -1,0 +1,66 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+
+#include <glibmm/object.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gio
+{
+
+/** Allows actions to be cancelled.
+ * Cancellable is a thread-safe operation cancellation stack used throughout GIO to allow for cancellation of synchronous and asynchronous operations.
+ *
+ * @newin2p16
+ */
+class Cancellable : public Glib::Object
+{
+  _CLASS_GOBJECT(Cancellable, GCancellable, G_CANCELLABLE, Glib::Object, GObject)
+
+protected:
+  _CTOR_DEFAULT
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(bool is_cancelled() const, g_cancellable_is_cancelled)
+
+  _IGNORE(g_cancellable_set_error_if_cancelled)
+
+  //May return -1 if fds not supported, or on errors .
+  _WRAP_METHOD(int get_fd() const, g_cancellable_get_fd)
+
+  //This is safe to call from another thread.
+  _WRAP_METHOD(void cancel(), g_cancellable_cancel)
+
+  _WRAP_METHOD(static Glib::RefPtr<Cancellable> get_current(), g_cancellable_get_current, refreturn)
+
+  _WRAP_METHOD(void push_current(),
+               g_cancellable_push_current)
+  _WRAP_METHOD(void pop_current(),
+               g_cancellable_pop_current)
+  _WRAP_METHOD(void reset(), g_cancellable_reset)
+
+  _WRAP_SIGNAL(void cancelled(), cancelled)
+};
+
+} // namespace Gio
+

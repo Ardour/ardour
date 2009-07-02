@@ -1,0 +1,54 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+#include <giomm/file.h>
+#include <giomm/icon.h>
+#include <giomm/loadableicon.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gio
+{
+
+/** FileIcon specifies an icon by pointing to an image file to be used as icon.
+ *
+ * @newin2p16
+ */
+class FileIcon
+: public Glib::Object,
+  //Already derived by LoadableIcon: public Icon,
+  public LoadableIcon
+{
+  _CLASS_GOBJECT(FileIcon, GFileIcon, G_FILE_ICON, Glib::Object, GObject)
+  _IMPLEMENTS_INTERFACE(Icon)
+  _IMPLEMENTS_INTERFACE(LoadableIcon)
+
+protected:
+  _CTOR_DEFAULT()
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(Glib::RefPtr<File> get_file(), g_file_icon_get_file, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const File> get_file() const, g_file_icon_get_file, refreturn, constversion)
+};
+
+} // namespace Gio

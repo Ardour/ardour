@@ -7,16 +7,16 @@
 /* Copyright (C) 2007 The glibmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
+ * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 2 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
+ * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -155,48 +155,10 @@ class RegexError : public Glib::Error
 public:
   enum Code
   {
-    COMPILE = 0,
-    OPTIMIZE = 1,
-    REPLACE = 2,
-    MATCH = 3,
-    INTERNAL = 4,
-    STRAY_BACKSLASH = 101,
-    MISSING_CONTROL_CHAR = 102,
-    UNRECOGNIZED_ESCAPE = 103,
-    QUANTIFIERS_OUT_OF_ORDER = 104,
-    QUANTIFIER_TOO_BIG = 105,
-    UNTERMINATED_CHARACTER_CLASS = 106,
-    INVALID_ESCAPE_IN_CHARACTER_CLASS = 107,
-    RANGE_OUT_OF_ORDER = 108,
-    NOTHING_TO_REPEAT = 109,
-    UNRECOGNIZED_CHARACTER = 112,
-    POSIX_NAMED_CLASS_OUTSIDE_CLASS = 113,
-    UNMATCHED_PARENTHESIS = 114,
-    INEXISTENT_SUBPATTERN_REFERENCE = 115,
-    UNTERMINATED_COMMENT = 118,
-    EXPRESSION_TOO_LARGE = 120,
-    MEMORY_ERROR = 121,
-    VARIABLE_LENGTH_LOOKBEHIND = 125,
-    MALFORMED_CONDITION = 126,
-    TOO_MANY_CONDITIONAL_BRANCHES = 127,
-    ASSERTION_EXPECTED = 128,
-    UNKNOWN_POSIX_CLASS_NAME = 130,
-    POSIX_COLLATING_ELEMENTS_NOT_SUPPORTED = 131,
-    HEX_CODE_TOO_LARGE = 134,
-    INVALID_CONDITION = 135,
-    SINGLE_BYTE_MATCH_IN_LOOKBEHIND = 136,
-    INFINITE_LOOP = 140,
-    MISSING_SUBPATTERN_NAME_TERMINATOR = 142,
-    DUPLICATE_SUBPATTERN_NAME = 143,
-    MALFORMED_PROPERTY = 146,
-    UNKNOWN_PROPERTY = 147,
-    SUBPATTERN_NAME_TOO_LONG = 148,
-    TOO_MANY_SUBPATTERNS = 149,
-    INVALID_OCTAL_VALUE = 151,
-    TOO_MANY_BRANCHES_IN_DEFINE = 154,
-    DEFINE_REPETION = 155,
-    INCONSISTENT_NEWLINE_OPTIONS = 156,
-    MISSING_BACK_REFERENCE = 157
+    COMPILE,
+    OPTIMIZE,
+    REPLACE,
+    MATCH
   };
 
   RegexError(Code error_code, const Glib::ustring& error_message);
@@ -358,9 +320,9 @@ public:
    * g_regex_new() and then use g_regex_match().
    * @param pattern The regular expression.
    * @param string The string to scan for matches.
-   * @param compile_options Compile options for the regular expression, or 0.
-   * @param match_options Match options, or 0.
-   * @return <tt>true</tt> if the string matched, <tt>false</tt> otherwise
+   * @param compile_options Compile options for the regular expression.
+   * @param match_options Match options.
+   * @return <tt>true</tt> is the string matched, <tt>false</tt> otherwise
    * 
    * @newin2p14.
    */
@@ -431,9 +393,9 @@ public:
    * "\s*", you will get "a", "b" and "c".
    * @param pattern The regular expression.
    * @param string The string to scan for matches.
-   * @param compile_options Compile options for the regular expression, or 0.
-   * @param match_options Match options, or 0.
-   * @return A <tt>0</tt>-terminated array of strings. Free it using g_strfreev()
+   * @param compile_options Compile options for the regular expression.
+   * @param match_options Match options.
+   * @return A <tt>0</tt>-terminated gchar ** array. Free it using g_strfreev()
    * 
    * @newin2p14.
    */

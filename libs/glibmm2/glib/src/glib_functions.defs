@@ -18,6 +18,16 @@
   )
 )
 
+(define-flags ArrayFlags
+  (in-module "GBSearch")
+  (c-name "GBSearchArrayFlags")
+  (gtype-id "G_TYPE_B_SEARCH_ARRAY_FLAGS")
+  (values
+    '("lign-power2" "G_BSEARCH_ARRAY_ALIGN_POWER2")
+    '("uto-shrink" "G_BSEARCH_ARRAY_AUTO_SHRINK")
+  )
+)
+
 (define-enum Type
   (in-module "GChecksum")
   (c-name "GChecksumType")
@@ -88,6 +98,16 @@
     '("october" "G_DATE_OCTOBER")
     '("november" "G_DATE_NOVEMBER")
     '("december" "G_DATE_DECEMBER")
+  )
+)
+
+(define-flags Flag
+  (in-module "GDebug")
+  (c-name "GDebugFlag")
+  (gtype-id "G_TYPE_DEBUG_FLAG")
+  (values
+    '("warnings" "G_DEBUG_FATAL_WARNINGS")
+    '("criticals" "G_DEBUG_FATAL_CRITICALS")
   )
 )
 
@@ -607,7 +627,7 @@
   (c-name "GThreadError")
   (gtype-id "G_TYPE_THREAD_ERROR")
   (values
-    '("again" "G_THREAD_ERROR_AGAIN")
+    '("n" "G_THREAD_ERROR_AGAIN")
   )
 )
 
@@ -835,6 +855,10 @@
     '("n-directories" "G_USER_N_DIRECTORIES")
   )
 )
+
+
+;; From galias.h
+
 
 
 ;; From galloca.h
@@ -1917,6 +1941,26 @@
 
 
 
+;; From gbsearcharray.h
+
+(define-function if
+  (c-name "if")
+  (return-type "else")
+  (parameters
+    '("cmp-<" "0")
+  )
+)
+
+(define-function MIN
+  (c-name "MIN")
+  (return-type "return")
+  (parameters
+    '("barray->n_nodes-+" "1")
+  )
+)
+
+
+
 ;; From gcache.h
 
 (define-function g_cache_new
@@ -2149,19 +2193,7 @@
     '("const-gchar*" "to_codeset")
     '("const-gchar*" "from_codeset")
   )
-)
-
-(define-method 
-  (of-object "GIConv")
-  (c-name "g_iconv")
-  (return-type "gsize")
-  (parameters
-    '("gchar**" "inbuf")
-    '("gsize*" "inbytes_left")
-    '("gchar**" "outbuf")
-    '("gsize*" "outbytes_left")
-  )
-)
+)	
 
 (define-method close
   (of-object "GIConv")
@@ -2442,6 +2474,10 @@
     '("gpointer" "user_data")
   )
 )
+
+
+
+;; From gdatasetprivate.h
 
 
 
@@ -2837,6 +2873,10 @@
 
 
 
+;; From gdebug.h
+
+
+
 ;; From gdir.h
 
 (define-function g_dir_open
@@ -3019,7 +3059,7 @@
   (parameters
     '("const-gchar*" "filename")
     '("const-gchar*" "contents")
-    '("gssize" "length")
+    '("gsize" "length")
     '("GError**" "error")
   )
 )
@@ -3956,14 +3996,6 @@
   (c-name "g_io_channel_win32_new_messages")
   (return-type "GIOChannel*")
   (parameters
-    '("gsize" "hwnd")
-  )
-)
-
-(define-function g_io_channel_win32_new_messages
-  (c-name "g_io_channel_win32_new_messages")
-  (return-type "GIOChannel*")
-  (parameters
     '("guint" "hwnd")
   )
 )
@@ -4434,6 +4466,26 @@
     '("GError**" "error")
   )
 )
+
+
+
+;; From glib.h
+
+
+
+;; From glibintl.h
+
+(define-function glib_gettext
+  (c-name "glib_gettext")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "str")
+  )
+)
+
+
+
+;; From glib-object.h
 
 
 
@@ -5351,12 +5403,6 @@
   )
 )
 
-(define-method get_user_data
-  (of-object "GMarkupParseContext")
-  (c-name "g_markup_parse_context_get_user_data")
-  (return-type "gpointer")
-)
-
 (define-function g_markup_escape_text
   (c-name "g_markup_escape_text")
   (return-type "gchar*")
@@ -5711,6 +5757,10 @@
     '("GPrintFunc" "func")
   )
 )
+
+
+
+;; From gmirroringtable.h
 
 
 
@@ -6228,20 +6278,6 @@
 
 
 
-;; From gpoll.h
-
-(define-function g_poll
-  (c-name "g_poll")
-  (return-type "gint")
-  (parameters
-    '("GPollFD*" "fds")
-    '("guint" "nfds")
-    '("gint" "timeout")
-  )
-)
-
-
-
 ;; From gprimes.h
 
 (define-function g_spaced_primes_closest
@@ -6323,6 +6359,10 @@
     '("va_list" "args")
   )
 )
+
+
+
+;; From gprintfint.h
 
 
 
@@ -7430,6 +7470,10 @@
   )
   (varargs #t)
 )
+
+
+
+;; From gscripttable.h
 
 
 
@@ -8833,16 +8877,6 @@
   )
 )
 
-(define-function g_dpgettext2
-  (c-name "g_dpgettext2")
-  (return-type "const-gchar*")
-  (parameters
-    '("const-gchar*" "domain")
-    '("const-gchar*" "context")
-    '("const-gchar*" "msgid")
-  )
-)
-
 
 
 ;; From gstring.h
@@ -9228,24 +9262,6 @@
   (return-type "int")
 )
 
-(define-function g_test_add_func
-  (c-name "g_test_add_func")
-  (return-type "none")
-  (parameters
-    '("const-char*" "testpath")
-    '("void-(*" "test_func")
-  )
-)
-
-(define-function g_test_add_data_func
-  (c-name "g_test_add_data_func")
-  (return-type "none")
-  (parameters
-    '("const-char*" "testpath")
-    '("gconstpointer" "test_data")
-    '("void-(*" "test_func")
-  )
-)
 
 (define-function g_test_message
   (c-name "g_test_message")
@@ -9348,17 +9364,6 @@
   (parameters
     '("double" "range_start")
     '("double" "range_end")
-  )
-)
-
-(define-function g_test_create_case
-  (c-name "g_test_create_case")
-  (return-type "GTestCase*")
-  (parameters
-    '("const-char*" "test_name")
-    '("gsize" "data_size")
-    '("gconstpointer" "test_data")
-    '("void-(*" "data_setup")
   )
 )
 
@@ -9466,32 +9471,6 @@
     '("const-char*" "cmp")
     '("long-double" "arg2")
     '("char" "numtype")
-  )
-)
-
-(define-function g_assertion_message_error
-  (c-name "g_assertion_message_error")
-  (return-type "none")
-  (parameters
-    '("const-char*" "domain")
-    '("const-char*" "file")
-    '("int" "line")
-    '("const-char*" "func")
-    '("const-char*" "expr")
-    '("GError*" "error")
-    '("GQuark" "error_domain")
-    '("int" "error_code")
-  )
-)
-
-(define-function g_test_add_vtable
-  (c-name "g_test_add_vtable")
-  (return-type "none")
-  (parameters
-    '("const-char*" "testpath")
-    '("gsize" "data_size")
-    '("gconstpointer" "test_data")
-    '("void-(*" "data_setup")
   )
 )
 
@@ -9895,6 +9874,15 @@
 
 
 
+;; From gthreadprivate.h
+
+(define-function g_thread_init_glib
+  (c-name "g_thread_init_glib")
+  (return-type "none")
+)
+
+
+
 ;; From gtimer.h
 
 (define-function g_timer_new
@@ -10117,6 +10105,14 @@
 
 
 ;; From gtypes.h
+
+
+
+;; From gunibreak.h
+
+
+
+;; From gunichartables.h
 
 
 
@@ -10595,6 +10591,18 @@
 
 
 
+;; From gunicodeprivate.h
+
+
+
+;; From gunicomp.h
+
+
+
+;; From gunidecomp.h
+
+
+
 ;; From gurifuncs.h
 
 (define-function g_uri_unescape_string
@@ -10702,24 +10710,6 @@
 (define-function g_get_user_cache_dir
   (c-name "g_get_user_cache_dir")
   (return-type "const-gchar*")
-)
-
-(define-function g_get_system_data_dirs
-  (c-name "g_get_system_data_dirs")
-  (return-type "const-gchar**")
-)
-
-(define-function g_win32_get_system_data_dirs_for_module
-  (c-name "g_win32_get_system_data_dirs_for_module")
-  (return-type "const-gchar**")
-  (parameters
-    '("gconstpointer" "address")
-  )
-)
-
-(define-function g_get_language_names
-  (c-name "g_get_language_names")
-  (return-type "const-gchar**")
 )
 
 (define-function g_get_user_special_dir
@@ -10851,14 +10841,6 @@
   (return-type "none")
   (parameters
     '("GVoidFunc" "func")
-  )
-)
-
-(define-function atexit
-  (c-name "atexit")
-  (return-type "int")
-  (parameters
-    '("void" "(*")
   )
 )
 

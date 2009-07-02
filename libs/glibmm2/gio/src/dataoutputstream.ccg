@@ -1,0 +1,180 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gio/gio.h>
+
+namespace Gio
+{
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_byte(guchar data)
+#else
+bool DataOutputStream::put_byte(guchar data, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  guchar retvalue = g_data_output_stream_put_byte(gobj(), data, NULL, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_int16(gint16 data)
+#else
+bool DataOutputStream::put_int16(gint16 data, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gint16 retvalue = g_data_output_stream_put_int16(gobj(), data, NULL, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_uint16(guint16 data)
+#else
+bool DataOutputStream::put_uint16(guint16 data, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  guint16 retvalue = g_data_output_stream_put_uint16(gobj(), data, NULL, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_int32(gint32 data)
+#else
+bool DataOutputStream::put_int32(gint32 data, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gint32 retvalue = g_data_output_stream_put_int32(gobj(), data, NULL, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_uint32(guint32 data)
+#else
+bool DataOutputStream::put_uint32(guint32 data, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  guint32 retvalue = g_data_output_stream_put_uint32(gobj(), data, NULL, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_int64(gint64 data)
+#else
+bool DataOutputStream::put_int64(gint64 data, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gint64 retvalue = g_data_output_stream_put_int64(gobj(), data, NULL, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_uint64(guint64 data)
+#else
+bool DataOutputStream::put_uint64(guint64 data, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  guint64 retvalue = g_data_output_stream_put_uint64(gobj(), data, NULL, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool DataOutputStream::put_string(std::string str)
+#else
+bool DataOutputStream::put_string(std::string str, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retval = g_data_output_stream_put_string(gobj(),
+                                                str.c_str (),
+                                                NULL,
+                                                &gerror);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+    return retval;
+}
+
+
+} // namespace Gio

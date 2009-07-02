@@ -1,4 +1,4 @@
-dnl $Id: class_gobject.m4 479 2007-12-28 11:51:47Z murrayc $
+dnl $Id: class_gobject.m4 798 2009-03-20 22:08:01Z jaalburqu $
 
 
 define(`_CLASS_GOBJECT',`dnl
@@ -29,6 +29,15 @@ define(`_CUSTOM_DTOR',`dnl
 _PUSH()
 dnl Define this macro to be tested for later.
 define(`__BOOL_CUSTOM_DTOR__',`$1')
+_POP()
+')
+
+dnl For classes that need custom code in their cast and construct_params
+dnl constructor.
+define(`_CUSTOM_CTOR_CAST',`dnl
+_PUSH()
+dnl Define this macro to be tested for later.
+define(`__BOOL_CUSTOM_CTOR_CAST__',`$1')
 _POP()
 ')
 
@@ -169,6 +178,8 @@ __CNAME__* __CPPNAME__::gobj_copy()
   return gobj();
 }
 
+ifdef(`__BOOL_CUSTOM_CTOR_CAST__',`dnl
+',`dnl
 __CPPNAME__::__CPPNAME__`'(const Glib::ConstructParams& construct_params)
 :
   __CPPPARENT__`'(construct_params)
@@ -180,6 +191,8 @@ __CPPNAME__::__CPPNAME__`'(__CNAME__* castitem)
 :
   __CPPPARENT__`'(__PCAST__`'(castitem))
 {}
+
+')dnl
 
 ifdef(`__BOOL_CUSTOM_DTOR__',`dnl
 ',`dnl

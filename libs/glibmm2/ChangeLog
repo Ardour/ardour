@@ -1,9 +1,31 @@
-2.20.0
+2.18.2:
 
-2009-03-15  Jonathon Jongsma  <jjongsma@gnome.org>
+2009-03-23  Daniel Elstner  <danielk@openismus.com>
 
-	* configure.in: bump rev to 2.20.0
-	* NEWS: update for release
+	* glib/src/keyfile.{ccg,hg}: Conditionalize all exception-handling
+	code in order to fix the build with --disable-api-exceptions.
+	* glib/src/regex.hg: ditto,
+	* gio/src/appinfo.ccg: ditto,
+	* gio/src/file.{ccg,hg}: ditto,
+	* gio/src/outputstream.ccg: ditto,
+	* examples/keyfile/main.cc: ditto,
+	* examples/regex/main.cc: ditto,
+	* tests/giomm_ioerror/main.cc: ditto,
+	* tests/giomm_simple/main.cc: ditto.
+
+2009-03-19  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* tools/m4/class_gobject.m4: Added _CUSTOM_CTOR_CAST to _CLASS_GOBJECT
+	for classes that need to include custom code in their cast and
+	construct_params constructors as is done with _CLASS_GTKOBJECT.
+	Bug #574861.
+
+2009-03-18  José Alburquerque  <jaalburqu@svn.gnome.org>
+
+	* tools/m4/base.m4: Modified _GET_TYPE_FUNC() to properly work with
+	types like GtkFOOBar producing, for example, gtk_foo_bar_get_type()
+	instead of gtk_fo_obar_get_type().
+	Bug #575870.
 
 2009-03-09  Daniel Elstner  <danielk@openismus.com>
 
@@ -11,232 +33,32 @@
 	Replace nested double quotes in the docs string by single quotes
 	to ease the parsing pain of gmmproc.
 
-2.19.8:
-
-2009-02-23  Murray Cumming  <murrayc@murrayc.com>
-
-	* gio/src/gio_enums.defs: Regenerated, adding 
-	FILE_CREATE_REPLACE_DESTINATION and Error::TOO_MANY_OPEN_FILES.
-	* gio/src/gio_signals.defs: Regenerated.
-	* go/src/mountoperation: Added the aborted signal.
-
-2009-02-22  Murray Cumming  <murrayc@murrayc.com>
-
-	* gio/src/drive.hg: Remove extra ;s on the new signalsl, to avoid 
-	compiler warnings.
-
-2.19.3
-
-2009-02-20  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* docs/reference/Makefile.am: fix distcheck issue
-
-2009-02-20  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* NEWS:
-	* configure.in: update for 2.19.3 release
-
-2009-02-17  Daniel Elstner  <danielk@openismus.com>
-
-	* glib/glibmm/debug.h: Remove mention of G_GNUC_PRETTY_FUNCTION in
-	comment because a code maintenance tool of André Klapper complained
-	about it.
-	* glib/glibmm/objectbase.cc: Likewise.
-
-2009-02-06  Murray Cumming  <murrayc@murrayc.com>
-
-	* gio/src/gio_methods.defs: Regenerated.
-
-	* gio/src/filterinputstream.hg: Added get/set_close_base_stream().
-	* gio/src/filteroutputstream.hg: Added get/set_close_base_stream().
-	* gio/src/unixinputstream.hg: Added get_fd() and get/set_close_fd().
-	* gio/src/unixoutputstream.hg: Added get_fd() and get/set_close_fd().
-
-	* gio/src/datainputstream.[hg|ccg]: Added read_until_async(), 
-	read_until_finish(), read_line_async() and read_line_finish().
-	Added documentation for read_until() and read_line().
-
-2009-02-06  Murray Cumming  <murrayc@murrayc.com>
-
-	* tools/extra_defs_gen/generate_defs_gio.cc: Added unix types.
-	* gio/src/gio_signals.defs: Regenerated.
-	* gio/src/bufferedinputstream.hg: Added buffer_size property.
-	* gio/src/bufferedoutputstream.hg: Added buffer_size and auto_grow 
-	properties.
-	* gio/src/datainputstream.hg: Added byte_order and newline_type 
-	properties.
-	* gio/src/dataoutputstream.hg: Added byte_order property.
-	* gio/src/filterinputstream.hg: Added close_base_ stream property.
-	* gio/src/filteroutputstream.hg:
-	* gio/src/unixinputstream.hg: Added fd and close_fd properties.
-	* gio/src/unixoutputstream.hg: Added fd and close_fd properties.
-
-2009-02-05  Theppitak Karoonboonyanan  <thep@linux.thai.net>	
-
-	* docs/reference/Doxyfile.in:
-	* docs/reference/Makefile.am: Allow glibmm to build outside the source 
-	tree. Bug #570216
-
-2009-02-05  Murray Cumming  <murrayc@murrayc.com>
-
-	* glib/src/regex.hg: create(): For the version when 
-	GLIBMM_EXCEPTIONS_ENABLED is not defined, do not specify default 
-	parameter values because we have an extra error parameter.
-	Bug #570648 (Bernd Buschinski)
-
-2009-01-20  Deng Xiyue  <manphiz@gmail.com>
-
-	* Change license header to mention Lesser General Public License
-	version 2.1 instead of Library General Public License, to be
-	consistent with COPYING.
-
-2.19.2:
-
 2009-01-19  Tao Wang  <dancefire@gmail.com>
 
 	* glib/src/nodetree.hg: Do not use a non-ASCII dash character, to 
 	avoid the MSVC++ warning C4819 with Visual Studio 2008.
 	Bug #568072
 
-2009-01-09  Murray Cumming  <murrayc@murrayc.com>
+2009-01-11  José Alburquerque  <jaalburqu@svn.gnome.org>
 
-	* glib/glibmm/wrap.h: wrap_auto_interface<>(): Add a warning to give a 
-	clue when the dynamic_cast fails, for instance if you are doing some 
-	incorrect multiple inheritance.
+	* tools/extra_defs_gen/generate_extra_defs.cc:
+	* tools/extra_defs_gen/generate_extra_defs.h: Undid patch from bug
+	#562810 (José Alburquerque).  All the confusion about gstreamermm
+	packaging (see bug #565454) led to suggested patch which will really
+	probably never be used.
 
-2009-01-08  Daniel Elstner  <danielk@openismus.com>
-
-	* glib/glibmm/ustring.h (ustring::compose): Add an overload which
-	takes only a format string and no arguments to be substituted.  It
-	is essentially a null-operation as long as the format string does
-	not contain any invalid argument references.  Bug #506394.
-
-2009-01-06  Jonathon Jongsma  <jonathon@quotidian.org>
+2009-01-06 Jonathon Jongsma <jonathon@quotidian.org>
 
 	* glib/src/uriutils.ccg: fix a memory leak in the uri utility functions
-	caused by not freeing the returned C string.  Bug #566845 (Jason Kasper)
+	caused by not freeing the returned C string. Bug #566845 (Jason Kasper)
 
-2009-01-03  Murray Cumming  <murrayc@murrayc.com>
+2008-12-16  José Alburquerque  <jaalburqu@svn.gnome.org>
 
-	* gio/src/file.ccg: Added implementation of the 
-	make_directory_with_parents() method overload that takes no parameter.
-	Bug #566003 (Philip Belemezov).
-
-2008-12-24  Murray Cumming  <murrayc@murrayc.com>
-
-	* glib/src/spawn.ccg:
-	* glib/src/spawn.hg: Added Glib::spawn_*() alternative API for when 
-	GLIBMM_EXCEPTIONS_ENABLED is not enabled (when compiling without 
-	C++ exceptions.)
-	Bug #565487
-	(Jonathon Jongsma)
-
-2008-12-14  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* NEWS: update for follow-up release
-
-2008-12-14  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* configure.in: bump to 2.19.1
-
-2008-12-14  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* gio/src/drive.hg: Wrap new signals 'changed', 'disconnected', and
-	'eject_button' with the no_default_handler option so that we don't break ABI
-	by adding new virtual functions
-
-=== 2.19.0 ===
-
-2008-12-12  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* NEWS: update for release
-
-2008-12-12  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* tests/giomm_ioerror/main.cc:
-	* tests/giomm_simple/main.cc: use common filenames so that people other than
-	murrayc can run the tests without errors
-
-2008-12-12  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* gio/src/memoryoutputstream.hg: Fix a copy-paste error where I accidentally
-	left a FilterOutputStream type in
-
-2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* gio/src/memoryoutputstream.ccg:
-	* gio/src/memoryoutputstream.hg: Added MemoryOutputStream, but needs a bit
-	of work on the constructor yet
-
-2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* gio/src/Makefile_list_of_hg.am_fragment:
-	* gio/src/emblem.ccg:
-	* gio/src/emblem.hg:
-	* gio/src/emblemedicon.ccg:
-	* gio/src/emblemedicon.hg:
-	* tools/m4/convert_gio.m4: add Emblem and EmblemedIcon classes
-
-2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* tools/m4/convert_glib.m4: add a conversion for Glib::KeyFile&
-	* gio/src/desktopappinfo.hg: wrap the new create_from_keyfile() function.
-	In addition, I removed the _WRAP_CTOR and _WRAP_CREATE usage from the
-	desktop_id constructor and wrapped all of the static create* functions using
-	_WRAP_METHOD since these functions do a lot of error handling and can fail
-	to create an object under some circumstances.
-
-2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* docs/reference/Makefile.am: rebuild docs when a giomm header file is
-	changed (similar to how we handle glibmm)
-
-2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* gio/giomm/contenttype.cc:
-	* gio/giomm/contenttype.h: add content_type_from_mime_type()
-
-2008-12-02  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	Wrap a bunch of new / missed API
-
-	* gio/src/appinfo.hg:
-	* gio/src/appinfo.ccg: AppInfo::get_commandline(), can_delete(), do_delete()
-	(need better name?), reset_type_associations(), launch_default_for_uri()
-	* gio/src/cancellable.hg: add commented-out make_pollfd() since I'm not sure
-	yet whether it's useful with the C++ API or not
-	* gio/src/drive.hg: Added signals 'changed', 'disconnected', and
-	'eject_button'
-	* gio/src/icon.hg:
-	* gio/src/icon.ccg: Added Icon::create(string) and Icon::to_string()
-	* gio/src/mount.hg:
-	* gio/src/mount.ccg: Added Mount::guess_content_type_sync(), is_shadowed(),
-	shadow(), and unshadow()
-
-2008-12-01  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* configure.in: bump requirement to glib 2.19.x
-	* gio/src/gio_docs.xml:
-	* gio/src/gio_enums.defs:
-	* gio/src/gio_methods.defs:
-	* gio/src/gio_signals.defs:
-	* glib/src/glib_docs.xml:
-	* glib/src/glib_enums.defs:
-	* glib/src/glib_functions.defs:
-	* glib/src/gmodule_enums.defs:
-	* glib/src/gmodule_functions.defs:
-	* glib/src/gobject_enums.defs:
-	* glib/src/gobject_functions.defs: update the .defs to start on 2.19.x API
-
-2008-12-01  Jonathon Jongsma  <jonathon@quotidian.org>
-
-	* Makefile.am: add some convenience rules for generating the .defs files
-
-2008-09-22  Dave Foster <daf@minuslab.net>
-
-	* glib/glibmm/main.h:
-	* glib/glibmm/main.cc: Added SignalIdle::connect_once,
-	SignalTimeout::connect_once, and SignalTimeout::connect_seconds_once.
+	* tools/extra_defs_gen/generate_extra_defs.cc:
+	* tools/extra_defs_gen/generate_extra_defs.h: Modify extra defs
+	generation utility to accept custom defined function to determine if
+	GType is a pointer.
+	Bug #562810.
 
 2008-12-10  Przemysław Grzegorczyk  <pgrzegorczyk@gmail.com>
 
@@ -252,6 +74,8 @@
 2008-11-29  Hubert Figuiere  <hub@figuiere.net>
 
 	* glib/src/nodetree.hg: Fix -Wshadow warnings. Bug #555743.
+
+2.18.1:
 
 2008-10-20  Jonathon Jongsma  <jonathon@quotidian.org>
 

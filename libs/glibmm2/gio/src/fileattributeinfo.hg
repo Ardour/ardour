@@ -1,0 +1,62 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <string>
+#include <gio/gio.h> //TODO: avoid this include
+#include <glibmm/object.h>
+
+_DEFS(giomm,gio)
+
+namespace Gio
+{
+
+//TODO: Fix the need for NO_GTYPE.
+//It guesses gfile_attribute_type_get_type() instead of g_file_attribute_type_get_type(). murrayc.
+_WRAP_ENUM(FileAttributeType, GFileAttributeType, NO_GTYPE)
+_WRAP_ENUM(FileAttributeInfoFlags, GFileAttributeInfoFlags, NO_GTYPE)
+_WRAP_ENUM(FileAttributeStatus, GFileAttributeStatus, NO_GTYPE)
+
+
+/** Information about a specific attribute - see FileAttributeInfoList.
+ *
+ * @newin2p16
+ */
+class FileAttributeInfo
+{
+  _CLASS_GENERIC(FileAttributeInfo, GFileAttributeInfo)
+public:
+  explicit FileAttributeInfo(const GFileAttributeInfo* ginfo);
+
+  FileAttributeInfo(const FileAttributeInfo& other);
+  FileAttributeInfo& operator=(const FileAttributeInfo& other);
+
+  ~FileAttributeInfo();
+
+  std::string get_name() const;
+  FileAttributeType get_type() const;
+  FileAttributeInfoFlags get_flags() const;
+
+protected:
+  std::string m_name;
+  FileAttributeType m_type;
+  FileAttributeInfoFlags m_flags;
+};
+
+} // namespace Gio
+

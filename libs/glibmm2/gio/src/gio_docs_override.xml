@@ -1,0 +1,1737 @@
+<root>
+<function name="g_file_make_symbolic_link">
+<description>
+Creates a symbolic link.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="symlink_value">
+<parameter_description> a string with the value of the new symlink.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError. 
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on the creation of a new symlink, %FALSE otherwise.
+</return>
+</function>
+
+
+<function name="g_file_enumerator_close_finish">
+<description>
+Finishes closing a file enumerator, started from g_file_enumerator_close_async().
+
+If the file enumerator was already closed when g_file_enumerator_close_async() 
+was called, then this function will throw a Gio::Error with CLOSED, and 
+return %FALSE. If the file enumerator had pending operation when the close 
+operation was started, then this function will throw a Gio::Error with PENDING, and
+return %FALSE.  The operation may have been 
+cancelled by triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error with CANCELLED will be thrown, and %FALSE will be 
+returned.
+
+
+</description>
+<parameters>
+<parameter name="enumerator">
+<parameter_description> a #GFileEnumerator.
+</parameter_description>
+</parameter>
+<parameter name="result">
+<parameter_description> a #GAsyncResult.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError location to store the error occuring, or %NULL to 
+ignore.
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the close operation has finished successfully.
+</return>
+</function>
+
+<function name="g_file_append_to">
+<description>
+Gets an output stream for appending data to the file. If
+the file doesn&apos;t already exist it is created.
+
+By default files created are generally readable by everyone,
+but if you pass #G_FILE_CREATE_PRIVATE in @flags the file
+will be made readable only to the current user, to the level that
+is supported on the target filesystem.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+Some file systems don&apos;t allow all file names, and may
+throw a Gio::Error with INVALID_FILENAME.
+If the file is a directory a Gio::Error with IS_DIRECTORY will be
+thrown. Other errors are possible too, and depend on what kind of
+filesystem the file is on.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileCreateFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileOutputStream.
+</return>
+</function>
+
+
+<function name="g_file_set_attribute_int32">
+<description>
+Sets @attribute of type %G_FILE_ATTRIBUTE_TYPE_INT32 to @value. 
+If @attribute is of a different type, this operation will fail.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attribute">
+<parameter_description> a string containing the attribute&apos;s name.
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> a #gint32 containing the attribute&apos;s new value.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the @attribute was successfully set to @value 
+in the @file, %FALSE otherwise. 
+</return>
+</function>
+
+<function name="g_file_delete">
+<description>
+Deletes a file.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL 
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the file was deleted. %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_seekable_seek">
+<description>
+Seeks in the stream by the given @offset, modified by @type.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="seekable">
+<parameter_description> a #GSeekable.
+</parameter_description>
+</parameter>
+<parameter name="offset">
+<parameter_description> a #goffset.
+</parameter_description>
+</parameter>
+<parameter name="type">
+<parameter_description> a #GSeekType.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object. 
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError location to store the error occuring, or %NULL to 
+ignore.
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if successful. If an error
+has occurred, this function will return %FALSE and set @error
+appropriately if present.
+</return>
+</function>
+
+<function name="g_file_set_display_name">
+<description>
+Renames @file to the specified display name.
+
+The display name is converted from UTF8 to the correct encoding for the target
+filesystem if possible and the @file is renamed to this.
+
+If you want to implement a rename operation in the user interface the edit name
+(#G_FILE_ATTRIBUTE_STANDARD_EDIT_NAME) should be used as the initial value in the rename
+widget, and then the result after editing should be passed to g_file_set_display_name().
+
+On success the resulting converted filename is returned.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="display_name">
+<parameter_description> a string.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFile specifying what @file was renamed to, or %NULL if there was an error.
+</return>
+</function>
+
+<function name="g_file_set_attribute_byte_string">
+<description>
+Sets @attribute of type %G_FILE_ATTRIBUTE_TYPE_BYTE_STRING to @value. 
+If @attribute is of a different type, this operation will fail, 
+returning %FALSE. 
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attribute">
+<parameter_description> a string containing the attribute&apos;s name.
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> a string containing the attribute&apos;s new value.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the @attribute was successfully set to @value 
+in the @file, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_file_query_info">
+<description>
+Gets the requested information about specified @file. The result
+is a #GFileInfo object that contains key-value attributes (such as 
+the type or size of the file).
+
+The @attribute value is a string that specifies the file attributes that
+should be gathered. It is not an error if it&apos;s not possible to read a particular
+requested attribute from a file - it just won&apos;t be set. @attribute should
+be a comma-separated list of attribute or attribute wildcards. The wildcard &quot;*&quot;
+means all attributes, and a wildcard like &quot;standard::*&quot; means all attributes in the standard
+namespace. An example attribute query be &quot;standard::*,owner::user&quot;.
+The standard attributes are available as defines, like #G_FILE_ATTRIBUTE_STANDARD_NAME.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+For symlinks, normally the information about the target of the
+symlink is returned, rather than information about the symlink itself.
+However if you pass #G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS in @flags the
+information about the symlink itself will be returned. Also, for symlinks
+that point to non-existing files the information about the symlink itself
+will be returned.
+
+If the file does not exist, a Gio::Error with NOT_FOUND will be thrown.
+Other errors are possible too, and depend on what kind of filesystem the file is on.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attributes">
+<parameter_description> an attribute query string.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileInfo for the given @file, or %NULL on error.
+</return>
+</function>
+
+<function name="g_input_stream_skip">
+<description>
+Tries to skip @count bytes from the stream. Will block during the operation.
+
+This is identical to g_input_stream_read(), from a behaviour standpoint,
+but the bytes that are skipped are not returned to the user. Some
+streams have an implementation that is more efficient than reading the data.
+
+This function is optional for inherited classes, as the default implementation
+emulates it using read.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. If an
+operation was partially finished when the operation was cancelled the
+partial result will be returned, without an error.
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a #GInputStream.
+</parameter_description>
+</parameter>
+<parameter name="count">
+<parameter_description> the number of bytes that will be skipped from the stream
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object. 
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore
+</parameter_description>
+</parameter>
+</parameters>
+<return> Number of bytes skipped, or -1 on error
+</return>
+</function>
+
+<function name="g_file_make_directory">
+<description>
+Creates a directory.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL 
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on successful creation, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_file_set_attribute_uint32">
+<description>
+Sets @attribute of type %G_FILE_ATTRIBUTE_TYPE_UINT32 to @value. 
+If @attribute is of a different type, this operation will fail.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attribute">
+<parameter_description> a string containing the attribute&apos;s name.
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> a #guint32 containing the attribute&apos;s new value.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the @attribute was successfully set to @value 
+in the @file, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_file_query_writable_namespaces">
+<description>
+Obtain the list of attribute namespaces where new attributes 
+can be created by a user. An example of this is extended
+attributes (in the &quot;xattr&quot; namespace).
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileAttributeInfoList describing the writable namespaces.
+When you are done with it, release it with g_file_attribute_info_list_unref()
+</return>
+</function>
+
+<function name="g_file_trash">
+<description>
+Sends @file to the &quot;Trashcan&quot;, if possible. This is similar to
+deleting it, but the user can recover it before emptying the trashcan.
+Not all file systems support trashing, so this call can throw a Gio::Error with 
+ NOT_SUPPORTED.
+
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> #GFile to send to trash.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on successful trash, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_file_set_attributes_from_info">
+<description>
+Tries to set all attributes in the #GFileInfo on the target values, 
+not stopping on the first error.
+
+If there is any error during this operation then @error will be set to
+the first error. Error on particular fields are flagged by setting 
+the &quot;status&quot; field in the attribute value to 
+%G_FILE_ATTRIBUTE_STATUS_ERROR_SETTING, which means you can also detect
+further errors.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="info">
+<parameter_description> a #GFileInfo.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> #GFileQueryInfoFlags
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL 
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if there was any error, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_file_set_attribute_uint64">
+<description>
+Sets @attribute of type %G_FILE_ATTRIBUTE_TYPE_UINT64 to @value. 
+If @attribute is of a different type, this operation will fail.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile. 
+</parameter_description>
+</parameter>
+<parameter name="attribute">
+<parameter_description> a string containing the attribute&apos;s name.
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> a #guint64 containing the attribute&apos;s new value.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the @attribute was successfully set to @value 
+in the @file, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_output_stream_flush">
+<description>
+Flushed any outstanding buffers in the stream. Will block during 
+the operation. Closing the stream will implicitly cause a flush.
+
+This function is optional for inherited classes.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED.
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a #GOutputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on success, %FALSE on error
+</return>
+</function>
+
+
+<function name="g_seekable_truncate">
+<description>
+Truncates a stream with a given #offset. 
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. If an
+operation was partially finished when the operation was cancelled the
+partial result will be returned, without an error.
+
+
+</description>
+<parameters>
+<parameter name="seekable">
+<parameter_description> a #GSeekable.
+</parameter_description>
+</parameter>
+<parameter name="offset">
+<parameter_description> a #goffset.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object. 
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError location to store the error occuring, or %NULL to 
+ignore.
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if successful. If an error
+has occurred, this function will return %FALSE and set @error
+appropriately if present. 
+</return>
+</function>
+
+<function name="g_buffered_input_stream_read_byte">
+<description>
+Tries to read a single byte from the stream or the buffer. Will block
+during this read.
+
+On success, the byte read from the stream is returned. On end of stream
+-1 is returned but it&apos;s not an exceptional error and @error is not set.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. If an
+operation was partially finished when the operation was cancelled the
+partial result will be returned, without an error.
+
+
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> #GBufferedInputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore.
+</parameter_description>
+</parameter>
+</parameters>
+<return> the byte read from the @stream, or -1 on end of stream or error.
+</return>
+</function>
+
+
+<function name="g_data_input_stream_read_uint64">
+<description>
+Reads an unsigned 64-bit/8-byte value from @stream.
+
+In order to get the correct byte order for this read operation, 
+see g_data_stream_get_byte_order().
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a given #GDataInputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> #GError for error reporting.
+</parameter_description>
+</parameter>
+</parameters>
+<return> an unsigned 64-bit/8-byte read from @stream or %0 if 
+an error occurred. 
+</return>
+</function>
+
+<function name="g_file_output_stream_query_info">
+<description>
+Queries a file output stream for the given @attributes. 
+This function blocks while querying the stream. For the asynchronous 
+version of this function, see g_file_output_stream_query_info_async(). 
+While the stream is blocked, the stream will set the pending flag 
+internally, and any other operations on the stream will fail with 
+PENDING.
+
+Can fail if the stream was already closed (throwing a Gio::Error with 
+CLOSED), the stream has pending operations (throwing a Gio::Error with 
+PENDING), or if querying info is not supported for 
+the stream&apos;s interface (throwing a Gio::Error with NOT_SUPPORTED). In
+all cases of failure, %NULL will be returned.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED, and %NULL will 
+be returned. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a #GFileOutputStream.
+</parameter_description>
+</parameter>
+<parameter name="attributes">
+<parameter_description> a file attribute query string.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object. 
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, %NULL to ignore.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileInfo for the @stream, or %NULL on error.
+</return>
+</function>
+
+
+<function name="g_file_set_attribute_int64">
+<description>
+Sets @attribute of type %G_FILE_ATTRIBUTE_TYPE_INT64 to @value. 
+If @attribute is of a different type, this operation will fail.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attribute">
+<parameter_description> a string containing the attribute&apos;s name.
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> a #guint64 containing the attribute&apos;s new value.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the @attribute was successfully set, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_file_find_enclosing_mount">
+<description>
+Gets a #GMount for the #GFile. 
+
+If the #GFileIface for @file does not have a mount (e.g. possibly a 
+remote share), a Gio::Error will be thrown with NOT_FOUND and %NULL
+will be returned.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object. 
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError. 
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GMount where the @file is located or %NULL on error.
+</return>
+</function>
+
+<function name="g_data_input_stream_read_int64">
+<description>
+Reads a 64-bit/8-byte value from @stream.
+
+In order to get the correct byte order for this read operation, 
+see g_data_stream_get_byte_order() and g_data_stream_set_byte_order().
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a given #GDataInputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> #GError for error reporting.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a signed 64-bit/8-byte value read from @stream or %0 if 
+an error occurred.  
+</return>
+</function>
+
+<function name="g_buffered_input_stream_fill">
+<description>
+Tries to read @count bytes from the stream into the buffer. 
+Will block during this read.
+
+If @count is zero, returns zero and does nothing. A value of @count
+larger than %G_MAXSSIZE will cause a Gio::Error to be thrown, with INVALID_ARGUMENT.
+
+On success, the number of bytes read into the buffer is returned.
+It is not an error if this is not the same as the requested size, as it
+can happen e.g. near the end of a file. Zero is returned on end of file
+(or if @count is zero),  but never otherwise.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. If an
+operation was partially finished when the operation was cancelled the
+partial result will be returned, without an error.
+
+
+
+For the asynchronous, non-blocking, version of this function, see 
+g_buffered_input_stream_fill_async().
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> #GBufferedInputStream.
+</parameter_description>
+</parameter>
+<parameter name="count">
+<parameter_description> the number of bytes that will be read from the stream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore.
+</parameter_description>
+</parameter>
+</parameters>
+<return> the number of bytes read into @stream&apos;s buffer, up to @count, 
+or -1 on error.
+</return>
+</function>
+
+<function name="g_data_input_stream_read_int32">
+<description>
+Reads a signed 32-bit/4-byte value from @stream.
+
+In order to get the correct byte order for this read operation, 
+see g_data_stream_get_byte_order() and g_data_stream_set_byte_order().
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a given #GDataInputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> #GError for error reporting.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a signed 32-bit/4-byte value read from the @stream or %0 if 
+an error occurred. 
+</return>
+</function>
+
+
+<function name="g_file_set_attribute_string">
+<description>
+Sets @attribute of type %G_FILE_ATTRIBUTE_TYPE_STRING to @value. 
+If @attribute is of a different type, this operation will fail.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attribute">
+<parameter_description> a string containing the attribute&apos;s name.
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> a string containing the attribute&apos;s value.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the @attribute was successfully set, %FALSE otherwise.
+</return>
+</function>
+
+
+<function name="g_file_create">
+<description>
+Creates a new file and returns an output stream for writing to it.
+The file must not already exists.
+
+By default files created are generally readable by everyone,
+but if you pass #G_FILE_CREATE_PRIVATE in @flags the file
+will be made readable only to the current user, to the level that
+is supported on the target filesystem.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+If a file or directory with this name already exists a Gio::Error with EXISTS
+will be thrown.
+Some file systems don&apos;t allow all file names, and may
+throw a Gio::Error with INVALID_FILENAME, and if the name
+is to long a Gio::Error with FILENAME_TOO_LONG will be thrown.
+Other errors are possible too, and depend on what kind of
+filesystem the file is on.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileCreateFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileOutputStream for the newly created file, or 
+%NULL on error.
+</return>
+</function>
+
+<function name="g_file_load_contents">
+<description>
+Loads the content of the file into memory, returning the size of
+the data. The data is always zero terminated, but this is not
+included in the resultant @length.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="contents">
+<parameter_description> a location to place the contents of the file.
+</parameter_description>
+</parameter>
+<parameter name="length">
+<parameter_description> a location to place the length of the contents of the file.
+</parameter_description>
+</parameter>
+<parameter name="etag_out">
+<parameter_description> a location to place the current entity tag for the file.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the @file&apos;s contents were successfully loaded.
+%FALSE if there were errors..
+</return>
+</function>
+
+<function name="g_output_stream_close">
+<description>
+Closes the stream, releasing resources related to it.
+
+Once the stream is closed, all other operations will throw a Gio::Error with 
+CLOSED. Closing a stream multiple times will not cause an error to be 
+thrown.
+
+Closing a stream will automatically flush any outstanding buffers in the
+stream.
+
+Streams will be automatically closed when the last reference
+is dropped, but you might want to call this function to make sure 
+resources are released as early as possible.
+
+Some streams might keep the backing store of the stream (e.g. a file descriptor)
+open after the stream is closed. See the documentation for the individual
+stream for details.
+
+On failure the first error that happened will be reported, but the close
+operation will finish as much as possible. A stream that failed to
+close will still throw a Gio::Error with CLOSED for all operations. Still, it
+is important to check and report the error to the user, otherwise
+there might be a loss of data as all data might not be written.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED.
+Cancelling a close will still leave the stream closed, but there some streams
+can use a faster close that doesn&apos;t block to e.g. check errors. On
+cancellation (as with any error) there is no guarantee that all written
+data will reach the target. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> A #GOutputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on success, %FALSE on failure
+</return>
+</function>
+
+<function name="g_file_replace_contents">
+<description>
+Replaces the contents of @file with @contents of @length bytes.
+ 
+If @etag is specified any existing file must have that etag, or
+a Gio::Errrow with WRONG_ETAG will be thrown.
+
+If @make_backup is %TRUE, this function will attempt to make a backup of @file.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED.
+
+The returned @new_etag can be used to verify that the file hasn&apos;t changed the
+next time it is saved over.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="contents">
+<parameter_description> a string containing the new contents for @file.
+</parameter_description>
+</parameter>
+<parameter name="length">
+<parameter_description> the length of @contents in bytes.
+</parameter_description>
+</parameter>
+<parameter name="etag">
+<parameter_description> the old &amp;lt;link linkend=&quot;gfile-etag&quot;&amp;gt;entity tag&amp;lt;/link&amp;gt; 
+for the document.
+</parameter_description>
+</parameter>
+<parameter name="make_backup">
+<parameter_description> %TRUE if a backup should be created.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileCreateFlags.
+</parameter_description>
+</parameter>
+<parameter name="new_etag">
+<parameter_description> a location to a new &amp;lt;link linkend=&quot;gfile-etag&quot;&amp;gt;entity tag&amp;lt;/link&amp;gt;
+for the document. This should be freed with g_free() when no longer 
+needed.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if successful. If an error
+has occurred, this function will return %FALSE and set @error
+appropriately if present.
+
+
+</return>
+</function>
+
+<function name="g_data_input_stream_read_line">
+<description>
+Reads a line from the data input stream.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a given #GDataInputStream.
+</parameter_description>
+</parameter>
+<parameter name="length">
+<parameter_description> a #gsize to get the length of the data read in.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> #GError for error reporting.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a string with the line that was read in (including the newlines).
+Set @length to a #gsize to get the length of the read line. Returns %NULL on an error.
+</return>
+</function>
+
+
+<function name="g_input_stream_read">
+<description>
+Tries to read @count bytes from the stream into the buffer starting at
+@buffer. Will block during this read.
+
+If count is zero returns zero and does nothing. A value of @count
+larger than %G_MAXSSIZE will cause a Gio::Error with INVALID_ARGUMENT to be thrown.
+
+On success, the number of bytes read into the buffer is returned.
+It is not an error if this is not the same as the requested size, as it
+can happen e.g. near the end of a file. Zero is returned on end of file
+(or if @count is zero),  but never otherwise.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. If an
+operation was partially finished when the operation was cancelled the
+partial result will be returned, without an error.
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a #GInputStream.
+</parameter_description>
+</parameter>
+<parameter name="buffer">
+<parameter_description> a buffer to read data into (which should be at least count bytes long).
+</parameter_description>
+</parameter>
+<parameter name="count">
+<parameter_description> the number of bytes that will be read from the stream
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore
+</parameter_description>
+</parameter>
+</parameters>
+<return> Number of bytes read, or -1 on error
+</return>
+</function>
+
+<function name="g_file_enumerate_children">
+<description>
+Gets the requested information about the files in a directory. The result
+is a #GFileEnumerator object that will give out #GFileInfo objects for
+all the files in the directory.
+
+The @attribute value is a string that specifies the file attributes that
+should be gathered. It is not an error if it&apos;s not possible to read a particular
+requested attribute from a file - it just won&apos;t be set. @attribute should
+be a comma-separated list of attribute or attribute wildcards. The wildcard &quot;*&quot;
+means all attributes, and a wildcard like &quot;standard::*&quot; means all attributes in the standard
+namespace. An example attribute query be &quot;standard::*,owner::user&quot;.
+The standard attributes are available as defines, like #G_FILE_ATTRIBUTE_STANDARD_NAME.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+If the file does not exist, a Gio::Error with NOT_FOUND will be thrown.
+If the file is not a directory, a Glib::FileError with NOTDIR will be returned.
+Other errors are possible too.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attributes">
+<parameter_description> an attribute query string.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> #GError for error reporting.
+</parameter_description>
+</parameter>
+</parameters>
+<return> A #GFileEnumerator if successful, %NULL on error. 
+</return>
+</function>
+
+<function name="g_data_input_stream_read_uint32">
+<description>
+Reads an unsigned 32-bit/4-byte value from @stream.
+
+In order to get the correct byte order for this read operation, 
+see g_data_stream_get_byte_order() and g_data_stream_set_byte_order().
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a given #GDataInputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> #GError for error reporting.
+</parameter_description>
+</parameter>
+</parameters>
+<return> an unsigned 32-bit/4-byte value read from the @stream or %0 if 
+an error occurred. 
+</return>
+</function>
+
+<function name="g_input_stream_close">
+<description>
+Closes the stream, releasing resources related to it.
+
+Once the stream is closed, all other operations will throw a Gio::Error with CLOSED.
+Closing a stream multiple times will not return an error.
+
+Streams will be automatically closed when the last reference
+is dropped, but you might want to call this function to make sure 
+resources are released as early as possible.
+
+Some streams might keep the backing store of the stream (e.g. a file descriptor)
+open after the stream is closed. See the documentation for the individual
+stream for details.
+
+On failure the first error that happened will be reported, but the close
+operation will finish as much as possible. A stream that failed to
+close will still throw a Gio::Error with CLOSED for all operations. Still, it
+is important to check and report the error to the user.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED.
+Cancelling a close will still leave the stream closed, but some streams
+can use a faster close that doesn&apos;t block to e.g. check errors. 
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> A #GInputStream.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on success, %FALSE on failure
+</return>
+</function>
+
+
+<function name="g_file_query_filesystem_info">
+<description>
+Similar to g_file_query_info(), but obtains information
+about the filesystem the @file is on, rather than the file itself.
+For instance the amount of space available and the type of
+the filesystem.
+
+The @attribute value is a string that specifies the file attributes that
+should be gathered. It is not an error if it&apos;s not possible to read a particular
+requested attribute from a file - it just won&apos;t be set. @attribute should
+be a comma-separated list of attribute or attribute wildcards. The wildcard &quot;*&quot;
+means all attributes, and a wildcard like &quot;fs:*&quot; means all attributes in the fs
+namespace. The standard namespace for filesystem attributes is &quot;fs&quot;.
+Common attributes of interest are #G_FILE_ATTRIBUTE_FILESYSTEM_SIZE
+(the total size of the filesystem in bytes), #G_FILE_ATTRIBUTE_FILESYSTEM_FREE (number of
+bytes available), and #G_FILE_ATTRIBUTE_FILESYSTEM_TYPE (type of the filesystem).
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+If the file does not exist, a Gio::Error with NOT_FOUND will be thrown.
+Other errors are possible too, and depend on what kind of filesystem the file is on.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attributes">
+<parameter_description>  an attribute query string.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object. 
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError. 
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileInfo or %NULL if there was an error.
+</return>
+</function>
+
+<function name="g_output_stream_write">
+<description>
+Tries to write @count bytes from @buffer into the stream. Will block
+during the operation.
+
+If count is zero returns zero and does nothing. A value of @count
+larger than %G_MAXSSIZE will cause a Gio::Error with INVALID_ARGUMENT to be thrown.
+
+On success, the number of bytes written to the stream is returned.
+It is not an error if this is not the same as the requested size, as it
+can happen e.g. on a partial i/o error, or if there is not enough
+storage in the stream. All writes either block until at least one byte
+is written, so zero is never returned (unless @count is zero).
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. If an
+operation was partially finished when the operation was cancelled the
+partial result will be returned, without an error.
+
+
+
+
+</description>
+<parameters>
+<parameter name="stream">
+<parameter_description> a #GOutputStream.
+</parameter_description>
+</parameter>
+<parameter name="buffer">
+<parameter_description> the buffer containing the data to write. 
+</parameter_description>
+</parameter>
+<parameter name="count">
+<parameter_description> the number of bytes to write
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> location to store the error occuring, or %NULL to ignore
+</parameter_description>
+</parameter>
+</parameters>
+<return> Number of bytes written, or -1 on error
+</return>
+</function>
+
+<function name="g_file_monitor_file">
+<description>
+Obtains a file monitor for the given file. If no file notification
+mechanism exists, then regular polling of the file is used.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileMonitorFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileMonitor for the given @file.
+</return>
+</function>
+
+<function name="g_file_set_attribute">
+<description>
+Sets an attribute in the file with attribute name @attribute to @value.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="attribute">
+<parameter_description> a string containing the attribute&apos;s name.
+</parameter_description>
+</parameter>
+<parameter name="type">
+<parameter_description> The type of the attribute
+</parameter_description>
+</parameter>
+<parameter name="value_p">
+<parameter_description> a pointer to the value (or the pointer itself if the type is a pointer type)
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileQueryInfoFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the attribute was set, %FALSE otherwise.
+</return>
+</function>
+
+<function name="g_file_read">
+<description>
+Opens a file for reading. The result is a #GFileInputStream that
+can be used to read the contents of the file.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+If the file does not exist, a Gio::Error with NOT_FOUND will be thrown.
+If the file is a directory, a Gio::Error with IS_DIRECTORY will be thrown.
+Other errors are possible too, and depend on what kind of filesystem the file is on.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> #GFile to read.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> a #GCancellable
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL
+</parameter_description>
+</parameter>
+</parameters>
+<return> #GFileInputStream or %NULL on error.
+</return>
+</function>
+
+<function name="g_file_monitor_directory">
+<description>
+Obtains a directory monitor for the given file.
+This may fail if directory monitoring is not supported.
+
+The operation can be cancelled by
+triggering the cancellable object from another thread. If the operation
+was cancelled, a Gio::Error will be thrown with CANCELLED. 
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> a set of #GFileMonitorFlags.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> Cancellable object.
+</parameter_description>
+</parameter>
+<parameter name="error">
+<parameter_description> a #GError, or %NULL.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GFileMonitor for the given @file, 
+or %NULL on error.
+</return>
+</function>
+
+<function name="g_file_query_exists">
+<description>
+Utility function to check if a particular file exists. This is
+implemented using query_info() and as such does blocking I/O.
+
+Note that in many cases it is racy to first check for file existence
+and then execute something based on the outcome of that, because the
+file might have been created or removed in between the operations. The
+general approach to handling that is to not check, but just do the
+operation and handle the errors as they come.
+
+As an example of race-free checking, take the case of reading a file, and
+if it doesn&apos;t exist, creating it. There are two racy versions: read it, and
+on error create it; and: check if it exists, if not create it. These
+can both result in two processes creating the file (with perhaps a partially
+written file as the result). The correct approach is to always try to create
+the file with File::create() which will either atomically create the file
+or fail with a Gio::Error exception with EXISTS.
+
+However, in many cases an existence check is useful in a user
+interface, for instance to make a menu item sensitive/insensitive, so that
+you don&apos;t have to fool users that something is possible and then just show
+and error dialog. If you do this, you should make sure to also handle the
+errors that can happen due to races when you execute the operation.
+
+
+</description>
+<parameters>
+<parameter name="file">
+<parameter_description> input #GFile.
+</parameter_description>
+</parameter>
+<parameter name="cancellable">
+<parameter_description> optional #GCancellable object, %NULL to ignore.
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the file exists (and can be detected without error), %FALSE otherwise (or if cancelled).
+</return>
+</function>
+
+
+</root>

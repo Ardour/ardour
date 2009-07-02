@@ -1,71 +1,21 @@
-2.20.0 (stable):
+2.18.2 (stable):
 
-* Documentation fixes (Daniel Elstner)
-
-2.19.8 (unstable):
-(2.19.4 to 2.19.8 were skipped)
-
-* Added FILE_CREATE_REPLACE_DESTINATION enum value.
-* Added Error::TOO_MANY_OPEN_FILES error code.
-* Fix some compiler warnings about extra ;s.
-  (Murray Cumming)
-
-2.19.3 (unstable):
-
-* New API:
-  * BufferedInputStream: buffer_size property
-  * BufferedOutputStream: buffer_size, auto_grow properties
-  * DataInputStream: byte_order, newline_type properties
-  * DataOutputStream: byte_order property
-  * FilterInputStream: close_base_stream property, get/set_close_base_stream()
-  * FilterOutputStream: close_base_stream property, get/set_close_base_stream()
-  * UnixInputStream: fd and close_fd properties, get_fd(), get/set_close_fd()
-  * UnixOutputStream: fd and close_fd properties, get_fd(), get/set_close_fd()
-* Make licenses consistent with eachother (library gpl vs. lesser gpl, etc)
-  (Deng Xiyue)
-* Fixed some problems when building with exceptions disabled (Murray Cumming)
-* Build fixes (Theppitak Karoonboonyanan)
-
-2.19.2 (unstable):
-
-* File: Added make_directory_with_parents() method overload with no parameter.
-  Bug #566003 (Philip Belemezov).
-* NoteTree: Do not use a non-ASCII dash character in a comment, to 
-  avoid the MSVC++ warning C4819 with Visual Studio 2008.
-  (Tao Wang) Bug #568072
-* spawn_*() functions: Added alternative API for when 
-  GLIBMM_EXCEPTIONS_ENABLED is not enabled. (Murray Cumming)
-  Bug #565487 (Jonathon Jongsma)
-* uri_*() functions: Fix memory leak.
-  (Jonathan Jongsma) Bug #566845 (Jason Kasper)
-* ustring: Add an overload which takes only a format string and no arguments 
-  to be substituted. (Daniel Elstner) Bug #506394.
-
-2.19.1 (unstable):
-
- * Fix accidental ABI breakage in 2.19.0 caused by adding default handlers for
-   new Gio::Drive signals
-
-2.19.0 (unstable):
-
- * wrapped new glib 2.19.x API
-   * Gio::AppInfo: get_commandline(), can_delete(), do_delete(),
-     reset_type_associations(), launch_default_for_uri()
-   * Gio::Drive: new signals changed, disconnected, and eject_button
-   * Gio::Icon: create(std::string), to_string()(),
-   * Gio::Mount: guess_content_type_sync(), is_shadowed(), shadow(), unshadow()
-   * Gio::content_type_from_mine_type();
-   * Gio::DesktopAppInfo: create_from_keyfile()
-   * Gio::Emblem: new class
-   * Gio::EmblemedIcon: new class
-   * Gio::MemoryOutputStream: new class
- * Bugs Fixed:
-   * 555743 - warning in glibmm
-   * 562716 - warning fixing cause more warnings.
-   * 396963 - Add Glib::signal_idle().connect_once()
- * Thanks to contributions from Przemysław Grzegorczyk, Dave Foster, Hubert
-   Figuiere, and Jonathon Jongsma for changes in this release
-
+ * uri_*(): Fix a memory leak. (Jonathon Jongsma) Bug #566845 (Jason Kasper)
+ * gmmproc: 
+  - CLASS_GOBJECT(): Added _CUSTOM_CTOR_CAST for classes that need to 
+  include custom code in their cast and construct_params constructors as 
+  already seen in _CLASS_GTKOBJECT. Bug #574861.
+	- enum handling of unusually-capitalized names: For example, 
+	gtk_foo_bar_get_type() instead of gtk_fo_obar_get_type(). Bug #575870.
+	(José Alburquerque)
+ * Build:
+   - Fix the build with --disable-api-exceptions. (Daniel Elstner)
+   - Fix -Wshadow warnings in NodeTree. (Hubert Figuiere) Bug #555743
+   - Fix ununused variables warnings. (Hubert Figuiere) Bug #562716
+   - Use single glib includes. (Przemysław Grzegorczyk) Bug #563987
+   - Do not use a non-ASCII dash character, to avoid the MSVC++ warning C4819.
+	   (Tao Wang) Bug #568072
+   
 2.18.1 (stable):
 
  * Many windows build improvements

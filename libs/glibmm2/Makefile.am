@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS	= -I scripts
 
-SUBDIRS		= tools glib scripts
+SUBDIRS		= tools glib gio scripts
 DIST_SUBDIRS	= $(SUBDIRS)
 
 EXTRA_DIST	= build_shared/Makefile_build.am_fragment \
@@ -26,33 +26,6 @@ dist-hook:
 	echo "**********************************************************"; \
 	echo; echo
 
-
-# This doesn't work very well in a $(srcdir) != $(builddir) setup,
-# but this target is for maintainer use only anyway.
-
-glibmm-docs.tar.gz:
-	find examples -name '*.cc' -o -name '*.h' -o -name '*.xpm' -o -name '*.xml' | \
-	tar cf - --files-from - $(doc_tarball_files) | gzip -c --best >$@
-
-# Upload documentation and examples:
-
-post-html-recursive:
-	list='docs examples'; for subdir in $$list; do \
-	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) post-html); \
-	done
-
-post-html-local: glibmm-docs.tar.gz
-	rsync $(rsync_args) glibmm-docs.tar.gz $$USER@$(web_host):$(web_path_gtkmm)
-
-post-html: post-html-recursive post-html-local
-
-doc-clean-recursive:
-	(cd docs && $(MAKE) $(AM_MAKEFLAGS) doc-clean)
-
-doc-clean: doc-clean-recursive
-
-doc-rebuild:
-	(cd docs && $(MAKE) $(AM_MAKEFLAGS) doc-rebuild)
 
 SVN_REV=`svnversion -n`
 URL_KEY=URL:
@@ -118,26 +91,5 @@ install-module:
 
 release: upload-release release-announce
 
-#FIXME: use generic paths, rather than my particular paths
-H2DEF = env python /opt/gnome2/share/pygobject/2.0/codegen/h2def.py
-DEFS_INC_DIR = /opt/gnome2/include
-GEN_ENUM = env perl ./tools/enum.pl
-GEN_EXTRA_DEFS_GLIB = ./tools/extra_defs_gen/generate_extra_defs
-DOCEXTRACT = /home/jonathon/gnome-build/pygobject/codegen/docextract_to_xml.py
-
-defs: glib-defs docextract
-	@echo
-	@echo "*** Make sure to examine the .defs files to make sure they look reasonable"
-	@echo
-
-glib-defs:
-	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/glib/*.h > glib/src/glib_functions.defs
-	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/gobject/*.h > glib/src/gobject_functions.defs
-	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/gmodule.h > glib/src/gmodule_functions.defs
-	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/glib/*.h > glib/src/glib_enums.defs
-	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gobject/*.h > glib/src/gobject_enums.defs
-	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gmodule.h > glib/src/gmodule_enums.defs
-
-
-.PHONY: post-html post-html-local post-html-recursive release tag-release upload-release release-announce install-module defs glib-defs 
+.PHONY: post-html post-html-local post-html-recursive release tag-release upload-release release-announce install-module
 

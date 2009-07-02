@@ -1,4 +1,4 @@
-;; From /opt/gnome2/include/glib-2.0/glib/gbookmarkfile.h
+;; From /opt/gnome218/include/glib-2.0/glib/gbookmarkfile.h
 
 (define-enum-extended BookmarkFileError
   (in-module "G")
@@ -15,7 +15,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gchecksum.h
+;; From ../glibc/trunk/glib/gchecksum.h
 
 (define-enum-extended ChecksumType
   (in-module "G")
@@ -27,7 +27,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gconvert.h
+;; From /opt/gnome218/include/glib-2.0/glib/gconvert.h
 
 (define-enum-extended ConvertError
   (in-module "G")
@@ -42,7 +42,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gdate.h
+;; From /opt/gnome218/include/glib-2.0/glib/gdate.h
 
 (define-enum-extended DateDMY
   (in-module "G")
@@ -89,7 +89,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gfileutils.h
+;; From /opt/gnome218/include/glib-2.0/glib/gfileutils.h
 
 (define-enum-extended FileError
   (in-module "G")
@@ -135,7 +135,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/ghook.h
+;; From /opt/gnome218/include/glib-2.0/glib/ghook.h
 
 (define-flags-extended HookFlagMask
   (in-module "G")
@@ -147,7 +147,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/giochannel.h
+;; From /opt/gnome218/include/glib-2.0/glib/giochannel.h
 
 (define-enum-extended IOError
   (in-module "G")
@@ -218,7 +218,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gkeyfile.h
+;; From /opt/gnome218/include/glib-2.0/glib/gkeyfile.h
 
 (define-enum-extended KeyFileError
   (in-module "G")
@@ -243,7 +243,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gmarkup.h
+;; From /opt/gnome218/include/glib-2.0/glib/gmarkup.h
 
 (define-enum-extended MarkupError
   (in-module "G")
@@ -255,7 +255,6 @@
     '("unknown-element" "G_MARKUP_ERROR_UNKNOWN_ELEMENT" "3")
     '("unknown-attribute" "G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE" "4")
     '("invalid-content" "G_MARKUP_ERROR_INVALID_CONTENT" "5")
-    '("missing-attribute" "G_MARKUP_ERROR_MISSING_ATTRIBUTE" "6")
   )
 )
 
@@ -265,24 +264,10 @@
   (values
     '("do-not-use-this-unsupported-flag" "G_MARKUP_DO_NOT_USE_THIS_UNSUPPORTED_FLAG" "1 << 0")
     '("treat-cdata-as-text" "G_MARKUP_TREAT_CDATA_AS_TEXT" "1 << 1")
-    '("prefix-error-position" "G_MARKUP_PREFIX_ERROR_POSITION" "1 << 2")
   )
 )
 
-(define-flags-extended MarkupCollectType
-  (in-module "G")
-  (c-name "GMarkupCollectType")
-  (values
-    '("invalid" "G_MARKUP_COLLECT_INVALID" "0")
-    '("string" "G_MARKUP_COLLECT_STRING" "1")
-    '("strdup" "G_MARKUP_COLLECT_STRDUP" "2")
-    '("boolean" "G_MARKUP_COLLECT_BOOLEAN" "3")
-    '("tristate" "G_MARKUP_COLLECT_TRISTATE" "4")
-    '("optional" "G_MARKUP_COLLECT_OPTIONAL" "1 << 16")
-  )
-)
-
-;; From /opt/gnome2/include/glib-2.0/glib/gmessages.h
+;; From /opt/gnome218/include/glib-2.0/glib/gmessages.h
 
 (define-flags-extended LogLevelFlags
   (in-module "G")
@@ -300,7 +285,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gnode.h
+;; From /opt/gnome218/include/glib-2.0/glib/gnode.h
 
 (define-flags-extended TraverseFlags
   (in-module "G")
@@ -326,7 +311,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/goption.h
+;; From /opt/gnome218/include/glib-2.0/glib/goption.h
 
 (define-flags-extended OptionFlags
   (in-module "G")
@@ -368,7 +353,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gregex.h
+;; From /opt/gnome218/include/glib-2.0/glib/gregex.h
 
 (define-enum-extended RegexError
   (in-module "G")
@@ -378,44 +363,6 @@
     '("optimize" "G_REGEX_ERROR_OPTIMIZE" "1")
     '("replace" "G_REGEX_ERROR_REPLACE" "2")
     '("match" "G_REGEX_ERROR_MATCH" "3")
-    '("internal" "G_REGEX_ERROR_INTERNAL" "4")
-    '("stray-backslash" "G_REGEX_ERROR_STRAY_BACKSLASH" "101")
-    '("missing-control-char" "G_REGEX_ERROR_MISSING_CONTROL_CHAR" "102")
-    '("unrecognized-escape" "G_REGEX_ERROR_UNRECOGNIZED_ESCAPE" "103")
-    '("quantifiers-out-of-order" "G_REGEX_ERROR_QUANTIFIERS_OUT_OF_ORDER" "104")
-    '("quantifier-too-big" "G_REGEX_ERROR_QUANTIFIER_TOO_BIG" "105")
-    '("unterminated-character-class" "G_REGEX_ERROR_UNTERMINATED_CHARACTER_CLASS" "106")
-    '("invalid-escape-in-character-class" "G_REGEX_ERROR_INVALID_ESCAPE_IN_CHARACTER_CLASS" "107")
-    '("range-out-of-order" "G_REGEX_ERROR_RANGE_OUT_OF_ORDER" "108")
-    '("nothing-to-repeat" "G_REGEX_ERROR_NOTHING_TO_REPEAT" "109")
-    '("unrecognized-character" "G_REGEX_ERROR_UNRECOGNIZED_CHARACTER" "112")
-    '("posix-named-class-outside-class" "G_REGEX_ERROR_POSIX_NAMED_CLASS_OUTSIDE_CLASS" "113")
-    '("unmatched-parenthesis" "G_REGEX_ERROR_UNMATCHED_PARENTHESIS" "114")
-    '("inexistent-subpattern-reference" "G_REGEX_ERROR_INEXISTENT_SUBPATTERN_REFERENCE" "115")
-    '("unterminated-comment" "G_REGEX_ERROR_UNTERMINATED_COMMENT" "118")
-    '("expression-too-large" "G_REGEX_ERROR_EXPRESSION_TOO_LARGE" "120")
-    '("memory-error" "G_REGEX_ERROR_MEMORY_ERROR" "121")
-    '("variable-length-lookbehind" "G_REGEX_ERROR_VARIABLE_LENGTH_LOOKBEHIND" "125")
-    '("malformed-condition" "G_REGEX_ERROR_MALFORMED_CONDITION" "126")
-    '("too-many-conditional-branches" "G_REGEX_ERROR_TOO_MANY_CONDITIONAL_BRANCHES" "127")
-    '("assertion-expected" "G_REGEX_ERROR_ASSERTION_EXPECTED" "128")
-    '("unknown-posix-class-name" "G_REGEX_ERROR_UNKNOWN_POSIX_CLASS_NAME" "130")
-    '("posix-collating-elements-not-supported" "G_REGEX_ERROR_POSIX_COLLATING_ELEMENTS_NOT_SUPPORTED" "131")
-    '("hex-code-too-large" "G_REGEX_ERROR_HEX_CODE_TOO_LARGE" "134")
-    '("invalid-condition" "G_REGEX_ERROR_INVALID_CONDITION" "135")
-    '("single-byte-match-in-lookbehind" "G_REGEX_ERROR_SINGLE_BYTE_MATCH_IN_LOOKBEHIND" "136")
-    '("infinite-loop" "G_REGEX_ERROR_INFINITE_LOOP" "140")
-    '("missing-subpattern-name-terminator" "G_REGEX_ERROR_MISSING_SUBPATTERN_NAME_TERMINATOR" "142")
-    '("duplicate-subpattern-name" "G_REGEX_ERROR_DUPLICATE_SUBPATTERN_NAME" "143")
-    '("malformed-property" "G_REGEX_ERROR_MALFORMED_PROPERTY" "146")
-    '("unknown-property" "G_REGEX_ERROR_UNKNOWN_PROPERTY" "147")
-    '("subpattern-name-too-long" "G_REGEX_ERROR_SUBPATTERN_NAME_TOO_LONG" "148")
-    '("too-many-subpatterns" "G_REGEX_ERROR_TOO_MANY_SUBPATTERNS" "149")
-    '("invalid-octal-value" "G_REGEX_ERROR_INVALID_OCTAL_VALUE" "151")
-    '("too-many-branches-in-define" "G_REGEX_ERROR_TOO_MANY_BRANCHES_IN_DEFINE" "154")
-    '("define-repetion" "G_REGEX_ERROR_DEFINE_REPETION" "155")
-    '("inconsistent-newline-options" "G_REGEX_ERROR_INCONSISTENT_NEWLINE_OPTIONS" "156")
-    '("missing-back-reference" "G_REGEX_ERROR_MISSING_BACK_REFERENCE" "157")
   )
 )
 
@@ -456,7 +403,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gscanner.h
+;; From /opt/gnome218/include/glib-2.0/glib/gscanner.h
 
 (define-enum-extended ErrorType
   (in-module "G")
@@ -473,38 +420,7 @@
   )
 )
 
-(define-enum-extended TokenType
-  (in-module "G")
-  (c-name "GTokenType")
-  (values
-    '("eof" "G_TOKEN_EOF" "0")
-    '("left-paren" "G_TOKEN_LEFT_PAREN" "'('")
-    '("right-paren" "G_TOKEN_RIGHT_PAREN" "')'")
-    '("left-curly" "G_TOKEN_LEFT_CURLY" "'{'")
-    '("right-curly" "G_TOKEN_RIGHT_CURLY" "']'")
-    '("left-brace" "G_TOKEN_LEFT_BRACE" "'['")
-    '("right-brace" "G_TOKEN_RIGHT_BRACE" "']'")
-    '("equal-sign" "G_TOKEN_EQUAL_SIGN" "'='")
-    '("comma" "G_TOKEN_COMMA" "','")
-    '("none" "G_TOKEN_NONE" "256")
-    '("error" "G_TOKEN_ERROR" "257")
-    '("char" "G_TOKEN_CHAR" "258")
-    '("binary" "G_TOKEN_BINARY" "259")
-    '("octal" "G_TOKEN_OCTAL" "260")
-    '("int" "G_TOKEN_INT" "261")
-    '("hex" "G_TOKEN_HEX" "262")
-    '("float" "G_TOKEN_FLOAT" "263")
-    '("string" "G_TOKEN_STRING" "264")
-    '("symbol" "G_TOKEN_SYMBOL" "265")
-    '("identifier" "G_TOKEN_IDENTIFIER" "266")
-    '("identifier-null" "G_TOKEN_IDENTIFIER_NULL" "267")
-    '("comment-single" "G_TOKEN_COMMENT_SINGLE" "268")
-    '("comment-multi" "G_TOKEN_COMMENT_MULTI" "269")
-    '("last" "G_TOKEN_LAST" "270")
-  )
-)
-
-;; From /opt/gnome2/include/glib-2.0/glib/gshell.h
+;; From /opt/gnome218/include/glib-2.0/glib/gshell.h
 
 (define-enum-extended ShellError
   (in-module "G")
@@ -516,7 +432,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gslice.h
+;; From /opt/gnome218/include/glib-2.0/glib/gslice.h
 
 (define-enum-extended SliceConfig
   (in-module "G")
@@ -531,7 +447,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gspawn.h
+;; From /opt/gnome218/include/glib-2.0/glib/gspawn.h
 
 (define-enum-extended SpawnError
   (in-module "G")
@@ -573,7 +489,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gstrfuncs.h
+;; From /opt/gnome218/include/glib-2.0/glib/gstrfuncs.h
 
 (define-flags-extended AsciiType
   (in-module "G")
@@ -593,36 +509,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gtestutils.h
-
-(define-flags-extended TestTrapFlags
-  (in-module "G")
-  (c-name "GTestTrapFlags")
-  (values
-    '("silence-stdout" "G_TEST_TRAP_SILENCE_STDOUT" "1 << 7")
-    '("silence-stderr" "G_TEST_TRAP_SILENCE_STDERR" "1 << 8")
-    '("inherit-stdin" "G_TEST_TRAP_INHERIT_STDIN" "1 << 9")
-  )
-)
-
-(define-enum-extended TestLogType
-  (in-module "G")
-  (c-name "GTestLogType")
-  (values
-    '("none" "G_TEST_LOG_NONE" "0")
-    '("error" "G_TEST_LOG_ERROR" "1")
-    '("start-binary" "G_TEST_LOG_START_BINARY" "2")
-    '("list-case" "G_TEST_LOG_LIST_CASE" "3")
-    '("skip-case" "G_TEST_LOG_SKIP_CASE" "4")
-    '("start-case" "G_TEST_LOG_START_CASE" "5")
-    '("stop-case" "G_TEST_LOG_STOP_CASE" "6")
-    '("min-result" "G_TEST_LOG_MIN_RESULT" "7")
-    '("max-result" "G_TEST_LOG_MAX_RESULT" "8")
-    '("message" "G_TEST_LOG_MESSAGE" "9")
-  )
-)
-
-;; From /opt/gnome2/include/glib-2.0/glib/gthread.h
+;; From /opt/gnome218/include/glib-2.0/glib/gthread.h
 
 (define-enum-extended ThreadError
   (in-module "G")
@@ -653,7 +540,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gunicode.h
+;; From /opt/gnome218/include/glib-2.0/glib/gunicode.h
 
 (define-enum-extended UnicodeType
   (in-module "G")
@@ -807,17 +694,6 @@
     '("phoenician" "G_UNICODE_SCRIPT_PHOENICIAN" "64")
     '("phags-pa" "G_UNICODE_SCRIPT_PHAGS_PA" "65")
     '("nko" "G_UNICODE_SCRIPT_NKO" "66")
-    '("kayah-li" "G_UNICODE_SCRIPT_KAYAH_LI" "67")
-    '("lepcha" "G_UNICODE_SCRIPT_LEPCHA" "68")
-    '("rejang" "G_UNICODE_SCRIPT_REJANG" "69")
-    '("sundanese" "G_UNICODE_SCRIPT_SUNDANESE" "70")
-    '("saurashtra" "G_UNICODE_SCRIPT_SAURASHTRA" "71")
-    '("cham" "G_UNICODE_SCRIPT_CHAM" "72")
-    '("ol-chiki" "G_UNICODE_SCRIPT_OL_CHIKI" "73")
-    '("vai" "G_UNICODE_SCRIPT_VAI" "74")
-    '("carian" "G_UNICODE_SCRIPT_CARIAN" "75")
-    '("lycian" "G_UNICODE_SCRIPT_LYCIAN" "76")
-    '("lydian" "G_UNICODE_SCRIPT_LYDIAN" "77")
   )
 )
 
@@ -836,7 +712,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/glib/gutils.h
+;; From /opt/gnome218/include/glib-2.0/glib/gutils.h
 
 (define-enum-extended UserDirectory
   (in-module "G")

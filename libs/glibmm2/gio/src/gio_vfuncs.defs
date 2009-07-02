@@ -1,0 +1,466 @@
+;; -*- scheme -*-
+; virtual function definitions
+; define-vfunc is g*mm-specific
+; These are hand-written.
+
+; GAsyncResult
+
+(define-vfunc get_source_object
+  (of-object "GAsyncResult")
+  (return-type "GObject*")
+)
+
+; GFile
+
+(define-vfunc dup
+  (of-object "GFile")
+  (return-type "GFile*")
+)
+
+(define-vfunc hash
+  (of-object "GFile")
+  (return-type "guint")
+)
+
+(define-vfunc get_basename
+  (of-object "GFile")
+  (return-type "char*")
+)
+
+(define-vfunc get_path
+  (of-object "GFile")
+  (return-type "char*")
+)
+
+(define-vfunc get_uri
+  (of-object "GFile")
+  (return-type "char*")
+)
+
+(define-vfunc get_parse_name
+  (of-object "GFile")
+  (return-type "char*")
+)
+
+(define-vfunc get_parent
+  (of-object "GFile")
+  (return-type "GFile*")
+)
+
+(define-vfunc get_child_for_display_name
+  (of-object "GFile")
+  (return-type "GFile*")
+  (parameters
+   '("const-char*" "display_name")
+   '("GError**" "error")
+  )
+)
+
+(define-vfunc has_prefix
+  (of-object "GFile")
+  (return-type "gboolean")
+  (parameters
+   '("GFile*" "prefix")
+  )
+)
+
+(define-vfunc get_relative_path
+  (of-object "GFile")
+  (return-type "char*")
+  (parameters
+   '("GFile*" "descendant")
+  )
+)
+
+(define-vfunc resolve_relative_path
+  (of-object "GFile")
+  (return-type "GFile*")
+  (parameters
+   '("const-char*" "relative_path")
+  )
+)
+
+(define-vfunc is_native
+  (of-object "GFile")
+  (return-type "gboolean")
+)
+
+(define-vfunc has_uri_scheme
+  (of-object "GFile")
+  (return-type "gboolean")
+  (parameters
+   '("const-char*" "uri_scheme")
+  )
+)
+
+; GDrive
+
+(define-vfunc get_name
+  (of-object "GDrive")
+  (return-type "char*")
+)
+
+(define-vfunc has_volumes
+  (of-object "GDrive")
+  (return-type "gboolean")
+)
+
+(define-vfunc is_automounted
+  (of-object "GDrive")
+  (return-type "gboolean")
+)
+
+(define-vfunc can_mount
+  (of-object "GDrive")
+  (return-type "gboolean")
+)
+
+(define-vfunc can_eject
+  (of-object "GDrive")
+  (return-type "gboolean")
+)
+
+; GIcon
+
+(define-vfunc hash
+  (of-object "GIcon")
+  (return-type "guint")
+)
+
+; GLoadableIcon
+
+(define-vfunc load
+ (of-object "GLoadableIcon")
+ (return-type "GInputStream*")
+ (parameters
+  '("int" "size")
+  '("char**" "type")
+  '("GCancellable*" "cancellable")
+  '("GError**" "error")
+ )
+)
+
+(define-vfunc load_async
+ (of-object "GLoadableIcon")
+ (return-type "void")
+ (parameters
+  '("int" "size")
+  '("GCancellable*" "cancellable")
+  '("GAsyncReadyCallback" "callback")
+  '("gpointer" "user_data")
+ )
+)
+
+(define-vfunc load_finish
+ (of-object "GLoadableIcon")
+ (return-type "GInputStream*")
+ (parameters
+  '("GAsyncResult*" "res")
+  '("char**" "type")
+  '("GError**" "error")
+ )
+)
+
+; GAppInfo
+
+(define-vfunc dup
+ (of-object "GAppInfo")
+ (return-type "GAppInfo*")
+)
+
+(define-vfunc equal
+ (of-object "GAppInfo")
+ (return-type "gboolean")
+ (parameters
+  '("GAppInfo*" "appinfo2")
+ )
+)
+
+(define-vfunc get_id
+  (of-object "GAppInfo")
+  (return-type "const-char*")
+)
+
+(define-vfunc get_name
+  (of-object "GAppInfo")
+  (return-type "const-char*")
+)
+
+(define-vfunc get_description
+  (of-object "GAppInfo")
+  (return-type "const-char*")
+)
+
+(define-vfunc get_executable
+  (of-object "GAppInfo")
+  (return-type "const-char*")
+)
+
+(define-vfunc get_icon
+  (of-object "GAppInfo")
+  (return-type "GIcon*")
+)
+
+(define-vfunc launch
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+ (parameters
+  '("GList*" "filenames")
+  '("GAppLaunchContext*" "launch_context")
+  '("GError**" "error")
+ )
+)
+
+(define-vfunc supports_uris
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+)
+
+(define-vfunc supports_files
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+)
+
+(define-vfunc launch_uris
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+ (parameters
+  '("GList*" "uris")
+  '("GAppLaunchContext*" "launch_context")
+  '("GError**" "error")
+ )
+)
+
+(define-vfunc should_show
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+)
+
+(define-vfunc set_as_default_for_type
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+  (parameters
+  '("const-char*" "content_type")
+  '("GError**" "error")
+  )
+)
+
+(define-vfunc set_as_default_for_extension
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+  (parameters
+   '("const-char*" "extension")
+   '("GError**" "error")
+  )
+)
+
+(define-vfunc add_supports_type
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+  (parameters
+   '("const-char*" "content_type")
+   '("GError**" "error")
+  )
+)
+
+(define-vfunc can_remove_supports_type
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+)
+
+(define-vfunc remove_supports_type
+  (of-object "GAppInfo")
+  (return-type "gboolean")
+  (parameters
+   '("const-char*" "content_type")
+   '("GError**" "error")
+  )
+)
+
+; GBufferedInputStream
+
+(define-vfunc fill
+ (of-object "GBufferedInputStream")
+ (return-type "gssize")
+ (parameters
+  '("gssize" "count")
+  '("GCancellable*" "cancellable")
+  '("GError**" "error")
+ )
+)
+
+(define-vfunc fill_async
+ (of-object "GBufferedInputStream")
+ (return-type "void")
+ (parameters
+  '("gssize" "count")
+  '("int" "io_priority")
+  '("GCancellable*" "cancellable")
+  '("GAsyncReadyCallback" "callback")
+  '("gpointer" "user_data")
+ )
+)
+
+(define-vfunc fill_finish
+ (of-object "GBufferedInputStream")
+ (return-type "gssize")
+ (parameters
+  '("GAsyncResult*" "result")
+  '("GError**" "error")
+ )
+)
+
+; GVolume
+
+(define-vfunc get_name
+ (of-object "GVolume")
+ (return-type "char*")
+)
+
+(define-vfunc get_icon
+ (of-object "GVolume")
+ (return-type "GIcon*")
+)
+
+(define-vfunc get_uuid
+ (of-object "GVolume")
+ (return-type "char*")
+)
+
+(define-vfunc get_drive
+ (of-object "GVolume")
+ (return-type "GDrive*")
+)
+
+(define-vfunc get_mount
+ (of-object "GVolume")
+ (return-type "GMount*")
+)
+
+(define-vfunc can_mount
+ (of-object "GVolume")
+ (return-type "gboolean")
+)
+
+(define-vfunc can_eject
+ (of-object "GVolume")
+ (return-type "gboolean")
+)
+
+(define-vfunc mount_fn
+ (of-object "GVolume")
+ (return-type "void")
+ (parameters
+  '("GMountMountFlags" "flags")
+  '("GMountOperation*" "mount_operation")
+  '("GCancellable*" "cancellable")
+  '("GAsyncReadyCallback" "callback")
+  '("gpointer" "user_data")
+ )
+)
+
+(define-vfunc mount_finish
+ (of-object "GVolume")
+ (return-type "gboolean")
+ (parameters
+  '("GAsyncResult*" "result")
+  '("GError**" "error")
+ )
+)
+
+
+(define-vfunc eject
+ (of-object "GVolume")
+ (return-type "void")
+ (parameters
+  '("GMountUnmountFlags" "flags")
+  '("GCancellable*" "cancellable")
+  '("GAsyncReadyCallback" "callback")
+  '("gpointer" "user_data")
+ )
+)
+
+(define-vfunc eject_finish
+ (of-object "GVolume")
+ (return-type "gboolean")
+ (parameters
+  '("GAsyncResult*" "result")
+  '("GError**" "error")
+ )
+)
+
+(define-vfunc get_identifier
+ (of-object "GVolume")
+ (return-type "char*")
+ (parameters
+  '("const-char*" "kind")
+ )
+)
+
+(define-vfunc enumerate_identifiers
+ (of-object "GVolume")
+ (return-type "char**")
+)
+
+(define-vfunc should_automount
+ (of-object "GVolume")
+ (return-type "gboolean")
+)
+
+
+; GVolumeMonitor
+
+; This doesn't even take a GVolumeMonitor.
+; Maybe it is not a real vfunc. murrayc.
+(define-vfunc is_supported
+ (of-object "GVolumeMonitor")
+ (return-type "gboolean")
+)
+
+(define-vfunc get_connected_drives
+ (of-object "GVolumeMonitor")
+ (return-type "GList*")
+)
+
+(define-vfunc get_connected_drives
+ (of-object "GVolumeMonitor")
+ (return-type "GList*")
+)
+
+(define-vfunc get_volumes
+ (of-object "GVolumeMonitor")
+ (return-type "GList*")
+)
+
+(define-vfunc get_mounts
+ (of-object "GVolumeMonitor")
+ (return-type "GList*")
+)
+
+(define-vfunc get_volume_for_uuid
+ (of-object "GVolumeMonitor")
+ (return-type "GVolume*")
+ (parameters
+  '("const-char*" "uuid")
+ )
+)
+
+(define-vfunc get_mount_for_uuid
+ (of-object "GVolumeMonitor")
+ (return-type "GMount*")
+ (parameters
+  '("const-char*" "uuid")
+ )
+)
+
+; This doesn't take a GVolumeMonitor.
+; Maybe it is not a real vfunc. murrayc
+(define-vfunc adopt_orphan_mount
+ (of-object "GVolumeMonitor")
+ (return-type "GVolume*")
+ (parameters
+  '("GMount*" "mount")
+ )
+)
+
+

@@ -1,0 +1,346 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gio/gio.h>
+#include <glibmm/error.h>
+#include <glibmm/exceptionhandler.h>
+#include "slot_async.h"
+
+namespace Gio {
+
+void
+OutputStream::write_async(const void* buffer, gsize count, const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_write_async(gobj(),
+                              buffer,
+                              count,
+                              io_priority,
+                              cancellable->gobj(),
+                              &SignalProxy_async_callback,
+                              slot_copy);
+}
+
+void
+OutputStream::write_async(const void* buffer, gsize count, const SlotAsyncReady& slot, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_write_async(gobj(),
+                              buffer,
+                              count,
+                              io_priority,
+                              0,
+                              &SignalProxy_async_callback,
+                              slot_copy);
+}
+
+void
+OutputStream::splice_async(const Glib::RefPtr<InputStream>& source, const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, OutputStreamSpliceFlags flags, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_splice_async(gobj(),
+                               source->gobj(),
+                               static_cast<GOutputStreamSpliceFlags>(flags),
+                               io_priority,
+                               cancellable->gobj(),
+                               &SignalProxy_async_callback,
+                               slot_copy);
+}
+
+void
+OutputStream::splice_async(const Glib::RefPtr<InputStream>& source, const SlotAsyncReady& slot, OutputStreamSpliceFlags flags, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_splice_async(gobj(),
+                               source->gobj(),
+                               static_cast<GOutputStreamSpliceFlags>(flags),
+                               io_priority,
+                               0,
+                               &SignalProxy_async_callback,
+                               slot_copy);
+}
+
+void
+OutputStream::flush_async(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_flush_async(gobj(),
+                              io_priority,
+                              Glib::unwrap(cancellable),
+                              &SignalProxy_async_callback,
+                              slot_copy);
+}
+
+void
+OutputStream::flush_async(const SlotAsyncReady& slot, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_flush_async(gobj(),
+                              io_priority,
+                              0,
+                              &SignalProxy_async_callback,
+                              slot_copy);
+}
+
+void
+OutputStream::close_async(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_close_async(gobj(),
+                              io_priority,
+                              Glib::unwrap(cancellable),
+                              &SignalProxy_async_callback,
+                              slot_copy);
+}
+
+void
+OutputStream::close_async(const SlotAsyncReady& slot, int io_priority)
+{
+  // Create a copy of the slot.
+  // A pointer to it will be passed through the callback's data parameter
+  // and deleted in the callback.
+  SlotAsyncReady* slot_copy = new SlotAsyncReady(slot);
+
+  g_output_stream_close_async(gobj(),
+                              io_priority,
+                              0,
+                              &SignalProxy_async_callback,
+                              slot_copy);
+}
+
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+gssize OutputStream::write(const void* buffer, gsize count)
+#else
+gssize OutputStream::write(const void* buffer, gsize count, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gssize retvalue = g_output_stream_write(gobj(), buffer, count, 0, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+gssize OutputStream::write(const std::string& buffer, const Glib::RefPtr<Cancellable>& cancellable)
+#else
+gssize OutputStream::write(const std::string& buffer, const Glib::RefPtr<Cancellable>& cancellable, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gssize retvalue = g_output_stream_write(gobj(), buffer.data(), buffer.size(), Glib::unwrap(cancellable), &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+gssize OutputStream::write(const std::string& buffer)
+#else
+gssize OutputStream::write(const std::string& buffer, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gssize retvalue = g_output_stream_write(gobj(), buffer.data(), buffer.size(), 0, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool OutputStream::write_all(const void* buffer, gsize count, gsize& bytes_written)
+#else
+bool OutputStream::write_all(const void* buffer, gsize count, gsize& bytes_written, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retvalue = g_output_stream_write_all(gobj(), buffer, count, &(bytes_written), 0, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool OutputStream::write_all(const std::string& buffer, gsize& bytes_written, const Glib::RefPtr<Cancellable>& cancellable)
+#else
+bool OutputStream::write_all(const std::string& buffer, gsize& bytes_written, const Glib::RefPtr<Cancellable>& cancellable, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retvalue = g_output_stream_write_all(gobj(), buffer.data(), buffer.size(), &(bytes_written), Glib::unwrap(cancellable), &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool OutputStream::write_all(const std::string& buffer, gsize& bytes_written)
+#else
+bool OutputStream::write_all(const std::string& buffer, gsize& bytes_written, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retvalue = g_output_stream_write_all(gobj(), buffer.data(), buffer.size(), &(bytes_written), 0, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+gssize OutputStream::splice(const Glib::RefPtr<InputStream>& source, const Glib::RefPtr<Cancellable>& cancellable, OutputStreamSpliceFlags flags)
+#else
+gssize OutputStream::splice(const Glib::RefPtr<InputStream>& source, const Glib::RefPtr<Cancellable>& cancellable, OutputStreamSpliceFlags flags, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gssize retvalue = g_output_stream_splice(gobj(), Glib::unwrap(source), ((GOutputStreamSpliceFlags)(flags)), Glib::unwrap(cancellable), &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+gssize OutputStream::splice(const Glib::RefPtr<InputStream>& source, OutputStreamSpliceFlags flags)
+#else
+gssize OutputStream::splice(const Glib::RefPtr<InputStream>& source, OutputStreamSpliceFlags flags, std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  gssize retvalue = g_output_stream_splice(gobj(), Glib::unwrap(source), ((GOutputStreamSpliceFlags)(flags)), 0, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool OutputStream::flush()
+#else
+bool OutputStream::flush(std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retvalue = g_output_stream_flush(gobj(), 0, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool OutputStream::close()
+#else
+bool OutputStream::close(std::auto_ptr<Glib::Error>& error)
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retvalue = g_output_stream_close(gobj(), 0, &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+} // namespace Gio

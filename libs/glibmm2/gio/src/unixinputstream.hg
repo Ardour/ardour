@@ -1,0 +1,50 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/inputstream.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(giomm/private/inputstream_p.h)
+
+namespace Gio
+{
+
+/**
+ * UnixInputStream implements InputStream for reading from a unix file
+ * descriptor, including asynchronous operations. The file descriptor must be
+ * selectable, so it doesn't work with opened files.
+ *
+ * @ingroup Streams
+ *
+ * @newin2p16
+ */
+class UnixInputStream : public Gio::InputStream
+{
+  _CLASS_GOBJECT(UnixInputStream, GUnixInputStream, G_UNIX_INPUT_STREAM, Gio::InputStream, GInputStream)
+  _GTKMMPROC_WIN32_NO_WRAP
+
+protected:
+  _WRAP_CTOR(UnixInputStream(int fd, bool close_fd_at_close), g_unix_input_stream_new)
+
+public:
+  _WRAP_CREATE(int fd, bool close_fd_at_close)
+};
+
+} // namespace Gio
+

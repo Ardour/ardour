@@ -4,8 +4,8 @@ import os
 import os.path
 import glob
 
-
 glibmm2_files = glob.glob('glib/glibmm/*.cc')
+giomm_files = glob.glob('gio/giomm/*.cc')
 
 Import('env libraries install_prefix')
 
@@ -14,13 +14,26 @@ glibmm2.Merge([libraries['sigc2'], libraries['glib2']])
 glibmm2.Append(LIBPATH='#libs/glibmm2',
                  CPPPATH='#libs/glibmm2/glib')
 
+giomm = env.Clone()
+giomm.Merge([libraries['sigc2'], libraries['glib2'], libraries['gio']])
+giomm.Append(LIBPATH='#libs/glibmm2',
+             CPPPATH='#libs/glibmm2/gio')
+giomm.Append(CPPPATH='#libs/glibmm2/glib')
+
 glibmm2.Append(CXXFLAGS=['-DHAVE_CONFIG_H', '-DGLIBMM_EXCEPTIONS_ENABLED', '-DGLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED', '-DGLIBMM_PROPERTIES_ENABLED'])
-#glibmm2.Append(CXXFLAGS='-DG_DISABLE_DEPRECATED')
+giomm.Append(CXXFLAGS='-DG_DISABLE_DEPRECATED')
 glibmm2.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"glibmm\\\"')
 
+giomm.Append(CXXFLAGS=['-DHAVE_CONFIG_H', '-DGLIBMM_EXCEPTIONS_ENABLED', '-DGLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED', '-DGLIBMM_PROPERTIES_ENABLED'])
+giomm.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"giomm\\\"')
+
 libglibmm2 = glibmm2.SharedLibrary('glibmm2', glibmm2_files)
+libgiomm = giomm.SharedLibrary('giomm', giomm_files)
 
 if os.access ('autogen.sh', os.F_OK) :
+    #
+    # note that this should also build the giomm config.h and other files
+    # 
     glibmm2_configure_script = glibmm2.Command ('configure', 'configure.in', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
     glibmm2_config_h = glibmm2.Command('glib/glibmmconfig.h', [glibmm2_configure_script, 'glib/glibmmconfig.h.in'],
                                        'cd libs/glibmm2; ./configure || exit 1; cd -', ENV=os.environ)
@@ -28,9 +41,10 @@ else :
     glibmm2_config_h = glibmm2.Command('glib/glibmmconfig.h', ['configure', 'glib/glibmmconfig.h.in'],
                                        'cd libs/glibmm2; ./configure || exit 1; cd -', ENV=os.environ)
 
-Default([glibmm2_config_h, libglibmm2])
+Default([glibmm2_config_h, libglibmm2, libgiomm])
 
 env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libglibmm2))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libgiomm))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript',
@@ -42,10 +56,17 @@ env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                        'glib/glibmm-2.4.pc.in',
                                        'glib/glibmm/Makefile.in',
                                        'scripts',
-                                       'build_shared'
+                                       'build_shared',
+                                       'gio/giommconfig.h',
+                                       'gio/giommconfig.h.in',
+                                       'gio/giomm.h',
+                                       'gio/Makefile.in',
                                        ] +
 				     glibmm2_files + 
+				     giomm_files + 
 				     glob.glob('glib/glibmm/*.h') +
-				     glob.glob('glib/glibmm/private/*.h')
+				     glob.glob('glib/glibmm/private/*.h') +
+				     glob.glob('gio/giomm/*.h') +
+				     glob.glob('gio/giomm/private/*.h')
 				     ))
 

@@ -1,4 +1,4 @@
-;; From /opt/gnome2/include/glib-2.0/gobject/gparam.h
+;; From gobject/gparam.h
 
 (define-flags-extended ParamFlags
   (in-module "G")
@@ -9,12 +9,11 @@
     '("construct" "G_PARAM_CONSTRUCT" "1 << 2")
     '("construct-only" "G_PARAM_CONSTRUCT_ONLY" "1 << 3")
     '("lax-validation" "G_PARAM_LAX_VALIDATION" "1 << 4")
-    '("static-name" "G_PARAM_STATIC_NAME" "1 << 5")
-    '("static-blurb" "G_PARAM_STATIC_BLURB" "1 << 7")
+    '("private" "G_PARAM_PRIVATE" "1 << 5")
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/gobject/gsignal.h
+;; From gobject/gsignal.h
 
 (define-flags-extended SignalFlags
   (in-module "G")
@@ -52,7 +51,7 @@
   )
 )
 
-;; From /opt/gnome2/include/glib-2.0/gobject/gtype.h
+;; From gobject/gtype.h
 
 (define-flags-extended TypeDebugFlags
   (in-module "G")
@@ -65,23 +64,17 @@
   )
 )
 
-(define-flags-extended TypeFundamentalFlags
+(define-enum-extended TypeFundamentalFlags
   (in-module "G")
   (c-name "GTypeFundamentalFlags")
   (values
-    '("classed" "G_TYPE_FLAG_CLASSED" "1 << 0")
-    '("instantiatable" "G_TYPE_FLAG_INSTANTIATABLE" "1 << 1")
-    '("derivable" "G_TYPE_FLAG_DERIVABLE" "1 << 2")
-    '("deep-derivable" "G_TYPE_FLAG_DEEP_DERIVABLE" "1 << 3")
   )
 )
 
-(define-flags-extended TypeFlags
+(define-enum-extended TypeFlags
   (in-module "G")
   (c-name "GTypeFlags")
   (values
-    '("abstract" "G_TYPE_FLAG_ABSTRACT" "1 << 4")
-    '("value-abstract" "G_TYPE_FLAG_VALUE_ABSTRACT" "1 << 5")
   )
 )
 

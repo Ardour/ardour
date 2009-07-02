@@ -1,0 +1,17 @@
+## This file is include by other Makefile.am files, using the automake
+## include feature.  The include happens in Makefile.am, not Makefile.in
+## or Makefile, so it's like copy-and-pasting this into each of those
+## Makefile.am files.
+
+files_posix_hg = unixinputstream.hg unixoutputstream.hg desktopappinfo.hg
+files_win32_hg =
+files_general_hg = appinfo.hg asyncresult.hg cancellable.hg drive.hg error.hg file.hg fileattributeinfo.hg \
+				   fileattributeinfolist.hg fileenumerator.hg fileicon.hg fileinfo.hg fileinputstream.hg fileoutputstream.hg \
+				   filemonitor.hg filterinputstream.hg filteroutputstream.hg filenamecompleter.hg \
+				   icon.hg inputstream.hg loadableicon.hg mount.hg mountoperation.hg outputstream.hg \
+				   seekable.hg volume.hg volumemonitor.hg bufferedinputstream.hg \
+				   bufferedoutputstream.hg datainputstream.hg dataoutputstream.hg enums.hg \
+				   memoryinputstream.hg themedicon.hg
+
+include $(top_srcdir)/build_shared/Makefile_build_gensrc.am_fragment
+

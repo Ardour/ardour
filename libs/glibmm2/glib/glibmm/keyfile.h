@@ -7,16 +7,16 @@
 /* Copyright(C) 2006 The gtkmm Development Team
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
+ * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or(at your option) any later version.
+ * version 2 of the License, or(at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
+ * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -349,7 +349,7 @@ public:
   /** Return value: a newly allocated string or <tt>0</tt> if the specified
    * @param group_name A group name.
    * @param key A key.
-   * @param locale A locale identifier or <tt>0</tt>.
+   * @param locale A locale or <tt>0</tt>.
    * @return A newly allocated string or <tt>0</tt> if the specified 
    * key cannot be found.
    * 
@@ -383,8 +383,11 @@ public:
    * @return The value of @a key as an integer
    * @throws Glib::KeyFileError
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   int get_integer(const Glib::ustring& key) const;
-
+#else
+  int get_integer(const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const;
+#endif
   
   /** Return value: the value associated with the key as an integer, or
    * @param group_name A group name.
@@ -409,8 +412,11 @@ public:
    *
    * @newin2p14
    */
-   double get_double(const Glib::ustring& key) const;
-
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  double get_double(const Glib::ustring& key) const;
+#else
+  double get_double(const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const;
+#endif
   
   /** Return value: the value associated with the key as a double, or
    * @param group_name A group name.
@@ -452,7 +458,11 @@ public:
    * @return A list containing the values requested
    * @throws Glib::KeyFileError
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ArrayHandle<Glib::ustring> get_string_list(const Glib::ustring& group_name, const Glib::ustring& key) const;
+#else
+  Glib::ArrayHandle<Glib::ustring> get_string_list(const Glib::ustring& group_name, const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const;
+#endif
   
 	
   /** Returns the values associated with @a key under @a group_name
@@ -462,8 +472,12 @@ public:
    * @return A list containing the values requested
    * @throws Glib::KeyFileError
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ArrayHandle<Glib::ustring> get_locale_string_list(const Glib::ustring& group_name, const Glib::ustring& key) const;
-	
+#else
+  Glib::ArrayHandle<Glib::ustring> get_locale_string_list(const Glib::ustring& group_name, const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const;
+#endif
+
   /** Returns the values associated with @a key under @a group_name
    * translated into @a locale, if available.
    * @param group_name The name of a group
@@ -472,7 +486,11 @@ public:
    * @return A list containing the values requested
    * @throws Glib::KeyFileError
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ArrayHandle<Glib::ustring> get_locale_string_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& locale) const;
+#else
+  Glib::ArrayHandle<Glib::ustring> get_locale_string_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& locale, std::auto_ptr<Glib::Error>& error) const;
+#endif
   
 
   /** Returns the values associated with @a key under @a group_name
@@ -481,7 +499,12 @@ public:
    * @return A list of booleans
    * @throws Glib::KeyFileError
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ArrayHandle<bool> get_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key) const;
+#else
+  Glib::ArrayHandle<bool> get_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key,
+                                           std::auto_ptr<Glib::Error>& error) const;
+#endif
   
 
   /** Returns the values associated with @a key under @a group_name
@@ -490,7 +513,12 @@ public:
    * @return A list of integers
    * @throws Glib::KeyFileError
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ArrayHandle<int> get_integer_list(const Glib::ustring& group_name, const Glib::ustring& key) const;
+#else
+  Glib::ArrayHandle<int> get_integer_list(const Glib::ustring& group_name, const Glib::ustring& key,
+                                          std::auto_ptr<Glib::Error>& error) const;
+#endif
   
 
   /** Returns the values associated with @a key under @a group_name
@@ -499,19 +527,32 @@ public:
    * @return A list of doubles
    * @throws Glib::KeyFileError
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ArrayHandle<double> get_double_list(const Glib::ustring& group_name, const Glib::ustring& key) const;
+#else
+  Glib::ArrayHandle<double> get_double_list(const Glib::ustring& group_name, const Glib::ustring& key,
+                                            std::auto_ptr<Glib::Error>& error) const;
+#endif
   
 
   /** Get comment from top of file
    * @return The comment
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ustring get_comment() const;
+#else
+  Glib::ustring get_comment(std::auto_ptr<Glib::Error>& error) const;
+#endif
 
   /** Get comment from above a group
    * @param group_name The group
    * @return The comment
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::ustring get_comment(const Glib::ustring& group_name) const;
+#else
+  Glib::ustring get_comment(const Glib::ustring& group_name, std::auto_ptr<Glib::Error>& error) const;
+#endif
 
   
   /** Retrieves a comment above @a key from @a group_name.
@@ -568,7 +609,7 @@ public:
    * @newin2p6
    * @param group_name A group name.
    * @param key A key.
-   * @param locale A locale identifier.
+   * @param locale A locale.
    * @param string A string.
    */
   void set_locale_string(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ustring& locale, const Glib::ustring& string);
@@ -646,13 +687,22 @@ public:
   /** Places @a comment at the start of the file, before the first group.
    * @param comment The Comment
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   void set_comment(const Glib::ustring& comment);
+#else
+  void set_comment(const Glib::ustring& comment, std::auto_ptr<Glib::Error>& error);
+#endif
 
   /** Places @a comment above @a group_name.
    * @param group_name The Group the comment should be above
    * @param comment The comment
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   void set_comment(const Glib::ustring& group_name, const Glib::ustring& comment);
+#else
+  void set_comment(const Glib::ustring& group_name, const Glib::ustring& comment,
+                   std::auto_ptr<Glib::Error>& error);
+#endif
 
   /** Places a comment above @a key from @a group_name.
    * @param key Key comment should be above

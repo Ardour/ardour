@@ -1,0 +1,116 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2008 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/filterinputstream.h>
+#include <glibmm/object.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(giomm/private/filterinputstream_p.h)
+
+namespace Gio
+{
+
+/** @defgroup Streams Stream Classes
+ * 
+ */
+
+/** The buffered input stream implements FilterInputStream and provides for buffered reads.
+ * By default, BufferedInputStream's buffer size is set at 4 kilobytes, but you can specify 
+ * this to the constructor.
+ * 
+ * To get the size of a buffer within a buffered input stream, use get_buffer_size(). 
+ * To change the size of a buffered input stream's buffer, use set_buffer_size(). 
+ * Note that the buffer's size cannot be reduced below the size of the data within the buffer.
+ *
+ * @ingroup Streams
+ *
+ * @newin2p16
+ */
+class BufferedInputStream : public Gio::FilterInputStream
+{
+  _CLASS_GOBJECT(BufferedInputStream, GBufferedInputStream, G_BUFFERED_INPUT_STREAM, Gio::FilterInputStream, GFilterInputStream)
+protected:
+  _WRAP_CTOR(BufferedInputStream(const Glib::RefPtr<InputStream>& base_stream), g_buffered_input_stream_new)
+  _WRAP_CTOR(BufferedInputStream(const Glib::RefPtr<InputStream>& base_stream, gsize size), g_buffered_input_stream_new_sized)
+public:
+  _WRAP_CREATE(const Glib::RefPtr<InputStream>& base_stream)
+  static Glib::RefPtr<BufferedInputStream> create_sized(const Glib::RefPtr<InputStream>& base_stream, gsize size);
+
+  _WRAP_METHOD(gsize get_buffer_size() const, g_buffered_input_stream_get_buffer_size)
+  _WRAP_METHOD(void set_buffer_size(gsize size), g_buffered_input_stream_set_buffer_size)
+  _WRAP_METHOD(gsize get_available() const, g_buffered_input_stream_get_available)
+  _WRAP_METHOD(gsize peek(void* buffer, gsize offset, gsize count) const, g_buffered_input_stream_peek)
+  _WRAP_METHOD(const void* peek_buffer(gsize& count) const,  g_buffered_input_stream_peek_buffer)
+  _WRAP_METHOD(gssize fill(gssize count, const Glib::RefPtr<Cancellable>& cancellable), g_buffered_input_stream_fill, errthrow)
+
+  /** non-cancellable version of fill()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gssize fill(gssize count);
+#else
+  gssize fill(gssize count, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _IGNORE(g_buffered_input_stream_fill_async)
+
+  /** Reads data into the stream's buffer asynchronously, up to @a count size.
+   * @a io_priority can be used to prioritize reads. For the synchronous version of
+   * this function, see fill().
+   *
+   * @param slot A AsyncReadyCallback.
+   * @param count The number of bytes to read.
+   * @param cancellable Cancellable object.
+   * @param io_priority the I/O priority of the request.
+   */
+  void fill_async(const SlotAsyncReady& slot,
+                  gssize count,
+                  const Glib::RefPtr<Cancellable>& cancellable,
+                  int io_priority = Glib::PRIORITY_DEFAULT);
+
+  /** Reads data into the stream's buffer asynchronously, up to @a count size.
+   * @a io_priority can be used to prioritize reads. For the synchronous version of
+   * this function, see fill().
+   *
+   * @param slot A AsyncReadyCallback.
+   * @param count The number of bytes to read.
+   * @param io_priority the I/O priority of the request.
+   */
+  void fill_async(const SlotAsyncReady& slot,
+                  gssize count,
+                  int io_priority = Glib::PRIORITY_DEFAULT);
+
+  _WRAP_METHOD(gssize fill_finish(const Glib::RefPtr<AsyncResult>& result), g_buffered_input_stream_fill_finish, errthrow)
+
+  _WRAP_METHOD(int read_byte(const Glib::RefPtr<Cancellable>& cancellable), g_buffered_input_stream_read_byte, errthrow)
+
+  /** Non-cancellable version of read_byte.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  int read_byte();
+#else
+  int read_byte(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+protected:
+#m4 _CONVERSION(`GCancellable*', `const Glib::RefPtr<Cancellable>&', `Glib::wrap($3, true)')
+  //_WRAP_VFUNC(gssize fill(gssize count, const Glib::RefPtr<Cancellable>& cancellable, GError** error), "fill")
+
+};
+
+} // namespace Gio

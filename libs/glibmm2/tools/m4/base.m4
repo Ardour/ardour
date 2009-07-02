@@ -1,4 +1,4 @@
-dnl $Id: base.m4 452 2007-10-12 19:52:11Z arminb $
+dnl $Id: base.m4 797 2009-03-19 00:17:42Z jaalburqu $
 divert(-1)
 
 dnl
@@ -121,9 +121,15 @@ dnl _IMPORT(section_name):
 define(`_IMPORT',`m4_undivert(__SEC_$1)dnl')
 
 dnl _GET_TYPE_FUNC(GtkWidget) -> gtk_widget_get_type()
-dnl The funny `[A-Z]?' part of the regexp is to catch things like GdkGCFooBar.
+dnl The way the macro works is that (in the inner patsubst) it first finds
+dnl groups of caps, pre-pending an '_' to the groups .  After (in the outer
+dnl patsubst), it finds pairs of a caps and a lowercase (like 'Fo' or 'Ba'),
+dnl also pre-pending an '_' to the pairs.  Finally, it converts all characters
+dnl to lowercase (with the translit), removing the first '_' (with substr) and
+dnl appending _get_type().  This works with regular types like GtkWidget, but
+dnl also multi-cap types like GdkGCFooBar or GdkFOOBar.
 define(`_GET_TYPE_FUNC',`dnl
-m4_translit(m4_substr(m4_patsubst(`$1',`[A-Z]?[A-Z]',`_\&'),1),`[A-Z]',`[a-z]')_get_type()`'dnl
+m4_translit(m4_substr(m4_patsubst(m4_patsubst(`$1',`[A-Z][A-Z]+',`_\&'),`[A-Z][a-z]',`_\&'),1),`[A-Z]',`[a-z]')_get_type()`'dnl
 ')
 
 dnl Define a new diversion

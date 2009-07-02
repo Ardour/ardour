@@ -1,0 +1,88 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The giomm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/icon.h>
+#include <giomm/inputstream.h>
+#include <giomm/icon.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(giomm/private/icon_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+typedef struct _GLoadableIconIface GLoadableIconIface;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+namespace Gio
+{
+
+/** Extends the Icon interface and adds the ability to load icons from streams.
+ *
+ * @newin2p16
+ */
+class LoadableIcon : public Icon
+{
+  _CLASS_INTERFACE(LoadableIcon, GLoadableIcon, G_LOADABLE_ICON, GLoadableIconIface, Icon, GIcon)
+
+public:
+/**
+ * Loads a loadable icon. For the asynchronous version of this function,
+ * see load_async().
+ *
+ * @param size an integer.
+ * @param type a location to store the type of the loaded icon
+ * @param cancellable a Cancellable object
+ *
+ * @return a InputStream to read the icon from.
+ **/
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  Glib::RefPtr<InputStream> load(int size, Glib::ustring& type, const Glib::RefPtr<Cancellable>& cancellable);
+#else
+  Glib::RefPtr<InputStream> load(int size, Glib::ustring& type, const Glib::RefPtr<Cancellable>& cancellable, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+  /** Non-cancellable version of load()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  Glib::RefPtr<InputStream> load(int size, Glib::ustring& type);
+#else
+  Glib::RefPtr<InputStream> load(int size, Glib::ustring& type, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+  //TODO: 'type' can be NULL as well, but I don't really want to add 2 more
+  //overloads -- one cancellable, and one not...
+
+  /**
+   * Loads an icon asynchronously. To finish this function, see load_finish().
+   * For the synchronous, blocking version of this function, see load().
+   *
+   * @param size an integer.
+   * @param cancellable a Cancellable object
+   * @param slot a function to call when the request is satisfied
+   **/
+  void load_async(int size, const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable);
+  /** Non-cancellable version of load_async()
+   */
+  void load_async(int size, const SlotAsyncReady& slot);
+  //_WRAP_METHOD(Glib::RefPtr<InputStream> load_finish(const Glib::RefPtr<AsyncResult>& res, Glib::ustring& type), g_loadable_icon_load_finish, errthrow)
+
+protected:
+  //_WRAP_VFUNC(Glib::RefPtr<InputStream> load(int size, Glib::ustring& type, const Glib::RefPtr<Cancellable>& cancellable), "load")
+};
+
+
+} // namespace Gio
+

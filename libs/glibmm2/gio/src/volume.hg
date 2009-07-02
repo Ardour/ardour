@@ -1,0 +1,227 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/file.h>
+#include <giomm/mountoperation.h>
+//#include <giomm/drive.h>
+//#include <giomm/icon.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+typedef struct _GVolumeIface GGVolumeIface;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gio
+{
+
+// Making a forward declaration here to avoid circular dependency.
+// file.hg already includes volume.h.
+class File;
+class Drive;
+
+/** The Volume interface represents user-visible objects that can be mounted.
+ * 
+ * Mounting a Volume instance is an asynchronous operation. For more information about asynchronous operations, see AsyncReady and SimpleAsyncReady. To 
+ * mount a GVolume, first call mount(), optionally providing a MountOperation object and a SlotAsyncReady callback.
+ * 
+ * Typically, you will not want to provide a MountOperation if automounting all volumes when a desktop session starts since it's not desirable to 
+ * put up a lot of dialogs asking for credentials.
+ * 
+ * The callback will be fired when the operation has resolved (either with success or failure), and a AsyncReady structure will be passed to the callback. 
+ * That callback should then call g_volume_mount_finish() with the GVolume instance and the GAsyncReady data to see if the operation was completed 
+ * successfully. If an error is present when finish() is called, then it will be filled with any error information.
+ *
+ * @newin2p16
+ */
+class Volume : public Glib::Interface
+{
+  _CLASS_INTERFACE(Volume, GVolume, G_DRIVE, GVolumeIface)
+public:
+  _WRAP_METHOD(std::string get_name() const, g_volume_get_name)
+  _WRAP_METHOD(std::string get_uuid() const, g_volume_get_uuid)
+
+  _WRAP_METHOD(Glib::RefPtr<Icon> get_icon(),
+               g_volume_get_icon,
+               refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Icon> get_icon() const,
+               g_volume_get_icon,
+               refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Drive> get_drive(),
+               g_volume_get_drive,
+               refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Drive> get_drive() const,
+               g_volume_get_drive,
+               refreturn, constversion)
+
+ _WRAP_METHOD(Glib::RefPtr<Mount> get_mount(),
+               g_volume_get_mount,
+               refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Mount> get_mount() const,
+               g_volume_get_mount,
+               refreturn, constversion)
+
+  _WRAP_METHOD(bool can_mount() const, g_volume_can_mount)
+  _WRAP_METHOD(bool can_eject() const, g_volume_can_eject)
+  _WRAP_METHOD(bool should_automount() const, g_volume_should_automount)
+
+  /** Mounts a volume.
+   * This is an asynchronous operation, and is finished by calling mount_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   * @param mount_operation A mount operation.
+   */
+  void mount(const Glib::RefPtr<MountOperation>& mount_operation, const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, MountMountFlags flags = MOUNT_MOUNT_NONE);
+
+  /** Mounts a volume.
+   * This is an asynchronous operation, and is finished by calling mount_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param mount_operation A mount operation.
+   */
+  void mount(const Glib::RefPtr<MountOperation>& mount_operation, const SlotAsyncReady& slot, MountMountFlags flags = MOUNT_MOUNT_NONE);
+
+  /** Mounts a volume.
+   * 
+   * @param mount_operation A mount operation.
+   */
+  void mount(const Glib::RefPtr<MountOperation>& mount_operation, MountMountFlags flags = MOUNT_MOUNT_NONE);
+
+  /** Mounts a volume.
+   */
+  void mount(MountMountFlags flags = MOUNT_MOUNT_NONE);
+
+  _IGNORE(g_volume_mount)
+
+  _WRAP_METHOD(bool mount_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_volume_mount_finish,
+               errthrow)
+
+  /** Ejects a volume. 
+   * This is an asynchronous operation, and is finished by calling eject_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  /** Ejects a volume. 
+   * This is an asynchronous operation, and is finished by calling eject_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(const SlotAsyncReady& slot, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  /** Ejects a volume. 
+   * This is an asynchronous operation, and is finished by calling eject_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+  _IGNORE(g_volume_eject)
+
+  _WRAP_METHOD(bool eject_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_volume_eject_finish,
+               errthrow)
+
+  _WRAP_METHOD(std::string get_identifier(const std::string& kind) const,
+               g_volume_get_identifier)
+
+  _WRAP_METHOD(Glib::StringArrayHandle enumerate_identifiers() const,
+               g_volume_enumerate_identifiers)
+
+  _WRAP_METHOD(Glib::RefPtr<File> get_activation_root(), g_volume_get_activation_root)
+  _WRAP_METHOD(Glib::RefPtr<const File> get_activation_root() const, g_volume_get_activation_root)
+
+  _WRAP_SIGNAL(void changed(), changed)
+  _WRAP_SIGNAL(void removed(), removed)
+
+  //_WRAP_VFUNC(std::string get_name(), get_name)
+  //_WRAP_VFUNC(Glib::RefPtr<Icon> get_icon(), get_icon)
+  //_WRAP_VFUNC(std::string get_uuid(), get_uuid)
+
+#m4 _CONVERSION(`Glib::RefPtr<Drive>',`GDrive*',__CONVERT_CONST_REFPTR_TO_P)
+  //_WRAP_VFUNC(Glib::RefPtr<Drive> get_drive(), get_drive)
+
+#m4 _CONVERSION(`Glib::RefPtr<Mount>',`GMount*',__CONVERT_CONST_REFPTR_TO_P)
+  //_WRAP_VFUNC(Glib::RefPtr<Mount> get_mount(), get_mount)
+
+  //_WRAP_VFUNC(bool can_mount(), can_mount)
+  //_WRAP_VFUNC(bool can_eject(), can_eject)
+  //_WRAP_VFUNC(void mount_fn(GMountMountFlags flags, GMountOperation* mount_operation, GCancellable* cancellable, GAsyncReadyCallback callback, gpointer user_data), mount_fn) //TODO: Rename to mount()?       
+  //_WRAP_VFUNC(bool mount_finish(GAsyncResult* result, GError** error), mount_finish)
+  //_WRAP_VFUNC(void eject(GMountUnmountFlags flags, GCancellable* cancellable, GAsyncReadyCallback callback, gpointer user_data), eject)
+  //_WRAP_VFUNC(bool eject_finish(GAsyncResult* result, GError** error), eject_finish)
+  
+  //_WRAP_VFUNC(std::string get_identifier(const std::string& kind), get_identifier)
+
+  //TODO: Use an ArrayHandle.
+  //_WRAP_VFUNC(char** enumerate_identifiers(), enumerate_identifiers)
+
+  //_WRAP_VFUNC(bool should_automount(), should_automount)
+};
+
+} // namespace Gio
+
+namespace Glib
+{
+
+//Pre-declare this so we can use it in TypeTrait:
+Glib::RefPtr<Gio::Volume> wrap(GVolume* object, bool take_copy);
+
+namespace Container_Helpers
+{
+
+/** This specialization of TypeTraits exists 
+ * because the default use of Glib::wrap(GObject*), 
+ * instead of a specific Glib::wrap(GSomeInterface*),
+ * would not return a wrapper for an interface.
+ */ 
+template <>
+struct TypeTraits< Glib::RefPtr<Gio::Volume> >
+{
+  typedef Glib::RefPtr<Gio::Volume> CppType;
+  typedef GVolume* CType;
+  typedef GVolume* CTypeNonConst;
+
+  static CType   to_c_type      (const CppType& item)
+  { return Glib::unwrap (item); }
+
+  static CppType to_cpp_type    (const CType& item)
+  {
+    //Use a specific Glib::wrap() function, 
+    //because CType has the specific type (not just GObject):
+    return Glib::wrap(item, true /* take_copy */);
+  }
+
+  static void    release_c_type (CType item)
+  {
+    GLIBMM_DEBUG_UNREFERENCE(0, item);
+    g_object_unref(item);
+  }
+};
+
+} // Container_Helpers
+} // Glib

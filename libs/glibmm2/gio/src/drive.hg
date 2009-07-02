@@ -1,0 +1,161 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/mount.h>
+#include <giomm/icon.h>
+//#include <giomm/mountoperation.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+typedef struct _GDriveIface GDriveIface;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+namespace Gio
+{
+
+/** Virtual File System drive management.
+ *
+ * This represent a piece of hardware connected to the machine. It's generally only created for removable hardware or hardware with removable media.
+ * Gio::Drive is a container class for Gio::Volume objects that stem from the same piece of media. As such, Gio::Drive abstracts a drive with 
+ * (or without) removable media and provides operations for querying whether media is available, determing whether media change is automatically 
+ * detected and ejecting the media.
+ *
+ * If the Gio::Drive reports that media isn't automatically detected, one can poll for media; typically one should not do this periodically as a 
+ * poll for media operation is potententially expensive and may spin up the drive, creating noise.
+ *
+ * @newin2p16
+ */
+class Drive : public Glib::Interface
+{
+  _CLASS_INTERFACE(Drive, GDrive, G_DRIVE, GDriveIface)
+public:
+
+  _WRAP_METHOD(Glib::ustring get_name() const, g_drive_get_name)
+
+  _WRAP_METHOD(Glib::RefPtr<Icon> get_icon(), g_drive_get_icon, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Icon> get_icon() const, g_drive_get_icon,  refreturn, constversion)
+
+  _WRAP_METHOD(bool has_volumes() const, g_drive_has_volumes)
+
+#m4 _CONVERSION(`GList*',`Glib::ListHandle< Glib::RefPtr<Volume> >',`$2($3, Glib::OWNERSHIP_SHALLOW)')
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<Volume> > get_volumes(), g_drive_get_volumes)
+
+  _WRAP_METHOD(bool is_media_removable() const, g_drive_is_media_removable)
+  _WRAP_METHOD(bool has_media() const, g_drive_has_media)
+  _WRAP_METHOD(bool is_media_check_automatic() const, g_drive_is_media_check_automatic)
+  _WRAP_METHOD(bool can_poll_for_media() const, g_drive_can_poll_for_media)
+  _WRAP_METHOD(bool can_eject() const, g_drive_can_eject)
+
+  /** Ejects the drive.
+   * @param slot A callback which will be called when the eject is completed or canceled.
+   * @param flags Flags affecting the unmount if required for eject.
+   * @param cancellable A cancellable object which can be used to cancel the eject.
+   */
+  void eject(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  /** Ejects the drive.
+   * @param slot A callback which will be called when the eject is completed.
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(const SlotAsyncReady& slot, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+  _IGNORE(g_drive_eject)
+
+  /** Ejects the drive.
+   * @param slot A callback which will be called when the eject is completed.
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  _WRAP_METHOD(bool eject_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_drive_eject_finish,
+               errthrow)
+
+  /** Polls drive to see if media has been inserted or removed.
+   * @param slot A callback which will be called when the poll is completed.
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   */
+  void poll_for_media(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable);
+
+  /** Polls drive to see if media has been inserted or removed.
+   * @param slot A callback which will be called when the poll is completed.
+   */
+  void poll_for_media(const SlotAsyncReady& slot);
+
+  /** Polls drive to see if media has been inserted or removed.
+   */
+  void poll_for_media();
+  _IGNORE(g_drive_poll_for_media)
+
+  _WRAP_METHOD(bool poll_for_media_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_drive_poll_for_media_finish,
+               errthrow)
+
+  _WRAP_METHOD(std::string get_identifier(const std::string& kind) const, g_drive_get_identifier)
+  _WRAP_METHOD(Glib::StringArrayHandle enumerate_identifiers() const, g_drive_enumerate_identifiers)
+
+  //_WRAP_VFUNC(Glib::ustring get_name() const, get_name)
+  //Careful of ref-counting: //_WRAP_VFUNC(Glib::RefPtr<Icon> get_icon() const, get_icon)
+  //_WRAP_VFUNC(bool has_volumes() const, has_volumes)
+};
+
+} // namespace Gio
+
+namespace Glib
+{
+
+//Pre-declare this so we can use it in TypeTrait:
+Glib::RefPtr<Gio::Drive> wrap(GDrive* object, bool take_copy);
+
+namespace Container_Helpers
+{
+
+/** This specialization of TypeTraits exists 
+ * because the default use of Glib::wrap(GObject*), 
+ * instead of a specific Glib::wrap(GSomeInterface*),
+ * would not return a wrapper for an interface.
+ */ 
+template <>
+struct TypeTraits< Glib::RefPtr<Gio::Drive> >
+{
+  typedef Glib::RefPtr<Gio::Drive> CppType;
+  typedef GDrive* CType;
+  typedef GDrive* CTypeNonConst;
+
+  static CType   to_c_type      (const CppType& item)
+  { return Glib::unwrap (item); }
+
+  static CppType to_cpp_type    (const CType& item)
+  {
+    //Use a specific Glib::wrap() function, 
+    //because CType has the specific type (not just GObject):
+    return Glib::wrap(item, true /* take_copy */);
+  }
+
+  static void    release_c_type (CType item)
+  {
+    GLIBMM_DEBUG_UNREFERENCE(0, item);
+    g_object_unref(item);
+  }
+};
+
+} // Container_Helpers
+} // Glib

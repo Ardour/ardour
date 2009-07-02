@@ -1,0 +1,34 @@
+; h2defs.py does not generate this. murrayc.
+(define-function g_themed_icon_get_names
+  (c-name "g_themed_icon_get_names")
+  (return-type "const-char*const*")
+)
+
+
+; extra_defs does not generate these, for some reason. murrayc:
+(define-signal changed
+  (of-object "GMount")
+  (return-type "void")
+  (when "last")
+)
+
+(define-signal unmounted
+  (of-object "GMount")
+  (return-type "void")
+  (when "last")
+)
+
+; extra_defs does not generate these, for some reason. murrayc:
+(define-signal changed
+  (of-object "GVolume")
+  (return-type "void")
+  (when "last")
+)
+
+(define-signal removed
+  (of-object "GVolume")
+  (return-type "void")
+  (when "last")
+)
+
+

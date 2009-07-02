@@ -10,9 +10,9 @@
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
+ * Library General Public License for more details.
  *
- * You should have received a copy of the GNU General Public
+ * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
@@ -20,8 +20,6 @@
 #include "generate_extra_defs.h"
 #include <iostream>
 #include <gio/gio.h>
-#include <gio/gunixinputstream.h>
-#include <gio/gunixoutputstream.h>
 
 int main (int argc, char** argv)
 {
@@ -46,9 +44,6 @@ int main (int argc, char** argv)
             << get_defs(G_TYPE_FILE_OUTPUT_STREAM)
             << get_defs(G_TYPE_FILTER_INPUT_STREAM)
             << get_defs(G_TYPE_FILTER_OUTPUT_STREAM)
-
-            << get_defs(G_TYPE_UNIX_INPUT_STREAM)
-            << get_defs(G_TYPE_UNIX_OUTPUT_STREAM)
 
             << get_defs(G_TYPE_INPUT_STREAM)
             << get_defs(G_TYPE_LOADABLE_ICON)

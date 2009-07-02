@@ -1,0 +1,251 @@
+;; From /home/murrayc/svn/gnome220/glib/gio/gioenums.h
+
+(define-flags-extended AppInfoCreateFlags
+  (in-module "G")
+  (c-name "GAppInfoCreateFlags")
+  (values
+    '("none" "G_APP_INFO_CREATE_NONE" "0")
+    '("needs-terminal" "G_APP_INFO_CREATE_NEEDS_TERMINAL" "1 << 0")
+    '("supports-uris" "G_APP_INFO_CREATE_SUPPORTS_URIS" "1 << 1")
+  )
+)
+
+(define-enum-extended DataStreamByteOrder
+  (in-module "G")
+  (c-name "GDataStreamByteOrder")
+  (values
+    '("big-endian" "G_DATA_STREAM_BYTE_ORDER_BIG_ENDIAN" "0")
+    '("little-endian" "G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN" "1")
+    '("host-endian" "G_DATA_STREAM_BYTE_ORDER_HOST_ENDIAN" "2")
+  )
+)
+
+(define-enum-extended DataStreamNewlineType
+  (in-module "G")
+  (c-name "GDataStreamNewlineType")
+  (values
+    '("lf" "G_DATA_STREAM_NEWLINE_TYPE_LF" "0")
+    '("cr" "G_DATA_STREAM_NEWLINE_TYPE_CR" "1")
+    '("cr-lf" "G_DATA_STREAM_NEWLINE_TYPE_CR_LF" "2")
+    '("any" "G_DATA_STREAM_NEWLINE_TYPE_ANY" "3")
+  )
+)
+
+(define-enum-extended FileAttributeType
+  (in-module "G")
+  (c-name "GFileAttributeType")
+  (values
+    '("invalid" "G_FILE_ATTRIBUTE_TYPE_INVALID" "0")
+    '("string" "G_FILE_ATTRIBUTE_TYPE_STRING" "1")
+    '("byte-string" "G_FILE_ATTRIBUTE_TYPE_BYTE_STRING" "2")
+    '("boolean" "G_FILE_ATTRIBUTE_TYPE_BOOLEAN" "3")
+    '("uint32" "G_FILE_ATTRIBUTE_TYPE_UINT32" "4")
+    '("int32" "G_FILE_ATTRIBUTE_TYPE_INT32" "5")
+    '("uint64" "G_FILE_ATTRIBUTE_TYPE_UINT64" "6")
+    '("int64" "G_FILE_ATTRIBUTE_TYPE_INT64" "7")
+    '("object" "G_FILE_ATTRIBUTE_TYPE_OBJECT" "8")
+  )
+)
+
+(define-flags-extended FileAttributeInfoFlags
+  (in-module "G")
+  (c-name "GFileAttributeInfoFlags")
+  (values
+    '("none" "G_FILE_ATTRIBUTE_INFO_NONE" "0")
+    '("copy-with-file" "G_FILE_ATTRIBUTE_INFO_COPY_WITH_FILE" "1 << 0")
+    '("copy-when-moved" "G_FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED" "1 << 1")
+  )
+)
+
+(define-enum-extended FileAttributeStatus
+  (in-module "G")
+  (c-name "GFileAttributeStatus")
+  (values
+    '("unset" "G_FILE_ATTRIBUTE_STATUS_UNSET" "0")
+    '("set" "G_FILE_ATTRIBUTE_STATUS_SET" "1")
+    '("error-setting" "G_FILE_ATTRIBUTE_STATUS_ERROR_SETTING" "2")
+  )
+)
+
+(define-flags-extended FileQueryInfoFlags
+  (in-module "G")
+  (c-name "GFileQueryInfoFlags")
+  (values
+    '("none" "G_FILE_QUERY_INFO_NONE" "0")
+    '("nofollow-symlinks" "G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS" "1 << 0")
+  )
+)
+
+(define-flags-extended FileCreateFlags
+  (in-module "G")
+  (c-name "GFileCreateFlags")
+  (values
+    '("none" "G_FILE_CREATE_NONE" "0")
+    '("private" "G_FILE_CREATE_PRIVATE" "1 << 0")
+  )
+)
+
+(define-enum-extended MountMountFlags
+  (in-module "G")
+  (c-name "GMountMountFlags")
+  (values
+    '("e" "G_MOUNT_MOUNT_NONE" "0")
+  )
+)
+
+(define-flags-extended MountUnmountFlags
+  (in-module "G")
+  (c-name "GMountUnmountFlags")
+  (values
+    '("none" "G_MOUNT_UNMOUNT_NONE" "0")
+    '("force" "G_MOUNT_UNMOUNT_FORCE" "1 << 0")
+  )
+)
+
+(define-flags-extended FileCopyFlags
+  (in-module "G")
+  (c-name "GFileCopyFlags")
+  (values
+    '("none" "G_FILE_COPY_NONE" "0")
+    '("overwrite" "G_FILE_COPY_OVERWRITE" "1 << 0")
+    '("backup" "G_FILE_COPY_BACKUP" "1 << 1")
+    '("nofollow-symlinks" "G_FILE_COPY_NOFOLLOW_SYMLINKS" "1 << 2")
+    '("all-metadata" "G_FILE_COPY_ALL_METADATA" "1 << 3")
+    '("no-fallback-for-move" "G_FILE_COPY_NO_FALLBACK_FOR_MOVE" "1 << 4")
+  )
+)
+
+(define-flags-extended FileMonitorFlags
+  (in-module "G")
+  (c-name "GFileMonitorFlags")
+  (values
+    '("none" "G_FILE_MONITOR_NONE" "0")
+    '("watch-mounts" "G_FILE_MONITOR_WATCH_MOUNTS" "1 << 0")
+  )
+)
+
+(define-enum-extended FileType
+  (in-module "G")
+  (c-name "GFileType")
+  (values
+    '("unknown" "G_FILE_TYPE_UNKNOWN" "0")
+    '("regular" "G_FILE_TYPE_REGULAR" "1")
+    '("directory" "G_FILE_TYPE_DIRECTORY" "2")
+    '("symbolic-link" "G_FILE_TYPE_SYMBOLIC_LINK" "3")
+    '("special" "G_FILE_TYPE_SPECIAL" "4")
+    '("shortcut" "G_FILE_TYPE_SHORTCUT" "5")
+    '("mountable" "G_FILE_TYPE_MOUNTABLE" "6")
+  )
+)
+
+(define-enum-extended FilesystemPreviewType
+  (in-module "G")
+  (c-name "GFilesystemPreviewType")
+  (values
+    '("if-always" "G_FILESYSTEM_PREVIEW_TYPE_IF_ALWAYS" "0")
+    '("if-local" "G_FILESYSTEM_PREVIEW_TYPE_IF_LOCAL" "1")
+    '("never" "G_FILESYSTEM_PREVIEW_TYPE_NEVER" "2")
+  )
+)
+
+(define-enum-extended FileMonitorEvent
+  (in-module "G")
+  (c-name "GFileMonitorEvent")
+  (values
+    '("changed" "G_FILE_MONITOR_EVENT_CHANGED" "0")
+    '("changes-done-hint" "G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT" "1")
+    '("deleted" "G_FILE_MONITOR_EVENT_DELETED" "2")
+    '("created" "G_FILE_MONITOR_EVENT_CREATED" "3")
+    '("attribute-changed" "G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED" "4")
+    '("pre-unmount" "G_FILE_MONITOR_EVENT_PRE_UNMOUNT" "5")
+    '("unmounted" "G_FILE_MONITOR_EVENT_UNMOUNTED" "6")
+  )
+)
+
+; We added G_IO_ERROR_HOST_WAS_NOT_FOUND and deprecated G_IO_ERROR_HOST_WAS_NOT_FOUND,
+; because it clashes with a HOST_NOT_FOUND define in netdb.h.
+; http://bugzilla.gnome.org/show_bug.cgi?id=529496
+; We need to deprecate HOST_NOT_FOUND, but we don't currently document generated enums 
+; at all: http://bugzilla.gnome.org/show_bug.cgi?id=544692
+; murrayc
+(define-enum-extended IOErrorEnum
+  (in-module "G")
+  (c-name "GIOErrorEnum")
+  (values
+    '("failed" "G_IO_ERROR_FAILED" "0")
+    '("not-found" "G_IO_ERROR_NOT_FOUND" "1")
+    '("exists" "G_IO_ERROR_EXISTS" "2")
+    '("is-directory" "G_IO_ERROR_IS_DIRECTORY" "3")
+    '("not-directory" "G_IO_ERROR_NOT_DIRECTORY" "4")
+    '("not-empty" "G_IO_ERROR_NOT_EMPTY" "5")
+    '("not-regular-file" "G_IO_ERROR_NOT_REGULAR_FILE" "6")
+    '("not-symbolic-link" "G_IO_ERROR_NOT_SYMBOLIC_LINK" "7")
+    '("not-mountable-file" "G_IO_ERROR_NOT_MOUNTABLE_FILE" "8")
+    '("filename-too-long" "G_IO_ERROR_FILENAME_TOO_LONG" "9")
+    '("invalid-filename" "G_IO_ERROR_INVALID_FILENAME" "10")
+    '("too-many-links" "G_IO_ERROR_TOO_MANY_LINKS" "11")
+    '("no-space" "G_IO_ERROR_NO_SPACE" "12")
+    '("invalid-argument" "G_IO_ERROR_INVALID_ARGUMENT" "13")
+    '("permission-denied" "G_IO_ERROR_PERMISSION_DENIED" "14")
+    '("not-supported" "G_IO_ERROR_NOT_SUPPORTED" "15")
+    '("not-mounted" "G_IO_ERROR_NOT_MOUNTED" "16")
+    '("already-mounted" "G_IO_ERROR_ALREADY_MOUNTED" "17")
+    '("closed" "G_IO_ERROR_CLOSED" "18")
+    '("cancelled" "G_IO_ERROR_CANCELLED" "19")
+    '("pending" "G_IO_ERROR_PENDING" "20")
+    '("read-only" "G_IO_ERROR_READ_ONLY" "21")
+    '("cant-create-backup" "G_IO_ERROR_CANT_CREATE_BACKUP" "22")
+    '("wrong-etag" "G_IO_ERROR_WRONG_ETAG" "23")
+    '("timed-out" "G_IO_ERROR_TIMED_OUT" "24")
+    '("would-recurse" "G_IO_ERROR_WOULD_RECURSE" "25")
+    '("busy" "G_IO_ERROR_BUSY" "26")
+    '("would-block" "G_IO_ERROR_WOULD_BLOCK" "27")
+    '("host-not-found" "G_IO_ERROR_HOST_NOT_FOUND" "28")
+    '("host-was-not-found" "G_IO_ERROR_HOST_WAS_NOT_FOUND" "28")
+    '("would-merge" "G_IO_ERROR_WOULD_MERGE" "29")
+    '("failed-handled" "G_IO_ERROR_FAILED_HANDLED" "30")
+  )
+)
+
+(define-flags-extended AskPasswordFlags
+  (in-module "G")
+  (c-name "GAskPasswordFlags")
+  (values
+    '("need-password" "G_ASK_PASSWORD_NEED_PASSWORD" "1 << 0")
+    '("need-username" "G_ASK_PASSWORD_NEED_USERNAME" "1 << 1")
+    '("need-domain" "G_ASK_PASSWORD_NEED_DOMAIN" "1 << 2")
+    '("saving-supported" "G_ASK_PASSWORD_SAVING_SUPPORTED" "1 << 3")
+    '("anonymous-supported" "G_ASK_PASSWORD_ANONYMOUS_SUPPORTED" "1 << 4")
+  )
+)
+
+(define-enum-extended PasswordSave
+  (in-module "G")
+  (c-name "GPasswordSave")
+  (values
+    '("never" "G_PASSWORD_SAVE_NEVER" "0")
+    '("for-session" "G_PASSWORD_SAVE_FOR_SESSION" "1")
+    '("permanently" "G_PASSWORD_SAVE_PERMANENTLY" "2")
+  )
+)
+
+(define-enum-extended MountOperationResult
+  (in-module "G")
+  (c-name "GMountOperationResult")
+  (values
+    '("handled" "G_MOUNT_OPERATION_HANDLED" "0")
+    '("aborted" "G_MOUNT_OPERATION_ABORTED" "1")
+    '("unhandled" "G_MOUNT_OPERATION_UNHANDLED" "2")
+  )
+)
+
+(define-flags-extended OutputStreamSpliceFlags
+  (in-module "G")
+  (c-name "GOutputStreamSpliceFlags")
+  (values
+    '("none" "G_OUTPUT_STREAM_SPLICE_NONE" "0")
+    '("close-source" "G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE" "1 << 0")
+    '("close-target" "G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET" "1 << 1")
+  )
+)
+

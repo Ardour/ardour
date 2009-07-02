@@ -1,0 +1,160 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/bufferedinputstream.h>
+#include <giomm/enums.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(giomm/private/bufferedinputstream_p.h)
+
+namespace Gio
+{
+
+/**
+ * An implementation of BufferedInputStream that allows for high-level data
+ * manipulation of arbitrary data (including binary operations).
+ *
+ * @ingroup Streams
+ *
+ * @newin2p16
+ */
+class DataInputStream : public Gio::BufferedInputStream
+{
+  _CLASS_GOBJECT(DataInputStream, GDataInputStream, G_DATA_INPUT_STREAM, Gio::BufferedInputStream, GBufferedInputStream)
+
+protected:
+  _WRAP_CTOR(DataInputStream(const Glib::RefPtr<InputStream>& base_stream), g_data_input_stream_new)
+
+public:
+
+  _WRAP_CREATE(const Glib::RefPtr<InputStream>& base_stream)
+
+  _WRAP_METHOD(void set_byte_order(DataStreamByteOrder order), g_data_input_stream_set_byte_order)
+  _WRAP_METHOD(DataStreamByteOrder get_byte_order() const, g_data_input_stream_get_byte_order)
+  _WRAP_METHOD(void set_newline_type(DataStreamNewlineType type), g_data_input_stream_set_newline_type)
+  _WRAP_METHOD(DataStreamNewlineType get_newline_type() const, g_data_input_stream_get_newline_type)
+
+  _WRAP_METHOD(guchar read_byte(const Glib::RefPtr<Cancellable>& cancellable), g_data_input_stream_read_byte, errthrow)
+
+  /** non-cancellable version of read_byte()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  guchar read_byte();
+#else
+  guchar read_byte(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(gint16 read_int16(const Glib::RefPtr<Cancellable>& cancellable), g_data_input_stream_read_int16, errthrow)
+  /** non-cancellable version of read_int16()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gint16 read_int16();
+#else
+  gint16 read_int16(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(guint16 read_uint16(const Glib::RefPtr<Cancellable>& cancellable), g_data_input_stream_read_uint16, errthrow)
+
+//TODO: Real documentation:
+  /** non-cancellable version of read_uint16()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  guint16 read_uint16();
+#else
+  guint16 read_uint16(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(gint32 read_int32(const Glib::RefPtr<Cancellable>& cancellable), g_data_input_stream_read_int32, errthrow)
+
+  /** non-cancellable version of read_int32()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gint32 read_int32();
+#else
+  gint32 read_int32(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(guint32 read_uint32(const Glib::RefPtr<Cancellable>& cancellable), g_data_input_stream_read_uint32, errthrow)
+  /** non-cancellable version of read_uint32()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  guint32 read_uint32();
+#else
+  guint32 read_uint32(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(gint64 read_int64(const Glib::RefPtr<Cancellable>& cancellable), g_data_input_stream_read_int64, errthrow)
+  /** non-cancellable version of read_int64()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gint64 read_int64();
+#else
+  gint64 read_int64(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(guint64 read_uint64(const Glib::RefPtr<Cancellable>& cancellable), g_data_input_stream_read_uint64, errthrow)
+
+  /** non-cancellable version of read_uint64()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  guint64 read_uint64();
+#else
+  guint64 read_uint64(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _IGNORE(g_data_input_stream_read_line)
+
+  // FIXME: In C, these functions return NULL if there is an error (i.e. end of
+  // stream reached), but if we use std::string, we don't have a way to tell an
+  // empty string from NULL.  Perhaps we should use raw pointers as in C, but
+  // that would mean we need to worry about freeing the C string...
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool read_line(std::string& line, const Glib::RefPtr<Cancellable>& cancellable);
+#else
+  bool read_line(std::string& line, const Glib::RefPtr<Cancellable>& cancellable, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** non-cancellable version of read_line()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool read_line(std::string& line);
+#else
+  bool read_line(std::string& line, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _IGNORE(g_data_input_stream_read_until)
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool read_until(std::string& data, const std::string& stop_chars, const Glib::RefPtr<Cancellable>& cancellable);
+#else
+  bool read_until(std::string& data, const std::string& stop_chars, const Glib::RefPtr<Cancellable>& cancellable, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** non-cancellable version of read_until()
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool read_until(std::string& data, const std::string& stop_chars);
+#else
+  bool read_until(std::string& data, const std::string& stop_chars, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+};
+
+} // namespace Gio
+

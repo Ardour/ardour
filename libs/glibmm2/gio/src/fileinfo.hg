@@ -1,0 +1,178 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/arrayhandle.h>
+#include <glibmm/object.h>
+#include <glibmm/timeval.h>
+#include <giomm/fileattributeinfolist.h>
+#include <giomm/icon.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gio
+{
+
+// Rename FILE_TYPE_UNKNOWN to FILE_TYPE_NOT_KNOWN because the former is a
+// define in a Windows header (winbase.h, included from windows.h).
+_WRAP_ENUM(FileType, GFileType, NO_GTYPE, s#FILE_TYPE_UNKNOWN#FILE_TYPE_NOT_KNOWN#)
+
+// Provide FILE_TYPE_UNKNOWN for backwards compatibility.
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#ifndef FILE_TYPE_UNKNOWN
+const FileType FILE_TYPE_UNKNOWN = FILE_TYPE_NOT_KNOWN;
+#endif
+#endif
+
+//TODO: attribute strings
+
+/** FileAttributeMatcher allows for searching through a FileInfo for attributes.
+ *
+ * @newin2p16
+ */
+class FileAttributeMatcher
+{
+  _CLASS_OPAQUE_REFCOUNTED(FileAttributeMatcher, GFileAttributeMatcher,
+                           NONE, g_file_attribute_matcher_ref, g_file_attribute_matcher_unref)
+
+public:
+  /** Creates a new file attribute matcher, which matches attributes against a given string. 
+   * The attribute string should be formatted with specific keys separated from namespaces with a double colon. 
+   * Several "namespace::key" strings may be concatenated with a single comma (e.g. "standard::type,standard::is-hidden"). 
+   * The wildcard "*" may be used to match all keys and namespaces, or "namespace::*" will match all keys in a given namespace.
+   *
+   * @param attributes The attributes string.
+   * @result a new FileAttributeMatcher.
+   */
+  static Glib::RefPtr<FileAttributeMatcher> create(const std::string& attributes = "*");
+
+  _WRAP_METHOD(bool matches(const std::string& full_name) const, g_file_attribute_matcher_matches)
+  _WRAP_METHOD(bool matches_only(const std::string& full_name) const, g_file_attribute_matcher_matches_only)
+  _WRAP_METHOD(bool enumerate_namespace(const std::string& ns), g_file_attribute_matcher_enumerate_namespace)
+  _WRAP_METHOD(std::string enumerate_next(), g_file_attribute_matcher_enumerate_next)
+};
+
+/** FileInfo implements methods for getting information that all files should contain, and allows for manipulation of extended attributes.
+ * See FileAttribute for more information on how GIO handles file attributes.
+ *
+ * To obtain a FileInfo for a File, use File::query_info() (or its async variant).
+ * To obtain a FileInfo for a file input or output stream, use FileInput::stream_query_info() or FileOutput::stream_query_info() 
+ * (or their async variants).
+ *
+ * FileAttributeMatcher allows for searching through a FileInfo for attributes.
+ */
+class FileInfo : public Glib::Object
+{
+  _CLASS_GOBJECT(FileInfo, GFileInfo, G_FILE_INFO, Glib::Object, GObject)
+
+public:
+  _CTOR_DEFAULT()
+
+  _WRAP_METHOD(Glib::RefPtr<FileInfo> dup() const,
+               g_file_info_dup)
+  _WRAP_METHOD(void copy_into(Glib::RefPtr<FileInfo>& dest) const,
+               g_file_info_copy_into)
+  _WRAP_METHOD(bool has_attribute(const std::string& attribute) const,
+               g_file_info_has_attribute)
+  _WRAP_METHOD(Glib::StringArrayHandle list_attributes(const std::string& name_space) const,
+               g_file_info_list_attributes)
+  _WRAP_METHOD(FileAttributeType get_attribute_type(const std::string& attribute) const,
+               g_file_info_get_attribute_type)
+  _WRAP_METHOD(void remove_attribute(const std::string& attribute),
+               g_file_info_remove_attribute)
+  _WRAP_METHOD(std::string get_attribute_string(const std::string& attribute) const,
+               g_file_info_get_attribute_string)
+  _WRAP_METHOD(Glib::ustring get_attribute_as_string(const std::string& attribute) const,
+               g_file_info_get_attribute_as_string)
+  _WRAP_METHOD(std::string get_attribute_byte_string(const std::string& attribute) const,
+               g_file_info_get_attribute_byte_string)
+  _WRAP_METHOD(bool get_attribute_boolean(const std::string& attribute) const,
+               g_file_info_get_attribute_boolean)
+  _WRAP_METHOD(guint32 get_attribute_uint32(const std::string& attribute) const,
+               g_file_info_get_attribute_uint32)
+  _WRAP_METHOD(gint32 get_attribute_int32(const std::string& attribute) const,
+               g_file_info_get_attribute_int32)
+  _WRAP_METHOD(guint64 get_attribute_uint64(const std::string& attribute) const,
+               g_file_info_get_attribute_uint64)
+  _WRAP_METHOD(gint64 get_attribute_int64(const std::string& attribute) const,
+               g_file_info_get_attribute_int64)
+  _WRAP_METHOD(Glib::RefPtr<Glib::Object> get_attribute_object(const std::string& attribute) const,
+               g_file_info_get_attribute_object)
+  _WRAP_METHOD(void set_attribute_string(const std::string& attribute, const std::string& value),
+               g_file_info_set_attribute_string)
+  _WRAP_METHOD(void set_attribute_byte_string(const std::string& attribute, const std::string& value),
+               g_file_info_set_attribute_byte_string)
+  _WRAP_METHOD(void set_attribute_boolean(const std::string& attribute, bool value),
+               g_file_info_set_attribute_boolean)
+  _WRAP_METHOD(void set_attribute_uint32(const std::string& attribute, guint32 value),
+               g_file_info_set_attribute_uint32)
+  _WRAP_METHOD(void set_attribute_int32(const std::string& attribute, gint32 value),
+               g_file_info_set_attribute_int32)
+  _WRAP_METHOD(void set_attribute_uint64(const std::string& attribute, guint64 value),
+               g_file_info_set_attribute_uint64)
+  _WRAP_METHOD(void set_attribute_int64(const std::string& attribute, gint64 value),
+               g_file_info_set_attribute_int64)
+  _WRAP_METHOD(void set_attribute_object(const std::string& attribute, const Glib::RefPtr<Glib::Object>& object),
+               g_file_info_set_attribute_object)
+  _WRAP_METHOD(void clear_status(), g_file_info_clear_status)
+
+  // helper getters
+
+  _WRAP_METHOD(FileType get_file_type() const, g_file_info_get_file_type)
+  _WRAP_METHOD(bool is_hidden() const, g_file_info_get_is_hidden)
+  _WRAP_METHOD(bool is_backup() const, g_file_info_get_is_backup)
+  _WRAP_METHOD(bool is_symlink() const, g_file_info_get_is_symlink)
+  _WRAP_METHOD(std::string get_name() const, g_file_info_get_name)
+  _WRAP_METHOD(std::string get_display_name() const, g_file_info_get_display_name)
+  _WRAP_METHOD(std::string get_edit_name() const, g_file_info_get_edit_name)
+
+  _WRAP_METHOD(Glib::RefPtr<Icon> get_icon(), g_file_info_get_icon, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Icon> get_icon() const, g_file_info_get_icon, refreturn, constversion)
+
+  _WRAP_METHOD(std::string get_content_type() const, g_file_info_get_content_type)
+  _WRAP_METHOD(goffset get_size() const, g_file_info_get_size)
+
+  Glib::TimeVal modification_time() const;
+
+  _WRAP_METHOD(std::string get_symlink_target() const, g_file_info_get_symlink_target)
+  _WRAP_METHOD(std::string get_etag() const, g_file_info_get_etag)
+  _WRAP_METHOD(gint32 get_sort_order() const, g_file_info_get_sort_order)
+  _WRAP_METHOD(void set_attribute_mask(const Glib::RefPtr<FileAttributeMatcher>& mask),
+               g_file_info_set_attribute_mask)
+  _WRAP_METHOD(void unset_attribute_mask(), g_file_info_unset_attribute_mask)
+
+  // helper setters
+
+  _WRAP_METHOD(void set_file_type(FileType type), g_file_info_set_file_type)
+  _WRAP_METHOD(void set_is_hidden(bool is_hidden = true), g_file_info_set_is_hidden)
+  _WRAP_METHOD(void set_is_symlink(bool is_symlink = true), g_file_info_set_is_symlink)
+  _WRAP_METHOD(void set_name(const std::string& name), g_file_info_set_name)
+  _WRAP_METHOD(void set_display_name(const std::string& display_name), g_file_info_set_display_name)
+  _WRAP_METHOD(void set_edit_name(const std::string& edit_name), g_file_info_set_edit_name)
+  _WRAP_METHOD(void set_icon(const Glib::RefPtr<Icon>& icon), g_file_info_set_icon)
+  _WRAP_METHOD(void set_content_type(const std::string& content_type), g_file_info_set_content_type)
+  _WRAP_METHOD(void set_size(goffset size), g_file_info_set_size)
+
+  _WRAP_METHOD(void set_modification_time(const Glib::TimeVal& mtime), g_file_info_set_modification_time)
+  _WRAP_METHOD(void set_symlink_target(const std::string& symlink_target), g_file_info_set_symlink_target)
+  _WRAP_METHOD(void set_sort_order(gint32 sort_order), g_file_info_set_sort_order)
+};
+
+} // namespace Gio
+

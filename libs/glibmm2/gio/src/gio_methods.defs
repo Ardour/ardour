@@ -1,0 +1,5375 @@
+;; -*- scheme -*-
+; object definitions ...
+(define-object Info
+  (in-module "GApp")
+  (c-name "GAppInfo")
+  (gtype-id "G_TYPE_APP_INFO")
+)
+
+(define-object LaunchContext
+  (in-module "GApp")
+  (parent "GObject")
+  (c-name "GAppLaunchContext")
+  (gtype-id "G_TYPE_APP_LAUNCH_CONTEXT")
+)
+
+(define-object Result
+  (in-module "GAsync")
+  (c-name "GAsyncResult")
+  (gtype-id "G_TYPE_ASYNC_RESULT")
+)
+
+(define-object AppInfoLookup
+  (in-module "GDesktop")
+  (c-name "GDesktopAppInfoLookup")
+  (gtype-id "G_TYPE_DESKTOP_APP_INFO_LOOKUP")
+)
+
+(define-object e
+  (in-module "GDriv")
+  (c-name "GDrive")
+  (gtype-id "G_TYPE_DRIVE")
+)
+
+(define-object e
+  (in-module "GFil")
+  (c-name "GFile")
+  (gtype-id "G_TYPE_FILE")
+)
+
+(define-object Enumerator
+  (in-module "GFile")
+  (parent "GObject")
+  (c-name "GFileEnumerator")
+  (gtype-id "G_TYPE_FILE_ENUMERATOR")
+)
+
+(define-object Monitor
+  (in-module "GFile")
+  (parent "GObject")
+  (c-name "GFileMonitor")
+  (gtype-id "G_TYPE_FILE_MONITOR")
+)
+
+(define-object n
+  (in-module "GIco")
+  (c-name "GIcon")
+  (gtype-id "G_TYPE_ICON")
+)
+
+(define-object Stream
+  (in-module "GInput")
+  (parent "GObject")
+  (c-name "GInputStream")
+  (gtype-id "G_TYPE_INPUT_STREAM")
+)
+
+(define-object InputStream
+  (in-module "GFilter")
+  (parent "GInputStream")
+  (c-name "GFilterInputStream")
+  (gtype-id "G_TYPE_FILTER_INPUT_STREAM")
+)
+
+(define-object InputStream
+  (in-module "GBuffered")
+  (parent "GFilterInputStream")
+  (c-name "GBufferedInputStream")
+  (gtype-id "G_TYPE_BUFFERED_INPUT_STREAM")
+)
+
+(define-object InputStream
+  (in-module "GData")
+  (parent "GBufferedInputStream")
+  (c-name "GDataInputStream")
+  (gtype-id "G_TYPE_DATA_INPUT_STREAM")
+)
+
+(define-object InputStream
+  (in-module "GFile")
+  (parent "GInputStream")
+  (c-name "GFileInputStream")
+  (gtype-id "G_TYPE_FILE_INPUT_STREAM")
+)
+
+(define-object Icon
+  (in-module "GLoadable")
+  (c-name "GLoadableIcon")
+  (gtype-id "G_TYPE_LOADABLE_ICON")
+)
+
+(define-object DirectoryMonitor
+  (in-module "GLocal")
+  (parent "GFileMonitor")
+  (c-name "GLocalDirectoryMonitor")
+  (gtype-id "G_TYPE_LOCAL_DIRECTORY_MONITOR")
+)
+
+(define-object FileInputStream
+  (in-module "GLocal")
+  (parent "GFileInputStream")
+  (c-name "GLocalFileInputStream")
+  (gtype-id "G_TYPE_LOCAL_FILE_INPUT_STREAM")
+)
+
+(define-object FileMonitor
+  (in-module "GLocal")
+  (parent "GFileMonitor")
+  (c-name "GLocalFileMonitor")
+  (gtype-id "G_TYPE_LOCAL_FILE_MONITOR")
+)
+
+(define-object InputStream
+  (in-module "GMemory")
+  (parent "GInputStream")
+  (c-name "GMemoryInputStream")
+  (gtype-id "G_TYPE_MEMORY_INPUT_STREAM")
+)
+
+(define-object t
+  (in-module "GMoun")
+  (c-name "GMount")
+  (gtype-id "G_TYPE_MOUNT")
+)
+
+(define-object Operation
+  (in-module "GMount")
+  (parent "GObject")
+  (c-name "GMountOperation")
+  (gtype-id "G_TYPE_MOUNT_OPERATION")
+)
+
+(define-object Stream
+  (in-module "GOutput")
+  (parent "GObject")
+  (c-name "GOutputStream")
+  (gtype-id "G_TYPE_OUTPUT_STREAM")
+)
+
+(define-object OutputStream
+  (in-module "GMemory")
+  (parent "GOutputStream")
+  (c-name "GMemoryOutputStream")
+  (gtype-id "G_TYPE_MEMORY_OUTPUT_STREAM")
+)
+
+(define-object OutputStream
+  (in-module "GFilter")
+  (parent "GOutputStream")
+  (c-name "GFilterOutputStream")
+  (gtype-id "G_TYPE_FILTER_OUTPUT_STREAM")
+)
+
+(define-object OutputStream
+  (in-module "GData")
+  (parent "GFilterOutputStream")
+  (c-name "GDataOutputStream")
+  (gtype-id "G_TYPE_DATA_OUTPUT_STREAM")
+)
+
+(define-object OutputStream
+  (in-module "GFile")
+  (parent "GOutputStream")
+  (c-name "GFileOutputStream")
+  (gtype-id "G_TYPE_FILE_OUTPUT_STREAM")
+)
+
+(define-object FileOutputStream
+  (in-module "GLocal")
+  (parent "GFileOutputStream")
+  (c-name "GLocalFileOutputStream")
+  (gtype-id "G_TYPE_LOCAL_FILE_OUTPUT_STREAM")
+)
+
+(define-object e
+  (in-module "GSeekabl")
+  (c-name "GSeekable")
+  (gtype-id "G_TYPE_SEEKABLE")
+)
+
+(define-object InputStream
+  (in-module "GUnix")
+  (parent "GInputStream")
+  (c-name "GUnixInputStream")
+  (gtype-id "G_TYPE_UNIX_INPUT_STREAM")
+)
+
+(define-object OutputStream
+  (in-module "GUnix")
+  (parent "GOutputStream")
+  (c-name "GUnixOutputStream")
+  (gtype-id "G_TYPE_UNIX_OUTPUT_STREAM")
+)
+
+(define-object s
+  (in-module "GVf")
+  (parent "GObject")
+  (c-name "GVfs")
+  (gtype-id "G_TYPE_VFS")
+)
+
+(define-object e
+  (in-module "GVolum")
+  (c-name "GVolume")
+  (gtype-id "G_TYPE_VOLUME")
+)
+
+(define-object Monitor
+  (in-module "GVolume")
+  (parent "GObject")
+  (c-name "GVolumeMonitor")
+  (gtype-id "G_TYPE_VOLUME_MONITOR")
+)
+
+(define-object VolumeMonitor
+  (in-module "GNative")
+  (parent "GVolumeMonitor")
+  (c-name "GNativeVolumeMonitor")
+  (gtype-id "G_TYPE_NATIVE_VOLUME_MONITOR")
+)
+
+;; Enumerations and flags ...
+
+(define-flags InfoCreateFlags
+  (in-module "GApp")
+  (c-name "GAppInfoCreateFlags")
+  (gtype-id "G_TYPE_APP_INFO_CREATE_FLAGS")
+  (values
+    '("none" "G_APP_INFO_CREATE_NONE")
+    '("needs-terminal" "G_APP_INFO_CREATE_NEEDS_TERMINAL")
+    '("supports-uris" "G_APP_INFO_CREATE_SUPPORTS_URIS")
+  )
+)
+
+(define-enum StreamByteOrder
+  (in-module "GData")
+  (c-name "GDataStreamByteOrder")
+  (gtype-id "G_TYPE_DATA_STREAM_BYTE_ORDER")
+  (values
+    '("big-endian" "G_DATA_STREAM_BYTE_ORDER_BIG_ENDIAN")
+    '("little-endian" "G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN")
+    '("host-endian" "G_DATA_STREAM_BYTE_ORDER_HOST_ENDIAN")
+  )
+)
+
+(define-enum StreamNewlineType
+  (in-module "GData")
+  (c-name "GDataStreamNewlineType")
+  (gtype-id "G_TYPE_DATA_STREAM_NEWLINE_TYPE")
+  (values
+    '("lf" "G_DATA_STREAM_NEWLINE_TYPE_LF")
+    '("cr" "G_DATA_STREAM_NEWLINE_TYPE_CR")
+    '("cr-lf" "G_DATA_STREAM_NEWLINE_TYPE_CR_LF")
+    '("any" "G_DATA_STREAM_NEWLINE_TYPE_ANY")
+  )
+)
+
+(define-enum AttributeType
+  (in-module "GFile")
+  (c-name "GFileAttributeType")
+  (gtype-id "G_TYPE_FILE_ATTRIBUTE_TYPE")
+  (values
+    '("invalid" "G_FILE_ATTRIBUTE_TYPE_INVALID")
+    '("string" "G_FILE_ATTRIBUTE_TYPE_STRING")
+    '("byte-string" "G_FILE_ATTRIBUTE_TYPE_BYTE_STRING")
+    '("boolean" "G_FILE_ATTRIBUTE_TYPE_BOOLEAN")
+    '("uint32" "G_FILE_ATTRIBUTE_TYPE_UINT32")
+    '("int32" "G_FILE_ATTRIBUTE_TYPE_INT32")
+    '("uint64" "G_FILE_ATTRIBUTE_TYPE_UINT64")
+    '("int64" "G_FILE_ATTRIBUTE_TYPE_INT64")
+    '("object" "G_FILE_ATTRIBUTE_TYPE_OBJECT")
+  )
+)
+
+(define-flags AttributeInfoFlags
+  (in-module "GFile")
+  (c-name "GFileAttributeInfoFlags")
+  (gtype-id "G_TYPE_FILE_ATTRIBUTE_INFO_FLAGS")
+  (values
+    '("none" "G_FILE_ATTRIBUTE_INFO_NONE")
+    '("copy-with-file" "G_FILE_ATTRIBUTE_INFO_COPY_WITH_FILE")
+    '("copy-when-moved" "G_FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED")
+  )
+)
+
+(define-enum AttributeStatus
+  (in-module "GFile")
+  (c-name "GFileAttributeStatus")
+  (gtype-id "G_TYPE_FILE_ATTRIBUTE_STATUS")
+  (values
+    '("unset" "G_FILE_ATTRIBUTE_STATUS_UNSET")
+    '("set" "G_FILE_ATTRIBUTE_STATUS_SET")
+    '("error-setting" "G_FILE_ATTRIBUTE_STATUS_ERROR_SETTING")
+  )
+)
+
+(define-flags QueryInfoFlags
+  (in-module "GFile")
+  (c-name "GFileQueryInfoFlags")
+  (gtype-id "G_TYPE_FILE_QUERY_INFO_FLAGS")
+  (values
+    '("ne" "G_FILE_QUERY_INFO_NONE")
+    '("follow-symlinks" "G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS")
+  )
+)
+
+(define-flags CreateFlags
+  (in-module "GFile")
+  (c-name "GFileCreateFlags")
+  (gtype-id "G_TYPE_FILE_CREATE_FLAGS")
+  (values
+    '("none" "G_FILE_CREATE_NONE")
+    '("private" "G_FILE_CREATE_PRIVATE")
+  )
+)
+
+(define-enum MountFlags
+  (in-module "GMount")
+  (c-name "GMountMountFlags")
+  (gtype-id "G_TYPE_MOUNT_MOUNT_FLAGS")
+  (values
+    '("e" "G_MOUNT_MOUNT_NONE")
+  )
+)
+
+(define-flags UnmountFlags
+  (in-module "GMount")
+  (c-name "GMountUnmountFlags")
+  (gtype-id "G_TYPE_MOUNT_UNMOUNT_FLAGS")
+  (values
+    '("none" "G_MOUNT_UNMOUNT_NONE")
+    '("force" "G_MOUNT_UNMOUNT_FORCE")
+  )
+)
+
+(define-flags CopyFlags
+  (in-module "GFile")
+  (c-name "GFileCopyFlags")
+  (gtype-id "G_TYPE_FILE_COPY_FLAGS")
+  (values
+    '("none" "G_FILE_COPY_NONE")
+    '("overwrite" "G_FILE_COPY_OVERWRITE")
+    '("backup" "G_FILE_COPY_BACKUP")
+    '("nofollow-symlinks" "G_FILE_COPY_NOFOLLOW_SYMLINKS")
+    '("all-metadata" "G_FILE_COPY_ALL_METADATA")
+    '("no-fallback-for-move" "G_FILE_COPY_NO_FALLBACK_FOR_MOVE")
+  )
+)
+
+(define-flags MonitorFlags
+  (in-module "GFile")
+  (c-name "GFileMonitorFlags")
+  (gtype-id "G_TYPE_FILE_MONITOR_FLAGS")
+  (values
+    '("none" "G_FILE_MONITOR_NONE")
+    '("watch-mounts" "G_FILE_MONITOR_WATCH_MOUNTS")
+  )
+)
+
+(define-enum Type
+  (in-module "GFile")
+  (c-name "GFileType")
+  (gtype-id "G_TYPE_FILE_TYPE")
+  (values
+    '("unknown" "G_FILE_TYPE_UNKNOWN")
+    '("regular" "G_FILE_TYPE_REGULAR")
+    '("directory" "G_FILE_TYPE_DIRECTORY")
+    '("symbolic-link" "G_FILE_TYPE_SYMBOLIC_LINK")
+    '("special" "G_FILE_TYPE_SPECIAL")
+    '("shortcut" "G_FILE_TYPE_SHORTCUT")
+    '("mountable" "G_FILE_TYPE_MOUNTABLE")
+  )
+)
+
+(define-enum PreviewType
+  (in-module "GFilesystem")
+  (c-name "GFilesystemPreviewType")
+  (gtype-id "G_TYPE_FILESYSTEM_PREVIEW_TYPE")
+  (values
+    '("if-always" "G_FILESYSTEM_PREVIEW_TYPE_IF_ALWAYS")
+    '("if-local" "G_FILESYSTEM_PREVIEW_TYPE_IF_LOCAL")
+    '("never" "G_FILESYSTEM_PREVIEW_TYPE_NEVER")
+  )
+)
+
+(define-enum MonitorEvent
+  (in-module "GFile")
+  (c-name "GFileMonitorEvent")
+  (gtype-id "G_TYPE_FILE_MONITOR_EVENT")
+  (values
+    '("changed" "G_FILE_MONITOR_EVENT_CHANGED")
+    '("changes-done-hint" "G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT")
+    '("deleted" "G_FILE_MONITOR_EVENT_DELETED")
+    '("created" "G_FILE_MONITOR_EVENT_CREATED")
+    '("attribute-changed" "G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED")
+    '("pre-unmount" "G_FILE_MONITOR_EVENT_PRE_UNMOUNT")
+    '("unmounted" "G_FILE_MONITOR_EVENT_UNMOUNTED")
+  )
+)
+
+(define-enum Enum
+  (in-module "GIOError")
+  (c-name "GIOErrorEnum")
+  (gtype-id "G_TYPE_IO_ERROR_ENUM")
+  (values
+    '("failed" "G_IO_ERROR_FAILED")
+    '("not-found" "G_IO_ERROR_NOT_FOUND")
+    '("exists" "G_IO_ERROR_EXISTS")
+    '("is-directory" "G_IO_ERROR_IS_DIRECTORY")
+    '("not-directory" "G_IO_ERROR_NOT_DIRECTORY")
+    '("not-empty" "G_IO_ERROR_NOT_EMPTY")
+    '("not-regular-file" "G_IO_ERROR_NOT_REGULAR_FILE")
+    '("not-symbolic-link" "G_IO_ERROR_NOT_SYMBOLIC_LINK")
+    '("not-mountable-file" "G_IO_ERROR_NOT_MOUNTABLE_FILE")
+    '("filename-too-long" "G_IO_ERROR_FILENAME_TOO_LONG")
+    '("invalid-filename" "G_IO_ERROR_INVALID_FILENAME")
+    '("too-many-links" "G_IO_ERROR_TOO_MANY_LINKS")
+    '("no-space" "G_IO_ERROR_NO_SPACE")
+    '("invalid-argument" "G_IO_ERROR_INVALID_ARGUMENT")
+    '("permission-denied" "G_IO_ERROR_PERMISSION_DENIED")
+    '("not-supported" "G_IO_ERROR_NOT_SUPPORTED")
+    '("not-mounted" "G_IO_ERROR_NOT_MOUNTED")
+    '("already-mounted" "G_IO_ERROR_ALREADY_MOUNTED")
+    '("closed" "G_IO_ERROR_CLOSED")
+    '("cancelled" "G_IO_ERROR_CANCELLED")
+    '("pending" "G_IO_ERROR_PENDING")
+    '("read-only" "G_IO_ERROR_READ_ONLY")
+    '("cant-create-backup" "G_IO_ERROR_CANT_CREATE_BACKUP")
+    '("wrong-etag" "G_IO_ERROR_WRONG_ETAG")
+    '("timed-out" "G_IO_ERROR_TIMED_OUT")
+    '("would-recurse" "G_IO_ERROR_WOULD_RECURSE")
+    '("busy" "G_IO_ERROR_BUSY")
+    '("would-block" "G_IO_ERROR_WOULD_BLOCK")
+    '("host-not-found" "G_IO_ERROR_HOST_NOT_FOUND")
+    '("would-merge" "G_IO_ERROR_WOULD_MERGE")
+    '("failed-handled" "G_IO_ERROR_FAILED_HANDLED")
+  )
+)
+
+(define-flags PasswordFlags
+  (in-module "GAsk")
+  (c-name "GAskPasswordFlags")
+  (gtype-id "G_TYPE_ASK_PASSWORD_FLAGS")
+  (values
+    '("need-password" "G_ASK_PASSWORD_NEED_PASSWORD")
+    '("need-username" "G_ASK_PASSWORD_NEED_USERNAME")
+    '("need-domain" "G_ASK_PASSWORD_NEED_DOMAIN")
+    '("saving-supported" "G_ASK_PASSWORD_SAVING_SUPPORTED")
+    '("anonymous-supported" "G_ASK_PASSWORD_ANONYMOUS_SUPPORTED")
+  )
+)
+
+(define-enum Save
+  (in-module "GPassword")
+  (c-name "GPasswordSave")
+  (gtype-id "G_TYPE_PASSWORD_SAVE")
+  (values
+    '("never" "G_PASSWORD_SAVE_NEVER")
+    '("for-session" "G_PASSWORD_SAVE_FOR_SESSION")
+    '("permanently" "G_PASSWORD_SAVE_PERMANENTLY")
+  )
+)
+
+(define-enum OperationResult
+  (in-module "GMount")
+  (c-name "GMountOperationResult")
+  (gtype-id "G_TYPE_MOUNT_OPERATION_RESULT")
+  (values
+    '("handled" "G_MOUNT_OPERATION_HANDLED")
+    '("aborted" "G_MOUNT_OPERATION_ABORTED")
+    '("unhandled" "G_MOUNT_OPERATION_UNHANDLED")
+  )
+)
+
+(define-flags StreamSpliceFlags
+  (in-module "GOutput")
+  (c-name "GOutputStreamSpliceFlags")
+  (gtype-id "G_TYPE_OUTPUT_STREAM_SPLICE_FLAGS")
+  (values
+    '("none" "G_OUTPUT_STREAM_SPLICE_NONE")
+    '("close-source" "G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE")
+    '("close-target" "G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET")
+  )
+)
+
+
+;; From gappinfo.h
+
+(define-function g_app_info_get_type
+  (c-name "g_app_info_get_type")
+  (return-type "GType")
+)
+
+(define-function g_app_launch_context_get_type
+  (c-name "g_app_launch_context_get_type")
+  (return-type "GType")
+)
+
+(define-function g_app_info_create_from_commandline
+  (c-name "g_app_info_create_from_commandline")
+  (return-type "GAppInfo*")
+  (parameters
+    '("const-char*" "commandline")
+    '("const-char*" "application_name")
+    '("GAppInfoCreateFlags" "flags")
+    '("GError**" "error")
+  )
+)
+
+(define-method dup
+  (of-object "GAppInfo")
+  (c-name "g_app_info_dup")
+  (return-type "GAppInfo*")
+)
+
+(define-method equal
+  (of-object "GAppInfo")
+  (c-name "g_app_info_equal")
+  (return-type "gboolean")
+  (parameters
+    '("GAppInfo*" "appinfo2")
+  )
+)
+
+(define-method get_id
+  (of-object "GAppInfo")
+  (c-name "g_app_info_get_id")
+  (return-type "const-char*")
+)
+
+(define-method get_name
+  (of-object "GAppInfo")
+  (c-name "g_app_info_get_name")
+  (return-type "const-char*")
+)
+
+(define-method get_description
+  (of-object "GAppInfo")
+  (c-name "g_app_info_get_description")
+  (return-type "const-char*")
+)
+
+(define-method get_executable
+  (of-object "GAppInfo")
+  (c-name "g_app_info_get_executable")
+  (return-type "const-char*")
+)
+
+(define-method get_icon
+  (of-object "GAppInfo")
+  (c-name "g_app_info_get_icon")
+  (return-type "GIcon*")
+)
+
+(define-method launch
+  (of-object "GAppInfo")
+  (c-name "g_app_info_launch")
+  (return-type "gboolean")
+  (parameters
+    '("GList*" "files")
+    '("GAppLaunchContext*" "launch_context")
+    '("GError**" "error")
+  )
+)
+
+(define-method supports_uris
+  (of-object "GAppInfo")
+  (c-name "g_app_info_supports_uris")
+  (return-type "gboolean")
+)
+
+(define-method supports_files
+  (of-object "GAppInfo")
+  (c-name "g_app_info_supports_files")
+  (return-type "gboolean")
+)
+
+(define-method launch_uris
+  (of-object "GAppInfo")
+  (c-name "g_app_info_launch_uris")
+  (return-type "gboolean")
+  (parameters
+    '("GList*" "uris")
+    '("GAppLaunchContext*" "launch_context")
+    '("GError**" "error")
+  )
+)
+
+(define-method should_show
+  (of-object "GAppInfo")
+  (c-name "g_app_info_should_show")
+  (return-type "gboolean")
+)
+
+(define-method set_as_default_for_type
+  (of-object "GAppInfo")
+  (c-name "g_app_info_set_as_default_for_type")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "content_type")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_as_default_for_extension
+  (of-object "GAppInfo")
+  (c-name "g_app_info_set_as_default_for_extension")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "extension")
+    '("GError**" "error")
+  )
+)
+
+(define-method add_supports_type
+  (of-object "GAppInfo")
+  (c-name "g_app_info_add_supports_type")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "content_type")
+    '("GError**" "error")
+  )
+)
+
+(define-method can_remove_supports_type
+  (of-object "GAppInfo")
+  (c-name "g_app_info_can_remove_supports_type")
+  (return-type "gboolean")
+)
+
+(define-method remove_supports_type
+  (of-object "GAppInfo")
+  (c-name "g_app_info_remove_supports_type")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "content_type")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_app_info_get_all
+  (c-name "g_app_info_get_all")
+  (return-type "GList*")
+)
+
+(define-function g_app_info_get_all_for_type
+  (c-name "g_app_info_get_all_for_type")
+  (return-type "GList*")
+  (parameters
+    '("const-char*" "content_type")
+  )
+)
+
+(define-function g_app_info_get_default_for_type
+  (c-name "g_app_info_get_default_for_type")
+  (return-type "GAppInfo*")
+  (parameters
+    '("const-char*" "content_type")
+    '("gboolean" "must_support_uris")
+  )
+)
+
+(define-function g_app_info_get_default_for_uri_scheme
+  (c-name "g_app_info_get_default_for_uri_scheme")
+  (return-type "GAppInfo*")
+  (parameters
+    '("const-char*" "uri_scheme")
+  )
+)
+
+(define-function g_app_info_launch_default_for_uri
+  (c-name "g_app_info_launch_default_for_uri")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "uri")
+    '("GAppLaunchContext*" "launch_context")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_app_launch_context_new
+  (c-name "g_app_launch_context_new")
+  (is-constructor-of "GAppLaunchContext")
+  (return-type "GAppLaunchContext*")
+)
+
+(define-method get_display
+  (of-object "GAppLaunchContext")
+  (c-name "g_app_launch_context_get_display")
+  (return-type "char*")
+  (parameters
+    '("GAppInfo*" "info")
+    '("GList*" "files")
+  )
+)
+
+(define-method get_startup_notify_id
+  (of-object "GAppLaunchContext")
+  (c-name "g_app_launch_context_get_startup_notify_id")
+  (return-type "char*")
+  (parameters
+    '("GAppInfo*" "info")
+    '("GList*" "files")
+  )
+)
+
+(define-method launch_failed
+  (of-object "GAppLaunchContext")
+  (c-name "g_app_launch_context_launch_failed")
+  (return-type "none")
+  (parameters
+    '("const-char*" "startup_notify_id")
+  )
+)
+
+
+
+;; From gasynchelper.h
+
+
+
+;; From gasyncresult.h
+
+(define-function g_async_result_get_type
+  (c-name "g_async_result_get_type")
+  (return-type "GType")
+)
+
+(define-method get_user_data
+  (of-object "GAsyncResult")
+  (c-name "g_async_result_get_user_data")
+  (return-type "gpointer")
+)
+
+(define-method get_source_object
+  (of-object "GAsyncResult")
+  (c-name "g_async_result_get_source_object")
+  (return-type "GObject*")
+)
+
+
+
+;; From gbufferedinputstream.h
+
+(define-function g_buffered_input_stream_get_type
+  (c-name "g_buffered_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_buffered_input_stream_new
+  (c-name "g_buffered_input_stream_new")
+  (is-constructor-of "GBufferedInputStream")
+  (return-type "GInputStream*")
+  (parameters
+    '("GInputStream*" "base_stream")
+  )
+)
+
+(define-function g_buffered_input_stream_new_sized
+  (c-name "g_buffered_input_stream_new_sized")
+  (return-type "GInputStream*")
+  (parameters
+    '("GInputStream*" "base_stream")
+    '("gsize" "size")
+  )
+)
+
+(define-method get_buffer_size
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_get_buffer_size")
+  (return-type "gsize")
+)
+
+(define-method set_buffer_size
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_set_buffer_size")
+  (return-type "none")
+  (parameters
+    '("gsize" "size")
+  )
+)
+
+(define-method get_available
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_get_available")
+  (return-type "gsize")
+)
+
+(define-method peek
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_peek")
+  (return-type "gsize")
+  (parameters
+    '("void*" "buffer")
+    '("gsize" "offset")
+    '("gsize" "count")
+  )
+)
+
+(define-method peek_buffer
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_peek_buffer")
+  (return-type "const-void*")
+  (parameters
+    '("gsize*" "count")
+  )
+)
+
+(define-method fill
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_fill")
+  (return-type "gssize")
+  (parameters
+    '("gssize" "count")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method fill_async
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_fill_async")
+  (return-type "none")
+  (parameters
+    '("gssize" "count")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method fill_finish
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_fill_finish")
+  (return-type "gssize")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_byte
+  (of-object "GBufferedInputStream")
+  (c-name "g_buffered_input_stream_read_byte")
+  (return-type "int")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gbufferedoutputstream.h
+
+(define-function g_buffered_output_stream_get_type
+  (c-name "g_buffered_output_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_buffered_output_stream_new
+  (c-name "g_buffered_output_stream_new")
+  (is-constructor-of "GBufferedOutputStream")
+  (return-type "GOutputStream*")
+  (parameters
+    '("GOutputStream*" "base_stream")
+  )
+)
+
+(define-function g_buffered_output_stream_new_sized
+  (c-name "g_buffered_output_stream_new_sized")
+  (return-type "GOutputStream*")
+  (parameters
+    '("GOutputStream*" "base_stream")
+    '("gsize" "size")
+  )
+)
+
+(define-method get_buffer_size
+  (of-object "GBufferedOutputStream")
+  (c-name "g_buffered_output_stream_get_buffer_size")
+  (return-type "gsize")
+)
+
+(define-method set_buffer_size
+  (of-object "GBufferedOutputStream")
+  (c-name "g_buffered_output_stream_set_buffer_size")
+  (return-type "none")
+  (parameters
+    '("gsize" "size")
+  )
+)
+
+(define-method get_auto_grow
+  (of-object "GBufferedOutputStream")
+  (c-name "g_buffered_output_stream_get_auto_grow")
+  (return-type "gboolean")
+)
+
+(define-method set_auto_grow
+  (of-object "GBufferedOutputStream")
+  (c-name "g_buffered_output_stream_set_auto_grow")
+  (return-type "none")
+  (parameters
+    '("gboolean" "auto_grow")
+  )
+)
+
+
+
+;; From gcancellable.h
+
+(define-function g_cancellable_get_type
+  (c-name "g_cancellable_get_type")
+  (return-type "GType")
+)
+
+(define-function g_cancellable_new
+  (c-name "g_cancellable_new")
+  (is-constructor-of "GCancellable")
+  (return-type "GCancellable*")
+)
+
+(define-method is_cancelled
+  (of-object "GCancellable")
+  (c-name "g_cancellable_is_cancelled")
+  (return-type "gboolean")
+)
+
+(define-method set_error_if_cancelled
+  (of-object "GCancellable")
+  (c-name "g_cancellable_set_error_if_cancelled")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method get_fd
+  (of-object "GCancellable")
+  (c-name "g_cancellable_get_fd")
+  (return-type "int")
+)
+
+(define-function g_cancellable_get_current
+  (c-name "g_cancellable_get_current")
+  (return-type "GCancellable*")
+)
+
+(define-method push_current
+  (of-object "GCancellable")
+  (c-name "g_cancellable_push_current")
+  (return-type "none")
+)
+
+(define-method pop_current
+  (of-object "GCancellable")
+  (c-name "g_cancellable_pop_current")
+  (return-type "none")
+)
+
+(define-method reset
+  (of-object "GCancellable")
+  (c-name "g_cancellable_reset")
+  (return-type "none")
+)
+
+(define-method cancel
+  (of-object "GCancellable")
+  (c-name "g_cancellable_cancel")
+  (return-type "none")
+)
+
+
+
+;; From gcontenttype.h
+
+(define-function g_content_type_equals
+  (c-name "g_content_type_equals")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "type1")
+    '("const-char*" "type2")
+  )
+)
+
+(define-function g_content_type_is_a
+  (c-name "g_content_type_is_a")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "type")
+    '("const-char*" "supertype")
+  )
+)
+
+(define-function g_content_type_is_unknown
+  (c-name "g_content_type_is_unknown")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "type")
+  )
+)
+
+(define-function g_content_type_get_description
+  (c-name "g_content_type_get_description")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "type")
+  )
+)
+
+(define-function g_content_type_get_mime_type
+  (c-name "g_content_type_get_mime_type")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "type")
+  )
+)
+
+(define-function g_content_type_get_icon
+  (c-name "g_content_type_get_icon")
+  (return-type "GIcon*")
+  (parameters
+    '("const-char*" "type")
+  )
+)
+
+(define-function g_content_type_can_be_executable
+  (c-name "g_content_type_can_be_executable")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "type")
+  )
+)
+
+(define-function g_content_type_from_mime_type
+  (c-name "g_content_type_from_mime_type")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "mime_type")
+  )
+)
+
+(define-function g_content_type_guess
+  (c-name "g_content_type_guess")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "filename")
+    '("const-guchar*" "data")
+    '("gsize" "data_size")
+    '("gboolean*" "result_uncertain")
+  )
+)
+
+(define-function g_content_type_guess_for_tree
+  (c-name "g_content_type_guess_for_tree")
+  (return-type "char**")
+  (parameters
+    '("GFile*" "root")
+  )
+)
+
+(define-function g_content_types_get_registered
+  (c-name "g_content_types_get_registered")
+  (return-type "GList*")
+)
+
+
+
+;; From gcontenttypeprivate.h
+
+
+
+;; From gdatainputstream.h
+
+(define-function g_data_input_stream_get_type
+  (c-name "g_data_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_data_input_stream_new
+  (c-name "g_data_input_stream_new")
+  (is-constructor-of "GDataInputStream")
+  (return-type "GDataInputStream*")
+  (parameters
+    '("GInputStream*" "base_stream")
+  )
+)
+
+(define-method set_byte_order
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_set_byte_order")
+  (return-type "none")
+  (parameters
+    '("GDataStreamByteOrder" "order")
+  )
+)
+
+(define-method get_byte_order
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_get_byte_order")
+  (return-type "GDataStreamByteOrder")
+)
+
+(define-method set_newline_type
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_set_newline_type")
+  (return-type "none")
+  (parameters
+    '("GDataStreamNewlineType" "type")
+  )
+)
+
+(define-method get_newline_type
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_get_newline_type")
+  (return-type "GDataStreamNewlineType")
+)
+
+(define-method read_byte
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_byte")
+  (return-type "guchar")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_int16
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_int16")
+  (return-type "gint16")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_uint16
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_uint16")
+  (return-type "guint16")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_int32
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_int32")
+  (return-type "gint32")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_uint32
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_uint32")
+  (return-type "guint32")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_int64
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_int64")
+  (return-type "gint64")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_uint64
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_uint64")
+  (return-type "guint64")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_line
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_line")
+  (return-type "char*")
+  (parameters
+    '("gsize*" "length")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_until
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_until")
+  (return-type "char*")
+  (parameters
+    '("const-gchar*" "stop_chars")
+    '("gsize*" "length")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gdataoutputstream.h
+
+(define-function g_data_output_stream_get_type
+  (c-name "g_data_output_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_data_output_stream_new
+  (c-name "g_data_output_stream_new")
+  (is-constructor-of "GDataOutputStream")
+  (return-type "GDataOutputStream*")
+  (parameters
+    '("GOutputStream*" "base_stream")
+  )
+)
+
+(define-method set_byte_order
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_set_byte_order")
+  (return-type "none")
+  (parameters
+    '("GDataStreamByteOrder" "order")
+  )
+)
+
+(define-method get_byte_order
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_get_byte_order")
+  (return-type "GDataStreamByteOrder")
+)
+
+(define-method put_byte
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_byte")
+  (return-type "gboolean")
+  (parameters
+    '("guchar" "data")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method put_int16
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_int16")
+  (return-type "gboolean")
+  (parameters
+    '("gint16" "data")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method put_uint16
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_uint16")
+  (return-type "gboolean")
+  (parameters
+    '("guint16" "data")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method put_int32
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_int32")
+  (return-type "gboolean")
+  (parameters
+    '("gint32" "data")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method put_uint32
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_uint32")
+  (return-type "gboolean")
+  (parameters
+    '("guint32" "data")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method put_int64
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_int64")
+  (return-type "gboolean")
+  (parameters
+    '("gint64" "data")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method put_uint64
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_uint64")
+  (return-type "gboolean")
+  (parameters
+    '("guint64" "data")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method put_string
+  (of-object "GDataOutputStream")
+  (c-name "g_data_output_stream_put_string")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "str")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gdesktopappinfo.h
+
+(define-function g_desktop_app_info_get_type
+  (c-name "g_desktop_app_info_get_type")
+  (return-type "GType")
+)
+
+(define-function g_desktop_app_info_new_from_filename
+  (c-name "g_desktop_app_info_new_from_filename")
+  (return-type "GDesktopAppInfo*")
+  (parameters
+    '("const-char*" "filename")
+  )
+)
+
+(define-function g_desktop_app_info_new_from_keyfile
+  (c-name "g_desktop_app_info_new_from_keyfile")
+  (return-type "GDesktopAppInfo*")
+  (parameters
+    '("GKeyFile*" "key_file")
+  )
+)
+
+(define-function g_desktop_app_info_new
+  (c-name "g_desktop_app_info_new")
+  (is-constructor-of "GDesktopAppInfo")
+  (return-type "GDesktopAppInfo*")
+  (parameters
+    '("const-char*" "desktop_id")
+  )
+)
+
+(define-method get_is_hidden
+  (of-object "GDesktopAppInfo")
+  (c-name "g_desktop_app_info_get_is_hidden")
+  (return-type "gboolean")
+)
+
+(define-function g_desktop_app_info_set_desktop_env
+  (c-name "g_desktop_app_info_set_desktop_env")
+  (return-type "none")
+  (parameters
+    '("const-char*" "desktop_env")
+  )
+)
+
+(define-function g_desktop_app_info_lookup_get_type
+  (c-name "g_desktop_app_info_lookup_get_type")
+  (return-type "GType")
+)
+
+(define-method get_default_for_uri_scheme
+  (of-object "GDesktopAppInfoLookup")
+  (c-name "g_desktop_app_info_lookup_get_default_for_uri_scheme")
+  (return-type "GAppInfo*")
+  (parameters
+    '("const-char*" "uri_scheme")
+  )
+)
+
+
+
+;; From gdrive.h
+
+(define-function g_drive_get_type
+  (c-name "g_drive_get_type")
+  (return-type "GType")
+)
+
+(define-method get_name
+  (of-object "GDrive")
+  (c-name "g_drive_get_name")
+  (return-type "char*")
+)
+
+(define-method get_icon
+  (of-object "GDrive")
+  (c-name "g_drive_get_icon")
+  (return-type "GIcon*")
+)
+
+(define-method has_volumes
+  (of-object "GDrive")
+  (c-name "g_drive_has_volumes")
+  (return-type "gboolean")
+)
+
+(define-method get_volumes
+  (of-object "GDrive")
+  (c-name "g_drive_get_volumes")
+  (return-type "GList*")
+)
+
+(define-method is_media_removable
+  (of-object "GDrive")
+  (c-name "g_drive_is_media_removable")
+  (return-type "gboolean")
+)
+
+(define-method has_media
+  (of-object "GDrive")
+  (c-name "g_drive_has_media")
+  (return-type "gboolean")
+)
+
+(define-method is_media_check_automatic
+  (of-object "GDrive")
+  (c-name "g_drive_is_media_check_automatic")
+  (return-type "gboolean")
+)
+
+(define-method can_poll_for_media
+  (of-object "GDrive")
+  (c-name "g_drive_can_poll_for_media")
+  (return-type "gboolean")
+)
+
+(define-method can_eject
+  (of-object "GDrive")
+  (c-name "g_drive_can_eject")
+  (return-type "gboolean")
+)
+
+(define-method eject
+  (of-object "GDrive")
+  (c-name "g_drive_eject")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_finish
+  (of-object "GDrive")
+  (c-name "g_drive_eject_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method poll_for_media
+  (of-object "GDrive")
+  (c-name "g_drive_poll_for_media")
+  (return-type "none")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method poll_for_media_finish
+  (of-object "GDrive")
+  (c-name "g_drive_poll_for_media_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_identifier
+  (of-object "GDrive")
+  (c-name "g_drive_get_identifier")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "kind")
+  )
+)
+
+(define-method enumerate_identifiers
+  (of-object "GDrive")
+  (c-name "g_drive_enumerate_identifiers")
+  (return-type "char**")
+)
+
+
+
+;; From gdummyfile.h
+
+
+
+;; From gfileattribute.h
+
+(define-function g_file_attribute_info_list_new
+  (c-name "g_file_attribute_info_list_new")
+  (is-constructor-of "GFileAttributeInfoList")
+  (return-type "GFileAttributeInfoList*")
+)
+
+(define-method ref
+  (of-object "GFileAttributeInfoList")
+  (c-name "g_file_attribute_info_list_ref")
+  (return-type "GFileAttributeInfoList*")
+)
+
+(define-method unref
+  (of-object "GFileAttributeInfoList")
+  (c-name "g_file_attribute_info_list_unref")
+  (return-type "none")
+)
+
+(define-method dup
+  (of-object "GFileAttributeInfoList")
+  (c-name "g_file_attribute_info_list_dup")
+  (return-type "GFileAttributeInfoList*")
+)
+
+(define-method lookup
+  (of-object "GFileAttributeInfoList")
+  (c-name "g_file_attribute_info_list_lookup")
+  (return-type "const-GFileAttributeInfo*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method add
+  (of-object "GFileAttributeInfoList")
+  (c-name "g_file_attribute_info_list_add")
+  (return-type "none")
+  (parameters
+    '("const-char*" "name")
+    '("GFileAttributeType" "type")
+    '("GFileAttributeInfoFlags" "flags")
+  )
+)
+
+
+
+;; From gfileattribute-priv.h
+
+
+
+;; From gfileenumerator.h
+
+(define-function g_file_enumerator_get_type
+  (c-name "g_file_enumerator_get_type")
+  (return-type "GType")
+)
+
+(define-method next_file
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_next_file")
+  (return-type "GFileInfo*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method close
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_close")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method next_files_async
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_next_files_async")
+  (return-type "none")
+  (parameters
+    '("int" "num_files")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method next_files_finish
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_next_files_finish")
+  (return-type "GList*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method close_async
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_close_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method close_finish
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_close_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method is_closed
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_is_closed")
+  (return-type "gboolean")
+)
+
+(define-method has_pending
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_has_pending")
+  (return-type "gboolean")
+)
+
+(define-method set_pending
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_set_pending")
+  (return-type "none")
+  (parameters
+    '("gboolean" "pending")
+  )
+)
+
+(define-method get_container
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_get_container")
+  (return-type "GFile*")
+)
+
+
+
+;; From gfile.h
+
+(define-function g_file_get_type
+  (c-name "g_file_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_new_for_path
+  (c-name "g_file_new_for_path")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "path")
+  )
+)
+
+(define-function g_file_new_for_uri
+  (c-name "g_file_new_for_uri")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "uri")
+  )
+)
+
+(define-function g_file_new_for_commandline_arg
+  (c-name "g_file_new_for_commandline_arg")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "arg")
+  )
+)
+
+(define-function g_file_parse_name
+  (c-name "g_file_parse_name")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "parse_name")
+  )
+)
+
+(define-method dup
+  (of-object "GFile")
+  (c-name "g_file_dup")
+  (return-type "GFile*")
+)
+
+(define-function g_file_hash
+  (c-name "g_file_hash")
+  (return-type "guint")
+  (parameters
+    '("gconstpointer" "file")
+  )
+)
+
+(define-method equal
+  (of-object "GFile")
+  (c-name "g_file_equal")
+  (return-type "gboolean")
+  (parameters
+    '("GFile*" "file2")
+  )
+)
+
+(define-method get_basename
+  (of-object "GFile")
+  (c-name "g_file_get_basename")
+  (return-type "char*")
+)
+
+(define-method get_path
+  (of-object "GFile")
+  (c-name "g_file_get_path")
+  (return-type "char*")
+)
+
+(define-method get_uri
+  (of-object "GFile")
+  (c-name "g_file_get_uri")
+  (return-type "char*")
+)
+
+(define-method get_parse_name
+  (of-object "GFile")
+  (c-name "g_file_get_parse_name")
+  (return-type "char*")
+)
+
+(define-method get_parent
+  (of-object "GFile")
+  (c-name "g_file_get_parent")
+  (return-type "GFile*")
+)
+
+(define-method get_child
+  (of-object "GFile")
+  (c-name "g_file_get_child")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method get_child_for_display_name
+  (of-object "GFile")
+  (c-name "g_file_get_child_for_display_name")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "display_name")
+    '("GError**" "error")
+  )
+)
+
+(define-method has_prefix
+  (of-object "GFile")
+  (c-name "g_file_has_prefix")
+  (return-type "gboolean")
+  (parameters
+    '("GFile*" "prefix")
+  )
+)
+
+(define-method get_relative_path
+  (of-object "GFile")
+  (c-name "g_file_get_relative_path")
+  (return-type "char*")
+  (parameters
+    '("GFile*" "descendant")
+  )
+)
+
+(define-method resolve_relative_path
+  (of-object "GFile")
+  (c-name "g_file_resolve_relative_path")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "relative_path")
+  )
+)
+
+(define-method is_native
+  (of-object "GFile")
+  (c-name "g_file_is_native")
+  (return-type "gboolean")
+)
+
+(define-method has_uri_scheme
+  (of-object "GFile")
+  (c-name "g_file_has_uri_scheme")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "uri_scheme")
+  )
+)
+
+(define-method get_uri_scheme
+  (of-object "GFile")
+  (c-name "g_file_get_uri_scheme")
+  (return-type "char*")
+)
+
+(define-method read
+  (of-object "GFile")
+  (c-name "g_file_read")
+  (return-type "GFileInputStream*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_async
+  (of-object "GFile")
+  (c-name "g_file_read_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method read_finish
+  (of-object "GFile")
+  (c-name "g_file_read_finish")
+  (return-type "GFileInputStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method append_to
+  (of-object "GFile")
+  (c-name "g_file_append_to")
+  (return-type "GFileOutputStream*")
+  (parameters
+    '("GFileCreateFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method create
+  (of-object "GFile")
+  (c-name "g_file_create")
+  (return-type "GFileOutputStream*")
+  (parameters
+    '("GFileCreateFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace
+  (of-object "GFile")
+  (c-name "g_file_replace")
+  (return-type "GFileOutputStream*")
+  (parameters
+    '("const-char*" "etag")
+    '("gboolean" "make_backup")
+    '("GFileCreateFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method append_to_async
+  (of-object "GFile")
+  (c-name "g_file_append_to_async")
+  (return-type "none")
+  (parameters
+    '("GFileCreateFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method append_to_finish
+  (of-object "GFile")
+  (c-name "g_file_append_to_finish")
+  (return-type "GFileOutputStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method create_async
+  (of-object "GFile")
+  (c-name "g_file_create_async")
+  (return-type "none")
+  (parameters
+    '("GFileCreateFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method create_finish
+  (of-object "GFile")
+  (c-name "g_file_create_finish")
+  (return-type "GFileOutputStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace_async
+  (of-object "GFile")
+  (c-name "g_file_replace_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "etag")
+    '("gboolean" "make_backup")
+    '("GFileCreateFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method replace_finish
+  (of-object "GFile")
+  (c-name "g_file_replace_finish")
+  (return-type "GFileOutputStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_exists
+  (of-object "GFile")
+  (c-name "g_file_query_exists")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+  )
+)
+
+(define-method query_file_type
+  (of-object "GFile")
+  (c-name "g_file_query_file_type")
+  (return-type "GFileType")
+  (parameters
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+  )
+)
+
+(define-method query_info
+  (of-object "GFile")
+  (c-name "g_file_query_info")
+  (return-type "GFileInfo*")
+  (parameters
+    '("const-char*" "attributes")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_info_async
+  (of-object "GFile")
+  (c-name "g_file_query_info_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attributes")
+    '("GFileQueryInfoFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method query_info_finish
+  (of-object "GFile")
+  (c-name "g_file_query_info_finish")
+  (return-type "GFileInfo*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_filesystem_info
+  (of-object "GFile")
+  (c-name "g_file_query_filesystem_info")
+  (return-type "GFileInfo*")
+  (parameters
+    '("const-char*" "attributes")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_filesystem_info_async
+  (of-object "GFile")
+  (c-name "g_file_query_filesystem_info_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attributes")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method query_filesystem_info_finish
+  (of-object "GFile")
+  (c-name "g_file_query_filesystem_info_finish")
+  (return-type "GFileInfo*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method find_enclosing_mount
+  (of-object "GFile")
+  (c-name "g_file_find_enclosing_mount")
+  (return-type "GMount*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method find_enclosing_mount_async
+  (of-object "GFile")
+  (c-name "g_file_find_enclosing_mount_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method find_enclosing_mount_finish
+  (of-object "GFile")
+  (c-name "g_file_find_enclosing_mount_finish")
+  (return-type "GMount*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method enumerate_children
+  (of-object "GFile")
+  (c-name "g_file_enumerate_children")
+  (return-type "GFileEnumerator*")
+  (parameters
+    '("const-char*" "attributes")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method enumerate_children_async
+  (of-object "GFile")
+  (c-name "g_file_enumerate_children_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attributes")
+    '("GFileQueryInfoFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method enumerate_children_finish
+  (of-object "GFile")
+  (c-name "g_file_enumerate_children_finish")
+  (return-type "GFileEnumerator*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_display_name
+  (of-object "GFile")
+  (c-name "g_file_set_display_name")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "display_name")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_display_name_async
+  (of-object "GFile")
+  (c-name "g_file_set_display_name_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "display_name")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method set_display_name_finish
+  (of-object "GFile")
+  (c-name "g_file_set_display_name_finish")
+  (return-type "GFile*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method delete
+  (of-object "GFile")
+  (c-name "g_file_delete")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method trash
+  (of-object "GFile")
+  (c-name "g_file_trash")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method copy
+  (of-object "GFile")
+  (c-name "g_file_copy")
+  (return-type "gboolean")
+  (parameters
+    '("GFile*" "destination")
+    '("GFileCopyFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GFileProgressCallback" "progress_callback")
+    '("gpointer" "progress_callback_data")
+    '("GError**" "error")
+  )
+)
+
+(define-method copy_async
+  (of-object "GFile")
+  (c-name "g_file_copy_async")
+  (return-type "none")
+  (parameters
+    '("GFile*" "destination")
+    '("GFileCopyFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GFileProgressCallback" "progress_callback")
+    '("gpointer" "progress_callback_data")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method copy_finish
+  (of-object "GFile")
+  (c-name "g_file_copy_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method move
+  (of-object "GFile")
+  (c-name "g_file_move")
+  (return-type "gboolean")
+  (parameters
+    '("GFile*" "destination")
+    '("GFileCopyFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GFileProgressCallback" "progress_callback")
+    '("gpointer" "progress_callback_data")
+    '("GError**" "error")
+  )
+)
+
+(define-method make_directory
+  (of-object "GFile")
+  (c-name "g_file_make_directory")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method make_directory_with_parents
+  (of-object "GFile")
+  (c-name "g_file_make_directory_with_parents")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method make_symbolic_link
+  (of-object "GFile")
+  (c-name "g_file_make_symbolic_link")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "symlink_value")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_settable_attributes
+  (of-object "GFile")
+  (c-name "g_file_query_settable_attributes")
+  (return-type "GFileAttributeInfoList*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_writable_namespaces
+  (of-object "GFile")
+  (c-name "g_file_query_writable_namespaces")
+  (return-type "GFileAttributeInfoList*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attribute
+  (of-object "GFile")
+  (c-name "g_file_set_attribute")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("GFileAttributeType" "type")
+    '("gpointer" "value_p")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attributes_from_info
+  (of-object "GFile")
+  (c-name "g_file_set_attributes_from_info")
+  (return-type "gboolean")
+  (parameters
+    '("GFileInfo*" "info")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attributes_async
+  (of-object "GFile")
+  (c-name "g_file_set_attributes_async")
+  (return-type "none")
+  (parameters
+    '("GFileInfo*" "info")
+    '("GFileQueryInfoFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method set_attributes_finish
+  (of-object "GFile")
+  (c-name "g_file_set_attributes_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GFileInfo**" "info")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attribute_string
+  (of-object "GFile")
+  (c-name "g_file_set_attribute_string")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("const-char*" "value")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attribute_byte_string
+  (of-object "GFile")
+  (c-name "g_file_set_attribute_byte_string")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("const-char*" "value")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attribute_uint32
+  (of-object "GFile")
+  (c-name "g_file_set_attribute_uint32")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("guint32" "value")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attribute_int32
+  (of-object "GFile")
+  (c-name "g_file_set_attribute_int32")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("gint32" "value")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attribute_uint64
+  (of-object "GFile")
+  (c-name "g_file_set_attribute_uint64")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("guint64" "value")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_attribute_int64
+  (of-object "GFile")
+  (c-name "g_file_set_attribute_int64")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("gint64" "value")
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method mount_enclosing_volume
+  (of-object "GFile")
+  (c-name "g_file_mount_enclosing_volume")
+  (return-type "none")
+  (parameters
+    '("GMountMountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method mount_enclosing_volume_finish
+  (of-object "GFile")
+  (c-name "g_file_mount_enclosing_volume_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method mount_mountable
+  (of-object "GFile")
+  (c-name "g_file_mount_mountable")
+  (return-type "none")
+  (parameters
+    '("GMountMountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method mount_mountable_finish
+  (of-object "GFile")
+  (c-name "g_file_mount_mountable_finish")
+  (return-type "GFile*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method unmount_mountable
+  (of-object "GFile")
+  (c-name "g_file_unmount_mountable")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method unmount_mountable_finish
+  (of-object "GFile")
+  (c-name "g_file_unmount_mountable_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method eject_mountable
+  (of-object "GFile")
+  (c-name "g_file_eject_mountable")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_mountable_finish
+  (of-object "GFile")
+  (c-name "g_file_eject_mountable_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method copy_attributes
+  (of-object "GFile")
+  (c-name "g_file_copy_attributes")
+  (return-type "gboolean")
+  (parameters
+    '("GFile*" "destination")
+    '("GFileCopyFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method monitor_directory
+  (of-object "GFile")
+  (c-name "g_file_monitor_directory")
+  (return-type "GFileMonitor*")
+  (parameters
+    '("GFileMonitorFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method monitor_file
+  (of-object "GFile")
+  (c-name "g_file_monitor_file")
+  (return-type "GFileMonitor*")
+  (parameters
+    '("GFileMonitorFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method monitor
+  (of-object "GFile")
+  (c-name "g_file_monitor")
+  (return-type "GFileMonitor*")
+  (parameters
+    '("GFileMonitorFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_default_handler
+  (of-object "GFile")
+  (c-name "g_file_query_default_handler")
+  (return-type "GAppInfo*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method load_contents
+  (of-object "GFile")
+  (c-name "g_file_load_contents")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("char**" "contents")
+    '("gsize*" "length")
+    '("char**" "etag_out")
+    '("GError**" "error")
+  )
+)
+
+(define-method load_contents_async
+  (of-object "GFile")
+  (c-name "g_file_load_contents_async")
+  (return-type "none")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method load_contents_finish
+  (of-object "GFile")
+  (c-name "g_file_load_contents_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("char**" "contents")
+    '("gsize*" "length")
+    '("char**" "etag_out")
+    '("GError**" "error")
+  )
+)
+
+(define-method load_partial_contents_async
+  (of-object "GFile")
+  (c-name "g_file_load_partial_contents_async")
+  (return-type "none")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GFileReadMoreCallback" "read_more_callback")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method load_partial_contents_finish
+  (of-object "GFile")
+  (c-name "g_file_load_partial_contents_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("char**" "contents")
+    '("gsize*" "length")
+    '("char**" "etag_out")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace_contents
+  (of-object "GFile")
+  (c-name "g_file_replace_contents")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "contents")
+    '("gsize" "length")
+    '("const-char*" "etag")
+    '("gboolean" "make_backup")
+    '("GFileCreateFlags" "flags")
+    '("char**" "new_etag")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace_contents_async
+  (of-object "GFile")
+  (c-name "g_file_replace_contents_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "contents")
+    '("gsize" "length")
+    '("const-char*" "etag")
+    '("gboolean" "make_backup")
+    '("GFileCreateFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method replace_contents_finish
+  (of-object "GFile")
+  (c-name "g_file_replace_contents_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("char**" "new_etag")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gfileicon.h
+
+(define-function g_file_icon_get_type
+  (c-name "g_file_icon_get_type")
+  (return-type "GType")
+)
+
+(define-method icon_new
+  (of-object "GFile")
+  (c-name "g_file_icon_new")
+  (return-type "GIcon*")
+)
+
+(define-method get_file
+  (of-object "GFileIcon")
+  (c-name "g_file_icon_get_file")
+  (return-type "GFile*")
+)
+
+
+
+;; From gfileinfo.h
+
+(define-function g_file_info_get_type
+  (c-name "g_file_info_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_info_new
+  (c-name "g_file_info_new")
+  (is-constructor-of "GFileInfo")
+  (return-type "GFileInfo*")
+)
+
+(define-method dup
+  (of-object "GFileInfo")
+  (c-name "g_file_info_dup")
+  (return-type "GFileInfo*")
+)
+
+(define-method copy_into
+  (of-object "GFileInfo")
+  (c-name "g_file_info_copy_into")
+  (return-type "none")
+  (parameters
+    '("GFileInfo*" "dest_info")
+  )
+)
+
+(define-method has_attribute
+  (of-object "GFileInfo")
+  (c-name "g_file_info_has_attribute")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method list_attributes
+  (of-object "GFileInfo")
+  (c-name "g_file_info_list_attributes")
+  (return-type "char**")
+  (parameters
+    '("const-char*" "name_space")
+  )
+)
+
+(define-method get_attribute_data
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_data")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("GFileAttributeType*" "type")
+    '("gpointer*" "value_pp")
+    '("GFileAttributeStatus*" "status")
+  )
+)
+
+(define-method get_attribute_type
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_type")
+  (return-type "GFileAttributeType")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method remove_attribute
+  (of-object "GFileInfo")
+  (c-name "g_file_info_remove_attribute")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_status
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_status")
+  (return-type "GFileAttributeStatus")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_as_string
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_as_string")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_string
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_string")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_byte_string
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_byte_string")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_boolean
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_boolean")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_uint32
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_uint32")
+  (return-type "guint32")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_int32
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_int32")
+  (return-type "gint32")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_uint64
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_uint64")
+  (return-type "guint64")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_int64
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_int64")
+  (return-type "gint64")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_object
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_object")
+  (return-type "GObject*")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method set_attribute
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("GFileAttributeType" "type")
+    '("gpointer" "value_p")
+  )
+)
+
+(define-method set_attribute_string
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_string")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("const-char*" "attr_value")
+  )
+)
+
+(define-method set_attribute_byte_string
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_byte_string")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("const-char*" "attr_value")
+  )
+)
+
+(define-method set_attribute_boolean
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_boolean")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("gboolean" "attr_value")
+  )
+)
+
+(define-method set_attribute_uint32
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_uint32")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("guint32" "attr_value")
+  )
+)
+
+(define-method set_attribute_int32
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_int32")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("gint32" "attr_value")
+  )
+)
+
+(define-method set_attribute_uint64
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_uint64")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("guint64" "attr_value")
+  )
+)
+
+(define-method set_attribute_int64
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_int64")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("gint64" "attr_value")
+  )
+)
+
+(define-method set_attribute_object
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_object")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attribute")
+    '("GObject*" "attr_value")
+  )
+)
+
+(define-method clear_status
+  (of-object "GFileInfo")
+  (c-name "g_file_info_clear_status")
+  (return-type "none")
+)
+
+(define-method get_file_type
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_file_type")
+  (return-type "GFileType")
+)
+
+(define-method get_is_hidden
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_is_hidden")
+  (return-type "gboolean")
+)
+
+(define-method get_is_backup
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_is_backup")
+  (return-type "gboolean")
+)
+
+(define-method get_is_symlink
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_is_symlink")
+  (return-type "gboolean")
+)
+
+(define-method get_name
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_name")
+  (return-type "const-char*")
+)
+
+(define-method get_display_name
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_display_name")
+  (return-type "const-char*")
+)
+
+(define-method get_edit_name
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_edit_name")
+  (return-type "const-char*")
+)
+
+(define-method get_icon
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_icon")
+  (return-type "GIcon*")
+)
+
+(define-method get_content_type
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_content_type")
+  (return-type "const-char*")
+)
+
+(define-method get_size
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_size")
+  (return-type "goffset")
+)
+
+(define-method get_modification_time
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_modification_time")
+  (return-type "none")
+  (parameters
+    '("GTimeVal*" "result")
+  )
+)
+
+(define-method get_symlink_target
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_symlink_target")
+  (return-type "const-char*")
+)
+
+(define-method get_etag
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_etag")
+  (return-type "const-char*")
+)
+
+(define-method get_sort_order
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_sort_order")
+  (return-type "gint32")
+)
+
+(define-method set_attribute_mask
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_mask")
+  (return-type "none")
+  (parameters
+    '("GFileAttributeMatcher*" "mask")
+  )
+)
+
+(define-method unset_attribute_mask
+  (of-object "GFileInfo")
+  (c-name "g_file_info_unset_attribute_mask")
+  (return-type "none")
+)
+
+(define-method set_file_type
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_file_type")
+  (return-type "none")
+  (parameters
+    '("GFileType" "type")
+  )
+)
+
+(define-method set_is_hidden
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_is_hidden")
+  (return-type "none")
+  (parameters
+    '("gboolean" "is_hidden")
+  )
+)
+
+(define-method set_is_symlink
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_is_symlink")
+  (return-type "none")
+  (parameters
+    '("gboolean" "is_symlink")
+  )
+)
+
+(define-method set_name
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_name")
+  (return-type "none")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method set_display_name
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_display_name")
+  (return-type "none")
+  (parameters
+    '("const-char*" "display_name")
+  )
+)
+
+(define-method set_edit_name
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_edit_name")
+  (return-type "none")
+  (parameters
+    '("const-char*" "edit_name")
+  )
+)
+
+(define-method set_icon
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_icon")
+  (return-type "none")
+  (parameters
+    '("GIcon*" "icon")
+  )
+)
+
+(define-method set_content_type
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_content_type")
+  (return-type "none")
+  (parameters
+    '("const-char*" "content_type")
+  )
+)
+
+(define-method set_size
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_size")
+  (return-type "none")
+  (parameters
+    '("goffset" "size")
+  )
+)
+
+(define-method set_modification_time
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_modification_time")
+  (return-type "none")
+  (parameters
+    '("GTimeVal*" "mtime")
+  )
+)
+
+(define-method set_symlink_target
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_symlink_target")
+  (return-type "none")
+  (parameters
+    '("const-char*" "symlink_target")
+  )
+)
+
+(define-method set_sort_order
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_sort_order")
+  (return-type "none")
+  (parameters
+    '("gint32" "sort_order")
+  )
+)
+
+(define-function g_file_attribute_matcher_new
+  (c-name "g_file_attribute_matcher_new")
+  (is-constructor-of "GFileAttributeMatcher")
+  (return-type "GFileAttributeMatcher*")
+  (parameters
+    '("const-char*" "attributes")
+  )
+)
+
+(define-method ref
+  (of-object "GFileAttributeMatcher")
+  (c-name "g_file_attribute_matcher_ref")
+  (return-type "GFileAttributeMatcher*")
+)
+
+(define-method unref
+  (of-object "GFileAttributeMatcher")
+  (c-name "g_file_attribute_matcher_unref")
+  (return-type "none")
+)
+
+(define-method matches
+  (of-object "GFileAttributeMatcher")
+  (c-name "g_file_attribute_matcher_matches")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method matches_only
+  (of-object "GFileAttributeMatcher")
+  (c-name "g_file_attribute_matcher_matches_only")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method enumerate_namespace
+  (of-object "GFileAttributeMatcher")
+  (c-name "g_file_attribute_matcher_enumerate_namespace")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "ns")
+  )
+)
+
+(define-method enumerate_next
+  (of-object "GFileAttributeMatcher")
+  (c-name "g_file_attribute_matcher_enumerate_next")
+  (return-type "const-char*")
+)
+
+
+
+;; From gfileinputstream.h
+
+(define-function g_file_input_stream_get_type
+  (c-name "g_file_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method query_info
+  (of-object "GFileInputStream")
+  (c-name "g_file_input_stream_query_info")
+  (return-type "GFileInfo*")
+  (parameters
+    '("char*" "attributes")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_info_async
+  (of-object "GFileInputStream")
+  (c-name "g_file_input_stream_query_info_async")
+  (return-type "none")
+  (parameters
+    '("char*" "attributes")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method query_info_finish
+  (of-object "GFileInputStream")
+  (c-name "g_file_input_stream_query_info_finish")
+  (return-type "GFileInfo*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gfilemonitor.h
+
+(define-function g_file_monitor_get_type
+  (c-name "g_file_monitor_get_type")
+  (return-type "GType")
+)
+
+(define-method cancel
+  (of-object "GFileMonitor")
+  (c-name "g_file_monitor_cancel")
+  (return-type "gboolean")
+)
+
+(define-method is_cancelled
+  (of-object "GFileMonitor")
+  (c-name "g_file_monitor_is_cancelled")
+  (return-type "gboolean")
+)
+
+(define-method set_rate_limit
+  (of-object "GFileMonitor")
+  (c-name "g_file_monitor_set_rate_limit")
+  (return-type "none")
+  (parameters
+    '("int" "limit_msecs")
+  )
+)
+
+(define-method emit_event
+  (of-object "GFileMonitor")
+  (c-name "g_file_monitor_emit_event")
+  (return-type "none")
+  (parameters
+    '("GFile*" "child")
+    '("GFile*" "other_file")
+    '("GFileMonitorEvent" "event_type")
+  )
+)
+
+
+
+;; From gfilenamecompleter.h
+
+(define-function g_filename_completer_get_type
+  (c-name "g_filename_completer_get_type")
+  (return-type "GType")
+)
+
+(define-function g_filename_completer_new
+  (c-name "g_filename_completer_new")
+  (is-constructor-of "GFilenameCompleter")
+  (return-type "GFilenameCompleter*")
+)
+
+(define-method get_completion_suffix
+  (of-object "GFilenameCompleter")
+  (c-name "g_filename_completer_get_completion_suffix")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "initial_text")
+  )
+)
+
+(define-method get_completions
+  (of-object "GFilenameCompleter")
+  (c-name "g_filename_completer_get_completions")
+  (return-type "char**")
+  (parameters
+    '("const-char*" "initial_text")
+  )
+)
+
+(define-method set_dirs_only
+  (of-object "GFilenameCompleter")
+  (c-name "g_filename_completer_set_dirs_only")
+  (return-type "none")
+  (parameters
+    '("gboolean" "dirs_only")
+  )
+)
+
+
+
+;; From gfileoutputstream.h
+
+(define-function g_file_output_stream_get_type
+  (c-name "g_file_output_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method query_info
+  (of-object "GFileOutputStream")
+  (c-name "g_file_output_stream_query_info")
+  (return-type "GFileInfo*")
+  (parameters
+    '("char*" "attributes")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_info_async
+  (of-object "GFileOutputStream")
+  (c-name "g_file_output_stream_query_info_async")
+  (return-type "none")
+  (parameters
+    '("char*" "attributes")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method query_info_finish
+  (of-object "GFileOutputStream")
+  (c-name "g_file_output_stream_query_info_finish")
+  (return-type "GFileInfo*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_etag
+  (of-object "GFileOutputStream")
+  (c-name "g_file_output_stream_get_etag")
+  (return-type "char*")
+)
+
+
+
+;; From gfilterinputstream.h
+
+(define-function g_filter_input_stream_get_type
+  (c-name "g_filter_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method get_base_stream
+  (of-object "GFilterInputStream")
+  (c-name "g_filter_input_stream_get_base_stream")
+  (return-type "GInputStream*")
+)
+
+
+
+;; From gfilteroutputstream.h
+
+(define-function g_filter_output_stream_get_type
+  (c-name "g_filter_output_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method get_base_stream
+  (of-object "GFilterOutputStream")
+  (c-name "g_filter_output_stream_get_base_stream")
+  (return-type "GOutputStream*")
+)
+
+
+
+;; From gicon.h
+
+(define-function g_icon_get_type
+  (c-name "g_icon_get_type")
+  (return-type "GType")
+)
+
+(define-function g_icon_hash
+  (c-name "g_icon_hash")
+  (return-type "guint")
+  (parameters
+    '("gconstpointer" "icon")
+  )
+)
+
+(define-method equal
+  (of-object "GIcon")
+  (c-name "g_icon_equal")
+  (return-type "gboolean")
+  (parameters
+    '("GIcon*" "icon2")
+  )
+)
+
+
+
+;; From ginputstream.h
+
+(define-function g_input_stream_get_type
+  (c-name "g_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method read
+  (of-object "GInputStream")
+  (c-name "g_input_stream_read")
+  (return-type "gssize")
+  (parameters
+    '("void*" "buffer")
+    '("gsize" "count")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_all
+  (of-object "GInputStream")
+  (c-name "g_input_stream_read_all")
+  (return-type "gboolean")
+  (parameters
+    '("void*" "buffer")
+    '("gsize" "count")
+    '("gsize*" "bytes_read")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method skip
+  (of-object "GInputStream")
+  (c-name "g_input_stream_skip")
+  (return-type "gssize")
+  (parameters
+    '("gsize" "count")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method close
+  (of-object "GInputStream")
+  (c-name "g_input_stream_close")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_async
+  (of-object "GInputStream")
+  (c-name "g_input_stream_read_async")
+  (return-type "none")
+  (parameters
+    '("void*" "buffer")
+    '("gsize" "count")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method read_finish
+  (of-object "GInputStream")
+  (c-name "g_input_stream_read_finish")
+  (return-type "gssize")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method skip_async
+  (of-object "GInputStream")
+  (c-name "g_input_stream_skip_async")
+  (return-type "none")
+  (parameters
+    '("gsize" "count")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method skip_finish
+  (of-object "GInputStream")
+  (c-name "g_input_stream_skip_finish")
+  (return-type "gssize")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method close_async
+  (of-object "GInputStream")
+  (c-name "g_input_stream_close_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method close_finish
+  (of-object "GInputStream")
+  (c-name "g_input_stream_close_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method is_closed
+  (of-object "GInputStream")
+  (c-name "g_input_stream_is_closed")
+  (return-type "gboolean")
+)
+
+(define-method has_pending
+  (of-object "GInputStream")
+  (c-name "g_input_stream_has_pending")
+  (return-type "gboolean")
+)
+
+(define-method set_pending
+  (of-object "GInputStream")
+  (c-name "g_input_stream_set_pending")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method clear_pending
+  (of-object "GInputStream")
+  (c-name "g_input_stream_clear_pending")
+  (return-type "none")
+)
+
+
+
+;; From gioalias.h
+
+
+
+;; From gioenums.h
+
+
+
+;; From gioenumtypes.h
+
+(define-function g_app_info_create_flags_get_type
+  (c-name "g_app_info_create_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_data_stream_byte_order_get_type
+  (c-name "g_data_stream_byte_order_get_type")
+  (return-type "GType")
+)
+
+(define-function g_data_stream_newline_type_get_type
+  (c-name "g_data_stream_newline_type_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_attribute_type_get_type
+  (c-name "g_file_attribute_type_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_attribute_info_flags_get_type
+  (c-name "g_file_attribute_info_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_attribute_status_get_type
+  (c-name "g_file_attribute_status_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_query_info_flags_get_type
+  (c-name "g_file_query_info_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_create_flags_get_type
+  (c-name "g_file_create_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_mount_mount_flags_get_type
+  (c-name "g_mount_mount_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_mount_unmount_flags_get_type
+  (c-name "g_mount_unmount_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_copy_flags_get_type
+  (c-name "g_file_copy_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_monitor_flags_get_type
+  (c-name "g_file_monitor_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_type_get_type
+  (c-name "g_file_type_get_type")
+  (return-type "GType")
+)
+
+(define-function g_filesystem_preview_type_get_type
+  (c-name "g_filesystem_preview_type_get_type")
+  (return-type "GType")
+)
+
+(define-function g_file_monitor_event_get_type
+  (c-name "g_file_monitor_event_get_type")
+  (return-type "GType")
+)
+
+(define-function g_io_error_enum_get_type
+  (c-name "g_io_error_enum_get_type")
+  (return-type "GType")
+)
+
+(define-function g_ask_password_flags_get_type
+  (c-name "g_ask_password_flags_get_type")
+  (return-type "GType")
+)
+
+(define-function g_password_save_get_type
+  (c-name "g_password_save_get_type")
+  (return-type "GType")
+)
+
+(define-function g_mount_operation_result_get_type
+  (c-name "g_mount_operation_result_get_type")
+  (return-type "GType")
+)
+
+(define-function g_output_stream_splice_flags_get_type
+  (c-name "g_output_stream_splice_flags_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From gioerror.h
+
+(define-function g_io_error_quark
+  (c-name "g_io_error_quark")
+  (return-type "GQuark")
+)
+
+(define-function g_io_error_from_errno
+  (c-name "g_io_error_from_errno")
+  (return-type "GIOErrorEnum")
+  (parameters
+    '("gint" "err_no")
+  )
+)
+
+
+
+;; From gio.h
+
+
+
+;; From gio-marshal.h
+
+
+
+;; From giomodule.h
+
+(define-function g_io_module_get_type
+  (c-name "g_io_module_get_type")
+  (return-type "GType")
+)
+
+(define-function g_io_module_new
+  (c-name "g_io_module_new")
+  (is-constructor-of "GIoModule")
+  (return-type "GIOModule*")
+  (parameters
+    '("const-gchar*" "filename")
+  )
+)
+
+(define-function g_io_modules_load_all_in_directory
+  (c-name "g_io_modules_load_all_in_directory")
+  (return-type "GList*")
+  (parameters
+    '("const-char*" "dirname")
+  )
+)
+
+(define-function g_io_extension_point_register
+  (c-name "g_io_extension_point_register")
+  (return-type "GIOExtensionPoint*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-function g_io_extension_point_lookup
+  (c-name "g_io_extension_point_lookup")
+  (return-type "GIOExtensionPoint*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method set_required_type
+  (of-object "GIOExtensionPoint")
+  (c-name "g_io_extension_point_set_required_type")
+  (return-type "none")
+  (parameters
+    '("GType" "type")
+  )
+)
+
+(define-method get_required_type
+  (of-object "GIOExtensionPoint")
+  (c-name "g_io_extension_point_get_required_type")
+  (return-type "GType")
+)
+
+(define-method get_extensions
+  (of-object "GIOExtensionPoint")
+  (c-name "g_io_extension_point_get_extensions")
+  (return-type "GList*")
+)
+
+(define-method get_extension_by_name
+  (of-object "GIOExtensionPoint")
+  (c-name "g_io_extension_point_get_extension_by_name")
+  (return-type "GIOExtension*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-function g_io_extension_point_implement
+  (c-name "g_io_extension_point_implement")
+  (return-type "GIOExtension*")
+  (parameters
+    '("const-char*" "extension_point_name")
+    '("GType" "type")
+    '("const-char*" "extension_name")
+    '("gint" "priority")
+  )
+)
+
+(define-method get_type
+  (of-object "GIOExtension")
+  (c-name "g_io_extension_get_type")
+  (return-type "GType")
+)
+
+(define-method get_name
+  (of-object "GIOExtension")
+  (c-name "g_io_extension_get_name")
+  (return-type "const-char*")
+)
+
+(define-method get_priority
+  (of-object "GIOExtension")
+  (c-name "g_io_extension_get_priority")
+  (return-type "gint")
+)
+
+(define-method ref_class
+  (of-object "GIOExtension")
+  (c-name "g_io_extension_ref_class")
+  (return-type "GTypeClass*")
+)
+
+(define-method load
+  (of-object "GIOModule")
+  (c-name "g_io_module_load")
+  (return-type "none")
+)
+
+(define-method unload
+  (of-object "GIOModule")
+  (c-name "g_io_module_unload")
+  (return-type "none")
+)
+
+
+
+;; From giomodule-priv.h
+
+
+
+;; From gioscheduler.h
+
+(define-function g_io_scheduler_push_job
+  (c-name "g_io_scheduler_push_job")
+  (return-type "none")
+  (parameters
+    '("GIOSchedulerJobFunc" "job_func")
+    '("gpointer" "user_data")
+    '("GDestroyNotify" "notify")
+    '("gint" "io_priority")
+    '("GCancellable*" "cancellable")
+  )
+)
+
+(define-function g_io_scheduler_cancel_all_jobs
+  (c-name "g_io_scheduler_cancel_all_jobs")
+  (return-type "none")
+)
+
+(define-method send_to_mainloop
+  (of-object "GIOSchedulerJob")
+  (c-name "g_io_scheduler_job_send_to_mainloop")
+  (return-type "gboolean")
+  (parameters
+    '("GSourceFunc" "func")
+    '("gpointer" "user_data")
+    '("GDestroyNotify" "notify")
+  )
+)
+
+(define-method send_to_mainloop_async
+  (of-object "GIOSchedulerJob")
+  (c-name "g_io_scheduler_job_send_to_mainloop_async")
+  (return-type "none")
+  (parameters
+    '("GSourceFunc" "func")
+    '("gpointer" "user_data")
+    '("GDestroyNotify" "notify")
+  )
+)
+
+
+
+;; From giotypes.h
+
+
+
+;; From gloadableicon.h
+
+(define-function g_loadable_icon_get_type
+  (c-name "g_loadable_icon_get_type")
+  (return-type "GType")
+)
+
+(define-method load
+  (of-object "GLoadableIcon")
+  (c-name "g_loadable_icon_load")
+  (return-type "GInputStream*")
+  (parameters
+    '("int" "size")
+    '("char**" "type")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method load_async
+  (of-object "GLoadableIcon")
+  (c-name "g_loadable_icon_load_async")
+  (return-type "none")
+  (parameters
+    '("int" "size")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method load_finish
+  (of-object "GLoadableIcon")
+  (c-name "g_loadable_icon_load_finish")
+  (return-type "GInputStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("char**" "type")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From glocaldirectorymonitor.h
+
+(define-function g_local_directory_monitor_get_type
+  (c-name "g_local_directory_monitor_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From glocalfileenumerator.h
+
+
+
+;; From glocalfile.h
+
+
+
+;; From glocalfileinfo.h
+
+
+
+;; From glocalfileinputstream.h
+
+
+
+;; From glocalfilemonitor.h
+
+(define-function g_local_file_monitor_get_type
+  (c-name "g_local_file_monitor_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From glocalfileoutputstream.h
+
+
+
+;; From glocalvfs.h
+
+
+
+;; From gmemoryinputstream.h
+
+(define-function g_memory_input_stream_get_type
+  (c-name "g_memory_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_memory_input_stream_new
+  (c-name "g_memory_input_stream_new")
+  (is-constructor-of "GMemoryInputStream")
+  (return-type "GInputStream*")
+)
+
+(define-function g_memory_input_stream_new_from_data
+  (c-name "g_memory_input_stream_new_from_data")
+  (return-type "GInputStream*")
+  (parameters
+    '("const-void*" "data")
+    '("gssize" "len")
+    '("GDestroyNotify" "destroy")
+  )
+)
+
+(define-method add_data
+  (of-object "GMemoryInputStream")
+  (c-name "g_memory_input_stream_add_data")
+  (return-type "none")
+  (parameters
+    '("const-void*" "data")
+    '("gssize" "len")
+    '("GDestroyNotify" "destroy")
+  )
+)
+
+
+
+;; From gmemoryoutputstream.h
+
+(define-function g_memory_output_stream_get_type
+  (c-name "g_memory_output_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_memory_output_stream_new
+  (c-name "g_memory_output_stream_new")
+  (is-constructor-of "GMemoryOutputStream")
+  (return-type "GOutputStream*")
+  (parameters
+    '("gpointer" "data")
+    '("gsize" "len")
+    '("GReallocFunc" "realloc_fn")
+    '("GDestroyNotify" "destroy")
+  )
+)
+
+(define-method get_data
+  (of-object "GMemoryOutputStream")
+  (c-name "g_memory_output_stream_get_data")
+  (return-type "gpointer")
+)
+
+(define-method get_size
+  (of-object "GMemoryOutputStream")
+  (c-name "g_memory_output_stream_get_size")
+  (return-type "gsize")
+)
+
+(define-method get_data_size
+  (of-object "GMemoryOutputStream")
+  (c-name "g_memory_output_stream_get_data_size")
+  (return-type "gsize")
+)
+
+
+
+;; From gmount.h
+
+(define-function g_mount_get_type
+  (c-name "g_mount_get_type")
+  (return-type "GType")
+)
+
+(define-method get_root
+  (of-object "GMount")
+  (c-name "g_mount_get_root")
+  (return-type "GFile*")
+)
+
+(define-method get_name
+  (of-object "GMount")
+  (c-name "g_mount_get_name")
+  (return-type "char*")
+)
+
+(define-method get_icon
+  (of-object "GMount")
+  (c-name "g_mount_get_icon")
+  (return-type "GIcon*")
+)
+
+(define-method get_uuid
+  (of-object "GMount")
+  (c-name "g_mount_get_uuid")
+  (return-type "char*")
+)
+
+(define-method get_volume
+  (of-object "GMount")
+  (c-name "g_mount_get_volume")
+  (return-type "GVolume*")
+)
+
+(define-method get_drive
+  (of-object "GMount")
+  (c-name "g_mount_get_drive")
+  (return-type "GDrive*")
+)
+
+(define-method can_unmount
+  (of-object "GMount")
+  (c-name "g_mount_can_unmount")
+  (return-type "gboolean")
+)
+
+(define-method can_eject
+  (of-object "GMount")
+  (c-name "g_mount_can_eject")
+  (return-type "gboolean")
+)
+
+(define-method unmount
+  (of-object "GMount")
+  (c-name "g_mount_unmount")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method unmount_finish
+  (of-object "GMount")
+  (c-name "g_mount_unmount_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method eject
+  (of-object "GMount")
+  (c-name "g_mount_eject")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_finish
+  (of-object "GMount")
+  (c-name "g_mount_eject_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method remount
+  (of-object "GMount")
+  (c-name "g_mount_remount")
+  (return-type "none")
+  (parameters
+    '("GMountMountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method remount_finish
+  (of-object "GMount")
+  (c-name "g_mount_remount_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method guess_content_type
+  (of-object "GMount")
+  (c-name "g_mount_guess_content_type")
+  (return-type "none")
+  (parameters
+    '("gboolean" "force_rescan")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method guess_content_type_finish
+  (of-object "GMount")
+  (c-name "g_mount_guess_content_type_finish")
+  (return-type "gchar**")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gmountoperation.h
+
+(define-function g_mount_operation_get_type
+  (c-name "g_mount_operation_get_type")
+  (return-type "GType")
+)
+
+(define-function g_mount_operation_new
+  (c-name "g_mount_operation_new")
+  (is-constructor-of "GMountOperation")
+  (return-type "GMountOperation*")
+)
+
+(define-method get_username
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_get_username")
+  (return-type "const-char*")
+)
+
+(define-method set_username
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_set_username")
+  (return-type "none")
+  (parameters
+    '("const-char*" "username")
+  )
+)
+
+(define-method get_password
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_get_password")
+  (return-type "const-char*")
+)
+
+(define-method set_password
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_set_password")
+  (return-type "none")
+  (parameters
+    '("const-char*" "password")
+  )
+)
+
+(define-method get_anonymous
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_get_anonymous")
+  (return-type "gboolean")
+)
+
+(define-method set_anonymous
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_set_anonymous")
+  (return-type "none")
+  (parameters
+    '("gboolean" "anonymous")
+  )
+)
+
+(define-method get_domain
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_get_domain")
+  (return-type "const-char*")
+)
+
+(define-method set_domain
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_set_domain")
+  (return-type "none")
+  (parameters
+    '("const-char*" "domain")
+  )
+)
+
+(define-method get_password_save
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_get_password_save")
+  (return-type "GPasswordSave")
+)
+
+(define-method set_password_save
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_set_password_save")
+  (return-type "none")
+  (parameters
+    '("GPasswordSave" "save")
+  )
+)
+
+(define-method get_choice
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_get_choice")
+  (return-type "int")
+)
+
+(define-method set_choice
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_set_choice")
+  (return-type "none")
+  (parameters
+    '("int" "choice")
+  )
+)
+
+(define-method reply
+  (of-object "GMountOperation")
+  (c-name "g_mount_operation_reply")
+  (return-type "none")
+  (parameters
+    '("GMountOperationResult" "result")
+  )
+)
+
+
+
+;; From gmountprivate.h
+
+
+
+;; From gnativevolumemonitor.h
+
+(define-function g_native_volume_monitor_get_type
+  (c-name "g_native_volume_monitor_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From goutputstream.h
+
+(define-function g_output_stream_get_type
+  (c-name "g_output_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method write
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_write")
+  (return-type "gssize")
+  (parameters
+    '("const-void*" "buffer")
+    '("gsize" "count")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method write_all
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_write_all")
+  (return-type "gboolean")
+  (parameters
+    '("const-void*" "buffer")
+    '("gsize" "count")
+    '("gsize*" "bytes_written")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method splice
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_splice")
+  (return-type "gssize")
+  (parameters
+    '("GInputStream*" "source")
+    '("GOutputStreamSpliceFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method flush
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_flush")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method close
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_close")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method write_async
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_write_async")
+  (return-type "none")
+  (parameters
+    '("const-void*" "buffer")
+    '("gsize" "count")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method write_finish
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_write_finish")
+  (return-type "gssize")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method splice_async
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_splice_async")
+  (return-type "none")
+  (parameters
+    '("GInputStream*" "source")
+    '("GOutputStreamSpliceFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method splice_finish
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_splice_finish")
+  (return-type "gssize")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method flush_async
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_flush_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method flush_finish
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_flush_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method close_async
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_close_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method close_finish
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_close_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method is_closed
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_is_closed")
+  (return-type "gboolean")
+)
+
+(define-method has_pending
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_has_pending")
+  (return-type "gboolean")
+)
+
+(define-method set_pending
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_set_pending")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method clear_pending
+  (of-object "GOutputStream")
+  (c-name "g_output_stream_clear_pending")
+  (return-type "none")
+)
+
+
+
+;; From gpollfilemonitor.h
+
+
+
+;; From gseekable.h
+
+(define-function g_seekable_get_type
+  (c-name "g_seekable_get_type")
+  (return-type "GType")
+)
+
+(define-method tell
+  (of-object "GSeekable")
+  (c-name "g_seekable_tell")
+  (return-type "goffset")
+)
+
+(define-method can_seek
+  (of-object "GSeekable")
+  (c-name "g_seekable_can_seek")
+  (return-type "gboolean")
+)
+
+(define-method seek
+  (of-object "GSeekable")
+  (c-name "g_seekable_seek")
+  (return-type "gboolean")
+  (parameters
+    '("goffset" "offset")
+    '("GSeekType" "type")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method can_truncate
+  (of-object "GSeekable")
+  (c-name "g_seekable_can_truncate")
+  (return-type "gboolean")
+)
+
+(define-method truncate
+  (of-object "GSeekable")
+  (c-name "g_seekable_truncate")
+  (return-type "gboolean")
+  (parameters
+    '("goffset" "offset")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gsimpleasyncresult.h
+
+(define-function g_simple_async_result_get_type
+  (c-name "g_simple_async_result_get_type")
+  (return-type "GType")
+)
+
+(define-function g_simple_async_result_new
+  (c-name "g_simple_async_result_new")
+  (is-constructor-of "GSimpleAsyncResult")
+  (return-type "GSimpleAsyncResult*")
+  (parameters
+    '("GObject*" "source_object")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+    '("gpointer" "source_tag")
+  )
+)
+
+(define-function g_simple_async_result_new_error
+  (c-name "g_simple_async_result_new_error")
+  (return-type "GSimpleAsyncResult*")
+  (parameters
+    '("GObject*" "source_object")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+    '("GQuark" "domain")
+    '("gint" "code")
+    '("const-char*" "format")
+  )
+  (varargs #t)
+)
+
+(define-function g_simple_async_result_new_from_error
+  (c-name "g_simple_async_result_new_from_error")
+  (return-type "GSimpleAsyncResult*")
+  (parameters
+    '("GObject*" "source_object")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+    '("GError*" "error")
+  )
+)
+
+(define-method set_op_res_gpointer
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_set_op_res_gpointer")
+  (return-type "none")
+  (parameters
+    '("gpointer" "op_res")
+    '("GDestroyNotify" "destroy_op_res")
+  )
+)
+
+(define-method get_op_res_gpointer
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_get_op_res_gpointer")
+  (return-type "gpointer")
+)
+
+(define-method set_op_res_gssize
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_set_op_res_gssize")
+  (return-type "none")
+  (parameters
+    '("gssize" "op_res")
+  )
+)
+
+(define-method get_op_res_gssize
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_get_op_res_gssize")
+  (return-type "gssize")
+)
+
+(define-method set_op_res_gboolean
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_set_op_res_gboolean")
+  (return-type "none")
+  (parameters
+    '("gboolean" "op_res")
+  )
+)
+
+(define-method get_op_res_gboolean
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_get_op_res_gboolean")
+  (return-type "gboolean")
+)
+
+(define-method get_source_tag
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_get_source_tag")
+  (return-type "gpointer")
+)
+
+(define-method set_handle_cancellation
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_set_handle_cancellation")
+  (return-type "none")
+  (parameters
+    '("gboolean" "handle_cancellation")
+  )
+)
+
+(define-method complete
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_complete")
+  (return-type "none")
+)
+
+(define-method complete_in_idle
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_complete_in_idle")
+  (return-type "none")
+)
+
+(define-method run_in_thread
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_run_in_thread")
+  (return-type "none")
+  (parameters
+    '("GSimpleAsyncThreadFunc" "func")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+  )
+)
+
+(define-method set_from_error
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_set_from_error")
+  (return-type "none")
+  (parameters
+    '("GError*" "error")
+  )
+)
+
+(define-method propagate_error
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_propagate_error")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "dest")
+  )
+)
+
+(define-method set_error
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_set_error")
+  (return-type "none")
+  (parameters
+    '("GQuark" "domain")
+    '("gint" "code")
+    '("const-char*" "format")
+  )
+  (varargs #t)
+)
+
+(define-method set_error_va
+  (of-object "GSimpleAsyncResult")
+  (c-name "g_simple_async_result_set_error_va")
+  (return-type "none")
+  (parameters
+    '("GQuark" "domain")
+    '("gint" "code")
+    '("const-char*" "format")
+    '("va_list" "args")
+  )
+)
+
+(define-function g_simple_async_report_error_in_idle
+  (c-name "g_simple_async_report_error_in_idle")
+  (return-type "none")
+  (parameters
+    '("GObject*" "object")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+    '("GQuark" "domain")
+    '("gint" "code")
+    '("const-char*" "format")
+  )
+  (varargs #t)
+)
+
+(define-function g_simple_async_report_gerror_in_idle
+  (c-name "g_simple_async_report_gerror_in_idle")
+  (return-type "none")
+  (parameters
+    '("GObject*" "object")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+    '("GError*" "error")
+  )
+)
+
+
+
+;; From gthemedicon.h
+
+(define-function g_themed_icon_get_type
+  (c-name "g_themed_icon_get_type")
+  (return-type "GType")
+)
+
+(define-function g_themed_icon_new
+  (c-name "g_themed_icon_new")
+  (is-constructor-of "GThemedIcon")
+  (return-type "GIcon*")
+  (parameters
+    '("const-char*" "iconname")
+  )
+)
+
+(define-function g_themed_icon_new_with_default_fallbacks
+  (c-name "g_themed_icon_new_with_default_fallbacks")
+  (return-type "GIcon*")
+  (parameters
+    '("const-char*" "iconname")
+  )
+)
+
+(define-function g_themed_icon_new_from_names
+  (c-name "g_themed_icon_new_from_names")
+  (return-type "GIcon*")
+  (parameters
+    '("char**" "iconnames")
+    '("int" "len")
+  )
+)
+
+(define-method prepend_name
+  (of-object "GThemedIcon")
+  (c-name "g_themed_icon_prepend_name")
+  (return-type "none")
+  (parameters
+    '("const-char*" "iconname")
+  )
+)
+
+(define-method append_name
+  (of-object "GThemedIcon")
+  (c-name "g_themed_icon_append_name")
+  (return-type "none")
+  (parameters
+    '("const-char*" "iconname")
+  )
+)
+
+
+
+;; From gunionvolumemonitor.h
+
+
+
+;; From gunixinputstream.h
+
+(define-function g_unix_input_stream_get_type
+  (c-name "g_unix_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_unix_input_stream_new
+  (c-name "g_unix_input_stream_new")
+  (is-constructor-of "GUnixInputStream")
+  (return-type "GInputStream*")
+  (parameters
+    '("int" "fd")
+    '("gboolean" "close_fd_at_close")
+  )
+)
+
+
+
+;; From gunixmount.h
+
+
+
+;; From gunixmounts.h
+
+(define-function g_unix_mount_free
+  (c-name "g_unix_mount_free")
+  (return-type "none")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-method free
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_free")
+  (return-type "none")
+)
+
+(define-function g_unix_mount_compare
+  (c-name "g_unix_mount_compare")
+  (return-type "gint")
+  (parameters
+    '("GUnixMountEntry*" "mount1")
+    '("GUnixMountEntry*" "mount2")
+  )
+)
+
+(define-function g_unix_mount_get_mount_path
+  (c-name "g_unix_mount_get_mount_path")
+  (return-type "const-char*")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_get_device_path
+  (c-name "g_unix_mount_get_device_path")
+  (return-type "const-char*")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_get_fs_type
+  (c-name "g_unix_mount_get_fs_type")
+  (return-type "const-char*")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_is_readonly
+  (c-name "g_unix_mount_is_readonly")
+  (return-type "gboolean")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_is_system_internal
+  (c-name "g_unix_mount_is_system_internal")
+  (return-type "gboolean")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_guess_can_eject
+  (c-name "g_unix_mount_guess_can_eject")
+  (return-type "gboolean")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_guess_should_display
+  (c-name "g_unix_mount_guess_should_display")
+  (return-type "gboolean")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_guess_name
+  (c-name "g_unix_mount_guess_name")
+  (return-type "char*")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-function g_unix_mount_guess_icon
+  (c-name "g_unix_mount_guess_icon")
+  (return-type "GIcon*")
+  (parameters
+    '("GUnixMountEntry*" "mount_entry")
+  )
+)
+
+(define-method compare
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_compare")
+  (return-type "gint")
+  (parameters
+    '("GUnixMountPoint*" "mount2")
+  )
+)
+
+(define-method get_mount_path
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_get_mount_path")
+  (return-type "const-char*")
+)
+
+(define-method get_device_path
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_get_device_path")
+  (return-type "const-char*")
+)
+
+(define-method get_fs_type
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_get_fs_type")
+  (return-type "const-char*")
+)
+
+(define-method is_readonly
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_is_readonly")
+  (return-type "gboolean")
+)
+
+(define-method is_user_mountable
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_is_user_mountable")
+  (return-type "gboolean")
+)
+
+(define-method is_loopback
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_is_loopback")
+  (return-type "gboolean")
+)
+
+(define-method guess_can_eject
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_guess_can_eject")
+  (return-type "gboolean")
+)
+
+(define-method guess_name
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_guess_name")
+  (return-type "char*")
+)
+
+(define-method guess_icon
+  (of-object "GUnixMountPoint")
+  (c-name "g_unix_mount_point_guess_icon")
+  (return-type "GIcon*")
+)
+
+(define-function g_unix_mount_points_get
+  (c-name "g_unix_mount_points_get")
+  (return-type "GList*")
+  (parameters
+    '("guint64*" "time_read")
+  )
+)
+
+(define-function g_unix_mounts_get
+  (c-name "g_unix_mounts_get")
+  (return-type "GList*")
+  (parameters
+    '("guint64*" "time_read")
+  )
+)
+
+(define-function g_unix_mount_at
+  (c-name "g_unix_mount_at")
+  (return-type "GUnixMountEntry*")
+  (parameters
+    '("const-char*" "mount_path")
+    '("guint64*" "time_read")
+  )
+)
+
+(define-function g_unix_mounts_changed_since
+  (c-name "g_unix_mounts_changed_since")
+  (return-type "gboolean")
+  (parameters
+    '("guint64" "time")
+  )
+)
+
+(define-function g_unix_mount_points_changed_since
+  (c-name "g_unix_mount_points_changed_since")
+  (return-type "gboolean")
+  (parameters
+    '("guint64" "time")
+  )
+)
+
+(define-function g_unix_mount_monitor_get_type
+  (c-name "g_unix_mount_monitor_get_type")
+  (return-type "GType")
+)
+
+(define-function g_unix_mount_monitor_new
+  (c-name "g_unix_mount_monitor_new")
+  (is-constructor-of "GUnixMountMonitor")
+  (return-type "GUnixMountMonitor*")
+)
+
+(define-method set_rate_limit
+  (of-object "GUnixMountMonitor")
+  (c-name "g_unix_mount_monitor_set_rate_limit")
+  (return-type "none")
+  (parameters
+    '("int" "limit_msec")
+  )
+)
+
+(define-function g_unix_is_mount_path_system_internal
+  (c-name "g_unix_is_mount_path_system_internal")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "mount_path")
+  )
+)
+
+
+
+;; From gunixoutputstream.h
+
+(define-function g_unix_output_stream_get_type
+  (c-name "g_unix_output_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function g_unix_output_stream_new
+  (c-name "g_unix_output_stream_new")
+  (is-constructor-of "GUnixOutputStream")
+  (return-type "GOutputStream*")
+  (parameters
+    '("int" "fd")
+    '("gboolean" "close_fd_at_close")
+  )
+)
+
+
+
+;; From gunixvolume.h
+
+
+
+;; From gunixvolumemonitor.h
+
+
+
+;; From gvfs.h
+
+(define-function g_vfs_get_type
+  (c-name "g_vfs_get_type")
+  (return-type "GType")
+)
+
+(define-method is_active
+  (of-object "GVfs")
+  (c-name "g_vfs_is_active")
+  (return-type "gboolean")
+)
+
+(define-method get_file_for_path
+  (of-object "GVfs")
+  (c-name "g_vfs_get_file_for_path")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "path")
+  )
+)
+
+(define-method get_file_for_uri
+  (of-object "GVfs")
+  (c-name "g_vfs_get_file_for_uri")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "uri")
+  )
+)
+
+(define-method parse_name
+  (of-object "GVfs")
+  (c-name "g_vfs_parse_name")
+  (return-type "GFile*")
+  (parameters
+    '("const-char*" "parse_name")
+  )
+)
+
+(define-function g_vfs_get_default
+  (c-name "g_vfs_get_default")
+  (return-type "GVfs*")
+)
+
+(define-function g_vfs_get_local
+  (c-name "g_vfs_get_local")
+  (return-type "GVfs*")
+)
+
+
+
+;; From gvolume.h
+
+(define-function g_volume_get_type
+  (c-name "g_volume_get_type")
+  (return-type "GType")
+)
+
+(define-method get_name
+  (of-object "GVolume")
+  (c-name "g_volume_get_name")
+  (return-type "char*")
+)
+
+(define-method get_icon
+  (of-object "GVolume")
+  (c-name "g_volume_get_icon")
+  (return-type "GIcon*")
+)
+
+(define-method get_uuid
+  (of-object "GVolume")
+  (c-name "g_volume_get_uuid")
+  (return-type "char*")
+)
+
+(define-method get_drive
+  (of-object "GVolume")
+  (c-name "g_volume_get_drive")
+  (return-type "GDrive*")
+)
+
+(define-method get_mount
+  (of-object "GVolume")
+  (c-name "g_volume_get_mount")
+  (return-type "GMount*")
+)
+
+(define-method can_mount
+  (of-object "GVolume")
+  (c-name "g_volume_can_mount")
+  (return-type "gboolean")
+)
+
+(define-method can_eject
+  (of-object "GVolume")
+  (c-name "g_volume_can_eject")
+  (return-type "gboolean")
+)
+
+(define-method should_automount
+  (of-object "GVolume")
+  (c-name "g_volume_should_automount")
+  (return-type "gboolean")
+)
+
+(define-method mount
+  (of-object "GVolume")
+  (c-name "g_volume_mount")
+  (return-type "none")
+  (parameters
+    '("GMountMountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method mount_finish
+  (of-object "GVolume")
+  (c-name "g_volume_mount_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method eject
+  (of-object "GVolume")
+  (c-name "g_volume_eject")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_finish
+  (of-object "GVolume")
+  (c-name "g_volume_eject_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_identifier
+  (of-object "GVolume")
+  (c-name "g_volume_get_identifier")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "kind")
+  )
+)
+
+(define-method enumerate_identifiers
+  (of-object "GVolume")
+  (c-name "g_volume_enumerate_identifiers")
+  (return-type "char**")
+)
+
+(define-method get_activation_root
+  (of-object "GVolume")
+  (c-name "g_volume_get_activation_root")
+  (return-type "GFile*")
+)
+
+
+
+;; From gvolumemonitor.h
+
+(define-function g_volume_monitor_get_type
+  (c-name "g_volume_monitor_get_type")
+  (return-type "GType")
+)
+
+(define-function g_volume_monitor_get
+  (c-name "g_volume_monitor_get")
+  (return-type "GVolumeMonitor*")
+)
+
+(define-method get_connected_drives
+  (of-object "GVolumeMonitor")
+  (c-name "g_volume_monitor_get_connected_drives")
+  (return-type "GList*")
+)
+
+(define-method get_volumes
+  (of-object "GVolumeMonitor")
+  (c-name "g_volume_monitor_get_volumes")
+  (return-type "GList*")
+)
+
+(define-method get_mounts
+  (of-object "GVolumeMonitor")
+  (c-name "g_volume_monitor_get_mounts")
+  (return-type "GList*")
+)
+
+(define-method get_volume_for_uuid
+  (of-object "GVolumeMonitor")
+  (c-name "g_volume_monitor_get_volume_for_uuid")
+  (return-type "GVolume*")
+  (parameters
+    '("const-char*" "uuid")
+  )
+)
+
+(define-method get_mount_for_uuid
+  (of-object "GVolumeMonitor")
+  (c-name "g_volume_monitor_get_mount_for_uuid")
+  (return-type "GMount*")
+  (parameters
+    '("const-char*" "uuid")
+  )
+)
+
+(define-function g_volume_monitor_adopt_orphan_mount
+  (c-name "g_volume_monitor_adopt_orphan_mount")
+  (return-type "GVolume*")
+  (parameters
+    '("GMount*" "mount")
+  )
+)
+
+
+
+;; From gwin32appinfo.h
+
+(define-function g_win32_app_info_get_type
+  (c-name "g_win32_app_info_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From gwin32mount.h
+
+
+
+;; From gwin32volumemonitor.h
+
+

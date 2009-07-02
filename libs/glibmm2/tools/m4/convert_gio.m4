@@ -15,7 +15,6 @@ _CONV_ENUM(G,OutputStreamSpliceFlags)
 _CONV_ENUM(G,AppInfoCreateFlags)
 _CONV_ENUM(G,DataStreamByteOrder)
 _CONV_ENUM(G,DataStreamNewlineType)
-_CONV_ENUM(G,EmblemOrigin)
 
 
 # AppInfo
@@ -85,10 +84,6 @@ _CONVERSION(`GFileOutputStream*',`Glib::RefPtr<FileOutputStream>',`Glib::wrap($3
 _CONVERSION(`GIcon*',`Glib::RefPtr<Icon>',`Glib::wrap($3)')
 _CONVERSION(`const Glib::RefPtr<Icon>&',`GIcon*',__CONVERT_CONST_REFPTR_TO_P)
 _CONVERSION(`Glib::RefPtr<Icon>',`GIcon*',__CONVERT_REFPTR_TO_P)
-_CONVERSION(`Glib::RefPtr<const Icon>',`GIcon*',__CONVERT_CONST_REFPTR_TO_P)
-
-_CONVERSION(`const Glib::RefPtr<Emblem>&',`GEmblem*',__CONVERT_CONST_REFPTR_TO_P)
-_CONVERSION(`const Glib::RefPtr<Emblem>&',`GEmblem*',__CONVERT_CONST_REFPTR_TO_P)
 
 # InputStream
 _CONVERSION(`const Glib::RefPtr<InputStream>&',`GInputStream*',__CONVERT_CONST_REFPTR_TO_P)

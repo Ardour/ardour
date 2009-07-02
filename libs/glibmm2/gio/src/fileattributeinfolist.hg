@@ -1,0 +1,80 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/fileattributeinfo.h>
+
+_DEFS(giomm,gio)
+
+namespace Gio
+{
+
+/** Key-Value paired file attributes.
+ * File attributes in GIO consist of a list of key-value pairs.
+ *
+ * Keys are strings that contain a key namespace and a key name, separated by a colon, e.g. "namespace:keyname". 
+ * Namespaces are included to sort key-value pairs by namespaces for relevance. Keys can be retreived using wildcards, 
+ * e.g. "standard::*" will return all of the keys in the "standard" namespace.
+ *
+ * Values are stored within the list in Gio::FileAttributeValue structures. Values can store different types, listed in the enum 
+ * Gio::FileAttributeType. Upon creation of a Gio::FileAttributeValue, the type will be set to Gio::FILE_ATTRIBUTE_TYPE_INVALID.
+ *
+ * The list of possible attributes for a filesystem (pointed to by a Gio::File) is availible as a Gio::FileAttributeInfoList. 
+ * This list is queryable by key names as indicated earlier.
+ *
+ * Classes that implement Gio::FileIface will create a Gio::FileAttributeInfoList and install default keys and values for their given file 
+ * system, architecture, and other possible implementation details (e.g., on a UNIX system, a file attribute key will be registered for 
+ * the user id for a given file).
+ *
+ * See http://library.gnome.org/devel/gio/unstable/gio-GFileAttribute.html for the list of default namespaces and the list of default keys.
+ *
+ * @newin2p16
+ */
+class FileAttributeInfoList
+{
+  _CLASS_OPAQUE_REFCOUNTED(FileAttributeInfoList, GFileAttributeInfoList,
+                           g_file_attribute_info_list_new,
+                           g_file_attribute_info_list_ref,
+                           g_file_attribute_info_list_unref)
+  _IGNORE(g_file_attribute_info_list_new, g_file_attribute_info_list_ref, g_file_attribute_info_list_unref)
+public:
+
+  /** Whether the FileAttributeInfoList is valid and non empty.
+   * @result true if this FileAttributeInfoList is not empty.
+   */
+  operator bool() const;
+
+  /** Whether the FileAttributeInfoList is empty or invalid.
+   * @result true if this FileAttributeInfoList is empty.
+   */
+  bool empty() const;
+
+  /** Gets the file attribute with the name name from list. 
+   * @param name The name of the attribute to lookup.
+   * @result A FileAttributeInfo for the name.
+   */
+  FileAttributeInfo lookup(const std::string& name) const;
+  _IGNORE(g_file_attribute_info_list_lookup)
+
+  _WRAP_METHOD(Glib::RefPtr<FileAttributeInfoList> dup() const, g_file_attribute_info_list_dup)
+
+  _WRAP_METHOD(void add(const std::string& name, FileAttributeType type, FileAttributeInfoFlags flags = FILE_ATTRIBUTE_INFO_NONE), g_file_attribute_info_list_add)
+};
+
+} // namespace Gio
+

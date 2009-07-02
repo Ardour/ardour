@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: giomm
+Description: C++ wrapper for gio-standalone
+Requires: gio-2.0 glibmm-2.4
+Version: 2.18.2
+Libs: -L${libdir} -lgiomm-2.4
+Cflags: -I${includedir}/giomm-2.4 -I${libdir}/giomm-2.4/include

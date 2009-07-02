@@ -1,0 +1,455 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+#include <giomm/asyncresult.h>
+#include <giomm/cancellable.h>
+#include <giomm/inputstream.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gio
+{
+
+_WRAP_ENUM(OutputStreamSpliceFlags, GOutputStreamSpliceFlags, NO_GTYPE)
+
+/** Base class for implementing streaming output.
+ *
+ * @ingroup Streams
+ *
+ * @newin2p16
+ */
+class OutputStream : public Glib::Object
+{
+  _CLASS_GOBJECT(OutputStream, GOutputStream, G_OUTPUT_STREAM, Glib::Object, GObject)
+
+public:
+
+  _WRAP_METHOD(gssize write(const void* buffer, gsize count, const Glib::RefPtr<Cancellable>& cancellable),
+               g_output_stream_write,
+               errthrow)
+
+  /** Tries to write @a count  bytes from @a buffer  into the stream. Will block
+   * during the operation.
+   * 
+   * If count is zero returns zero and does nothing. A value of @a count 
+   * larger than MAXSSIZE will cause a Gio::Error with INVALID_ARGUMENT to be thrown.
+   * 
+   * On success, the number of bytes written to the stream is returned.
+   * It is not an error if this is not the same as the requested size, as it
+   * can happen e.g. on a partial i/o error, or if the there is not enough
+   * storage in the stream. All writes either block until at least one byte
+   * is written, so zero is never returned (unless @a count  is zero).
+   * 
+   * On error -1 is returned.
+   * @param buffer The buffer containing the data to write.
+   * @param count The number of bytes to write.
+   * @return Number of bytes written, or -1 on error.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gssize write(const void* buffer, gsize count);
+  #else
+  gssize write(const void* buffer, gsize count, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** Tries to write @a count  bytes from @a buffer  into the stream. Will block
+   * during the operation.
+   * 
+   * If count is zero returns zero and does nothing. A value of @a count 
+   * larger than MAXSSIZE will cause a Gio::Error with INVALID_ARGUMENT to be thrown.
+   * 
+   * On success, the number of bytes written to the stream is returned.
+   * It is not an error if this is not the same as the requested size, as it
+   * can happen e.g. on a partial i/o error, or if the there is not enough
+   * storage in the stream. All writes either block until at least one byte
+   * is written, so zero is never returned (unless @a count  is zero).
+   * 
+   * On error -1 is returned.
+   * @param buffer The buffer containing the data to write.
+   * @param cancellable Cancellable object.
+   * @return Number of bytes written, or -1 on error.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gssize write(const std::string& buffer, const Glib::RefPtr<Cancellable>& cancellable);
+  #else
+  gssize write(const std::string& buffer, const Glib::RefPtr<Cancellable>& cancellable, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** Tries to write @a count  bytes from @a buffer  into the stream. Will block
+   * during the operation.
+   * 
+   * If string that is larger than MAXSSIZE bytes will cause a Gio::Error with INVALID_ARGUMENT to be thrown.
+   * 
+   * On success, the number of bytes written to the stream is returned.
+   * It is not an error if this is not the same as the requested size, as it
+   * can happen e.g. on a partial i/o error, or if the there is not enough
+   * storage in the stream. All writes either block until at least one byte
+   * is written, so zero is never returned (unless @a count  is zero).
+   * 
+   * On error -1 is returned.
+   * @param buffer The buffer containing the data to write.
+   * @return Number of bytes written, or -1 on error.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gssize write(const std::string& buffer);
+  #else
+  gssize write(const std::string& buffer, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+
+  _WRAP_METHOD(bool write_all(const void* buffer, gsize count, gsize& bytes_written, const Glib::RefPtr<Cancellable>& cancellable),
+               g_output_stream_write_all,
+               errthrow)
+
+  /** Tries to write @a count  bytes from @a buffer into the stream. Will block
+   * during the operation.
+   * 
+   * This function is similar to write(), except it tries to
+   * write as many bytes as requested, only stopping on an error.
+   * 
+   * On a successful write of @a count  bytes, <tt>true</tt> is returned, and @a bytes_written 
+   * is set to @a count .
+   * 
+   * If there is an error during the operation <tt>false</tt> is returned and @a error 
+   * is set to indicate the error status, @a bytes_written  is updated to contain
+   * the number of bytes written into the stream before the error occured.
+   * @param buffer The buffer containing the data to write.
+   * @param count The number of bytes to write.
+   * @param bytes_written Location to store the number of bytes that was 
+   * written to the stream.
+   * @return <tt>true</tt> on success, <tt>false</tt> if there was an error.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool write_all(const void* buffer, gsize count, gsize& bytes_written);
+  #else
+  bool write_all(const void* buffer, gsize count, gsize& bytes_written, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** Tries to write @a count  bytes from @a buffer into the stream. Will block
+   * during the operation.
+   * 
+   * This function is similar to write(), except it tries to
+   * write as many bytes as requested, only stopping on an error.
+   * 
+   * On a successful write of @a count  bytes, <tt>true</tt> is returned, and @a bytes_written 
+   * is set to @a count .
+   * 
+   * If there is an error during the operation <tt>false</tt> is returned and @a error 
+   * is set to indicate the error status, @a bytes_written  is updated to contain
+   * the number of bytes written into the stream before the error occured.
+   * @param buffer The buffer containing the data to write.
+   * @param bytes_written Location to store the number of bytes that was 
+   * written to the stream.
+   * @param cancellable Cancellable object.
+   * @return <tt>true</tt> on success, <tt>false</tt> if there was an error.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool write_all(const std::string& buffer, gsize& bytes_written, const Glib::RefPtr<Cancellable>& cancellable);
+  #else
+  bool write_all(const std::string& buffer, gsize& bytes_written, const Glib::RefPtr<Cancellable>& cancellable, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** Tries to write @a count  bytes from @a buffer into the stream. Will block
+   * during the operation.
+   * 
+   * This function is similar to write(), except it tries to
+   * write as many bytes as requested, only stopping on an error.
+   * 
+   * On a successful write of @a count  bytes, <tt>true</tt> is returned, and @a bytes_written 
+   * is set to @a count .
+   * 
+   * If there is an error during the operation <tt>false</tt> is returned and @a error 
+   * is set to indicate the error status, @a bytes_written  is updated to contain
+   * the number of bytes written into the stream before the error occured.
+   * @param buffer The buffer containing the data to write.
+   * @param bytes_written Location to store the number of bytes that was 
+   * written to the stream.
+   * @return <tt>true</tt> on success, <tt>false</tt> if there was an error.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool write_all(const std::string& buffer, gsize& bytes_written);
+  #else
+  bool write_all(const std::string& buffer, gsize& bytes_written, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+   
+  /** Splices an input stream into an output stream.
+   *
+   * @param source An InputStream.
+   * @param flags A set of OutputStreamSpliceFlags.
+   * @param cancellable A Cancellable object.
+   * ignore.
+   * @return A #gssize containing the size of the data spliced.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gssize splice(const Glib::RefPtr<InputStream>& source, const Glib::RefPtr<Cancellable>& cancellable, OutputStreamSpliceFlags flags = OUTPUT_STREAM_SPLICE_NONE);
+  #else
+  gssize splice(const Glib::RefPtr<InputStream>& source, const Glib::RefPtr<Cancellable>& cancellable, OutputStreamSpliceFlags flags, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** Splices an input stream into an output stream.
+   *
+   * @param source An InputStream.
+   * @param flags A set of OutputStreamSpliceFlags.
+   * ignore.
+   * @return A #gssize containing the size of the data spliced.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  gssize splice(const Glib::RefPtr<InputStream>& source, OutputStreamSpliceFlags flags = OUTPUT_STREAM_SPLICE_NONE);
+  #else
+  gssize splice(const Glib::RefPtr<InputStream>& source, OutputStreamSpliceFlags flags, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+  _IGNORE(g_output_stream_splice)
+
+  _WRAP_METHOD(bool flush(const Glib::RefPtr<Cancellable>& cancellable),
+               g_output_stream_flush,
+               errthrow)
+
+  /** Flushed any outstanding buffers in the stream. Will block during 
+   * the operation. Closing the stream will implicitly cause a flush.
+   * 
+   * This function is optional for inherited classes.
+   * 
+   * The operation can be cancelled by
+   * triggering the cancellable object from another thread. If the operation
+   * was cancelled, a Gio::Error with CANCELLED will be thrown.
+   * @param cancellable Optional cancellable object.
+   * @return <tt>true</tt> on success, <tt>false</tt> on error.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool flush();
+  #else
+  bool flush(std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(bool close(const Glib::RefPtr<Cancellable>& cancellable),
+               g_output_stream_close,
+               errthrow)
+
+  /** Closes the stream, releasing resources related to it.
+   * 
+   * Once the stream is closed, all other operations will throw a Gio::Error with CLOSED.
+   * Closing a stream multiple times will not return an error.
+   * 
+   * Closing a stream will automatically flush any outstanding buffers in the
+   * stream.
+   * 
+   * Streams will be automatically closed when the last reference
+   * is dropped, but you might want to call make sure resources
+   * are released as early as possible.
+   * 
+   * Some streams might keep the backing store of the stream (e.g. a file descriptor)
+   * open after the stream is closed. See the documentation for the individual
+   * stream for details.
+   * 
+   * On failure the first error that happened will be reported, but the close
+   * operation will finish as much as possible. A stream that failed to
+   * close will still throw a Gio::Error with CLOSED for all operations. Still, it
+   * is important to check and report the error to the user, otherwise
+   * there might be a loss of data as all data might not be written.
+   * 
+   * The operation can be cancelled by
+   * triggering the cancellable object from another thread. If the operation
+   * was cancelled, a Gio::Error with CANCELLED will be thrown.
+   * Cancelling a close will still leave the stream closed, but there some streams
+   * can use a faster close that doesn't block to e.g. check errors. On
+   * cancellation (as with any error) there is no guarantee that all written
+   * data will reach the target.
+   * @param cancellable Optional cancellable object.
+   * @return <tt>true</tt> on success, <tt>false</tt> on failure.
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool close();
+  #else
+  bool close(std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  /** Request an asynchronous write of @a count bytes from @a buffer into 
+   * the stream. When the operation is finished @a slot will be called. 
+   * You can then call write_finish() to get the result of the 
+   * operation.
+   *
+   * During an async request no other sync and async calls are allowed, 
+   * and will result in Gio::Error with PENDING being thrown. 
+   *
+   * A value of @a count larger than MAXSSIZE will cause a Gio::Error with  
+   * NVALID_ARGUMENT to be thrown.
+   *
+   * On success, the number of bytes written will be passed to the
+   * callback @a slot. It is not an error if this is not the same as the 
+   * requested size, as it can happen e.g. on a partial I/O error, 
+   * but generally we try to write as many bytes as requested. 
+   *
+   * Any outstanding I/O request with higher priority (lower numerical 
+   * value) will be executed before an outstanding request with lower 
+   * priority. Default priority is Glib::PRIORITY_DEFAULT.
+   *
+   * The asyncronous methods have a default fallback that uses threads 
+   * to implement asynchronicity, so they are optional for inheriting 
+   * classes. However, if you override one you must override all.
+   *
+   * For the synchronous, blocking version of this function, see 
+   * write().
+   *
+   * @param buffer The buffer containing the data to write. 
+   * @param count The number of bytes to write
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param cancellable Cancellable object.
+   * @param io_priority The io priority of the request.
+   */
+  void write_async(const void* buffer, gsize count, const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, int io_priority = Glib::PRIORITY_DEFAULT);
+
+  /** Request an asynchronous write of @a count bytes from @a buffer into 
+   * the stream. When the operation is finished @a slot will be called. 
+   * You can then call write_finish() to get the result of the 
+   * operation.
+   *
+   * During an async request no other sync and async calls are allowed, 
+   * and will result in Gio::Error with PENDING being thrown. 
+   *
+   * A value of @a count larger than MAXSSIZE will cause a Gio::Error with  
+   * INVALID_ARGUMENT to be thrown.
+   *
+   * On success, the number of bytes written will be passed to the
+   * callback @a slot. It is not an error if this is not the same as the 
+   * requested size, as it can happen e.g. on a partial I/O error, 
+   * but generally we try to write as many bytes as requested. 
+   *
+   * Any outstanding I/O request with higher priority (lower numerical 
+   * value) will be executed before an outstanding request with lower 
+   * priority. Default priority is Glib::PRIORITY_DEFAULT.
+   *
+   * The asyncronous methods have a default fallback that uses threads 
+   * to implement asynchronicity, so they are optional for inheriting 
+   * classes. However, if you override one you must override all.
+   *
+   * For the synchronous, blocking version of this function, see 
+   * write().
+   *
+   * @param buffer The buffer containing the data to write. 
+   * @param count The number of bytes to write
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param io_priority The io priority of the request.
+   */
+  void write_async(const void* buffer, gsize count, const SlotAsyncReady& slot, int io_priority = Glib::PRIORITY_DEFAULT);
+  _IGNORE(g_output_stream_write_async)
+
+  _WRAP_METHOD(gssize write_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_output_stream_write_finish,
+               errthrow)
+
+  /** Splices a stream asynchronously.
+   *  When the operation is finished @a slot will be called. 
+   * You can then call splice_finish() to get the result of the 
+   * operation.
+   *
+   * For the synchronous, blocking version of this function, see 
+   * splice().
+   *
+   * @param source An InputStream.
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param cancellable Cancellable object.
+   * @param io_priority The io priority of the request.
+   */
+  void splice_async(const Glib::RefPtr<InputStream>& source, const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, OutputStreamSpliceFlags flags = OUTPUT_STREAM_SPLICE_NONE, int io_priority = Glib::PRIORITY_DEFAULT);
+
+  /** Splices a stream asynchronously.
+   *  When the operation is finished @a slot will be called. 
+   * You can then call splice_finish() to get the result of the 
+   * operation.
+   *
+   * For the synchronous, blocking version of this function, see 
+   * splice().
+   *
+   * @param source An InputStream.
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param io_priority The io priority of the request.
+   */
+  void splice_async(const Glib::RefPtr<InputStream>& source, const SlotAsyncReady& slot, OutputStreamSpliceFlags flags = OUTPUT_STREAM_SPLICE_NONE, int io_priority = Glib::PRIORITY_DEFAULT);
+
+  _IGNORE(g_output_stream_splice_async)
+
+  _WRAP_METHOD(gssize splice_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_output_stream_splice_finish,
+               errthrow)
+
+  /** Flushes a stream asynchronously.
+   * When the operation is finished the @a slot will be called, giving the results.
+   * You can then call flush_finish() to get the result of the operation.
+   * For behaviour details see flush().
+   *
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param cancellable Cancellable object.
+   * @param io_priority The io priority of the request.
+   */
+  void flush_async(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, int io_priority = Glib::PRIORITY_DEFAULT);
+
+  /** Flushes a stream asynchronously.
+   * When the operation is finished the @a slot will be called, giving the results.
+   * You can then call flush_finish() to get the result of the operation.
+   * For behaviour details see flush().
+   *
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param io_priority The io priority of the request.
+   */
+  void flush_async(const SlotAsyncReady& slot, int io_priority = Glib::PRIORITY_DEFAULT);
+  _IGNORE(g_output_stream_flush_async)
+
+  _WRAP_METHOD(bool flush_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_output_stream_flush_finish,
+               errthrow)
+
+  /** Requests an asynchronous close of the stream, releasing resources related to it. 
+   * When the operation is finished the @a slot will be called, giving the results.
+   * You can then call close_finish() to get the result of the operation.
+   * For behaviour details see close().
+   *
+   * The asyncronous methods have a default fallback that uses threads to implement asynchronicity, 
+   * so they are optional for inheriting classes. However, if you override one you must override all.
+   *
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param cancellable Cancellable object.
+   * @param io_priority The io priority of the request.
+   */
+  void close_async(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, int io_priority = Glib::PRIORITY_DEFAULT);
+
+  /** Requests an asynchronous close of the stream, releasing resources related to it. 
+   * When the operation is finished the @a slot will be called, giving the results. 
+   * You can then call close_finish() to get the result of the operation.
+   * For behaviour details see close().
+   *
+   * The asyncronous methods have a default fallback that uses threads to implement asynchronicity, 
+   * so they are optional for inheriting classes. However, if you override one you must override all.
+   *
+   * @param slot Callback slot to call when the request is satisfied.
+   * @param io_priority The io priority of the request.
+   */
+  void close_async(const SlotAsyncReady& slot, int io_priority = Glib::PRIORITY_DEFAULT);
+  _IGNORE(g_output_stream_close_async)
+
+  _WRAP_METHOD(bool close_finish(const Glib::RefPtr<AsyncResult>& result),
+               g_output_stream_close_finish,
+               errthrow)
+
+  // These are private inside the module (for implementations)
+  _IGNORE(g_output_stream_has_pending, g_output_stream_is_closed, g_output_stream_set_pending, g_output_stream_clear_pending)
+
+};
+
+} // namespace Gio

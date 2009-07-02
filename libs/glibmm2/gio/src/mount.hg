@@ -1,0 +1,276 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+//#include <giomm/drive.h>
+#include <giomm/file.h>
+#include <giomm/volume.h>
+#include <glibmm/interface.h>
+
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+typedef struct _GMountIface GMountIface;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gio
+{
+
+class Drive;
+//class Volume;
+
+/** The Mount interface represents user-visible mounts.
+ * Mount is a "mounted" filesystem that you can access. Mounted is in quotes because it's not the same as a unix mount: 
+ * it might be a gvfs mount, but you can still access the files on it if you use GIO. It might or might not be related to a volume object.
+ *
+ * Unmounting a Mount instance is an asynchronous operation. For more information about asynchronous operations, see AsyncReady. 
+ * To unmount a Mount instance, first call unmount(). The callback slot will be called when the operation has resolved (either with success or failure), 
+ * and a AsyncReady structure will be passed to the callback. That callback should then call unmount_finish() with the AsyncReady data to see if the operation was completed successfully. 
+ *
+ * @ingroup Streams
+ *
+ * @newin2p16
+ */
+class Mount : public Glib::Interface
+{
+  _CLASS_INTERFACE(Mount, GMount, G_MOUNT, GMountIface)
+
+public:
+
+  _WRAP_METHOD(Glib::RefPtr<File> get_root(), g_mount_get_root, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const File> get_root() const, g_mount_get_root, refreturn, constversion)
+
+  _WRAP_METHOD(std::string get_name() const, g_mount_get_name)
+
+  _WRAP_METHOD(Glib::RefPtr<Icon> get_icon(), g_mount_get_icon, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Icon> get_icon() const, g_mount_get_icon, refreturn, constversion)
+
+  _WRAP_METHOD(std::string get_uuid() const, g_mount_get_uuid)
+
+  _WRAP_METHOD(Glib::RefPtr<Volume> get_volume(), g_mount_get_volume, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Volume> get_volume() const, g_mount_get_volume, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Drive> get_drive(), g_mount_get_drive, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Drive> get_drive() const, g_mount_get_drive, refreturn, constversion)
+
+  _WRAP_METHOD(bool can_unmount() const, g_mount_can_unmount)
+  _WRAP_METHOD(bool can_eject() const, g_mount_can_eject)
+
+  /** Unmounts a mount. 
+   * This is an asynchronous operation, and is finished by calling unmount_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   * @param flags Flags affecting the unmount.
+   */
+  void unmount(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  /** Unmounts a mount. 
+   * This is an asynchronous operation, and is finished by calling unmount_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param flags Flags affecting the unmount.
+   */
+  void unmount(const SlotAsyncReady& slot, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  /** Unmounts a mount.
+   *
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   */
+  void unmount(MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+  _IGNORE(g_mount_unmount)
+
+  _WRAP_METHOD(bool unmount_finish(const Glib::RefPtr<AsyncResult>& result), g_mount_unmount_finish, errthrow)
+
+  /** Remounts a mount.
+   * This is an asynchronous operation, and is finished by calling mount_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * Remounting is useful when some setting affecting the operation of the volume has been changed, as this may need a remount 
+   * to take affect. While this is semantically equivalent with unmounting and then remounting, not all backends might need to 
+   * actually be unmounted.
+   *
+   * @param operation A mount operation.
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   */
+  void remount(const Glib::RefPtr<MountOperation>& operation, const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, MountMountFlags flags = MOUNT_MOUNT_NONE);
+
+  /** Remounts a mount.
+   * This is an asynchronous operation, and is finished by calling mount_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * Remounting is useful when some setting affecting the operation of the volume has been changed, as this may need a remount 
+   * to take affect. While this is semantically equivalent with unmounting and then remounting, not all backends might need to 
+   * actually be unmounted.
+   *
+   * @param operation A mount operation.
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   */
+  void remount(const Glib::RefPtr<MountOperation>& operation, const SlotAsyncReady& slot, MountMountFlags flags = MOUNT_MOUNT_NONE);
+
+  /** Remounts a mount.
+   * 
+   * Remounting is useful when some setting affecting the operation of the volume has been changed, as this may need a remount 
+   * to take affect. While this is semantically equivalent with unmounting and then remounting, not all backends might need to 
+   * actually be unmounted.
+   *
+   * @param operation A mount operation.
+   */
+  void remount(const Glib::RefPtr<MountOperation>& operation, MountMountFlags flags = MOUNT_MOUNT_NONE);
+
+  /** Remounts a mount, without user interaction.
+   * 
+   * Remounting is useful when some setting affecting the operation of the volume has been changed, as this may need a remount 
+   * to take affect. While this is semantically equivalent with unmounting and then remounting, not all backends might need to 
+   * actually be unmounted.
+   */
+  void remount(MountMountFlags flags = MOUNT_MOUNT_NONE);
+  _IGNORE(g_mount_remount)
+
+
+  _WRAP_METHOD(bool remount_finish(const Glib::RefPtr<AsyncResult>& result), g_mount_remount_finish, errthrow)
+
+  /** Ejects a mount. 
+   * This is an asynchronous operation, and is finished by calling eject_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  /** Ejects a mount. 
+   * This is an asynchronous operation, and is finished by calling eject_finish() with the AsyncResult data returned in the callback slot.
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(const SlotAsyncReady& slot, MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+
+  /** Ejects a mount. 
+   *
+   * @param flags Flags affecting the unmount if required for eject.
+   */
+  void eject(MountUnmountFlags flags = MOUNT_UNMOUNT_NONE);
+  _IGNORE(g_mount_eject)
+
+  _WRAP_METHOD(bool eject_finish(const Glib::RefPtr<AsyncResult>& result), g_mount_eject_finish, errthrow)
+
+
+
+
+  /** Tries to guess the type of content stored on the mount.
+   * Returns one or more textual identifiers of well-known content types (typically
+   * prefixed with "x-content/"), e.g. x-content/image-dcf for camera 
+   * memory cards. See the <ulink url="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">shared-mime-info</ulink> specification for more on x-content types.
+   *
+   * This is an asynchronous operation, and is finished by calling 
+   * guess_content_type_finish().
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param cancellable A cancellable object which can be used to cancel the operation.
+   * @param force_rescan Whether to force a rescan of the content. Otherwise a cached result will be used if available.
+   *
+   * @newin2p18
+   */
+  void guess_content_type(const SlotAsyncReady& slot, const Glib::RefPtr<Cancellable>& cancellable, bool force_rescan = true);
+
+  /** Tries to guess the type of content stored on the mount.
+   * Returns one or more textual identifiers of well-known content types (typically
+   * prefixed with "x-content/"), e.g. x-content/image-dcf for camera 
+   * memory cards. See the <ulink url="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">shared-mime-info</ulink> specification for more on x-content types.
+   *
+   * This is an asynchronous operation, and is finished by calling 
+   * guess_content_type_finish().
+   *
+   * @param slot A callback which will be called when the operation is completed or canceled.
+   * @param force_rescan Whether to force a rescan of the content. Otherwise a cached result will be used if available.
+   *
+   * @newin2p18
+   */
+  void guess_content_type(const SlotAsyncReady& slot, bool force_rescan = true);
+
+  /** Tries to guess the type of content stored on the mount.
+   * Returns one or more textual identifiers of well-known content types (typically
+   * prefixed with "x-content/"), e.g. x-content/image-dcf for camera 
+   * memory cards. See the <ulink url="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">shared-mime-info</ulink> specification for more on x-content types.
+   *
+   * @param force_rescan Whether to force a rescan of the content. Otherwise a cached result will be used if available.
+   *
+   * @newin2p18
+   */
+  void guess_content_type(bool force_rescan = true);
+  _IGNORE(g_mount_guess_content_type)
+
+
+  #m4 _CONVERSION(`gchar**',`Glib::StringArrayHandle',`Glib::StringArrayHandle($3, Glib::OWNERSHIP_DEEP)')
+
+  //TODO: Correct the documentation:
+  _WRAP_METHOD(Glib::StringArrayHandle guess_content_type_finish(const Glib::RefPtr<AsyncResult>& result), g_mount_guess_content_type_finish, errthrow)
+
+
+  _WRAP_SIGNAL(void changed(), changed)
+  _WRAP_SIGNAL(void unmounted(), unmounted)
+
+  //There are no properties.
+};
+
+} // namespace Gio
+
+namespace Glib
+{
+
+//Pre-declare this so we can use it in TypeTrait:
+Glib::RefPtr<Gio::Mount> wrap(GMount* object, bool take_copy);
+
+namespace Container_Helpers
+{
+
+/** This specialization of TypeTraits exists 
+ * because the default use of Glib::wrap(GObject*), 
+ * instead of a specific Glib::wrap(GSomeInterface*),
+ * would not return a wrapper for an interface.
+ */ 
+template <>
+struct TypeTraits< Glib::RefPtr<Gio::Mount> >
+{
+  typedef Glib::RefPtr<Gio::Mount> CppType;
+  typedef GMount* CType;
+  typedef GMount* CTypeNonConst;
+
+  static CType   to_c_type      (const CppType& item)
+  { return Glib::unwrap (item); }
+
+  static CppType to_cpp_type    (const CType& item)
+  {
+    //Use a specific Glib::wrap() function, 
+    //because CType has the specific type (not just GObject):
+    return Glib::wrap(item, true /* take_copy */);
+  }
+
+  static void    release_c_type (CType item)
+  {
+    GLIBMM_DEBUG_UNREFERENCE(0, item);
+    g_object_unref(item);
+  }
+};
+
+} // Container_Helpers
+} // Glib

@@ -1,0 +1,99 @@
+// -*- Mode: C++; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
+/* Copyright (C) 2007 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <giomm/cancellable.h>
+#include <glibmm/interface.h>
+
+_DEFS(giomm,gio)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+typedef struct _GSeekableIface GSeekableIface;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gio
+{
+
+/** Stream seeking interface.
+ * Seekable is implemented by streams (implementations of InputStream or OutputStream) that support seeking.
+ * To find the position of a stream, use tell(). To find 
+ * out if a stream supports seeking, use can_seek(). To position a 
+ * stream, use seek(). To find out if a stream supports 
+ * truncating, use can_truncate(). To truncate a stream, use 
+ * truncate().
+ *
+ * @ingroup Streams
+ *
+ * @newin2p16
+ */
+class Seekable : public Glib::Interface
+{
+  _CLASS_INTERFACE(Seekable, GSeekable, G_SEEKABLE, GSeekableIface)
+
+public:
+  _WRAP_METHOD(goffset tell() const, g_seekable_tell)
+  _WRAP_METHOD(bool can_seek() const, g_seekable_can_seek)
+
+  _WRAP_METHOD(bool seek(goffset offset, Glib::SeekType type, const Glib::RefPtr<Cancellable>& cancellable), g_seekable_seek, errthrow)
+
+  //TODO: Document the exception: http://bugzilla.gnome.org/show_bug.cgi?id=509990
+  /** Seeks in the stream by the given @a offset, modified by @a type .
+   * 
+   * @param offset A #goffset.
+   * @param type A Glib::SeekType.
+   * @return <tt>true</tt> if successful. If an error
+   * has occurred, this function will return <tt>false</tt>.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool seek(goffset offset, Glib::SeekType type);
+#else
+  bool seek(goffset offset, Glib::SeekType type, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  _WRAP_METHOD(bool can_truncate() const, g_seekable_can_truncate)
+
+  _WRAP_METHOD(bool truncate(goffset offset, const Glib::RefPtr<Cancellable>& cancellable), g_seekable_truncate, errthrow)
+
+  //TODO: Document the exception: http://bugzilla.gnome.org/show_bug.cgi?id=509990
+  /** Truncates a stream with a given #offset. 
+   * 
+   * @param offset A #goffset.
+   * @return <tt>true</tt> if successful. If an error
+   * has occured, this function will return <tt>false</tt>.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool truncate(goffset offset);
+#else
+  bool truncate(goffset offset, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  //_WRAP_VFUNC(goffset tell() const, tell)
+  //_WRAP_VFUNC(goffset can_seek() const, can_seek)
+  //_WRAP_VFUNC(goffset seek(goffset offset, Glib::SeekType type, const Glib::RefPtr<Cancellable>& cancellable, GError** error), seek)
+  //_WRAP_VFUNC(goffset can_truncate() const, can_truncate)
+
+  //Renamed to truncate() - we don't know why it's called truncate_fn in C.
+  //_WRAP_VFUNC(goffset truncate(goffset offset, const Glib::RefPtr<Cancellable>& cancellable, GError** error), truncate_fn)
+
+  //There are no properties or signals.
+};
+
+} // namespace Gio
+
