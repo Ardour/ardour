@@ -41,7 +41,8 @@ env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                        'glib/glibmmconfig.h.in',
                                        'glib/glibmm-2.4.pc.in',
                                        'glib/glibmm/Makefile.in',
-                                       'scripts'
+                                       'scripts',
+                                       'build_shared'
                                        ] +
 				     glibmm2_files + 
 				     glob.glob('glib/glibmm/*.h') +

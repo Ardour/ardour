@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS	= -I scripts
 
-SUBDIRS		= tools glib gio examples scripts tests MSVC_Net2005 MSVC_Net2008 docs
+SUBDIRS		= tools glib scripts
 DIST_SUBDIRS	= $(SUBDIRS)
 
 EXTRA_DIST	= build_shared/Makefile_build.am_fragment \
@@ -26,12 +26,6 @@ dist-hook:
 	echo "**********************************************************"; \
 	echo; echo
 
-
-include $(top_srcdir)/docs/Makefile_web.am_fragment
-
-doc_tarball_files = \
-	docs/images/*.gif \
-	docs/internal/*.txt docs/internal/*.dia docs/reference/html
 
 # This doesn't work very well in a $(srcdir) != $(builddir) setup,
 # but this target is for maintainer use only anyway.
@@ -129,10 +123,9 @@ H2DEF = env python /opt/gnome2/share/pygobject/2.0/codegen/h2def.py
 DEFS_INC_DIR = /opt/gnome2/include
 GEN_ENUM = env perl ./tools/enum.pl
 GEN_EXTRA_DEFS_GLIB = ./tools/extra_defs_gen/generate_extra_defs
-GEN_EXTRA_DEFS_GIO = ./tools/extra_defs_gen/generate_defs_gio
 DOCEXTRACT = /home/jonathon/gnome-build/pygobject/codegen/docextract_to_xml.py
 
-defs: glib-defs gio-defs docextract
+defs: glib-defs docextract
 	@echo
 	@echo "*** Make sure to examine the .defs files to make sure they look reasonable"
 	@echo
@@ -145,21 +138,6 @@ glib-defs:
 	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gobject/*.h > glib/src/gobject_enums.defs
 	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gmodule.h > glib/src/gmodule_enums.defs
 
-gio-defs:
-	$(H2DEF) $(DEFS_INC_DIR)/glib-2.0/gio/*.h \
-		$(DEFS_INC_DIR)/gio-unix-2.0/gio/*.h > gio/src/gio_methods.defs
-	$(GEN_ENUM) $(DEFS_INC_DIR)/glib-2.0/gio/*.h \
-		$(DEFS_INC_DIR)/gio-unix-2.0/gio/*.h > gio/src/gio_enums.defs
-	$(GEN_EXTRA_DEFS_GIO) > gio/src/gio_signals.defs
 
-docextract:
-	$(DOCEXTRACT) -s ../glib/glib \
-		-s ../glib/docs/reference/glib \
-		-s ../glib/gobject \
-		-s ../glib/docs/reference/gobject > glib/src/glib_docs.xml
-	$(DOCEXTRACT) -s ../glib/gio \
-		-s ../glib/docs/reference/gio > gio/src/gio_docs.xml
-
-
-.PHONY: post-html post-html-local post-html-recursive doc-clean doc-clean-recursive doc-rebuild release tag-release upload-release release-announce install-module defs glib-defs gio-defs docextract
+.PHONY: post-html post-html-local post-html-recursive release tag-release upload-release release-announce install-module defs glib-defs 
 
