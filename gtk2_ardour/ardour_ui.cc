@@ -2408,7 +2408,9 @@ ARDOUR_UI::close_session ()
 		return;
 	}
 
-	unload_session (true);
+	if (unload_session (true)) {
+		return;
+	}
 	
 	get_session_parameters (true, false);
 }

@@ -322,7 +322,6 @@ PluginUIWindow::plugin_going_away ()
 	}
 	
 	death_connection.disconnect ();
-
 	delete_when_idle (this);
 }
 
@@ -361,10 +360,20 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow the plugin to receive keyboard events that Ardour would normally use as a shortcut"), "");
 	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
+
+	insert->GoingAway.connect (mem_fun (*this, &PlugUIBase::plugin_going_away));
 }
 
 PlugUIBase::~PlugUIBase ()
 {
+}
+
+void
+PlugUIBase::plugin_going_away ()
+{
+	/* drop references to the plugin/insert */
+	insert.reset ();
+	plugin.reset ();
 }
 
 void

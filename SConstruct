@@ -483,18 +483,6 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-#libraries['sndfile'] = LibraryInfo()
-#libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
-
-libraries['lrdf'] = LibraryInfo()
-libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
-
-libraries['raptor'] = LibraryInfo()
-libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
-
-libraries['samplerate'] = LibraryInfo()
-libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
-
 conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
 
 if conf.CheckPKGExists ('fftw3f'):
@@ -569,6 +557,15 @@ libraries['xml'].ParseConfig('pkg-config --cflags --libs libxml-2.0')
 
 libraries['xslt'] = LibraryInfo()
 libraries['xslt'].ParseConfig('pkg-config --cflags --libs libxslt')
+
+libraries['lrdf'] = LibraryInfo()
+libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
+
+libraries['raptor'] = LibraryInfo()
+libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
+
+libraries['samplerate'] = LibraryInfo()
+libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
 libraries['glib2'] = LibraryInfo()
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')

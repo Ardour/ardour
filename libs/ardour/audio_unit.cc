@@ -799,9 +799,12 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 			}
 		}
 
+		if (plugcnt == 1) {
+			break;
+		}
+
 	}
 
-	/* no fit */
 	return plugcnt;
 }
 
@@ -1651,7 +1654,9 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		if (cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name)) {
 
 			/* here we have to map apple's wildcard system to a simple pair
-			   of values.
+			   of values. in ::can_do() we use the whole system, but here
+			   we need a single pair of values. XXX probably means we should
+			   remove any use of these values.
 			*/
 
 			info->n_inputs = info->cache.io_configs.front().first;
@@ -1825,7 +1830,8 @@ AUPluginInfo::load_cached_info ()
 			}
 
 			std::string id = prop->value();
-			
+			AUPluginCachedInfo cinfo;
+
 			for (XMLNodeConstIterator giter = gchildren.begin(); giter != gchildren.end(); giter++) {
 
 				gchild = *giter;
@@ -1842,11 +1848,13 @@ AUPluginInfo::load_cached_info ()
 						in = atoi (iprop->value());
 						out = atoi (iprop->value());
 						
-						AUPluginCachedInfo cinfo;
 						cinfo.io_configs.push_back (pair<int,int> (in, out));
-						add_cached_info (id, cinfo);
 					}
 				}
+			}
+
+			if (cinfo.io_configs.size()) {
+				add_cached_info (id, cinfo);
 			}
 		}
 	}

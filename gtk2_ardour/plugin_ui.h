@@ -99,6 +99,8 @@ class PlugUIBase : public virtual sigc::trackable
 	bool focus_toggled(GdkEventButton*);
 	void bypass_toggled();
 	void redirect_active_changed (ARDOUR::Redirect* r, void* src);
+
+	void plugin_going_away ();
 };
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox 
