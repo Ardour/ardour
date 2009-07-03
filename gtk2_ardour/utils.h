@@ -27,6 +27,7 @@
 #include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
 #include <glibmm/ustring.h>
+#include <gtkmm/menushell.h>
 
 #include "canvas.h"
 
@@ -60,6 +61,7 @@ int pixel_width (const Glib::ustring& str, Pango::FontDescription& font);
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);
+void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList &, Gtk::Menu_Helpers::MenuElem, bool);
 
 unsigned char* xpm2rgb  (const char** xpm, uint32_t& w, uint32_t& h);
 unsigned char* xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h);

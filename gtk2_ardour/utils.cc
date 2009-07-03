@@ -149,6 +149,21 @@ fit_to_pixels (cairo_t* cr, std::string name, double avail)
 }
 
 
+/** Add an element to a menu, settings its sensitivity.
+ * @param m Menu to add to.
+ * @param e Element to add.
+ * @param s true to make sensitive, false to make insensitive
+ */
+void
+add_item_with_sensitivity (Menu_Helpers::MenuList& m, Menu_Helpers::MenuElem e, bool s)
+{
+	m.push_back (e);
+	if (!s) {
+		m.back().set_sensitive (false);
+	}
+}
+
+
 gint
 just_hide_it (GdkEventAny *ev, Gtk::Window *win)
 {

@@ -119,6 +119,7 @@ class EditorGroupTabs;
 class EditorRoutes;
 class EditorRouteGroups;
 class EditorRegions;
+class EditorSnapshots;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -599,8 +600,6 @@ class Editor : public PublicEditor
 	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
-	void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList&, Gtk::Menu_Helpers::MenuElem, bool) const;
-
 	void handle_new_route (ARDOUR::RouteList&);
 	void remove_route (TimeAxisView *);
 	bool route_removal;
@@ -939,28 +938,6 @@ class Editor : public PublicEditor
 
 	void end_location_changed (ARDOUR::Location*);
 
-	/* snapshots */
-
-	Gtk::ScrolledWindow snapshot_display_scroller;
-	struct SnapshotDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    SnapshotDisplayModelColumns() { 
-		    add (visible_name);
-		    add (real_name);
-	    }
-	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
-	    Gtk::TreeModelColumn<Glib::ustring> real_name;
-	};
-
-	SnapshotDisplayModelColumns snapshot_display_columns;
-	Glib::RefPtr<Gtk::ListStore> snapshot_display_model;
-	Gtk::TreeView snapshot_display;
-	Gtk::Menu snapshot_context_menu;
-
-	bool snapshot_display_button_press (GdkEventButton*);
-	void snapshot_display_selection_changed ();
-	void redisplay_snapshots();
-	void popup_snapshot_context_menu (int, int32_t, Glib::ustring);
-
 	/* named selections */
 
 	struct NamedSelectionDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -981,8 +958,6 @@ class Editor : public PublicEditor
 	void create_named_selection ();
 	void paste_named_selection (float times);
 	void remove_selected_named_selections ();
-	void remove_snapshot (Glib::ustring);
-	void rename_snapshot (Glib::ustring);
 
 	void handle_new_named_selection ();
 	void add_named_selection_to_named_selection_display (ARDOUR::NamedSelection&);
@@ -1680,6 +1655,7 @@ public:
 	EditorRouteGroups* _route_groups;
 	EditorRoutes* _routes;
 	EditorRegions* _regions;
+	EditorSnapshots* _snapshots;
 	
 	/* diskstream/route display management */
 	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;

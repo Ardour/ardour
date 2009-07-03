@@ -103,6 +103,7 @@
 #include "mixer_strip.h"
 #include "editor_route_groups.h"
 #include "editor_regions.h"
+#include "editor_snapshots.h"
 
 #include "i18n.h"
 
@@ -530,6 +531,7 @@ Editor::Editor ()
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);
 	_regions = new EditorRegions (this);
+	_snapshots = new EditorSnapshots (this);
 
 	named_selection_scroller.add (named_selection_display);
 	named_selection_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
@@ -547,21 +549,6 @@ Editor::Editor ()
 	named_selection_display.signal_key_release_event().connect (mem_fun(*this, &Editor::named_selection_display_key_release), false);
 	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
 
-	/* SNAPSHOTS */
-
-	snapshot_display_model = ListStore::create (snapshot_display_columns);
-	snapshot_display.set_model (snapshot_display_model);
-	snapshot_display.append_column (X_("snapshot"), snapshot_display_columns.visible_name);
-	snapshot_display.set_name ("SnapshotDisplay");
-	snapshot_display.set_size_request (75, -1);
-	snapshot_display.set_headers_visible (false);
-	snapshot_display.set_reorderable (false);
-	snapshot_display_scroller.add (snapshot_display);
-	snapshot_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	snapshot_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::snapshot_display_selection_changed));
-	snapshot_display.signal_button_press_event().connect (mem_fun (*this, &Editor::snapshot_display_button_press), false);
-
 	Gtk::Label* nlabel;
 
 	nlabel = manage (new Label (_("Regions")));
@@ -572,7 +559,7 @@ Editor::Editor ()
 	the_notebook.append_page (_routes->widget (), *nlabel);
 	nlabel = manage (new Label (_("Snapshots")));
 	nlabel->set_angle (-90);
-	the_notebook.append_page (snapshot_display_scroller, *nlabel);
+	the_notebook.append_page (_snapshots->widget (), *nlabel);
 	nlabel = manage (new Label (_("Route Groups")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (_route_groups->widget (), *nlabel);
@@ -1183,7 +1170,6 @@ Editor::connect_to_session (Session *t)
 	handle_new_duration ();
 
 	redisplay_named_selections ();
-	redisplay_snapshots ();
 
 	restore_ruler_visibility ();
 	//tempo_map_changed (Change (0));
@@ -1216,6 +1202,7 @@ Editor::connect_to_session (Session *t)
 	_group_tabs->connect_to_session (session);
 	_route_groups->connect_to_session (session);
 	_regions->connect_to_session (session);
+	_snapshots->connect_to_session (session);
 	
 	start_updating ();
 }
@@ -1696,20 +1683,6 @@ Editor::xfade_edit_right_region ()
 {
 	if (clicked_crossfadeview) {
 		clicked_crossfadeview->right_view.show_region_editor ();
-	}
-}
-
-/** Add an element to a menu, settings its sensitivity.
- * @param m Menu to add to.
- * @param e Element to add.
- * @param s true to make sensitive, false to make insensitive
- */
-void
-Editor::add_item_with_sensitivity (Menu_Helpers::MenuList& m, Menu_Helpers::MenuElem e, bool s) const
-{
-	m.push_back (e);
-	if (!s) {
-		m.back().set_sensitive (false);
 	}
 }
 
@@ -4062,161 +4035,12 @@ Editor::control_layout_scroll (GdkEventScroll* ev)
 	return false;
 }
 
-
-/** A new snapshot has been selected.
- */
-void
-Editor::snapshot_display_selection_changed ()
-{
-	if (snapshot_display.get_selection()->count_selected_rows() > 0) {
-
-		TreeModel::iterator i = snapshot_display.get_selection()->get_selected();
-		
-		Glib::ustring snap_name = (*i)[snapshot_display_columns.real_name];
-
-		if (snap_name.length() == 0) {
-			return;
-		}
-		
-		if (session->snap_name() == snap_name) {
-			return;
-		}
-		
-		ARDOUR_UI::instance()->load_session(session->path(), string (snap_name));
-	}
-}
-
-bool
-Editor::snapshot_display_button_press (GdkEventButton* ev)
-{
-	if (ev->button == 3) {
-		/* Right-click on the snapshot list. Work out which snapshot it
-		   was over. */
-		Gtk::TreeModel::Path path;
-		Gtk::TreeViewColumn* col;
-		int cx;
-		int cy;
-		snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
-		Gtk::TreeModel::iterator iter = snapshot_display_model->get_iter (path);
-		if (iter) {
-			Gtk::TreeModel::Row row = *iter;
-			popup_snapshot_context_menu (ev->button, ev->time, row[snapshot_display_columns.real_name]);
-		}
-		return true;
-	}
-
-	return false;
-}
-
-
-/** Pop up the snapshot display context menu.
- * @param button Button used to open the menu.
- * @param time Menu open time.
- * @snapshot_name Name of the snapshot that the menu click was over.
- */
-
-void
-Editor::popup_snapshot_context_menu (int button, int32_t time, Glib::ustring snapshot_name)
-{
-	using namespace Menu_Helpers;
-
-	MenuList& items (snapshot_context_menu.items());
-	items.clear ();
-
-	const bool modification_allowed = (session->snap_name() != snapshot_name && session->name() != snapshot_name);
-
-	add_item_with_sensitivity (items, MenuElem (_("Remove"), bind (mem_fun (*this, &Editor::remove_snapshot), snapshot_name)), modification_allowed);
-
-	add_item_with_sensitivity (items, MenuElem (_("Rename"), bind (mem_fun (*this, &Editor::rename_snapshot), snapshot_name)), modification_allowed);
-
-	snapshot_context_menu.popup (button, time);
-}
-
-void
-Editor::rename_snapshot (Glib::ustring old_name)
-{
-	ArdourPrompter prompter(true);
-
-	string new_name;
-
-	prompter.set_name ("Prompter");
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_prompt (_("New name of snapshot"));
-	prompter.set_initial_text (old_name);
-	
-	if (prompter.run() == RESPONSE_ACCEPT) {
-		prompter.get_result (new_name);
-		if (new_name.length()) {
-			session->rename_state (old_name, new_name);
-			redisplay_snapshots ();
-		}
-	}
-}
-
-
-void
-Editor::remove_snapshot (Glib::ustring name)
-{
-	vector<string> choices;
-
-	std::string prompt  = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(cannot be undone)"), name);
-
-	choices.push_back (_("No, do nothing."));
-	choices.push_back (_("Yes, remove it."));
-
-	Gtkmm2ext::Choice prompter (prompt, choices);
-
-	if (prompter.run () == 1) {
-		session->remove_state (name);
-		redisplay_snapshots ();
-	}
-}
-
-void
-Editor::redisplay_snapshots ()
-{
-	if (session == 0) {
-		return;
-	}
-
-	vector<sys::path> state_file_paths;
-
-	get_state_files_in_directory (session->session_directory().root_path(),
-			state_file_paths);
-
-	if (state_file_paths.empty()) return;
-
-	vector<string> state_file_names(get_file_names_no_extension(state_file_paths));
-
-	snapshot_display_model->clear ();
-
-	for (vector<string>::iterator i = state_file_names.begin();
-			i != state_file_names.end(); ++i)
-	{
-		string statename = (*i);
-		TreeModel::Row row = *(snapshot_display_model->append());
-		
-		/* this lingers on in case we ever want to change the visible
-		   name of the snapshot.
-		*/
-		
-		string display_name;
-		display_name = statename;
-
-		if (statename == session->snap_name()) {
-			snapshot_display.get_selection()->select(row);
-		} 
-		
-		row[snapshot_display_columns.visible_name] = display_name;
-		row[snapshot_display_columns.real_name] = statename;
-	}
-}
-
 void
 Editor::session_state_saved (string snap_name)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::session_state_saved), snap_name));
-	redisplay_snapshots ();
+	
+	_snapshots->redisplay ();
 }
 
 void
