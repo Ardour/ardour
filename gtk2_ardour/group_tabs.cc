@@ -29,18 +29,19 @@ using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
 
-GroupTabs::GroupTabs ()
-	: _session (0),
+GroupTabs::GroupTabs (Editor* e)
+	: EditorComponent (e),
 	  _dragging (0)
 {
 
 }
 
 void
-GroupTabs::set_session (Session* s)
+GroupTabs::connect_to_session (Session* s)
 {
-	_session = s;
-	s->RouteGroupChanged.connect (mem_fun (*this, &GroupTabs::set_dirty));
+	EditorComponent::connect_to_session (s);
+
+	_session_connections.push_back (_session->RouteGroupChanged.connect (mem_fun (*this, &GroupTabs::set_dirty)));
 }
 
 

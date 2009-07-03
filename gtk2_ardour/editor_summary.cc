@@ -35,8 +35,7 @@ using namespace ARDOUR;
  *  @param e Editor to represent.
  */
 EditorSummary::EditorSummary (Editor* e)
-	: _editor (e),
-	  _session (0),
+	: EditorComponent (e),
 	  _x_scale (1),
 	  _y_scale (1),
 	  _last_playhead (-1),
@@ -48,19 +47,19 @@ EditorSummary::EditorSummary (Editor* e)
 	
 }
 
-/** Set the session.
+/** Connect to a session.
  *  @param s Session.
  */
 void
-EditorSummary::set_session (Session* s)
+EditorSummary::connect_to_session (Session* s)
 {
-	_session = s;
+	EditorComponent::connect_to_session (s);
 
 	Region::RegionPropertyChanged.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty)));
 
-	_session->RegionRemoved.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty)));
-	_session->EndTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty));
-	_session->StartTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty));
+	_session_connections.push_back (_session->RegionRemoved.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty))));
+	_session_connections.push_back (_session->EndTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty)));
+	_session_connections.push_back (_session->StartTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty)));
 	_editor->playhead_cursor->PositionChanged.connect (mem_fun (*this, &EditorSummary::playhead_position_changed));
 
 	set_dirty ();

@@ -486,7 +486,7 @@ Mixer_UI::connect_to_session (Session* sess)
 	       show_window();
 	}
 
-	_group_tabs->set_session (sess);
+	_group_tabs->connect_to_session (sess);
 
 	start_updating ();
 }

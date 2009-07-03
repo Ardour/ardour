@@ -98,9 +98,10 @@
 #include "editor_drag.h"
 #include "editor_group_tabs.h"
 #include "automation_time_axis.h"
-#include "editor_route_list.h"
+#include "editor_routes.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
+#include "editor_route_groups.h"
 
 #include "i18n.h"
 
@@ -314,7 +315,6 @@ Editor::Editor ()
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
-	route_group_menu = 0;
 	region_list_menu = 0;
 	marker_menu = 0;
 	start_end_marker_menu = 0;
@@ -338,7 +338,6 @@ Editor::Editor ()
 	clear_entered_track = false;
 	_new_regionviews_show_envelope = false;
 	current_timefx = 0;
-	in_route_group_row_change = false;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
 	_dragging_playhead = false;
@@ -531,117 +530,8 @@ Editor::Editor ()
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
 
-	group_model = ListStore::create(group_columns);
-	route_group_display.set_model (group_model);
-
-	route_group_display.append_column (_("Name"), group_columns.text);
-
-	route_group_display.append_column (_("G"), group_columns.gain);
-	route_group_display.append_column (_("R"), group_columns.record);
-	route_group_display.append_column (_("M"), group_columns.mute);
-	route_group_display.append_column (_("S"), group_columns.solo);
-	route_group_display.append_column (_("Sel"), group_columns.select);
-	route_group_display.append_column (_("E"), group_columns.edits);
-
-	route_group_display.append_column (_("Show"), group_columns.is_visible);
-
-	route_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	route_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	route_group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
-	route_group_display.get_column (3)->set_data (X_("colnum"), GUINT_TO_POINTER(3));
-	route_group_display.get_column (4)->set_data (X_("colnum"), GUINT_TO_POINTER(4));
-	route_group_display.get_column (5)->set_data (X_("colnum"), GUINT_TO_POINTER(5));
-	route_group_display.get_column (6)->set_data (X_("colnum"), GUINT_TO_POINTER(6));
-	route_group_display.get_column (7)->set_data (X_("colnum"), GUINT_TO_POINTER(7));
-
-	route_group_display.get_column (0)->set_expand (true);
-	route_group_display.get_column (1)->set_expand (false);
-	route_group_display.get_column (2)->set_expand (false);
-	route_group_display.get_column (3)->set_expand (false);
-	route_group_display.get_column (4)->set_expand (false);
-	route_group_display.get_column (5)->set_expand (false);
-	route_group_display.get_column (6)->set_expand (false);
-	route_group_display.get_column (7)->set_expand (false);
-
-	route_group_display.set_headers_visible (true);
-
-	/* name is directly editable */
-
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(route_group_display.get_column_cell_renderer (0));
-	name_cell->property_editable() = true;
-	name_cell->signal_edited().connect (mem_fun (*this, &Editor::route_group_name_edit));
-
-	/* use checkbox for the active + visible columns */
-
-	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (1));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (2));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (3));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (4));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (5));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (6));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	active_cell = dynamic_cast<CellRendererToggle*>(route_group_display.get_column_cell_renderer (7));
-	active_cell->property_activatable() = true;
-	active_cell->property_radio() = false;
-
-	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_group_row_change));
-
-	_route_list = new EditorRouteList (this);
-
-	route_group_display.set_name ("EditGroupList");
-	route_group_display.get_selection()->set_mode (SELECTION_SINGLE);
-	route_group_display.set_headers_visible (true);
-	route_group_display.set_reorderable (false);
-	route_group_display.set_rules_hint (true);
-	route_group_display.set_size_request (75, -1);
-
-	route_group_display_scroller.add (route_group_display);
-	route_group_display_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
-
-	route_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::route_group_list_button_press_event), false);
-
-	VBox* route_group_display_packer = manage (new VBox());
-	HBox* route_group_display_button_box = manage (new HBox());
-	route_group_display_button_box->set_homogeneous (true);
-
-	Button* route_group_add_button = manage (new Button ());
-	Button* route_group_remove_button = manage (new Button ());
-
-	Widget* w;
-
-	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show();
-	route_group_add_button->add (*w);
-
-	w = manage (new Image (Stock::REMOVE, ICON_SIZE_BUTTON));
-	w->show();
-	route_group_remove_button->add (*w);
-
-	route_group_add_button->signal_clicked().connect (mem_fun (*this, &Editor::new_route_group));
-	route_group_remove_button->signal_clicked().connect (mem_fun (*this, &Editor::remove_selected_route_group));
-	
-	route_group_display_button_box->pack_start (*route_group_add_button);
-	route_group_display_button_box->pack_start (*route_group_remove_button);
-
-	route_group_display_packer->pack_start (route_group_display_scroller, true, true);
-	route_group_display_packer->pack_start (*route_group_display_button_box, false, false);
+	_route_groups = new EditorRouteGroups (this);
+	_routes = new EditorRoutes (this);
 
 	region_list_display.set_size_request (100, -1);
 	region_list_display.set_name ("RegionListDisplay");
@@ -748,13 +638,13 @@ Editor::Editor ()
 	the_notebook.append_page (region_list_scroller, *nlabel);
 	nlabel = manage (new Label (_("Tracks/Busses")));
 	nlabel->set_angle (-90);
-	the_notebook.append_page (_route_list->widget (), *nlabel);
+	the_notebook.append_page (_routes->widget (), *nlabel);
 	nlabel = manage (new Label (_("Snapshots")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (snapshot_display_scroller, *nlabel);
 	nlabel = manage (new Label (_("Route Groups")));
 	nlabel->set_angle (-90);
-	the_notebook.append_page (*route_group_display_packer, *nlabel);
+	the_notebook.append_page (_route_groups->widget (), *nlabel);
 	
 	if (!Profile->get_sae()) {
 		nlabel = manage (new Label (_("Chunks")));
@@ -893,7 +783,8 @@ Editor::~Editor()
 	}
 #endif
 
-	delete _route_list;
+	delete _routes;
+	delete _route_groups;
 	delete track_canvas;
 	delete _drag;
 }
@@ -1278,8 +1169,6 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->RegionsAdded.connect (mem_fun(*this, &Editor::handle_new_regions)));
 	session_connections.push_back (session->RegionRemoved.connect (mem_fun(*this, &Editor::handle_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
-	session_connections.push_back (session->route_group_added.connect (mem_fun(*this, &Editor::add_route_group)));
-	session_connections.push_back (session->route_group_removed.connect (mem_fun(*this, &Editor::route_groups_changed)));
 	session_connections.push_back (session->NamedSelectionAdded.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->NamedSelectionRemoved.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->DirtyChanged.connect (mem_fun(*this, &Editor::update_title)));
@@ -1294,7 +1183,7 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->Located.connect (mem_fun (*this, &Editor::located)));
 	session_connections.push_back (session->config.ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed)));
 
-	route_groups_changed ();
+	_route_groups->connect_to_session (session);
 
 	edit_point_clock.set_mode(AudioClock::BBT);
 	edit_point_clock.set_session (session);
@@ -1375,7 +1264,7 @@ Editor::connect_to_session (Session *t)
 	//tempo_map_changed (Change (0));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
-	_route_list->initial_display ();
+	_routes->initial_display ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
@@ -1398,8 +1287,8 @@ Editor::connect_to_session (Session *t)
 	/* register for undo history */
 	session->register_with_memento_command_factory(_id, this);
 
-	_summary->set_session (session);
-	_group_tabs->set_session (session);
+	_summary->connect_to_session (session);
+	_group_tabs->connect_to_session (session);
 	
 	start_updating ();
 }
@@ -4615,7 +4504,7 @@ Editor::use_visual_state (VisualState& vs)
 {
 	no_save_visual = true;
 
-	_route_list->suspend_redisplay ();
+	_routes->suspend_redisplay ();
 
 	vertical_adjustment.set_value (vs.y_position);
 
@@ -4635,10 +4524,10 @@ Editor::use_visual_state (VisualState& vs)
 
 
 	if (!vs.track_states.empty()) {
-		_route_list->update_visibility ();
+		_routes->update_visibility ();
 	} 
 
-	_route_list->resume_redisplay ();
+	_routes->resume_redisplay ();
 
 	no_save_visual = false;
 }
@@ -5136,7 +5025,7 @@ Editor::first_idle ()
 	}
 
 	// first idle adds route children (automation tracks), so we need to redisplay here
-	_route_list->redisplay ();
+	_routes->redisplay ();
 	
 	delete dialog;
 
@@ -5282,7 +5171,7 @@ Editor::handle_new_route (RouteList& routes)
 		rtv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), rtv));
 	}
 
-	_route_list->routes_added (new_views);
+	_routes->routes_added (new_views);
 
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);
@@ -5343,13 +5232,13 @@ Editor::hide_track_in_display (TimeAxisView& tv, bool temponly)
 		set_selected_mixer_strip (tv);
 	}
 
-	_route_list->hide_track_in_display (tv);
+	_routes->hide_track_in_display (tv);
 }
 
 bool
-Editor::sync_track_view_list_and_route_list ()
+Editor::sync_track_view_list_and_routes ()
 {
-	track_views = TrackSelection (_route_list->views ());
+	track_views = TrackSelection (_routes->views ());
 	
 	_summary->set_dirty ();
 	_group_tabs->set_dirty ();
@@ -5381,3 +5270,9 @@ Editor::get_route_view_by_id (PBD::ID& id)
 	return 0;
 }
 
+void
+Editor::fit_route_group (RouteGroup *g)
+{
+	TrackSelection ts = axis_views_from_routes (g->route_list ());
+	fit_tracks (ts);
+}

@@ -18,6 +18,7 @@
 */
 
 #include <gtkmm/menu.h>
+#include "editor_component.h"
 #include "cairo_widget.h"
 
 namespace ARDOUR {
@@ -30,12 +31,12 @@ class Editor;
 /** Parent class for tabs which represent route groups as coloured tabs;
  *  Currently used on the left-hand side of the editor and at the top of the mixer.
  */
-class GroupTabs : public CairoWidget
+class GroupTabs : public CairoWidget, public EditorComponent
 {
 public:
-	GroupTabs ();
+	GroupTabs (Editor *);
 
-	void set_session (ARDOUR::Session *);
+	void connect_to_session (ARDOUR::Session *);
 
 protected:
 
@@ -47,8 +48,6 @@ protected:
 		double first_ui_size; ///< GUI size of the first route in the group
 		double last_ui_size; ///< GUI size of the last route in the group
 	};
-
-	ARDOUR::Session* _session; ///< our session
 
 private:
 	/** Compute all the tabs for this widget.

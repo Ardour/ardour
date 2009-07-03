@@ -77,7 +77,7 @@
 #include "utils.h"
 #include "editor_drag.h"
 #include "strip_silence_dialog.h"
-#include "editor_route_list.h"
+#include "editor_routes.h"
 
 #include "i18n.h"
 
@@ -1745,7 +1745,7 @@ Editor::temporal_zoom_region (bool both_axes)
 		
 		/* hide irrelevant tracks */
 
-		_route_list->suspend_redisplay ();
+		_routes->suspend_redisplay ();
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
@@ -1753,7 +1753,7 @@ Editor::temporal_zoom_region (bool both_axes)
 			}
 		}
 
-		_route_list->resume_redisplay ();
+		_routes->resume_redisplay ();
 
 		vertical_adjustment.set_value (0.0);
 		no_save_visual = false;
@@ -6374,13 +6374,6 @@ void
 Editor::fit_selected_tracks ()
 {
 	fit_tracks (selection->tracks);
-}
-
-void
-Editor::fit_route_group (RouteGroup *g)
-{
-	TrackSelection ts = axis_views_from_routes (g->route_list ());
-	fit_tracks (ts);
 }
 
 void

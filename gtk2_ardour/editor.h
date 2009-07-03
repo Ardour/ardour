@@ -116,7 +116,8 @@ class TimeFXDialog;
 class TimeSelection;
 class TrackSelection;
 class EditorGroupTabs;
-class EditorRouteList;
+class EditorRoutes;
+class EditorRouteGroups;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -398,6 +399,10 @@ class Editor : public PublicEditor
 
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
+
+	TrackViewList const & get_track_views () {
+		return track_views;
+	}
 
   protected:
 	void map_transport_state ();
@@ -1761,7 +1766,8 @@ public:
 	ArdourCanvas::SimpleRect   *zoom_rect;
 	void reposition_zoom_rect (nframes64_t start, nframes64_t end);
 
-	EditorRouteList* _route_list;
+	EditorRouteGroups* _route_groups;
+	EditorRoutes* _routes;
 	
 	/* diskstream/route display management */
 	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;
@@ -1769,65 +1775,7 @@ public:
 
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
-	bool sync_track_view_list_and_route_list ();
-
-	/* edit group management */
-
-        struct GroupListModelColumns : public Gtk::TreeModel::ColumnRecord {
-
-                GroupListModelColumns () {
-			add (is_visible);
-			add (gain);
-			add (record);
-			add (mute);
-			add (solo);
-			add (select);
-			add (edits);
-			add (text);
-			add (routegroup);
-                }
-
-	        Gtk::TreeModelColumn<bool> is_visible;
-		Gtk::TreeModelColumn<bool> gain;
-		Gtk::TreeModelColumn<bool> record;
-		Gtk::TreeModelColumn<bool> mute;
-		Gtk::TreeModelColumn<bool> solo;
-		Gtk::TreeModelColumn<bool> select;
-		Gtk::TreeModelColumn<bool> edits;
-	        Gtk::TreeModelColumn<std::string> text;
-	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*> routegroup;
-	};
-
-	GroupListModelColumns group_columns;
-
-	Glib::RefPtr<Gtk::ListStore> group_model;
-	Glib::RefPtr<Gtk::TreeSelection> group_selection;
-
-	Gtk::TreeView          route_group_display;
-	Gtk::ScrolledWindow    route_group_display_scroller;
-	Gtk::Menu*             route_group_menu;
-
-	void build_route_group_menu (ARDOUR::RouteGroup *);
-	void activate_all_route_groups ();
-	void disable_all_route_groups ();
-	void subgroup_route_group (ARDOUR::RouteGroup*);
-	void unsubgroup_route_group (ARDOUR::RouteGroup*);
-
-	bool in_route_group_row_change;
-	void route_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
-	void route_group_name_edit (const Glib::ustring&, const Glib::ustring&);
-	void new_route_group ();
-	void new_route_group_from_selection ();
-	void new_route_group_from_rec_enabled ();
-	void new_route_group_from_soloed ();
-	void edit_route_group (ARDOUR::RouteGroup *);
-	void fit_route_group (ARDOUR::RouteGroup *);
-	void route_group_list_button_clicked ();
-	gint route_group_list_button_press_event (GdkEventButton* ev);
-	void add_route_group (ARDOUR::RouteGroup* group);
-	void remove_selected_route_group ();
-	void route_groups_changed ();
-	void group_flags_changed (void*, ARDOUR::RouteGroup*);
+	bool sync_track_view_list_and_routes ();
 
 	Gtk::VBox           list_vpacker;
 
@@ -2197,8 +2145,7 @@ public:
 	void streamview_height_changed ();
 
 	EditorGroupTabs* _group_tabs;
-
-	void set_route_group_activation (ARDOUR::RouteGroup *, bool);
+	void fit_route_group (ARDOUR::RouteGroup *);
 
 	friend class Drag;
 	friend class RegionDrag;
@@ -2227,7 +2174,7 @@ public:
 	friend class EditorSummary;
 	friend class EditorGroupTabs;
 
-	friend class EditorRouteList;
+	friend class EditorRoutes;
 };
 
 #endif /* __ardour_editor_h__ */

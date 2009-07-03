@@ -17,23 +17,32 @@
 
 */
 
-#include <gtkmm/menu.h>
-#include "group_tabs.h"
+#include "ardour/session.h"
+#include "editor_component.h"
 
-class Editor;
+using namespace std;
+using namespace sigc;
+using namespace ARDOUR;
 
-class EditorGroupTabs : public GroupTabs
+EditorComponent::EditorComponent (Editor* e)
+	: _editor (e),
+	  _session (0)
 {
-public:
-	EditorGroupTabs (Editor *);
 
-private:
-	std::list<Tab> compute_tabs () const;
-	void draw_tab (cairo_t *, Tab const &) const;
-	double primary_coordinate (double, double) const;
-	void reflect_tabs (std::list<Tab> const &);
-	double extent () const {
-		return _height;
+}
+	
+void
+EditorComponent::connect_to_session (Session* s)
+{
+	_session = s;
+
+	_session_connections.push_back (_session->GoingAway.connect (mem_fun (*this, &EditorComponent::session_going_away)));
+}
+
+void
+EditorComponent::session_going_away ()
+{
+	for (list<connection>::iterator i = _session_connections.begin(); i != _session_connections.end(); ++i) {
+		i->disconnect ();
 	}
-	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
-};
+}

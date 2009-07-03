@@ -103,9 +103,10 @@ def build(bld):
 		editor_audiotrack.cc
 		editor_canvas.cc
 		editor_canvas_events.cc
+		editor_component.cc
 		editor_cursors.cc
 		editor_drag.cc
-		editor_edit_groups.cc
+		editor_route_groups.cc
 		editor_export_audio.cc
 		editor_group_tabs.cc
 		editor_hscroller.cc
@@ -117,7 +118,7 @@ def build(bld):
 		editor_nudge.cc
 		editor_ops.cc
 		editor_region_list.cc
-		editor_route_list.cc
+		editor_routes.cc
 		editor_rulers.cc
 		editor_scrub.cc
 		editor_selection.cc

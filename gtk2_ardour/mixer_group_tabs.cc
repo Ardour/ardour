@@ -31,7 +31,8 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 MixerGroupTabs::MixerGroupTabs (Mixer_UI* m)
-	: _mixer (m),
+	: GroupTabs (0),
+	  _mixer (m),
 	  _menu (0)
 {
 	

@@ -38,7 +38,7 @@
 #include "actions.h"
 #include "utils.h"
 #include "editor_group_tabs.h"
-#include "editor_route_list.h"
+#include "editor_routes.h"
 
 #include "pbd/unknown_type.h"
 
@@ -54,8 +54,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Glib;
 
-EditorRouteList::EditorRouteList (Editor* e)
-	: _editor (e),
+EditorRoutes::EditorRoutes (Editor* e)
+	: EditorComponent (e),
 	  _ignore_reorder (false),
 	  _no_redisplay (false),
 	  _redisplay_does_not_sync_order_keys (false),
@@ -73,7 +73,7 @@ EditorRouteList::EditorRouteList (Editor* e)
 	rec_col_renderer->set_active_pixbuf (::get_icon("record_normal_red"));
 	rec_col_renderer->set_inactive_pixbuf (::get_icon("record_disabled_grey"));
 
-	rec_col_renderer->signal_toggled().connect (mem_fun (*this, &EditorRouteList::on_tv_rec_enable_toggled));
+	rec_col_renderer->signal_toggled().connect (mem_fun (*this, &EditorRoutes::on_tv_rec_enable_toggled));
 
 	Gtk::TreeViewColumn* rec_state_column = manage (new TreeViewColumn("Rec", *rec_col_renderer));
 	rec_state_column->add_attribute(rec_col_renderer->property_active(), _columns.rec_enabled);
@@ -100,16 +100,16 @@ EditorRouteList::EditorRouteList (Editor* e)
 	visible_cell->property_activatable() = true;
 	visible_cell->property_radio() = false;
 
-	_model->signal_row_deleted().connect (mem_fun (*this, &EditorRouteList::route_deleted));
-	_model->signal_row_changed().connect (mem_fun (*this, &EditorRouteList::changed));
-	_model->signal_rows_reordered().connect (mem_fun (*this, &EditorRouteList::reordered));
-	_display.signal_button_press_event().connect (mem_fun (*this, &EditorRouteList::button_press), false);
+	_model->signal_row_deleted().connect (mem_fun (*this, &EditorRoutes::route_deleted));
+	_model->signal_row_changed().connect (mem_fun (*this, &EditorRoutes::changed));
+	_model->signal_rows_reordered().connect (mem_fun (*this, &EditorRoutes::reordered));
+	_display.signal_button_press_event().connect (mem_fun (*this, &EditorRoutes::button_press), false);
 
-	Route::SyncOrderKeys.connect (mem_fun (*this, &EditorRouteList::sync_order_keys));
+	Route::SyncOrderKeys.connect (mem_fun (*this, &EditorRoutes::sync_order_keys));
 }
 
 void 
-EditorRouteList::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
+EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 {
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
@@ -123,7 +123,7 @@ EditorRouteList::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 }
 
 void
-EditorRouteList::build_menu ()
+EditorRoutes::build_menu ()
 {
 	using namespace Menu_Helpers;
 	using namespace Gtk;
@@ -133,17 +133,17 @@ EditorRouteList::build_menu ()
 	MenuList& items = _menu->items();
 	_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Show All"), mem_fun (*this, &EditorRouteList::show_all_routes)));
-	items.push_back (MenuElem (_("Hide All"), mem_fun (*this, &EditorRouteList::hide_all_routes)));
-	items.push_back (MenuElem (_("Show All Audio Tracks"), mem_fun (*this, &EditorRouteList::show_all_audiotracks)));
-	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun (*this, &EditorRouteList::hide_all_audiotracks)));
-	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun (*this, &EditorRouteList::show_all_audiobus)));
-	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun (*this, &EditorRouteList::hide_all_audiobus)));
+	items.push_back (MenuElem (_("Show All"), mem_fun (*this, &EditorRoutes::show_all_routes)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun (*this, &EditorRoutes::hide_all_routes)));
+	items.push_back (MenuElem (_("Show All Audio Tracks"), mem_fun (*this, &EditorRoutes::show_all_audiotracks)));
+	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun (*this, &EditorRoutes::hide_all_audiotracks)));
+	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun (*this, &EditorRoutes::show_all_audiobus)));
+	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun (*this, &EditorRoutes::hide_all_audiobus)));
 
 }
 
 void
-EditorRouteList::show_menu ()
+EditorRoutes::show_menu ()
 {
 	if (_menu == 0) {
 		build_menu ();
@@ -155,7 +155,7 @@ EditorRouteList::show_menu ()
 const char* _order_key = N_("editor");
 
 void
-EditorRouteList::redisplay ()
+EditorRoutes::redisplay ()
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -204,7 +204,7 @@ EditorRouteList::redisplay ()
 	   the track order and has caused a redisplay of the list.
 	*/
 
-	Glib::signal_idle().connect (mem_fun (*_editor, &Editor::sync_track_view_list_and_route_list));
+	Glib::signal_idle().connect (mem_fun (*_editor, &Editor::sync_track_view_list_and_routes));
 	
 	_editor->full_canvas_height = position + _editor->canvas_timebars_vsize;
 	_editor->vertical_adjustment.set_upper (_editor->full_canvas_height);
@@ -223,7 +223,7 @@ EditorRouteList::redisplay ()
 }
 
 void
-EditorRouteList::route_deleted (Gtk::TreeModel::Path const & path)
+EditorRoutes::route_deleted (Gtk::TreeModel::Path const & path)
 {
 	/* this could require an order reset & sync */
 	_editor->current_session()->set_remote_control_ids();
@@ -234,7 +234,7 @@ EditorRouteList::route_deleted (Gtk::TreeModel::Path const & path)
 
 
 void
-EditorRouteList::changed (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterator const & iter)
+EditorRoutes::changed (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterator const & iter)
 {
 	/* never reset order keys because of a property change */
 	_redisplay_does_not_reset_order_keys = true;
@@ -244,7 +244,7 @@ EditorRouteList::changed (Gtk::TreeModel::Path const & path, Gtk::TreeModel::ite
 }
 
 void
-EditorRouteList::routes_added (list<RouteTimeAxisView*> routes)
+EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	TreeModel::Row row;
 
@@ -271,13 +271,13 @@ EditorRouteList::routes_added (list<RouteTimeAxisView*> routes)
 		_ignore_reorder = false;
 
 		boost::weak_ptr<Route> wr ((*x)->route());
-		(*x)->route()->gui_changed.connect (mem_fun (*this, &EditorRouteList::handle_gui_changes));
-		(*x)->route()->NameChanged.connect (bind (mem_fun (*this, &EditorRouteList::route_name_changed), wr));
-		(*x)->GoingAway.connect (bind (mem_fun (*this, &EditorRouteList::route_removed), *x));
+		(*x)->route()->gui_changed.connect (mem_fun (*this, &EditorRoutes::handle_gui_changes));
+		(*x)->route()->NameChanged.connect (bind (mem_fun (*this, &EditorRoutes::route_name_changed), wr));
+		(*x)->GoingAway.connect (bind (mem_fun (*this, &EditorRoutes::route_removed), *x));
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
-			t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &EditorRouteList::update_rec_display));
+			t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &EditorRoutes::update_rec_display));
 		}
 	}
 
@@ -286,9 +286,9 @@ EditorRouteList::routes_added (list<RouteTimeAxisView*> routes)
 }
 
 void
-EditorRouteList::handle_gui_changes (string const & what, void *src)
+EditorRoutes::handle_gui_changes (string const & what, void *src)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRouteList::handle_gui_changes), what, src));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRoutes::handle_gui_changes), what, src));
 
 	if (what == "track_height") {
 		/* Optional :make tracks change height while it happens, instead 
@@ -304,9 +304,9 @@ EditorRouteList::handle_gui_changes (string const & what, void *src)
 }
 
 void
-EditorRouteList::route_removed (TimeAxisView *tv)
+EditorRoutes::route_removed (TimeAxisView *tv)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRouteList::route_removed), tv));
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRoutes::route_removed), tv));
 
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
@@ -328,9 +328,9 @@ EditorRouteList::route_removed (TimeAxisView *tv)
 }
 
 void
-EditorRouteList::route_name_changed (boost::weak_ptr<Route> r)
+EditorRoutes::route_name_changed (boost::weak_ptr<Route> r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRouteList::route_name_changed), r));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRoutes::route_name_changed), r));
 
 	boost::shared_ptr<Route> route = r.lock ();
 	if (!route) {
@@ -350,7 +350,7 @@ EditorRouteList::route_name_changed (boost::weak_ptr<Route> r)
 }
 
 void
-EditorRouteList::update_visibility ()
+EditorRoutes::update_visibility ()
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -367,7 +367,7 @@ EditorRouteList::update_visibility ()
 }
 
 void
-EditorRouteList::hide_track_in_display (TimeAxisView& tv)
+EditorRoutes::hide_track_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -381,7 +381,7 @@ EditorRouteList::hide_track_in_display (TimeAxisView& tv)
 }
 
 void
-EditorRouteList::show_track_in_display (TimeAxisView& tv)
+EditorRoutes::show_track_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -395,14 +395,14 @@ EditorRouteList::show_track_in_display (TimeAxisView& tv)
 }
 
 void
-EditorRouteList::reordered (TreeModel::Path const & path, TreeModel::iterator const & iter, int* what)
+EditorRoutes::reordered (TreeModel::Path const & path, TreeModel::iterator const & iter, int* what)
 {
 	redisplay ();
 }
 
 
 void
-EditorRouteList::sync_order_keys (char const * src)
+EditorRoutes::sync_order_keys (char const * src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = _model->children();
@@ -443,7 +443,7 @@ EditorRouteList::sync_order_keys (char const * src)
 
 
 void
-EditorRouteList::hide_all_tracks (bool with_select)
+EditorRoutes::hide_all_tracks (bool with_select)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -472,7 +472,7 @@ EditorRouteList::hide_all_tracks (bool with_select)
 }
 
 void
-EditorRouteList::set_all_tracks_visibility (bool yn)
+EditorRoutes::set_all_tracks_visibility (bool yn)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -495,7 +495,7 @@ EditorRouteList::set_all_tracks_visibility (bool yn)
 }
 
 void
-EditorRouteList::set_all_audio_visibility (int tracks, bool yn) 
+EditorRoutes::set_all_audio_visibility (int tracks, bool yn) 
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -536,41 +536,41 @@ EditorRouteList::set_all_audio_visibility (int tracks, bool yn)
 }
 
 void
-EditorRouteList::hide_all_routes ()
+EditorRoutes::hide_all_routes ()
 {
 	set_all_tracks_visibility (false);
 }
 
 void
-EditorRouteList::show_all_routes ()
+EditorRoutes::show_all_routes ()
 {
 	set_all_tracks_visibility (true);
 }
 
 void
-EditorRouteList::show_all_audiobus ()
+EditorRoutes::show_all_audiobus ()
 {
 	set_all_audio_visibility (2, true);
 }
 void
-EditorRouteList::hide_all_audiobus ()
+EditorRoutes::hide_all_audiobus ()
 {
 	set_all_audio_visibility (2, false);
 }
 
 void
-EditorRouteList::show_all_audiotracks()
+EditorRoutes::show_all_audiotracks()
 {
 	set_all_audio_visibility (1, true);
 }
 void
-EditorRouteList::hide_all_audiotracks ()
+EditorRoutes::hide_all_audiotracks ()
 {
 	set_all_audio_visibility (1, false);
 }
 
 bool
-EditorRouteList::button_press (GdkEventButton* ev)
+EditorRoutes::button_press (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_menu ();
@@ -614,7 +614,7 @@ EditorRouteList::button_press (GdkEventButton* ev)
 }
 
 bool
-EditorRouteList::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const &, bool)
+EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const &, bool)
 {
 	return true;
 }
@@ -627,7 +627,7 @@ struct EditorOrderRouteSorter {
 };
 
 void
-EditorRouteList::initial_display ()
+EditorRoutes::initial_display ()
 {
 	boost::shared_ptr<RouteList> routes = _editor->current_session()->get_routes();
 	RouteList r (*routes);
@@ -668,7 +668,7 @@ EditorRouteList::initial_display ()
 }
 
 void
-EditorRouteList::track_list_reorder (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterator const & iter, int* new_order)
+EditorRoutes::track_list_reorder (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterator const & iter, int* new_order)
 {
 	_redisplay_does_not_sync_order_keys = true;
 	_editor->current_session()->set_remote_control_ids();
@@ -677,7 +677,7 @@ EditorRouteList::track_list_reorder (Gtk::TreeModel::Path const & path, Gtk::Tre
 }
 
 void  
-EditorRouteList::display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
+EditorRoutes::display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
 					     int x, int y, 
 					     const SelectionData& data,
 					     guint info, guint time)
@@ -691,7 +691,7 @@ EditorRouteList::display_drag_data_received (const RefPtr<Gdk::DragContext>& con
 }
 
 void
-EditorRouteList::move_selected_tracks (bool up)
+EditorRoutes::move_selected_tracks (bool up)
 {
 	if (_editor->selection->tracks.empty()) {
 		return;
@@ -803,7 +803,7 @@ EditorRouteList::move_selected_tracks (bool up)
 }
 
 void
-EditorRouteList::update_rec_display ()
+EditorRoutes::update_rec_display ()
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -823,7 +823,7 @@ EditorRouteList::update_rec_display ()
 }
 
 list<TimeAxisView*>
-EditorRouteList::views () const
+EditorRoutes::views () const
 {
 	list<TimeAxisView*> v;
 	for (TreeModel::Children::iterator i = _model->children().begin(); i != _model->children().end(); ++i) {
@@ -834,7 +834,7 @@ EditorRouteList::views () const
 }
 
 void
-EditorRouteList::clear ()
+EditorRoutes::clear ()
 {
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();

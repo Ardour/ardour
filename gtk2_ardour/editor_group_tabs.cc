@@ -22,12 +22,13 @@
 #include "editor.h"
 #include "route_time_axis.h"
 #include "utils.h"
+#include "editor_route_groups.h"
 
 using namespace std;
 using namespace ARDOUR;
 
 EditorGroupTabs::EditorGroupTabs (Editor* e)
-	: _editor (e)
+	: GroupTabs (e)
 {
 	
 }
@@ -157,6 +158,5 @@ EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
 Gtk::Menu*
 EditorGroupTabs::get_menu (RouteGroup *g)
 {
-	_editor->build_route_group_menu (g);
-	return _editor->route_group_menu;
+	return _editor->_route_groups->menu (g);
 }

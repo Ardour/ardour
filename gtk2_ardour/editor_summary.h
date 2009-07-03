@@ -21,6 +21,7 @@
 #define __gtk_ardour_editor_summary_h__
 
 #include "cairo_widget.h"
+#include "editor_component.h"
 
 namespace ARDOUR {
 	class Session;
@@ -31,12 +32,12 @@ class Editor;
 /** Class to provide a visual summary of the contents of an editor window; represents
  *  the whole session as a set of lines, one per region view.
  */
-class EditorSummary : public CairoWidget
+class EditorSummary : public CairoWidget, public EditorComponent
 {
 public:
 	EditorSummary (Editor *);
 
-	void set_session (ARDOUR::Session *);
+	void connect_to_session (ARDOUR::Session *);
 	void set_overlays_dirty ();
 
 private:
@@ -54,8 +55,6 @@ private:
 	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
 	void playhead_position_changed (nframes64_t);
 
-	Editor* _editor; ///< our editor
-	ARDOUR::Session* _session; ///< our session
 	double _x_scale; ///< pixels per frame for the x axis of the pixmap
 	double _y_scale;
 	double _last_playhead;

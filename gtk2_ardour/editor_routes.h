@@ -17,10 +17,10 @@
 
 */
 
-class EditorRouteList
+class EditorRoutes : public EditorComponent
 {
 public:
-	EditorRouteList (Editor *);
+	EditorRoutes (Editor *);
 
 	Gtk::Widget& widget () {
 		return _scroller;
@@ -89,7 +89,6 @@ private:
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 	};
 
-	Editor* _editor;
 	Gtk::ScrolledWindow _scroller;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > _display; 
 	Glib::RefPtr<Gtk::ListStore> _model;
