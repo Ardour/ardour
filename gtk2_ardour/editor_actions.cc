@@ -31,6 +31,7 @@
 #include "audio_time_axis.h"
 #include "editor_group_tabs.h"
 #include "editor_routes.h"
+#include "editor_regions.h"
 
 using namespace Gtk;
 using namespace Glib;
@@ -766,37 +767,37 @@ Editor::register_actions ()
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (rl_actions, X_("rlHide"), _("Hide"), mem_fun(*this, &Editor::hide_region_from_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (rl_actions, X_("rlRemove"), _("Remove"), mem_fun (*this, &Editor::remove_region_from_region_list));
+	act = ActionManager::register_action (rl_actions, X_("rlRemove"), _("Remove"), mem_fun (*_regions, &EditorRegions::remove_region));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
-	ActionManager::register_toggle_action (rl_actions, X_("rlShowAll"), _("Show All"), mem_fun(*this, &Editor::toggle_full_region_list));
-	ActionManager::register_toggle_action (rl_actions, X_("rlShowAuto"), _("Show Automatic Regions"), mem_fun(*this, &Editor::toggle_show_auto_regions));
+	ActionManager::register_toggle_action (rl_actions, X_("rlShowAll"), _("Show All"), mem_fun(*_regions, &EditorRegions::toggle_full));
+	ActionManager::register_toggle_action (rl_actions, X_("rlShowAuto"), _("Show Automatic Regions"), mem_fun (*_regions, &EditorRegions::toggle_show_auto_regions));
 
 	ActionManager::register_radio_action (rl_actions, sort_order_group, X_("SortAscending"),  _("Ascending"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), true));
+			       bind (mem_fun (*_regions, &EditorRegions::reset_sort_direction), true));
 	ActionManager::register_radio_action (rl_actions, sort_order_group, X_("SortDescending"),   _("Descending"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_direction), false));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_direction), false));
 	
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionName"),  _("By Region Name"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByName));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), ByName, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionLength"),  _("By Region Length"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByLength));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), ByLength, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionPosition"),  _("By Region Position"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByPosition));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), ByPosition, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionTimestamp"),  _("By Region Timestamp"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByTimestamp));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), ByTimestamp, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionStartinFile"),  _("By Region Start in File"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByStartInFile));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), ByStartInFile, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionEndinFile"),  _("By Region End in File"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), ByEndInFile));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), ByEndInFile, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFileName"),  _("By Source File Name"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileName));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileName, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFileLength"),  _("By Source File Length"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileLength));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileLength, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFileCreationDate"),  _("By Source File Creation Date"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileCreationDate));
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileCreationDate, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
-			       bind (mem_fun(*this, &Editor::reset_region_list_sort_type), BySourceFileFS));
-
+					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileFS, false));
+	
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 

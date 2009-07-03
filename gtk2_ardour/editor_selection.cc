@@ -34,6 +34,7 @@
 #include "audio_streamview.h"
 #include "automation_line.h"
 #include "control_point.h"
+#include "editor_regions.h"
 
 #include "i18n.h"
 
@@ -878,15 +879,15 @@ Editor::sensitize_the_right_region_actions (bool have_selected_regions)
 void
 Editor::region_selection_changed ()
 {
-	region_list_change_connection.block(true);
+	_regions->block_change_connection (true);
 	editor_regions_selection_changed_connection.block(true);
-	
-	region_list_display.get_selection()->unselect_all();
+
+	_regions->unselect_all ();
 	
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		
 		(*i)->set_selected_regionviews (selection->regions);
-		set_selected_in_region_list(selection->regions);
+		_regions->set_selected (selection->regions);
 	
 	}
 	
@@ -894,7 +895,7 @@ Editor::region_selection_changed ()
 
 	zoomed_to_region = false;
 
-	region_list_change_connection.block(false);
+	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
 }
 

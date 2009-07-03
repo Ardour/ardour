@@ -102,6 +102,7 @@
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
 #include "editor_route_groups.h"
+#include "editor_regions.h"
 
 #include "i18n.h"
 
@@ -305,17 +306,14 @@ Editor::Editor ()
 	show_gain_after_trim = false;
 	verbose_cursor_on = true;
 	route_removal = false;
-	show_automatic_regions_in_region_list = true;
 	last_item_entered = 0;
 	last_item_entered_n = 0;
 
-	region_list_sort_type = (Editing::RegionListSortType) 0;
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
-	region_list_menu = 0;
 	marker_menu = 0;
 	start_end_marker_menu = 0;
 	range_marker_menu = 0;
@@ -352,7 +350,6 @@ Editor::Editor ()
 	}
 	allow_vertical_scroll = false;
 	no_save_visual = false;
-	no_region_list_redisplay = false;
 	resize_idle_id = -1;
 
 	scrubbing_direction = 0;
@@ -532,74 +529,8 @@ Editor::Editor ()
 
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);
+	_regions = new EditorRegions (this);
 
-	region_list_display.set_size_request (100, -1);
-	region_list_display.set_name ("RegionListDisplay");
-	/* Try to prevent single mouse presses from initiating edits.
-	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()
-	*/
-	region_list_display.set_data ("mouse-edits-require-mod1", (gpointer) 0x1);
-
-	region_list_model = TreeStore::create (region_list_columns);
-	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
-	region_list_model->set_sort_column (0, SORT_ASCENDING);
-
-	region_list_display.set_model (region_list_model);
-	region_list_display.append_column (_("Regions"), region_list_columns.name);
-	region_list_display.append_column (_("Start"), region_list_columns.start);
-	region_list_display.append_column (_("End"), region_list_columns.end);
-	region_list_display.append_column (_("Length"), region_list_columns.length);
-	region_list_display.append_column (_("Sync"), region_list_columns.sync);
-	region_list_display.append_column (_("Fade In"), region_list_columns.fadein);
-	region_list_display.append_column (_("Fade Out"), region_list_columns.fadeout);
-	region_list_display.append_column (_("L"), region_list_columns.locked);
-	region_list_display.append_column (_("G"), region_list_columns.glued);
-	region_list_display.append_column (_("M"), region_list_columns.muted);
-	region_list_display.append_column (_("O"), region_list_columns.opaque);
-	region_list_display.append_column (_("Used"), region_list_columns.used);
-	region_list_display.append_column (_("Path"), region_list_columns.path);
-	region_list_display.set_headers_visible (true);
-	//region_list_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
-	
-	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
-	region_name_cell->property_editable() = true;
-	region_name_cell->signal_edited().connect (mem_fun (*this, &Editor::region_name_edit));
-
-	region_list_display.get_selection()->set_select_function (mem_fun (*this, &Editor::region_list_selection_filter));
-	
-	TreeViewColumn* tv_col = region_list_display.get_column(0);
-	CellRendererText* renderer = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
-	tv_col->add_attribute(renderer->property_text(), region_list_columns.name);
-	tv_col->add_attribute(renderer->property_foreground_gdk(), region_list_columns.color_);
-	
-	region_list_display.get_selection()->set_mode (SELECTION_MULTIPLE);
-	region_list_display.add_object_drag (region_list_columns.region.index(), "regions");
-	
-	/* setup DnD handling */
-	
-	list<TargetEntry> region_list_target_table;
-	
-	region_list_target_table.push_back (TargetEntry ("text/plain"));
-	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
-	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
-	
-	region_list_display.add_drop_targets (region_list_target_table);
-	region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
-
-	region_list_scroller.add (region_list_display);
-	region_list_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
-	
-	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
-	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
-	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press), false);
-	region_list_display.signal_button_release_event().connect (mem_fun(*this, &Editor::region_list_display_button_release));
-	region_list_change_connection = region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
-	// region_list_display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show_region_list_display_context_menu), 1, 0));
-	
-	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::redisplay_regions));
-	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::update_all_region_rows));
-	ARDOUR::Region::RegionPropertyChanged.connect (mem_fun(*this, &Editor::update_region_row));
-	
 	named_selection_scroller.add (named_selection_display);
 	named_selection_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
@@ -635,7 +566,7 @@ Editor::Editor ()
 
 	nlabel = manage (new Label (_("Regions")));
 	nlabel->set_angle (-90);
-	the_notebook.append_page (region_list_scroller, *nlabel);
+	the_notebook.append_page (_regions->widget (), *nlabel);
 	nlabel = manage (new Label (_("Tracks/Busses")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (_routes->widget (), *nlabel);
@@ -1166,15 +1097,12 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->TransportStateChange.connect (mem_fun(*this, &Editor::map_transport_state)));
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
 	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route)));
-	session_connections.push_back (session->RegionsAdded.connect (mem_fun(*this, &Editor::handle_new_regions)));
-	session_connections.push_back (session->RegionRemoved.connect (mem_fun(*this, &Editor::handle_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
 	session_connections.push_back (session->NamedSelectionAdded.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->NamedSelectionRemoved.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->DirtyChanged.connect (mem_fun(*this, &Editor::update_title)));
 	session_connections.push_back (session->StateSaved.connect (mem_fun(*this, &Editor::update_title_s)));
 	session_connections.push_back (session->AskAboutPlaylistDeletion.connect (mem_fun(*this, &Editor::playlist_deletion_dialog)));
-	session_connections.push_back (session->RegionHiddenChange.connect (mem_fun(*this, &Editor::region_hidden)));
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
@@ -1182,8 +1110,6 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->Located.connect (mem_fun (*this, &Editor::located)));
 	session_connections.push_back (session->config.ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed)));
-
-	_route_groups->connect_to_session (session);
 
 	edit_point_clock.set_mode(AudioClock::BBT);
 	edit_point_clock.set_session (session);
@@ -1256,7 +1182,6 @@ Editor::connect_to_session (Session *t)
 
 	handle_new_duration ();
 
-	redisplay_regions ();
 	redisplay_named_selections ();
 	redisplay_snapshots ();
 
@@ -1289,6 +1214,8 @@ Editor::connect_to_session (Session *t)
 
 	_summary->connect_to_session (session);
 	_group_tabs->connect_to_session (session);
+	_route_groups->connect_to_session (session);
+	_regions->connect_to_session (session);
 	
 	start_updating ();
 }
@@ -2477,8 +2404,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("region-list-sort-type"))) {
-		region_list_sort_type = (Editing::RegionListSortType) -1; // force change 
-		reset_region_list_sort_type(str2regionlistsorttype(prop->value()));
+		_regions->reset_sort_type (str2regionlistsorttype(prop->value()), true);
 	}
 
 	if ((prop = node.property ("xfades-visible"))) {
@@ -2579,7 +2505,7 @@ Editor::get_state ()
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
 	node->add_property ("xfades-visible", _xfade_visibility ? "yes" : "no");
-	node->add_property ("region-list-sort-type", enum2str(region_list_sort_type));
+	node->add_property ("region-list-sort-type", enum2str (_regions->sort_type ()));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
 	
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
@@ -4086,14 +4012,13 @@ Editor::prepare_for_cleanup ()
 	selection->clear_regions ();
 	selection->clear_playlists ();
 
-	no_region_list_redisplay = true;
+	_regions->suspend_redisplay ();
 }
 
 void
 Editor::finish_cleanup ()
 {
-	no_region_list_redisplay = false;
-	redisplay_regions ();
+	_regions->resume_redisplay ();
 }
 
 Location*
@@ -5276,3 +5201,50 @@ Editor::fit_route_group (RouteGroup *g)
 	TrackSelection ts = axis_views_from_routes (g->route_list ());
 	fit_tracks (ts);
 }
+
+void
+Editor::consider_auditioning (boost::shared_ptr<Region> region)
+{
+	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
+
+	if (r == 0) {
+		session->cancel_audition ();
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		session->cancel_audition ();
+		if (r == last_audition_region) {
+			return;
+		}
+	}
+
+	session->audition_region (r);
+	last_audition_region = r;
+}
+
+
+void
+Editor::hide_a_region (boost::shared_ptr<Region> r)
+{
+	r->set_hidden (true);
+}
+
+void
+Editor::remove_a_region (boost::shared_ptr<Region> r)
+{
+	session->remove_region_from_region_list (r);
+}
+
+void
+Editor::audition_region_from_region_list ()
+{
+	_regions->selection_mapover (mem_fun (*this, &Editor::consider_auditioning));
+}
+
+void
+Editor::hide_region_from_region_list ()
+{
+	_regions->selection_mapover (mem_fun (*this, &Editor::hide_a_region));
+}
+

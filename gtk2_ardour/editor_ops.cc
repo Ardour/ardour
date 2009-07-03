@@ -78,6 +78,7 @@
 #include "editor_drag.h"
 #include "strip_silence_dialog.h"
 #include "editor_routes.h"
+#include "editor_regions.h"
 
 #include "i18n.h"
 
@@ -2314,29 +2315,17 @@ Editor::insert_region_list_selection (float times)
 	if ((playlist = tv->playlist()) == 0) {
 		return;
 	}
-	
-	Glib::RefPtr<TreeSelection> selected = region_list_display.get_selection();
-	
-	if (selected->count_selected_rows() != 1) {
+
+	boost::shared_ptr<Region> region = _regions->get_single_selection ();
+	if (region == 0) {
 		return;
 	}
-	
-	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
-
-	/* only one row selected, so rows.begin() is it */
-
-	TreeIter iter;
-
-	if ((iter = region_list_model->get_iter (*rows.begin()))) {
-
-		boost::shared_ptr<Region> region = (*iter)[region_list_columns.region];
 		
-		begin_reversible_command (_("insert region"));
-		XMLNode &before = playlist->get_state();
-		playlist->add_region ((RegionFactory::create (region)), get_preferred_edit_position(), times);
-		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
-		commit_reversible_command ();
-	} 
+	begin_reversible_command (_("insert region"));
+	XMLNode &before = playlist->get_state();
+	playlist->add_region ((RegionFactory::create (region)), get_preferred_edit_position(), times);
+	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+	commit_reversible_command ();
 }
 
 /* BUILT-IN EFFECTS */
@@ -2590,7 +2579,7 @@ Editor::rename_region()
 		strip_whitespace_edges (str);
 		if (!str.empty()) {
 			rs.front()->region()->set_name (str);
-			redisplay_regions ();
+			_regions->redisplay ();
 		}
 	}
 }
@@ -3114,15 +3103,10 @@ Editor::region_fill_selection ()
 		return;
 	}
 
-
-	Glib::RefPtr<TreeSelection> selected = region_list_display.get_selection();
-
-	if (selected->count_selected_rows() != 1) {
+	boost::shared_ptr<Region> region = _regions->get_single_selection ();
+	if (region == 0) {
 		return;
 	}
-
-	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
-	boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
 
 	nframes64_t start = selection->time[clicked_selection].start;
 	nframes64_t end = selection->time[clicked_selection].end;

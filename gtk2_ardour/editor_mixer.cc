@@ -33,6 +33,7 @@
 #include "actions.h"
 #include "editor_routes.h"
 #include "editor_route_groups.h"
+#include "editor_regions.h"
 
 #include "i18n.h"
 
@@ -369,15 +370,12 @@ Editor::session_going_away ()
 
 	/* rip everything out of the list displays */
 
-	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	_regions->clear ();
 	_routes->clear ();
 	_route_groups->clear ();
+
 	named_selection_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
-
-	region_list_model->clear ();
 	named_selection_model->clear ();
-
-	region_list_display.set_model (region_list_model);
 	named_selection_display.set_model (named_selection_model);
 
 	edit_point_clock_connection_a.disconnect();

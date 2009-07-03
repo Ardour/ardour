@@ -117,7 +117,7 @@ def build(bld):
 		editor_mouse.cc
 		editor_nudge.cc
 		editor_ops.cc
-		editor_region_list.cc
+		editor_regions.cc
 		editor_routes.cc
 		editor_rulers.cc
 		editor_scrub.cc

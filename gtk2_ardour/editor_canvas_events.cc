@@ -47,6 +47,7 @@
 #include "interactive-item.h"
 #include "editor_drag.h"
 #include "midi_time_axis.h"
+#include "editor_regions.h"
 
 #include "i18n.h"
 
@@ -929,11 +930,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & c, int 
 			return true;
 		}
 
-		list<boost::shared_ptr<Region> > regions;
-		TreeView* source;
-		region_list_display.get_object_drag_data (regions, &source);
-		assert (regions.size() == 1);
-		boost::shared_ptr<Region> region = regions.front ();
+		boost::shared_ptr<Region> region = _regions->get_dragged_region ();
 
 		boost::shared_ptr<Region> region_copy = RegionFactory::create (region);
 

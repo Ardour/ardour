@@ -118,6 +118,7 @@ class TrackSelection;
 class EditorGroupTabs;
 class EditorRoutes;
 class EditorRouteGroups;
+class EditorRegions;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -279,6 +280,8 @@ class Editor : public PublicEditor
 	void invert_selection_in_track ();
 	void invert_selection ();
 	void deselect_all ();
+	
+	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 
 	/* tempo */
 
@@ -404,6 +407,13 @@ class Editor : public PublicEditor
 		return track_views;
 	}
 
+	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region>);
+
+	void do_import (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+	void do_embed (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+
+	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
+	
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);
@@ -412,9 +422,9 @@ class Editor : public PublicEditor
 
   private:
 
-	/// The session that we are editing, or 0
 	void color_handler ();
-	ARDOUR::Session     *session;
+	
+	ARDOUR::Session     *session; ///< The session that we are editing, or 0
 	bool                 constructed;
 
 	// to keep track of the playhead position for control_scroll
@@ -557,14 +567,11 @@ class Editor : public PublicEditor
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
 	
-	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region> region);
-	
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_as_side_effect (bool force = false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
-	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 	void collect_and_select_new_region_view (RegionView *);
@@ -932,81 +939,6 @@ class Editor : public PublicEditor
 
 	void end_location_changed (ARDOUR::Location*);
 
-	struct RegionListDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    RegionListDisplayModelColumns() {
-			add (name);
-		    add (region);
-		    add (color_);
-		    add (start);
-		    add (end);
-		    add (length);
-			add (sync);
-			add (fadein);
-			add (fadeout);
-			add (locked);
-			add (glued);
-			add (muted);
-			add (opaque);
-			add (used);
-		    add (path);
-	    }
-	    Gtk::TreeModelColumn<Glib::ustring> name;
-	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
-	    Gtk::TreeModelColumn<Gdk::Color> color_;
-	    Gtk::TreeModelColumn<Glib::ustring> start;
-	    Gtk::TreeModelColumn<Glib::ustring> end;
-	    Gtk::TreeModelColumn<Glib::ustring> length;
-	    Gtk::TreeModelColumn<Glib::ustring> sync;
-	    Gtk::TreeModelColumn<Glib::ustring> fadein;
-	    Gtk::TreeModelColumn<Glib::ustring> fadeout;
-	    Gtk::TreeModelColumn<bool> locked;
-	    Gtk::TreeModelColumn<bool> glued;
-	    Gtk::TreeModelColumn<bool> muted;
-	    Gtk::TreeModelColumn<bool> opaque;
-	    Gtk::TreeModelColumn<Glib::ustring> used;
-	    Gtk::TreeModelColumn<Glib::ustring> path;
-	};
-	    
-	RegionListDisplayModelColumns          region_list_columns;
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > region_list_display;
-	
-	Glib::RefPtr<Gtk::TreeStore>           region_list_model;
-	Glib::RefPtr<Gtk::ToggleAction>        toggle_full_region_list_action;
-	Glib::RefPtr<Gtk::ToggleAction>        toggle_show_auto_regions_action;
-
-	void region_list_region_changed (ARDOUR::Change, boost::weak_ptr<ARDOUR::Region>);
-	void region_list_selection_changed ();
-	sigc::connection region_list_change_connection;
-	void set_selected_in_region_list(RegionSelection&);
-	bool set_selected_in_region_list_subrow(boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
-	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
-	void region_name_edit (const Glib::ustring&, const Glib::ustring&);
-	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
-
-	Gtk::Menu          *region_list_menu;
-	Gtk::ScrolledWindow region_list_scroller;
-	Gtk::Frame          region_list_frame;
-
-	bool region_list_display_key_press (GdkEventKey *);
-	bool region_list_display_key_release (GdkEventKey *);
-	bool region_list_display_button_press (GdkEventButton *);
-	bool region_list_display_button_release (GdkEventButton *);
-	void region_list_clear ();
-	void region_list_selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
-	void build_region_list_menu ();
-	void show_region_list_display_context_menu (int button, int time);
-
-	bool show_automatic_regions_in_region_list;
-	Editing::RegionListSortType region_list_sort_type;
-
-	void reset_region_list_sort_direction (bool);
-	void reset_region_list_sort_type (Editing::RegionListSortType);
-
-	void toggle_full_region_list ();
-	void toggle_show_auto_regions ();
-
-	int region_list_sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
-
 	/* snapshots */
 
 	Gtk::ScrolledWindow snapshot_display_scroller;
@@ -1109,23 +1041,6 @@ class Editor : public PublicEditor
 
 	int ensure_cursor (nframes64_t* pos);
 
-	void handle_new_region (boost::weak_ptr<ARDOUR::Region>);
-	void handle_new_regions (std::vector<boost::weak_ptr<ARDOUR::Region> >& );
-	void handle_region_removed (boost::weak_ptr<ARDOUR::Region>);
-	void add_region_to_region_display (boost::shared_ptr<ARDOUR::Region>);
-	void add_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::Region> > & );
-	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
-	void redisplay_regions ();
-	void populate_row (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &);
-	void update_region_row (boost::shared_ptr<ARDOUR::Region>);
-	bool update_region_subrows (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
-	void update_all_region_rows ();
-	void update_all_region_subrows (Gtk::TreeModel::Row const &, int);
-	bool no_region_list_redisplay;
-	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
-
-	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
-
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
 	void cut_copy_points (Editing::CutCopyOp);
@@ -1192,7 +1107,6 @@ class Editor : public PublicEditor
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
-	void remove_region_from_region_list ();
 
 	void align (ARDOUR::RegionPoint);
 	void align_relative (ARDOUR::RegionPoint);
@@ -1256,9 +1170,6 @@ class Editor : public PublicEditor
 	bool  idle_drop_paths  (std::vector<Glib::ustring> paths, nframes64_t frame, double ypos);
 	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
 	
-	void do_import (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-	void do_embed (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
-
 	int  import_sndfiles (std::vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>, bool, uint32_t total);
 	int  embed_sndfiles (std::vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
@@ -1768,6 +1679,7 @@ public:
 
 	EditorRouteGroups* _route_groups;
 	EditorRoutes* _routes;
+	EditorRegions* _regions;
 	
 	/* diskstream/route display management */
 	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;
@@ -1834,14 +1746,6 @@ public:
 			guint                                 time);
 
 	void track_canvas_drag_data_received (
-			const Glib::RefPtr<Gdk::DragContext>& context,
-			gint                                  x,
-			gint                                  y,
-			const Gtk::SelectionData&             data,
-			guint                                 info,
-			guint                                 time);
-	
-	void region_list_display_drag_data_received (
 			const Glib::RefPtr<Gdk::DragContext>& context,
 			gint                                  x,
 			gint                                  y,
