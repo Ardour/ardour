@@ -40,48 +40,20 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-static const char* channel_setup_names[] = {
-	N_("Mono"),
-	N_("Stereo"),
-	N_("3 Channels"),
-	N_("4 Channels"),
-	N_("6 Channels"),
-	N_("8 Channels"),
-	N_("Manual Setup"),
-	0
-};
-
 static const char* track_mode_names[] = {
 	N_("Normal"),
 	N_("Tape"),
 	0
 };
 
-static vector<string> channel_combo_strings;
-static vector<string> track_mode_strings;
-
 
 AddRouteDialog::AddRouteDialog ()
 	: Dialog (_("ardour: add track/bus")),
 	  track_button (_("Tracks")),
 	  bus_button (_("Busses")),
-	  template_button (_("Using this template:")),
 	  routes_adjustment (1, 1, 128, 1, 4),
 	  routes_spinner (routes_adjustment)
 {
-	if (channel_combo_strings.empty()) {
-		channel_combo_strings = I18N (channel_setup_names);
-
-		if (ARDOUR::Profile->get_sae()) {
-			/* remove all but the first two (Mono & Stereo) */
-
-			while (track_mode_strings.size() > 2) {
-				track_mode_strings.pop_back();
-			}
-		}
-
-	}
-
 	if (track_mode_strings.empty()) {
 		track_mode_strings = I18N (track_mode_names);
 
@@ -102,12 +74,10 @@ AddRouteDialog::AddRouteDialog ()
 	name_template_entry.set_name ("AddRouteDialogNameTemplateEntry");
 	track_button.set_name ("AddRouteDialogRadioButton");
 	bus_button.set_name ("AddRouteDialogRadioButton");
-	template_button.set_name ("AddRouteDialogRadioButton");
 	routes_spinner.set_name ("AddRouteDialogSpinner");
 	
 	RadioButton::Group g = track_button.get_group();
 	bus_button.set_group (g);
-	template_button.set_group (g);
 	track_button.set_active (true);
 
 	/* add */
@@ -123,33 +93,6 @@ AddRouteDialog::AddRouteDialog ()
 	hbox2->set_border_width (6);
 	hbox2->pack_start (*hbox1, PACK_EXPAND_WIDGET);
 
-	/* templates */
-
-	hbox3 = new HBox;
-	hbox3->set_spacing (6);
-	hbox3->set_border_width (6);
-	hbox3->pack_start (template_button, PACK_SHRINK);
-
-	hbox9 = new HBox;
-	hbox9->set_spacing (6);
-	hbox9->set_border_width (6);
-	hbox9->pack_start (track_template_combo, PACK_EXPAND_WIDGET);
-	
-	/* separator */
-
-	hbox4 = new HBox;
-	hbox4->set_spacing (6);
-	Label* label2 = manage (new Label (_("OR")));
-	hbox4->pack_start (*(manage (new HSeparator)), PACK_EXPAND_WIDGET);
-	hbox4->pack_start (*label2, false, false);
-	hbox4->pack_start (*(manage (new HSeparator)), PACK_EXPAND_WIDGET);
-
-	/* we need more control over the visibility of these boxes */
-	/*
-	  hbox3->set_no_show_all (true);
-	  hbox9->set_no_show_all (true);
-	  hbox4->set_no_show_all (true);
-	*/
 	/* track/bus choice & modes */
 
 	HBox* hbox5 = manage (new HBox);
@@ -160,7 +103,7 @@ AddRouteDialog::AddRouteDialog ()
 	channel_combo.set_name (X_("ChannelCountSelector"));
 	track_mode_combo.set_name (X_("ChannelCountSelector"));
 
-	set_popdown_strings (channel_combo, channel_combo_strings, true);
+	refill_channel_setups ();
 	set_popdown_strings (track_mode_combo, track_mode_strings, true);
 
 	channel_combo.set_active_text (channel_combo_strings.front());
@@ -168,8 +111,6 @@ AddRouteDialog::AddRouteDialog ()
 
 	track_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
 	bus_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
-	template_button.signal_clicked().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
-
 	
 	VBox* vbox1 = manage (new VBox);
 	vbox1->set_spacing (6);
@@ -191,9 +132,6 @@ AddRouteDialog::AddRouteDialog ()
 	get_vbox()->set_border_width (6);
 
 	get_vbox()->pack_start (*hbox2, PACK_SHRINK);
-	get_vbox()->pack_start (*hbox3, PACK_SHRINK);
-	get_vbox()->pack_start (*hbox9, PACK_SHRINK);
-	get_vbox()->pack_start (*hbox4, PACK_SHRINK);
 	get_vbox()->pack_start (*vbox1, PACK_SHRINK);
 
 	get_vbox()->show_all ();
@@ -215,18 +153,10 @@ AddRouteDialog::~AddRouteDialog ()
 void
 AddRouteDialog::track_type_chosen ()
 {
-	if (template_button.get_active()) {
-		track_mode_combo.set_sensitive (false);
-		channel_combo.set_sensitive (false);
-		track_template_combo.set_sensitive (true);
+	if (track_button.get_active()) {
+		track_mode_combo.set_sensitive (true);
 	} else {
-		track_template_combo.set_sensitive (false);
-		channel_combo.set_sensitive (true);
-		if (track_button.get_active()) {
-			track_mode_combo.set_sensitive (true);
-		} else {
-			track_mode_combo.set_sensitive (false);
-		}
+		track_mode_combo.set_sensitive (false);
 	}
 }
 
@@ -273,15 +203,12 @@ int
 AddRouteDialog::channels ()
 {
 	string str = channel_combo.get_active_text();
-	int chns;
-
-	if (str == _("Mono")) {
-		return 1;
-	} else if (str == _("Stereo")) {
-		return 2;
-	} else if ((chns = PBD::atoi (str)) != 0) {
-		return chns;
-	} 
+      
+	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
+		if (str == (*i).name) {
+			return (*i).channels;
+		}
+	}
 
 	return 0;
 }
@@ -289,56 +216,87 @@ AddRouteDialog::channels ()
 string
 AddRouteDialog::track_template ()
 {
-	if (!template_button.get_active()) {
-		return string ();
-	}
-
-	string str = track_template_combo.get_active_text();
-
-	for (vector<Session::RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
-		if ((*x).name == str) {
-			return (*x).path;
+	string str = channel_combo.get_active_text();
+	
+	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
+		if (str == (*i).name) {
+			return (*i).template_path;
 		}
 	}
-
+	
 	return string();
 }
 
 void
 AddRouteDialog::on_show ()
 {
-	refill_track_templates ();
+	refill_channel_setups ();
 	Dialog::on_show ();
 }
-
 void
-AddRouteDialog::refill_track_templates ()
+AddRouteDialog::refill_channel_setups ()
 {
+	ChannelSetup chn;
+	
 	route_templates.clear ();
+	channel_combo_strings.clear ();
+	channel_setups.clear ();
+
+	chn.name = _("Mono");
+	chn.channels = 1;
+	channel_setups.push_back (chn);
+
+	chn.name = _("Stereo");
+	chn.channels = 2;
+	channel_setups.push_back (chn);
+
 	Session::get_route_templates (route_templates);
-  
-	if (!route_templates.empty()) {
-		vector<string> v;
-		for (vector<Session::RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
-			v.push_back ((*x).name);
-		}
-		set_popdown_strings (track_template_combo, v);
-		track_template_combo.set_active_text (v.front());
-	} 
 
-	reset_template_option_visibility ();
-}
+	if (!ARDOUR::Profile->get_sae()) {
+		if (!route_templates.empty()) {
+			vector<string> v;
+			for (vector<Session::RouteTemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
+				chn.name = x->name;
+				chn.channels = 0;
+				chn.template_path = x->path;
+				channel_setups.push_back (chn);
+			}
+		} 
 
-void
-AddRouteDialog::reset_template_option_visibility ()
-{
-	if (route_templates.empty()) {
-		hbox3->hide ();
-		hbox9->hide ();
-		hbox4->hide ();
-	} else {
-		hbox3->show_all ();
-		hbox9->show_all ();
-		hbox4->show_all ();
+		chn.name = _("3 Channel");
+		chn.channels = 3;
+		channel_setups.push_back (chn);
+
+		chn.name = _("4 Channel");
+		chn.channels = 4;
+		channel_setups.push_back (chn);
+
+		chn.name = _("5 Channel");
+		chn.channels = 5;
+		channel_setups.push_back (chn);
+
+		chn.name = _("6 Channel");
+		chn.channels = 6;
+		channel_setups.push_back (chn);
+
+		chn.name = _("8 Channel");
+		chn.channels = 8;
+		channel_setups.push_back (chn);
+
+		chn.name = _("12 Channel");
+		chn.channels = 12;
+		channel_setups.push_back (chn);
+
+		chn.name = X_("Custom");
+		chn.channels = 0;
+		channel_setups.push_back (chn);
 	}
+
+	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
+		channel_combo_strings.push_back ((*i).name);
+	}
+
+	set_popdown_strings (channel_combo, channel_combo_strings, true);
+	channel_combo.set_active_text (channel_combo_strings.front());
 }
+
