@@ -108,6 +108,14 @@ EditorRoutes::EditorRoutes (Editor* e)
 	Route::SyncOrderKeys.connect (mem_fun (*this, &EditorRoutes::sync_order_keys));
 }
 
+void
+EditorRoutes::connect_to_session (Session* s)
+{
+	EditorComponent::connect_to_session (s);
+
+	initial_display ();
+}
+
 void 
 EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 {
@@ -216,7 +224,7 @@ EditorRoutes::redisplay ()
 	}
 
 	if (!_redisplay_does_not_reset_order_keys && !_redisplay_does_not_sync_order_keys) {
-		_editor->current_session()->sync_order_keys (N_ ("editor"));
+		_session->sync_order_keys (N_ ("editor"));
 	}
 }
 
@@ -224,7 +232,7 @@ void
 EditorRoutes::route_deleted (Gtk::TreeModel::Path const & path)
 {
 	/* this could require an order reset & sync */
-	_editor->current_session()->set_remote_control_ids();
+	_session->set_remote_control_ids();
 	_ignore_reorder = true;
 	redisplay ();
 	_ignore_reorder = false;
@@ -236,7 +244,7 @@ EditorRoutes::changed (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterat
 {
 	/* never reset order keys because of a property change */
 	_redisplay_does_not_reset_order_keys = true;
-	_editor->current_session()->set_remote_control_ids();
+	_session->set_remote_control_ids();
 	redisplay ();
 	_redisplay_does_not_reset_order_keys = false;
 }
@@ -398,7 +406,9 @@ EditorRoutes::reordered (TreeModel::Path const & path, TreeModel::iterator const
 	redisplay ();
 }
 
-
+/** If src == "editor", take editor order keys from each route and use them to rearrange the
+ *  route list so that the visual arrangement of routes matches the order keys from the routes.
+ */
 void
 EditorRoutes::sync_order_keys (string const & src)
 {
@@ -406,9 +416,7 @@ EditorRoutes::sync_order_keys (string const & src)
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
 
-	ARDOUR::Session* s = _editor->current_session ();
-
-	if (src != N_ ("editor") || !s || (s->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src != N_ ("editor") || !_session || (_session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -627,7 +635,7 @@ struct EditorOrderRouteSorter {
 void
 EditorRoutes::initial_display ()
 {
-	boost::shared_ptr<RouteList> routes = _editor->current_session()->get_routes();
+	boost::shared_ptr<RouteList> routes = _session->get_routes();
 	RouteList r (*routes);
 	EditorOrderRouteSorter sorter;
 
@@ -669,7 +677,7 @@ void
 EditorRoutes::track_list_reorder (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterator const & iter, int* new_order)
 {
 	_redisplay_does_not_sync_order_keys = true;
-	_editor->current_session()->set_remote_control_ids();
+	_session->set_remote_control_ids();
 	redisplay ();
 	_redisplay_does_not_sync_order_keys = false;
 }
@@ -797,7 +805,7 @@ EditorRoutes::move_selected_tracks (bool up)
 
 	_model->reorder (neworder);
 
-	_editor->current_session()->sync_order_keys (N_ ("editor"));
+	_session->sync_order_keys (N_ ("editor"));
 }
 
 void

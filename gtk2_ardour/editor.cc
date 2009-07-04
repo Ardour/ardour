@@ -1175,8 +1175,6 @@ Editor::connect_to_session (Session *t)
 	//tempo_map_changed (Change (0));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
-	_routes->initial_display ();
-
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
 	}
@@ -1203,6 +1201,7 @@ Editor::connect_to_session (Session *t)
 	_route_groups->connect_to_session (session);
 	_regions->connect_to_session (session);
 	_snapshots->connect_to_session (session);
+	_routes->connect_to_session (session);
 	
 	start_updating ();
 }

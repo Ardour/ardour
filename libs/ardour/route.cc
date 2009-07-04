@@ -204,6 +204,10 @@ Route::set_order_key (std::string const & name, long n)
 	_session.set_dirty ();
 }
 
+/** Set all order keys to be the same as that for `base', if such a key
+ *  exists in this route.
+ *  @param base Base key.
+ */
 void
 Route::sync_order_keys (std::string const & base)
 {

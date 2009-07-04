@@ -65,8 +65,9 @@ private:
 
 	void activate_all ();
 	void disable_all ();
-	void subgroup (ARDOUR::RouteGroup*);
-	void unsubgroup (ARDOUR::RouteGroup*);
+	void subgroup (ARDOUR::RouteGroup *);
+	void unsubgroup (ARDOUR::RouteGroup *);
+	void collect (ARDOUR::RouteGroup *);
 
 	void row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void name_edit (const Glib::ustring&, const Glib::ustring&);

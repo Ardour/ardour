@@ -66,7 +66,6 @@ public:
 	gain_t get_min_factor(gain_t factor);
 	
 	int size() { return routes.size();}
-	ARDOUR::Route * first () const { return *routes.begin();}
 	
 	void set_active (bool yn, void *src);
 	void set_relative (bool yn, void *src);

@@ -187,6 +187,7 @@ EditorRouteGroups::menu (RouteGroup* g)
 		items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &EditorRouteGroups::edit), g)));
 		items.push_back (MenuElem (_("Fit to Window"), bind (mem_fun (*_editor, &Editor::fit_route_group), g)));
 		items.push_back (MenuElem (_("Subgroup"), bind (mem_fun (*this, &EditorRouteGroups::subgroup), g)));
+		items.push_back (MenuElem (_("Collect"), bind (mem_fun (*this, &EditorRouteGroups::collect), g)));
 	}
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &EditorRouteGroups::activate_all)));
@@ -665,4 +666,51 @@ EditorRouteGroups::connect_to_session (Session* s)
 	groups_changed ();
 }
 
+/** Collect all members of a RouteGroup so that they are together in the Editor.
+ *  @param g Group to collect.
+ */
+void
+EditorRouteGroups::collect (RouteGroup* g)
+{
+	list<Route*> routes = g->route_list ();
+	int const N = routes.size ();
 
+	list<Route*>::iterator i = routes.begin ();
+	Editor::TrackViewList::const_iterator j = _editor->get_track_views().begin();
+
+	int diff = 0;
+	int coll = -1;
+	while (i != routes.end() && j != _editor->get_track_views().end()) {
+
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
+		if (rtv) {
+
+			boost::shared_ptr<Route> r = rtv->route ();
+			int const k = r->order_key (N_ ("editor"));
+			
+			if (*i == r.get()) {
+				
+				if (coll == -1) {
+					coll = k;
+					diff = N - 1;
+				} else {
+					--diff;
+				}
+				
+				r->set_order_key (N_ ("editor"), coll);
+				
+				++coll;
+				++i;
+				
+			} else {
+				
+				r->set_order_key (N_ ("editor"), k + diff);
+				
+			}
+		}
+			
+		++j;
+	}
+
+	_editor->_routes->sync_order_keys (N_ ("editor"));
+}

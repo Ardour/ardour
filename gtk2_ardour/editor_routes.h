@@ -22,12 +22,13 @@ class EditorRoutes : public EditorComponent
 public:
 	EditorRoutes (Editor *);
 
+	void connect_to_session (ARDOUR::Session *);
+
 	Gtk::Widget& widget () {
 		return _scroller;
 	}
 
 	void move_selected_tracks (bool);
-	void initial_display ();
 	void show_track_in_display (TimeAxisView &);
 	void suspend_redisplay () {
 		_no_redisplay = true;
@@ -43,9 +44,11 @@ public:
 	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
+	void sync_order_keys (std::string const &);
 
 private:
 
+	void initial_display ();
 	void on_tv_rec_enable_toggled (Glib::ustring const &);
 	void build_menu ();
 	void show_menu ();
@@ -54,7 +57,6 @@ private:
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
 	void route_name_changed (boost::weak_ptr<ARDOUR::Route>);
-	void sync_order_keys (std::string const &);
 	void route_removed (TimeAxisView *);
 	void handle_gui_changes (std::string const &, void *);
 	void update_rec_display ();
