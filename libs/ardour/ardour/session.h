@@ -321,7 +321,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	    bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 	
-	void sync_order_keys (const char* base);
+	void sync_order_keys (std::string const &);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));

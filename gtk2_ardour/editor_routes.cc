@@ -152,8 +152,6 @@ EditorRoutes::show_menu ()
 	_menu->popup (1, gtk_get_current_event_time());
 }
 
-const char* _order_key = N_("editor");
-
 void
 EditorRoutes::redisplay ()
 {
@@ -181,7 +179,7 @@ EditorRoutes::redisplay ()
 			   to tracks.
 			*/
 			
-			route->set_order_key (_order_key, n);
+			route->set_order_key (N_ ("editor"), n);
 		}
 
 		bool visible = (*i)[_columns.visible];
@@ -218,7 +216,7 @@ EditorRoutes::redisplay ()
 	}
 
 	if (!_redisplay_does_not_reset_order_keys && !_redisplay_does_not_sync_order_keys) {
-		_editor->current_session()->sync_order_keys (_order_key);
+		_editor->current_session()->sync_order_keys (N_ ("editor"));
 	}
 }
 
@@ -264,8 +262,8 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		_ignore_reorder = true;
 		
 		/* added a new fresh one at the end */
-		if ((*x)->route()->order_key(_order_key) == -1) {
-			(*x)->route()->set_order_key (_order_key, _model->children().size()-1);
+		if ((*x)->route()->order_key (N_ ("editor")) == -1) {
+			(*x)->route()->set_order_key (N_ ("editor"), _model->children().size()-1);
 		}
 		
 		_ignore_reorder = false;
@@ -402,7 +400,7 @@ EditorRoutes::reordered (TreeModel::Path const & path, TreeModel::iterator const
 
 
 void
-EditorRoutes::sync_order_keys (char const * src)
+EditorRoutes::sync_order_keys (string const & src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = _model->children();
@@ -410,7 +408,7 @@ EditorRoutes::sync_order_keys (char const * src)
 
 	ARDOUR::Session* s = _editor->current_session ();
 
-	if ((strcmp (src, _order_key) == 0) || !s || (s->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src != N_ ("editor") || !s || (s->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -425,7 +423,7 @@ EditorRoutes::sync_order_keys (char const * src)
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 
 		int old_key = order;
-		int new_key = route->order_key (_order_key);
+		int new_key = route->order_key (N_ ("editor"));
 
 		neworder[new_key] = old_key;
 
@@ -622,7 +620,7 @@ EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key (_order_key) < b->order_key (_order_key);
+	    return a->order_key (N_ ("editor")) < b->order_key (N_ ("editor"));
     }
 };
 
@@ -794,12 +792,12 @@ EditorRoutes::move_selected_tracks (bool up)
 	}
 
 	for (leading = view_routes.begin(); leading != view_routes.end(); ++leading) {
-		neworder.push_back (leading->second->order_key (_order_key));
+		neworder.push_back (leading->second->order_key (N_ ("editor")));
 	}
 
 	_model->reorder (neworder);
 
-	_editor->current_session()->sync_order_keys (_order_key);
+	_editor->current_session()->sync_order_keys (N_ ("editor"));
 }
 
 void

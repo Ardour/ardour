@@ -54,7 +54,7 @@ private:
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
 	void route_name_changed (boost::weak_ptr<ARDOUR::Route>);
-	void sync_order_keys (char const *);
+	void sync_order_keys (std::string const &);
 	void route_removed (TimeAxisView *);
 	void handle_gui_changes (std::string const &, void *);
 	void update_rec_display ();

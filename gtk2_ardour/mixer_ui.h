@@ -80,7 +80,7 @@ class Mixer_UI : public Gtk::Window
 
 	RouteRedirectSelection& selection() { return _selection; }
 
-	static const char* get_order_key();
+	static std::string get_order_key();
 	
   private:
 	ARDOUR::Session         *session;
@@ -243,7 +243,7 @@ class Mixer_UI : public Gtk::Window
 
 	Width _strip_width;
 
-	void sync_order_keys (const char *src);
+	void sync_order_keys (std::string const &);
 	bool strip_redisplay_does_not_reset_order_keys;
 	bool strip_redisplay_does_not_sync_order_keys;
 	bool ignore_sync;

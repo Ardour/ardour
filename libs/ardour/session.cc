@@ -4281,7 +4281,7 @@ Session::compute_initial_length ()
 }
 
 void
-Session::sync_order_keys (const char* base)
+Session::sync_order_keys (std::string const & base)
 {
 	if (!Config->get_sync_all_route_ordering()) {
 		/* leave order keys as they are */

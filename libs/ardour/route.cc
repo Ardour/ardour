@@ -64,7 +64,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 uint32_t Route::order_key_cnt = 0;
-sigc::signal<void,const char*> Route::SyncOrderKeys;
+sigc::signal<void, string const &> Route::SyncOrderKeys;
 
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
@@ -121,7 +121,7 @@ Route::init ()
 	processor_max_streams.reset();
 	_solo_safe = false;
 	_recordable = true;
-	order_keys[strdup (N_("signal"))] = order_key_cnt++;
+	order_keys[N_("signal")] = order_key_cnt++;
 	_silent = false;
 	_meter_point = MeterPostFader;
 	_initial_delay = 0;
@@ -162,10 +162,6 @@ Route::~Route ()
 
 	clear_processors (PreFader);
 	clear_processors (PostFader);
-
-	for (OrderKeys::iterator i = order_keys.begin(); i != order_keys.end(); ++i) {
-		free ((void*)(i->first));
-	}
 }
 
 void
@@ -184,23 +180,20 @@ Route::remote_control_id() const
 }
 
 long
-Route::order_key (const char* name) const
+Route::order_key (std::string const & name) const
 {
-	OrderKeys::const_iterator i;
-
-	for (i = order_keys.begin(); i != order_keys.end(); ++i) {
-		if (!strcmp (name, i->first)) {
-			return i->second;
-		}
+	OrderKeys::const_iterator i = order_keys.find (name);
+	if (i == order_keys.end()) {
+		return -1;
 	}
 
-	return -1;
+	return i->second;
 }
 
 void
-Route::set_order_key (const char* name, long n)
+Route::set_order_key (std::string const & name, long n)
 {
-	order_keys[strdup(name)] = n;
+	order_keys[name] = n;
 
 	if (Config->get_sync_all_route_ordering()) {
 		for (OrderKeys::iterator x = order_keys.begin(); x != order_keys.end(); ++x) {
@@ -212,7 +205,7 @@ Route::set_order_key (const char* name, long n)
 }
 
 void
-Route::sync_order_keys (const char* base)
+Route::sync_order_keys (std::string const & base)
 {
 	if (order_keys.empty()) {
 		return;
@@ -1643,7 +1636,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 					      << endmsg;
 				} else {
-					set_order_key (remaining.substr (0, equal).c_str(), n);
+					set_order_key (remaining.substr (0, equal), n);
 				}
 			}
 

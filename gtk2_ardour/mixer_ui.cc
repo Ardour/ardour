@@ -374,7 +374,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	strip_redisplay_does_not_sync_order_keys = false;
 }
 
-const char*
+string
 Mixer_UI::get_order_key() 
 {
 	return X_("signal");
@@ -388,13 +388,13 @@ Mixer_UI::get_order_key()
 }
 
 void
-Mixer_UI::sync_order_keys (const char *src)
+Mixer_UI::sync_order_keys (string const & src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
-	if ((strcmp (src, get_order_key()) == 0) || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src != get_order_key() || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 

@@ -88,8 +88,8 @@ class Route : public SessionObject, public AutomatableControls
 
 	bool set_name (const std::string& str);
 
-	long order_key (const char* name) const;
-	void set_order_key (const char* name, long n);
+	long order_key (std::string const &) const;
+	void set_order_key (std::string const &, long);
 
 	bool is_hidden() const { return _flags & Hidden; }
 	bool is_master() const { return _flags & MasterOut; }
@@ -312,8 +312,8 @@ class Route : public SessionObject, public AutomatableControls
 	uint32_t remote_control_id () const;
 	sigc::signal<void> RemoteControlIDChanged;
 
-	void sync_order_keys (const char* base);
-	static sigc::signal<void,const char*> SyncOrderKeys;
+	void sync_order_keys (std::string const &);
+	static sigc::signal<void, std::string const &> SyncOrderKeys;
 
   protected:
 	friend class Session;
@@ -399,13 +399,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	static uint32_t order_key_cnt;
 
-	struct ltstr {
-	    bool operator()(const char* s1, const char* s2) const {
-		    return strcmp(s1, s2) < 0;
-	    }
-	};
-
-	typedef std::map<const char*,long,ltstr> OrderKeys;
+	typedef std::map<std::string, long> OrderKeys;
 	OrderKeys order_keys;
 
 	void input_change_handler (IOChange, void *src);
