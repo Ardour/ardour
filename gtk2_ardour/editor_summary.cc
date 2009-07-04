@@ -73,6 +73,10 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 {
 	CairoWidget::on_expose_event (event);
 
+	if (_session == 0) {
+		return false;
+	}
+
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
 	/* Render the view rectangle */
@@ -115,15 +119,15 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 void
 EditorSummary::render (cairo_t* cr)
 {
-	if (_session == 0) {
-		return;
-	}
-
 	/* background */
 	
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
+
+	if (_session == 0) {
+		return;
+	}
 
 	/* compute total height of all tracks */
 	

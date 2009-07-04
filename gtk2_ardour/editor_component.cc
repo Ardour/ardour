@@ -45,4 +45,6 @@ EditorComponent::session_going_away ()
 	for (list<connection>::iterator i = _session_connections.begin(); i != _session_connections.end(); ++i) {
 		i->disconnect ();
 	}
+
+	_session = 0;
 }
