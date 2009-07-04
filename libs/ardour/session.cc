@@ -478,7 +478,7 @@ Session::destroy ()
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete route groups\n";
 #endif /* TRACK_DESTRUCTION */
-	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ) {
+	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		delete *i;
 	}
 
