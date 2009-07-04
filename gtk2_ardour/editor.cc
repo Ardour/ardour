@@ -2418,7 +2418,8 @@ Editor::set_state (const XMLNode& node)
 	move (x, y);
 
 	if (session && (prop = node.property ("playhead"))) {
-		nframes64_t pos = atol (prop->value().c_str());
+		nframes64_t pos;
+		sscanf (prop->value().c_str(), "%" PRIi64, &pos);
 		playhead_cursor->set_position (pos);
 	} else {
 		playhead_cursor->set_position (0);

@@ -375,15 +375,15 @@ Location::set_state (const XMLNode& node)
 		/* can't use set_start() here, because _end
 		   may make the value of _start illegal.
 		*/
-		
-	_start = atoi (prop->value().c_str());
+
+	sscanf (prop->value().c_str(), "%" PRIu32, &_start);
 
 	if ((prop = node.property ("end")) == 0) {
 		  error << _("XML node for Location has no end information") << endmsg; 
 		  return -1;
 	}
 		
-	_end = atoi (prop->value().c_str());
+	sscanf (prop->value().c_str(), "%" PRIu32, &_end);
 		
 	if ((prop = node.property ("flags")) == 0) {
 		  error << _("XML node for Location has no flags information") << endmsg; 
@@ -403,19 +403,19 @@ Location::set_state (const XMLNode& node)
 		  cd_node = *cd_iter;
 		  
 		  if (cd_node->name() != "CD-Info") {
-		    continue;
+			  continue;
 		  }
 		  
 		  if ((prop = cd_node->property ("name")) != 0) {
-		    cd_name = prop->value();
+			  cd_name = prop->value();
 		  } else {
-		    throw failed_constructor ();
+			  throw failed_constructor ();
 		  }
 		  
 		  if ((prop = cd_node->property ("value")) != 0) {
-		    cd_value = prop->value();
+			  cd_value = prop->value();
 		  } else {
-		    throw failed_constructor ();
+			  throw failed_constructor ();
 		  }
 		  
 		  
