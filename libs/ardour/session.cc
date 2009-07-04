@@ -2042,6 +2042,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 	RouteList ret;
 	uint32_t control_id;
 	XMLTree tree;
+	uint32_t number = 1;
 
 	if (!tree.read (template_path.c_str())) {
 		return ret;
@@ -2057,30 +2058,25 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 	  
 		std::string node_name = IO::name_from_state (*node_copy.children().front());
 
-		if (route_by_name (node_name) != 0) {
-
-			/* generate a new name by adding a number to the end of the template name */
-
-			uint32_t number = 1;
-
-			do {
-				snprintf (name, sizeof (name), "%s %" PRIu32, node_name.c_str(), number);
-	      
-				number++;
-	      
-				if (route_by_name (name) == 0) {
-					break;
-				}
-	      
-			} while (number < UINT_MAX);
-
-			if (number == UINT_MAX) {
-				fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
-				/*NOTREACHED*/
+		/* generate a new name by adding a number to the end of the template name */
+		
+		do {
+			snprintf (name, sizeof (name), "%s %" PRIu32, node_name.c_str(), number);
+			
+			number++;
+			
+			if (route_by_name (name) == 0) {
+				break;
 			}
-
-			IO::set_name_in_state (*node_copy.children().front(), name);
+			
+		} while (number < UINT_MAX);
+		
+		if (number == UINT_MAX) {
+			fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+				/*NOTREACHED*/
 		}
+		
+		IO::set_name_in_state (*node_copy.children().front(), name);
 
 		Track::zero_diskstream_id_in_xml (node_copy);
 		
