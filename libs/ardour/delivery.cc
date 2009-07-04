@@ -56,6 +56,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
+	, no_panner_reset (false)
 
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
@@ -79,6 +80,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
+	, no_panner_reset (false)
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
@@ -101,6 +103,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
+	, no_panner_reset (false)
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
@@ -127,6 +130,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	, _solo_level (0)
 	, _solo_isolated (false)
 	, _mute_master (mm)
+	, no_panner_reset (false)
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
