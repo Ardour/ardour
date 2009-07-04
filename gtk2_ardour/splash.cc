@@ -66,7 +66,8 @@ void
 Splash::on_realize ()
 {
 	Window::on_realize ();
-	get_window()->set_override_redirect(true);
+	get_window()->set_decorations (Gdk::WMDecoration (0));
+	/* get_window()->set_override_redirect(true);*/
 	layout->set_font_description (get_style()->get_font());
 }
 
