@@ -795,9 +795,8 @@ pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_
 {
 	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
-	cairo_t *cr = cairo_create (surface);
+	cairo_t* cr = cairo_create (surface);
 	cairo_text_extents_t te;
-	unsigned char* src = cairo_image_surface_get_data (surface);
 
 	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
 	cairo_select_font_face (cr, font->get_family().c_str(),
@@ -808,10 +807,10 @@ pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_
 	cairo_move_to (cr, 0.5, 0.5 - te.height / 2 - te.y_bearing + clip_height / 2);
 	cairo_show_text (cr, name.c_str());
 	
-	convert_bgra_to_rgba(src, buf->get_pixels(), clip_width, clip_height);
+	convert_bgra_to_rgba(cairo_image_surface_get_data (surface), buf->get_pixels(), clip_width, clip_height);
 
-	delete [] src;
 	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
 
 	return buf;
 }
