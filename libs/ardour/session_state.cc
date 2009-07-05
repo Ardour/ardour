@@ -601,7 +601,7 @@ Session::remove_pending_capture_state ()
 	string xml_path;
 
 	xml_path = _path;
-	xml_path += _current_snapshot_name;
+	xml_path += legalize_for_path (_current_snapshot_name);
 	xml_path += _pending_suffix;
 
 	unlink (xml_path.c_str());
@@ -618,8 +618,8 @@ Session::rename_state (string old_name, string new_name)
 		return;
 	}
 	
-	const string old_xml_path = _path + old_name + _statefile_suffix;
-	const string new_xml_path = _path + new_name + _statefile_suffix;
+	const string old_xml_path = _path + legalize_for_path (old_name) + _statefile_suffix;
+	const string new_xml_path = _path + legalize_for_path (new_name) + _statefile_suffix;
 
 	if (rename (old_xml_path.c_str(), new_xml_path.c_str()) != 0) {
 		error << string_compose(_("could not rename snapshot %1 to %2"), old_name, new_name) << endmsg;
@@ -637,7 +637,7 @@ Session::remove_state (string snapshot_name)
 		return;
 	}
 	
-	const string xml_path = _path + snapshot_name + _statefile_suffix;
+	const string xml_path = _path + legalize_for_path (snapshot_name) + _statefile_suffix;
 
 	/* make a backup copy of the state file */
 	const string bak_path = xml_path + ".bak";
@@ -777,7 +777,7 @@ Session::load_state (string snapshot_name)
 	if (!state_was_pending) {
 
 		xmlpath = _path;
-		xmlpath += snapshot_name;
+		xmlpath += legalize_for_path (snapshot_name);
 		xmlpath += _statefile_suffix;
 	}
 	
@@ -824,7 +824,7 @@ Session::load_state (string snapshot_name)
 		string backup_path;
 
 		backup_path = _path;
-		backup_path += snapshot_name;
+		backup_path += legalize_for_path (snapshot_name);
 		backup_path += "-1";
 		backup_path += _statefile_suffix;
 
@@ -2666,7 +2666,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	}
 
 	this_snapshot_path = _path;
-	this_snapshot_path += _current_snapshot_name;
+	this_snapshot_path += legalize_for_path (_current_snapshot_name);
 	this_snapshot_path += _statefile_suffix;
 
 	for (vector<string*>::iterator i = state_files->begin(); i != state_files->end(); ++i) {
