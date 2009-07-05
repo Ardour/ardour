@@ -2209,8 +2209,9 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 	Glib::ustring session_name;
 	Glib::ustring session_path;
 	Glib::ustring template_name;
+	Glib::ustring legal_session_folder_name;
 	int response;
-
+	
   begin:
 	response = Gtk::RESPONSE_NONE;
 
@@ -2307,7 +2308,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		if (response == Gtk::RESPONSE_OK) {
 
 			session_name = new_session_dialog->session_name();
-
+			
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
 				goto try_again;
@@ -2325,7 +2326,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				session_name = Glib::path_get_basename (session_name);
 				
 			} else {
-
+				
 				session_path = new_session_dialog->session_folder();
 			}
 
@@ -2340,11 +2341,13 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			case NewSessionDialog::NewPage: /* nominally the "new" session creator, but could be in use for an old session */
 				
 				should_be_new = true;
-				
+
+				legal_session_folder_name = legalize_for_path (session_name);
+
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
-				
-				session_path = Glib::build_filename (session_path, session_name);
+
+				session_path = Glib::build_filename (session_path, legal_session_folder_name);
 
 				if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 

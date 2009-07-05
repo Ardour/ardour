@@ -676,7 +676,7 @@ Session::save_state (string snapshot_name, bool pending)
 
 		/* proper save: use _statefile_suffix (.ardour in English) */
 		xml_path = _path;
-		xml_path += snapshot_name;
+		xml_path += legalize_for_path (snapshot_name);
 		xml_path += _statefile_suffix;
 
 		/* make a backup copy of the old file */
@@ -691,7 +691,7 @@ Session::save_state (string snapshot_name, bool pending)
 
 		/* pending save: use _pending_suffix (.pending in English) */
 		xml_path = _path;
-		xml_path += snapshot_name;
+		xml_path += legalize_for_path (snapshot_name);
 		xml_path += _pending_suffix;
 
 	}
@@ -699,7 +699,7 @@ Session::save_state (string snapshot_name, bool pending)
 	string tmp_path;
 
 	tmp_path = _path;
-	tmp_path += snapshot_name;
+	tmp_path += legalize_for_path (snapshot_name);
 	tmp_path += ".tmp";
 
 	// cerr << "actually writing state to " << xml_path << endl;
@@ -762,7 +762,7 @@ Session::load_state (string snapshot_name)
 	/* check for leftover pending state from a crashed capture attempt */
 
 	xmlpath = _path;
-	xmlpath += snapshot_name;
+	xmlpath += legalize_for_path (snapshot_name);
 	xmlpath += _pending_suffix;
 
 	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
@@ -3111,7 +3111,7 @@ Session::save_history (string snapshot_name)
 	snapshot_name = _current_snapshot_name;
     }
 
-    xml_path = _path + snapshot_name + ".history"; 
+    xml_path = _path + legalize_for_path (snapshot_name) + ".history"; 
 
     bak_path = xml_path + ".bak";
 
@@ -3160,7 +3160,7 @@ Session::restore_history (string snapshot_name)
     }
 
     /* read xml */
-    xmlpath = _path + snapshot_name + ".history";
+    xmlpath = _path + legalize_for_path (snapshot_name) + ".history";
     cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
 
     if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
