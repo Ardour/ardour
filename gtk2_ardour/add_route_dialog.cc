@@ -399,7 +399,7 @@ AddRouteDialog::group_changed ()
 		} else {
 			delete g;
 
-			route_group_combo.set_active (0);
+			route_group_combo.set_active (2);
 		}
 	}
 }
