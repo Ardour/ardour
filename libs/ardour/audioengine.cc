@@ -112,7 +112,6 @@ AudioEngine::start ()
 	if (!_running) {
 
 		nframes_t blocksize = jack_get_buffer_size (_jack);
-		cerr << "pre-run: Set Port buffer size to " << blocksize << endl;
 		Port::set_buffer_size (blocksize);
 
 		if (session) {
