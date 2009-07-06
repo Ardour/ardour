@@ -98,7 +98,7 @@ static double direct_gain_to_control (gain_t gain) {
 static bool sort_ports_by_name (Port* a, Port* b) {
 
 	unsigned int	last_digit_position_a = a->name().size();
-	std::string::const_reverse_iterator	r_iterator = a->name().rbegin();
+	std::string::reverse_iterator	r_iterator = a->name().rbegin();
 
 	while (r_iterator!=a->name().rend() and Glib::Unicode::isdigit(*r_iterator)) {
 		r_iterator++; last_digit_position_a--;
