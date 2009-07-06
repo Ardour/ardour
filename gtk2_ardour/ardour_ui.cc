@@ -1850,11 +1850,24 @@ ARDOUR_UI::snapshot_session ()
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_prompt (_("Name of New Snapshot"));
 	prompter.set_initial_text (timebuf);
-	
+
+  again:
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
 		prompter.get_result (snapname);
 		if (snapname.length()){
+			if (snapname.find ('/')) {
+				MessageDialog msg (_("To ensure compatibility with various systems\n"
+						     "snapshot names may not contain a '/' character"));
+				msg.run ();
+				goto again;
+			}
+			if (snapname.find ('\\')) {
+				MessageDialog msg (_("To ensure compatibility with various systems\n"
+						     "snapshot names may not contain a '\\' character"));
+				msg.run ();
+				goto again;
+			}
 			save_state (snapname);
 		}
 		break;
@@ -2209,7 +2222,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 	Glib::ustring session_name;
 	Glib::ustring session_path;
 	Glib::ustring template_name;
-	Glib::ustring legal_session_folder_name;
 	int response;
 	
   begin:
@@ -2342,12 +2354,26 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				
 				should_be_new = true;
 
-				legal_session_folder_name = legalize_for_path (session_name);
+				if (session_name.find ('/')) {
+					MessageDialog msg (*new_session_dialog, _("To ensure compatibility with various systems\n"
+							 "session names may not contain a '/' character"));
+					msg.run ();
+					response = RESPONSE_NONE;
+					goto try_again;
+				}
+
+				if (session_name.find ('\\')) {
+					MessageDialog msg (*new_session_dialog, _("To ensure compatibility with various systems\n"
+							 "session names may not contain a '\\' character"));
+					msg.run ();
+					response = RESPONSE_NONE;
+					goto try_again;
+				}
 
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
 
-				session_path = Glib::build_filename (session_path, legal_session_folder_name);
+				session_path = Glib::build_filename (session_path, session_name);
 
 				if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 

@@ -94,7 +94,7 @@ legalize_for_path (ustring str)
 	ustring::size_type pos;
 	ustring legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
 	ustring legal;
-
+	
 	legal = str;
 	pos = 0;
 
