@@ -1856,13 +1856,13 @@ ARDOUR_UI::snapshot_session ()
 	case RESPONSE_ACCEPT:
 		prompter.get_result (snapname);
 		if (snapname.length()){
-			if (snapname.find ('/')) {
+			if (snapname.find ('/') != string::npos) {
 				MessageDialog msg (_("To ensure compatibility with various systems\n"
 						     "snapshot names may not contain a '/' character"));
 				msg.run ();
 				goto again;
 			}
-			if (snapname.find ('\\')) {
+			if (snapname.find ('\\') != string::npos) {
 				MessageDialog msg (_("To ensure compatibility with various systems\n"
 						     "snapshot names may not contain a '\\' character"));
 				msg.run ();
@@ -2354,7 +2354,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				
 				should_be_new = true;
 
-				if (session_name.find ('/')) {
+				if (session_name.find ('/') != Glib::ustring::npos) {
 					MessageDialog msg (*new_session_dialog, _("To ensure compatibility with various systems\n"
 							 "session names may not contain a '/' character"));
 					msg.run ();
@@ -2362,7 +2362,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 					goto try_again;
 				}
 
-				if (session_name.find ('\\')) {
+				if (session_name.find ('\\') != Glib::ustring::npos) {
 					MessageDialog msg (*new_session_dialog, _("To ensure compatibility with various systems\n"
 							 "session names may not contain a '\\' character"));
 					msg.run ();
