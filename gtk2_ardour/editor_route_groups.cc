@@ -666,6 +666,12 @@ EditorRouteGroups::connect_to_session (Session* s)
 	groups_changed ();
 }
 
+struct CollectSorter {
+	bool operator () (Route* a, Route* b) {
+		return a->order_key (N_ ("editor")) < b->order_key (N_ ("editor"));
+	}
+};
+
 /** Collect all members of a RouteGroup so that they are together in the Editor.
  *  @param g Group to collect.
  */
@@ -673,6 +679,7 @@ void
 EditorRouteGroups::collect (RouteGroup* g)
 {
 	list<Route*> routes = g->route_list ();
+	routes.sort (CollectSorter ());
 	int const N = routes.size ();
 
 	list<Route*>::iterator i = routes.begin ();
@@ -689,7 +696,7 @@ EditorRouteGroups::collect (RouteGroup* g)
 			int const k = r->order_key (N_ ("editor"));
 			
 			if (*i == r.get()) {
-				
+
 				if (coll == -1) {
 					coll = k;
 					diff = N - 1;
