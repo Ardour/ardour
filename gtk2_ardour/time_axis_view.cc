@@ -1210,7 +1210,7 @@ TimeAxisView::covers_y_position (double y)
 			}
 		}
 			
-		return std::make_pair (this, l);
+		return std::make_pair (shared_from_this (), l);
 	}
 
 	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
