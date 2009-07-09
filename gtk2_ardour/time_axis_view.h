@@ -23,6 +23,8 @@
 #include <vector>
 #include <list>
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/drawingarea.h>
@@ -44,6 +46,7 @@
 #include "enums.h"
 #include "editing.h"
 #include "canvas.h"
+#include "shared_ptrs.h"
 
 namespace ARDOUR {
 	class Session;
@@ -73,7 +76,7 @@ class StreamView;
  * This class provides the basic LHS controls and display methods. This should be
  * extended to create functional time-axis based views.
  */
-class TimeAxisView : public virtual AxisView, public PBD::Stateful
+class TimeAxisView : public virtual AxisView, public PBD::Stateful, public boost::enable_shared_from_this<TimeAxisView>
 {
   private:
 	enum NamePackingBits {
@@ -89,7 +92,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	static uint32_t hSmaller;
 	static uint32_t hSmall;
 
-	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
+	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisViewPtr parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
 	XMLNode& get_state ();
@@ -153,7 +156,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void set_height (uint32_t h);
 	void reset_height();
 
-	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);
+	std::pair<TimeAxisViewPtr, ARDOUR::layer_t> covers_y_position (double);
 
 	/**
 	 * Steps through the defined heights for this TrackView.
@@ -204,8 +207,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	    expensive data loading/redisplay code in here. */
 	virtual void first_idle () {}
 
-	TimeAxisView* get_parent () { return parent; }
-	void set_parent (TimeAxisView& p);
+	TimeAxisViewPtr get_parent () { return parent; }
+	void set_parent (TimeAxisViewPtr p);
 	bool has_state () const;
 
 	/* call this on the parent */
@@ -214,6 +217,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	virtual LayerDisplay layer_display () const { return Overlaid; }
 	virtual StreamView* view () const { return 0; }
+
+	TimeAxisViewPtr find_time_axis (TimeAxisView *);
 	
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
@@ -293,16 +298,16 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	Gtk::Label    name_label;
 
-	TimeAxisView* parent;
+	TimeAxisViewPtr parent;
 
 	/** Find the parent with state */
-	TimeAxisView* get_parent_with_state();
+	TimeAxisViewPtr get_parent_with_state();
 
 	Children children;
-	bool is_child (TimeAxisView*);
+	bool is_child (TimeAxisViewPtr);
 
-	void remove_child (boost::shared_ptr<TimeAxisView>);
-	void add_child (boost::shared_ptr<TimeAxisView>);
+	void remove_child (TimeAxisViewPtr);
+	void add_child (TimeAxisViewPtr);
 
 	/* selection display */
 

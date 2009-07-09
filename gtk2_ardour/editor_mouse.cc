@@ -1104,7 +1104,7 @@ bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	nframes64_t where = event_frame (event, 0, 0);
-	AutomationTimeAxisView* atv = 0;
+	AutomationTimeAxisViewPtr atv;
 	
 	/* no action if we're recording */
 						
@@ -1338,7 +1338,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MouseObject:
 			switch (item_type) {
 			case AutomationTrackItem:
-				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_axisview);
+				atv = boost::dynamic_pointer_cast<AutomationTimeAxisView>(clicked_axisview);
 				if (atv) {
 					atv->add_automation_event (item, event, where, event->button.y);
 				} 
@@ -1371,7 +1371,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 				
 			case AutomationTrackItem:
-				dynamic_cast<AutomationTimeAxisView*>(clicked_axisview)->
+				boost::dynamic_pointer_cast<AutomationTimeAxisView> (clicked_axisview)->
 					add_automation_event (item, event, where, event->button.y);
 				return true;
 				break;
@@ -1575,8 +1575,13 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 			track_canvas->get_window()->set_cursor (*cursor);
 
-			AutomationTimeAxisView* atv;
-			if ((atv = static_cast<AutomationTimeAxisView*>(item->get_data ("trackview"))) != 0) {
+			AutomationTimeAxisViewPtr atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (
+				find_time_axis (
+					static_cast<TimeAxisView*> (item->get_data ("trackview"))
+					)
+				);
+			
+			if (atv) {
 				clear_entered_track = false;
 				set_entered_track (atv);
 			}
@@ -1638,7 +1643,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	default:
-		set_entered_track (0);
+		set_entered_track (TimeAxisViewPtr ());
 		break;
 	}
 
@@ -1770,7 +1775,7 @@ gint
 Editor::left_automation_track ()
 {
 	if (clear_entered_track) {
-		set_entered_track (0);
+		set_entered_track (TimeAxisViewPtr ());
 		clear_entered_track = false;
 	}
 	return false;
@@ -1875,7 +1880,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 
 	if (current_stepping_trackview) {
 		/* don't keep the persistent stepped trackview if the mouse moves */
-		current_stepping_trackview = 0;
+		current_stepping_trackview.reset ();
 		step_timeout.disconnect ();
 	}
 
@@ -1959,7 +1964,7 @@ Editor::visible_order_range (int* low, int* high) const
 	
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 		
 		if (!rtv->hidden()) {
 			
@@ -1982,8 +1987,8 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 	*/
 	
 	if (Keyboard::modifier_state_contains (event->state, Keyboard::PrimaryModifier)) {
-		TimeAxisView* tv = &rv.get_time_axis_view();
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
+		TimeAxisViewPtr tv = rv.get_time_axis_view();
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (tv);
 		double speed = 1.0;
 		if (rtv && rtv->is_track()) {
 			speed = rtv->get_diskstream()->speed();
@@ -2187,8 +2192,8 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 	nframes64_t new_bound;
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_axisview;
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
+	TimeAxisViewPtr tvp = clicked_axisview;
+	RouteTimeAxisViewPtr tv = boost::dynamic_pointer_cast<RouteTimeAxisView>(tvp);
 
 	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
@@ -2227,8 +2232,8 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 	nframes64_t new_bound;
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_axisview;
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
+	TimeAxisViewPtr tvp = clicked_axisview;
+	RouteTimeAxisViewPtr tv = boost::dynamic_pointer_cast<RouteTimeAxisView>(tvp);
 
 	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
@@ -2284,8 +2289,8 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 	nframes64_t new_bound;
 
 	double speed = 1.0;
-	TimeAxisView* tvp = clicked_axisview;
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
+	TimeAxisViewPtr tvp = clicked_axisview;
+	RouteTimeAxisViewPtr tv = boost::dynamic_pointer_cast<RouteTimeAxisView>(tvp);
 
 	if (tv && tv->is_track()) {
 		speed = tv->get_diskstream()->speed();
@@ -2513,7 +2518,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 		return;
 	}
 
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
+	RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (rv->get_time_axis_view());
 
 	if (rtv == 0 || !rtv->is_track()) {
 		return;
@@ -2536,7 +2541,7 @@ gint
 Editor::track_height_step_timeout ()
 {
 	if (get_microseconds() - last_track_height_step_timestamp < 250000) {
-		current_stepping_trackview = 0;
+		current_stepping_trackview.reset ();
 		return false;
 	}
 	return true;

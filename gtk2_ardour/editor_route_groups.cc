@@ -267,7 +267,7 @@ EditorRouteGroups::new_from_selection ()
 		_session->add_route_group (g);
 
 		for (TrackSelection::iterator i = _editor->get_selection().tracks.begin(); i != _editor->get_selection().tracks.end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 			if (rtv) {
 				rtv->route()->set_route_group (g, this);
 			}
@@ -295,7 +295,7 @@ EditorRouteGroups::new_from_rec_enabled ()
 		_session->add_route_group (g);
 
 		for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 			if (rtv && rtv->route()->record_enabled()) {
 				rtv->route()->set_route_group (g, this);
 			}
@@ -323,7 +323,7 @@ EditorRouteGroups::new_from_soloed ()
 		_session->add_route_group (g);
 
 		for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 			if (rtv && !rtv->route()->is_master() && rtv->route()->soloed()) {
 				rtv->route()->set_route_group (g, this);
 			}
@@ -517,13 +517,13 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 	if ((*iter)[_columns.is_visible]) {
 		for (Editor::TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
 			if ((*j)->route_group() == group) {
-				_editor->_routes->show_track_in_display (**j);
+				_editor->_routes->show_track_in_display (*j);
 			}
 		}
 	} else {
 		for (Editor::TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
 			if ((*j)->route_group() == group) {
-				_editor->hide_track_in_display (**j);
+				_editor->hide_track_in_display (*j);
 			}
 		}
 	}
@@ -682,7 +682,7 @@ EditorRouteGroups::collect (RouteGroup* g)
 	int coll = -1;
 	while (i != routes.end() && j != _editor->get_track_views().end()) {
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*j);
 		if (rtv) {
 
 			boost::shared_ptr<Route> r = rtv->route ();

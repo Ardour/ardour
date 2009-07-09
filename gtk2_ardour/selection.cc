@@ -112,7 +112,7 @@ Selection::clear_tracks ()
 void
 Selection::clear_time ()
 {
-	time.track = 0;
+	time.track.reset ();
 	time.group = 0;
 	time.clear();
 
@@ -170,21 +170,22 @@ Selection::toggle (boost::shared_ptr<Playlist> pl)
 }
 
 void
-Selection::toggle (const list<TimeAxisView*>& track_list)
+Selection::toggle (const list<TimeAxisViewPtr>& track_list)
 {
-	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
+	for (list<TimeAxisViewPtr>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 		toggle ( (*i) );
 	}
 }
 
 void
-Selection::toggle (TimeAxisView* track)
+Selection::toggle (TimeAxisViewPtr track)
 {
 	TrackSelection::iterator i;
 	
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
-		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), track));
+		void (Selection::*pmf)(boost::weak_ptr<TimeAxisView>) = &Selection::remove;
+		boost::weak_ptr<TimeAxisView> w (track);
+		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), w));
 		tracks.push_back (track);
 	} else {
 		tracks.erase (i);
@@ -268,13 +269,14 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 }
 
 void
-Selection::add (const list<TimeAxisView*>& track_list)
+Selection::add (const list<TimeAxisViewPtr>& track_list)
 {
-	list<TimeAxisView*> added = tracks.add (track_list);
+	list<TimeAxisViewPtr> added = tracks.add (track_list);
 
-	for (list<TimeAxisView*>::const_iterator i = added.begin(); i != added.end(); ++i) {
-		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), (*i)));
+	for (list<TimeAxisViewPtr>::const_iterator i = added.begin(); i != added.end(); ++i) {
+		void (Selection::*pmf)(boost::weak_ptr<TimeAxisView>) = &Selection::remove;
+		boost::weak_ptr<TimeAxisView> w (*i);
+		(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), w));
 	}
 	
 	if (!added.empty()) {
@@ -283,10 +285,10 @@ Selection::add (const list<TimeAxisView*>& track_list)
 }
 
 void
-Selection::add (TimeAxisView* track)
+Selection::add (TimeAxisViewPtr track)
 {
 	if (find (tracks.begin(), tracks.end(), track) == tracks.end()) {
-		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
+		void (Selection::*pmf)(TimeAxisViewPtr) = &Selection::remove;
 		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), track));
 		tracks.push_back (track);
 		TracksChanged();
@@ -305,7 +307,7 @@ Selection::add (vector<RegionView*>& v)
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
 			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_trackview());
+				add ((*i)->get_trackview());
 			}
 		}
 	}
@@ -327,7 +329,7 @@ Selection::add (const RegionSelection& rs)
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
 			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_trackview());
+				add ((*i)->get_trackview());
 			}
 		}
 	}
@@ -343,7 +345,7 @@ Selection::add (RegionView* r)
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		regions.add (r);
 		if (Config->get_link_region_and_track_selection()) {
-			add (&r->get_trackview());
+			add (r->get_trackview());
 		}
 		RegionsChanged ();
 	}
@@ -402,9 +404,9 @@ Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 }
 
 void
-Selection::remove (TimeAxisView* track)
+Selection::remove (TimeAxisViewPtr track)
 {
-	list<TimeAxisView*>::iterator i;
+	list<TimeAxisViewPtr>::iterator i;
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
 		tracks.erase (i);
 		TracksChanged();
@@ -412,13 +414,22 @@ Selection::remove (TimeAxisView* track)
 }
 
 void
-Selection::remove (const list<TimeAxisView*>& track_list)
+Selection::remove (boost::weak_ptr<TimeAxisView> w)
+{
+	boost::shared_ptr<TimeAxisView> t = w.lock ();
+	if (t) {
+		remove (t);
+	}
+}
+
+void
+Selection::remove (const list<TimeAxisViewPtr>& track_list)
 {
 	bool changed = false;
 
-	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
+	for (list<TimeAxisViewPtr>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 
-		list<TimeAxisView*>::iterator x;
+		list<TimeAxisViewPtr>::iterator x;
 
 		if ((x = find (tracks.begin(), tracks.end(), (*i))) != tracks.end()) {
 			tracks.erase (x);
@@ -469,7 +480,7 @@ Selection::remove (RegionView* r)
 	}
 
 	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_trackview())) {
-		remove (&r->get_trackview());
+		remove (r->get_trackview());
 	}
 }
 
@@ -507,14 +518,14 @@ Selection::remove (boost::shared_ptr<ARDOUR::AutomationList> ac)
 }
 
 void
-Selection::set (TimeAxisView* track)
+Selection::set (TimeAxisViewPtr track)
 {
 	clear_tracks ();
 	add (track);
 }
 
 void
-Selection::set (const list<TimeAxisView*>& track_list)
+Selection::set (const list<TimeAxisViewPtr>& track_list)
 {
 	clear_tracks ();
 	add (track_list);
@@ -565,7 +576,7 @@ Selection::set (vector<RegionView*>& v)
 }
 
 long
-Selection::set (TimeAxisView* track, nframes_t start, nframes_t end)
+Selection::set (TimeAxisViewPtr track, nframes_t start, nframes_t end)
 {
 	if ((start == 0 && end == 0) || end < start) {
 		return 0;
@@ -587,7 +598,7 @@ Selection::set (TimeAxisView* track, nframes_t start, nframes_t end)
 		time.track = track;
 		time.group = track->route_group();
 	} else {
-		time.track = 0;
+		time.track.reset ();
 		time.group = 0;
 	}
 
@@ -612,7 +623,7 @@ Selection::selected (Marker* m)
 }
 
 bool
-Selection::selected (TimeAxisView* tv)
+Selection::selected (TimeAxisViewPtr tv)
 {
 	return find (tracks.begin(), tracks.end(), tv) != tracks.end();
 }

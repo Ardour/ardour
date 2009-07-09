@@ -105,7 +105,7 @@ Editor::external_audio_dialog ()
 	track_cnt = 0;
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*x);
+		AudioTimeAxisViewPtr atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(*x);
 		
 		if (!atv) {
 			continue;
@@ -263,12 +263,12 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 boost::shared_ptr<AudioTrack>
 Editor::get_nth_selected_audio_track (int nth) const
 {
-	AudioTimeAxisView* atv;
+	AudioTimeAxisViewPtr atv;
 	TrackSelection::iterator x;
 	
 	for (x = selection->tracks.begin(); nth > 0 && x != selection->tracks.end(); ++x) {
 
-		atv = dynamic_cast<AudioTimeAxisView*>(*x);
+		atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(*x);
 		
 		if (!atv) {
 			continue;
@@ -278,9 +278,9 @@ Editor::get_nth_selected_audio_track (int nth) const
 	}
 	
 	if (x == selection->tracks.end()) {
-		atv = dynamic_cast<AudioTimeAxisView*>(selection->tracks.back());
+		atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(selection->tracks.back());
 	} else {
-		atv = dynamic_cast<AudioTimeAxisView*>(*x);
+		atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(*x);
 	}
 	
 	if (!atv || !atv->is_audio_track()) {
@@ -293,12 +293,12 @@ Editor::get_nth_selected_audio_track (int nth) const
 boost::shared_ptr<MidiTrack>
 Editor::get_nth_selected_midi_track (int nth) const
 {
-	MidiTimeAxisView* mtv;
+	MidiTimeAxisViewPtr mtv;
 	TrackSelection::iterator x;
 	
 	for (x = selection->tracks.begin(); nth > 0 && x != selection->tracks.end(); ++x) {
 
-		mtv = dynamic_cast<MidiTimeAxisView*>(*x);
+		mtv = boost::dynamic_pointer_cast<MidiTimeAxisView>(*x);
 		
 		if (!mtv) {
 			continue;
@@ -308,9 +308,9 @@ Editor::get_nth_selected_midi_track (int nth) const
 	}
 	
 	if (x == selection->tracks.end()) {
-		mtv = dynamic_cast<MidiTimeAxisView*>(selection->tracks.back());
+		mtv = boost::dynamic_pointer_cast<MidiTimeAxisView>(selection->tracks.back());
 	} else {
-		mtv = dynamic_cast<MidiTimeAxisView*>(*x);
+		mtv = boost::dynamic_pointer_cast<MidiTimeAxisView>(*x);
 	}
 	
 	if (!mtv || !mtv->is_midi_track()) {

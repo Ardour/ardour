@@ -23,6 +23,7 @@
 #include <list>
 #include <sigc++/signal.h>
 #include "ardour/types.h"
+#include "shared_ptrs.h"
 
 class RegionView;
 class TimeAxisView;
@@ -42,7 +43,7 @@ class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 	void sort_by_position_and_track ();
 
 	bool contains (RegionView*) const;
-	bool involves (const TimeAxisView&) const;
+	bool involves (TimeAxisViewPtr) const;
 
 	void clear_all();
 	

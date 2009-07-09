@@ -102,7 +102,7 @@ RouteTimeAxisView::setup_slider_pix ()
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess)
 	, RouteUI(rt, sess)
-	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
+	, TimeAxisView (sess, ed, TimeAxisViewPtr (), canvas)
 	, parent_canvas (canvas)
 	, button_table (3, 3)
 	, route_group_button (_("g"))
@@ -1173,7 +1173,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
 
 		/* special case: select/deselect all tracks */
-		if (_editor.get_selection().selected (this)) {
+		if (_editor.get_selection().selected (shared_from_this ())) {
 			_editor.get_selection().clear_tracks ();
 		} else {
 			_editor.select_all_tracks ();
@@ -1182,7 +1182,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		return;
 	} 
 
-	PublicEditor::TrackViewList* tracks = _editor.get_valid_views (this, _route->route_group());
+	PublicEditor::TrackViewList* tracks = _editor.get_valid_views (shared_from_this(), _route->route_group());
 
 	switch (Keyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
@@ -1199,7 +1199,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 			_editor.get_selection().add (*tracks);
 		} else {
 			/* extend to the single track */
-			_editor.extend_selection_to_track (*tracks->front());
+			_editor.extend_selection_to_track (tracks->front());
 		}
 		break;
 
@@ -1364,7 +1364,7 @@ RouteTimeAxisView::hide_click ()
 	// LAME fix for hide_button refresh fix
 	hide_button.set_sensitive(false);
 	
-	_editor.hide_track_in_display (*this);
+	_editor.hide_track_in_display (shared_from_this ());
 	
 	hide_button.set_sensitive(true);
 }
@@ -1532,19 +1532,21 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
+	boost::weak_ptr<TimeAxisView> v (shared_from_this ());
+	
 	if (!route_group() || !route_group()->is_active()) {
-		playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(_editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(_editor, &PublicEditor::new_playlists), v)));
+		playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), v)));
 
 	} else {
 		// Use a label which tells the user what is happening
-		playlist_items.push_back (MenuElem (_("New Take"), bind(mem_fun(_editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Take"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Take"), bind(mem_fun(_editor, &PublicEditor::new_playlists), v)));
+		playlist_items.push_back (MenuElem (_("Copy Take"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), v)));
 		
 	}
 
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), bind(mem_fun(_editor, &PublicEditor::clear_playlists), this)));
+	playlist_items.push_back (MenuElem (_("Clear Current"), bind(mem_fun(_editor, &PublicEditor::clear_playlists), v)));
 	playlist_items.push_back (SeparatorElem());
 
 	playlist_items.push_back (MenuElem(_("Select from all ..."), mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
@@ -1908,9 +1910,10 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	boost::shared_ptr<AutomationControl> control
 			= boost::dynamic_pointer_cast<AutomationControl>(processor->data().control(what, true));
 
-	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
-			new AutomationTimeAxisView (_session, _route, processor, control,
-				_editor, *this, false, parent_canvas, name, state_name));
+	pan->view = AutomationTimeAxisView::create (
+		_session, _route, processor, control,
+		_editor, shared_from_this(), false, parent_canvas, name, state_name
+		);
 
 	pan->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
 
@@ -2290,7 +2293,7 @@ RouteTimeAxisView::build_underlay_menu(Gtk::Menu* parent_menu) {
 		parent_items.push_back (MenuElem (_("Underlays"), *gs_menu));
 		
 		for(UnderlayList::iterator it = _underlay_streams.begin(); it != _underlay_streams.end(); ++it) {
-			gs_items.push_back(MenuElem(string_compose(_("Remove \"%1\""), (*it)->trackview().name()),
+			gs_items.push_back(MenuElem(string_compose(_("Remove \"%1\""), (*it)->trackview()->name()),
 						    bind(mem_fun(*this, &RouteTimeAxisView::remove_underlay), *it)));
 		}
 	}
@@ -2318,7 +2321,7 @@ RouteTimeAxisView::set_underlay_state()
 		if (prop) {
 			PBD::ID id (prop->value());
 
-			RouteTimeAxisView* v = _editor.get_route_view_by_id (id);
+			RouteTimeAxisViewPtr v = _editor.get_route_view_by_id (id);
 
 			if (v) {
 				add_underlay(v->view(), false);
@@ -2336,16 +2339,16 @@ RouteTimeAxisView::add_underlay(StreamView* v, bool update_xml)
 		return;
 	}
 
-	RouteTimeAxisView& other = v->trackview();
+	RouteTimeAxisViewPtr other = v->trackview();
 
-	if(find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
-		if(find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
+	if (find (_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
+		if (find (other->_underlay_mirrors.begin(), other->_underlay_mirrors.end(), this) != other->_underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
 			/*NOTREACHED*/
 		}
 
 		_underlay_streams.push_back(v);
-		other._underlay_mirrors.push_back(this);
+		other->_underlay_mirrors.push_back(this);
 
 		v->foreach_regionview(mem_fun(*this, &RouteTimeAxisView::add_ghost));
 
@@ -2357,7 +2360,7 @@ RouteTimeAxisView::add_underlay(StreamView* v, bool update_xml)
 
 			XMLNode* node = underlay_xml_node->add_child("Underlay");
 			XMLProperty* prop = node->add_property("id");
-			prop->set_value(v->trackview().route()->id().to_s());
+			prop->set_value(v->trackview()->route()->id().to_s());
 		}
 	}
 }
@@ -2370,12 +2373,12 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 	}
 
 	UnderlayList::iterator it = find(_underlay_streams.begin(), _underlay_streams.end(), v);
-	RouteTimeAxisView& other = v->trackview();
+	RouteTimeAxisViewPtr other = v->trackview();
 
 	if(it != _underlay_streams.end()) {
-		UnderlayMirrorList::iterator gm = find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this);
+		UnderlayMirrorList::iterator gm = find (other->_underlay_mirrors.begin(), other->_underlay_mirrors.end(), this);
 
-		if(gm == other._underlay_mirrors.end()) {
+		if (gm == other->_underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
 			/*NOTREACHED*/
 		}
@@ -2383,10 +2386,10 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 		v->foreach_regionview(mem_fun(*this, &RouteTimeAxisView::remove_ghost));
 
 		_underlay_streams.erase(it);
-		other._underlay_mirrors.erase(gm);
+		other->_underlay_mirrors.erase(gm);
 
-		if(underlay_xml_node) {
-			underlay_xml_node->remove_nodes_and_delete("id", v->trackview().route()->id().to_s());
+		if (underlay_xml_node) {
+			underlay_xml_node->remove_nodes_and_delete("id", v->trackview()->route()->id().to_s());
 		}
 	}
 }

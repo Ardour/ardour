@@ -22,6 +22,7 @@
 
 #include <list>
 #include "ardour/types.h"
+#include "shared_ptrs.h"
 
 namespace ARDOUR {
 	class RouteGroup;
@@ -41,7 +42,7 @@ struct TimeSelection : public std::list<ARDOUR::AudioRange> {
        the group.
     */
     
-    TimeAxisView*               track;
+    TimeAxisViewPtr             track;
     ARDOUR::RouteGroup*         group;
 
     ARDOUR::AudioRange& operator[](uint32_t);

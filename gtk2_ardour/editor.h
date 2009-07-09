@@ -191,16 +191,16 @@ class Editor : public PublicEditor
 
 #ifdef WITH_CMT
 	void add_imageframe_time_axis(const std::string & track_name, void*) ;
-	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
+	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisViewPtr marked_track, void*) ;
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
 #endif
 
-	TimeAxisView* get_named_time_axis(const std::string & name) ;
-	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
-	void add_to_idle_resize (TimeAxisView*, int32_t);
+	TimeAxisViewPtr get_named_time_axis(const std::string & name) ;
+	void foreach_time_axis_view (sigc::slot<void,TimeAxisViewPtr>);
+	void add_to_idle_resize (TimeAxisViewPtr, int32_t);
 
-	RouteTimeAxisView* get_route_view_by_id (PBD::ID& id);
+	RouteTimeAxisViewPtr get_route_view_by_id (PBD::ID& id);
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
@@ -273,7 +273,7 @@ class Editor : public PublicEditor
 	Selection& get_selection() const { return *selection; }
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
-	bool extend_selection_to_track (TimeAxisView&);
+	bool extend_selection_to_track (TimeAxisViewPtr);
 
 	void play_selection ();
 	void select_all_in_track (Selection::Operation op);
@@ -315,11 +315,11 @@ class Editor : public PublicEditor
 	PlaylistSelector& playlist_selector() const;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
-	void new_playlists (TimeAxisView* v);
-	void copy_playlists (TimeAxisView* v);
-	void clear_playlists (TimeAxisView* v);
+	void new_playlists (boost::weak_ptr<TimeAxisView>);
+	void copy_playlists (boost::weak_ptr<TimeAxisView>);
+	void clear_playlists (boost::weak_ptr<TimeAxisView>);
 
-	TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0);
+	TrackViewList* get_valid_views (TimeAxisViewPtr, ARDOUR::RouteGroup* grp = 0);
 	void get_onscreen_tracks (TrackViewList&);
 
 	Width editor_mixer_strip_width;
@@ -327,8 +327,8 @@ class Editor : public PublicEditor
 	void show_editor_mixer (bool yn);
 	void create_editor_mixer ();
 	void show_editor_list (bool yn);
-	void set_selected_mixer_strip (TimeAxisView&);
-	void hide_track_in_display (TimeAxisView& tv, bool temporary = false);
+	void set_selected_mixer_strip (TimeAxisViewPtr);
+	void hide_track_in_display (TimeAxisViewPtr tv, bool temporary = false);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
@@ -433,7 +433,7 @@ class Editor : public PublicEditor
  
 	PlaylistSelector* _playlist_selector;
 
-	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
+	typedef std::pair<TimeAxisViewPtr,XMLNode*> TAVState;
 
 	struct VisualState {
 	    double              y_position;
@@ -531,8 +531,8 @@ class Editor : public PublicEditor
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 
-	TimeAxisView*      clicked_axisview;
-	RouteTimeAxisView* clicked_routeview;
+	TimeAxisViewPtr      clicked_axisview;
+	RouteTimeAxisViewPtr clicked_routeview;
 	/** The last RegionView that was clicked on, or 0 if the last click was not
 	 * on a RegionView.  This is set up by the canvas event handlers in
 	 * editor_canvas_events.cc
@@ -545,18 +545,18 @@ class Editor : public PublicEditor
 
 	void sort_track_selection (TrackSelection* sel = 0);
 
-	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks) const;
-	void get_equivalent_tracks (RouteTimeAxisView*, std::set<RouteTimeAxisView*> &, ARDOUR::RouteGroup::Property) const;
+	void get_relevant_tracks (std::set<RouteTimeAxisViewPtr>& relevant_tracks) const;
+	void get_equivalent_tracks (RouteTimeAxisViewPtr, std::set<RouteTimeAxisViewPtr> &, ARDOUR::RouteGroup::Property) const;
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, ARDOUR::RouteGroup::Property) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, ARDOUR::RouteGroup::Property) const;
-	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, ARDOUR::RouteGroup::Property) const;
+	void mapover_tracks (sigc::slot<void,RouteTimeAxisViewPtr,uint32_t> sl, TimeAxisViewPtr, ARDOUR::RouteGroup::Property) const;
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
-	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView *, std::vector<RegionView*>*) const;
-	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
+	void mapped_get_equivalent_regions (RouteTimeAxisViewPtr, uint32_t, RegionView *, std::vector<RegionView*>*) const;
+	void mapped_use_new_playlist (RouteTimeAxisViewPtr, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_copy_playlist (RouteTimeAxisViewPtr, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_clear_playlist (RouteTimeAxisViewPtr, uint32_t);
 
 	/* end */
 
@@ -565,7 +565,7 @@ class Editor : public PublicEditor
 
 	void catch_vanishing_regionview (RegionView *);
 
-	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void set_selected_track (TimeAxisViewPtr, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
 	
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
@@ -601,7 +601,7 @@ class Editor : public PublicEditor
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
 	void handle_new_route (ARDOUR::RouteList&);
-	void remove_route (TimeAxisView *);
+	void remove_route (TimeAxisViewPtr);
 	bool route_removal;
 
 	Gtk::HBox           global_hpacker;
@@ -846,7 +846,7 @@ class Editor : public PublicEditor
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes64_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes64_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisViewPtr * = 0);
 	nframes64_t find_next_region_boundary (nframes64_t, int32_t dir, const TrackViewList&);
 
 	std::vector<nframes64_t> region_boundary_cache;
@@ -969,7 +969,7 @@ class Editor : public PublicEditor
 
 	/* track views */
 	TrackViewList track_views;
-	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
+	std::pair<TimeAxisViewPtr, ARDOUR::layer_t> trackview_by_y_position (double);
 	TrackSelection axis_views_from_routes (std::list<ARDOUR::Route *>) const;
 
 	static Gdk::Cursor* cross_hair_cursor;
@@ -1270,7 +1270,7 @@ class Editor : public PublicEditor
 	bool have_pending_keyboard_selection;
 	nframes64_t pending_keyboard_selection_start;
 
-	boost::shared_ptr<ARDOUR::Region> select_region_for_operation (int dir, TimeAxisView **tv);
+	boost::shared_ptr<ARDOUR::Region> select_region_for_operation (int dir, TimeAxisViewPtr *tv);
 	void extend_selection_to_end_of_region (bool next);
 	void extend_selection_to_start_of_region (bool previous);
 
@@ -1350,12 +1350,12 @@ public:
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
-	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
+	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, boost::weak_ptr<TimeAxisView>);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);
 	bool canvas_zoom_rect_event (GdkEvent* event,ArdourCanvas::Item*);
 	bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*);
 	bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*);
-	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*) ;
+	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, boost::weak_ptr<AutomationTimeAxisView>);
 
 	bool canvas_tempo_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*);
@@ -1851,7 +1851,7 @@ public:
 	
 #ifdef WITH_CMT
 	void handle_new_imageframe_time_axis_view(const std::string & track_name, void* src) ;
-	void handle_new_imageframe_marker_time_axis_view(const std::string & track_name, TimeAxisView* marked_track) ;
+	void handle_new_imageframe_marker_time_axis_view(const std::string & track_name, TimeAxisViewPtr marked_track) ;
 
 	void start_imageframe_grab(ArdourCanvas::Item*, GdkEvent*) ;
 	void start_markerview_grab(ArdourCanvas::Item*, GdkEvent*) ;
@@ -1924,12 +1924,12 @@ public:
 
 	/* tracking step changes of track height */
 
-	TimeAxisView* current_stepping_trackview;
+	TimeAxisViewPtr current_stepping_trackview;
 	ARDOUR::microseconds_t last_track_height_step_timestamp;
 	gint track_height_step_timeout();
 	sigc::connection step_timeout;
 
-	TimeAxisView* entered_track;
+	TimeAxisViewPtr entered_track;
 	RegionView*   entered_regionview;
 
 
@@ -1937,9 +1937,9 @@ public:
 	bool clear_entered_track;
 	bool left_track_canvas (GdkEventCrossing*);
 	bool entered_track_canvas (GdkEventCrossing*);
-	void set_entered_track (TimeAxisView*);
+	void set_entered_track (TimeAxisViewPtr);
 	void set_entered_regionview (RegionView*);
-	void ensure_track_visible (TimeAxisView*);
+	void ensure_track_visible (TimeAxisViewPtr);
 	gint left_automation_track ();
 
 	bool _new_regionviews_show_envelope;
@@ -2011,7 +2011,7 @@ public:
 	bool idle_resize();
 	friend gboolean _idle_resize (gpointer);
 	int32_t _pending_resize_amount;
-	TimeAxisView* _pending_resize_view;
+	TimeAxisViewPtr _pending_resize_view;
 
 	void visible_order_range (int*, int*) const;
 
@@ -2026,6 +2026,8 @@ public:
 
 	EditorGroupTabs* _group_tabs;
 	void fit_route_group (ARDOUR::RouteGroup *);
+
+	TimeAxisViewPtr find_time_axis (TimeAxisView *);
 
 	friend class Drag;
 	friend class RegionDrag;

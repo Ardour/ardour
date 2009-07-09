@@ -89,7 +89,7 @@ static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 162;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 140;
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
-		boost::shared_ptr<Route> rt, Canvas& canvas)
+				    boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess) // virtually inherited
 	, RouteTimeAxisView(ed, sess, rt, canvas)
 	, _ignore_signals(false)  
@@ -103,9 +103,27 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 	, _channel_color_mode_item(0)
 	, _track_color_mode_item(0)
 {
+
+}
+
+
+MidiTimeAxisViewPtr
+MidiTimeAxisView::create (PublicEditor& ed, Session& sess,
+			  boost::shared_ptr<Route> rt, Canvas& canvas)
+{
+	MidiTimeAxisViewPtr v (new MidiTimeAxisView (ed, sess, rt, canvas));
+	v->init (ed, sess, rt, canvas);
+	return v;
+}
+
+
+void
+MidiTimeAxisView::init (PublicEditor& ed, Session& sess,
+			boost::shared_ptr<Route> rt, Canvas& canvas)
+{
 	subplugin_menu.set_name ("ArdourContextMenu");
 
-	_view = new MidiStreamView (*this);
+	_view = new MidiStreamView (boost::dynamic_pointer_cast<MidiTimeAxisView> (shared_from_this ()));
 
 	ignore_toggle = false;
 
@@ -510,13 +528,16 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	
 	assert(c);
 
-	boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
+	boost::shared_ptr<AutomationTimeAxisView> track =
+		AutomationTimeAxisView::create (
+			_session,
 			_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
 			_editor,
-			*this,
+			shared_from_this (),
 			true,
 			parent_canvas,
-			_route->describe_parameter(param)));
+			_route->describe_parameter(param)
+			);
 	
 	add_automation_child(param, track, show);
 }

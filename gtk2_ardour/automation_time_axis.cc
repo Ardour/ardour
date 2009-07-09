@@ -58,20 +58,46 @@ const string AutomationTimeAxisView::state_node_name = "AutomationChild";
  * For region automation (e.g. MIDI CC), pass null for \a.
  */
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r,
-		boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
-		PublicEditor& e, TimeAxisView& parent, bool show_regions,
-		ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
+						boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
+						PublicEditor& e, TimeAxisViewPtr parent, bool show_regions,
+						ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
 	: AxisView (s), 
-	  TimeAxisView (s, e, &parent, canvas),
+	  TimeAxisView (s, e, parent, canvas),
 	  _route (r),
 	  _control (c),
 	  _automatable (a),
 	  _controller(AutomationController::create(a, c->parameter(), c)),
 	  _base_rect (0),
-	  _view (show_regions ? new AutomationStreamView(*this) : NULL),
 	  _name (nom),
 	  auto_button (X_("")) /* force addition of a label */
 {
+
+}
+
+AutomationTimeAxisViewPtr
+AutomationTimeAxisView::create (Session& s, boost::shared_ptr<Route> r,
+				boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
+				PublicEditor& e, TimeAxisViewPtr parent, bool show_regions,
+				ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
+{
+	AutomationTimeAxisViewPtr v (new AutomationTimeAxisView (s, r, a, c, e, parent, show_regions, canvas, nom, nomparent));
+	v->init (s, r, a, c, e, parent, show_regions, canvas, nom, nomparent);
+	return v;
+}
+
+
+void
+AutomationTimeAxisView::init (Session& s, boost::shared_ptr<Route> r,
+			      boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
+			      PublicEditor& e, TimeAxisViewPtr parent, bool show_regions,
+			      ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
+{
+	if (show_regions) {
+		_view = new AutomationStreamView (boost::dynamic_pointer_cast<AutomationTimeAxisView> (shared_from_this()));
+	} else {
+		_view = 0;
+	}
+	
 	if (!have_name_font) {
 		name_font = get_font_for_style (X_("AutomationTrackName"));
 		have_name_font = true;
@@ -100,9 +126,15 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	
 	_base_rect->set_data ("trackview", this);
 
-	_base_rect->signal_event().connect (bind (
+	_base_rect->signal_event().connect (
+		bind (
 			mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
-			_base_rect, this));
+			_base_rect,
+			boost::weak_ptr<AutomationTimeAxisView> (
+				boost::dynamic_pointer_cast<AutomationTimeAxisView> (shared_from_this ())
+				)
+			)
+		);
 
 	// _base_rect->lower_to_bottom();
 
@@ -207,7 +239,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	} else {
 		boost::shared_ptr<AutomationLine> line(new AutomationLine (
 					ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
-					*this,
+					boost::dynamic_pointer_cast<AutomationTimeAxisView> (shared_from_this ()),
 					*_canvas_display,
 					_control->alist()));
 
@@ -380,7 +412,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 		   (height < hNormal && h >= hNormal)
 		|| (height >= hNormal || h < hNormal) );
 
-	TimeAxisView* state_parent = get_parent_with_state ();
+	TimeAxisViewPtr state_parent = get_parent_with_state ();
 	assert(state_parent);
 	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_control->parameter());
 
@@ -658,7 +690,7 @@ AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection&
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
-		if (&(*i).track != this) {
+		if (i->track != shared_from_this ()) {
 			continue;
 		}
 		
@@ -683,7 +715,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
-		if (&(*i).track != this) {
+		if (i->track != shared_from_this ()) {
 			continue;
 		}
 
@@ -888,7 +920,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 XMLNode*
 AutomationTimeAxisView::get_state_node ()
 {
-	TimeAxisView* state_parent = get_parent_with_state ();
+	TimeAxisViewPtr state_parent = get_parent_with_state ();
 
 	if (state_parent) {
 		return state_parent->get_automation_child_xml_node (_control->parameter());

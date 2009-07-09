@@ -52,16 +52,16 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
-	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
-		      new ArdourCanvas::Group(*tv.canvas_display()))
-	, _controller(tv.controller())
+AutomationStreamView::AutomationStreamView (AutomationTimeAxisViewPtr tv)
+	: StreamView (boost::dynamic_pointer_cast<RouteTimeAxisView> (tv->get_parent()),
+		      new ArdourCanvas::Group(*tv->canvas_display()))
+	, _controller(tv->controller())
 	, _automation_view(tv)
 {
 	//canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
 
-	use_rec_regions = tv.editor().show_waveforms_recording ();
+	use_rec_regions = tv->editor().show_waveforms_recording ();
 }
 
 AutomationStreamView::~AutomationStreamView ()
@@ -165,8 +165,8 @@ AutomationStreamView::redisplay_diskstream ()
 	}
 
 	// Add and display region views, and flag them as valid
-	if (_trackview.is_track()) {
-		_trackview.get_diskstream()->playlist()->foreach_region (
+	if (_trackview->is_track()) {
+		_trackview->get_diskstream()->playlist()->foreach_region (
 			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 			);
 	}
@@ -199,11 +199,11 @@ AutomationStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t
 void
 AutomationStreamView::color_handler ()
 {
-	/*if (_trackview.is_midi_track()) {
+	/*if (_trackview->is_midi_track()) {
 		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	} 
 
-	if (!_trackview.is_midi_track()) {
+	if (!_trackview->is_midi_track()) {
 		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
 	}*/
 }

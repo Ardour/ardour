@@ -57,7 +57,9 @@ class PianoRollHeader;
 class MidiTimeAxisView : public RouteTimeAxisView
 {
   public:
- 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+ 	static MidiTimeAxisViewPtr
+	create (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+	
  	virtual ~MidiTimeAxisView ();
 
 	MidiStreamView* midi_view();
@@ -88,7 +90,10 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
-	  		
+
+ 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+ 	void init (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+	
 	void model_changed();
 	void custom_device_mode_changed();
 	

@@ -755,7 +755,7 @@ Editor::update_ruler_visibility ()
 	}
 	
 	gdouble bottom_track_pos = vertical_adjustment.get_value() + _canvas_height - canvas_timebars_vsize;
-	std::pair<TimeAxisView*, int> const p = trackview_by_y_position (bottom_track_pos);
+	std::pair<TimeAxisViewPtr, int> const p = trackview_by_y_position (bottom_track_pos);
 	if (p.first) {
 		p.first->clip_to_viewport ();
 	}

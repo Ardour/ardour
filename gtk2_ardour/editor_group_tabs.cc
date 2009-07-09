@@ -124,7 +124,7 @@ EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
 			continue;
 		}
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 		if (rtv) {
 
 			if (j == tabs.end()) {

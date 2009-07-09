@@ -49,23 +49,23 @@ using namespace Editing;
 
 struct TrackViewByPositionSorter
 {
-    bool operator() (const TimeAxisView* a, const TimeAxisView *b) {
+    bool operator() (const TimeAxisViewPtr a, const TimeAxisViewPtr b) {
 	    return a->y_position() < b->y_position();
     }
 };
 
 bool
-Editor::extend_selection_to_track (TimeAxisView& view)
+Editor::extend_selection_to_track (TimeAxisViewPtr view)
 {
-	if (selection->selected (&view)) {
+	if (selection->selected (view)) {
 		/* already selected, do nothing */
 		return false;
 	}
 
 	if (selection->tracks.empty()) {
 
-		if (!selection->selected (&view)) {
-			selection->set (&view);
+		if (!selection->selected (view)) {
+			selection->set (view);
 			return true;
 		} else {
 			return false;
@@ -82,15 +82,15 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 
 	sorted.sort (cmp);
 
-	if (!selection->selected (&view)) {
-		to_be_added.push_back (&view);
+	if (!selection->selected (view)) {
+		to_be_added.push_back (view);
 	}
 
 	/* figure out if we should go forward or backwards */
 
 	for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
 
-		if ((*i) == &view) {
+		if (*i == view) {
 			passed_clicked = true;
 		}
 
@@ -110,7 +110,7 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 
 		for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
 					
-			if ((*i) == &view) {
+			if (*i == view) {
 				passed_clicked = true;
 				continue;
 			}
@@ -131,7 +131,7 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 
 		for (TrackViewList::reverse_iterator r = sorted.rbegin(); r != sorted.rend(); ++r) {
 					
-			if ((*r) == &view) {
+			if (*r == view) {
 				passed_clicked = true;
 				continue;
 			}
@@ -180,36 +180,36 @@ Editor::set_selected_track_as_side_effect (bool force)
 
 	if (!selection->tracks.empty()) {
 		if (!selection->selected (clicked_routeview)) {
-			selection->add (clicked_routeview);
+			selection->add (boost::static_pointer_cast<TimeAxisView> (clicked_routeview));
 		}
 
 	} else if (force) {
-		selection->set (clicked_routeview);
+		selection->set (boost::static_pointer_cast<TimeAxisView> (clicked_routeview));
 	}
 }
 
 void
-Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
+Editor::set_selected_track (TimeAxisViewPtr view, Selection::Operation op, bool no_remove)
 {
 	switch (op) {
 	case Selection::Toggle:
-		if (selection->selected (&view)) {
+		if (selection->selected (view)) {
 			if (!no_remove) {
-				selection->remove (&view);
+				selection->remove (view);
 			}
 		} else {
-			selection->add (&view);
+			selection->add (view);
 		}
 		break;
 
 	case Selection::Add:
-		if (!selection->selected (&view)) {
-			selection->add (&view);
+		if (!selection->selected (view)) {
+			selection->add (view);
 		}
 		break;
 
 	case Selection::Set:
-		selection->set (&view);
+		selection->set (view);
 		break;
 		
 	case Selection::Extend:
@@ -229,7 +229,7 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 		return;
 	}
 
-	set_selected_track (*clicked_routeview, op, no_remove);
+	set_selected_track (clicked_routeview, op, no_remove);
 }
 
 bool
@@ -269,7 +269,7 @@ Editor::get_onscreen_tracks (TrackViewList& tvl)
  */
 
 void
-Editor::get_equivalent_tracks (RouteTimeAxisView* basis, set<RouteTimeAxisView*> & equivs, RouteGroup::Property prop) const
+Editor::get_equivalent_tracks (RouteTimeAxisViewPtr basis, set<RouteTimeAxisViewPtr> & equivs, RouteGroup::Property prop) const
 {
 	equivs.insert (basis);
 
@@ -280,7 +280,7 @@ Editor::get_equivalent_tracks (RouteTimeAxisView* basis, set<RouteTimeAxisView*>
 		   properties; find other members */
 		
 		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
+			RouteTimeAxisViewPtr v = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 			if (v && v->route()->route_group() == group) {
 				equivs.insert (v);
 			}
@@ -294,10 +294,10 @@ Editor::get_equivalent_tracks (RouteTimeAxisView* basis, set<RouteTimeAxisView*>
  */
 
 void
-Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks) const
+Editor::get_relevant_tracks (set<RouteTimeAxisViewPtr>& relevant_tracks) const
 {
 	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*ti);
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*ti);
 		if (rtv) {
 			get_equivalent_tracks (rtv, relevant_tracks, RouteGroup::Select);
 		}
@@ -313,37 +313,37 @@ Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks) const
  */
 
 void
-Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, RouteGroup::Property prop) const
+Editor::mapover_tracks (slot<void, RouteTimeAxisViewPtr, uint32_t> sl, TimeAxisViewPtr basis, RouteGroup::Property prop) const
 {
-	RouteTimeAxisView* route_basis = dynamic_cast<RouteTimeAxisView*> (basis);
+	RouteTimeAxisViewPtr route_basis = boost::dynamic_pointer_cast<RouteTimeAxisView> (basis);
 	if (route_basis == 0) {
 		return;
 	}
 	
-	set<RouteTimeAxisView*> tracks;
+	set<RouteTimeAxisViewPtr> tracks;
 	get_equivalent_tracks (route_basis, tracks, prop);
 
 	/* call the slots */
 	uint32_t const sz = tracks.size ();
-	for (set<RouteTimeAxisView*>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
-		sl (**i, sz);
+	for (set<RouteTimeAxisViewPtr>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		sl (*i, sz);
 	}
 }
 
 void
-Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, RegionView * basis, vector<RegionView*>* all_equivs) const
+Editor::mapped_get_equivalent_regions (RouteTimeAxisViewPtr tv, uint32_t ignored, RegionView * basis, vector<RegionView*>* all_equivs) const
 {
 	boost::shared_ptr<Playlist> pl;
 	vector<boost::shared_ptr<Region> > results;
 	RegionView* marv;
 	boost::shared_ptr<Diskstream> ds;
 
-	if ((ds = tv.get_diskstream()) == 0) {
+	if ((ds = tv->get_diskstream()) == 0) {
 		/* bus */
 		return;
 	}
 
-	if (&tv == &basis->get_time_axis_view()) {
+	if (tv == basis->get_time_axis_view()) {
 		/* looking in same track as the original */
 		return;
 	}
@@ -353,7 +353,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, 
 	}
 
 	for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
-		if ((marv = tv.view()->find_view (*ir)) != 0) {
+		if ((marv = tv->view()->find_view (*ir)) != 0) {
 			all_equivs->push_back (marv);
 		}
 	}
@@ -362,7 +362,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, 
 void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, RouteGroup::Property prop) const
 {
-	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview(), prop);
+	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), basis->get_trackview(), prop);
 	
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 	
@@ -377,10 +377,9 @@ Editor::get_equivalent_regions (RegionSelection & basis, RouteGroup::Property pr
 	for (RegionSelection::const_iterator i = basis.begin(); i != basis.end(); ++i) {
 
 		vector<RegionView*> eq;
-		
+
 		mapover_tracks (
-			bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), *i, &eq),
-			&(*i)->get_trackview(), prop
+			bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), *i, &eq), (*i)->get_trackview(), prop
 			);
 
 		for (vector<RegionView*>::iterator j = eq.begin(); j != eq.end(); ++j) {
@@ -401,9 +400,9 @@ Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
 	
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		
-		RouteTimeAxisView* tatv;
+		RouteTimeAxisViewPtr tatv;
 		
-		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+		if ((tatv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i)) != 0) {
 			
 			boost::shared_ptr<Playlist> pl;
 			vector<boost::shared_ptr<Region> > results;
@@ -530,7 +529,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		first_frame = max_frames;
 
 		for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
-			if (&(*x)->get_time_axis_view() == &clicked_regionview->get_time_axis_view()) {
+			if ((*x)->get_time_axis_view() == clicked_regionview->get_time_axis_view()) {
 
 				if ((*x)->region()->last_frame() > last_frame) {
 					last_frame = (*x)->region()->last_frame();
@@ -610,8 +609,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		/* 2. find all the tracks we should select in */
 
-		set<RouteTimeAxisView*> relevant_tracks;
-		set<RouteTimeAxisView*> already_in_selection;
+		set<RouteTimeAxisViewPtr> relevant_tracks;
+		set<RouteTimeAxisViewPtr> already_in_selection;
 
 		get_relevant_tracks (relevant_tracks);
 
@@ -625,7 +624,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 			if (!selection->selected (entered_regionview)) {
 
-				RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&entered_regionview->get_time_axis_view());
+				RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (entered_regionview->get_time_axis_view());
 
 				if (rtv) {
 
@@ -637,17 +636,17 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					   already a selected region.
 					*/
 
-					RouteTimeAxisView* closest = 0;
+					RouteTimeAxisViewPtr closest;
 					int distance = INT_MAX;
 					int key = rtv->route()->order_key ("editor");
 
 					for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 
-						RouteTimeAxisView* artv = dynamic_cast<RouteTimeAxisView*>(&(*x)->get_time_axis_view());
+						RouteTimeAxisViewPtr artv = boost::dynamic_pointer_cast<RouteTimeAxisView>((*x)->get_time_axis_view());
 
 						if (artv && artv != rtv) {
 
-							pair<set<RouteTimeAxisView*>::iterator,bool> result;
+							pair<set<RouteTimeAxisViewPtr>::iterator,bool> result;
 
 							result = already_in_selection.insert (artv);
 
@@ -678,7 +677,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 						}
 						
 						for (TrackViewList::iterator x = track_views.begin(); x != track_views.end(); ++x) {
-							RouteTimeAxisView* artv = dynamic_cast<RouteTimeAxisView*>(*x);
+							RouteTimeAxisViewPtr artv = boost::dynamic_pointer_cast<RouteTimeAxisView>(*x);
 							if (artv && artv != rtv) {
 
 								int k = artv->route()->order_key ("editor");
@@ -711,7 +710,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		get_relevant_tracks (relevant_tracks);
 
-		for (set<RouteTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
+		for (set<RouteTimeAxisViewPtr>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
 		}
 		
@@ -808,7 +807,7 @@ Editor::track_selection_changed ()
 	case 0:
 		break;
 	default:
-		set_selected_mixer_strip (*(selection->tracks.front()));
+		set_selected_mixer_strip (selection->tracks.front());
 		break;
 	}
 
@@ -1061,7 +1060,7 @@ Editor::set_selection_from_region ()
 		return;
 	}
 
-	selection->set (0, selection->regions.start(), selection->regions.end_frame());
+	selection->set (TimeAxisViewPtr (), selection->regions.start(), selection->regions.end_frame());
 	if (!Profile->get_sae()) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
@@ -1094,7 +1093,7 @@ void
 Editor::set_selection_from_range (Location& loc)
 {
 	begin_reversible_command (_("set selection from range"));
-	selection->set (0, loc.start(), loc.end());
+	selection->set (TimeAxisViewPtr (), loc.start(), loc.end());
 	commit_reversible_command ();
 
 	if (!Profile->get_sae()) {
@@ -1321,7 +1320,7 @@ Editor::select_range_between ()
 	}
 
 	set_mouse_mode (MouseRange);
-	selection->set ((TimeAxisView*) 0, start, end);
+	selection->set (TimeAxisViewPtr (), start, end);
 }
 
 bool

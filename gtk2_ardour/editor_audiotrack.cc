@@ -36,12 +36,12 @@ using namespace PBD;
 void
 Editor::set_show_waveforms_recording (bool yn)
 {
-	AudioTimeAxisView* atv;
+	AudioTimeAxisViewPtr atv;
 
 	if (_show_waveforms_recording != yn) {
 		_show_waveforms_recording = yn;
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((atv = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {
+			if ((atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(*i)) != 0) {
 				atv->set_show_waveforms_recording (yn);
 			}
 		}
@@ -51,12 +51,12 @@ Editor::set_show_waveforms_recording (bool yn)
 gint
 Editor::start_updating ()
 {
-	RouteTimeAxisView* rtv;
+	RouteTimeAxisViewPtr rtv;
 
 	//cerr << "Editor::start_updating () called" << endl;//DEBUG
 	if (is_mapped() && session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+			if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView>(*i)) != 0) {
 				rtv->reset_meter ();
 			}
 		}
@@ -72,14 +72,14 @@ Editor::start_updating ()
 gint
 Editor::stop_updating ()
 {
-	RouteTimeAxisView* rtv;
+	RouteTimeAxisViewPtr rtv;
 	
 	meters_running = false;
 	fast_screen_update_connection.disconnect();
 	//cerr << "Editor::stop_updating () called" << endl;//DEBUG
 	if (is_mapped() && session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+			if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView>(*i)) != 0) {
 				rtv->hide_meter ();
 			}
 		}
@@ -102,11 +102,11 @@ Editor::toggle_meter_updating()
 void
 Editor::fast_update_strips ()
 {
-	RouteTimeAxisView* rtv;
+	RouteTimeAxisViewPtr rtv;
 
 	if (is_mapped() && session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+			if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView>(*i)) != 0) {
 				rtv->fast_update ();
 			}
 		}

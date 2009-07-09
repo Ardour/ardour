@@ -58,7 +58,7 @@ Editor::keyboard_selection_finish (bool add)
 		if (add) {
 			selection->add (pending_keyboard_selection_start, end);
 		} else {
-			selection->set (0, pending_keyboard_selection_start, end);
+			selection->set (TimeAxisViewPtr (), pending_keyboard_selection_start, end);
 		}
 
 		have_pending_keyboard_selection = false;

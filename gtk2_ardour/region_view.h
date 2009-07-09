@@ -42,7 +42,7 @@ class RegionView : public TimeAxisViewItem
 {
   public:
 	RegionView (ArdourCanvas::Group* parent, 
-	            TimeAxisView&        time_view,
+	            TimeAxisViewPtr        time_view,
 	            boost::shared_ptr<ARDOUR::Region> region,
 	            double               samples_per_unit,
 	            Gdk::Color const &   basic_color);
@@ -77,8 +77,8 @@ class RegionView : public TimeAxisViewItem
 	
 	virtual void region_changed (ARDOUR::Change);
 	
-	virtual GhostRegion* add_ghost (TimeAxisView&) = 0;
-	void remove_ghost_in (TimeAxisView&);
+	virtual GhostRegion* add_ghost (TimeAxisViewPtr) = 0;
+	void remove_ghost_in (TimeAxisViewPtr);
 	void remove_ghost (GhostRegion*);
 	
 	uint32_t get_fill_color ();
@@ -97,7 +97,7 @@ class RegionView : public TimeAxisViewItem
      * to the TimeAxisViewItem parent class
      */
     RegionView (ArdourCanvas::Group *, 
-		TimeAxisView&,
+		TimeAxisViewPtr,
 		boost::shared_ptr<ARDOUR::Region>,
 		double samples_per_unit,
 		Gdk::Color const & basic_color,

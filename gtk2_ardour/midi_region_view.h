@@ -63,7 +63,7 @@ class MidiRegionView : public RegionView
 	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
 
 	MidiRegionView (ArdourCanvas::Group *,
-	                RouteTimeAxisView&,
+	                RouteTimeAxisViewPtr,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double initial_samples_per_unit,
 	                Gdk::Color const & basic_color);
@@ -78,8 +78,9 @@ class MidiRegionView : public RegionView
 	inline const boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const
 		{ return boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region); }
 
-	inline MidiTimeAxisView* midi_view() const
-		{ return dynamic_cast<MidiTimeAxisView*>(&trackview); }
+	inline MidiTimeAxisViewPtr midi_view() const {
+		return boost::dynamic_pointer_cast<MidiTimeAxisView> (trackview);
+	}
 
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
@@ -93,7 +94,7 @@ class MidiRegionView : public RegionView
 
 	void redisplay_model();
 
-	GhostRegion* add_ghost (TimeAxisView&);
+	GhostRegion* add_ghost (TimeAxisViewPtr);
 
 	void add_note(const boost::shared_ptr<NoteType> note);
 	void resolve_note(uint8_t note_num, double end_time);
@@ -258,7 +259,7 @@ class MidiRegionView : public RegionView
      * to the TimeAxisViewItem parent class.
      */
     MidiRegionView (ArdourCanvas::Group *,
-	                RouteTimeAxisView&,
+	                RouteTimeAxisViewPtr,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double samples_per_unit,
 	                Gdk::Color& basic_color,

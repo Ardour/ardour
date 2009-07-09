@@ -65,7 +65,7 @@ using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
+AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisViewPtr tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, sync_mark(0)
@@ -82,7 +82,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 }
 
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu, 
+AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisViewPtr tv, boost::shared_ptr<AudioRegion> r, double spu, 
 				  Gdk::Color const & basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
@@ -165,7 +165,7 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		store_flags ();
 	}
 
-	if (trackview.editor().new_regionviews_display_gain()) {
+	if (trackview->editor().new_regionviews_display_gain()) {
 		_flags |= EnvelopeVisible;
 	}
 
@@ -200,14 +200,14 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	setup_fade_handle_positions ();
 
- 	if (!trackview.session().config.get_show_region_fades()) {
+ 	if (!trackview->session().config.get_show_region_fades()) {
  		set_fade_visibility (false);
  	}
 
 	const string line_name = _region->name() + ":gain";
 
 	if (!Profile->get_sae()) {
-		gain_line = new AudioRegionGainLine (line_name, trackview.session(), *this, *group,
+		gain_line = new AudioRegionGainLine (line_name, trackview->session(), *this, *group,
 				audio_region()->envelope());
 	}
 
@@ -219,7 +219,7 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	gain_line->reset ();
 
-	set_height (trackview.current_height());
+	set_height (trackview->current_height());
 
 	region_muted ();
 	region_sync_changed ();
@@ -360,7 +360,7 @@ AudioRegionView::region_renamed ()
 {
 	Glib::ustring str = RegionView::make_name ();
 	
-	if (audio_region()->speed_mismatch (trackview.session().frame_rate())) {
+	if (audio_region()->speed_mismatch (trackview->session().frame_rate())) {
 		str = string ("*") + str;
 	}
 
@@ -415,7 +415,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 				fade_in_handle->hide();
 				fade_out_handle->hide();
 			} else {
-				if (trackview.session().config.get_show_region_fades()) {
+				if (trackview->session().config.get_show_region_fades()) {
 					fade_in_handle->show();
 					fade_out_handle->show();
 				}
@@ -575,7 +575,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 		return;
 	}
 
-	if (trackview.session().config.get_show_region_fades()) {
+	if (trackview->session().config.get_show_region_fades()) {
 		fade_in_shape->show();
 	}
 
@@ -663,7 +663,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 		return;
 	} 
 	
-	if (trackview.session().config.get_show_region_fades()) {
+	if (trackview->session().config.get_show_region_fades()) {
 		fade_out_shape->show();
 	}
 
@@ -768,10 +768,10 @@ void
 AudioRegionView::show_region_editor ()
 {
 	if (editor == 0) {
-		editor = new AudioRegionEditor (trackview.session(), audio_region(), *this);
+		editor = new AudioRegionEditor (trackview->session(), audio_region(), *this);
 		// GTK2FIX : how to ensure float without realizing
 		// editor->realize ();
-		// trackview.editor.ensure_float (*editor);
+		// trackview->editor.ensure_float (*editor);
 	} 
 
 	editor->present ();
@@ -836,13 +836,13 @@ void
 AudioRegionView::create_waves ()
 {
 	// cerr << "AudioRegionView::create_waves() called on " << this << endl;//DEBUG
-	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
+	RouteTimeAxisViewPtr atv = boost::dynamic_pointer_cast<RouteTimeAxisView> (trackview); // ick
 
-	if (!atv.get_diskstream()) {
+	if (!atv->get_diskstream()) {
 		return;
 	}
 
-	ChanCount nchans = atv.get_diskstream()->n_channels();
+	ChanCount nchans = atv->get_diskstream()->n_channels();
 
 	// cerr << "creating waves for " << _region->name() << " with wfd = " << wait_for_data
 	//		<< " and channels = " << nchans.n_audio() << endl;
@@ -884,16 +884,16 @@ void
 AudioRegionView::create_one_wave (uint32_t which, bool direct)
 {
 	//cerr << "AudioRegionView::create_one_wave() called which: " << which << " this: " << this << endl;//DEBUG
-	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
-	uint32_t nchans = atv.get_diskstream()->n_channels().n_audio();
+	RouteTimeAxisViewPtr atv = boost::dynamic_pointer_cast<RouteTimeAxisView> (trackview); // ick
+	uint32_t nchans = atv->get_diskstream()->n_channels().n_audio();
 	uint32_t n;
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
-	if (trackview.current_height() < NAME_HIGHLIGHT_THRESH) {
-		ht = ((trackview.current_height()) / (double) nchans);
+	if (trackview->current_height() < NAME_HIGHLIGHT_THRESH) {
+		ht = ((trackview->current_height()) / (double) nchans);
 	} else {
-		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
+		ht = ((trackview->current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
 	}
 
 	gdouble yoff = which * ht;
@@ -998,7 +998,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	item->w2i (x, y);
 
-	nframes_t fx = trackview.editor().pixel_to_frame (x);
+	nframes_t fx = trackview->editor().pixel_to_frame (x);
 
 	if (fx > _region->length()) {
 		return;
@@ -1012,21 +1012,21 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	gain_line->view_to_model_coord (x, y);
 
-	trackview.session().begin_reversible_command (_("add gain control point"));
+	trackview->session().begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope()->get_state();
 
 	if (!audio_region()->envelope_active()) {
 		XMLNode &region_before = audio_region()->get_state();
 		audio_region()->set_envelope_active(true);
 		XMLNode &region_after = audio_region()->get_state();
-		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
+		trackview->session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
 	}
 
 	audio_region()->envelope()->add (fx, y);
 	
 	XMLNode &after = audio_region()->envelope()->get_state();
-	trackview.session().add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
-	trackview.session().commit_reversible_command ();
+	trackview->session().add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
+	trackview->session().commit_reversible_command ();
 }
 
 void
@@ -1141,9 +1141,9 @@ AudioRegionView::set_waveform_scale (WaveformScale scale)
 
 
 GhostRegion*
-AudioRegionView::add_ghost (TimeAxisView& tv)
+AudioRegionView::add_ghost (TimeAxisViewPtr tv)
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
+	RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (trackview);
 	assert(rtv);
 
 	double unit_position = _region->position () / samples_per_unit;

@@ -42,7 +42,7 @@ class AutomationRegionView;
 class AutomationStreamView : public StreamView
 {
   public:
-	AutomationStreamView (AutomationTimeAxisView& tv);
+	AutomationStreamView (AutomationTimeAxisViewPtr tv);
 	~AutomationStreamView ();
 
 	void set_automation_state (ARDOUR::AutoState state);
@@ -50,7 +50,7 @@ class AutomationStreamView : public StreamView
 	void redisplay_diskstream ();
 	
 	inline double contents_height() const { 
-		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
+		return (_trackview->current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
 	}
 	
   private:
@@ -65,7 +65,7 @@ class AutomationStreamView : public StreamView
 	
 	boost::shared_ptr<AutomationController> _controller;
 	
-	AutomationTimeAxisView& _automation_view;
+	AutomationTimeAxisViewPtr _automation_view;
 };
 
 #endif /* __ardour_automation_streamview_h__ */

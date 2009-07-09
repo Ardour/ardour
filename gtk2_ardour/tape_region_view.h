@@ -28,7 +28,7 @@ class TapeAudioRegionView : public AudioRegionView
 {
   public:
 	TapeAudioRegionView (ArdourCanvas::Group *, 
-			     RouteTimeAxisView&,
+			     RouteTimeAxisViewPtr,
 			     boost::shared_ptr<ARDOUR::AudioRegion>,
 			     double initial_samples_per_unit,
 			     Gdk::Color const & base_color);

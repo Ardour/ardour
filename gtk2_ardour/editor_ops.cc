@@ -198,7 +198,7 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 }
 
 boost::shared_ptr<Region>
-Editor::select_region_for_operation (int dir, TimeAxisView **tv)
+Editor::select_region_for_operation (int dir, TimeAxisViewPtr *tv)
 {
 	RegionView* rv;
 	boost::shared_ptr<Region> region;
@@ -217,16 +217,16 @@ Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 	if (!selection->regions.empty()) {
 
 		rv = *(selection->regions.begin());
-		(*tv) = &rv->get_time_axis_view();
+		(*tv) = rv->get_time_axis_view();
 		region = rv->region();
 
 	} else if (!selection->tracks.empty()) {
 
 		(*tv) = selection->tracks.front();
 
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisViewPtr rtv;
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*tv)) != 0) {
+		if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*tv)) != 0) {
 			boost::shared_ptr<Playlist> pl;
 			
 			if ((pl = rtv->playlist()) == 0) {
@@ -243,7 +243,7 @@ Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 void
 Editor::extend_selection_to_end_of_region (bool next)
 {
-	TimeAxisView *tv;
+	TimeAxisViewPtr tv;
 	boost::shared_ptr<Region> region;
 	nframes64_t start;
 
@@ -271,7 +271,7 @@ Editor::extend_selection_to_end_of_region (bool next)
 void
 Editor::extend_selection_to_start_of_region (bool previous)
 {
-	TimeAxisView *tv;
+	TimeAxisViewPtr tv;
 	boost::shared_ptr<Region> region;
 	nframes64_t end;
 
@@ -608,7 +608,7 @@ Editor::build_region_boundary_cache ()
 		return;
 	}
 	
-	TimeAxisView *ontrack = 0;
+	TimeAxisViewPtr ontrack;
 	TrackViewList tlist;
 
 	if (!selection->tracks.empty()) {
@@ -651,9 +651,9 @@ Editor::build_region_boundary_cache ()
 			}
 			
 			float speed = 1.0f;
-			RouteTimeAxisView *rtav;
+			RouteTimeAxisViewPtr rtav;
 			
-			if (ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0 ) {
+			if (ontrack != 0 && (rtav = boost::dynamic_pointer_cast<RouteTimeAxisView>(ontrack)) != 0 ) {
 				if (rtav->get_diskstream() != 0) {
 					speed = rtav->get_diskstream()->speed();
 				}
@@ -691,7 +691,7 @@ Editor::build_region_boundary_cache ()
 }
 
 boost::shared_ptr<Region>
-Editor::find_next_region (nframes64_t frame, RegionPoint point, int32_t dir, TrackViewList& tracks, TimeAxisView **ontrack)
+Editor::find_next_region (nframes64_t frame, RegionPoint point, int32_t dir, TrackViewList& tracks, TimeAxisViewPtr *ontrack)
 {
 	TrackViewList::iterator i;
 	nframes64_t closest = max_frames;
@@ -700,7 +700,7 @@ Editor::find_next_region (nframes64_t frame, RegionPoint point, int32_t dir, Tra
 
 	float track_speed;
 	nframes64_t track_frame;
-	RouteTimeAxisView *rtav;
+	RouteTimeAxisViewPtr rtav;
 
 	for (i = tracks.begin(); i != tracks.end(); ++i) {
 
@@ -708,7 +708,7 @@ Editor::find_next_region (nframes64_t frame, RegionPoint point, int32_t dir, Tra
 		boost::shared_ptr<Region> r;
 		
 		track_speed = 1.0f;
-		if ( (rtav = dynamic_cast<RouteTimeAxisView*>(*i)) != 0 ) {
+		if ( (rtav = boost::dynamic_pointer_cast<RouteTimeAxisView>(*i)) != 0 ) {
 			if (rtav->get_diskstream()!=0)
 				track_speed = rtav->get_diskstream()->speed();
 		}
@@ -765,7 +765,7 @@ Editor::find_next_region_boundary (nframes64_t pos, int32_t dir, const TrackView
 		nframes64_t contender;
 		nframes64_t d;
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 
 		if (!rtv) {
 			continue;
@@ -866,7 +866,7 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 		return;
 	}
 
-	TimeAxisView *ontrack = 0;
+	TimeAxisViewPtr ontrack;
 
 	// so we don't find the current region again..
 	if (dir>0 || pos>0)
@@ -908,9 +908,9 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 	}
 	
 	float speed = 1.0f;
-	RouteTimeAxisView *rtav;
+	RouteTimeAxisViewPtr rtav;
 
-	if ( ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0 ) {
+	if ( ontrack != 0 && (rtav = boost::dynamic_pointer_cast<RouteTimeAxisView>(ontrack)) != 0 ) {
 		if (rtav->get_diskstream() != 0) {
 			speed = rtav->get_diskstream()->speed();
 		}
@@ -1069,7 +1069,7 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 		return;
 	}
 
-	TimeAxisView *ontrack = 0;
+	TimeAxisViewPtr ontrack;
 
 	pos = loc->start();
 
@@ -1105,9 +1105,9 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 	}
 	
 	float speed = 1.0f;
-	RouteTimeAxisView *rtav;
+	RouteTimeAxisViewPtr rtav;
 
-	if (ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0) {
+	if (ontrack != 0 && (rtav = boost::dynamic_pointer_cast<RouteTimeAxisView>(ontrack)) != 0) {
 		if (rtav->get_diskstream() != 0) {
 			speed = rtav->get_diskstream()->speed();
 		}
@@ -1673,7 +1673,7 @@ Editor::temporal_zoom_region (bool both_axes)
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 	RegionSelection rs; 
-	set<TimeAxisView*> tracks;
+	set<TimeAxisViewPtr> tracks;
 
 	get_regions_for_action (rs);
 
@@ -1691,7 +1691,7 @@ Editor::temporal_zoom_region (bool both_axes)
 			end = (*i)->region()->last_frame() + 1;
 		}
 
-		tracks.insert (&((*i)->get_time_axis_view()));
+		tracks.insert ((*i)->get_time_axis_view());
 	}
 
 	/* now comes an "interesting" hack ... make sure we leave a little space
@@ -1740,7 +1740,7 @@ Editor::temporal_zoom_region (bool both_axes)
 		
 		/* set visible track heights appropriately */
 		
-		for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+		for (set<TimeAxisViewPtr>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
 			(*t)->set_height (per_track_height);
 		}
 		
@@ -1750,7 +1750,7 @@ Editor::temporal_zoom_region (bool both_axes)
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
-				hide_track_in_display (**i, true);
+				hide_track_in_display (*i, true);
 			}
 		}
 
@@ -2209,7 +2209,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	double wx, wy;
 	double cx, cy;
 	nframes64_t where;
-	RouteTimeAxisView *rtv = 0;
+	RouteTimeAxisViewPtr rtv;
 	boost::shared_ptr<Playlist> playlist;
 	
 	track_canvas->window_to_world (x, y, wx, wy);
@@ -2228,12 +2228,12 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 		return;
 	}
 
-	std::pair<TimeAxisView*, int> tv = trackview_by_y_position (cy);
+	std::pair<TimeAxisViewPtr, int> tv = trackview_by_y_position (cy);
 	if (tv.first == 0) {
 		return;
 	}
 	
-	if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv.first)) == 0) {
+	if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (tv.first)) == 0) {
 		return;
 	}
 
@@ -2255,8 +2255,8 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 	double wx, wy;
 	double cx, cy;
 	nframes_t where;
-	RouteTimeAxisView *dest_rtv = 0;
-	RouteTimeAxisView *source_rtv = 0;
+	RouteTimeAxisViewPtr dest_rtv;
+	RouteTimeAxisViewPtr source_rtv;
 
 	track_canvas->window_to_world (x, y, wx, wy);
 	wx += horizontal_adjustment.get_value();
@@ -2269,19 +2269,19 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 
 	where = event_frame (&event, &cx, &cy);
 
-	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (cy);
+	std::pair<TimeAxisViewPtr, int> const tv = trackview_by_y_position (cy);
 	if (tv.first == 0) {
 		return;
 	}
 
-	if ((dest_rtv = dynamic_cast<RouteTimeAxisView*> (tv.first)) == 0) {
+	if ((dest_rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (tv.first)) == 0) {
 		return;
 	}
 
 	/* use this drag source to add underlay to a track. But we really don't care 
 	   about the Route, only the view of the route, so find it first */
 	for(TrackViewList::iterator it = track_views.begin(); it != track_views.end(); ++it) {
-		if((source_rtv = dynamic_cast<RouteTimeAxisView*>(*it)) == 0) {
+		if((source_rtv = boost::dynamic_pointer_cast<RouteTimeAxisView>(*it)) == 0) {
 			continue;
 		}
 		
@@ -2295,17 +2295,17 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 void
 Editor::insert_region_list_selection (float times)
 {
-	RouteTimeAxisView *tv = 0;
+	RouteTimeAxisViewPtr tv;
 	boost::shared_ptr<Playlist> playlist;
 
 	if (clicked_routeview != 0) {
 		tv = clicked_routeview;
 	} else if (!selection->tracks.empty()) {
-		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
+		if ((tv = boost::dynamic_pointer_cast<RouteTimeAxisView>(selection->tracks.front())) == 0) {
 			return;
 		}
 	} else if (entered_track != 0) {
-		if ((tv = dynamic_cast<RouteTimeAxisView*>(entered_track)) == 0) {
+		if ((tv = boost::dynamic_pointer_cast<RouteTimeAxisView>(entered_track)) == 0) {
 			return;
 		}
 	} else {
@@ -2803,7 +2803,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 		get_regions_for_action (rs);
 
 		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-			TimeAxisView* tv = &(*i)->get_time_axis_view();
+			TimeAxisViewPtr tv = (*i)->get_time_axis_view();
 
 			if (find (tmptracks.begin(), tmptracks.end(), tv) == tmptracks.end()) {
 				tmptracks.push_back (tv);
@@ -2825,9 +2825,9 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisViewPtr rtv;
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
+		if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> ((*i))) != 0) {
 
 			if (rtv->is_track()) {
 
@@ -2991,9 +2991,9 @@ Editor::crop_region_to (nframes64_t start, nframes64_t end)
 	
 	for (TrackSelection::iterator i = ts->begin(); i != ts->end(); ++i) {
 		
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisViewPtr rtv;
 		
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
+		if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> ((*i))) != 0) {
 
 			boost::shared_ptr<Track> t = rtv->track();
 
@@ -3473,7 +3473,7 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 			continue;
 		}
 				
-		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
+		RouteTimeAxisViewPtr tav = boost::dynamic_pointer_cast<RouteTimeAxisView> (rv->get_time_axis_view());
 		if (!tav) {
 			return;
 		}
@@ -3518,7 +3518,7 @@ Editor::trim_region_to_edit_point ()
 			continue;
 		}
 
-		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
+		RouteTimeAxisViewPtr tav = boost::dynamic_pointer_cast<RouteTimeAxisView> (rv->get_time_axis_view());
 		if (!tav) {
 			return;
 		}
@@ -3558,7 +3558,7 @@ Editor::trim_region_from_edit_point ()
 			continue;
 		}
 
-		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
+		RouteTimeAxisViewPtr tav = boost::dynamic_pointer_cast<RouteTimeAxisView> (rv->get_time_axis_view());
 		if (!tav) {
 			return;
 		}
@@ -3610,7 +3610,7 @@ Editor::trim_to_region(bool forward)
 			continue;
 		}
 
-		AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&arv->get_time_axis_view());
+		AudioTimeAxisViewPtr atav = boost::dynamic_pointer_cast<AudioTimeAxisView> (arv->get_time_axis_view());
 
 		if (!atav) {
 			return;
@@ -3757,9 +3757,9 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisViewPtr rtv;
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*i)) == 0) {
+		if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i)) == 0) {
 			continue;
 		}
 		
@@ -3934,7 +3934,7 @@ Editor::cut_copy (CutCopyOp op)
 			if (!get_edit_op_range (start, end)) {
 				return;
 			}
-			selection->set ((TimeAxisView*) 0, start, end);
+			selection->set (TimeAxisViewPtr (), start, end);
 		}
 			
 		begin_reversible_command (opname + _(" range"));
@@ -3967,7 +3967,7 @@ Editor::cut_copy_points (CutCopyOp op)
 {
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 
-		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&(*i).track);
+		AutomationTimeAxisViewPtr atv = boost::dynamic_pointer_cast<AutomationTimeAxisView>(i->track);
 
 		if (atv) {
 			atv->cut_copy_clear_objects (selection->points, op);
@@ -3987,10 +3987,10 @@ struct lt_playlist {
 };
 	
 struct PlaylistMapping { 
-    TimeAxisView* tv;
+    TimeAxisViewPtr tv;
     boost::shared_ptr<Playlist> pl;
 
-    PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
+    PlaylistMapping (TimeAxisViewPtr tvp) : tv (tvp) {}
 };
 
 /** Remove `clicked_regionview' */
@@ -4135,7 +4135,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			}
 		}
 
-		TimeAxisView* tv = &(*x)->get_trackview();
+		TimeAxisViewPtr tv = (*x)->get_trackview();
 		vector<PlaylistMapping>::iterator z;
 
 		for (z = pmap.begin(); z != pmap.end(); ++z) {
@@ -4158,7 +4158,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			continue;
 		}
 
-		TimeAxisView& tv = (*x)->get_trackview();
+		TimeAxisViewPtr tv = (*x)->get_trackview();
 		boost::shared_ptr<Playlist> npl;
 		RegionSelection::iterator tmp;
 		
@@ -4168,7 +4168,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		vector<PlaylistMapping>::iterator z;
 		
 		for (z = pmap.begin(); z != pmap.end(); ++z) {
-			if ((*z).tv == &tv) {
+			if (z->tv == tv) {
 				break;
 			}
 		}
@@ -4337,11 +4337,11 @@ Editor::paste_named_selection (float times)
 
 	for (t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
 		
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisViewPtr rtv;
 		boost::shared_ptr<Playlist> pl;
 		boost::shared_ptr<AudioPlaylist> apl;
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*t)) == 0) {
+		if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*t)) == 0) {
 			continue;
 		}
 
@@ -4383,8 +4383,8 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 		boost::shared_ptr<Region> r ((*i)->region());
 
-		TimeAxisView& tv = (*i)->get_time_axis_view();
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+		TimeAxisViewPtr tv = (*i)->get_time_axis_view();
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (tv);
 		latest_regionviews.clear ();
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 		
@@ -4451,7 +4451,7 @@ Editor::reset_point_selection ()
 
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 		
-		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&(*i).track);
+		AutomationTimeAxisViewPtr atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (i->track);
 		
 		if (atv) {
 			atv->reset_objects (selection->points);
@@ -5033,7 +5033,7 @@ Editor::toggle_record_enable ()
 	bool new_state = false;
 	bool first = true;
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+		RouteTimeAxisViewPtr rtav = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i);
 		if (!rtav)
 			continue;
 		if (!rtav->is_track())
@@ -5357,7 +5357,7 @@ Editor::update_region_fade_visibility ()
 	bool _fade_visibility = session->config.get_show_region_fades ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
+		AudioTimeAxisViewPtr v = boost::dynamic_pointer_cast<AudioTimeAxisView> (*i);
 		if (v) {
 			if (_fade_visibility) {
 				v->audio_view()->show_all_fades ();
@@ -5375,7 +5375,7 @@ Editor::update_xfade_visibility ()
 	_xfade_visibility = session->config.get_xfades_visible ();
 	
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
+		AudioTimeAxisViewPtr v = boost::dynamic_pointer_cast<AudioTimeAxisView> (*i);
 		if (v) {
 			if (_xfade_visibility) {
 				v->show_all_xfades ();
@@ -5483,9 +5483,9 @@ Editor::select_next_route()
 		return;
 	}
 
-	TimeAxisView* current = selection->tracks.front();
+	TimeAxisViewPtr current = selection->tracks.front();
 
-	RouteUI *rui;
+	boost::shared_ptr<RouteUI> rui;
 	do {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if (*i == current) {
@@ -5499,8 +5499,8 @@ Editor::select_next_route()
 				break;
 			}
 		}
-		rui = dynamic_cast<RouteUI *>(current);
-	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
+		rui = boost::dynamic_pointer_cast<RouteUI> (current);
+	} while ( current->hidden() || (rui && !rui->route()->active()));
 
 	selection->set(current);
 
@@ -5515,9 +5515,9 @@ Editor::select_prev_route()
 		return;
 	}
 
-	TimeAxisView* current = selection->tracks.front();
+	TimeAxisViewPtr current = selection->tracks.front();
 
-	RouteUI *rui;
+	boost::shared_ptr<RouteUI> rui;
 	do {
 		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
 			if (*i == current) {
@@ -5530,8 +5530,8 @@ Editor::select_prev_route()
 				break;
 			}
 		}
-		rui = dynamic_cast<RouteUI *>(current);
-	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
+		rui = boost::dynamic_pointer_cast<RouteUI> (current);
+	} while ( current->hidden() || (rui && !rui->route()->active()));
 
 	selection->set (current);
 
@@ -5539,7 +5539,7 @@ Editor::select_prev_route()
 }
 
 void
-Editor::ensure_track_visible(TimeAxisView *track)
+Editor::ensure_track_visible(TimeAxisViewPtr track)
 {
 	if (track->hidden())
 		return;
@@ -6002,7 +6002,7 @@ Editor::tab_to_transient (bool forward)
 
 		for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
 
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*t);
+			RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*t);
 
 			if (rtv) {
 				boost::shared_ptr<Diskstream> ds = rtv->get_diskstream();
@@ -6110,7 +6110,7 @@ Editor::toggle_tracks_active ()
 	}
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*x);
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView>(*x);
 
 		if (rtv) {
 			if (first) {
@@ -6140,7 +6140,7 @@ Editor::remove_tracks ()
 	vector<boost::shared_ptr<Route> > routes;
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*x);
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*x);
 		if (rtv) {
 			if (rtv->is_track()) {
 				ntracks++;
@@ -6313,7 +6313,7 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 		}
 			
 		/* automation */
-		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
+		RouteTimeAxisViewPtr rtav = boost::dynamic_pointer_cast<RouteTimeAxisView> (*x);
 		if (rtav) {
 			rtav->route ()->shift (pos, frames);
 			commit = true;
@@ -6413,7 +6413,7 @@ Editor::fit_tracks (TrackSelection & tracks)
 			first_y_pos = std::min ((*t)->y_position (), first_y_pos);
 		} else {
 			if (prev_was_selected && next_is_selected) {
-				hide_track_in_display (**t);
+				hide_track_in_display (*t);
 			}
 		}
 

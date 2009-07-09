@@ -80,12 +80,26 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	: AxisView(sess)
 	, RouteTimeAxisView(ed, sess, rt, canvas)
 {
+
+}
+
+AudioTimeAxisViewPtr
+AudioTimeAxisView::create (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
+{
+	AudioTimeAxisViewPtr v (new AudioTimeAxisView (ed, sess, rt, canvas));
+	v->init (ed, sess, rt, canvas);
+	return v;
+}
+
+void
+AudioTimeAxisView::init (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
+{
 	// Make sure things are sane...
 	assert(!is_track() || is_audio_track());
 
 	subplugin_menu.set_name ("ArdourContextMenu");
 
-	_view = new AudioStreamView (*this);
+	_view = new AudioStreamView (boost::dynamic_pointer_cast<AudioTimeAxisView> (shared_from_this ()));
 
 	ignore_toggle = false;
 
@@ -246,13 +260,13 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 		}
 
 		boost::shared_ptr<AutomationTimeAxisView> 
-			gain_track(new AutomationTimeAxisView (_session,
-							       _route, _route->amp(), c,
-							       _editor,
-							       *this,
-							       false,
-							       parent_canvas,
-							       _route->amp()->describe_parameter(param)));
+			gain_track = AutomationTimeAxisView::create (_session,
+								     _route, _route->amp(), c,
+								     _editor,
+								     shared_from_this (),
+								     false,
+								     parent_canvas,
+								     _route->amp()->describe_parameter(param));
 
 		add_automation_child(Evoral::Parameter(GainAutomation), gain_track, show);
 
@@ -297,14 +311,14 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 
 			std::string const name = _route->panner()->describe_parameter (pan_control->parameter ());
 
-			boost::shared_ptr<AutomationTimeAxisView> pan_track (
-				new AutomationTimeAxisView (_session,
-							    _route, _route->panner(), pan_control, 
-							    _editor,
-							    *this,
-							    false,
-							    parent_canvas,
-							    name));
+			boost::shared_ptr<AutomationTimeAxisView> pan_track =
+				AutomationTimeAxisView::create (_session,
+								_route, _route->panner(), pan_control, 
+								_editor,
+								shared_from_this (),
+								false,
+								parent_canvas,
+								name);
 			
 			add_automation_child (*p, pan_track, show);
 		}

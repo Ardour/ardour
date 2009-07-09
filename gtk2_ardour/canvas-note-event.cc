@@ -220,7 +220,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	bool select_mod;
 	uint8_t d_velocity = 10;
 
-	if (_region.get_time_axis_view().editor().current_mouse_mode() != Editing::MouseNote) {
+	if (_region.get_time_axis_view()->editor().current_mouse_mode() != Editing::MouseNote) {
 		return false;
 	}
 	

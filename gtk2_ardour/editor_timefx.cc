@@ -70,9 +70,10 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		return time_fx (regions, fraction, false);
 	} else {
 		// MIDI, just stretch
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&regions.front()->get_time_axis_view());
-		if (!rtv)
+		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (regions.front()->get_time_axis_view());
+		if (!rtv) {
 			return -1;
+		}
 		
 		boost::shared_ptr<Playlist> playlist
 			= rtv->track()->diskstream()->playlist();
@@ -262,14 +263,14 @@ Editor::do_timefx (TimeFXDialog& dialog)
 		}
 
 		boost::shared_ptr<AudioRegion> region (arv->audio_region());
-		TimeAxisView* tv = &(arv->get_time_axis_view());
-		RouteTimeAxisView* rtv;
+		TimeAxisViewPtr tv = arv->get_time_axis_view();
+		RouteTimeAxisViewPtr rtv;
 		RegionSelection::iterator tmp;
 		
 		tmp = i;
 		++tmp;
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) == 0) {
+		if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (tv)) == 0) {
 			i = tmp;
 			continue;
 		}

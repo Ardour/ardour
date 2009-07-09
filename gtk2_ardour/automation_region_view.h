@@ -40,7 +40,7 @@ class AutomationRegionView : public RegionView
 {
 public:
 	AutomationRegionView(ArdourCanvas::Group*,
-	                     AutomationTimeAxisView&,
+	                     AutomationTimeAxisViewPtr,
 	                     boost::shared_ptr<ARDOUR::Region>,
 	                     const Evoral::Parameter& parameter,
 	                     boost::shared_ptr<ARDOUR::AutomationList>,
@@ -51,14 +51,15 @@ public:
 	
 	void init (Gdk::Color const & basic_color, bool wfd);
 	
-	inline AutomationTimeAxisView* automation_view() const
-		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
+	inline AutomationTimeAxisViewPtr automation_view() const {
+		return boost::dynamic_pointer_cast<AutomationTimeAxisView> (trackview);
+	}
 	
 	void set_line(boost::shared_ptr<AutomationLine> line) { _line = line; }
 	boost::shared_ptr<AutomationLine> line() { return _line; }
 	
 	// We are a ghost.  Meta ghosts?  Crazy talk.
-	virtual GhostRegion* add_ghost(TimeAxisView&) { return NULL; }
+	virtual GhostRegion* add_ghost(TimeAxisViewPtr) { return 0; }
 	
 	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);

@@ -197,7 +197,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual gulong frame_to_pixel (nframes64_t frame) const = 0;
 	virtual Selection& get_selection () const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
-	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
+	virtual bool extend_selection_to_track (TimeAxisViewPtr) = 0;
 	virtual void play_selection () = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
@@ -219,13 +219,13 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual gdouble   get_current_zoom () const = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
-	virtual void new_playlists (TimeAxisView*) = 0;
-	virtual void copy_playlists (TimeAxisView*) = 0;
-	virtual void clear_playlists (TimeAxisView*) = 0;
+	virtual void new_playlists (boost::weak_ptr<TimeAxisView>) = 0;
+	virtual void copy_playlists (boost::weak_ptr<TimeAxisView>) = 0;
+	virtual void clear_playlists (boost::weak_ptr<TimeAxisView>) = 0;
 	virtual void select_all_tracks () = 0;
-	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
-	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
-	virtual void hide_track_in_display (TimeAxisView& tv, bool temporary = false) = 0;
+	virtual void set_selected_track (TimeAxisViewPtr, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
+	virtual void set_selected_mixer_strip (TimeAxisViewPtr) = 0;
+	virtual void hide_track_in_display (TimeAxisViewPtr tv, bool temporary = false) = 0;
 
 	/** Set whether the editor should follow the playhead.
 	 * @param yn true to follow playhead, otherwise false.
@@ -243,7 +243,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual double get_physical_screen_width() const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
-	virtual TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0) = 0;
+	virtual TrackViewList* get_valid_views (TimeAxisViewPtr, ARDOUR::RouteGroup* grp = 0) = 0;
 	virtual nframes64_t leftmost_position() const = 0;
 	virtual nframes64_t current_page_frames() const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
@@ -260,18 +260,18 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret) = 0;
 	virtual void mouse_add_new_marker (nframes64_t where, bool is_cd=false, bool is_xrun=false) = 0;
-	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
-	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
+	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisViewPtr>) = 0;
+	virtual void add_to_idle_resize (TimeAxisViewPtr, int32_t) = 0;
 
 #ifdef WITH_CMT
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
-	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*)  = 0;
+	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisViewPtr marked_track, void*)  = 0;
 	virtual void connect_to_image_compositor()  = 0;
 	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
-	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
+	virtual TimeAxisViewPtr get_named_time_axis(const std::string & name)  = 0;
 #endif
 
-	virtual RouteTimeAxisView* get_route_view_by_id (PBD::ID& id) = 0;
+	virtual RouteTimeAxisViewPtr get_route_view_by_id (PBD::ID& id) = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, ARDOUR::RouteGroup::Property) const = 0;
 
@@ -298,12 +298,12 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_region_view_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
-	virtual bool canvas_stream_view_event (GdkEvent* event, ArdourCanvas::Item*, RouteTimeAxisView*) = 0;
+	virtual bool canvas_stream_view_event (GdkEvent* event, ArdourCanvas::Item*, boost::weak_ptr<TimeAxisView>) = 0;
 	virtual bool canvas_marker_event (GdkEvent* event, ArdourCanvas::Item*, Marker*) = 0;
 	virtual bool canvas_zoom_rect_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_tempo_marker_event (GdkEvent* event, ArdourCanvas::Item*, TempoMarker*) = 0;
 	virtual bool canvas_meter_marker_event (GdkEvent* event, ArdourCanvas::Item*, MeterMarker*) = 0;
-	virtual bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*) = 0;
+	virtual bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, boost::weak_ptr<AutomationTimeAxisView>) = 0;
 
 	virtual bool canvas_tempo_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;

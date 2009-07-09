@@ -39,6 +39,7 @@
 #include "editing.h"
 #include "route_time_axis.h"
 #include "canvas.h"
+#include "shared_ptrs.h"
 
 namespace ARDOUR {
 	class Session;
@@ -66,7 +67,9 @@ class AutomationTimeAxisView;
 class AudioTimeAxisView : public RouteTimeAxisView
 {
   public:
- 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+	static AudioTimeAxisViewPtr
+ 	create (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+	
  	virtual ~AudioTimeAxisView ();
 	
 	AudioStreamView* audio_view();
@@ -90,6 +93,9 @@ class AudioTimeAxisView : public RouteTimeAxisView
   private:
 	friend class AudioStreamView;
 	friend class AudioRegionView;
+
+ 	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+	void init (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
 	
 	void route_active_changed ();
 

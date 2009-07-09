@@ -33,7 +33,7 @@ class AudioRegionView;
 struct CrossfadeView : public TimeAxisViewItem
 {
     CrossfadeView (ArdourCanvas::Group*, 
-		   RouteTimeAxisView&,
+		   RouteTimeAxisViewPtr,
 		   boost::shared_ptr<ARDOUR::Crossfade>,
 		   double initial_samples_per_unit, 
 		   Gdk::Color& basic_color,

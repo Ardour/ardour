@@ -261,7 +261,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 			if (!pl)
 				continue;
 
-			RouteUI *rui = dynamic_cast<RouteUI *>(*i);
+			boost::shared_ptr<RouteUI> rui = boost::dynamic_pointer_cast<RouteUI>(*i);
 			int n_inputs = rui->route()->n_inputs().n_audio(); // FFT is audio only
 
 			// Busses don't have playlists, so we need to check that we actually are working with a playlist
@@ -306,7 +306,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 			} else if (source_selection_regions_rb.get_active()) {
 //				cerr << "Analyzing selected regions on track " << *&rui->route().name() << endl;
 				
-				TimeAxisView *current_axis = (*i);
+				TimeAxisViewPtr current_axis = (*i);
 				
 				for (RegionSelection::iterator j = ars.begin(); j != ars.end(); ++j) {
 					// Check that the region is actually audio (so we can analyze it)
@@ -315,7 +315,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 						continue;
 					
 					// Check that the region really is selected on _this_ track/solo
-					if ( &arv->get_time_axis_view() != current_axis)
+					if (arv->get_time_axis_view() != current_axis)
 						continue;
 
 //					cerr << " - " << (*j)->region().name() << ": " << (*j)->region().length() << " samples starting at " << (*j)->region().position() << endl;
