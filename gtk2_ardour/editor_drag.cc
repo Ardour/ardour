@@ -52,6 +52,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i) :
 	_grab_frame (0),
 	_last_pointer_frame (0),
 	_current_pointer_frame (0),
+	_ending (false),
 	_had_movement (false),
 	_move_threshold_passed (false)
 {
@@ -541,7 +542,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		
 		RegionView* rv = (*i);
-		
+
 		if (rv->region()->locked()) {
 			continue;
 		}
