@@ -459,9 +459,9 @@ Editor::idle_drop_paths (vector<ustring> paths, nframes64_t frame, double ypos)
 void
 Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, double ypos)
 {
-	RouteTimeAxisViewPtr tv;
+	RouteTimeAxisView* tv;
 
-	std::pair<TimeAxisViewPtr, int> const tvp = trackview_by_y_position (ypos);
+	std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (ypos);
 	if (tvp.first == 0) {
 
 		/* drop onto canvas background: create new tracks */
@@ -474,13 +474,13 @@ Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, do
 			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
 		}
 		
-	} else if ((tv = boost::dynamic_pointer_cast<RouteTimeAxisView> (tvp.first)) != 0) {
+	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
 
 		/* check that its an audio track, not a bus */
 		
 		if (tv->get_diskstream()) {
 			/* select the track, then embed/import */
-			selection->set (boost::static_pointer_cast<TimeAxisView> (tv));
+			selection->set (tv);
 
 			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
 				do_import (paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame); 
@@ -756,7 +756,7 @@ Editor::stop_canvas_autoscroll ()
 bool
 Editor::left_track_canvas (GdkEventCrossing *ev)
 {
-	set_entered_track (TimeAxisViewPtr ());
+	set_entered_track (0);
 	set_entered_regionview (0);
 	reset_canvas_action_sensitivity (false);
 	return false;

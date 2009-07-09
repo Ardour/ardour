@@ -29,7 +29,7 @@ public:
 	}
 
 	void move_selected_tracks (bool);
-	void show_track_in_display (TimeAxisViewPtr);
+	void show_track_in_display (TimeAxisView &);
 	void suspend_redisplay () {
 		_no_redisplay = true;
 	}
@@ -39,9 +39,9 @@ public:
 	}
 	void redisplay ();
 	void update_visibility ();
-	void routes_added (std::list<RouteTimeAxisViewPtr> routes);
-	void hide_track_in_display (TimeAxisViewPtr);
-	std::list<TimeAxisViewPtr> views () const;
+	void routes_added (std::list<RouteTimeAxisView*> routes);
+	void hide_track_in_display (TimeAxisView &);
+	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
 	void sync_order_keys (std::string const &);
@@ -57,7 +57,7 @@ private:
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
 	void route_name_changed (boost::weak_ptr<ARDOUR::Route>);
-	void route_removed (TimeAxisViewPtr);
+	void route_removed (TimeAxisView *);
 	void handle_gui_changes (std::string const &, void *);
 	void update_rec_display ();
 	void set_all_tracks_visibility (bool);
@@ -87,7 +87,7 @@ private:
 		Gtk::TreeModelColumn<bool>           visible;
 		Gtk::TreeModelColumn<bool>           rec_enabled;
 		Gtk::TreeModelColumn<bool>           is_track;
-		Gtk::TreeModelColumn<TimeAxisViewPtr> tv;
+		Gtk::TreeModelColumn<TimeAxisView*>  tv;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 	};
 

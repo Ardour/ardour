@@ -89,9 +89,9 @@ Editor::show_editor_mixer (bool yn)
 			} 
 
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-				RouteTimeAxisViewPtr atv;
+				RouteTimeAxisView* atv;
 				
-				if ((atv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i)) != 0) {
+				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
 					break;
 				}
@@ -101,9 +101,9 @@ Editor::show_editor_mixer (bool yn)
 			sort_track_selection ();
 			
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-				RouteTimeAxisViewPtr atv;
+				RouteTimeAxisView* atv;
 				
-				if ((atv = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i)) != 0) {
+				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
 					break;
 				}
@@ -183,12 +183,12 @@ Editor::create_editor_mixer ()
 }	
 
 void
-Editor::set_selected_mixer_strip (TimeAxisViewPtr view)
+Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
-	RouteTimeAxisViewPtr at;
+	RouteTimeAxisView* at;
 	bool created;
 
-	if (!session || (at = boost::dynamic_pointer_cast<RouteTimeAxisView> (view)) == 0) {
+	if (!session || (at = dynamic_cast<RouteTimeAxisView*>(&view)) == 0) {
 		return;
 	}
 
@@ -323,9 +323,9 @@ Editor::current_mixer_strip_hidden ()
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		
-		RouteTimeAxisViewPtr tmp;
+		RouteTimeAxisView* tmp;
 		
-		if ((tmp = boost::dynamic_pointer_cast<RouteTimeAxisView> (*i)) != 0) {
+		if ((tmp = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 			if (tmp->route() == current_mixer_strip->route()) {
 				(*i)->set_selected (false);
 				break;
@@ -354,11 +354,11 @@ Editor::session_going_away ()
 	cut_buffer->clear ();
 
 	clicked_regionview = 0;
-	clicked_axisview.reset ();
-	clicked_routeview.reset ();
+	clicked_axisview = 0;
+	clicked_routeview = 0;
 	clicked_crossfadeview = 0;
 	entered_regionview = 0;
-	entered_track.reset ();
+	entered_track = 0;
 	last_update_frame = 0;
 	_drag = 0;
 

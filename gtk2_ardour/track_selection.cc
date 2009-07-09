@@ -3,16 +3,16 @@
 
 using namespace std;
 
-TrackSelection::TrackSelection (list<TimeAxisViewPtr> const &t)
-	: list<TimeAxisViewPtr> (t)
+TrackSelection::TrackSelection (list<TimeAxisView*> const &t)
+	: list<TimeAxisView*> (t)
 {
 
 }
 
-list<TimeAxisViewPtr>
-TrackSelection::add (list<TimeAxisViewPtr> const & t)
+list<TimeAxisView*>
+TrackSelection::add (list<TimeAxisView*> const & t)
 {
-	list<TimeAxisViewPtr> added;
+	list<TimeAxisView*> added;
 
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
 		if (!contains (*i)) {
@@ -25,7 +25,7 @@ TrackSelection::add (list<TimeAxisViewPtr> const & t)
 }
 
 bool
-TrackSelection::contains (TimeAxisViewConstPtr t) const
+TrackSelection::contains (TimeAxisView const * t) const
 {
 	return find (begin(), end(), t) != end();
 }

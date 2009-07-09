@@ -46,20 +46,20 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-StreamView::StreamView (RouteTimeAxisViewPtr tv, ArdourCanvas::Group* group)
+StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	: _trackview (tv)
 	, owns_canvas_group(group == 0)
-	, _background_group (new ArdourCanvas::Group (*_trackview->canvas_background()))
-	, canvas_group(group ? group : new ArdourCanvas::Group(*_trackview->canvas_display()))
-	, _samples_per_unit (_trackview->editor().get_current_zoom ())
+	, _background_group (new ArdourCanvas::Group (*_trackview.canvas_background()))
+	, canvas_group(group ? group : new ArdourCanvas::Group(*_trackview.canvas_display()))
+	, _samples_per_unit (_trackview.editor().get_current_zoom ())
 	, rec_updating(false)
 	, rec_active(false)
-	, use_rec_regions (tv->editor().show_waveforms_recording ())
-	, region_color(_trackview->color())
+	, use_rec_regions (tv.editor().show_waveforms_recording ())
+	, region_color(_trackview.color())
 	, stream_base_color(0xFFFFFFFF)
 	, _layers (1)
 	, _layer_display (Overlaid)
-	, height(tv->height)
+	, height(tv.height)
 	, last_rec_data_frame(0)
 {
 	/* set_position() will position the group */
@@ -67,27 +67,26 @@ StreamView::StreamView (RouteTimeAxisViewPtr tv, ArdourCanvas::Group* group)
 	canvas_rect = new ArdourCanvas::SimpleRect (*_background_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = _trackview->editor().get_physical_screen_width ();
-	canvas_rect->property_y2() = (double) tv->current_height();
+	canvas_rect->property_x2() = _trackview.editor().get_physical_screen_width ();
+	canvas_rect->property_y2() = (double) tv.current_height();
 	canvas_rect->raise(1); // raise above tempo lines
 
 	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
 
-	boost::weak_ptr<TimeAxisView> w (_trackview);
 	canvas_rect->signal_event().connect (bind (
-			mem_fun (_trackview->editor(), &PublicEditor::canvas_stream_view_event),
-			canvas_rect, w));
+			mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event),
+			canvas_rect, &_trackview));
 
-	if (_trackview->is_track()) {
-		_trackview->track()->DiskstreamChanged.connect (
+	if (_trackview.is_track()) {
+		_trackview.track()->DiskstreamChanged.connect (
 				mem_fun (*this, &StreamView::diskstream_changed));
-		_trackview->session().TransportStateChange.connect (
+		_trackview.session().TransportStateChange.connect (
 				mem_fun (*this, &StreamView::transport_changed));
-		_trackview->session().TransportLooped.connect (
+		_trackview.session().TransportLooped.connect (
 				mem_fun (*this, &StreamView::transport_looped));
-		_trackview->get_diskstream()->RecordEnableChanged.connect (
+		_trackview.get_diskstream()->RecordEnableChanged.connect (
 				mem_fun (*this, &StreamView::rec_enable_changed));
-		_trackview->session().RecordStateChanged.connect (
+		_trackview.session().RecordStateChanged.connect (
 				mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	} 
 
@@ -108,8 +107,8 @@ StreamView::~StreamView ()
 void
 StreamView::attach ()
 {
-	if (_trackview->is_track()) {
-		display_diskstream (_trackview->get_diskstream());
+	if (_trackview.is_track()) {
+		display_diskstream (_trackview.get_diskstream());
 	}
 }
 
@@ -160,8 +159,8 @@ StreamView::set_samples_per_unit (gdouble spp)
 	for (vector<RecBoxInfo>::iterator xi = rec_rects.begin(); xi != rec_rects.end(); ++xi) {
 		RecBoxInfo &recbox = (*xi);
 		
-		gdouble xstart = _trackview->editor().frame_to_pixel (recbox.start);
-		gdouble xend = _trackview->editor().frame_to_pixel (recbox.start + recbox.length);
+		gdouble xstart = _trackview.editor().frame_to_pixel (recbox.start);
+		gdouble xend = _trackview.editor().frame_to_pixel (recbox.start + recbox.length);
 
 		recbox.rectangle->property_x1() = xstart;
 		recbox.rectangle->property_x2() = xend;
@@ -373,7 +372,7 @@ StreamView::diskstream_changed ()
 {
 	boost::shared_ptr<Track> t;
 
-	if ((t = _trackview->track()) != 0) {
+	if ((t = _trackview.track()) != 0) {
 		Gtkmm2ext::UI::instance()->call_slot (bind (
 				mem_fun (*this, &StreamView::display_diskstream),
 				t->diskstream()));
@@ -445,23 +444,23 @@ StreamView::update_rec_box ()
 	if (rec_active && rec_rects.size() > 0) {
 		/* only update the last box */
 		RecBoxInfo & rect = rec_rects.back();
-		nframes_t at = _trackview->get_diskstream()->current_capture_end();
+		nframes_t at = _trackview.get_diskstream()->current_capture_end();
 		double xstart;
 		double xend;
 		
-		switch (_trackview->track()->mode()) {
+		switch (_trackview.track()->mode()) {
 		
 		case NonLayered:
 		case Normal:
 			rect.length = at - rect.start;
-			xstart = _trackview->editor().frame_to_pixel (rect.start);
-			xend = _trackview->editor().frame_to_pixel (at);
+			xstart = _trackview.editor().frame_to_pixel (rect.start);
+			xend = _trackview.editor().frame_to_pixel (at);
 			break;
 			
 		case Destructive:
 			rect.length = 2;
-			xstart = _trackview->editor().frame_to_pixel (_trackview->get_diskstream()->current_capture_start());
-			xend = _trackview->editor().frame_to_pixel (at);
+			xstart = _trackview.editor().frame_to_pixel (_trackview.get_diskstream()->current_capture_start());
+			xend = _trackview.editor().frame_to_pixel (at);
 			break;
 		}
 		

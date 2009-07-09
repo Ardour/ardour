@@ -186,19 +186,19 @@ protected:
 	
 	void copy_regions (GdkEvent *);
 	bool y_movement_disallowed (int, int, int, TimeAxisViewSummary const &) const;
-	std::map<RegionView*, RouteTimeAxisViewPtr> find_time_axis_views ();
+	std::map<RegionView*, RouteTimeAxisView*> find_time_axis_views ();
 	double compute_x_delta (GdkEvent const *, nframes64_t *);
 	bool compute_y_delta (
-		TimeAxisViewConstPtr, TimeAxisViewPtr, int32_t, int32_t, TimeAxisViewSummary const &,
+		TimeAxisView const *, TimeAxisView*, int32_t, int32_t, TimeAxisViewSummary const &,
 		int32_t *, int32_t *, int32_t *
 		);
 
 	TimeAxisViewSummary get_time_axis_view_summary ();
 	virtual bool x_move_allowed () const = 0;
 	
-	TimeAxisViewPtr _dest_trackview;
+	TimeAxisView* _dest_trackview;
 	ARDOUR::layer_t _dest_layer;
-	bool check_possible (RouteTimeAxisViewPtr *, ARDOUR::layer_t *);
+	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
 	bool _brushing;
 };
 
@@ -230,7 +230,7 @@ private:
 class RegionInsertDrag : public RegionMotionDrag
 {
 public:
-	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisViewPtr, nframes64_t);
+	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, nframes64_t);
 
 	void finished (GdkEvent *, bool);
 	
@@ -252,15 +252,15 @@ public:
 class RegionCreateDrag : public Drag
 {
 public:
-	RegionCreateDrag (Editor *, ArdourCanvas::Item *, TimeAxisViewPtr);
+	RegionCreateDrag (Editor *, ArdourCanvas::Item *, TimeAxisView *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
 private:
-	TimeAxisViewPtr _view;
-	TimeAxisViewPtr _dest_trackview;
+	TimeAxisView* _view;
+	TimeAxisView* _dest_trackview;
 };
 
 /** Drag of region gain */

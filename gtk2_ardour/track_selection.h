@@ -21,18 +21,17 @@
 #define __ardour_gtk_track_selection_h__
 
 #include <list>
-#include "shared_ptrs.h"
 
 class TimeAxisView;
 
-class TrackSelection : public std::list<TimeAxisViewPtr>
+class TrackSelection : public std::list<TimeAxisView*>
 {
 public:
 	TrackSelection () {}
 		
-	TrackSelection (std::list<TimeAxisViewPtr> const &);
-	std::list<TimeAxisViewPtr> add (std::list<TimeAxisViewPtr> const &);
-	bool contains (TimeAxisViewConstPtr) const;
+	TrackSelection (std::list<TimeAxisView*> const &);
+	std::list<TimeAxisView*> add (std::list<TimeAxisView*> const &);
+	bool contains (TimeAxisView const *) const;
 };
 
 #endif /* __ardour_gtk_track_selection_h__ */

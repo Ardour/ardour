@@ -34,7 +34,7 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using namespace ARDOUR;
 
-GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisViewPtr tv, TimeAxisViewPtr source_tv, double initial_pos)
+GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_pos)
 	: trackview (tv)
 	, source_trackview (source_tv)
 {
@@ -45,7 +45,7 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisViewPtr tv, TimeA
 	base_rect = new ArdourCanvas::SimpleRect (*group);
 	base_rect->property_x1() = (double) 0.0;
 	base_rect->property_y1() = (double) 0.0;
-	base_rect->property_y2() = (double) trackview->current_height();
+	base_rect->property_y2() = (double) trackview.current_height();
 	base_rect->property_outline_what() = (guint32) 0;
 
 	if (!is_automation_ghost()) {
@@ -75,7 +75,7 @@ GhostRegion::set_duration (double units)
 void
 GhostRegion::set_height ()
 {
-	base_rect->property_y2() = (double) trackview->current_height();
+	base_rect->property_y2() = (double) trackview.current_height();
 }
 
 void
@@ -89,7 +89,7 @@ GhostRegion::set_colors ()
 
 guint
 GhostRegion::source_track_color(unsigned char alpha) {
-	Gdk::Color color = source_trackview->color();
+	Gdk::Color color = source_trackview.color();
 	unsigned char r,g,b ;
 	r = color.get_red()/256;
 	g = color.get_green()/256;
@@ -99,11 +99,11 @@ GhostRegion::source_track_color(unsigned char alpha) {
 
 bool
 GhostRegion::is_automation_ghost() {
-	return (boost::dynamic_pointer_cast<AutomationTimeAxisViewPtr> (trackview)) != 0;
+	return (dynamic_cast<AutomationTimeAxisView*>(&trackview)) != 0;
 }
 
-AudioGhostRegion::AudioGhostRegion(TimeAxisViewPtr tv, TimeAxisViewPtr source_tv, double initial_unit_pos)
-	: GhostRegion(tv->ghost_group(), tv, source_tv, initial_unit_pos) {
+AudioGhostRegion::AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
+	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos) {
 }
 
 void
@@ -123,10 +123,10 @@ AudioGhostRegion::set_height ()
 
 	GhostRegion::set_height();
 
-	ht = ((trackview->current_height()) / (double) waves.size());
+	ht = ((trackview.current_height()) / (double) waves.size());
 	
 	for (n = 0, i = waves.begin(); i != waves.end(); ++i, ++n) {
-		gdouble const yoff = n * ht;
+		gdouble yoff = n * ht;
 		(*i)->property_height() = ht;
 		(*i)->property_y() = yoff;
 	}
@@ -158,14 +158,14 @@ AudioGhostRegion::set_colors ()
  * a midistreamview. But what to do when positioning the midi ghost here? For example, there is
  * no range controller in these tracks. maybe show the whole range.
  */
-MidiGhostRegion::MidiGhostRegion(TimeAxisViewPtr tv, TimeAxisViewPtr source_tv, double initial_unit_pos)
-	: GhostRegion (tv->ghost_group(), tv, source_tv, initial_unit_pos)
+MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
+	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
 {
 
 	base_rect->lower_to_bottom();
 }
 
-MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisViewPtr source_tv, double initial_unit_pos)
+MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos)
 	: GhostRegion(msv.midi_underlay_group, msv.trackview(), source_tv, initial_unit_pos)
 {
 	base_rect->lower_to_bottom();	
@@ -222,9 +222,9 @@ MidiGhostRegion::set_samples_per_unit (double spu)
 MidiStreamView*
 MidiGhostRegion::midi_view()
 {
-	MidiTimeAxisViewPtr mtv;
+	MidiTimeAxisView* mtv;
 
-	if ((mtv = boost::dynamic_pointer_cast<MidiTimeAxisView> (trackview)) != 0) {
+	if ((mtv = dynamic_cast<MidiTimeAxisView*>(&trackview)) != 0) {
 		return mtv->midi_view();
 	}
 	else {

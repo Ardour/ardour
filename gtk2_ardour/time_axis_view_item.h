@@ -28,7 +28,6 @@
 #include "selectable.h"
 #include "simplerect.h"
 #include "canvas.h"
-#include "shared_ptrs.h"
 
 class TimeAxisView;
 
@@ -189,7 +188,7 @@ class TimeAxisViewItem : public Selectable
      *
      * @return the timeAxisView that this item is placed upon
      */
-    TimeAxisViewPtr get_time_axis_view() ;
+    TimeAxisView& get_time_axis_view() ;
     
     //---------------------------------------------------------------------------------------//
     // ui methods & data
@@ -240,7 +239,7 @@ class TimeAxisViewItem : public Selectable
     /**
      * Returns the time axis that this item is upon
      */
-    TimeAxisViewPtr get_trackview() const { return trackview; }
+    TimeAxisView& get_trackview() const { return trackview; }
 
     /**
      * Sets the samples per unit of this item.
@@ -342,7 +341,7 @@ class TimeAxisViewItem : public Selectable
      * @param start the start point of this item
      * @param duration the duration of this item
      */
-    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisViewPtr tv, double spu, Gdk::Color const & base_color, 
+    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color, 
 		     nframes_t start, nframes_t duration, bool recording = false, Visibility v = Visibility (0));
 
     TimeAxisViewItem (const TimeAxisViewItem& other);
@@ -386,7 +385,7 @@ class TimeAxisViewItem : public Selectable
     static gint idle_remove_this_item(TimeAxisViewItem* item, void* src) ;
     
     /** The time axis that this item is upon */
-    TimeAxisViewPtr trackview ;
+    TimeAxisView& trackview ;
     
     /** indicates whether this item is locked to its current position */
     bool position_locked ;

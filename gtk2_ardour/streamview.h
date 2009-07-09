@@ -26,7 +26,6 @@
 #include "enums.h"
 #include "simplerect.h"
 #include "canvas.h"
-#include "shared_ptrs.h"
 
 namespace Gdk {
 	class Color;
@@ -59,8 +58,8 @@ class StreamView : public sigc::trackable
 public:
 	virtual ~StreamView ();
 
-	RouteTimeAxisViewPtr       trackview()       { return _trackview; }
-	const RouteTimeAxisViewPtr trackview() const { return _trackview; }
+	RouteTimeAxisView&       trackview()       { return _trackview; }
+	const RouteTimeAxisView& trackview() const { return _trackview; }
 
 	void attach ();
 
@@ -113,7 +112,7 @@ public:
 	sigc::signal<void> HeightChanged;
 
 protected:
-	StreamView (RouteTimeAxisViewPtr, ArdourCanvas::Group* group = NULL);
+	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* group = NULL);
 	
 	void         transport_changed();
 	void         transport_looped();
@@ -138,7 +137,7 @@ protected:
 	
 	virtual void color_handler () = 0;
 
-	RouteTimeAxisViewPtr      _trackview;
+	RouteTimeAxisView&        _trackview;
 	bool                      owns_canvas_group;
 	ArdourCanvas::Group*      _background_group;
 	ArdourCanvas::Group*      canvas_group;

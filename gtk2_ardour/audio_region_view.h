@@ -49,13 +49,13 @@ class AudioRegionView : public RegionView
 {
   public:
 	AudioRegionView (ArdourCanvas::Group *, 
-			 RouteTimeAxisViewPtr,
+			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double initial_samples_per_unit,
 			 Gdk::Color const & basic_color);
 
 	AudioRegionView (ArdourCanvas::Group *, 
-			 RouteTimeAxisViewPtr,
+			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double samples_per_unit,
 			 Gdk::Color const & basic_color,
@@ -101,7 +101,7 @@ class AudioRegionView : public RegionView
 	void region_changed (ARDOUR::Change);
 	void envelope_active_changed ();
 	
-	GhostRegion* add_ghost (TimeAxisViewPtr);
+	GhostRegion* add_ghost (TimeAxisView&);
 	
 	void reset_fade_in_shape_width (nframes_t);
 	void reset_fade_out_shape_width (nframes_t);

@@ -54,7 +54,7 @@ class Selection;
 class MidiStreamView : public StreamView
 {
   public:
-	MidiStreamView (MidiTimeAxisViewPtr);
+	MidiStreamView (MidiTimeAxisView&);
 	~MidiStreamView ();
 
 	void set_selected_regionviews (RegionSelection&);
@@ -79,7 +79,7 @@ class MidiStreamView : public StreamView
 	void redisplay_diskstream ();
 	
 	inline double contents_height() const
-	{ return (_trackview->current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	{ return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 	
 	inline double note_to_y(uint8_t note) const
 		{ return contents_height()

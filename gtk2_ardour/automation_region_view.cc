@@ -28,7 +28,7 @@
 #include "i18n.h"
 
 AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                      parent,
-                                           AutomationTimeAxisViewPtr                 time_axis,
+                                           AutomationTimeAxisView&                   time_axis,
                                            boost::shared_ptr<ARDOUR::Region>         region,
                                            const Evoral::Parameter&                  param,
                                            boost::shared_ptr<ARDOUR::AutomationList> list,
@@ -56,7 +56,7 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
-	set_height (trackview->current_height());
+	set_height (trackview.current_height());
 
 	_region->StateChanged.connect (mem_fun(*this, &AutomationRegionView::region_changed));
 
@@ -75,7 +75,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->set_interpolation(list->interpolation());
 	_line->show();
 	_line->show_all_control_points();
-	_line->set_height ((uint32_t)rint(trackview->current_height() - NAME_HIGHLIGHT_SIZE));
+	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 }
 
 bool
@@ -83,7 +83,7 @@ AutomationRegionView::canvas_event(GdkEvent* ev)
 {
 	if (ev->type == GDK_BUTTON_RELEASE) {
 
-		const nframes_t when = trackview->editor().pixel_to_frame((nframes_t)ev->button.x)
+		const nframes_t when = trackview.editor().pixel_to_frame((nframes_t)ev->button.x)
 			- _region->position();
 		add_automation_event(ev, when, ev->button.y);
 	}
@@ -104,13 +104,13 @@ AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, dou
 	assert(_line);
 
 	double x = 0;
-	AutomationTimeAxisViewPtr view = automation_view();
+	AutomationTimeAxisView* const view = automation_view();
 
 	view->canvas_display()->w2i (x, y);
 
 	/* compute vertical fractional position */
 
-	const double h = trackview->current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
+	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
 	y = 1.0 - (y / h);
 
 	/* map using line */

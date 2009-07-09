@@ -99,7 +99,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisViewPtr, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -134,7 +134,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisViewPtr, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -270,8 +270,8 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_axisview = rv->get_time_axis_view();
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView> (clicked_axisview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, RegionItem);
 		break;
 
@@ -284,12 +284,12 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		set_entered_track (rv->get_time_axis_view ());
+		set_entered_track (&rv->get_time_axis_view ());
 		set_entered_regionview (rv);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_track (TimeAxisViewPtr ());
+		set_entered_track (0);
 		set_entered_regionview (0);
 		break;
 
@@ -301,13 +301,8 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 }
 
 bool
-Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, boost::weak_ptr<TimeAxisView> w)
+Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, RouteTimeAxisView *tv)
 {
-	boost::shared_ptr<TimeAxisView> tv = w.lock ();
-	if (!tv) {
-		return false;
-	}
-	
 	bool ret = FALSE;
 	
 	switch (event->type) {
@@ -317,7 +312,7 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, boo
 		clicked_regionview = 0;
 		clicked_control_point = 0;
 		clicked_axisview = tv;
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView>(tv);
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(tv);
 		ret = button_press_handler (item, event, StreamItem);
 		break;
 
@@ -334,7 +329,7 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, boo
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_track (TimeAxisViewPtr ());
+		set_entered_track (0);
 		break;
 
 	default:
@@ -345,13 +340,8 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, boo
 }
 
 bool
-Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item, boost::weak_ptr<AutomationTimeAxisView> v)
+Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationTimeAxisView *atv)
 {
-	boost::shared_ptr<AutomationTimeAxisView> atv = v.lock ();
-	if (!atv) {
-		return false;
-	}
-	
 	bool ret = false;
 
 	switch (event->type) {
@@ -360,8 +350,8 @@ Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = 0;
 		clicked_control_point = 0;
-		clicked_axisview.reset ();
-		clicked_routeview.reset ();
+		clicked_axisview = atv;
+		clicked_routeview = 0;
 		ret = button_press_handler (item, event, AutomationTrackItem);
 		break;
 
@@ -401,8 +391,8 @@ Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRe
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_axisview = rv->get_time_axis_view();
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView>(clicked_axisview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, FadeInItem);
 		}
@@ -439,8 +429,8 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_axisview = rv->get_time_axis_view();
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView>(clicked_axisview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, FadeInHandleItem);
 		break;
 
@@ -480,8 +470,8 @@ Editor::canvas_fade_out_event (GdkEvent *event, ArdourCanvas::Item* item, AudioR
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_axisview = rv->get_time_axis_view();
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView> (clicked_axisview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, FadeOutItem);
 		}
@@ -518,8 +508,8 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_axisview = rv->get_time_axis_view();
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView>(clicked_axisview);
+		clicked_axisview = &rv->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, FadeOutHandleItem);
 		break;
 
@@ -560,7 +550,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 		clicked_crossfadeview = xfv;
-		clicked_axisview = clicked_crossfadeview->get_time_axis_view();
+		clicked_axisview = &clicked_crossfadeview->get_time_axis_view();
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, CrossfadeViewItem);
 		} 
@@ -590,10 +580,10 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 	   and proxy to that when required.
 	*/
 	
-	TimeAxisViewPtr tv (xfv->get_time_axis_view());
-	AudioTimeAxisViewPtr atv;
+	TimeAxisView& tv (xfv->get_time_axis_view());
+	AudioTimeAxisView* atv;
 
-	if ((atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(tv)) != 0) {
+	if ((atv = dynamic_cast<AudioTimeAxisView*>(&tv)) != 0) {
 
 		if (atv->is_audio_track()) {
 
@@ -631,8 +621,8 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
 		clicked_control_point = cp;
-		clicked_axisview = cp->line().trackview;
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView>(clicked_axisview);
+		clicked_axisview = &cp->line().trackview;
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;
 
@@ -779,8 +769,8 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_axisview = clicked_regionview->get_time_axis_view();
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView>(clicked_axisview);
+		clicked_axisview = &clicked_regionview->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, RegionViewNameHighlight);
 		break;
 	case GDK_BUTTON_RELEASE:
@@ -819,8 +809,8 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 	case GDK_3BUTTON_PRESS:
 		clicked_regionview = rv;
 		clicked_control_point = 0;
-		clicked_axisview = clicked_regionview->get_time_axis_view();
-		clicked_routeview = boost::dynamic_pointer_cast<RouteTimeAxisView>(clicked_axisview);
+		clicked_axisview = &clicked_regionview->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, RegionViewName);
 		break;
 	case GDK_BUTTON_RELEASE:
@@ -930,12 +920,12 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & c, int 
 		double py;
 		nframes64_t const pos = event_frame (&event, &px, &py);
 	
-		std::pair<TimeAxisViewPtr, int> const tv = trackview_by_y_position (py);
+		std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 		if (tv.first == 0) {
 			return true;
 		}
 
-		RouteTimeAxisViewPtr rtav = boost::dynamic_pointer_cast<RouteTimeAxisView> (tv.first);
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
 		if (rtav == 0 || !rtav->is_track ()) {
 			return true;
 		}
@@ -945,14 +935,14 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & c, int 
 		boost::shared_ptr<Region> region_copy = RegionFactory::create (region);
 
 		if (boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && 
-		    boost::dynamic_pointer_cast<AudioTimeAxisView> (tv.first) == 0) {
+		    dynamic_cast<AudioTimeAxisView*> (tv.first) == 0) {
 
 			/* audio -> non-audio */
 			return true;
 		}
 
 		if (boost::dynamic_pointer_cast<MidiRegion> (region_copy) == 0 && 
-		    boost::dynamic_pointer_cast<MidiTimeAxisView> (tv.first) != 0) {
+		    dynamic_cast<MidiTimeAxisView*> (tv.first) != 0) {
 
 			/* MIDI -> non-MIDI */
 			return true;

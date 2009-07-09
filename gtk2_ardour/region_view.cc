@@ -61,7 +61,7 @@ static const int32_t sync_mark_width = 9;
 sigc::signal<void,RegionView*> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Group*              parent, 
-                        TimeAxisViewPtr                   tv,
+                        TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
                         Gdk::Color const &                basic_color)
@@ -115,7 +115,7 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent, 
-                        TimeAxisViewPtr              tv,
+                        TimeAxisView&                tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
                         Gdk::Color const &           basic_color,
@@ -163,7 +163,7 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 	if (wfd)
 		_enable_display = true;
 
-	set_height (trackview->current_height());
+	set_height (trackview.current_height());
 
 	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 
@@ -496,7 +496,7 @@ RegionView::region_sync_changed ()
 
 			points.clear ();
 			points.push_back (Gnome::Art::Point (offset, 0));
-			points.push_back (Gnome::Art::Point (offset, trackview->current_height() - NAME_HIGHLIGHT_SIZE));
+			points.push_back (Gnome::Art::Point (offset, trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 
 			sync_line->property_points().set_value (points);
 			sync_line->show ();
@@ -521,10 +521,10 @@ RegionView::move (double x_delta, double y_delta)
 }
 
 void
-RegionView::remove_ghost_in (TimeAxisViewPtr tv)
+RegionView::remove_ghost_in (TimeAxisView& tv)
 {
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if ((*i)->trackview == tv) {
+		if (&(*i)->trackview == &tv) {
 			delete *i;
 			break;
 		}
@@ -611,14 +611,14 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
-			cr->property_x2() = trackview->editor().frame_to_pixel (t - position);
+			cr->property_x2() = trackview.editor().frame_to_pixel (t - position);
 		}
 
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
 			cr = new ArdourCanvas::SimpleRect (*group);
 			_coverage_frames.push_back (cr);
-			cr->property_x1() = trackview->editor().frame_to_pixel (t - position);
+			cr->property_x1() = trackview.editor().frame_to_pixel (t - position);
 			cr->property_y1() = 1;
 			cr->property_y2() = _height + 1;
 			cr->property_outline_pixels() = 0;
@@ -636,6 +636,6 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 	if (cr) {
 		/* finish off the last rectangle */
-		cr->property_x2() = trackview->editor().frame_to_pixel (end - position);
+		cr->property_x2() = trackview.editor().frame_to_pixel (end - position);
 	}
 }

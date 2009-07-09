@@ -260,7 +260,7 @@ RhythmFerret::run_analysis ()
 	}
 
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		(*i)->get_time_axis_view()->show_feature_lines (current_results);
+		(*i)->get_time_axis_view().show_feature_lines (current_results);
 	}
 
 }
@@ -399,7 +399,7 @@ RhythmFerret::do_split_action ()
 		tmp = i;
 		++tmp;
 
-		(*i)->get_time_axis_view()->hide_feature_lines ();
+		(*i)->get_time_axis_view().hide_feature_lines ();
 
 		editor.split_region_at_points ((*i)->region(), current_results, false);
 
@@ -418,9 +418,9 @@ RhythmFerret::set_session (Session* s)
 	current_results.clear ();
 }
 
-static void hide_time_axis_features (TimeAxisViewPtr tav)
+static void hide_time_axis_features (TimeAxisView& tav)
 {
-	tav->hide_feature_lines ();
+	tav.hide_feature_lines ();
 }
 
 void

@@ -99,8 +99,8 @@ Editor::export_region ()
 		boost::shared_ptr<Region> r = selection->regions.front()->region();
 		AudioRegion & region (dynamic_cast<AudioRegion &> (*r));
 		
-		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView> (selection->regions.front()->get_time_axis_view());
-		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv->route()));
+		RouteTimeAxisView & rtv (dynamic_cast<RouteTimeAxisView &> (selection->regions.front()->get_time_axis_view()));
+		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv.route()));
 		
 		ExportRegionDialog dialog (*this, region, track);
 		dialog.set_session (session);
@@ -132,7 +132,7 @@ Editor::bounce_region_selection ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		
 		boost::shared_ptr<Region> region ((*i)->region());
-		RouteTimeAxisViewPtr rtv = boost::dynamic_pointer_cast<RouteTimeAxisView>((*i)->get_time_axis_view());
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
 		Track* track = dynamic_cast<Track*>(rtv->route().get());
 
 		InterThreadInfo itt;
@@ -280,9 +280,9 @@ Editor::write_audio_selection (TimeSelection& ts)
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
-		AudioTimeAxisViewPtr atv;
+		AudioTimeAxisView* atv;
 
-		if ((atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(*i)) == 0) {
+		if ((atv = dynamic_cast<AudioTimeAxisView*>(*i)) == 0) {
 			continue;
 		}
 

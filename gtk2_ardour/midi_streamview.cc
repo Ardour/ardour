@@ -53,7 +53,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-MidiStreamView::MidiStreamView (MidiTimeAxisViewPtr tv)
+MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
 	, note_range_adjustment(0.0f, 0.0f, 0.0f)
 	, _range_dirty(false)
@@ -63,13 +63,13 @@ MidiStreamView::MidiStreamView (MidiTimeAxisViewPtr tv)
 	, _data_note_min(60)
 	, _data_note_max(71)
 {
-	if (tv->is_track()) {
+	if (tv.is_track()) {
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	} else {
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();
 	}
 
-	use_rec_regions = tv->editor().show_waveforms_recording ();
+	use_rec_regions = tv.editor().show_waveforms_recording ();
 
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Group (*canvas_group);
@@ -81,16 +81,12 @@ MidiStreamView::MidiStreamView (MidiTimeAxisViewPtr tv)
 
 	_note_lines->property_x1() = 0;
 	_note_lines->property_y1() = 0;
-	_note_lines->property_x2() = trackview()->editor().frame_to_pixel (max_frames);
+	_note_lines->property_x2() = trackview().editor().frame_to_pixel (max_frames);
 	_note_lines->property_y2() = 0;
 
-	TimeAxisViewPtr w (_trackview);
-	_note_lines->signal_event().connect(
-		bind(
-			mem_fun(_trackview->editor(), &PublicEditor::canvas_stream_view_event),
-			_note_lines, w
-			)
-		);
+	_note_lines->signal_event().connect(bind(
+			mem_fun(_trackview.editor(), &PublicEditor::canvas_stream_view_event),
+			_note_lines, &_trackview));
 
 	_note_lines->lower_to_bottom();
 
@@ -251,7 +247,7 @@ MidiStreamView::update_data_note_range(uint8_t min, uint8_t max)
 void
 MidiStreamView::redisplay_diskstream ()
 {
-	if (!_trackview->is_midi_track()) {
+	if (!_trackview.is_midi_track()) {
 		return;
 	}
 
@@ -261,7 +257,7 @@ MidiStreamView::redisplay_diskstream ()
 	_range_dirty = false;
 	_data_note_min = 127;
 	_data_note_max = 0;
-	_trackview->get_diskstream()->playlist()->foreach_region(
+	_trackview.get_diskstream()->playlist()->foreach_region(
 		sigc::mem_fun (*this, &StreamView::update_contents_metrics)
 		);
 
@@ -284,7 +280,7 @@ MidiStreamView::redisplay_diskstream ()
 	}
 
 	// Add and display region views, and flag them as valid
-	_trackview->get_diskstream()->playlist()->foreach_region(
+	_trackview.get_diskstream()->playlist()->foreach_region(
 		sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 		);
 
@@ -386,11 +382,11 @@ MidiStreamView::setup_rec_box ()
 {
 	// cerr << _trackview.name() << " streamview SRB\n";
 
-	if (_trackview->session().transport_rolling()) {
+	if (_trackview.session().transport_rolling()) {
 
 		if (!rec_active && 
-		    _trackview->session().record_status() == Session::Recording && 
-		    _trackview->get_diskstream()->record_enabled()) {
+		    _trackview.session().record_status() == Session::Recording && 
+		    _trackview.get_diskstream()->record_enabled()) {
 
 			if (use_rec_regions && rec_regions.size() == rec_rects.size()) {
 
@@ -404,7 +400,7 @@ MidiStreamView::setup_rec_box ()
 				rec_data_ready_connections.clear();
 
 				// FIXME
-				boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream>(_trackview->get_diskstream());
+				boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream>(_trackview.get_diskstream());
 				assert(mds);
 
 				sources.push_back(mds->write_source());
@@ -415,14 +411,14 @@ MidiStreamView::setup_rec_box ()
 				
 				jack_nframes_t start = 0;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back().first->position() + _trackview->get_diskstream()->get_captured_frames(rec_regions.size()-1);
+					start = rec_regions.back().first->position() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 				
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
 					(RegionFactory::create (sources, start, 1 , "", 0, Region::DefaultFlags, false)));
 				assert(region);
 				region->block_property_changes ();
-				region->set_position (_trackview->session().transport_frame(), this);
+				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (make_pair(region, (RegionView*)0));
 				
 				// rec regions are destroyed in setup_rec_box
@@ -432,14 +428,14 @@ MidiStreamView::setup_rec_box ()
 			
 			/* start a new rec box */
 
-			boost::shared_ptr<MidiTrack> mt = _trackview->midi_track(); /* we know what it is already */
+			boost::shared_ptr<MidiTrack> mt = _trackview.midi_track(); /* we know what it is already */
 			boost::shared_ptr<MidiDiskstream> ds = mt->midi_diskstream();
 			jack_nframes_t frame_pos = ds->current_capture_start ();
-			gdouble xstart = _trackview->editor().frame_to_pixel (frame_pos);
+			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
 
-			assert(_trackview->midi_track()->mode() == Normal);
+			assert(_trackview.midi_track()->mode() == Normal);
 			
 			xend = xstart;
 			fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
@@ -448,14 +444,14 @@ MidiStreamView::setup_rec_box ()
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
-			rec_rect->property_y2() = (double) _trackview->current_height() - 1;
+			rec_rect->property_y2() = (double) _trackview.current_height() - 1;
 			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 			rec_rect->property_fill_color_rgba() = fill_color;
 			rec_rect->lower_to_bottom();
 			
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
-			recbox.start = _trackview->session().transport_frame();
+			recbox.start = _trackview.session().transport_frame();
 			recbox.length = 0;
 			
 			rec_rects.push_back (recbox);
@@ -466,8 +462,8 @@ MidiStreamView::setup_rec_box ()
 			rec_active = true;
 
 		} else if (rec_active &&
-			   (_trackview->session().record_status() != Session::Recording ||
-			    !_trackview->get_diskstream()->record_enabled())) {
+			   (_trackview.session().record_status() != Session::Recording ||
+			    !_trackview.get_diskstream()->record_enabled())) {
 
 			screen_update_connection.disconnect();
 			rec_active = false;
@@ -561,7 +557,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 					if (nlen != region->length()) {
 					
 						region->freeze ();
-						region->set_position (_trackview->get_diskstream()->get_capture_start_frame(n), this);
+						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (start + dur - region->position(), this);
 						region->thaw ("updated");
 						
@@ -573,7 +569,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 						/* also update rect */
 						ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
-						gdouble xend = _trackview->editor().frame_to_pixel (region->position() + region->length());
+						gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
 						rect->property_x2() = xend;
 
 						/* draw events */
@@ -610,14 +606,14 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 			} else {
 				
-				nframes_t nlen = _trackview->get_diskstream()->get_captured_frames(n);
+				nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
 
 				if (nlen != region->length()) {
 
 					if (region->source_length(0) >= region->position() + nlen) {
 
 						region->freeze ();
-						region->set_position (_trackview->get_diskstream()->get_capture_start_frame(n), this);
+						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
 						region->thaw ("updated");
 						
@@ -658,12 +654,12 @@ void
 MidiStreamView::color_handler ()
 {
 	//case cMidiTrackBase:
-	if (_trackview->is_midi_track()) {
+	if (_trackview.is_midi_track()) {
 		//canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	} 
 
 	//case cMidiBusBase:
-	if (!_trackview->is_midi_track()) {
+	if (!_trackview.is_midi_track()) {
 		//canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
 	}
 }

@@ -74,7 +74,7 @@ uint32_t TimeAxisView::hSmall = 0;
 bool TimeAxisView::need_size_info = true;
 int const TimeAxisView::_max_order = 512;
 
-TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisViewPtr rent, Canvas& canvas) 
+TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
 	: AxisView (sess), 
 	  controls_table (2, 8),
 	  _y_position (0),
@@ -338,7 +338,7 @@ void
 TimeAxisView::selection_click (GdkEventButton* ev)
 {
 	Selection::Operation op = Keyboard::selection_type (ev->state);
-	_editor.set_selected_track (shared_from_this (), op, false);
+	_editor.set_selected_track (*this, op, false);
 }
 
 void
@@ -367,7 +367,7 @@ TimeAxisView::hide ()
 
 	/* if its hidden, it cannot be selected */
 
-	_editor.get_selection().remove (shared_from_this ());
+	_editor.get_selection().remove (this);
 
 	Hiding ();
 }
@@ -436,9 +436,9 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	case GDK_ISO_Left_Tab:
 	case GDK_Tab:
 		name_entry_changed ();
-		allviews = _editor.get_valid_views (TimeAxisViewPtr ());
+		allviews = _editor.get_valid_views (0);
 		if (allviews != 0) {
-			i = find (allviews->begin(), allviews->end(), shared_from_this ());
+			i = find (allviews->begin(), allviews->end(), this);
 			if (ev->keyval == GDK_Tab) {
 				if (i != allviews->end()) {
 					do {
@@ -564,8 +564,8 @@ TimeAxisView::conditionally_add_to_selection ()
 {
 	Selection& s (_editor.get_selection ());
 
-	if (!s.selected (shared_from_this ())) {
-		_editor.set_selected_track (shared_from_this (), Selection::Set);
+	if (!s.selected (this)) {
+		_editor.set_selected_track (*this, Selection::Set);
 	}
 }
 
@@ -878,10 +878,12 @@ TimeAxisView::get_selection_rect (uint32_t id)
 	return rect;
 }
 
+struct null_deleter { void operator()(void const *) const {} };
+
 bool
-TimeAxisView::is_child (TimeAxisViewPtr tav)
+TimeAxisView::is_child (TimeAxisView* tav)
 {
-	return find (children.begin(), children.end(), tav) != children.end();
+	return find (children.begin(), children.end(), boost::shared_ptr<TimeAxisView>(tav, null_deleter())) != children.end();
 }
 
 void
@@ -915,7 +917,7 @@ TimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& resul
 void
 TimeAxisView::add_ghost (RegionView* rv)
 {
-	GhostRegion* gr = rv->add_ghost (shared_from_this ());
+	GhostRegion* gr = rv->add_ghost (*this);
 
 	if(gr) {
 		ghosts.push_back(gr);
@@ -924,9 +926,8 @@ TimeAxisView::add_ghost (RegionView* rv)
 }
 
 void
-TimeAxisView::remove_ghost (RegionView* rv)
-{
-	rv->remove_ghost_in (shared_from_this ());
+TimeAxisView::remove_ghost (RegionView* rv) {
+	rv->remove_ghost_in (*this);
 }
 
 void
@@ -960,9 +961,9 @@ TimeAxisView::touched (double top, double bot)
 }		
 
 void
-TimeAxisView::set_parent (TimeAxisViewPtr p)
+TimeAxisView::set_parent (TimeAxisView& p)
 {
-	parent = p;
+	parent = &p;
 }
 
 bool
@@ -971,12 +972,16 @@ TimeAxisView::has_state () const
 	return _has_state;
 }
 
-TimeAxisViewPtr
+TimeAxisView*
 TimeAxisView::get_parent_with_state ()
 {
-	if (parent == 0 || parent->has_state()) {
-		return parent;
+	if (parent == 0) {
+		return 0;
 	}
+
+	if (parent->has_state()) {
+		return parent;
+	} 
 
 	return parent->get_parent_with_state ();
 }
@@ -1189,11 +1194,11 @@ TimeAxisView::color_handler ()
  * Layer index is the layer number if the TimeAxisView is valid and is in stacked
  * region display mode, otherwise 0.
  */
-std::pair<TimeAxisViewPtr, layer_t>
+std::pair<TimeAxisView*, layer_t>
 TimeAxisView::covers_y_position (double y)
 {
 	if (hidden()) {
-		return std::make_pair (TimeAxisViewPtr (), 0);
+		return std::make_pair ( (TimeAxisView *) 0, 0);
 	}
 
 	if (_y_position <= y && y < (_y_position + height)) {
@@ -1210,18 +1215,18 @@ TimeAxisView::covers_y_position (double y)
 			}
 		}
 			
-		return std::make_pair (shared_from_this (), l);
+		return std::make_pair (this, l);
 	}
 
 	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
 
-		std::pair<TimeAxisViewPtr, int> const r = (*i)->covers_y_position (y);
+		std::pair<TimeAxisView*, int> const r = (*i)->covers_y_position (y);
 		if (r.first) {
 			return r;
 		}
 	}
 
-	return std::make_pair (TimeAxisViewPtr (), 0);
+	return std::make_pair ( (TimeAxisView *) 0, 0);
 }
 
 void
@@ -1297,7 +1302,7 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 	}
 
 	int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
-	_editor.add_to_idle_resize (shared_from_this (), delta);
+	_editor.add_to_idle_resize (this, delta);
 	_resize_drag_start = ev->y_root;
 
 	return true;
@@ -1344,17 +1349,3 @@ TimeAxisView::resizer_expose (GdkEventExpose* event)
 	return true;
 }
 
-TimeAxisViewPtr
-TimeAxisView::find_time_axis (TimeAxisView* v)
-{
-	Children::iterator i = children.begin ();
-	while (i != children.end() && i->get() != v) {
-		++i;
-	}
-
-	if (i == children.end()) {
-		return TimeAxisViewPtr ();
-	}
-
-	return *i;
-}

@@ -29,7 +29,6 @@
 #include <sigc++/signal.h>
 #include "canvas.h"
 #include "simplerect.h"
-#include "shared_ptrs.h"
 
 #include "evoral/TimeConverter.hpp"
 
@@ -56,7 +55,7 @@ namespace Gnome {
 class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
-	AutomationLine (const std::string& name, TimeAxisViewPtr, ArdourCanvas::Group&,
+	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Group&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
 			const Evoral::TimeConverter<double, ARDOUR::sframes_t>* converter = 0);
 	virtual ~AutomationLine ();
@@ -98,7 +97,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void    set_uses_gain_mapping (bool yn);
 	bool    get_uses_gain_mapping () const { return _uses_gain_mapping; }
 
-	TimeAxisViewPtr trackview;
+	TimeAxisView& trackview;
 
 	ArdourCanvas::Group& canvas_group() const { return *group; }
 	ArdourCanvas::Item&  parent_group() const { return _parent_group; }

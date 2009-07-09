@@ -54,7 +54,7 @@ class Selection;
 class AudioStreamView : public StreamView
 {
   public:
-	AudioStreamView (AudioTimeAxisViewPtr);
+	AudioStreamView (AudioTimeAxisView&);
 	~AudioStreamView ();
 
 	int set_samples_per_unit (gdouble spp);

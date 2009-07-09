@@ -34,7 +34,6 @@
 #include "time_axis_view.h"
 #include "simplerect.h"
 #include "automation_controller.h"
-#include "shared_ptrs.h"
 
 namespace ARDOUR {
 	class Session;
@@ -55,18 +54,16 @@ class AutomationController;
 
 class AutomationTimeAxisView : public TimeAxisView {
   public:
-	
-	static AutomationTimeAxisViewPtr
-	create (ARDOUR::Session&,
-		boost::shared_ptr<ARDOUR::Route>,
-		boost::shared_ptr<ARDOUR::Automatable>,
-		boost::shared_ptr<ARDOUR::AutomationControl>,
-		PublicEditor&,
-		TimeAxisViewPtr parent,
-		bool show_regions,
-		ArdourCanvas::Canvas& canvas,
-		const std::string & name, /* translatable */
-		const std::string & plug_name = "");
+	AutomationTimeAxisView (ARDOUR::Session&,
+				boost::shared_ptr<ARDOUR::Route>,
+				boost::shared_ptr<ARDOUR::Automatable>,
+				boost::shared_ptr<ARDOUR::AutomationControl>,
+				PublicEditor&,
+				TimeAxisView& parent,
+				bool show_regions,
+				ArdourCanvas::Canvas& canvas,
+				const std::string & name, /* translatable */
+				const std::string & plug_name = "");
 
 	~AutomationTimeAxisView();
 	
@@ -167,32 +164,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	static Pango::FontDescription* name_font;
 	static bool have_name_font;
-
-private:
-
-	AutomationTimeAxisView (ARDOUR::Session&,
-				boost::shared_ptr<ARDOUR::Route>,
-				boost::shared_ptr<ARDOUR::Automatable>,
-				boost::shared_ptr<ARDOUR::AutomationControl>,
-				PublicEditor&,
-				TimeAxisViewPtr parent,
-				bool show_regions,
-				ArdourCanvas::Canvas& canvas,
-				const std::string & name, /* translatable */
-				const std::string & plug_name = "");
-
-	void 
-	init                   (ARDOUR::Session&,
-				boost::shared_ptr<ARDOUR::Route>,
-				boost::shared_ptr<ARDOUR::Automatable>,
-				boost::shared_ptr<ARDOUR::AutomationControl>,
-				PublicEditor&,
-				TimeAxisViewPtr parent,
-				bool show_regions,
-				ArdourCanvas::Canvas& canvas,
-				const std::string & name, /* translatable */
-				const std::string & plug_name);
-	
 };
 
 #endif /* __ardour_gtk_automation_time_axis_h__ */

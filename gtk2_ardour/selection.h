@@ -97,7 +97,7 @@ class Selection : public sigc::trackable
 
 	void dump_region_layers();
 
-	bool selected (TimeAxisViewPtr);
+	bool selected (TimeAxisView*);
 	bool selected (RegionView*);
 	bool selected (Marker*);
 
@@ -105,11 +105,11 @@ class Selection : public sigc::trackable
 	void add (std::list<Selectable*>&);
 	void toggle (std::list<Selectable*>&);
 	
-	void set (TimeAxisViewPtr);
-	void set (const std::list<TimeAxisViewPtr>&);
+	void set (TimeAxisView*);
+	void set (const std::list<TimeAxisView*>&);
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (std::vector<RegionView*>&);
-	long set (TimeAxisViewPtr, nframes_t, nframes_t);
+	long set (TimeAxisView*, nframes_t, nframes_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -117,8 +117,8 @@ class Selection : public sigc::trackable
 	void set (Marker*);
 	void set (const RegionSelection&);
 
-	void toggle (TimeAxisViewPtr);
-	void toggle (const std::list<TimeAxisViewPtr>&);
+	void toggle (TimeAxisView*);
+	void toggle (const std::list<TimeAxisView*>&);
 	void toggle (RegionView*);
 	void toggle (std::vector<RegionView*>&);
 	long toggle (nframes_t, nframes_t);
@@ -128,8 +128,8 @@ class Selection : public sigc::trackable
 	void toggle (const std::vector<AutomationSelectable*>&);
 	void toggle (Marker*);
 
-	void add (TimeAxisViewPtr);
-	void add (const std::list<TimeAxisViewPtr>&);
+	void add (TimeAxisView*);
+	void add (const std::list<TimeAxisView*>&);
 	void add (RegionView*);
 	void add (std::vector<RegionView*>&);
 	long add (nframes_t, nframes_t);
@@ -140,9 +140,8 @@ class Selection : public sigc::trackable
 	void add (const std::list<Marker*>&);
 	void add (const RegionSelection&);
 
-	void remove (TimeAxisViewPtr);
-	void remove (const std::list<TimeAxisViewPtr>&);
-	void remove (boost::weak_ptr<TimeAxisView>);
+	void remove (TimeAxisView*);
+	void remove (const std::list<TimeAxisView*>&);
 	void remove (RegionView*);
 	void remove (uint32_t selection_id);
 	void remove (nframes_t, nframes_t);

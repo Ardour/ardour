@@ -65,7 +65,7 @@ using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisViewPtr tv,
+MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
 		boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _force_channel(-1)
@@ -84,7 +84,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisViewPt
 	_note_group->raise_to_top();
 }
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisViewPtr tv,
+MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
 		boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color,
 		TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
@@ -163,7 +163,7 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	compute_colors (basic_color);
 
-	set_height (trackview->current_height());
+	set_height (trackview.current_height());
 
 	region_muted ();
 	region_sync_changed ();
@@ -202,10 +202,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 	static ArdourCanvas::SimpleRect* drag_rect = NULL;
 
-	if (trackview->editor().current_mouse_mode() != MouseNote)
+	if (trackview.editor().current_mouse_mode() != MouseNote)
 		return false;
 	
-	const Editing::MidiEditMode midi_edit_mode = trackview->editor().current_midi_edit_mode();
+	const Editing::MidiEditMode midi_edit_mode = trackview.editor().current_midi_edit_mode();
 
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
@@ -253,8 +253,8 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		group->w2i(event_x, event_y);
 
 		// convert event_x to global frame
-		event_frame = trackview->editor().pixel_to_frame(event_x) + _region->position();
-		trackview->editor().snap_to(event_frame);
+		event_frame = trackview.editor().pixel_to_frame(event_x) + _region->position();
+		trackview.editor().snap_to(event_frame);
 		// convert event_frame back to local coordinates relative to position
 		event_frame -= _region->position();
 
@@ -294,7 +294,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				drag_start_y = event_y;
 
 				drag_rect = new ArdourCanvas::SimpleRect(*group);
-				drag_rect->property_x1() = trackview->editor().frame_to_pixel(event_frame);
+				drag_rect->property_x1() = trackview.editor().frame_to_pixel(event_frame);
 
 				drag_rect->property_y1() = midi_stream_view()->note_to_y(
 						midi_stream_view()->y_to_note(event_y));
@@ -323,7 +323,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			}
 
 			if (_mouse_state == AddDragging)
-				event_x = trackview->editor().frame_to_pixel(event_frame);
+				event_x = trackview.editor().frame_to_pixel(event_frame);
 
 			if (drag_rect) {
 				if (event_x > drag_start_x)
@@ -357,7 +357,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
 		group->ungrab(ev->button.time);
-		event_frame = trackview->editor().pixel_to_frame(event_x);
+		event_frame = trackview.editor().pixel_to_frame(event_x);
 
 		if (_pressed_button != 1) {
 			return false;
@@ -385,7 +385,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			_mouse_state = None;
 			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
 				const double x      = drag_rect->property_x1();
-				const double length = trackview->editor().pixel_to_frame(
+				const double length = trackview.editor().pixel_to_frame(
 				                        drag_rect->property_x2() - drag_rect->property_x1());
 					
 				create_note_at(x, drag_rect->property_y1(), frames_to_beats(length));
@@ -410,7 +410,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 void
 MidiRegionView::create_note_at(double x, double y, double length)
 {
-	MidiTimeAxisViewPtr mtv = boost::dynamic_pointer_cast<MidiTimeAxisView> (trackview);
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 
 	double note = midi_stream_view()->y_to_note(y);
@@ -419,7 +419,7 @@ MidiRegionView::create_note_at(double x, double y, double length)
 	assert(note <= 127.0);
 
 	// Start of note in frames relative to region start
-	nframes64_t start_frames = snap_frame_to_frame(trackview->editor().pixel_to_frame(x));
+	nframes64_t start_frames = snap_frame_to_frame(trackview.editor().pixel_to_frame(x));
 	assert(start_frames >= 0);
 
 	// Snap length
@@ -434,7 +434,7 @@ MidiRegionView::create_note_at(double x, double y, double length)
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
 	cmd->add(new_note);
-	_model->apply_command(trackview->session(), cmd);
+	_model->apply_command(trackview.session(), cmd);
 }
 
 
@@ -512,7 +512,7 @@ MidiRegionView::apply_command()
 		_marked_for_selection.insert((*i)->note());
 	}
 	
-	_model->apply_command(trackview->session(), _delta_command);
+	_model->apply_command(trackview.session(), _delta_command);
 	_delta_command = NULL; 
 	midi_view()->midi_track()->diskstream()->playlist_modified();
 
@@ -628,7 +628,7 @@ MidiRegionView::display_sysexes()
 		string text = str.str();
 		
 		ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
-		const double x = trackview->editor().frame_to_pixel(beats_to_frames(time));
+		const double x = trackview.editor().frame_to_pixel(beats_to_frames(time));
 		
 		double height = midi_stream_view()->contents_height();
 		
@@ -745,7 +745,7 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 					note->property_y1() = y1;
 					note->property_y2() = y2;
 				} else if (CanvasHit* hit = dynamic_cast<CanvasHit*>(event)) {
-					double x = trackview->editor().frame_to_pixel(
+					double x = trackview.editor().frame_to_pixel(
 							beats_to_frames(event->note()->time()) - _region->start());
 					const double diamond_size = midi_stream_view()->note_height() / 2.0;
 					double y = midi_stream_view()->note_to_y(event->note()->note()) 
@@ -762,12 +762,12 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 }
 
 GhostRegion*
-MidiRegionView::add_ghost (TimeAxisViewPtr tv)
+MidiRegionView::add_ghost (TimeAxisView& tv)
 {
 	CanvasNote* note;
 
 	double unit_position = _region->position () / samples_per_unit;
-	MidiTimeAxisViewPtr mtv = boost::dynamic_pointer_cast<MidiTimeAxisView> (tv);
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);
 	MidiGhostRegion* ghost;
 
 	if (mtv && mtv->midi_view()) {
@@ -831,7 +831,7 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 
 	if (_active_notes && _active_notes[note]) {
 		const nframes64_t end_time_frames = beats_to_frames(end_time);
-		_active_notes[note]->property_x2() = trackview->editor().frame_to_pixel(end_time_frames);
+		_active_notes[note]->property_x2() = trackview.editor().frame_to_pixel(end_time_frames);
 		_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
 		_active_notes[note] = NULL;
 	}
@@ -849,7 +849,7 @@ MidiRegionView::extend_active_notes()
 
 	for (unsigned i=0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->property_x2() = trackview->editor().frame_to_pixel(_region->length());
+			_active_notes[i]->property_x2() = trackview.editor().frame_to_pixel(_region->length());
 		}
 	}
 }
@@ -857,11 +857,11 @@ MidiRegionView::extend_active_notes()
 void 
 MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 {
-	if (!trackview->editor().sound_notes()) {
+	if (!trackview.editor().sound_notes()) {
 		return;
 	}
 
-	boost::shared_ptr<RouteUI> route_ui = boost::dynamic_pointer_cast<RouteUI> (trackview);
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
 	assert(route_ui);
 	
 	route_ui->midi_track()->write_immediate_event(
@@ -877,7 +877,7 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 bool
 MidiRegionView::play_midi_note_off(boost::shared_ptr<NoteType> note)
 {
-	boost::shared_ptr<RouteUI> route_ui = boost::dynamic_pointer_cast<RouteUI> (trackview);
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
 	assert(route_ui);
 	
 	route_ui->midi_track()->write_immediate_event(
@@ -916,12 +916,12 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 
 	CanvasNoteEvent* event = 0;
 	
-	const double x = trackview->editor().frame_to_pixel(note_start_frames - _region->start());
+	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
 	
 	if (midi_view()->note_mode() == Sustained) {
 		const double y1 = midi_stream_view()->note_to_y(note->note());
 		const double note_endpixel = 
-			trackview->editor().frame_to_pixel(note_end_frames - _region->start());
+			trackview.editor().frame_to_pixel(note_end_frames - _region->start());
 		
 		CanvasNote* ev_rect = new CanvasNote(*this, *group, note);
 		ev_rect->property_x1() = x;
@@ -929,7 +929,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 		if (note->length() > 0) {
 			ev_rect->property_x2() = note_endpixel;
 		} else {
-			ev_rect->property_x2() = trackview->editor().frame_to_pixel(_region->length());
+			ev_rect->property_x2() = trackview.editor().frame_to_pixel(_region->length());
 		}
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
@@ -996,7 +996,7 @@ MidiRegionView::add_pgm_change(PCEvent& program, const string& displaytext)
 	assert(program.time >= 0);
 	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
-	const double x = trackview->editor().frame_to_pixel(beats_to_frames(program.time));
+	const double x = trackview.editor().frame_to_pixel(beats_to_frames(program.time));
 	
 	double height = midi_stream_view()->contents_height();
 	
@@ -1319,9 +1319,9 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 
 		nframes64_t start_frames = beats_to_frames((*i)->note()->time());
 		if (dt >= 0) {
-			start_frames += snap_frame_to_frame(trackview->editor().pixel_to_frame(dt));
+			start_frames += snap_frame_to_frame(trackview.editor().pixel_to_frame(dt));
 		} else {
-			start_frames -= snap_frame_to_frame(trackview->editor().pixel_to_frame(-dt));
+			start_frames -= snap_frame_to_frame(trackview.editor().pixel_to_frame(-dt));
 		}
 
 		copy->set_time(frames_to_beats(start_frames));
@@ -1361,7 +1361,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 nframes64_t
 MidiRegionView::snap_pixel_to_frame(double x)
 {
-	PublicEditor& editor = trackview->editor();
+	PublicEditor& editor = trackview.editor();
 	// x is region relative, convert it to global absolute frames
 	nframes64_t frame = editor.pixel_to_frame(x) + _region->position();
 	editor.snap_to(frame);
@@ -1371,7 +1371,7 @@ MidiRegionView::snap_pixel_to_frame(double x)
 nframes64_t
 MidiRegionView::snap_frame_to_frame(nframes64_t x)
 {
-	PublicEditor& editor = trackview->editor();
+	PublicEditor& editor = trackview.editor();
 	// x is region relative, convert it to global absolute frames
 	nframes64_t frame = x + _region->position();
 	editor.snap_to(frame);
@@ -1381,14 +1381,14 @@ MidiRegionView::snap_frame_to_frame(nframes64_t x)
 double
 MidiRegionView::snap_to_pixel(double x)
 {
-	return (double) trackview->editor().frame_to_pixel(snap_pixel_to_frame(x));
+	return (double) trackview.editor().frame_to_pixel(snap_pixel_to_frame(x));
 }
 
 double
 MidiRegionView::get_position_pixels()
 {
 	nframes64_t region_frame = get_position();
-	return trackview->editor().frame_to_pixel(region_frame);
+	return trackview.editor().frame_to_pixel(region_frame);
 }
 
 nframes64_t

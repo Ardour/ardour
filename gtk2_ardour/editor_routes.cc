@@ -122,8 +122,8 @@ EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
-	TimeAxisViewPtr tv = row[_columns.tv];
-	AudioTimeAxisViewPtr atv = boost::dynamic_pointer_cast<AudioTimeAxisView> (tv);
+	TimeAxisView *tv = row[_columns.tv];
+	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
 	if (atv != 0 && atv->is_audio_track()){
 	      atv->get_diskstream()->set_record_enabled(!atv->get_diskstream()->record_enabled());
@@ -173,7 +173,7 @@ EditorRoutes::redisplay ()
 	}
 
 	for (n = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
-		TimeAxisViewPtr tv = (*i)[_columns.tv];
+		TimeAxisView *tv = (*i)[_columns.tv];
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
 
 		if (tv == 0) {
@@ -192,7 +192,7 @@ EditorRoutes::redisplay ()
 
 		bool visible = (*i)[_columns.visible];
 
-		/* show or hide the TimeAxisViewPtr */
+		/* show or hide the TimeAxisView */
 		if (visible) {
 			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
@@ -250,14 +250,14 @@ EditorRoutes::changed (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterat
 }
 
 void
-EditorRoutes::routes_added (list<RouteTimeAxisViewPtr> routes)
+EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	TreeModel::Row row;
 
 	_redisplay_does_not_sync_order_keys = true;
 	suspend_redisplay ();
 
-	for (list<RouteTimeAxisViewPtr>::iterator x = routes.begin(); x != routes.end(); ++x) {
+	for (list<RouteTimeAxisView*>::iterator x = routes.begin(); x != routes.end(); ++x) {
 
 		row = *(_model->append ());
 
@@ -310,7 +310,7 @@ EditorRoutes::handle_gui_changes (string const & what, void *src)
 }
 
 void
-EditorRoutes::route_removed (TimeAxisViewPtr tv)
+EditorRoutes::route_removed (TimeAxisView *tv)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRoutes::route_removed), tv));
 
@@ -324,8 +324,7 @@ EditorRoutes::route_removed (TimeAxisViewPtr tv)
 	_redisplay_does_not_sync_order_keys = true;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		TimeAxisViewPtr t = (*ri)[_columns.tv];
-		if (t == tv) {
+		if ((*ri)[_columns.tv] == tv) {
 			_model->erase (ri);
 			break;
 		}
@@ -365,7 +364,7 @@ EditorRoutes::update_visibility ()
 	suspend_redisplay ();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		TimeAxisViewPtr tv = (*i)[_columns.tv];
+		TimeAxisView *tv = (*i)[_columns.tv];
 		(*i)[_columns.visible] = tv->marked_for_display ();
 		cerr << "marked " << tv->name() << " for display = " << tv->marked_for_display() << endl;
 	}
@@ -374,14 +373,13 @@ EditorRoutes::update_visibility ()
 }
 
 void
-EditorRoutes::hide_track_in_display (TimeAxisViewPtr tv)
+EditorRoutes::hide_track_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		TimeAxisViewPtr t = (*i)[_columns.tv];
-		if (t == tv) { 
+		if ((*i)[_columns.tv] == &tv) { 
 			(*i)[_columns.visible] = false;
 			break;
 		}
@@ -389,14 +387,13 @@ EditorRoutes::hide_track_in_display (TimeAxisViewPtr tv)
 }
 
 void
-EditorRoutes::show_track_in_display (TimeAxisViewPtr tv)
+EditorRoutes::show_track_in_display (TimeAxisView& tv)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		TimeAxisViewPtr t = (*i)[_columns.tv];
-		if (t == tv) { 
+		if ((*i)[_columns.tv] == &tv) { 
 			(*i)[_columns.visible] = true;
 			break;
 		}
@@ -462,7 +459,7 @@ EditorRoutes::hide_all_tracks (bool with_select)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		
 		TreeModel::Row row = (*i);
-		TimeAxisViewPtr tv = row[_columns.tv];
+		TimeAxisView *tv = row[_columns.tv];
 
 		if (tv == 0) {
 			continue;
@@ -491,7 +488,7 @@ EditorRoutes::set_all_tracks_visibility (bool yn)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
 		TreeModel::Row row = (*i);
-		TimeAxisViewPtr tv = row[_columns.tv];
+		TimeAxisView* tv = row[_columns.tv];
 
 		if (tv == 0) {
 			continue;
@@ -513,14 +510,14 @@ EditorRoutes::set_all_audio_visibility (int tracks, bool yn)
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		TreeModel::Row row = (*i);
-		TimeAxisViewPtr tv = row[_columns.tv];
-		AudioTimeAxisViewPtr atv;
+		TimeAxisView* tv = row[_columns.tv];
+		AudioTimeAxisView* atv;
 
 		if (tv == 0) {
 			continue;
 		}
 
-		if ((atv = boost::dynamic_pointer_cast<AudioTimeAxisView>(tv)) != 0) {
+		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 			switch (tracks) {
 			case 0:
 				(*i)[_columns.visible] = yn;
@@ -603,7 +600,7 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		return false;
 	case 1:
 		if ((iter = _model->get_iter (path))) {
-			TimeAxisViewPtr tv = (*iter)[_columns.tv];
+			TimeAxisView* tv = (*iter)[_columns.tv];
 			if (tv) {
 				bool visible = (*iter)[_columns.visible];
 				(*iter)[_columns.visible] = !visible;
@@ -659,10 +656,10 @@ EditorRoutes::initial_display ()
 		_no_redisplay = true;
 		
 		for (i = rows.begin(); i != rows.end(); ++i) {
-			TimeAxisViewPtr tv =  (*i)[_columns.tv];
-			RouteTimeAxisViewPtr rtv;
+			TimeAxisView *tv =  (*i)[_columns.tv];
+			RouteTimeAxisView *rtv;
 			
-			if ((rtv = boost::dynamic_pointer_cast<RouteTimeAxisView>(tv)) != 0) {
+			if ((rtv = dynamic_cast<RouteTimeAxisView*>(tv)) != 0) {
 				if (rtv->route()->is_master()) {
 					_display.get_selection()->unselect (i);
 				}
@@ -706,14 +703,14 @@ EditorRoutes::move_selected_tracks (bool up)
 		return;
 	}
 
-	typedef std::pair<TimeAxisViewPtr,boost::shared_ptr<Route> > ViewRoute;
+	typedef std::pair<TimeAxisView*,boost::shared_ptr<Route> > ViewRoute;
 	std::list<ViewRoute> view_routes;
 	std::vector<int> neworder;
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		TimeAxisViewPtr tv = (*ri)[_columns.tv];
+		TimeAxisView* tv = (*ri)[_columns.tv];
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 
 		view_routes.push_back (ViewRoute (tv, route));
@@ -831,10 +828,10 @@ EditorRoutes::update_rec_display ()
 	}
 }
 
-list<TimeAxisViewPtr>
+list<TimeAxisView*>
 EditorRoutes::views () const
 {
-	list<TimeAxisViewPtr> v;
+	list<TimeAxisView*> v;
 	for (TreeModel::Children::iterator i = _model->children().begin(); i != _model->children().end(); ++i) {
 		v.push_back ((*i)[_columns.tv]);
 	}

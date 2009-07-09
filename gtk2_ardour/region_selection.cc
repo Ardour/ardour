@@ -253,10 +253,10 @@ struct RegionSortByTrack {
 	    
 	    /* really, track and position */
 
-	    if (a->get_trackview()->order() == b->get_trackview()->order()) {
+	    if (a->get_trackview().order() == b->get_trackview().order()) {
 		    return a->region()->position() < b->region()->position();
 	    } else {
-		    return a->get_trackview()->order() < b->get_trackview()->order();
+		    return a->get_trackview().order() < b->get_trackview().order();
 	    }
     }
 };
@@ -295,10 +295,10 @@ RegionSelection::sort_by_position_and_track ()
  *  @return true if any of the selection's regions are on tv.
  */
 bool
-RegionSelection::involves (TimeAxisViewPtr tv) const
+RegionSelection::involves (const TimeAxisView& tv) const
 {
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
-		if ((*i)->get_trackview() == tv) {
+		if (&(*i)->get_trackview() == &tv) {
 			return true;
 		}
 	}

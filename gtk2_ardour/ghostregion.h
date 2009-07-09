@@ -40,7 +40,7 @@ class TimeAxisView;
 class GhostRegion : public sigc::trackable 
 {
 public:
-	GhostRegion(ArdourCanvas::Group* parent, TimeAxisViewPtr tv, TimeAxisViewPtr source_tv, double initial_unit_pos);
+	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	virtual ~GhostRegion();
 
 	virtual void set_samples_per_unit(double spu) = 0;
@@ -54,15 +54,15 @@ public:
 
 	sigc::signal<void,GhostRegion*> GoingAway;
 
-	TimeAxisViewPtr trackview;
-	TimeAxisViewPtr source_trackview;
+	TimeAxisView& trackview;
+	TimeAxisView& source_trackview;
 	ArdourCanvas::Group* group;
 	ArdourCanvas::SimpleRect* base_rect;
 };
 
 class AudioGhostRegion : public GhostRegion {
 public:
-	AudioGhostRegion(TimeAxisViewPtr tv, TimeAxisViewPtr source_tv, double initial_unit_pos);
+	AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 
 	void set_samples_per_unit(double spu);
 	void set_height();
@@ -100,8 +100,8 @@ public:
 		ArdourCanvas::Diamond* diamond;
 	};
 	
-	MidiGhostRegion(TimeAxisViewPtr tv, TimeAxisViewPtr source_tv, double initial_unit_pos);
-	MidiGhostRegion(MidiStreamView& msv, TimeAxisViewPtr source_tv, double initial_unit_pos);
+	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
+	MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos);
 	~MidiGhostRegion();
 
 	MidiStreamView* midi_view();
