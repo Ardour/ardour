@@ -295,8 +295,14 @@ MixerStrip::init ()
 	else
 		set_name ("AudioTrackStripBase");
 
-	add_events (Gdk::BUTTON_RELEASE_MASK);
+	add_events (Gdk::BUTTON_RELEASE_MASK|
+		    Gdk::ENTER_NOTIFY_MASK|
+		    Gdk::LEAVE_NOTIFY_MASK|
+		    Gdk::KEY_PRESS_MASK|
+		    Gdk::KEY_RELEASE_MASK);
 
+	set_flags (get_flags() | Gtk::CAN_FOCUS);
+	
 	SwitchIO.connect (mem_fun (*this, &MixerStrip::switch_io));
 	
 }
@@ -1485,4 +1491,111 @@ MixerStrip::set_button_names ()
 		break;
 		
 	}
+}
+
+bool
+MixerStrip::on_key_press_event (GdkEventKey* ev)
+{
+	GdkEventButton fake;
+	fake.type = GDK_BUTTON_PRESS;
+	fake.button = 1;
+	fake.state = ev->state;
+
+	switch (ev->keyval) {
+	case GDK_m:
+		mute_press (&fake);
+		return true;
+		break;
+		
+	case GDK_s:
+		solo_press (&fake);
+		return true;
+		break;
+		
+	case GDK_r:
+		rec_enable_press (&fake);
+		return true;
+		break;
+		
+	case GDK_e:
+		show_sends_press (&fake);
+		return true;
+		break;			
+		
+	case GDK_g:
+		if (ev->state & Keyboard::PrimaryModifier) {
+			step_gain_down ();
+		} else {
+			step_gain_up ();
+		}
+		return true;
+		break;
+		
+	default:
+		break;
+	}
+
+	return false;
+}
+
+
+bool
+MixerStrip::on_key_release_event (GdkEventKey* ev)
+{
+	GdkEventButton fake;
+	fake.type = GDK_BUTTON_RELEASE;
+	fake.button = 1;
+	fake.state = ev->state;
+
+	switch (ev->keyval) {
+	case GDK_m:
+		mute_release (&fake);
+		return true;
+		break;
+		
+	case GDK_s:
+		solo_release (&fake);
+		return true;
+		break;
+		
+	case GDK_r:
+		rec_enable_release (&fake);
+		return true;
+		break;
+		
+	case GDK_e:
+		show_sends_release (&fake);
+		return true;
+		break;			
+		
+	case GDK_g:
+		return true;
+		break;
+		
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool
+MixerStrip::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	Keyboard::magic_widget_grab_focus ();
+	grab_focus ();
+	return false;
+}
+
+bool
+MixerStrip::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	switch (ev->detail) {
+	case GDK_NOTIFY_INFERIOR:
+		break;
+	default:
+		Keyboard::magic_widget_drop_focus ();
+	}
+
+	return false;
 }

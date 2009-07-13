@@ -109,6 +109,11 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_selected(bool yn);
 	void set_stuff_from_route ();
 
+	bool on_leave_notify_event (GdkEventCrossing* ev);
+	bool on_enter_notify_event (GdkEventCrossing* ev);
+	bool on_key_press_event (GdkEventKey* ev);
+	bool on_key_release_event (GdkEventKey* ev);
+
   private:
 	Mixer_UI& _mixer;
 

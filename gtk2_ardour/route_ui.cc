@@ -26,6 +26,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/route_group.h"
+#include "ardour/dB.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/shiva.h"
@@ -1420,3 +1421,26 @@ RouteUI::parameter_changed (string const & p)
 	}
 }
 
+void
+RouteUI::step_gain_up ()
+{
+	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) + 0.1), this);
+}
+
+void
+RouteUI::page_gain_up ()
+{
+	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) + 0.5), this);
+}
+
+void
+RouteUI::step_gain_down ()
+{
+	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) - 0.1), this);
+}
+
+void
+RouteUI::page_gain_down ()
+{
+	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), this);
+}

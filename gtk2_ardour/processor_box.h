@@ -158,6 +158,10 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	bool no_processor_redisplay;
 	bool ignore_delete;
 
+	bool enter_notify (GdkEventCrossing *ev);
+	bool leave_notify (GdkEventCrossing *ev);
+	bool processor_key_press_event (GdkEventKey *);
+	bool processor_key_release_event (GdkEventKey *);
 	bool processor_button_press_event (GdkEventButton *);
 	bool processor_button_release_event (GdkEventButton *);
 	void redisplay_processors ();
@@ -208,8 +212,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::ProcessorStreams streams);
 
 	static ProcessorBox* _current_processor_box;
-	static bool enter_box (GdkEventCrossing*, ProcessorBox*);
-	static bool leave_box (GdkEventCrossing*, ProcessorBox*);
 
 	static void rb_choose_plugin ();
 	static void rb_choose_insert ();

@@ -1475,6 +1475,12 @@ Mixer_UI::on_key_press_event (GdkEventKey* ev)
 	return key_press_focus_accelerator_handler (*this, ev);
 }
 
+bool
+Mixer_UI::on_key_release_event (GdkEventKey* ev)
+{
+	return key_press_focus_accelerator_handler (*this, ev);
+}
+
 void
 Mixer_UI::parameter_changed (string const & p)
 {

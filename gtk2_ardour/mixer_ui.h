@@ -115,6 +115,7 @@ class Mixer_UI : public Gtk::Window
 	void get_window_pos_and_size ();
 
 	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 	

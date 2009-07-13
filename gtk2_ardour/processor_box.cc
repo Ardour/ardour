@@ -135,6 +135,7 @@ ProcessorBox::ProcessorBox (Session& sess, PluginSelector &plugsel,
 	processor_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	processor_display.get_column(0)->set_fixed_width(48);
 	processor_display.add_object_drag (columns.processor.index(), "processors");
+	processor_display.set_enable_search (false);
 	processor_display.signal_drop.connect (mem_fun (*this, &ProcessorBox::object_drop));
 
 	TreeViewColumn* name_col = processor_display.get_column(0);
@@ -153,14 +154,16 @@ ProcessorBox::ProcessorBox (Session& sess, PluginSelector &plugsel,
 
 	pack_start (processor_eventbox, true, true);
 
-	processor_eventbox.signal_enter_notify_event().connect (bind (
-			sigc::ptr_fun (ProcessorBox::enter_box),
-			this));
+	processor_display.signal_enter_notify_event().connect (mem_fun(*this, &ProcessorBox::enter_notify), false);
+	processor_display.signal_leave_notify_event().connect (mem_fun(*this, &ProcessorBox::leave_notify), false);
+
+	processor_display.signal_key_press_event().connect (mem_fun(*this, &ProcessorBox::processor_key_press_event));
+	processor_display.signal_key_release_event().connect (mem_fun(*this, &ProcessorBox::processor_key_release_event));
 
 	processor_display.signal_button_press_event().connect (
-			mem_fun(*this, &ProcessorBox::processor_button_press_event), false);
+		mem_fun(*this, &ProcessorBox::processor_button_press_event), false);
 	processor_display.signal_button_release_event().connect (
-			mem_fun(*this, &ProcessorBox::processor_button_release_event));
+		mem_fun(*this, &ProcessorBox::processor_button_release_event));
 }
 
 ProcessorBox::~ProcessorBox ()
@@ -314,6 +317,91 @@ ProcessorBox::processor_drag_end (GdkDragContext *context)
 }
 
 bool
+ProcessorBox::enter_notify (GdkEventCrossing* ev)
+{
+	_current_processor_box = this;
+	Keyboard::magic_widget_grab_focus ();
+	processor_display.grab_focus ();
+
+	return false;
+}
+
+bool
+ProcessorBox::leave_notify (GdkEventCrossing* ev)
+{
+	switch (ev->detail) {
+	case GDK_NOTIFY_INFERIOR:
+		break;
+	default:
+		Keyboard::magic_widget_drop_focus ();
+	}
+
+	return false;
+}
+
+bool
+ProcessorBox::processor_key_press_event (GdkEventKey *ev)
+{
+	/* do real stuff on key release */
+	return false;
+}
+
+bool
+ProcessorBox::processor_key_release_event (GdkEventKey *ev)
+{
+	bool ret = false;
+	ProcSelection targets;
+
+	get_selected_processors (targets);
+
+	if (targets.empty()) {
+
+		int x, y;
+		TreeIter iter;
+		TreeModel::Path path;
+		TreeViewColumn* column;
+		int cellx;
+		int celly;
+		
+		processor_display.get_pointer (x, y);
+		
+		if (processor_display.get_path_at_pos (x, y, path, column, cellx, celly)) {
+			if ((iter = model->get_iter (path))) {
+				targets.push_back ((*iter)[columns.processor]);
+			}
+		}
+	}
+	
+	if (targets.empty()) {
+		return ret;
+	}
+
+	switch (ev->keyval) {
+	case GDK_Delete:
+	case GDK_BackSpace:
+		delete_processors ();
+		ret = true;
+		break;
+
+	case GDK_KP_0:
+		for (ProcSelection::iterator i = targets.begin(); i != targets.end(); ++i) {
+			if ((*i)->active()) {
+				(*i)->deactivate ();
+			} else {
+				(*i)->activate ();
+			}
+		}
+		ret = true;
+		break;
+		
+	default:
+		break;
+	}
+
+	return ret;
+}
+
+bool
 ProcessorBox::processor_button_press_event (GdkEventButton *ev)
 {
 	TreeIter iter;
@@ -392,10 +480,8 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 			} else {
 				_placement = PostFader;
 			}
-			cerr << "had processor " << processor->name() << " placement = " << _placement << endl;
 		} else {
 			_placement = PostFader;
-			cerr << "no processor, postfader\n";
 		}
 		
 		show_processor_menu (ev->time);
@@ -727,7 +813,7 @@ ProcessorBox::processor_name (boost::weak_ptr<Processor> weak_processor)
 		string::size_type lbracket, rbracket;
 		lbracket = send->name().find ('[');
 		rbracket = send->name().find (']');
-
+		
 		switch (_width) {
 		case Wide:
 			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
@@ -741,10 +827,10 @@ ProcessorBox::processor_name (boost::weak_ptr<Processor> weak_processor)
 
 		switch (_width) {
 		case Wide:
-			name_display += processor->name();
+			name_display += processor->display_name();
 			break;
 		case Narrow:
-			name_display += PBD::short_version (processor->name(), 5);
+			name_display += PBD::short_version (processor->display_name(), 5);
 			break;
 		}
 
@@ -826,6 +912,7 @@ ProcessorBox::compute_processor_sort_keys ()
 	Route::ProcessorList our_processors;
 
 	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+		boost::shared_ptr<Processor> p = (*iter)[columns.processor];
 		our_processors.push_back ((*iter)[columns.processor]);
 	}
 
@@ -1317,23 +1404,6 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 			gidget->present ();
 		}
 	}
-}
-
-bool
-ProcessorBox::enter_box (GdkEventCrossing *ev, ProcessorBox* rb)
-{
-	switch (ev->detail) {
-	case GDK_NOTIFY_INFERIOR:
-		break;
-
-	case GDK_NOTIFY_VIRTUAL:
-		/* fallthru */
-
-	default:
-		_current_processor_box = rb;
-	}
-
-	return false;
 }
 
 void

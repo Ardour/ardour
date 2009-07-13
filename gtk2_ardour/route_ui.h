@@ -114,6 +114,11 @@ class RouteUI : public virtual AxisView
 	bool show_sends_press(GdkEventButton*);
 	bool show_sends_release(GdkEventButton*);
 
+	void step_gain_up ();
+	void step_gain_down ();
+	void page_gain_up ();
+	void page_gain_down ();
+
 	void build_sends_menu ();
 	void set_sends_gain_from_track ();
 	void set_sends_gain_to_zero ();
