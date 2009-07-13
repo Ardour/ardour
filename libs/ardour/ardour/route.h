@@ -167,15 +167,6 @@ class Route : public SessionObject, public AutomatableControls
 		}
 	}
 	
-	void foreach_processor (Placement p, sigc::slot<void, boost::weak_ptr<Processor> > method) {
-		Glib::RWLock::ReaderLock lm (_processor_lock);
-		ProcessorList::iterator start, end;
-		placement_range(p, start, end);
-		for (ProcessorList::iterator i = start; i != end; ++i) {
-			method (boost::weak_ptr<Processor> (*i));
-		}
-	}
-
 	boost::shared_ptr<Processor> nth_processor (uint32_t n) {
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
@@ -412,7 +403,6 @@ class Route : public SessionObject, public AutomatableControls
 	int configure_processors (ProcessorStreams*);
 	int configure_processors_unlocked (ProcessorStreams*);
 
-	bool add_processor_from_xml (const XMLNode&, Placement);
 	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);	
 
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);

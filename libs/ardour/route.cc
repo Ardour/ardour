@@ -721,22 +721,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 }
 
 bool
-Route::add_processor_from_xml (const XMLNode& node, Placement placement)
-{
-	ProcessorList::iterator loc;
-
-	if (placement == PreFader) {
-		/* generic pre-fader: insert immediately before the amp */
-		loc = find(_processors.begin(), _processors.end(), _amp);
-	} else {
-		/* generic post-fader: insert at end */
-		loc = _processors.end();
-	}
-
-	return add_processor_from_xml (node, loc);
-}
-
-bool
 Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter)
 {
 	const XMLProperty *prop;
