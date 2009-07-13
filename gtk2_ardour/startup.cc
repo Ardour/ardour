@@ -191,7 +191,8 @@ Glib::ustring
 ArdourStartup::session_folder ()
 {
 	if (ic_new_session_button.get_active()) {
-		return Glib::build_filename (new_folder_chooser.get_current_folder(), new_name_entry.get_text());
+		Glib::ustring legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
+		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
 	} else {
 		TreeIter iter = recent_session_display.get_selection()->get_selected();
 

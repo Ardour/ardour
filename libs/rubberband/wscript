@@ -26,21 +26,6 @@ def set_options(opt):
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_tool(conf, 'compiler_cxx')
-	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
-	autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
-
-	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
-
-	# This must be defined for librubberband only, it breaks ardour
-	conf.check(header_name='execinfo.h', define_name='PBD_HAVE_EXECINFO')
-
-	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
-	conf.write_config_header('wafconfig.h')
-
-	# Boost headers
-	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
 
 def build(bld):
 	# Library

@@ -34,7 +34,7 @@ class InternalReturn : public Return
 	InternalReturn (Session&);
 	InternalReturn (Session&, const XMLNode&);
 
-	bool visible() const { return true; }
+	bool visible() const;
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);

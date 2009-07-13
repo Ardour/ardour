@@ -19,6 +19,10 @@
 #ifndef __ardour_buffer_set_h__
 #define __ardour_buffer_set_h__
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <cassert>
 #include <vector>
 #include "ardour/chan_count.h"

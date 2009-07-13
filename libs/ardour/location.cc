@@ -88,7 +88,7 @@ Location::operator= (const Location& other)
 }
 
 int
-Location::set_start (nframes_t s)
+Location::set_start (nframes64_t s)
 {
 	if (_locked) {
 		return -1;
@@ -129,7 +129,7 @@ Location::set_start (nframes_t s)
 }
 
 int
-Location::set_end (nframes_t e)
+Location::set_end (nframes64_t e)
 {
 	if (_locked) {
 		return -1;
@@ -166,7 +166,7 @@ Location::set_end (nframes_t e)
 }
 
 int
-Location::set (nframes_t start, nframes_t end)
+Location::set (nframes64_t start, nframes64_t end)
 {
 	if (_locked) {
 		return -1;
@@ -191,7 +191,7 @@ Location::set (nframes_t start, nframes_t end)
 }
 
 int
-Location::move_to (nframes_t pos) 
+Location::move_to (nframes64_t pos) 
 {
 	if (_locked) {
 		return -1;
@@ -385,14 +385,14 @@ Location::set_state (const XMLNode& node)
 		   may make the value of _start illegal.
 		*/
 		
-	_start = atoi (prop->value().c_str());
-		
+	sscanf (prop->value().c_str(), "%" PRIu32, &_start);
+	
 	if ((prop = node.property ("end")) == 0) {
 		  error << _("XML node for Location has no end information") << endmsg; 
 		  return -1;
 	}
 		
-	_end = atoi (prop->value().c_str());
+	sscanf (prop->value().c_str(), "%" PRIu32, &_end);
 		
 	if ((prop = node.property ("flags")) == 0) {
 		  error << _("XML node for Location has no flags information") << endmsg; 
@@ -733,7 +733,7 @@ struct LocationStartLaterComparison
 };
 
 Location *
-Locations::first_location_before (nframes_t frame, bool include_special_ranges)
+Locations::first_location_before (nframes64_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -760,7 +760,7 @@ Locations::first_location_before (nframes_t frame, bool include_special_ranges)
 }
 
 Location *
-Locations::first_location_after (nframes_t frame, bool include_special_ranges)
+Locations::first_location_after (nframes64_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -786,8 +786,8 @@ Locations::first_location_after (nframes_t frame, bool include_special_ranges)
 	return 0;
 }
 
-nframes_t
-Locations::first_mark_before (nframes_t frame, bool include_special_ranges)
+nframes64_t
+Locations::first_mark_before (nframes64_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -826,8 +826,8 @@ Locations::first_mark_before (nframes_t frame, bool include_special_ranges)
 	return 0;
 }
 
-nframes_t
-Locations::first_mark_after (nframes_t frame, bool include_special_ranges)
+nframes64_t
+Locations::first_mark_after (nframes64_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 

@@ -17,6 +17,11 @@
 
 */
 
+
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <string>

@@ -33,6 +33,7 @@ class InternalSend : public Send
 	virtual ~InternalSend ();
 
 	bool set_name (const std::string&);
+	bool visible() const;
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);

@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <vector>
 
 #include <sys/time.h>
@@ -345,8 +349,12 @@ AudioFileSource::safe_audio_file_extension(const ustring& file)
 		".vwe", ".VWE",
 		".paf", ".PAF",
 		".voc", ".VOC",
+#ifdef HAVE_OGG
+		".ogg", ".OGG",
+#endif /* HAVE_OGG */
 #ifdef HAVE_FLAC
 		".flac", ".FLAC",
+#else
 #endif // HAVE_FLAC
 #ifdef HAVE_COREAUDIO
 		".mp3", ".MP3",

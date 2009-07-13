@@ -70,7 +70,6 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	/* Cocoa */
 
 	NSWindow*           cocoa_window;
-	NSScrollView*       scroll_view;
 	NSView*             au_view;
 
 	/* Carbon */

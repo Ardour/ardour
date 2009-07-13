@@ -134,8 +134,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Frame          global_frame;
 	Gtk::VBox           global_vpacker;
 
-	ProcessorBox pre_processor_box;
-	ProcessorBox post_processor_box;
+	ProcessorBox processor_box;
 	GainMeter   gpm;
 	PannerUI    panners;
 	

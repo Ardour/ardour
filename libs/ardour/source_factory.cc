@@ -18,6 +18,10 @@
     $Id$
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/pthread_utils.h"

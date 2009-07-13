@@ -80,16 +80,14 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::Notebook            notebook;
 	Gtk::Frame 		 input_frame;
 	Gtk::Frame 		 output_frame;
-	Gtk::HPaned		 pre_redir_hpane;
-	Gtk::HPaned		 post_redir_hpane;
+	Gtk::HPaned		 redir_hpane;
 
 	Gtk::Frame 		 route_select_frame;
 
 	Gtk::HBox                route_hpacker;
 	Gtk::VBox                route_vpacker;
 
-	ProcessorBox              * pre_insert_box;
-	ProcessorBox              * post_insert_box;
+	ProcessorBox*            insert_box;
 	
 	Gtk::HPaned		 list_hpane;
 
@@ -119,8 +117,7 @@ class RouteParams_UI : public ArdourDialog
 	
 	Gtk::Label  title_label;
 	
-	Gtk::Container * _active_pre_view;
-	Gtk::Container * _active_post_view;
+	Gtk::Container * _active_view;
 	IOSelector     * _input_iosel;
 	IOSelector     * _output_iosel;
 	
@@ -131,12 +128,9 @@ class RouteParams_UI : public ArdourDialog
 	sigc::connection            _route_conn;
 	sigc::connection            _route_ds_conn;
 
-	boost::shared_ptr<ARDOUR::Processor> _pre_processor;
-	sigc::connection                    _pre_plugin_conn;
+	boost::shared_ptr<ARDOUR::Processor> _processor;
+	sigc::connection                    _plugin_conn;
 
-	boost::shared_ptr<ARDOUR::Processor> _post_processor;
-	sigc::connection                     _post_plugin_conn;
-	
 	
 	enum ConfigView {
 		NO_CONFIG_VIEW = 0,
@@ -176,8 +170,7 @@ class RouteParams_UI : public ArdourDialog
 
 	void setup_io_frames();
 	void cleanup_io_frames();
-	void cleanup_pre_view(bool stopupdate = true);
-	void cleanup_post_view(bool stopupdate = true);
+	void cleanup_view(bool stopupdate = true);
 	void cleanup_latency_frame ();
 	void setup_latency_frame ();
 	
@@ -186,7 +179,7 @@ class RouteParams_UI : public ArdourDialog
 	void setup_processor_boxes();
 	void cleanup_processor_boxes();
 
-	void redirect_selected (boost::shared_ptr<ARDOUR::Processor>, ARDOUR::Placement);
+	void redirect_selected (boost::shared_ptr<ARDOUR::Processor>);
 	
 	void plugin_going_away (ARDOUR::Placement);
 	void redirect_going_away (boost::shared_ptr<ARDOUR::Processor>);

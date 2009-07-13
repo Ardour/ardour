@@ -78,8 +78,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 	, RouteUI (sess)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
- 	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
-	, post_processor_box (PostFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
+ 	, processor_box (sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
 	, gpm (sess)
 	, panners (sess)
 	, button_table (3, 2)
@@ -105,8 +104,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	, RouteUI (sess)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
- 	, pre_processor_box (PreFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
-	, post_processor_box (PostFader, sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
+ 	, processor_box (sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
 	, gpm (sess)
 	, panners (sess)
 	, button_table (3, 2)
@@ -231,11 +229,10 @@ MixerStrip::init ()
 
 	global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (pre_processor_box, true, true);
+	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (post_processor_box, true, true);
 	if (!is_midi_track()) {
 		global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	}
@@ -341,8 +338,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	panners.set_panner (rt->main_outs()->panner());
 	gpm.set_controls (rt, rt->shared_peak_meter(), rt->gain_control(), rt->amp());
-	pre_processor_box.set_route (rt);
-	post_processor_box.set_route (rt);
+	processor_box.set_route (rt);
 
 	if (set_color_from_route()) {
 		set_color (unique_random_color());
@@ -436,8 +432,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	/* now force an update of all the various elements */
 
-	pre_processor_box.update();
-	post_processor_box.update();
+	processor_box.update();
 	mute_changed (0);
 	solo_changed (0);
 	name_changed ();
@@ -454,7 +449,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 
-	pre_processor_box.show();
+	processor_box.show();
 
 	if (!route()->is_master() && !route()->is_control()) {
 		/* we don't allow master or control routes to be hidden */
@@ -469,11 +464,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	button_table.show();
 	middle_button_table.show();
 	bottom_button_table.show();
-	pre_processor_box.show_all ();
+	processor_box.show_all ();
 	gpm.show_all ();
 	panners.show_all ();
 	gain_meter_alignment.show ();
-	post_processor_box.show_all ();
 	gain_unit_button.show();
 	gain_unit_label.show();
 	meter_point_button.show();
@@ -525,8 +519,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	gpm.set_width (w);
 	panners.set_width (w);
-	pre_processor_box.set_width (w);
-	post_processor_box.set_width (w);
+	processor_box.set_width (w);
 
 	boost::shared_ptr<AutomationList> gain_automation = _route->gain_control()->alist();
 
@@ -1273,12 +1266,10 @@ MixerStrip::map_frozen ()
 	if (at) {
 		switch (at->freeze_state()) {
 		case AudioTrack::Frozen:
-			pre_processor_box.set_sensitive (false);
-			post_processor_box.set_sensitive (false);
+			processor_box.set_sensitive (false);
 			break;
 		default:
-			pre_processor_box.set_sensitive (true);
-			post_processor_box.set_sensitive (true);
+			processor_box.set_sensitive (true);
 			// XXX need some way, maybe, to retoggle redirect editors
 			break;
 		}
@@ -1414,6 +1405,9 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 	}
 	
 	_current_delivery = _route->internal_send_for (target);
+
+	cerr << "internal send from " << _route->name() << " to " << target->name() << " = " 
+	     << _current_delivery << endl;
 
 	if (_current_delivery) {
 		send = boost::dynamic_pointer_cast<Send>(_current_delivery);

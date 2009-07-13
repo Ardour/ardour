@@ -129,6 +129,11 @@ def configure(conf):
 
 	# Fix utterly braindead FLAC include path to not smash assert.h
 	conf.env['CPPPATH_FLAC'] = []
+	
+	# Tell everyone that this is a waf build
+
+	conf.env.append_value('CCFLAGS', '-DWAF_BUILD')
+	conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
 
 	autowaf.print_summary(conf)
 	opts = Options.options

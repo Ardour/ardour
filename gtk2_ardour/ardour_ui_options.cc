@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"
 

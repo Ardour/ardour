@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <climits>
 #include <cerrno>
 #include <cmath>
@@ -383,13 +387,22 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
 
 	plugin_analysis_expander.property_expanded().signal_changed().connect( mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
-
 	plugin_analysis_expander.set_expanded(false);
+
+	insert->GoingAway.connect (mem_fun (*this, &PlugUIBase::plugin_going_away));
 }
 
 PlugUIBase::~PlugUIBase()
 {
 	delete latency_gui;
+}
+
+void
+PlugUIBase::plugin_going_away ()
+{
+	/* drop references to the plugin/insert */
+	insert.reset ();
+	plugin.reset ();
 }
 
 void

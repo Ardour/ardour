@@ -49,6 +49,10 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
 	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
 	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
+	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
+	autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
+
+	# we don't try to detect this, since its part of our source tree
 
 	conf.env.append_value('CXXFLAGS', '-DUSE_RUBBERBAND')
 	conf.define('HAVE_RUBBERBAND', 1)
@@ -59,8 +63,7 @@ def configure(conf):
 	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
 	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
 
-	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
-	conf.write_config_header('wafconfig.h')
+	conf.write_config_header('libardour-config.h')
 
 	# Boost headers
 	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
@@ -244,7 +247,6 @@ def build(bld):
 	if bld.env['HAVE_SLV2']:
 		obj.source += ' lv2_plugin.cc lv2_event_buffer.cc uri_map.cc '
 		obj.uselib += ' SLV2 '
-		obj.cxxflags += ['-DHAVE_SLV2']
 		
 	if bld.env['HAVE_CPPUNIT']:
 		# Unit tests

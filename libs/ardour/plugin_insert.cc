@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <string>
 
 #include <sigc++/bind.h>

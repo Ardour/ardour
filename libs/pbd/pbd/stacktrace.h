@@ -29,8 +29,8 @@ namespace PBD {
 	void stacktrace (std::ostream& out, int levels = 0);
 	void trace_twb();
 
-#ifdef HAVE_WAFCONFIG_H
-#include "wafconfig.h"
+#ifdef HAVE_WAFBUILD
+#include "libpbd-config.h"
 #endif
 
 #ifdef HAVE_EXECINFO

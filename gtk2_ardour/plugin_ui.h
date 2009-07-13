@@ -20,6 +20,10 @@
 #ifndef __ardour_plugin_ui_h__
 #define __ardour_plugin_ui_h__
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <vector>
 #include <map>
 #include <list>
@@ -112,6 +116,7 @@ class PlugUIBase : public virtual sigc::trackable
 	void bypass_toggled();
 	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
+	void plugin_going_away ();
 };
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox

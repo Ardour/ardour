@@ -20,6 +20,10 @@
 #ifndef __ardour_utils_h__
 #define __ardour_utils_h__
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <iostream>
 #include <string>
 #include <cmath>

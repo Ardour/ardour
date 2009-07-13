@@ -42,8 +42,7 @@ def configure(conf):
 	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
 	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
 
-	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
-	conf.write_config_header('wafconfig.h')
+	conf.write_config_header('gtk2ardour-config.h')
 
 	# TODO
 	conf.define('WINDOWS_KEY', 'Mod4')
@@ -244,7 +243,6 @@ def build(bld):
 	if bld.env['HAVE_SLV2']:
 		obj.source += ' lv2_plugin_ui.cc '
 		obj.uselib += ' SLV2 '
-		obj.cxxflags += ['-DHAVE_SLV2']
 
 	# Wrappers
 

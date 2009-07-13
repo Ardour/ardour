@@ -1210,10 +1210,10 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	options.set_spacing (12);
 
 	str.clear ();
-	str.push_back (_("use file timestamp"));
-	str.push_back (_("at edit point"));
-	str.push_back (_("at playhead"));
-	str.push_back (_("at session start"));
+	str.push_back (_("file timestamp"));
+	str.push_back (_("edit point"));
+	str.push_back (_("playhead"));
+	str.push_back (_("session start"));
 	set_popdown_strings (where_combo, str);
 	where_combo.set_active_text (str.front());
 
@@ -1240,7 +1240,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	action_combo.set_sensitive (false);
 
 	l = manage (new Label);
-	l->set_text (_("Insert:"));
+	l->set_text (_("Insert at:"));
 
 	hbox = manage (new HBox);
 	hbox->set_border_width (12);
@@ -1364,11 +1364,11 @@ SoundFileOmega::get_position() const
 {
 	ustring str = where_combo.get_active_text();
 
-	if (str == _("use file timestamp")) {
+	if (str == _("file timestamp")) {
 		return ImportAtTimestamp;
-	} else if (str == _("at edit point")) {
+	} else if (str == _("edit point")) {
 		return ImportAtEditPoint;
-	} else if (str == _("at playhead")) {
+	} else if (str == _("playhead")) {
 		return ImportAtPlayhead;
 	} else {
 		return ImportAtStart;

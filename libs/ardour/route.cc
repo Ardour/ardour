@@ -1348,8 +1348,33 @@ Route::all_processors_active (Placement p, bool state)
 	_session.set_dirty ();
 }
 
+bool
+Route::processor_is_prefader (boost::shared_ptr<Processor> p)
+{
+	bool pre_fader = true;
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		/* semantic note: if p == amp, we want to return true, so test
+		   for equality before checking if this is the amp
+		*/
+
+		if ((*i) == p) {
+			break;
+		}
+
+		if ((*i) == _amp) {
+			pre_fader = false;
+			break;
+		}
+	}
+
+	return pre_fader;
+}
+
 int
-Route::reorder_processors (const ProcessorList& new_order, Placement placement, ProcessorStreams* err)
+Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err)
 {
 	/* "new_order" is an ordered list of processors to be positioned according to "placement".
 	   NOTE: all processors in "new_order" MUST be marked as visible. There maybe additional
@@ -1364,11 +1389,8 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 		ProcessorList::const_iterator niter;
 		ProcessorList as_it_was_before = _processors;
 		ProcessorList as_it_will_be;
-		ProcessorList::iterator start, end;
 
-		placement_range (placement, start, end);
-
-		oiter = start;
+		oiter = _processors.begin();
 		niter = new_order.begin(); 
 
 		while (niter !=  new_order.end()) {
@@ -1380,7 +1402,7 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 			   its been deleted. If its there, append it to the temp list.
 			*/
 
-			if (oiter == end) {
+			if (oiter == _processors.end()) {
 
 				/* no more elements in the old list, so just stick the rest of 
 				   the new order onto the temp list.
@@ -1388,7 +1410,6 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 
 				as_it_will_be.insert (as_it_will_be.end(), niter, new_order.end());
 				while (niter != new_order.end()) {
-					(*niter)->set_placement (placement);
 					++niter;
 				}
 				break;
@@ -1398,7 +1419,6 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 				if (!(*oiter)->visible()) {
 
 					as_it_will_be.push_back (*oiter);
-					(*oiter)->set_placement (placement);
 
 				} else {
 
@@ -1409,7 +1429,6 @@ Route::reorder_processors (const ProcessorList& new_order, Placement placement, 
 					} else {
 						/* ignore this one, and add the next item from the new order instead */
 						as_it_will_be.push_back (*niter);
-						(*niter)->set_placement (placement);
 						++niter;
 					}
 				}

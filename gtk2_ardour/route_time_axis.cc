@@ -2397,7 +2397,14 @@ RouteTimeAxisView::set_button_names ()
 	rec_enable_button_label.set_text (_("r"));
 
 	if (Config->get_solo_control_is_listen_control()) {
-		solo_button_label.set_text (_("l"));
+		switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+			solo_button_label.set_text (_("A"));
+			break;
+		case PreFaderListen:
+			solo_button_label.set_text (_("P"));
+			break;
+		}
 	} else {
 		solo_button_label.set_text (_("s"));
 	}

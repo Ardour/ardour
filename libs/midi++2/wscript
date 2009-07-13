@@ -36,9 +36,6 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
 	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 
-	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
-	conf.write_config_header('wafconfig.h')
-
 	# TODO
 	conf.env['SYSMIDI'] = 'JACK MIDI'
 	conf.env.append_value('CXXFLAGS', '-DWITH_JACK_MIDI')

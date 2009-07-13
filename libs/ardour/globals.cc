@@ -16,6 +16,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
 #include <sys/stat.h>
 #include <sys/types.h>

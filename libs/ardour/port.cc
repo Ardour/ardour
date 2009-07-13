@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include "ardour/port.h"
 #include "ardour/audioengine.h"
 #include "pbd/failed_constructor.h"

@@ -181,10 +181,14 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 	if (out != in) { // always 1:1
 		return false;
 	}
+	
+	if (!Processor::configure_io (in, out)) {
+		return false;
+	}
 
 	reset_panner ();
-	
-	return Processor::configure_io (in, out);
+
+	return true;
 }
 
 void
@@ -431,11 +435,8 @@ Delivery::target_gain ()
 			break;
 		case Send:
 		case Insert:
-			if (_placement == PreFader) {
-				mp = MuteMaster::PreFader;
-			} else {
-				mp = MuteMaster::PostFader;
-			}
+			/* XXX FIX ME this is wrong, we need per-delivery muting */
+			mp = MuteMaster::PreFader;
 			break;
 		}
 

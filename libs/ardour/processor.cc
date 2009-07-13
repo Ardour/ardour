@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <string>
 
 #include <sigc++/bind.h>
@@ -142,7 +146,6 @@ Processor::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 	const XMLProperty *legacy_active = 0;
-	const XMLProperty *legacy_placement = 0;
 
 	// may not exist for legacy 3.0 sessions
 	if ((prop = node.property ("name")) != 0) {
@@ -191,9 +194,6 @@ Processor::set_state (const XMLNode& node)
 		} else if ((*niter)->name() == "Redirect") {
 			if ( !(legacy_active = (*niter)->property("active"))) {
 				error << string_compose(_("No %1 property flag in element %2"), "active", (*niter)->name()) << endl;
-			}
-			if ( !(legacy_placement = (*niter)->property("placement"))) {
-				error << string_compose(_("No %1 property flag in element %2"), "placement", (*niter)->name()) << endl;
 			}
 		}
 	}

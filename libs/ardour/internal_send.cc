@@ -222,3 +222,9 @@ InternalSend::set_name (const std::string& str)
 	/* rules for external sends don't apply to us */
 	return IOProcessor::set_name (str);
 }
+
+bool
+InternalSend::visible () const
+{
+	return false; 
+}

@@ -129,8 +129,12 @@ AUPluginUI::~AUPluginUI ()
 		DisposeWindow (carbon_window);
 	}
 
-	if (packView && packView != au_view) {
-		[packView release];
+	if (packView) {
+		/* remove whatever we packed into low_box so that GTK doesn't
+		   mess with it.
+		*/
+
+		[packView removeFromSuperview];
 	}
 }
 
@@ -284,46 +288,11 @@ AUPluginUI::create_cocoa_view ()
 		[(AUGenericView *)au_view setShowsExpertParameters:YES];
 	}
 
-	NSRect packFrame;
-
+	packView = au_view;
+	
 	// Get the size of the new AU View's frame 
+	NSRect packFrame;
 	packFrame = [au_view frame];
-
-	packFrame.origin.x = 0;
-	packFrame.origin.y = 0;
-
-	if (packFrame.size.width > 500 || packFrame.size.height > 500) {
-		
-		/* its too big - use a scrollview */
-
-		NSRect frameRect = [[cocoa_window contentView] frame];
-		scroll_view = [[[NSScrollView alloc] initWithFrame:frameRect] autorelease];
-		[scroll_view setDrawsBackground:NO];
-		[scroll_view setHasHorizontalScroller:YES];
-		[scroll_view setHasVerticalScroller:YES];
-
-		packFrame.size = [NSScrollView  frameSizeForContentSize:packFrame.size
-				    hasHorizontalScroller:[scroll_view hasHorizontalScroller]
-				    hasVerticalScroller:[scroll_view hasVerticalScroller]
-				    borderType:[scroll_view borderType]];
-		
-		// Create a new frame with same origin as current
-		// frame but size equal to the size of the new view
-		NSRect newFrame;
-		newFrame.origin = [scroll_view frame].origin;
-		newFrame.size = packFrame.size;
-		
-		// Set the new frame and document views on the scroll view
-		[scroll_view setFrame:newFrame];
-		[scroll_view setDocumentView:au_view];
-		
-		packView = scroll_view;
-
-	} else {
-
-		packView = au_view;
-	}
-
 	prefwidth = packFrame.size.width;
 	prefheight = packFrame.size.height;
 

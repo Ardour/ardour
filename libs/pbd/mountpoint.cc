@@ -28,8 +28,8 @@
 
 using std::string;
 
-#ifdef HAVE_WAFCONFIG_H
-#include "wafconfig.h"
+#ifdef WAF_BUILD
+#include "libpbd-config.h"
 #endif
 
 #ifdef HAVE_GETMNTENT

@@ -1161,8 +1161,6 @@ AudioEngine::remove_connections_for (Port& port)
 }
 
 
-#ifdef HAVE_JACK_CLIENT_OPEN
-
 static void 
 ardour_jack_error (const char* msg) 
 {
@@ -1192,22 +1190,6 @@ AudioEngine::connect_to_jack (string client_name)
 	
 	return 0;
 }
-
-#else
-
-int
-AudioEngine::connect_to_jack (string client_name)
-{
-	jack_client_name = client_name;
-
-	if ((_jack = jack_client_new (client_name.c_str())) == 0) {
-		return -1;
-	}
-
-	return 0;
-}
-
-#endif /* HAVE_JACK_CLIENT_OPEN */
 
 int 
 AudioEngine::disconnect_from_jack ()

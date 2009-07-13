@@ -18,6 +18,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <iostream>
 #include <cmath>
 #include <unistd.h>

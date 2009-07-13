@@ -41,8 +41,7 @@ def configure(conf):
 	# This must be defined for libpbd only, it breaks ardour
 	conf.check(header_name='execinfo.h', define_name='PBD_HAVE_EXECINFO')
 
-	conf.env.append_value('CXXFLAGS', '-DHAVE_WAFCONFIG_H')
-	conf.write_config_header('wafconfig.h')
+	conf.write_config_header('libpbd-config.h')
 
 	# Boost headers
 	autowaf.check_header(conf, 'boost/shared_ptr.hpp')

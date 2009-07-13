@@ -1112,6 +1112,8 @@ if env['SYSLIBS']:
     libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')
     libraries['glibmm2'] = LibraryInfo()
     libraries['glibmm2'].ParseConfig('pkg-config --cflags --libs glibmm-2.4')
+    libraries['giomm'] = LibraryInfo()
+    libraries['giomm'].ParseConfig('pkg-config --cflags --libs giomm-2.4')
     libraries['cairo'] = LibraryInfo()
     libraries['cairo'].ParseConfig('pkg-config --cflags --libs cairo')
     libraries['cairomm'] = LibraryInfo()
@@ -1189,6 +1191,9 @@ else:
     libraries['glibmm2'] = LibraryInfo(LIBS='glibmm2',
                                     LIBPATH='#libs/glibmm2',
                                     CPPPATH='#libs/glibmm2/glib')
+    libraries['giomm'] = LibraryInfo(LIBS='giomm',
+                                    LIBPATH='#libs/glibmm2',
+                                    CPPPATH='#libs/glibmm2/gio')
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')

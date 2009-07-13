@@ -1,3 +1,7 @@
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <fstream>
 #include <gtkmm/stock.h>
 

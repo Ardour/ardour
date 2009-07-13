@@ -16,6 +16,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
 
 #include <cstdio>
 #include <lrdf.h>

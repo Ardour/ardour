@@ -69,7 +69,7 @@ namespace ARDOUR {
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 {
   public:
-	ProcessorBox (ARDOUR::Placement, ARDOUR::Session&, PluginSelector &, RouteRedirectSelection &, MixerStrip* parent, bool owner_is_mixer = false);
+	ProcessorBox (ARDOUR::Session&, PluginSelector &, RouteRedirectSelection &, MixerStrip* parent, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);

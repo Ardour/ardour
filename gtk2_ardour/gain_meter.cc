@@ -166,6 +166,11 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 			     boost::shared_ptr<Automatable> gc_owner)
 {
  	connections.clear ();
+
+	cerr << "GM reset controls for " << r->name()
+	     << " pm = " << pm 
+	     << " autocontrol = " << gc 
+	     << endl;
 	
 	if (!pm && !gc) {
 		level_meter->set_meter (0);
@@ -417,10 +422,10 @@ GainMeterBase::set_fader_name (const char * name)
 void
 GainMeterBase::update_gain_sensitive ()
 {
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (
-			!(_gain_control->alist()->automation_state() & Play));
+	bool x = !(_gain_control->alist()->automation_state() & Play);
+	cerr << " for " << _route->name() << " set gain sensitive to " << x << endl;
+	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
 }
-
 
 static MeterPoint
 next_meter_point (MeterPoint mp)
@@ -826,6 +831,9 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	if (!r->is_hidden()) {
 		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 	}
+
+	setup_meters ();
+	hbox.show_all ();
 }
 
 int

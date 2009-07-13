@@ -17,6 +17,11 @@
     
 */
 
+
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #define __STDC_FORMAT_MACROS 1
 #include <stdint.h>
 
@@ -588,7 +593,7 @@ Session::remove_pending_capture_state ()
 {
 	sys::path pending_state_file_path(_session_dir->root_path());
 	
-	pending_state_file_path /= _current_snapshot_name + pending_suffix;
+	pending_state_file_path /= legalize_for_path (_current_snapshot_name) + pending_suffix;
 
 	try
 	{
@@ -612,8 +617,8 @@ Session::rename_state (string old_name, string new_name)
 		return;
 	}
 
-	const string old_xml_filename = old_name + statefile_suffix;
-	const string new_xml_filename = new_name + statefile_suffix;
+	const string old_xml_filename = legalize_for_path (old_name) + statefile_suffix;
+	const string new_xml_filename = legalize_for_path (new_name) + statefile_suffix;
 
 	const sys::path old_xml_path = _session_dir->root_path() / old_xml_filename;
 	const sys::path new_xml_path = _session_dir->root_path() / new_xml_filename;
@@ -642,7 +647,7 @@ Session::remove_state (string snapshot_name)
 
 	sys::path xml_path(_session_dir->root_path());
 
-	xml_path /= snapshot_name + statefile_suffix;
+	xml_path /= legalize_for_path (snapshot_name) + statefile_suffix;
 
 	if (!create_backup_file (xml_path)) {
 		// don't remove it if a backup can't be made
@@ -685,7 +690,7 @@ Session::save_state (string snapshot_name, bool pending)
 
 		/* proper save: use statefile_suffix (.ardour in English) */
 		
-		xml_path /= snapshot_name + statefile_suffix;
+		xml_path /= legalize_for_path (snapshot_name) + statefile_suffix;
 
 		/* make a backup copy of the old file */
 
@@ -697,12 +702,12 @@ Session::save_state (string snapshot_name, bool pending)
 	} else {
 
 		/* pending save: use pending_suffix (.pending in English) */
-		xml_path /= snapshot_name + pending_suffix;
+		xml_path /= legalize_for_path (snapshot_name) + pending_suffix;
 	}
 
 	sys::path tmp_path(_session_dir->root_path());
 
-	tmp_path /= snapshot_name + temp_suffix;
+	tmp_path /= legalize_for_path (snapshot_name) + temp_suffix;
 
 	// cerr << "actually writing state to " << xml_path.to_string() << endl;
 
@@ -760,7 +765,7 @@ Session::load_state (string snapshot_name)
 	/* check for leftover pending state from a crashed capture attempt */
 
 	sys::path xmlpath(_session_dir->root_path());
-	xmlpath /= snapshot_name + pending_suffix;
+	xmlpath /= legalize_for_path (snapshot_name) + pending_suffix;
 
 	if (sys::exists (xmlpath)) {
 
@@ -773,7 +778,7 @@ Session::load_state (string snapshot_name)
 
 	if (!state_was_pending) {
 		xmlpath = _session_dir->root_path();
-		xmlpath /= snapshot_name + statefile_suffix;
+		xmlpath /= legalize_for_path (snapshot_name) + statefile_suffix;
 	}
 	
 	if (!sys::exists (xmlpath)) {
@@ -819,7 +824,7 @@ Session::load_state (string snapshot_name)
 
 		sys::path backup_path(_session_dir->root_path());
 
-		backup_path /= snapshot_name + "-1" + statefile_suffix;
+		backup_path /= legalize_for_path (snapshot_name) + "-1" + statefile_suffix;
 
 		// only create a backup once
 		if (sys::exists (backup_path)) {
@@ -2348,7 +2353,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	}
 
 	this_snapshot_path = _path;
-	this_snapshot_path += _current_snapshot_name;
+	this_snapshot_path += legalize_for_path (_current_snapshot_name);
 	this_snapshot_path += statefile_suffix;
 
 	for (vector<string*>::iterator i = state_files->begin(); i != state_files->end(); ++i) {
@@ -2809,7 +2814,7 @@ Session::save_history (string snapshot_name)
 		snapshot_name = _current_snapshot_name;
 	}
   
- 	const string history_filename = snapshot_name + history_suffix;
+ 	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const string backup_filename = history_filename + backup_suffix;
  	const sys::path xml_path = _session_dir->root_path() / history_filename;
 	const sys::path backup_path = _session_dir->root_path() / backup_filename;
@@ -2862,11 +2867,11 @@ Session::restore_history (string snapshot_name)
 	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
 	}
-
-	const string xml_filename = snapshot_name + history_suffix;
+	
+	const string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const sys::path xml_path = _session_dir->root_path() / xml_filename;
-
-    cerr << "Loading history from " << xml_path.to_string() << endmsg;
+	
+	cerr << "Loading history from " << xml_path.to_string() << endmsg;
 
 	if (!sys::exists (xml_path)) {
 		info << string_compose (_("%1: no history file \"%2\" for this session."),

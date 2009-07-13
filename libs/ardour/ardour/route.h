@@ -187,6 +187,8 @@ class Route : public SessionObject, public AutomatableControls
 		}
 	}
 
+	bool processor_is_prefader (boost::shared_ptr<Processor> p);
+
 	ChanCount max_processor_streams () const { return processor_max_streams; }
 
 	/* special processors */
@@ -215,7 +217,7 @@ class Route : public SessionObject, public AutomatableControls
 	int add_processors (const ProcessorList&, Placement placement, ProcessorStreams* err = 0);
 	int add_processors (const ProcessorList&, ProcessorList::iterator iter, ProcessorStreams* err = 0);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
-	int reorder_processors (const ProcessorList& new_order, Placement placement, ProcessorStreams* err = 0);
+	int reorder_processors (const ProcessorList& new_order, ProcessorStreams* err = 0);
 	void disable_processors (Placement);
 	void disable_processors ();
 	void disable_plugins (Placement);

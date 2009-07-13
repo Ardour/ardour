@@ -138,5 +138,8 @@ InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& ou
 	return true;
 }
 
-
-
+bool
+InternalReturn::visible () const
+{
+	return false; 
+}

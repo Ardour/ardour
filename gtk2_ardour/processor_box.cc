@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <cmath>
 #include <iostream>
 #include <set>
@@ -89,12 +93,12 @@ bool ProcessorBox::get_colors = true;
 Gdk::Color* ProcessorBox::active_processor_color;
 Gdk::Color* ProcessorBox::inactive_processor_color;
 
-ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, PluginSelector &plugsel,
+ProcessorBox::ProcessorBox (Session& sess, PluginSelector &plugsel,
 			    RouteRedirectSelection & rsel, MixerStrip* parent, bool owner_is_mixer)
 	: _session(sess)
 	, _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)
-	, _placement(pcmnt)
+	, _placement(PreFader)
 	, _plugin_selector(plugsel)
 	, _rr_selection(rsel)
 {
@@ -363,7 +367,6 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 	boost::shared_ptr<Processor> processor;
 	int ret = false;
 
-
 	if (processor_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = model->get_iter (path))) {
 			processor = (*iter)[columns.processor];
@@ -379,7 +382,23 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 
 	} else if (Keyboard::is_context_menu_event (ev)) {
 
-		show_processor_menu(ev->time);
+		/* figure out if we are above or below the fader/amp processor,
+		   and set the next insert position appropriately.
+		*/
+
+		if (processor) {
+			if (_route->processor_is_prefader (processor)) {
+				_placement = PreFader;
+			} else {
+				_placement = PostFader;
+			}
+			cerr << "had processor " << processor->name() << " placement = " << _placement << endl;
+		} else {
+			_placement = PostFader;
+			cerr << "no processor, postfader\n";
+		}
+		
+		show_processor_menu (ev->time);
 		ret = true;
 
 	} else if (processor && Keyboard::is_button2_event (ev)
@@ -512,9 +531,8 @@ void
 ProcessorBox::choose_insert ()
 {
 	boost::shared_ptr<Processor> processor (new PortInsert (_session, _route->mute_master()));
-	processor->ActiveChanged.connect (bind (
-			mem_fun(*this, &ProcessorBox::show_processor_active),
-			boost::weak_ptr<Processor>(processor)));
+	processor->ActiveChanged.connect (bind (mem_fun(*this, &ProcessorBox::show_processor_active),
+						boost::weak_ptr<Processor>(processor)));
 
 	_route->add_processor (processor, _placement);
 }
@@ -651,16 +669,9 @@ ProcessorBox::redisplay_processors ()
 	processor_active_connections.clear ();
 	processor_name_connections.clear ();
 
-	_route->foreach_processor (_placement, mem_fun (*this, &ProcessorBox::add_processor_to_display));
+	_route->foreach_processor (mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
-	switch (_placement) {
-	case PreFader:
-		build_processor_tooltip (processor_eventbox, _("Pre-fader inserts, sends & plugins:"));
-		break;
-	case PostFader:
-		build_processor_tooltip (processor_eventbox, _("Post-fader inserts, sends & plugins:"));
-		break;
-	}
+	build_processor_tooltip (processor_eventbox, _("Inserts, sends & plugins:"));
 }
 
 void
@@ -671,9 +682,11 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		return;
 	}
 
+#if 0
 	if (processor == _route->amp() || !processor->visible()) {
 		return;
 	}
+#endif
 
 	Gtk::TreeModel::Row row = *(model->append());
 	row[columns.text] = processor_name (processor);
@@ -816,7 +829,7 @@ ProcessorBox::compute_processor_sort_keys ()
 		our_processors.push_back ((*iter)[columns.processor]);
 	}
 
-	if (_route->reorder_processors (our_processors, _placement)) {
+	if (_route->reorder_processors (our_processors)) {
 
 		/* reorder failed, so redisplay */
 

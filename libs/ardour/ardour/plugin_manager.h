@@ -20,6 +20,10 @@
 #ifndef __ardour_plugin_manager_h__
 #define __ardour_plugin_manager_h__
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <list>
 #include <map>
 #include <string>

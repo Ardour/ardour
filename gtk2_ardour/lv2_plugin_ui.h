@@ -21,6 +21,10 @@
 #ifndef __ardour_lv2_plugin_ui_h__
 #define __ardour_lv2_plugin_ui_h__
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <vector>
 #include <map>
 #include <list>

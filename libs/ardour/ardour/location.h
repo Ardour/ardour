@@ -52,8 +52,8 @@ class Location : public PBD::StatefulDestructible
 		IsStart = 0x80
 	};
 
-	Location (nframes_t sample_start,
-		  nframes_t sample_end,
+	Location (nframes64_t sample_start,
+		  nframes64_t sample_end,
 		  const std::string &name,
 		  Flags bits = Flags(0))		
 		
@@ -78,15 +78,15 @@ class Location : public PBD::StatefulDestructible
 	void lock() { _locked = true; changed (this); }
 	void unlock() { _locked = false; changed (this); }
 	
-	nframes_t start() const  { return _start; }
-	nframes_t end() const { return _end; }
-	nframes_t length() const { return _end - _start; }
+	nframes64_t start() const  { return _start; }
+	nframes64_t end() const { return _end; }
+	nframes64_t length() const { return _end - _start; }
 
-	int set_start (nframes_t s);
-	int set_end (nframes_t e);
-	int set (nframes_t start, nframes_t end);
+	int set_start (nframes64_t s);
+	int set_end (nframes64_t e);
+	int set (nframes64_t start, nframes64_t end);
 
-	int move_to (nframes_t pos);
+	int move_to (nframes64_t pos);
 
 	const std::string& name() const { return _name; }
 	void set_name (const std::string &str) { _name = str; name_changed(this); }
@@ -129,8 +129,8 @@ class Location : public PBD::StatefulDestructible
 
   private:
 	std::string   _name;
-	nframes_t     _start;
-	nframes_t     _end;
+	nframes64_t   _start;
+	nframes64_t   _end;
 	Flags         _flags;
 	bool          _locked;
 
@@ -169,11 +169,11 @@ class Locations : public PBD::StatefulDestructible
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location *first_location_before (nframes_t, bool include_special_ranges = false);
-	Location *first_location_after (nframes_t, bool include_special_ranges = false);
+	Location *first_location_before (nframes64_t, bool include_special_ranges = false);
+	Location *first_location_after (nframes64_t, bool include_special_ranges = false);
 
-	nframes_t first_mark_before (nframes_t, bool include_special_ranges = false);
-	nframes_t first_mark_after (nframes_t, bool include_special_ranges = false);
+	nframes64_t first_mark_before (nframes64_t, bool include_special_ranges = false);
+	nframes64_t first_mark_after (nframes64_t, bool include_special_ranges = false);
 
 	void find_all_between (nframes64_t start, nframes64_t, LocationList&, Location::Flags);
 
