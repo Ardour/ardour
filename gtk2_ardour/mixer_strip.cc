@@ -1530,6 +1530,12 @@ MixerStrip::on_key_press_event (GdkEventKey* ev)
 		}
 		return true;
 		break;
+
+	case GDK_0:
+		if (_route) {
+			_route->set_gain (1.0, this);
+		}
+		return true;
 		
 	default:
 		break;

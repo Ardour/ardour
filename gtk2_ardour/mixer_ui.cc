@@ -1478,7 +1478,8 @@ Mixer_UI::on_key_press_event (GdkEventKey* ev)
 bool
 Mixer_UI::on_key_release_event (GdkEventKey* ev)
 {
-	return key_press_focus_accelerator_handler (*this, ev);
+	return Gtk::Window::on_key_release_event (ev);
+	// return key_press_focus_accelerator_handler (*this, ev);
 }
 
 void

@@ -383,7 +383,7 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		ret = true;
 		break;
 
-	case GDK_KP_0:
+	case GDK_slash:
 		for (ProcSelection::iterator i = targets.begin(); i != targets.end(); ++i) {
 			if ((*i)->active()) {
 				(*i)->deactivate ();
