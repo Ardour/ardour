@@ -145,6 +145,23 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
 }
 
+std::string
+Delivery::display_name () const
+{
+	switch (_role) {
+	case Main:
+		return _("main outs");
+		break;
+	case Listen:
+		return _("listen");
+		break;
+	case Send:
+	case Insert:
+	default:
+		return name();
+	}
+}
+
 void
 Delivery::cycle_start (nframes_t nframes)
 {
@@ -194,7 +211,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 void
 Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (_output->n_ports ().get (_output->default_type()) == 0) {
+	if (!_active || _output->n_ports ().get (_output->default_type()) == 0) {
 		return;
 	}
 

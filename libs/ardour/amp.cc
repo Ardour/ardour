@@ -47,6 +47,12 @@ Amp::Amp(Session& s, boost::shared_ptr<MuteMaster> mm)
 	add_control(_gain_control);
 }
 
+std::string
+Amp::display_name() const
+{
+	return _("Fader");
+}
+
 bool
 Amp::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
@@ -68,6 +74,10 @@ void
 Amp::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	gain_t mute_gain;
+
+	if (!_active) {
+		return;
+	}
 
 	if (_mute_master) {
 		mute_gain = _mute_master->mute_gain_at (MuteMaster::PreFader);

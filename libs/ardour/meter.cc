@@ -73,6 +73,10 @@ Metering::update_meters()
 void
 PeakMeter::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
+	if (!_active) {
+		return;
+	}
+
 	const uint32_t n_audio = min(_configured_input.n_audio(), bufs.count().n_audio());
 	const uint32_t n_midi  = min(_configured_input.n_midi(), bufs.count().n_midi());
 	
