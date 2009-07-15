@@ -197,15 +197,26 @@ ProcessorBox::route_going_away ()
 
 
 void
-ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk::TreeView* source, Glib::RefPtr<Gdk::DragContext>& context)
+ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk::TreeView* source, int x, int y, Glib::RefPtr<Gdk::DragContext>& context)
 {
-	cerr << "Drop from " << source << " (mine is " << &processor_display << ") action = " << hex << context->get_suggested_action() << dec << endl;
-		
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+	boost::shared_ptr<Processor> p;
+
+	if (processor_display.get_path_at_pos (x, y, path, column, cellx, celly)) {
+		if ((iter = model->get_iter (path))) {
+			p = (*iter)[columns.processor];
+		} 
+	}
+
 	for (list<boost::shared_ptr<Processor> >::const_iterator i = procs.begin(); i != procs.end(); ++i) {
 		XMLNode& state = (*i)->get_state ();
 		XMLNodeList nlist;
 		nlist.push_back (&state);
-		paste_processor_state (nlist);
+		paste_processor_state (nlist, p);
 		delete &state;
 	}
 	
@@ -373,14 +384,33 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		}
 	}
 	
-	if (targets.empty()) {
-		return ret;
-	}
-
+	
 	switch (ev->keyval) {
+	case GDK_c:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			copy_processors (targets);
+		}
+		break;
+
+	case GDK_x:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			cut_processors (targets);
+		}
+		break;
+
+	case GDK_v:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			if (targets.empty()) {
+				paste_processors ();
+			} else {
+				paste_processors (targets.front());
+			}
+		}
+		break;
+
 	case GDK_Delete:
 	case GDK_BackSpace:
-		delete_processors ();
+		delete_processors (targets);
 		ret = true;
 		break;
 
@@ -432,7 +462,7 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev)
 
 	} else if (processor && ev->button == 1 && selected) {
 
-		// this is purely informational but necessary
+		// this is purely informational but necessary for route params UI
 		ProcessorSelected (processor); // emit
 
 	} else if (!processor && ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
@@ -964,19 +994,26 @@ void
 ProcessorBox::cut_processors ()
 {
 	ProcSelection to_be_removed;
-	XMLNode* node = new XMLNode (X_("cut"));
 
 	get_selected_processors (to_be_removed);
+}
 
+void
+ProcessorBox::cut_processors (const ProcSelection& to_be_removed)
+{
 	if (to_be_removed.empty()) {
 		return;
 	}
 
+	XMLNode* node = new XMLNode (X_("cut"));
+	Route::ProcessorList to_cut;
+
 	no_processor_redisplay = true;
-	for (ProcSelection::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
-		// Do not cut inserts
+	for (ProcSelection::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
+		// Cut only plugins, sends and returns
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0 ||
-		    (boost::dynamic_pointer_cast<Send>((*i)) != 0)) {
+		    (boost::dynamic_pointer_cast<Send>((*i)) != 0) ||
+		    (boost::dynamic_pointer_cast<Return>((*i)) != 0)) {
 
 			void* gui = (*i)->get_gui ();
 
@@ -985,14 +1022,15 @@ ProcessorBox::cut_processors ()
 			}
 
 			XMLNode& child ((*i)->get_state());
-
-			if (_route->remove_processor (*i) == 0) {
-				/* success */
-				node->add_child_nocopy (child);
-			} else {
-				delete &child;
-			}
+			node->add_child_nocopy (child);
+			to_cut.push_back (*i);
 		}
+	}
+		
+	if (_route->remove_processors (to_cut) != 0) {
+		delete node;
+		no_processor_redisplay = false;
+		return;
 	}
 
 	_rr_selection.set (node);
@@ -1005,18 +1043,24 @@ void
 ProcessorBox::copy_processors ()
 {
 	ProcSelection to_be_copied;
-	XMLNode* node = new XMLNode (X_("copy"));
-
 	get_selected_processors (to_be_copied);
+	copy_processors (to_be_copied);
+}
 
+void
+ProcessorBox::copy_processors (const ProcSelection& to_be_copied)
+{
 	if (to_be_copied.empty()) {
 		return;
 	}
 
-	for (ProcSelection::iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
-		// Do not copy inserts
+	XMLNode* node = new XMLNode (X_("copy"));
+
+	for (ProcSelection::const_iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
+		// Copy only plugins, sends, returns
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0 ||
-		    (boost::dynamic_pointer_cast<Send>((*i)) != 0)) {
+		    (boost::dynamic_pointer_cast<Send>((*i)) != 0) ||
+		    (boost::dynamic_pointer_cast<Return>((*i)) != 0)) {
 			node->add_child_nocopy ((*i)->get_state());
 		}
   	}
@@ -1028,16 +1072,20 @@ void
 ProcessorBox::delete_processors ()
 {
 	ProcSelection to_be_deleted;
-
 	get_selected_processors (to_be_deleted);
+	delete_processors (to_be_deleted);
+}
 
-	if (to_be_deleted.empty()) {
+void
+ProcessorBox::delete_processors (const ProcSelection& targets)
+{
+	if (targets.empty()) {
 		return;
 	}
 
 	no_processor_redisplay = true;
 
-	for (ProcSelection::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
+	for (ProcSelection::const_iterator i = targets.begin(); i != targets.end(); ++i) {
 
 		void* gui = (*i)->get_gui ();
 
@@ -1123,59 +1171,66 @@ ProcessorBox::paste_processors ()
 		return;
 	}
 
-	cerr << "paste from node called " << _rr_selection.processors.get_node().name() << endl;
-
-	paste_processor_state (_rr_selection.processors.get_node().children());
+	paste_processor_state (_rr_selection.processors.get_node().children(), boost::shared_ptr<Processor>());
 }
 
 void
-ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
+ProcessorBox::paste_processors (boost::shared_ptr<Processor> before)
+{
+
+	if (_rr_selection.processors.empty()) {
+		return;
+	}
+
+	paste_processor_state (_rr_selection.processors.get_node().children(), before);
+}
+
+void
+ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr<Processor> p)
 {
 	XMLNodeConstIterator niter;
 	list<boost::shared_ptr<Processor> > copies;
-
-	cerr << "Pasting processor selection containing " << nlist.size() << endl;
 
 	if (nlist.empty()) {
 		return;
 	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		cerr << "try using " << (*niter)->name() << endl;
+
 		XMLProperty const * type = (*niter)->property ("type");
 		assert (type);
 
 		boost::shared_ptr<Processor> p;
 		try {
-			if (type->value() == "send") {
+			if (type->value() == "meter" || 
+			    type->value() == "main-outs" ||
+			    type->value() == "amp" ||
+			    type->value() == "intsend" || type->value() == "intreturn") {
+				/* do not paste meter, main outs, amp or internal send/returns */
+				continue;
+
+			} else if (type->value() == "send") {
+				
 				XMLNode n (**niter);
 				Send::make_unique (n, _session);
 				p.reset (new Send (_session, _route->mute_master(), n));
 
-			} else if (type->value() == "meter") {
-				p = _route->shared_peak_meter();
+			} else if (type->value() == "return") {
 
-			} else if (type->value() == "main-outs") {
-				/* do not copy-n-paste main outs */
-				continue;
-
-			} else if (type->value() == "amp") {
-				/* do not copy-n-paste amp */
-				continue;
-
-			} else if (type->value() == "intsend" || type->value() == "intreturn") {
-				/* do not copy-n-paste internal sends&returns */
-				continue;
-
-			} else if (type->value() == "listen") {
-				p.reset (new Delivery (_session, _route->mute_master(), **niter));
+				XMLNode n (**niter);
+				Return::make_unique (n, _session);
+				p.reset (new Return (_session, **niter));
 				
 			} else {
+				/* XXX its a bit limiting to assume that everything else
+				   is a plugin.
+				*/
 				p.reset (new PluginInsert (_session, **niter));
 			}
 
 			copies.push_back (p);
 		}
+
 		catch (...) {
 			cerr << "plugin insert constructor failed\n";
 		}
@@ -1185,7 +1240,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist)
 		return;
 	}
 
-	if (_route->add_processors (copies, _placement)) {
+	if (_route->add_processors (copies, p)) {
 
 		string msg = _(
 			"Copying the set of processors on the clipboard failed,\n\
@@ -1249,22 +1304,32 @@ ProcessorBox::clear_processors ()
 	string prompt;
 	vector<string> choices;
 
-	if (boost::dynamic_pointer_cast<AudioTrack>(_route) != 0) {
-		if (_placement == PreFader) {
-			prompt = _("Do you really want to remove all pre-fader processors from this track?\n"
-				   "(this cannot be undone)");
-		} else {
-			prompt = _("Do you really want to remove all post-fader processors from this track?\n"
-				   "(this cannot be undone)");
-		}
+	prompt = string_compose (_("Do you really want to remove all processors from %1?\n"
+				   "(this cannot be undone)"), _route->name());
+	
+	choices.push_back (_("Cancel"));
+	choices.push_back (_("Yes, remove them all"));
+
+	Gtkmm2ext::Choice prompter (prompt, choices);
+
+	if (prompter.run () == 1) {
+		_route->clear_processors (PreFader);
+		_route->clear_processors (PostFader);
+	}
+}
+
+void
+ProcessorBox::clear_processors (Placement p)
+{
+	string prompt;
+	vector<string> choices;
+
+	if (p == PreFader) {
+		prompt = string_compose (_("Do you really want to remove all pre-fader processors from %1?\n"
+					   "(this cannot be undone)"), _route->name());
 	} else {
-		if (_placement == PreFader) {
-			prompt = _("Do you really want to remove all pre-fader processors from this bus?\n"
-				   "(this cannot be undone)");
-		} else {
-			prompt = _("Do you really want to remove all post-fader processors from this bus?\n"
-				   "(this cannot be undone)");
-		}
+		prompt = string_compose (_("Do you really want to remove all post-fader processors from %1?\n"
+					   "(this cannot be undone)"), _route->name());
 	}
 
 	choices.push_back (_("Cancel"));
@@ -1273,7 +1338,7 @@ ProcessorBox::clear_processors ()
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
 	if (prompter.run () == 1) {
-		_route->clear_processors (_placement);
+		_route->clear_processors (p);
 	}
 }
 
@@ -1426,8 +1491,12 @@ ProcessorBox::register_actions ()
 			sigc::ptr_fun (ProcessorBox::rb_choose_return));
 	ActionManager::jack_sensitive_actions.push_back (act);
 
-	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),
+	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
+	ActionManager::register_action (popup_act_grp, X_("clear_pre"), _("Clear (pre-fader)"),
+			sigc::ptr_fun (ProcessorBox::rb_clear_pre));
+	ActionManager::register_action (popup_act_grp, X_("clear_post"), _("Clear (post-fader)"),
+			sigc::ptr_fun (ProcessorBox::rb_clear_post));
 
 	/* standard editing stuff */
 	act = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),
@@ -1515,6 +1584,28 @@ ProcessorBox::rb_clear ()
 	}
 
 	_current_processor_box->clear_processors ();
+}
+
+
+void
+ProcessorBox::rb_clear_pre ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->clear_processors (PreFader);
+}
+
+
+void
+ProcessorBox::rb_clear_post ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->clear_processors (PostFader);
 }
 
 void

@@ -265,3 +265,15 @@ IOProcessor::feeds (boost::shared_ptr<Route> other) const
 {
 	return _output && _output->connected_to (other->input());
 }
+
+void
+IOProcessor::disconnect ()
+{
+	if (_input) {
+		_input->disconnect (this);
+	}
+
+	if (_output) {
+		_output->disconnect (this);
+	}
+}

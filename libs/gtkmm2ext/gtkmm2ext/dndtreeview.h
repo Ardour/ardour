@@ -91,7 +91,7 @@ class DnDTreeView : public DnDTreeViewBase
 	DnDTreeView() {} 
 	~DnDTreeView() {}
 
-	sigc::signal<void,const std::list<DataType>&,Gtk::TreeView*,Glib::RefPtr<Gdk::DragContext>&> signal_drop;
+	sigc::signal<void,const std::list<DataType>&,Gtk::TreeView*,int,int,Glib::RefPtr<Gdk::DragContext>&> signal_drop;
 
 	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time) {
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
@@ -126,7 +126,7 @@ class DnDTreeView : public DnDTreeViewBase
 
 		} else if (selection_data.get_target() == object_type) {
 			
-			end_object_drag (const_cast<Glib::RefPtr<Gdk::DragContext>& > (context));
+			end_object_drag (const_cast<Glib::RefPtr<Gdk::DragContext>& > (context), x, y);
 
 		} else {
 			/* some kind of target type added by the app, which will be handled by a signal handler */
@@ -152,11 +152,11 @@ class DnDTreeView : public DnDTreeViewBase
 	}
 
   private:
-	void end_object_drag (Glib::RefPtr<Gdk::DragContext>& context) {
+	void end_object_drag (Glib::RefPtr<Gdk::DragContext>& context, int x, int y) {
 		std::list<DataType> l;
 		Gtk::TreeView* source;
 		get_object_drag_data (l, &source);
-		signal_drop (l, source, context);
+		signal_drop (l, source, x, y, context);
 	}
 
 };

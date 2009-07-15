@@ -205,9 +205,10 @@ class Route : public SessionObject, public AutomatableControls
 
 	int add_processor (boost::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0);
 	int add_processor (boost::shared_ptr<Processor>, ProcessorList::iterator iter, ProcessorStreams* err = 0);
-	int add_processors (const ProcessorList&, Placement placement, ProcessorStreams* err = 0);
+	int add_processors (const ProcessorList&, boost::shared_ptr<Processor> before, ProcessorStreams* err = 0);
 	int add_processors (const ProcessorList&, ProcessorList::iterator iter, ProcessorStreams* err = 0);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
+	int remove_processors (const ProcessorList&, ProcessorStreams* err = 0);
 	int reorder_processors (const ProcessorList& new_order, ProcessorStreams* err = 0);
 	void disable_processors (Placement);
 	void disable_processors ();

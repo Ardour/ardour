@@ -131,7 +131,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	Gtk::ScrolledWindow    processor_scroller;
 
 	void object_drop (const std::list<boost::shared_ptr<ARDOUR::Processor> >&, Gtk::TreeView*,
-			  Glib::RefPtr<Gdk::DragContext>& context);
+			  int x, int y, Glib::RefPtr<Gdk::DragContext>& context);
 
 	Width _width;
 	
@@ -185,21 +185,27 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void all_plugins_active(bool state);
 	void ab_plugins ();
 
+	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
+
+	void cut_processors (const ProcSelection&);
 	void cut_processors ();
+	void copy_processors (const ProcSelection&);
 	void copy_processors ();
-	void paste_processors ();
+	void delete_processors (const ProcSelection&);
 	void delete_processors ();
+	void paste_processors ();
+	void paste_processors (boost::shared_ptr<ARDOUR::Processor> before);
+
 	void delete_dragged_processors (const std::list<boost::shared_ptr<ARDOUR::Processor> >&);
 	void clear_processors ();
+	void clear_processors (ARDOUR::Placement);
 	void rename_processors ();
-
-	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
 
 	void for_selected_processors (void (ProcessorBox::*pmf)(boost::shared_ptr<ARDOUR::Processor>));
 	void get_selected_processors (ProcSelection&);
 
 	static Glib::RefPtr<Gtk::Action> paste_action;
-	void paste_processor_state (const XMLNodeList&);
+	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
 	
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void deactivate_processor (boost::shared_ptr<ARDOUR::Processor>);
@@ -218,6 +224,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	static void rb_choose_send ();
 	static void rb_choose_return ();
 	static void rb_clear ();
+	static void rb_clear_pre ();
+	static void rb_clear_post ();
 	static void rb_cut ();
 	static void rb_copy ();
 	static void rb_paste ();

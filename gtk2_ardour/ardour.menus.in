@@ -455,6 +455,8 @@
 	 <menuitem action='newreturn'/>
 	  <separator/>
 	 <menuitem action='clear'/>
+	 <menuitem action='clear_pre'/>
+	 <menuitem action='clear_post'/>
 	  <separator/>
 	 <menuitem action='cut'/>
 	 <menuitem action='copy'/>

@@ -826,28 +826,15 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 }
 
 int
-Route::add_processors (const ProcessorList& others, Placement placement, ProcessorStreams* err)
+Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor> before, ProcessorStreams* err)
 {
 	ProcessorList::iterator loc;
-	if (placement == PreFader) {
-		/* generic pre-fader: insert immediately before the amp */
-		loc = find(_processors.begin(), _processors.end(), _amp);
-	} else {
-		/* generic post-fader: insert at end */
-		loc = _processors.end();
 
-		if (!_processors.empty()) {
-			/* check for invisible processors stacked at the end and leave them there */
-			ProcessorList::iterator p;
-			p = _processors.end();
-			--p;
-			cerr << "Let's check " << (*p)->name() << " vis ? " << (*p)->visible() << endl;
-			while (!(*p)->visible() && p != _processors.begin()) {
-				--p;
-			}
-			++p;
-			loc = p;
-		}
+	if (before) {
+		loc = find(_processors.begin(), _processors.end(), before);
+	} else {
+		/* nothing specified - at end but before main outs */
+		loc = find (_processors.begin(), _processors.end(), _main_outs);
 	}
 
 	return add_processors (others, loc, err);
@@ -893,9 +880,11 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				pi->set_count (1);
 				
-				ChanCount m = max(pi->input_streams(), pi->output_streams());
-				if (m > potential_max_streams)
+				ChanCount m = max (pi->input_streams(), pi->output_streams());
+
+				if (m > potential_max_streams) {
 					potential_max_streams = m;
+				}
 			}
 
 			_processors.insert (iter, *i);
@@ -1067,26 +1056,43 @@ Route::clear_processors (Placement p)
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList new_list;
 		ProcessorStreams err;
+		bool seen_amp = false;
 
-		ProcessorList::iterator amp_loc = find(_processors.begin(), _processors.end(), _amp);
-		if (p == PreFader) {
-			// Get rid of PreFader processors
-			for (ProcessorList::iterator i = _processors.begin(); i != amp_loc; ++i) {
-				(*i)->drop_references ();
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+			if (*i == _amp) {
+				seen_amp = true;
 			}
-			// Keep the rest
-			for (ProcessorList::iterator i = amp_loc; i != _processors.end(); ++i) {
+
+			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs) {
+				
+				/* you can't remove these */
+
 				new_list.push_back (*i);
-			}
-		} else {
-			// Keep PreFader processors
-			for (ProcessorList::iterator i = _processors.begin(); i != amp_loc; ++i) {
-				new_list.push_back (*i);
-			}
-			new_list.push_back (_amp);
-			// Get rid of PostFader processors
-			for (ProcessorList::iterator i = amp_loc; i != _processors.end(); ++i) {
-				(*i)->drop_references ();
+
+			} else {
+				if (seen_amp) {
+
+					switch (p) {
+					case PreFader:
+						new_list.push_back (*i);
+						break;
+					case PostFader:
+						(*i)->drop_references ();
+						break;
+					}
+
+				} else {
+
+					switch (p) {
+					case PreFader:
+						(*i)->drop_references ();
+						break;
+					case PostFader:
+						new_list.push_back (*i);
+						break;
+					}
+				}
 			}
 		}
 
@@ -1191,6 +1197,99 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 	return 0;
 }
+
+int
+Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* err)
+{
+	ProcessorList deleted;
+	ProcessorList as_we_were;
+
+	if (!_session.engine().connected()) {
+		return 1;
+	}
+
+	processor_max_streams.reset();
+
+	{
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		ProcessorList::iterator i;
+		boost::shared_ptr<Processor> processor;
+
+		as_we_were = _processors;
+
+		for (i = _processors.begin(); i != _processors.end(); ) {
+			
+			processor = *i;
+
+			/* these can never be removed */
+
+			if (processor == _amp || processor == _meter || processor == _main_outs) {
+				++i;
+				continue;
+			}
+			
+			/* see if its in the list of processors to delete */
+			
+			if (find (to_be_deleted.begin(), to_be_deleted.end(), processor) == to_be_deleted.end()) {
+				++i;
+				continue;
+			}
+
+			/* stop IOProcessors that send to JACK ports
+			   from causing noise as a result of no longer being
+			   run.
+			*/
+			
+			boost::shared_ptr<IOProcessor> iop;
+			
+			if ((iop = boost::dynamic_pointer_cast<IOProcessor> (processor)) != 0) {
+				iop->disconnect ();
+			}
+
+			deleted.push_back (processor);
+			i = _processors.erase (i);
+		}
+
+		if (deleted.empty()) {
+			/* none of those in the requested list were found */
+			return 0;
+		}
+
+		_output->set_user_latency (0);
+
+		if (configure_processors_unlocked (err)) {
+			/* get back to where we where */
+			_processors = as_we_were;
+			/* we know this will work, because it worked before :) */
+			configure_processors_unlocked (0);
+			return -1;
+		}
+
+		_have_internal_generator = false;
+
+		for (i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> pi;
+			
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+				if (pi->is_generator()) {
+					_have_internal_generator = true;
+					break;
+				}
+			}
+		}
+	}
+
+	/* now try to do what we need to so that those that were removed will be deleted */
+
+	for (ProcessorList::iterator i = deleted.begin(); i != deleted.end(); ++i) {
+		(*i)->drop_references ();
+	}
+
+	processors_changed (); /* EMIT SIGNAL */
+
+	return 0;
+}
+
 
 int
 Route::configure_processors (ProcessorStreams* err)
