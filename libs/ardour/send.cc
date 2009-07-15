@@ -36,9 +36,8 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, bool internal)
-	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), 
-		    (internal ? Delivery::Listen : Delivery::Send))
+Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, Role r)
+	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), r)
 	, _metering (false)
 {
 	_amp.reset (new Amp (_session, _mute_master));
@@ -47,8 +46,8 @@ Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, bool internal)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, bool internal)
-        : Delivery (s, mm, "send", (internal ? Delivery::Listen : Delivery::Send))
+Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, Role r)
+        : Delivery (s, mm, "send", r)
 	, _metering (false)
 {
 	_amp.reset (new Amp (_session, _mute_master));
@@ -184,6 +183,7 @@ Send::make_unique (XMLNode &state, Session &session)
 	state.property("name")->set_value (name);
 
 	XMLNode* io = state.child ("IO");
+
 	if (io) {
 		io->property("name")->set_value (name);
 	}
@@ -194,7 +194,7 @@ Send::set_name (const std::string& new_name)
 {
 	std::string unique_name;
 
-	if (_role != Listen) {
+	if (_role == Delivery::Send) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), "%u", _bitslot);
 		unique_name = new_name;
@@ -204,4 +204,14 @@ Send::set_name (const std::string& new_name)
 	}
 
 	return Delivery::set_name (unique_name);
+}
+
+bool
+Send::visible () const
+{
+	if (_role == Listen) {
+		return false;
+	}
+
+	return true;
 }

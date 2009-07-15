@@ -53,6 +53,8 @@ public:
 	PeakMeter(Session& s) : Processor(s, "Meter") {}
 	PeakMeter(Session&s, const XMLNode& node);
 
+	bool visible() const;
+
 	void meter();
 
 	void reset ();

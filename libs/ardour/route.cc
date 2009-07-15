@@ -619,22 +619,10 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
 
 	if (placement == PreFader) {
 		/* generic pre-fader: insert immediately before the amp */
-		loc = find(_processors.begin(), _processors.end(), _amp);
+		loc = find (_processors.begin(), _processors.end(), _amp);
 	} else {
-		/* generic post-fader: insert at end */
-		loc = _processors.end();
-
-		if (processor->visible() && !_processors.empty()) {
-			/* check for invisible processors stacked at the end and leave them there */
-			ProcessorList::iterator p;
-			p = _processors.end();
-			--p;
-			while (!(*p)->visible() && p != _processors.begin()) {
-				--p;
-			}
-			++p;
-			loc = p;
-		}
+		/* generic post-fader: insert right before the main outs */
+		loc = find (_processors.begin(), _processors.end(), _main_outs);
 	}
 
 	return add_processor (processor, loc, err);
@@ -725,129 +713,116 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 {
 	const XMLProperty *prop;
 
-	// legacy sessions use a different node name for sends
-	if (node.name() == "Send") {
-	
-		try {
-			boost::shared_ptr<Send> send (new Send (_session, _mute_master, node));
-			add_processor (send, iter); 
-			return true;
-		} 
+	if (node.name() != "Processor") {
+		return false;
+	}
 		
-		catch (failed_constructor &err) {
-			error << _("Send construction failed") << endmsg;
-			return false;
-		}
-		
-	} else if (node.name() == "Processor") {
-		
-		try {
-			if ((prop = node.property ("type")) != 0) {
+	try {
+		if ((prop = node.property ("type")) != 0) {
+			
+			boost::shared_ptr<Processor> processor;
 
-				boost::shared_ptr<Processor> processor;
-
-				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
-				    prop->value() == "lv2" ||
-				    prop->value() == "vst" ||
-				    prop->value() == "audiounit") {
+			if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+			    prop->value() == "lv2" ||
+			    prop->value() == "vst" ||
+			    prop->value() == "audiounit") {
 					
-					processor.reset (new PluginInsert(_session, node));
+				processor.reset (new PluginInsert(_session, node));
 					
-				} else if (prop->value() == "port") {
+			} else if (prop->value() == "port") {
 
-					processor.reset (new PortInsert (_session, _mute_master, node));
+				processor.reset (new PortInsert (_session, _mute_master, node));
 				
-				} else if (prop->value() == "send") {
+			} else if (prop->value() == "send") {
 
-					processor.reset (new Send (_session, _mute_master, node));
+				processor.reset (new Send (_session, _mute_master, node));
 
-				} else if (prop->value() == "meter") {
+			} else if (prop->value() == "meter") {
 
-					if (_meter) {
-						if (_meter->set_state (node)) {
-							return false;
-						} else {
-							return true;
-						}
-					}
-
-					_meter.reset (new PeakMeter (_session, node));						
-					processor = _meter;
-				
-				} else if (prop->value() == "amp") {
-
-					/* amp always exists */
-					
-					processor = _amp;
-					if (processor->set_state (node)) {
+				if (_meter) {
+					if (_meter->set_state (node)) {
 						return false;
 					} else {
-						/* never any reason to add it */
 						return true;
 					}
+				}
+
+				_meter.reset (new PeakMeter (_session, node));						
+				processor = _meter;
+				
+			} else if (prop->value() == "amp") {
+
+				/* amp always exists */
 					
-				} else if (prop->value() == "listen" || prop->value() == "deliver") {
-
-					/* XXX need to generalize */
-
-				} else if (prop->value() == "intsend") {
-
-					processor.reset (new InternalSend (_session, _mute_master, node));
-
-				} else if (prop->value() == "intreturn") {
-					
-					if (_intreturn) {
-						if (_intreturn->set_state (node)) {
-							return false;
-						} else {
-							return true;
-						}
-					}
-					_intreturn.reset (new InternalReturn (_session, node));
-					processor = _intreturn;
-
-				} else if (prop->value() == "main-outs") {
-					
-					if (_main_outs) {
-						if (_main_outs->set_state (node)) {
-							return false;
-						} else {
-							return true;
-						}
-					}
-
-					_main_outs.reset (new Delivery (_session, _output, _mute_master, node));
-					processor = _main_outs;
-
+				processor = _amp;
+				if (processor->set_state (node)) {
+					return false;
 				} else {
-					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
+					/* never any reason to add it */
+					return true;
 				}
-				
-				if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
-					/* check for invisible processors stacked at the end and leave them there */
-					ProcessorList::iterator p;
-					p = _processors.end();
-					--p;
-					while (!(*p)->visible() && p != _processors.begin()) {
-						--p;
+					
+			} else if (prop->value() == "listen" || prop->value() == "deliver") {
+
+				/* XXX need to generalize */
+
+			} else if (prop->value() == "intsend") {
+
+				processor.reset (new InternalSend (_session, _mute_master, node));
+
+			} else if (prop->value() == "intreturn") {
+					
+				if (_intreturn) {
+					if (_intreturn->set_state (node)) {
+						return false;
+					} else {
+						return true;
 					}
-					++p;
-					iter = p;
+				}
+				_intreturn.reset (new InternalReturn (_session, node));
+				processor = _intreturn;
+
+			} else if (prop->value() == "main-outs") {
+					
+				if (_main_outs) {
+					if (_main_outs->set_state (node)) {
+						return false;
+					} else {
+						return true;
+					}
 				}
 
-				return (add_processor (processor, iter) == 0);
-				
-			} else {
-				error << _("Processor XML node has no type property") << endmsg;
-			}
-		}
+				_main_outs.reset (new Delivery (_session, _output, _mute_master, node));
+				processor = _main_outs;
 
-		catch (failed_constructor &err) {
-			warning << _("processor could not be created. Ignored.") << endmsg;
+			} else {
+				error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
+			}
+				
+			if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
+				/* check for invisible processors stacked at the end and leave them there */
+				ProcessorList::iterator p;
+				p = _processors.end();
+				--p;
+				while (!(*p)->visible() && p != _processors.begin()) {
+					--p;
+				}
+				++p;
+				iter = p;
+			}
+
+			return (add_processor (processor, iter) == 0);
+				
+		} else {
+			error << _("Processor XML node has no type property") << endmsg;
 			return false;
 		}
 	}
-	return false;
+
+	catch (failed_constructor &err) {
+		warning << _("processor could not be created. Ignored.") << endmsg;
+		return false;
+	}
 }
 
 int
@@ -1885,7 +1860,7 @@ Route::release_return_buffer () const
 }
 
 int
-Route::listen_via (boost::shared_ptr<Route> route, bool active)
+Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool active, bool aux)
 {
 	vector<string> ports;
 	vector<string>::const_iterator i;
@@ -1917,7 +1892,7 @@ Route::listen_via (boost::shared_ptr<Route> route, bool active)
 	boost::shared_ptr<InternalSend> listener;
 
 	try {
-		listener.reset (new InternalSend (_session, _mute_master, route));
+		listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
 
 	} catch (failed_constructor& err) {
 		return -1;
@@ -1927,7 +1902,7 @@ Route::listen_via (boost::shared_ptr<Route> route, bool active)
 		_control_outs = listener;
 	}
 
-	add_processor (listener, (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader));
+	add_processor (listener, placement);
 	
  	return 0;
 }	

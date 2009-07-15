@@ -323,3 +323,9 @@ Amp::setup_gain_automation (sframes_t start_frame, sframes_t end_frame, nframes_
 		_apply_gain_automation = false;
 	}
 }
+
+bool
+Amp::visible() const
+{
+	return true;
+}

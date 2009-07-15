@@ -37,7 +37,8 @@ public:
 		Insert = 0x1,
 		Send   = 0x2,
 		Listen = 0x4,
-		Main   = 0x8
+		Main   = 0x8,
+		Aux    = 0x10
 	};
 
 	/* Delivery to an existing output */

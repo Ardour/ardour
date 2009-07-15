@@ -37,11 +37,13 @@ class Amp;
 class Send : public Delivery
 {
   public:	
-	Send (Session&, boost::shared_ptr<MuteMaster>, bool internal = false);
-	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, bool internal = false);
+	Send (Session&, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);
+	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, Delivery::Role r = Delivery::Send);
 	virtual ~Send ();
 
 	uint32_t bit_slot() const { return _bitslot; }
+
+	bool visible() const;
 
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }

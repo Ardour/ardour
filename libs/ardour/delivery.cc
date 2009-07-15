@@ -178,10 +178,6 @@ Delivery::increment_output_offset (nframes_t n)
 bool
 Delivery::visible () const
 {
-	if (_role & Main) {
-		return false;
-	}
-
 	return true;
 }
 

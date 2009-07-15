@@ -33,8 +33,8 @@
 using namespace PBD;
 using namespace ARDOUR;
 
-InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto)
-	: Send (s, mm, true)
+InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
+	: Send (s, mm, role)
 	, _send_to (sendto)
 {
 	if ((target = _send_to->get_return_buffer ()) == 0) {
@@ -42,12 +42,12 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 	}
 
 	set_name (sendto->name());
-
+	
 	_send_to->GoingAway.connect (mem_fun (*this, &InternalSend::send_to_going_away));
 }
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
-	: Send (s, mm, node, true)
+	: Send (s, mm, node, Delivery::Aux /* will be reset in set_state() */)
 {
 	set_state (node);
 }
@@ -223,8 +223,22 @@ InternalSend::set_name (const std::string& str)
 	return IOProcessor::set_name (str);
 }
 
+std::string
+InternalSend::display_name () const
+{
+	if (_role == Aux) {
+		return string_compose (X_("aux-%1"), _name);
+	} else {
+		return _name;
+	}
+}
+
 bool
 InternalSend::visible () const
 {
+	if (_role == Aux) {
+		return true;
+	}
+
 	return false; 
 }

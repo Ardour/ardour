@@ -218,3 +218,9 @@ PeakMeter::state (bool full_state)
 	return node;
 }
 
+
+bool
+PeakMeter::visible() const
+{
+	return true;
+}

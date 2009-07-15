@@ -46,6 +46,7 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
+#include "ardour/internal_send.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/meter.h"
 #include "ardour/plugin_insert.h"
@@ -768,11 +769,9 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		return;
 	}
 
-#if 0
-	if (processor == _route->amp() || !processor->visible()) {
+	if (!processor->visible()) {
 		return;
 	}
-#endif
 
 	Gtk::TreeModel::Row row = *(model->append());
 	row[columns.text] = processor_name (processor);
@@ -804,7 +803,8 @@ ProcessorBox::processor_name (boost::weak_ptr<Processor> weak_processor)
 		name_display = " (";
 	}
 
-	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
+	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0 && 
+	    !boost::dynamic_pointer_cast<InternalSend>(processor)) {
 
 		name_display += '>';
 

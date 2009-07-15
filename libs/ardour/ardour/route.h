@@ -260,7 +260,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	sigc::signal<void,void*> SelectedChanged;
 	
-	int listen_via (boost::shared_ptr<Route>, bool);
+	int listen_via (boost::shared_ptr<Route>, Placement p, bool active, bool aux);
 	void drop_listen (boost::shared_ptr<Route>);
 
 	bool feeds (boost::shared_ptr<Route>);

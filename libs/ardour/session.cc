@@ -820,7 +820,9 @@ Session::hookup_io ()
 				continue;
 			}
 
-			(*x)->listen_via (_control_out, false);
+			(*x)->listen_via (_control_out, 
+					  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
+					  false, false);
 		}
 	}
 
@@ -2147,8 +2149,9 @@ Session::add_routes (RouteList& new_routes, bool save)
 			if ((*x)->is_control() || (*x)->is_master()) {
 				continue;
 			}
-			cerr << "Add listen via control outs\n";
-			(*x)->listen_via (_control_out, false);
+			(*x)->listen_via (_control_out, 
+					  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
+					  false, false);
 		}
 
 		resort_routes ();
@@ -2164,7 +2167,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 }
 
 void
-Session::globally_add_internal_sends (boost::shared_ptr<Route> dest)
+Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p)
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<RouteList> t (new RouteList);
@@ -2177,11 +2180,11 @@ Session::globally_add_internal_sends (boost::shared_ptr<Route> dest)
 		}
 	}
 
-	add_internal_sends (dest, t);
+	add_internal_sends (dest, p, t);
 }
 
 void
-Session::add_internal_sends (boost::shared_ptr<Route> dest, boost::shared_ptr<RouteList> senders)
+Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders)
 {
 	if (dest->is_control() || dest->is_master()) {
 		return;
@@ -2197,8 +2200,7 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, boost::shared_ptr<Ro
 			continue;
 		}
 
-		cerr << (*i)->name() << " listening via " << dest->name() << endl;
-		(*i)->listen_via (dest, true);
+		(*i)->listen_via (dest, p, true, true);
 	}
 }
 
