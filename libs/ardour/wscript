@@ -268,9 +268,9 @@ def build(bld):
 	if bld.env['FPU_OPTIMIZATION']:
 		obj.source += ' sse_functions_xmm.cc'
 		if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
-			obj.source += ' sse_functions.S'
+			obj.source += ' sse_functions.s'
 		elif bld.env['build_target'] == 'x86_64':
-			obj.source += ' sse_functions_64bit.S'
+			obj.source += ' sse_functions_64bit.s'
 
 	if bld.env['HAVE_CPPUNIT']:
 		# Unit tests

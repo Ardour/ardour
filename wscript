@@ -116,9 +116,6 @@ def set_compiler_flags (conf,opt):
 				conf.define ('build_target', 'powerpc')
 			else:
 				conf.define ('build_target', 'i686')
-		print "\n*******************************"
-		print "detected DIST_TARGET = " + conf.env['build_target']
-		print "*******************************\n"
 	else:
 		conf.define ('build_target', opt.dist_target)
 
@@ -359,8 +356,6 @@ def configure(conf):
 	# Fix utterly braindead FLAC include path to not smash assert.h
 	conf.env['CPPPATH_FLAC'] = []
 
-	set_compiler_flags (conf, Options.options)
-	
 	# Tell everyone that this is a waf build
 
 	conf.env.append_value('CCFLAGS', '-DWAF_BUILD')
@@ -404,6 +399,9 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
 	if opts.windows_key:
 		conf.define('WINDOWS_KEY', opts.windows_key)
+
+	set_compiler_flags (conf, Options.options)
+
 	autowaf.display_msg(conf, 'C Compiler flags', conf.env['CCFLAGS'])
 	autowaf.display_msg(conf, 'C++ Compiler flags', conf.env['CXXFLAGS'])
 
