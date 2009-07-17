@@ -21,6 +21,8 @@
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 
+using namespace std;
+
 /** Constructor.
  *  @param p Port matrix that we're in.
  */
@@ -98,7 +100,7 @@ PortMatrixComponent::set_source_rgba (cairo_t *cr, Gdk::Color const & c, double 
 	cairo_set_source_rgba (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p(), a);
 }
 
-std::pair<uint32_t, uint32_t>
+pair<uint32_t, uint32_t>
 PortMatrixComponent::dimensions ()
 {
 	if (_dimension_computation_required) {
@@ -107,11 +109,103 @@ PortMatrixComponent::dimensions ()
 		_body->component_size_changed ();
 	}
 
-	return std::make_pair (_width, _height);
+	return make_pair (_width, _height);
 }
 
 Gdk::Color
 PortMatrixComponent::background_colour ()
 {
 	return _matrix->get_style()->get_bg (Gtk::STATE_NORMAL);
+}
+
+uint32_t
+PortMatrixComponent::group_width (boost::shared_ptr<const PortGroup> g) const
+{
+	uint32_t width = 0;
+	
+	if (g->visible()) {
+		PortGroup::BundleList const & bundles = g->bundles ();
+		if (_matrix->show_only_bundles()) {
+			width = bundles.size() * column_width ();
+		} else {
+			for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
+				width += i->bundle->nchannels() * column_width ();
+			}
+		}
+	} else {
+		width = column_width ();
+	}
+
+	return width;
+}
+
+uint32_t
+PortMatrixComponent::group_height (boost::shared_ptr<const PortGroup> g) const
+{
+	uint32_t height = 0;
+
+	if (g->visible ()) {
+		PortGroup::BundleList const & bundles = g->bundles ();
+		if (_matrix->show_only_bundles()) {
+			height = bundles.size() * row_height ();
+		} else {
+			for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
+				height += i->bundle->nchannels() * row_height ();
+			}
+		}
+	} else {
+		height = row_height ();
+	}
+
+	return height;
+}
+
+
+pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>
+PortMatrixComponent::y_position_to_group_and_channel (double y) const
+{
+	PortGroupList::List::const_iterator i = _matrix->rows()->begin();
+
+	while (i != _matrix->rows()->end()) {
+
+		uint32_t const gh = group_height (*i);
+
+		if (y < gh) {
+
+			/* it's in this group */
+
+			PortGroup::BundleList const & bundles = (*i)->bundles ();
+			for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
+
+				if (_matrix->show_only_bundles()) {
+					
+					if (y < row_height()) {
+						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, 0));
+					} else {
+						y -= row_height ();
+					}
+					
+				} else {
+
+					uint32_t const h = j->bundle->nchannels () * row_height ();
+					if (y < h) {
+						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, y / row_height()));
+					} else {
+					        y -= h;
+					}
+
+				}
+
+			}
+
+		} else {
+
+			y -= gh;
+
+		}
+
+		++i;
+	}
+
+	return make_pair (boost::shared_ptr<PortGroup> (), ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0));
 }

@@ -63,7 +63,6 @@ private:
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void queue_draw_for (ARDOUR::BundleChannel const &);
 	double port_name_x () const;
-	void maybe_popup_context_menu (double, double, uint32_t);
 	double bundle_name_x () const;
 
 	double _longest_port_name;

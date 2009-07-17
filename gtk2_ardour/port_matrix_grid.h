@@ -41,7 +41,7 @@ class PortMatrixGrid : public PortMatrixComponent
 public:
 	PortMatrixGrid (PortMatrix *, PortMatrixBody *);
 
-	void button_press (double, double, int);
+	void button_press (double, double, int, uint32_t);
 	void mouseover_event (double, double);
 
 	double component_to_parent_x (double x) const;
@@ -55,10 +55,11 @@ private:
 	
 	void compute_dimensions ();
 	void render (cairo_t *);
+	void render_group_pair (cairo_t *, boost::shared_ptr<const PortGroup>, boost::shared_ptr<const PortGroup>, uint32_t, uint32_t);
 
 	double channel_position (ARDOUR::BundleChannel, PortGroup::BundleList const &, double) const;
 	PortMatrixNode position_to_node (double, double) const;
-	ARDOUR::BundleChannel position_to_channel (double, PortGroup::BundleList const &, double) const;
+	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> x_position_to_group_and_channel (double) const;
 	void queue_draw_for (PortMatrixNode const &);
 	void draw_association_indicator (cairo_t *, uint32_t, uint32_t, double p = 1);
 	void draw_unknown_indicator (cairo_t *, uint32_t, uint32_t);

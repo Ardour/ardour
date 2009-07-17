@@ -60,7 +60,11 @@ public:
 	
 	void disassociate_all ();
 	void setup_scrollbars ();
-	void popup_channel_context_menu (int, uint32_t, uint32_t);
+	void popup_menu (
+		std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>,
+		std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>,
+		uint32_t
+		);
 
 	int min_height_divisor () const {
 		return _min_height_divisor;
@@ -83,8 +87,6 @@ public:
 		return _show_only_bundles;
 	}
 
-	void set_show_only_bundles (bool);
-
 	PortGroupList const * columns () const;
 
 	/** @return index into the _ports array for the list which is displayed as columns */
@@ -106,6 +108,8 @@ public:
 	void setup ();
 	virtual void setup_ports (int) = 0;
 	void setup_all_ports ();
+
+	std::pair<uint32_t, uint32_t> max_size () const;
 
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.
@@ -148,12 +152,14 @@ private:
 	void vscroll_changed ();
 	void routes_changed ();
 	void reconnect_to_routes ();
-	void visibility_toggled (boost::weak_ptr<PortGroup>, Gtk::CheckButton *);
 	void select_arrangement ();
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
 	void setup_global_ports ();
+	void hide_group (boost::weak_ptr<PortGroup>);
+	void show_group (boost::weak_ptr<PortGroup>);
+	void toggle_show_only_bundles ();
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;
@@ -162,22 +168,14 @@ private:
 	PortMatrixBody* _body;
 	Gtk::HScrollbar _hscroll;
 	Gtk::VScrollbar _vscroll;
-	Gtk::HBox _column_visibility_box;
-	bool _column_visibility_box_added;
-	Gtk::Label _column_visibility_label;
-	std::vector<Gtk::CheckButton*> _column_visibility_buttons;
-	Gtk::VBox _row_visibility_box;
-	bool _row_visibility_box_added;
-	Gtk::Label _row_visibility_label;
-	std::vector<Gtk::CheckButton*> _row_visibility_buttons;
-	Gtk::Table _scroller_table;
 	Gtk::Menu* _menu;
-	bool _setup_once;
 	Arrangement _arrangement;
 	int _row_index;
 	int _column_index;
 	int _min_height_divisor;
 	bool _show_only_bundles;
+	bool _inhibit_toggle_show_only_bundles;
+	bool _first_setup;
 };
 
 #endif

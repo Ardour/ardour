@@ -181,100 +181,22 @@ IOSelector::list_is_global (int dim) const
 }
 
 IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool can_cancel)
-	: ArdourDialog ("I/O selector")
-	, _selector (session, io)
-	, add_button (_("Add Port"))
-	, disconnect_button (_("Disconnect All"))
-	, ok_button (can_cancel ? _("OK"): _("Close"))
-	, cancel_button (_("Cancel"))
-	, rescan_button (_("Rescan"))
-
+	: _selector (session, io)
 {
-	/* XXX: what's this for? */
-	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
-	
 	set_name ("IOSelectorWindow2");
+	set_title (_("I/O selector"));
 
-	/* Disconnect All button */
-	disconnect_button.set_name ("IOSelectorButton");
-	disconnect_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::DISCONNECT, Gtk::ICON_SIZE_BUTTON)));
-	disconnect_button.signal_clicked().connect (sigc::mem_fun (_selector, &IOSelector::disassociate_all));
-	get_action_area()->pack_start (disconnect_button, false, false);
-
-	/* Add Port button */
-	add_button.set_name ("IOSelectorButton");
-	add_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
-	get_action_area()->pack_start (add_button, false, false);
-	add_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (_selector, &IOSelector::add_channel), boost::shared_ptr<Bundle> ()));
-
-	/* Rescan button */
- 	rescan_button.set_name ("IOSelectorButton");
-	rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
-	rescan_button.signal_clicked().connect (sigc::mem_fun (*this, &IOSelectorWindow::rescan));
-	get_action_area()->pack_start (rescan_button, false, false);
-
-	io->PortCountChanged.connect (sigc::hide (mem_fun (*this, &IOSelectorWindow::ports_changed)));
-
-	/* Cancel button */
-	if (can_cancel) {
-		cancel_button.set_name ("IOSelectorButton");
-		cancel_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CANCEL, Gtk::ICON_SIZE_BUTTON)));
-		get_action_area()->pack_start (cancel_button, false, false);
-	} else {
-		cancel_button.hide();
-	}
-	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
-
-	/* OK button */
-	ok_button.set_name ("IOSelectorButton");
-	if (!can_cancel) {
-		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
-	}
-	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
-	get_action_area()->pack_start (ok_button, false, false);
-
-	get_vbox()->set_spacing (8);
-
-	get_vbox()->pack_start (_selector, true, true);
+	add (_selector);
 
 	set_position (Gtk::WIN_POS_MOUSE);
 
 	io_name_changed (this);
-	ports_changed ();
 
 	show_all ();
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
-}
 
-void
-IOSelectorWindow::ports_changed ()
-{
-	/* XXX make this insensitive based on port connectivity, not
-	   port counts.
-	*/
-
-	add_button.set_sensitive (true);
-}
-
-void
-IOSelectorWindow::rescan ()
-{
-	_selector.setup_ports (_selector.other());
-}
-
-void
-IOSelectorWindow::cancel ()
-{
-	_selector.Finished (IOSelector::Cancelled);
-	hide ();
-}
-
-void
-IOSelectorWindow::accept ()
-{
-	_selector.Finished (IOSelector::Accepted);
-	hide ();
+	resize (32768, 32768);
 }
 
 void
@@ -299,6 +221,21 @@ IOSelectorWindow::io_name_changed (void* src)
 
 	set_title (title);
 }
+
+void
+IOSelectorWindow::on_realize ()
+{
+	Window::on_realize ();
+
+	pair<uint32_t, uint32_t> const m = _selector.max_size ();
+
+	GdkGeometry g;
+	g.max_width = m.first;
+	g.max_height = m.second;
+
+	set_geometry_hints (*this, g, Gdk::HINT_MAX_SIZE);
+}
+
 
 PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
 	: input_selector (sess, pi->input())
@@ -330,8 +267,7 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARD
 	: ArdourDialog ("port insert dialog"),
 	  _portinsertui (sess, pi),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
-	  cancel_button (_("Cancel")),
-	  rescan_button (_("Rescan"))
+	  cancel_button (_("Cancel"))
 {
 
 	set_name ("IOSelectorWindow");
@@ -344,10 +280,7 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARD
 		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
 	}
 	cancel_button.set_name ("IOSelectorButton");
-	rescan_button.set_name ("IOSelectorButton");
-	rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
 
-	get_action_area()->pack_start (rescan_button, false, false);
 	if (can_cancel) {
 		cancel_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CANCEL, Gtk::ICON_SIZE_BUTTON)));
 		get_action_area()->pack_start (cancel_button, false, false);

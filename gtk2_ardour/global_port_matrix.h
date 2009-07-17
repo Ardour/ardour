@@ -63,7 +63,7 @@ public:
 	GlobalPortMatrixWindow (ARDOUR::Session&, ARDOUR::DataType);
 
 private:
-	void show_ports_toggled ();
+	void on_realize ();
 	
 	GlobalPortMatrix _port_matrix;
 	Gtk::Button _rescan_button;

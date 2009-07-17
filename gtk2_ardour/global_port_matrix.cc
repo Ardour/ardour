@@ -28,6 +28,8 @@
 
 #include "i18n.h"
 
+using namespace std;
+
 GlobalPortMatrix::GlobalPortMatrix (ARDOUR::Session& s, ARDOUR::DataType t)
 	: PortMatrix (s, t)
 {
@@ -119,27 +121,25 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::Data
 		break;
 	}
 
-	Gtk::HBox* buttons_hbox = Gtk::manage (new Gtk::HBox);
-
-	_rescan_button.set_label (_("Rescan"));
-	_rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
-	_rescan_button.signal_clicked().connect (sigc::mem_fun (_port_matrix, &GlobalPortMatrix::setup_all_ports));
-	buttons_hbox->pack_start (_rescan_button, Gtk::PACK_SHRINK);
-
-	_show_ports_button.set_label (_("Show individual ports"));
-	_show_ports_button.set_active (true);
-	_show_ports_button.signal_toggled().connect (sigc::mem_fun (*this, &GlobalPortMatrixWindow::show_ports_toggled));
-	buttons_hbox->pack_start (_show_ports_button, Gtk::PACK_SHRINK);
-	
-	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox);
-	vbox->pack_start (_port_matrix);
-	vbox->pack_start (*buttons_hbox, Gtk::PACK_SHRINK);
-	add (*vbox);
+	add (_port_matrix);
 	show_all ();
+
+	/* XXX: hack to make the window full-size on opening.  This may not work for
+	   people with very large monitors */
+	
+	resize (32768, 32768);
 }
 
 void
-GlobalPortMatrixWindow::show_ports_toggled ()
+GlobalPortMatrixWindow::on_realize ()
 {
-	_port_matrix.set_show_only_bundles (!_show_ports_button.get_active());
+	Window::on_realize ();
+
+	pair<uint32_t, uint32_t> const m = _port_matrix.max_size ();
+	
+	GdkGeometry g;
+	g.max_width = m.first;
+	g.max_height = m.second;
+
+	set_geometry_hints (*this, g, Gdk::HINT_MAX_SIZE);
 }

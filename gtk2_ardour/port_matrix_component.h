@@ -22,10 +22,16 @@
 
 #include <stdint.h>
 #include <gtkmm/eventbox.h>
+#include <boost/shared_ptr.hpp>
 
 class PortMatrix;
 class PortMatrixBody;
 class PortMatrixNode;
+class PortGroup;
+
+namespace ARDOUR {
+	class BundleChannel;
+}
 
 /** One component of the PortMatrix.  This is a cairo-rendered
  *  Pixmap.
@@ -166,6 +172,9 @@ protected:
 	
 	void set_source_rgb (cairo_t *, Gdk::Color const &);
 	void set_source_rgba (cairo_t *, Gdk::Color const &, double);
+	uint32_t group_width (boost::shared_ptr<const PortGroup>) const;
+	uint32_t group_height (boost::shared_ptr<const PortGroup>) const;
+	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> y_position_to_group_and_channel (double) const;
 
 	/** Render the complete component to a cairo context. */
 	virtual void render (cairo_t *) = 0;

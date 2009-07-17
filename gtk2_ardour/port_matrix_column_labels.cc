@@ -28,7 +28,8 @@
 using namespace std;
 
 PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b)
-	: PortMatrixLabels (m, b)
+	: PortMatrixLabels (m, b),
+	  _overhang (0)
 {
 
 }
@@ -92,6 +93,8 @@ PortMatrixColumnLabels::compute_dimensions ()
 			if (ext.height > _highest_group_name) {
 				_highest_group_name = ext.height;
 			}
+		} else {
+			_width += column_width ();
 		}
 	}
 
@@ -109,7 +112,8 @@ PortMatrixColumnLabels::compute_dimensions ()
 
 	_height = parallelogram_height + _highest_group_name + 2 * name_pad();
 
-	_width += parallelogram_height / tan (angle ());
+	_overhang = parallelogram_height / tan (angle ());
+	_width += _overhang;
 }
 
 double
@@ -144,18 +148,18 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	int g = 0;
 	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 
-		if (!(*i)->visible() || (*i)->bundles().empty()) {
-			continue;
-		}
-
 		/* compute width of this group */
 		uint32_t w = 0;
-		if (_matrix->show_only_bundles()) {
-			w = (*i)->bundles().size() * column_width();
+		if (!(*i)->visible() || (*i)->bundles().empty()) {
+			w = column_width ();
 		} else {
-			w = (*i)->total_channels() * column_width();
-		}
-
+			if (_matrix->show_only_bundles()) {
+				w = (*i)->bundles().size() * column_width();
+			} else {
+				w = (*i)->total_channels() * column_width();
+			}
+			}
+		
 		/* rectangle */
 		set_source_rgb (cr, get_a_group_colour (g));
 		double const rh = _highest_group_name + 2 * name_pad();
@@ -165,36 +169,49 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 			cairo_rectangle (cr, x, _height - rh, w, rh);
 		}
 		cairo_fill (cr);
-
+		
 		string const upper = Glib::ustring ((*i)->name).uppercase ();
 		pair<string, double> const display = fit_to_pixels (cr, upper, w);
-
+		
 		/* plot it */
 		set_source_rgb (cr, text_colour());
 		cairo_move_to (cr, x + (w - display.second) / 2, y);
 		cairo_show_text (cr, display.first.c_str());
-
+		
 		x += w;
 		++g;
+		
 	}
 
         /* BUNDLE PARALLELOGRAM-TYPE-THING AND NAME */
 
 	x = 0;
 	int N = 0;
-	PortGroup::BundleList const bundles = _matrix->columns()->bundles();
-	for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
 
-		Gdk::Color c = i->has_colour ? i->colour : get_a_bundle_colour (N);
-		render_bundle_name (cr, c, x, 0, i->bundle);
+	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 
-		if (_matrix->show_only_bundles()) {
-			x += column_width();
+		if ((*i)->visible ()) {
+	
+			PortGroup::BundleList const & bundles = (*i)->bundles ();
+			for (PortGroup::BundleList::const_iterator j = bundles.begin (); j != bundles.end(); ++j) {
+
+				Gdk::Color c = j->has_colour ? j->colour : get_a_bundle_colour (N);
+				render_bundle_name (cr, c, x, 0, j->bundle);
+				
+				if (_matrix->show_only_bundles()) {
+					x += column_width();
+				} else {
+					x += j->bundle->nchannels () * column_width();
+				}
+
+				++N;
+			}
+
 		} else {
-			x += i->bundle->nchannels () * column_width();
-		}
 
-		++N;
+			x += column_width ();
+
+		}
 	}
 	
 
@@ -203,15 +220,27 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	if (!_matrix->show_only_bundles()) {
 		x = 0;
 		N = 0;
-		for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
-			
-			for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
-				Gdk::Color c = i->has_colour ? i->colour : get_a_bundle_colour (N);
-				render_channel_name (cr, c, x, 0, ARDOUR::BundleChannel (i->bundle, j));
-				x += column_width();
-			}
+		for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 
-			++N;
+			if ((*i)->visible ()) {
+			
+				PortGroup::BundleList const & bundles = (*i)->bundles ();
+				for (PortGroup::BundleList::const_iterator j = bundles.begin (); j != bundles.end(); ++j) {
+			
+					for (uint32_t k = 0; k < j->bundle->nchannels(); ++k) {
+						Gdk::Color c = j->has_colour ? j->colour : get_a_bundle_colour (N);
+						render_channel_name (cr, c, x, 0, ARDOUR::BundleChannel (j->bundle, k));
+						x += column_width();
+					}
+					
+					++N;
+				}
+
+			} else {
+
+				x += column_width ();
+
+			}
 		}
 	}
 }
@@ -484,43 +513,102 @@ PortMatrixColumnLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 	}
 }
 
+pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>
+PortMatrixColumnLabels::x_position_to_group_and_channel (double x, double y) const
+{
+	uint32_t cx = 0;
+	uint32_t const gh = _highest_group_name + 2 * name_pad();
+
+	bool group_name = false;
+	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
+		if (y > (_height - gh)) {
+			group_name = true;
+			cx = x;
+		} else {
+			cx = x - (_height - gh - y) * tan (angle ());
+		}
+	} else {
+		if (y < gh) {
+			group_name = true;
+			cx = x - _overhang;
+		} else {
+			cx = x - (_height - y) * tan (angle ());
+		}
+	}
+
+	uint32_t px = 0;
+
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> gc;
+	
+	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
+
+		if (!(*i)->visible()) {
+
+			uint32_t const gw = group_width (*i);
+			
+			if (px <= cx && cx < (px + gw)) {
+				return make_pair (*i, ARDOUR::BundleChannel ());
+			} else {
+				px += gw;
+			}
+
+		} else {
+				
+			PortGroup::BundleList bundles = (*i)->bundles ();
+			for (PortGroup::BundleList::iterator j = bundles.begin(); j != bundles.end(); ++j) {
+
+				if (_matrix->show_only_bundles()) {
+					
+					if (px <= cx && cx < (px + column_width())) {
+						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, 0));
+					} else {
+						px += column_width ();
+					}
+					
+				} else {
+
+					for (uint32_t k = 0; k < j->bundle->nchannels(); ++k) {
+
+						if (px <= cx && cx < (px + column_width())) {
+							if (group_name) {
+								return make_pair (*i, ARDOUR::BundleChannel ());
+							} else {
+								return make_pair (*i, ARDOUR::BundleChannel (j->bundle, k));
+							}
+						}
+						
+						px += column_width ();
+					}
+				}
+
+			}
+		}
+		
+	}
+
+	return make_pair (boost::shared_ptr<PortGroup> (), ARDOUR::BundleChannel ());
+}
+
 void
 PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
 {
-	uint32_t N = _matrix->columns()->total_visible_channels ();
-	uint32_t i = 0;
-	for (; i < N; ++i) {
-		
-		vector<pair<double, double> > const shape = port_name_shape (i * column_width(), 0);
-
-		uint32_t j = 0;
-		for (; j < 4; ++j) {
-			uint32_t k = (j + 1) % 4;
-
-			double const P = (y - shape[j].second) * (shape[k].first - shape[j].first) -
-				(x - shape[j].first) * (shape[k].second - shape[j].second);
-
-			if (P > 0) {
-				break;
-			}
-		}
-
-		if (j == 4) {
-			break;
-		}
-	}
-
-	if (i == N) {
-		return;
-	}
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> gc = x_position_to_group_and_channel (x, y);
 	
-	switch (b) {
-	case 1:
-		_body->highlight_associated_channels (_matrix->column_index(), i);
-		break;
-	case 3:
-		_matrix->popup_channel_context_menu (_matrix->column_index(), i, t);
-		break;
+	if (b == 1) {
+
+		if (gc.second.bundle) {
+			_body->highlight_associated_channels (_matrix->column_index(), gc.second);
+		} else if (gc.first) {
+			gc.first->set_visible (!gc.first->visible ());
+		}
+		
+	} else if (b == 3) {
+
+			_matrix->popup_menu (
+				gc,
+				make_pair (boost::shared_ptr<PortGroup> (), ARDOUR::BundleChannel ()),
+				t
+				);
 	}
 }
 

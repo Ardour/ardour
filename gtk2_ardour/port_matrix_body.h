@@ -61,8 +61,9 @@ public:
 		return _mouseover;
 	}
 
-	void highlight_associated_channels (int, uint32_t);
+	void highlight_associated_channels (int, ARDOUR::BundleChannel);
 	void component_size_changed ();
+	std::pair<uint32_t, uint32_t> max_size () const;
 
 protected:
 	bool on_expose_event (GdkEventExpose *);

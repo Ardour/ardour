@@ -44,6 +44,10 @@ public:
 	double parent_to_component_y (double y) const;
 	void mouseover_changed (PortMatrixNode const &);
 
+	uint32_t overhang () const {
+		return _overhang;
+	}
+		
 private:
 	void render_bundle_name (cairo_t *, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>);
 	void render_channel_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
@@ -60,11 +64,13 @@ private:
 		return _height - _highest_group_name - 2 * name_pad();
 	}
 
-//	PortGroup::BundleList _bundles;
+	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> x_position_to_group_and_channel (double, double) const;
+
 	double _longest_bundle_name;
 	double _longest_channel_name;
 	double _highest_text;
 	double _highest_group_name;
+	uint32_t _overhang;
 };
 
 #endif

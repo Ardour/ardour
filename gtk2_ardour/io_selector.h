@@ -71,7 +71,7 @@ class IOSelector : public PortMatrix
 	bool _find_inputs_for_io_outputs;
 };
 
-class IOSelectorWindow : public ArdourDialog
+class IOSelectorWindow : public Gtk::Window
 {
   public:
 	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
@@ -80,23 +80,11 @@ class IOSelectorWindow : public ArdourDialog
 
   protected:
 	void on_map ();
+	void on_realize ();
 	
   private:
 	IOSelector _selector;
-
-	/* overall operation buttons */
-
-	Gtk::Button add_button;
-	Gtk::Button disconnect_button;
-	Gtk::Button ok_button;
-	Gtk::Button cancel_button;
-	Gtk::Button rescan_button;
-
-	void cancel ();
-	void accept ();
-	void rescan ();
 	
-	void ports_changed ();
 	void io_name_changed (void *src);
 };
 
@@ -128,7 +116,6 @@ class PortInsertWindow : public ArdourDialog
 	
 	Gtk::Button ok_button;
 	Gtk::Button cancel_button;
-	Gtk::Button rescan_button;
 	Gtk::Frame button_frame;
 	
 	void cancel ();

@@ -26,6 +26,8 @@
 #include "port_matrix_row_labels.h"
 #include "port_matrix_grid.h"
 
+using namespace std;
+
 PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	: _matrix (p),
 	  _xoffset (0),
@@ -138,9 +140,9 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 void
 PortMatrixBody::on_size_request (Gtk::Requisition *req)
 {
-	std::pair<int, int> const col = _column_labels->dimensions ();
-	std::pair<int, int> const row = _row_labels->dimensions ();
-	std::pair<int, int> const grid = _grid->dimensions ();
+	pair<int, int> const col = _column_labels->dimensions ();
+	pair<int, int> const row = _row_labels->dimensions ();
+	pair<int, int> const grid = _grid->dimensions ();
 
 	/* don't ask for the maximum size of our contents, otherwise GTK won't
 	   let the containing window shrink below this size */
@@ -149,8 +151,8 @@ PortMatrixBody::on_size_request (Gtk::Requisition *req)
 	int const min_width = 512;
 	int const min_height = 512;
 
-	req->width = std::min (min_width, std::max (col.first, grid.first + row.first));
-	req->height = std::min (min_height / _matrix->min_height_divisor(), col.second + grid.second);
+	req->width = min (min_width, max (col.first, grid.first + row.first));
+	req->height = min (min_height / _matrix->min_height_divisor(), col.second + grid.second);
 }
 
 void
@@ -169,9 +171,10 @@ void
 PortMatrixBody::compute_rectangles ()
 {
 	/* full sizes of components */
-	std::pair<uint32_t, uint32_t> const col = _column_labels->dimensions ();
-	std::pair<uint32_t, uint32_t> const row = _row_labels->dimensions ();
-	std::pair<uint32_t, uint32_t> const grid = _grid->dimensions ();
+	pair<uint32_t, uint32_t> const col = _column_labels->dimensions ();
+	uint32_t col_overhang = _column_labels->overhang ();
+	pair<uint32_t, uint32_t> const row = _row_labels->dimensions ();
+	pair<uint32_t, uint32_t> const grid = _grid->dimensions ();
 
 	Gdk::Rectangle col_rect;
 	Gdk::Rectangle row_rect;
@@ -179,34 +182,18 @@ PortMatrixBody::compute_rectangles ()
 
 	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
-		/* build from top left */
-
 		col_rect.set_x (0);
 		col_rect.set_y (0);
 		grid_rect.set_x (0);
 
-		if (_alloc_width > col.first) {
-			col_rect.set_width (col.first);
-		} else {
-			col_rect.set_width (_alloc_width);
-		}
+		col_rect.set_width (min (col.first, _alloc_width));
 
-		/* move down to y division */
-		
-		uint32_t y = 0;
-		if (_alloc_height > col.second) {
-			y = col.second;
-		} else {
-			y = _alloc_height;
-		}
-
+		uint32_t const y = min (_alloc_height, col.second);
 		col_rect.set_height (y);
 		row_rect.set_y (y);
 		row_rect.set_height (_alloc_height - y);
 		grid_rect.set_y (y);
 		grid_rect.set_height (_alloc_height - y);
-
-		/* move right to x division */
 
 		uint32_t x = 0;
 		if (_alloc_width > (grid.first + row.first)) {
@@ -222,42 +209,22 @@ PortMatrixBody::compute_rectangles ()
 
 	} else if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 
-		/* build from bottom right */
-
-		/* move left to x division */
-
-		uint32_t x = 0;
-		if (_alloc_width > (grid.first + row.first)) {
-			x = grid.first;
-		} else if (_alloc_width > row.first) {
-			x = _alloc_width - row.first;
-		}
-
-		grid_rect.set_x (_alloc_width - x);
-		grid_rect.set_width (x);
-		col_rect.set_width (col.first - grid.first + x);
-		col_rect.set_x (_alloc_width - col_rect.get_width());
-
-		row_rect.set_width (std::min (_alloc_width - x, row.first));
-		row_rect.set_x (_alloc_width - x - row_rect.get_width());
-
-		/* move up to the y division */
+		col_rect.set_height (min (_alloc_height, col.second));
 		
-		uint32_t y = 0;
-		if (_alloc_height > col.second) {
-			y = col.second;
-		} else {
-			y = _alloc_height;
-		}
+		row_rect.set_x (0);
+		row_rect.set_y (0);
+		row_rect.set_width (min (_alloc_width, row.first));
+		row_rect.set_height (std::min (_alloc_height - col_rect.get_height(), row.second));
 
-		col_rect.set_y (_alloc_height - y);
-		col_rect.set_height (y);
+		grid_rect.set_x (row_rect.get_width());
+		grid_rect.set_y (0);
+		grid_rect.set_width (std::min (_alloc_width - row_rect.get_width(), grid.first));
+		grid_rect.set_height (row_rect.get_height ());
 
-		grid_rect.set_height (std::min (grid.second, _alloc_height - y));
-		grid_rect.set_y (_alloc_height - y - grid_rect.get_height());
-
-		row_rect.set_height (grid_rect.get_height());
-		row_rect.set_y (grid_rect.get_y());
+		col_rect.set_width (grid_rect.get_width () + col_overhang);
+		col_rect.set_x (row_rect.get_width() + grid_rect.get_width() - col_rect.get_width());
+		col_rect.set_y (row_rect.get_height());
+		
 	}
 
 	_row_labels->set_parent_rectangle (row_rect);
@@ -270,7 +237,7 @@ PortMatrixBody::setup ()
 {
 	/* Discard any old connections to bundles */
 	
-	for (std::list<sigc::connection>::iterator i = _bundle_connections.begin(); i != _bundle_connections.end(); ++i) {
+	for (list<sigc::connection>::iterator i = _bundle_connections.begin(); i != _bundle_connections.end(); ++i) {
 		i->disconnect ();
 	}
 	_bundle_connections.clear ();
@@ -348,7 +315,7 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 		_grid->button_press (
 			_grid->parent_to_component_x (ev->x),
 			_grid->parent_to_component_y (ev->y),
-			ev->button
+			ev->button, ev->time
 			);
 
 	} else if (Gdk::Region (_row_labels->parent_rectangle()).point_in (ev->x, ev->y)) {
@@ -453,19 +420,10 @@ PortMatrixBody::set_mouseover (PortMatrixNode const & n)
 
 
 void
-PortMatrixBody::highlight_associated_channels (int dim, uint32_t N)
+PortMatrixBody::highlight_associated_channels (int dim, ARDOUR::BundleChannel h)
 {
 	ARDOUR::BundleChannel bc[2];
-	
-	PortGroup::BundleList const a = _matrix->ports(dim)->bundles ();
-	for (PortGroup::BundleList::const_iterator i = a.begin(); i != a.end(); ++i) {
-		if (N < i->bundle->nchannels ()) {
-			bc[dim] = ARDOUR::BundleChannel (i->bundle, N);
-			break;
-		} else {
-			N -= i->bundle->nchannels ();
-		}
-	}
+	bc[dim] = h;
 
 	if (!bc[dim].bundle) {
 		return;
@@ -507,4 +465,12 @@ PortMatrixBody::component_size_changed ()
 	_matrix->setup_scrollbars ();
 }
 
-
+pair<uint32_t, uint32_t>
+PortMatrixBody::max_size () const
+{
+	pair<uint32_t, uint32_t> const col = _column_labels->dimensions ();
+	pair<uint32_t, uint32_t> const row = _row_labels->dimensions ();
+	pair<uint32_t, uint32_t> const grid = _grid->dimensions ();
+	
+	return make_pair (std::max (row.first, _column_labels->overhang()) + grid.first, col.second + grid.second);
+}

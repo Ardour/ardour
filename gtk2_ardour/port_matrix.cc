@@ -32,23 +32,26 @@
 #include "port_matrix_body.h"
 #include "i18n.h"
 
+using namespace std;
+using namespace sigc;
+using namespace Gtk;
+
 /** PortMatrix constructor.
  *  @param session Our session.
  *  @param type Port type that we are handling.
  */
 PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
-	: Gtk::Table (2, 2),
+	: Table (2, 2),
 	  _session (session),
 	  _type (type),
-	  _column_visibility_box_added (false),
-	  _row_visibility_box_added (false),
 	  _menu (0),
-	  _setup_once (false),
 	  _arrangement (TOP_TO_RIGHT),
 	  _row_index (0),
 	  _column_index (1),
 	  _min_height_divisor (1),
-	  _show_only_bundles (false)
+	  _show_only_bundles (false),
+	  _inhibit_toggle_show_only_bundles (false),
+	  _first_setup (true)
 {
 	_body = new PortMatrixBody (this);
 
@@ -56,38 +59,30 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 		_ports[i].set_type (type);
 		
 		/* watch for the content of _ports[] changing */
-		_ports[i].Changed.connect (sigc::mem_fun (*this, &PortMatrix::setup));
+		_ports[i].Changed.connect (mem_fun (*this, &PortMatrix::setup));
 	}
 
-	_row_visibility_box.pack_start (_row_visibility_label, Gtk::PACK_SHRINK);
-	_column_visibility_box.pack_start (_column_visibility_label, Gtk::PACK_SHRINK);
-
-	_hscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::hscroll_changed));
-	_vscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::vscroll_changed));
+	_hscroll.signal_value_changed().connect (mem_fun (*this, &PortMatrix::hscroll_changed));
+	_vscroll.signal_value_changed().connect (mem_fun (*this, &PortMatrix::vscroll_changed));
 
 	/* watch for routes being added or removed */
-	_session.RouteAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::routes_changed)));
+	_session.RouteAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::routes_changed)));
 
 	/* and also bundles */
-	_session.BundleAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::setup_global_ports)));
+	_session.BundleAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::setup_global_ports)));
 	
 	reconnect_to_routes ();
 
+	attach (*_body, 0, 1, 0, 1);
+	attach (_vscroll, 1, 2, 0, 1, SHRINK);
+	attach (_hscroll, 0, 1, 1, 2, FILL | EXPAND, SHRINK);
+	
 	show_all ();
 }
 
 PortMatrix::~PortMatrix ()
 {
 	delete _body;
-	
-	for (std::vector<Gtk::CheckButton*>::iterator i = _column_visibility_buttons.begin(); i != _column_visibility_buttons.end(); ++i) {
-		delete *i;
-	}
-
-	for (std::vector<Gtk::CheckButton*>::iterator i = _row_visibility_buttons.begin(); i != _row_visibility_buttons.end(); ++i) {
-		delete *i;
-	}
-
 	delete _menu;
 }
 
@@ -95,7 +90,7 @@ PortMatrix::~PortMatrix ()
 void
 PortMatrix::reconnect_to_routes ()
 {
-	for (std::vector<sigc::connection>::iterator i = _route_connections.begin(); i != _route_connections.end(); ++i) {
+	for (vector<connection>::iterator i = _route_connections.begin(); i != _route_connections.end(); ++i) {
 		i->disconnect ();
 	}
 	_route_connections.clear ();
@@ -103,7 +98,7 @@ PortMatrix::reconnect_to_routes ()
 	boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
 	for (ARDOUR::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		_route_connections.push_back (
-			(*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::setup_global_ports))
+			(*i)->processors_changed.connect (mem_fun (*this, &PortMatrix::setup_global_ports))
 			);
 	}
 }
@@ -120,117 +115,16 @@ PortMatrix::routes_changed ()
 void
 PortMatrix::setup ()
 {
-	select_arrangement ();
+	if (_first_setup) {
+		select_arrangement ();
+	}
+
 	_body->setup ();
 	setup_scrollbars ();
 	queue_draw ();
 
-	if (_setup_once) {
-
-		/* we've set up before, so we need to clean up before re-setting-up */
-		/* XXX: we ought to be able to do this by just getting a list of children
-		   from each container widget, but I couldn't make that work */
-               
-		for (std::vector<Gtk::CheckButton*>::iterator i = _column_visibility_buttons.begin(); i != _column_visibility_buttons.end(); ++i) {
-			_column_visibility_box.remove (**i);
-			delete *i;
-		}
-
-		_column_visibility_buttons.clear ();
-
-		for (std::vector<Gtk::CheckButton*>::iterator i = _row_visibility_buttons.begin(); i != _row_visibility_buttons.end(); ++i) {
-			_row_visibility_box.remove (**i);
-			delete *i;
-		}
-
-		_row_visibility_buttons.clear ();
-		
-		_scroller_table.remove (_vscroll);
-		_scroller_table.remove (*_body);
-		_scroller_table.remove (_hscroll);
-
-		remove (_scroller_table);
-		if (_row_visibility_box_added) {
-			remove (_row_visibility_box);
-		}
-		
-		if (_column_visibility_box_added) {
-			remove (_column_visibility_box);
-		}
-	}
-
-	if (_column_index == 0) {
-		_column_visibility_label.set_text (_("Show Outputs"));
-		_row_visibility_label.set_text (_("Show Inputs"));
-	} else {
-		_column_visibility_label.set_text (_("Show Inputs"));
-		_row_visibility_label.set_text (_("Show Outputs"));
-	}
-
-	for (PortGroupList::List::const_iterator i = columns()->begin(); i != columns()->end(); ++i) {
-		Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
-		b->set_active ((*i)->visible());
-		boost::weak_ptr<PortGroup> w (*i);
-		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortMatrix::visibility_toggled), w, b));
-		_column_visibility_buttons.push_back (b);
-		_column_visibility_box.pack_start (*b, Gtk::PACK_SHRINK);
-	}
-
-	for (PortGroupList::List::const_iterator i = rows()->begin(); i != rows()->end(); ++i) {
-		Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
-		b->set_active ((*i)->visible());
-		boost::weak_ptr<PortGroup> w (*i);
-		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortMatrix::visibility_toggled), w, b));
-		_row_visibility_buttons.push_back (b);
-		_row_visibility_box.pack_start (*b, Gtk::PACK_SHRINK);
-	}
-
-	if (_arrangement == TOP_TO_RIGHT) {
-	  
-		_scroller_table.attach (_hscroll, 0, 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-		_scroller_table.attach (*_body, 0, 1, 1, 2);
-		_scroller_table.attach (_vscroll, 1, 2, 1, 2, Gtk::SHRINK);
-
-		attach (_scroller_table, 0, 1, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-
-		if (rows()->size() > 1) {
-			attach (_row_visibility_box, 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
-			_row_visibility_box_added = true;
-		} else {
-			_row_visibility_box_added = false;
-		}
-
-		if (columns()->size() > 1) {
-			attach (_column_visibility_box, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
-			_column_visibility_box_added = true;
-		} else {
-			_column_visibility_box_added = false;
-		}
-		
-	} else {
-		_scroller_table.attach (_vscroll, 0, 1, 0, 1, Gtk::SHRINK);
-		_scroller_table.attach (*_body, 1, 2, 0, 1);
-		_scroller_table.attach (_hscroll, 1, 2, 1, 2, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-
-		if (rows()->size() > 1) {
-			attach (_row_visibility_box, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
-			_row_visibility_box_added = true;
-		} else {
-			_row_visibility_box_added = false;
-		}
-		
-		attach (_scroller_table, 1, 2, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-
-		if (columns()->size() > 1) {
-			attach (_column_visibility_box, 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
-			_column_visibility_box_added = true;
-		} else {
-			_column_visibility_box_added = false;
-		}
-	}
-
-	_setup_once = true;
-
+	_first_setup = false;
+	
 	show_all ();
 }
 
@@ -259,7 +153,7 @@ PortMatrix::vscroll_changed ()
 void
 PortMatrix::setup_scrollbars ()
 {
-	Gtk::Adjustment* a = _hscroll.get_adjustment ();
+	Adjustment* a = _hscroll.get_adjustment ();
 	a->set_lower (0);
 	a->set_upper (_body->full_scroll_width());
 	a->set_page_size (_body->alloc_scroll_width());
@@ -346,90 +240,113 @@ PortMatrix::rows () const
 	return &_ports[_row_index];
 }
 
-/** A group visibility checkbutton has been toggled.
- * @param w Group.
- * @param b Button.
- */
 void
-PortMatrix::visibility_toggled (boost::weak_ptr<PortGroup> w, Gtk::CheckButton* b)
+PortMatrix::popup_menu (
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> column,
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> row,
+	uint32_t t
+	)
 {
-	boost::shared_ptr<PortGroup> g = w.lock ();
-	if (!g) {
-		return;
-	}
+	using namespace Menu_Helpers;
 	
-	g->set_visible (b->get_active());
-	_body->setup ();
-	setup_scrollbars ();
-	queue_draw ();
-}
-
-void
-PortMatrix::popup_channel_context_menu (int dim, uint32_t N, uint32_t t)
-{
 	delete _menu;
 
-	_menu = new Gtk::Menu;
+	_menu = new Menu;
 	_menu->set_name ("ArdourContextMenu");
 	
-	Gtk::Menu_Helpers::MenuList& items = _menu->items ();
+	MenuList& items = _menu->items ();
 
-	ARDOUR::BundleChannel bc;
+	boost::shared_ptr<PortGroup> pg[2];
+	pg[_column_index] = column.first;
+	pg[_row_index] = row.first;
 
-	PortGroup::BundleList const r = _ports[dim].bundles();
-	for (PortGroup::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
-		if (N < i->bundle->nchannels ()) {
-			bc = ARDOUR::BundleChannel (i->bundle, N);
-			break;
-		} else {
-			N -= i->bundle->nchannels ();
-		}
-	}
+	ARDOUR::BundleChannel bc[2];
+	bc[_column_index] = column.second;
+	bc[_row_index] = row.second;
 
-	if (bc.bundle) {
-		char buf [64];
-		bool have_one = false;
+	char buf [64];
 
-		if (can_rename_channels (dim)) {
-			snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc.bundle->channel_name (bc.channel).c_str());
-			boost::weak_ptr<ARDOUR::Bundle> w (bc.bundle);
-			items.push_back (
-				Gtk::Menu_Helpers::MenuElem (
-					buf,
-					sigc::bind (sigc::mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc.channel)
-					)
-				);
+	for (int dim = 0; dim < 2; ++dim) {
 
-			have_one = true;
-		}
+		if (pg[dim]) {
 
-		if (can_remove_channels (dim)) {
-			snprintf (buf, sizeof (buf), _("Remove '%s'"), bc.bundle->channel_name (bc.channel).c_str());
-			boost::weak_ptr<ARDOUR::Bundle> w (bc.bundle);
-			items.push_back (
-				Gtk::Menu_Helpers::MenuElem (
-					buf,
-					sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc.channel)
-					)
-				);
-
-			have_one = true;
-		}
-
-		if (have_one) {
-			items.push_back (Gtk::Menu_Helpers::SeparatorElem ());
-		}
-		
-		boost::weak_ptr<ARDOUR::Bundle> w (bc.bundle);
-		items.push_back (Gtk::Menu_Helpers::MenuElem (
-					 _("Disassociate all"),
-					 sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc.channel, dim)
-					 )
-			);
+			boost::weak_ptr<PortGroup> wp (pg[dim]);
 			
-		_menu->popup (1, t);
+			if (pg[dim]->visible()) {
+				if (dim == 0) {
+					snprintf (buf, sizeof (buf), _("Hide '%s' sources"), pg[dim]->name.c_str());
+				} else {
+					snprintf (buf, sizeof (buf), _("Hide '%s' destinations"), pg[dim]->name.c_str());
+				}
+
+				items.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::hide_group), wp)));
+			} else {
+				if (dim == 0) {
+					snprintf (buf, sizeof (buf), _("Show '%s' sources"), pg[dim]->name.c_str());
+				} else {
+					snprintf (buf, sizeof (buf), _("Show '%s' destinations"), pg[dim]->name.c_str());
+				}
+				items.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::show_group), wp)));
+			}
+		}
+
+		if (bc[dim].bundle) {
+			bool have_one = false;
+			
+			if (can_rename_channels (dim)) {
+				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
+				boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
+				items.push_back (
+					MenuElem (
+						buf,
+						bind (mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
+						)
+					);
+				
+				have_one = true;
+			}
+			
+			if (can_remove_channels (dim)) {
+				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
+				boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
+				items.push_back (
+					MenuElem (
+						buf,
+						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
+						)
+					);
+				
+				have_one = true;
+			}
+			
+			boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
+
+			if (_show_only_bundles) {
+				snprintf (buf, sizeof (buf), _("Disassociate all from '%s'"), bc[dim].bundle->name().c_str());
+			} else {
+				snprintf (
+					buf, sizeof (buf), _("Disassociate all from '%s/%s'"),
+					bc[dim].bundle->name().c_str(), bc[dim].bundle->channel_name (bc[dim].channel).c_str()
+					);
+			}
+			
+			items.push_back (
+				MenuElem (buf, bind (mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
+				);
+			
+		}
 	}
+
+	items.push_back (SeparatorElem ());
+
+	items.push_back (MenuElem (_("Rescan"), mem_fun (*this, &PortMatrix::setup_all_ports)));
+	items.push_back (CheckMenuElem (_("Show individual ports"), mem_fun (*this, &PortMatrix::toggle_show_only_bundles)));
+	CheckMenuItem* i = dynamic_cast<CheckMenuItem*> (&items.back());
+	_inhibit_toggle_show_only_bundles = true;
+	i->set_active (!_show_only_bundles);
+	_inhibit_toggle_show_only_bundles = false;
 	
+	_menu->popup (1, t);
 }
 
 
@@ -500,10 +417,47 @@ PortMatrix::setup_all_ports ()
 }
 
 void
-PortMatrix::set_show_only_bundles (bool s)
+PortMatrix::toggle_show_only_bundles ()
 {
-	_show_only_bundles = s;
+	if (_inhibit_toggle_show_only_bundles) {
+		return;
+	}
+	
+	_show_only_bundles = !_show_only_bundles;
 	_body->setup ();
 	setup_scrollbars ();
 	queue_draw ();
+}
+
+void
+PortMatrix::hide_group (boost::weak_ptr<PortGroup> w)
+{
+	boost::shared_ptr<PortGroup> g = w.lock ();
+	if (!g) {
+		return;
+	}
+
+	g->set_visible (false);
+}
+
+void
+PortMatrix::show_group (boost::weak_ptr<PortGroup> w)
+{
+	boost::shared_ptr<PortGroup> g = w.lock ();
+	if (!g) {
+		return;
+	}
+
+	g->set_visible (true);
+}
+
+pair<uint32_t, uint32_t>
+PortMatrix::max_size () const
+{
+	pair<uint32_t, uint32_t> m = _body->max_size ();
+
+	m.first += _vscroll.get_width ();
+	m.second += _hscroll.get_height ();
+
+	return m;
 }
