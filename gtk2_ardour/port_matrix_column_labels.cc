@@ -413,8 +413,9 @@ PortMatrixColumnLabels::channel_x (ARDOUR::BundleChannel const &bc) const
 {
 	uint32_t n = 0;
 
-	PortGroup::BundleList::const_iterator i = _matrix->columns()->bundles().begin();
-	while (i != _matrix->columns()->bundles().end() && i->bundle != bc.bundle) {
+	PortGroup::BundleList const & b = _matrix->columns()->bundles ();
+	PortGroup::BundleList::const_iterator i = b.begin();
+	while (i != b.end() && i->bundle != bc.bundle) {
 		if (_matrix->show_only_bundles()) {
 			n += 1;
 		} else {
@@ -426,7 +427,7 @@ PortMatrixColumnLabels::channel_x (ARDOUR::BundleChannel const &bc) const
 	if (!_matrix->show_only_bundles()) {
 		n += bc.channel;
 	}
-	
+
 	return n * column_width();
 }
 

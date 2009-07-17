@@ -25,7 +25,6 @@ void
 PortMatrixLabels::draw_extra (cairo_t* cr)
 {
 	for (std::vector<ARDOUR::BundleChannel>::const_iterator i = _channel_highlights.begin(); i != _channel_highlights.end(); ++i) {
-
 		if (_matrix->show_only_bundles()) {
 			render_bundle_name (
 				cr,
@@ -50,7 +49,6 @@ void
 PortMatrixLabels::clear_channel_highlights ()
 {
 	for (std::vector<ARDOUR::BundleChannel>::const_iterator i = _channel_highlights.begin(); i != _channel_highlights.end(); ++i) {
-
 		queue_draw_for (*i);
 	}
 

@@ -134,6 +134,7 @@ class PortGroupList : public sigc::trackable
 
 	ARDOUR::DataType _type;
 	mutable PortGroup::BundleList _bundles;
+	mutable bool _bundles_dirty;
 	List _groups;
 	std::vector<sigc::connection> _bundle_changed_connections;
 	bool _signals_suspended;

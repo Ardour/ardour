@@ -316,8 +316,9 @@ PortMatrixRowLabels::channel_y (ARDOUR::BundleChannel const& bc) const
 {
 	uint32_t n = 0;
 
-	PortGroup::BundleList::const_iterator i = _matrix->rows()->bundles().begin();
-	while (i != _matrix->rows()->bundles().end() && i->bundle != bc.bundle) {
+	PortGroup::BundleList const & bundles = _matrix->rows()->bundles();
+	PortGroup::BundleList::const_iterator i = bundles.begin ();
+	while (i != bundles.end() && i->bundle != bc.bundle) {
 		if (_matrix->show_only_bundles()) {
 			n += 1;
 		} else {
