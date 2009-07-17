@@ -159,7 +159,7 @@ PortGroup::total_channels () const
 /** PortGroupList constructor.
  */
 PortGroupList::PortGroupList ()
-	: _type (DataType::AUDIO), _signals_suspended (false), _pending_change (false), _bundles_dirty (true)
+	: _type (DataType::AUDIO), _signals_suspended (false), _pending_change (false)
 {
 	
 }
@@ -319,7 +319,6 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 	add_group (other);
 
 	emit_changed ();
-	_bundles_dirty = true;
 }
 
 boost::shared_ptr<Bundle>
@@ -403,25 +402,20 @@ PortGroupList::clear ()
 	_bundle_changed_connections.clear ();
 
 	emit_changed ();
-	_bundles_dirty = true;
 }
 
 
 PortGroup::BundleList const &
 PortGroupList::bundles () const
 {
-	if (_bundles_dirty) {
-		_bundles.clear ();
-		
-		for (PortGroupList::List::const_iterator i = begin (); i != end (); ++i) {
-			if ((*i)->visible()) {
-				std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
-			}
+	_bundles.clear ();
+	
+	for (PortGroupList::List::const_iterator i = begin (); i != end (); ++i) {
+		if ((*i)->visible()) {
+			std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
 		}
-
-		_bundles_dirty = false;
 	}
-
+	
 	return _bundles;
 }
 
@@ -452,7 +446,6 @@ PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
 		);
 
 	emit_changed ();
-	_bundles_dirty = true;
 }
 
 void
@@ -463,7 +456,6 @@ PortGroupList::remove_bundle (boost::shared_ptr<Bundle> b)
 	}
 
 	emit_changed ();
-	_bundles_dirty = true;
 }
 
 void
