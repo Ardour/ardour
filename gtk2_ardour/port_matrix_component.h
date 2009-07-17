@@ -88,13 +88,13 @@ protected:
 	}
 
 	/** @return width of thin lines in the grid */
-	static uint32_t thin_grid_line_width () {
-		return 1;
+	static double thin_grid_line_width () {
+		return 0.5;
 	}
 
 	/** @return width of thick lines in the grid */
-	static uint32_t thick_grid_line_width () {
-		return 2;
+	static double thick_grid_line_width () {
+		return 1;
 	}
 
 	/** @return space around the connection indicator */
@@ -111,12 +111,10 @@ protected:
 		return M_PI / 4;
 	}
 
-	/* XXX I guess these colours should come from a theme, or something */
-
 	/** @return background colour */
-	static Gdk::Color background_colour () {
- 		return Gdk::Color ("#000000");
-	}
+	Gdk::Color background_colour ();
+
+	/* XXX I guess these colours should come from a theme, or something */
 
 	/** @return text colour */
 	static Gdk::Color text_colour () {
@@ -125,7 +123,7 @@ protected:
 
 	/** @return grid line colour */
 	static Gdk::Color grid_colour () {
-		return Gdk::Color ("#333333");
+		return Gdk::Color ("#000000");
 	}
 
 	/** @return colour of association blobs */

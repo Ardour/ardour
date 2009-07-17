@@ -36,7 +36,6 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	_row_labels = new PortMatrixRowLabels (p, this);
 	_grid = new PortMatrixGrid (p, this);
 	
-	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#00000"));
 	add_events (Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
 }
 

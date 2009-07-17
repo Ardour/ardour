@@ -110,3 +110,8 @@ PortMatrixComponent::dimensions ()
 	return std::make_pair (_width, _height);
 }
 
+Gdk::Color
+PortMatrixComponent::background_colour ()
+{
+	return _matrix->get_style()->get_bg (Gtk::STATE_NORMAL);
+}
