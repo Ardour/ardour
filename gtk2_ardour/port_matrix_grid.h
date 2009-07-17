@@ -26,6 +26,7 @@
 #include "ardour/types.h"
 #include "port_matrix_component.h"
 #include "port_matrix_types.h"
+#include "port_group.h"
 
 class PortMatrix;
 class PortMatrixBody;
@@ -55,9 +56,9 @@ private:
 	void compute_dimensions ();
 	void render (cairo_t *);
 
-	double channel_position (ARDOUR::BundleChannel, ARDOUR::BundleList const &, double) const;
+	double channel_position (ARDOUR::BundleChannel, PortGroup::BundleList const &, double) const;
 	PortMatrixNode position_to_node (double, double) const;
-	ARDOUR::BundleChannel position_to_channel (double, ARDOUR::BundleList const &, double) const;
+	ARDOUR::BundleChannel position_to_channel (double, PortGroup::BundleList const &, double) const;
 	void queue_draw_for (PortMatrixNode const &);
 	void draw_association_indicator (cairo_t *, uint32_t, uint32_t, double p = 1);
 	void draw_unknown_indicator (cairo_t *, uint32_t, uint32_t);

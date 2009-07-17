@@ -278,19 +278,19 @@ PortMatrixBody::setup ()
 
 	/* Connect to bundles so that we find out when their names change */
 	
-	ARDOUR::BundleList r = _matrix->rows()->bundles ();
-	for (ARDOUR::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
+	PortGroup::BundleList r = _matrix->rows()->bundles ();
+	for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 		
 		_bundle_connections.push_back (
-			(*i)->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels)))
+			i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels)))
 			);
 		
 	}
 
-	ARDOUR::BundleList c = _matrix->columns()->bundles ();
-	for (ARDOUR::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
+	PortGroup::BundleList c = _matrix->columns()->bundles ();
+	for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
 		_bundle_connections.push_back (
-			(*i)->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
+			i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
 			);
 	}
 	
@@ -458,13 +458,13 @@ PortMatrixBody::highlight_associated_channels (int dim, uint32_t N)
 {
 	ARDOUR::BundleChannel bc[2];
 	
-	ARDOUR::BundleList const a = _matrix->ports(dim)->bundles ();
-	for (ARDOUR::BundleList::const_iterator i = a.begin(); i != a.end(); ++i) {
-		if (N < (*i)->nchannels ()) {
-			bc[dim] = ARDOUR::BundleChannel (*i, N);
+	PortGroup::BundleList const a = _matrix->ports(dim)->bundles ();
+	for (PortGroup::BundleList::const_iterator i = a.begin(); i != a.end(); ++i) {
+		if (N < i->bundle->nchannels ()) {
+			bc[dim] = ARDOUR::BundleChannel (i->bundle, N);
 			break;
 		} else {
-			N -= (*i)->nchannels ();
+			N -= i->bundle->nchannels ();
 		}
 	}
 
@@ -478,11 +478,11 @@ PortMatrixBody::highlight_associated_channels (int dim, uint32_t N)
 		_row_labels->add_channel_highlight (bc[dim]);
 	}
 
-	ARDOUR::BundleList const b = _matrix->ports(1 - dim)->bundles ();
+	PortGroup::BundleList const b = _matrix->ports(1 - dim)->bundles ();
 
-	for (ARDOUR::BundleList::const_iterator i = b.begin(); i != b.end(); ++i) {
-	        for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-			bc[1 - dim] = ARDOUR::BundleChannel (*i, j);
+	for (PortGroup::BundleList::const_iterator i = b.begin(); i != b.end(); ++i) {
+	        for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
+			bc[1 - dim] = ARDOUR::BundleChannel (i->bundle, j);
 			if (_matrix->get_state (bc) == PortMatrixNode::ASSOCIATED) {
 				if (dim == _matrix->column_index()) {
 					_row_labels->add_channel_highlight (bc[1 - dim]);

@@ -970,6 +970,7 @@ class Editor : public PublicEditor
 	/* track views */
 	TrackViewList track_views;
 	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
+	TimeAxisView* axis_view_from_route (ARDOUR::Route *) const;
 	TrackSelection axis_views_from_routes (std::list<ARDOUR::Route *>) const;
 
 	static Gdk::Cursor* cross_hair_cursor;

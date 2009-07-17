@@ -31,6 +31,8 @@
 
 #include "port_group.h"
 #include "port_matrix.h"
+#include "time_axis_view.h"
+#include "public_editor.h"
 
 #include "i18n.h"
 
@@ -54,11 +56,34 @@ void
 PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
 {
 	assert (b.get());
-	_bundles.push_back (b);
 
-	_bundle_changed_connections[b] = 
-		b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
-	
+	BundleRecord r;
+	r.bundle = b;
+	r.has_colour = false;
+	r.changed_connection = b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
+
+	_bundles.push_back (r);
+
+	Modified ();
+}
+
+/** Add a bundle to a group.
+ *  @param b Bundle.
+ *  @param c Colour to represent the group with.
+ */
+void
+PortGroup::add_bundle (boost::shared_ptr<Bundle> b, Gdk::Color c)
+{
+	assert (b.get());
+
+	BundleRecord r;
+	r.bundle = b;
+	r.colour = c;
+	r.has_colour = true;
+	r.changed_connection = b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
+
+	_bundles.push_back (r);
+
 	Modified ();
 }
 
@@ -67,13 +92,17 @@ PortGroup::remove_bundle (boost::shared_ptr<Bundle> b)
 {
 	assert (b.get());
 
-	BundleList::iterator i = std::find (_bundles.begin(), _bundles.end(), b);
+	BundleList::iterator i = _bundles.begin ();
+	while (i != _bundles.end() && i->bundle != b) {
+		++i;
+	}
+
 	if (i == _bundles.end()) {
 		return;
 	}
 
+	i->changed_connection.disconnect ();
 	_bundles.erase (i);
-	_bundle_changed_connections[b].disconnect ();
 	
 	Modified ();
 }
@@ -88,16 +117,11 @@ PortGroup::bundle_changed (Bundle::Change c)
 void
 PortGroup::clear ()
 {
-	_bundles.clear ();
-
-	for (ConnectionList::iterator i = _bundle_changed_connections.begin(); i != _bundle_changed_connections.end(); ++i) {
-
-		i->second.disconnect ();
-
+	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+		i->changed_connection.disconnect ();
 	}
-	
-	_bundle_changed_connections.clear ();
 
+	_bundles.clear ();
 	Modified ();
 }
 
@@ -105,7 +129,7 @@ bool
 PortGroup::has_port (std::string const& p) const
 {
 	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-		if ((*i)->offers_port_alone (p)) {
+		if (i->bundle->offers_port_alone (p)) {
 			return true;
 		}
 	}
@@ -117,7 +141,7 @@ boost::shared_ptr<Bundle>
 PortGroup::only_bundle ()
 {
 	assert (_bundles.size() == 1);
-	return _bundles.front();
+	return _bundles.front().bundle;
 }
 
 
@@ -126,13 +150,12 @@ PortGroup::total_channels () const
 {
 	uint32_t n = 0;
 	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-		n += (*i)->nchannels ();
+		n += i->bundle->nchannels ();
 	}
 
 	return n;
 }
 
-	
 /** PortGroupList constructor.
  */
 PortGroupList::PortGroupList ()
@@ -173,7 +196,7 @@ PortGroupList::maybe_add_processor_to_bundle (boost::weak_ptr<Processor> wp, boo
 
 /** Gather bundles from around the system and put them in this PortGroupList */
 void
-PortGroupList::gather (Session& session, bool inputs)
+PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 {
 	clear ();
 
@@ -222,7 +245,13 @@ PortGroupList::gather (Session& session, bool inputs)
 		} 
 			
 		if (g) {
-			g->add_bundle (rb);
+
+			TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (i->get());
+			if (tv) {
+				g->add_bundle (rb, tv->color ());
+			} else {
+				g->add_bundle (rb);
+			}
 		}
 	}
 
@@ -246,7 +275,7 @@ PortGroupList::gather (Session& session, bool inputs)
 	std::vector<std::string> extra_other;
 
  	const char **ports = session.engine().get_ports ("", _type.to_jack_type(), inputs ? 
- 							  JackPortIsInput : JackPortIsOutput);
+							 JackPortIsInput : JackPortIsOutput);
  	if (ports) {
 
 		int n = 0;
@@ -376,7 +405,7 @@ PortGroupList::clear ()
 }
 
 
-BundleList const &
+PortGroup::BundleList const &
 PortGroupList::bundles () const
 {
 	_bundles.clear ();

@@ -25,6 +25,8 @@
 #include "port_matrix_body.h"
 #include "utils.h"
 
+using namespace std;
+
 PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b)
 	: PortMatrixLabels (m, b)
 {
@@ -47,11 +49,11 @@ PortMatrixColumnLabels::compute_dimensions ()
 	/* width of the whole thing */
 	_width = 0;
 
-	ARDOUR::BundleList const c = _matrix->columns()->bundles();
-	for (ARDOUR::BundleList::const_iterator i = c.begin (); i != c.end(); ++i) {
+	PortGroup::BundleList const c = _matrix->columns()->bundles();
+	for (PortGroup::BundleList::const_iterator i = c.begin (); i != c.end(); ++i) {
 
 		cairo_text_extents_t ext;
-		cairo_text_extents (cr, (*i)->name().c_str(), &ext);
+		cairo_text_extents (cr, i->bundle->name().c_str(), &ext);
 		if (ext.width > _longest_bundle_name) {
 			_longest_bundle_name = ext.width;
 		}
@@ -59,11 +61,11 @@ PortMatrixColumnLabels::compute_dimensions ()
 			_highest_text = ext.height;
 		}
 
-		for (uint32_t j = 0; j < (*i)->nchannels (); ++j) {
+		for (uint32_t j = 0; j < i->bundle->nchannels (); ++j) {
 			
 			cairo_text_extents (
 				cr,
-				(*i)->channel_name (j).c_str(),
+				i->bundle->channel_name (j).c_str(),
 				&ext
 				);
 			
@@ -78,7 +80,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 		if (_matrix->show_only_bundles()) {
 			_width += column_width();
 		} else {
-			_width += (*i)->nchannels() * column_width();
+			_width += i->bundle->nchannels() * column_width();
 		}
 	}
 
@@ -164,8 +166,8 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		}
 		cairo_fill (cr);
 
-		std::string const upper = Glib::ustring ((*i)->name).uppercase ();
-		std::pair<std::string, double> const display = fit_to_pixels (cr, upper, w);
+		string const upper = Glib::ustring ((*i)->name).uppercase ();
+		pair<string, double> const display = fit_to_pixels (cr, upper, w);
 
 		/* plot it */
 		set_source_rgb (cr, text_colour());
@@ -179,16 +181,20 @@ PortMatrixColumnLabels::render (cairo_t* cr)
         /* BUNDLE PARALLELOGRAM-TYPE-THING AND NAME */
 
 	x = 0;
-	ARDOUR::BundleList const c = _matrix->columns()->bundles();
-	for (ARDOUR::BundleList::const_iterator i = c.begin (); i != c.end(); ++i) {
+	int N = 0;
+	PortGroup::BundleList const bundles = _matrix->columns()->bundles();
+	for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
 
-		render_bundle_name (cr, get_a_bundle_colour (i - c.begin ()), x, 0, *i);
+		Gdk::Color c = i->has_colour ? i->colour : get_a_bundle_colour (N);
+		render_bundle_name (cr, c, x, 0, i->bundle);
 
 		if (_matrix->show_only_bundles()) {
 			x += column_width();
 		} else {
-			x += (*i)->nchannels () * column_width();
+			x += i->bundle->nchannels () * column_width();
 		}
+
+		++N;
 	}
 	
 
@@ -196,13 +202,16 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 	if (!_matrix->show_only_bundles()) {
 		x = 0;
-		for (ARDOUR::BundleList::const_iterator i = c.begin (); i != c.end(); ++i) {
+		N = 0;
+		for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
 			
-			for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-				
-				render_channel_name (cr, get_a_bundle_colour (i - c.begin()), x, 0, ARDOUR::BundleChannel (*i, j));
+			for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
+				Gdk::Color c = i->has_colour ? i->colour : get_a_bundle_colour (N);
+				render_channel_name (cr, c, x, 0, ARDOUR::BundleChannel (i->bundle, j));
 				x += column_width();
 			}
+
+			++N;
 		}
 	}
 }
@@ -240,10 +249,10 @@ PortMatrixColumnLabels::mouseover_changed (PortMatrixNode const &)
 	}
 }
 
-std::vector<std::pair<double, double> >
+vector<pair<double, double> >
 PortMatrixColumnLabels::port_name_shape (double xoff, double yoff) const
 {
-	std::vector<std::pair<double, double> > shape;
+	vector<pair<double, double> > shape;
 	
 	double const lc = _longest_channel_name + name_pad();
 	double const w = column_width();
@@ -252,29 +261,29 @@ PortMatrixColumnLabels::port_name_shape (double xoff, double yoff) const
 
 		double x_ = xoff + slanted_height() / tan (angle()) + w;
 		double y_ = yoff;
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 		x_ -= w;
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 		x_ -= lc * cos (angle());
 		y_ += lc * sin (angle());
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 		x_ += w * pow (sin (angle()), 2);
 		y_ += w * sin (angle()) * cos (angle());
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 		
 	} else {
 		
 		double x_ = xoff;
 		double y_ = yoff + _height;
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 		x_ += w;
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 		x_ += lc * cos (angle());
 		y_ -= lc * sin (angle());
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 		x_ -= column_width() * pow (sin (angle()), 2);
 		y_ -= column_width() * sin (angle()) * cos (angle());
-		shape.push_back (std::make_pair (x_, y_));
+		shape.push_back (make_pair (x_, y_));
 	}
 
 	return shape;
@@ -354,7 +363,7 @@ PortMatrixColumnLabels::render_channel_name (
 	cairo_t* cr, Gdk::Color colour, double xoff, double yoff, ARDOUR::BundleChannel const &bc
 	)
 {
-	std::vector<std::pair<double, double> > const shape = port_name_shape (xoff, yoff);
+	vector<pair<double, double> > const shape = port_name_shape (xoff, yoff);
 
 	cairo_move_to (cr, shape[0].first, shape[0].second);
 	for (uint32_t i = 1; i < 4; ++i) {
@@ -404,12 +413,12 @@ PortMatrixColumnLabels::channel_x (ARDOUR::BundleChannel const &bc) const
 {
 	uint32_t n = 0;
 
-	ARDOUR::BundleList::const_iterator i = _matrix->columns()->bundles().begin();
-	while (i != _matrix->columns()->bundles().end() && *i != bc.bundle) {
+	PortGroup::BundleList::const_iterator i = _matrix->columns()->bundles().begin();
+	while (i != _matrix->columns()->bundles().end() && i->bundle != bc.bundle) {
 		if (_matrix->show_only_bundles()) {
 			n += 1;
 		} else {
-			n += (*i)->nchannels ();
+			n += i->bundle->nchannels ();
 		}
 		++i;
 	}
@@ -481,7 +490,7 @@ PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
 	uint32_t i = 0;
 	for (; i < N; ++i) {
 		
-		std::vector<std::pair<double, double> > const shape = port_name_shape (i * column_width(), 0);
+		vector<pair<double, double> > const shape = port_name_shape (i * column_width(), 0);
 
 		uint32_t j = 0;
 		for (; j < 4; ++j) {

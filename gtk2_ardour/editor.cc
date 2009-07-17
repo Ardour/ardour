@@ -4863,19 +4863,31 @@ Editor::streamview_height_changed ()
 	_summary->set_dirty ();
 }
 
+TimeAxisView*
+Editor::axis_view_from_route (Route* r) const
+{
+	TrackViewList::const_iterator j = track_views.begin ();
+	while (j != track_views.end()) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
+		if (rtv && rtv->route().get() == r) {
+			return rtv;
+		}
+		++j;
+	}
+
+	return 0;
+}
+
+
 TrackSelection
 Editor::axis_views_from_routes (list<Route*> r) const
 {
 	TrackSelection t;
 	
 	for (list<Route*>::const_iterator i = r.begin(); i != r.end(); ++i) {
-		TrackViewList::const_iterator j = track_views.begin ();
-		while (j != track_views.end()) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
-			if (rtv && rtv->route().get() == *i) {
-				t.push_back (rtv);
-			}
-			++j;
+		TimeAxisView* tv = axis_view_from_route (*i);
+		if (tv) {
+			t.push_back (tv);
 		}
 	}
 

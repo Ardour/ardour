@@ -38,6 +38,7 @@ namespace ARDOUR {
 
 class PortMatrix;
 class RouteBundle;
+class PublicEditor;
 
 /** A list of bundles and ports, grouped by some aspect of their
  *  type e.g. busses, tracks, system.  Each group has 0 or more bundles
@@ -49,6 +50,7 @@ public:
 	PortGroup (std::string const & n);
 
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, Gdk::Color);
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	boost::shared_ptr<ARDOUR::Bundle> only_bundle ();
 	void clear ();
@@ -56,10 +58,6 @@ public:
 
 	std::string name; ///< name for the group
 
-	ARDOUR::BundleList const & bundles () const {
-		return _bundles;
-	}
-	
 	bool visible () const {
 		return _visible;
 	}
@@ -74,14 +72,23 @@ public:
 	sigc::signal<void> Modified;
 	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
 
+	struct BundleRecord {
+		boost::shared_ptr<ARDOUR::Bundle> bundle;
+		Gdk::Color colour;
+		bool has_colour;
+		sigc::connection changed_connection;
+	};
+
+	typedef std::list<BundleRecord> BundleList;
+
+	BundleList const & bundles () const {
+		return _bundles;
+	}
+	
 private:
 	void bundle_changed (ARDOUR::Bundle::Change);
-	
-	ARDOUR::BundleList _bundles;
 
-	typedef std::map<boost::shared_ptr<ARDOUR::Bundle>, sigc::connection> ConnectionList;
-	ConnectionList _bundle_changed_connections;
-	
+	BundleList _bundles;
 	bool _visible; ///< true if the group is visible in the UI
 };
 
@@ -96,7 +103,7 @@ class PortGroupList : public sigc::trackable
 	void add_group (boost::shared_ptr<PortGroup>);
 	void set_type (ARDOUR::DataType);
 	void gather (ARDOUR::Session &, bool);
-	ARDOUR::BundleList const & bundles () const;
+	PortGroup::BundleList const & bundles () const;
 	void clear ();
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	uint32_t total_visible_channels () const;
@@ -126,7 +133,7 @@ class PortGroupList : public sigc::trackable
 	void maybe_add_processor_to_bundle (boost::weak_ptr<ARDOUR::Processor>, boost::shared_ptr<RouteBundle>, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &);
 
 	ARDOUR::DataType _type;
-	mutable ARDOUR::BundleList _bundles;
+	mutable PortGroup::BundleList _bundles;
 	List _groups;
 	std::vector<sigc::connection> _bundle_changed_connections;
 	bool _signals_suspended;

@@ -278,17 +278,17 @@ PortMatrix::setup_scrollbars ()
 void
 PortMatrix::disassociate_all ()
 {
-	ARDOUR::BundleList a = _ports[0].bundles ();
-	ARDOUR::BundleList b = _ports[1].bundles ();
+	PortGroup::BundleList a = _ports[0].bundles ();
+	PortGroup::BundleList b = _ports[1].bundles ();
 
-	for (ARDOUR::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
-		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-			for (ARDOUR::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
-				for (uint32_t l = 0; l < (*k)->nchannels(); ++l) {
+	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
+		for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
+			for (PortGroup::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
+				for (uint32_t l = 0; l < k->bundle->nchannels(); ++l) {
 						
 					ARDOUR::BundleChannel c[2] = {
-						ARDOUR::BundleChannel (*i, j),
-						ARDOUR::BundleChannel (*k, l)
+						ARDOUR::BundleChannel (i->bundle, j),
+						ARDOUR::BundleChannel (k->bundle, l)
 							};
 
 					if (get_state (c) == PortMatrixNode::ASSOCIATED) {
@@ -376,13 +376,13 @@ PortMatrix::popup_channel_context_menu (int dim, uint32_t N, uint32_t t)
 
 	ARDOUR::BundleChannel bc;
 
-	ARDOUR::BundleList const r = _ports[dim].bundles();
-	for (ARDOUR::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
-		if (N < (*i)->nchannels ()) {
-			bc = ARDOUR::BundleChannel (*i, N);
+	PortGroup::BundleList const r = _ports[dim].bundles();
+	for (PortGroup::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
+		if (N < i->bundle->nchannels ()) {
+			bc = ARDOUR::BundleChannel (i->bundle, N);
 			break;
 		} else {
-			N -= (*i)->nchannels ();
+			N -= i->bundle->nchannels ();
 		}
 	}
 
@@ -464,14 +464,14 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle> bundle,
 		return;
 	}
 
-	ARDOUR::BundleList a = _ports[1-dim].bundles ();
+	PortGroup::BundleList a = _ports[1-dim].bundles ();
 
-	for (ARDOUR::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
-		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
+	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
+		for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
 
 			ARDOUR::BundleChannel c[2];
 			c[dim] = ARDOUR::BundleChannel (sb, channel);
-			c[1-dim] = ARDOUR::BundleChannel (*i, j);
+			c[1-dim] = ARDOUR::BundleChannel (i->bundle, j);
 
 			if (get_state (c) == PortMatrixNode::ASSOCIATED) {
 				set_state (c, false);

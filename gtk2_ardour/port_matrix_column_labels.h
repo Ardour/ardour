@@ -60,7 +60,7 @@ private:
 		return _height - _highest_group_name - 2 * name_pad();
 	}
 
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _bundles;
+//	PortGroup::BundleList _bundles;
 	double _longest_bundle_name;
 	double _longest_channel_name;
 	double _highest_text;
