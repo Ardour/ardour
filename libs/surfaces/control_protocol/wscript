@@ -6,7 +6,7 @@ import os
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
+LIBARDOUR_CP_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
 srcdir = '.'
@@ -25,13 +25,13 @@ def build(bld):
 		control_protocol.cc
 		smpte.cc
 	'''
-	obj.export_incdirs = ['.']
+	obj.export_incdirs = ['.', './control_protocol' ]
 	obj.cxxflags     = '-DPACKAGE="ardour_cp"'
-	obj.includes     = ['.']
-	obj.name         = 'libsurfaces'
-	obj.target       = 'surfaces'
+	obj.includes     = ['.', './control_protocol']
+	obj.name         = 'libardour_cp'
+	obj.target       = 'ardourcp'
 	obj.uselib_local = 'libardour'
-	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.vnum         = LIBARDOUR_CP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

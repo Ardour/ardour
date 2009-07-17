@@ -34,12 +34,19 @@ class Panner;
 class Delivery : public IOProcessor {
 public:
 	enum Role {
-		Insert = 0x1,
+		/* main outputs - delivers out-of-place to port buffers, and cannot be removed */
+		Main   = 0x1,
+		/* send - delivers to port buffers, leaves input buffers untouched */
 		Send   = 0x2,
-		Listen = 0x4,
-		Main   = 0x8,
+		/* insert - delivers to port buffers and receives in-place from port buffers */
+		Insert = 0x4,
+		/* listen - internal send used only to deliver to control/monitor bus */
+		Listen = 0x8,
+		/* aux - internal send used to deliver to any bus, by user request */
 		Aux    = 0x10
 	};
+
+	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert; }
 
 	/* Delivery to an existing output */
 

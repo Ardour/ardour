@@ -336,9 +336,9 @@ Location::get_state (void)
 	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 	node->add_property ("name", name());
-	snprintf (buf, sizeof (buf), "%u", start());
+	snprintf (buf, sizeof (buf), "%" PRId64, start());
 	node->add_property ("start", buf);
-	snprintf (buf, sizeof (buf), "%u", end());
+	snprintf (buf, sizeof (buf), "%" PRId64, end());
 	node->add_property ("end", buf);
 	node->add_property ("flags", enum_2_string (_flags));
 	node->add_property ("locked", (_locked ? "yes" : "no"));
@@ -385,14 +385,14 @@ Location::set_state (const XMLNode& node)
 		   may make the value of _start illegal.
 		*/
 		
-	sscanf (prop->value().c_str(), "%" PRIu32, &_start);
+	sscanf (prop->value().c_str(), "%" PRId64, &_start);
 	
 	if ((prop = node.property ("end")) == 0) {
 		  error << _("XML node for Location has no end information") << endmsg; 
 		  return -1;
 	}
 		
-	sscanf (prop->value().c_str(), "%" PRIu32, &_end);
+	sscanf (prop->value().c_str(), "%" PRId64, &_end);
 		
 	if ((prop = node.property ("flags")) == 0) {
 		  error << _("XML node for Location has no flags information") << endmsg; 

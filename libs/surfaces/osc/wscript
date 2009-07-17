@@ -2,18 +2,11 @@
 import autowaf
 import os
 
-# Version of this package (even if built as a child)
-LIBSURFACES_VERSION = '4.1.0'
-
 # Library version (UNIX style major, minor, micro)
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
-
-# Variables for 'waf dist'
-APPNAME = 'libsurfaces'
-VERSION = LIBSURFACES_VERSION
+LIBARDOUR_OSC_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
 srcdir = '.'
@@ -24,6 +17,7 @@ def set_options(opt):
 
 def configure(conf):
 	autowaf.configure(conf)
+	autowaf.check_pkg(conf, 'liblo', uselib_store='LO')
 
 def build(bld):
 	obj = bld.new_task_gen('cxx', 'shlib')
@@ -32,13 +26,14 @@ def build(bld):
 		osc_controllable.cc
 		interface.cc
 	'''
-	obj.export_incdirs = ['./osc']
+	obj.export_incdirs = ['.']
 	obj.cxxflags     = '-DPACKAGE="ardour_cp"'
 	obj.includes     = ['.', './osc']
-	obj.name         = 'libsurfaces'
-	obj.target       = 'surfaces'
-	obj.uselib_local = 'libardour'
-	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.name         = 'libardour_osc'
+	obj.target       = 'osc'
+	obj.uselib       = ' LO '
+	obj.uselib_local = 'libardour libardour_cp'
+	obj.vnum         = LIBARDOUR_OSC_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

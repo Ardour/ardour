@@ -6,7 +6,7 @@ import os
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
+LIBARDOUR_TRANZPORT_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
 srcdir = '.'
@@ -41,10 +41,10 @@ def build(bld):
 	obj.export_incdirs = ['./tranzport']
 	obj.cxxflags     = '-DPACKAGE="ardour_tranzport"'
 	obj.includes     = ['.', './tranzport']
-	obj.name         = 'libtranzport'
-	obj.target       = 'tranzport'
-	obj.uselib_local = 'libardour libsurfaces'
-	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.name         = 'libardour_tranzport'
+	obj.target       = 'ardour_tranzport'
+	obj.uselib_local = 'libardour libardour_cp'
+	obj.vnum         = LIBARDOUR_TRANZPORT_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

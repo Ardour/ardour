@@ -141,7 +141,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		template_names.push_back (rti);
 	}
 
-	free (templates);
+	delete templates;
 }
 
 }

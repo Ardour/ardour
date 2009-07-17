@@ -6,7 +6,7 @@ import os
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
+LIBARDOUR_POWERMATE_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
 srcdir = '.'
@@ -24,13 +24,13 @@ def build(bld):
 		interface.cc
 		powermate.cc
 	'''
-	obj.export_incdirs = ['./powermate']
+	obj.export_incdirs = ['.']
 	obj.cxxflags     = '-DPACKAGE="ardour_powermate"'
-	obj.includes     = ['.', './powermate']
+	obj.includes     = ['.' ]
 	obj.name         = 'libpowermate'
 	obj.target       = 'powermate'
-	obj.uselib_local = 'libardour libsurfaces'
-	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.uselib_local = 'libardour libardour_cp'
+	obj.vnum         = LIBARDOUR_POWERMATE_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

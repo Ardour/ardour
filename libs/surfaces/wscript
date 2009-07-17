@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import autowaf
+import Options
 
 # Version of this package (even if built as a child)
 LIBSURFACES_VERSION = '4.1.0'
@@ -24,9 +25,32 @@ def set_options(opt):
 def configure(conf):
 	autowaf.configure(conf)
 
+	conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
+	conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE')
+	conf.check_cc (lib='lo', header_name='lo/lo.h', function_name='lo_server_new', define_name='BUILD_OSC')
+	
+	if Options.options.wiimote:
+		conf.check_cc (header_name='cwiid.h',define_name='HAVE_CWIID_H')
+		if not conf.env['HAVE_CWIID_H']:
+			print 'WIIMOTE configured but you are missing libcwiid!'
+			sys.exit(1)
+		conf.check_cc (header_name='bluetooth/bluetooth.h',define_name='HAVE_BLUETOOTH_H')
+		if not conf.env['HAVE_BLUETOOTH_H']:
+			print 'WIIMOTE configured but you are missing the libbluetooth headers needed to compile wiimote support!'
+			sys.exit(1)
+		conf.define ('BUILD_WIIMOTE', 1)
+
 def build(bld):
 	bld.add_subdirs('control_protocol')
 	bld.add_subdirs('generic_midi')
+	if bld.env['BUILD_OSC']:
+		bld.add_subdirs('osc')
+	if bld.env['BUILD_POWERMATE']:
+		bld.add_subdirs('powermate')
+	if bld.env['BUILD_WIIMOTE']:
+		bld.add_subdirs('wiimote')
+	if bld.env['BUILD_TRANZPORT']:
+		bld.add_subdirs('tranzport')
 
 def shutdown():
 	autowaf.shutdown()

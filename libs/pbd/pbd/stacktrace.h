@@ -20,23 +20,23 @@
 #ifndef __libpbd_stacktrace_h__
 #define __libpbd_stacktrace_h__
 
+#ifdef HAVE_WAFBUILD
+#include "libpbd-config.h"
+#endif
+
 #include <iostream>
 #include <ostream>
 #include <glibmm/thread.h>
 #include <list>
 
+#ifdef HAVE_EXECINFO
+#include <execinfo.h>
+#include <cstdlib>
+#endif
+
 namespace PBD {
 	void stacktrace (std::ostream& out, int levels = 0);
 	void trace_twb();
-
-#ifdef HAVE_WAFBUILD
-#include "libpbd-config.h"
-#endif
-
-#ifdef HAVE_EXECINFO
-#include <execinfo.h>
-#include <stdlib.h>
-#endif
 
 template<typename T>
 class thing_with_backtrace 

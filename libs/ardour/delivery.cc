@@ -47,7 +47,7 @@ bool                         Delivery::panners_legal = false;
 /* deliver to an existing IO object */
 
 Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, boost::shared_ptr<IO>(), (r == Listen ? boost::shared_ptr<IO>() : io), name)
+	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _current_gain (1.0)
@@ -71,7 +71,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 /* deliver to a new IO object */
 
 Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, false, (r == Listen ? false : true), name)
+	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _current_gain (1.0)
@@ -184,17 +184,88 @@ Delivery::visible () const
 bool
 Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	out = in;
-	return true;
+	if (_role == Main) {
+
+		/* the out buffers will be set to point to the port output buffers
+		   of our output object.
+		*/
+
+		if (_output) { 
+			if (_output->n_ports() != ChanCount::ZERO) {
+				out = _output->n_ports();
+				return true;
+			} else {
+				/* not configured yet - we will passthru */
+				out = in;
+				return true;
+			}
+		} else {
+			fatal << "programming error: this should never be reached" << endmsg;
+			/*NOTREACHED*/
+		}
+
+
+	} else if (_role == Insert) {
+
+		/* the output buffers will be filled with data from the *input* ports
+		   of this Insert. 
+		*/
+
+		if (_input) { 
+			if (_input->n_ports() != ChanCount::ZERO) {
+				out = _input->n_ports();
+				return true;
+			} else {
+				/* not configured yet - we will passthru */
+				out = in;
+				return true;
+			}
+		} else {
+			fatal << "programming error: this should never be reached" << endmsg;
+			/*NOTREACHED*/
+		}
+
+	} else {
+		fatal << "programming error: this should never be reached" << endmsg;
+	}
+
+	return false;
 }
 
 bool
 Delivery::configure_io (ChanCount in, ChanCount out)
 {
-	if (out != in) { // always 1:1
-		return false;
+	/* check configuration by comparison with our I/O port configuration, if appropriate.
+	   see ::can_support_io_configuration() for comments 
+	*/
+
+	if (_role == Main) {
+
+		if (_output) { 
+			if (_output->n_ports() != out) {
+				if (_output->n_ports() != ChanCount::ZERO) {
+					fatal << _name << " programming error: configure_io with nports = " << _output->n_ports() << " called with " << in << " and " << out << " with " << _output->n_ports() << " output ports" << endmsg;
+					/*NOTREACHED*/
+				} else {
+					/* I/O not yet configured */
+				}
+			} 
+		}
+
+	} else if (_role == Insert) {
+
+		if (_input) { 
+			if (_input->n_ports() != in) {
+				if (_input->n_ports() != ChanCount::ZERO) {
+					fatal << _name << " programming error: configure_io called with " << in << " and " << out << " with " << _input->n_ports() << " input ports" << endmsg;
+					/*NOTREACHED*/
+				} else {
+					/* I/O not yet configured */
+				}
+			}
+		}
 	}
-	
+
 	if (!Processor::configure_io (in, out)) {
 		return false;
 	}
@@ -207,6 +278,8 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 void
 Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
+	assert (_output);
+
 	if (!_active || _output->n_ports ().get (_output->default_type()) == 0) {
 		return;
 	}
@@ -269,7 +342,6 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		}
 	}
 }
-
 
 XMLNode&
 Delivery::state (bool full_state)
@@ -448,6 +520,7 @@ Delivery::target_gain ()
 			break;
 		case Send:
 		case Insert:
+		case Aux:
 			/* XXX FIX ME this is wrong, we need per-delivery muting */
 			mp = MuteMaster::PreFader;
 			break;

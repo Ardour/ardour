@@ -37,9 +37,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
 
 	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
-
-	# This must be defined for libpbd only, it breaks ardour
-	conf.check(header_name='execinfo.h', define_name='PBD_HAVE_EXECINFO')
+	conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
 
 	conf.write_config_header('libpbd-config.h')
 
@@ -92,8 +90,9 @@ def build(bld):
 	obj.vnum         = LIBPBD_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = ['-DPACKAGE="libpbd"']
-	if bld.env['PBD_HAVE_EXECINFO']:
-		obj.cxxflags += ['-DHAVE_EXECINFO']
+
+	if bld.env['build_target'] == 'x86_64':
+		obj.cxxflags += [ '-DUSE_X86_64_ASM' ]
 
 def shutdown():
 	autowaf.shutdown()

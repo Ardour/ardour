@@ -20,6 +20,10 @@
 #ifndef __ardour_pitch_h__
 #define __ardour_pitch_h__
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif 
+
 #include "ardour/filter.h"
 
 namespace ARDOUR {

@@ -3784,8 +3784,11 @@ Session::ensure_buffers (ChanCount howmany)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		size_t count = std::max(_scratch_buffers->available().get(*t), howmany.get(*t));
+		cerr << "Ensure bufs for scratch at " << _scratch_buffers << " mirror ? " << _scratch_buffers->is_mirror() << endl;
 		_scratch_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
+		cerr << "Ensure bufs for mix at " << _mix_buffers << " mirror ? " << _mix_buffers->is_mirror() << endl;
 		_mix_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
+		cerr << "Ensure bufs for silent at " << _silent_buffers << " mirror ? " << _silent_buffers->is_mirror() << endl;
 		_silent_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
 	}
 

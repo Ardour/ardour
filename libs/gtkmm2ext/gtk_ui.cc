@@ -220,7 +220,10 @@ UI::run (Receiver &old_receiver)
 	listen_to (warning);
 	listen_to (fatal);
 
-	old_receiver.hangup ();
+	/* stop the old receiver (text/console) once we hit the first idle */
+
+	Glib::signal_idle().connect (bind_return (mem_fun (old_receiver, &Receiver::hangup), false));
+
 	starting ();
 	_active = true;	
 	theMain->run ();
@@ -529,10 +532,10 @@ UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag
 void
 UI::handle_fatal (const char *message)
 {
-	Window win (WINDOW_POPUP);
-	VBox packer;
+	Dialog win;
 	Label label (message);
 	Button quit (_("Press To Exit"));
+	HBox hpacker;
 
 	win.set_default_size (400, 100);
 	
@@ -542,10 +545,12 @@ UI::handle_fatal (const char *message)
 	win.set_title (title);
 
 	win.set_position (WIN_POS_MOUSE);
-	win.add (packer);
+	win.set_border_width (12);
 
-	packer.pack_start (label, true, true);
-	packer.pack_start (quit, false, false);
+	win.get_vbox()->pack_start (label, true, true);
+	hpacker.pack_start (quit, true, false);
+	win.get_vbox()->pack_start (hpacker, false, false);
+
 	quit.signal_clicked().connect(mem_fun(*this,&UI::quit));
 	
 	win.show_all ();
@@ -553,7 +558,7 @@ UI::handle_fatal (const char *message)
 
 	theMain->run ();
 	
-	exit (1);
+	_exit (1);
 }
 
 void

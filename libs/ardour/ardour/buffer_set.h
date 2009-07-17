@@ -74,6 +74,7 @@ public:
 	void is_silent(bool yn) { _is_silent = yn; }
 	bool is_silent() const  { return _is_silent; }
 	void silence (nframes_t nframes, nframes_t offset);
+	bool is_mirror() const { return _is_mirror; } 
 
 	void set_count(const ChanCount& count) { assert(count <= _available); _count = count; }
 	
@@ -169,7 +170,7 @@ private:
 	/// Available counts (number of buffers actually allocated)
 	ChanCount _available;
 
-	/// Whether we (don't) 'own' the contained buffers (otherwise we mirror a PortSet)
+	/// False if we 'own' the contained buffers, if true we mirror a PortSet)
 	bool _is_mirror;
 
 	/// Whether the buffer set should be considered silent

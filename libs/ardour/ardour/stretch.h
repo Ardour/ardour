@@ -20,6 +20,10 @@
 #ifndef __ardour_stretch_h__
 #define __ardour_stretch_h__
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif 
+
 #include "ardour/filter.h"
 
 #ifdef USE_RUBBERBAND

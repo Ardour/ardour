@@ -39,9 +39,6 @@ def configure(conf):
 
 	conf.check_tool('misc') # subst tool
 
-	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
-	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
-
 	conf.write_config_header('gtk2ardour-config.h')
 
 	# TODO
@@ -224,17 +221,17 @@ def build(bld):
 		version.cc
 		waveview.cc
 	'''
-	obj.source += ' x11.cc'
 	obj.includes     = ['.']
 	obj.name         = 'gtk2_ardour'
 	obj.target       = 'ardour-3.0'
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA'
 	obj.uselib       += ' GTKMM GNOMECANVASMM'
-	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libsurfaces
+	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp
 	                      libgtkmm2ext libtaglib'''
-	obj.cxxflags     = ['-DVERSIONSTRING="' + GTK2_ARDOUR_VERSION + '"']
-	obj.cxxflags     += ['-DPACKAGE="gtk2_ardour"']
+	obj.cflags       = ['-DPACKAGE="gtk2_ardour"']
+	obj.cxxflags     = ['-DPACKAGE="gtk2_ardour"']
+	obj.cxxflags     += ['-DVERSIONSTRING="' + GTK2_ARDOUR_VERSION + '"']
 	obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIRNAME']) + '"']
 	obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '"']
 	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIRNAME']) + '"']
@@ -243,6 +240,27 @@ def build(bld):
 	if bld.env['HAVE_SLV2']:
 		obj.source += ' lv2_plugin_ui.cc '
 		obj.uselib += ' SLV2 '
+
+	if bld.env['FREESOUND']:
+		obj.source += 'sfdb_freesound_mootcher.cc '
+
+	if bld.env['VST']:
+		obj.source += ' vst_pluginui.cc '
+		obj.cxxflags += [ '-DVST_SUPPORT' ]
+
+	if bld.env['GTKOSX']:
+		obj.features += ' objc '
+		obj.source += ' cocoacarbon.mm '
+		obj.cxxflags += [ '-DTOP_MENUBAR', '-DGTKOSX' ]
+		obj.linkflags += [ '-framework', 'AppKit', '-framework', 'CoreAudioKit' ]
+		
+		if bld.env['AUDIOUNITS']:
+			obj.source += ' au_pluginui.mm '
+			obj.cxxflags += [ '-DHAVE_AUDIOUNITS' ]
+			obj.uselib_local += ' libappleutility '
+			
+	else:
+		obj.source += ' x11.cc '
 
 	# Wrappers
 

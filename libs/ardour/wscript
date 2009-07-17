@@ -2,6 +2,7 @@
 import autowaf
 import os
 import glob
+import Options
 
 # Version of this package (even if built as a child)
 MAJOR = '3'
@@ -28,17 +29,11 @@ path_prefix = 'libs/ardour/'
 def set_options(opt):
 	autowaf.set_options(opt)
 
-def check_header_and_define(conf, header, define):
-	conf.check(header_name=header, define_name=define)
-	if conf.env[define]:
-		conf.env.append_value('CCFLAGS', '-D' + define)
-		conf.env.append_value('CXXFLAGS', '-D' + define)
-
 def configure(conf):
 	autowaf.build_version_files(path_prefix+'ardour/version.h', path_prefix+'version.cc',
 			'libardour3', MAJOR, MINOR, MICRO)
 	autowaf.configure(conf)
-	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_tool(conf, 'compiler_cxx gas')
 	autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
 	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.109.0')
 	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
@@ -54,14 +49,24 @@ def configure(conf):
 
 	# we don't try to detect this, since its part of our source tree
 
-	conf.env.append_value('CXXFLAGS', '-DUSE_RUBBERBAND')
-	conf.define('HAVE_RUBBERBAND', 1)
+	conf.define('HAVE_RUBBERBAND', 1) # controls whether we think we have it
+	conf.define('USE_RUBBERBAND', 1)  # controls whether we actually use it
 
-	check_header_and_define(conf, 'sys/vfs.h', 'HAVE_SYS_VFS_H')
-	check_header_and_define(conf, 'wordexp.h', 'HAVE_WORDEXP')
-
-	conf.env.append_value('CCFLAGS', '-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE')
-	conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
+	conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
+	conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
+	
+	if conf.env['IS_OSX']:
+		conf.check_cc (header_name = '/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h',
+			       linkflags = [ '-framework', 'CoreMIDI' ])
+		
+		conf.check_cc (header_name = '/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h',
+			       linkflags = [ '-framework', 'AudioToolbox' ])
+		
+		conf.check_cc (header_name = '/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h',
+			      define_name = 'HAVE_COREAUDIO')
+		
+		conf.check_cc (header_name = '/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h',
+			       define_name = 'HAVE_AUDIOUNITS', linkflags = [ '-framework', 'AudioUnit' ])
 
 	conf.write_config_header('libardour-config.h')
 
@@ -188,6 +193,7 @@ def build(bld):
 		reverse.cc
                 route.cc
 		route_group.cc
+	        rb_effect.cc
 		send.cc
 		session.cc
 		session_butler.cc
@@ -229,7 +235,7 @@ def build(bld):
 	obj.name         = 'libardour'
 	obj.target       = 'ardour'
 	obj.uselib       = 'GLIBMM AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF'
-	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib'
+	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = ['-DPACKAGE="libardour3"']
@@ -240,14 +246,32 @@ def build(bld):
 			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
 	obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
 			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
-	obj.source += ' rb_effect.cc '
-	obj.uselib_local += ' librubberband '
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '
 	if bld.env['HAVE_SLV2']:
 		obj.source += ' lv2_plugin.cc lv2_event_buffer.cc uri_map.cc '
 		obj.uselib += ' SLV2 '
 		
+	if bld.env['VST']:
+		obj.source += ' vst_plugin.cc session_vst.cc '
+
+	if bld.env['HAVE_COREAUDIO'] and bld.env['COREAUDIO']:
+		obj.sources += ' coreaudio.cc caimportable.cc '
+
+	if bld.env['HAVE_AUDIOUNITS'] and bld.env['AUDIOUNITS']:
+		obj.sources += ' audio_unit.cc '
+
+	if bld.env['IS_OSX']:
+		# this avoids issues with circular dependencies between libardour and libardour_cp.
+		obj.linkflags += '-undefined suppress -flat_namespace'
+
+	if bld.env['FPU_OPTIMIZATION']:
+		obj.source += ' sse_functions_xmm.cc'
+		if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
+			obj.source += ' sse_functions.S'
+		elif bld.env['build_target'] == 'x86_64':
+			obj.source += ' sse_functions_64bit.S'
+
 	if bld.env['HAVE_CPPUNIT']:
 		# Unit tests
 		testobj              = bld.new_task_gen('cxx', 'program')
@@ -260,6 +284,7 @@ def build(bld):
 		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM SAMPLERATE'
 		testobj.target       = 'run-tests'
 		testobj.install_path = ''
+
 
 def shutdown():
 	autowaf.shutdown()

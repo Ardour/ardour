@@ -6,7 +6,7 @@ import os
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
+LIBARDOUR_GENERIC_MIDI_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
 srcdir = '.'
@@ -25,13 +25,13 @@ def build(bld):
 		interface.cc
 		midicontrollable.cc
 	'''
-	obj.export_incdirs = ['./generic_midi']
+	obj.export_incdirs = ['.']
 	obj.cxxflags     = '-DPACKAGE="ardour_genericmidi"'
 	obj.includes     = ['.', './generic_midi']
-	obj.name         = 'libgeneric_midi'
-	obj.target       = 'generic_midi'
-	obj.uselib_local = 'libardour libsurfaces'
-	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.name         = 'libardour_generic_midi'
+	obj.target       = 'ardour_generic_midi'
+	obj.uselib_local = 'libardour libardour_cp'
+	obj.vnum         = LIBARDOUR_GENERIC_MIDI_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

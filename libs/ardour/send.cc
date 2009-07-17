@@ -147,22 +147,12 @@ Send::set_state(const XMLNode& node)
 bool
 Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-	if (_output->n_ports() == ChanCount::ZERO) {
-
-		/* not configured yet, we can support anything */
-
-		out = in;
-		return true; /* we can support anything the first time we're asked */
-
-	} else {
-
-		/* for a send, processor input corresponds to IO output */
-
-		out = in;
-		return true;
-	}
-
-	return false;
+	/* sends have no impact at all on the channel configuration of the
+	   streams passing through the route. so, out == in.
+	*/
+	
+	out = in;
+	return true;
 }
 
 /** Set up the XML description of a send so that its name is unique.
