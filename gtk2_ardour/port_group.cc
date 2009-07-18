@@ -28,6 +28,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/port.h"
 #include "ardour/session.h"
+#include "ardour/auditioner.h"
 
 #include "port_group.h"
 #include "port_matrix.h"
@@ -203,6 +204,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 	boost::shared_ptr<PortGroup> bus (new PortGroup (_("Bus")));
 	boost::shared_ptr<PortGroup> track (new PortGroup (_("Track")));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("System")));
+	boost::shared_ptr<PortGroup> ardour (new PortGroup (_("Ardour")));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
 	/* Find the bundles for routes.  We use the RouteBundle class to join
@@ -269,6 +271,11 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 		}
 	}
 
+	/* Ardour stuff */
+
+	ardour->add_bundle (session.the_auditioner()->output()->bundle());
+	ardour->add_bundle (session.click_io()->bundle());
+
 	/* Now find all other ports that we haven't thought of yet */
 
 	std::vector<std::string> extra_system;
@@ -288,7 +295,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 			
 			std::string const p = ports[n];
 
-			if (!system->has_port(p) && !bus->has_port(p) && !track->has_port(p) && !other->has_port(p)) {
+			if (!system->has_port(p) && !bus->has_port(p) && !track->has_port(p) && !ardour->has_port(p) && !other->has_port(p)) {
 				
 				if (port_has_prefix (p, "system:") ||
 				    port_has_prefix (p, "alsa_pcm") ||
@@ -316,6 +323,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 	add_group (system);
 	add_group (bus);
 	add_group (track);
+	add_group (ardour);
 	add_group (other);
 
 	emit_changed ();
