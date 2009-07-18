@@ -64,7 +64,7 @@ PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
 
 	_bundles.push_back (r);
 
-	Modified ();
+	Changed ();
 }
 
 /** Add a bundle to a group.
@@ -84,7 +84,7 @@ PortGroup::add_bundle (boost::shared_ptr<Bundle> b, Gdk::Color c)
 
 	_bundles.push_back (r);
 
-	Modified ();
+	Changed ();
 }
 
 void
@@ -104,7 +104,7 @@ PortGroup::remove_bundle (boost::shared_ptr<Bundle> b)
 	i->changed_connection.disconnect ();
 	_bundles.erase (i);
 	
-	Modified ();
+	Changed ();
 }
 
 void
@@ -122,7 +122,7 @@ PortGroup::clear ()
 	}
 
 	_bundles.clear ();
-	Modified ();
+	Changed ();
 }
 
 bool
@@ -439,7 +439,7 @@ PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
 {
 	_groups.push_back (g);
 	
-	g->Modified.connect (sigc::mem_fun (*this, &PortGroupList::emit_changed));
+	g->Changed.connect (sigc::mem_fun (*this, &PortGroupList::emit_changed));
 	
 	_bundle_changed_connections.push_back (
 		g->BundleChanged.connect (sigc::hide (sigc::mem_fun (*this, &PortGroupList::emit_changed)))

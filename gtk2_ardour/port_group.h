@@ -64,12 +64,12 @@ public:
 
 	void set_visible (bool v) {
 		_visible = v;
-		Modified ();
+		Changed ();
 	}
 
 	bool has_port (std::string const &) const;
 
-	sigc::signal<void> Modified;
+	sigc::signal<void> Changed;
 	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
 
 	struct BundleRecord {

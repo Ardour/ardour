@@ -160,6 +160,8 @@ private:
 	void hide_group (boost::weak_ptr<PortGroup>);
 	void show_group (boost::weak_ptr<PortGroup>);
 	void toggle_show_only_bundles ();
+	void on_realize ();
+	void on_unrealize ();
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;
@@ -175,7 +177,7 @@ private:
 	int _min_height_divisor;
 	bool _show_only_bundles;
 	bool _inhibit_toggle_show_only_bundles;
-	bool _first_setup;
+	bool _realized;
 };
 
 #endif

@@ -51,7 +51,7 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	  _min_height_divisor (1),
 	  _show_only_bundles (false),
 	  _inhibit_toggle_show_only_bundles (false),
-	  _first_setup (true)
+	  _realized (false)
 {
 	_body = new PortMatrixBody (this);
 
@@ -115,7 +115,7 @@ PortMatrix::routes_changed ()
 void
 PortMatrix::setup ()
 {
-	if (_first_setup) {
+	if (!_realized) {
 		select_arrangement ();
 	}
 
@@ -123,8 +123,6 @@ PortMatrix::setup ()
 	setup_scrollbars ();
 	queue_draw ();
 
-	_first_setup = false;
-	
 	show_all ();
 }
 
@@ -460,4 +458,18 @@ PortMatrix::max_size () const
 	m.second += _hscroll.get_height ();
 
 	return m;
+}
+
+void
+PortMatrix::on_realize ()
+{
+	Widget::on_realize ();
+	_realized = true;
+}
+
+void
+PortMatrix::on_unrealize ()
+{
+	Widget::on_unrealize ();
+	_realized = false;
 }
