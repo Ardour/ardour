@@ -150,7 +150,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 		/* compute width of this group */
 		uint32_t w = 0;
-		if (!(*i)->visible() || (*i)->bundles().empty()) {
+		if (!(*i)->visible()) {
 			w = grid_spacing ();
 		} else {
 			if (_matrix->show_only_bundles()) {
@@ -158,7 +158,11 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 			} else {
 				w = (*i)->total_channels() * grid_spacing();
 			}
-			}
+		}
+
+		if (w == 0) {
+			continue;
+		}
 		
 		/* rectangle */
 		set_source_rgb (cr, get_a_group_colour (g));

@@ -121,7 +121,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 
 		/* compute height of this group */
 		double h = 0;
-		if (!(*i)->visible() || (*i)->bundles().empty()) {
+		if (!(*i)->visible()) {
 			h = grid_spacing ();
 		} else {
 			if (_matrix->show_only_bundles()) {
@@ -129,6 +129,10 @@ PortMatrixRowLabels::render (cairo_t* cr)
 			} else {
 				h = (*i)->total_channels () * grid_spacing();
 			}
+		}
+
+		if (h == 0) {
+			continue;
 		}
 		
 		/* rectangle */

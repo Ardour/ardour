@@ -64,6 +64,8 @@ public:
 
 private:
 	void on_realize ();
+	void max_size_changed ();
+	void set_max_size ();
 	
 	GlobalPortMatrix _port_matrix;
 	Gtk::Button _rescan_button;

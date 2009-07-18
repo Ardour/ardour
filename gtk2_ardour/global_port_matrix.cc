@@ -128,13 +128,31 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::Data
 	   people with very large monitors */
 	
 	resize (32768, 32768);
+
+	_port_matrix.MaxSizeChanged.connect (mem_fun (*this, &GlobalPortMatrixWindow::max_size_changed));
 }
 
 void
 GlobalPortMatrixWindow::on_realize ()
 {
 	Window::on_realize ();
+	set_max_size ();
+}
 
+void
+GlobalPortMatrixWindow::max_size_changed ()
+{
+	set_max_size ();
+	resize (32768, 32768);
+}
+
+void
+GlobalPortMatrixWindow::set_max_size ()
+{
+	if ((get_flags() & Gtk::REALIZED) == 0) {
+		return;
+	}
+	
 	pair<uint32_t, uint32_t> const m = _port_matrix.max_size ();
 	
 	GdkGeometry g;

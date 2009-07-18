@@ -110,6 +110,8 @@ public:
 	void setup_all_ports ();
 
 	std::pair<uint32_t, uint32_t> max_size () const;
+	void setup_max_size ();
+	sigc::signal<void> MaxSizeChanged;
 
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.
@@ -160,8 +162,6 @@ private:
 	void hide_group (boost::weak_ptr<PortGroup>);
 	void show_group (boost::weak_ptr<PortGroup>);
 	void toggle_show_only_bundles ();
-	void on_realize ();
-	void on_unrealize ();
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;

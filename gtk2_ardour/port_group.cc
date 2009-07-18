@@ -421,9 +421,7 @@ PortGroupList::bundles () const
 	_bundles.clear ();
 	
 	for (PortGroupList::List::const_iterator i = begin (); i != end (); ++i) {
-		if ((*i)->visible()) {
-			std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
-		}
+		std::copy ((*i)->bundles().begin(), (*i)->bundles().end(), std::back_inserter (_bundles));
 	}
 	
 	return _bundles;

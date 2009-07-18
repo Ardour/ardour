@@ -50,8 +50,7 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
 	  _column_index (1),
 	  _min_height_divisor (1),
 	  _show_only_bundles (false),
-	  _inhibit_toggle_show_only_bundles (false),
-	  _realized (false)
+	  _inhibit_toggle_show_only_bundles (false)
 {
 	_body = new PortMatrixBody (this);
 
@@ -115,7 +114,7 @@ PortMatrix::routes_changed ()
 void
 PortMatrix::setup ()
 {
-	if (!_realized) {
+	if ((get_flags () & Gtk::REALIZED) == 0) {
 		select_arrangement ();
 	}
 
@@ -461,15 +460,7 @@ PortMatrix::max_size () const
 }
 
 void
-PortMatrix::on_realize ()
+PortMatrix::setup_max_size ()
 {
-	Widget::on_realize ();
-	_realized = true;
-}
-
-void
-PortMatrix::on_unrealize ()
-{
-	Widget::on_unrealize ();
-	_realized = false;
+	MaxSizeChanged ();
 }

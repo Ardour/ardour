@@ -471,6 +471,7 @@ void
 PortMatrixBody::component_size_changed ()
 {
 	compute_rectangles ();
+	_matrix->setup_max_size ();
 	_matrix->setup_scrollbars ();
 }
 
