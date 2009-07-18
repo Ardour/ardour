@@ -36,6 +36,7 @@ public:
 	virtual nframes_t length() const = 0;
 	virtual nframes_t samplerate() const = 0;
 	virtual void      seek (nframes_t pos) = 0;
+	virtual nframes_t natural_position() const = 0;
 };
 
 }

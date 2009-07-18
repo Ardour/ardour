@@ -225,7 +225,7 @@ Editor::add_edit_group (RouteGroup* group)
 
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.is_active] = group->is_active();
-	row[group_columns.is_visible] = !group->is_hidden();
+	row[group_columns.is_visible] = false;
 
 	in_edit_group_row_change = true;
 

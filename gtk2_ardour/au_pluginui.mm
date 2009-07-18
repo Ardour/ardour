@@ -105,6 +105,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	cocoa_window = 0;
 	au_view = 0;
 	packView = 0;
+	editView = 0;
 
 	/* prefer cocoa, fall back to cocoa, but use carbon if its there */
 
@@ -126,8 +127,12 @@ AUPluginUI::~AUPluginUI ()
 		RemoveEventHandler(carbon_event_handler);
 		[win removeChildWindow:cocoa_parent];
 	} else if (carbon_window) {
-		/* never parented */
+		/* not parented, just overlaid on top of our window */
 		DisposeWindow (carbon_window);
+	}
+
+	if (editView) {
+		CloseComponent (editView);
 	}
 
 	if (packView) {
@@ -323,11 +328,14 @@ AUPluginUI::create_carbon_view ()
 
 	if ((err = CreateNewWindow(kDocumentWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
+	        CloseComponent (editView);
 		return -1;
 	}
 	
 	if ((err = GetRootControl(carbon_window, &root_control)) != noErr) {
 		error << string_compose (_("AUPlugin: cannot get root control of carbon window (err: %1)"), err) << endmsg;
+		DisposeWindow (carbon_window);
+	        CloseComponent (editView);
 		return -1;
 	}
 
@@ -337,6 +345,8 @@ AUPluginUI::create_carbon_view ()
 
 	if ((err = AudioUnitCarbonViewCreate (editView, *au->get_au(), carbon_window, root_control, &location, &size, &viewPane)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon plugin view (err: %1)"), err) << endmsg;
+		DisposeWindow (carbon_window);
+	        CloseComponent (editView);
 		return -1;
 	}
 

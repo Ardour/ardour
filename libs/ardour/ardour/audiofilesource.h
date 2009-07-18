@@ -125,6 +125,8 @@ class AudioFileSource : public AudioSource {
 
 	bool can_be_analysed() const { return _length > 0; } 
 
+	virtual void set_timeline_position (int64_t pos);
+
 	static bool find (Glib::ustring path, bool must_exist, bool embedded, bool& is_new, uint16_t& chan,
 			  Glib::ustring& found_path, std::string& found_name);
 
@@ -164,7 +166,6 @@ class AudioFileSource : public AudioSource {
 
 	static uint64_t header_position_offset;
 
-	virtual void set_timeline_position (int64_t pos);
 	virtual void set_header_timeline_position () = 0;
 
 	bool removable() const;

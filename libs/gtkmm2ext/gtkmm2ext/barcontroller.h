@@ -50,6 +50,8 @@ class BarController : public Gtk::Frame
 	void set_use_parent (bool yn);
 
 	void set_sensitive (bool yn);
+	
+	void set_logarithmic (bool yn) { logarithmic = yn; }
 
 	Gtk::SpinButton& get_spin_button() { return spinner; }
 
@@ -77,6 +79,7 @@ class BarController : public Gtk::Frame
 	GdkWindow*          grab_window;
 	Gtk::SpinButton     spinner;
 	bool                use_parent;
+	bool                logarithmic;
 
 	virtual bool button_press (GdkEventButton *);
 	virtual bool button_release (GdkEventButton *);
@@ -92,6 +95,9 @@ class BarController : public Gtk::Frame
 
 	void entry_activated ();
 	void drop_grab ();
+	
+	int entry_input (double* new_value);
+	bool entry_output ();
 };
 
 

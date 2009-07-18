@@ -193,8 +193,11 @@ map_existing_mono_sources (const vector<string>& new_paths, Session& sess,
 
 static bool
 create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
-		uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+		uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles,
+		nframes_t timeline_position)
 {
+    boost::shared_ptr<AudioFileSource> afs;
+    
 	for (vector<string>::const_iterator i = new_paths.begin();
 			i != new_paths.end(); ++i)
 	{
@@ -215,7 +218,9 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 			return false;
 		}
 
-		newfiles.push_back(boost::dynamic_pointer_cast<AudioFileSource>(source));
+		afs = boost::dynamic_pointer_cast<AudioFileSource>(source);
+		afs->set_timeline_position(timeline_position);
+		newfiles.push_back(afs);
 	}
 	return true;
 }
@@ -337,7 +342,7 @@ Session::import_audiofiles (import_status& status)
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endl;
 			status.cancel = !map_existing_mono_sources (new_paths, *this, frame_rate(), newfiles, this);
 		} else {
-			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles);
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles, source->natural_position());
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below
@@ -366,7 +371,7 @@ Session::import_audiofiles (import_status& status)
 
 		for (AudioSources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ++x)
 		{
-			(*x)->update_header(0, *now, xnow);
+			(*x)->update_header((*x)->natural_position(), *now, xnow);
 			(*x)->done_with_peakfile_writes ();
 			
 			/* now that there is data there, requeue the file for analysis */

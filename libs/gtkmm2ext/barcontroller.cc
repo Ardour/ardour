@@ -18,6 +18,7 @@
 */
 
 #include <string>
+#include <sstream>
 #include <climits>
 #include <cstdio>
 #include <cmath>
@@ -51,6 +52,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	switch_on_release = false;
 	with_text = true;
 	use_parent = false;
+	logarithmic = false;
 
 	layout = darea.create_pango_layout("");
 
@@ -76,10 +78,70 @@ BarController::BarController (Gtk::Adjustment& adj,
 
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
 	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
+	spinner.signal_output().connect (mem_fun (*this, &BarController::entry_output));
+	spinner.signal_input().connect (mem_fun (*this, &BarController::entry_input));
 	spinner.set_digits (3);
+	spinner.set_numeric (true);
 
 	add (darea);
 	show_all ();
+}
+
+/* 
+    This is called when we need to update the adjustment with the value
+    from the spinner's text entry.
+    
+    We need to use Gtk::Entry::get_text to avoid recursive nastiness :)
+    
+    If we're not in logarithmic mode we can return false to use the 
+    default conversion.
+    
+    In theory we should check for conversion errors but set numeric
+    mode to true on the spinner prevents invalid input.
+*/
+int
+BarController::entry_input (double* new_value)
+{
+	if (!logarithmic) {
+		return false;
+	}
+
+	// extract a double from the string and take its log
+	Entry *entry = dynamic_cast<Entry *>(&spinner);
+	stringstream stream(entry->get_text());
+
+	double value;
+	stream >> value;
+	
+	*new_value = log(value);
+	return true;
+}
+
+/* 
+    This is called when we need to update the spinner's text entry 
+    with the value of the adjustment.
+    
+    We need to use Gtk::Entry::set_text to avoid recursive nastiness :)
+    
+    If we're not in logarithmic mode we can return false to use the 
+    default conversion.
+*/
+bool
+BarController::entry_output ()
+{
+	if (!logarithmic) {
+		return false;
+	}
+
+	// generate the exponential and turn it into a string
+	stringstream stream;
+	stream.precision(spinner.get_digits());
+	stream << fixed << exp(spinner.get_adjustment()->get_value());
+	
+	Entry *entry = dynamic_cast<Entry *>(&spinner);
+	entry->set_text(stream.str());
+	
+	return true;
 }
 
 void
@@ -436,13 +498,6 @@ BarController::switch_to_spinner ()
 void
 BarController::entry_activated ()
 {
-	string text = spinner.get_text ();
-	float val;
-
-	if (sscanf (text.c_str(), "%f", &val) == 1) {
-		adjustment.set_value (val);
-	}
-	
 	switch_to_bar ();
 }
 

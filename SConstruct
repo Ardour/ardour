@@ -51,6 +51,7 @@ opts.AddOptions(
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
     BoolOption('WIIMOTE', 'Build the wiimote control surface', 0),
+    ('LIBDIR', 'Set librarydir (typically lib or lib64)', 'lib'),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
@@ -736,7 +737,7 @@ if env['FPU_OPTIMIZATION']:
             opt_flags.append ("-DUSE_X86_64_ASM")
             debug_flags.append ("-DUSE_X86_64_ASM")
         if build_host_supports_sse != 1:
-            print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+            print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be anerror, especially if you are a package maintainer)"
 # end optimization section
 
 # handle x86/x86_64 libdir properly

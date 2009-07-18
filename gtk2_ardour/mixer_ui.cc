@@ -1233,7 +1233,18 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.active] = group->is_active();
-	row[group_columns.visible] = true;
+
+	row[group_columns.visible] = false;
+
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->mix_group() == group) {
+			if ((*i)->marked_for_display()) {
+				row[group_columns.visible] = true;
+			}
+			break;
+		}
+	}
+
 	row[group_columns.group] = group;
 	if (!group->name().empty()) {
 		row[group_columns.text] = group->name();

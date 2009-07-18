@@ -683,8 +683,11 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	ustring region_name;
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
+	bool use_timestamp;
+	
+	use_timestamp = (pos == -1);
 
-	if (pos == -1) { // "use timestamp"
+	if (use_timestamp) {
 		if (sources[0]->natural_position() != 0) {
 			pos = sources[0]->natural_position();
 		} else {
@@ -697,10 +700,15 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		/* take all the sources we have and package them up as a region */
 
 		region_name = region_name_from_path (paths.front(), (sources.size() > 1), false);
-		
-		regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> 
 				   (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
-							   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External))));
+							   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
+							   
+        if (use_timestamp) {
+		    ar->special_set_position(sources[0]->natural_position());
+		}
+		
+		regions.push_back (ar);
 		
 	} else if (target_regions == -1 || target_regions > 1) {
 
@@ -718,11 +726,15 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*x);
 
 			region_name = region_name_from_path (afs->path(), false, true, sources.size(), n);
-
-			regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
+			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> 
 					   (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
-								   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External))));
+								   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 
+            if (use_timestamp) {
+    		    ar->special_set_position((*x)->natural_position());
+    		}
+
+			regions.push_back (ar);
 		}
 	}
 

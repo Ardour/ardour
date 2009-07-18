@@ -40,6 +40,7 @@ class ResampledImportableSource : public ImportableSource
 	nframes_t length() const { return source->length(); }
 	nframes_t samplerate() const { return source->samplerate(); }
 	void      seek (nframes_t pos) { source->seek (pos); }
+	nframes_t natural_position() const { return source->natural_position(); }
 	
 	static const uint32_t blocksize;
 	

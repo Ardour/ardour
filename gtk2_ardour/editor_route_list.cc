@@ -31,6 +31,7 @@
 
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
+#include <ardour/route_group.h>
 
 #include "i18n.h"
 
@@ -70,6 +71,14 @@ Editor::handle_new_route (Session::RouteList& routes)
 		row[route_display_columns.text] = route->name();
 		row[route_display_columns.visible] = tv->marked_for_display();
 		row[route_display_columns.tv] = tv;
+
+		RouteGroup *group = route->edit_group();
+		if (group) {
+			if (tv->marked_for_display()) {
+				group->set_hidden(false, this);
+				group_flags_changed(this, group);
+			}
+		}
 
 		track_views.push_back (tv);
 		

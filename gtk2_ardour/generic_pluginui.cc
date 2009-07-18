@@ -494,6 +494,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 			control_ui->control->set_name (X_("PluginSlider"));
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
+			control_ui->control->set_logarithmic (control_ui->logarithmic);
 
 			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
 			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
