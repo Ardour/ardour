@@ -42,7 +42,8 @@ public:
 	PortMatrixGrid (PortMatrix *, PortMatrixBody *);
 
 	void button_press (double, double, int, uint32_t);
-	void mouseover_event (double, double);
+	void button_release (double, double, int, uint32_t);
+	void motion (double, double);
 
 	double component_to_parent_x (double x) const;
 	double parent_to_component_x (double x) const;
@@ -57,14 +58,19 @@ private:
 	void render (cairo_t *);
 	void render_group_pair (cairo_t *, boost::shared_ptr<const PortGroup>, boost::shared_ptr<const PortGroup>, uint32_t, uint32_t);
 
-	double channel_position (ARDOUR::BundleChannel, PortGroup::BundleList const &, double) const;
-	PortMatrixNode position_to_node (double, double) const;
-	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> x_position_to_group_and_channel (double) const;
+	PortMatrixNode position_to_node (uint32_t, uint32_t) const;
 	void queue_draw_for (PortMatrixNode const &);
 	void draw_association_indicator (cairo_t *, uint32_t, uint32_t, double p = 1);
 	void draw_unknown_indicator (cairo_t *, uint32_t, uint32_t);
 	PortMatrixNode::State bundle_to_bundle_state (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::Bundle>) const;
-	
+	std::list<PortMatrixNode> nodes_on_line (int, int, int, int) const;
+
+	bool _dragging;
+	bool _moved;
+	int _drag_start_x;
+	int _drag_start_y;
+	int _drag_x;
+	int _drag_y;
 };
 
 #endif

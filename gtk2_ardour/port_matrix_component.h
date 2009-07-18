@@ -28,6 +28,7 @@ class PortMatrix;
 class PortMatrixBody;
 class PortMatrixNode;
 class PortGroup;
+class PortGroupList;
 
 namespace ARDOUR {
 	class BundleChannel;
@@ -71,13 +72,8 @@ public:
 		return _parent_rectangle;
 	}
 
-	/** @return width of columns in the grid */
-	static uint32_t column_width () {
-		return 32;
-	}
-
-	/** @return height of rows in the grid */
-	static uint32_t row_height () {
+	/** @return grid spacing */
+	static uint32_t grid_spacing () {
 		return 32;
 	}
 
@@ -172,9 +168,9 @@ protected:
 	
 	void set_source_rgb (cairo_t *, Gdk::Color const &);
 	void set_source_rgba (cairo_t *, Gdk::Color const &, double);
-	uint32_t group_width (boost::shared_ptr<const PortGroup>) const;
-	uint32_t group_height (boost::shared_ptr<const PortGroup>) const;
-	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> y_position_to_group_and_channel (double) const;
+	uint32_t group_size (boost::shared_ptr<const PortGroup>) const;
+	uint32_t channel_to_position (ARDOUR::BundleChannel, PortGroupList const *) const;
+	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> position_to_group_and_channel (uint32_t, PortGroupList const *) const;
 
 	/** Render the complete component to a cairo context. */
 	virtual void render (cairo_t *) = 0;

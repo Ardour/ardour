@@ -64,8 +64,6 @@ private:
 		return _height - _highest_group_name - 2 * name_pad();
 	}
 
-	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> x_position_to_group_and_channel (double, double) const;
-
 	double _longest_bundle_name;
 	double _longest_channel_name;
 	double _highest_text;

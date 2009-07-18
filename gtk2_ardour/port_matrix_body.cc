@@ -347,6 +347,14 @@ PortMatrixBody::on_button_release_event (GdkEventButton* ev)
 		_row_labels->clear_channel_highlights ();
 		_column_labels->clear_channel_highlights ();
 		
+	} else if (Gdk::Region (_grid->parent_rectangle()).point_in (ev->x, ev->y)) {
+
+		_grid->button_release (
+			_grid->parent_to_component_x (ev->x),
+			_grid->parent_to_component_y (ev->y),
+			ev->button, ev->time
+			);
+
 	}
 
 	return true;
@@ -387,11 +395,14 @@ bool
 PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (Gdk::Region (_grid->parent_rectangle()).point_in (ev->x, ev->y)) {
-		_grid->mouseover_event (
+		
+		_grid->motion (
 			_grid->parent_to_component_x (ev->x),
 			_grid->parent_to_component_y (ev->y)
 			);
+		
 		_mouse_over_grid = true;
+		
 	} else {
 		if (_mouse_over_grid) {
 			set_mouseover (PortMatrixNode ());
@@ -416,8 +427,6 @@ PortMatrixBody::set_mouseover (PortMatrixNode const & n)
 	_row_labels->mouseover_changed (old);
 	_column_labels->mouseover_changed (old);
 }
-
-
 
 void
 PortMatrixBody::highlight_associated_channels (int dim, ARDOUR::BundleChannel h)

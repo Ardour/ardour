@@ -118,80 +118,114 @@ PortMatrixComponent::background_colour ()
 	return _matrix->get_style()->get_bg (Gtk::STATE_NORMAL);
 }
 
+/** @param g Group.
+ *  @return Visible size of the group in grid units, taking visibility and show_only_bundles into account.
+ */
 uint32_t
-PortMatrixComponent::group_width (boost::shared_ptr<const PortGroup> g) const
+PortMatrixComponent::group_size (boost::shared_ptr<const PortGroup> g) const
 {
-	uint32_t width = 0;
+	uint32_t s = 0;
 	
 	if (g->visible()) {
 		PortGroup::BundleList const & bundles = g->bundles ();
 		if (_matrix->show_only_bundles()) {
-			width = bundles.size() * column_width ();
+			s = bundles.size();
 		} else {
 			for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
-				width += i->bundle->nchannels() * column_width ();
+				s += i->bundle->nchannels();
 			}
 		}
 	} else {
-		width = column_width ();
+		s = 1;
 	}
 
-	return width;
+	return s;
 }
 
+/** @param bc Channel.
+ *  @param groups List of groups.
+ *  @return Position of bc in groups in grid units, taking visibility and show_only_bundles into account.
+ */
 uint32_t
-PortMatrixComponent::group_height (boost::shared_ptr<const PortGroup> g) const
+PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, PortGroupList const * groups) const
 {
-	uint32_t height = 0;
+	uint32_t p = 0;
 
-	if (g->visible ()) {
-		PortGroup::BundleList const & bundles = g->bundles ();
-		if (_matrix->show_only_bundles()) {
-			height = bundles.size() * row_height ();
-		} else {
-			for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
-				height += i->bundle->nchannels() * row_height ();
+	for (PortGroupList::List::const_iterator i = groups->begin(); i != groups->end(); ++i) {
+
+		PortGroup::BundleList const & bundles = (*i)->bundles ();
+
+		for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
+
+			if (j->bundle == bc.bundle) {
+
+				/* found the bundle */
+				
+				if (_matrix->show_only_bundles() || !(*i)->visible()) {
+					return p;
+				} else {
+					return p + bc.channel;
+				}
+
+			}
+
+			if ((*i)->visible()) {
+
+				/* move past this bundle */
+
+				if (_matrix->show_only_bundles()) {
+					p += 1;
+				} else {
+					p += j->bundle->nchannels ();
+				}
 			}
 		}
-	} else {
-		height = row_height ();
+
+		if (!(*i)->visible()) {
+			/* if this group isn't visible we won't have updated p, so do it now */
+			p += 1;
+		}
 	}
 
-	return height;
+	return 0;
 }
 
 
 pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>
-PortMatrixComponent::y_position_to_group_and_channel (double y) const
+PortMatrixComponent::position_to_group_and_channel (uint32_t p, PortGroupList const * groups) const
 {
-	PortGroupList::List::const_iterator i = _matrix->rows()->begin();
+	PortGroupList::List::const_iterator i = groups->begin ();
 
-	while (i != _matrix->rows()->end()) {
+	while (i != groups->end()) {
 
-		uint32_t const gh = group_height (*i);
+		uint32_t const gs = group_size (*i);
 
-		if (y < gh) {
+		if (p < gs) {
 
 			/* it's in this group */
+
+			if (!(*i)->visible()) {
+				return make_pair (*i, ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0));
+			}
 
 			PortGroup::BundleList const & bundles = (*i)->bundles ();
 			for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
 
 				if (_matrix->show_only_bundles()) {
 					
-					if (y < row_height()) {
+					if (p == 0) {
 						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, 0));
 					} else {
-						y -= row_height ();
+						p -= 1;
 					}
 					
 				} else {
 
-					uint32_t const h = j->bundle->nchannels () * row_height ();
-					if (y < h) {
-						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, y / row_height()));
+					uint32_t const s = j->bundle->nchannels ();
+					if (p < s) {
+						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, p));
 					} else {
-					        y -= h;
+					        p -= s;
 					}
 
 				}
@@ -200,7 +234,7 @@ PortMatrixComponent::y_position_to_group_and_channel (double y) const
 
 		} else {
 
-			y -= gh;
+			p -= gs;
 
 		}
 
