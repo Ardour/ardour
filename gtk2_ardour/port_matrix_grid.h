@@ -64,6 +64,8 @@ private:
 	void draw_unknown_indicator (cairo_t *, uint32_t, uint32_t);
 	PortMatrixNode::State bundle_to_bundle_state (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::Bundle>) const;
 	std::list<PortMatrixNode> nodes_on_line (int, int, int, int) const;
+	void toggle_association (PortMatrixNode node);
+	void set_association (PortMatrixNode node);
 
 	bool _dragging;
 	bool _moved;

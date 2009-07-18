@@ -290,6 +290,73 @@ PortMatrixGrid::button_press (double x, double y, int b, uint32_t t)
 }
 
 void
+PortMatrixGrid::set_association (PortMatrixNode node)
+{
+	if (_matrix->show_only_bundles()) {
+				
+		for (uint32_t i = 0; i < node.column.bundle->nchannels(); ++i) {
+			for (uint32_t j = 0; j < node.row.bundle->nchannels(); ++j) {
+				
+				ARDOUR::BundleChannel c[2];
+				c[_matrix->column_index()] = ARDOUR::BundleChannel (node.column.bundle, i);
+				c[_matrix->row_index()] = ARDOUR::BundleChannel (node.row.bundle, j);
+				_matrix->set_state (c, true);
+			}
+		}
+		
+	} else {
+		
+		if (node.row.bundle && node.column.bundle) {
+			
+			ARDOUR::BundleChannel c[2];
+			c[_matrix->row_index()] = node.row;
+			c[_matrix->column_index()] = node.column;
+			_matrix->set_state (c, true);
+		}
+	}
+}
+
+void
+PortMatrixGrid::toggle_association (PortMatrixNode node)
+{
+	if (_matrix->show_only_bundles()) {
+				
+		PortMatrixNode::State const s = bundle_to_bundle_state (node.column.bundle, node.row.bundle);
+		
+		for (uint32_t i = 0; i < node.column.bundle->nchannels(); ++i) {
+			for (uint32_t j = 0; j < node.row.bundle->nchannels(); ++j) {
+				
+				ARDOUR::BundleChannel c[2];
+				c[_matrix->column_index()] = ARDOUR::BundleChannel (node.column.bundle, i);
+				c[_matrix->row_index()] = ARDOUR::BundleChannel (node.row.bundle, j);
+				if (s == PortMatrixNode::NOT_ASSOCIATED || s == PortMatrixNode::PARTIAL) {
+					_matrix->set_state (c, i == j);
+				} else {
+					_matrix->set_state (c, false);
+				}
+			}
+		}
+		
+	} else {
+		
+		if (node.row.bundle && node.column.bundle) {
+			
+			ARDOUR::BundleChannel c[2];
+			c[_matrix->row_index()] = node.row;
+			c[_matrix->column_index()] = node.column;
+			
+			PortMatrixNode::State const s = _matrix->get_state (c);
+			
+			if (s == PortMatrixNode::ASSOCIATED || s == PortMatrixNode::NOT_ASSOCIATED) {
+				bool const n = !(s == PortMatrixNode::ASSOCIATED);
+				_matrix->set_state (c, n);
+			}
+			
+		}
+	}
+}
+
+void
 PortMatrixGrid::button_release (double x, double y, int b, uint32_t t)
 {
 	if (b == 1) {
@@ -298,71 +365,17 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t t)
 
 			list<PortMatrixNode> const p = nodes_on_line (_drag_start_x, _drag_start_y, _drag_x, _drag_y);
 
-			if (_matrix->show_only_bundles()) {
-				/* XXX: err... */
-			} else {
-				for (list<PortMatrixNode>::const_iterator i = p.begin(); i != p.end(); ++i) {
-
-					ARDOUR::BundleChannel c[2];
-					c[_matrix->row_index()] = i->row;
-					c[_matrix->column_index()] = i->column;
-
-					PortMatrixNode::State const s = _matrix->get_state (c);
-
-					if (s == PortMatrixNode::ASSOCIATED || s == PortMatrixNode::NOT_ASSOCIATED) {
-						bool const n = !(s == PortMatrixNode::ASSOCIATED);
-						_matrix->set_state (c, n);
-					}
-				}
+			for (list<PortMatrixNode>::const_iterator i = p.begin(); i != p.end(); ++i) {
+				set_association (*i);
 			}
-
-			require_render ();
-			_body->queue_draw ();
 
 		} else {
 
-			PortMatrixNode const node = position_to_node (x / grid_spacing(), y / grid_spacing());
-			
-			if (_matrix->show_only_bundles()) {
-				
-				PortMatrixNode::State const s = bundle_to_bundle_state (node.column.bundle, node.row.bundle);
-				
-				for (uint32_t i = 0; i < node.column.bundle->nchannels(); ++i) {
-					for (uint32_t j = 0; j < node.row.bundle->nchannels(); ++j) {
-						
-						ARDOUR::BundleChannel c[2];
-						c[_matrix->column_index()] = ARDOUR::BundleChannel (node.column.bundle, i);
-						c[_matrix->row_index()] = ARDOUR::BundleChannel (node.row.bundle, j);
-						if (s == PortMatrixNode::NOT_ASSOCIATED || s == PortMatrixNode::PARTIAL) {
-							_matrix->set_state (c, i == j);
-						} else {
-							_matrix->set_state (c, false);
-						}
-					}
-				}
-				
-			} else {
-				
-				if (node.row.bundle && node.column.bundle) {
-					
-					ARDOUR::BundleChannel c[2];
-					c[_matrix->row_index()] = node.row;
-					c[_matrix->column_index()] = node.column;
-					
-					PortMatrixNode::State const s = _matrix->get_state (c);
-					
-					if (s == PortMatrixNode::ASSOCIATED || s == PortMatrixNode::NOT_ASSOCIATED) {
-						
-						bool const n = !(s == PortMatrixNode::ASSOCIATED);
-						_matrix->set_state (c, n);
-					}
-					
-				}
-			}
-			
-			require_render ();
-			_body->queue_draw ();
+			toggle_association (position_to_node (x / grid_spacing(), y / grid_spacing()));
 		}
+
+		require_render ();
+		_body->queue_draw ();
 	}
 
 	_dragging = false;
