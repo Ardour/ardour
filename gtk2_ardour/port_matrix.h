@@ -129,6 +129,7 @@ public:
 	virtual void remove_channel (ARDOUR::BundleChannel) = 0;
 	virtual bool can_rename_channels (int) const = 0;
 	virtual void rename_channel (ARDOUR::BundleChannel) {}
+	virtual std::string disassociation_verb () const = 0;
 	
 	enum Result {
 		Cancelled,
@@ -162,6 +163,7 @@ private:
 	void hide_group (boost::weak_ptr<PortGroup>);
 	void show_group (boost::weak_ptr<PortGroup>);
 	void toggle_show_only_bundles ();
+	bool on_scroll_event (GdkEventScroll *);
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;

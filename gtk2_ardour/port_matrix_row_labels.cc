@@ -45,44 +45,37 @@ PortMatrixRowLabels::compute_dimensions ()
 	_longest_port_name = 0;
 	_longest_bundle_name = 0;
 	_height = 0;
-
-	PortGroup::BundleList const r = _matrix->rows()->bundles();
-	for (PortGroup::BundleList::const_iterator i = r.begin(); i != r.end(); ++i) {
-		for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
-			cairo_text_extents_t ext;
-			cairo_text_extents (cr, i->bundle->channel_name(j).c_str(), &ext);
-			if (ext.width > _longest_port_name) {
-				_longest_port_name = ext.width;
-			}
-		}
-
-		cairo_text_extents_t ext;
-		cairo_text_extents (cr, i->bundle->name().c_str(), &ext);
-		if (ext.width > _longest_bundle_name) {
-			_longest_bundle_name = ext.width;
-		}
-
-		if (_matrix->show_only_bundles()) {
-			_height += grid_spacing ();
-		} else {
-			_height += i->bundle->nchannels() * grid_spacing();
-		}
-	}
-
 	_highest_group_name = 0;
+
 	for (PortGroupList::List::const_iterator i = _matrix->rows()->begin(); i != _matrix->rows()->end(); ++i) {
-		if ((*i)->visible()) {
-			cairo_text_extents_t ext;
-			cairo_text_extents (cr, (*i)->name.c_str(), &ext);
-			if (ext.height > _highest_group_name) {
-				_highest_group_name = ext.height;
+		
+		PortGroup::BundleList const r = (*i)->bundles ();
+		for (PortGroup::BundleList::const_iterator j = r.begin(); j != r.end(); ++j) {
+			
+			for (uint32_t k = 0; k < j->bundle->nchannels(); ++k) {
+				cairo_text_extents_t ext;
+				cairo_text_extents (cr, j->bundle->channel_name(k).c_str(), &ext);
+				if (ext.width > _longest_port_name) {
+					_longest_port_name = ext.width;
+				}
 			}
-		} else {
-			/* add another grid_spacing for a tab for this hidden group */
-			_height += grid_spacing ();
+
+			cairo_text_extents_t ext;
+			cairo_text_extents (cr, j->bundle->name().c_str(), &ext);
+			if (ext.width > _longest_bundle_name) {
+				_longest_bundle_name = ext.width;
+			}
+		}
+
+		_height += group_size (*i) * grid_spacing ();
+		
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, (*i)->name.c_str(), &ext);
+		if (ext.height > _highest_group_name) {
+			_highest_group_name = ext.height;
 		}
 	}
-			
+
 	cairo_destroy (cr);
 	gdk_pixmap_unref (pm);
 

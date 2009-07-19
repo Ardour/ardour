@@ -30,6 +30,7 @@
 #include "ardour/route.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
+#include "port_matrix_component.h"
 #include "i18n.h"
 
 using namespace std;
@@ -319,11 +320,13 @@ PortMatrix::popup_menu (
 			boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
 
 			if (_show_only_bundles) {
-				snprintf (buf, sizeof (buf), _("Disassociate all from '%s'"), bc[dim].bundle->name().c_str());
+				snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), bc[dim].bundle->name().c_str());
 			} else {
 				snprintf (
-					buf, sizeof (buf), _("Disassociate all from '%s/%s'"),
-					bc[dim].bundle->name().c_str(), bc[dim].bundle->channel_name (bc[dim].channel).c_str()
+					buf, sizeof (buf), _("%s all from '%s/%s'"),
+					disassociation_verb().c_str(),
+					bc[dim].bundle->name().c_str(),
+					bc[dim].bundle->channel_name (bc[dim].channel).c_str()
 					);
 			}
 			
@@ -463,4 +466,28 @@ void
 PortMatrix::setup_max_size ()
 {
 	MaxSizeChanged ();
+}
+
+bool
+PortMatrix::on_scroll_event (GdkEventScroll* ev)
+{
+	double const h = _hscroll.get_value ();
+	double const v = _vscroll.get_value ();
+	
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		_vscroll.set_value (v - PortMatrixComponent::grid_spacing ());
+		break;
+	case GDK_SCROLL_DOWN:
+		_vscroll.set_value (v + PortMatrixComponent::grid_spacing ());
+		break;
+	case GDK_SCROLL_LEFT:
+		_hscroll.set_value (h - PortMatrixComponent::grid_spacing ());
+		break;
+	case GDK_SCROLL_RIGHT:
+		_hscroll.set_value (h + PortMatrixComponent::grid_spacing ());
+		break;
+	}
+
+	return true;
 }

@@ -25,6 +25,7 @@
 #include <gtkmm/entry.h>
 #include "ardour_dialog.h"
 #include "port_matrix.h"
+#include "i18n.h"
 
 namespace ARDOUR {
 	class Session;
@@ -49,6 +50,10 @@ class BundleEditorMatrix : public PortMatrix
 	void rename_channel (ARDOUR::BundleChannel);
 	void setup_ports (int);
 	bool list_is_global (int) const;
+
+	std::string disassociation_verb () const {
+		return _("Disassociate");
+	}
 
   private:
 	enum {

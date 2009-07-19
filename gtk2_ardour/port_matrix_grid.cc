@@ -39,6 +39,7 @@ void
 PortMatrixGrid::compute_dimensions ()
 {
 	_width = 0;
+
 	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 		_width += group_size (*i) * grid_spacing ();
 	}

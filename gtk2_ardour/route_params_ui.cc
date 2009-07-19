@@ -511,8 +511,6 @@ RouteParams_UI::show_track_menu()
 void
 RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 {
-	Placement place = PreFader;
-	
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;

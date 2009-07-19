@@ -210,7 +210,7 @@ PortMatrixBody::compute_rectangles ()
 	} else if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 
 		col_rect.set_height (min (_alloc_height, col.second));
-		
+
 		row_rect.set_x (0);
 		row_rect.set_y (0);
 		row_rect.set_width (min (_alloc_width, row.first));

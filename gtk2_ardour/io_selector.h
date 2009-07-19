@@ -22,6 +22,7 @@
 
 #include "ardour_dialog.h"
 #include "port_matrix.h"
+#include "i18n.h"
 
 namespace ARDOUR {
 	class PortInsert;
@@ -43,6 +44,10 @@ class IOSelector : public PortMatrix
 	bool can_rename_channels (int d) const {
 		return false;
 	}
+
+	std::string disassociation_verb () const {
+		return _("Disconnect");
+	}
 	
 	uint32_t n_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
@@ -60,7 +65,6 @@ class IOSelector : public PortMatrix
 	int other () const {
 		return _other;
 	}
-
 
   private:
 	

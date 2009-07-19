@@ -24,6 +24,7 @@
 #include "port_matrix.h"
 #include "port_group.h"
 #include "ardour_dialog.h"
+#include "i18n.h"
 
 class GlobalPortMatrix : public PortMatrix
 {
@@ -44,6 +45,10 @@ public:
 		return false;
 	}
 
+	std::string disassociation_verb () const {
+		return _("Disconnect");
+	}
+	
 	bool list_is_global (int) const {
 		return true;
 	}

@@ -101,6 +101,10 @@ public:
 	bool can_rename_channels (int) const {
 		return false;
 	}
+
+	std::string disassociation_verb () const {
+		return _("Disassociate");
+	}
 	
 private:
 	/* see PortMatrix: signal flow from 0 to 1 (out to in) */

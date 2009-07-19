@@ -49,26 +49,30 @@ PortMatrixColumnLabels::compute_dimensions ()
 	_highest_text = 0;
 	/* width of the whole thing */
 	_width = 0;
-
-	PortGroup::BundleList const c = _matrix->columns()->bundles();
-	for (PortGroup::BundleList::const_iterator i = c.begin (); i != c.end(); ++i) {
-
-		cairo_text_extents_t ext;
-		cairo_text_extents (cr, i->bundle->name().c_str(), &ext);
-		if (ext.width > _longest_bundle_name) {
-			_longest_bundle_name = ext.width;
-		}
-		if (ext.height > _highest_text) {
-			_highest_text = ext.height;
-		}
-
-		for (uint32_t j = 0; j < i->bundle->nchannels (); ++j) {
+	_highest_group_name = 0;
+	
+	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
+		PortGroup::BundleList const c = _matrix->columns()->bundles();
+		for (PortGroup::BundleList::const_iterator j = c.begin (); j != c.end(); ++j) {
 			
-			cairo_text_extents (
-				cr,
-				i->bundle->channel_name (j).c_str(),
-				&ext
-				);
+			cairo_text_extents_t ext;
+			cairo_text_extents (cr, j->bundle->name().c_str(), &ext);
+			if (ext.width > _longest_bundle_name) {
+				_longest_bundle_name = ext.width;
+			}
+			
+			if (ext.height > _highest_text) {
+				_highest_text = ext.height;
+			}
+			
+			for (uint32_t k = 0; k < j->bundle->nchannels (); ++k) {
+
+				cairo_text_extents (
+					cr,
+					j->bundle->channel_name (k).c_str(),
+					&ext
+					);
+			}
 			
 			if (ext.width > _longest_channel_name) {
 				_longest_channel_name = ext.width;
@@ -78,23 +82,12 @@ PortMatrixColumnLabels::compute_dimensions ()
 			}
 		}
 
-		if (_matrix->show_only_bundles()) {
-			_width += grid_spacing();
-		} else {
-			_width += i->bundle->nchannels() * grid_spacing();
-		}
-	}
+		_width += group_size (*i) * grid_spacing ();
 
-	_highest_group_name = 0;
-	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
-		if ((*i)->visible()) {
-			cairo_text_extents_t ext;
-			cairo_text_extents (cr, (*i)->name.c_str(), &ext);
-			if (ext.height > _highest_group_name) {
-				_highest_group_name = ext.height;
-			}
-		} else {
-			_width += grid_spacing ();
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, (*i)->name.c_str(), &ext);
+		if (ext.height > _highest_group_name) {
+			_highest_group_name = ext.height;
 		}
 	}
 
