@@ -28,6 +28,7 @@ PortMatrixLabels::draw_extra (cairo_t* cr)
 		if (_matrix->show_only_bundles()) {
 			render_bundle_name (
 				cr,
+				mouseover_line_colour(),
 				highlighted_channel_colour(),
 				component_to_parent_x (channel_x (*i)),
 				component_to_parent_y (channel_y (*i)),
@@ -36,6 +37,7 @@ PortMatrixLabels::draw_extra (cairo_t* cr)
 		} else {
 			render_channel_name (
 				cr,
+				mouseover_line_colour(),
 				highlighted_channel_colour(),
 				component_to_parent_x (channel_x (*i)),
 				component_to_parent_y (channel_y (*i)),

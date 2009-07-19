@@ -52,8 +52,8 @@ public:
 	void mouseover_changed (PortMatrixNode const &);
 
 private:
-	void render_channel_name (cairo_t *, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
-	void render_bundle_name (cairo_t *, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>);
+	void render_channel_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
+	void render_bundle_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>);
 	double channel_x (ARDOUR::BundleChannel const &) const;
 	double channel_y (ARDOUR::BundleChannel const &) const;
 	

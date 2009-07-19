@@ -193,7 +193,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 			for (PortGroup::BundleList::const_iterator j = bundles.begin (); j != bundles.end(); ++j) {
 
 				Gdk::Color c = j->has_colour ? j->colour : get_a_bundle_colour (N);
-				render_bundle_name (cr, c, x, 0, j->bundle);
+				render_bundle_name (cr, background_colour (), c, x, 0, j->bundle);
 				
 				if (_matrix->show_only_bundles()) {
 					x += grid_spacing();
@@ -226,7 +226,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 			
 					for (uint32_t k = 0; k < j->bundle->nchannels(); ++k) {
 						Gdk::Color c = j->has_colour ? j->colour : get_a_bundle_colour (N);
-						render_channel_name (cr, c, x, 0, ARDOUR::BundleChannel (j->bundle, k));
+						render_channel_name (cr, background_colour (), c, x, 0, ARDOUR::BundleChannel (j->bundle, k));
 						x += grid_spacing();
 					}
 					
@@ -317,10 +317,10 @@ PortMatrixColumnLabels::port_name_shape (double xoff, double yoff) const
 
 void
 PortMatrixColumnLabels::render_bundle_name (
-	cairo_t* cr, Gdk::Color colour, double xoff, double yoff, boost::shared_ptr<ARDOUR::Bundle> b
+	cairo_t* cr, Gdk::Color fg_colour, Gdk::Color bg_colour, double xoff, double yoff, boost::shared_ptr<ARDOUR::Bundle> b
 	)
 {
-	set_source_rgb (cr, colour);
+	set_source_rgb (cr, bg_colour);
 
 	double w = 0;
 	if (_matrix->show_only_bundles()) {
@@ -349,7 +349,7 @@ PortMatrixColumnLabels::render_bundle_name (
 	cairo_line_to (cr, x_, y_);
 	cairo_line_to (cr, xoff, y);
 	cairo_fill_preserve (cr);
-	set_source_rgb (cr, background_colour());
+	set_source_rgb (cr, fg_colour);
 	cairo_set_line_width (cr, label_border_width());
 	cairo_stroke (cr);
 
@@ -386,7 +386,7 @@ PortMatrixColumnLabels::render_bundle_name (
 
 void
 PortMatrixColumnLabels::render_channel_name (
-	cairo_t* cr, Gdk::Color colour, double xoff, double yoff, ARDOUR::BundleChannel const &bc
+	cairo_t* cr, Gdk::Color fg_colour, Gdk::Color bg_colour, double xoff, double yoff, ARDOUR::BundleChannel const &bc
 	)
 {
 	vector<pair<double, double> > const shape = port_name_shape (xoff, yoff);
@@ -397,9 +397,9 @@ PortMatrixColumnLabels::render_channel_name (
 	}
 	cairo_line_to (cr, shape[0].first, shape[0].second);
 	
-	set_source_rgb (cr, colour);
+	set_source_rgb (cr, bg_colour);
 	cairo_fill_preserve (cr);
-	set_source_rgb (cr, background_colour());
+	set_source_rgb (cr, fg_colour);
 	cairo_set_line_width (cr, label_border_width());
 	cairo_stroke (cr);
 	
@@ -456,10 +456,10 @@ PortMatrixColumnLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 	if (_matrix->show_only_bundles()) {
 
 		_body->queue_draw_area (
-			component_to_parent_x (channel_x (bc)),
-			component_to_parent_y (0),
-			grid_spacing() + _height * tan (angle()),
-			_height
+			component_to_parent_x (channel_x (bc)) - 1,
+			component_to_parent_y (0) - 1,
+			grid_spacing() + _height * tan (angle()) + 2,
+			_height + 2
 			);
 		
 	} else {
@@ -471,10 +471,10 @@ PortMatrixColumnLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
 			_body->queue_draw_area (
-				component_to_parent_x (x),
-				component_to_parent_y (_height - h),
-				grid_spacing() + lc * cos (angle()),
-				h
+				component_to_parent_x (x) - 1,
+				component_to_parent_y (_height - h) - 1,
+				grid_spacing() + lc * cos (angle()) + 2,
+				h + 2
 				);
 			
 		} else if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
@@ -482,10 +482,10 @@ PortMatrixColumnLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 			double const x_ = x + slanted_height() / tan (angle()) - lc * cos (angle());
 			
 			_body->queue_draw_area (
-				component_to_parent_x (x_),
-				component_to_parent_y (0),
-				grid_spacing() + lc * cos (angle()),
-				h
+				component_to_parent_x (x_) - 1,
+				component_to_parent_y (0) - 1,
+				grid_spacing() + lc * cos (angle()) + 2,
+				h + 2
 				);
 			
 		}
