@@ -441,8 +441,8 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 
 	double const x = component_to_parent_x (channel_to_position (_body->mouseover().column, _matrix->columns()) * grid_spacing()) + grid_spacing() / 2;
 	double const y = component_to_parent_y (channel_to_position (_body->mouseover().row, _matrix->rows()) * grid_spacing()) + grid_spacing() / 2;
-	
-	if (_body->mouseover().row.bundle) {
+
+	if (_body->mouseover().row.bundle && _body->mouseover().column.bundle) {
 
 		cairo_move_to (cr, x, y);
 		if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
@@ -451,9 +451,6 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 			cairo_line_to (cr, _parent_rectangle.get_x() + _parent_rectangle.get_width(), y);
 		}
 		cairo_stroke (cr);
-	}
-
-	if (_body->mouseover().column.bundle) {
 
 		cairo_move_to (cr, x, y);
 		if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {

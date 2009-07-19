@@ -266,7 +266,7 @@ PortMatrix::popup_menu (
 
 	std::string const n = add_channel_name ();
 	if (!n.empty()) {
-		snprintf (buf, sizeof (buf), _("Add channel to '%s'"), n.c_str());
+		snprintf (buf, sizeof (buf), _("Add %s to '%s'"), channel_noun().c_str(), n.c_str());
 		items.push_back (MenuElem (buf, mem_fun (*this, &PortMatrix::add_channel)));
 	}
 	

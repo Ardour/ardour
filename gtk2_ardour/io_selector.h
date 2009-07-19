@@ -52,6 +52,10 @@ class IOSelector : public PortMatrix
 	std::string disassociation_verb () const {
 		return _("Disconnect");
 	}
+
+	std::string channel_noun () const {
+		return _("port");
+	}
 	
 	uint32_t n_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
