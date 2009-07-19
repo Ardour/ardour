@@ -30,6 +30,7 @@ using namespace std;
 PortMatrixGrid::PortMatrixGrid (PortMatrix* m, PortMatrixBody* b)
 	: PortMatrixComponent (m, b),
 	  _dragging (false),
+	  _drag_valid (false),
 	  _moved (false)
 {
 	
@@ -291,18 +292,21 @@ PortMatrixGrid::position_to_node (uint32_t x, uint32_t y) const
 void
 PortMatrixGrid::button_press (double x, double y, int b, uint32_t t)
 {
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> px = position_to_group_and_channel (x / grid_spacing(), _matrix->columns());
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> py = position_to_group_and_channel (y / grid_spacing(), _matrix->rows());
+	
 	if (b == 1) {
 
 		_dragging = true;
+		_drag_valid = (px.second.bundle && py.second.bundle);
+		
 		_moved = false;
 		_drag_start_x = x / grid_spacing ();
 		_drag_start_y = y / grid_spacing ();
 
 	} else if (b == 3) {
 
-		_matrix->popup_menu (
-			position_to_group_and_channel (x / grid_spacing(), _matrix->columns()),
-			position_to_group_and_channel (y / grid_spacing(), _matrix->rows()), t);
+		_matrix->popup_menu (px, py, t);
 		
 	}
 }
@@ -408,12 +412,14 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t t)
 
 		if (_dragging && _moved) {
 
-			list<PortMatrixNode> const p = nodes_on_line (_drag_start_x, _drag_start_y, _drag_x, _drag_y);
-
-			if (!p.empty()) {
-				PortMatrixNode::State const s = get_association (p.front());
-				for (list<PortMatrixNode>::const_iterator i = p.begin(); i != p.end(); ++i) {
-					set_association (*i, toggle_state (s));
+			if (_drag_valid) {
+				list<PortMatrixNode> const p = nodes_on_line (_drag_start_x, _drag_start_y, _drag_x, _drag_y);
+				
+				if (!p.empty()) {
+					PortMatrixNode::State const s = get_association (p.front());
+					for (list<PortMatrixNode>::const_iterator i = p.begin(); i != p.end(); ++i) {
+						set_association (*i, toggle_state (s));
+					}
 				}
 			}
 
@@ -462,7 +468,7 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 		cairo_stroke (cr);
 	}
 
-	if (_dragging && _moved) {
+	if (_dragging && _drag_valid && _moved) {
 
 		list<PortMatrixNode> const p = nodes_on_line (_drag_start_x, _drag_start_y, _drag_x, _drag_y);
 
@@ -525,7 +531,7 @@ PortMatrixGrid::motion (double x, double y)
 		_moved = true;
 	}
 
-	if (_dragging && _moved) {
+	if (_dragging && _drag_valid && _moved) {
 		_drag_x = px;
 		_drag_y = py;
 		_body->queue_draw ();

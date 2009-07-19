@@ -69,6 +69,7 @@ private:
 	bool toggle_state (PortMatrixNode::State) const;
 
 	bool _dragging;
+	bool _drag_valid;
 	bool _moved;
 	int _drag_start_x;
 	int _drag_start_y;
