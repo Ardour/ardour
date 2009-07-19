@@ -364,7 +364,7 @@ void
 PortMatrixRowLabels::mouseover_changed (PortMatrixNode const &)
 {
 	clear_channel_highlights ();
-	if (_body->mouseover().row.bundle) {
+	if (_body->mouseover().column.bundle && _body->mouseover().row.bundle) {
 		add_channel_highlight (_body->mouseover().row);
 	}
 }

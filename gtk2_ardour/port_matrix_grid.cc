@@ -420,9 +420,10 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t t)
 		} else {
 
 			PortMatrixNode const n = position_to_node (x / grid_spacing(), y / grid_spacing());
-			PortMatrixNode::State const s = get_association (n);
-
-			set_association (n, toggle_state (s));
+			if (n.row.bundle && n.column.bundle) {
+				PortMatrixNode::State const s = get_association (n);
+				set_association (n, toggle_state (s));
+			}
 		}
 
 		require_render ();
@@ -619,9 +620,15 @@ PortMatrixGrid::nodes_on_line (int x0, int y0, int x1, int y1) const
 
 	for (int x = x0; x <= x1; ++x) {
 		if (steep) {
-			p.push_back (position_to_node (y, x));
+			PortMatrixNode n = position_to_node (y, x);
+			if (n.row.bundle && n.column.bundle) {
+				p.push_back (n);
+			}
 		} else {
-			p.push_back (position_to_node (x, y));
+			PortMatrixNode n = position_to_node (x, y);
+			if (n.row.bundle && n.column.bundle) {
+				p.push_back (n);
+			}
 		}
 
 		err += derr;
