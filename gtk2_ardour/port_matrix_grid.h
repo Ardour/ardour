@@ -61,11 +61,12 @@ private:
 	PortMatrixNode position_to_node (uint32_t, uint32_t) const;
 	void queue_draw_for (PortMatrixNode const &);
 	void draw_association_indicator (cairo_t *, uint32_t, uint32_t, double p = 1);
+	void draw_empty_square (cairo_t *, uint32_t, uint32_t);
 	void draw_unknown_indicator (cairo_t *, uint32_t, uint32_t);
-	PortMatrixNode::State bundle_to_bundle_state (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::Bundle>) const;
 	std::list<PortMatrixNode> nodes_on_line (int, int, int, int) const;
-	void toggle_association (PortMatrixNode node);
-	void set_association (PortMatrixNode node);
+	PortMatrixNode::State get_association (PortMatrixNode) const;
+	void set_association (PortMatrixNode, bool);
+	bool toggle_state (PortMatrixNode::State) const;
 
 	bool _dragging;
 	bool _moved;
