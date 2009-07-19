@@ -13,9 +13,9 @@ class Interpolation {
          double   _speed, _target_speed;
              
  public:
-         Interpolation () { _speed = 1.0; }
+         Interpolation () { _speed = 1.0; _target_speed = 1.0; }
      
-         void set_speed (double new_speed)          { _speed = new_speed; }
+         void set_speed (double new_speed)          { _speed = new_speed; _target_speed = new_speed; }
          void set_target_speed (double new_speed)   { _target_speed = new_speed; }
 
          double target_speed()          const { return _target_speed; }

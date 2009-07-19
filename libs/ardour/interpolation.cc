@@ -34,7 +34,6 @@ FixedPointLinearInterpolation::interpolate (int channel, nframes_t nframes, Samp
 		
 		if (input && output) {
 			// Linearly interpolate into the output buffer
-			// using fixed point math
 			output[outsample] = 
 				input[i] * (1.0f - fractional_phase_part) +
 				input[i+1] * fractional_phase_part;
@@ -85,10 +84,11 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 		acceleration = 0.0;
 	}
 	
-	printf("phase before: %lf\n", phase[channel]);
 	distance = phase[channel];
+	//printf("processing channel: %d\n", channel);
+	//printf("phase before: %lf\n", phase[channel]);
 	for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
-		i = distance;
+		i = floor(distance);
 		Sample fractional_phase_part = distance - i;
 		if (fractional_phase_part >= 1.0) {
 			fractional_phase_part -= 1.0;
@@ -107,11 +107,11 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 		//printf("distance after: %lf, _speed: %lf\n", distance, _speed);
 	}
 	
-	printf("before assignment: i: %d, distance: %lf\n", i, distance);
+	//printf("before assignment: i: %d, distance: %lf\n", i, distance);
 	i = floor(distance);
-	printf("after assignment: i: %d, distance: %16lf\n", i, distance);
+	//printf("after assignment: i: %d, distance: %16lf\n", i, distance);
 	phase[channel] = distance - floor(distance);
-	printf("speed: %16lf, i after: %d, distance after: %16lf, phase after: %16lf\n", _speed, i, distance, phase[channel]);
+	//printf("speed: %16lf, i after: %d, distance after: %16lf, phase after: %16lf\n", _speed, i, distance, phase[channel]);
 	
 	return i;
 }
