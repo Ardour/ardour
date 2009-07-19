@@ -264,6 +264,12 @@ PortMatrix::popup_menu (
 
 	char buf [64];
 
+	std::string const n = add_channel_name ();
+	if (!n.empty()) {
+		snprintf (buf, sizeof (buf), _("Add channel to '%s'"), n.c_str());
+		items.push_back (MenuElem (buf, mem_fun (*this, &PortMatrix::add_channel)));
+	}
+	
 	for (int dim = 0; dim < 2; ++dim) {
 
 		if (pg[dim]) {
@@ -289,36 +295,28 @@ PortMatrix::popup_menu (
 		}
 
 		if (bc[dim].bundle) {
-			bool have_one = false;
-			
-			if (can_rename_channels (dim)) {
-				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
-				boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
-				items.push_back (
-					MenuElem (
-						buf,
-						bind (mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
-						)
-					);
-				
-				have_one = true;
-			}
-			
+			boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
+
 			if (can_remove_channels (dim)) {
 				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
-				boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
 				items.push_back (
 					MenuElem (
 						buf,
 						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
 						)
 					);
-				
-				have_one = true;
+			}			
+			
+			if (can_rename_channels (dim)) {
+				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
+				items.push_back (
+					MenuElem (
+						buf,
+						bind (mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
+						)
+					);
 			}
 			
-			boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
-
 			if (_show_only_bundles) {
 				snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), bc[dim].bundle->name().c_str());
 			} else {
@@ -348,7 +346,6 @@ PortMatrix::popup_menu (
 	
 	_menu->popup (1, t);
 }
-
 
 void
 PortMatrix::remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)

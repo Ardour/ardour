@@ -80,8 +80,14 @@ BundleEditorMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 	return PortMatrixNode::ASSOCIATED;
 }
 
+std::string
+BundleEditorMatrix::add_channel_name () const
+{
+	return _bundle->name ();
+}
+
 void
-BundleEditorMatrix::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
+BundleEditorMatrix::add_channel ()
 {
 	NameChannelDialog d;
 	d.set_position (Gtk::WIN_POS_MOUSE);
@@ -177,20 +183,6 @@ BundleEditor::BundleEditor (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::
 	get_vbox()->pack_start (*Gtk::manage (t), false, false);
 	get_vbox()->pack_start (_matrix);
 	get_vbox()->set_spacing (4);
-
-	/* Add Channel button */
-	Gtk::Button* add_channel_button = Gtk::manage (new Gtk::Button (_("Add Channel")));
-	add_channel_button->set_name ("IOSelectorButton");
-	add_channel_button->set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
-	get_action_area()->pack_start (*add_channel_button, false, false);
-	add_channel_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (_matrix, &BundleEditorMatrix::add_channel), boost::shared_ptr<ARDOUR::Bundle> ()));
-
-	if (add) {
-		add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
-	} else {
-		add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
-	}
 
 	show_all ();
 }

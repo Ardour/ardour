@@ -39,7 +39,8 @@ class BundleEditorMatrix : public PortMatrix
 
 	void set_state (ARDOUR::BundleChannel c[2], bool s);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
-	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
+	std::string add_channel_name () const;
+	void add_channel ();
 	bool can_remove_channels (int d) const {
 		return d == OURS;
 	}

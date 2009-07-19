@@ -36,7 +36,6 @@ public:
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
-	void add_channel (boost::shared_ptr<ARDOUR::Bundle>) {}
 	bool can_remove_channels (int d) const {
 		return false;
 	}

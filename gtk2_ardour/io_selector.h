@@ -36,10 +36,14 @@ class IOSelector : public PortMatrix
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
-	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
+	std::string add_channel_name () const;
+	
+	void add_channel ();
+	
 	bool can_remove_channels (int d) const {
 		return d == _ours;
 	}
+	
 	void remove_channel (ARDOUR::BundleChannel);
 	bool can_rename_channels (int d) const {
 		return false;
@@ -67,7 +71,7 @@ class IOSelector : public PortMatrix
 	}
 
   private:
-	
+
 	int _other;
 	int _ours;
 	boost::shared_ptr<ARDOUR::IO> _io;
@@ -90,6 +94,8 @@ class IOSelectorWindow : public Gtk::Window
 	IOSelector _selector;
 	
 	void io_name_changed (void *src);
+	void set_max_size ();
+	void max_size_changed ();
 };
 
 

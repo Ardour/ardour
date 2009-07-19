@@ -145,11 +145,15 @@ IOSelector::n_io_ports () const
 	}
 }
 
-void
-IOSelector::add_channel (boost::shared_ptr<ARDOUR::Bundle> b)
+string
+IOSelector::add_channel_name () const
 {
-	/* we ignore the bundle parameter, as we know what it is that we're adding to */
-	
+	return _io->name ();
+}
+
+void
+IOSelector::add_channel ()
+{
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 
@@ -197,6 +201,8 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
 
 	resize (32768, 32768);
+
+	_selector.MaxSizeChanged.connect (mem_fun (*this, &IOSelectorWindow::max_size_changed));
 }
 
 void
@@ -226,7 +232,12 @@ void
 IOSelectorWindow::on_realize ()
 {
 	Window::on_realize ();
+	set_max_size ();
+}
 
+void
+IOSelectorWindow::set_max_size ()
+{
 	pair<uint32_t, uint32_t> const m = _selector.max_size ();
 
 	GdkGeometry g;
@@ -235,6 +246,14 @@ IOSelectorWindow::on_realize ()
 
 	set_geometry_hints (*this, g, Gdk::HINT_MAX_SIZE);
 }
+
+void
+IOSelectorWindow::max_size_changed ()
+{
+	set_max_size ();
+	resize (32768, 32768);
+}
+
 
 
 PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)

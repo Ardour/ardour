@@ -124,7 +124,12 @@ public:
 	virtual PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const = 0;
 	virtual bool list_is_global (int) const = 0;
 
-	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>) = 0;
+	/** If adding a channel is allowed in this situation, return the name of the
+	 *  thing that it would be added to.
+	 *  @return Name.
+	 */
+	virtual std::string add_channel_name () const { return ""; }
+	virtual void add_channel () {}
 	virtual bool can_remove_channels (int) const = 0;
 	virtual void remove_channel (ARDOUR::BundleChannel) = 0;
 	virtual bool can_rename_channels (int) const = 0;

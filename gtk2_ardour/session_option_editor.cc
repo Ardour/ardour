@@ -93,7 +93,6 @@ public:
 		return (dim == OTHER);
 	}
 
-	void add_channel (boost::shared_ptr<ARDOUR::Bundle>) {}
 	bool can_remove_channels (int) const {
 		return false;
 	}
