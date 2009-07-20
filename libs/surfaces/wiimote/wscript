@@ -29,7 +29,7 @@ def build(bld):
 	obj.includes     = ['.', './wiimote']
 	obj.name         = 'libwiimote'
 	obj.target       = 'wiimote'
-	obj.uselib_local = 'libardour libsurfaces'
+	obj.uselib_local = 'libardour libardour_cp'
 	obj.vnum         = LIBSURFACES_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
