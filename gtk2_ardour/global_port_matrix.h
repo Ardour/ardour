@@ -36,16 +36,12 @@ public:
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
-	bool can_remove_channels (int d) const {
-		return false;
-	}
-	void remove_channel (ARDOUR::BundleChannel) {}
-	bool can_rename_channels (int d) const {
-		return false;
-	}
-
 	std::string disassociation_verb () const {
 		return _("Disconnect");
+	}
+
+	std::string channel_noun () const {
+		return _("port");
 	}
 	
 	bool list_is_global (int) const {

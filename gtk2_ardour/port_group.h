@@ -50,11 +50,13 @@ public:
 	PortGroup (std::string const & n);
 
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, Gdk::Color);
+	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO> io);
+	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, Gdk::Color);
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	boost::shared_ptr<ARDOUR::Bundle> only_bundle ();
 	void clear ();
 	uint32_t total_channels () const;
+	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
 
 	std::string name; ///< name for the group
 
@@ -74,6 +76,7 @@ public:
 
 	struct BundleRecord {
 		boost::shared_ptr<ARDOUR::Bundle> bundle;
+		boost::shared_ptr<ARDOUR::IO> io;
 		Gdk::Color colour;
 		bool has_colour;
 		sigc::connection changed_connection;
@@ -110,6 +113,7 @@ class PortGroupList : public sigc::trackable
 	uint32_t size () const {
 		return _groups.size();
 	}
+	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
 
 	void suspend_signals ();
 	void resume_signals ();

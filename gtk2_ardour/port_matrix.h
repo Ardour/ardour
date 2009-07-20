@@ -125,15 +125,13 @@ public:
 	virtual PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const = 0;
 	virtual bool list_is_global (int) const = 0;
 
-	/** If adding a channel is allowed in this situation, return the name of the
-	 *  thing that it would be added to.
-	 *  @return Name.
-	 */
-	virtual std::string add_channel_name () const { return ""; }
-	virtual void add_channel () {}
-	virtual bool can_remove_channels (int) const = 0;
-	virtual void remove_channel (ARDOUR::BundleChannel) = 0;
-	virtual bool can_rename_channels (int) const = 0;
+	virtual bool can_add_channel (boost::shared_ptr<ARDOUR::Bundle>) const;
+	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
+	virtual bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
+	virtual void remove_channel (ARDOUR::BundleChannel);
+	virtual bool can_rename_channels (boost::shared_ptr<ARDOUR::Bundle>) const {
+		return false;
+	}
 	virtual void rename_channel (ARDOUR::BundleChannel) {}
 	virtual std::string disassociation_verb () const = 0;
 	virtual std::string channel_noun () const { return _("channel"); }
@@ -163,6 +161,7 @@ private:
 	void routes_changed ();
 	void reconnect_to_routes ();
 	void select_arrangement ();
+	void add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>);
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
@@ -171,6 +170,7 @@ private:
 	void show_group (boost::weak_ptr<PortGroup>);
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
+	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;

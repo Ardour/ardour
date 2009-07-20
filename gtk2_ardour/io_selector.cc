@@ -75,7 +75,7 @@ IOSelector::setup_ports (int dim)
 	} else {
 
 		_port_group->clear ();
-		_port_group->add_bundle (_io->bundle ());
+		_port_group->add_bundle (_io->bundle (), _io);
 	}
 
 	_ports[dim].resume_signals ();
@@ -143,39 +143,6 @@ IOSelector::n_io_ports () const
 	} else {
 		return _io->n_ports().get (_io->default_type());
 	}
-}
-
-string
-IOSelector::add_channel_name () const
-{
-	return _io->name ();
-}
-
-void
-IOSelector::add_channel ()
-{
-	// The IO selector only works for single typed IOs
-	const ARDOUR::DataType t = _io->default_type ();
-
-	try {
-		_io->add_port ("", this);
-	}
-	
-	catch (AudioEngine::PortRegistrationFailure& err) {
-		MessageDialog msg (_("There are no more JACK ports available."));
-		msg.run ();
-	}
-}
-
-void
-IOSelector::remove_channel (ARDOUR::BundleChannel bc)
-{
-	Port* f = _session.engine().get_port_by_name (bc.bundle->channel_ports(bc.channel)[0]);
-	if (!f) {
-		return;
-	}
-	
-	_io->remove_port (f, this);
 }
 
 bool

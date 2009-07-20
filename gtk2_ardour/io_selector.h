@@ -36,19 +36,6 @@ class IOSelector : public PortMatrix
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
-	std::string add_channel_name () const;
-	
-	void add_channel ();
-	
-	bool can_remove_channels (int d) const {
-		return d == _ours;
-	}
-	
-	void remove_channel (ARDOUR::BundleChannel);
-	bool can_rename_channels (int d) const {
-		return false;
-	}
-
 	std::string disassociation_verb () const {
 		return _("Disconnect");
 	}

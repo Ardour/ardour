@@ -36,12 +36,13 @@
 using namespace std;
 using namespace sigc;
 using namespace Gtk;
+using namespace ARDOUR;
 
 /** PortMatrix constructor.
  *  @param session Our session.
  *  @param type Port type that we are handling.
  */
-PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type)
+PortMatrix::PortMatrix (Session& session, DataType type)
 	: Table (2, 2),
 	  _session (session),
 	  _type (type),
@@ -95,8 +96,8 @@ PortMatrix::reconnect_to_routes ()
 	}
 	_route_connections.clear ();
 
-	boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
-	for (ARDOUR::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+	boost::shared_ptr<RouteList> routes = _session.get_routes ();
+	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		_route_connections.push_back (
 			(*i)->processors_changed.connect (mem_fun (*this, &PortMatrix::setup_global_ports))
 			);
@@ -127,7 +128,7 @@ PortMatrix::setup ()
 }
 
 void
-PortMatrix::set_type (ARDOUR::DataType t)
+PortMatrix::set_type (DataType t)
 {
 	_type = t;
 	_ports[0].set_type (_type);
@@ -178,9 +179,9 @@ PortMatrix::disassociate_all ()
 			for (PortGroup::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
 				for (uint32_t l = 0; l < k->bundle->nchannels(); ++l) {
 						
-					ARDOUR::BundleChannel c[2] = {
-						ARDOUR::BundleChannel (i->bundle, j),
-						ARDOUR::BundleChannel (k->bundle, l)
+					BundleChannel c[2] = {
+						BundleChannel (i->bundle, j),
+						BundleChannel (k->bundle, l)
 							};
 
 					if (get_state (c) == PortMatrixNode::ASSOCIATED) {
@@ -240,8 +241,8 @@ PortMatrix::rows () const
 
 void
 PortMatrix::popup_menu (
-	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> column,
-	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> row,
+	pair<boost::shared_ptr<PortGroup>, BundleChannel> column,
+	pair<boost::shared_ptr<PortGroup>, BundleChannel> row,
 	uint32_t t
 	)
 {
@@ -258,18 +259,68 @@ PortMatrix::popup_menu (
 	pg[_column_index] = column.first;
 	pg[_row_index] = row.first;
 
-	ARDOUR::BundleChannel bc[2];
+	BundleChannel bc[2];
 	bc[_column_index] = column.second;
 	bc[_row_index] = row.second;
 
 	char buf [64];
 
-	std::string const n = add_channel_name ();
-	if (!n.empty()) {
-		snprintf (buf, sizeof (buf), _("Add %s to '%s'"), channel_noun().c_str(), n.c_str());
-		items.push_back (MenuElem (buf, mem_fun (*this, &PortMatrix::add_channel)));
+
+	for (int dim = 0; dim < 2; ++dim) {
+
+		if (bc[dim].bundle) {
+
+			Menu* m = manage (new Menu);
+			MenuList& sub = m->items ();
+
+			boost::weak_ptr<Bundle> w (bc[dim].bundle);
+
+			if (can_add_channel (bc[dim].bundle)) {
+				snprintf (buf, sizeof (buf), _("Add %s"), channel_noun().c_str());
+				sub.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::add_channel_proxy), w)));
+			}
+			
+			if (can_remove_channels (bc[dim].bundle)) {
+				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
+				sub.push_back (
+					MenuElem (
+						buf,
+						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
+						)
+					);
+			}			
+			
+			if (can_rename_channels (bc[dim].bundle)) {
+				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
+				sub.push_back (
+					MenuElem (
+						buf,
+						bind (mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
+						)
+					);
+			}
+			
+			if (_show_only_bundles) {
+				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
+			} else {
+				snprintf (
+					buf, sizeof (buf), _("%s all from '%s'"),
+					disassociation_verb().c_str(),
+					bc[dim].bundle->channel_name (bc[dim].channel).c_str()
+					);
+			}
+			
+			sub.push_back (
+				MenuElem (buf, bind (mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
+				);
+
+			
+			items.push_back (MenuElem (bc[dim].bundle->name().c_str(), *m));
+		}
 	}
-	
+
+	items.push_back (SeparatorElem ());
+
 	for (int dim = 0; dim < 2; ++dim) {
 
 		if (pg[dim]) {
@@ -293,46 +344,6 @@ PortMatrix::popup_menu (
 				items.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::show_group), wp)));
 			}
 		}
-
-		if (bc[dim].bundle) {
-			boost::weak_ptr<ARDOUR::Bundle> w (bc[dim].bundle);
-
-			if (can_remove_channels (dim)) {
-				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
-				items.push_back (
-					MenuElem (
-						buf,
-						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
-						)
-					);
-			}			
-			
-			if (can_rename_channels (dim)) {
-				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
-				items.push_back (
-					MenuElem (
-						buf,
-						bind (mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
-						)
-					);
-			}
-			
-			if (_show_only_bundles) {
-				snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), bc[dim].bundle->name().c_str());
-			} else {
-				snprintf (
-					buf, sizeof (buf), _("%s all from '%s/%s'"),
-					disassociation_verb().c_str(),
-					bc[dim].bundle->name().c_str(),
-					bc[dim].bundle->channel_name (bc[dim].channel).c_str()
-					);
-			}
-			
-			items.push_back (
-				MenuElem (buf, bind (mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
-				);
-			
-		}
 	}
 
 	items.push_back (SeparatorElem ());
@@ -348,32 +359,32 @@ PortMatrix::popup_menu (
 }
 
 void
-PortMatrix::remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)
+PortMatrix::remove_channel_proxy (boost::weak_ptr<Bundle> b, uint32_t c)
 {
-	boost::shared_ptr<ARDOUR::Bundle> sb = b.lock ();
+	boost::shared_ptr<Bundle> sb = b.lock ();
 	if (!sb) {
 		return;
 	}
 
-	remove_channel (ARDOUR::BundleChannel (sb, c));
+	remove_channel (BundleChannel (sb, c));
 
 }
 
 void
-PortMatrix::rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle> b, uint32_t c)
+PortMatrix::rename_channel_proxy (boost::weak_ptr<Bundle> b, uint32_t c)
 {
-	boost::shared_ptr<ARDOUR::Bundle> sb = b.lock ();
+	boost::shared_ptr<Bundle> sb = b.lock ();
 	if (!sb) {
 		return;
 	}
 
-	rename_channel (ARDOUR::BundleChannel (sb, c));
+	rename_channel (BundleChannel (sb, c));
 }
 
 void
-PortMatrix::disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle> bundle, uint32_t channel, int dim)
+PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_t channel, int dim)
 {
-	boost::shared_ptr<ARDOUR::Bundle> sb = bundle.lock ();
+	boost::shared_ptr<Bundle> sb = bundle.lock ();
 	if (!sb) {
 		return;
 	}
@@ -383,9 +394,9 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle> bundle,
 	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
 		for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
 
-			ARDOUR::BundleChannel c[2];
-			c[dim] = ARDOUR::BundleChannel (sb, channel);
-			c[1-dim] = ARDOUR::BundleChannel (i->bundle, j);
+			BundleChannel c[2];
+			c[dim] = BundleChannel (sb, channel);
+			c[1-dim] = BundleChannel (i->bundle, j);
 
 			if (get_state (c) == PortMatrixNode::ASSOCIATED) {
 				set_state (c, false);
@@ -487,4 +498,61 @@ PortMatrix::on_scroll_event (GdkEventScroll* ev)
 	}
 
 	return true;
+}
+
+boost::shared_ptr<IO>
+PortMatrix::io_from_bundle (boost::shared_ptr<Bundle> b) const
+{
+	boost::shared_ptr<IO> io = _ports[0].io_from_bundle (b);
+	if (!io) {
+		io = _ports[1].io_from_bundle (b);
+	}
+
+	return io;
+}
+
+bool
+PortMatrix::can_add_channel (boost::shared_ptr<Bundle> b) const
+{
+	return io_from_bundle (b);
+}
+
+void
+PortMatrix::add_channel (boost::shared_ptr<Bundle> b)
+{
+	boost::shared_ptr<IO> io = io_from_bundle (b);
+
+	if (io) {
+		io->add_port ("", this, _type);
+	}
+}
+
+bool
+PortMatrix::can_remove_channels (boost::shared_ptr<Bundle> b) const
+{
+	return io_from_bundle (b);
+}
+
+void
+PortMatrix::remove_channel (ARDOUR::BundleChannel b)
+{
+	boost::shared_ptr<IO> io = io_from_bundle (b.bundle);
+
+	if (io) {
+		Port* p = io->nth (b.channel);
+		if (p) {
+			io->remove_port (p, this);
+		}
+	}
+}
+
+void
+PortMatrix::add_channel_proxy (boost::weak_ptr<Bundle> w)
+{
+	boost::shared_ptr<Bundle> b = w.lock ();
+	if (!b) {
+		return;
+	}
+
+	add_channel (b);
 }

@@ -50,16 +50,23 @@ PortGroup::PortGroup (std::string const & n)
 	
 }
 
+void
+PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
+{
+	add_bundle (b, boost::shared_ptr<IO> ());
+}
+
 /** Add a bundle to a group.
  *  @param b Bundle.
  */
 void
-PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
+PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io)
 {
 	assert (b.get());
 
 	BundleRecord r;
 	r.bundle = b;
+	r.io = io;
 	r.has_colour = false;
 	r.changed_connection = b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
 
@@ -73,12 +80,13 @@ PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
  *  @param c Colour to represent the group with.
  */
 void
-PortGroup::add_bundle (boost::shared_ptr<Bundle> b, Gdk::Color c)
+PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, Gdk::Color c)
 {
 	assert (b.get());
 
 	BundleRecord r;
 	r.bundle = b;
+	r.io = io;
 	r.colour = c;
 	r.has_colour = true;
 	r.changed_connection = b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
@@ -156,6 +164,22 @@ PortGroup::total_channels () const
 
 	return n;
 }
+
+boost::shared_ptr<IO>
+PortGroup::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
+{
+	BundleList::const_iterator i = _bundles.begin ();
+	while (i != _bundles.end() && i->bundle != b) {
+		++i;
+	}
+
+	if (i == _bundles.end()) {
+		return boost::shared_ptr<IO> ();
+	}
+
+	return i->io;
+}
+
 
 /** PortGroupList constructor.
  */
@@ -250,9 +274,9 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 
 			TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (i->get());
 			if (tv) {
-				g->add_bundle (rb, tv->color ());
+				g->add_bundle (rb, io, tv->color ());
 			} else {
-				g->add_bundle (rb);
+				g->add_bundle (rb, io);
 			}
 		}
 	}
@@ -492,6 +516,22 @@ PortGroupList::resume_signals ()
 
 	_signals_suspended = false;
 }
+
+boost::shared_ptr<IO>
+PortGroupList::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
+{
+	List::const_iterator i = _groups.begin ();
+	while (i != _groups.end()) {
+		boost::shared_ptr<IO> io = (*i)->io_from_bundle (b);
+		if (io) {
+			return io;
+		}
+		++i;
+	}
+
+	return boost::shared_ptr<IO> ();
+}
+
 
 RouteBundle::RouteBundle (boost::shared_ptr<Bundle> r)
 	: _route (r)

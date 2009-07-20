@@ -260,7 +260,7 @@ IO::remove_port (Port* port, void* src)
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 	}
 
-	if (change == ConfigurationChanged) {
+	if (change & ConfigurationChanged) {
 		setup_bundles ();
 	}
 

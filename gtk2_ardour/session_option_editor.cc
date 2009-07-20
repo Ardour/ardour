@@ -88,19 +88,16 @@ public:
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 
-	bool list_is_global (int dim) const
-	{
+	bool list_is_global (int dim) const {
 		return (dim == OTHER);
 	}
 
-	bool can_remove_channels (int) const {
+	bool can_remove_channels (boost::shared_ptr<Bundle>) const {
 		return false;
 	}
+	
 	void remove_channel (ARDOUR::BundleChannel) {}
-	bool can_rename_channels (int) const {
-		return false;
-	}
-
+	
 	std::string disassociation_verb () const {
 		return _("Disassociate");
 	}
