@@ -172,7 +172,7 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 
 		bool result = AccelMap::change_entry (path,
 						      ev->keyval,
-						      (ModifierType) ev->state,
+						      ModifierType (Keyboard::RelevantModifierKeyMask & ev->state),
 						      true);
 
 		if (result) {

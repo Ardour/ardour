@@ -2683,7 +2683,8 @@ ARDOUR_UI::hide_splash ()
 }
 
 void
-ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* list_title, const string & msg)
+ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* list_title, 
+				    const string& plural_msg, const string& singular_msg)
 {
 	size_t removed;
 
@@ -2738,18 +2739,28 @@ require some unused files to continue to exist."));
 
 	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
+
+	/* subst:
+	   %1 - number of files removed
+	   %2 - location of "dead_sounds"
+	   %3 - size of files affected
+	   %4 - prefix for "bytes" to produce sensible results (e.g. mega, kilo, giga)
+	*/
+
+	const char* bprefix;
+
 	if (rep.space < 1048576.0f) {
-		if (removed > 1) {
-		  txt.set_text (string_compose (msg, removed, _("files were"), session->path() + "dead_sounds", (float) rep.space / 1024.0f, "kilo"));
-		} else {
-			txt.set_text (string_compose (msg, removed, _("file was"), session->path() + "dead_sounds", (float) rep.space / 1024.0f, "kilo"));
-		}
+		bprefix = X_("kilo");
+	} else if (rep.space < 1048576.0f * 1000) {
+		bprefix = X_("mega");
 	} else {
-		if (removed > 1) {
-			txt.set_text (string_compose (msg, removed, _("files were"), session->path() + "dead_sounds", (float) rep.space / 1048576.0f, "mega"));
-		} else {
-			txt.set_text (string_compose (msg, removed, _("file was"), session->path() + "dead_sounds", (float) rep.space / 1048576.0f, "mega"));
-		}
+		bprefix = X_("giga");
+	}
+
+	if (removed > 1) {
+		txt.set_text (string_compose (plural_msg, removed, session->path() + "dead_sounds", (float) rep.space / 1024.0f, bprefix));
+	} else {
+		txt.set_text (string_compose (singular_msg, removed, session->path() + "dead_sounds", (float) rep.space / 1024.0f, bprefix));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
@@ -2836,12 +2847,19 @@ After cleanup, unused audio files will be moved to a \
 	display_cleanup_results (rep, 
 				 _("cleaned files"),
 				 _("\
-The following %1 %2 not in use and \n\
+The following %1 files were not in use and \n\
 have been moved to:\n\
-%3. \n\n\
+%2. \n\n\
 Flushing the wastebasket will \n\
 release an additional\n\
-%4 %5bytes of disk space.\n"
+%3 %4bytes of disk space.\n"),
+				 _("\
+The following file was not in use and \n	\
+has been moved to:\n				\
+%2. \n\n\
+Flushing the wastebasket will \n\
+release an additional\n\
+%3 %4bytes of disk space.\n"
 					 ));
 
 }
@@ -2862,9 +2880,12 @@ ARDOUR_UI::flush_trash ()
 
 	display_cleanup_results (rep, 
 				 _("deleted file"),
-				 _("The following %1 %2 deleted from\n\
-%3,\n\
-releasing %4 %5bytes of disk space"));
+				 _("The following %1 files were deleted from\n\
+%2,\n\
+releasing %3 %4bytes of disk space"),
+				 _("The following file was deleted from\n\
+%2,\n\
+releasing %3 %4bytes of disk space"));
 }
 
 void
