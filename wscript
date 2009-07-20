@@ -201,7 +201,7 @@ def set_compiler_flags (conf,opt):
 	    
 	if conf.env['build_target'] == 'x86_64' and opt.vst:
 		print "\n\n=================================================="
-		print "You cannot use VST plugins with a 64 bit host. Please run scons with VST=0"
+		print "You cannot use VST plugins with a 64 bit host. Please run waf with --vst=0"
 		print "\nIt is theoretically possible to build a 32 bit host on a 64 bit system."
 		print "However, this is tricky and not recommended for beginners."
 		sys.exit (-1)
@@ -255,6 +255,7 @@ def set_compiler_flags (conf,opt):
 		conf.env.append_value('LINKFLAGS', debug_flags)
 	else:
 		conf.env.append_value('CCFLAGS', optimization_flags)
+		conf.env.append_value('CXXFLAGS', optimization_flags)
 		conf.env.append_value('LINKFLAGS', optimization_flags)
 
 	if opt.stl_debug:
@@ -283,7 +284,7 @@ def set_compiler_flags (conf,opt):
 	#
 
 	conf.env.append_value('CCFLAGS', [ '-D_LARGEFILE64_SOURCE', '-D_LARGEFILE_SOURCE' ])
-	conf.env.append_value('CXXFLAGS', [ '-D_LARGEFILE_SOURCE', '-D_LARGEFILE_SOURCE' ])
+	conf.env.append_value('CXXFLAGS', [ '-D_LARGEFILE64_SOURCE', '-D_LARGEFILE_SOURCE' ])
 	if opt.nls:
 		conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
 		conf.env.append_value('CCFLAGS', '-DENABLE_NLS')
