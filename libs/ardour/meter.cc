@@ -73,7 +73,7 @@ Metering::update_meters()
 void
 PeakMeter::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (!_active) {
+	if (!_active && !_pending_active) {
 		return;
 	}
 
@@ -111,6 +111,8 @@ PeakMeter::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfr
 	for (uint32_t i = n; i < _peak_power.size(); ++i) {
 		_peak_power[i] = 0.0f;
 	}
+
+	_active = _pending_active;
 }
 
 PeakMeter::PeakMeter (Session& s, const XMLNode& node)

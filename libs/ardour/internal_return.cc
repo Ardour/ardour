@@ -46,7 +46,11 @@ InternalReturn::InternalReturn (Session& s, const XMLNode& node)
 void
 InternalReturn::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	/* XXX no lock here, just atomic fetch */
+	if (!_active && !_pending_active) {
+		return;
+	}
+
+	/* no lock here, just atomic fetch */
 
 	if (g_atomic_int_get(&user_count) == 0) {
 		/* nothing to do - nobody is feeding us anything */
@@ -54,6 +58,7 @@ InternalReturn::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame
 	}
 
 	bufs.merge_from (buffers, nframes);
+	_active = _pending_active;
 }
 
 bool

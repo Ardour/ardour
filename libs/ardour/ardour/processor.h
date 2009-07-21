@@ -59,7 +59,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual bool visible() const { return true; }
 	virtual void set_visible (bool) {}
 
-	bool active () const { return _active; }
+	bool active () const { return _pending_active; }
 
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
@@ -73,8 +73,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes) {}
 	virtual void silence (nframes_t nframes) {}
 	
-	virtual void activate ()   { _active = true; ActiveChanged(); }
-	virtual void deactivate () { _active = false; ActiveChanged(); }
+	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
+	virtual void deactivate () { _pending_active = false; ActiveChanged(); }
 	
 	virtual bool configure_io (ChanCount in, ChanCount out);
 

@@ -19,6 +19,7 @@
 
 #include <limits.h>
 
+#include "ardour/amp.h"
 #include "ardour/io.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
@@ -162,27 +163,26 @@ GainMeterBase::~GainMeterBase ()
 void
 GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 			     boost::shared_ptr<PeakMeter> pm, 
-			     boost::shared_ptr<AutomationControl> gc,
-			     boost::shared_ptr<Automatable> gc_owner)
+			     boost::shared_ptr<Amp> amp)
 {
  	connections.clear ();
 
-	if (!pm && !gc) {
+	if (!pm && !amp) {
 		level_meter->set_meter (0);
 		gain_slider->set_controllable (boost::shared_ptr<PBD::Controllable>());
 		_meter.reset ();
-		_gain_control.reset ();
+		_amp.reset ();
 		_route.reset ();
 		return;
 	} 
 
 	_meter = pm;
-	_gain_control = gc;
+	_amp = amp;
 	_route = r;
 
  	level_meter->set_meter (pm.get());
-	gain_slider->set_controllable (gc);
-	
+	gain_slider->set_controllable (amp->gain_control());
+       
 	if (!_route || !_route->is_hidden()) {
 		
 		using namespace Menu_Helpers;
@@ -190,28 +190,30 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 		gain_astate_menu.items().clear ();
 		
 		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
-							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
-							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Play)));
 		gain_astate_menu.items().push_back (MenuElem (_("Write"),
-							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Write)));
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-							      bind (mem_fun (*(gc_owner.get()), &Automatable::set_parameter_automation_state),
+							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Touch)));
 		
 		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
-		
+
+		boost::shared_ptr<AutomationControl> gc = amp->gain_control();
+
 		connections.push_back (gc->alist()->automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed)));
 		connections.push_back (gc->alist()->automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed)));
 		
 		gain_automation_state_changed ();
 	}
 
-	connections.push_back (gc->Changed.connect (mem_fun (*this, &GainMeterBase::gain_changed)));
+	connections.push_back (amp->gain_control()->Changed.connect (mem_fun (*this, &GainMeterBase::gain_changed)));
 
 	gain_changed ();
 	show_gain ();
@@ -344,7 +346,7 @@ GainMeterBase::gain_activated ()
 
 		f = min (f, 6.0f);
 
-		_gain_control->set_value (dB_to_coefficient(f));
+		_amp->set_gain (dB_to_coefficient(f), this);
 
 		if (gain_display.has_focus()) {
 			PublicEditor::instance().reset_focus();
@@ -372,7 +374,13 @@ void
 GainMeterBase::gain_adjusted ()
 {
 	if (!ignore_toggle) {
-		_gain_control->set_value (slider_position_to_gain (gain_adjustment.get_value()));
+		if (_route) {
+			if (_route->amp() == _amp) {
+				_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+			} else {
+				_amp->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+			}
+		}
 	}
 
 	show_gain ();
@@ -381,7 +389,7 @@ GainMeterBase::gain_adjusted ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	gfloat value = gain_to_slider_position (_gain_control->get_value());
+	gfloat value = gain_to_slider_position (_amp->gain());
 	
 	//cerr << this << " for " << _io->name() << " EGAIN = " << value
 	//		<< " AGAIN = " << gain_adjustment.get_value () << endl;
@@ -415,7 +423,7 @@ GainMeterBase::set_fader_name (const char * name)
 void
 GainMeterBase::update_gain_sensitive ()
 {
-	bool x = !(_gain_control->alist()->automation_state() & Play);
+	bool x = !(_amp->gain_control()->alist()->automation_state() & Play);
 	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
 }
 
@@ -557,14 +565,14 @@ GainMeterBase::meter_point_clicked ()
 gint
 GainMeterBase::start_gain_touch (GdkEventButton* ev)
 {
-	_gain_control->start_touch ();
+	_amp->gain_control()->start_touch ();
 	return FALSE;
 }
 
 gint
 GainMeterBase::end_gain_touch (GdkEventButton* ev)
 {
-	_gain_control->stop_touch ();
+	_amp->gain_control()->stop_touch ();
 	return FALSE;
 }
 
@@ -667,10 +675,10 @@ GainMeterBase::gain_automation_style_changed ()
 {
 	switch (_width) {
 	case Wide:
-		gain_automation_style_button.set_label (astyle_string(_gain_control->alist()->automation_style()));
+		gain_automation_style_button.set_label (astyle_string(_amp->gain_control()->alist()->automation_style()));
 		break;
 	case Narrow:
-		gain_automation_style_button.set_label  (short_astyle_string(_gain_control->alist()->automation_style()));
+		gain_automation_style_button.set_label  (short_astyle_string(_amp->gain_control()->alist()->automation_style()));
 		break;
 	}
 }
@@ -684,14 +692,14 @@ GainMeterBase::gain_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		gain_automation_state_button.set_label (astate_string(_gain_control->alist()->automation_state()));
+		gain_automation_state_button.set_label (astate_string(_amp->gain_control()->alist()->automation_state()));
 		break;
 	case Narrow:
-		gain_automation_state_button.set_label (short_astate_string(_gain_control->alist()->automation_state()));
+		gain_automation_state_button.set_label (short_astate_string(_amp->gain_control()->alist()->automation_state()));
 		break;
 	}
 
-	x = (_gain_control->alist()->automation_state() != Off);
+	x = (_amp->gain_control()->alist()->automation_state() != Off);
 	
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;
@@ -795,8 +803,7 @@ GainMeter::GainMeter (Session& s)
 void 
 GainMeter::set_controls (boost::shared_ptr<Route> r,
 			 boost::shared_ptr<PeakMeter> meter,
-			 boost::shared_ptr<AutomationControl> gain_control,
-			 boost::shared_ptr<Automatable> gc_owner)
+			 boost::shared_ptr<Amp> amp)
 {
 	if (level_meter->get_parent()) {
 		hbox.remove (*level_meter);
@@ -810,7 +817,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		fader_vbox->remove (gain_automation_state_button);
 	}
 
-	GainMeterBase::set_controls (r, meter, gain_control, gc_owner);
+	GainMeterBase::set_controls (r, meter, amp);
 
 	/* 
 	   if we have a non-hidden route (ie. we're not the click or the auditioner), 
@@ -915,7 +922,11 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 boost::shared_ptr<PBD::Controllable>
 GainMeterBase::get_controllable()
 {
-	return _gain_control;
+	if (_amp) {
+		return _amp->gain_control();
+	} else {
+		return boost::shared_ptr<PBD::Controllable>();
+	}
 }
 
 

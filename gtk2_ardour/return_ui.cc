@@ -38,7 +38,7 @@ ReturnUI::ReturnUI (boost::shared_ptr<Return> r, Session& se)
 	, _session (se)
 	, _gpm (se)
 {
- 	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp()->gain_control(), r->amp());
+ 	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp());
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name ("ReturnUIFrame");

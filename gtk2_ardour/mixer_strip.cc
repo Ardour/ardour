@@ -343,7 +343,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	_current_delivery = _route->main_outs ();
 
 	panners.set_panner (rt->main_outs()->panner());
-	gpm.set_controls (rt, rt->shared_peak_meter(), rt->gain_control(), rt->amp());
+	gpm.set_controls (rt, rt->shared_peak_meter(), rt->amp());
 	processor_box.set_route (rt);
 
 	if (set_color_from_route()) {
@@ -1419,12 +1419,12 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 		send = boost::dynamic_pointer_cast<Send>(_current_delivery);
 		send->set_metering (true);
 		_current_delivery->GoingAway.connect (mem_fun (*this, &MixerStrip::revert_to_default_display));
-		gain_meter().set_controls (_route, send->meter(), send->amp()->gain_control(), send->amp());
+		gain_meter().set_controls (_route, send->meter(), send->amp());
 		panner_ui().set_panner (_current_delivery->panner());
 
 	} else {
 		_current_delivery = _route->main_outs ();
-		gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->gain_control(), _route->amp());
+		gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
 		panner_ui().set_panner (_route->main_outs()->panner());
 	}
 	
@@ -1446,7 +1446,7 @@ MixerStrip::revert_to_default_display ()
 	
 	_current_delivery = _route->main_outs();
 
-	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->gain_control(), _route->amp());
+	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gain_meter().setup_meters ();
 	panner_ui().set_panner (_route->main_outs()->panner());
 	panner_ui().setup_pan ();

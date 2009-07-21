@@ -377,13 +377,14 @@ PluginInsert::silence (nframes_t nframes)
 void
 PluginInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (active()) {
+	if (_active || _pending_active) {
 
 		if (_session.transport_rolling()) {
 			automation_run (bufs, nframes);
 		} else {
 			connect_and_run (bufs, nframes, 0, false);
 		}
+
 	} else {
 
 		/* FIXME: type, audio only */
@@ -402,6 +403,8 @@ PluginInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 
 		bufs.count().set_audio(out);
 	}
+
+	_active = _pending_active;
 }
 
 void

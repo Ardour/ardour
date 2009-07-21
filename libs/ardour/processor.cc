@@ -65,6 +65,7 @@ const string Processor::state_node_name = "Processor";
 Processor::Processor(Session& session, const string& name)
 	: SessionObject(session, name)
 	, AutomatableControls(session)
+	, _pending_active(false)
 	, _active(false)
 	, _next_ab_is_active(false)
 	, _configured(false)
@@ -75,12 +76,14 @@ Processor::Processor(Session& session, const string& name)
 Processor::Processor (Session& session, const XMLNode& node)
 	: SessionObject(session, "renameMe")
 	, AutomatableControls(session)
+	, _pending_active(false)
 	, _active(false)
 	, _next_ab_is_active(false)
 	, _configured(false)
 	, _gui(0)
 {
 	set_state (node);
+	_pending_active = _active;
 }
 
 XMLNode&

@@ -47,6 +47,7 @@ namespace ARDOUR {
 	class Route;
 	class RouteGroup;
 	class PeakMeter;
+	class Amp;
 	class Automatable;
 }
 namespace Gtkmm2ext {
@@ -66,8 +67,7 @@ class GainMeterBase : virtual public sigc::trackable
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
 				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
-				   boost::shared_ptr<ARDOUR::AutomationControl> gain_control,
-				   boost::shared_ptr<ARDOUR::Automatable> gc_owner);
+				   boost::shared_ptr<ARDOUR::Amp> amp);
 
 	void update_gain_sensitive ();
 	void update_meters ();
@@ -89,7 +89,7 @@ class GainMeterBase : virtual public sigc::trackable
 	friend class MixerStrip;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
-	boost::shared_ptr<ARDOUR::AutomationControl> _gain_control;
+	boost::shared_ptr<ARDOUR::Amp> _amp;
 	ARDOUR::Session& _session;
 	std::vector<sigc::connection> connections;
 
@@ -184,8 +184,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
 				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
-				   boost::shared_ptr<ARDOUR::AutomationControl> gain_control,
-				   boost::shared_ptr<ARDOUR::Automatable> gc_owner);
+				   boost::shared_ptr<ARDOUR::Amp> amp);
 
 	int get_gm_width ();
 	void setup_meters (int len=0);

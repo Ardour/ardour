@@ -40,7 +40,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	, _panners (se)
 {
  	_panners.set_panner (s->panner());
- 	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp()->gain_control(), s->amp());
+ 	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp());
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name ("SendUIFrame");

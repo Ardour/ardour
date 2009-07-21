@@ -75,7 +75,7 @@ Amp::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t
 {
 	gain_t mute_gain;
 
-	if (!_active) {
+	if (!_active && !_pending_active) {
 		return;
 	}
 
@@ -159,6 +159,8 @@ Amp::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t
 			} 
 		}
 	}
+
+	_active = _pending_active;
 }
 
 void

@@ -86,8 +86,16 @@ Send::deactivate ()
 void
 Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (!_active || _output->n_ports() == ChanCount::ZERO) {
+	if (_output->n_ports() == ChanCount::ZERO) {
 		_meter->reset ();
+		_active = _pending_active;
+		return;
+	}
+
+	if (!_active && !_pending_active) {
+		_meter->reset ();
+		_output->silence (nframes);
+		_active = _pending_active;
 		return;
 	}
 
@@ -118,6 +126,8 @@ Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_
 			_meter->run (*_output_buffers, start_frame, end_frame, nframes);
 		}
 	}
+
+	/* _active was set to _pending_active by Delivery::run() */
 }
 
 XMLNode&

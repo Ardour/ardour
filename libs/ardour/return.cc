@@ -122,7 +122,7 @@ Return::set_state(const XMLNode& node)
 void
 Return::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (!active() || _input->n_ports() == ChanCount::ZERO) {
+	if ((!_active && !_pending_active) || _input->n_ports() == ChanCount::ZERO) {
 		return;
 	}
 	
@@ -141,6 +141,8 @@ Return::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframe
 			_meter->run (bufs, start_frame, end_frame, nframes);
 		}
 	}
+
+	_active = _pending_active;
 }
 
 bool

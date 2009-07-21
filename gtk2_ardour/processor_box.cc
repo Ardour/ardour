@@ -1383,7 +1383,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		gidget = send_ui;
 #else
 		if (_parent_strip) {
-			_parent_strip->gain_meter().set_controls (_route, send->meter(), send->amp()->gain_control(), send->amp());
+			_parent_strip->gain_meter().set_controls (_route, send->meter(), send->amp());
 			_parent_strip->panner_ui().set_panner (send->panner());
 		}
 #endif

@@ -72,14 +72,17 @@ PortInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nf
 		return;
 	}
 
-	if (!active()) {
+	if (!_active && !_pending_active) {
 		/* deliver silence */
 		silence (nframes);
-		return;
+		goto out;
 	}
 
 	_out->run (bufs, start_frame, end_frame, nframes);
 	_input->collect_input (bufs, nframes, ChanCount::ZERO);
+
+  out:
+	_active = _pending_active;
 }
 
 XMLNode&

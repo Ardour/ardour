@@ -280,15 +280,22 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 {
 	assert (_output);
 
-	if (!_active || _output->n_ports ().get (_output->default_type()) == 0) {
-		return;
+	PortSet& ports (_output->ports());
+	gain_t tgain;
+
+	if (_output->n_ports ().get (_output->default_type()) == 0) {
+		goto out;
+	}
+
+	if (!_active && !_pending_active) {
+		_output->silence (nframes);
+		goto out;
 	}
 
 	/* this setup is not just for our purposes, but for anything that comes after us in the 
 	   processing pathway that wants to use this->output_buffers() for some reason.
 	*/
 
-	PortSet& ports (_output->ports());
 	output_buffers().attach_buffers (ports, nframes, _output_offset);
 
 	// this Delivery processor is not a derived type, and thus we assume
@@ -296,7 +303,7 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 	// the main output stage of a Route). Contrast with Send::run()
 	// which cannot do this.
 
-	gain_t tgain = target_gain ();
+	tgain = target_gain ();
 	
 	if (tgain != _current_gain) {
 		
@@ -310,11 +317,10 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		/* we were quiet last time, and we're still supposed to be quiet.
 		   Silence the outputs, and make sure the buffers are quiet too,
 		*/
-
+		
 		_output->silence (nframes);
 		Amp::apply_simple_gain (bufs, nframes, 0.0);
-		
-		return;
+		goto out;
 
 	} else if (tgain != 1.0) {
 
@@ -341,6 +347,9 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, _output_offset);
 		}
 	}
+
+  out:
+	_active = _pending_active;
 }
 
 XMLNode&
@@ -495,6 +504,12 @@ Delivery::flush (nframes_t nframes)
 gain_t
 Delivery::target_gain ()
 {
+	/* if we've been requested to deactivate, our target gain is zero */
+
+	if (!_pending_active) {
+		return 0.0;
+	}
+
 	/* if we've been told not to output because its a monitoring situation and
 	   we're not monitoring, then be quiet.
 	*/

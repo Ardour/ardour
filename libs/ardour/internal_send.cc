@@ -72,7 +72,7 @@ InternalSend::send_to_going_away ()
 void
 InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	if (!_active || !target || !_send_to) {
+	if ((!_active && !_pending_active) || !target || !_send_to) {
 		_meter->reset ();
 		return;
 	}
@@ -102,7 +102,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 
 		_meter->reset ();
 		Amp::apply_simple_gain (sendbufs, nframes, 0.0);
-		return;
+		goto out;
 
 	} else if (tgain != 1.0) {
 
@@ -130,6 +130,9 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	/* deliver to target */
 
 	target->merge_from (sendbufs, nframes);
+
+  out:
+	_active = _pending_active;
 }
 
 bool

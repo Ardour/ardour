@@ -114,7 +114,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 {
 	set_button_names ();
 
-	gm.set_controls (_route, _route->shared_peak_meter(), _route->gain_control(), _route->amp());
+	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
 

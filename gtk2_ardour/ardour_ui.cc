@@ -733,7 +733,7 @@ ARDOUR_UI::finish()
 
 		if (session->transport_rolling()) {
 			session->request_stop ();
-			usleep (2500000);
+			usleep (250000);
 		}
 
 		if (session->dirty()) {
