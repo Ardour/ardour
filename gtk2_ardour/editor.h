@@ -973,6 +973,8 @@ class Editor : public PublicEditor
 	TimeAxisView* axis_view_from_route (ARDOUR::Route *) const;
 	TrackSelection axis_views_from_routes (std::list<ARDOUR::Route *>) const;
 
+	TrackSelection get_tracks_for_range_action () const;
+
 	static Gdk::Cursor* cross_hair_cursor;
 	static Gdk::Cursor* trimmer_cursor;
 	static Gdk::Cursor* selector_cursor;

@@ -2693,9 +2693,11 @@ Editor::region_from_selection ()
 	nframes64_t start = selection->time[clicked_selection].start;
 	nframes64_t end = selection->time[clicked_selection].end;
 
+	TrackSelection tracks = get_tracks_for_range_action ();
+
 	nframes64_t selection_cnt = end - start + 1;
 	
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	for (TrackSelection::iterator i = tracks.begin(); i != tracks.end(); ++i) {
 		boost::shared_ptr<Region> current;
 		boost::shared_ptr<Playlist> pl;
 		nframes64_t internal_start;
@@ -2786,41 +2788,52 @@ add_if_covered (RegionView* rv, const AudioRange* ar, RegionSelection* rs)
 	}
 }
 
+/** Return either:
+ *    - selected tracks, or if there are none...
+ *    - tracks containing selected regions, or if there are none...
+ *    - all tracks
+ * @return tracks.
+ */
+TrackSelection
+Editor::get_tracks_for_range_action () const
+{
+	TrackSelection t;
+	
+	if (selection->tracks.empty()) {
+		
+		/* use tracks with selected regions */
+
+		RegionSelection rs = selection->regions;
+
+		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+			TimeAxisView* tv = &(*i)->get_time_axis_view();
+
+			if (!t.contains (tv)) {
+				t.push_back (tv);
+			}
+		}
+
+		if (t.empty()) {
+			/* no regions and no tracks: use all tracks */
+			t = track_views;
+		}
+
+	} else {
+
+		t = selection->tracks;
+	}
+
+	return t;
+}
+
 void
 Editor::separate_regions_between (const TimeSelection& ts)
 {
 	bool in_command = false;
 	boost::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
-	TrackSelection tmptracks;
 
-	if (selection->tracks.empty()) {
-		
-		/* use tracks with selected regions */
-
-		RegionSelection rs; 
-
-		get_regions_for_action (rs);
-
-		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-			TimeAxisView* tv = &(*i)->get_time_axis_view();
-
-			if (find (tmptracks.begin(), tmptracks.end(), tv) == tmptracks.end()) {
-				tmptracks.push_back (tv);
-			}
-		}
-
-		if (tmptracks.empty()) {
-			/* no regions selected: do nothing */
-			return;
-		}
-
-	} else {
-
-		tmptracks = selection->tracks;
-
-	}
-
+	TrackSelection tmptracks = get_tracks_for_range_action ();
 	sort_track_selection (&tmptracks);
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
@@ -2895,6 +2908,10 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	}
 }
 
+/** Take tracks from get_tracks_for_range_action and cut any regions
+ *  on those tracks so that the tracks are empty over the time
+ *  selection.
+ */
 void
 Editor::separate_region_from_selection ()
 {

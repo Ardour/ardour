@@ -1920,40 +1920,44 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
 
-	edit_items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
-	edit_items.push_back (MenuElem (_("Loop range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
+	edit_items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::play_selection)));
+	edit_items.push_back (MenuElem (_("Loop Range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_range_selection)));
-	
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));
-	edit_items.push_back (MenuElem (_("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false)));
+
+	if (!selection->regions.empty()) {
+		edit_items.push_back (SeparatorElem());
+		edit_items.push_back (MenuElem (_("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));
+		edit_items.push_back (MenuElem (_("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false)));
+	}
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Convert to region in-place"), mem_fun(*this, &Editor::separate_region_from_selection)));
-	edit_items.push_back (MenuElem (_("Convert to region in region list"), mem_fun(*this, &Editor::new_region_from_selection)));
+	edit_items.push_back (MenuElem (_("Silence Range"), mem_fun(*this, &Editor::separate_region_from_selection)));
+	edit_items.push_back (MenuElem (_("Convert to Region in Region List"), mem_fun(*this, &Editor::new_region_from_selection)));
 	
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
+	edit_items.push_back (MenuElem (_("Select All in Range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Set loop from selection"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
-	edit_items.push_back (MenuElem (_("Set punch from selection"), mem_fun(*this, &Editor::set_punch_from_selection)));
+	edit_items.push_back (MenuElem (_("Set Loop from Range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
+	edit_items.push_back (MenuElem (_("Set Punch from Range"), mem_fun(*this, &Editor::set_punch_from_selection)));
 	
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_selection)));
+	
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Crop region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
-	edit_items.push_back (MenuElem (_("Fill range with region"), mem_fun(*this, &Editor::region_fill_selection)));
-	edit_items.push_back (MenuElem (_("Duplicate range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
-	edit_items.push_back (MenuElem (_("Create chunk from range"), mem_fun(*this, &Editor::create_named_selection)));
+	edit_items.push_back (MenuElem (_("Crop Region to Range"), mem_fun(*this, &Editor::crop_region_to_selection)));
+	edit_items.push_back (MenuElem (_("Fill Range with Region"), mem_fun(*this, &Editor::region_fill_selection)));
+	edit_items.push_back (MenuElem (_("Duplicate Range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
+	edit_items.push_back (MenuElem (_("Create Chunk from Range"), mem_fun(*this, &Editor::create_named_selection)));
+	
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Consolidate range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true, false)));
-	edit_items.push_back (MenuElem (_("Consolidate range with processing"), bind (mem_fun(*this, &Editor::bounce_range_selection), true, true)));
-	edit_items.push_back (MenuElem (_("Bounce range to region list"), bind (mem_fun(*this, &Editor::bounce_range_selection), false, false)));
-	edit_items.push_back (MenuElem (_("Bounce range to region list with processing"), bind (mem_fun(*this, &Editor::bounce_range_selection), false, true)));
-	edit_items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_range)));
+	edit_items.push_back (MenuElem (_("Consolidate Range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true, false)));
+	edit_items.push_back (MenuElem (_("Consolidate Range With Processing"), bind (mem_fun(*this, &Editor::bounce_range_selection), true, true)));
+	edit_items.push_back (MenuElem (_("Bounce Range to Region List"), bind (mem_fun(*this, &Editor::bounce_range_selection), false, false)));
+	edit_items.push_back (MenuElem (_("Bounce Range to Region List With Processing"), bind (mem_fun(*this, &Editor::bounce_range_selection), false, true)));
+	edit_items.push_back (MenuElem (_("Export Range"), mem_fun(*this, &Editor::export_range)));
 }
 
 	
@@ -4590,6 +4594,11 @@ Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
 	commit_reversible_command ();
 }
 
+/** Find regions which exist at a given time, and optionally on a given list of tracks.
+ *  @param rs List to which found regions are added.
+ *  @param where Time to look at.
+ *  @param ts Tracks to look on; if this is empty, all tracks are examined.
+ */
 void
 Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelection& ts) const
 {
@@ -4662,11 +4671,21 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSe
 	}
 }
 
+/** Find all regions which are either:
+ *      - selected or
+ *      - the entered_regionview (if allow_entered == true) or
+ *      - under the preferred edit position AND on a selected track, or on a track
+ *        which is in the same active edit-enable route group as a selected region.
+ *  @param rs Returned region list.
+ *  @param allow_entered true to include the entered_regionview in the list.
+ */
 void
 Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 {
+	/* Start with selected regions */
 	rs = selection->regions;
 
+	/* Add the entered_regionview, if requested */
 	if (allow_entered && entered_regionview) {
 		rs.add (entered_regionview);
 	}
@@ -4675,13 +4694,19 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 
 	RegionSelection to_map = rs;
 
+	/* tracks is currently the set of selected tracks; add any other tracks that
+	 * have regions that are in the same edit-activated route group as one of
+	 * our regions */
 	for (RegionSelection::iterator i = to_map.begin (); i != to_map.end(); ++i) {
 
 		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
 		if (g && g->active_property (RouteGroup::Edit)) {
 			tracks.add (axis_views_from_routes (g->route_list()));
 		}
+	}
 
+	/* now find regions that are at the edit position on those tracks */
+	for (RegionSelection::iterator i = to_map.begin (); i != to_map.end(); ++i) {
 		nframes64_t const where = get_preferred_edit_position ();
 		get_regions_at (rs, where, tracks);
 	}
@@ -4690,7 +4715,6 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 void
 Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions)
 {
-
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		
 		RouteTimeAxisView* tatv;

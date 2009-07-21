@@ -638,9 +638,8 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 		items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range"), mem_fun(*this, &Editor::marker_menu_rename)));
 		items.push_back (MenuElem (_("Remove Range"), mem_fun(*this, &Editor::marker_menu_remove)));
+		items.push_back (SeparatorElem());
 	}
-
-	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Separate Regions in Range"), mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select All in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
