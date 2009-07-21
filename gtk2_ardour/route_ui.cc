@@ -543,16 +543,19 @@ RouteUI::create_sends (Placement p)
 void
 RouteUI::set_sends_gain_from_track ()
 {
+	_session.globally_set_send_gains_from_track (_route);
 }
 
 void
 RouteUI::set_sends_gain_to_zero ()
 {
+	_session.globally_set_send_gains_to_zero (_route);
 }
 
 void
 RouteUI::set_sends_gain_to_unity ()
 {
+	_session.globally_set_send_gains_to_unity (_route);
 }
 
 bool

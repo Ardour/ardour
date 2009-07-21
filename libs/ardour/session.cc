@@ -43,6 +43,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/file_utils.h"
 
+#include "ardour/amp.h"
 #include "ardour/analyser.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_diskstream.h"
@@ -2167,6 +2168,57 @@ Session::add_routes (RouteList& new_routes, bool save)
 }
 
 void
+Session::globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest)
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<Send> s;
+
+	/* only tracks */
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (boost::dynamic_pointer_cast<Track>(*i)) {
+			if ((s = (*i)->internal_send_for (dest)) != 0) {
+				s->amp()->gain_control()->set_value (0.0);
+			}
+		}
+	}
+}
+
+void
+Session::globally_set_send_gains_to_unity (boost::shared_ptr<Route> dest)
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<Send> s;
+
+	/* only tracks */
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (boost::dynamic_pointer_cast<Track>(*i)) {
+			if ((s = (*i)->internal_send_for (dest)) != 0) {
+				s->amp()->gain_control()->set_value (1.0);
+			}
+		}
+	}
+}
+
+void
+Session::globally_set_send_gains_from_track(boost::shared_ptr<Route> dest)
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<Send> s;
+
+	/* only tracks */
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (boost::dynamic_pointer_cast<Track>(*i)) {
+			if ((s = (*i)->internal_send_for (dest)) != 0) {
+				s->amp()->gain_control()->set_value ((*i)->gain_control()->get_value());
+			}
+		}
+	}
+}
+
+void
 Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p)
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -2182,6 +2234,7 @@ Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p
 
 	add_internal_sends (dest, p, t);
 }
+
 
 void
 Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders)

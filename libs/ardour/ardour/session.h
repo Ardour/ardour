@@ -741,6 +741,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
 
 	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p);
+	void globally_set_send_gains_from_track (boost::shared_ptr<Route> dest);
+	void globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest);
+	void globally_set_send_gains_to_unity (boost::shared_ptr<Route> dest);
 	void add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders);
 
 	static void set_disable_all_loaded_plugins (bool yn) {
