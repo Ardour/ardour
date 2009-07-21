@@ -259,7 +259,7 @@ string
 AddRouteDialog::track_template ()
 {
 	string str = channel_combo.get_active_text();
-	
+
 	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
 		if (str == (*i).name) {
 			return (*i).template_path;
@@ -287,19 +287,22 @@ AddRouteDialog::refill_channel_setups ()
 	channel_combo_strings.clear ();
 	channel_setups.clear ();
 
-	chn.name = X_("MIDI");
-	chn.channels = 0;
-	channel_setups.push_back (chn);
-
-	chn.name = "separator";
-	channel_setups.push_back (chn);
-
 	chn.name = _("Mono");
 	chn.channels = 1;
 	channel_setups.push_back (chn);
 
 	chn.name = _("Stereo");
 	chn.channels = 2;
+	channel_setups.push_back (chn);
+
+	chn.name = "separator";
+	channel_setups.push_back (chn);
+
+	chn.name = X_("MIDI");
+	chn.channels = 0;
+	channel_setups.push_back (chn);
+
+	chn.name = "separator";
 	channel_setups.push_back (chn);
 
 	ARDOUR::find_route_templates (route_templates);
@@ -314,6 +317,10 @@ AddRouteDialog::refill_channel_setups ()
 				channel_setups.push_back (chn);
 			}
 		} 
+
+		/* clear template path for the rest */
+		
+		chn.template_path = "";
 
 		chn.name = _("3 Channel");
 		chn.channels = 3;
