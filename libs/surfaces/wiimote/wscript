@@ -6,7 +6,7 @@ import os
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
+LIBARDOUR_WIIMOTE_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
 srcdir = '.'
@@ -30,7 +30,7 @@ def build(bld):
 	obj.name         = 'libwiimote'
 	obj.target       = 'wiimote'
 	obj.uselib_local = 'libardour libardour_cp'
-	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.vnum         = LIBARDOUR_WIIMOTE_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

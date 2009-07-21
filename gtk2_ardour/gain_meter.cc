@@ -167,11 +167,6 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 {
  	connections.clear ();
 
-	cerr << "GM reset controls for " << r->name()
-	     << " pm = " << pm 
-	     << " autocontrol = " << gc 
-	     << endl;
-	
 	if (!pm && !gc) {
 		level_meter->set_meter (0);
 		gain_slider->set_controllable (boost::shared_ptr<PBD::Controllable>());
@@ -377,9 +372,7 @@ void
 GainMeterBase::gain_adjusted ()
 {
 	if (!ignore_toggle) {
-		if (_route) {
-			_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
-		}
+		_gain_control->set_value (slider_position_to_gain (gain_adjustment.get_value()));
 	}
 
 	show_gain ();
@@ -423,7 +416,6 @@ void
 GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_gain_control->alist()->automation_state() & Play);
-	cerr << " for " << _route->name() << " set gain sensitive to " << x << endl;
 	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
 }
 

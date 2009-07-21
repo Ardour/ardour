@@ -83,7 +83,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	BufferSet& sendbufs = _session.get_mix_buffers (bufs.count());
 	sendbufs.read_from (bufs, nframes);
 	assert(sendbufs.count() == bufs.count());
-	
+
 	/* gain control */
 
 	gain_t tgain = target_gain ();
@@ -106,7 +106,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 
 	} else if (tgain != 1.0) {
 
-		/* target gain has not changed, but is not unity */
+		/* target gain has not changed, but is not zero or unity */
 		Amp::apply_simple_gain (sendbufs, nframes, tgain);
 	}
 

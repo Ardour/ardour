@@ -177,6 +177,10 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 void
 PeakMeter::meter ()
 {
+	if (!_active) {
+		return;
+	}
+
 	assert(_visible_peak_power.size() == _peak_power.size());
 
 	const size_t limit = _peak_power.size();
@@ -187,7 +191,7 @@ PeakMeter::meter ()
 
  		float new_peak = _peak_power[n]; /* XXX we should use atomic exchange from here ... */
 		_peak_power[n] = 0;              /* ... to here */
-		
+
 		/* compute new visible value using falloff */
 
 		if (new_peak > 0.0) {

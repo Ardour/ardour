@@ -96,6 +96,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 {
 	_in_update = false;
 	_fixed = false;
+	_follow_overlap = false;
 
 	if (compute (a, b, model)) {
 		throw failed_constructor();
@@ -104,8 +105,6 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 	_active = act;
 
 	initialize ();
-
-
 }
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)

@@ -73,8 +73,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes) {}
 	virtual void silence (nframes_t nframes) {}
 	
-	void activate ()   { _active = true; ActiveChanged(); }
-	void deactivate () { _active = false; ActiveChanged(); }
+	virtual void activate ()   { _active = true; ActiveChanged(); }
+	virtual void deactivate () { _active = false; ActiveChanged(); }
 	
 	virtual bool configure_io (ChanCount in, ChanCount out);
 

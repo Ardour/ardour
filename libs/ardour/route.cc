@@ -695,9 +695,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		}
 		
 		// XXX: do we want to emit the signal here ? change call order.
-		if (!boost::dynamic_pointer_cast<InternalSend>(processor)) {
-			processor->activate ();
-		}
+		processor->activate ();
 		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 
 		_output->set_user_latency (0);
@@ -1344,6 +1342,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	// Ensure route outputs match last processor's outputs
 	if (out != _output->n_ports ()) {
+		cerr << "For " << _name << " out/last mismatch - out = " << out << " vs. " << _output->n_ports() << endl;
 		_output->ensure_io (out, false, this);
 	}
 
@@ -2649,7 +2648,20 @@ void
 Route::meter ()
 {
 	Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
+
 	_meter->meter ();
+
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		boost::shared_ptr<Send> s;
+		boost::shared_ptr<Return> r;
+
+		if ((s = boost::dynamic_pointer_cast<Send> (*i)) != 0) {
+			s->meter()->meter();
+		} else if ((r = boost::dynamic_pointer_cast<Return> (*i)) != 0) {
+			r->meter()->meter ();
+		}
+	}
 }
 
 boost::shared_ptr<Panner>

@@ -66,6 +66,24 @@ Send::~Send ()
 }
 
 void
+Send::activate ()
+{
+	_amp->activate ();
+	_meter->activate ();
+
+	Processor::activate ();
+}
+
+void
+Send::deactivate ()
+{
+	_amp->deactivate ();
+	_meter->deactivate ();
+
+	Processor::deactivate ();
+}
+
+void
 Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
 	if (!_active || _output->n_ports() == ChanCount::ZERO) {
@@ -153,6 +171,16 @@ Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 	
 	out = in;
 	return true;
+}
+
+bool
+Send::configure_io (ChanCount in, ChanCount out)
+{
+	if (!_amp->configure_io (in, out) || !_meter->configure_io (in, out)) {
+		return false;
+	}
+	
+	return Processor::configure_io (in, out);
 }
 
 /** Set up the XML description of a send so that its name is unique.

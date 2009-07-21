@@ -60,6 +60,10 @@ class Send : public Delivery
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool configure_io (ChanCount in, ChanCount out);
+
+	void activate ();
+	void deactivate ();
 
 	bool set_name (const std::string& str);
 

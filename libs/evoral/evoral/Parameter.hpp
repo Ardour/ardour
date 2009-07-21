@@ -1,3 +1,4 @@
+
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
@@ -21,6 +22,7 @@
 
 #include <string>
 #include <map>
+#include <stdint.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/format.hpp>
 #include <iostream>

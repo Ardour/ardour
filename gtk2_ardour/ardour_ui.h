@@ -615,7 +615,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::MenuItem *cleanup_item;
 
-	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title, const std::string & msg);
+ 	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title, 
+ 				      const std::string& plural_msg, const std::string& singular_msg);
 	void cleanup ();
 	void flush_trash ();
 
