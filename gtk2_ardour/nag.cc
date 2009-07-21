@@ -16,7 +16,7 @@ using namespace std;
 using namespace Glib;
 using namespace Gtk;
 
-NagScreen::NagScreen (std::string context, bool maybe_sub)
+NagScreen::NagScreen (std::string /*context*/, bool maybe_sub)
 	: ArdourDialog (_("Support Ardour Development"), true)
 	, donate_button (button_group, _("I'd like to make a one-time donation"))
 	, subscribe_button (button_group, _("Tell me more about becoming a subscriber"))

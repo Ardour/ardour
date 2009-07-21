@@ -404,7 +404,7 @@ ExportFormatManager::change_dither_type_selection (bool select, WeakDitherTypePt
 }
 
 void
-ExportFormatManager::select_compatibility (WeakCompatPtr const & compat)
+ExportFormatManager::select_compatibility (WeakCompatPtr const & /*compat*/)
 {
 	/* Calculate compatibility intersection for the selection */
 	

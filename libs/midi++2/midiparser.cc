@@ -139,7 +139,7 @@ Parser::~Parser ()
 }
 
 void
-Parser::trace_event (Parser &p, byte *msg, size_t len)
+Parser::trace_event (Parser &, byte *msg, size_t len)
 {
 	eventType type;
 	ostream *o;

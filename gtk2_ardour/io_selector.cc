@@ -151,7 +151,7 @@ IOSelector::list_is_global (int dim) const
 	return (dim == _other);
 }
 
-IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool can_cancel)
+IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
 	: _selector (session, io)
 {
 	set_name ("IOSelectorWindow2");

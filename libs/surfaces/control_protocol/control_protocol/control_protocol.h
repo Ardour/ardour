@@ -44,7 +44,7 @@ class ControlProtocol : public sigc::trackable, public PBD::Stateful, public Bas
 	virtual int set_active (bool yn) = 0;
 	bool get_active() const { return _active; }
 
-	virtual int set_feedback (bool yn) { return 0; }
+	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
 
 	virtual void route_list_changed () {}

@@ -354,7 +354,7 @@ IO::disconnect (void* src)
 }
 
 bool
-IO::ensure_ports_locked (ChanCount count, bool clear, void* src)
+IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 {
 	Port* port = 0;
 	bool  changed    = false;
@@ -460,7 +460,7 @@ IO::get_state (void)
 }
 
 XMLNode&
-IO::state (bool full_state)
+IO::state (bool /*full_state*/)
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	char buf[64];
@@ -1039,7 +1039,7 @@ IO::enable_connecting ()
 }
 
 void
-IO::bundle_changed (Bundle::Change c)
+IO::bundle_changed (Bundle::Change /*c*/)
 {
 	//XXX
 //	connect_input_ports_to_bundle (_input_bundle, this);

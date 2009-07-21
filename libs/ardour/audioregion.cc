@@ -195,7 +195,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const SourceList& srcs,
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const SourceList& /*srcs*/,
 			  nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, length, name, layer, flags)
 	, _automatable (other->session())
@@ -373,12 +373,12 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 }
 
 nframes_t
-AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
+AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 		Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		sframes_t position, nframes_t cnt, 
 		uint32_t chan_n, 
-		nframes_t read_frames, 
-		nframes_t skip_frames,
+	        nframes_t /*read_frames*/, 
+		nframes_t /*skip_frames*/,
 		ReadOps rops) const
 {
 	nframes_t internal_offset;
@@ -1038,7 +1038,7 @@ AudioRegion::recompute_at_start ()
 }
 
 int
-AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Region> >& v) const
+AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr<Region> >& v) const
 {
 	SourceList srcs;
 	string new_name;
@@ -1086,7 +1086,7 @@ AudioRegion::read_raw_internal (Sample* buf, sframes_t pos, nframes_t cnt, int c
 }
 
 int
-AudioRegion::exportme (Session& session, ARDOUR::ExportSpecification& spec)
+AudioRegion::exportme (Session& /*session*/, ARDOUR::ExportSpecification& /*spec*/)
 {
 	// TODO EXPORT
 // 	const nframes_t blocksize = 4096;

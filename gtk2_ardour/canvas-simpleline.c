@@ -245,6 +245,8 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 				      GParamSpec   *pspec)
 
 {
+	(void) pspec;
+	
 	GnomeCanvasSimpleLine *simpleline;
 	int update = FALSE;
 	int bounds_changed = FALSE;
@@ -465,6 +467,9 @@ gnome_canvas_simpleline_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 static double
 gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item)
 {
+	(void) cx;
+	(void) cy;
+	
 	GnomeCanvasSimpleLine *simpleline;
 	double x1, y1, x2, y2;
 	double dx, dy;

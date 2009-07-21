@@ -210,7 +210,7 @@ PathScanner::find_first (const string &dirpath,
 string *
 PathScanner::find_first (const string &dirpath,
 			 bool (*filter)(const string &, void *),
-			 void *arg,
+			 void * /*arg*/,
 			 bool match_fullpath,
 			 bool return_fullpath)
 {

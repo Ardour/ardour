@@ -440,7 +440,7 @@ ARDOUR_UI::configure_timeout ()
 }
 
 gboolean
-ARDOUR_UI::configure_handler (GdkEventConfigure* conf)
+ARDOUR_UI::configure_handler (GdkEventConfigure* /*conf*/)
 {
 	if (have_configure_timeout) {
 		last_configure_time = get_microseconds();
@@ -995,7 +995,7 @@ ARDOUR_UI::update_wall_clock ()
 }
 
 gint
-ARDOUR_UI::session_menu (GdkEventButton *ev)
+ARDOUR_UI::session_menu (GdkEventButton */*ev*/)
 {
 	session_popup_menu->popup (0, 0);
 	return TRUE;
@@ -1114,7 +1114,7 @@ ARDOUR_UI::build_session_selector ()
 }
 
 void
-ARDOUR_UI::recent_session_row_activated (const TreePath& path, TreeViewColumn* col)
+ARDOUR_UI::recent_session_row_activated (const TreePath& /*path*/, TreeViewColumn* /*col*/)
 {
 	session_selector_window->response (RESPONSE_ACCEPT);
 }
@@ -2210,7 +2210,7 @@ ARDOUR_UI::end_loading_messages ()
 }
 
 void
-ARDOUR_UI::loading_message (const std::string& msg)
+ARDOUR_UI::loading_message (const std::string& /*msg*/)
 {
 	// show_splash ();
 	// splash->message (msg);
@@ -2527,7 +2527,7 @@ ARDOUR_UI::hide_about ()
 }
 
 void
-ARDOUR_UI::about_signal_response(int response)
+ARDOUR_UI::about_signal_response (int /*response*/)
 {
 	hide_about();
 }
@@ -3033,7 +3033,7 @@ quickly enough to keep up with playback.\n"));
 }
 
 void
-ARDOUR_UI::disk_speed_dialog_gone (int ignored_response, MessageDialog* msg)
+ARDOUR_UI::disk_speed_dialog_gone (int /*ignored_response*/, MessageDialog* msg)
 {
 	have_disk_speed_dialog_displayed = false;
 	delete msg;

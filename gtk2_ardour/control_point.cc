@@ -56,7 +56,7 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	set_visible (false);
 }
 
-ControlPoint::ControlPoint (const ControlPoint& other, bool dummy_arg_to_force_special_copy_constructor)
+ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force_special_copy_constructor*/)
 	: _line (other._line)
 {
 	if (&other == this) {

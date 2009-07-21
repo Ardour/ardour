@@ -6,7 +6,7 @@
 using namespace ARDOUR;
 
 ControlProtocol*
-new_generic_midi_protocol (ControlProtocolDescriptor* descriptor, Session* s)
+new_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	GenericMidiControlProtocol* gmcp;
 		
@@ -25,13 +25,13 @@ new_generic_midi_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 }
 
 void
-delete_generic_midi_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
+delete_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
 	delete cp;
 }
 
 bool
-probe_generic_midi_protocol (ControlProtocolDescriptor* descriptor)
+probe_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
 	return GenericMidiControlProtocol::probe ();
 }

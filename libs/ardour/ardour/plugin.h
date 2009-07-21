@@ -167,12 +167,12 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool reconfigurable_io() const { return false; }
 
 	/* this is only called if reconfigurable_io() returns true */
-	virtual bool configure_io (ChanCount in, ChanCount out) { return true; }
+	virtual bool configure_io (ChanCount /*in*/, ChanCount /*out*/) { return true; }
 
 	/* specific types of plugins can overload this. As of September 2008, only
 	   AUPlugin does this.
 	*/
-	virtual bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return false; }
+	virtual bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) const { return false; }
 	virtual ChanCount output_streams() const;
 	virtual ChanCount input_streams() const;
 

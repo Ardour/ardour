@@ -77,7 +77,7 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 }
 
 int
-GenericMidiControlProtocol::set_active (bool yn)
+GenericMidiControlProtocol::set_active (bool /*yn*/)
 {
 	/* start/stop delivery/outbound thread */
 	return 0;

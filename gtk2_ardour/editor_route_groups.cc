@@ -502,7 +502,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
  }
 
 void 
-EditorRouteGroups::row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
+EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
 {
 	RouteGroup* group;
 

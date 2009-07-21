@@ -57,7 +57,7 @@ PercussiveAudioCurve::setWindowSize(size_t newSize)
 }
 
 float
-PercussiveAudioCurve::process(const float *R__ mag, size_t increment)
+PercussiveAudioCurve::process(const float *R__ mag, size_t /*increment*/)
 {
     static float threshold = powf(10.f, 0.15f); // 3dB rise in square of magnitude
     static float zeroThresh = powf(10.f, -8);
@@ -82,7 +82,7 @@ PercussiveAudioCurve::process(const float *R__ mag, size_t increment)
 }
 
 float
-PercussiveAudioCurve::processDouble(const double *R__ mag, size_t increment)
+PercussiveAudioCurve::processDouble(const double *R__ mag, size_t /*increment*/)
 {
     Profiler profiler("PercussiveAudioCurve::process");
 

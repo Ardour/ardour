@@ -369,7 +369,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 }
 
 
-static void integer_printer (char buf[32], Adjustment &adj, void *arg)
+static void integer_printer (char buf[32], Adjustment &adj, void */*arg*/)
 {
 	snprintf (buf, 32, "%.0f", adj.get_value());
 }
@@ -613,7 +613,7 @@ GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
 }
 
 void
-GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
+GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t /*port*/)
 {
 	using namespace Menu_Helpers;
 
@@ -739,7 +739,7 @@ GenericPluginUI::processor_active_changed (boost::weak_ptr<Processor> weak_proce
 }
 
 bool
-GenericPluginUI::start_updating (GdkEventAny* ignored)
+GenericPluginUI::start_updating (GdkEventAny*)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
@@ -750,7 +750,7 @@ GenericPluginUI::start_updating (GdkEventAny* ignored)
 }
 
 bool
-GenericPluginUI::stop_updating (GdkEventAny* ignored)
+GenericPluginUI::stop_updating (GdkEventAny*)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();

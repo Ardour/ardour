@@ -165,8 +165,10 @@ class ISlaveSessionProxy {
 	virtual nframes_t frames_since_cycle_start () const   { return 0; }
 	virtual nframes_t frame_time ()               const   { return 0; }
 
-	virtual void request_locate (nframes_t frame, bool with_roll = false) {}
-	virtual void request_transport_speed (double speed)                   {}
+	virtual void request_locate (nframes_t /*frame*/, bool with_roll = false) {
+		(void) with_roll;
+	}
+	virtual void request_transport_speed (double /*speed*/)                   {}
 };
 
 

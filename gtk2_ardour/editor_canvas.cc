@@ -430,7 +430,7 @@ Editor::controls_layout_size_request (Requisition* req)
 }
 
 bool
-Editor::track_canvas_map_handler (GdkEventAny* ev)
+Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 {
 	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 	return false;
@@ -534,10 +534,10 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 }
 
 void
-Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
-		      int x, int y, 
-		      const SelectionData& data,
-		      guint info, guint time)
+Editor::drop_regions (const RefPtr<Gdk::DragContext>& /*context*/,
+		      int /*x*/, int /*y*/, 
+		      const SelectionData& /*data*/,
+		      guint /*info*/, guint /*time*/)
 {
 	assert (_drag);
 	_drag->end_grab (0);
@@ -754,7 +754,7 @@ Editor::stop_canvas_autoscroll ()
 }
 
 bool
-Editor::left_track_canvas (GdkEventCrossing *ev)
+Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 {
 	set_entered_track (0);
 	set_entered_regionview (0);
@@ -763,7 +763,7 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 }
 
 bool
-Editor::entered_track_canvas (GdkEventCrossing *ev)
+Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 {
 	reset_canvas_action_sensitivity (true);
 	return FALSE;

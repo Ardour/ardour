@@ -123,7 +123,7 @@ AudioEngine::jack() const
 }
 
 void
-_thread_init_callback (void *arg)
+_thread_init_callback (void * /*arg*/)
 {
 	/* make sure that anybody who needs to know about this thread
 	   knows about it.
@@ -217,7 +217,7 @@ AudioEngine::stop (bool forever)
 
 
 bool
-AudioEngine::get_sync_offset (nframes_t& offset) const
+AudioEngine::get_sync_offset (nframes_t& /*offset*/) const
 {
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT

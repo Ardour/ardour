@@ -75,7 +75,7 @@ Splash::on_realize ()
 
 
 bool
-Splash::on_button_release_event (GdkEventButton* ev)
+Splash::on_button_release_event (GdkEventButton*)
 {
 	hide ();
 	return true;

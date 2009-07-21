@@ -347,7 +347,7 @@ Region::~Region ()
 }
 
 void
-Region::copy_stuff (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
+Region::copy_stuff (boost::shared_ptr<const Region> other, nframes_t /*offset*/, nframes_t length, const string& name, layer_t layer, Flag flags)
 {
 	_frozen = 0;
 	_pending_changed = Change (0);
@@ -429,7 +429,7 @@ Region::set_name (const std::string& str)
 }
 
 void
-Region::set_length (nframes_t len, void *src)
+Region::set_length (nframes_t len, void */*src*/)
 {
 	//cerr << "Region::set_length() len = " << len << endl;
 	if (_flags & Locked) {
@@ -567,7 +567,7 @@ Region::update_position_after_tempo_map_change ()
 }
 
 void
-Region::set_position (nframes_t pos, void *src)
+Region::set_position (nframes_t pos, void */*src*/)
 {
 	if (!can_move()) {
 		return;
@@ -609,7 +609,7 @@ Region::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 }
 
 void
-Region::set_position_on_top (nframes_t pos, void *src)
+Region::set_position_on_top (nframes_t pos, void */*src*/)
 {
 	if (_flags & Locked) {
 		return;
@@ -645,7 +645,7 @@ Region::recompute_position_from_lock_style ()
 }
 		
 void
-Region::nudge_position (nframes64_t n, void *src)
+Region::nudge_position (nframes64_t n, void */*src*/)
 {
 	if (_flags & Locked) {
 		return;
@@ -684,7 +684,7 @@ Region::set_ancestral_data (nframes64_t s, nframes64_t l, float st, float sh)
 }
 
 void
-Region::set_start (nframes_t pos, void *src)
+Region::set_start (nframes_t pos, void */*src*/)
 {
 	if (_flags & (Locked|PositionLocked)) {
 		return;
@@ -710,7 +710,7 @@ Region::set_start (nframes_t pos, void *src)
 }
 
 void
-Region::trim_start (nframes_t new_position, void *src)
+Region::trim_start (nframes_t new_position, void */*src*/)
 {
 	if (_flags & (Locked|PositionLocked)) {
 		return;
@@ -797,7 +797,7 @@ Region::trim_front (nframes_t new_position, void *src)
 }
 
 void
-Region::trim_end (nframes_t new_endpoint, void *src)
+Region::trim_end (nframes_t new_endpoint, void */*src*/)
 {
 	if (_flags & Locked) {
 		return;
@@ -827,7 +827,7 @@ Region::trim_to (nframes_t position, nframes_t length, void *src)
 }
 
 void
-Region::trim_to_internal (nframes_t position, nframes_t length, void *src)
+Region::trim_to_internal (nframes_t position, nframes_t length, void */*src*/)
 {
 	int32_t start_shift;
 	nframes_t new_start;
@@ -1099,7 +1099,7 @@ Region::set_layer (layer_t l)
 }
 
 XMLNode&
-Region::state (bool full_state)
+Region::state (bool /*full_state*/)
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
@@ -1362,7 +1362,7 @@ Region::freeze ()
 }
 
 void
-Region::thaw (const string& why)
+Region::thaw (const string& /*why*/)
 {
 	Change what_changed = Change (0);
 

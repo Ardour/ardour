@@ -84,7 +84,7 @@ class IgnorableControllable : public Controllable
     IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
     ~IgnorableControllable () {}
     
-    void set_value (float v){}
+    void set_value (float /*v*/) {}
     float get_value () const { return 0.0; }
 };
 

@@ -100,7 +100,7 @@ MidiBuffer::read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offse
 }
 
 void
-MidiBuffer::merge_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset, nframes_t src_offset)
+MidiBuffer::merge_from (const Buffer& src, nframes_t /*nframes*/, nframes_t /*dst_offset*/, nframes_t /*src_offset*/)
 {
 	const MidiBuffer* mbuf = dynamic_cast<const MidiBuffer*>(&src);
 	assert (mbuf);
@@ -233,7 +233,7 @@ MidiBuffer::reserve(TimeType time, size_t size)
 
 
 void
-MidiBuffer::silence (nframes_t nframes, nframes_t offset)
+MidiBuffer::silence (nframes_t /*nframes*/, nframes_t /*offset*/)
 {
 	/* XXX iterate over existing events, find all in range given by offset & nframes,
 	   and delete them.

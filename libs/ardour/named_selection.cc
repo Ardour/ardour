@@ -106,7 +106,7 @@ NamedSelection::~NamedSelection ()
 }
 
 int
-NamedSelection::set_state (const XMLNode& node)
+NamedSelection::set_state (const XMLNode& /*node*/)
 {
 	return 0;
 }

@@ -192,9 +192,9 @@ static void build_mmc_cmd_map ()
 }
 
 
-MachineControl::MachineControl (Port &p, float version,
-				CommandSignature &csig,
-				ResponseSignature &rsig)
+MachineControl::MachineControl (Port &p, float /*version*/,
+				CommandSignature & /*csig*/,
+				ResponseSignature & /*rsig*/)
 
 	: _port (p)
 {
@@ -247,7 +247,7 @@ MachineControl::is_mmc (byte *sysex_buf, size_t len)
 }
 
 void
-MachineControl::process_mmc_message (Parser &p, byte *msg, size_t len)
+MachineControl::process_mmc_message (Parser &, byte *msg, size_t len)
 
 {
 	size_t skiplen;
@@ -478,7 +478,7 @@ MachineControl::do_masked_write (byte *msg, size_t len)
 }
 
 void
-MachineControl::write_track_record_ready (byte *msg, size_t len)
+MachineControl::write_track_record_ready (byte *msg, size_t /*len*/)
 
 {
 	size_t n;
@@ -564,7 +564,7 @@ MachineControl::write_track_record_ready (byte *msg, size_t len)
 }
 
 int
-MachineControl::do_locate (byte *msg, size_t msglen)
+MachineControl::do_locate (byte *msg, size_t /*msglen*/)
 
 {
 	if (msg[2] == 0) {
@@ -580,7 +580,7 @@ MachineControl::do_locate (byte *msg, size_t msglen)
 }
 
 int
-MachineControl::do_step (byte *msg, size_t msglen)
+MachineControl::do_step (byte *msg, size_t /*msglen*/)
 {
 	int steps = msg[2] & 0x3f;
 
@@ -593,7 +593,7 @@ MachineControl::do_step (byte *msg, size_t msglen)
 }
 
 int
-MachineControl::do_shuttle (byte *msg, size_t msglen)
+MachineControl::do_shuttle (byte *msg, size_t /*msglen*/)
 
 {
 	size_t forward;

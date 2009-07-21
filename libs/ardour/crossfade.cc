@@ -270,7 +270,7 @@ Crossfade::initialize ()
 }	
 
 nframes_t 
-Crossfade::read_raw_internal (Sample* buf, sframes_t start, nframes_t cnt, int channel) const
+Crossfade::read_raw_internal (Sample* /*buf*/, sframes_t /*start*/, nframes_t cnt, int /*channel*/) const
 {
 	// FIXME: Why is this disabled?
 #if 0

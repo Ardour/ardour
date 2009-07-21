@@ -421,7 +421,7 @@ LocationEditRow::clock_changed (LocationPart part)
 }
 
 void
-LocationEditRow::change_aborted (LocationPart part)
+LocationEditRow::change_aborted (LocationPart /*part*/)
 {
 	if (i_am_the_modifier || !location) return;
 	
@@ -945,7 +945,7 @@ LocationUI::session_gone()
 }
 
 bool
-LocationUI::on_delete_event (GdkEventAny* ev)
+LocationUI::on_delete_event (GdkEventAny*)
 {
 	hide ();
 	return true;

@@ -881,7 +881,7 @@ AudioRegionView::create_waves ()
 }
 
 void
-AudioRegionView::create_one_wave (uint32_t which, bool direct)
+AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 {
 	//cerr << "AudioRegionView::create_one_wave() called which: " << which << " this: " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
@@ -1030,7 +1030,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 }
 
 void
-AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
+AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent */*ev*/)
 {
 	ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
 	audio_region()->envelope()->erase (cp->model());

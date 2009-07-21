@@ -275,7 +275,7 @@ JACK_MidiPort::get_state () const
 }
 
 void
-JACK_MidiPort::set_state (const XMLNode& node)
+JACK_MidiPort::set_state (const XMLNode& /*node*/)
 {
 }
 

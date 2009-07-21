@@ -421,7 +421,7 @@ Editor::mouse_add_new_marker (nframes64_t where, bool is_cd, bool is_xrun)
 }
 
 void
-Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent* event)
+Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 {
 	Marker* marker;
 	bool is_start;
@@ -552,7 +552,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 }
 
 void
-Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
+Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item*)
 {
 	if (new_transport_marker_menu == 0) {
 		build_new_transport_marker_menu ();
@@ -563,7 +563,7 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Ite
 }
 
 void
-Editor::transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
+Editor::transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item*)
 {
 	if (transport_marker_menu == 0) {
 		build_range_marker_menu (true);

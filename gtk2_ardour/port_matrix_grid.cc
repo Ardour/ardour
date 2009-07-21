@@ -406,7 +406,7 @@ PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 }
 
 void
-PortMatrixGrid::button_release (double x, double y, int b, uint32_t t)
+PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/)
 {
 	if (b == 1) {
 

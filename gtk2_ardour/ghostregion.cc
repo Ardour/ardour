@@ -215,7 +215,7 @@ MidiGhostRegion::Hit::x_changed()
 }
 
 void
-MidiGhostRegion::set_samples_per_unit (double spu)
+MidiGhostRegion::set_samples_per_unit (double /*spu*/)
 {
 }
 
@@ -310,7 +310,7 @@ MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n)
 }
 
 void
-MidiGhostRegion::add_hit(ArdourCanvas::CanvasHit* h)
+MidiGhostRegion::add_hit(ArdourCanvas::CanvasHit* /*h*/)
 {
 	//events.push_back(new Hit(h, group));
 }

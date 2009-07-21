@@ -406,9 +406,9 @@ TimeAxisViewItem::get_position_locked() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_max_duration_active(bool active, void* src)
+TimeAxisViewItem::set_max_duration_active (bool active, void* /*src*/)
 {
-	max_duration_active = active ;
+	max_duration_active = active;
 }
 		
 /**
@@ -429,7 +429,7 @@ TimeAxisViewItem::get_max_duration_active() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_min_duration_active(bool active, void* src)
+TimeAxisViewItem::set_min_duration_active (bool active, void* /*src*/)
 {
 	min_duration_active = active ;
 }
@@ -895,7 +895,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 }
 
 void
-TimeAxisViewItem::reset_name_width (double pixel_width)
+TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 {
 	set_name_text (item_name);
 }

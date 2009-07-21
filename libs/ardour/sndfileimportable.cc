@@ -42,7 +42,7 @@ SndFileImportableSource::samplerate() const
 }
 
 void
-SndFileImportableSource::seek (nframes_t pos)
+SndFileImportableSource::seek (nframes_t /*pos*/)
 {
 	sf_seek (in.get(), 0, SEEK_SET);
 }

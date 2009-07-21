@@ -45,7 +45,7 @@ CanvasFlag::~CanvasFlag()
 }
 
 bool
-CanvasFlag::on_event(GdkEvent* ev)
+CanvasFlag::on_event(GdkEvent* /*ev*/)
 {
 	return false;
 }

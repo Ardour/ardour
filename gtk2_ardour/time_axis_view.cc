@@ -74,7 +74,7 @@ uint32_t TimeAxisView::hSmall = 0;
 bool TimeAxisView::need_size_info = true;
 int const TimeAxisView::_max_order = 512;
 
-TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
+TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/) 
 	: AxisView (sess), 
 	  controls_table (2, 8),
 	  _y_position (0),
@@ -498,7 +498,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 }
 
 bool
-TimeAxisView::name_entry_focus_in (GdkEventFocus* ev)
+TimeAxisView::name_entry_focus_in (GdkEventFocus*)
 {
 	name_entry.select_region (0, -1);
 	name_entry.set_name ("EditorActiveTrackNameDisplay");
@@ -506,7 +506,7 @@ TimeAxisView::name_entry_focus_in (GdkEventFocus* ev)
 }
 
 bool
-TimeAxisView::name_entry_focus_out (GdkEventFocus* ev)
+TimeAxisView::name_entry_focus_out (GdkEventFocus*)
 {
 	/* clean up */
 
@@ -903,13 +903,13 @@ TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
 }
 
 void
-TimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& result)
+TimeAxisView::get_selectables (nframes_t /*start*/, nframes_t /*end*/, double /*top*/, double /*bot*/, list<Selectable*>& /*result*/)
 {
 	return;
 }
 
 void
-TimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& result)
+TimeAxisView::get_inverted_selectables (Selection& /*sel*/, list<Selectable*>& /*result*/)
 {
 	return;
 }
@@ -1282,7 +1282,7 @@ TimeAxisView::resizer_button_press (GdkEventButton* event)
 }
 
 bool
-TimeAxisView::resizer_button_release (GdkEventButton* ev)
+TimeAxisView::resizer_button_release (GdkEventButton*)
 {
 	_resize_drag_start = -1;
 	return true;

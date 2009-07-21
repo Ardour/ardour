@@ -258,7 +258,7 @@ BarController::mouse_control (double x, GdkWindow* window, double scaling)
 }
 
 bool
-BarController::expose (GdkEventExpose* event)
+BarController::expose (GdkEventExpose* /*event*/)
 {
 	Glib::RefPtr<Gdk::Window> win (darea.get_window());
 	Widget* parent;
@@ -433,7 +433,7 @@ BarController::entry_activated ()
 }
 
 bool
-BarController::entry_focus_out (GdkEventFocus* ev)
+BarController::entry_focus_out (GdkEventFocus* /*ev*/)
 {
 	entry_activated ();
 	return true;
@@ -454,7 +454,7 @@ BarController::set_sensitive (bool yn)
 }
 
 bool
-BarController::entry_input (double* v)
+BarController::entry_input (double* /*v*/)
 {
 	return false;
 }

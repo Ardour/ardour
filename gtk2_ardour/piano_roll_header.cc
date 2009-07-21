@@ -91,7 +91,7 @@ create_path(Cairo::RefPtr<Cairo::Context> cr, double x[], double y[], int start,
 }
 
 inline void 
-render_rect(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
+render_rect(Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
 	     PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
 {
 	cr->set_source_rgb(bg.r, bg.g, bg.b);
@@ -108,7 +108,7 @@ render_rect(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
 }
 
 inline void
-render_cf(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
+render_cf(Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
 		PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
 {
 	cr->set_source_rgb(bg.r, bg.g, bg.b);
@@ -125,7 +125,7 @@ render_cf(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
 }
 
 inline void
-render_eb(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
+render_eb(Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
 		PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
 {
 	cr->set_source_rgb(bg.r, bg.g, bg.b);
@@ -146,7 +146,7 @@ render_eb(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
 }
 
 inline void
-render_dga(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
+render_dga(Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
 		 PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
 {
 	cr->set_source_rgb(bg.r, bg.g, bg.b);
@@ -562,7 +562,7 @@ PianoRollHeader::on_leave_notify_event (GdkEventCrossing*)
 }
 
 bool
-PianoRollHeader::on_scroll_event (GdkEventScroll* ev)
+PianoRollHeader::on_scroll_event (GdkEventScroll*)
 {
 	return true;
 }

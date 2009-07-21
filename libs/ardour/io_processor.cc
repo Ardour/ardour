@@ -69,7 +69,7 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 /* create an IOProcessor that proxies to an existing IO object */
 
 IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_ptr<IO> out, 
-			  const string& proc_name, DataType dtype)
+			  const string& proc_name, DataType /*dtype*/)
 	: Processor(s, proc_name)
 	, _input (in)
 	, _output (out)

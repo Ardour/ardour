@@ -393,7 +393,7 @@ ARDOUR_UI::toggle_route_params_window ()
 }
 
 void
-ARDOUR_UI::handle_locations_change (Location* ignored)
+ARDOUR_UI::handle_locations_change (Location *)
 {
 	if (session) {
 		if (session->locations()->num_range_markers()) {

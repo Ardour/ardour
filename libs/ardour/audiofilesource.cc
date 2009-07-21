@@ -103,7 +103,7 @@ AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded
 
 /** Constructor used for new internal-to-session files. */
 AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded, Source::Flag flags,
-		SampleFormat samp_format, HeaderFormat hdr_format)
+				  SampleFormat /*samp_format*/, HeaderFormat /*hdr_format*/)
 	: Source (s, DataType::AUDIO, path, flags)
 	, AudioSource (s, path)
 	, FileSource (s, DataType::AUDIO, path, embedded, flags)
@@ -307,7 +307,7 @@ AudioFileSource::set_header_position_offset (nframes_t offset)
 }
 
 bool
-AudioFileSource::is_empty (Session& s, ustring path)
+AudioFileSource::is_empty (Session& /*s*/, ustring path)
 {
 	SoundFileInfo info;
 	string err;

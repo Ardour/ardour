@@ -165,7 +165,7 @@ LV2EventBuffer::append(uint32_t       frames,
  * \return true on success
  */
 bool
-LV2EventBuffer::append(const LV2_Event_Buffer* buf)
+LV2EventBuffer::append(const LV2_Event_Buffer* /*buf*/)
 {
 	uint8_t** data = NULL;
 	bool      ret  = true;

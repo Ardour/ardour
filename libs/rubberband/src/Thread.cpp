@@ -454,7 +454,7 @@ Mutex::trylock()
     }
 }
 
-Condition::Condition(string name) :
+Condition::Condition(string /*name*/) :
     m_locked(false)
 #ifdef DEBUG_CONDITION
     , m_name(name)

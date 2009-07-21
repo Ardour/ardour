@@ -492,7 +492,7 @@ Selection::remove (uint32_t selection_id)
 }
 
 void
-Selection::remove (nframes_t start, nframes_t end)
+Selection::remove (nframes_t /*start*/, nframes_t /*end*/)
 {
 }
 

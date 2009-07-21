@@ -64,7 +64,7 @@ user_route_template_directory ()
 }
 
 static bool
-template_filter (const string &str, void *arg)
+template_filter (const string &str, void */*arg*/)
 {
 	cerr << "Checking into " << str << " using " << template_suffix << endl;
 	return (str.length() > strlen(template_suffix) &&

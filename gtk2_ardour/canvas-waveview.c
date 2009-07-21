@@ -738,6 +738,8 @@ gnome_canvas_waveview_set_property (GObject      *object,
 				    GParamSpec   *pspec)
 
 {
+	(void) pspec;
+	
 	GnomeCanvasItem *item;
 	GnomeCanvasWaveView *waveview;
 	int redraw = FALSE;
@@ -1861,6 +1863,13 @@ gnome_canvas_waveview_bounds (GnomeCanvasItem *item, double *x1, double *y1, dou
 static double
 gnome_canvas_waveview_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item)
 {
+	(void) item;
+	(void) x;
+	(void) y;
+	(void) cx;
+	(void) cy;
+	(void) actual_item;
+	
 	/* XXX for now, point is never inside the wave 
 	GnomeCanvasWaveView *waveview;
 	double x1, y1, x2, y2;

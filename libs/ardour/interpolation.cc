@@ -49,7 +49,7 @@ FixedPointLinearInterpolation::interpolate (int channel, nframes_t nframes, Samp
 }
 
 void 
-FixedPointLinearInterpolation::add_channel_to (int input_buffer_size, int output_buffer_size)
+FixedPointLinearInterpolation::add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/)
 {
 	last_phase.push_back (0);
 }
@@ -117,7 +117,7 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 }
 
 void 
-LinearInterpolation::add_channel_to (int input_buffer_size, int output_buffer_size)
+LinearInterpolation::add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/)
 {
 	phase.push_back (0.0);
 }

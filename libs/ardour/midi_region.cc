@@ -142,7 +142,7 @@ MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, 
 }
 
 nframes_t
-MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer<nframes_t>& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
 	nframes_t internal_offset = 0;
 	nframes_t src_offset      = 0;

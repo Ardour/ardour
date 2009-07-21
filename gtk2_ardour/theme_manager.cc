@@ -106,7 +106,7 @@ ThemeManager::~ThemeManager()
 }
 
 int
-ThemeManager::save (string path)
+ThemeManager::save (string /*path*/)
 {
 	return 0;
 }

@@ -297,7 +297,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 }
 
 bool
-RouteUI::mute_release(GdkEventButton* ev)
+RouteUI::mute_release(GdkEventButton*)
 {
 	if (!ignore_toggle) {
 		if (wait_for_release){
@@ -437,7 +437,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 }
 
 bool
-RouteUI::solo_release(GdkEventButton* ev)
+RouteUI::solo_release(GdkEventButton*)
 {
 	if (!ignore_toggle) {
 		if (wait_for_release) {
@@ -512,7 +512,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 }
 
 bool
-RouteUI::rec_enable_release (GdkEventButton* ev)
+RouteUI::rec_enable_release (GdkEventButton*)
 {
 	return true;
 }
@@ -605,7 +605,7 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 }
 
 bool
-RouteUI::show_sends_release (GdkEventButton* ev)
+RouteUI::show_sends_release (GdkEventButton*)
 {
 	return true;
 }
@@ -625,14 +625,14 @@ RouteUI::send_blink (bool onoff)
 }
 
 void
-RouteUI::solo_changed(void* src)
+RouteUI::solo_changed(void* /*src*/)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
 }
 
 
 void
-RouteUI::listen_changed(void* src)
+RouteUI::listen_changed(void* /*src*/)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
 }
@@ -682,7 +682,7 @@ RouteUI::solo_changed_so_update_mute ()
 }
 
 void
-RouteUI::mute_changed(void* src)
+RouteUI::mute_changed(void* /*src*/)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_mute_display));
 }
@@ -914,7 +914,7 @@ RouteUI::init_mute_menu(MuteMaster::MutePoint mp, CheckMenuItem* check)
 }
 
 void
-RouteUI::toggle_mute_menu(MuteMaster::MutePoint mp, Gtk::CheckMenuItem* check)
+RouteUI::toggle_mute_menu(MuteMaster::MutePoint /*mp*/, Gtk::CheckMenuItem* /*check*/)
 {
 	// _route->set_mute_config(type, check->get_active(), this);
 }
@@ -1220,7 +1220,7 @@ RouteUI::denormal_protection_changed ()
 }
 
 void
-RouteUI::solo_isolated_toggle(void* src, Gtk::CheckMenuItem* check)
+RouteUI::solo_isolated_toggle(void* /*src*/, Gtk::CheckMenuItem* check)
 {
 	bool yn = _route->solo_isolated ();
 

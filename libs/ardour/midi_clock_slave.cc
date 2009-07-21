@@ -124,7 +124,7 @@ MIDIClock_Slave::calculate_filter_coefficients()
 }
 
 void
-MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
+MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, nframes_t timestamp)
 {	
 	// some pieces of hardware send MIDI Clock all the time				
 	if ( (!_starting) && (!_started) ) {
@@ -195,7 +195,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 }
 
 void
-MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
+MIDIClock_Slave::start (Parser& /*parser*/, nframes_t /*timestamp*/)
 {	
 	#ifdef DEBUG_MIDI_CLOCK	
 		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " engine time: " << session->frame_time() << endl;
@@ -223,7 +223,7 @@ MIDIClock_Slave::reset ()
 }
 
 void
-MIDIClock_Slave::contineu (Parser& parser, nframes_t timestamp)
+MIDIClock_Slave::contineu (Parser& /*parser*/, nframes_t /*timestamp*/)
 {
 	#ifdef DEBUG_MIDI_CLOCK	
 		std::cerr << "MIDIClock_Slave got continue message" << endl;
@@ -236,7 +236,7 @@ MIDIClock_Slave::contineu (Parser& parser, nframes_t timestamp)
 
 
 void
-MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
+MIDIClock_Slave::stop (Parser& /*parser*/, nframes_t /*timestamp*/)
 {
 	#ifdef DEBUG_MIDI_CLOCK	
 		std::cerr << "MIDIClock_Slave got stop message" << endl;
@@ -268,7 +268,7 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 }
 
 void
-MIDIClock_Slave::position (Parser& parser, byte* message, size_t size)
+MIDIClock_Slave::position (Parser& /*parser*/, byte* message, size_t size)
 {
 	// we are note supposed to get position messages while we are running
 	// so lets be robust and ignore those

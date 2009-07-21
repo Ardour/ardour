@@ -69,7 +69,7 @@ MTC_Slave::rebind (MIDI::Port& p)
 }
 
 void
-MTC_Slave::update_mtc_qtr (Parser& p)
+MTC_Slave::update_mtc_qtr (Parser& /*p*/)
 {
 	cycles_t cnow = get_cycles ();
 	nframes_t now = session.engine().frame_time();

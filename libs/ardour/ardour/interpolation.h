@@ -21,7 +21,7 @@ class Interpolation {
          double target_speed()          const { return _target_speed; }
          double speed()                 const { return _speed; }
          
-         void add_channel_to (int input_buffer_size, int output_buffer_size) {}
+	void add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/) {}
          void remove_channel_from () {}
   
          void reset () {}
@@ -101,7 +101,7 @@ class LibSamplerateInterpolation : public Interpolation {
         ~LibSamplerateInterpolation ();
     
         void   set_speed (double new_speed);
-        void   set_target_speed (double new_speed)   {}
+        void   set_target_speed (double /*new_speed*/) {}
         double speed ()                        const { return _speed;      }
         
         void add_channel_to (int input_buffer_size, int output_buffer_size);

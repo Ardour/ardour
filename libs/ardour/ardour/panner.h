@@ -210,7 +210,7 @@ class Panner : public SessionObject, public AutomatableControls
 	AutoStyle automation_style() const;
 	bool touching() const;
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return true; };
+	bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) const { return true; };
 
 	/// The fundamental Panner function
 	void run (BufferSet& src, BufferSet& dest, sframes_t start_frame, sframes_t end_frames, nframes_t nframes);

@@ -551,7 +551,7 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 }
 
 void
-FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& win, float old_level)
+FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& /*win*/, float /*old_level*/)
 {
 	/* XXX OPTIMIZE (when we have some horizontal meters) */
 	queue_draw ();

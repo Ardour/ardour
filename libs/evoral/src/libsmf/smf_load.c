@@ -379,6 +379,8 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 static int
 extract_sysex_event(const unsigned char *buf, const size_t buffer_length, smf_event_t *event, uint32_t *len, int last_status)
 {
+	(void) last_status;
+	
 	int status;
 	int32_t vlq_length, message_length;
 	const unsigned char *c = buf;
@@ -419,6 +421,8 @@ extract_sysex_event(const unsigned char *buf, const size_t buffer_length, smf_ev
 static int
 extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_event_t *event, uint32_t *len, int last_status)
 {
+	(void) last_status;
+	
 	int status;
 	int32_t message_length, vlq_length;
 	const unsigned char *c = buf;

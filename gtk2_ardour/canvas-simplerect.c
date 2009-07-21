@@ -370,6 +370,8 @@ gnome_canvas_simplerect_set_property (GObject      *object,
 				      GParamSpec   *pspec)
 
 {
+	(void) pspec;
+	
 	GnomeCanvasSimpleRect *simplerect;
 	int update = FALSE;
 	int bounds_changed = FALSE;
@@ -825,6 +827,9 @@ gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
 static double
 gnome_canvas_simplerect_point (GnomeCanvasItem *item, double x, double y, int cx, int cy, GnomeCanvasItem **actual_item)
 {
+	(void) cx;
+	(void) cy;
+		
 	GnomeCanvasSimpleRect *simplerect;
 	double x1, y1, x2, y2;
 	double dx, dy;

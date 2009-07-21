@@ -209,7 +209,7 @@ MidiMultipleChannelSelector::set_selected_channels(uint16_t selected_channels)
 }
 
 void
-MidiMultipleChannelSelector::button_toggled(ToggleButton *button, uint8_t channel)
+MidiMultipleChannelSelector::button_toggled(ToggleButton */*button*/, uint8_t channel)
 {
 	++_recursion_counter;
 	if (_recursion_counter == 1) {

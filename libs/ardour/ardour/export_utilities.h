@@ -137,7 +137,7 @@ class Normalizer : public GraphSinkVertex<float, float>
 class NullSink : public GraphSink<float>
 {
   public:
-	nframes_t write (float * data, nframes_t frames) { return frames; }
+	nframes_t write (float * /*data*/, nframes_t frames) { return frames; }
 };
 
 

@@ -388,7 +388,7 @@ AudioDiskstream::use_destructive_playlist ()
 }
 
 void
-AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record)
+AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*/, bool can_record)
 {
 	int possibly_recording;
 	int rolling;
@@ -832,7 +832,7 @@ AudioDiskstream::process_varispeed_playback(nframes_t nframes, boost::shared_ptr
 }
 
 bool
-AudioDiskstream::commit (nframes_t nframes)
+AudioDiskstream::commit (nframes_t /*nframes*/)
 {
 	bool need_butler = false;
 
@@ -1030,7 +1030,7 @@ AudioDiskstream::internal_playback_seek (nframes_t distance)
 
 int
 AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, nframes_t& start, nframes_t cnt, 
-		       ChannelInfo* channel_info, int channel, bool reversed)
+		       ChannelInfo* /*channel_info*/, int channel, bool reversed)
 {
 	nframes_t this_read = 0;
 	bool reloop = false;
@@ -1364,7 +1364,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
  * written at all unless @a force_flush is true.
  */
 int
-AudioDiskstream::do_flush (RunContext context, bool force_flush)
+AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 {
 	uint32_t to_write;
 	int32_t ret = 0;
@@ -1724,7 +1724,7 @@ AudioDiskstream::transport_looped (nframes_t transport_frame)
 }
 
 void
-AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList> c)
+AudioDiskstream::finish_capture (bool /*rec_monitors_input*/, boost::shared_ptr<ChannelList> c)
 {
 	was_recording = false;
 	
@@ -2059,7 +2059,7 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 }
 
 void
-AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
+AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 {
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -2120,7 +2120,7 @@ AudioDiskstream::rename_write_sources ()
 }
 
 void
-AudioDiskstream::set_block_size (nframes_t nframes)
+AudioDiskstream::set_block_size (nframes_t /*nframes*/)
 {
 	if (_session.get_block_size() > speed_buffer_size) {
 		speed_buffer_size = _session.get_block_size();

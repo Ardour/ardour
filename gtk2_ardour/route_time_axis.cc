@@ -304,7 +304,7 @@ RouteTimeAxisView::post_construct ()
 }
 
 void
-RouteTimeAxisView::set_playlist (boost::shared_ptr<Playlist> newplaylist)
+RouteTimeAxisView::set_playlist (boost::shared_ptr<Playlist> /*newplaylist*/)
 {
 	boost::shared_ptr<Playlist> pl = playlist();
 	assert(pl);
@@ -2272,7 +2272,7 @@ RouteTimeAxisView::meter_changed (void *src)
 }
 
 void
-RouteTimeAxisView::io_changed (IOChange change, void *src)
+RouteTimeAxisView::io_changed (IOChange /*change*/, void */*src*/)
 {
 	reset_meter ();
 }

@@ -81,7 +81,7 @@ ClickBox::button_release_handler (GdkEventButton* ev)
 
 void
 ClickBox::default_printer (char buf[32], Gtk::Adjustment &adj, 
-			       void *ignored)
+			       void *)
 {
 	sprintf (buf, "%.2f", adj.get_value());
 }
@@ -104,9 +104,8 @@ ClickBox::set_label ()
 }
 
 void
-ClickBox::style_changed (const Glib::RefPtr<Gtk::Style>& ignored)
+ClickBox::style_changed (const Glib::RefPtr<Gtk::Style>&)
 {
-
 	layout->context_changed (); 
 	layout->get_pixel_size (twidth, theight);
 }

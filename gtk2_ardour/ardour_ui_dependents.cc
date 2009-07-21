@@ -123,7 +123,7 @@ ARDOUR_UI::toggle_editor_mixer_on_top ()
 }
 
 gint
-ARDOUR_UI::exit_on_main_window_close (GdkEventAny *ev)
+ARDOUR_UI::exit_on_main_window_close (GdkEventAny * /*ev*/)
 {
 #ifdef TOP_MENUBAR
 	/* just hide the window, and return - the top menu stays up */

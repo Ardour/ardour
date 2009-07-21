@@ -32,8 +32,8 @@ void
 LV2PluginUI::lv2_ui_write(
 		LV2UI_Controller controller,
 		uint32_t         port_index,
-		uint32_t         buffer_size,
-		uint32_t         format,
+		uint32_t         /*buffer_size*/,
+		uint32_t         /*format*/,
 		const void*      buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
@@ -60,7 +60,7 @@ LV2PluginUI::parameter_update (uint32_t port_index, float val)
 }
 
 bool
-LV2PluginUI::start_updating(GdkEventAny* event)
+LV2PluginUI::start_updating(GdkEventAny*)
 {
 	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
@@ -71,7 +71,7 @@ LV2PluginUI::start_updating(GdkEventAny* event)
 }
 
 bool
-LV2PluginUI::stop_updating(GdkEventAny* event)
+LV2PluginUI::stop_updating(GdkEventAny*)
 {
 	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
@@ -157,14 +157,14 @@ LV2PluginUI::package (Gtk::Window& win)
 }
 
 bool
-LV2PluginUI::configure_handler (GdkEventConfigure* ev)
+LV2PluginUI::configure_handler (GdkEventConfigure*)
 {
 	std::cout << "CONFIGURE" << std::endl;
 	return false;
 }
 
 bool
-LV2PluginUI::is_update_wanted(uint32_t index)
+LV2PluginUI::is_update_wanted(uint32_t /*index*/)
 {
 	/* FIXME this should check the port notification properties, which nobody sets now anyway :) */
 	return true;

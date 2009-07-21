@@ -135,7 +135,7 @@ LevelMeter::parameter_changed (string p)
 }
 
 void
-LevelMeter::configuration_changed(ChanCount in, ChanCount out)
+LevelMeter::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
 	color_changed = true;
 	setup_meters (meter_length, regular_meter_width);
@@ -216,7 +216,7 @@ LevelMeter::setup_meters (int len, int initial_width)
 }
 
 gint
-LevelMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
+LevelMeter::meter_button_release (GdkEventButton* ev, uint32_t /*which*/)
 {
 	if (ev->button == 1) {
 		clear_meters();

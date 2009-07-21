@@ -1064,7 +1064,7 @@ Session::set_auto_loop_location (Location* location)
 }
 
 void
-Session::locations_added (Location* ignored)
+Session::locations_added (Location *)
 {
 	set_dirty ();
 }
@@ -1355,7 +1355,7 @@ Session::set_block_size (nframes_t nframes)
 }
 
 void
-Session::set_default_fade (float steepness, float fade_msecs)
+Session::set_default_fade (float /*steepness*/, float /*fade_msecs*/)
 {
 #if 0
 	nframes_t fade_frames;
@@ -2362,13 +2362,13 @@ Session::remove_route (shared_ptr<Route> route)
 }
 
 void
-Session::route_mute_changed (void* src)
+Session::route_mute_changed (void* /*src*/)
 {
 	set_dirty ();
 }
 
 void
-Session::route_listen_changed (void* src, boost::weak_ptr<Route> wpr)
+Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 {
 	boost::shared_ptr<Route> route = wpr.lock();
 	if (!route) {
@@ -2384,7 +2384,7 @@ Session::route_listen_changed (void* src, boost::weak_ptr<Route> wpr)
 }
 
 void
-Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
+Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 {
 	if (solo_update_disabled) {
 		// We know already
@@ -3810,7 +3810,7 @@ Session::bundle_by_name (string name) const
 }
 
 void
-Session::tempo_map_changed (Change ignored)
+Session::tempo_map_changed (Change)
 {
 	clear_clicks ();
 
@@ -4095,7 +4095,7 @@ Session::freeze (InterThreadInfo& itt)
 
 boost::shared_ptr<Region>
 Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end, 	
-			  bool overwrite, vector<boost::shared_ptr<Source> >& srcs, 
+			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs, 
 			  InterThreadInfo& itt, bool enable_processing)
 {
 	boost::shared_ptr<Region> result;

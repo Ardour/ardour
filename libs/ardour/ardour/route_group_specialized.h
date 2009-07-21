@@ -26,7 +26,7 @@
 namespace ARDOUR {
 
 template<class T> void 
-RouteGroup::apply (void (Track::*func)(T, void *), T val, void *src) 
+RouteGroup::apply (void (Track::*func)(T, void *), T val, void */*src*/) 
 {
 	for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		Track *at;

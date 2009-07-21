@@ -233,7 +233,7 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 }
 
 bool
-Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_remove)
+Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*no_remove*/)
 {
 	if (!clicked_control_point) {
 		return false;
@@ -331,7 +331,7 @@ Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisVie
 }
 
 void
-Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, RegionView * basis, vector<RegionView*>* all_equivs) const
+Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionView * basis, vector<RegionView*>* all_equivs) const
 {
 	boost::shared_ptr<Playlist> pl;
 	vector<boost::shared_ptr<Region> > results;
@@ -433,7 +433,7 @@ Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
 
 
 bool
-Editor::set_selected_regionview_from_click (bool press, Selection::Operation op, bool no_track_remove)
+Editor::set_selected_regionview_from_click (bool press, Selection::Operation op, bool /*no_track_remove*/)
 {
 	vector<RegionView*> all_equivalent_regions;
 	bool commit = false;
@@ -771,7 +771,7 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 }
 
 bool
-Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv, boost::weak_ptr<Region> weak_r)
+Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView* sv, boost::weak_ptr<Region> weak_r)
 {
 	RegionView* rv;
 	boost::shared_ptr<Region> r (weak_r.lock());
@@ -1282,7 +1282,7 @@ Editor::select_all_selectables_using_edit (bool after)
 }
 
 void
-Editor::select_all_selectables_between (bool within)
+Editor::select_all_selectables_between (bool /*within*/)
 {
         nframes64_t start;
 	nframes64_t end;

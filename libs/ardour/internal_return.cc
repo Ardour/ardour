@@ -44,7 +44,7 @@ InternalReturn::InternalReturn (Session& s, const XMLNode& node)
 }
 
 void
-InternalReturn::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+InternalReturn::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes)
 {
 	if (!_active && !_pending_active) {
 		return;

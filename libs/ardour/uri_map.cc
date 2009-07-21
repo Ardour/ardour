@@ -46,7 +46,7 @@ URIMap::uri_to_id(const char* map,
 
 uint32_t
 URIMap::uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
-                          const char*               map,
+                          const char*               /*map*/,
                           const char*               uri)
 {
 	// TODO: map ignored, < UINT16_MAX assumed

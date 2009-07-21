@@ -321,7 +321,7 @@ Route::set_gain (gain_t val, void *src)
 void
 Route::process_output_buffers (BufferSet& bufs,
 			       sframes_t start_frame, sframes_t end_frame, nframes_t nframes,
-			       bool with_processors, int declick)
+			       bool /*with_processors*/, int declick)
 {
 	bool monitor;
 
@@ -1599,7 +1599,7 @@ Route::set_state (const XMLNode& node)
 }
 
 int
-Route::_set_state (const XMLNode& node, bool call_base)
+Route::_set_state (const XMLNode& node, bool /*call_base*/)
 {
 
 	XMLNodeList nlist;
@@ -1958,7 +1958,7 @@ Route::release_return_buffer () const
 }
 
 int
-Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool active, bool aux)
+Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*active*/, bool aux)
 {
 	vector<string> ports;
 	vector<string>::const_iterator i;
@@ -2103,7 +2103,7 @@ Route::feeds (boost::shared_ptr<Route> other)
 }
 
 void
-Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_processors)
+Route::handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
 {
 	nframes_t now = _session.transport_frame();
 
@@ -2129,7 +2129,7 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 }
 
 void
-Route::input_change_handler (IOChange change, void *src)
+Route::input_change_handler (IOChange change, void * /*src*/)
 {
 	if ((change & ConfigurationChanged)) {
 		configure_processors (0);
@@ -2137,7 +2137,7 @@ Route::input_change_handler (IOChange change, void *src)
 }
 
 void
-Route::output_change_handler (IOChange change, void *src)
+Route::output_change_handler (IOChange change, void * /*src*/)
 {
 	if ((change & ConfigurationChanged)) {
 		
@@ -2159,7 +2159,7 @@ Route::pans_required () const
 
 int 
 Route::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,  
-		bool session_state_changing, bool can_record, bool rec_monitors_input)
+		bool session_state_changing, bool /*can_record*/, bool /*rec_monitors_input*/)
 {
 	if (n_outputs().n_total() == 0) {
 		return 0;
@@ -2205,7 +2205,7 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
 
 int
 Route::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
-	     bool can_record, bool rec_monitors_input)
+	     bool /*can_record*/, bool /*rec_monitors_input*/)
 {
 	{
 		// automation snapshot can also be called from the non-rt context
@@ -2240,8 +2240,8 @@ Route::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int 
 }
 
 int
-Route::silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-		    bool can_record, bool rec_monitors_input)
+Route::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*end_frame*/, 
+		    bool /*can_record*/, bool /*rec_monitors_input*/)
 {
 	silence (nframes);
 	return 0;
@@ -2497,7 +2497,7 @@ Route::set_pending_declick (int declick)
  */
 
 void
-Route::shift (nframes64_t pos, nframes64_t frames)
+Route::shift (nframes64_t /*pos*/, nframes64_t /*frames*/)
 {
 #ifdef THIS_NEEDS_FIXING_FOR_V3
 

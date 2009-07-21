@@ -365,7 +365,7 @@ SoundFileBox::stop_audition ()
 }
 
 bool
-SoundFileBox::tags_entry_left (GdkEventFocus *ev)
+SoundFileBox::tags_entry_left (GdkEventFocus *)
 {
 	tags_changed ();
 	return false;
@@ -566,13 +566,13 @@ SoundFileBrowser::chooser_file_activated ()
 }
 
 void
-SoundFileBrowser::found_list_view_activated (const TreeModel::Path& path, TreeViewColumn* col)
+SoundFileBrowser::found_list_view_activated (const TreeModel::Path&, TreeViewColumn*)
 {
 	preview.audition ();
 }
 
 void
-SoundFileBrowser::freesound_list_view_activated (const TreeModel::Path& path, TreeViewColumn* col)
+SoundFileBrowser::freesound_list_view_activated (const TreeModel::Path&, TreeViewColumn*)
 {
 	preview.audition ();
 }

@@ -229,13 +229,13 @@ PannerUI::get_controllable()
 }
 
 bool
-PannerUI::panning_link_button_press (GdkEventButton* ev)
+PannerUI::panning_link_button_press (GdkEventButton*)
 {
 	return true;
 }
 
 bool
-PannerUI::panning_link_button_release (GdkEventButton* ev)
+PannerUI::panning_link_button_release (GdkEventButton*)
 {
 	if (!ignore_toggle) {
 		_panner->set_linked (!_panner->linked());

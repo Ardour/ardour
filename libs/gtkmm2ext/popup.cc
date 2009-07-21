@@ -111,7 +111,7 @@ PopUp::touch ()
 }
 
 gint
-PopUp::button_click (GdkEventButton *ev)
+PopUp::button_click (GdkEventButton */*ev*/)
 {
 	remove ();
 	return TRUE;
@@ -131,7 +131,7 @@ PopUp::set_name (string name)
 }
 
 bool
-PopUp::on_delete_event (GdkEventAny* ev)
+PopUp::on_delete_event (GdkEventAny* /*ev*/)
 {
 	hide();
 

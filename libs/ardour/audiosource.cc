@@ -128,7 +128,7 @@ AudioSource::set_state (const XMLNode& node)
 }
 
 sframes_t
-AudioSource::length (sframes_t pos) const
+AudioSource::length (sframes_t /*pos*/) const
 {
 	return _length;
 }
@@ -264,7 +264,7 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 }
 
 nframes_t
-AudioSource::read (Sample *dst, sframes_t start, nframes_t cnt, int channel) const
+AudioSource::read (Sample *dst, sframes_t start, nframes_t cnt, int /*channel*/) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);

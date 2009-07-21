@@ -71,7 +71,7 @@ CellRendererPixbufToggle::activate_vfunc(GdkEvent*, Gtk::Widget&, const Glib::us
 
 
 void 
-CellRendererPixbufToggle::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, Gtk::CellRendererState flags)
+CellRendererPixbufToggle::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& /*widget*/, const Gdk::Rectangle& /*background_area*/, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& /*expose_area*/, Gtk::CellRendererState /*flags*/)
 {
 	int offset_width = 0;
 	int offset_height = 0;
@@ -92,7 +92,7 @@ CellRendererPixbufToggle::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& windo
 }
 
 void 
-CellRendererPixbufToggle::get_size_vfunc (Gtk::Widget& widget, const Gdk::Rectangle* cell_area, int* x_offset, int* y_offset, int* width, int* height) const
+CellRendererPixbufToggle::get_size_vfunc (Gtk::Widget& /*widget*/, const Gdk::Rectangle* /*cell_area*/, int* /*x_offset*/, int* /*y_offset*/, int* /*width*/, int* /*height*/) const
 {
 //cerr << "cell_renderer_pixbuf_toggle get_size" << endl;
 

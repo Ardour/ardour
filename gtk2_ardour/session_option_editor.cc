@@ -123,7 +123,7 @@ public:
 		_box->pack_start (_port_matrix);
 	}
 
-	void parameter_changed (string const & p)
+	void parameter_changed (string const &)
 	{
 
 	}

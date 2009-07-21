@@ -94,9 +94,9 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	virtual void set_record_enabled (bool yn) = 0;
 
 	bool destructive() const { return _flags & Destructive; }
-	virtual int set_destructive (bool yn) { return -1; }
-	virtual int set_non_layered (bool yn) { return -1; }
-	virtual	bool can_become_destructive (bool& requires_bounce) const { return false; }
+	virtual int set_destructive (bool /*yn*/) { return -1; }
+	virtual int set_non_layered (bool /*yn*/) { return -1; }
+	virtual	bool can_become_destructive (bool& /*requires_bounce*/) const { return false; }
 
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
@@ -109,7 +109,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	void set_speed (double);
 	void non_realtime_set_speed ();
-	virtual void non_realtime_locate (nframes_t location) {};
+	virtual void non_realtime_locate (nframes_t /*location*/) {};
 	virtual void playlist_modified ();
 
 	boost::shared_ptr<Playlist> playlist () { return _playlist; }

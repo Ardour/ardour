@@ -251,11 +251,11 @@ class Playlist : public SessionObject,
 	void splice_locked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
 	void splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
 
-	virtual void finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right) {}
+	virtual void finalize_split_region (boost::shared_ptr<Region> /*original*/, boost::shared_ptr<Region> /*left*/, boost::shared_ptr<Region> /*right*/) {}
 	
-	virtual void check_dependents (boost::shared_ptr<Region> region, bool norefresh) {}
-	virtual void refresh_dependents (boost::shared_ptr<Region> region) {}
-	virtual void remove_dependents (boost::shared_ptr<Region> region) {}
+	virtual void check_dependents (boost::shared_ptr<Region> /*region*/, bool /*norefresh*/) {}
+	virtual void refresh_dependents (boost::shared_ptr<Region> /*region*/) {}
+	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
 

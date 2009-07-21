@@ -71,7 +71,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes)
 {
 	gain_t mute_gain;
 

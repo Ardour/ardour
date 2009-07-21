@@ -26,19 +26,19 @@ using namespace ARDOUR;
 using namespace PBD;
 
 void
-Editor::hscrollbar_allocate (Gtk::Allocation &alloc)
+Editor::hscrollbar_allocate (Gtk::Allocation &)
 {
 }
 
 bool
-Editor::hscrollbar_button_press (GdkEventButton *ev)
+Editor::hscrollbar_button_press (GdkEventButton *)
 {
 	_dragging_hscrollbar = true;
 	return false;
 }
 
 bool
-Editor::hscrollbar_button_release (GdkEventButton *ev)
+Editor::hscrollbar_button_release (GdkEventButton *)
 {
 	_dragging_hscrollbar = false;
 

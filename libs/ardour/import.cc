@@ -191,8 +191,8 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 }
 
 static bool
-map_existing_mono_sources (const vector<string>& new_paths, Session& sess,
-		           uint samplerate, vector<boost::shared_ptr<Source> >& newfiles, Session *session)
+map_existing_mono_sources (const vector<string>& new_paths, Session& /*sess*/,
+		           uint /*samplerate*/, vector<boost::shared_ptr<Source> >& newfiles, Session *session)
 {
 	for (vector<string>::const_iterator i = new_paths.begin();
 			i != new_paths.end(); ++i)

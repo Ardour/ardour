@@ -283,7 +283,7 @@ fixup_bundle_environment ()
 #endif
 
 static void
-sigpipe_handler (int sig)
+sigpipe_handler (int /*sig*/)
 {
 	cerr << _("SIGPIPE received - JACK has probably died") << endl;
 }

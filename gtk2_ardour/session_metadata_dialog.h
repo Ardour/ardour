@@ -127,7 +127,7 @@ class SessionMetadataSet {
 	/// Sets session, into which the data is eventually saved
 	virtual void set_session (ARDOUR::Session * s) { session = s; }
 	/// allows loading extra data into data sets (for importing etc.)
-	virtual void load_extra_data (ARDOUR::SessionMetadata const & data) { }
+	virtual void load_extra_data (ARDOUR::SessionMetadata const & /*data*/) { }
 	/// Saves data to session
 	virtual void save_data () = 0;
 	

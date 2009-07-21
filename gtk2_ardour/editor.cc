@@ -911,7 +911,7 @@ Editor::control_scroll (float fraction)
 }
 
 bool
-Editor::deferred_control_scroll (nframes64_t target)
+Editor::deferred_control_scroll (nframes64_t /*target*/)
 {
 	session->request_locate (*_control_scroll_target, session->transport_rolling());
 	// reset for next stream
@@ -1468,7 +1468,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 }
 
 Menu*
-Editor::build_track_context_menu (nframes64_t ignored)
+Editor::build_track_context_menu (nframes64_t)
 {
 	using namespace Menu_Helpers;
 
@@ -1480,7 +1480,7 @@ Editor::build_track_context_menu (nframes64_t ignored)
 }
 
 Menu*
-Editor::build_track_bus_context_menu (nframes64_t ignored)
+Editor::build_track_bus_context_menu (nframes64_t)
 {
 	using namespace Menu_Helpers;
 
@@ -1612,7 +1612,7 @@ Editor::analyze_range_selection()
 }
 
 Menu*
-Editor::build_track_selection_context_menu (nframes64_t ignored)
+Editor::build_track_selection_context_menu (nframes64_t)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_selection_context_menu.items();
@@ -1629,7 +1629,7 @@ Editor::build_track_selection_context_menu (nframes64_t ignored)
  * @param edit_items List to add the items to.
  */
 void
-Editor::add_crossfade_context_items (AudioStreamView* view, boost::shared_ptr<Crossfade> xfade, Menu_Helpers::MenuList& edit_items, bool many)
+Editor::add_crossfade_context_items (AudioStreamView* /*view*/, boost::shared_ptr<Crossfade> xfade, Menu_Helpers::MenuList& edit_items, bool many)
 {
 	using namespace Menu_Helpers;
 	Menu     *xfade_menu = manage (new Menu);
@@ -3132,12 +3132,12 @@ Editor::setup_midi_toolbar ()
 int
 Editor::convert_drop_to_paths (
 		vector<ustring>&                paths, 
-		const RefPtr<Gdk::DragContext>& context,
-		gint                            x,
-		gint                            y,
+		const RefPtr<Gdk::DragContext>& /*context*/,
+		gint                            /*x*/,
+		gint                            /*y*/,
 		const SelectionData&            data,
-		guint                           info,
-		guint                           time)
+		guint                           /*info*/,
+		guint                           /*time*/)
 {	
 	if (session == 0) {
 		return -1;
@@ -3806,7 +3806,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 }
 
 void
-Editor::detach_tearoff (Box* b, Window* w)
+Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 {
 	if (tools_tearoff->torn_off() && 
 	    mouse_mode_tearoff->torn_off()) {
@@ -3815,7 +3815,7 @@ Editor::detach_tearoff (Box* b, Window* w)
 }
 
 void
-Editor::reattach_tearoff (Box* b, Window* w, int32_t n)
+Editor::reattach_tearoff (Box* /*b*/, Window* /*w*/, int32_t /*n*/)
 {
 	if (toolbar_frame.get_parent() == 0) {
 		top_hbox.pack_end (toolbar_frame);
@@ -4143,7 +4143,7 @@ Editor::mapped_use_copy_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<bo
 }
 
 void 
-Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t sz)
+Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t /*sz*/)
 {
 	atv.clear_playlist ();
 }
@@ -4983,7 +4983,7 @@ Editor::remove_route (TimeAxisView *tv)
 }
 
 void
-Editor::hide_track_in_display (TimeAxisView& tv, bool temponly)
+Editor::hide_track_in_display (TimeAxisView& tv, bool /*temponly*/)
 {
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
 

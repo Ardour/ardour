@@ -448,7 +448,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 }
 
 void
-MidiTrack::write_controller_messages(MidiBuffer& output_buf, sframes_t start, sframes_t end, nframes_t nframes)
+MidiTrack::write_controller_messages(MidiBuffer& output_buf, sframes_t /*start*/, sframes_t /*end*/, nframes_t nframes)
 {
 	// Append immediate events (UI controls)
 
@@ -458,7 +458,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, sframes_t start, sf
 }
 
 int
-MidiTrack::export_stuff (BufferSet& bufs, nframes_t nframes, sframes_t end_frame)
+MidiTrack::export_stuff (BufferSet& /*bufs*/, nframes_t /*nframes*/, sframes_t /*end_frame*/)
 {
 	return -1;
 }
@@ -471,7 +471,7 @@ MidiTrack::set_latency_delay (nframes_t longest_session_latency)
 }
 
 boost::shared_ptr<Region>
-MidiTrack::bounce (InterThreadInfo& itt)
+MidiTrack::bounce (InterThreadInfo& /*itt*/)
 {
 	throw;
 	// vector<MidiSource*> srcs;
@@ -481,7 +481,7 @@ MidiTrack::bounce (InterThreadInfo& itt)
 
 
 boost::shared_ptr<Region>
-MidiTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt, bool enable_processing)
+MidiTrack::bounce_range (nframes_t /*start*/, nframes_t /*end*/, InterThreadInfo& /*itt*/, bool /*enable_processing*/)
 {
 	throw;
 	//vector<MidiSource*> srcs;
@@ -490,7 +490,7 @@ MidiTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt, b
 }
 
 void
-MidiTrack::freeze (InterThreadInfo& itt)
+MidiTrack::freeze (InterThreadInfo& /*itt*/)
 {
 }
 

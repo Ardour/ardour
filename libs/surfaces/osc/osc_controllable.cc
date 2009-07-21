@@ -51,7 +51,7 @@ OSCControllable::get_state ()
 }
 
 int
-OSCControllable::set_state (const XMLNode& node)
+OSCControllable::set_state (const XMLNode& /*node*/)
 {
 	return 0;
 }

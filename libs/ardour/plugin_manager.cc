@@ -213,7 +213,7 @@ PluginManager::add_ladspa_directory (string path)
 	return -1;
 }
 
-static bool ladspa_filter (const string& str, void *arg)
+static bool ladspa_filter (const string& str, void */*arg*/)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "so" */
 	
@@ -221,7 +221,7 @@ static bool ladspa_filter (const string& str, void *arg)
 }
 
 int
-PluginManager::ladspa_discover_from_path (string path)
+PluginManager::ladspa_discover_from_path (string /*path*/)
 {
 	PathScanner scanner;
 	vector<string *> *plugin_objects;
@@ -240,7 +240,7 @@ PluginManager::ladspa_discover_from_path (string path)
 	return ret;
 }
 
-static bool rdf_filter (const string &str, void *arg)
+static bool rdf_filter (const string &str, void */*arg*/)
 {
 	return str[0] != '.' && 
 		   ((str.find(".rdf")  == (str.length() - 4)) ||

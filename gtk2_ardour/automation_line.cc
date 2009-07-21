@@ -1037,7 +1037,7 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 }
 
 void
-AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& results)
+AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*results*/)
 {
 	// hmmm ....
 }
@@ -1198,7 +1198,7 @@ AutomationLine::clear ()
 }
 
 void
-AutomationLine::change_model (AutomationList::iterator i, double x, double y)
+AutomationLine::change_model (AutomationList::iterator /*i*/, double /*x*/, double /*y*/)
 {
 }
 

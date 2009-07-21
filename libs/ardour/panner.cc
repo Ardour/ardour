@@ -465,7 +465,7 @@ EqualPowerStereoPanner::get_state (void)
 }
 
 XMLNode&
-EqualPowerStereoPanner::state (bool full_state)
+EqualPowerStereoPanner::state (bool /*full_state*/)
 {
 	XMLNode* root = new XMLNode ("StreamPanner");
 	char buf[64];
@@ -623,9 +623,9 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 }
 
 void
-Multi2dPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs, 
-				     nframes_t start, nframes_t end, nframes_t nframes,
-				     pan_t** buffers)
+Multi2dPanner::distribute_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/, 
+				     nframes_t /*start*/, nframes_t /*end*/, nframes_t /*nframes*/,
+				     pan_t** /*buffers*/)
 {
 	if (_muted) {
 		return;
@@ -643,7 +643,7 @@ Multi2dPanner::factory (Panner& p, Evoral::Parameter param)
 }
 
 int
-Multi2dPanner::load (istream& in, string path, uint32_t& linecnt)
+Multi2dPanner::load (istream& /*in*/, string /*path*/, uint32_t& /*linecnt*/)
 {
 	return 0;
 }
@@ -655,7 +655,7 @@ Multi2dPanner::get_state (void)
 }
 
 XMLNode&
-Multi2dPanner::state (bool full_state)
+Multi2dPanner::state (bool /*full_state*/)
 {
 	XMLNode* root = new XMLNode ("StreamPanner");
 	char buf[64];

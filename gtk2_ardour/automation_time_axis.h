@@ -80,7 +80,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, std::list<Selectable *>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
-	void show_timestretch (nframes_t start, nframes_t end) {}
+	void show_timestretch (nframes_t /*start*/, nframes_t /*end*/) {}
 	void hide_timestretch () {}
 
 	/* editing operations */

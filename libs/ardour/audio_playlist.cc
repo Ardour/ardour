@@ -729,7 +729,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 }
 
 void
-AudioPlaylist::crossfade_changed (Change ignored)
+AudioPlaylist::crossfade_changed (Change)
 {
 	if (in_flush || in_set_state) {
 		return;

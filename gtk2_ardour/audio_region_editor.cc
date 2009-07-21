@@ -172,7 +172,7 @@ AudioRegionEditor::region_changed (Change what_changed)
 }
 
 gint 
-AudioRegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)())
+AudioRegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* /*but*/, void (AudioRegionEditor::*/*pmf*/)())
 {
 	switch (ev->button) {
 	case 1:
@@ -195,7 +195,7 @@ AudioRegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (Aud
 }
 
 gint 
-AudioRegionEditor::breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)())
+AudioRegionEditor::breleased (GdkEventButton* /*ev*/, Gtk::SpinButton* /*but*/, void (AudioRegionEditor::*pmf)())
 {
 	if (spin_arrow_grab) {
 		(this->*pmf)();

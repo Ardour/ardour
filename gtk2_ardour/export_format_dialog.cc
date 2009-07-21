@@ -850,7 +850,7 @@ ExportFormatDialog::show_linear_enconding_options (boost::shared_ptr<ARDOUR::Exp
 }
 
 void
-ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ptr)
+ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> /*ptr*/)
 {
 	encoding_options_label.set_label (_("Ogg Vorbis options"));
 	

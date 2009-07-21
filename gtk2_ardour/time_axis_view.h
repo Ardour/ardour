@@ -182,12 +182,12 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	/* editing operations */
 	
 	virtual bool cut_copy_clear (Selection&, Editing::CutCopyOp) { return false; }
-	virtual bool paste (nframes_t, float times, Selection&, size_t nth) { return false; }
+	virtual bool paste (nframes_t, float /*times*/, Selection&, size_t /*nth*/) { return false; }
 	
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}
 
-	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir) {
+	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
@@ -210,7 +210,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	/* call this on the parent */
 
-	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter param) { return 0; }
+	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter /*param*/) { return 0; }
 
 	virtual LayerDisplay layer_display () const { return Overlaid; }
 	virtual StreamView* view () const { return 0; }
@@ -268,7 +268,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	/** Do whatever needs to be done to dynamically reset the LHS control menu.
 	 */
-	virtual bool handle_display_menu_map_event (GdkEventAny *ev) { return false; }
+	virtual bool handle_display_menu_map_event (GdkEventAny * /*ev*/) { return false; }
 
 	/** Build the standard LHS control size menu for the default heights options.
 	 */

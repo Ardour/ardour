@@ -58,7 +58,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 #else
 
 void
-PBD::stacktrace (std::ostream& out, int levels)
+PBD::stacktrace (std::ostream& out, int /*levels*/)
 {
 	out << "stack tracing is not enabled on this platform" << std::endl;
 }

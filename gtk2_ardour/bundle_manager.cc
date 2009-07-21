@@ -161,7 +161,7 @@ BundleEditorMatrix::list_is_global (int dim) const
 	return (dim == OTHER);
 }
 
-BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bundle, bool add)
+BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bundle, bool /*add*/)
 	: ArdourDialog (_("Edit Bundle")), _matrix (session, bundle), _bundle (bundle)
 {
 	Gtk::Table* t = new Gtk::Table (3, 2);

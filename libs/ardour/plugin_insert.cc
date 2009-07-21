@@ -375,7 +375,7 @@ PluginInsert::silence (nframes_t nframes)
 }
 	
 void
-PluginInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+PluginInsert::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes)
 {
 	if (_active || _pending_active) {
 
@@ -633,7 +633,7 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
  * (private helper)
  */
 int32_t
-PluginInsert::count_for_configuration (ChanCount in, ChanCount out) const
+PluginInsert::count_for_configuration (ChanCount in, ChanCount /*out*/) const
 {
 	if (_plugins.front()->reconfigurable_io()) {
 		/* plugin has flexible I/O, so the answer is always 1 */

@@ -101,8 +101,7 @@ public:
 
 	void can_automate(Evoral::Parameter);
 
-	virtual void auto_state_changed (Evoral::Parameter which) {}
-
+	virtual void auto_state_changed (Evoral::Parameter /*which*/) {}
 	
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);

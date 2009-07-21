@@ -106,7 +106,7 @@ class OSC : public ARDOUR::ControlProtocol
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+        int cb_ ## name (const char *, const char *, lo_arg **, int, void *) { \
 		name (); \
 		return 0; \
 	}
@@ -133,7 +133,7 @@ class OSC : public ARDOUR::ControlProtocol
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
                 if (argc > 0) {						\
 			name (optional argv[0]->type);		\
                 }							\
@@ -147,7 +147,7 @@ class OSC : public ARDOUR::ControlProtocol
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
                 if (argc > 1) {						\
 			name (argv[0]->arg1type, argv[1]->arg2type); \
                 }							\

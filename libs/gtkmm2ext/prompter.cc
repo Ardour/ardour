@@ -75,7 +75,7 @@ Prompter::init ()
 }	
 
 void
-Prompter::change_labels (string okstr, string cancelstr)
+Prompter::change_labels (string /*okstr*/, string /*cancelstr*/)
 {
 	// dynamic_cast<Gtk::Label*>(ok.get_child())->set_text (okstr);
 	// dynamic_cast<Gtk::Label*>(cancel.get_child())->set_text (cancelstr);

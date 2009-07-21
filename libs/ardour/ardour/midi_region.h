@@ -52,7 +52,7 @@ class MidiRegion : public Region
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 	
 	/* Stub Readable interface */
-	virtual nframes_t read (Sample*, sframes_t pos, nframes_t cnt, int channel) const { return 0; }
+	virtual nframes_t read (Sample*, sframes_t /*pos*/, nframes_t /*cnt*/, int /*channel*/) const { return 0; }
 	virtual sframes_t readable_length() const { return length(); }
 
 	nframes_t read_at (MidiRingBuffer<nframes_t>& dst,

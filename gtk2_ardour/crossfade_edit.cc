@@ -510,7 +510,7 @@ CrossfadeEditor::Point::move_to (double nx, double ny, double xfract, double yfr
 }
 
 void
-CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
+CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 {
 	if (toplevel) {
 		toplevel->property_x1() = 0.0;
@@ -622,7 +622,7 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
 
 
 void
-CrossfadeEditor::xfade_changed (Change ignored)
+CrossfadeEditor::xfade_changed (Change)
 {
 	set (xfade->fade_in(), In);
 	set (xfade->fade_out(), Out);
@@ -1355,7 +1355,7 @@ CrossfadeEditor::audition_left_dry_toggled ()
 }
 
 bool
-CrossfadeEditor::on_key_press_event (GdkEventKey *ev)
+CrossfadeEditor::on_key_press_event (GdkEventKey */*ev*/)
 {
 	return true;
 }

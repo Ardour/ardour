@@ -130,7 +130,7 @@ veto_note_range(uint8_t& min, uint8_t& max)
 }
 
 RegionView*
-MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool wfd, bool)
+MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, bool)
 {
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 

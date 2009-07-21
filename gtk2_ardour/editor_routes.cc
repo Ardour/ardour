@@ -229,7 +229,7 @@ EditorRoutes::redisplay ()
 }
 
 void
-EditorRoutes::route_deleted (Gtk::TreeModel::Path const & path)
+EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
 {
 	/* this could require an order reset & sync */
 	_session->set_remote_control_ids();
@@ -240,7 +240,7 @@ EditorRoutes::route_deleted (Gtk::TreeModel::Path const & path)
 
 
 void
-EditorRoutes::changed (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterator const & iter)
+EditorRoutes::changed (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &)
 {
 	/* never reset order keys because of a property change */
 	_redisplay_does_not_reset_order_keys = true;
@@ -401,7 +401,7 @@ EditorRoutes::show_track_in_display (TimeAxisView& tv)
 }
 
 void
-EditorRoutes::reordered (TreeModel::Path const & path, TreeModel::iterator const & iter, int* what)
+EditorRoutes::reordered (TreeModel::Path const &, TreeModel::iterator const &, int* /*what*/)
 {
 	redisplay ();
 }
@@ -449,7 +449,7 @@ EditorRoutes::sync_order_keys (string const & src)
 
 
 void
-EditorRoutes::hide_all_tracks (bool with_select)
+EditorRoutes::hide_all_tracks (bool /*with_select*/)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -674,7 +674,7 @@ EditorRoutes::initial_display ()
 }
 
 void
-EditorRoutes::track_list_reorder (Gtk::TreeModel::Path const & path, Gtk::TreeModel::iterator const & iter, int* new_order)
+EditorRoutes::track_list_reorder (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int* /*new_order*/)
 {
 	_redisplay_does_not_sync_order_keys = true;
 	_session->set_remote_control_ids();

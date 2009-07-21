@@ -712,7 +712,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 int
 Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t& pos, ImportMode mode, 
-		     int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool add_channel_suffix)
+		     int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool /*add_channel_suffix*/)
 {
 	vector<boost::shared_ptr<Region> > regions;
 	ustring region_name;
@@ -903,7 +903,7 @@ Editor::import_thread ()
 }
 
 gint
-Editor::import_progress_timeout (void *arg)
+Editor::import_progress_timeout (void */*arg*/)
 {
 	bool reset = false;
 

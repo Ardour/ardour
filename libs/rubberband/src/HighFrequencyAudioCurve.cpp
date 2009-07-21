@@ -38,7 +38,7 @@ HighFrequencyAudioCurve::setWindowSize(size_t newSize)
 }
 
 float
-HighFrequencyAudioCurve::process(const float *R__ mag, size_t increment)
+HighFrequencyAudioCurve::process(const float *R__ mag, size_t /*increment*/)
 {
     float result = 0.0;
 
@@ -52,7 +52,7 @@ HighFrequencyAudioCurve::process(const float *R__ mag, size_t increment)
 }
 
 float
-HighFrequencyAudioCurve::processDouble(const double *R__ mag, size_t increment)
+HighFrequencyAudioCurve::processDouble(const double *R__ mag, size_t /*increment*/)
 {
     float result = 0.0;
 

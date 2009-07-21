@@ -198,7 +198,7 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 }
 
 boost::shared_ptr<Region>
-Editor::select_region_for_operation (int dir, TimeAxisView **tv)
+Editor::select_region_for_operation (int /*dir*/, TimeAxisView **tv)
 {
 	RegionView* rv;
 	boost::shared_ptr<Region> region;
@@ -1800,7 +1800,7 @@ Editor::temporal_zoom_session ()
 }
 
 void
-Editor::temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string & op)
+Editor::temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string & /*op*/)
 {
 	if (!session) return;
 
@@ -3684,7 +3684,7 @@ Editor::freeze_thread ()
 }
 
 gint
-Editor::freeze_progress_timeout (void *arg)
+Editor::freeze_progress_timeout (void */*arg*/)
 {
 	interthread_progress_bar.set_fraction (current_interthread_info->progress);
 	return !(current_interthread_info->done || current_interthread_info->cancel);

@@ -163,7 +163,7 @@ Delivery::display_name () const
 }
 
 void
-Delivery::cycle_start (nframes_t nframes)
+Delivery::cycle_start (nframes_t /*nframes*/)
 {
 	_output_offset = 0;
 	_no_outs_cuz_we_no_monitor = false;
@@ -578,7 +578,7 @@ Delivery::set_name (const std::string& name)
 }
 
 void
-Delivery::output_changed (IOChange change, void* src)
+Delivery::output_changed (IOChange change, void* /*src*/)
 {
 	if (change & ARDOUR::ConfigurationChanged) {
 		reset_panner ();

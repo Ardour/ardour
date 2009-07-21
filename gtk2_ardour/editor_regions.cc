@@ -904,7 +904,7 @@ EditorRegions::show_context_menu (int button, int time)
 }
 
 bool
-EditorRegions::key_press (GdkEventKey* ev)
+EditorRegions::key_press (GdkEventKey* /*ev*/)
 {
 	return false;
 }
@@ -1145,7 +1145,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 }
 
 bool
-EditorRegions::selection_filter (const RefPtr<TreeModel>& model, const TreeModel::Path& path, bool yn)
+EditorRegions::selection_filter (const RefPtr<TreeModel>& model, const TreeModel::Path& path, bool /*yn*/)
 {
 	/* not possible to select rows that do not represent regions, like "Hidden" */
 	

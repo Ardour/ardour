@@ -165,7 +165,7 @@ add_item_with_sensitivity (Menu_Helpers::MenuList& m, Menu_Helpers::MenuElem e, 
 
 
 gint
-just_hide_it (GdkEventAny *ev, Gtk::Window *win)
+just_hide_it (GdkEventAny */*ev*/, Gtk::Window *win)
 {
 	win->hide ();
 	return 0;
@@ -285,7 +285,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 }
 
 ArdourCanvas::Points*
-get_canvas_points (string who, uint32_t npoints)
+get_canvas_points (string /*who*/, uint32_t npoints)
 {
 	// cerr << who << ": wants " << npoints << " canvas points" << endl;
 #ifdef TRAP_EXCESSIVE_POINT_REQUESTS

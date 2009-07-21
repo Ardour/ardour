@@ -317,19 +317,19 @@ ProcessorBox::show_processor_menu (gint arg)
 }
 
 void
-ProcessorBox::processor_drag_begin (GdkDragContext *context)
+ProcessorBox::processor_drag_begin (GdkDragContext *)
 {
 	processor_drag_in_progress = true;
 }
 
 void
-ProcessorBox::processor_drag_end (GdkDragContext *context)
+ProcessorBox::processor_drag_end (GdkDragContext *)
 {
 	processor_drag_in_progress = false;
 }
 
 bool
-ProcessorBox::enter_notify (GdkEventCrossing* ev)
+ProcessorBox::enter_notify (GdkEventCrossing*)
 {
 	_current_processor_box = this;
 	Keyboard::magic_widget_grab_focus ();
@@ -352,7 +352,7 @@ ProcessorBox::leave_notify (GdkEventCrossing* ev)
 }
 
 bool
-ProcessorBox::processor_key_press_event (GdkEventKey *ev)
+ProcessorBox::processor_key_press_event (GdkEventKey *)
 {
 	/* do real stuff on key release */
 	return false;
@@ -928,7 +928,7 @@ ProcessorBox::show_processor_active (boost::weak_ptr<Processor> weak_processor)
 }
 
 void
-ProcessorBox::row_deleted (const Gtk::TreeModel::Path& path)
+ProcessorBox::row_deleted (const Gtk::TreeModel::Path &)
 {
 	if (!ignore_delete) {
 		compute_processor_sort_keys ();

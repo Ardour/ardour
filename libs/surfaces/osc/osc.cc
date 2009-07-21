@@ -51,12 +51,17 @@ using namespace sigc;
 using namespace std;
 
 
+#ifdef DEBUG
 static void error_callback(int num, const char *m, const char *path)
 {
-#ifdef DEBUG
 	fprintf(stderr, "liblo server error %d in path %s: %s\n", num, path, m);
-#endif
 }
+#else
+static void error_callback(int, const char *, const char *)
+{
+
+}
+#endif
 
 OSC::OSC (Session& s, uint32_t port)
 	: ControlProtocol (s, "OSC")
@@ -601,7 +606,7 @@ OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_
 }
 
 void
-OSC::route_added (RouteList& rl)
+OSC::route_added (RouteList&)
 {
 }
 
@@ -726,7 +731,7 @@ OSC::session_exported( std::string path, std::string name ) {
 /* path callbacks */
 
 int 
-OSC::current_value (const char *path, const char *types, lo_arg **argv, int argc, void *data, void* user_data) 
+OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv*/, int /*argc*/, void */*data*/, void* /*user_data*/) 
 { 
 #if 0
 	const char* returl;

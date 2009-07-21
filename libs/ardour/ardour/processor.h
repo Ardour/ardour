@@ -66,12 +66,12 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	
 	virtual nframes_t signal_latency() const { return 0; }
 	
-	virtual void transport_stopped (sframes_t frame) {}
+	virtual void transport_stopped (sframes_t /*frame*/) {}
 	
-	virtual void set_block_size (nframes_t nframes) {}
+	virtual void set_block_size (nframes_t /*nframes*/) {}
 
-	virtual void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes) {}
-	virtual void silence (nframes_t nframes) {}
+	virtual void run (BufferSet& /*bufs*/, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t /*nframes*/) {}
+	virtual void silence (nframes_t /*nframes*/) {}
 	
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }

@@ -206,7 +206,7 @@ TimeFXDialog::cancel_in_progress ()
 }
 
 gint
-TimeFXDialog::delete_in_progress (GdkEventAny* ev)
+TimeFXDialog::delete_in_progress (GdkEventAny*)
 {
 	status = -2;
 	request.cancel = true;

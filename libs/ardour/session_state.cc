@@ -1432,7 +1432,7 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 }
 
 boost::shared_ptr<AudioRegion>
-Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
+Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 {
 	const XMLProperty* prop;
 	boost::shared_ptr<Source> source;
@@ -1551,7 +1551,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 }
 
 boost::shared_ptr<MidiRegion>
-Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
+Session::XMLMidiRegionFactory (const XMLNode& node, bool /*full*/)
 {
 	const XMLProperty* prop;
 	boost::shared_ptr<Source> source;
@@ -2061,7 +2061,7 @@ Session::auto_save()
 }
 
 static bool
-state_file_filter (const string &str, void *arg)
+state_file_filter (const string &str, void */*arg*/)
 {
 	return (str.length() > strlen(statefile_suffix) &&
 		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
@@ -2266,13 +2266,13 @@ Session::set_global_record_enable (GlobalRouteBooleanState s, void* src)
 }
 
 static bool
-accept_all_non_peak_files (const string& path, void *arg)
+accept_all_non_peak_files (const string& path, void */*arg*/)
 {
 	return (path.length() > 5 && path.find (peakfile_suffix) != (path.length() - 5));
 }
 
 static bool
-accept_all_state_files (const string& path, void *arg)
+accept_all_state_files (const string& path, void */*arg*/)
 {
 	return (path.length() > 7 && path.find (".ardour") == (path.length() - 7));
 }

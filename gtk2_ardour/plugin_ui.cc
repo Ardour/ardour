@@ -228,7 +228,11 @@ PluginUIWindow::on_hide ()
 }
 
 bool
+#ifdef VST_SUPPORT
 PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
+#else
+PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert>)
+#endif	
 {
 #ifndef VST_SUPPORT
 	return false;
@@ -254,7 +258,11 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
 }
 
 bool
+#if defined (HAVE_AUDIOUNITS) && defined (GTKOSX)
 PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
+#else
+PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
+#endif	
 {
 #if !defined(HAVE_AUDIOUNITS) || !defined(GTKOSX)
 	return false;
@@ -272,7 +280,11 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 }
 
 void
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
 PluginUIWindow::app_activated (bool yn)
+#else
+PluginUIWindow::app_activated (bool)
+#endif	
 {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
 	cerr << "APP activated ? " << yn << endl;
@@ -327,7 +339,7 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 }
 
 bool
-PluginUIWindow::on_key_release_event (GdkEventKey* event)
+PluginUIWindow::on_key_release_event (GdkEventKey *)
 {
 	return true;
 }
@@ -499,7 +511,7 @@ PlugUIBase::bypass_toggled ()
 }
 
 bool
-PlugUIBase::focus_toggled (GdkEventButton* ev)
+PlugUIBase::focus_toggled (GdkEventButton*)
 {
 	if (Keyboard::the_keyboard().some_magic_widget_has_focus()) {
 		Keyboard::the_keyboard().magic_widget_drop_focus();

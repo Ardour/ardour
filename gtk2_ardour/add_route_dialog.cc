@@ -405,7 +405,7 @@ AddRouteDialog::group_changed ()
 }
 
 bool
-AddRouteDialog::channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i)
+AddRouteDialog::channel_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gtk::TreeModel::iterator &i)
 {
 	channel_combo.set_active (i);
 
@@ -413,7 +413,7 @@ AddRouteDialog::channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const 
 }
 
 bool
-AddRouteDialog::route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i)
+AddRouteDialog::route_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gtk::TreeModel::iterator &i)
 {
 	route_group_combo.set_active (i);
 

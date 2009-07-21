@@ -720,7 +720,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-RegionMoveDrag::finished (GdkEvent* event, bool movement_occurred)
+RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
 	bool nocommit = true;
 	vector<RegionView*> copies;
@@ -1243,7 +1243,7 @@ RegionMotionDrag::find_time_axis_views ()
 
 
 void
-RegionInsertDrag::finished (GdkEvent* event, bool movement_occurred)
+RegionInsertDrag::finished (GdkEvent* /*event*/, bool /*movement_occurred*/)
 {
 	_editor->update_canvas_now ();
 
@@ -1280,7 +1280,7 @@ struct RegionSelectionByPosition {
 };
 
 void
-RegionSpliceDrag::motion (GdkEvent* event, bool)
+RegionSpliceDrag::motion (GdkEvent* /*event*/, bool)
 {
 	RouteTimeAxisView* tv;
 	layer_t layer;
@@ -1338,7 +1338,7 @@ RegionSpliceDrag::motion (GdkEvent* event, bool)
 }
 
 void
-RegionSpliceDrag::finished (GdkEvent* event, bool)
+RegionSpliceDrag::finished (GdkEvent* /*event*/, bool)
 {
 	
 }
@@ -1361,7 +1361,7 @@ RegionCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 
 
 void
-RegionCreateDrag::motion (GdkEvent* event, bool first_move)
+RegionCreateDrag::motion (GdkEvent* /*event*/, bool first_move)
 {
 	if (first_move) {
 		// TODO: create region-create-drag region view here
@@ -1415,7 +1415,7 @@ RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 
 
 void
-RegionGainDrag::motion (GdkEvent* event, bool)
+RegionGainDrag::motion (GdkEvent* /*event*/, bool)
 {
 	
 }
@@ -2434,7 +2434,7 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 
 
 void
-ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 {
 	Drag::start_grab (event, _editor->fader_cursor);
 
@@ -2552,7 +2552,7 @@ LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
 
 }
 void
-LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 {
 	_line = reinterpret_cast<AutomationLine*> (_item->get_data ("line"));
 	assert (_line);
@@ -2771,7 +2771,7 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 }
 
 void
-TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
+TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
 	_primary->get_time_axis_view().hide_timestretch ();
 
@@ -2814,13 +2814,13 @@ ScrubDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 }
 
 void
-ScrubDrag::motion (GdkEvent* event, bool)
+ScrubDrag::motion (GdkEvent* /*event*/, bool)
 {
 	_editor->scrub ();
 }
 
 void
-ScrubDrag::finished (GdkEvent* event, bool movement_occurred)
+ScrubDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
 	if (movement_occurred && _editor->session) {
 		/* make sure we stop */

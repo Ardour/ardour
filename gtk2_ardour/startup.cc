@@ -1127,7 +1127,7 @@ ArdourStartup::move_along_now ()
 }
 
 void
-ArdourStartup::recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col)
+ArdourStartup::recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*)
 {
 	set_page_complete (session_vbox, true);
 	move_along_now ();

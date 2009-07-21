@@ -198,7 +198,7 @@ AnalysisWindow::set_regionmode()
 }
 
 void 
-AnalysisWindow::track_list_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter)
+AnalysisWindow::track_list_row_changed(const Gtk::TreeModel::Path& /*path*/, const Gtk::TreeModel::iterator& /*iter*/)
 {
 	if (track_list_ready) {
 		fft_graph.redraw();
@@ -235,7 +235,7 @@ AnalysisWindow::analyze()
 }
 
 void
-AnalysisWindow::analyze_data (Gtk::Button *button)
+AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 {
 	track_list_ready = false;
 	{

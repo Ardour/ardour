@@ -485,10 +485,10 @@ Session::jack_sync_callback (jack_transport_state_t state,
 }
 
 void
-Session::jack_timebase_callback (jack_transport_state_t state,
-				 nframes_t nframes,
+Session::jack_timebase_callback (jack_transport_state_t /*state*/,
+				 nframes_t /*nframes*/,
 				 jack_position_t* pos,
-				 int new_position)
+				 int /*new_position*/)
 {
 	BBT_Time bbt;
 
@@ -565,7 +565,7 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 }
 
 ARDOUR::nframes_t
-Session::convert_to_frames_at (nframes_t position, AnyTime const & any)
+Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
 {
 	double secs;
 	

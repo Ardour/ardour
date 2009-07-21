@@ -46,7 +46,7 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
 }
 
 void
-AutomationRegionView::init (Gdk::Color const & basic_color, bool wfd)
+AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 {
 	_enable_display = false;
 	
@@ -92,7 +92,7 @@ AutomationRegionView::canvas_event(GdkEvent* ev)
 }
 
 void
-AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, double y)
+AutomationRegionView::add_automation_event (GdkEvent* /*event*/, nframes_t when, double y)
 {
 	if (!_line) {
 		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);

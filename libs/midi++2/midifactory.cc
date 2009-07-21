@@ -124,7 +124,11 @@ PortFactory::ignore_duplicate_devices (Port::Type type)
 }
 
 int
+#if defined (WITH_ALSA) || defined (WITH_COREMIDI)
 PortFactory::get_known_ports (vector<PortSet>& ports)
+#else
+PortFactory::get_known_ports (vector<PortSet>&)
+#endif	
 {
 	int n = 0;
 #ifdef WITH_ALSA

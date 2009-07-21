@@ -131,8 +131,8 @@ class RegionExportChannel : public ExportChannel
 
   public:
 	void read (Sample * data, nframes_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
-	void get_state (XMLNode * node) const {};
-	void set_state (XMLNode * node, Session & session) {};
+	void get_state (XMLNode * /*node*/) const {};
+	void set_state (XMLNode * /*node*/, Session & /*session*/) {};
 	bool empty () const { return false; }
 	// Region export should never have duplicate channels, so there need not be any semantics here
 	bool operator< (ExportChannel const & other) const { return this < &other; }

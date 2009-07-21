@@ -160,7 +160,7 @@ MIDIControllable::midi_sense_note_off (Parser &p, EventTwoBytes *tb)
 }
 
 void
-MIDIControllable::midi_sense_note (Parser &p, EventTwoBytes *msg, bool is_on)
+MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool is_on)
 {
 	if (!bistate) {
 		controllable.set_value (msg->note_number/127.0);
@@ -202,7 +202,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 }
 
 void
-MIDIControllable::midi_sense_program_change (Parser &p, byte msg)
+MIDIControllable::midi_sense_program_change (Parser &, byte msg)
 {
 	/* XXX program change messages make no sense for bistates */
 
@@ -213,7 +213,7 @@ MIDIControllable::midi_sense_program_change (Parser &p, byte msg)
 }
 
 void
-MIDIControllable::midi_sense_pitchbend (Parser &p, pitchbend_t pb)
+MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 {
 	/* pitchbend messages make no sense for bistates */
 
@@ -224,7 +224,7 @@ MIDIControllable::midi_sense_pitchbend (Parser &p, pitchbend_t pb)
 }			
 
 void
-MIDIControllable::midi_receiver (Parser &p, byte *msg, size_t len)
+MIDIControllable::midi_receiver (Parser &, byte *msg, size_t /*len*/)
 {
 	/* we only respond to channel messages */
 
@@ -342,7 +342,7 @@ MIDIControllable::send_feedback ()
 }
 
 MIDI::byte*
-MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force)
+MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*force*/)
 {
 	if (control_type != none && feedback && bufsize > 2) {
 		

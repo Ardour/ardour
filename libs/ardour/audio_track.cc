@@ -173,7 +173,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 }
 
 int
-AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void *src)
+AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void * /*src*/)
 {
 	_diskstream = ds;
 	_diskstream->set_route (*this);

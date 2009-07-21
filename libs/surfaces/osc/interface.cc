@@ -23,7 +23,7 @@
 using namespace ARDOUR;
 
 ControlProtocol*
-new_osc_protocol (ControlProtocolDescriptor* descriptor, Session* s)
+new_osc_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	OSC* osc = new OSC (*s, Config->get_osc_port());
 		
@@ -33,13 +33,13 @@ new_osc_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 }
 
 void
-delete_osc_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
+delete_osc_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
 	delete cp;
 }
 
 bool
-probe_osc_protocol (ControlProtocolDescriptor* descriptor)
+probe_osc_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
 	return true; // we can always do OSC
 }

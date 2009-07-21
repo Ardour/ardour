@@ -398,7 +398,7 @@ PluginEqGui::run_impulse_analysis()
 }
 
 bool
-PluginEqGui::expose_analysis_area(GdkEventExpose *evt)
+PluginEqGui::expose_analysis_area(GdkEventExpose *)
 {
 	redraw_analysis_area();
 
@@ -463,7 +463,7 @@ PluginEqGui::redraw_analysis_area()
 #define PHASE_PROPORTION 0.5
 
 void 
-PluginEqGui::draw_scales_phase(Gtk::Widget *w, cairo_t *cr)
+PluginEqGui::draw_scales_phase(Gtk::Widget */*w*/, cairo_t *cr)
 {
 	float y;
 	cairo_font_extents_t extents;
@@ -561,7 +561,7 @@ PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 }
 
 void
-PluginEqGui::draw_scales_power(Gtk::Widget *w, cairo_t *cr)
+PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 {
 	static float scales[] = { 30.0, 70.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 15000.0, 20000.0, -1.0 };
 	

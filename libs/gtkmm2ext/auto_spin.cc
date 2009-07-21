@@ -57,7 +57,7 @@ AutoSpin::stop_timer ()
 }
 
 gint
-AutoSpin::stop_spinning (GdkEventButton *ev)
+AutoSpin::stop_spinning (GdkEventButton */*ev*/)
 {
 	need_timer = false;
 	stop_timer ();

@@ -110,7 +110,9 @@ public:
 	virtual void cycle_end (nframes_t) = 0;
 	virtual void cycle_split () = 0;
 	virtual Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) = 0;
-	virtual void flush_buffers (nframes_t, nframes_t offset = 0) {}
+	virtual void flush_buffers (nframes_t, nframes_t offset = 0) {
+		(void) offset;
+	}
 	
 	static void set_engine (AudioEngine *);
 

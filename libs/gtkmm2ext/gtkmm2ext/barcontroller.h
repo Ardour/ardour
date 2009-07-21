@@ -74,7 +74,7 @@ class BarController : public Gtk::Frame
 	Gtk::SpinButton     spinner;
 	bool                use_parent;
 
-	virtual std::string get_label (int& x) {
+	virtual std::string get_label (int& /*x*/) {
 		return "";
 	}
 	

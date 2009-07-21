@@ -939,14 +939,14 @@ MixerStrip::diskstream_changed ()
 }	
 
 void
-MixerStrip::input_changed (IOChange change, void *src)
+MixerStrip::input_changed (IOChange /*change*/, void */*src*/)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_input_display));
 	set_width_enum (_width, this);
 }
 
 void
-MixerStrip::output_changed (IOChange change, void *src)
+MixerStrip::output_changed (IOChange /*change*/, void */*src*/)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
 	set_width_enum (_width, this);
@@ -1586,7 +1586,7 @@ MixerStrip::on_key_release_event (GdkEventKey* ev)
 }
 
 bool
-MixerStrip::on_enter_notify_event (GdkEventCrossing* ev)
+MixerStrip::on_enter_notify_event (GdkEventCrossing*)
 {
 	Keyboard::magic_widget_grab_focus ();
 	grab_focus ();

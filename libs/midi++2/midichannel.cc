@@ -76,7 +76,7 @@ Channel::connect_output_signals ()
 }
 
 void
-Channel::reset (timestamp_t timestamp, nframes_t nframes, bool notes_off)
+Channel::reset (timestamp_t timestamp, nframes_t /*nframes*/, bool notes_off)
 {
 	_program_number = _channel_number;
 	_bank_number = 0;
@@ -115,8 +115,7 @@ Channel::reset (timestamp_t timestamp, nframes_t nframes, bool notes_off)
 }
 
 void
-Channel::process_note_off (Parser &parser, EventTwoBytes *tb) 
-
+Channel::process_note_off (Parser & /*parser*/, EventTwoBytes *tb) 
 {
 	_last_note_off = tb->note_number;
 	_last_off_velocity = tb->velocity;
@@ -127,8 +126,7 @@ Channel::process_note_off (Parser &parser, EventTwoBytes *tb)
 }
 
 void
-Channel::process_note_on (Parser &parser, EventTwoBytes *tb) 
-
+Channel::process_note_on (Parser & /*parser*/, EventTwoBytes *tb) 
 {
 	_last_note_on = tb->note_number;
 	_last_on_velocity = tb->velocity;
@@ -136,8 +134,7 @@ Channel::process_note_on (Parser &parser, EventTwoBytes *tb)
 }
 
 void
-Channel::process_controller (Parser &parser, EventTwoBytes *tb) 
-
+Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb) 
 {
 	unsigned short cv;
 
@@ -216,36 +213,31 @@ Channel::process_controller (Parser &parser, EventTwoBytes *tb)
 }
 
 void
-Channel::process_program_change (Parser &parser, byte val) 
-
+Channel::process_program_change (Parser & /*parser*/, byte val) 
 {
 	_program_number = val;
 }
 
 void
-Channel::process_chanpress (Parser &parser, byte val) 
-
+Channel::process_chanpress (Parser & /*parser*/, byte val) 
 {
 	_chanpress = val;
 }
 
 void
-Channel::process_polypress (Parser &parser, EventTwoBytes *tb) 
-
+Channel::process_polypress (Parser & /*parser*/, EventTwoBytes *tb) 
 {
 	_polypress[tb->note_number] = tb->value;
 }
 
 void
-Channel::process_pitchbend (Parser &parser, pitchbend_t val) 
-
+Channel::process_pitchbend (Parser & /*parser*/, pitchbend_t val) 
 {
 	_pitch_bend = val;
 }
 
 void
-Channel::process_reset (Parser &parser) 
-
+Channel::process_reset (Parser & /*parser*/) 
 {
 	reset (0, 1);
 }

@@ -325,7 +325,7 @@ LV2Plugin::load_preset(const string uri)
 }
 
 bool
-LV2Plugin::save_preset (string name)
+LV2Plugin::save_preset (string /*name*/)
 {
 	return false;
 }

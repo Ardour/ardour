@@ -109,7 +109,7 @@ class Route : public SessionObject, public AutomatableControls
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
 
-	virtual void set_record_enable (bool yn, void *src) {}
+	virtual void set_record_enable (bool /*yn*/, void * /*src*/) {}
 	virtual bool record_enabled() const { return false; }
 	virtual void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void set_pending_declick (int);

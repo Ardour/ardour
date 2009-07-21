@@ -200,7 +200,7 @@ Auditioner::play_audition (nframes_t nframes)
 }
 
 void
-Auditioner::output_changed (IOChange change, void* src)
+Auditioner::output_changed (IOChange change, void* /*src*/)
 {
 	string phys;
 

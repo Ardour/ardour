@@ -119,7 +119,7 @@ void MidiClockTicker::transport_looped()
 	_last_tick = loop_location->start() - elapsed_since_last_tick;
 }
 
-void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& transport_bbt, const SMPTE::Time& transport_smpt)
+void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& /*transport_bbt*/, const SMPTE::Time& /*transport_smpt*/)
 {
 #ifdef WITH_JACK_MIDI
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f)

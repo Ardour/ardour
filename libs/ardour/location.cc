@@ -654,7 +654,7 @@ Locations::remove (Location *loc)
 }
 
 void
-Locations::location_changed (Location* loc)
+Locations::location_changed (Location* /*loc*/)
 {
 	changed (); /* EMIT SIGNAL */
 }

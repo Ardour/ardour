@@ -249,7 +249,7 @@ Session::set_mmc_port (string port_tag)
 }
 
 int
-Session::set_midi_port (string port_tag)
+Session::set_midi_port (string /*port_tag*/)
 {
 #if 0
 	if (port_tag.length() == 0) {
@@ -492,7 +492,7 @@ Session::setup_midi_control ()
 }
 
 void
-Session::spp_start (Parser& ignored, nframes_t timestamp)
+Session::spp_start (Parser &, nframes_t /*timestamp*/)
 {
 	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
 		request_transport_speed (1.0);
@@ -506,7 +506,7 @@ Session::spp_continue (Parser& ignored, nframes_t timestamp)
 }
 
 void
-Session::spp_stop (Parser& ignored, nframes_t timestamp)
+Session::spp_stop (Parser&, nframes_t /*timestamp*/)
 {
 	if (Config->get_mmc_control()) {
 		request_stop ();
@@ -537,7 +537,7 @@ Session::midi_clock_stop (Parser& ignored, nframes_t timestamp)
 */
 
 void
-Session::mmc_deferred_play (MIDI::MachineControl &mmc)
+Session::mmc_deferred_play (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
 		request_transport_speed (1.0);
@@ -545,7 +545,7 @@ Session::mmc_deferred_play (MIDI::MachineControl &mmc)
 }
 
 void
-Session::mmc_record_pause (MIDI::MachineControl &mmc)
+Session::mmc_record_pause (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control()) {
 		maybe_enable_record();
@@ -553,7 +553,7 @@ Session::mmc_record_pause (MIDI::MachineControl &mmc)
 }
 
 void
-Session::mmc_record_strobe (MIDI::MachineControl &mmc)
+Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 {
 	if (!Config->get_mmc_control())
 		return;
@@ -581,7 +581,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 }
 
 void
-Session::mmc_record_exit (MIDI::MachineControl &mmc)
+Session::mmc_record_exit (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control()) {
 		disable_record (false);
@@ -589,7 +589,7 @@ Session::mmc_record_exit (MIDI::MachineControl &mmc)
 }
 
 void
-Session::mmc_stop (MIDI::MachineControl &mmc)
+Session::mmc_stop (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control()) {
 		request_stop ();
@@ -597,7 +597,7 @@ Session::mmc_stop (MIDI::MachineControl &mmc)
 }
 
 void
-Session::mmc_pause (MIDI::MachineControl &mmc)
+Session::mmc_pause (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control()) {
 
@@ -617,7 +617,7 @@ Session::mmc_pause (MIDI::MachineControl &mmc)
 static bool step_queued = false;
 
 void
-Session::mmc_step (MIDI::MachineControl &mmc, int steps)
+Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 {
 	if (!Config->get_mmc_control()) {
 		return;
@@ -668,7 +668,7 @@ Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 }
 
 void
-Session::mmc_rewind (MIDI::MachineControl &mmc)
+Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control()) {
 		request_transport_speed(-8.0f);
@@ -676,7 +676,7 @@ Session::mmc_rewind (MIDI::MachineControl &mmc)
 }
 
 void
-Session::mmc_fast_forward (MIDI::MachineControl &mmc)
+Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control()) {
 		request_transport_speed(8.0f);
@@ -684,7 +684,7 @@ Session::mmc_fast_forward (MIDI::MachineControl &mmc)
 }
 
 void
-Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
+Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 {
 	if (!Config->get_mmc_control()) {
 		return;
@@ -725,7 +725,7 @@ Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 }
 
 void
-Session::mmc_shuttle (MIDI::MachineControl &mmc, float speed, bool forw)
+Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 {
 	if (!Config->get_mmc_control()) {
 		return;
@@ -778,7 +778,7 @@ Session::change_midi_ports ()
  * the first one with the beginning of this cycle as the new start point.
  */
 int
-Session::send_full_time_code(nframes_t nframes)
+Session::send_full_time_code(nframes_t /*nframes*/)
 {
 	/* This function could easily send at a given frame offset, but would
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */

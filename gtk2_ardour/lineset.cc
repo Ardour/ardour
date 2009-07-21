@@ -66,7 +66,7 @@ LineSetClass::init()
 }
 
 void
-LineSetClass::class_init_function(void* g_class, void* class_data)
+LineSetClass::class_init_function(void* /*g_class*/, void* /*class_data*/)
 {
 }
 
@@ -503,7 +503,7 @@ LineSet::update_bounds()
  * N. find out if the item moved. if it moved, the old bbox and the new bbox need to be updated.
  */
 void
-LineSet::update_vfunc(double* affine, ArtSVP* clip_path, int flags)
+LineSet::update_vfunc(double* /*affine*/, ArtSVP* /*clip_path*/, int /*flags*/)
 {
 	GnomeCanvasItem* item = GNOME_CANVAS_ITEM(gobj());
 	bool lines_need_redraw = true;
@@ -539,7 +539,7 @@ LineSet::update_vfunc(double* affine, ArtSVP* clip_path, int flags)
 }
 
 void
-LineSet::draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height)
+LineSet::draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& /*drawable*/, int /*x*/, int /*y*/, int /*width*/, int /*height*/)
 {
 	cerr << "please don't use the GnomeCanvasLineSet item in a non-aa Canvas" << endl;
 	abort();
@@ -704,7 +704,7 @@ LineSet::bounds_vfunc(double* _x1, double* _y1, double* _x2, double* _y2)
 
 
 double
-LineSet::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actual_item)
+LineSet::point_vfunc(double x, double y, int /*cx*/, int /*cy*/, GnomeCanvasItem** actual_item)
 {
 	double x1, y1, x2, y2;
 	double dx, dy;
@@ -774,7 +774,7 @@ LineSet::region_needs_update(double coord1, double coord2)
  * These have been defined to avoid endless recursion with gnomecanvasmm.
  * Don't know why this happens
  */
-bool LineSet::on_event(GdkEvent* p1)
+bool LineSet::on_event(GdkEvent* /*p1*/)
 { 
 	return false;
 }

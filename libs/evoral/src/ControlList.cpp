@@ -211,7 +211,7 @@ void ControlList::_x_scale (double factor)
 }
 
 void
-ControlList::reposition_for_rt_add (double when)
+ControlList::reposition_for_rt_add (double /*when*/)
 {
 	_rt_insertion_point = _events.end();
 }
@@ -1254,7 +1254,7 @@ ControlList::clear (double start, double end)
 }
 
 bool
-ControlList::paste (ControlList& alist, double pos, float times)
+ControlList::paste (ControlList& alist, double pos, float /*times*/)
 {
 	if (alist._events.empty()) {
 		return false;

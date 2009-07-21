@@ -110,7 +110,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 }
 
 double
-PortMatrixColumnLabels::basic_text_x_pos (int c) const
+PortMatrixColumnLabels::basic_text_x_pos (int) const
 {
 	return grid_spacing() / 2 +
 		_highest_text / (2 * sin (angle ()));
@@ -441,7 +441,7 @@ PortMatrixColumnLabels::channel_x (ARDOUR::BundleChannel const &bc) const
 }
 
 double
-PortMatrixColumnLabels::channel_y (ARDOUR::BundleChannel const &bc) const
+PortMatrixColumnLabels::channel_y (ARDOUR::BundleChannel const &) const
 {
 	return 0;
 }

@@ -325,7 +325,7 @@ PortMatrixRowLabels::render_channel_name (
 }
 
 double
-PortMatrixRowLabels::channel_x (ARDOUR::BundleChannel const& bc) const
+PortMatrixRowLabels::channel_x (ARDOUR::BundleChannel const &) const
 {
 	return 0;
 }

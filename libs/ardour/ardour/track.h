@@ -41,8 +41,8 @@ class Track : public Route
 	bool set_name (const std::string& str);
 
 	TrackMode mode () const { return _mode; }
-	virtual int set_mode (TrackMode m) { return false; }
-	virtual bool can_use_mode (TrackMode m, bool& bounce_required) { return false; }
+	virtual int set_mode (TrackMode /*m*/) { return false; }
+	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	sigc::signal<void> TrackModeChanged;
 	
 	int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 

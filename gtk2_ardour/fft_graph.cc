@@ -140,7 +140,7 @@ FFTGraph::~FFTGraph()
 }
 
 bool
-FFTGraph::on_expose_event (GdkEventExpose* event)
+FFTGraph::on_expose_event (GdkEventExpose* /*event*/)
 {
 	redraw();
 	return true;

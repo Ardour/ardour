@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class SilentFileSource : public AudioFileSource {
 public:
-	int update_header (sframes_t when, struct tm&, time_t) { return 0; }
+	int update_header (sframes_t /*when*/, struct tm&, time_t) { return 0; }
 	int flush_header () { return 0; }
 	float sample_rate () const { return _sample_rate; }
 
@@ -47,17 +47,17 @@ protected:
 		_length = len;
 	}
 
-	nframes_t read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const {
+	nframes_t read_unlocked (Sample *dst, sframes_t /*start*/, nframes_t cnt) const {
 		memset (dst, 0, sizeof (Sample) * cnt);
 		return cnt;
 	}
 
-	nframes_t write_unlocked (Sample *dst, nframes_t cnt) { return 0; }
+	nframes_t write_unlocked (Sample */*dst*/, nframes_t /*cnt*/) { return 0; }
 
 	void set_header_timeline_position () {}
 
- 	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t start, nframes_t cnt,
-			double samples_per_unit, nframes_t fpp) const {
+ 	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t /*start*/, nframes_t /*cnt*/,
+				 double /*samples_per_unit*/, nframes_t /*fpp*/) const {
 		memset (peaks, 0, sizeof (PeakData) * npeaks);
 		return 0;
 	}

@@ -158,7 +158,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		bool            max_unbound;
 		bool packed;
 		
-		MeterInfo(int i) { 
+		MeterInfo (int /*i*/) { 
 			meter = 0;
 			packed = false;
 			min = 1.0e10;

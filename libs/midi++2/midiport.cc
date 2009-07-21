@@ -166,13 +166,13 @@ Port::get_state () const
 }
 
 void
-Port::set_state (const XMLNode& node)
+Port::set_state (const XMLNode& /*node*/)
 {
 	// relax
 }
 
 void
-Port::gtk_read_callback (void *ptr, int fd, int cond)
+Port::gtk_read_callback (void *ptr, int /*fd*/, int /*cond*/)
 {
 	byte buf[64];
 	((Port *)ptr)->read (buf, sizeof (buf));

@@ -113,7 +113,7 @@ MidiSource::length (sframes_t pos) const
 }
 
 void
-MidiSource::update_length (sframes_t pos, sframes_t cnt)
+MidiSource::update_length (sframes_t /*pos*/, sframes_t /*cnt*/)
 {
 	// You're not the boss of me!
 }

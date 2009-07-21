@@ -930,7 +930,7 @@ EngineControl::audio_mode_changed ()
 	}
 }
 
-static bool jack_server_filter(const string& str, void *arg)
+static bool jack_server_filter(const string& str, void */*arg*/)
 {
    return str == "jackd" || str == "jackdmp";
 }

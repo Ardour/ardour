@@ -314,7 +314,7 @@ MidiDiskstream::set_note_mode (NoteMode m)
 }
 
 void
-MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record)
+MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*/, bool can_record)
 {
 	// FIXME: waaay too much code to duplicate (AudioDiskstream)
 	
@@ -1029,7 +1029,7 @@ MidiDiskstream::do_refill ()
  * written at all unless @a force_flush is true.
  */
 int
-MidiDiskstream::do_flush (RunContext context, bool force_flush)
+MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 {
 	uint32_t to_write;
 	int32_t ret = 0;
@@ -1084,7 +1084,7 @@ out:
 }
 
 void
-MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture)
+MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool abort_capture)
 {
 	uint32_t buffer_position;
 	bool more_work = true;
@@ -1257,7 +1257,7 @@ MidiDiskstream::transport_looped (nframes_t transport_frame)
 }
 
 void
-MidiDiskstream::finish_capture (bool rec_monitors_input)
+MidiDiskstream::finish_capture (bool /*rec_monitors_input*/)
 {
 	was_recording = false;
 	
@@ -1547,7 +1547,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 }
 
 void
-MidiDiskstream::reset_write_sources (bool mark_write_complete, bool force)
+MidiDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 {
 	if (!recordable()) {
 		return;
@@ -1575,7 +1575,7 @@ MidiDiskstream::rename_write_sources ()
 }
 
 void
-MidiDiskstream::set_block_size (nframes_t nframes)
+MidiDiskstream::set_block_size (nframes_t /*nframes*/)
 {
 }
 
@@ -1629,7 +1629,7 @@ MidiDiskstream::capture_buffer_load () const
 }
 
 int
-MidiDiskstream::use_pending_capture_data (XMLNode& node)
+MidiDiskstream::use_pending_capture_data (XMLNode& /*node*/)
 {
 	return 0;
 }

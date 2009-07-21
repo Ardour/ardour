@@ -242,7 +242,7 @@ SessionImportDialog::update (string path)
 }
 
 void
-SessionImportDialog::show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
+SessionImportDialog::show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*)
 {
 	if (path.size() == 1) {
 		return;

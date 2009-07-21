@@ -181,13 +181,13 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 }
 
 bool
-TempoDialog::bpm_button_press (GdkEventButton* ev)
+TempoDialog::bpm_button_press (GdkEventButton*)
 {
 	return false;
 }
 
 bool
-TempoDialog::bpm_button_release (GdkEventButton* ev)
+TempoDialog::bpm_button_release (GdkEventButton*)
 {	
 	/* the value has been modified, accept should work now */
 
@@ -196,7 +196,7 @@ TempoDialog::bpm_button_release (GdkEventButton* ev)
 }
 
 bool
-TempoDialog::entry_key_release (GdkEventKey* ev)
+TempoDialog::entry_key_release (GdkEventKey*)
 {	
 	if (when_beat_entry.get_text() != "" && when_bar_entry.get_text() != "") {
 	        set_response_sensitive (RESPONSE_ACCEPT, true);
@@ -425,7 +425,7 @@ MeterDialog::entry_key_press (GdkEventKey* ev)
 }
 
 bool
-MeterDialog::entry_key_release (GdkEventKey* ev)
+MeterDialog::entry_key_release (GdkEventKey*)
 {
         if (when_bar_entry.get_text() != "" && bpb_entry.get_text() != "") {
 	        set_response_sensitive (RESPONSE_ACCEPT, true);

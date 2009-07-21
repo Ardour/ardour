@@ -336,7 +336,11 @@ PluginSelector::lv2_refiller (const std::string& filterstr)
 }
 
 void
+#ifdef VST_SUPPORT
 PluginSelector::vst_refiller (const std::string& filterstr)
+#else
+PluginSelector::vst_refiller (const std::string&)
+#endif
 {
 #ifdef VST_SUPPORT
 	refiller (manager->vst_plugin_info(), filterstr, "VST");
@@ -344,7 +348,11 @@ PluginSelector::vst_refiller (const std::string& filterstr)
 }
 
 void
+#ifdef HAVE_AUDIOUNITS
 PluginSelector::au_refiller (const std::string& filterstr)
+#else
+PluginSelector::au_refiller (const std::string&)
+#endif	
 {
 #ifdef HAVE_AUDIOUNITS
 	refiller (manager->au_plugin_info(), filterstr, "AU");

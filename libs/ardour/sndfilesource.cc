@@ -512,7 +512,7 @@ SndFileSource::flush_header ()
 }
 
 int
-SndFileSource::setup_broadcast_info (sframes_t when, struct tm& now, time_t tnow)
+SndFileSource::setup_broadcast_info (sframes_t /*when*/, struct tm& now, time_t /*tnow*/)
 {
 	if (!writable()) {
 		warning << string_compose (_("attempt to store broadcast info in a non-writable audio file source (%1)"), _path) << endmsg;

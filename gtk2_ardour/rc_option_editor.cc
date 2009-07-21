@@ -135,7 +135,7 @@ public:
 	
 private:
 
-	void model_changed (TreeModel::Path const & p, TreeModel::iterator const & i)
+	void model_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
 
@@ -622,7 +622,7 @@ public:
 		_box->pack_start (*t, false, false);
 	}
 
-	void parameter_changed (string const & p)
+	void parameter_changed (string const &)
 	{
 		/* XXX: these aren't really config options... */
 	}
@@ -872,7 +872,7 @@ public:
 
 private:
 
-	void model_changed (TreeModel::Path const & p, TreeModel::iterator const & i)
+	void model_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
 

@@ -96,7 +96,7 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 
 	
 void
-MidiPort::cycle_end (nframes_t nframes)
+MidiPort::cycle_end (nframes_t /*nframes*/)
 {
 	_has_been_mixed_down = false;
 }

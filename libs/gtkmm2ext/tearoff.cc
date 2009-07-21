@@ -116,7 +116,7 @@ TearOff::set_visible (bool yn)
 }
 
 gint
-TearOff::tearoff_click (GdkEventButton* ev)
+TearOff::tearoff_click (GdkEventButton* /*ev*/)
 {
 	if (_can_be_torn_off) {
 		remove (contents);
@@ -132,7 +132,7 @@ TearOff::tearoff_click (GdkEventButton* ev)
 }
 
 gint
-TearOff::close_click (GdkEventButton* ev)
+TearOff::close_click (GdkEventButton* /*ev*/)
 {
 	window_box.remove (contents);
 	pack_start (contents);
@@ -162,7 +162,7 @@ TearOff::window_button_press (GdkEventButton* ev)
 }
 
 gint
-TearOff::window_button_release (GdkEventButton* ev)
+TearOff::window_button_release (GdkEventButton* /*ev*/)
 {
 	dragging = false;
 	own_window.remove_modal_grab();
@@ -170,7 +170,7 @@ TearOff::window_button_release (GdkEventButton* ev)
 }
 
 gint
-TearOff::window_delete_event (GdkEventAny* ev)
+TearOff::window_delete_event (GdkEventAny* /*ev*/)
 {
 	return close_click(0);
 }

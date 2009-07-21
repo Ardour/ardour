@@ -30,7 +30,7 @@ using namespace PBD;
 
 SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				    Gtk::Adjustment *adj,  int orientation,
-				    bool with_numeric)
+				    bool /*with_numeric*/)
 
 	: PixFader (image, *adj, orientation),
 	  spin (*adj, 0, 2)

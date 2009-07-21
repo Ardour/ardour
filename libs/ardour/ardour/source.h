@@ -80,7 +80,7 @@ class Source : public SessionObject, public boost::noncopyable
 	
 	bool         destructive() const       { return (_flags & Destructive); }
 	bool         writable () const         { return _flags & Writable; }
-	virtual bool set_destructive (bool yn) { return false; }
+	virtual bool set_destructive (bool /*yn*/) { return false; }
 	virtual bool length_mutable() const    { return false; }
 	
 	void use ()    { _in_use++; }

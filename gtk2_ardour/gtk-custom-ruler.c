@@ -62,6 +62,11 @@ static void gtk_custom_ruler_get_property  (GObject        *object,
 static gint
 default_metric_get_marks (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
+	(void) marks;
+	(void) lower;
+	(void) upper;
+	(void) maxchars;
+	
 	return 0;
 }
 
@@ -193,6 +198,8 @@ gtk_custom_ruler_set_property (GObject      *object,
 			       const GValue *value,
 			       GParamSpec   *pspec)
 {
+	(void) pspec;
+	
   GtkCustomRuler *ruler = GTK_CUSTOM_RULER (object);
 
   switch (prop_id)

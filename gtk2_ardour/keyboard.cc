@@ -295,14 +295,14 @@ Keyboard::key_is_down (uint32_t keyval)
 }
 
 bool
-Keyboard::enter_window (GdkEventCrossing *ev, Gtk::Window* win)
+Keyboard::enter_window (GdkEventCrossing *, Gtk::Window* win)
 {
 	current_window = win;
 	return false;
 }
 
 bool
-Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* win)
+Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
 {
 	if (ev) {
 		switch (ev->detail) {
@@ -447,11 +447,11 @@ Keyboard::selection_type (guint state)
 
 
 static void 
-accel_map_changed (GtkAccelMap* map,
-		   gchar* path,
-		   guint  key,
-		   GdkModifierType mod,
-		   gpointer arg)
+accel_map_changed (GtkAccelMap* /*map*/,
+		   gchar* /*path*/,
+		   guint /*key*/,
+		   GdkModifierType /*mod*/,
+		   gpointer /*arg*/)
 {
 	Keyboard::keybindings_changed ();
 }

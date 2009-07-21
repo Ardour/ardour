@@ -52,7 +52,7 @@ class FD_MidiPort : public Port
 	int _fd;
 	virtual void open (const Port::Descriptor&);
 
-	virtual int write (byte *msg, size_t msglen, timestamp_t ignored) {
+	virtual int write (byte *msg, size_t msglen, timestamp_t) {
 		int nwritten;
 		
 		if ((_mode & O_ACCMODE) == O_RDONLY) {

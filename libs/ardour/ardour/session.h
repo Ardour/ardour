@@ -206,11 +206,11 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 			return e1->before (*e2);
 		}
 
-		void *operator new (size_t ignored) {
+		void *operator new (size_t) {
 			return pool.alloc ();
 		}
 
-		void operator delete(void *ptr, size_t size) {
+		void operator delete (void *ptr, size_t /*size*/) {
 			pool.release (ptr);
 		}
 
@@ -1039,7 +1039,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	uint32_t                _listen_cnt;
 
 	void set_worst_io_latencies ();
-	void set_worst_io_latencies_x (IOChange asifwecare, void *ignored) {
+	void set_worst_io_latencies_x (IOChange, void *) {
 		set_worst_io_latencies ();
 	}
 
@@ -1630,11 +1630,11 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		Click (nframes_t s, nframes_t d, const Sample *b)
 			: start (s), duration (d), data (b) { offset = 0; }
 
-		void *operator new(size_t ignored) {
+		void *operator new (size_t) {
 			return pool.alloc ();
 		};
 
-		void operator delete(void *ptr, size_t size) {
+		void operator delete(void *ptr, size_t /*size*/) {
 			pool.release (ptr);
 		}
 

@@ -77,7 +77,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	init (flag);
 }
 	
-Diskstream::Diskstream (Session& sess, const XMLNode& node)
+Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
 	: SessionObject(sess, "unnamed diskstream")
 {
 	init (Recordable);
@@ -145,7 +145,7 @@ Diskstream::set_route (Route& r)
 }
 
 void
-Diskstream::handle_input_change (IOChange change, void *src)
+Diskstream::handle_input_change (IOChange change, void * /*src*/)
 {
 	Glib::Mutex::Lock lm (state_lock);
 
@@ -356,7 +356,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 }
 
 void
-Diskstream::playlist_changed (Change ignored)
+Diskstream::playlist_changed (Change)
 {
 	playlist_modified ();
 }

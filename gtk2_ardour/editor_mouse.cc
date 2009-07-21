@@ -508,7 +508,7 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 }
 
 void
-Editor::set_midi_edit_cursor (MidiEditMode m)
+Editor::set_midi_edit_cursor (MidiEditMode)
 {
 	switch (midi_edit_mode) {
 	case MidiEditPencil:
@@ -530,7 +530,7 @@ Editor::set_midi_edit_cursor (MidiEditMode m)
 }
 
 void
-Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemType item_type)
 {
  	/* in object/audition/timefx/gain-automation mode,
 	   any button press sets the selection if the object
@@ -1450,7 +1450,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 }
 
 bool
-Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* /*event*/, ItemType item_type)
 {
 	ControlPoint* cp;
 	Marker * marker;
@@ -1646,7 +1646,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 }
 
 bool
-Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* /*event*/, ItemType item_type)
 {
 	AutomationLine* al;
 	ControlPoint* cp;
@@ -1856,7 +1856,7 @@ Editor::scrub ()
 }
 
 bool
-Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_autoscroll)
+Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from_autoscroll)
 {
 	if (event->motion.is_hint) {
 		gint x, y;
@@ -1898,7 +1898,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 }
 
 void
-Editor::remove_gain_control_point (ArdourCanvas::Item*item, GdkEvent* event)
+Editor::remove_gain_control_point (ArdourCanvas::Item*item, GdkEvent* /*event*/)
 {
 	ControlPoint* control_point;
 
@@ -1917,7 +1917,7 @@ Editor::remove_gain_control_point (ArdourCanvas::Item*item, GdkEvent* event)
 }
 
 void
-Editor::remove_control_point (ArdourCanvas::Item* item, GdkEvent* event)
+Editor::remove_control_point (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 {
 	ControlPoint* control_point;
 
@@ -2433,7 +2433,7 @@ Editor::thaw_region_after_trim (RegionView& rv)
 }
 
 void
-Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* event)
+Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 {
 	Marker* marker;
 	bool is_start;
@@ -2463,7 +2463,7 @@ Editor::reposition_zoom_rect (nframes64_t start, nframes64_t end)
 
 
 gint
-Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
+Editor::mouse_rename_region (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/)
 {
 	using namespace Gtkmm2ext;
 
@@ -2601,7 +2601,7 @@ Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event, Regi
  *  the section of the clicked region that lies within the time range.
  */
 void
-Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
+Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 {
 	if (clicked_regionview == 0) {
 		return;

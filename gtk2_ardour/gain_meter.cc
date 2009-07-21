@@ -521,7 +521,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 }
 
 gint
-GainMeterBase::meter_release(GdkEventButton* ev)
+GainMeterBase::meter_release(GdkEventButton*)
 {
 	if(!ignore_toggle){
 		if (wait_for_release){
@@ -563,14 +563,14 @@ GainMeterBase::meter_point_clicked ()
 }
 
 gint
-GainMeterBase::start_gain_touch (GdkEventButton* ev)
+GainMeterBase::start_gain_touch (GdkEventButton*)
 {
 	_amp->gain_control()->start_touch ();
 	return FALSE;
 }
 
 gint
-GainMeterBase::end_gain_touch (GdkEventButton* ev)
+GainMeterBase::end_gain_touch (GdkEventButton*)
 {
 	_amp->gain_control()->stop_touch ();
 	return FALSE;

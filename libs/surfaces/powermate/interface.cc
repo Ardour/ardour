@@ -10,7 +10,7 @@
 using namespace ARDOUR;
 
 ControlProtocol*
-new_powermate_protocol (ControlProtocolDescriptor* descriptor, Session* s)
+new_powermate_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	PowermateControlProtocol* pcp = new PowermateControlProtocol (*s);
 
@@ -24,13 +24,13 @@ new_powermate_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 }
 
 void
-delete_powermate_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
+delete_powermate_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
 	delete cp;
 }
 
 bool
-probe_powermate_protocol (ControlProtocolDescriptor* descriptor)
+probe_powermate_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
 	return PowermateControlProtocol::probe ();
 }

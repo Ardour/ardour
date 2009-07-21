@@ -338,7 +338,7 @@ UI::idle_add (int (*func)(void *), void *arg)
 /* END abstract_ui interfaces */
 
 void
-UI::signal_pipe_callback (void *arg, int fd, GdkInputCondition cond)
+UI::signal_pipe_callback (void *arg, int fd, GdkInputCondition /*cond*/)
 {
 	char buf[256];
 	
@@ -518,7 +518,7 @@ UI::toggle_errors ()
 }
 
 void
-UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
+UI::display_message (const char *prefix, gint /*prefix_len*/, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
 {
 	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
@@ -616,7 +616,7 @@ UI::flush_pending ()
 }
 
 bool
-UI::just_hide_it (GdkEventAny *ev, Window *win)
+UI::just_hide_it (GdkEventAny */*ev*/, Window *win)
 {
 	win->hide ();
 	return true;
@@ -666,7 +666,7 @@ UI::color_selection_done (bool status)
 }
 
 bool
-UI::color_selection_deleted (GdkEventAny *ev)
+UI::color_selection_deleted (GdkEventAny */*ev*/)
 {
 	Main::quit ();
 	return true;

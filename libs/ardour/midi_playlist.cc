@@ -161,26 +161,26 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 
 
 void
-MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
+MidiPlaylist::remove_dependents (boost::shared_ptr<Region> /*region*/)
 {
 	/* MIDI regions have no dependents (crossfades) */
 }
 
 
 void
-MidiPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
+MidiPlaylist::refresh_dependents (boost::shared_ptr<Region> /*r*/)
 {
 	/* MIDI regions have no dependents (crossfades) */
 }
 
 void
-MidiPlaylist::finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right)
+MidiPlaylist::finalize_split_region (boost::shared_ptr<Region> /*original*/, boost::shared_ptr<Region> /*left*/, boost::shared_ptr<Region> /*right*/)
 {
 	/* No MIDI crossfading (yet?), so nothing to do here */
 }
 
 void
-MidiPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
+MidiPlaylist::check_dependents (boost::shared_ptr<Region> /*r*/, bool /*norefresh*/)
 {
 	/* MIDI regions have no dependents (crossfades) */
 }

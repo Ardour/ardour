@@ -250,11 +250,12 @@ class Region
 	void set_last_layer_op (uint64_t when);
 
 	virtual bool is_dependent() const { return false; }
-	virtual bool depends_on (boost::shared_ptr<Region> other) const { return false; }
+	virtual bool depends_on (boost::shared_ptr<Region> /*other*/) const { return false; }
 
 	virtual int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&) = 0;
 
-	virtual int get_transients (AnalysisFeatureList&, bool force_new = false) { 
+	virtual int get_transients (AnalysisFeatureList&, bool force_new = false) {
+		(void) force_new;
 		// no transients, but its OK
 		return 0;
 	}

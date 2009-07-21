@@ -65,7 +65,7 @@ FileSource::FileSource (Session& session, DataType type,
 {
 }
 
-FileSource::FileSource (Session& session, const XMLNode& node, bool must_exist)
+FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist*/)
 	: Source(session, node)
 	, _file_is_new(false)
 {

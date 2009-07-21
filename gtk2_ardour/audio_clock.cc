@@ -395,7 +395,7 @@ AudioClock::setup_events ()
 }
 
 bool
-AudioClock::drop_focus_handler (GdkEventFocus* ignored)
+AudioClock::drop_focus_handler (GdkEventFocus*)
 {
 	Keyboard::magic_widget_drop_focus ();
 	return false;
@@ -490,7 +490,7 @@ AudioClock::smpte_offset_changed ()
 }
 
 void
-AudioClock::set_frames (nframes_t when, bool force)
+AudioClock::set_frames (nframes_t when, bool /*force*/)
 {
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", when);
@@ -735,7 +735,7 @@ AudioClock::focus ()
 
 
 bool
-AudioClock::field_key_press_event (GdkEventKey *ev, Field field)
+AudioClock::field_key_press_event (GdkEventKey */*ev*/, Field /*field*/)
 {
 	/* all key activity is handled on key release */
 	return true;
@@ -987,7 +987,7 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 }
 
 bool
-AudioClock::field_focus_in_event (GdkEventFocus *ev, Field field)
+AudioClock::field_focus_in_event (GdkEventFocus */*ev*/, Field field)
 {
 	key_entry_state = 0;
 
@@ -1046,7 +1046,7 @@ AudioClock::field_focus_in_event (GdkEventFocus *ev, Field field)
 }
 
 bool
-AudioClock::field_focus_out_event (GdkEventFocus *ev, Field field)
+AudioClock::field_focus_out_event (GdkEventFocus */*ev*/, Field field)
 {
 	switch (field) {
 
@@ -1182,9 +1182,11 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 }
 
 bool
-AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
+AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
 {
-	if (session == 0) return false;
+	if (session == 0) {
+		return false;
+	}
 
 	nframes_t frames = 0;
 

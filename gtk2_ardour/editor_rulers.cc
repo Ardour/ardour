@@ -977,7 +977,7 @@ Editor::set_smpte_ruler_scale (gdouble lower, gdouble upper)
 }
 
 gint
-Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
+Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
 	nframes_t pos;
 	nframes64_t spacer;
@@ -1220,7 +1220,7 @@ Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
 }
 
 gint
-Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
+Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
         if (session == 0) {
                 return 0;
@@ -1692,7 +1692,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 }
 
 gint
-Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
+Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
 {
 	nframes64_t mark_interval;
 	nframes64_t pos;
@@ -1856,7 +1856,7 @@ Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
 }
 
 gint
-Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
+Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
 	nframes64_t pos;
 	nframes64_t spacer;

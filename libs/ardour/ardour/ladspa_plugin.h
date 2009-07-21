@@ -82,7 +82,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 			_descriptor->cleanup (_handle);
 	}
 
-	void set_block_size (nframes_t nframes) {}
+	void set_block_size (nframes_t /*nframes*/) {}
 	
 	int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,

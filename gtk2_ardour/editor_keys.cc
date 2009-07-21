@@ -99,7 +99,7 @@ Editor::keyboard_insert_region_list_selection ()
 }
 
 int
-Editor::get_prefix (float& val, bool& was_floating)
+Editor::get_prefix (float& /*val*/, bool& was_floating)
 {
 	was_floating = false;
 	return 1;

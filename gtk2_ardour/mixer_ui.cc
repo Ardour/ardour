@@ -671,7 +671,7 @@ Mixer_UI::hide_all_audiotracks ()
 }
 
 void
-Mixer_UI::track_list_reorder (const TreeModel::Path& path, const TreeModel::iterator& iter, int* new_order)
+Mixer_UI::track_list_reorder (const TreeModel::Path&, const TreeModel::iterator&, int* /*new_order*/)
 {
 	strip_redisplay_does_not_sync_order_keys = true;
 	session->set_remote_control_ids();
@@ -680,7 +680,7 @@ Mixer_UI::track_list_reorder (const TreeModel::Path& path, const TreeModel::iter
 }
 
 void
-Mixer_UI::track_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
+Mixer_UI::track_list_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&)
 {
 	// never reset order keys because of a property change
 	strip_redisplay_does_not_reset_order_keys = true; 
@@ -690,7 +690,7 @@ Mixer_UI::track_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeMod
 }
 
 void
-Mixer_UI::track_list_delete (const Gtk::TreeModel::Path& path)
+Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 {
 	/* this could require an order sync */
 	session->set_remote_control_ids();
@@ -1197,7 +1197,7 @@ Mixer_UI::route_group_name_edit (const Glib::ustring& path, const Glib::ustring&
 }
 
 void 
-Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
+Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
 {
 	RouteGroup* group;
 
@@ -1403,7 +1403,7 @@ Mixer_UI::get_state (void)
 
 
 void 
-Mixer_UI::pane_allocation_handler (Allocation& alloc, Gtk::Paned* which)
+Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 {
 	int pos;
 	XMLProperty* prop = 0;

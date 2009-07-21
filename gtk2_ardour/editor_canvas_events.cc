@@ -184,7 +184,7 @@ Editor::track_canvas_scroll_event (GdkEventScroll *event)
 }
 
 bool
-Editor::track_canvas_button_press_event (GdkEventButton *event)
+Editor::track_canvas_button_press_event (GdkEventButton */*event*/)
 {
 	selection->clear ();
 	track_canvas->grab_focus();
@@ -203,7 +203,7 @@ Editor::track_canvas_button_release_event (GdkEventButton *event)
 }
 
 bool
-Editor::track_canvas_motion_notify_event (GdkEventMotion *event)
+Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 {
 	int x, y;
 	/* keep those motion events coming */
@@ -835,7 +835,7 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 }
 
 bool
-Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Marker* marker)
+Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Marker* /*marker*/)
 {
 	return typed_event (item, event, MarkerItem);
 }
@@ -865,13 +865,13 @@ Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, TempoMarker* marker)
+Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, TempoMarker* /*marker*/)
 {
 	return typed_event (item, event, TempoMarkerItem);
 }
 
 bool
-Editor::canvas_meter_marker_event (GdkEvent *event, ArdourCanvas::Item* item, MeterMarker* marker)
+Editor::canvas_meter_marker_event (GdkEvent *event, ArdourCanvas::Item* item, MeterMarker* /*marker*/)
 {
 	return typed_event (item, event, MeterMarkerItem);
 }
@@ -901,7 +901,7 @@ Editor::canvas_zoom_rect_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & c, int x, int y, guint time)
+Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, int x, int y, guint /*time*/)
 {
 	double wx;
 	double wy;

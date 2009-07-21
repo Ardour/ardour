@@ -192,7 +192,7 @@ RegionView::~RegionView ()
 }
 
 gint
-RegionView::_lock_toggle (ArdourCanvas::Item* item, GdkEvent* ev, void* arg)
+RegionView::_lock_toggle (ArdourCanvas::Item*, GdkEvent* ev, void* arg)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
@@ -301,7 +301,7 @@ RegionView::lower_to_bottom ()
 }
 
 bool
-RegionView::set_position (nframes_t pos, void* src, double* ignored)
+RegionView::set_position (nframes_t pos, void* /*src*/, double* ignored)
 {
 	double delta;
 	bool ret;
