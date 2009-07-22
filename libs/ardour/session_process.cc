@@ -325,8 +325,8 @@ Session::process_with_events (nframes_t nframes)
 	if (_transport_speed == 1.0) {
 		frames_moved = (long) nframes;
 	} else {		
-		interpolation.set_target_speed (_target_transport_speed);
-		interpolation.set_speed (_transport_speed);
+		interpolation.set_target_speed (fabs(_target_transport_speed));
+		interpolation.set_speed (fabs(_transport_speed));
 		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
@@ -846,8 +846,8 @@ Session::process_without_events (nframes_t nframes)
 	if (_transport_speed == 1.0) {
 		frames_moved = (long) nframes;
 	} else {		
-		interpolation.set_target_speed (_target_transport_speed);
-		interpolation.set_speed (_transport_speed);
+		interpolation.set_target_speed (fabs(_target_transport_speed));
+		interpolation.set_speed (fabs(_transport_speed));
 		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
 	}
 

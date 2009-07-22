@@ -146,19 +146,22 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
     M[0]     = 0.0;
     M[n - 1] = 0.0;
     
-    // solve L * t = d
-    t[0] = 6.0 * (input[0] - 2*input[1] + input[2]); 
-    for (nframes_t i = 1; i <= n - 3; i++) {
-        t[i] = 6.0 * (input[i] - 2*input[i+1] + input[i+2])
-               - l(i-1) * t[i-1];
+    if (input) {
+        // solve L * t = d
+        t[0] = 6.0 * (input[0] - 2*input[1] + input[2]); 
+        for (nframes_t i = 1; i <= n - 3; i++) {
+            t[i] = 6.0 * (input[i] - 2*input[i+1] + input[i+2])
+                   - l(i-1) * t[i-1];
+        }
+        
+        // solve U * M = t
+        M[n-2] = t[n-3] / m(n-3);
+        for (nframes_t i = n-4;; i--) {
+            M[i+1] = (t[i]-M[i+2])/m(i);
+            if ( i == 0 ) break;
+        }
     }
     
-    // solve U * M = t
-    M[n-2] = t[n-3] / m(n-3);
-    for (nframes_t i = n-4;; i--) {
-        M[i+1] = (t[i]-M[i+2])/m(i);
-        if ( i == 0 ) break;
-    }
     assert (M[0] == 0.0 && M[n-1] == 0.0);
     
     // now interpolate
@@ -185,7 +188,7 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
         if (x >= 1.0) {
             x = 0.0;
             i++;
-        }
+        } 
         
         assert(x >= 0.0 && x < 1.0);
         
