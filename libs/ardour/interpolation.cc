@@ -120,10 +120,12 @@ SplineInterpolation::SplineInterpolation()
 {
     // precompute LU-factorization of matrix A
     // see "Teubner Taschenbuch der Mathematik", p. 1105
-    m[0] = 4.0;
-    for (int i = 0; i <= MAX_PERIOD_SIZE - 2; i++) {
-        l[i] = 1.0 / m[i];
-        m[i+1] = 4.0 - l[i];
+    // We only need to calculate up to 20, because they
+    // won't change any more above that
+    _m[0] = 4.0;
+    for (int i = 0; i <= 20 - 2; i++) {
+        _l[i] = 1.0 / _m[i];
+        _m[i+1] = 4.0 - _l[i];
     }
 }
 
@@ -131,9 +133,12 @@ nframes_t
 SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
 {
     // How many input samples we need
-    nframes_t n = ceil (double(nframes) * _speed) + 2;
-    //   |------------------------------------------^
-    // this won't be here in the debugged version.
+    nframes_t n = ceil (double(nframes) * _speed + phase[channel]) + 1;
+    //printf("n = %d\n", n);
+
+    if (n <= 3) {
+        return 0;
+    }
     
     double M[n], t[n-2];
     
@@ -142,20 +147,19 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
     M[n - 1] = 0.0;
     
     // solve L * t = d
-    // see "Teubner Taschenbuch der Mathematik", p. 1105
     t[0] = 6.0 * (input[0] - 2*input[1] + input[2]); 
     for (nframes_t i = 1; i <= n - 3; i++) {
         t[i] = 6.0 * (input[i] - 2*input[i+1] + input[i+2])
-               - l[i-1] * t[i-1];
+               - l(i-1) * t[i-1];
     }
     
-    // solve R * M = t
-    // see "Teubner Taschenbuch der Mathematik", p. 1105
-    M[n-2] = -t[n-3] / m[n-3];
+    // solve U * M = t
+    M[n-2] = t[n-3] / m(n-3);
     for (nframes_t i = n-4;; i--) {
-        M[i+1] = -(t[i] + M[i+2]) / m[i];
+        M[i+1] = (t[i]-M[i+2])/m(i);
         if ( i == 0 ) break;
     }
+    assert (M[0] == 0.0 && M[n-1] == 0.0);
     
     // now interpolate
     // index in the input buffers
@@ -174,29 +178,32 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
     for (nframes_t outsample = 0; outsample < nframes; outsample++) {
         i = floor(distance);
         
-        Sample x = distance - i;
+        Sample x = double(distance) - double(i);
         
-        /* this would break the assertion below
+        // if distance is something like 0.999999999999
+        // it will get rounded to 1 in the conversion to float above
         if (x >= 1.0) {
-            x -= 1.0;
+            x = 0.0;
             i++;
         }
-        */
+        
+        assert(x >= 0.0 && x < 1.0);
         
         if (input && output) {
             assert (i <= n-1);
-            double a0 = input[i];
-            double a1 = input[i+1] - input[i] - M[i+1]/6.0 - M[i]/3.0;
-            double a2 = M[i] / 2.0;
             double a3 = (M[i+1] - M[i]) / 6.0;
+            double a2 = M[i] / 2.0;
+            double a1 = input[i+1] - input[i] - (M[i+1] + 2.0*M[i])/6.0;
+            double a0 = input[i];
             // interpolate into the output buffer
-            output[outsample] = ((a3*x +a2)*x +a1)*x + a0;
+            output[outsample] = ((a3*x + a2)*x + a1)*x + a0;
         }
         distance += _speed + acceleration;
     }
     
     i = floor(distance);
     phase[channel] = distance - floor(distance);
+    assert (phase[channel] >= 0.0 && phase[channel] < 1.0);
     
     return i;
 }

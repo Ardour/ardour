@@ -92,6 +92,60 @@ InterpolationTest::linearInterpolationTest ()
 }
 
 void
+InterpolationTest::splineInterpolationTest ()
+{
+        nframes_t result = 0;
+         cout << "\nspline Interpolation Test\n";
+         
+         cout << "\nSpeed: 1/2" << endl;
+         spline.reset();
+         spline.set_speed (0.5);
+         int one_period = 1024;
+         /*
+         
+         for (int i = 0; 2 * i < NUM_SAMPLES - one_period;) {
+             result = spline.interpolate (0, one_period, input + i, output + int(2*i));
+             i += result;
+         }
+         for (int i=0; i < NUM_SAMPLES - one_period; ++i) {
+             //cout << "output[" << i << "] = " << output[i] << endl;    
+             if (i % 200 == 0) { CPPUNIT_ASSERT_EQUAL (double(1.0), double(output[i])); }
+             else if (i % 2 == 0) { CPPUNIT_ASSERT_EQUAL (double(0.0), double(output[i])); }
+         }
+         */
+         
+         /*
+         // square function
+         
+         for (int i = 0; i < NUM_SAMPLES; ++i) {
+             if (i % INTERVAL/8 < INTERVAL/16 ) {
+                 input[i] = 1.0f;
+             } else {
+                 input[i] = 0.0f;
+             }
+             output[i] = 0.0f;
+         }
+         */
+         
+         cout << "\nSpeed: 1/60" << endl;
+         spline.reset();
+         spline.set_speed (1.0/60.0);
+         
+         one_period = 8192;
+         
+         for (int i = 0; 60 * i < NUM_SAMPLES - one_period;) {
+             result = spline.interpolate (0, one_period, input + i, output + int(60*i));
+             printf ("Result: %d\n", result);
+             i += result;
+         }
+         for (int i=0; i < NUM_SAMPLES - one_period; ++i) {
+             cout << "input[" << i << "] = " << input[i] << "  output[" << i << "] = " << output[i] << endl; 
+             //if (i % 333 == 0) { CPPUNIT_ASSERT_EQUAL (double(1.0), double(output[i])); }
+             //else if (i % 2 == 0) { CPPUNIT_ASSERT_EQUAL (double(0.0), double(output[i])); }
+         }
+}
+
+void
 InterpolationTest::libSamplerateInterpolationTest ()
 {
     nframes_t result;

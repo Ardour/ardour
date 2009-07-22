@@ -19,7 +19,8 @@ class Interpolation {
 
              
  public:
-     Interpolation () { _speed = 1.0; _target_speed = 1.0; }
+     Interpolation ()  { _speed = 1.0; _target_speed = 1.0; }
+     ~Interpolation () { phase.clear(); }
  
      void set_speed (double new_speed)          { _speed = new_speed; _target_speed = new_speed; }
      void set_target_speed (double new_speed)   { _target_speed = new_speed; }
@@ -90,7 +91,6 @@ class LinearInterpolation : public Interpolation {
 };
  
 
-#define MAX_PERIOD_SIZE 4096
 /**
  * @class SplineInterpolation
  * 
@@ -143,14 +143,40 @@ class LinearInterpolation : public Interpolation {
  *
  *  where the l[i] and m[i] can be precomputed.
  * 
- *  Then we solve the system A * M = d by first solving the system
+ *  Then we solve the system A * M = L(UM) = d by first solving the system
  *    L * t = d 
+ *    
+ *    [ 1    0    0    0   ... 0      0      0      0 ]    [ t[0]   ]    [ 6*y[0] - 12*y[1] + 6*y[2] ]
+ *    [ l[0] 1    0    0   ... 0      0      0      0 ]    [ t[1]   ]    [ 6*y[1] - 12*y[2] + 6*y[3] ]
+ *    [ 0    l[1] 1    0   ... 0      0      0      0 ]    [ t[2]   ]    [ 6*y[2] - 12*y[3] + 6*y[4] ]
+ *    [ 0    0    l[2] 1   ... 0      0      0      0 ]    [ t[3]   ]    [ 6*y[3] - 12*y[4] + 6*y[5] ]
+ *                        ...                           *             =             ...            
+ *    [ 0    0    0    0   ... 1      0      0      0 ]    [ t[n-6] ]    [ 6*y[n-6]- 12*y[n-5] + 6*y[n-4] ]
+ *    [ 0    0    0    0   ... l[n-6] 1      0      0 ]    [ t[n-5] ]    [ 6*y[n-5]- 12*y[n-4] + 6*y[n-3] ]
+ *    [ 0    0    0    0   ... 0      l[n-5] 1      0 ]    [ t[n-4] ]    [ 6*y[n-4]- 12*y[n-3] + 6*y[n-2] ]
+ *    [ 0    0    0    0   ... 0      0      l[n-4] 1 ]    [ t[n-3] ]    [ 6*y[n-3]- 12*y[n-2] + 6*y[n-1] ]
+ *    
+ *    
  *  and then
- *    R * M = t
+ *    U * M = t
+ *  
+ *  [ m[0] 1    0    0   ... 0      0      0      ]   [ M[1]   ]    [ t[0]   ]
+ *  [ 0    m[1] 1    0   ... 0      0      0      ]   [ M[2]   ]    [ t[1]   ]
+ *  [ 0    0    m[2] 1   ... 0      0      0      ]   [ M[3]   ]    [ t[2]   ]
+ *                       ...                          [ M[4]   ]    [ t[3]   ]
+ *  [ 0    0    0    0   ... 0      0      0      ] *            =            
+ *  [ 0    0    0    0   ... 1      0      0      ]   [ M[n-5] ]    [ t[n-6] ]
+ *  [ 0    0    0    0   ... m[n-5] 1      0      ]   [ M[n-4] ]    [ t[n-5] ]
+ *  [ 0    0    0    0   ... 0      m[n-4] 1      ]   [ M[n-3] ]    [ t[n-4] ]
+ *  [ 0    0    0    0   ... 0      0      m[n-3] ]   [ M[n-2] ]    [ t[n-3] ]
+ *  
  */
 class SplineInterpolation : public Interpolation {
  protected:
-    double l[MAX_PERIOD_SIZE], m[MAX_PERIOD_SIZE];
+    double _l[19], _m[20];
+    
+    inline double l(nframes_t i) {  return (i >= 19) ? _l[18] : _l[i]; }
+    inline double m(nframes_t i) {  return (i >= 20) ? _m[19] : _m[i]; }
     
  public:
     SplineInterpolation();
