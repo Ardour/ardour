@@ -304,13 +304,13 @@ RouteParams_UI::setup_io_frames()
 	cleanup_io_frames();
 	
 	// input
-	_input_iosel = new IOSelector (*session, _route->input());
+	_input_iosel = new IOSelector (this, *session, _route->input());
 	_input_iosel->setup ();
 	input_frame.add (*_input_iosel);
 	input_frame.show_all();
 	
 	// output
-	_output_iosel = new IOSelector (*session, _route->output());
+	_output_iosel = new IOSelector (this, *session, _route->output());
 	_output_iosel->setup ();
 	output_frame.add (*_output_iosel);
 	output_frame.show_all();
@@ -518,7 +518,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 	
 	if ((send = boost::dynamic_pointer_cast<Send> (insert)) != 0) {
 
-		SendUI *send_ui = new SendUI (send, *session);
+		SendUI *send_ui = new SendUI (this, send, *session);
 
 		cleanup_view();
 		_plugin_conn = send->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away),
@@ -530,7 +530,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (insert)) != 0) {
 
-		ReturnUI *return_ui = new ReturnUI (retrn, *session);
+		ReturnUI *return_ui = new ReturnUI (this, retrn, *session);
 
 		cleanup_view();
 		_plugin_conn = retrn->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away),
@@ -554,7 +554,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 
-		PortInsertUI *portinsert_ui = new PortInsertUI (*session, port_insert);
+		PortInsertUI *portinsert_ui = new PortInsertUI (this, *session, port_insert);
 				
 		cleanup_view();
 		_plugin_conn = port_insert->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away),

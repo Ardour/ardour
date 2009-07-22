@@ -35,7 +35,7 @@ class IOSelector;
 class ReturnUI : public Gtk::HBox
 {
   public:
-	ReturnUI (boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session&);
+	ReturnUI (Gtk::Window *,boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session&);
 	~ReturnUI();
 
 	void update ();

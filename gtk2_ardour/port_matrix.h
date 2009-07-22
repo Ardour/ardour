@@ -50,7 +50,7 @@ class PortMatrixBody;
 class PortMatrix : public Gtk::Table
 {
 public:
-	PortMatrix (ARDOUR::Session&, ARDOUR::DataType);
+	PortMatrix (Gtk::Window*, ARDOUR::Session&, ARDOUR::DataType);
 	~PortMatrix ();
 
 	void set_type (ARDOUR::DataType);
@@ -112,7 +112,6 @@ public:
 
 	std::pair<uint32_t, uint32_t> max_size () const;
 	void setup_max_size ();
-	sigc::signal<void> MaxSizeChanged;
 
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.
@@ -171,6 +170,8 @@ private:
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
+
+	Gtk::Window* _parent;
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;

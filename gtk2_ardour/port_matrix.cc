@@ -24,6 +24,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menushell.h>
 #include <gtkmm/menu_elems.h>
+#include <gtkmm/window.h>
 #include "ardour/bundle.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
@@ -42,9 +43,10 @@ using namespace ARDOUR;
  *  @param session Our session.
  *  @param type Port type that we are handling.
  */
-PortMatrix::PortMatrix (Session& session, DataType type)
+PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 	: Table (2, 2),
 	  _session (session),
+	  _parent (parent),
 	  _type (type),
 	  _menu (0),
 	  _arrangement (TOP_TO_RIGHT),
@@ -280,15 +282,6 @@ PortMatrix::popup_menu (
 				sub.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::add_channel_proxy), w)));
 			}
 			
-			if (can_remove_channels (bc[dim].bundle)) {
-				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
-				sub.push_back (
-					MenuElem (
-						buf,
-						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
-						)
-					);
-			}			
 			
 			if (can_rename_channels (bc[dim].bundle)) {
 				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
@@ -299,7 +292,19 @@ PortMatrix::popup_menu (
 						)
 					);
 			}
+
+			sub.push_back (SeparatorElem ());
 			
+			if (can_remove_channels (bc[dim].bundle)) {
+				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
+				sub.push_back (
+					MenuElem (
+						buf,
+						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
+						)
+					);
+			}			
+
 			if (_show_only_bundles) {
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 			} else {
@@ -473,7 +478,17 @@ PortMatrix::max_size () const
 void
 PortMatrix::setup_max_size ()
 {
-	MaxSizeChanged ();
+	if (!_parent) {
+		return;
+	}
+
+	pair<uint32_t, uint32_t> const m = max_size ();
+	
+	GdkGeometry g;
+	g.max_width = m.first;
+	g.max_height = m.second;
+
+	_parent->set_geometry_hints (*this, g, Gdk::HINT_MAX_SIZE);
 }
 
 bool

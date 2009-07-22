@@ -33,7 +33,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-ReturnUI::ReturnUI (boost::shared_ptr<Return> r, Session& se)
+ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& se)
 	: _return (r)
 	, _session (se)
 	, _gpm (se)
@@ -48,7 +48,7 @@ ReturnUI::ReturnUI (boost::shared_ptr<Return> r, Session& se)
 
 	_vbox.pack_start (_hbox, false, false, false);
 
-	io = manage (new IOSelector (se, r->output()));
+	io = manage (new IOSelector (parent, se, r->output()));
 	
 	pack_start (_vbox, false, false);
 
@@ -101,7 +101,7 @@ ReturnUI::fast_update ()
 ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
 	: ArdourDialog (string("Ardour: return ") + s->name())
 {
-	ui = new ReturnUI (s, ss);
+	ui = new ReturnUI (this, s, ss);
 
 	hpacker.pack_start (*ui, true, true);
 

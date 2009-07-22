@@ -33,7 +33,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
+SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 	: _send (s)
 	, _session (se)
 	, _gpm (se)
@@ -51,7 +51,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	_vbox.pack_start (_hbox, false, false, false);
 	_vbox.pack_start (_panners, false,false);
 
-	io = manage (new IOSelector (se, s->output()));
+	io = manage (new IOSelector (parent, se, s->output()));
 	
 	pack_start (_vbox, false, false);
 
@@ -121,7 +121,7 @@ SendUI::fast_update ()
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
 	: ArdourDialog (string("Ardour: send ") + s->name())
 {
-	ui = new SendUI (s, ss);
+	ui = new SendUI (this, s, ss);
 
 	hpacker.pack_start (*ui, true, true);
 

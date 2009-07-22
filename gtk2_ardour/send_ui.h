@@ -35,7 +35,7 @@ class IOSelector;
 class SendUI : public Gtk::HBox
 {
   public:
-	SendUI (boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session&);
+	SendUI (Gtk::Window *, boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session&);
 	~SendUI();
 
 	void update ();

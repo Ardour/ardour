@@ -41,8 +41,8 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io)
-	: PortMatrix (session, io->default_type())
+IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io)
+	: PortMatrix (p, session, io->default_type())
 	, _io (io)
 {
 	/* signal flow from 0 to 1 */
@@ -152,7 +152,7 @@ IOSelector::list_is_global (int dim) const
 }
 
 IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
-	: _selector (session, io)
+	: _selector (this, session, io)
 {
 	set_name ("IOSelectorWindow2");
 	set_title (_("I/O selector"));
@@ -168,8 +168,6 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
 
 	resize (32768, 32768);
-
-	_selector.MaxSizeChanged.connect (mem_fun (*this, &IOSelectorWindow::max_size_changed));
 }
 
 void
@@ -195,37 +193,9 @@ IOSelectorWindow::io_name_changed (void* src)
 	set_title (title);
 }
 
-void
-IOSelectorWindow::on_realize ()
-{
-	Window::on_realize ();
-	set_max_size ();
-}
-
-void
-IOSelectorWindow::set_max_size ()
-{
-	pair<uint32_t, uint32_t> const m = _selector.max_size ();
-
-	GdkGeometry g;
-	g.max_width = m.first;
-	g.max_height = m.second;
-
-	set_geometry_hints (*this, g, Gdk::HINT_MAX_SIZE);
-}
-
-void
-IOSelectorWindow::max_size_changed ()
-{
-	set_max_size ();
-	resize (32768, 32768);
-}
-
-
-
-PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
-	: input_selector (sess, pi->input())
-	, output_selector (sess, pi->output())
+PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
+	: input_selector (parent, sess, pi->input())
+	, output_selector (parent, sess, pi->output())
 {
 	output_selector.set_min_height_divisor (2);
 	input_selector.set_min_height_divisor (2);
@@ -251,7 +221,7 @@ PortInsertUI::finished (IOSelector::Result r)
 
 PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi, bool can_cancel)
 	: ArdourDialog ("port insert dialog"),
-	  _portinsertui (sess, pi),
+	  _portinsertui (this, sess, pi),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
 	  cancel_button (_("Cancel"))
 {

@@ -34,9 +34,9 @@ using namespace std;
 using namespace ARDOUR;
 
 BundleEditorMatrix::BundleEditorMatrix (
-	Session& session, boost::shared_ptr<Bundle> bundle
+	Gtk::Window* parent, Session& session, boost::shared_ptr<Bundle> bundle
 	)
-	: PortMatrix (session, bundle->type()),
+	: PortMatrix (parent, session, bundle->type()),
 	  _bundle (bundle)
 {
 	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
@@ -161,8 +161,8 @@ BundleEditorMatrix::list_is_global (int dim) const
 	return (dim == OTHER);
 }
 
-BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bundle, bool /*add*/)
-	: ArdourDialog (_("Edit Bundle")), _matrix (session, bundle), _bundle (bundle)
+BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bundle, bool add)
+	: ArdourDialog (_("Edit Bundle")), _matrix (this, session, bundle), _bundle (bundle)
 {
 	Gtk::Table* t = new Gtk::Table (3, 2);
 	t->set_spacings (4);
@@ -219,7 +219,16 @@ BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bund
 	get_vbox()->pack_start (_matrix);
 	get_vbox()->set_spacing (4);
 
+	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	if (add) {
+		add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
+	} else {
+		add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
+	}
+	
 	show_all ();
+
+	resize (32768, 32768);
 }
 
 void
@@ -321,10 +330,10 @@ BundleManager::set_button_sensitivity ()
 void
 BundleManager::new_clicked ()
 {
-	boost::shared_ptr<UserBundle> b (new UserBundle (""));
+	boost::shared_ptr<UserBundle> b (new UserBundle (_("Bundle")));
 
 	/* Start off with a single channel */
-	b->add_channel ("");
+	b->add_channel ("1");
 
 	BundleEditor e (_session, b, true);
 

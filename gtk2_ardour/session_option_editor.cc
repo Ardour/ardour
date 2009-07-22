@@ -14,8 +14,8 @@ using namespace ARDOUR;
 class OptionsPortMatrix : public PortMatrix
 {
 public:
-	OptionsPortMatrix (ARDOUR::Session& session)
-		: PortMatrix (session, DataType::AUDIO)
+	OptionsPortMatrix (Gtk::Window* parent, ARDOUR::Session& session)
+		: PortMatrix (parent, session, DataType::AUDIO)
 	{
 		_port_group.reset (new PortGroup (""));
 		_ports[OURS].add_group (_port_group);
@@ -117,8 +117,8 @@ private:
 class ConnectionOptions : public OptionEditorBox
 {
 public:
-	ConnectionOptions (ARDOUR::Session* s)
-		: _port_matrix (*s)
+	ConnectionOptions (Gtk::Window* parent, ARDOUR::Session* s)
+		: _port_matrix (parent, *s)
 	{
 		_box->pack_start (_port_matrix);
 	}
@@ -330,5 +330,5 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    mem_fun (*_session_config, &SessionConfiguration::set_bwf_organization_code)
 			    ));
 
-	add_option (_("Connections"), new ConnectionOptions (s));
+	add_option (_("Connections"), new ConnectionOptions (this, s));
 }

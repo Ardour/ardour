@@ -31,7 +31,7 @@ namespace ARDOUR {
 class IOSelector : public PortMatrix
 {
   public:
-	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>);
+	IOSelector (Gtk::Window*, ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
@@ -79,21 +79,18 @@ class IOSelectorWindow : public Gtk::Window
 
   protected:
 	void on_map ();
-	void on_realize ();
 	
   private:
 	IOSelector _selector;
 	
 	void io_name_changed (void *src);
-	void set_max_size ();
-	void max_size_changed ();
 };
 
 
 class PortInsertUI : public Gtk::VBox
 {
   public: 
-	PortInsertUI (ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>);
+	PortInsertUI (Gtk::Window*, ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>);
 	
 	void redisplay ();
 	void finished (IOSelector::Result);

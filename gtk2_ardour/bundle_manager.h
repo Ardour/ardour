@@ -35,7 +35,7 @@ namespace ARDOUR {
 class BundleEditorMatrix : public PortMatrix
 {
   public:
-	BundleEditorMatrix (ARDOUR::Session &, boost::shared_ptr<ARDOUR::Bundle>);
+	BundleEditorMatrix (Gtk::Window *, ARDOUR::Session &, boost::shared_ptr<ARDOUR::Bundle>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool s);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
