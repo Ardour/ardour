@@ -13,7 +13,7 @@ FixedPointLinearInterpolation::interpolate (int channel, nframes_t nframes, Samp
 	// rather than being at sample N or N+1, we were at N+0.8792922
 	// so the "phase" element, if you want to think about this way, 
 	// varies from 0 to 1, representing the "offset" between samples
-	uint64_t	phase = last_phase[channel];
+	uint64_t	the_phase = last_phase[channel];
 	
 	// acceleration
 	int64_t	 phi_delta;
@@ -29,8 +29,8 @@ FixedPointLinearInterpolation::interpolate (int channel, nframes_t nframes, Samp
 	nframes_t   i = 0;
 
 	for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
-		i = phase >> 24;
-		Sample fractional_phase_part = (phase & fractional_part_mask) / binary_scaling_factor;
+		i = the_phase >> 24;
+		Sample fractional_phase_part = (the_phase & fractional_part_mask) / binary_scaling_factor;
 		
 		if (input && output) {
 			// Linearly interpolate into the output buffer
@@ -39,10 +39,10 @@ FixedPointLinearInterpolation::interpolate (int channel, nframes_t nframes, Samp
 				input[i+1] * fractional_phase_part;
 		}
 		
-		phase += phi + phi_delta;
+		the_phase += phi + phi_delta;
 	}
 
-	last_phase[channel] = (phase & fractional_part_mask);
+	last_phase[channel] = (the_phase & fractional_part_mask);
 	
 	// playback distance
 	return i;
@@ -116,25 +116,89 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 	return i;
 }
 
-void 
-LinearInterpolation::add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/)
+SplineInterpolation::SplineInterpolation()
 {
-	phase.push_back (0.0);
+    // precompute LU-factorization of matrix A
+    // see "Teubner Taschenbuch der Mathematik", p. 1105
+    m[0] = 4.0;
+    for (int i = 0; i <= MAX_PERIOD_SIZE - 2; i++) {
+        l[i] = 1.0 / m[i];
+        m[i+1] = 4.0 - l[i];
+    }
 }
 
-void 
-LinearInterpolation::remove_channel_from ()
+nframes_t
+SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
 {
-	phase.pop_back ();
-}
-
-
-void
-LinearInterpolation::reset() 
-{
-	for (size_t i = 0; i <= phase.size(); i++) {
-		phase[i] = 0.0;
-	}
+    // How many input samples we need
+    nframes_t n = ceil (double(nframes) * _speed) + 2;
+    //   |------------------------------------------^
+    // this won't be here in the debugged version.
+    
+    double M[n], t[n-2];
+    
+    // natural spline: boundary conditions
+    M[0]     = 0.0;
+    M[n - 1] = 0.0;
+    
+    // solve L * t = d
+    // see "Teubner Taschenbuch der Mathematik", p. 1105
+    t[0] = 6.0 * (input[0] - 2*input[1] + input[2]); 
+    for (nframes_t i = 1; i <= n - 3; i++) {
+        t[i] = 6.0 * (input[i] - 2*input[i+1] + input[i+2])
+               - l[i-1] * t[i-1];
+    }
+    
+    // solve R * M = t
+    // see "Teubner Taschenbuch der Mathematik", p. 1105
+    M[n-2] = -t[n-3] / m[n-3];
+    for (nframes_t i = n-4;; i--) {
+        M[i+1] = -(t[i] + M[i+2]) / m[i];
+        if ( i == 0 ) break;
+    }
+    
+    // now interpolate
+    // index in the input buffers
+    nframes_t   i = 0;
+    
+    double acceleration;
+    double distance = 0.0;
+    
+    if (_speed != _target_speed) {
+        acceleration = _target_speed - _speed;
+    } else {
+        acceleration = 0.0;
+    }
+    
+    distance = phase[channel];
+    for (nframes_t outsample = 0; outsample < nframes; outsample++) {
+        i = floor(distance);
+        
+        Sample x = distance - i;
+        
+        /* this would break the assertion below
+        if (x >= 1.0) {
+            x -= 1.0;
+            i++;
+        }
+        */
+        
+        if (input && output) {
+            assert (i <= n-1);
+            double a0 = input[i];
+            double a1 = input[i+1] - input[i] - M[i+1]/6.0 - M[i]/3.0;
+            double a2 = M[i] / 2.0;
+            double a3 = (M[i+1] - M[i]) / 6.0;
+            // interpolate into the output buffer
+            output[outsample] = ((a3*x +a2)*x +a1)*x + a0;
+        }
+        distance += _speed + acceleration;
+    }
+    
+    i = floor(distance);
+    phase[channel] = distance - floor(distance);
+    
+    return i;
 }
 
 LibSamplerateInterpolation::LibSamplerateInterpolation() : state (0)

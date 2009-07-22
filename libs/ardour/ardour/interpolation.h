@@ -10,21 +10,31 @@ namespace ARDOUR {
 
 class Interpolation {
  protected:
-         double   _speed, _target_speed;
+     double   _speed, _target_speed;
+
+     // the idea is that when the speed is not 1.0, we have to 
+     // interpolate between samples and then we have to store where we thought we were. 
+     // rather than being at sample N or N+1, we were at N+0.8792922
+     std::vector<double> phase;
+
              
  public:
-         Interpolation () { _speed = 1.0; _target_speed = 1.0; }
-     
-         void set_speed (double new_speed)          { _speed = new_speed; _target_speed = new_speed; }
-         void set_target_speed (double new_speed)   { _target_speed = new_speed; }
+     Interpolation () { _speed = 1.0; _target_speed = 1.0; }
+ 
+     void set_speed (double new_speed)          { _speed = new_speed; _target_speed = new_speed; }
+     void set_target_speed (double new_speed)   { _target_speed = new_speed; }
 
-         double target_speed()          const { return _target_speed; }
-         double speed()                 const { return _speed; }
-         
-	void add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/) {}
-         void remove_channel_from () {}
-  
-         void reset () {}
+     double target_speed()          const { return _target_speed; }
+     double speed()                 const { return _speed; }
+     
+     void add_channel_to (int input_buffer_size, int output_buffer_size) { phase.push_back (0.0); }
+     void remove_channel_from () { phase.pop_back (); }
+
+     void reset () {
+         for (size_t i = 0; i <= phase.size(); i++) {
+              phase[i] = 0.0;
+          }
+     }
 };
 
 // 40.24 fixpoint math
@@ -72,20 +82,80 @@ class FixedPointLinearInterpolation : public Interpolation {
         void reset ();
 };
 
- class LinearInterpolation : public Interpolation {
+class LinearInterpolation : public Interpolation {
  protected:
-    // the idea is that when the speed is not 1.0, we have to 
-    // interpolate between samples and then we have to store where we thought we were. 
-    // rather than being at sample N or N+1, we were at N+0.8792922
-    std::vector<double> phase;
     
  public:
-         void add_channel_to (int input_buffer_size, int output_buffer_size);
-         void remove_channel_from ();
-     
-         nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
-         void reset ();
- };
+     nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
+};
+ 
+
+#define MAX_PERIOD_SIZE 4096
+/**
+ * @class SplineInterpolation
+ * 
+ * @brief interpolates using cubic spline interpolation over an input period
+ * 
+ * Splines are piecewise cubic functions between each samples,
+ * where the cubic polynomials' values, first and second derivatives are equal
+ * on each sample point.
+ * 
+ * Those conditions are equivalent of solving the linear system of equations
+ * defined by the matrix equation (all indices are zero-based):
+ *  A * M = d
+ *
+ * where A has (n-2) rows and (n-2) columns
+ *
+ *  [ 4 1 0 0 ... 0 0 0 0 ]   [ M[1]   ]   [ 6*y[0] - 12*y[1] + 6*y[2] ]
+ *  [ 1 4 1 0 ... 0 0 0 0 ]   [ M[2]   ]   [ 6*y[1] - 12*y[2] + 6*y[3] ]
+ *  [ 0 1 4 1 ... 0 0 0 0 ]   [ M[3]   ]   [ 6*y[2] - 12*y[3] + 6*y[4] ]
+ *  [ 0 0 1 4 ... 0 0 0 0 ]   [ M[4]   ]   [ 6*y[3] - 12*y[4] + 6*y[5] ]
+ *            ...           *            =            ...            
+ *  [ 0 0 0 0 ... 4 1 0 0 ]   [ M[n-5] ]   [ 6*y[n-6]- 12*y[n-5] + 6*y[n-4] ]
+ *  [ 0 0 0 0 ... 1 4 1 0 ]   [ M[n-4] ]   [ 6*y[n-5]- 12*y[n-4] + 6*y[n-3] ]
+ *  [ 0 0 0 0 ... 0 1 4 1 ]   [ M[n-3] ]   [ 6*y[n-4]- 12*y[n-3] + 6*y[n-2] ]
+ *  [ 0 0 0 0 ... 0 0 1 4 ]   [ M[n-2] ]   [ 6*y[n-3]- 12*y[n-2] + 6*y[n-1] ]
+ *
+ *  For our purpose we use natural splines which means the boundary coefficients
+ *  M[0] = M[n-1] = 0
+ *
+ *  The interpolation polynomial in the i-th interval then has the form
+ *  p_i(x) = a3 (x - i)^3 + a2 (x - i)^2 + a1 (x - i) + a0
+ *         = ((a3 * (x - i) + a2) * (x - i) + a1) * (x - i) + a0
+ *     where
+ *  a3 = (M[i+1] - M[i]) / 6
+ *  a2 = M[i] / 2 
+ *  a1 = y[i+1] - y[i] - M[i+1]/6 - M[i]/3
+ *  a0 = y[i] 
+ *
+ *  We solve the system by LU-factoring the matrix A:
+ *  A = L * U:
+ *
+ *  [ 4 1 0 0 ... 0 0 0 0 ]   [ 1    0    0    0   ... 0      0      0      0 ]   [ m[0] 1    0    0   ... 0      0      0      ]
+ *  [ 1 4 1 0 ... 0 0 0 0 ]   [ l[0] 1    0    0   ... 0      0      0      0 ]   [ 0    m[1] 1    0   ... 0      0      0      ]
+ *  [ 0 1 4 1 ... 0 0 0 0 ]   [ 0    l[1] 1    0   ... 0      0      0      0 ]   [ 0    0    m[2] 1   ... 0      0      0      ]
+ *  [ 0 0 1 4 ... 0 0 0 0 ]   [ 0    0    l[2] 1   ... 0      0      0      0 ]                        ...                
+ *            ...           =                     ...                          *  [ 0    0    0    0   ... 0      0      0      ]
+ *  [ 0 0 0 0 ... 4 1 0 0 ]   [ 0    0    0    0   ... 1      0      0      0 ]   [ 0    0    0    0   ... 1      0      0      ]
+ *  [ 0 0 0 0 ... 1 4 1 0 ]   [ 0    0    0    0   ... l[n-6] 1      0      0 ]   [ 0    0    0    0   ... m[n-5] 1      0      ]
+ *  [ 0 0 0 0 ... 0 1 4 1 ]   [ 0    0    0    0   ... 0      l[n-5] 1      0 ]   [ 0    0    0    0   ... 0      m[n-4] 1      ]
+ *  [ 0 0 0 0 ... 0 0 1 4 ]   [ 0    0    0    0   ... 0      0      l[n-4] 1 ]   [ 0    0    0    0   ... 0      0      m[n-3] ]
+ *
+ *  where the l[i] and m[i] can be precomputed.
+ * 
+ *  Then we solve the system A * M = d by first solving the system
+ *    L * t = d 
+ *  and then
+ *    R * M = t
+ */
+class SplineInterpolation : public Interpolation {
+ protected:
+    double l[MAX_PERIOD_SIZE], m[MAX_PERIOD_SIZE];
+    
+ public:
+    SplineInterpolation();
+    nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
+};
 
 class LibSamplerateInterpolation : public Interpolation {
  protected:
@@ -101,7 +171,7 @@ class LibSamplerateInterpolation : public Interpolation {
         ~LibSamplerateInterpolation ();
     
         void   set_speed (double new_speed);
-        void   set_target_speed (double /*new_speed*/) {}
+        void   set_target_speed (double new_speed)   {}
         double speed ()                        const { return _speed;      }
         
         void add_channel_to (int input_buffer_size, int output_buffer_size);
