@@ -271,6 +271,7 @@
 		      <menuitem action='linear-waveforms'/>
 		      <menuitem action='logarithmic-waveforms'/>
 		</menu>
+		<menuitem action='track-record-enable-toggle'/>	
 		<menuitem action='toggle-track-active'/>	
 		<menuitem action='remove-track'/>	
 	</menu>

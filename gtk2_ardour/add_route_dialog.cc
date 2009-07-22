@@ -263,6 +263,9 @@ AddRouteDialog::refill_channel_setups ()
 			}
 		} 
 
+		/* no more templates for the rest */
+		chn.template_path = "";
+
 		chn.name = _("3 Channel");
 		chn.channels = 3;
 		channel_setups.push_back (chn);
