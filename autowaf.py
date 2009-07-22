@@ -81,18 +81,8 @@ def check_header(conf, name, define='', mandatory=False):
 		else:
 			conf.check(header_name=name, mandatory=mandatory)
 
-def check_tool(conf, name):
-	"Check for a tool iff it hasn't been checked for yet"
-	if type(conf.env['AUTOWAF_TOOLS']) != dict:
-		conf.env['AUTOWAF_TOOLS'] = {}
-
-	checked = conf.env['AUTOWAF_TOOLS']
-	if not name in checked:
-		conf.check_tool(name)
-		checked[name] = True
-
 def nameify(name):
-	return name.replace('/', '_').replace('++', 'PP').replace('-', '_')
+	return name.replace('/', '_').replace('++', 'PP').replace('-', '_').replace('.', '_')
 
 def check_pkg(conf, name, **args):
 	if not 'mandatory' in args:
@@ -133,9 +123,9 @@ def configure(conf):
 		conf.env.append_value('CCFLAGS', vals.split())
 		conf.env.append_value('CXXFLAGS', vals.split())
 	conf.line_just = 43
-	check_tool(conf, 'misc')
-	check_tool(conf, 'compiler_cc')
-	check_tool(conf, 'compiler_cxx')
+	conf.check_tool('misc')
+	conf.check_tool('compiler_cc')
+	conf.check_tool('compiler_cxx')
 	conf.env['BUILD_DOCS'] = Options.options.build_docs
 	conf.env['DEBUG'] = Options.options.debug
 	conf.env['STRICT'] = Options.options.strict
@@ -239,7 +229,7 @@ def use_lib(bld, obj, libs):
 			inc_flag = '-iquote ' + os.path.join(abssrcdir, l.lower())
 			for f in ['CCFLAGS', 'CXXFLAGS']:
 				if not inc_flag in bld.env[f]:
-					bld.env.prepend_value(f, inc_flag)
+					bld.env.append_value(f, inc_flag)
 		else:
 			if hasattr(obj, 'uselib'):
 				obj.uselib += ' ' + l
@@ -336,6 +326,7 @@ def build_dox(bld, name, version, srcdir, blddir):
 	}
 	obj.install_path = ''
 	out1 = bld.new_task_gen('command-output')
+	out1.dependencies = [obj]
 	out1.stdout = '/doc/doxygen.out'
 	out1.stdin = '/doc/reference.doxygen' # whatever..
 	out1.command = 'doxygen'

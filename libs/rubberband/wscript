@@ -25,7 +25,7 @@ def set_options(opt):
 
 def configure(conf):
 	autowaf.configure(conf)
-	autowaf.check_tool(conf, 'compiler_cxx')
+	conf.check_tool('compiler_cxx')
 
 def build(bld):
 	# Library

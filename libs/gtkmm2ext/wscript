@@ -31,7 +31,7 @@ def configure(conf):
 	autowaf.build_version_files(path_prefix+'gtkmm2ext/version.h', path_prefix+'version.cc',
 			'libgtkmm2ext', MAJOR, MINOR, MICRO)
 	autowaf.configure(conf)
-	autowaf.check_tool(conf, 'compiler_cxx')
+	conf.check_tool('compiler_cxx')
 	autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
 
 def build(bld):
