@@ -760,10 +760,6 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 					return true;
 				}
 					
-			} else if (prop->value() == "listen" || prop->value() == "deliver") {
-
-				/* XXX need to generalize */
-
 			} else if (prop->value() == "intsend") {
 
 				processor.reset (new InternalSend (_session, _mute_master, node));
@@ -795,6 +791,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 
 			} else {
 				error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
+				return false;
 			}
 				
 			if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
@@ -2648,6 +2645,8 @@ void
 Route::meter ()
 {
 	Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
+
+	assert (_meter);
 
 	_meter->meter ();
 

@@ -28,6 +28,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/configuration.h"
 #include "ardour/io.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/mute_master.h"
 #include "ardour/session.h"
 
@@ -193,9 +194,26 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 		delta = target - initial;
 	}
 
+	/* MIDI Gain */
+
+	for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
+#if 0
+		MidiBuffer& mb (*i);
+
+		for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
+			Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*m);
+			if (ev.buffer()[0] == MIDI_CMD_NOTE_ON) {
+				ev.buffer()[2] = (uint8_t) rint (ev.buffer()[2] * 1.0);
+			}
+		}
+#endif
+	}
+
+	/* Audio Gain */
+
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 		Sample* const buffer = i->data();
-
+		
 		fractional_pos = 1.0;
 
 		for (nframes_t nx = 0; nx < declick; ++nx) {

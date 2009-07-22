@@ -117,6 +117,8 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 
 	_amp->run (sendbufs, start_frame, end_frame, nframes);
 
+	/* XXX NEED TO PAN */
+
 	/* consider metering */
 	
 	if (_metering) {

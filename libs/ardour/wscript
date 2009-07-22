@@ -3,6 +3,7 @@ import autowaf
 import os
 import glob
 import Options
+from w18n import build_i18n
 
 # Version of this package (even if built as a child)
 MAJOR = '3'
@@ -25,6 +26,160 @@ srcdir = '.'
 blddir = 'build'
 
 path_prefix = 'libs/ardour/'
+
+libardour_sources = [
+	'amp.cc',
+	'analyser.cc',
+	'audio_buffer.cc',
+	'audio_diskstream.cc',
+	'audio_library.cc',
+	'audio_playlist.cc',
+	'audio_playlist_importer.cc',
+	'audio_port.cc',
+	'audio_region_importer.cc',
+	'audio_track.cc',
+	'audio_track_importer.cc',
+	'audioanalyser.cc',
+	'audioengine.cc',
+	'audiofile_tagger.cc',
+	'audiofilesource.cc',
+	'audioregion.cc',
+	'audiosource.cc',
+	'auditioner.cc',
+	'automatable.cc',
+	'automation.cc',
+	'automation_control.cc',
+	'automation_list.cc',
+	'beats_frames_converter.cc',
+	'broadcast_info.cc',
+	'buffer.cc',
+	'buffer_set.cc',
+	'bundle.cc',
+	'chan_count.cc',
+	'chan_mapping.cc',
+	'configuration.cc',
+	'control_protocol_manager.cc',
+	'control_protocol_search_path.cc',
+	'crossfade.cc',
+	'cycle_timer.cc',
+	'default_click.cc',
+	'delivery.cc',
+	'directory_names.cc',
+	'diskstream.cc',
+	'element_import_handler.cc',
+	'element_importer.cc',
+	'enums.cc',
+	'event_type_map.cc',
+	'export_channel.cc',
+	'export_channel_configuration.cc',
+	'export_file_io.cc',
+	'export_filename.cc',
+	'export_format_base.cc',
+	'export_format_manager.cc',
+	'export_format_specification.cc',
+	'export_formats.cc',
+	'export_handler.cc',
+	'export_preset.cc',
+	'export_processor.cc',
+	'export_profile_manager.cc',
+	'export_status.cc',
+	'export_timespan.cc',
+	'export_utilities.cc',
+	'file_source.cc',
+	'filename_extensions.cc',
+	'filesystem_paths.cc',
+	'filter.cc',
+	'find_session.cc',
+	'gain.cc',
+	'gdither.cc',
+	'globals.cc',
+	'import.cc',
+	'internal_return.cc',
+	'internal_send.cc',
+	'interpolation.cc',
+	'io.cc',
+	'io_processor.cc',
+	'jack_slave.cc',
+	'ladspa_plugin.cc',
+	'location.cc',
+	'location_importer.cc',
+	'meter.cc',
+	'midi_buffer.cc',
+	'midi_clock_slave.cc',
+	'midi_diskstream.cc',
+	'midi_model.cc',
+	'midi_patch_manager.cc',
+	'midi_playlist.cc',
+	'midi_port.cc',
+	'midi_region.cc',
+	'midi_ring_buffer.cc',
+	'midi_source.cc',
+	'midi_state_tracker.cc',
+	'midi_stretch.cc',
+	'midi_track.cc',
+	'mix.cc',
+	'mtc_slave.cc',
+	'mute_master.cc',
+	'named_selection.cc',
+	'onset_detector.cc',
+	'panner.cc',
+	'pcm_utils.cc',
+	'playlist.cc',
+	'playlist_factory.cc',
+	'plugin.cc',
+	'plugin_insert.cc',
+	'plugin_manager.cc',
+	'port.cc',
+	'port_insert.cc',
+	'port_set.cc',
+	'processor.cc',
+	'quantize.cc',
+	'rc_configuration.cc',
+	'recent_sessions.cc',
+	'region.cc',
+	'region_factory.cc',
+	'resampled_source.cc',
+	'return.cc',
+	'reverse.cc',
+	'route.cc',
+	'route_group.cc',
+	'rb_effect.cc',
+	'send.cc',
+	'session.cc',
+	'session_butler.cc',
+	'session_click.cc',
+	'session_command.cc',
+	'session_configuration.cc',
+	'session_directory.cc',
+	'session_events.cc',
+	'session_export.cc',
+	'session_metadata.cc',
+	'session_midi.cc',
+	'session_process.cc',
+	'session_state.cc',
+	'session_state_utils.cc',
+	'session_time.cc',
+	'session_transport.cc',
+	'session_utils.cc',
+	'smf_source.cc',
+	'sndfile_helpers.cc',
+	'sndfileimportable.cc',
+	'sndfilesource.cc',
+	'source.cc',
+	'source_factory.cc',
+	'strip_silence.cc',
+	'svn_revision.cc',
+	'tape_file_matcher.cc',
+	'template_utils.cc',
+	'tempo.cc',
+	'tempo_map_importer.cc',
+	'ticker.cc',
+	'track.cc',
+	'transient_detector.cc',
+	'user_bundle.cc',
+	'utils.cc',
+	'version.cc'
+]
 
 def set_options(opt):
 	autowaf.set_options(opt)
@@ -76,160 +231,8 @@ def configure(conf):
 
 def build(bld):
 	# Library
-	obj = bld.new_task_gen('cxx', 'shlib')
-	obj.source = '''
-		amp.cc
-		analyser.cc
-		audio_buffer.cc
-		audio_diskstream.cc
-		audio_library.cc
-		audio_playlist.cc
-		audio_playlist_importer.cc
-		audio_port.cc
-		audio_region_importer.cc
-		audio_track.cc
-		audio_track_importer.cc
-		audioanalyser.cc
-		audioengine.cc
-		audiofile_tagger.cc
-		audiofilesource.cc
-		audioregion.cc
-		audiosource.cc
-		auditioner.cc
-		automatable.cc
-		automation.cc
-		automation_control.cc
-		automation_list.cc
-		beats_frames_converter.cc
-		broadcast_info.cc
-		buffer.cc
-		buffer_set.cc
-		bundle.cc
-		chan_count.cc
-		chan_mapping.cc
-		configuration.cc
-		control_protocol_manager.cc
-		control_protocol_search_path.cc
-		crossfade.cc
-		cycle_timer.cc
-		default_click.cc
-                delivery.cc
-		directory_names.cc
-		diskstream.cc
-		element_import_handler.cc
-		element_importer.cc
-		enums.cc
-		event_type_map.cc
-		export_channel.cc
-		export_channel_configuration.cc
-		export_file_io.cc
-		export_filename.cc
-		export_format_base.cc
-		export_format_manager.cc
-		export_format_specification.cc
-		export_formats.cc
-		export_handler.cc
-		export_preset.cc
-		export_processor.cc
-		export_profile_manager.cc
-		export_status.cc
-		export_timespan.cc
-		export_utilities.cc
-		file_source.cc
-		filename_extensions.cc
-		filesystem_paths.cc
-		filter.cc
-		find_session.cc
-		gain.cc
-		gdither.cc
-		globals.cc
-		import.cc
-                internal_return.cc
-                internal_send.cc
-		interpolation.cc
-                io.cc
-		io_processor.cc
-		jack_slave.cc
-		ladspa_plugin.cc
-		location.cc
-		location_importer.cc
-		meter.cc
-		midi_buffer.cc
-		midi_clock_slave.cc
-		midi_diskstream.cc
-		midi_model.cc
-		midi_patch_manager.cc
-		midi_playlist.cc
-		midi_port.cc
-		midi_region.cc
-		midi_ring_buffer.cc
-		midi_source.cc
-		midi_state_tracker.cc
-		midi_stretch.cc
-		midi_track.cc
-		mix.cc
-		mtc_slave.cc
-                mute_master.cc
-		named_selection.cc
-		onset_detector.cc
-		panner.cc
-		pcm_utils.cc
-		playlist.cc
-		playlist_factory.cc
-		plugin.cc
-		plugin_insert.cc
-		plugin_manager.cc
-		port.cc
-		port_insert.cc
-		port_set.cc
-		processor.cc
-		quantize.cc
-	        rc_configuration.cc
-		recent_sessions.cc
-		region.cc
-		region_factory.cc
-		resampled_source.cc
-		return.cc
-		reverse.cc
-                route.cc
-		route_group.cc
-	        rb_effect.cc
-		send.cc
-		session.cc
-		session_butler.cc
-		session_click.cc
-		session_command.cc
-		session_configuration.cc
-		session_directory.cc
-		session_events.cc
-		session_export.cc
-		session_metadata.cc
-		session_midi.cc
-		session_process.cc
-		session_state.cc
-		session_state_utils.cc
-		session_time.cc
-		session_transport.cc
-		session_utils.cc
-		smf_source.cc
-		sndfile_helpers.cc
-		sndfileimportable.cc
-		sndfilesource.cc
-		source.cc
-		source_factory.cc
-		strip_silence.cc
-		svn_revision.cc
-		tape_file_matcher.cc
-		template_utils.cc
-		tempo.cc
-		tempo_map_importer.cc
-		ticker.cc
-		track.cc
-		transient_detector.cc
-		user_bundle.cc
-		utils.cc
-		version.cc
-	'''
+	obj              = bld.new_task_gen('cxx', 'shlib')
+	obj.source       = libardour_sources
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.', '../surfaces/control_protocol']
 	obj.name         = 'libardour'
@@ -249,28 +252,35 @@ def build(bld):
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '
 	if bld.env['HAVE_SLV2']:
-		obj.source += ' lv2_plugin.cc lv2_event_buffer.cc uri_map.cc '
+		obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc' ]
 		obj.uselib += ' SLV2 '
 		
 	if bld.env['VST']:
-		obj.source += ' vst_plugin.cc session_vst.cc '
+		obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
 
 	if bld.env['HAVE_COREAUDIO'] and bld.env['COREAUDIO']:
-		obj.sources += ' coreaudio.cc caimportable.cc '
+		obj.sources += [ 'coreaudio.cc', 'caimportable.cc' ]
 
 	if bld.env['HAVE_AUDIOUNITS'] and bld.env['AUDIOUNITS']:
-		obj.sources += ' audio_unit.cc '
+		obj.sources += [ 'audio_unit.cc' ]
 
 	if bld.env['IS_OSX']:
 		# this avoids issues with circular dependencies between libardour and libardour_cp.
 		obj.linkflags += '-undefined suppress -flat_namespace'
 
 	if bld.env['FPU_OPTIMIZATION']:
-		obj.source += ' sse_functions_xmm.cc'
+		obj.source += [ 'sse_functions_xmm.cc' ]
 		if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
-			obj.source += ' sse_functions.s'
+			obj.source += [ 'sse_functions.s' ]
 		elif bld.env['build_target'] == 'x86_64':
-			obj.source += ' sse_functions_64bit.s'
+			obj.source += [ 'sse_functions_64bit.s' ]
+
+	# i18n
+	if bld.env['ENABLE_NLS']:
+		mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
+		for mo in mo_files:
+			lang = os.path.basename (mo).replace ('.mo', '')
+			bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
 
 	if bld.env['HAVE_CPPUNIT']:
 		# Unit tests
@@ -289,3 +299,5 @@ def build(bld):
 def shutdown():
 	autowaf.shutdown()
 
+def i18n(bld):
+	build_i18n (bld, 'libs/ardour', APPNAME, libardour_sources)

@@ -29,6 +29,11 @@ children = [
 ]
 
 
+i18n_children = [
+	'gtk2_ardour',
+	'libs/ardour'
+]
+
 # Version stuff
 
 def fetch_svn_revision (path):
@@ -386,6 +391,8 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Samplerate', bool(conf.env['HAVE_SAMPLERATE']))
 	autowaf.display_msg(conf, 'Soundtouch', bool(conf.env['HAVE_SOUNDTOUCH']))
 	autowaf.display_msg(conf, 'Translation', opts.nls)
+	if opts.nls:
+		conf.define ('ENABLE_NLS', 1)
 	autowaf.display_msg(conf, 'System Libraries', opts.syslibs)
 	autowaf.display_msg(conf, 'Tranzport', opts.tranzport)
 	if opts.tranzport:
@@ -411,6 +418,6 @@ def build(bld):
 	for i in children:
 		bld.add_subdirs(i)
 
-def shutdown():
-	autowaf.shutdown()
+def i18n(bld):
+	bld.recurse (i18n_children)
 

@@ -34,6 +34,8 @@
 #include "ardour/configuration.h"
 #include "ardour/session.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace sigc;
 using namespace std;
@@ -223,6 +225,15 @@ RouteGroup::make_subgroup ()
 {
 	RouteList rl;
 	uint32_t nin = 0;
+
+	/* since we don't do MIDI Busses yet, check quickly ... */
+
+	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		if ((*i)->output()->n_ports().n_midi() != 0) {
+			PBD::info << _("You cannot subgroup MIDI tracks at this time") << endmsg;
+			return;
+		}
+	}
 
 	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
 		nin = max (nin, (*i)->output()->n_ports().n_audio());

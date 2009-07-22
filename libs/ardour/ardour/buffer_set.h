@@ -126,6 +126,25 @@ public:
 	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
 	audio_iterator audio_end()   { return audio_iterator(*this, _count.n_audio()); }
 
+	class midi_iterator {
+	public:
+		MidiBuffer& operator*()  { return _set.get_midi(_index); }
+		MidiBuffer* operator->() { return &_set.get_midi(_index); }
+		midi_iterator& operator++() { ++_index; return *this; } // yes, prefix only
+		bool operator==(const midi_iterator& other) { return (_index == other._index); }
+		bool operator!=(const midi_iterator& other) { return (_index != other._index); }
+
+	private:
+		friend class BufferSet;
+
+		midi_iterator(BufferSet& list, size_t index) : _set(list), _index(index) {}
+
+		BufferSet& _set;
+		size_t    _index;
+	};
+
+	midi_iterator midi_begin() { return midi_iterator(*this, 0); }
+	midi_iterator midi_end()   { return midi_iterator(*this, _count.n_midi()); }
 
 	class iterator {
 	public:

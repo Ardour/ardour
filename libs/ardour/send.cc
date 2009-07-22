@@ -190,7 +190,13 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 	
-	return Processor::configure_io (in, out);
+	if (!Processor::configure_io (in, out)) {
+		return false;
+	}
+
+	reset_panner ();
+	
+	return true;
 }
 
 /** Set up the XML description of a send so that its name is unique.

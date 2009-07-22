@@ -43,6 +43,7 @@ def configure(conf):
 def build(bld):
 	bld.add_subdirs('control_protocol')
 	bld.add_subdirs('generic_midi')
+	bld.add_subdirs('mackie')
 	if bld.env['BUILD_OSC']:
 		bld.add_subdirs('osc')
 	if bld.env['BUILD_POWERMATE']:

@@ -6,7 +6,7 @@ import os
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
+LIBARDOUR_MCP_LIB_VERSION = '4.1.0'
 
 # Mandatory variables
 srcdir = '.'
@@ -43,10 +43,10 @@ def build(bld):
 	obj.export_incdirs = ['./mackie']
 	obj.cxxflags     = '-DPACKAGE="ardour_mackie"'
 	obj.includes     = ['.', './mackie']
-	obj.name         = 'libmackie'
-	obj.target       = 'mackie'
-	obj.uselib_local = 'libardour libsurfaces'
-	obj.vnum         = LIBSURFACES_LIB_VERSION
+	obj.name         = 'libardour_mcp'
+	obj.target       = 'ardour_mcp'
+	obj.uselib_local = 'libardour libardour_cp'
+	obj.vnum         = LIBARDOUR_MCP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

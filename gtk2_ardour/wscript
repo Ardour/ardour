@@ -2,6 +2,7 @@
 import autowaf
 import os
 import glob
+from w18n import build_i18n
 
 # Version of this package (even if built as a child)
 MAJOR = '1'
@@ -19,8 +20,181 @@ blddir = 'build'
 
 path_prefix = 'gtk2_ardour/'
 
+gtk2_ardour_sources = [
+	'about.cc',
+	'actions.cc',
+	'add_midi_cc_track_dialog.cc',
+	'add_route_dialog.cc',
+	'analysis_window.cc',
+	'ardour_dialog.cc',
+	'ardour_ui.cc',
+	'ardour_ui2.cc',
+	'ardour_ui_dependents.cc',
+	'ardour_ui_dialogs.cc',
+	'ardour_ui_ed.cc',
+	'ardour_ui_mixer.cc',
+	'ardour_ui_options.cc',
+	'audio_clock.cc',
+	'audio_region_editor.cc',
+	'audio_region_view.cc',
+	'audio_streamview.cc',
+	'audio_time_axis.cc',
+	'automation_controller.cc',
+	'automation_line.cc',
+	'automation_region_view.cc',
+	'automation_streamview.cc',
+	'automation_time_axis.cc',
+	'axis_view.cc',
+	'bundle_manager.cc',
+	'cairo_widget.cc',
+	'canvas-flag.cc',
+	'canvas-note-event.cc',
+	'canvas-note.cc',
+	'canvas-program-change.cc',
+	'canvas-simpleline.c',
+	'canvas-simplerect.c',
+	'canvas-sysex.cc',
+	'canvas-waveview.c',
+	'control_point.cc',
+	'control_point_dialog.cc',
+	'crossfade_edit.cc',
+	'crossfade_view.cc',
+	'curvetest.cc',
+	'diamond.cc',
+	'editing.cc',
+	'editor.cc',
+	'editor_actions.cc',
+	'editor_audio_import.cc',
+	'editor_audiotrack.cc',
+	'editor_canvas.cc',
+	'editor_canvas_events.cc',
+	'editor_component.cc',
+	'editor_cursors.cc',
+	'editor_drag.cc',
+	'editor_route_groups.cc',
+	'editor_export_audio.cc',
+	'editor_group_tabs.cc',
+	'editor_hscroller.cc',
+	'editor_keyboard.cc',
+	'editor_keys.cc',
+	'editor_markers.cc',
+	'editor_mixer.cc',
+	'editor_mouse.cc',
+	'editor_nudge.cc',
+	'editor_ops.cc',
+	'editor_regions.cc',
+	'editor_routes.cc',
+	'editor_rulers.cc',
+	'editor_scrub.cc',
+	'editor_selection.cc',
+	'editor_selection_list.cc',
+	'editor_snapshots.cc',
+	'editor_summary.cc',
+	'editor_tempodisplay.cc',
+	'editor_timefx.cc',
+	'engine_dialog.cc',
+	'enums.cc',
+	'export_channel_selector.cc',
+	'export_dialog.cc',
+	'export_file_notebook.cc',
+	'export_filename_selector.cc',
+	'export_format_dialog.cc',
+	'export_format_selector.cc',
+	'export_preset_selector.cc',
+	'export_timespan_selector.cc',
+	'fft.cc',
+	'fft_graph.cc',
+	'fft_result.cc',
+	'gain_meter.cc',
+	'generic_pluginui.cc',
+	'ghostregion.cc',
+	'global_port_matrix.cc',
+	'group_tabs.cc',
+	'gtk-custom-hruler.c',
+	'gtk-custom-ruler.c',
+	'io_selector.cc',
+	'keyboard.cc',
+	'keyeditor.cc',
+	'latency_gui.cc',
+	'level_meter.cc',
+	'lineset.cc',
+	'location_ui.cc',
+	'main.cc',
+	'marker.cc',
+	'midi_channel_selector.cc',
+	'midi_port_dialog.cc',
+	'midi_region_view.cc',
+	'midi_scroomer.cc',
+	'midi_streamview.cc',
+	'midi_time_axis.cc',
+	'mixer_group_tabs.cc',
+	'mixer_strip.cc',
+	'mixer_ui.cc',
+	'nag.cc',
+	'option_editor.cc',
+	'opts.cc',
+	'panner.cc',
+	'panner2d.cc',
+	'panner_ui.cc',
+	'piano_roll_header.cc',
+	'playlist_selector.cc',
+	'plugin_eq_gui.cc',
+	'plugin_selector.cc',
+	'plugin_ui.cc',
+	'port_group.cc',
+	'port_matrix.cc',
+	'port_matrix_body.cc',
+	'port_matrix_column_labels.cc',
+	'port_matrix_component.cc',
+	'port_matrix_grid.cc',
+	'port_matrix_labels.cc',
+	'port_matrix_row_labels.cc',
+	'processor_box.cc',
+	'prompter.cc',
+	'public_editor.cc',
+	'rc_option_editor.cc',
+	'region_gain_line.cc',
+	'region_selection.cc',
+	'region_view.cc',
+	'return_ui.cc',
+	'rhythm_ferret.cc',
+	'route_group_dialog.cc',
+	'route_group_menu.cc',
+	'route_params_ui.cc',
+	'route_processor_selection.cc',
+	'route_time_axis.cc',
+	'route_ui.cc',
+	'selection.cc',
+	'send_ui.cc',
+	'session_import_dialog.cc',
+	'session_metadata_dialog.cc',
+	'session_option_editor.cc',
+	'sfdb_ui.cc',
+	'simpleline.cc',
+	'simplerect.cc',
+	'splash.cc',
+	'startup.cc',
+	'streamview.cc',
+	'strip_silence_dialog.cc',
+	'tape_region_view.cc',
+	'tempo_dialog.cc',
+	'tempo_lines.cc',
+	'theme_manager.cc',
+	'time_axis_view.cc',
+	'time_axis_view_item.cc',
+	'time_fx_dialog.cc',
+	'time_selection.cc',
+	'track_selection.cc',
+	'ui_config.cc',
+	'utils.cc',
+	'version.cc',
+	'waveview.cc',
+]
+
 def set_options(opt):
 	autowaf.set_options(opt)
+	opt.add_option('--potupdate', action='store_true', dest='potupdate',
+		       help='Rebuild pot file for translators')
 
 def configure(conf):
 	autowaf.build_version_files(path_prefix+'version.h', path_prefix+'version.cc',
@@ -51,177 +225,8 @@ def configure(conf):
 def build(bld):
 	# Program
 	obj = bld.new_task_gen(features = 'cxx cc cprogram')
-	obj.source = '''
-		about.cc
-		actions.cc
-		add_midi_cc_track_dialog.cc
-		add_route_dialog.cc
-		analysis_window.cc
-		ardour_dialog.cc
-		ardour_ui.cc
-		ardour_ui2.cc
-		ardour_ui_dependents.cc
-		ardour_ui_dialogs.cc
-		ardour_ui_ed.cc
-		ardour_ui_mixer.cc
-		ardour_ui_options.cc
-		audio_clock.cc
-		audio_region_editor.cc
-		audio_region_view.cc
-		audio_streamview.cc
-		audio_time_axis.cc
-		automation_controller.cc
-		automation_line.cc
-		automation_region_view.cc
-		automation_streamview.cc
-		automation_time_axis.cc
-		axis_view.cc
-		bundle_manager.cc
-		cairo_widget.cc
-		canvas-flag.cc
-		canvas-note-event.cc
-		canvas-note.cc
-		canvas-program-change.cc
-		canvas-simpleline.c
-		canvas-simplerect.c
-		canvas-sysex.cc
-		canvas-waveview.c
-		control_point.cc
-		control_point_dialog.cc
-		crossfade_edit.cc
-		crossfade_view.cc
-		curvetest.cc
-		diamond.cc
-		editing.cc
-		editor.cc
-		editor_actions.cc
-		editor_audio_import.cc
-		editor_audiotrack.cc
-		editor_canvas.cc
-		editor_canvas_events.cc
-		editor_component.cc
-		editor_cursors.cc
-		editor_drag.cc
-		editor_route_groups.cc
-		editor_export_audio.cc
-		editor_group_tabs.cc
-		editor_hscroller.cc
-		editor_keyboard.cc
-		editor_keys.cc
-		editor_markers.cc
-		editor_mixer.cc
-		editor_mouse.cc
-		editor_nudge.cc
-		editor_ops.cc
-		editor_regions.cc
-		editor_routes.cc
-		editor_rulers.cc
-		editor_scrub.cc
-		editor_selection.cc
-		editor_selection_list.cc
-		editor_snapshots.cc
-                editor_summary.cc
-		editor_tempodisplay.cc
-		editor_timefx.cc
-		engine_dialog.cc
-		enums.cc
-		export_channel_selector.cc
-		export_dialog.cc
-		export_file_notebook.cc
-		export_filename_selector.cc
-		export_format_dialog.cc
-		export_format_selector.cc
-		export_preset_selector.cc
-		export_timespan_selector.cc
-		fft.cc
-		fft_graph.cc
-		fft_result.cc
-		gain_meter.cc
-		generic_pluginui.cc
-		ghostregion.cc
-		global_port_matrix.cc
-                group_tabs.cc
-		gtk-custom-hruler.c
-		gtk-custom-ruler.c
-		io_selector.cc
-		keyboard.cc
-		keyeditor.cc
-		latency_gui.cc
-		level_meter.cc
-		lineset.cc
-		location_ui.cc
-		main.cc
-		marker.cc
-		midi_channel_selector.cc
-		midi_port_dialog.cc
-		midi_region_view.cc
-		midi_scroomer.cc
-		midi_streamview.cc
-		midi_time_axis.cc
-		mixer_group_tabs.cc
-		mixer_strip.cc
-		mixer_ui.cc
-		nag.cc
-		option_editor.cc
-		opts.cc
-		panner.cc
-		panner2d.cc
-		panner_ui.cc
-		piano_roll_header.cc
-		playlist_selector.cc
-		plugin_eq_gui.cc
-		plugin_selector.cc
-		plugin_ui.cc
-		port_group.cc
-		port_matrix.cc
-		port_matrix_body.cc
-		port_matrix_column_labels.cc
-		port_matrix_component.cc
-		port_matrix_grid.cc
-		port_matrix_labels.cc
-		port_matrix_row_labels.cc
-		processor_box.cc
-		prompter.cc
-		public_editor.cc
-		rc_option_editor.cc
-		region_gain_line.cc
-		region_selection.cc
-		region_view.cc
-		return_ui.cc
-		rhythm_ferret.cc
-		route_group_dialog.cc
-		route_group_menu.cc
-		route_params_ui.cc
-		route_processor_selection.cc
-		route_time_axis.cc
-		route_ui.cc
-		selection.cc
-		send_ui.cc
-		session_import_dialog.cc
-		session_metadata_dialog.cc
-                session_option_editor.cc
-		sfdb_ui.cc
-		simpleline.cc
-		simplerect.cc
-		splash.cc
-		startup.cc
-		streamview.cc
-		strip_silence_dialog.cc
-		tape_region_view.cc
-		tempo_dialog.cc
-		tempo_lines.cc
-		theme_manager.cc
-		time_axis_view.cc
-		time_axis_view_item.cc
-		time_fx_dialog.cc
-		time_selection.cc
-		track_selection.cc
-		ui_config.cc
-		utils.cc
-		version.cc
-		waveview.cc
-	'''
 	obj.includes     = ['.']
+	obj.source       = gtk2_ardour_sources
 	obj.name         = 'gtk2_ardour'
 	obj.target       = 'ardour-3.0'
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
@@ -238,29 +243,29 @@ def build(bld):
 	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
 			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
 	if bld.env['HAVE_SLV2']:
-		obj.source += ' lv2_plugin_ui.cc '
+		obj.source += [ 'lv2_plugin_ui.cc' ]
 		obj.uselib += ' SLV2 '
 
 	if bld.env['FREESOUND']:
-		obj.source += 'sfdb_freesound_mootcher.cc '
+		obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]
 
 	if bld.env['VST']:
-		obj.source += ' vst_pluginui.cc '
+		obj.source += [ 'vst_pluginui.cc' ]
 		obj.cxxflags += [ '-DVST_SUPPORT' ]
 
 	if bld.env['GTKOSX']:
 		obj.features += ' objc '
-		obj.source += ' cocoacarbon.mm '
+		obj.source += [ 'cocoacarbon.mm' ]
 		obj.cxxflags += [ '-DTOP_MENUBAR', '-DGTKOSX' ]
 		obj.linkflags += [ '-framework', 'AppKit', '-framework', 'CoreAudioKit' ]
 		
 		if bld.env['AUDIOUNITS']:
-			obj.source += ' au_pluginui.mm '
+			obj.source += [ 'au_pluginui.mm' ]
 			obj.cxxflags += [ '-DHAVE_AUDIOUNITS' ]
 			obj.uselib_local += ' libappleutility '
 			
 	else:
-		obj.source += ' x11.cc '
+		obj.source += [ 'x11.cc' ]
 
 	# Wrappers
 
@@ -401,6 +406,12 @@ def build(bld):
 	bld.install_files('${DATADIR}/ardour3/pixmaps', 'pixmaps/*.xpm')
 	bld.install_files('${DATADIR}/ardour3', 'splash.png')
 
-def shutdown():
-	autowaf.shutdown()
+	# i18n
+	if bld.env['ENABLE_NLS']:
+		mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
+		for mo in mo_files:
+			lang = os.path.basename (mo).replace ('.mo', '')
+			bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
 
+def i18n(bld):
+	build_i18n (bld, 'gtk2_ardour', APPNAME, gtk2_ardour_sources)

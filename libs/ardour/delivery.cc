@@ -328,8 +328,6 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
-	// Attach output buffers to port buffers
-
 	if (_panner && _panner->npanners() && !_panner->bypassed()) {
 
 		// Use the panner to distribute audio to output port buffers
