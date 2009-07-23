@@ -126,7 +126,7 @@ EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
 	if (atv != 0 && atv->is_audio_track()){
-	      atv->get_diskstream()->set_record_enabled(!atv->get_diskstream()->record_enabled());
+		atv->reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !atv->track()->record_enabled(), this);
 	}
 }
 
