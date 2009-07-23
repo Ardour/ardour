@@ -292,6 +292,7 @@ def build(bld):
 		'''
 		testobj.includes     = obj.includes + ['../pbd/']
 		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM SAMPLERATE'
+		testobj.name         = 'libardour-tests'
 		testobj.target       = 'run-tests'
 		testobj.install_path = ''
 
