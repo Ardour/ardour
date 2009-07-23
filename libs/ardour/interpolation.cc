@@ -85,8 +85,6 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 	}
 	
 	distance = phase[channel];
-	//printf("processing channel: %d\n", channel);
-	//printf("phase before: %lf\n", phase[channel]);
 	for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
 		i = floor(distance);
 		Sample fractional_phase_part = distance - i;
@@ -94,7 +92,6 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 			fractional_phase_part -= 1.0;
 			i++;
 		}
-		//printf("I: %u, distance: %lf, fractional_phase_part: %lf\n", i, distance, fractional_phase_part);
 		
 		if (input && output) {
 		// Linearly interpolate into the output buffer
@@ -102,18 +99,50 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 				input[i] * (1.0f - fractional_phase_part) +
 				input[i+1] * fractional_phase_part;
 		}
-		//printf("distance before: %lf\n", distance);
 		distance += _speed + acceleration;
-		//printf("distance after: %lf, _speed: %lf\n", distance, _speed);
 	}
 	
-	//printf("before assignment: i: %d, distance: %lf\n", i, distance);
 	i = floor(distance);
-	//printf("after assignment: i: %d, distance: %16lf\n", i, distance);
 	phase[channel] = distance - floor(distance);
-	//printf("speed: %16lf, i after: %d, distance after: %16lf, phase after: %16lf\n", _speed, i, distance, phase[channel]);
 	
 	return i;
+}
+
+nframes_t
+CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
+{
+    // index in the input buffers
+    nframes_t   i = 0;
+    
+    double acceleration;
+    double distance = 0.0;
+    
+    if (_speed != _target_speed) {
+        acceleration = _target_speed - _speed;
+    } else {
+        acceleration = 0.0;
+    }
+    
+    distance = phase[channel];
+    for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
+        i = floor(distance);
+        Sample fractional_phase_part = distance - i;
+        if (fractional_phase_part >= 1.0) {
+            fractional_phase_part -= 1.0;
+            i++;
+        }
+        
+        if (input && output) {
+            // Cubically interpolate into the output buffer
+            output[outsample] = cube_interp(fractional_phase_part, input[i-1], input[i], input[i+1], input[i+2]);
+        }
+        distance += _speed + acceleration;
+    }
+    
+    i = floor(distance);
+    phase[channel] = distance - floor(distance);
+    
+    return i;
 }
 
 SplineInterpolation::SplineInterpolation()
@@ -133,9 +162,10 @@ nframes_t
 SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
 {
     // How many input samples we need
-    nframes_t n = ceil (double(nframes) * _speed + phase[channel]) + 1;
-    //printf("n = %d\n", n);
-
+    nframes_t n = ceil (double(nframes) * _speed + phase[channel]);
+    
+    printf("======== n: %u nframes: %u input: %u, output: %u\n", n, nframes, uint32_t(input), uint32_t(output));
+    
     if (n <= 3) {
         return 0;
     }
@@ -156,10 +186,16 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
         
         // solve U * M = t
         M[n-2] = t[n-3] / m(n-3);
+        //printf(" M[%d] = %lf \n", n-1 ,M[n-1]);
+        //printf(" M[%d] = %lf \n", n-2 ,M[n-2]);
         for (nframes_t i = n-4;; i--) {
             M[i+1] = (t[i]-M[i+2])/m(i);
+            //printf(" M[%d] = %lf\n", i+1 ,M[i+1]);
             if ( i == 0 ) break;
         }
+        M[1]     = 0.0;
+        M[n - 2] = 0.0;
+        //printf(" M[%d] = %lf \n", 0 ,M[0]);
     }
     
     assert (M[0] == 0.0 && M[n-1] == 0.0);
@@ -178,15 +214,17 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
     }
     
     distance = phase[channel];
+    assert(distance >= 0.0 && distance < 1.0);
+    
     for (nframes_t outsample = 0; outsample < nframes; outsample++) {
         i = floor(distance);
         
-        Sample x = double(distance) - double(i);
+        double x = double(distance) - double(i);
         
         // if distance is something like 0.999999999999
         // it will get rounded to 1 in the conversion to float above
-        if (x >= 1.0) {
-            x = 0.0;
+        while (x >= 1.0) {
+            x -= 1.0;
             i++;
         } 
         
@@ -200,6 +238,7 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
             double a0 = input[i];
             // interpolate into the output buffer
             output[outsample] = ((a3*x + a2)*x + a1)*x + a0;
+            //std::cout << "input[" << i << "/" << i+1 << "] = " << input[i] << "/" << input[i+1] <<  " distance: " << distance << " output[" << outsample << "] = " << output[outsample] << std::endl;
         }
         distance += _speed + acceleration;
     }
@@ -207,6 +246,7 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
     i = floor(distance);
     phase[channel] = distance - floor(distance);
     assert (phase[channel] >= 0.0 && phase[channel] < 1.0);
+    printf("Moved input frames: %u ", i);
     
     return i;
 }
