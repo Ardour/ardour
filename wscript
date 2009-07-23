@@ -5,6 +5,7 @@ import os
 import commands
 import re
 import string
+import subprocess
 
 # Variables for 'waf dist'
 VERSION = '3.0pre0'
@@ -53,12 +54,23 @@ def fetch_git_revision (path):
 			pass
 	return rev
 
+def fetch_bzr_revision (path):
+	cmd = subprocess.Popen("LANG= bzr log -l 1 " + path, stdout=subprocess.PIPE, shell=True)
+	out = cmd.communicate()[0]
+	svn = re.search('^svn revno: [0-9]*', out, re.MULTILINE)
+	str = svn.group(0)
+	chars = 'svnreio: '
+	return string.lstrip(str, chars)
+
 def create_stored_revision():
 	rev = ""
 	if os.path.exists('.svn'):
 		rev = fetch_svn_revision('.');
 	elif os.path.exists('.git'):
 		rev = fetch_git_revision('.');
+	elif os.path.exists('.bzr'):
+		rev = fetch_bzr_revision('.');
+		print "Revision: " + rev;
 	elif os.path.exists('libs/ardour/svn_revision.cc'):
 		print "Using packaged svn revision"
 		return
