@@ -77,12 +77,13 @@ GainMeter::setup_slider_pix ()
 GainMeterBase::GainMeterBase (Session& s, 
 			      const Glib::RefPtr<Gdk::Pixbuf>& pix,
 			      bool horizontal)
-	: _session (s),
+	: _session (s)
 	  // 0.781787 is the value needed for gain to be set to 0.
-	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
-	  gain_automation_style_button (""),
-	  gain_automation_state_button (""),
-	  dpi_changed (false)
+	, gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
+	, gain_automation_style_button ("")
+	, gain_automation_state_button ("")
+	, dpi_changed (false)
+	, _is_midi (false)
 	
 {
 	using namespace Menu_Helpers;
@@ -183,6 +184,20 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
  	level_meter->set_meter (pm.get());
 	gain_slider->set_controllable (amp->gain_control());
        
+	if (!_route || _route->output()->n_ports().n_midi() == 0) {
+		_is_midi = false;
+		gain_adjustment.set_lower (0.0);
+		gain_adjustment.set_upper (1.0);
+		gain_adjustment.set_step_increment (0.01);
+		gain_adjustment.set_page_increment (0.1);
+	} else {
+		_is_midi = true;
+		gain_adjustment.set_lower (0.0);
+		gain_adjustment.set_upper (2.0);
+		gain_adjustment.set_step_increment (0.05);
+		gain_adjustment.set_page_increment (0.1);
+	}
+	
 	if (!_route || !_route->is_hidden()) {
 		
 		using namespace Menu_Helpers;
@@ -361,10 +376,14 @@ GainMeterBase::show_gain ()
 
 	float v = gain_adjustment.get_value();
 	
-	if (v == 0.0) {
-		strcpy (buf, _("-inf"));
+	if (!_is_midi) {
+		if (v == 0.0) {
+			strcpy (buf, _("-inf"));
+		} else {
+			snprintf (buf, sizeof (buf), "%.1f", coefficient_to_dB (slider_position_to_gain (v)));
+		}
 	} else {
-		snprintf (buf, 32, "%.1f", coefficient_to_dB (slider_position_to_gain (v)));
+		snprintf (buf, sizeof (buf), "%.1f", v);
 	}
 	
 	gain_display.set_text (buf);
@@ -376,7 +395,11 @@ GainMeterBase::gain_adjusted ()
 	if (!ignore_toggle) {
 		if (_route) {
 			if (_route->amp() == _amp) {
-				_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+				if (_is_midi) {
+					_route->set_gain (gain_adjustment.get_value(), this);
+				} else {
+					_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+				}
 			} else {
 				_amp->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
 			}
@@ -389,7 +412,13 @@ GainMeterBase::gain_adjusted ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	gfloat value = gain_to_slider_position (_amp->gain());
+	gfloat value;
+
+	if (!_route || _route->output()->n_ports().n_midi() == 0) {
+		value = gain_to_slider_position (_amp->gain());
+	} else {
+		value = _amp->gain ();
+	}
 	
 	//cerr << this << " for " << _io->name() << " EGAIN = " << value
 	//		<< " AGAIN = " << gain_adjustment.get_value () << endl;

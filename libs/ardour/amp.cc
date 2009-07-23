@@ -154,6 +154,18 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 				/* gain has not changed, but its non-unity
 				*/
 
+				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
+
+					MidiBuffer& mb (*i);
+					
+					for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
+						Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
+						if (ev.is_note_on()) {
+							ev.scale_velocity (_current_gain);
+						}
+					}
+				}
+
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 					apply_gain_to_buffer (i->data(), nframes, _current_gain);
 				}
@@ -197,16 +209,19 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 	/* MIDI Gain */
 
 	for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
-#if 0
-		MidiBuffer& mb (*i);
 
+
+		MidiBuffer& mb (*i);
+		
 		for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
-			Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*m);
-			if (ev.buffer()[0] == MIDI_CMD_NOTE_ON) {
-				ev.buffer()[2] = (uint8_t) rint (ev.buffer()[2] * 1.0);
+			Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
+
+			if (ev.is_note_on()) {
+				gain_t scale = delta * (ev.time()/nframes);
+				std::cerr << "scale by " << scale << " for " << ev.time() << " of " << nframes << std::endl;
+				ev.scale_velocity (scale);
 			}
 		}
-#endif
 	}
 
 	/* Audio Gain */
@@ -238,10 +253,35 @@ void
 Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 {
 	if (target == 0.0) {
+
+		for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
+			MidiBuffer& mb (*i);
+		
+			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
+				Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
+				if (ev.is_note_on()) {
+					ev.set_velocity (0);
+				}
+			}
+		}
+
 		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 			memset (i->data(), 0, sizeof (Sample) * nframes);
 		}
+
 	} else if (target != 1.0) {
+
+		for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
+			MidiBuffer& mb (*i);
+		
+			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
+				Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
+				if (ev.is_note_on()) {
+					ev.scale_velocity (target);
+				}
+			}
+		}
+
 		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 			apply_gain_to_buffer (i->data(), nframes, target);
 		}

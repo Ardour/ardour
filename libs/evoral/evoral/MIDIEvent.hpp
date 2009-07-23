@@ -19,6 +19,7 @@
 #ifndef EVORAL_MIDI_EVENT_HPP
 #define EVORAL_MIDI_EVENT_HPP
 
+#include <cmath>
 #include <boost/shared_ptr.hpp>
 #include "evoral/Event.hpp"
 #include "evoral/midi_events.h"
@@ -68,6 +69,12 @@ struct MIDIEvent : public Event<Time> {
 	inline bool     is_channel_pressure()   const { return (type() == MIDI_CMD_CHANNEL_PRESSURE); }
 	inline uint8_t  note()                  const { return (this->_buf[1]); }
 	inline uint8_t  velocity()              const { return (this->_buf[2]); }
+        inline void     set_velocity(uint8_t value)   { this->_buf[2] = value; }
+        inline void     scale_velocity(float factor)  { 
+		if (factor < 0) factor = 0;
+		this->_buf[2] = (uint8_t) lrintf (this->_buf[2]*factor);
+		if (this->_buf[2] > 127) this->_buf[2] = 127;
+	}
 	inline uint8_t  cc_number()             const { return (this->_buf[1]); }
 	inline void     set_cc_number(uint8_t number) { this->_buf[1] = number; }
 	inline uint8_t  cc_value()              const { return (this->_buf[2]); }

@@ -174,6 +174,7 @@ class GainMeterBase : virtual public sigc::trackable
 	bool dpi_changed;
 	bool color_changed;
 	void color_handler(bool);
+	bool _is_midi;
 };
 
 class GainMeter : public GainMeterBase, public Gtk::VBox

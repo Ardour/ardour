@@ -258,12 +258,12 @@ def build(bld):
 		obj.source += [ 'cocoacarbon.mm' ]
 		obj.cxxflags += [ '-DTOP_MENUBAR', '-DGTKOSX' ]
 		obj.linkflags += [ '-framework', 'AppKit', '-framework', 'CoreAudioKit' ]
-		
+
 		if bld.env['AUDIOUNITS']:
 			obj.source += [ 'au_pluginui.mm' ]
 			obj.cxxflags += [ '-DHAVE_AUDIOUNITS' ]
 			obj.uselib_local += ' libappleutility '
-			
+
 	else:
 		obj.source += [ 'x11.cc' ]
 
@@ -377,7 +377,7 @@ def build(bld):
 	obj.argv = menus_argv
 	obj.stdin = 'ardour.menus.in'
 	obj.stdout = 'ardour.menus'
-	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
+	bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'), 'ardour.menus')
 
 	# Keybindings
 	keybindings_dict = {}
@@ -397,9 +397,10 @@ def build(bld):
 	for b in [ 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad',
 	           'mnemonic-us', 'ergonomic-us' ]:
 		obj = bld.new_task_gen('subst')
-		obj.target = b + '.bindings'
-		obj.source = obj.target + '.in'
-		obj.dict   = keybindings_dict
+		obj.target       = b + '.bindings'
+		obj.source       = obj.target + '.in'
+		obj.dict         = keybindings_dict
+		obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
 	# Icons/Images
 	bld.install_files('${DATADIR}/ardour3/icons', 'icons/*.png')
@@ -415,3 +416,4 @@ def build(bld):
 
 def i18n(bld):
 	build_i18n (bld, 'gtk2_ardour', APPNAME, gtk2_ardour_sources)
+
