@@ -146,7 +146,7 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 	
-	LinearInterpolation interpolation;
+	CubicInterpolation interpolation;
 
 	XMLNode* deprecated_io_node;
 	

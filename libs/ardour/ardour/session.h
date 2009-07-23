@@ -1019,7 +1019,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	volatile double             _transport_speed;
 	double                      _last_transport_speed;
 	double                      _target_transport_speed;
-	LinearInterpolation  interpolation;
+	CubicInterpolation          interpolation;
 	
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;
