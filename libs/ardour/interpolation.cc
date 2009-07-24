@@ -164,7 +164,8 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
     // How many input samples we need
     nframes_t n = ceil (double(nframes) * _speed + phase[channel]);
     
-    printf("======== n: %u nframes: %u input: %u, output: %u\n", n, nframes, uint32_t(input), uint32_t(output));
+    // hans - we run on 64bit systems too .... no casting pointer to a sized integer, please
+    printf("======== n: %u nframes: %u input: %p, output: %p\n", n, nframes, input, output);
     
     if (n <= 3) {
         return 0;
