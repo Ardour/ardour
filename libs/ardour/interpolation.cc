@@ -147,63 +147,24 @@ CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, 
 
 SplineInterpolation::SplineInterpolation()
 {
-    // precompute LU-factorization of matrix A
-    // see "Teubner Taschenbuch der Mathematik", p. 1105
-    // We only need to calculate up to 20, because they
-    // won't change any more above that
-    _m[0] = 4.0;
-    for (int i = 0; i <= 20 - 2; i++) {
-        _l[i] = 1.0 / _m[i];
-        _m[i+1] = 4.0 - _l[i];
-    }
+    reset ();
+}
+
+void SplineInterpolation::reset()
+{
+    Interpolation::reset();
+    M[0] = 0.0;
+    M[1] = 0.0;
+    M[2] = 0.0;
 }
 
 nframes_t
 SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
 {
-    // How many input samples we need
-    nframes_t n = ceil (double(nframes) * _speed + phase[channel]);
-    
-    // hans - we run on 64bit systems too .... no casting pointer to a sized integer, please
-    printf("======== n: %u nframes: %u input: %p, output: %p\n", n, nframes, input, output);
-    
-    if (n <= 3) {
-        return 0;
-    }
-    
-    double M[n], t[n-2];
-    
-    // natural spline: boundary conditions
-    M[0]     = 0.0;
-    M[n - 1] = 0.0;
-    
-    if (input) {
-        // solve L * t = d
-        t[0] = 6.0 * (input[0] - 2*input[1] + input[2]); 
-        for (nframes_t i = 1; i <= n - 3; i++) {
-            t[i] = 6.0 * (input[i] - 2*input[i+1] + input[i+2])
-                   - l(i-1) * t[i-1];
-        }
-        
-        // solve U * M = t
-        M[n-2] = t[n-3] / m(n-3);
-        //printf(" M[%d] = %lf \n", n-1 ,M[n-1]);
-        //printf(" M[%d] = %lf \n", n-2 ,M[n-2]);
-        for (nframes_t i = n-4;; i--) {
-            M[i+1] = (t[i]-M[i+2])/m(i);
-            //printf(" M[%d] = %lf\n", i+1 ,M[i+1]);
-            if ( i == 0 ) break;
-        }
-        M[1]     = 0.0;
-        M[n - 2] = 0.0;
-        //printf(" M[%d] = %lf \n", 0 ,M[0]);
-    }
-    
-    assert (M[0] == 0.0 && M[n-1] == 0.0);
     
     // now interpolate
     // index in the input buffers
-    nframes_t   i = 0;
+    nframes_t   i = 0, delta_i = 0;
     
     double acceleration;
     double distance = 0.0;
@@ -232,22 +193,36 @@ SplineInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
         assert(x >= 0.0 && x < 1.0);
         
         if (input && output) {
-            assert (i <= n-1);
-            double a3 = (M[i+1] - M[i]) / 6.0;
-            double a2 = M[i] / 2.0;
-            double a1 = input[i+1] - input[i] - (M[i+1] + 2.0*M[i])/6.0;
+            // if i changed, recalculate coefficients
+            if (delta_i == 1) {
+                // if i changed, rotate the M's
+                M[0] = M[1];
+                M[1] = M[2];
+                M[2] = 6.0 * (input[i] - 2.0*input[i+1] + input[i+2]) - 4.0*M[1] - M[0];
+                printf("\ny[%d] = %lf\n", i, input[i]);
+                printf("y[%d] = %lf\n", i+1, input[i+1]);
+                printf("y[%d] = %lf\n\n", i+2, input[i+2]);
+                printf("M[2] = %lf  M[1] = %lf  M[0] = %lf y-term: %lf M-term: %lf\n", 
+                        M[2], M[1], M[0],  6.0 * (input[i] - 2.0*input[i+1] + input[i+2]),
+                        - 4.0*M[1] - M[0]);
+            }
+            double a3 = (M[1] - M[0]) / 6.0;
+            double a2 = M[0] / 2.0;
+            double a1 = input[i+1] - input[i] - (M[1] + 2.0*M[0]) / 6.0;
             double a0 = input[i];
             // interpolate into the output buffer
             output[outsample] = ((a3*x + a2)*x + a1)*x + a0;
-            //std::cout << "input[" << i << "/" << i+1 << "] = " << input[i] << "/" << input[i+1] <<  " distance: " << distance << " output[" << outsample << "] = " << output[outsample] << std::endl;
+            //printf( "input[%d/%d] = %lf/%lf  distance: %lf output[%d] = %lf\n", i, i+1, input[i], input[i+1], distance, outsample, output[outsample]);
+            
         }
         distance += _speed + acceleration;
+
+        delta_i = floor(distance) - i;
     }
     
     i = floor(distance);
     phase[channel] = distance - floor(distance);
     assert (phase[channel] >= 0.0 && phase[channel] < 1.0);
-    printf("Moved input frames: %u ", i);
     
     return i;
 }

@@ -26,8 +26,8 @@
 class InterpolationTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(InterpolationTest);
-    //CPPUNIT_TEST(linearInterpolationTest);
     CPPUNIT_TEST(splineInterpolationTest);
+    //CPPUNIT_TEST(linearInterpolationTest);
     //CPPUNIT_TEST(libSamplerateInterpolationTest);
     CPPUNIT_TEST_SUITE_END();
     
@@ -45,7 +45,7 @@ class InterpolationTest : public CppUnit::TestFixture
        	
         void setUp() {
             for (int i = 0; i < NUM_SAMPLES; ++i) {
-                if (i % INTERVAL == 50) {
+                if (i % INTERVAL == 0) {
                     input[i] = 1.0f;
                 } else {
                     input[i] = 0.0f;

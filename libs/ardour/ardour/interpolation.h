@@ -114,25 +114,6 @@ class CubicInterpolation : public Interpolation {
  * Splines are piecewise cubic functions between each samples,
  * where the cubic polynomials' values, first and second derivatives are equal
  * on each sample point.
- * 
- * Those conditions are equivalent of solving the linear system of equations
- * defined by the matrix equation (all indices are zero-based):
- *  A * M = d
- *
- * where A has (n-2) rows and (n-2) columns
- *
- *  [ 4 1 0 0 ... 0 0 0 0 ]   [ M[1]   ]   [ 6*y[0] - 12*y[1] + 6*y[2] ]
- *  [ 1 4 1 0 ... 0 0 0 0 ]   [ M[2]   ]   [ 6*y[1] - 12*y[2] + 6*y[3] ]
- *  [ 0 1 4 1 ... 0 0 0 0 ]   [ M[3]   ]   [ 6*y[2] - 12*y[3] + 6*y[4] ]
- *  [ 0 0 1 4 ... 0 0 0 0 ]   [ M[4]   ]   [ 6*y[3] - 12*y[4] + 6*y[5] ]
- *            ...           *            =            ...            
- *  [ 0 0 0 0 ... 4 1 0 0 ]   [ M[n-5] ]   [ 6*y[n-6]- 12*y[n-5] + 6*y[n-4] ]
- *  [ 0 0 0 0 ... 1 4 1 0 ]   [ M[n-4] ]   [ 6*y[n-5]- 12*y[n-4] + 6*y[n-3] ]
- *  [ 0 0 0 0 ... 0 1 4 1 ]   [ M[n-3] ]   [ 6*y[n-4]- 12*y[n-3] + 6*y[n-2] ]
- *  [ 0 0 0 0 ... 0 0 1 4 ]   [ M[n-2] ]   [ 6*y[n-3]- 12*y[n-2] + 6*y[n-1] ]
- *
- *  For our purpose we use natural splines which means the boundary coefficients
- *  M[0] = M[n-1] = 0
  *
  *  The interpolation polynomial in the i-th interval then has the form
  *  p_i(x) = a3 (x - i)^3 + a2 (x - i)^2 + a1 (x - i) + a0
@@ -143,57 +124,16 @@ class CubicInterpolation : public Interpolation {
  *  a1 = y[i+1] - y[i] - M[i+1]/6 - M[i]/3
  *  a0 = y[i] 
  *
- *  We solve the system by LU-factoring the matrix A:
- *  A = L * U:
+ *  The M's are calculated recursively:
+ *  M[i+2] = 6.0 * (y[i] - 2y[i+1] + y[i+2]) - 4M[i+1] - M[i]
  *
- *  [ 4 1 0 0 ... 0 0 0 0 ]   [ 1    0    0    0   ... 0      0      0      0 ]   [ m[0] 1    0    0   ... 0      0      0      ]
- *  [ 1 4 1 0 ... 0 0 0 0 ]   [ l[0] 1    0    0   ... 0      0      0      0 ]   [ 0    m[1] 1    0   ... 0      0      0      ]
- *  [ 0 1 4 1 ... 0 0 0 0 ]   [ 0    l[1] 1    0   ... 0      0      0      0 ]   [ 0    0    m[2] 1   ... 0      0      0      ]
- *  [ 0 0 1 4 ... 0 0 0 0 ]   [ 0    0    l[2] 1   ... 0      0      0      0 ]                        ...                
- *            ...           =                     ...                          *  [ 0    0    0    0   ... 0      0      0      ]
- *  [ 0 0 0 0 ... 4 1 0 0 ]   [ 0    0    0    0   ... 1      0      0      0 ]   [ 0    0    0    0   ... 1      0      0      ]
- *  [ 0 0 0 0 ... 1 4 1 0 ]   [ 0    0    0    0   ... l[n-6] 1      0      0 ]   [ 0    0    0    0   ... m[n-5] 1      0      ]
- *  [ 0 0 0 0 ... 0 1 4 1 ]   [ 0    0    0    0   ... 0      l[n-5] 1      0 ]   [ 0    0    0    0   ... 0      m[n-4] 1      ]
- *  [ 0 0 0 0 ... 0 0 1 4 ]   [ 0    0    0    0   ... 0      0      l[n-4] 1 ]   [ 0    0    0    0   ... 0      0      m[n-3] ]
- *
- *  where the l[i] and m[i] can be precomputed.
- * 
- *  Then we solve the system A * M = L(UM) = d by first solving the system
- *    L * t = d 
- *    
- *    [ 1    0    0    0   ... 0      0      0      0 ]    [ t[0]   ]    [ 6*y[0] - 12*y[1] + 6*y[2] ]
- *    [ l[0] 1    0    0   ... 0      0      0      0 ]    [ t[1]   ]    [ 6*y[1] - 12*y[2] + 6*y[3] ]
- *    [ 0    l[1] 1    0   ... 0      0      0      0 ]    [ t[2]   ]    [ 6*y[2] - 12*y[3] + 6*y[4] ]
- *    [ 0    0    l[2] 1   ... 0      0      0      0 ]    [ t[3]   ]    [ 6*y[3] - 12*y[4] + 6*y[5] ]
- *                        ...                           *             =             ...            
- *    [ 0    0    0    0   ... 1      0      0      0 ]    [ t[n-6] ]    [ 6*y[n-6]- 12*y[n-5] + 6*y[n-4] ]
- *    [ 0    0    0    0   ... l[n-6] 1      0      0 ]    [ t[n-5] ]    [ 6*y[n-5]- 12*y[n-4] + 6*y[n-3] ]
- *    [ 0    0    0    0   ... 0      l[n-5] 1      0 ]    [ t[n-4] ]    [ 6*y[n-4]- 12*y[n-3] + 6*y[n-2] ]
- *    [ 0    0    0    0   ... 0      0      l[n-4] 1 ]    [ t[n-3] ]    [ 6*y[n-3]- 12*y[n-2] + 6*y[n-1] ]
- *    
- *    
- *  and then
- *    U * M = t
- *  
- *  [ m[0] 1    0    0   ... 0      0      0      ]   [ M[1]   ]    [ t[0]   ]
- *  [ 0    m[1] 1    0   ... 0      0      0      ]   [ M[2]   ]    [ t[1]   ]
- *  [ 0    0    m[2] 1   ... 0      0      0      ]   [ M[3]   ]    [ t[2]   ]
- *                       ...                          [ M[4]   ]    [ t[3]   ]
- *  [ 0    0    0    0   ... 0      0      0      ] *            =            
- *  [ 0    0    0    0   ... 1      0      0      ]   [ M[n-5] ]    [ t[n-6] ]
- *  [ 0    0    0    0   ... m[n-5] 1      0      ]   [ M[n-4] ]    [ t[n-5] ]
- *  [ 0    0    0    0   ... 0      m[n-4] 1      ]   [ M[n-3] ]    [ t[n-4] ]
- *  [ 0    0    0    0   ... 0      0      m[n-3] ]   [ M[n-2] ]    [ t[n-3] ]
- *  
  */
 class SplineInterpolation : public Interpolation {
  protected:
-    double _l[19], _m[20];
-    
-    inline double l(nframes_t i) {  return (i >= 19) ? _l[18] : _l[i]; }
-    inline double m(nframes_t i) {  return (i >= 20) ? _m[19] : _m[i]; }
-    
+    double M[2];
+        
  public:
+    void reset ();
     SplineInterpolation();
     nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
 };
