@@ -38,51 +38,6 @@ class Interpolation {
      }
 };
 
-// 40.24 fixpoint math
-#define FIXPOINT_ONE 0x1000000
-
-class FixedPointLinearInterpolation : public Interpolation {
-    protected:
-    /// speed in fixed point math
-    uint64_t      phi;
-    
-    /// target speed in fixed point math
-    uint64_t      target_phi;
-    
-    std::vector<uint64_t> last_phase;
-
-    // Fixed point is just an integer with an implied scaling factor. 
-    // In 40.24 the scaling factor is 2^24 = 16777216,  
-    // so a value of 10*2^24 (in integer space) is equivalent to 10.0. 
-    //
-    // The advantage is that addition and modulus [like x = (x + y) % 2^40]  
-    // have no rounding errors and no drift, and just require a single integer add.
-    // (swh)
-    
-    static const int64_t fractional_part_mask  = 0xFFFFFF;
-    static const Sample  binary_scaling_factor = 16777216.0f;
-    
-    public:
-        
-        FixedPointLinearInterpolation () : phi (FIXPOINT_ONE), target_phi (FIXPOINT_ONE) {}
-    
-        void set_speed (double new_speed) {
-            target_phi = (uint64_t) (FIXPOINT_ONE * fabs(new_speed));
-            phi = target_phi;
-        }
-        
-        uint64_t get_phi() { return phi; }
-        uint64_t get_target_phi() { return target_phi; }
-        uint64_t get_last_phase() { assert(last_phase.size()); return last_phase[0]; }
-        void set_last_phase(uint64_t phase) { assert(last_phase.size()); last_phase[0] = phase; }
-        
-        void add_channel_to (int input_buffer_size, int output_buffer_size);
-        void remove_channel_from ();
-         
-        nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
-        void reset ();
-};
-
 class LinearInterpolation : public Interpolation {
  protected:
     
@@ -92,7 +47,7 @@ class LinearInterpolation : public Interpolation {
 
 class CubicInterpolation : public Interpolation {
  protected:
-    // shamelessly ripped from Steve Harris' swh-plugins
+    // shamelessly ripped from Steve Harris' swh-plugins (ladspa-util.h)
     static inline float cube_interp(const float fr, const float inm1, const float
                                     in, const float inp1, const float inp2)
     {
@@ -105,63 +60,6 @@ class CubicInterpolation : public Interpolation {
      nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
 };
  
-
-/**
- * @class SplineInterpolation
- * 
- * @brief interpolates using cubic spline interpolation over an input period
- * 
- * Splines are piecewise cubic functions between each samples,
- * where the cubic polynomials' values, first and second derivatives are equal
- * on each sample point.
- *
- *  The interpolation polynomial in the i-th interval then has the form
- *  p_i(x) = a3 (x - i)^3 + a2 (x - i)^2 + a1 (x - i) + a0
- *         = ((a3 * (x - i) + a2) * (x - i) + a1) * (x - i) + a0
- *     where
- *  a3 = (M[i+1] - M[i]) / 6
- *  a2 = M[i] / 2 
- *  a1 = y[i+1] - y[i] - M[i+1]/6 - M[i]/3
- *  a0 = y[i] 
- *
- *  The M's are calculated recursively:
- *  M[i+2] = 6.0 * (y[i] - 2y[i+1] + y[i+2]) - 4M[i+1] - M[i]
- *
- */
-class SplineInterpolation : public Interpolation {
- protected:
-    double M[2];
-        
- public:
-    void reset ();
-    SplineInterpolation();
-    nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
-};
-
-class LibSamplerateInterpolation : public Interpolation {
- protected:
-    std::vector<SRC_STATE*>  state;
-    std::vector<SRC_DATA*>   data;
-    
-    int        error;
-    
-    void reset_state ();
-    
- public:
-        LibSamplerateInterpolation ();
-        ~LibSamplerateInterpolation ();
-    
-        void   set_speed (double new_speed);
-        void   set_target_speed (double new_speed)   {}
-        double speed ()                        const { return _speed;      }
-        
-        void add_channel_to (int input_buffer_size, int output_buffer_size);
-        void remove_channel_from (); 
- 
-        nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
-        void reset() { reset_state (); }
-};
-
 } // namespace ARDOUR
 
 #endif

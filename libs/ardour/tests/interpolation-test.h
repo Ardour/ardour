@@ -26,9 +26,8 @@
 class InterpolationTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(InterpolationTest);
-    CPPUNIT_TEST(splineInterpolationTest);
-    //CPPUNIT_TEST(linearInterpolationTest);
-    //CPPUNIT_TEST(libSamplerateInterpolationTest);
+    CPPUNIT_TEST(cubicInterpolationTest);
+    CPPUNIT_TEST(linearInterpolationTest);
     CPPUNIT_TEST_SUITE_END();
     
     #define NUM_SAMPLES 1000000
@@ -38,8 +37,7 @@ class InterpolationTest : public CppUnit::TestFixture
     ARDOUR::Sample output[NUM_SAMPLES];
     
     ARDOUR::LinearInterpolation linear;
-    ARDOUR::SplineInterpolation spline;
-    ARDOUR::LibSamplerateInterpolation interpolation;
+    ARDOUR::CubicInterpolation  cubic;
 
     public:
        	
@@ -53,15 +51,12 @@ class InterpolationTest : public CppUnit::TestFixture
                 output[i] = 0.0f;
             }
             linear.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
-            spline.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
-            interpolation.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
+            cubic.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
         }
         
         void tearDown() {
         }
 
         void linearInterpolationTest();
-        void splineInterpolationTest();
-        void libSamplerateInterpolationTest();
-
+        void cubicInterpolationTest();
 };
