@@ -86,7 +86,7 @@ public:
 
 public:
 	/// display an indicator of the first switched-in Route. Do nothing by default.
-	virtual void display_bank_start( SurfacePort &, MackieMidiBuilder &, uint32_t current_bank ) {};
+	virtual void display_bank_start( SurfacePort &, MackieMidiBuilder &, uint32_t /*current_bank*/ ) {};
 		
 	/// called from MackieControlPRotocol::zero_all to turn things off
 	virtual void zero_all( SurfacePort &, MackieMidiBuilder & ) {};
@@ -96,7 +96,7 @@ public:
 	virtual void blank_jog_ring( SurfacePort &, MackieMidiBuilder & ) {};
 
 	virtual bool has_timecode_display() const = 0;
-	virtual void display_timecode( SurfacePort &, MackieMidiBuilder &, const std::string & timecode, const std::string & timecode_last ) {};
+	virtual void display_timecode( SurfacePort &, MackieMidiBuilder &, const std::string & /*timecode*/, const std::string & /*timecode_last*/) {};
 	
 public:
 	/**

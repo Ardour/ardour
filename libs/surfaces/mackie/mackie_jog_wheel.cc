@@ -28,23 +28,23 @@ JogWheel::State JogWheel::jog_wheel_state() const
 		return scroll;
 }
 
-void JogWheel::zoom_event( SurfacePort & port, Control & control, const ControlState & state )
+void JogWheel::zoom_event (SurfacePort &, Control &, const ControlState &)
 {
 }
 
-void JogWheel::scrub_event( SurfacePort & port, Control & control, const ControlState & state )
+void JogWheel::scrub_event (SurfacePort &, Control &, const ControlState &)
 {
 }
 
-void JogWheel::speed_event( SurfacePort & port, Control & control, const ControlState & state )
+void JogWheel::speed_event (SurfacePort &, Control &, const ControlState &)
 {
 }
 
-void JogWheel::scroll_event( SurfacePort & port, Control & control, const ControlState & state )
+void JogWheel::scroll_event (SurfacePort &, Control &, const ControlState &)
 {
 }
 
-void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlState & state )
+void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 {
 	// TODO use current snap-to setting?
 	switch ( jog_wheel_state() )

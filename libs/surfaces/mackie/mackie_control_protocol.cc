@@ -998,7 +998,7 @@ void MackieControlProtocol::notify_record_enable_changed( RouteSignal * route_si
 	}
 }
 
-void MackieControlProtocol::notify_active_changed( RouteSignal * route_signal )
+void MackieControlProtocol::notify_active_changed (RouteSignal *)
 {
 	try
 	{
@@ -1221,7 +1221,7 @@ void MackieControlProtocol::poll_session_data()
 // Transport Buttons
 /////////////////////////////////////
 
-LedState MackieControlProtocol::frm_left_press( Button & button )
+LedState MackieControlProtocol::frm_left_press (Button &)
 {
 	// can use first_mark_before/after as well
 	unsigned long elapsed = _frm_left_last.restart();
@@ -1249,12 +1249,12 @@ LedState MackieControlProtocol::frm_left_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::frm_left_release( Button & button )
+LedState MackieControlProtocol::frm_left_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::frm_right_press( Button & button )
+LedState MackieControlProtocol::frm_right_press (Button &)
 {
 	// can use first_mark_before/after as well
 	Location * loc = session->locations()->first_location_after (
@@ -1264,34 +1264,34 @@ LedState MackieControlProtocol::frm_right_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::frm_right_release( Button & button )
+LedState MackieControlProtocol::frm_right_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::stop_press( Button & button )
+LedState MackieControlProtocol::stop_press (Button &)
 {
 	session->request_stop();
 	return on;
 }
 
-LedState MackieControlProtocol::stop_release( Button & button )
+LedState MackieControlProtocol::stop_release (Button &)
 {
 	return session->transport_stopped();
 }
 
-LedState MackieControlProtocol::play_press( Button & button )
+LedState MackieControlProtocol::play_press (Button &)
 {
 	session->request_transport_speed( 1.0 );
 	return on;
 }
 
-LedState MackieControlProtocol::play_release( Button & button )
+LedState MackieControlProtocol::play_release (Button &)
 {
 	return session->transport_rolling();
 }
 
-LedState MackieControlProtocol::record_press( Button & button )
+LedState MackieControlProtocol::record_press (Button &)
 {
 	if ( session->get_record_enabled() )
 		session->disable_record( false );
@@ -1300,7 +1300,7 @@ LedState MackieControlProtocol::record_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::record_release( Button & button )
+LedState MackieControlProtocol::record_release (Button &)
 {
 	if ( session->get_record_enabled() )
 	{
@@ -1313,7 +1313,7 @@ LedState MackieControlProtocol::record_release( Button & button )
 		return off;
 }
 
-LedState MackieControlProtocol::rewind_press( Button & button )
+LedState MackieControlProtocol::rewind_press (Button &)
 {
 	_jog_wheel.push( JogWheel::speed );
 	_jog_wheel.transport_direction( -1 );
@@ -1321,7 +1321,7 @@ LedState MackieControlProtocol::rewind_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::rewind_release( Button & button )
+LedState MackieControlProtocol::rewind_release (Button &)
 {
 	_jog_wheel.pop();
 	_jog_wheel.transport_direction( 0 );
@@ -1332,7 +1332,7 @@ LedState MackieControlProtocol::rewind_release( Button & button )
 	return off;
 }
 
-LedState MackieControlProtocol::ffwd_press( Button & button )
+LedState MackieControlProtocol::ffwd_press (Button &)
 {
 	_jog_wheel.push( JogWheel::speed );
 	_jog_wheel.transport_direction( 1 );
@@ -1340,7 +1340,7 @@ LedState MackieControlProtocol::ffwd_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::ffwd_release( Button & button )
+LedState MackieControlProtocol::ffwd_release (Button &)
 {
 	_jog_wheel.pop();
 	_jog_wheel.transport_direction( 0 );
@@ -1351,83 +1351,83 @@ LedState MackieControlProtocol::ffwd_release( Button & button )
 	return off;
 }
 
-LedState MackieControlProtocol::loop_press( Button & button )
+LedState MackieControlProtocol::loop_press (Button &)
 {
 	session->request_play_loop( !session->get_play_loop() );
 	return on;
 }
 
-LedState MackieControlProtocol::loop_release( Button & button )
+LedState MackieControlProtocol::loop_release (Button &)
 {
 	return session->get_play_loop();
 }
 
-LedState MackieControlProtocol::punch_in_press( Button & button )
+LedState MackieControlProtocol::punch_in_press (Button &)
 {
 	bool state = !session->config.get_punch_in();
 	session->config.set_punch_in( state );
 	return state;
 }
 
-LedState MackieControlProtocol::punch_in_release( Button & button )
+LedState MackieControlProtocol::punch_in_release (Button &)
 {
 	return session->config.get_punch_in();
 }
 
-LedState MackieControlProtocol::punch_out_press( Button & button )
+LedState MackieControlProtocol::punch_out_press (Button &)
 {
 	bool state = !session->config.get_punch_out();
 	session->config.set_punch_out( state );
 	return state;
 }
 
-LedState MackieControlProtocol::punch_out_release( Button & button )
+LedState MackieControlProtocol::punch_out_release (Button &)
 {
 	return session->config.get_punch_out();
 }
 
-LedState MackieControlProtocol::home_press( Button & button )
+LedState MackieControlProtocol::home_press (Button &)
 {
 	session->goto_start();
 	return on;
 }
 
-LedState MackieControlProtocol::home_release( Button & button )
+LedState MackieControlProtocol::home_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::end_press( Button & button )
+LedState MackieControlProtocol::end_press (Button &)
 {
 	session->goto_end();
 	return on;
 }
 
-LedState MackieControlProtocol::end_release( Button & button )
+LedState MackieControlProtocol::end_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::clicking_press( Button & button )
+LedState MackieControlProtocol::clicking_press (Button &)
 {
 	bool state = !Config->get_clicking();
 	Config->set_clicking( state );
 	return state;
 }
 
-LedState MackieControlProtocol::clicking_release( Button & button )
+LedState MackieControlProtocol::clicking_release (Button &)
 {
 	return Config->get_clicking();
 }
 
-LedState MackieControlProtocol::global_solo_press( Button & button )
+LedState MackieControlProtocol::global_solo_press (Button &)
 {
 	bool state = !session->soloing();
 	session->set_all_solo ( state );
 	return state;
 }
 
-LedState MackieControlProtocol::global_solo_release( Button & button )
+LedState MackieControlProtocol::global_solo_release (Button &)
 {
 	return session->soloing();
 }
@@ -1529,7 +1529,7 @@ void MackieControlProtocol::notify_transport_state_changed()
 /////////////////////////////////////
 // Bank Switching
 /////////////////////////////////////
-LedState MackieControlProtocol::left_press( Button & button )
+LedState MackieControlProtocol::left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	if ( sorted.size() > route_table.size() )
@@ -1550,12 +1550,12 @@ LedState MackieControlProtocol::left_press( Button & button )
 	}
 }
 
-LedState MackieControlProtocol::left_release( Button & button )
+LedState MackieControlProtocol::left_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::right_press( Button & button )
+LedState MackieControlProtocol::right_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	if ( sorted.size() > route_table.size() )
@@ -1576,12 +1576,12 @@ LedState MackieControlProtocol::right_press( Button & button )
 	}
 }
 
-LedState MackieControlProtocol::right_release( Button & button )
+LedState MackieControlProtocol::right_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::channel_left_press( Button & button )
+LedState MackieControlProtocol::channel_left_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	if ( sorted.size() > route_table.size() )
@@ -1595,12 +1595,12 @@ LedState MackieControlProtocol::channel_left_press( Button & button )
 	}
 }
 
-LedState MackieControlProtocol::channel_left_release( Button & button )
+LedState MackieControlProtocol::channel_left_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::channel_right_press( Button & button )
+LedState MackieControlProtocol::channel_right_press (Button &)
 {
 	Sorted sorted = get_sorted_routes();
 	if ( sorted.size() > route_table.size() )
@@ -1614,7 +1614,7 @@ LedState MackieControlProtocol::channel_right_press( Button & button )
 	}
 }
 
-LedState MackieControlProtocol::channel_right_release( Button & button )
+LedState MackieControlProtocol::channel_right_release (Button &)
 {
 	return off;
 }
@@ -1622,7 +1622,7 @@ LedState MackieControlProtocol::channel_right_release( Button & button )
 /////////////////////////////////////
 // Functions
 /////////////////////////////////////
-LedState MackieControlProtocol::marker_press( Button & button )
+LedState MackieControlProtocol::marker_press (Button &)
 {
 	// cut'n'paste from LocationUI::add_new_location()
 	string markername;
@@ -1638,7 +1638,7 @@ LedState MackieControlProtocol::marker_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::marker_release( Button & button )
+LedState MackieControlProtocol::marker_release (Button &)
 {
 	return off;
 }
@@ -1690,29 +1690,29 @@ Mackie::LedState MackieControlProtocol::scrub_release( Mackie::Button & )
 	;
 }
 
-LedState MackieControlProtocol::drop_press( Button & button )
+LedState MackieControlProtocol::drop_press (Button &)
 {
 	session->remove_last_capture();
 	return on;
 }
 
-LedState MackieControlProtocol::drop_release( Button & button )
+LedState MackieControlProtocol::drop_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::save_press( Button & button )
+LedState MackieControlProtocol::save_press (Button &)
 {
 	session->save_state( "" );
 	return on;
 }
 
-LedState MackieControlProtocol::save_release( Button & button )
+LedState MackieControlProtocol::save_release (Button &)
 {
 	return off;
 }
 
-LedState MackieControlProtocol::smpte_beats_press( Button & )
+LedState MackieControlProtocol::smpte_beats_press (Button &)
 {
 	switch ( _timecode_type )
 	{

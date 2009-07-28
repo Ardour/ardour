@@ -189,7 +189,7 @@ MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & by
 	return MidiByteArray( 2, 0x13, 0x00 );
 }
 
-void MackiePort::probe_emulation( const MidiByteArray & bytes )
+void MackiePort::probe_emulation (const MidiByteArray &)
 {
 #if 0
 	cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
@@ -330,7 +330,7 @@ bool MackiePort::wait_for_init()
 	return SurfacePort::active();
 }
 
-void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
+void MackiePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count )
 {
 	MidiByteArray bytes( count, raw_bytes );
 #ifdef PORT_DEBUG
@@ -429,7 +429,7 @@ bool MackiePort::handle_control_timeout_event ( Control * control )
 // converts midi messages into control_event signals
 // it might be worth combining this with lookup_control
 // because they have similar logic flows.
-void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
+void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count )
 {
 #ifdef DEBUG
 	MidiByteArray bytes( count, raw_bytes );

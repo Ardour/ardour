@@ -27,7 +27,7 @@ using namespace PBD;
 using namespace std;
 
 ControlProtocol*
-new_mackie_protocol (ControlProtocolDescriptor* descriptor, Session* s)
+new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 {
 	if ( Config->get_mmc_port_name().substr(0,3) == "mcu" )
 	{
@@ -62,7 +62,7 @@ new_mackie_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 }
 
 void
-delete_mackie_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
+delete_mackie_protocol (ControlProtocolDescriptor*, ControlProtocol* cp)
 {
 	try
 	{
@@ -81,7 +81,7 @@ delete_mackie_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* 
 	prevent loading of the lib.
 */
 bool
-probe_mackie_protocol (ControlProtocolDescriptor* descriptor)
+probe_mackie_protocol (ControlProtocolDescriptor*)
 {
 	return MackieControlProtocol::probe();
 }

@@ -28,7 +28,7 @@ class Interpolation {
      double target_speed()          const { return _target_speed; }
      double speed()                 const { return _speed; }
      
-     void add_channel_to (int input_buffer_size, int output_buffer_size) { phase.push_back (0.0); }
+     void add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/) { phase.push_back (0.0); }
      void remove_channel_from () { phase.pop_back (); }
 
      void reset () {

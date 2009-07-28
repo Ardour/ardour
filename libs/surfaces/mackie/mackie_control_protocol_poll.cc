@@ -192,7 +192,7 @@ void MackieControlProtocol::handle_port_inactive( SurfacePort * port )
 	// TODO all the rebuilding of surfaces and so on
 }
 
-void MackieControlProtocol::handle_port_active( SurfacePort * port )
+void MackieControlProtocol::handle_port_active (SurfacePort *)
 {
 	// no need to re-add port because it was already added
 	// during the init phase. So just update the local surface
@@ -213,7 +213,7 @@ void MackieControlProtocol::handle_port_active( SurfacePort * port )
 	update_surface();
 }
 
-void MackieControlProtocol::handle_port_init( Mackie::SurfacePort * sport )
+void MackieControlProtocol::handle_port_init (Mackie::SurfacePort *)
 {
 #ifdef DEBUG
 	cout << "MackieControlProtocol::handle_port_init" << endl;
