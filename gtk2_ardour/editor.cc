@@ -211,50 +211,47 @@ show_me_the_size (Requisition* r, const char* what)
 }
 
 Editor::Editor ()
-	: 
 	  /* time display buttons */
-
-	  minsec_label (_("Mins:Secs")),
-	  bbt_label (_("Bars:Beats")),
-	  smpte_label (_("Timecode")),
-	  frame_label (_("Samples")),
-	  tempo_label (_("Tempo")),
-	  meter_label (_("Meter")),
-	  mark_label (_("Location Markers")),
-	  range_mark_label (_("Range Markers")),
-	  transport_mark_label (_("Loop/Punch Ranges")),
-	  cd_mark_label (_("CD Markers")),
-	  edit_packer (4, 4, true),
+	: minsec_label (_("Mins:Secs"))
+	, bbt_label (_("Bars:Beats"))
+	, smpte_label (_("Timecode"))
+	, frame_label (_("Samples"))
+	, tempo_label (_("Tempo"))
+	, meter_label (_("Meter"))
+	, mark_label (_("Location Markers"))
+	, range_mark_label (_("Range Markers"))
+	, transport_mark_label (_("Loop/Punch Ranges"))
+	, cd_mark_label (_("CD Markers"))
+	, edit_packer (4, 4, true)
 
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
 	  */
-
-	  vertical_adjustment (0.0, 0.0, 10.0, 400.0),
-	  horizontal_adjustment (0.0, 0.0, 20.0, 1200.0),
-
+	  
+	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
+	, horizontal_adjustment (0.0, 0.0, 20.0, 1200.0)
+	  
 	  /* tool bar related */
 
-	  edit_point_clock (X_("editpoint"), false, X_("EditPointClock"), true),
-	  zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, true),
+	, edit_point_clock (X_("editpoint"), false, X_("EditPointClock"), true)
+	, zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, true)
 	  
-	  toolbar_selection_clock_table (2,3),
+	, toolbar_selection_clock_table (2,3)
 	  
-	  automation_mode_button (_("mode")),
-	  global_automation_button (_("automation")),
-
-	  midi_panic_button (_("Panic")),
-	  midi_tools_tearoff (0),
-
+	, automation_mode_button (_("mode"))
+	, global_automation_button (_("automation"))
+	  
+	, midi_panic_button (_("Panic"))
+	  
 #ifdef WITH_CMT
-	  image_socket_listener(0),
+	, image_socket_listener(0)
 #endif
-
+	  
 	  /* nudge */
-
-	  nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, true),
-	  meters_running(false),
-	  _pending_locate_request (false)
+	  
+	, nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, true)
+	, meters_running(false)
+	, _pending_locate_request (false)
 
 {
 	constructed = false;
@@ -328,8 +325,6 @@ Editor::Editor ()
 	region_edit_menu_split_item = 0;
 	temp_location = 0;
 	leftmost_frame = 0;
-	ignore_mouse_mode_toggle = false;
-	ignore_midi_edit_mode_toggle = false;
 	current_stepping_trackview = 0;
 	entered_track = 0;
 	entered_regionview = 0;
@@ -363,9 +358,9 @@ Editor::Editor ()
 	location_loop_color = ARDOUR_UI::config()->canvasvar_LocationLoop.get();
 	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
 
-	set_midi_edit_mode (MidiEditPencil, true);
 	_edit_point = EditAtMouse;
-	set_mouse_mode (MouseObject, true);
+	_internal_editing = false;
+	current_canvas_cursor = 0;
 
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
 	reset_hscrollbar_stepping ();
@@ -589,7 +584,6 @@ Editor::Editor ()
 	edit_pane.signal_size_allocate().connect (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 
 	top_hbox.pack_start (toolbar_frame, false, true);
-	top_hbox.pack_start (midi_toolbar_frame, false, true);
 
 	HBox *hbox = manage (new HBox);
 	hbox->pack_start (edit_pane, true, true);
@@ -616,6 +610,7 @@ Editor::Editor ()
 	snap_mode = SnapOff;
 	set_snap_mode (snap_mode);
 	set_edit_point_preference (EditAtMouse, true);
+	set_mouse_mode (MouseObject, true);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
@@ -2785,36 +2780,13 @@ Editor::setup_toolbar ()
 
 	/* Mode Buttons (tool selection) */
 
-	vector<ToggleButton *> mouse_mode_buttons;
-
-	mouse_move_button.add (*(manage (new Image (::get_icon("tool_object")))));
 	mouse_move_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_mode_buttons.push_back (&mouse_move_button);
-
-	if (!Profile->get_sae()) {
-		mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
-		mouse_select_button.set_relief(Gtk::RELIEF_NONE);
-		mouse_mode_buttons.push_back (&mouse_select_button);
-
-		mouse_gain_button.add (*(manage (new Image (::get_icon("tool_gain")))));
-		mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
-		mouse_mode_buttons.push_back (&mouse_gain_button);
-	}
-
-	mouse_zoom_button.add (*(manage (new Image (::get_icon("tool_zoom")))));
+	mouse_select_button.set_relief(Gtk::RELIEF_NONE);
+	mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_zoom_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_mode_buttons.push_back (&mouse_zoom_button);
-	mouse_timefx_button.add (*(manage (new Image (::get_icon("tool_stretch")))));
 	mouse_timefx_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_mode_buttons.push_back (&mouse_timefx_button);
-	mouse_audition_button.add (*(manage (new Image (::get_icon("tool_audition")))));
 	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_note_button.add (*(manage (new Image (::get_icon("tool_note")))));
-	mouse_note_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_mode_buttons.push_back (&mouse_note_button);
-	mouse_mode_buttons.push_back (&mouse_audition_button);
-	
-	mouse_mode_button_set = new GroupedButtons (mouse_mode_buttons);
+	// internal_edit_button.set_relief(Gtk::RELIEF_NONE);
 
 	HBox* mode_box = manage(new HBox);
 	mode_box->set_border_width (2);
@@ -2830,7 +2802,7 @@ Editor::setup_toolbar ()
 	}
 	mouse_mode_button_box.pack_start(mouse_timefx_button, true, true);
 	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
-	mouse_mode_button_box.pack_start(mouse_note_button, true, true);
+	mouse_mode_button_box.pack_start(internal_edit_button, true, true);
 	mouse_mode_button_box.set_homogeneous(true);
 
 	vector<string> edit_mode_strings;
@@ -2863,21 +2835,21 @@ Editor::setup_toolbar ()
 	mouse_mode_tearoff->Visible.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox), 
 						   &mouse_mode_tearoff->tearoff_window(), 1));
 
+	mouse_move_button.set_mode (false);
+	mouse_select_button.set_mode (false);
+	mouse_gain_button.set_mode (false);
+	mouse_zoom_button.set_mode (false);
+	mouse_timefx_button.set_mode (false);
+	mouse_audition_button.set_mode (false);
+
 	mouse_move_button.set_name ("MouseModeButton");
 	mouse_select_button.set_name ("MouseModeButton");
 	mouse_gain_button.set_name ("MouseModeButton");
 	mouse_zoom_button.set_name ("MouseModeButton");
 	mouse_timefx_button.set_name ("MouseModeButton");
 	mouse_audition_button.set_name ("MouseModeButton");
-	mouse_note_button.set_name ("MouseModeButton");
 
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("Select/Move Objects"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_gain_button, _("Draw Gain Automation"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("Select Zoom Range"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("Listen to Specific Regions"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_note_button, _("Edit MIDI Notes"));
+	internal_edit_button.set_name ("MouseModeButton");
 
 	mouse_move_button.unset_flags (CAN_FOCUS);
 	mouse_select_button.unset_flags (CAN_FOCUS);
@@ -2885,20 +2857,7 @@ Editor::setup_toolbar ()
 	mouse_zoom_button.unset_flags (CAN_FOCUS);
 	mouse_timefx_button.unset_flags (CAN_FOCUS);
 	mouse_audition_button.unset_flags (CAN_FOCUS);
-	mouse_note_button.unset_flags (CAN_FOCUS);
-
-	mouse_select_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
-	mouse_select_button.signal_button_release_event().connect (mem_fun(*this, &Editor::mouse_select_button_release));
-
-	mouse_move_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
-	mouse_gain_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));
-	mouse_zoom_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));
-	mouse_timefx_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
-	mouse_audition_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
-	mouse_note_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseNote));
-
-	// mouse_move_button.set_active (true);
-	
+	internal_edit_button.unset_flags (CAN_FOCUS);
 
 	/* Zoom */
 	
@@ -3000,11 +2959,10 @@ Editor::setup_toolbar ()
 
 	toolbar_hbox.pack_start (*mouse_mode_tearoff, false, false);
 	toolbar_hbox.pack_start (*tools_tearoff, false, false);
-
 	
 	hbox->pack_start (snap_box, false, false);
-	// hbox->pack_start (zoom_box, false, false); 
 	hbox->pack_start (*nudge_box, false, false);
+	hbox->pack_start (panic_box, false, false);
 
 	hbox->show_all ();
 	
@@ -3027,12 +2985,7 @@ Editor::midi_panic_button_pressed ()
 void
 Editor::setup_midi_toolbar ()
 {
-	string pixmap_path;
-
-	/* Mode Buttons (tool selection) */
-
-	vector<ToggleButton *> midi_tool_buttons;
-
+#if 0
 	midi_tool_pencil_button.add (*(manage (new Image (::get_icon("midi_tool_pencil")))));
 	midi_tool_pencil_button.set_relief(Gtk::RELIEF_NONE);
 	midi_tool_buttons.push_back (&midi_tool_pencil_button);
@@ -3046,42 +2999,11 @@ Editor::setup_midi_toolbar ()
 	midi_tool_erase_button.set_relief(Gtk::RELIEF_NONE);
 	midi_tool_buttons.push_back (&midi_tool_erase_button);
 
-	midi_tool_pencil_button.set_active(true);
-	
-	midi_tool_button_set = new GroupedButtons (midi_tool_buttons);
-
-	midi_tool_button_box.set_border_width (2);
-	midi_tool_button_box.set_spacing(1);
-	midi_tool_button_box.pack_start(midi_tool_pencil_button, true, true);
-	midi_tool_button_box.pack_start(midi_tool_select_button, true, true);
-	midi_tool_button_box.pack_start(midi_tool_resize_button, true, true);
-	midi_tool_button_box.pack_start(midi_tool_erase_button , true, true);
-	midi_tool_button_box.set_homogeneous(true);
-
-	midi_tool_pencil_button.set_name ("MouseModeButton");
-	midi_tool_select_button.set_name ("MouseModeButton");
-	midi_tool_resize_button.set_name ("MouseModeButton");
-	midi_tool_erase_button .set_name ("MouseModeButton");
-
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_pencil_button, _("Add/Move/Stretch Notes"));
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_select_button, _("Select/Move Notes"));
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_resize_button, _("Resize Notes"));
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_erase_button,  _("Erase Notes"));
-
-	midi_tool_pencil_button.unset_flags (CAN_FOCUS);
-	midi_tool_select_button.unset_flags (CAN_FOCUS);
-	midi_tool_resize_button.unset_flags (CAN_FOCUS);
-	midi_tool_erase_button.unset_flags (CAN_FOCUS);
-	
-	midi_tool_pencil_button.signal_toggled().connect (bind (mem_fun(*this,
-				&Editor::midi_edit_mode_toggled), Editing::MidiEditPencil));
-	midi_tool_select_button.signal_toggled().connect (bind (mem_fun(*this,
-				&Editor::midi_edit_mode_toggled), Editing::MidiEditSelect));
-	midi_tool_resize_button.signal_toggled().connect (bind (mem_fun(*this,
-				&Editor::midi_edit_mode_toggled), Editing::MidiEditResize));
-	midi_tool_erase_button.signal_toggled().connect (bind (mem_fun(*this,
-				&Editor::midi_edit_mode_toggled), Editing::MidiEditErase));
-
+#endif
 	
 	/* Midi sound notes */
 	midi_sound_notes.add (*(manage (new Image (::get_icon("midi_sound_notes")))));
@@ -3091,46 +3013,11 @@ Editor::setup_midi_toolbar ()
 	
 	/* Panic */
 	
-	HBox* panic_box = manage (new HBox);
 	midi_panic_button.set_name("MidiPanicButton");
-	midi_panic_button.signal_pressed().connect (
-			mem_fun(this, &Editor::midi_panic_button_pressed));
-	panic_box->pack_start (midi_sound_notes , true, true);
-	panic_box->pack_start (midi_panic_button, true, true);
-	
-	/* Pack everything in... */
+	midi_panic_button.signal_pressed().connect (mem_fun(this, &Editor::midi_panic_button_pressed));
 
-	midi_tools_tearoff = manage (new TearOff (midi_tool_button_box));
-	midi_tools_tearoff->set_name ("MouseModeBase");
-
-	/*
-	midi_tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&midi_toolbar_hbox), 
-					     &midi_tools_tearoff->tearoff_window()));
-	midi_tools_tearoff->Attach.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&midi_toolbar_hbox), 
-					     &midi_tools_tearoff->tearoff_window(), 0));
-	midi_tools_tearoff->Hidden.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&midi_toolbar_hbox), 
-					     &midi_tools_tearoff->tearoff_window()));
-	midi_tools_tearoff->Visible.connect (bind (mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&midi_toolbar_hbox), 
-					      &midi_tools_tearoff->tearoff_window(), 0));
-	*/
-
-	midi_toolbar_hbox.set_spacing (10);
-	midi_toolbar_hbox.set_border_width (1);
-
-	midi_toolbar_hbox.pack_start (*midi_tools_tearoff, false, true);
-	
-	midi_toolbar_hbox.pack_start(*panic_box, false, true, 4);
-
-	midi_tool_button_box.show_all ();
-	midi_toolbar_hbox.show_all();
-	midi_tools_tearoff->show_all();
-	
-	midi_toolbar_base.set_name ("ToolBarBase");
-	midi_toolbar_base.add (midi_toolbar_hbox);
-
-	midi_toolbar_frame.set_shadow_type (SHADOW_OUT);
-	midi_toolbar_frame.set_name ("BaseFrame");
-	midi_toolbar_frame.add (midi_toolbar_base);
+	panic_box.pack_start (midi_sound_notes , true, true);
+	panic_box.pack_start (midi_panic_button, true, true);
 }
 
 int
@@ -3812,6 +3699,8 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 void
 Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 {
+	cerr << "remove tearoff\n";
+
 	if (tools_tearoff->torn_off() && 
 	    mouse_mode_tearoff->torn_off()) {
 		top_hbox.remove (toolbar_frame);
@@ -3821,6 +3710,7 @@ Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 void
 Editor::reattach_tearoff (Box* /*b*/, Window* /*w*/, int32_t /*n*/)
 {
+	cerr << "reattach tearoff\n";
 	if (toolbar_frame.get_parent() == 0) {
 		top_hbox.pack_end (toolbar_frame);
 	}

@@ -19,6 +19,7 @@
 */
 
 #include <cmath>
+#include <iostream>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
 
@@ -124,6 +125,8 @@ TearOff::tearoff_click (GdkEventButton* /*ev*/)
 		own_window.set_name (get_name());
 		close_event_box.set_name (get_name());
 		own_window.show_all ();
+		own_window.present ();
+		std::cerr << "own window should be visible\n";
 		hide ();
 		Detach ();
 	}

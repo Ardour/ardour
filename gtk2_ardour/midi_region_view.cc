@@ -195,17 +195,18 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
+	PublicEditor& editor (trackview.editor());
+
+	if (!editor.internal_editing()) {
+		return false;
+	}
+
 	static double drag_start_x, drag_start_y;
 	static double last_x, last_y;
 	double event_x, event_y;
 	nframes64_t event_frame = 0;
 
 	static ArdourCanvas::SimpleRect* drag_rect = NULL;
-
-	if (trackview.editor().current_mouse_mode() != MouseNote)
-		return false;
-	
-	const Editing::MidiEditMode midi_edit_mode = trackview.editor().current_midi_edit_mode();
 
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
@@ -262,7 +263,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		case Pressed: // Drag start
 
 			// Select drag start
-			if (_pressed_button == 1 && midi_edit_mode == MidiEditSelect) {
+			if (_pressed_button == 1 && editor.current_mouse_mode() == MouseRange) {
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;
@@ -285,7 +286,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				return true;
 
 			// Add note drag start
-			} else if (midi_edit_mode == MidiEditPencil) {
+			} else if (editor.current_mouse_mode() == MouseObject) {
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;
@@ -365,12 +366,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			
 		switch (_mouse_state) {
 		case Pressed: // Clicked
-			switch (midi_edit_mode) {
-			case MidiEditSelect:
-			case MidiEditResize:
+			switch (editor.current_mouse_mode()) {
+			case MouseRange:
+			case MouseTimeFX:
 				clear_selection();
 				break;
-			case MidiEditPencil:
+			case MouseObject:
 				create_note_at(event_x, event_y, _default_note_length);
 			default: break;
 			}

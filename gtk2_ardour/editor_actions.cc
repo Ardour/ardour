@@ -17,6 +17,9 @@
 
 */
 
+#include <gio/gio.h>
+#include <gtk/gtkiconfactory.h>
+
 #include "ardour/ardour.h"
 #include "ardour/profile.h"
 
@@ -661,15 +664,61 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseObject, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseRange, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
-	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-note", _("Note Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseNote, false));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("Select/Move Objects"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_gain_button, _("Draw Gain Automation"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("Select Zoom Range"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("Listen to Specific Regions"));
+	/* in the future, this may allow other kinds of "intra-region" editing, but for now its just MIDI */
+	ARDOUR_UI::instance()->tooltips().set_tip (internal_edit_button, _("Edit MIDI Notes"));
 
+	cerr << "Registering mouse mode actions\n";
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
+	act->connect_proxy (mouse_move_button);
+	mouse_move_button.set_image (*(manage (new Image (::get_icon("tool_object")))));
+	mouse_move_button.set_label ("");
+	mouse_move_button.set_name ("MouseModeButton");
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
+	act->connect_proxy (mouse_select_button);
+	mouse_select_button.set_image (*(manage (new Image (::get_xpm("tool_range.xpm")))));
+	mouse_select_button.set_label ("");
+	mouse_select_button.set_name ("MouseModeButton");
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));
+	act->connect_proxy (mouse_gain_button);
+	mouse_gain_button.set_image (*(manage (new Image (::get_icon("tool_gain")))));
+	mouse_gain_button.set_label ("");
+	mouse_gain_button.set_name ("MouseModeButton");
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));
+	act->connect_proxy (mouse_zoom_button);
+	mouse_zoom_button.set_image (*(manage (new Image (::get_icon("tool_zoom")))));
+	mouse_zoom_button.set_label ("");
+	mouse_zoom_button.set_name ("MouseModeButton");
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
+	act->connect_proxy (mouse_audition_button);
+	mouse_audition_button.set_image (*(manage (new Image (::get_icon("tool_audition")))));
+	mouse_audition_button.set_label ("");
+	mouse_audition_button.set_name ("MouseModeButton");
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
+	act->connect_proxy (mouse_timefx_button);
+	mouse_timefx_button.set_image (*(manage (new Image (::get_icon("tool_stretch")))));
+	mouse_timefx_button.set_label ("");
+	mouse_timefx_button.set_name ("MouseModeButton");
+	
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), bind (mem_fun(*this, &Editor::step_mouse_mode), true));
 	
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "toggle-internal-edit", _("Edit MIDI"), mem_fun(*this, &Editor::toggle_internal_editing));
+	act->connect_proxy (internal_edit_button);
+	internal_edit_button.set_image (*(manage (new Image (::get_icon("tool_note")))));
+	internal_edit_button.set_label ("");
+	internal_edit_button.set_name ("MouseModeButton");
+
 	RadioAction::Group edit_point_group;
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
@@ -1342,3 +1391,12 @@ Editor::reset_canvas_action_sensitivity (bool onoff)
 	}
 }
 
+void
+Editor::toggle_internal_editing ()
+{
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+		set_internal_edit (tact->get_active());
+	}
+}

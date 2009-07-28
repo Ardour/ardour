@@ -62,6 +62,11 @@ public:
 	
 	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset = 0);
 
+	/* the capacity here is a size_t and has a different interpretation depending
+	   on the DataType of the buffers. for audio, its a frame count. for MIDI
+	   its a byte count.
+	*/
+
 	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);
 	void ensure_buffers(const ChanCount& chns, size_t buffer_capacity);
 

@@ -43,10 +43,13 @@ class InternalSend : public Send
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 	bool feeds (boost::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool configure_io (ChanCount in, ChanCount out);
+	void set_block_size (nframes_t);
 
 	boost::shared_ptr<Route> target_route() const { return _send_to; }
 
   private:
+	BufferSet  mixbufs;
 	BufferSet* target;
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;

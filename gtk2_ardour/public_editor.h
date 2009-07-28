@@ -150,19 +150,19 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	 * (defined in editing_syms.h)
 	 */
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
+
+	/** Switch into a mode in which editing is primarily focused on "within" regions,
+	    rather than regions as black-box objects. For Ardour3, this is aimed at
+	    editing MIDI regions but may expand in the future to other types of regions.
+	*/
 	
-	/** Set the midi edit mode (pencil, select, eraser, etc.)
-	 * @param m Midi edit mode (defined in editing_syms.h)
-	 * @param force Perform the effects of the change even if no change is required
-	 * (ie even if the current midi edit mode is equal to \ref m)
+	virtual void set_internal_edit (bool yn) = 0;
+
+	/** @return Whether editing is currently in "internal" mode or not
 	 */
-	virtual void set_midi_edit_mode (Editing::MidiEditMode m, bool force = false) = 0;
-	
-	/** @return The current mouse mode (gain, object, range, timefx etc.)
-	 * (defined in editing_syms.h)
-	 */
-	virtual Editing::MidiEditMode current_midi_edit_mode () const = 0;
-	
+
+	virtual bool internal_editing() const = 0;
+
 	/** @return Sound edited notes in MIDI regions while editing
 	 */
 	virtual bool sound_notes () const = 0;

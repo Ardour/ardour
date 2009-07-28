@@ -11,16 +11,21 @@ namespace Canvas {
 bool
 CanvasNote::on_event(GdkEvent* ev)
 {
+	PublicEditor& editor (_region.get_trackview().editor());
+
+	if (!editor.internal_editing()) {
+		return false;
+	}
+
 	double          event_x;
 	static double   middle_point, last_x;
 	Gdk::Cursor     cursor;
 	static NoteEnd  note_end;
-	Editing::MidiEditMode edit_mode = _region.get_trackview().editor().current_midi_edit_mode();
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 2 ||
-				(ev->button.button == 1 && edit_mode == Editing::MidiEditResize)) {
+		    (ev->button.button == 1 && editor.current_mouse_mode() == Editing::MouseTimeFX)) {
 			double region_start = _region.get_position_pixels();
 			event_x = ev->button.x;
 			middle_point = region_start + x1() + (x2() - x1()) / 2.0L;

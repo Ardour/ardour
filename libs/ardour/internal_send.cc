@@ -80,10 +80,9 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	// we have to copy the input, because we may alter the buffers with the amp
 	// in-place, which a send must never do.
 	
-	BufferSet& sendbufs = _session.get_mix_buffers (bufs.count());
-	sendbufs.read_from (bufs, nframes);
-	assert(sendbufs.count() == bufs.count());
-
+	assert(mixbufs.available() >= bufs.count());
+	mixbufs.read_from (bufs, nframes);
+	
 	/* gain control */
 
 	gain_t tgain = target_gain ();
@@ -92,7 +91,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 		
 		/* target gain has changed */
 
-		Amp::apply_gain (sendbufs, nframes, _current_gain, tgain);
+		Amp::apply_gain (mixbufs, nframes, _current_gain, tgain);
 		_current_gain = tgain;
 
 	} else if (tgain == 0.0) {
@@ -101,13 +100,13 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 		*/
 
 		_meter->reset ();
-		Amp::apply_simple_gain (sendbufs, nframes, 0.0);
+		Amp::apply_simple_gain (mixbufs, nframes, 0.0);
 		goto out;
 
 	} else if (tgain != 1.0) {
 
 		/* target gain has not changed, but is not zero or unity */
-		Amp::apply_simple_gain (sendbufs, nframes, tgain);
+		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
 
 	
@@ -115,7 +114,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	// so that we don't overwrite the main automation data for the route amp
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
 
-	_amp->run (sendbufs, start_frame, end_frame, nframes);
+	_amp->run (mixbufs, start_frame, end_frame, nframes);
 
 	/* XXX NEED TO PAN */
 
@@ -125,16 +124,22 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (sendbufs, start_frame, end_frame, nframes);
+			_meter->run (mixbufs, start_frame, end_frame, nframes);
 		}
 	}
 
 	/* deliver to target */
 
-	target->merge_from (sendbufs, nframes);
+	target->merge_from (mixbufs, nframes);
 
   out:
 	_active = _pending_active;
+}
+
+void
+InternalSend::set_block_size (nframes_t nframes)
+{
+	mixbufs.ensure_buffers (_configured_input, nframes);
 }
 
 bool
@@ -219,6 +224,14 @@ InternalSend::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;
+}
+
+bool
+InternalSend::configure_io (ChanCount in, ChanCount out)
+{
+	bool ret = Send::configure_io (in, out);
+	set_block_size (_session.get_block_size());
+	return ret;
 }
 
 bool

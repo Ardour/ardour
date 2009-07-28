@@ -432,7 +432,9 @@ Editor::controls_layout_size_request (Requisition* req)
 bool
 Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 {
-	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	if (current_canvas_cursor) {
+		track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	}
 	return false;
 }
 

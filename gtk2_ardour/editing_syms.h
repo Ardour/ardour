@@ -59,12 +59,6 @@ MOUSEMODE(MouseRange)
 MOUSEMODE(MouseTimeFX)
 MOUSEMODE(MouseZoom)
 MOUSEMODE(MouseAudition)
-MOUSEMODE(MouseNote)
-
-MIDIEDITMODE(MidiEditPencil)
-MIDIEDITMODE(MidiEditSelect)
-MIDIEDITMODE(MidiEditResize)
-MIDIEDITMODE(MidiEditErase)
 
 /* Changing this order will break the menu */
 ZOOMFOCUS(ZoomFocusLeft)

@@ -212,6 +212,12 @@ CanvasNoteEvent::base_color()
 bool
 CanvasNoteEvent::on_event(GdkEvent* ev)
 {
+	PublicEditor& editor (_region.get_time_axis_view().editor());
+
+	if (!editor.internal_editing()) {
+		return false;
+	}
+
 	MidiStreamView *streamview = _region.midi_stream_view();
 	static uint8_t drag_delta_note = 0;
 	static double  drag_delta_x = 0;
@@ -219,13 +225,6 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	double event_x, event_y, dx, dy;
 	bool select_mod;
 	uint8_t d_velocity = 10;
-
-	if (_region.get_time_axis_view().editor().current_mouse_mode() != Editing::MouseNote) {
-		return false;
-	}
-	
-	const Editing::MidiEditMode midi_edit_mode
-			= _region.midi_view()->editor().current_midi_edit_mode();
 
 	switch (ev->type) {
 	case GDK_SCROLL:
@@ -286,8 +285,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Drag begin
-			if (midi_edit_mode == Editing::MidiEditSelect
-					&& _region.mouse_state() != MidiRegionView::SelectTouchDragging) {
+			if (editor.current_mouse_mode() == Editing::MouseRange && _region.mouse_state() != MidiRegionView::SelectTouchDragging) {
 				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				_state = Dragging;
@@ -355,7 +353,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		
 		switch (_state) {
 		case Pressed: // Clicked
-			if (midi_edit_mode == Editing::MidiEditSelect) {
+			if (editor.current_mouse_mode() == Editing::MouseRange) {
 				_state = None;
 				if (_selected && !select_mod && _region.selection_size() > 1) {
 					_region.unique_select(this);
@@ -364,10 +362,12 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 				} else {
 					_region.note_selected(this, select_mod);
 				}
+#if 0
 			} else if (midi_edit_mode == Editing::MidiEditErase) {
 				_region.start_delta_command();
 				_region.command_remove_note(this);
 				_region.apply_command();
+#endif
 			}
 
 			return true;

@@ -184,10 +184,10 @@ class Editor : public PublicEditor
 	void set_mouse_mode (Editing::MouseMode, bool force=true);
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
-	
-	void set_midi_edit_cursor (Editing::MidiEditMode);
-	void set_midi_edit_mode (Editing::MidiEditMode, bool force=true);
-	Editing::MidiEditMode current_midi_edit_mode () const { return midi_edit_mode; }
+	Editing::MidiEditMode current_midi_edit_mode () const;
+
+	bool internal_editing() const { return _internal_editing ; }
+	void set_internal_edit (bool yn);
 
 #ifdef WITH_CMT
 	void add_imageframe_time_axis(const std::string & track_name, void*) ;
@@ -467,8 +467,8 @@ class Editor : public PublicEditor
 	void post_zoom ();
 
 	Editing::MouseMode mouse_mode;
-	Editing::MidiEditMode midi_edit_mode;
-
+	bool _internal_editing;
+	
 	int  post_maximal_editor_width;
 	int  post_maximal_pane_position;
 	int  pre_maximal_pane_position;
@@ -1513,16 +1513,18 @@ public:
 	
 	Gtk::HBox                mouse_mode_button_box;
 	Gtkmm2ext::TearOff*      mouse_mode_tearoff;
-	Gtk::ToggleButton        mouse_select_button;
-	Gtk::ToggleButton        mouse_move_button;
-	Gtk::ToggleButton        mouse_gain_button;
-	Gtk::ToggleButton        mouse_zoom_button;
-	Gtk::ToggleButton        mouse_timefx_button;
-	Gtk::ToggleButton        mouse_audition_button;
-	Gtk::ToggleButton        mouse_note_button;
-	GroupedButtons          *mouse_mode_button_set;
+	Gtk::ToggleButton         mouse_select_button;
+	Gtk::ToggleButton         mouse_move_button;
+	Gtk::ToggleButton         mouse_gain_button;
+	Gtk::ToggleButton         mouse_zoom_button;
+	Gtk::ToggleButton         mouse_timefx_button;
+	Gtk::ToggleButton         mouse_audition_button;
+
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	bool                     ignore_mouse_mode_toggle;
+
+	Gtk::ToggleButton        internal_edit_button;
+	void                     toggle_internal_editing ();
 
 	gint                     mouse_select_button_release (GdkEventButton*);
 
@@ -1578,24 +1580,11 @@ public:
 
 	/* midi toolbar */
 
-	Gtk::HBox                midi_tool_button_box;
-	Gtk::ToggleButton        midi_tool_pencil_button;
-	Gtk::ToggleButton        midi_tool_select_button;
-	Gtk::ToggleButton        midi_tool_resize_button;
-	Gtk::ToggleButton        midi_tool_erase_button;
+	Gtk::HBox                panic_box;
 	Gtk::Button              midi_panic_button;
 	Gtk::ToggleButton        midi_sound_notes;
-	GroupedButtons          *midi_tool_button_set;
-	void                     midi_edit_mode_toggled (Editing::MidiEditMode m);
 	void                     midi_panic_button_pressed ();
 	bool                     sound_notes () const { return midi_sound_notes.get_active(); }
-	
-	bool                     ignore_midi_edit_mode_toggle;
-
-	Gtkmm2ext::TearOff* midi_tools_tearoff;
-	Gtk::HBox           midi_toolbar_hbox;
-	Gtk::EventBox       midi_toolbar_base;
-	Gtk::Frame          midi_toolbar_frame;
 	
 	void setup_midi_toolbar ();
 

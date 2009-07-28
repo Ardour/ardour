@@ -86,6 +86,7 @@ bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
 
 Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
+Glib::ustring get_icon_path (const char*);
 Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*);
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);

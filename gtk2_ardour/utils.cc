@@ -705,9 +705,8 @@ get_xpm (std::string name)
 	return xpm_map[name];
 }
 
-
-Glib::RefPtr<Gdk::Pixbuf>	
-get_icon (const char* cname)
+Glib::ustring
+get_icon_path (const char* cname)
 {
 	string name = cname;
 	name += X_(".png");
@@ -723,9 +722,15 @@ get_icon (const char* cname)
 		fatal << string_compose (_("cannot find icon image for %1"), name) << endmsg;
 	}
 
+	return data_file_path.to_string();
+}
+
+Glib::RefPtr<Gdk::Pixbuf>	
+get_icon (const char* cname)
+{
 	Glib::RefPtr<Gdk::Pixbuf> img;
 	try {
-		img = Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+		img = Gdk::Pixbuf::create_from_file (get_icon_path (cname));
 	} catch (const Gdk::PixbufError &e) {
 		cerr << "Caught PixbufError: " << e.what() << endl;
 	} catch (...) {

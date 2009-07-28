@@ -694,8 +694,10 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			
 		}
 		
-		// XXX: do we want to emit the signal here ? change call order.
-		processor->activate ();
+		if (_control_outs != processor) {
+			// XXX: do we want to emit the signal here ? change call order.
+			processor->activate ();
+		}
 		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 
 		_output->set_user_latency (0);

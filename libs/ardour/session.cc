@@ -62,6 +62,7 @@
 #include "ardour/cycle_timer.h"
 #include "ardour/data_type.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/internal_send.h"
 #include "ardour/io_processor.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_playlist.h"
