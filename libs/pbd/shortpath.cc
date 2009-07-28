@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <pbd/shortpath.h>
 
+#include <stdint.h>
+
 using namespace Glib;
 using namespace std;
 

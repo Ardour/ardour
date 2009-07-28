@@ -51,7 +51,7 @@ opts.AddOptions(
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
     BoolOption('WIIMOTE', 'Build the wiimote control surface', 0),
-    ('LIBDIR', 'Set librarydir (typically lib or lib64)', 'lib'),
+    ('DIST_LIBDIR', 'Explicitly set library dir. If not set, Fedora-style defaults are used (typically lib or lib64)', ''),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
@@ -742,10 +742,13 @@ if env['FPU_OPTIMIZATION']:
 
 # handle x86/x86_64 libdir properly
 
-if env['DIST_TARGET'] == 'x86_64':
-    env['LIBDIR']='lib64'
+if env['DIST_LIBDIR'] == '':
+    if env['DIST_TARGET'] == 'x86_64':
+        env['LIBDIR']='lib64'
+    else:
+        env['LIBDIR']='lib'
 else:
-    env['LIBDIR']='lib'
+    env['LIBDIR'] = env['DIST_LIBDIR']
 
 #
 # no VST on x86_64

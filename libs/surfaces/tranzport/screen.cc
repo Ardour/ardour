@@ -21,6 +21,8 @@
 #include <cstring>
 #include <tranzport_control_protocol.h>
 
+#include <cstring>
+
 void
 TranzportControlProtocol::screen_clear ()
 {

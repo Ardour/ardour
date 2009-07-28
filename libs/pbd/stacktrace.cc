@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <pbd/stacktrace.h>
+#include <cstdio>
 #include <iostream>
 
 /* Obtain a backtrace and print it to stdout. */

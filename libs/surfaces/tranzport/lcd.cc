@@ -30,7 +30,7 @@ bool TranzportControlProtocol::lcd_damage()
 
 bool TranzportControlProtocol::lcd_damage (int row, int col, int length)
 {
-	std::bitset<ROWS*COLUMNS> mask1(0);
+	std::bitset<ROWS*COLUMNS> mask1(0ul);
 	// there's an intrinsic to do this fast, darn it, or I'm just sleepy
 	for (int i = 0; i < length; i++) { mask1[i] = 1; }
 	std::bitset<ROWS*COLUMNS> mask(mask1 << (row*COLUMNS+col));
@@ -55,7 +55,7 @@ bool TranzportControlProtocol::lcd_isdamaged ()
 bool TranzportControlProtocol::lcd_isdamaged (int row, int col, int length)
 {
 	// there's an intrinsic to do this fast, darn it
-	std::bitset<ROWS*COLUMNS> mask1(0);
+	std::bitset<ROWS*COLUMNS> mask1(0ul);
 	for (int i = 0; i < length; i++) { mask1[i] = 1; }
 	std::bitset<ROWS*COLUMNS> mask(mask1 << (row*COLUMNS+col));
 	mask &= screen_invalid;

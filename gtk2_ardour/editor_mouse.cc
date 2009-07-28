@@ -3530,7 +3530,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		int32_t children = 0, numtracks = 0;
 		// XXX hard coding track limit, oh my, so very very bad
-		bitset <1024> tracks (0x00);
+		bitset <1024> tracks (0x00ul);
 		/* get a bitmask representing the visible tracks */
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {

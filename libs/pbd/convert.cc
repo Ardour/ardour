@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <cmath>
+#include <cstdio>
 #include <locale>
 #include <algorithm>
 #include <stdint.h>
