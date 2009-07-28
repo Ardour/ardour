@@ -2,16 +2,6 @@
 
 # script for pulling together a MacOSX app bundle.
 
-#
-# Ben: search the file for:
-#
-# EXTRA_PACKAGING_DIR
-# EXTERNAL_JACK
-# MIXBUS
-#
-# and correct/expand as necessary
-#
-
 GTKQUARTZ_ROOT=$HOME/gtk/inst
 
 SAE=
@@ -65,7 +55,7 @@ echo "Info string is $info_string"
 # setup directory structure
 
 if [ x$MIXBUS != x ] ; then
-    APPNAME=MixBus
+    APPNAME=Mixbus
 else
     APPNAME=Ardour2
 fi
@@ -81,7 +71,7 @@ Etc=$Resources/etc
 Locale=$Resources/locale
 
 SAE_PKG_DIR=ArdourSAE
-MIXBUS_PKG_DIR=MixBus
+MIXBUS_PKG_DIR=Mixbus
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -125,7 +115,7 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui_sae.conf</string>"
     env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark_sae.rc</string>"
 elif test x$MIXBUS != x ; then
-    appname="Ardour2/MixBus"
+    appname="Ardour2/Mixbus"
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
     # current default for MIXBUS version is US keyboard layout without a keypad
@@ -187,7 +177,7 @@ if test x$SAE != x ; then
     # cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour2-SAE.icns $Resources/appIcon.icns
 elif test x$MIXBUS != x ; then
-    cp  MixBus.icns $Resources/appIcon.icns
+    cp  Mixbus.icns $Resources/appIcon.icns
 else
     cp  Ardour2.icns $Resources/appIcon.icns
 fi
@@ -423,9 +413,9 @@ if [ x$EXTRA_PACKAGING_DIR != x ] ; then
 
     elif [ x$MIXBUS != x ] ; then
 
-	# MixBus packaging
+	# Mixbus packaging
 
-	echo "Creating MixBus packaging directory"
+	echo "Creating Mixbus packaging directory"
 	rm -rf $MIXBUS_PKG_DIR
 	mkdir $MIXBUS_PKG_DIR
 	mv $APPDIR $MIXBUS_PKG_DIR/
