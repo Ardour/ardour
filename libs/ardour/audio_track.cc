@@ -583,7 +583,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			limit = blimit;
 
 		} else {
-			for (i = 0, n = 1; i < blimit; ++i, ++n) {
+			for (i = 0, n = 1; i < limit; ++i, ++n) {
 				memcpy (bufs.get_audio (i).data(), b, sizeof (Sample) * nframes); 
 				if (n < diskstream->n_channels().n_audio()) {
 					tmpb = diskstream->playback_buffer(n);
@@ -592,6 +592,13 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 					}
 				}
 			}
+
+			/* try to leave any MIDI buffers alone */
+			
+			ChanCount chn;
+			chn.set_audio (limit);
+			chn.set_midi (_input->n_ports().n_midi());
+			bufs.set_count (chn);
 		}
 
 		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */

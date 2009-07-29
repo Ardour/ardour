@@ -1341,7 +1341,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	// Ensure route outputs match last processor's outputs
 	if (out != _output->n_ports ()) {
-		cerr << "For " << _name << " out/last mismatch - out = " << out << " vs. " << _output->n_ports() << endl;
 		_output->ensure_io (out, false, this);
 	}
 
