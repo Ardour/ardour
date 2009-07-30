@@ -163,6 +163,7 @@ static const char* authors[] = {
 	N_("Petter Sundlöf"),
 	N_("Mike Täht"),
 	N_("Thorsten Wilms"),
+	0
 };
 
 static const char* translators[] = {
