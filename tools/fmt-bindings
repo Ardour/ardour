@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+$in_group_def = 0;
+$group_name;
+$group_text;
+$group_key;
+%group_names;
+%group_text;
+
+while (<>) {
+    next if /^\;/;
+
+    if (/^%/) {
+
+	if ($in_group_def) {
+	    chop $group_text;
+	    $group_names{$group_key} = $group_name;
+	    $group_text{$group_key} = $group_text;
+	}
+
+	s/^%//;
+	chop;
+	($group_key,$group_name) = split (/\s+/, $_, 2);
+	$group_text = "";
+	$in_group_def = 1;
+	next;
+    }
+
+    if ($in_group_def) {
+	next if (/^[ \t]+$/);
+	$group_text .= $_;
+	$group_text;
+	next;
+    }
+
+    next;
+}
+
+foreach $k (keys %group_names) {
+    print "GROUP: ", $k, " ", $group_names{$k}, "\n\t", $group_text{$k}, "\n";
+}
+
+exit 0;
