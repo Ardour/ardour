@@ -182,8 +182,12 @@ while (<>) {
 	    if ($merge_bindings{$lookup}) {
 		$binding = $merge_bindings{$lookup};
 	    } else {
-		# this action is not defined in the merge from set, so forget it 
-		next;
+		if ($key =~ /^\+/) {
+		    # forced inclusion of bindings from template
+		} else {
+		    # this action is not defined in the merge from set, so forget it 
+		    next;
+		}
 	    }
 	} 
 
