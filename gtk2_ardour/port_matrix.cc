@@ -266,7 +266,7 @@ PortMatrix::popup_menu (
 	bc[_row_index] = row.second;
 
 	char buf [64];
-
+	bool need_separator = false;
 
 	for (int dim = 0; dim < 2; ++dim) {
 
@@ -319,13 +319,18 @@ PortMatrix::popup_menu (
 				MenuElem (buf, bind (mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
 				);
 
-			
 			items.push_back (MenuElem (bc[dim].bundle->name().c_str(), *m));
+			need_separator = true;
 		}
+
 	}
 
-	items.push_back (SeparatorElem ());
+	if (need_separator) {
+		items.push_back (SeparatorElem ());
+	}
 
+	need_separator = false;
+	
 	for (int dim = 0; dim < 2; ++dim) {
 
 		if (pg[dim]) {
@@ -334,24 +339,44 @@ PortMatrix::popup_menu (
 			
 			if (pg[dim]->visible()) {
 				if (dim == 0) {
-					snprintf (buf, sizeof (buf), _("Hide '%s' sources"), pg[dim]->name.c_str());
+					if (pg[dim]->name.empty()) {
+						snprintf (buf, sizeof (buf), _("Hide sources"));
+					} else {
+						snprintf (buf, sizeof (buf), _("Hide '%s' sources"), pg[dim]->name.c_str());
+					}
 				} else {
-					snprintf (buf, sizeof (buf), _("Hide '%s' destinations"), pg[dim]->name.c_str());
+					if (pg[dim]->name.empty()) {
+						snprintf (buf, sizeof (buf), _("Hide destinations"));
+					} else {
+						snprintf (buf, sizeof (buf), _("Hide '%s' destinations"), pg[dim]->name.c_str());
+					}
 				}
 
 				items.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::hide_group), wp)));
 			} else {
 				if (dim == 0) {
-					snprintf (buf, sizeof (buf), _("Show '%s' sources"), pg[dim]->name.c_str());
+					if (pg[dim]->name.empty()) {
+						snprintf (buf, sizeof (buf), _("Show sources"));
+					} else {
+						snprintf (buf, sizeof (buf), _("Show '%s' sources"), pg[dim]->name.c_str());
+					}
 				} else {
-					snprintf (buf, sizeof (buf), _("Show '%s' destinations"), pg[dim]->name.c_str());
+					if (pg[dim]->name.empty()) {
+						snprintf (buf, sizeof (buf), _("Show destinations"));
+					} else {
+						snprintf (buf, sizeof (buf), _("Show '%s' destinations"), pg[dim]->name.c_str());
+					}
 				}
 				items.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::show_group), wp)));
 			}
+
+			need_separator = true;
 		}
 	}
 
-	items.push_back (SeparatorElem ());
+	if (need_separator) {
+		items.push_back (SeparatorElem ());
+	}
 
 	items.push_back (MenuElem (_("Rescan"), mem_fun (*this, &PortMatrix::setup_all_ports)));
 	items.push_back (CheckMenuElem (_("Show individual ports"), mem_fun (*this, &PortMatrix::toggle_show_only_bundles)));
