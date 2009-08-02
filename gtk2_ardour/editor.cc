@@ -609,8 +609,8 @@ Editor::Editor ()
 	set_snap_to (snap_type);
 	snap_mode = SnapOff;
 	set_snap_mode (snap_mode);
-	set_edit_point_preference (EditAtMouse, true);
 	set_mouse_mode (MouseObject, true);
+	set_edit_point_preference (EditAtMouse, true);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
