@@ -395,7 +395,7 @@ Session::import_audiofiles (ImportStatus& status)
 	uint channels = 0;
 
 	status.sources.clear ();
-	
+
 	for (vector<Glib::ustring>::iterator p = status.paths.begin();
 			p != status.paths.end() && !status.cancel;
 			++p, ++cnt)
@@ -404,7 +404,7 @@ Session::import_audiofiles (ImportStatus& status)
 		std::auto_ptr<Evoral::SMF>          smf_reader;
 		const DataType type = ((*p).rfind(".mid") != string::npos) ? 
 			DataType::MIDI : DataType::AUDIO;
-		
+
 		if (type == DataType::AUDIO) {
 			try {
 				source = open_importable_source (*p, frame_rate(), status.quality);
@@ -442,7 +442,9 @@ Session::import_audiofiles (ImportStatus& status)
 		// copy on cancel/failure so that any files that were created will be removed below
 		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(all_new_sources));
 
-		if (status.cancel) break;
+		if (status.cancel) {
+			break;
+		}
 
 		for (Sources::iterator i = newfiles.begin(); i != newfiles.end(); ++i) {
 			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(*i)) != 0) {

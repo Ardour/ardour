@@ -352,61 +352,38 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 
 	} else {
 
-		bool replace = false;
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			int const check = check_whether_and_how_to_import (*a, true);
+
+			if (check != 2) {
+				to_import.push_back (*a);
+			}
+		}
+		
 		bool ok = true;
-		vector<ustring>::size_type total = paths.size();
 
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end() && ok; ++a) {
-
-			int check = check_whether_and_how_to_import(*a, true);
-
-			if (check == 2 ) { 
-				// user said skip
-				continue;
-			}
-
-			if (check == 0) {
-				fatal << "Updating existing sources should be disabled!" << endl;
-				replace = true;
-			} else if (check == 1) {
-				replace = false;
-			}
+		switch (chns) {
+		case Editing::ImportDistinctFiles:
 			
-
-
-			switch (chns) {
-			case Editing::ImportDistinctFiles:
-				
-				to_import.clear ();
-				to_import.push_back (*a);
-				
-				if (mode == Editing::ImportToTrack) {
-					track = get_nth_selected_audio_track (nth++);
-				}
-				
-				ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace, total) == 0);
-				break;
-				
-			case Editing::ImportDistinctChannels:
-				
-				to_import.clear ();
-				to_import.push_back (*a);
-				
-				ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace, total) == 0);
-				break;
-				
-			case Editing::ImportSerializeFiles:
-				
-				to_import.clear ();
-				to_import.push_back (*a);
-
-				ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace, total) == 0);
-				break;
-
-			case Editing::ImportMergeFiles:
-				// Not entered, handled in earlier if() branch
-				break;
+			if (mode == Editing::ImportToTrack) {
+				track = get_nth_selected_audio_track (nth++);
 			}
+				
+			ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, false, to_import.size()) == 0);
+			break;
+				
+		case Editing::ImportDistinctChannels:
+			ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, false, to_import.size()) == 0);
+			break;
+				
+		case Editing::ImportSerializeFiles:
+			ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, false, to_import.size()) == 0);
+			break;
+
+		case Editing::ImportMergeFiles:
+			// Not entered, handled in earlier if() branch
+			break;
 		}
 	}
 
