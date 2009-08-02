@@ -1139,7 +1139,7 @@ IO::setup_bundles ()
         char buf[32];
 
 	if (!_bundle) {
-		_bundle.reset (new Bundle (true));
+		_bundle.reset (new Bundle (_direction == Input));
 	}
 
 	_bundle->suspend_signals ();
@@ -1168,7 +1168,7 @@ BundleList
 IO::bundles_connected ()
 {
 	BundleList bundles;
-	
+
 	/* User bundles */
 	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
 		bundles.push_back (i->bundle);
