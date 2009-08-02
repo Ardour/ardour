@@ -247,16 +247,16 @@ compose_status_message (const string& path,
 			uint total_files)
 {
 	if (file_samplerate != session_samplerate) {
-		return string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
+		return string_compose (_("resampling %1 from %2kHz to %3kHz\n(%4 of %5)"),
 				       Glib::path_get_basename (path),
 				       file_samplerate/1000.0f,
 				       session_samplerate/1000.0f,
 				       current_file, total_files);
 	}
 
-	return  string_compose (_("converting %1\n(%2 of %3)"), 
-				Glib::path_get_basename (path),
-				current_file, total_files);
+	return string_compose (_("copying %1\n(%2 of %3)"), 
+			       Glib::path_get_basename (path),
+			       current_file, total_files);
 }
 
 static void
