@@ -2325,10 +2325,6 @@ Editor::set_state (const XMLNode& node)
 		set_snap_mode ((SnapMode) atoi (prop->value()));
 	}
 
-	if ((prop = node.property ("edit-point"))) {
-		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
-	}
-
 	if ((prop = node.property ("mouse-mode"))) {
 		MouseMode m = str2mousemode(prop->value());
 		mouse_mode = MouseMode ((int) m + 1); /* lie, force mode switch */
@@ -2336,6 +2332,10 @@ Editor::set_state (const XMLNode& node)
 	} else {
 		mouse_mode = MouseGain; /* lie, to force the mode switch */
 		set_mouse_mode (MouseObject, true);
+	}
+
+	if ((prop = node.property ("edit-point"))) {
+		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
 	}
 
 	if ((prop = node.property ("show-waveforms-recording"))) {
