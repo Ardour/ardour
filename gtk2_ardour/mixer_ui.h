@@ -80,8 +80,6 @@ class Mixer_UI : public Gtk::Window
 
 	RouteRedirectSelection& selection() { return _selection; }
 
-	static std::string get_order_key();
-	
   private:
 	ARDOUR::Session         *session;
 

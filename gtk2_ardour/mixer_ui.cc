@@ -374,19 +374,6 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	strip_redisplay_does_not_sync_order_keys = false;
 }
 
-string
-Mixer_UI::get_order_key() 
-{
-	return X_("signal");
-#if 0
-	if (Config->get_sync_all_route_ordering()) {
-		return X_("editor");
-	} else {
-		return X_("signal");
-	}
-#endif
-}
-
 void
 Mixer_UI::sync_order_keys (string const & src)
 {
@@ -394,7 +381,7 @@ Mixer_UI::sync_order_keys (string const & src)
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (src != get_order_key() || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src == N_("signal") || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -408,7 +395,7 @@ Mixer_UI::sync_order_keys (string const & src)
 	for (order = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		int old_key = order;
-		int new_key = route->order_key (get_order_key());
+		int new_key = route->order_key (N_("signal"));
 
 		neworder[new_key] = old_key;
 
@@ -723,7 +710,7 @@ Mixer_UI::redisplay_track_list ()
 			strip->route()->set_order_key (N_("signal"), order);
 
 			if (!strip_redisplay_does_not_reset_order_keys) {
-				strip->route()->set_order_key (get_order_key(), order);
+				strip->route()->set_order_key (N_("signal"), order);
 			} 
 
 			if (strip->packed()) {
@@ -761,7 +748,7 @@ Mixer_UI::redisplay_track_list ()
 	}
 	
 	if (!strip_redisplay_does_not_reset_order_keys && !strip_redisplay_does_not_sync_order_keys) {
-		session->sync_order_keys (get_order_key());
+		session->sync_order_keys (N_("signal"));
 	}
 
 	// Rebind all of the midi controls automatically
@@ -884,7 +871,7 @@ Mixer_UI::auto_rebind_midi_controls ()
 struct SignalOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key (Mixer_UI::get_order_key()) < b->order_key (Mixer_UI::get_order_key());
+	    return a->order_key (N_("signal")) < b->order_key (N_("signal"));
     }
 };
 

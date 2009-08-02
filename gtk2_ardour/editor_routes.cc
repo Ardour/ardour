@@ -416,7 +416,7 @@ EditorRoutes::sync_order_keys (string const & src)
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
 
-	if (src != N_ ("editor") || !_session || (_session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src == N_ ("editor") || !_session || (_session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
