@@ -730,10 +730,10 @@ ProcessorBox::choose_return ()
 	}
 
 	/* let the user adjust the IO setup before creation */
-	IOSelectorWindow *ios = new IOSelectorWindow (_session, retrn->output(), true);
+	IOSelectorWindow *ios = new IOSelectorWindow (_session, retrn->input(), true);
 	ios->show_all ();
 
-	/* keep a reference to the send so it doesn't get deleted while
+	/* keep a reference to the return so it doesn't get deleted while
 	   the IOSelectorWindow is doing its stuff */
 	_processor_being_created = retrn;
 
