@@ -301,6 +301,9 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
+
+	/* go there and back to ensure that the toggled handler is called to set up mouse_mode */
+	tact->set_active (false);
 	tact->set_active (true);
 }
 
