@@ -3181,6 +3181,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 	
 	if (movement_occurred) {
 		motion (event, false);
+		_drag_rect->hide();
 
 		switch (_operation) {
 		case CreateRangeMarker:
@@ -3202,15 +3203,12 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			XMLNode &after = _editor->session->locations()->get_state();
 			_editor->session->add_command(new MementoCommand<Locations>(*(_editor->session->locations()), &before, &after));
 			_editor->commit_reversible_command ();
-			
-			_drag_rect->hide();
 			break;
 		    }
 
 		case CreateTransportMarker:
 			// popup menu to pick loop or punch
 			_editor->new_transport_marker_context_menu (&event->button, _item);
-			
 			break;
 		}
 	} else {
