@@ -397,6 +397,7 @@ Mixer_UI::sync_order_keys (string const & src)
 		int old_key = order;
 		int new_key = route->order_key (N_("signal"));
 
+		assert (new_key < neworder.size());
 		neworder[new_key] = old_key;
 
 		if (new_key != old_key) {
