@@ -1008,6 +1008,8 @@ class Editor : public PublicEditor
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_1 (ArdourCanvas::Item *, GdkEvent *, ItemType);
+	bool button_press_handler_2 (ArdourCanvas::Item *, GdkEvent *, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
 	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);

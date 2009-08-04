@@ -500,8 +500,434 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 }
 
 bool
+Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	if (_drag) {
+		_drag->item()->ungrab (event->button.time);
+	}
+	
+	/* single mouse clicks on any of these item types operate
+	   independent of mouse mode, mostly because they are
+	   not on the main track canvas or because we want
+	   them to be modeless.
+	*/
+	
+	switch (item_type) {
+	case PlayheadCursorItem:
+		assert (_drag == 0);
+		_drag = new CursorDrag (this, item, true);
+		_drag->start_grab (event);
+		return true;
+		
+	case MarkerItem:
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+			hide_marker (item, event);
+		} else {
+			assert (_drag == 0);
+			_drag = new MarkerDrag (this, item);
+			_drag->start_grab (event);
+		}
+		return true;
+		
+	case TempoMarkerItem:
+		assert (_drag == 0);
+		_drag = new TempoMarkerDrag (
+			this,
+			item,
+			Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
+			);
+		_drag->start_grab (event);
+		return true;
+		
+	case MeterMarkerItem:
+		assert (_drag == 0);
+		_drag = new MeterMarkerDrag (
+			this,
+			item, 
+			Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
+			);
+		_drag->start_grab (event);
+		return true;
+		
+	case MarkerBarItem:
+	case TempoBarItem:
+	case MeterBarItem:
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			assert (_drag == 0);
+			_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
+			_drag->start_grab (event);
+		}
+		return true;
+		break;
+
+				
+	case RangeMarkerBarItem:
+		assert (_drag == 0);
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
+		} else {
+			_drag = new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker); 
+		}	
+		_drag->start_grab (event);
+		return true;
+		break;
+		
+	case CdMarkerBarItem:
+		assert (_drag == 0);
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
+		} else {
+			_drag = new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCDMarker);
+		}
+		_drag->start_grab (event);
+		return true;
+		break;
+		
+	case TransportMarkerBarItem:
+		assert (_drag == 0);
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
+		} else {
+			_drag = new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker);
+		}
+		_drag->start_grab (event);
+		return true;
+		break;
+		
+	default:
+		break;
+	}
+	
+	if (internal_editing()) {
+		assert (_drag == 0);
+		_drag = new RegionCreateDrag (this, item, clicked_axisview);
+		_drag->start_grab (event);
+	} else {
+		switch (mouse_mode) {
+		case MouseRange:
+			switch (item_type) {
+			case StartSelectionTrimItem:
+				assert (_drag == 0);
+				_drag = new SelectionDrag (this, item, SelectionDrag::SelectionStartTrim);
+				_drag->start_grab (event);
+				break;
+				
+			case EndSelectionTrimItem:
+				assert (_drag == 0);
+				_drag = new SelectionDrag (this, item, SelectionDrag::SelectionEndTrim);
+				_drag->start_grab (event);
+				break;
+				
+			case SelectionItem:
+				if (Keyboard::modifier_state_contains 
+				    (event->button.state, Keyboard::ModifierMask(Keyboard::SecondaryModifier))) {
+					// contains and not equals because I can't use alt as a modifier alone.
+					start_selection_grab (item, event);
+				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+					/* grab selection for moving */
+					assert (_drag == 0);
+					_drag = new SelectionDrag (this, item, SelectionDrag::SelectionMove);
+					_drag->start_grab (event);
+				} else {
+					/* this was debated, but decided the more common action was to
+					   make a new selection */
+					assert (_drag == 0);
+					_drag = new SelectionDrag (this, item, SelectionDrag::CreateSelection);
+					_drag->start_grab (event);
+				}
+				break;
+				
+			default:
+				assert (_drag == 0);
+				_drag = new SelectionDrag (this, item, SelectionDrag::CreateSelection);
+				_drag->start_grab (event);
+			}
+			return true;
+			break;
+			
+		case MouseObject:
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) &&
+			    event->type == GDK_BUTTON_PRESS) {
+				
+				assert (_drag == 0);
+				_drag = new RubberbandSelectDrag (this, item);
+				_drag->start_grab (event);
+				
+			} else if (event->type == GDK_BUTTON_PRESS) {
+				
+				switch (item_type) {
+				case FadeInHandleItem:
+				{
+					assert (_drag == 0);
+					RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+					_drag = new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s);
+					_drag->start_grab (event);
+					return true;
+				}
+				
+				case FadeOutHandleItem:
+				{
+					assert (_drag == 0);
+					RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+					_drag = new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s);
+					_drag->start_grab (event);
+					return true;
+				}
+				
+				case RegionItem:
+					if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
+						start_region_copy_grab (item, event, clicked_regionview);
+					} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
+						start_region_brush_grab (item, event, clicked_regionview);
+					} else {
+						start_region_grab (item, event, clicked_regionview);
+					}
+					break;
+					
+				case RegionViewNameHighlight:
+				{
+					assert (_drag == 0);
+					RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+					_drag = new TrimDrag (this, item, clicked_regionview, s.by_layer());
+					_drag->start_grab (event);
+					return true;
+					break;
+				}
+				
+				case RegionViewName:
+				{
+					/* rename happens on edit clicks */
+					assert (_drag == 0);
+					RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+					_drag = new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, s.by_layer());
+					_drag->start_grab (event);
+					return true;
+					break;
+				}
+				
+				case ControlPointItem:
+					assert (_drag == 0);
+					_drag = new ControlPointDrag (this, item);
+					_drag->start_grab (event);
+					return true;
+					break;
+					
+				case AutomationLineItem:
+					assert (_drag == 0);
+					_drag = new LineDrag (this, item);
+					_drag->start_grab (event);
+					return true;
+					break;
+
+				case StreamItem:
+				case AutomationTrackItem:
+					assert (_drag == 0);
+					_drag = new RubberbandSelectDrag (this, item);
+					_drag->start_grab (event);
+					break;
+					
+#ifdef WITH_CMT
+				case ImageFrameHandleStartItem:
+					imageframe_start_handle_op(item, event) ;
+					return(true) ;
+					break ;
+				case ImageFrameHandleEndItem:
+					imageframe_end_handle_op(item, event) ;
+					return(true) ;
+					break ;
+				case MarkerViewHandleStartItem:
+					markerview_item_start_handle_op(item, event) ;
+					return(true) ;
+					break ;
+				case MarkerViewHandleEndItem:
+					markerview_item_end_handle_op(item, event) ;
+					return(true) ;
+					break ;
+				case MarkerViewItem:
+					start_markerview_grab(item, event) ;
+					break ;
+				case ImageFrameItem:
+					start_imageframe_grab(item, event) ;
+					break ;
+#endif
+					
+				case MarkerBarItem:
+					
+					break;
+					
+				default:
+					break;
+				}
+			}
+			return true;
+			break;
+			
+		case MouseGain:
+			switch (item_type) {
+			case RegionItem:
+				/* start a grab so that if we finish after moving
+				   we can tell what happened.
+				*/
+				assert (_drag == 0);
+				_drag = new RegionGainDrag (this, item);
+				_drag->start_grab (event, current_canvas_cursor);
+				break;
+				
+			case GainLineItem:
+				assert (_drag == 0);
+				_drag = new LineDrag (this, item);
+				_drag->start_grab (event);
+				return true;
+				
+			case ControlPointItem:
+				assert (_drag == 0);
+				_drag = new ControlPointDrag (this, item);
+				_drag->start_grab (event);
+				return true;
+				break;
+				
+			default:
+				break;
+			}
+			return true;
+			break;
+			
+			switch (item_type) {
+			case ControlPointItem:
+				assert (_drag == 0);
+				_drag = new ControlPointDrag (this, item);
+				_drag->start_grab (event);
+				break;
+				
+			case AutomationLineItem:
+				assert (_drag == 0);
+				_drag = new LineDrag (this, item);
+				_drag->start_grab (event);
+				break;
+				
+			case RegionItem:
+				// XXX need automation mode to identify which
+				// line to use
+				// start_line_grab_from_regionview (item, event);
+				break;
+				
+			default:
+				break;
+			}
+			return true;
+			break;
+			
+		case MouseZoom:
+			if (event->type == GDK_BUTTON_PRESS) {
+				assert (_drag == 0);
+				_drag = new MouseZoomDrag (this, item);
+				_drag->start_grab (event);
+			}
+			
+			return true;
+			break;
+			
+		case MouseTimeFX:
+			if (item_type == RegionItem) {
+				assert (_drag == 0);
+				_drag = new TimeFXDrag (this, item, clicked_regionview, selection->regions.by_layer());
+				_drag->start_grab (event);
+			}
+			break;
+			
+		case MouseAudition:
+			_drag = new ScrubDrag (this, item);
+			_drag->start_grab (event);
+			scrub_reversals = 0;
+			scrub_reverse_distance = 0;
+			last_scrub_x = event->button.x;
+			scrubbing_direction = 0;
+			track_canvas->get_window()->set_cursor (*transparent_cursor);
+			break;
+			
+		default:
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool
+Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
+{
+	switch (mouse_mode) {
+	case MouseObject:
+		switch (item_type) {
+		case RegionItem:
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
+				start_region_copy_grab (item, event, clicked_regionview);
+			} else {
+				start_region_grab (item, event, clicked_regionview);
+			}
+			return true;
+			break;
+		case ControlPointItem:
+			assert (_drag == 0);
+			_drag = new ControlPointDrag (this, item);
+			_drag->start_grab (event);
+			return true;
+			break;
+			
+		default:
+			break;
+		}
+			
+		switch (item_type) {
+		case RegionViewNameHighlight:
+			assert (_drag == 0);
+			_drag = new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer());
+			_drag->start_grab (event);
+			return true;
+			break;
+			
+		case RegionViewName:
+			assert (_drag == 0);
+			_drag = new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, selection->regions.by_layer());
+			_drag->start_grab (event);
+			return true;
+			break;
+			
+		default:
+			break;
+		}
+		
+		break;
+
+	case MouseRange:
+		/* relax till release */
+		return true;
+		break;
+		
+		
+	case MouseZoom:
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			temporal_zoom_session();
+		} else {
+			temporal_zoom_to_frame (true, event_frame(event));
+		}
+		return true;
+		break;
+		
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	if (event->type != GDK_BUTTON_PRESS) {
+		return false;
+	}
+	
 	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas->get_window();
 
 	if (canvas_window) {
@@ -539,430 +965,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	switch (event->button.button) {
 	case 1:
-
-		if (event->type == GDK_BUTTON_PRESS) {
-
-			if (_drag) {
-				_drag->item()->ungrab (event->button.time);
-			}
-
-			/* single mouse clicks on any of these item types operate
-			   independent of mouse mode, mostly because they are
-			   not on the main track canvas or because we want
-			   them to be modeless.
-			*/
-
-			switch (item_type) {
-			case PlayheadCursorItem:
-				assert (_drag == 0);
-				_drag = new CursorDrag (this, item, true);
-				_drag->start_grab (event);
-				return true;
-
-			case MarkerItem:
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-					hide_marker (item, event);
-				} else {
-					assert (_drag == 0);
-					_drag = new MarkerDrag (this, item);
-					_drag->start_grab (event);
-				}
-				return true;
-
-			case TempoMarkerItem:
-				assert (_drag == 0);
-				_drag = new TempoMarkerDrag (
-					this,
-					item,
-					Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
-					);
-				_drag->start_grab (event);
-				return true;
-
-			case MeterMarkerItem:
-				assert (_drag == 0);
-
-				_drag = new MeterMarkerDrag (
-					this,
-					item, 
-					Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
-					);
-				
-				_drag->start_grab (event);
-				return true;
-
-			case MarkerBarItem:
-			case TempoBarItem:
-			case MeterBarItem:
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-					assert (_drag == 0);
-					_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
-					_drag->start_grab (event);
-				}
-				return true;
-				break;
-
-				
-			case RangeMarkerBarItem:
-				assert (_drag == 0);
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-					_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
-				} else {
-					_drag = new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker); 
-				}	
-				_drag->start_grab (event);
-				return true;
-				break;
-
-			case CdMarkerBarItem:
-				assert (_drag == 0);
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-					_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
-				} else {
-					_drag = new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCDMarker);
-				}
-				_drag->start_grab (event);
-				return true;
-				break;
-
-			case TransportMarkerBarItem:
-				assert (_drag == 0);
-				if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-					_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
-				} else {
-					_drag = new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker);
-				}
-				_drag->start_grab (event);
-				return true;
-				break;
-				
-			default:
-				break;
-			}
-		}
-
-		if (internal_editing()) {
-			assert (_drag == 0);
-			_drag = new RegionCreateDrag (this, item, clicked_axisview);
-			_drag->start_grab (event);
-			cerr << "--- DRAG START FOR RCD\n";
-		} else {
-			switch (mouse_mode) {
-			case MouseRange:
-				switch (item_type) {
-				case StartSelectionTrimItem:
-					assert (_drag == 0);
-					_drag = new SelectionDrag (this, item, SelectionDrag::SelectionStartTrim);
-					_drag->start_grab (event);
-					break;
-				
-				case EndSelectionTrimItem:
-					assert (_drag == 0);
-					_drag = new SelectionDrag (this, item, SelectionDrag::SelectionEndTrim);
-					_drag->start_grab (event);
-					break;
-
-				case SelectionItem:
-					if (Keyboard::modifier_state_contains 
-					    (event->button.state, Keyboard::ModifierMask(Keyboard::SecondaryModifier))) {
-						// contains and not equals because I can't use alt as a modifier alone.
-						start_selection_grab (item, event);
-					} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-						/* grab selection for moving */
-						assert (_drag == 0);
-						_drag = new SelectionDrag (this, item, SelectionDrag::SelectionMove);
-						_drag->start_grab (event);
-					} else {
-						/* this was debated, but decided the more common action was to
-						   make a new selection */
-						assert (_drag == 0);
-						_drag = new SelectionDrag (this, item, SelectionDrag::CreateSelection);
-						_drag->start_grab (event);
-					}
-					break;
-
-				default:
-					assert (_drag == 0);
-					_drag = new SelectionDrag (this, item, SelectionDrag::CreateSelection);
-					_drag->start_grab (event);
-				}
-				return true;
-				break;
-			
-			case MouseObject:
-				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) &&
-				    event->type == GDK_BUTTON_PRESS) {
-
-					assert (_drag == 0);
-					_drag = new RubberbandSelectDrag (this, item);
-					_drag->start_grab (event);
-
-				} else if (event->type == GDK_BUTTON_PRESS) {
-
-					switch (item_type) {
-					case FadeInHandleItem:
-					{
-						assert (_drag == 0);
-						RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
-						_drag = new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s);
-						_drag->start_grab (event);
-						return true;
-					}
-					
-					case FadeOutHandleItem:
-					{
-						assert (_drag == 0);
-						RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
-						_drag = new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s);
-						_drag->start_grab (event);
-						return true;
-					}
-
-					case RegionItem:
-						if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
-							start_region_copy_grab (item, event, clicked_regionview);
-						} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
-							start_region_brush_grab (item, event, clicked_regionview);
-						} else {
-							start_region_grab (item, event, clicked_regionview);
-						}
-						break;
-					
-					case RegionViewNameHighlight:
-					{
-						assert (_drag == 0);
-						RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
-						_drag = new TrimDrag (this, item, clicked_regionview, s.by_layer());
-						_drag->start_grab (event);
-						return true;
-						break;
-					}
-					
-					case RegionViewName:
-					{
-						/* rename happens on edit clicks */
-						assert (_drag == 0);
-						RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
-						_drag = new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, s.by_layer());
-						_drag->start_grab (event);
-						return true;
-						break;
-					}
-
-					case ControlPointItem:
-						assert (_drag == 0);
-						_drag = new ControlPointDrag (this, item);
-						_drag->start_grab (event);
-						return true;
-						break;
-					
-					case AutomationLineItem:
-						assert (_drag == 0);
-						_drag = new LineDrag (this, item);
-						_drag->start_grab (event);
-						return true;
-						break;
-
-					case StreamItem:
-					case AutomationTrackItem:
-						assert (_drag == 0);
-						_drag = new RubberbandSelectDrag (this, item);
-						_drag->start_grab (event);
-						break;
-					
-#ifdef WITH_CMT
-					case ImageFrameHandleStartItem:
-						imageframe_start_handle_op(item, event) ;
-						return(true) ;
-						break ;
-					case ImageFrameHandleEndItem:
-						imageframe_end_handle_op(item, event) ;
-						return(true) ;
-						break ;
-					case MarkerViewHandleStartItem:
-						markerview_item_start_handle_op(item, event) ;
-						return(true) ;
-						break ;
-					case MarkerViewHandleEndItem:
-						markerview_item_end_handle_op(item, event) ;
-						return(true) ;
-						break ;
-					case MarkerViewItem:
-						start_markerview_grab(item, event) ;
-						break ;
-					case ImageFrameItem:
-						start_imageframe_grab(item, event) ;
-						break ;
-#endif
-
-					case MarkerBarItem:
-					
-						break;
-
-					default:
-						break;
-					}
-				}
-				return true;
-				break;
-			
-			case MouseGain:
-				switch (item_type) {
-				case RegionItem:
-					/* start a grab so that if we finish after moving
-					   we can tell what happened.
-					*/
-					assert (_drag == 0);
-					_drag = new RegionGainDrag (this, item);
-					_drag->start_grab (event, current_canvas_cursor);
-					break;
-
-				case GainLineItem:
-					assert (_drag == 0);
-					_drag = new LineDrag (this, item);
-					_drag->start_grab (event);
-					return true;
-
-				case ControlPointItem:
-					assert (_drag == 0);
-					_drag = new ControlPointDrag (this, item);
-					_drag->start_grab (event);
-					return true;
-					break;
-
-				default:
-					break;
-				}
-				return true;
-				break;
-
-				switch (item_type) {
-				case ControlPointItem:
-					assert (_drag == 0);
-					_drag = new ControlPointDrag (this, item);
-					_drag->start_grab (event);
-					break;
-
-				case AutomationLineItem:
-					assert (_drag == 0);
-					_drag = new LineDrag (this, item);
-					_drag->start_grab (event);
-					break;
-
-				case RegionItem:
-					// XXX need automation mode to identify which
-					// line to use
-					// start_line_grab_from_regionview (item, event);
-					break;
-
-				default:
-					break;
-				}
-				return true;
-				break;
-
-			case MouseZoom:
-				if (event->type == GDK_BUTTON_PRESS) {
-					assert (_drag == 0);
-					_drag = new MouseZoomDrag (this, item);
-					_drag->start_grab (event);
-				}
-
-				return true;
-				break;
-
-			case MouseTimeFX:
-				if (item_type == RegionItem) {
-					assert (_drag == 0);
-					_drag = new TimeFXDrag (this, item, clicked_regionview, selection->regions.by_layer());
-					_drag->start_grab (event);
-				}
-				break;
-
-			case MouseAudition:
-				_drag = new ScrubDrag (this, item);
-				_drag->start_grab (event);
-				scrub_reversals = 0;
-				scrub_reverse_distance = 0;
-				last_scrub_x = event->button.x;
-				scrubbing_direction = 0;
-				track_canvas->get_window()->set_cursor (*transparent_cursor);
-				break;
-
-			default:
-				break;
-			}
-		}
+		return button_press_handler_1 (item, event, item_type);
 		break;
 
 	case 2:
-		switch (mouse_mode) {
-		case MouseObject:
-			if (event->type == GDK_BUTTON_PRESS) {
-				switch (item_type) {
-				case RegionItem:
-					if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
-						start_region_copy_grab (item, event, clicked_regionview);
-					} else {
-						start_region_grab (item, event, clicked_regionview);
-					}
-					return true;
-					break;
-				case ControlPointItem:
-					assert (_drag == 0);
-					_drag = new ControlPointDrag (this, item);
-					_drag->start_grab (event);
-					return true;
-					break;
-					
-				default:
-					break;
-				}
-			}
-			
-			
-			switch (item_type) {
-			case RegionViewNameHighlight:
-				assert (_drag == 0);
-				_drag = new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer());
-				_drag->start_grab (event);
-				return true;
-				break;
-				
-			case RegionViewName:
-				assert (_drag == 0);
-				_drag = new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, selection->regions.by_layer());
-				_drag->start_grab (event);
-				return true;
-				break;
-				
-			default:
-				break;
-			}
-			
-			break;
-
-		case MouseRange:
-			if (event->type == GDK_BUTTON_PRESS) {
-				/* relax till release */
-			}
-			return true;
-			break;
-					
-				
-		case MouseZoom:
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-				temporal_zoom_session();
-			} else {
-				temporal_zoom_to_frame (true, event_frame(event));
-			}
-			return true;
-			break;
-
-		default:
-			break;
-		}
-
+		return button_press_handler_2 (item, event, item_type);
 		break;
 
 	case 3:
