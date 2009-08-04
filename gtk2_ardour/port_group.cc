@@ -297,7 +297,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 
 	/* Ardour stuff */
 
-	if (!inputs) {
+	if (!inputs && _type == DataType::AUDIO) {
 		ardour->add_bundle (session.the_auditioner()->output()->bundle());
 		ardour->add_bundle (session.click_io()->bundle());
 	}
