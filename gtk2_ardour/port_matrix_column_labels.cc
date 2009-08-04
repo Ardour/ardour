@@ -50,7 +50,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 	/* width of the whole thing */
 	_width = 0;
 	_highest_group_name = 0;
-	
+
 	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
 		PortGroup::BundleList const c = _matrix->columns()->bundles();
 		for (PortGroup::BundleList::const_iterator j = c.begin (); j != c.end(); ++j) {
@@ -64,7 +64,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 			if (ext.height > _highest_text) {
 				_highest_text = ext.height;
 			}
-			
+
 			for (uint32_t k = 0; k < j->bundle->nchannels (); ++k) {
 
 				cairo_text_extents (
@@ -72,13 +72,14 @@ PortMatrixColumnLabels::compute_dimensions ()
 					j->bundle->channel_name (k).c_str(),
 					&ext
 					);
-			}
-			
-			if (ext.width > _longest_channel_name) {
-				_longest_channel_name = ext.width;
-			}
-			if (ext.height > _highest_text) {
-				_highest_text = ext.height;
+
+				if (ext.width > _longest_channel_name) {
+					_longest_channel_name = ext.width;
+				}
+				
+				if (ext.height > _highest_text) {
+					_highest_text = ext.height;
+				}
 			}
 		}
 
