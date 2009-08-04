@@ -33,35 +33,41 @@ static const char *valid_prefix[NUM_VALID_PREFIXES] = {
 
 #define NUM_EVENT_DEVICES 16
 
-int open_powermate(const char *dev, int mode)
+int open_powermate (const char *dev, int mode)
 {
 	if (!Glib::file_test (dev, Glib::FILE_TEST_EXISTS)) {
 		return -1;
 	}
+	
 	int fd = open(dev, mode);
 	int i;
 	char name[255];
 	
-	if(fd < 0){
+	if (fd < 0) {
 		if (errno != EACCES) {
 			error << string_compose ("Unable to open \"%1\": %2", dev, strerror(errno)) << endmsg;
 		}
 		return -1;
 	}
 
-  if(ioctl(fd, EVIOCGNAME(sizeof(name)), name) < 0){
-    error << string_compose ("\"%1\": EVIOCGNAME failed: %2", dev, strerror(errno)) << endmsg;
-    close(fd);
-    return -1;
-  }
+	/* placate valgrind */
+	name[0] = '\0';
 
-  // it's the correct device if the prefix matches what we expect it to be:
-  for(i=0; i<NUM_VALID_PREFIXES; i++)
-    if(!strncasecmp(name, valid_prefix[i], strlen(valid_prefix[i])))
-      return fd;
+	if (ioctl (fd, EVIOCGNAME (sizeof(name)), name) < 0) {
+		error << string_compose ("\"%1\": EVIOCGNAME failed: %2", dev, strerror(errno)) << endmsg;
+		close (fd);
+		return -1;
+	}
 
-  close(fd);
-  return -1;
+	// it's the correct device if the prefix matches what we expect it to be:
+	for (i = 0; i < NUM_VALID_PREFIXES; ++i) {
+		if (!strncasecmp (name, valid_prefix[i], strlen (valid_prefix[i]))) {
+			return fd;
+		}
+	}
+	
+	close (fd);
+	return -1;
 }
 
 int find_powermate(int mode)
@@ -96,7 +102,6 @@ PowermateControlProtocol::probe ()
 
 	if (port < 0) {
  		printf ("powermate: Opening of powermate failed - %s\n", strerror(errno));
-		close (port);
 		return false;
 	}
 
