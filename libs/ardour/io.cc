@@ -2721,11 +2721,25 @@ IO::build_legal_port_name (bool in)
 	char* suffix;
 	int maxports;
 
+	/* note that if "in" or "out" are translated it will break a session
+	   across locale switches because a port's connection list will
+	   show (old) translated names, but the current port name will
+	   use the (new) translated name.
+	*/
+
 	if (in) {
-		suffix = _("in");
+		if (getenv ("ARDOUR_RETAIN_PORT_NAME_SUFFIX_TRANSLATION") != 0) {
+			suffix = _("in");
+		} else {
+			suffix = X_("in");
+		}
 		maxports = _input_maximum;
 	} else {
-		suffix = _("out");
+		if (getenv ("ARDOUR_RETAIN_PORT_NAME_SUFFIX_TRANSLATION") != 0) {
+			suffix = _("out");
+		} else {
+			suffix = X_("out");
+		}
 		maxports = _output_maximum;
 	}
 	
