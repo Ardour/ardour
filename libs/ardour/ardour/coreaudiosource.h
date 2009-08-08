@@ -22,17 +22,20 @@
 
 #include <appleutility/CAAudioFile.h>
 #include "ardour/audiofilesource.h"
+#include <string>
+
+using namespace std;
 
 namespace ARDOUR {
 
 class CoreAudioSource : public AudioFileSource {
   public:
 	CoreAudioSource (ARDOUR::Session&, const XMLNode&);
-	CoreAudioSource (ARDOUR::Session&, const string& path, int chn, Flag);
+	CoreAudioSource (ARDOUR::Session&, const string& path, bool, int chn, Flag);
 	~CoreAudioSource ();
 
 	float sample_rate() const;
-	int update_header (nframes_t when, struct tm&, time_t);
+	int update_header (sframes_t when, struct tm&, time_t);
 
 	int flush_header () {return 0;};
 	void set_header_timeline_position () {};
@@ -40,7 +43,7 @@ class CoreAudioSource : public AudioFileSource {
 	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
 
   protected:
-	nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const;
+	nframes_t read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const;
 	nframes_t write_unlocked (Sample *dst, nframes_t cnt) { return 0; }
 
   private:

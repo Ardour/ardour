@@ -369,7 +369,7 @@ BarController::expose (GdkEventExpose* /*event*/)
 }
 
 void
-BarController::set_style (Style s)
+BarController::set_style (barStyle s)
 {
 	_style = s;
 	darea.queue_draw ();

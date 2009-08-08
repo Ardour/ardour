@@ -24,8 +24,6 @@
 #include <cmath>
 #include <cassert>
 
-#include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
-
 #include "ardour/diskstream.h"
 
 #include "editor.h"
@@ -43,6 +41,8 @@
 #include "pbd/unknown_type.h"
 
 #include "ardour/route.h"
+
+#include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
 
 #include "i18n.h"
 

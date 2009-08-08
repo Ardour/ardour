@@ -22,6 +22,7 @@
 
 #include <libgnomecanvasmm/polygon.h>
 #include "canvas-note-event.h"
+#include "canvas.h"
 
 namespace Gnome {
 namespace Canvas {

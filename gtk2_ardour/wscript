@@ -2,6 +2,10 @@
 import autowaf
 import os
 import glob
+import Options
+import sys
+import TaskGen
+import re
 from w18n import build_i18n
 
 # Version of this package (even if built as a child)
@@ -193,8 +197,6 @@ gtk2_ardour_sources = [
 
 def set_options(opt):
 	autowaf.set_options(opt)
-	opt.add_option('--potupdate', action='store_true', dest='potupdate',
-		       help='Rebuild pot file for translators')
 
 def configure(conf):
 	autowaf.build_version_files(path_prefix+'version.h', path_prefix+'version.cc',
@@ -202,7 +204,13 @@ def configure(conf):
 	autowaf.configure(conf)
 	conf.check_tool('compiler_cxx')
 
-	autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+	if re.search ("linux", sys.platform) != None:
+		autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+		#
+		#	TODO: Insert a sanity check for on OS X
+		#	to ensure that CoreAudio is present....
+		#	Really shouldn't these checks be in AutoWaf?
+		#
 	autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
 	autowaf.check_pkg(conf, 'gthread', uselib_store='GTHREAD', atleast_version='2.10.1')
 	autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
@@ -214,10 +222,7 @@ def configure(conf):
 	conf.check_tool('misc') # subst tool
 
 	conf.write_config_header('gtk2ardour-config.h')
-
-	# TODO
-	conf.define('WINDOWS_KEY', 'Mod4')
-
+	
 	# Boost headers
 	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
 	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
@@ -231,7 +236,7 @@ def build(bld):
 	obj.target       = 'ardour-3.0'
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA'
-	obj.uselib       += ' GTKMM GNOMECANVASMM'
+	obj.uselib       += ' GTKMM GNOMECANVASMM OSX GTKOSX COREAUDIO'
 	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp
 	                      libgtkmm2ext libtaglib'''
 	obj.cflags       = ['-DPACKAGE="gtk2_ardour"']
@@ -242,6 +247,7 @@ def build(bld):
 	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIRNAME']) + '"']
 	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
 			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
+
 	if bld.env['HAVE_SLV2']:
 		obj.source += [ 'lv2_plugin_ui.cc' ]
 		obj.uselib += ' SLV2 '
@@ -254,14 +260,11 @@ def build(bld):
 		obj.cxxflags += [ '-DVST_SUPPORT' ]
 
 	if bld.env['GTKOSX']:
-		obj.features += ' objc '
+		TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
 		obj.source += [ 'cocoacarbon.mm' ]
-		obj.cxxflags += [ '-DTOP_MENUBAR', '-DGTKOSX' ]
-		obj.linkflags += [ '-framework', 'AppKit', '-framework', 'CoreAudioKit' ]
 
 		if bld.env['AUDIOUNITS']:
 			obj.source += [ 'au_pluginui.mm' ]
-			obj.cxxflags += [ '-DHAVE_AUDIOUNITS' ]
 			obj.uselib_local += ' libappleutility '
 
 	else:
@@ -380,26 +383,15 @@ def build(bld):
 	bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'), 'ardour.menus')
 
 	# Keybindings
-	keybindings_dict = {}
-	if bld.env['GTKOSX']:
-		keybindings_dict['PRIMARY']   = 'Meta'
-		keybindings_dict['SECONDARY'] = 'Mod1'
-		keybindings_dict['TERTIARY']  = 'Shift'
-		keybindings_dict['LEVEL4']    = 'Ctrl'
-		keybindings_dict['WINDOW']    = 'Mod1'
-	else:
-		keybindings_dict['PRIMARY']   = 'Ctrl'
-		keybindings_dict['SECONDARY'] = 'Alt'
-		keybindings_dict['TERTIARY']  = 'Shift'
-		keybindings_dict['LEVEL4']    = bld.env['WINDOWS_KEY']
-		keybindings_dict['WINDOW']    = 'Alt'
 
-	for b in [ 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad',
-	           'mnemonic-us', 'ergonomic-us' ]:
-		obj = bld.new_task_gen('subst')
-		obj.target       = b + '.bindings'
-		obj.source       = obj.target + '.in'
-		obj.dict         = keybindings_dict
+        # 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad', 'ergonomic-us'
+
+	for b in [ 'mnemonic-us' ] :
+		obj = bld.new_task_gen (
+			target = b + '.bindings',
+			source = b + '.bindings.in',
+			rule = '../tools/fmt-bindings --winkey=%s --accelmap <${SRC} >${TGT}' % bld.env['windows_key']
+			)
 		obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
 	# Icons/Images

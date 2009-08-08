@@ -26,9 +26,9 @@
 
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioplaylist.h"
-#include "ardour/midi_region.h"
 #include "ardour/audioregion.h"
 #include "ardour/region_factory.h"
+#include "ardour/midi_region.h"
 
 #include "editor.h"
 #include "keyboard.h"

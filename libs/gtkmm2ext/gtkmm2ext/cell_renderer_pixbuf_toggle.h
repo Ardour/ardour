@@ -17,6 +17,13 @@
 
 */
 
+#ifdef GTKOSX
+#include <MacTypes.h>
+#if defined(Style)
+#undef style
+#endif
+#endif
+
 #ifndef __gtkmm2ext_cell_renderer_pixbuf_toggle_h__ 
 #define __gtkmm2ext_cell_renderer_pixbuf_toggle_h__
 
@@ -37,7 +44,7 @@ class CellRendererPixbufToggle : public Gtk::CellRenderer
 	CellRendererPixbufToggle();  
 	virtual ~CellRendererPixbufToggle(){};
 
-	virtual void render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, Gtk::CellRendererState flags);  
+	virtual void render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, Gtk::CellRendererState flags);
 
 	virtual void get_size_vfunc (Gtk::Widget& widget, const Gdk::Rectangle* cell_area, int* x_offset, int* y_offset, int* width, int* height) const;
 

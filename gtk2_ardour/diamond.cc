@@ -32,10 +32,10 @@ void
 Diamond::set_height(double height)
 {
 	Points points;
-	points.push_back(Point(0, height*2.0));
-	points.push_back(Point(height, height));
-	points.push_back(Point(0, 0));
-	points.push_back(Point(-height, height));
+	points.push_back(Art::Point(0, height*2.0));
+	points.push_back(Art::Point(height, height));
+	points.push_back(Art::Point(0, 0));
+	points.push_back(Art::Point(-height, height));
 	property_points() = points;	
 }
 

@@ -25,6 +25,7 @@
 #include <string>
 #include <glib.h>
 #include <gdk/gdktypes.h>
+#include <gtkmm/box.h>
 #include <gtkmm/window.h>
 #include <gtkmm/actiongroup.h>
 #include <jack/types.h>
@@ -327,6 +328,14 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	static const int vertical_spacing;
 	static const int horizontal_spacing;
 
+#ifdef TOP_MENUBAR
+	/*
+	 * This is needed for OS X primarily
+	 * but also any other OS that uses a single
+	 * top menubar instead of per window menus
+	 */
+	virtual Gtk::HBox& get_status_bar_packer() = 0;
+#endif
 
 	virtual gdouble get_trackview_group_vertical_offset () const = 0;
 	virtual gdouble get_canvas_timebars_vsize () const = 0;

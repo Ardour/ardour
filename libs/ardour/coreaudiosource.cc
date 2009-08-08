@@ -38,14 +38,16 @@ using namespace ARDOUR;
 using namespace PBD;
 
 CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
-	: AudioFileSource (s, node)
+	: 	Source (s, node),
+	AudioFileSource (s, node)
 {
 	init ();
 }
 
-CoreAudioSource::CoreAudioSource (Session& s, const string& path, int chn, Flag flags)
+CoreAudioSource::CoreAudioSource (Session& s, const string& path, bool, int chn, Flag flags)
 	/* files created this way are never writable or removable */
-	: AudioFileSource (s, path,
+	: Source (s, DataType::AUDIO, path, Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy))),
+		AudioFileSource (s, path,
 			Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	_channel = chn;
@@ -138,7 +140,7 @@ CoreAudioSource::safe_read (Sample* dst, nframes_t start, nframes_t cnt, AudioBu
 	
 
 nframes_t
-CoreAudioSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
+CoreAudioSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
 {
 	nframes_t file_cnt;
 	AudioBufferList abl;
@@ -217,7 +219,7 @@ CoreAudioSource::sample_rate() const
 }
 
 int
-CoreAudioSource::update_header (nframes_t when, struct tm&, time_t)
+CoreAudioSource::update_header (sframes_t when, struct tm&, time_t)
 {
 	return 0;
 }

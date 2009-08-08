@@ -420,7 +420,12 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	if (rm.locked()) {
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			bufs.set_count (ChanCount::max(bufs.count(), (*i)->input_streams()));
+			if (bufs.count() != (*i)->input_streams()) {
+				cerr << _name << " bufs = " << bufs.count()
+				     << " input = " << (*i)->input_streams()
+				     << endl;
+			}
+			assert (bufs.count() == (*i)->input_streams());
 			(*i)->run (bufs, start_frame, end_frame, nframes);
 			bufs.set_count (ChanCount::max(bufs.count(), (*i)->output_streams()));
 		}
@@ -1333,6 +1338,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	// We can, so configure everything
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
+		cerr << _name << " Configure " << (*p)->name() << " for " << in << "  + " << out << endl;
 		(*p)->configure_io(c->first, c->second);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);

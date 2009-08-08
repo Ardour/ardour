@@ -6,6 +6,7 @@ import commands
 import re
 import string
 import subprocess
+import sys
 
 # Variables for 'waf dist'
 VERSION = '3.0pre0'
@@ -200,7 +201,7 @@ def set_compiler_flags (conf,opt):
 		if conf.env['build_target'] == 'tiger' or conf.env['build_target'] == 'leopard':
 			optimization_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
 			debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
-			libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
+			conf.env.append_value('LINKFLAGS', "-framework Accelerate")
 		elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
 			optimization_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
 			debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
@@ -209,6 +210,8 @@ def set_compiler_flags (conf,opt):
 			debug_flags.append ("-DUSE_X86_64_ASM")
 		if build_host_supports_sse != 1:
 			print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+		if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h') == False:
+			optimization_flags.append("-DNO_POSIX_MEMALIGN")
 
 	# end optimization section
 			
@@ -231,13 +234,7 @@ def set_compiler_flags (conf,opt):
 		conf.define ('IS_OSX', 1)
 		# force tiger or later, to avoid issues on PPC which defaults
 		# back to 10.1 if we don't tell it otherwise.
-		conf.env.append_value (CCFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
-
-		if conf.env['build_target'] == 'leopard':
-			# need this to force build against the 10.4 SDK when building on later versions of OS X
-			# ideally this would be configurable, but lets just do that later when we need it
-			conf.env.append_value(CCFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-			conf.env.append_value(LINKFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+		conf.env.append_value('CCFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
 
 	else:
 		conf.define ('IS_OSX', 0)
@@ -353,8 +350,10 @@ def set_options(opt):
 			help='Compile with support for VST')
 	opt.add_option('--wiimote', action='store_true', default=False, dest='wiimote',
 			help='Build the wiimote control surface')
-	opt.add_option('--windows-key', type='string', dest='windows_key',
-			help='Set X Modifier (Mod1,Mod2,Mod3,Mod4,Mod5) for "Windows" key [Default: Mod4]', default='Mod4><Super')
+	opt.add_option('--windows-key', type='string', action='store', dest='windows_key', default='Mod4><Super',
+		       help='X Modifier(s) (Mod1,Mod2, etc) for the Windows key (X11 builds only). ' +
+		       'Multiple modifiers must be separated by \'><\'')
+
 	for i in children:
 		opt.sub_options(i)
 
@@ -368,6 +367,8 @@ def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
+	if sys.platform == 'darwin':
+		sub_config_and_use(conf, 'libs/appleutility')
 	for i in children:
 		sub_config_and_use(conf, i)
 
@@ -398,6 +399,8 @@ def configure(conf):
 	autowaf.display_msg(conf, 'GtkOSX', opts.gtkosx)
 	if opts.gtkosx:
 		conf.define ('GTKOSX', 1)
+	if opts.coreaudio:
+		conf.define ('COREAUDIO', 1)
 	autowaf.display_msg(conf, 'LV2 Support', bool(conf.env['HAVE_SLV2']))
 	autowaf.display_msg(conf, 'Rubberband', bool(conf.env['HAVE_RUBBERBAND']))
 	autowaf.display_msg(conf, 'Samplerate', bool(conf.env['HAVE_SAMPLERATE']))
@@ -416,9 +419,9 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Wiimote Support', opts.wiimote)
 	if opts.wiimote:
 		conf.define('WIIMOTE',1)
-	autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
 	if opts.windows_key:
 		conf.define('WINDOWS_KEY', opts.windows_key)
+	autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
 
 	set_compiler_flags (conf, Options.options)
 
@@ -427,6 +430,8 @@ def configure(conf):
 
 def build(bld):
 	autowaf.set_recursive()
+	if sys.platform == 'darwin':
+		bld.add_subdirs('libs/appleutility')
 	for i in children:
 		bld.add_subdirs(i)
 

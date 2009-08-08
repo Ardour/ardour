@@ -172,7 +172,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	
 
 #ifdef TOP_MENUBAR
-	_auto_display_errors = false;
+	// _auto_display_errors = false;
+	/*
+	 * This was commented out as it wasn't defined
+	 * in A3 IIRC.  If this is not needed it should
+	 * be completely removed.
+	 */
 #endif
 
 	about = 0;
@@ -2201,6 +2206,41 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 	}
 
 	return 0;
+}
+
+void
+ARDOUR_UI::idle_load (const Glib::ustring& path)
+{
+	if (session) {
+		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+			/* /path/to/foo => /path/to/foo, foo */
+			load_session (path, basename_nosuffix (path));
+		} else {
+			/* /path/to/foo/foo.ardour => /path/to/foo, foo */
+			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+		}
+	} else {
+
+		ARDOUR_COMMAND_LINE::session_name = path;
+
+		/*
+		 * new_session_dialog doens't exist in A3
+		 * Try to remove all references to it to
+		 * see if it will compile.  NOTE: this will
+		 * likely cause a runtime issue is my somewhat
+		 * uneducated guess.
+		 */
+
+		//if (new_session_dialog) {
+
+
+			/* make it break out of Dialog::run() and
+			   start again.
+			 */
+
+			//new_session_dialog->response (1);
+		//}
+	}
 }
 
 void

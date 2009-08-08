@@ -25,6 +25,13 @@
 
 #include <gtkmm2ext/utils.h>
 
+#include "ardour_ui.h"
+/*
+ * ardour_ui.h was moved up in the include list
+ * due to a conflicting definition of 'Rect' between
+ * Apple's MacTypes.h file and GTK
+ */
+
 #include "public_editor.h"
 #include "time_axis_view_item.h"
 #include "time_axis_view.h"
@@ -32,7 +39,6 @@
 #include "utils.h"
 #include "canvas_impl.h"
 #include "rgb_macros.h"
-#include "ardour_ui.h"
 
 #include "i18n.h"
 

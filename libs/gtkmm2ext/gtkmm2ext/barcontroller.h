@@ -33,7 +33,7 @@ class BarController : public Gtk::Frame
 
 	virtual ~BarController () {}
 
-	enum Style {
+	enum barStyle {
 		LeftToRight,
 		RightToLeft,
 		Line,
@@ -43,8 +43,8 @@ class BarController : public Gtk::Frame
 		BottomToTop
 	};
 
-	Style style() const { return _style; }
-	void set_style (Style);
+	barStyle style() const { return _style; }
+	void set_style (barStyle);
 	void set_use_parent (bool yn);
 
 	void set_sensitive (bool yn);
@@ -64,7 +64,7 @@ class BarController : public Gtk::Frame
 	BindingProxy        binding_proxy;
 	Gtk::DrawingArea    darea;
 	Glib::RefPtr<Pango::Layout> layout;
-	Style              _style;
+	barStyle              _style;
 	bool                grabbed;
 	bool                switching;
 	bool                switch_on_release;

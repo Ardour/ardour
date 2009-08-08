@@ -80,7 +80,7 @@ PluginManager::PluginManager ()
 
 	load_favorites ();
 
-#ifdef GTKOSX
+#ifdef HAVE_AUDIOUNITS
 	ProcessSerialNumber psn = { 0, kCurrentProcess }; 
 	OSStatus returnCode = TransformProcessType(& psn, kProcessTransformToForegroundApplication);
 	if( returnCode != 0) {

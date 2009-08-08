@@ -130,6 +130,102 @@ def configure(conf):
 	conf.env['DEBUG'] = Options.options.debug
 	conf.env['STRICT'] = Options.options.strict
 	conf.env['PREFIX'] = os.path.abspath(os.path.expanduser(os.path.normpath(conf.env['PREFIX'])))
+	
+	if sys.platform == 'darwin':
+		#
+		#	Define OSX as a uselib to use when compiling
+		#	on Darwin to add all applicable flags at once
+		#
+		conf.env.append_value('CXXFLAGS_OSX', "-mmacosx-version-min=10.4")
+		conf.env.append_value('CCFLAGS_OSX', "-mmacosx-version-min=10.4")
+		conf.env.append_value('CXXFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+		conf.env.append_value('CCFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+		conf.env.append_value('LINKFLAGS_OSX', "-mmacosx-version-min=10.4")
+		conf.env.append_value('LINKFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+		
+		conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
+		conf.env.append_value('LINKFLAGS_OSX', "-F/System/Library/Frameworks")
+
+		conf.env.append_value('CXXFLAGS_OSX', "-msse")
+		conf.env.append_value('CCFLAGS_OSX', "-msse")
+		conf.env.append_value('CXXFLAGS_OSX', "-msse2")
+		conf.env.append_value('CCFLAGS_OSX', "-msse2")
+		#
+		#	TODO: The previous sse flags NEED to be based
+		#	off processor type.  Need to add in a check
+		#	for that.
+		#
+		
+		conf.env.append_value('LINKFLAGS_OSX', ['-undefined', 'suppress'])
+		conf.env.append_value('LINKFLAGS_OSX', "-flat_namespace")
+		#
+		#	The previous 2 flags avoid circular dependencies
+		#	between libardour and libardour_cp on OS X.
+		#	ld reported -undefined suppress as an unknown option
+		#	in one of the tests ran, removing it for the moment
+		#
+		conf.env.append_value('CXXFLAGS_OSX', "-F/System/Library/Frameworks")
+		conf.env.append_value('CCFLAGS_OSX', "-F/System/Library/Frameworks")
+
+
+	if Options.options.gtkosx:
+		#
+		#	Define Include Paths for GTKOSX
+		#
+		conf.env.append_value('CPPPATH_GTKOSX', "/usr/include/")
+		conf.env.append_value('CPPPATH_GTKOSX', "/usr/include/c++/4.0.0")
+		conf.env.append_value('CPPPATH_GTKOSX', "/usr/include/c++/4.0.0/i686-apple-darwin8/")
+		#
+		#	TODO: Fix the above include path, it needs to be
+		#	defined based off what is read in the configuration
+		#	stage about the machine(PPC, X86, X86_64, etc.)
+		#
+		conf.env.append_value('CPPPATH_GTKOSX', "/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/")
+		#
+		#	TODO: Likewise this needs to be defined not only
+		#	based off the machine characteristics, but also
+		#	based off the version of GCC being used.
+		#
+		conf.env.append_value('CPPPATH_GTKOSX', "/System/Library/Frameworks/")
+		conf.env.append_value('CXXFLAGS_GTKOSX', '-DTOP_MENUBAR')
+		conf.env.append_value('CXXFLAGS_GTKOSX', '-DGTKOSX')
+		conf.env.append_value('LINKFLAGS_GTKOSX', "-framework AppKit")
+		conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker -headerpad")
+		conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker 2048")
+		conf.env.append_value('CPPPATH_GTKOSX', "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Headers/")
+		#
+		#	I had a note the previous was for MacTypes.h
+		#
+	
+	if Options.options.coreaudio:
+	   #conf.env.append_value('LINKFLAGS_COREAUDIO', "-framework CoreAudioKit")
+	   #conf.env.append_value('LINKFLAGS_COREAUDIO', "-framework AudioToolbox")
+	   #conf.env.append_value('LINKFLAGS_COREAUDIO', "-framework CoreServices")
+	   conf.check_cc (header_name = '/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h',
+					  define_name = 'HAVE_COREAUDIO', linkflags = ['-framework', 'CoreAudio'])
+	   conf.check_cxx (header_name = '/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h',
+					  linkflags = [ '-framework', 'AudioToolbox' ])
+	   conf.check_cc (header_name = '/System/Library/Frameworks/CoreFoundation.framework/Headers/CoreFoundation.h',
+					  linkflags = ['-framework', 'CoreFoundation'])
+	   conf.check_cc (header_name = '/System/Library/Frameworks/CoreServices.framework/Headers/CoreServices.h',
+					  linkflags = ['-framework', 'CoreServices'])
+	   #
+	   #	TODO: For some reason the above doesn't seem to be correctly adding the
+	   #	the link flags, so we will add them manually.
+	   #
+	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'CoreServices'])
+	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'CoreFoundation'])
+	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'AudioToolbox'])
+	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'CoreAudio'])
+
+	if Options.options.audiounits:
+	   #conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DHAVE_AUDIOUNITS")
+	   conf.env.append_value('LINKFLAGS_AUDIOUNITS', "-framework AudioToolbox")
+	   conf.env.append_value('LINKFLAGS_AUDIOUNITS', "-framework CoreServices")
+	   conf.check_cc (header_name = '/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h',
+					  define_name = 'HAVE_AUDIOUNITS', linkflags = [ '-framework', 'AudioUnit' ])
+	
+
 	if Options.options.bundle:
 		conf.env['BUNDLE'] = True
 		conf.define('BUNDLE', 1)

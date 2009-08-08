@@ -20,11 +20,17 @@
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
+#include "ardour_ui.h"
+/*
+ * ardour_ui.h include was moved to the top of the list
+ * due to a conflicting definition of 'Rect' between
+ * Apple's MacTypes.h and GTK.
+ */
+
 #include "marker.h"
 #include "public_editor.h"
 #include "utils.h"
 #include "canvas_impl.h"
-#include "ardour_ui.h"
 #include "simpleline.h"
 
 #include <gtkmm2ext/utils.h>

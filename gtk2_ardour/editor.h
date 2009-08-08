@@ -38,8 +38,8 @@
 
 #include <cmath>
 
-#include <gtkmm/layout.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/layout.h>
 
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/click_box.h>
@@ -48,7 +48,6 @@
 #include "pbd/stateful.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
-#include "ardour/stretch.h"
 #include "ardour/location.h"
 #include "ardour/audioregion.h"
 #include "ardour/track.h"

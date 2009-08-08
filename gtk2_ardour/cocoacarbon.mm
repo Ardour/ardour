@@ -21,6 +21,14 @@
 #undef YES   // stupid, stupid gtkmm and/or NSObjC
 #undef NO    // ditto
 
+#ifdef GTKOSX
+#include <objc/objc.h>
+#ifdef nil
+	/*Stupid OS X defining nil*/
+#undef nil
+#endif
+#endif
+
 #include "ardour_ui.h"
 #include "actions.h"
 #include "opts.h"

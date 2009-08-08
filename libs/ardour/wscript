@@ -210,19 +210,6 @@ def configure(conf):
 	conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
 	conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
 	
-	if conf.env['IS_OSX']:
-		conf.check_cc (header_name = '/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h',
-			       linkflags = [ '-framework', 'CoreMIDI' ])
-		
-		conf.check_cc (header_name = '/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h',
-			       linkflags = [ '-framework', 'AudioToolbox' ])
-		
-		conf.check_cc (header_name = '/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h',
-			      define_name = 'HAVE_COREAUDIO')
-		
-		conf.check_cc (header_name = '/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h',
-			       define_name = 'HAVE_AUDIOUNITS', linkflags = [ '-framework', 'AudioUnit' ])
-
 	conf.write_config_header('libardour-config.h')
 
 	# Boost headers
@@ -234,10 +221,10 @@ def build(bld):
 	obj              = bld.new_task_gen('cxx', 'shlib')
 	obj.source       = libardour_sources
 	obj.export_incdirs = ['.']
-	obj.includes     = ['.', '../surfaces/control_protocol']
+	obj.includes     = ['.', '../surfaces/control_protocol', '..']
 	obj.name         = 'libardour'
 	obj.target       = 'ardour'
-	obj.uselib       = 'GLIBMM AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF'
+	obj.uselib       = 'GLIBMM AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF OSX'
 	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
@@ -251,6 +238,14 @@ def build(bld):
 			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '
+	#obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
+	
+	obj.env.append_value('LINKFLAGS', 'default/libs/surfaces/control_protocol/smpte_1.o')
+	#
+	#	TODO: The above is an ugly hack that shouldn't be needed.  We really need
+	#	to refactor SMPTE out of libardour_cp to get rid of that circular dependency
+	#	alltogether.
+	#
 	if bld.env['HAVE_SLV2']:
 		obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc' ]
 		obj.uselib += ' SLV2 '
@@ -259,14 +254,13 @@ def build(bld):
 		obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
 
 	if bld.env['HAVE_COREAUDIO'] and bld.env['COREAUDIO']:
-		obj.sources += [ 'coreaudio.cc', 'caimportable.cc' ]
+		obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
+
+	if bld.env['HAVE_AUDIOUNITS'] or bld.env['HAVE_COREAUDIO']:
+		obj.uselib_local += ' libappleutility'	
 
 	if bld.env['HAVE_AUDIOUNITS'] and bld.env['AUDIOUNITS']:
-		obj.sources += [ 'audio_unit.cc' ]
-
-	if bld.env['IS_OSX']:
-		# this avoids issues with circular dependencies between libardour and libardour_cp.
-		obj.linkflags += '-undefined suppress -flat_namespace'
+		obj.source += [ 'audio_unit.cc' ]
 
 	if bld.env['FPU_OPTIMIZATION']:
 		obj.source += [ 'sse_functions_xmm.cc' ]
