@@ -217,7 +217,7 @@ AudioEngine::stop (bool forever)
 
 
 bool
-AudioEngine::get_sync_offset (nframes_t& /*offset*/) const
+AudioEngine::get_sync_offset (nframes_t& offset) const
 {
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
@@ -232,7 +232,9 @@ AudioEngine::get_sync_offset (nframes_t& /*offset*/) const
 			return true;
 		}
 	}
-
+#else
+	/* keep gcc happy */
+	offset = 0;
 #endif
 
 	return false;
