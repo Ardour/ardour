@@ -221,18 +221,6 @@ IOProcessor::silence (nframes_t nframes)
 }
 
 ChanCount
-IOProcessor::output_streams() const
-{
-	return _output ? _output->n_ports() : ChanCount::ZERO;
-}
-
-ChanCount
-IOProcessor::input_streams () const
-{
-	return _input ? _input->n_ports() : ChanCount::ZERO;
-}
-
-ChanCount
 IOProcessor::natural_output_streams() const
 {
 	return _output ? _output->n_ports() : ChanCount::ZERO;

@@ -33,11 +33,13 @@
 #include "processor_selection.h"
 #include "point_selection.h"
 #include "marker_selection.h"
+#include "midi_selection.h"
 
 class TimeAxisView;
 class RegionView;
 class Selectable;
 class PublicEditor;
+class MidiRegionView;
 
 namespace ARDOUR {
 	class Region;
@@ -77,6 +79,7 @@ class Selection : public sigc::trackable
 	PlaylistSelection    playlists;
 	PointSelection       points;
 	MarkerSelection      markers;
+	MidiSelection        midi;
 
 	Selection (PublicEditor const * e) : editor (e), next_time_id (0) {
 		clear();
@@ -91,6 +94,7 @@ class Selection : public sigc::trackable
 	sigc::signal<void> PlaylistsChanged;
 	sigc::signal<void> PointsChanged;
 	sigc::signal<void> MarkersChanged;
+	sigc::signal<void> MidiChanged;
 
 	void clear ();
 	bool empty();
@@ -108,6 +112,7 @@ class Selection : public sigc::trackable
 	void set (TimeAxisView*);
 	void set (const std::list<TimeAxisView*>&);
 	void set (RegionView*, bool also_clear_tracks = true);
+	void set (MidiRegionView*);
 	void set (std::vector<RegionView*>&);
 	long set (TimeAxisView*, nframes_t, nframes_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
@@ -120,6 +125,7 @@ class Selection : public sigc::trackable
 	void toggle (TimeAxisView*);
 	void toggle (const std::list<TimeAxisView*>&);
 	void toggle (RegionView*);
+	void toggle (MidiRegionView*);
 	void toggle (std::vector<RegionView*>&);
 	long toggle (nframes_t, nframes_t);
 	void toggle (ARDOUR::AutomationList*);
@@ -131,6 +137,7 @@ class Selection : public sigc::trackable
 	void add (TimeAxisView*);
 	void add (const std::list<TimeAxisView*>&);
 	void add (RegionView*);
+	void add (MidiRegionView*);
 	void add (std::vector<RegionView*>&);
 	long add (nframes_t, nframes_t);
 	void add (boost::shared_ptr<Evoral::ControlList>);
@@ -139,10 +146,10 @@ class Selection : public sigc::trackable
 	void add (Marker*);
 	void add (const std::list<Marker*>&);
 	void add (const RegionSelection&);
-
 	void remove (TimeAxisView*);
 	void remove (const std::list<TimeAxisView*>&);
 	void remove (RegionView*);
+	void remove (MidiRegionView*);
 	void remove (uint32_t selection_id);
 	void remove (nframes_t, nframes_t);
 	void remove (boost::shared_ptr<ARDOUR::AutomationList>);
@@ -160,6 +167,7 @@ class Selection : public sigc::trackable
 	void clear_playlists ();
 	void clear_points ();
 	void clear_markers ();
+	void clear_midi ();
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	void foreach_regionview (void (RegionView::*method)(void));

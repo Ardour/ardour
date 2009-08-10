@@ -53,6 +53,7 @@ Selection::operator= (const Selection& other)
 		tracks = other.tracks;
 		time = other.time;
 		lines = other.lines;
+		midi = other.midi;
 	}
 	return *this;
 }
@@ -66,7 +67,8 @@ operator== (const Selection& a, const Selection& b)
 		a.time.group == b.time.group && 
 		a.time == b.time &&
 		a.lines == b.lines &&
-		a.playlists == b.playlists;
+		a.playlists == b.playlists &&
+		a.midi == b.midi;
 }
 
 /** Clear everything from the Selection */
@@ -79,6 +81,7 @@ Selection::clear ()
 	clear_lines();
 	clear_time ();
 	clear_playlists ();
+	clear_midi ();
 }
 
 void
@@ -106,6 +109,15 @@ Selection::clear_tracks ()
 	if (!tracks.empty()) {
 		tracks.clear ();
 		TracksChanged();
+	}
+}
+
+void
+Selection::clear_midi ()
+{
+	if (!midi.empty()) {
+		midi.clear ();
+		MidiChanged ();
 	}
 }
 
@@ -205,6 +217,20 @@ Selection::toggle (RegionView* r)
 	}
 
 	RegionsChanged ();
+}
+
+void
+Selection::toggle (MidiRegionView* mrv)
+{
+	MidiSelection::iterator i;
+
+	if ((i = find (midi.begin(), midi.end(), mrv)) == midi.end()) {
+		add (mrv);
+	} else {
+		midi.erase (i);
+	}
+
+	MidiChanged ();
 }
 
 void
@@ -349,6 +375,21 @@ Selection::add (RegionView* r)
 	}
 }
 
+void
+Selection::add (MidiRegionView* mrv)
+{
+	if (find (midi.begin(), midi.end(), mrv) == midi.end()) {
+		midi.push_back (mrv);
+		/* XXX should we do this? */
+#if 0
+		if (Config->get_link_region_and_track_selection()) {
+			add (&mrv->get_trackview());
+		}
+#endif
+		MidiChanged ();
+	}
+}
+
 long
 Selection::add (nframes_t start, nframes_t end)
 {
@@ -473,6 +514,24 @@ Selection::remove (RegionView* r)
 	}
 }
 
+void
+Selection::remove (MidiRegionView* mrv)
+{
+	MidiSelection::iterator x;
+
+	if ((x = find (midi.begin(), midi.end(), mrv)) != midi.end()) {
+		midi.erase (x);
+		MidiChanged ();
+	}
+
+#if 0
+	/* XXX fix this up ? */
+	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_trackview())) {
+		remove (&r->get_trackview());
+	}
+#endif
+}
+
 
 void
 Selection::remove (uint32_t selection_id)
@@ -540,6 +599,13 @@ Selection::set (const RegionSelection& rs)
 	clear_regions();
 	regions = rs;
 	RegionsChanged(); /* EMIT SIGNAL */
+}
+
+void
+Selection::set (MidiRegionView* mrv) 
+{
+	clear_midi ();
+	add (mrv);
 }
 
 void

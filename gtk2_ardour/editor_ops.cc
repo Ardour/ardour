@@ -3906,69 +3906,82 @@ Editor::cut_copy (CutCopyOp op)
 		return;
 	}
 
-	RegionSelection rs; 
+	if (internal_editing()) {
 
-	/* we only want to cut regions if some are selected */
-
-	if (!selection->regions.empty()) {
-		get_regions_for_action (rs);
-	}
-
-	switch (current_mouse_mode()) {
-	case MouseObject: 
-		if (!rs.empty() || !selection->points.empty()) {
-
-			begin_reversible_command (opname + _(" objects"));
-
-			if (!rs.empty()) {
-				cut_copy_regions (op, rs);
-				
-				if (op == Cut) {
-					selection->clear_regions ();
-				}
-			}
-
-			if (!selection->points.empty()) {
-				cut_copy_points (op);
-
-				if (op == Cut) {
-					selection->clear_points ();
-				}
-			}
-
-			commit_reversible_command ();	
-			break; // terminate case statement here
-		} 
-		if (!selection->time.empty()) {
-			/* don't cause suprises */
+		switch (current_mouse_mode()) {
+		case MouseObject:
+		case MouseRange:
+			cut_copy_midi (op);
+			break;
+		default:
 			break;
 		}
-		// fall thru if there was nothing selected
+ 
+	} else {
 		
-	case MouseRange:
-		if (selection->time.empty()) {
-			nframes64_t start, end;
-			if (!get_edit_op_range (start, end)) {
-				return;
+		RegionSelection rs; 
+		
+		/* we only want to cut regions if some are selected */
+		
+		if (!selection->regions.empty()) {
+			get_regions_for_action (rs);
+		}
+		
+		switch (current_mouse_mode()) {
+		case MouseObject: 
+			if (!rs.empty() || !selection->points.empty()) {
+
+				begin_reversible_command (opname + _(" objects"));
+
+				if (!rs.empty()) {
+					cut_copy_regions (op, rs);
+				
+					if (op == Cut) {
+						selection->clear_regions ();
+					}
+				}
+
+				if (!selection->points.empty()) {
+					cut_copy_points (op);
+
+					if (op == Cut) {
+						selection->clear_points ();
+					}
+				}
+
+				commit_reversible_command ();	
+				break; // terminate case statement here
+			} 
+			if (!selection->time.empty()) {
+				/* don't cause suprises */
+				break;
 			}
-			selection->set ((TimeAxisView*) 0, start, end);
-		}
+			// fall thru if there was nothing selected
+		
+		case MouseRange:
+			if (selection->time.empty()) {
+				nframes64_t start, end;
+				if (!get_edit_op_range (start, end)) {
+					return;
+				}
+				selection->set ((TimeAxisView*) 0, start, end);
+			}
 			
-		begin_reversible_command (opname + _(" range"));
-		cut_copy_ranges (op);
-		commit_reversible_command ();
+			begin_reversible_command (opname + _(" range"));
+			cut_copy_ranges (op);
+			commit_reversible_command ();
 		
-		if (op == Cut) {
-			selection->clear_time ();
+			if (op == Cut) {
+				selection->clear_time ();
+			}
+
+			break;
+		
+		default:
+			break;
 		}
-
-		break;
-		
-	default:
-		break;
 	}
-
-
+		
 	if (op == Cut || op == Clear) {
 		break_drag ();
 		delete _drag;
@@ -3989,6 +4002,20 @@ Editor::cut_copy_points (CutCopyOp op)
 		if (atv) {
 			atv->cut_copy_clear_objects (selection->points, op);
 		} 
+	}
+}
+
+/** Cut, copy or clear selected automation points.
+ * @param op Operation (Cut, Copy or Clear)
+ */
+void
+Editor::cut_copy_midi (CutCopyOp op)
+{
+	cerr << "CCM: there are " << selection->midi.size() << " MRV's to work on\n";
+
+	for (MidiSelection::iterator i = selection->midi.begin(); i != selection->midi.end(); ++i) {
+		MidiRegionView* mrv = *i;
+		mrv->cut_copy_clear (op);
 	}
 }
 
@@ -4306,7 +4333,6 @@ Editor::paste_internal (nframes64_t position, float times)
 	size_t nth;
 
 	/* get everything in the correct order */
-
 
 	if (!selection->tracks.empty()) {
 		sort_track_selection ();

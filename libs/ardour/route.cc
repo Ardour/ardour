@@ -422,7 +422,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			if (bufs.count() != (*i)->input_streams()) {
 				cerr << _name << " bufs = " << bufs.count()
-				     << " input = " << (*i)->input_streams()
+				     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
 				     << endl;
 			}
 			assert (bufs.count() == (*i)->input_streams());

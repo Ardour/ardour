@@ -242,20 +242,6 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 			return false;
 		}
 		
-	case GDK_KEY_PRESS:
-		if (_note && ev->key.keyval == GDK_Delete) {
-			selected(true);
-			_region.start_delta_command();
-			_region.command_remove_note(this);
-		}
-		break;
-
-	case GDK_KEY_RELEASE:
-		if (ev->key.keyval == GDK_Delete) {
-			_region.apply_command();
-		}
-		break;
-
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered(this);
 		//_item->grab_focus();
@@ -342,7 +328,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		select_mod = (ev->motion.state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK));
+		select_mod = (ev->motion.state & (Keyboard::PrimaryModifier | Keyboard::SecondaryModifier));
 		event_x = ev->button.x;
 		event_y = ev->button.y;
 		_item->property_parent().get_value()->w2i(event_x, event_y);

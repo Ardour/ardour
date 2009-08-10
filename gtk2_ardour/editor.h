@@ -1025,6 +1025,7 @@ class Editor : public PublicEditor
 	void cut_copy_points (Editing::CutCopyOp);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
+	void cut_copy_midi (Editing::CutCopyOp);
 
 	void mouse_paste ();
 	void paste_internal (nframes64_t position, float times);

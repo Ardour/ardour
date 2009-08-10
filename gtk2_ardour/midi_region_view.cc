@@ -39,23 +39,24 @@
 #include "evoral/Parameter.hpp"
 #include "evoral/Control.hpp"
 
-#include "streamview.h"
-#include "midi_region_view.h"
-#include "midi_streamview.h"
-#include "midi_time_axis.h"
-#include "simpleline.h"
+#include "automation_region_view.h"
+#include "automation_time_axis.h"
 #include "canvas-hit.h"
 #include "canvas-note.h"
 #include "canvas-program-change.h"
-#include "public_editor.h"
 #include "ghostregion.h"
-#include "midi_time_axis.h"
-#include "automation_time_axis.h"
-#include "automation_region_view.h"
-#include "utils.h"
-#include "midi_util.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "midi_region_view.h"
+#include "midi_streamview.h"
+#include "midi_time_axis.h"
+#include "midi_time_axis.h"
+#include "midi_util.h"
+#include "public_editor.h"
+#include "selection.h"
+#include "simpleline.h"
+#include "streamview.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -659,11 +660,11 @@ MidiRegionView::~MidiRegionView ()
 	}
 
 	_selection.clear();
+	_cut_buffer.clear ();
 	clear_events();
 	delete _note_group;
 	delete _delta_command;
 }
-
 
 void
 MidiRegionView::region_resized (Change what_changed)
@@ -1162,34 +1163,32 @@ MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 void
 MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 {
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+
+		Selection::iterator tmp = i;
+		++tmp;
+
 		if ((*i) != ev) {
-			(*i)->selected(false);
-			(*i)->hide_velocity();
-		}
+			remove_from_selection (*i);
+		} 
+
+		i = tmp;
 	}
 
-	_selection.clear();
-	_selection.insert(ev);
-
-	if ( ! ev->selected()) {
-		ev->selected(true);
+	if (!ev->selected()) {
+		add_to_selection (ev);
 	}
 }
 
 void
 MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 {
-	if ( ! add) {
+	if (!add) {
 		clear_selection_except(ev);
 	}
 
-	if (_selection.insert(ev).second) {
-		play_midi_note(ev->note());
-	}
-
-	if ( ! ev->selected()) {
-		ev->selected(true);
+	if (!ev->selected()) {
+		add_to_selection (ev);
 	}
 }
 
@@ -1197,15 +1196,11 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 void
 MidiRegionView::note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 {
-	if ( ! add) {
+	if (!add) {
 		clear_selection_except(ev);
 	}
 
-	_selection.erase(ev);
-
-	if (ev->selected()) {
-		ev->selected(false);
-	}
+	remove_from_selection (ev);
 }
 
 
@@ -1230,17 +1225,12 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 			assert((*i)->x1() >= last_x1);
 			last_x1 = (*i)->x1();
 #endif
-			// Inside rectangle
 			if ((*i)->x1() >= x1 && (*i)->x1() <= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
-				if (!(*i)->selected()) {
-					(*i)->selected(true);
-					_selection.insert(*i);
-					play_midi_note((*i)->note());
-				}
-			// Not inside rectangle
+				// Inside rectangle
+				add_to_selection (*i);
 			} else if ((*i)->selected()) {
-				(*i)->selected(false);
-				_selection.erase(*i);
+				// Not inside rectangle
+				remove_from_selection (*i);
 			}
 		}
 	} else {
@@ -1250,22 +1240,54 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 			assert((*i)->x1() >= last_x1);
 			last_x1 = (*i)->x1();
 #endif
-			// Inside rectangle
 			if ((*i)->x2() <= x1 && (*i)->x2() >= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
-				if (!(*i)->selected()) {
-					(*i)->selected(true);
-					_selection.insert(*i);
-					play_midi_note((*i)->note());
-				}
-			// Not inside rectangle
+				// Inside rectangle
+				add_to_selection (*i);
 			} else if ((*i)->selected()) {
-				(*i)->selected(false);
-				_selection.erase(*i);
+				// Not inside rectangle
+				remove_from_selection (*i);
 			}
 		}
 	}
 }
 
+void
+MidiRegionView::remove_from_selection (CanvasNoteEvent* ev)
+{
+	Selection::iterator i = _selection.find (ev);
+
+	if (i != _selection.end()) {
+		_selection.erase (i);
+	}
+
+	ev->selected (false);
+	ev->hide_velocity ();
+	
+	if (_selection.empty()) {
+		PublicEditor& editor (trackview.editor());
+		editor.get_selection().remove (this);
+	}
+}
+
+void
+MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
+{
+	bool add_mrv_selection = false;
+
+	if (_selection.empty()) {
+		add_mrv_selection = true;
+	}
+
+	if (_selection.insert (ev).second) {
+		ev->selected (true);
+		play_midi_note ((ev)->note());
+	}
+
+	if (add_mrv_selection) {
+		PublicEditor& editor (trackview.editor());
+		editor.get_selection().add (this);
+	}
+}
 
 void
 MidiRegionView::move_selection(double dx, double dy)
@@ -1274,7 +1296,6 @@ MidiRegionView::move_selection(double dx, double dy)
 		(*i)->move_event(dx, dy);
 	}
 }
-
 
 void
 MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
@@ -1639,5 +1660,33 @@ MidiRegionView::midi_patch_settings_changed(std::string model, std::string custo
 	_model_name         = model;
 	_custom_device_mode = custom_device_mode;
 	redisplay_model();
+}
+
+void
+MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
+{
+	if (_selection.empty()) {
+		return;
+	}
+
+	_cut_buffer.clear ();
+
+	start_delta_command();
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		switch (op) {
+		case Copy:
+			_cut_buffer.push_back (NoteType (*((*i)->note().get())));
+			break;
+		case Cut:
+			_cut_buffer.push_back (NoteType (*(*i)->note().get()));
+			command_remove_note (*i);
+			break;
+		case Clear:
+			break;
+		}
+	}
+
+	apply_command();
 }
 

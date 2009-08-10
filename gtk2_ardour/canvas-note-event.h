@@ -24,6 +24,8 @@
 #include <libgnomecanvasmm/text.h>
 #include <libgnomecanvasmm/widget.h>
 
+#include "ardour/midi_model.h"
+
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 #include "ui_config.h"
@@ -51,7 +53,8 @@ namespace Canvas {
  */
 class CanvasNoteEvent : virtual public sigc::trackable, public InteractiveItem {
 public:
-	typedef Evoral::Note<double> NoteType;
+	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
+
 	CanvasNoteEvent(
 			MidiRegionView&                   region,
 			Item*                             item,

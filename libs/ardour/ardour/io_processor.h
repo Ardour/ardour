@@ -53,8 +53,6 @@ class IOProcessor : public Processor
 	
 	bool set_name (const std::string& str);
 
-	virtual ChanCount output_streams() const;
-	virtual ChanCount input_streams () const;
 	virtual ChanCount natural_output_streams() const;
 	virtual ChanCount natural_input_streams () const;
 

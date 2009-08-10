@@ -30,6 +30,7 @@
 #include "ardour/diskstream.h"
 #include "ardour/types.h"
 
+#include "editing.h"
 #include "region_view.h"
 #include "midi_time_axis.h"
 #include "time_axis_view_item.h"
@@ -97,6 +98,8 @@ class MidiRegionView : public RegionView
 
 	void add_note(const boost::shared_ptr<NoteType> note);
 	void resolve_note(uint8_t note_num, double end_time);
+
+	void cut_copy_clear (Editing::CutCopyOp);
 	
 	struct PCEvent {
 		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel) 
@@ -171,7 +174,7 @@ class MidiRegionView : public RegionView
 	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add);
 	void   delete_selection();
 	size_t selection_size() { return _selection.size(); }
-
+	
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_pixels, uint8_t d_note);
 
@@ -297,6 +300,9 @@ class MidiRegionView : public RegionView
 	void clear_selection() { clear_selection_except(NULL); }
 	void update_drag_selection(double last_x, double x, double last_y, double y);
 
+	void add_to_selection (ArdourCanvas::CanvasNoteEvent*);
+	void remove_from_selection (ArdourCanvas::CanvasNoteEvent*);
+
 	int8_t   _force_channel;
 	uint16_t _last_channel_selection;
 	double   _default_note_length;
@@ -327,6 +333,9 @@ class MidiRegionView : public RegionView
 	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
 	/// Currently selected CanvasNoteEvents
 	Selection _selection;
+	/// the cut buffer for this region view
+	typedef std::list<NoteType> CutBuffer;
+	CutBuffer _cut_buffer;
 
 	/** New notes (created in the current command) which should be selected
 	 * when they appear after the command is applied. */

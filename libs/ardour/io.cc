@@ -1061,10 +1061,16 @@ IO::build_legal_port_name (DataType type)
 		throw unknown_type();
 	}
 	
+	/* note that if "in" or "out" are translated it will break a session
+	   across locale switches because a port's connection list will
+	   show (old) translated names, but the current port name will
+	   use the (new) translated name.
+	*/
+
 	if (_direction == Input) {
-		suffix += _("_in");
+		suffix += X_("_in");
 	} else {
-		suffix += _("_out");
+		suffix += X_("_out");
 	}
 
 	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space
