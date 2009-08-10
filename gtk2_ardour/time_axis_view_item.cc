@@ -90,15 +90,15 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		win.add (foo);
 
 		Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
-		int width;
-		int height;
+		int width = 0;
+		int height = 0;
 
 		layout->set_font_description (*NAME_FONT);
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
-		NAME_Y_OFFSET = height + 5;
-		NAME_HIGHLIGHT_SIZE = height + 6;
-		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
+		NAME_Y_OFFSET = height + 3;
+		NAME_HIGHLIGHT_SIZE = height + 2;
+		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 
 		have_name_font = true;
 	}
@@ -205,20 +205,12 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & ba
 		name_pixbuf = 0;
 	}
 
-	/* create our grab handles used for trimming/duration etc */
+	/* create our grab handles used for trimming/duration etc */	
+	frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
+	frame_handle_start->property_outline_what() = 0x0;
 
-	if (visibility & ShowHandles) {
-	
-		frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 1.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH+1);
-		frame_handle_start->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
-
-		frame_handle_end = new ArdourCanvas::SimpleRect (*group, trackview.editor().frame_to_pixel(get_duration()) - TimeAxisViewItem::GRAB_HANDLE_LENGTH, trackview.editor().frame_to_pixel(get_duration()), 1.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1);
-		frame_handle_end->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameHandle.get();
-
-	} else {
-		frame_handle_start = 0;
-		frame_handle_end = 0;
-	}
+	frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
+	frame_handle_end->property_outline_what() = 0x0;
 
 	set_color (base_color) ;
 
@@ -558,7 +550,7 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pb_width, NAME_HIGHLIGHT_SIZE );
 	cairo_t *cr = cairo_create (surface);
 	cairo_text_extents_t te;
-	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+	cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 1.0);
 	cairo_select_font_face (cr, NAME_FONT->get_family().c_str(),
 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (cr, 10);
@@ -595,8 +587,8 @@ TimeAxisViewItem::set_height (double height)
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
-			name_highlight->property_y1() = (double) height+1 - NAME_HIGHLIGHT_SIZE;
-			name_highlight->property_y2() = (double) height;
+			name_highlight->property_y1() = (double) height - 1 - NAME_HIGHLIGHT_SIZE;
+			name_highlight->property_y2() = (double) height - 2;
 		}
 		else {
 			/* it gets hidden now anyway */
@@ -606,14 +598,16 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (visibility & ShowNameText) {
-		name_pixbuf->property_y() = height+1 - NAME_Y_OFFSET;
+		name_pixbuf->property_y() =  height - 1 - NAME_Y_OFFSET;
 	}
 
 	if (frame) {
-		frame->property_y2() = height+1;
+		frame->property_y2() = height - 1;
+		frame_handle_start->property_y2() = height - 1;
+		frame_handle_end->property_y2() = height - 1;
 	}
 
-	vestigial_frame->property_y2() = height+1;
+	vestigial_frame->property_y2() = height - 1;
 }
 
 /**
@@ -805,10 +799,10 @@ TimeAxisViewItem::set_trim_handle_colors()
 	if (frame_handle_start) {
 		if (position_locked) {
 			frame_handle_start->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TrimHandleLocked.get();
-			frame_handle_end->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TrimHandleLocked.get();
+			frame_handle_end->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_TrimHandleLocked.get();
 		} else {
-			frame_handle_start->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TrimHandle.get();
-			frame_handle_end->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TrimHandle.get();
+			frame_handle_start->property_fill_color_rgba() = RGBA_TO_UINT(1, 1, 1, 0); //ARDOUR_UI::config()->canvasvar_TrimHandle.get();
+			frame_handle_end->property_fill_color_rgba() = RGBA_TO_UINT(1, 1, 1, 0); //ARDOUR_UI::config()->canvasvar_TrimHandle.get();
 		}
 	}
 }
