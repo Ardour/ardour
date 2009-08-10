@@ -406,7 +406,7 @@ EditorRoutes::reordered (TreeModel::Path const &, TreeModel::iterator const &, i
 	redisplay ();
 }
 
-/** If src == "editor", take editor order keys from each route and use them to rearrange the
+/** If src != "editor", take editor order keys from each route and use them to rearrange the
  *  route list so that the visual arrangement of routes matches the order keys from the routes.
  */
 void

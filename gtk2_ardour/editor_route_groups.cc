@@ -719,5 +719,5 @@ EditorRouteGroups::collect (RouteGroup* g)
 		++j;
 	}
 
-	_editor->_routes->sync_order_keys (N_ ("editor"));
+	_editor->_routes->sync_order_keys ("");
 }
