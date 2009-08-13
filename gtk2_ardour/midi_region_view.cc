@@ -47,6 +47,7 @@
 #include "ghostregion.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "midi_cut_buffer.h"
 #include "midi_region_view.h"
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
@@ -660,7 +661,6 @@ MidiRegionView::~MidiRegionView ()
 	}
 
 	_selection.clear();
-	_cut_buffer.clear ();
 	clear_events();
 	delete _note_group;
 	delete _delta_command;
@@ -1669,17 +1669,25 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 		return;
 	}
 
-	_cut_buffer.clear ();
+	PublicEditor& editor (trackview.editor());
 
+	switch (op) {
+	case Cut:
+	case Copy:
+		cerr << "Cut/Copy: get selection as CB\n";
+		editor.get_cut_buffer().add (selection_as_cut_buffer());
+		break;
+	default:
+		break;
+	}
+		
 	start_delta_command();
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		switch (op) {
 		case Copy:
-			_cut_buffer.push_back (NoteType (*((*i)->note().get())));
 			break;
 		case Cut:
-			_cut_buffer.push_back (NoteType (*(*i)->note().get()));
 			command_remove_note (*i);
 			break;
 		case Clear:
@@ -1690,3 +1698,33 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 	apply_command();
 }
 
+MidiCutBuffer*
+MidiRegionView::selection_as_cut_buffer () const
+{
+	Evoral::Sequence<MidiModel::TimeType>::Notes notes;
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		notes.push_back (boost::shared_ptr<NoteType> (new NoteType (*((*i)->note().get()))));
+	}
+
+	/* sort them into time order */
+
+	sort (notes.begin(), notes.end(), Evoral::Sequence<MidiModel::TimeType>::note_time_comparator);
+
+	MidiCutBuffer* cb = new MidiCutBuffer (trackview.session());
+	cb->set (notes);
+	
+	return cb;
+}
+
+void
+MidiRegionView::paste (nframes64_t pos, const MidiCutBuffer& mcb)
+{
+	MidiModel::DeltaCommand* cmd = _model->new_delta_command("paste");
+	for (Evoral::Sequence<MidiModel::TimeType>::Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
+		cmd->add (boost::shared_ptr<NoteType> (new NoteType (*((*i).get()))));
+	}
+	_model->apply_command(trackview.session(), cmd);
+	
+
+}

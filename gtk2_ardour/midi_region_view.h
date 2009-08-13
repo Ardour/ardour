@@ -57,6 +57,7 @@ class MidiTimeAxisView;
 class GhostRegion;
 class AutomationTimeAxisView;
 class AutomationRegionView;
+class MidiCutBuffer;
 
 class MidiRegionView : public RegionView
 {
@@ -100,7 +101,8 @@ class MidiRegionView : public RegionView
 	void resolve_note(uint8_t note_num, double end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
-	
+	void paste (nframes64_t pos, const MidiCutBuffer&);
+
 	struct PCEvent {
 		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel) 
 			: time(a_time), value(a_value), channel(a_channel) {}
@@ -255,23 +257,26 @@ class MidiRegionView : public RegionView
 	
 	/** Convert a timestamp in frames to beats (both relative to region start) */
 	double frames_to_beats(nframes64_t beats) const;
+
+	/** Return the current selection as a MidiModel or null if there is no selection */
+	ARDOUR::MidiModel* selection_as_model () const;
 	
   protected:
-    /** Allows derived types to specify their visibility requirements
-     * to the TimeAxisViewItem parent class.
-     */
-    MidiRegionView (ArdourCanvas::Group *,
+	/** Allows derived types to specify their visibility requirements
+	 * to the TimeAxisViewItem parent class.
+	 */
+	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double samples_per_unit,
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
-
-    void region_resized (ARDOUR::Change);
-
-    void set_flags (XMLNode *);
-    void store_flags ();
-
+	
+	void region_resized (ARDOUR::Change);
+	
+	void set_flags (XMLNode *);
+	void store_flags ();
+	
 	void reset_width_dependent_items (double pixel_width);
 
   private:
@@ -333,9 +338,8 @@ class MidiRegionView : public RegionView
 	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
 	/// Currently selected CanvasNoteEvents
 	Selection _selection;
-	/// the cut buffer for this region view
-	typedef std::list<NoteType> CutBuffer;
-	CutBuffer _cut_buffer;
+
+	MidiCutBuffer* selection_as_cut_buffer () const;
 
 	/** New notes (created in the current command) which should be selected
 	 * when they appear after the command is applied. */

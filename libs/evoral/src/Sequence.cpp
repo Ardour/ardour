@@ -780,6 +780,13 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 	}
 }
 
+template<typename Time>
+void
+Sequence<Time>::set_notes (const Sequence<Time>::Notes& n)
+{
+	_notes = n;
+}
+
 template class Sequence<double>;
 
 } // namespace Evoral

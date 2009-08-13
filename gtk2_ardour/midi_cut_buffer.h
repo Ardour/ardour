@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,18 +14,32 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
-#ifndef __ardour_gtk_midi_selection_h__
-#define __ardour_gtk_midi_selection_h__
+#ifndef __gtk_ardour_midi_cut_buffer_h__
+#define __gtk_ardour_midi_cut_buffer_h__
 
-#include <list>
+#include "ardour/midi_model.h"
 
-class MidiRegionView;
-class MidiCutBuffer;
+namespace ARDOUR {
+	class Session;
+}
 
-struct MidiRegionSelection : std::list<MidiRegionView*> {};
-struct MidiNoteSelection   : std::list<MidiCutBuffer*> {};
+class MidiCutBuffer : public ARDOUR::AutomatableSequence<ARDOUR::MidiModel::TimeType> 
+{
+  public:
+	typedef ARDOUR::MidiModel::TimeType TimeType;
 
-#endif /* __ardour_gtk_midi_selection_h__ */
+	MidiCutBuffer (ARDOUR::Session&);
+	~MidiCutBuffer();
+
+	TimeType origin() const { return _origin; }
+	void set_origin (TimeType);
+	
+	void set (const Evoral::Sequence<TimeType>::Notes&);
+
+  private:
+	TimeType _origin;
+};
+
+#endif /* __gtk_ardour_midi_cut_buffer_h__ */

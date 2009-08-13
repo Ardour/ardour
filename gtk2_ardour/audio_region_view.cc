@@ -614,6 +614,9 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	
 	fade_in_shape->property_points() = *points;
 	delete points;
+	
+	/* ensure trim handle stays on top */
+	frame_handle_start->raise_to_top();
 }
 
 void
@@ -702,6 +705,9 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 
 	fade_out_shape->property_points() = *points;
 	delete points;
+	
+	/* ensure trim handle stays on top */
+	frame_handle_end->raise_to_top();
 }
 
 void

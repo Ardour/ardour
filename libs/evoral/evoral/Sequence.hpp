@@ -104,6 +104,8 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
+        void set_notes (const std::vector<boost::shared_ptr<Note<Time> > >&);
+
 	typedef std::vector< boost::shared_ptr< Event<Time> > > SysExes;
 	inline       SysExes& sysexes()       { return _sysexes; }
 	inline const SysExes& sysexes() const { return _sysexes; }

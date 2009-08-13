@@ -53,7 +53,8 @@ Selection::operator= (const Selection& other)
 		tracks = other.tracks;
 		time = other.time;
 		lines = other.lines;
-		midi = other.midi;
+		midi_regions = other.midi_regions;
+		midi_notes = other.midi_notes;
 	}
 	return *this;
 }
@@ -68,7 +69,8 @@ operator== (const Selection& a, const Selection& b)
 		a.time == b.time &&
 		a.lines == b.lines &&
 		a.playlists == b.playlists &&
-		a.midi == b.midi;
+		a.midi_notes == b.midi_notes &&
+		a.midi_regions == b.midi_regions;
 }
 
 /** Clear everything from the Selection */
@@ -81,7 +83,8 @@ Selection::clear ()
 	clear_lines();
 	clear_time ();
 	clear_playlists ();
-	clear_midi ();
+	clear_midi_notes ();
+	clear_midi_regions ();
 }
 
 void
@@ -113,11 +116,20 @@ Selection::clear_tracks ()
 }
 
 void
-Selection::clear_midi ()
+Selection::clear_midi_notes ()
 {
-	if (!midi.empty()) {
-		midi.clear ();
-		MidiChanged ();
+	if (!midi_notes.empty()) {
+		midi_notes.clear ();
+		MidiNotesChanged ();
+	}
+}
+
+void
+Selection::clear_midi_regions ()
+{
+	if (!midi_regions.empty()) {
+		midi_regions.clear ();
+		MidiRegionsChanged ();
 	}
 }
 
@@ -185,7 +197,7 @@ void
 Selection::toggle (const list<TimeAxisView*>& track_list)
 {
 	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
-		toggle ( (*i) );
+		toggle ((*i));
 	}
 }
 
@@ -206,6 +218,29 @@ Selection::toggle (TimeAxisView* track)
 }
 
 void
+Selection::toggle (const MidiNoteSelection& midi_note_list)
+{
+	for (MidiNoteSelection::const_iterator i = midi_note_list.begin(); i != midi_note_list.end(); ++i) {
+		toggle ((*i));
+	}
+}
+
+void
+Selection::toggle (MidiCutBuffer* midi)
+{
+	MidiNoteSelection::iterator i;
+	
+	if ((i = find (midi_notes.begin(), midi_notes.end(), midi)) == midi_notes.end()) {
+		midi_notes.push_back (midi);
+	} else {
+		midi_notes.erase (i);
+	}
+	
+	MidiNotesChanged();
+}
+
+
+void
 Selection::toggle (RegionView* r)
 {
 	RegionSelection::iterator i;
@@ -222,15 +257,15 @@ Selection::toggle (RegionView* r)
 void
 Selection::toggle (MidiRegionView* mrv)
 {
-	MidiSelection::iterator i;
+	MidiRegionSelection::iterator i;
 
-	if ((i = find (midi.begin(), midi.end(), mrv)) == midi.end()) {
+	if ((i = find (midi_regions.begin(), midi_regions.end(), mrv)) == midi_regions.end()) {
 		add (mrv);
 	} else {
-		midi.erase (i);
+		midi_regions.erase (i);
 	}
 
-	MidiChanged ();
+	MidiRegionsChanged ();
 }
 
 void
@@ -320,6 +355,27 @@ Selection::add (TimeAxisView* track)
 }
 
 void
+Selection::add (const MidiNoteSelection& midi_list)
+{
+	const MidiNoteSelection::const_iterator b = midi_list.begin();
+	const MidiNoteSelection::const_iterator e = midi_list.end();
+
+	if (!midi_list.empty()) {
+		midi_notes.insert (midi_notes.end(), b, e);
+		MidiNotesChanged ();
+	}
+}
+
+void
+Selection::add (MidiCutBuffer* midi)
+{
+	if (find (midi_notes.begin(), midi_notes.end(), midi) == midi_notes.end()) {
+		midi_notes.push_back (midi);
+		MidiNotesChanged ();
+	}
+}
+
+void
 Selection::add (vector<RegionView*>& v)
 {
 	/* XXX This method or the add (const RegionSelection&) needs to go
@@ -378,15 +434,15 @@ Selection::add (RegionView* r)
 void
 Selection::add (MidiRegionView* mrv)
 {
-	if (find (midi.begin(), midi.end(), mrv) == midi.end()) {
-		midi.push_back (mrv);
+	if (find (midi_regions.begin(), midi_regions.end(), mrv) == midi_regions.end()) {
+		midi_regions.push_back (mrv);
 		/* XXX should we do this? */
 #if 0
 		if (Config->get_link_region_and_track_selection()) {
 			add (&mrv->get_trackview());
 		}
 #endif
-		MidiChanged ();
+		MidiRegionsChanged ();
 	}
 }
 
@@ -473,6 +529,37 @@ Selection::remove (const list<TimeAxisView*>& track_list)
 }
 
 void
+Selection::remove (const MidiNoteSelection& midi_list)
+{
+	bool changed = false;
+
+	for (MidiNoteSelection::const_iterator i = midi_list.begin(); i != midi_list.end(); ++i) {
+
+		MidiNoteSelection::iterator x;
+
+		if ((x = find (midi_notes.begin(), midi_notes.end(), (*i))) != midi_notes.end()) {
+			midi_notes.erase (x);
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		MidiNotesChanged();
+	}
+}
+
+void
+Selection::remove (MidiCutBuffer* midi)
+{
+	MidiNoteSelection::iterator x;
+	
+	if ((x = find (midi_notes.begin(), midi_notes.end(), midi)) != midi_notes.end()) {
+		midi_notes.erase (x);
+		MidiNotesChanged ();
+	}
+}
+
+void
 Selection::remove (boost::shared_ptr<Playlist> track)
 {
 	list<boost::shared_ptr<Playlist> >::iterator i;
@@ -517,11 +604,11 @@ Selection::remove (RegionView* r)
 void
 Selection::remove (MidiRegionView* mrv)
 {
-	MidiSelection::iterator x;
+	MidiRegionSelection::iterator x;
 
-	if ((x = find (midi.begin(), midi.end(), mrv)) != midi.end()) {
-		midi.erase (x);
-		MidiChanged ();
+	if ((x = find (midi_regions.begin(), midi_regions.end(), mrv)) != midi_regions.end()) {
+		midi_regions.erase (x);
+		MidiRegionsChanged ();
 	}
 
 #if 0
@@ -580,6 +667,13 @@ Selection::set (const list<TimeAxisView*>& track_list)
 }
 
 void
+Selection::set (const MidiNoteSelection& midi_list)
+{
+	clear_midi_notes ();
+	add (midi_list);
+}
+
+void
 Selection::set (boost::shared_ptr<Playlist> playlist)
 {
 	clear_playlists ();
@@ -604,7 +698,7 @@ Selection::set (const RegionSelection& rs)
 void
 Selection::set (MidiRegionView* mrv) 
 {
-	clear_midi ();
+	clear_midi_regions ();
 	add (mrv);
 }
 
@@ -690,17 +784,28 @@ Selection::selected (RegionView* rv)
 }
 
 bool
-Selection::empty ()
+Selection::empty (bool internal_selection)
 {
-	return regions.empty () &&
+	bool object_level_empty =  regions.empty () &&
 		tracks.empty () &&
 		points.empty () && 
 		playlists.empty () && 
 		lines.empty () &&
 		time.empty () &&
 		playlists.empty () &&
-		markers.empty()
+		markers.empty() &&
+		midi_regions.empty()
 		;
+
+	if (!internal_selection) {
+		return object_level_empty;
+	}
+
+	/* this is intended to really only apply when using a Selection
+	   as a cut buffer.
+	*/
+
+	return object_level_empty && midi_notes.empty();
 }
 
 void

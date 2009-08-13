@@ -1462,8 +1462,9 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 		return false;
 	}
 
-	if (get_diskstream()->speed() != 1.0f)
+	if (get_diskstream()->speed() != 1.0f) {
 		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
+	}
 	
 	XMLNode &before = playlist->get_state();
 	playlist->paste (*p, pos, times);

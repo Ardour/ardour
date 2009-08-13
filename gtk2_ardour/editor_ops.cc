@@ -4011,9 +4011,9 @@ Editor::cut_copy_points (CutCopyOp op)
 void
 Editor::cut_copy_midi (CutCopyOp op)
 {
-	cerr << "CCM: there are " << selection->midi.size() << " MRV's to work on\n";
+	cerr << "CCM: there are " << selection->midi_regions.size() << " MRV's to work on\n";
 
-	for (MidiSelection::iterator i = selection->midi.begin(); i != selection->midi.end(); ++i) {
+	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
 		MidiRegionView* mrv = *i;
 		mrv->cut_copy_clear (op);
 	}
@@ -4318,8 +4318,14 @@ Editor::paste_internal (nframes64_t position, float times)
 {
 	bool commit = false;
 
-	if (cut_buffer->empty()) {
-		return;
+	if (internal_editing()) {
+		if (cut_buffer->midi_notes.empty()) {
+			return;
+		} 
+	} else {
+		if (cut_buffer->empty()) {
+			return;
+		}
 	}
 
 	if (position == max_frames) {
@@ -4341,13 +4347,38 @@ Editor::paste_internal (nframes64_t position, float times)
 		ts.push_back (entered_track);
 	}
 
+
+	cerr << "Paste into " << ts.size() << " tracks\n";
+
 	for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
 
-		/* undo/redo is handled by individual tracks */
+		/* undo/redo is handled by individual tracks/regions */
 
-		if ((*i)->paste (position, times, *cut_buffer, nth)) {
-			commit = true;
-		}
+		if (internal_editing()) {
+			
+			RegionSelection rs;
+			RegionSelection::iterator r;
+			MidiNoteSelection::iterator cb;
+
+			get_regions_at (rs, position, ts);
+			
+
+			cerr << " We have " << cut_buffer->midi_notes.size() << " MIDI cut buffers\n";
+
+			for (cb = cut_buffer->midi_notes.begin(), r = rs.begin(); cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
+				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
+				if (mrv) {
+					mrv->paste (position, **cb);
+					++cb;
+				}
+			}
+
+		} else {
+
+			if ((*i)->paste (position, times, *cut_buffer, nth)) {
+				commit = true;
+			}
+		} 
 	}
 	
 	if (commit) {
