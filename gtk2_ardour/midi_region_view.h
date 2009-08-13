@@ -101,7 +101,7 @@ class MidiRegionView : public RegionView
 	void resolve_note(uint8_t note_num, double end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
-	void paste (nframes64_t pos, const MidiCutBuffer&);
+	void paste (nframes64_t pos, float times, const MidiCutBuffer&);
 
 	struct PCEvent {
 		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel) 

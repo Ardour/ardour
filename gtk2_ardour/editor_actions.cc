@@ -673,8 +673,6 @@ Editor::register_actions ()
 	/* in the future, this may allow other kinds of "intra-region" editing, but for now its just MIDI */
 	ARDOUR_UI::instance()->tooltips().set_tip (internal_edit_button, _("Edit MIDI Notes"));
 
-	cerr << "Registering mouse mode actions\n";
-
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	act->connect_proxy (mouse_move_button);
 	mouse_move_button.set_image (*(manage (new Image (::get_icon("tool_object")))));

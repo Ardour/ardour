@@ -1674,7 +1674,6 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 	switch (op) {
 	case Cut:
 	case Copy:
-		cerr << "Cut/Copy: get selection as CB\n";
 		editor.get_cut_buffer().add (selection_as_cut_buffer());
 		break;
 	default:
@@ -1718,21 +1717,39 @@ MidiRegionView::selection_as_cut_buffer () const
 }
 
 void
-MidiRegionView::paste (nframes64_t pos, const MidiCutBuffer& mcb)
+MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 {
-	MidiModel::DeltaCommand* cmd = _model->new_delta_command("paste");
-	MidiModel::TimeType beat_delta;
-	MidiModel::TimeType paste_pos_beats;
-
-	paste_pos_beats = frames_to_beats (pos);
-	beat_delta = mcb.notes().front()->time() - paste_pos_beats;
-
-	for (Evoral::Sequence<MidiModel::TimeType>::Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
-
-		boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
-		copied_note->set_time (copied_note->time() - beat_delta);
-		cmd->add (copied_note);
+	if (mcb.empty()) {
+		return;
 	}
 
-	_model->apply_command(trackview.session(), cmd);
+	start_delta_command (_("paste"));
+
+	MidiModel::TimeType beat_delta;
+	MidiModel::TimeType paste_pos_beats;
+	MidiModel::TimeType duration;
+
+	duration = mcb.notes().back()->end_time() - mcb.notes().front()->time();
+	paste_pos_beats = frames_to_beats (pos);
+	beat_delta = mcb.notes().front()->time() - paste_pos_beats;
+	paste_pos_beats = 0;
+
+	_selection.clear ();
+
+	for (int n = 0; n < (int) times; ++n) {
+
+		for (Evoral::Sequence<MidiModel::TimeType>::Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
+			
+			boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
+			copied_note->set_time (paste_pos_beats + copied_note->time() - beat_delta);
+
+			/* make all newly added notes selected */
+
+			command_add_note (copied_note, true);
+		}
+
+		paste_pos_beats += duration;
+	}
+	
+	apply_command ();
 }

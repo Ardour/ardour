@@ -199,7 +199,8 @@ This mode provides many different operations on both regions and control points,
 @rop|Editor/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
-@rop|Editor/mute-unmute-region|m|mute/unmute
+@rop|Editor/toggle-internal-edit|<@PRIMARY@>m|toggle MIDI note editing
+@rop|Editor/mute-unmute-region|<@PRIMARY@>m|mute/unmute
 @wvis|Common/toggle-editor-mixer-on-top|<@WINDOW@>m|rotate editor \& mixer window
 
 ;; arrow keys, navigation etc.

@@ -4011,8 +4011,6 @@ Editor::cut_copy_points (CutCopyOp op)
 void
 Editor::cut_copy_midi (CutCopyOp op)
 {
-	cerr << "CCM: there are " << selection->midi_regions.size() << " MRV's to work on\n";
-
 	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
 		MidiRegionView* mrv = *i;
 		mrv->cut_copy_clear (op);
@@ -4347,9 +4345,6 @@ Editor::paste_internal (nframes64_t position, float times)
 		ts.push_back (entered_track);
 	}
 
-
-	cerr << "Paste into " << ts.size() << " tracks\n";
-
 	for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
 
 		/* undo/redo is handled by individual tracks/regions */
@@ -4361,14 +4356,12 @@ Editor::paste_internal (nframes64_t position, float times)
 			MidiNoteSelection::iterator cb;
 
 			get_regions_at (rs, position, ts);
-			
 
-			cerr << " We have " << cut_buffer->midi_notes.size() << " MIDI cut buffers\n";
-
-			for (cb = cut_buffer->midi_notes.begin(), r = rs.begin(); cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
+			for (cb = cut_buffer->midi_notes.begin(), r = rs.begin(); 
+			     cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
 				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
 				if (mrv) {
-					mrv->paste (position, **cb);
+					mrv->paste (position, times, **cb);
 					++cb;
 				}
 			}

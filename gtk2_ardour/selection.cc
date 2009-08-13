@@ -25,6 +25,7 @@
 #include "ardour/playlist.h"
 #include "ardour/rc_configuration.h"
 
+#include "midi_cut_buffer.h"
 #include "region_view.h"
 #include "selection.h"
 #include "selection_templates.h"
@@ -119,6 +120,9 @@ void
 Selection::clear_midi_notes ()
 {
 	if (!midi_notes.empty()) {
+		for (MidiNoteSelection::iterator x = midi_notes.begin(); x != midi_notes.end(); ++x) {
+			delete *x;
+		}
 		midi_notes.clear ();
 		MidiNotesChanged ();
 	}
@@ -233,6 +237,8 @@ Selection::toggle (MidiCutBuffer* midi)
 	if ((i = find (midi_notes.begin(), midi_notes.end(), midi)) == midi_notes.end()) {
 		midi_notes.push_back (midi);
 	} else {
+		/* remember that we own the MCB */
+		delete *i;
 		midi_notes.erase (i);
 	}
 	
@@ -369,6 +375,8 @@ Selection::add (const MidiNoteSelection& midi_list)
 void
 Selection::add (MidiCutBuffer* midi)
 {
+	/* we take ownership of the MCB */
+
 	if (find (midi_notes.begin(), midi_notes.end(), midi) == midi_notes.end()) {
 		midi_notes.push_back (midi);
 		MidiNotesChanged ();
@@ -554,6 +562,8 @@ Selection::remove (MidiCutBuffer* midi)
 	MidiNoteSelection::iterator x;
 	
 	if ((x = find (midi_notes.begin(), midi_notes.end(), midi)) != midi_notes.end()) {
+		/* remember that we own the MCB */
+		delete *x;
 		midi_notes.erase (x);
 		MidiNotesChanged ();
 	}

@@ -217,6 +217,8 @@
 		   <menuitem action='set-mouse-mode-zoom'/>
 		   <menuitem action='set-mouse-mode-timefx'/>
 		   <separator/>
+		   <menuitem action='toggle-internal-edit'/>
+		   <separator/>
 		   <menuitem action='cycle-edit-point'/>
 		   <menuitem action='cycle-edit-point-with-marker'/>
 		   <menuitem action='toggle-edit-mode'/>
