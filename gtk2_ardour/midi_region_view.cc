@@ -1721,8 +1721,21 @@ void
 MidiRegionView::paste (nframes64_t pos, const MidiCutBuffer& mcb)
 {
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("paste");
+	MidiModel::TimeType beat_delta;
+	nframes64_t paste_pos_beats;
+
+	paste_pos_beats = frames_to_beats (pos);
+	beat_delta = mcb.notes().front()->time() - paste_pos_beats;
+
+	cerr << "For paste @ " << pos << " beats = " << paste_pos_beats 
+	     << " first pasted note @ " << mcb.notes().front()->time()
+	     << " ... delta = " << beat_delta << endl;
+	
 	for (Evoral::Sequence<MidiModel::TimeType>::Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
-		cmd->add (boost::shared_ptr<NoteType> (new NoteType (*((*i).get()))));
+
+		boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
+		copied_note->set_time (copied_note->time() - beat_delta);
+		cmd->add (copied_note);
 	}
 	_model->apply_command(trackview.session(), cmd);
 	
