@@ -28,6 +28,8 @@
 
 #include <sigc++/signal.h>
 
+#include "pbd/memento_command.h"
+
 #include "ardour/playlist.h"
 #include "ardour/tempo.h"
 #include "ardour/midi_region.h"
@@ -158,7 +160,9 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		midi_region()->midi_source(0)->load_model();
 	}
 
+	cerr << "Looking up model for midi region\n";
 	_model = midi_region()->midi_source(0)->model();
+	cerr << " model = " << _model << endl;
 	_enable_display = false;
 
 	RegionView::init (basic_color, false);
@@ -179,9 +183,8 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	_enable_display = true;
 	if (_model) {
 		if (wfd) {
-			redisplay_model();
+			display_model (_model);
 		}
-		_model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
 	}
 
 	group->raise_to_top();
@@ -440,7 +443,6 @@ MidiRegionView::create_note_at(double x, double y, double length)
 	_model->apply_command(trackview.session(), cmd);
 }
 
-
 void
 MidiRegionView::clear_events()
 {
@@ -466,7 +468,11 @@ MidiRegionView::clear_events()
 void
 MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
+	cerr << "MRV: display mode, enable = " << _enable_display << endl;
 	_model = model;
+	content_connection.disconnect ();
+	content_connection = _model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
+	
 	if (_enable_display) {
 		redisplay_model();
 	}
@@ -536,6 +542,7 @@ MidiRegionView::abort_command()
 void
 MidiRegionView::redisplay_model()
 {
+	cerr << "MRV: display mode, active notes = " << _active_notes << endl;
 	// Don't redisplay the model if we're currently recording and displaying that
 	if (_active_notes) {
 		return;
@@ -1728,9 +1735,10 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 	MidiModel::TimeType beat_delta;
 	MidiModel::TimeType paste_pos_beats;
 	MidiModel::TimeType duration;
+	MidiModel::TimeType end_point;
 
 	duration = mcb.notes().back()->end_time() - mcb.notes().front()->time();
-	paste_pos_beats = frames_to_beats (pos);
+	paste_pos_beats = frames_to_beats (pos - _region->position());
 	beat_delta = mcb.notes().front()->time() - paste_pos_beats;
 	paste_pos_beats = 0;
 
@@ -1746,9 +1754,21 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 			/* make all newly added notes selected */
 
 			command_add_note (copied_note, true);
+			end_point = copied_note->end_time();
 		}
 
 		paste_pos_beats += duration;
+	}
+
+	/* if we pasted past the current end of the region, extend the region */
+
+	nframes64_t end_frame = beats_to_frames (end_point);
+	nframes64_t region_end = _region->position() + _region->length() - 1;
+
+	if (end_frame > region_end) {
+		XMLNode& before (_region->get_state());
+		_region->set_length (end_frame, this);
+		trackview.session().add_command (new MementoCommand<Region>(*_region, &before, &_region->get_state()));
 	}
 	
 	apply_command ();

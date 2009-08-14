@@ -350,6 +350,9 @@ class MidiRegionView : public RegionView
 	std::set< boost::shared_ptr<NoteType> > _marked_for_velocity;
 
 	std::vector<NoteResizeData *> _resize_data;
+
+	/* connection used to connect to model's ContentChanged signal */
+	sigc::connection content_connection;
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */
