@@ -260,7 +260,13 @@ class MidiRegionView : public RegionView
 
 	/** Return the current selection as a MidiModel or null if there is no selection */
 	ARDOUR::MidiModel* selection_as_model () const;
-	
+
+	void goto_previous_note ();
+	void goto_next_note ();
+	void change_velocities (int8_t velocity, bool relative);
+	void transpose (bool up, bool fine);
+	void nudge_notes (ARDOUR::MidiModel::TimeType delta);
+
   protected:
 	/** Allows derived types to specify their visibility requirements
 	 * to the TimeAxisViewItem parent class.
@@ -300,6 +306,8 @@ class MidiRegionView : public RegionView
 	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
 	
 	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
+	void change_note_note(ArdourCanvas::CanvasNoteEvent* ev, int8_t note, bool relative=false);
+	void change_note_time(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
 
 	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }

@@ -2558,5 +2558,14 @@ void
 Editor::set_internal_edit (bool yn)
 {
 	_internal_editing = yn;
+
+	if (yn) {
+		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_select")))));
+		mouse_move_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
+	} else {
+		mouse_select_button.set_image (*(manage (new Image (::get_xpm("tool_range.xpm")))));
+		mouse_move_button.set_image (*(manage (new Image (::get_icon("tool_object")))));
+	}
+
 	set_canvas_cursor ();
 }

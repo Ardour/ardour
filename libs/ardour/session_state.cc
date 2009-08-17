@@ -2151,10 +2151,12 @@ Session::begin_reversible_command(const string& name)
 {
 	UndoTransaction* trans = new UndoTransaction();
 	trans->set_name(name);
+
 	if (!_current_trans.empty()) {
-		_current_trans.top()->add_command(trans);
+		_current_trans.top()->add_command (trans);
+	} else {
+		_current_trans.push(trans);
 	}
-	_current_trans.push(trans);
 }
 
 void

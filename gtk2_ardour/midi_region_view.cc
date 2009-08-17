@@ -210,10 +210,27 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	static double last_x, last_y;
 	double event_x, event_y;
 	nframes64_t event_frame = 0;
+	uint8_t d_velocity = 10;
 
 	static ArdourCanvas::SimpleRect* drag_rect = NULL;
 
 	switch (ev->type) {
+	case GDK_SCROLL:
+		if (Keyboard::modifier_state_equals (ev->scroll.state, Keyboard::Level4Modifier)) {
+			d_velocity = 1;
+		}
+
+		if (ev->scroll.direction == GDK_SCROLL_UP) {
+			change_velocities (d_velocity, true);
+			return true;
+		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
+			change_velocities(-d_velocity, true);
+			return true;
+		} else {
+			return false;
+		}
+		break;
+
 	case GDK_KEY_PRESS:
 		if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
 			_mouse_state = SelectTouchDragging;
@@ -232,6 +249,36 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		} else if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
 			_mouse_state = None;
 			return true;
+		} else if (ev->key.keyval == GDK_Tab) {
+			if (Keyboard::modifier_state_equals (ev->key.state, Keyboard::PrimaryModifier)) {
+				goto_previous_note ();
+			} else {
+				goto_next_note ();
+			}
+			return true;
+		} else if (ev->key.keyval == GDK_Up) {
+
+			if (Keyboard::modifier_state_equals (ev->key.state, Keyboard::PrimaryModifier)) {
+				change_velocities (1, true);
+			} else {
+				transpose (true, false);
+			}
+
+		} else if (ev->key.keyval == GDK_Down) {
+
+			if (Keyboard::modifier_state_equals (ev->key.state, Keyboard::PrimaryModifier)) {
+				change_velocities (-1, true);
+			} else {
+				transpose (false, false);
+			}
+		} else if (ev->key.keyval == GDK_Left) {
+
+			nudge_notes (-1.0);
+
+		} else if (ev->key.keyval == GDK_Right) {
+
+			nudge_notes (1.0);
+
 		}
 		return false;
 
@@ -468,7 +515,6 @@ MidiRegionView::clear_events()
 void
 MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
-	cerr << "MRV: display mode, enable = " << _enable_display << endl;
 	_model = model;
 	content_connection.disconnect ();
 	content_connection = _model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
@@ -542,7 +588,6 @@ MidiRegionView::abort_command()
 void
 MidiRegionView::redisplay_model()
 {
-	cerr << "MRV: display mode, active notes = " << _active_notes << endl;
 	// Don't redisplay the model if we're currently recording and displaying that
 	if (_active_notes) {
 		return;
@@ -1570,6 +1615,46 @@ MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bo
 }
 
 void
+MidiRegionView::change_note_note (CanvasNoteEvent* event, int8_t note, bool relative)
+{
+	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
+
+	if (relative) {
+		uint8_t new_note = copy->note() + note;
+		clamp_to_0_127(new_note);
+		copy->set_note(new_note);
+	} else {
+		copy->set_note(note);			
+	}
+
+	command_remove_note(event);
+	command_add_note(copy, event->selected(), false);
+}
+
+void
+MidiRegionView::change_note_time (CanvasNoteEvent* event, MidiModel::TimeType delta, bool relative)
+{
+	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
+
+	if (relative) {
+		if (delta < 0.0) {
+			if (copy->time() < -delta) {
+				copy->set_time (0);
+			} else {
+				copy->set_time (copy->time() + delta);
+			} 
+		} else {
+			copy->set_time (copy->time() + delta);
+		}
+	} else {
+		copy->set_time (delta);
+	}
+
+	command_remove_note(event);
+	command_add_note(copy, event->selected(), false);
+}
+
+void
 MidiRegionView::change_velocity(CanvasNoteEvent* ev, int8_t velocity, bool relative)
 {
 	start_delta_command(_("change velocity"));
@@ -1587,6 +1672,66 @@ MidiRegionView::change_velocity(CanvasNoteEvent* ev, int8_t velocity, bool relat
 	
 	apply_command();
 }
+
+
+void
+MidiRegionView::change_velocities (int8_t velocity, bool relative)
+{
+	start_delta_command(_("change velocities"));
+	
+	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
+		Selection::iterator next = i;
+		++next;
+		change_note_velocity (*i, velocity, relative);
+		i = next;
+	}
+	
+	apply_command();
+}
+
+
+void
+MidiRegionView::transpose (bool up, bool fine)
+{
+	int8_t delta;
+	
+	if (fine) {
+		delta = 1;
+	} else {
+		delta = 12;
+	}
+
+	if (!up) {
+		delta = -delta;
+	}
+
+	start_delta_command (_("transpose"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+		Selection::iterator next = i;
+		++next;
+		change_note_note (*i, delta, true);
+		i = next;
+	}
+
+	apply_command ();
+}
+
+void
+MidiRegionView::nudge_notes (MidiModel::TimeType delta)
+{
+	start_delta_command (_("nudge"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+		Selection::iterator next = i;
+		++next;
+		change_note_time (*i, delta, true);
+		i = next;
+	}
+
+	apply_command ();
+}
+
 
 void
 MidiRegionView::change_channel(uint8_t channel)
@@ -1752,6 +1897,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 			copied_note->set_time (paste_pos_beats + copied_note->time() - beat_delta);
 
 			/* make all newly added notes selected */
+			cerr << "\tadd @ " << copied_note->time() << endl;
 
 			command_add_note (copied_note, true);
 			end_point = copied_note->end_time();
@@ -1762,14 +1908,51 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	/* if we pasted past the current end of the region, extend the region */
 
-	nframes64_t end_frame = beats_to_frames (end_point);
+	nframes64_t end_frame = _region->position() + beats_to_frames (end_point);
 	nframes64_t region_end = _region->position() + _region->length() - 1;
 
+	cerr << "\tEnd frame = " << end_frame << " from " << end_point << " region end = " << region_end << endl;
+
 	if (end_frame > region_end) {
+
+		trackview.session().begin_reversible_command (_("paste"));
+
 		XMLNode& before (_region->get_state());
 		_region->set_length (end_frame, this);
+		cerr << "\textended to " << end_frame << endl;
 		trackview.session().add_command (new MementoCommand<Region>(*_region, &before, &_region->get_state()));
 	}
 	
 	apply_command ();
+}
+
+void
+MidiRegionView::goto_next_note ()
+{
+	nframes64_t pos = trackview.session().transport_frame();
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+		nframes64_t npos = _region->position() + beats_to_frames ((*i)->note()->time());
+
+		if (npos >= pos && !(*i)->selected()) {
+			unique_select (*i);
+			trackview.session().request_locate (npos);
+			return;
+		}
+	}
+}
+
+void
+MidiRegionView::goto_previous_note ()
+{
+	nframes64_t pos = trackview.session().transport_frame();
+
+	for (Events::reverse_iterator i = _events.rbegin(); i != _events.rend(); ++i) {
+		nframes64_t npos = _region->position() + beats_to_frames ((*i)->note()->time());
+		if (npos <= pos && !(*i)->selected()) {
+			unique_select (*i);
+			trackview.session().request_locate (npos);
+			return;
+		}
+	}
 }

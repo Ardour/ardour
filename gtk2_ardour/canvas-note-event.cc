@@ -224,24 +224,8 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	static double last_x, last_y;
 	double event_x, event_y, dx, dy;
 	bool select_mod;
-	uint8_t d_velocity = 10;
 
 	switch (ev->type) {
-	case GDK_SCROLL:
-		if (Keyboard::modifier_state_equals (ev->scroll.state, Keyboard::Level4Modifier)) {
-			d_velocity = 1;
-		}
-
-		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			_region.change_velocity(this, d_velocity, true);
-			return true;
-		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			_region.change_velocity(this, -d_velocity, true);
-			return true;
-		} else {
-			return false;
-		}
-		
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered(this);
 		//_item->grab_focus();

@@ -891,10 +891,14 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			/* get the playlist where this drag started. we can't use rv->region()->playlist()
 			   because we may have copied the region and it has not been attached to a playlist.
 			*/
+			
+			source_tv = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
+			ds = source_tv->get_diskstream();
+			from_playlist = ds->playlist();
 
-			assert ((source_tv = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view())));
-			assert ((ds = source_tv->get_diskstream()));
-			assert ((from_playlist = ds->playlist()));
+			assert (source_tv);
+			assert (ds);
+			assert (from_playlist);
 
 			/* moved to a different audio track, without copying */
 
