@@ -1041,7 +1041,7 @@ size_t
 smf_get_length_pulses(const smf_t *smf)
 {
 	int i;
-	size_t pulses;
+	size_t pulses = 0;
 
 	for (i = 1; i <= smf->number_of_tracks; i++) {
 		smf_track_t *track;
