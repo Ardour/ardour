@@ -1902,6 +1902,8 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		fooc.block (false);
 	}
 	
+	items.push_back (MenuElem (_("Transpose"), mem_fun(*this, &Editor::pitch_shift_regions)));
+
 	if (!Profile->get_sae()) {
 		items.push_back (CheckMenuElem (_("Opaque")));
 		CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
