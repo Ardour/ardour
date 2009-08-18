@@ -325,22 +325,21 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		case Pressed: // Clicked
 			if (editor.current_mouse_mode() == Editing::MouseRange) {
 				_state = None;
-				if (_selected && !select_mod && _region.selection_size() > 1) {
-					_region.unique_select(this);
-				} else if (_selected) {
+				if (_selected) {
 					_region.note_deselected(this, select_mod);
 				} else {
-					_region.note_selected(this, select_mod);
-				}
-#if 0
-			} else if (midi_edit_mode == Editing::MidiEditErase) {
-				_region.start_delta_command();
-				_region.command_remove_note(this);
-				_region.apply_command();
-#endif
-			}
+					bool extend = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::TertiaryModifier);
+					bool add = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
 
+					if (!extend && !add && _region.selection_size() > 1) {
+						_region.unique_select(this);
+					} else {
+						_region.note_selected (this, (extend ? true : add), extend);
+					}
+				}
+			}
 			return true;
+
 		case Dragging: // Dropped
 			_item->ungrab(ev->button.time);
 			_state = None;

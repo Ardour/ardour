@@ -172,7 +172,7 @@ class MidiRegionView : public RegionView
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
-	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add);
+	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
 	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add);
 	void   delete_selection();
 	size_t selection_size() { return _selection.size(); }
@@ -265,7 +265,7 @@ class MidiRegionView : public RegionView
 	void goto_next_note ();
 	void change_velocities (int8_t velocity, bool relative);
 	void transpose (bool up, bool fine);
-	void nudge_notes (ARDOUR::MidiModel::TimeType delta);
+	void nudge_notes (bool forward);
 
   protected:
 	/** Allows derived types to specify their visibility requirements

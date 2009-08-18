@@ -331,6 +331,8 @@ class Editor : public PublicEditor
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
+	nframes64_t get_nudge_distance (nframes64_t pos, nframes64_t& next);
+
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
 
@@ -1900,8 +1902,6 @@ public:
 	Gtk::HBox        nudge_hbox;
 	Gtk::VBox        nudge_vbox;
 	AudioClock       nudge_clock;
-
-	nframes64_t get_nudge_distance (nframes64_t pos, nframes64_t& next);
 
 	bool nudge_forward_release (GdkEventButton*);
 	bool nudge_backward_release (GdkEventButton*);

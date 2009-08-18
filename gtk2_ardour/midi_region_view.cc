@@ -214,6 +214,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 	static ArdourCanvas::SimpleRect* drag_rect = NULL;
 
+	/* XXX: note that as of August 2009, the GnomeCanvas does not propagate scroll events
+	   to its items, which means that ev->type == GDK_SCROLL will never be seen
+	*/
+
 	switch (ev->type) {
 	case GDK_SCROLL:
 		if (Keyboard::modifier_state_equals (ev->scroll.state, Keyboard::Level4Modifier)) {
@@ -273,11 +277,11 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			}
 		} else if (ev->key.keyval == GDK_Left) {
 
-			nudge_notes (-1.0);
+			nudge_notes (false);
 
 		} else if (ev->key.keyval == GDK_Right) {
 
-			nudge_notes (1.0);
+			nudge_notes (true);
 
 		}
 		return false;
@@ -1233,14 +1237,49 @@ MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 }
 
 void
-MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
+MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend)
 {
 	if (!add) {
 		clear_selection_except(ev);
 	}
 
-	if (!ev->selected()) {
-		add_to_selection (ev);
+	if (!extend) {
+
+		if (!ev->selected()) {
+			add_to_selection (ev);
+		}
+
+	} else {
+		/* find end of latest note selected, select all between that and the start of "ev" */
+
+		MidiModel::TimeType earliest = DBL_MAX;
+		MidiModel::TimeType latest = 0;
+
+		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+			if ((*i)->note()->end_time() > latest) {
+				latest = (*i)->note()->end_time();
+			} 
+			if ((*i)->note()->time() < earliest) {
+				earliest = (*i)->note()->time();
+			}
+		}
+
+		if (ev->note()->end_time() > latest) {
+			earliest = latest;
+			latest = ev->note()->end_time();
+		} else {
+			earliest = ev->note()->time();
+		}
+
+		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {		
+			if ((*i)->note()->time() >= earliest && (*i)->note()->end_time() <= latest) {
+				add_to_selection (*i);
+			}
+			
+			if ((*i)->note()->end_time() > latest) {
+				break;
+			}
+		}
 	}
 }
 
@@ -1655,28 +1694,12 @@ MidiRegionView::change_note_time (CanvasNoteEvent* event, MidiModel::TimeType de
 }
 
 void
-MidiRegionView::change_velocity(CanvasNoteEvent* ev, int8_t velocity, bool relative)
-{
-	start_delta_command(_("change velocity"));
-	
-	change_note_velocity(ev, velocity, relative);
-
-	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
-		Selection::iterator next = i;
-		++next;
-		if ( !(*((*i)->note()) == *(ev->note())) ) {
-			change_note_velocity(*i, velocity, relative);
-		}
-		i = next;
-	}
-	
-	apply_command();
-}
-
-
-void
 MidiRegionView::change_velocities (int8_t velocity, bool relative)
 {
+	if (_selection.empty()) {
+		return;
+	}
+
 	start_delta_command(_("change velocities"));
 	
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
@@ -1693,6 +1716,10 @@ MidiRegionView::change_velocities (int8_t velocity, bool relative)
 void
 MidiRegionView::transpose (bool up, bool fine)
 {
+	if (_selection.empty()) {
+		return;
+	}
+
 	int8_t delta;
 	
 	if (fine) {
@@ -1718,8 +1745,40 @@ MidiRegionView::transpose (bool up, bool fine)
 }
 
 void
-MidiRegionView::nudge_notes (MidiModel::TimeType delta)
+MidiRegionView::nudge_notes (bool forward)
 {
+	if (_selection.empty()) {
+		return;
+	}
+
+	/* pick a note as the point along the timeline to get the nudge distance. 
+	   its not necessarily the earliest note, so we may want to pull the notes out 
+	   into a vector and sort before using the first one.
+	*/
+
+	nframes64_t ref_point = _region->position() + beats_to_frames ((*(_selection.begin()))->note()->time());
+	nframes64_t next_pos = ref_point;
+
+	if (forward) {
+		next_pos += 1;
+	} else { 
+		if (next_pos == 0) {
+			return;
+		}
+		next_pos -= 1;
+	}
+
+	trackview.editor().snap_to (next_pos, (forward ? 1 : -1), false);
+	nframes64_t distance = ref_point - next_pos;
+
+	cerr << "ref was " << ref_point << " next is " << next_pos << endl;
+
+	MidiModel::TimeType delta = frames_to_beats (fabs (distance));
+
+	if (!forward) {
+		delta = -delta;
+	}
+
 	start_delta_command (_("nudge"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
@@ -1897,7 +1956,6 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 			copied_note->set_time (paste_pos_beats + copied_note->time() - beat_delta);
 
 			/* make all newly added notes selected */
-			cerr << "\tadd @ " << copied_note->time() << endl;
 
 			command_add_note (copied_note, true);
 			end_point = copied_note->end_time();
@@ -1911,15 +1969,12 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 	nframes64_t end_frame = _region->position() + beats_to_frames (end_point);
 	nframes64_t region_end = _region->position() + _region->length() - 1;
 
-	cerr << "\tEnd frame = " << end_frame << " from " << end_point << " region end = " << region_end << endl;
-
 	if (end_frame > region_end) {
 
 		trackview.session().begin_reversible_command (_("paste"));
 
 		XMLNode& before (_region->get_state());
 		_region->set_length (end_frame, this);
-		cerr << "\textended to " << end_frame << endl;
 		trackview.session().add_command (new MementoCommand<Region>(*_region, &before, &_region->get_state()));
 	}
 	
@@ -1929,30 +1984,52 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 void
 MidiRegionView::goto_next_note ()
 {
-	nframes64_t pos = trackview.session().transport_frame();
+	// nframes64_t pos = -1;
+	bool use_next = false;
+
+	if (_events.back()->selected()) {
+		return;
+	}
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		nframes64_t npos = _region->position() + beats_to_frames ((*i)->note()->time());
-
-		if (npos >= pos && !(*i)->selected()) {
+		if ((*i)->selected()) {
+			use_next = true;
+			continue;
+		} else if (use_next) {
 			unique_select (*i);
-			trackview.session().request_locate (npos);
+			// pos = _region->position() + beats_to_frames ((*i)->note()->time());
 			return;
 		}
 	}
+
+	/* use the first one */
+
+	unique_select (_events.front());
+	
 }
 
 void
 MidiRegionView::goto_previous_note ()
 {
-	nframes64_t pos = trackview.session().transport_frame();
+	// nframes64_t pos = -1;
+	bool use_next = false;
+
+	if (_events.front()->selected()) {
+		return;
+	}
 
 	for (Events::reverse_iterator i = _events.rbegin(); i != _events.rend(); ++i) {
-		nframes64_t npos = _region->position() + beats_to_frames ((*i)->note()->time());
-		if (npos <= pos && !(*i)->selected()) {
+		if ((*i)->selected()) {
+			use_next = true;
+			continue;
+		} else if (use_next) {
 			unique_select (*i);
-			trackview.session().request_locate (npos);
+			// pos = _region->position() + beats_to_frames ((*i)->note()->time());
 			return;
 		}
 	}
+
+	/* use the last one */
+
+	unique_select (*(_events.rbegin()));
 }
