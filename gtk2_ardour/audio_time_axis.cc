@@ -382,7 +382,7 @@ AudioTimeAxisView::add_gain_automation_child ()
 						     editor,
 						     *this,
 						     parent_canvas,
-						     _("gain"),
+						     _("Fader"),
 						     _route->gain_automation_curve());
 	
 	line = new AutomationGainLine ("automation gain",
@@ -422,7 +422,7 @@ AudioTimeAxisView::add_pan_automation_child ()
 {
 	XMLProperty* prop;
 
-	pan_track = new PanAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, _("pan"));
+	pan_track = new PanAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, _("Pan"));
 
 	update_pans ();
 	
