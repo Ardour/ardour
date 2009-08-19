@@ -63,6 +63,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("MarkerMenu"), _("Markers"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
 	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));
+	ActionManager::register_action (editor_actions, X_("Performance"), _("Performance"));
 	ActionManager::register_action (editor_actions, X_("MiscOptions"), _("Misc Options"));
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
@@ -117,7 +118,7 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-auto-xfades", _("Created Automatically"), mem_fun(*this, &Editor::toggle_auto_xfade));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (editor_actions, "toggle-region-fades", _("Use Region Fades (global)"), mem_fun(*this, &Editor::toggle_region_fades));
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-region-fades", _("Use Region Fades"), mem_fun(*this, &Editor::toggle_region_fades));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-region-fades-visible", _("Show Region Fades"), mem_fun(*this, &Editor::toggle_region_fades_visible));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -460,7 +461,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "duplicate-range", _("Duplicate Range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "insert-region", _("Insert Region"), mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
+	act = ActionManager::register_action (editor_actions, "insert-region", _("Insert Region from List"), mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region"), mem_fun(*this, &Editor::normalize_region));
@@ -657,8 +658,6 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
 
-	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), bind (mem_fun(*this, &Editor::step_mouse_mode), true));
-	
 	RadioAction::Group edit_point_group;
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
@@ -671,8 +670,11 @@ Editor::register_actions ()
 	}
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), bind (mem_fun (*this, &Editor::set_edit_mode), Slide));
 	ActionManager::register_action (editor_actions, "set-edit-lock", _("Lock"), bind (mem_fun (*this, &Editor::set_edit_mode), Lock));
-	ActionManager::register_action (editor_actions, "toggle-edit-mode", _("Toggle Edit Mode"), mem_fun (*this, &Editor::cycle_edit_mode));
+	ActionManager::register_action (editor_actions, "toggle-edit-mode", _("Next Edit Mode"), mem_fun (*this, &Editor::cycle_edit_mode));
 
+	ActionManager::register_action (editor_actions, X_("MouseMode"), _("Mouse Mode"));
+	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Next Mouse Mode"), bind (mem_fun(*this, &Editor::step_mouse_mode), true));
+	
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap To"));
 	ActionManager::register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
 
@@ -798,7 +800,7 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms while Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 
 

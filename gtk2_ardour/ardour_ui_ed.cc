@@ -94,7 +94,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
 	ActionManager::register_action (main_actions, X_("Help"), _("Help"));
- 	ActionManager::register_action (main_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
+ 	ActionManager::register_action (main_actions, X_("KeyMouseActions"), _("Editing Modes"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormat"), _("Audio File Format"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("File Type"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Sample Format"));
@@ -506,7 +506,7 @@ ARDOUR_UI::install_actions ()
 		}
 	}
 
-	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
+	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do Not Run Plugins while Recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
 	ActionManager::session_sensitive_actions.push_back (act);
