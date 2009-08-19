@@ -216,6 +216,7 @@ Editor::register_actions ()
 	
        	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 
 	act = ActionManager::register_action (editor_actions, "save-visual-state-1", _("Save View 1"), bind (mem_fun (*this, &Editor::start_visual_state_op), 0));
@@ -328,8 +329,10 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), bind (mem_fun(*this, &Editor::move_selected_tracks), true));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), bind (mem_fun(*this, &Editor::move_selected_tracks), false));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), mem_fun(*this, &Editor::scroll_tracks_up));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -613,6 +616,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "fit-tracks", _("Fit Selected Tracks"), (mem_fun(*this, &Editor::fit_tracks)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), (mem_fun(*this, &Editor::set_track_height_largest)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
