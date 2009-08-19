@@ -1636,14 +1636,21 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 
 	/* no existing/complete transient info */
 
+	static bool analyse_dialog_shown = false;
 	if (!Config->get_auto_analyse_audio()) {
-		pl->session().Dialog (_("\
+		if ( !analyse_dialog_shown ) {
+			pl->session().Dialog (_("\
 You have requested an operation that requires audio analysis.\n\n\
 You currently have \"auto-analyse-audio\" disabled, which means\n\
 that transient data must be generated every time it is required.\n\n\
 If you are doing work that will require transient data on a\n\
 regular basis, you should probably enable \"auto-analyse-audio\"\n\
-then quit ardour and restart."));
+then quit ardour and restart.\n\n\
+This dialog will not display again.  But you may notice a slight delay\n\
+in this and future transient-detection operations.\n\
+"));
+			analyse_dialog_shown = true;  //only show this dialog once 
+			}
 	}
 
 	TransientDetector t (pl->session().frame_rate());
