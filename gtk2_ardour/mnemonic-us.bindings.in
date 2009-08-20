@@ -105,7 +105,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
 
 @rop|Editor/set-fade-in-length|slash|set fade in length
-@rop|Editor/set-fade-in-length|<@PRIMARY@>slash|toggle fade in active
+@rop|Editor/set-fade-out-length|<@PRIMARY@>slash|toggle fade in active
 @rop|Editor/toggle-fade-out-active|backslash|set fade out length
 @rop|Editor/toggle-fade-out-active|<@PRIMARY@>backslash|toggle fade out active
 
@@ -137,7 +137,7 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/goto-editor|<@WINDOW@>e|toggle editor window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
-@edit|Editor/reverse-region|<@PRIMARY@>r|reverse
+@rop|Editor/reverse-region|<@SECONDARY@>r|reverse
 @trans|Transport/Record|<@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
 @rop|Editor/pitch-shift-region|<@SECONDARY@>t|transpose
@@ -195,6 +195,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Editor/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
+@trans|Editor/track-record-enable-toggle|<@SECONDARY@>b|toggle track rec-enable 
 @wvis|Common/ToggleBigClock|<@WINDOW@>b|toggle big clock
 @rop|Editor/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
@@ -262,7 +263,7 @@ This mode provides many different operations on both regions and control points,
 @markers|Editor/add-location-from-playhead|KP_Enter|add mark at playhead
 @wvis|Transport/focus-on-clock|KP_Divide|focus on main clock
 
-@trans|Transport/GotoZero|KP_0|to zero
+@movp|Transport/GotoZero|KP_0|to zero
 @-group|Editor/goto-mark-1|KP_1|some text
 @-group|Editor/goto-mark-2|KP_2|some text
 @-group|Editor/goto-mark-3|KP_3|some text
@@ -280,7 +281,7 @@ This mode provides many different operations on both regions and control points,
 @-group|Editor/crop|F3|some text
 @-group|Editor/separate|F4|some text
 @-group|Editor/pitch-shift-region|F5|some text
-@select|Editor/select-range-between-cursors|F6|convert edit range as range
+@select|Editor/select-range-between-cursors|F6|convert edit range to range
 @wvis|Common/ToggleMaximalEditor|F11|toggle fullscreen editor window
 
 @-group|Editor/save-visual-state-1|<@PRIMARY@>F1|some text
@@ -296,18 +297,18 @@ This mode provides many different operations on both regions and control points,
 @-group|Editor/save-visual-state-11|<@PRIMARY@>F11|some text
 @-group|Editor/save-visual-state-12|<@PRIMARY@>F12|some text
 
-@-group|Editor/goto-visual-state-1|<release><@PRIMARY@>F1|some text
-@-group|Editor/goto-visual-state-2|<release><@PRIMARY@>F2|some text
-@-group|Editor/goto-visual-state-3|<release><@PRIMARY@>F3|some text
-@-group|Editor/goto-visual-state-4|<release><@PRIMARY@>F4|some text
-@-group|Editor/goto-visual-state-5|<release><@PRIMARY@>F5|some text
-@-group|Editor/goto-visual-state-6|<release><@PRIMARY@>F6|some text
-@-group|Editor/goto-visual-state-7|<release><@PRIMARY@>F7|some text
-@-group|Editor/goto-visual-state-8|<release><@PRIMARY@>F8|some text
-@-group|Editor/goto-visual-state-9|<release><@PRIMARY@>F9|some text
-@-group|Editor/goto-visual-state-10|<release><@PRIMARY@>F10|some text
-@-group|Editor/goto-visual-state-11|<release><@PRIMARY@>F11|some text
-@-group|Editor/goto-visual-state-12|<release><@PRIMARY@>F12|some text
+@-group|Editor/goto-visual-state-1|<Release><@PRIMARY@>F1|some text
+@-group|Editor/goto-visual-state-2|<Release><@PRIMARY@>F2|some text
+@-group|Editor/goto-visual-state-3|<Release><@PRIMARY@>F3|some text
+@-group|Editor/goto-visual-state-4|<Release><@PRIMARY@>F4|some text
+@-group|Editor/goto-visual-state-5|<Release><@PRIMARY@>F5|some text
+@-group|Editor/goto-visual-state-6|<Release><@PRIMARY@>F6|some text
+@-group|Editor/goto-visual-state-7|<Release><@PRIMARY@>F7|some text
+@-group|Editor/goto-visual-state-8|<Release><@PRIMARY@>F8|some text
+@-group|Editor/goto-visual-state-9|<Release><@PRIMARY@>F9|some text
+@-group|Editor/goto-visual-state-10|<Release><@PRIMARY@>F10|some text
+@-group|Editor/goto-visual-state-11|<Release><@PRIMARY@>F11|some text
+@-group|Editor/goto-visual-state-12|<Release><@PRIMARY@>F12|some text
 
 
 ;; numbers
