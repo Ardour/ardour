@@ -1,0 +1,414 @@
+#!/usr/bin/perl
+
+# import module
+use Getopt::Long; 
+
+$semicolon = ";"; # help out stupid emacs
+$title = "Ardour Shortcuts";
+$in_group_def = 0;
+$group_name;
+$group_text;
+$group_key;
+$group_number = 0;
+%group_names;
+%group_text;
+%group_bindings;
+%modifier_map;
+%group_numbering;
+%merge_bindings;
+
+$platform = linux;
+$winkey = 'Mod4><Super';
+$make_cheatsheet = 1;
+$make_accelmap = 0;
+$merge_from = "";
+
+GetOptions ("platform=s" => \$platform,
+	    "winkey=s" => \$winkey,
+	    "cheatsheet" => \$make_cheatsheet,
+	    "accelmap" => \$make_accelmap,
+	    "merge=s" => \$merge_from);
+
+if ($platform eq "osx") {
+
+    $gtk_modifier_map{'PRIMARY'} = 'meta';
+    $gtk_modifier_map{'SECONDARY'} = 'Mod1';
+    $gtk_modifier_map{'TERTIARY'} = 'Shift';
+    $gtk_modifier_map{'LEVEL4'} = 'Control';
+    $gtk_modifier_map{'WINDOW'} = 'Mod1';
+
+    $cs_modifier_map{'PRIMARY'} = 'Command';
+    $cs_modifier_map{'SECONDARY'} = 'Opt';
+    $cs_modifier_map{'TERTIARY'} = 'Shift';
+    $cs_modifier_map{'LEVEL4'} = 'Control';
+    $cs_modifier_map{'WINDOW'} = 'Opt';
+
+    $mouse_modifier_map{'PRIMARY'} = 'Cmd';
+    $mouse_modifier_map{'SECONDARY'} = 'Opt';
+    $mouse_modifier_map{'TERTIARY'} = 'Shift';
+    $mouse_modifier_map{'LEVEL4'} = 'Control';
+    $mouse_modifier_map{'WINDOW'} = 'Opt';
+
+} else {
+
+    $gtk_modifier_map{'PRIMARY'} = 'Control';
+    $gtk_modifier_map{'SECONDARY'} = 'Alt';
+    $gtk_modifier_map{'TERTIARY'} = 'Shift';
+    $gtk_modifier_map{'LEVEL4'} = $winkey;
+    $gtk_modifier_map{'WINDOW'} = 'Alt';
+    $gtk_modifier_map{$winkey} => 'Win';
+
+    $cs_modifier_map{'PRIMARY'} = 'Control';
+    $cs_modifier_map{'SECONDARY'} = 'Alt';
+    $cs_modifier_map{'TERTIARY'} = 'Shift';
+    $cs_modifier_map{'LEVEL4'} = 'Win';
+    $cs_modifier_map{'WINDOW'} = 'Alt';
+    $cs_modifier_map{$winkey} => 'Win';
+
+    $mouse_modifier_map{'PRIMARY'} = 'Ctl';
+    $mouse_modifier_map{'SECONDARY'} = 'Alt';
+    $mouse_modifier_map{'TERTIARY'} = 'Shift';
+    $mouse_modifier_map{'LEVEL4'} = 'Win';
+    $mouse_modifier_map{'WINDOW'} = 'Alt';
+    $mouse_modifier_map{$winkey} => 'Win';
+}
+
+%keycodes = (
+    'asciicircum' => '\\verb=^=',
+    'apostrophe' => '\'',
+    'bracketleft' => '[',
+    'bracketright' => ']',
+    'braceleft' => '\\{',
+    'braceright' => '\\}',
+    'backslash' => '$\\backslash$',
+    'slash' => '/',
+    'rightanglebracket' => '>',
+    'leftanglebracket' => '<',
+    'ampersand' => '\\&',
+    'comma' => ',',
+    'period' => '.',
+    'semicolon' => ';',
+    'colon' => ':',
+    'equal' => '=',
+    'minus' => '-',
+    'plus' => '+',
+    'grave' => '`',
+    'rightarrow' => '$\rightarrow$',
+    'leftarrow' => '$\\leftarrow$',
+    'uparrow' => '$\\uparrow$',
+    'downarrow' => '$\\downarrow$',
+    'Page_Down' => 'Page Down',
+    'Page_Up' => 'Page Up',
+    'space' => 'space',
+    'KP_' => 'KP$\_$',
+    );
+
+if ($merge_from) {
+    open (BINDINGS, $merge_from) || die ("merge from bindings: file not readable");
+    while (<BINDINGS>) {
+	next if (/^$semicolon/);
+	if (/^\(gtk_accel/) {
+	    chop; # newline
+	    chop; # closing parenthesis
+	    s/"//g;
+	    ($junk, $action, $binding) = split;
+	    $merge_bindings{$action} = $binding;
+	}
+    }
+    close (BINDINGS);
+}
+
+if ($make_accelmap && !$merge_from) {
+    print ";; this accelmap was produced by tools/fmt-bindings\n";
+}
+
+while (<>) {
+    next if /^$semicolon/;
+
+    if (/^\$/) {
+	s/^\$//;
+	$title = $_;
+	next;
+    }
+
+    if (/^%/) {
+	
+	if ($in_group_def) {
+	    chop $group_text;
+	    $group_names{$group_key} = $group_name;
+	    $group_text{$group_key} = $group_text;
+	    $group_numbering{$group_key} = $group_number;
+	    # each binding entry is 2 element array. bindings
+	    # are all collected into a container array. create
+	    # the first dummy entry so that perl knows what we
+	    # are doing.
+	    $group_bindings{$group_key} = [ [] ];
+	}
+
+	s/^%//;
+	chop;
+	($group_key,$group_name) = split (/\s+/, $_, 2);
+	$group_number++;
+	$group_text = "";
+	$in_group_def = 1;
+	next;
+    }
+
+    if ($in_group_def) {
+	if (/^@/) {
+	    chop $group_text;
+	    $group_names{$group_key} = $group_name;
+	    $group_text{$group_key} = $group_text;
+	    $in_group_def = 0;
+	} else {
+	    next if (/^[ \t]+$/);
+	    $group_text .= $_;
+	    $group_text;
+	    next;
+	}
+    }
+
+    if (/^@/) {
+	s/^@//;
+	chop;
+	($key,$action,$binding,$text) = split (/\|/, $_, 4);
+
+	# substitute bindings
+
+	$gtk_binding = $binding;
+
+	if ($merge_from) {
+	    $lookup = "<Actions>/" . $action;
+	    if ($merge_bindings{$lookup}) {
+		$binding = $merge_bindings{$lookup};
+	    } else {
+		if ($key =~ /^\+/) {
+		    # forced inclusion of bindings from template
+		} else {
+		    # this action is not defined in the merge from set, so forget it 
+		    next;
+		}
+	    }
+	} 
+
+	# print the accelmap output
+
+	if ($key =~ /^\+/) {
+	    # remove + and don't print it in the accelmap
+	    $key =~ s/^\+//;
+	} else {
+	    # include this in the accelmap
+	    if (!$merge_from && $make_accelmap) {
+		foreach $k (keys %gtk_modifier_map) {
+		    $gtk_binding =~ s/\@$k\@/$gtk_modifier_map{$k}/;
+		}
+		print "(gtk_accel_map \"<Actions>/$action\" \"$gtk_binding\")\n";
+	    }
+	}
+
+	if ($key =~ /^-/) {
+	    # do not include this binding in the cheat sheet
+	    next;
+	}
+
+	$bref = $group_bindings{$key};
+	push (@$bref, [$binding, $text]);
+
+	next;
+    }
+
+    next;
+}
+
+if ($make_accelmap || !$make_cheatsheet) {
+    exit 0;
+}
+
+# Now print the cheatsheet
+
+$boilerplate_header = <<END_HEADER;
+\\documentclass[10pt,landscape]{article}
+\\usepackage{multicol}
+\\usepackage{calc}
+\\usepackage{ifthen}
+\\usepackage{palatino}
+\\usepackage{geometry}
+
+\\setlength{\\parskip}{0pt}
+\\setlength{\\parsep}{0pt}
+\\setlength{\\headsep}{0pt}
+\\setlength{\\topskip}{0pt}
+\\setlength{\\topmargin}{0pt}
+\\setlength{\\topsep}{0pt}
+\\setlength{\\partopsep}{0pt}
+
+% This sets page margins to .5 inch if using letter paper, and to 1cm
+% if using A4 paper. (This probably isnott strictly necessary.)
+% If using another size paper, use default 1cm margins.
+\\ifthenelse{\\lengthtest { \\paperwidth = 11in}}
+	{ \\geometry{top=.5in,left=1in,right=0in,bottom=.5in} }
+	{\\ifthenelse{ \\lengthtest{ \\paperwidth = 297mm}}
+		{\\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+		{\\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+	}
+
+% Turn off header and footer
+\\pagestyle{empty}
+ 
+% Redefine section commands to use less space
+\\makeatletter
+\\renewcommand{\\section}{\\\@startsection{section}{1}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\\normalfont\\large\\bfseries}}
+\\renewcommand{\\subsection}{\\\@startsection{subsection}{2}{0mm}%
+                                {-1explus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\\normalfont\\normalsize\\bfseries}}
+\\renewcommand{\\subsubsection}{\\\@startsection{subsubsection}{3}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {1ex plus .2ex}%
+                                {\\normalfont\\small\\bfseries}}
+\\makeatother
+
+% Do not print section numbers% Do not print section numbers
+\\setcounter{secnumdepth}{0}
+
+\\setlength{\\parindent}{0pt}
+\\setlength{\\parskip}{0pt plus 0.5ex}
+
+%-------------------------------------------
+
+\\begin{document}
+\\newlength{\\MyLen}
+\\raggedright
+\\footnotesize
+\\begin{multicols}{3}
+END_HEADER
+
+$boilerplate_footer = <<END_FOOTER;
+\\rule{0.3\\linewidth}{0.25pt}
+\\scriptsize
+
+Copyright \\copyright\\ 2009 ardour.org
+
+% Should change this to be date of file, not current date.
+%\\verb!$Revision: 1.13 $, $Date: 2008/05/29 06:11:56 $.!
+
+http://ardour.org/manual
+
+\\end{multicols}
+\\end{document}
+END_FOOTER
+
+if ($make_cheatsheet) {
+    print $boilerplate_header;
+    print "\\begin{center}\\Large\\bf $title \\end{center}\n";
+}
+
+@groups_sorted_by_number = sort { $group_numbering{$a} <=> $group_numbering{$b} } keys %group_numbering; 
+
+foreach $gk (@groups_sorted_by_number) {
+    # $bref is a reference to the array of arrays for this group
+    $bref = $group_bindings{$gk};
+
+    if (scalar @$bref > 1) {
+	print "\\section{$group_names{$gk}}\n";
+
+	if (!($group_text{$gk} eq  "")) {
+	    print "$group_text{$gk}\n\\par\n";
+	}
+	
+	# ignore the first entry, which was empty
+
+	shift (@$bref);
+
+	# find the longest descriptive text (this is not 100% accuracy due to typography)
+
+	$maxtextlen = 0;
+	$maxtext = "";
+
+	for $bbref (@$bref) {
+	    # $bbref is a reference to an array
+	    $text = @$bbref[1];
+	    
+	    #
+	    # if there is a linebreak, just use everything up the linebreak
+	    # to determine the width
+	    #
+
+	    if ($text =~ /\\linebreak/) {
+		$matchtext = s/\\linebreak.*//;
+	    } else {
+		$matchtext = $text;
+	    }
+	    if (length ($matchtext) > $maxtextlen) {
+		$maxtextlen = length ($matchtext);
+		$maxtext = $matchtext;
+	    }
+	}
+
+	if ($gk =~ /^m/) {
+	    # mouse mode: don't extend max text at all - space it tight
+	    $maxtext .= ".";
+	} else {
+	    $maxtext .= "....";
+	}
+
+	# set up the table
+
+	print "\\settowidth{\\MyLen}{\\texttt{$maxtext}}\n";
+	print "\\begin{tabular}{\@{}p{\\the\\MyLen}% 
+                                \@{}p{\\linewidth-\\the\\MyLen}%
+                                \@{}}\n";
+
+	# sort the array of arrays by the descriptive text for nicer appearance,
+	# and print them
+
+	for $bbref (sort { @$a[1] cmp @$b[1] } @$bref) {
+	    # $bbref is a reference to an array
+
+	    $binding = @$bbref[0];
+	    $text = @$bbref[1];
+
+	    if ($binding =~ /:/) { # mouse binding with "where" clause
+		($binding,$where) = split (/:/, $binding, 2);
+	    }
+
+	    if ($gk =~ /^m/) {
+		# mouse mode - use shorter abbrevs
+		foreach $k (keys %mouse_modifier_map) {
+		    $binding =~ s/\@$k\@/$mouse_modifier_map{$k}/;
+		}
+	    } else {
+		foreach $k (keys %cs_modifier_map) {
+		    $binding =~ s/\@$k\@/$cs_modifier_map{$k}/;
+		}
+	    }
+
+	    $binding =~ s/></\+/g;
+	    $binding =~ s/^<//;
+	    $binding =~ s/>/\+/;
+
+	    # substitute keycode names for something printable
+
+	    $re = qr/${ \(join'|', map quotemeta, keys %keycodes)}/;
+	    $binding =~ s/($re)/$keycodes{$1}/g;
+
+	    # split up mouse bindings to "click" and "where" parts
+
+	    if ($gk eq "mobject") {
+		print "{\\tt @$bbref[1] } & {\\tt $binding} {\\it $where}\\\\\n";
+	    } else {
+		print "{\\tt @$bbref[1] } & {\\tt $binding} \\\\\n";
+	    }
+	}
+
+	print "\\end{tabular}\n";
+
+    }
+}
+
+print $boilerplate_footer;
+
+exit 0;
