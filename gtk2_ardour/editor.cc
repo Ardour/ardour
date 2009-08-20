@@ -1871,7 +1871,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	items.push_back (MenuElem (_("Trim"), *trim_menu));
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Split"), (mem_fun(*this, &Editor::split_region))));
+	items.push_back (MenuElem (_("Split"), (mem_fun(*this, &Editor::split))));
 	region_edit_menu_split_item = &items.back();
 	
 	if (_edit_point == EditAtMouse) {

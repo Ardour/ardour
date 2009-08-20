@@ -111,15 +111,6 @@ Editor::redo (uint32_t n)
 }
 
 void
-Editor::split_region ()
-{
-	RegionSelection rs;
-
-	get_regions_for_action (rs, true);
-	split_regions_at (get_preferred_edit_position (), selection->regions);
-}
-
-void
 Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 {
 	list <boost::shared_ptr<Playlist > > used_playlists;

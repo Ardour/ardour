@@ -1044,7 +1044,6 @@ class Editor : public PublicEditor
 	void raise_region_to_top ();
 	void lower_region ();
 	void lower_region_to_bottom ();
-	void split_region ();
 	void split_regions_at (nframes64_t, RegionSelection&);
 	void split_region_at_transients ();
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret);
