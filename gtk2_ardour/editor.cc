@@ -293,6 +293,7 @@ Editor::Editor ()
 	current_interthread_info = 0;
 	_show_measures = true;
 	_show_waveforms = true;
+	_show_waveforms_rectified = false;
 	_show_waveforms_recording = true;
 	export_dialog = 0;
 	export_range_markers_dialog = 0;
@@ -2480,6 +2481,18 @@ Editor::set_state (const XMLNode& node)
 		}
 	}
 
+	if ((prop = node.property ("show-waveforms-rectified"))) {
+		bool yn = (prop->value() == "yes");
+		_show_waveforms_rectified = !yn;
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-rectified"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			/* do it twice to force the change */
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
+	}
+
 	if ((prop = node.property ("show-waveforms-recording"))) {
 		bool yn = (prop->value() == "yes");
 		_show_waveforms_recording = !yn;
@@ -2612,6 +2625,7 @@ Editor::get_state ()
 	node->add_property ("playhead", buf);
 
 	node->add_property ("show-waveforms", _show_waveforms ? "yes" : "no");
+	node->add_property ("show-waveforms-rectified", _show_waveforms_rectified ? "yes" : "no");
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");

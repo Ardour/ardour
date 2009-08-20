@@ -801,7 +801,6 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_action (editor_actions, X_("Waveforms"), _("Waveforms"));
 	act = ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
 	act = ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-rectified"), _("Show Waveforms Rectified"), mem_fun (*this, &Editor::toggle_waveform_rectified));
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms while Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
