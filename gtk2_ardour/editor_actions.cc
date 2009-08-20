@@ -801,17 +801,16 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	ActionManager::register_action (editor_actions, X_("Waveforms"), _("Waveforms"));
 	act = ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
-
+	act = ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-rectified"), _("Show Waveforms Rectified"), mem_fun (*this, &Editor::toggle_waveform_rectified));
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms while Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
+
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 
-
-	RadioAction::Group waveform_scale_group;
-	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("linear-waveforms"), _("Linear"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LinearWaveform));
+	act = ActionManager::register_action (editor_actions, X_("linear-waveforms"), _("Set Selected Tracks to Linear Waveforms"), bind (mem_fun (*this, &Editor::set_waveform_scale), Editing::LinearWaveform));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("logarithmic-waveforms"), _("Logarithmic"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LogWaveform));
+	act = ActionManager::register_action (editor_actions, X_("logarithmic-waveforms"), _("Set Selected Tracks to Logarithmic Waveforms"), bind (mem_fun (*this, &Editor::set_waveform_scale), Editing::LogWaveform));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	/* if there is a logo in the editor canvas, its always visible at startup */
@@ -927,6 +926,16 @@ Editor::toggle_waveform_visibility ()
 }
 
 void
+Editor::toggle_waveform_rectified ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-rectified"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		set_show_waveforms_rectified (tact->get_active());
+	}
+}
+
+void
 Editor::toggle_waveforms_while_recording ()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
@@ -959,33 +968,6 @@ Editor::toggle_logo_visibility ()
 			} else {
 				logo_item->hide ();
 			}
-		}
-	}
-}
-
-void
-Editor::waveform_scale_chosen (Editing::WaveformScale ws)
-{
-	RefPtr<Action> act;
-
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	switch (ws) {
-	case LinearWaveform:
-		act = ActionManager::get_action (X_("Editor"), X_("linear-waveforms"));
-		break;
-	case LogWaveform:
-		act = ActionManager::get_action (X_("Editor"), X_("logarithmic-waveforms"));
-		break;
-	}
-	
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && ract->get_active()) {
-			set_waveform_scale (ws);
 		}
 	}
 }

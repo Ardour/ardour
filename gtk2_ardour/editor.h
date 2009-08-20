@@ -171,16 +171,21 @@ class Editor : public PublicEditor
 	std::vector<std::string> rb_opt_strings;
 #endif
 
-	/* option editor-access */
+	//global waveform options
 
 	void set_show_waveforms (bool yn);
 	bool show_waveforms() const { return _show_waveforms; }
 
-	void set_waveform_scale (Editing::WaveformScale);
+	void set_show_waveforms_rectified (bool yn);
+	bool show_waveforms_rectified() const { return _show_waveforms_rectified; }
 
 	void set_show_waveforms_recording (bool yn);
 	bool show_waveforms_recording() const { return _show_waveforms_recording; }
 	
+	//per-track waveform options
+	
+	void set_waveform_scale (Editing::WaveformScale);
+
 	/* things that need to be public to be used in the main menubar */
 
 	void new_region_from_selection ();
@@ -318,7 +323,9 @@ class Editor : public PublicEditor
 	bool dragging_playhead () const { return _dragging_playhead; }
 
 	void toggle_waveform_visibility ();
+	void toggle_waveform_rectified ();
 	void toggle_waveforms_while_recording ();
+	
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 
@@ -1473,10 +1480,13 @@ public:
 	/* display control */
 	
 	bool _show_measures;
+
 	bool _show_waveforms;
+	bool _show_waveforms_rectified;
+	bool _show_waveforms_recording;
+
 	bool _stationary_playhead;
 	bool _follow_playhead;
-	bool _show_waveforms_recording;
 	
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
@@ -2222,7 +2232,6 @@ public:
 
 	void remove_tracks ();
 	void toggle_tracks_active ();
-	void waveform_scale_chosen (Editing::WaveformScale);
 
 	bool _have_idled;
 	int resize_idle_id;

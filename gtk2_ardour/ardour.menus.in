@@ -297,7 +297,6 @@
 		     <menuitem action='track-height-small'/>
 		</menu>
 		<menu action='WaveformMenu'>
-		      <menuitem action='toggle-waveform-visible'/>
 		      <menuitem action='linear-waveforms'/>
 		      <menuitem action='logarithmic-waveforms'/>
 		</menu>
@@ -381,9 +380,12 @@
 
 	       <menuitem action='ToggleMaximalEditor'/>
 	       <menuitem action='show-editor-mixer'/>
-               <menuitem action='ToggleMeasureVisibility'/>
+           <menuitem action='ToggleMeasureVisibility'/>
+	       <menu action="Waveforms">
                <menuitem action='toggle-waveform-visible'/>
+               <menuitem action='toggle-waveform-rectified'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
+	       </menu>
 	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
 	       <menuitem action='toggle-region-fades-visible'/>
         </menu>

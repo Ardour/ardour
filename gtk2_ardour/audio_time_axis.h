@@ -72,6 +72,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	AudioStreamView* audio_view();
 
 	void set_show_waveforms (bool yn);
+	void set_show_waveforms_rectified (bool yn);
 	void set_show_waveforms_recording (bool yn);
 	void show_all_xfades ();
 	void hide_all_xfades ();

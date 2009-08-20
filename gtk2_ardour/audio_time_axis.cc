@@ -264,28 +264,6 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	MenuList& waveform_items = waveform_menu->items();
 	waveform_menu->set_name ("ArdourContextMenu");
 	
-	waveform_items.push_back (CheckMenuElem (_("Show waveforms"), mem_fun(*this, &AudioTimeAxisView::toggle_waveforms)));
-	waveform_item = static_cast<CheckMenuItem *> (&waveform_items.back());
-	ignore_toggle = true;
-	waveform_item->set_active (editor.show_waveforms());
-	ignore_toggle = false;
-
-	waveform_items.push_back (SeparatorElem());
-	
-	RadioMenuItem::Group group;
-	
-	waveform_items.push_back (RadioMenuElem (group, _("Traditional"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Traditional)));
-	traditional_item = static_cast<RadioMenuItem *> (&waveform_items.back());
-
-	if (!Profile->get_sae()) {
-		waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
-		rectified_item = static_cast<RadioMenuItem *> (&waveform_items.back());
-	} else {
-		rectified_item = 0;
-	}
-
-	waveform_items.push_back (SeparatorElem());
-	
 	RadioMenuItem::Group group2;
 
 	waveform_items.push_back (RadioMenuElem (group2, _("Linear"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_scale), LinearWaveform)));
@@ -298,12 +276,6 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	AudioStreamView* asv = audio_view();
 	if (asv) {
 		ignore_toggle = true;
-		if (asv->get_waveform_shape() == Rectified && rectified_item) {
-			rectified_item->set_active(true);
-		} else {
-			traditional_item->set_active(true);
-		}
-
 		if (asv->get_waveform_scale() == LogWaveform) 
 			logscale_item->set_active(true);
 		else linearscale_item->set_active(true);
@@ -344,6 +316,16 @@ AudioTimeAxisView::set_show_waveforms_recording (bool yn)
 
 	if (asv) {
 		asv->set_show_waveforms_recording (yn);
+	}
+}
+
+void
+AudioTimeAxisView::set_show_waveforms_rectified (bool yn)
+{
+	AudioStreamView* asv = audio_view();
+
+	if (asv) {
+		asv->set_waveform_shape ( yn ?  Rectified : Traditional );
 	}
 }
 
