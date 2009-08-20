@@ -202,7 +202,7 @@ while (<>) {
 		foreach $k (keys %gtk_modifier_map) {
 		    $gtk_binding =~ s/\@$k\@/$gtk_modifier_map{$k}/;
 		}
-		print "(gtk_accel_map \"<Actions>/$action\" \"$gtk_binding\")\n";
+		print "(gtk_accel_path \"<Actions>/$action\" \"$gtk_binding\")\n";
 	    }
 	}
 
