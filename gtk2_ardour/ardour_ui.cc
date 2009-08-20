@@ -1092,7 +1092,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 void
 ARDOUR_UI::build_session_selector ()
 {
-	session_selector_window = new ArdourDialog ("session selector");
+	session_selector_window = new ArdourDialog (_("Recent Sessions"));
 	
 	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
 	
