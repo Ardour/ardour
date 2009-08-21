@@ -61,11 +61,11 @@ RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& r
 	range = upper - lower;
 
 	if (desc.toggled) {
-		no_draw = true;
+		auto_is_boolean = true;
 		return;
 	}
 
-	no_draw = false;
+	auto_is_boolean = false;
 
 	/* XXX set min/max for underlying curve ??? */
 }

@@ -399,9 +399,15 @@ PluginInsert::set_parameter (uint32_t port, float val)
 {
 	/* the others will be set from the event triggered by this */
 
+	float last_val = _plugins[0]->get_parameter (port);
+	Plugin::ParameterDescriptor desc;
+	_plugins[0]->get_parameter_descriptor(port, desc);
+	
 	_plugins[0]->set_parameter (port, val);
 	
 	if (automation_list (port).automation_write()) {
+		if ( desc.toggled )  //store the previous value just before this so any interpolation works right 
+			automation_list (port).add (_session.audible_frame()-1, last_val);
 		automation_list (port).add (_session.audible_frame(), val);
 	}
 

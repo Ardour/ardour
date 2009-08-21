@@ -448,7 +448,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 
 			control_ui->pack_start (control_ui->label, true, true);
 			control_ui->pack_start (*control_ui->button, false, true);
-			//control_ui->pack_start (control_ui->automate_button, false, false);
+			control_ui->pack_start (control_ui->automate_button, false, false);
 
 			if(plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
@@ -458,6 +458,11 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 		
 			plugin->ParameterChanged.connect (bind (mem_fun(*this, &GenericPluginUI::toggle_parameter_changed), control_ui));
 	
+			control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+			automation_state_changed (control_ui);
+			insert->automation_list (port_index).automation_state_changed.connect 
+				(bind (mem_fun(*this, &GenericPluginUI::automation_state_changed), control_ui));
+
 			return control_ui;
 		}
 	

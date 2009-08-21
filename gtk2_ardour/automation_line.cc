@@ -229,7 +229,7 @@ AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCan
 	points_visible = false;
 	update_pending = false;
 	_vc_uses_gain_mapping = false;
-	no_draw = false;
+	auto_is_boolean = false;
 	_visible = true;
 	terminal_points_can_slide = true;
 	_height = 0;
@@ -1242,10 +1242,6 @@ AutomationLine::reset ()
 {
 	update_pending = false;
 
-	if (no_draw) {
-		return;
-	}
-
 	alist.apply_to_points (*this, &AutomationLine::reset_callback);
 }
 
@@ -1274,6 +1270,10 @@ AutomationLine::change_model_range (AutomationList::iterator start, AutomationLi
 void
 AutomationLine::show_all_control_points ()
 {
+	if (auto_is_boolean) {  //show the automation line but don't allow any control points
+		return;
+	}
+
 	points_visible = true;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
