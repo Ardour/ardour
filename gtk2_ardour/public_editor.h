@@ -235,7 +235,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	static PublicEditor* _instance;
 
-	friend class PluginUIWindow;
+	friend bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 };
 
 #endif // __gtk_ardour_public_editor_h__

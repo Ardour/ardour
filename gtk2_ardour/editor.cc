@@ -2945,6 +2945,7 @@ Editor::setup_toolbar ()
 	
 	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
+	mouse_mode_tearoff->tearoff_window().signal_key_press_event().connect (bind (sigc::ptr_fun (relay_key_press), &mouse_mode_tearoff->tearoff_window()));
 
 	if (Profile->get_sae()) {
 		mouse_mode_tearoff->set_can_be_torn_off (false);
@@ -3069,6 +3070,7 @@ Editor::setup_toolbar ()
 
 	tools_tearoff = new TearOff (*hbox);
 	tools_tearoff->set_name ("MouseModeBase");
+	tools_tearoff->tearoff_window().signal_key_press_event().connect (bind (sigc::ptr_fun (relay_key_press), &tools_tearoff->tearoff_window()));
 
 	if (Profile->get_sae()) {
 		tools_tearoff->set_can_be_torn_off (false);

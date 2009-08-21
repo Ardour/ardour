@@ -39,6 +39,7 @@
 #include "editor.h"
 #include "actions.h"
 #include "mixer_ui.h"
+#include "utils.h"
 
 #ifdef GTKOSX
 #include <gtkmm2ext/sync-menu.h>
@@ -853,11 +854,12 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->set_keep_above (true);
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);
+	big_clock_window->signal_key_press_event().connect (bind (sigc::ptr_fun (relay_key_press), big_clock_window));
 
 	WindowTitle title(Glib::get_application_name());
 	title += _("Clock");
 	big_clock_window->set_title (title.get_string());
-	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
+	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
 

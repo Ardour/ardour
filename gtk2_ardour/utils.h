@@ -29,6 +29,7 @@
 #include <glibmm/ustring.h>
 
 #include "canvas.h"
+#include "public_editor.h"
 
 namespace Gtk {
 	class Window;
@@ -75,6 +76,7 @@ bool canvas_item_visible (ArdourCanvas::Item* item);
 
 void set_color (Gdk::Color&, int);
 
+bool relay_key_press (GdkEventKey*, Gtk::Window*);
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
 

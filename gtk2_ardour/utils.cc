@@ -403,6 +403,16 @@ extern "C" {
 #endif
 
 bool
+relay_key_press (GdkEventKey* ev, Gtk::Window* win)
+{
+	if (!key_press_focus_accelerator_handler (*win, ev)) {
+		return PublicEditor::instance().on_key_press_event(ev);
+	} else {
+		return true;
+	}
+}
+
+bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
 	GtkWindow* win = window.gobj();
