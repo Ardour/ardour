@@ -606,6 +606,12 @@ LV2PluginInfo::discover (void* lv2_world)
 		LV2PluginInfoPtr info (new LV2PluginInfo(lv2_world, p));
 
 		SLV2Value name = slv2_plugin_get_name(p);
+
+		if (!name) {
+			cerr << "LV2: invalid plugin\n";
+			continue;
+		}
+		
 		info->name = string(slv2_value_as_string(name));
 		slv2_value_free(name);
 
