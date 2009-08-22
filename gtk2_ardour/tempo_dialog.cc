@@ -349,6 +349,8 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		when_frame.add (*when_hbox);
 		
 		get_vbox()->pack_end (when_frame, false, false);
+	} else {
+		when_bar_entry.set_text ("0");
 	}
 
 	get_vbox()->set_border_width (12);
