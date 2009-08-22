@@ -2684,26 +2684,28 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	case SnapToRegionSync:
 	case SnapToRegionBoundary:
 		if (!region_boundary_cache.empty()) {
-			vector<nframes64_t>::iterator i;
 
+			vector<nframes64_t>::iterator prev = region_boundary_cache.end ();
+			vector<nframes64_t>::iterator next = region_boundary_cache.end ();
+			
 			if (direction > 0) {
-				i = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
+				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
 			} else {
-				i = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
+				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
 			}
 			
-			if (i != region_boundary_cache.end()) {
+			if (next != region_boundary_cache.begin ()) {
+				prev = next;
+				prev--;
+			}
 
-				/* lower bound doesn't quite to the right thing for our purposes */
+			nframes64_t const p = (prev == region_boundary_cache.end()) ? region_boundary_cache.front () : *prev;
+			nframes64_t const n = (next == region_boundary_cache.end()) ? region_boundary_cache.back () : *next;
 
-				if (direction < 0 && i != region_boundary_cache.begin()) {
-					--i;
-				}
-
-				start = *i;
-
+			if (start > (p + n) / 2) {
+				start = n;
 			} else {
-				start = region_boundary_cache.back();
+				start = p;
 			}
 		} 
 		break;
