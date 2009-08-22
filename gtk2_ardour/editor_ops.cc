@@ -4730,8 +4730,6 @@ Editor::adjust_region_scale_amplitude (bool up)
 		}
 
 		fraction = slider_position_to_gain (fraction);
-		fraction = coefficient_to_dB (fraction);
-		fraction = dB_to_coefficient (fraction);
 
 		if (up && fraction >= 2.0) {
 			continue;

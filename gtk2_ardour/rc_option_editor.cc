@@ -803,7 +803,7 @@ public:
 			if (val == 0.0) {
 				snprintf (buf, sizeof (buf), "-inf");
 			} else {
-				snprintf (buf, sizeof (buf), "%.2f", coefficient_to_dB (val));
+				snprintf (buf, sizeof (buf), "%.2f", accurate_coefficient_to_dB (val));
 			}
 
 			_db_display.set_text (buf);

@@ -197,7 +197,7 @@ PeakMeter::meter ()
 		/* compute new visible value using falloff */
 
 		if (new_peak > 0.0) {
-			new_peak = coefficient_to_dB (new_peak);
+			new_peak = fast_coefficient_to_dB (new_peak);
 		} else {
 			new_peak = minus_infinity();
 		}

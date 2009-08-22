@@ -646,15 +646,15 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 		for (n = 0; n < cache->data_size; ++n) {
 
 			if (buf[n].max > 0.0f) {
-				buf[n].max = alt_log_meter(coefficient_to_dB(buf[n].max));
+				buf[n].max = alt_log_meter(fast_coefficient_to_dB(buf[n].max));
 			} else if (buf[n].max < 0.0f) {
-				buf[n].max = -alt_log_meter(coefficient_to_dB(-buf[n].max));
+				buf[n].max = -alt_log_meter(fast_coefficient_to_dB(-buf[n].max));
 			}
 			
 			if (buf[n].min > 0.0f) {
-				buf[n].min = alt_log_meter(coefficient_to_dB(buf[n].min));
+				buf[n].min = alt_log_meter(fast_coefficient_to_dB(buf[n].min));
 			} else if (buf[n].min < 0.0f) {
-				buf[n].min = -alt_log_meter(coefficient_to_dB(-buf[n].min));
+				buf[n].min = -alt_log_meter(fast_coefficient_to_dB(-buf[n].min));
 			}
 		}
 	}

@@ -1428,23 +1428,23 @@ RouteUI::parameter_changed (string const & p)
 void
 RouteUI::step_gain_up ()
 {
-	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) + 0.1), this);
+	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.1), this);
 }
 
 void
 RouteUI::page_gain_up ()
 {
-	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) + 0.5), this);
+	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.5), this);
 }
 
 void
 RouteUI::step_gain_down ()
 {
-	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) - 0.1), this);
+	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.1), this);
 }
 
 void
 RouteUI::page_gain_down ()
 {
-	_route->set_gain (dB_to_coefficient (coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), this);
+	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), this);
 }

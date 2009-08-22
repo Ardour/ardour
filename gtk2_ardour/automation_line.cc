@@ -668,7 +668,7 @@ AutomationLine::fraction_to_string (double fraction) const
 		if (fraction == 0.0) {
 			snprintf (buf, sizeof (buf), "-inf");
 		} else {
-			snprintf (buf, sizeof (buf), "%.1f", coefficient_to_dB (slider_position_to_gain (fraction)));
+			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain (fraction)));
 		}
 	} else {
 		double dummy = 0.0;
