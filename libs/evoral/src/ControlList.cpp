@@ -43,7 +43,8 @@ ControlList::ControlList (const Parameter& id)
 	_changed_when_thawed = false;
 	_min_yval = id.min();
 	_max_yval = id.max();
-	_max_xval = 0; // means "no limit" 
+	_max_xval = 0; // means "no limit"
+	_default_value = 0;
 	_rt_insertion_point = _events.end();
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
