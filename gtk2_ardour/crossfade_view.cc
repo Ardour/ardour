@@ -126,7 +126,10 @@ CrossfadeView::crossfade_changed (Change what_changed)
 	if (what_changed & BoundsChanged) {
 		set_position (crossfade->position(), this);
 		set_duration (crossfade->length(), this);
-		need_redraw_curves = true;
+
+		/* set_duration will call reset_width_dependent_items which in turn will call redraw_curves via active_changed,
+		   so no need for us to call it */
+		need_redraw_curves = false;
 	}
 
 	if (what_changed & Crossfade::FollowOverlapChanged) {

@@ -107,7 +107,7 @@ class AudioStreamView : public StreamView
 	
 	double _amplitude_above_axis;
 	
-	typedef std::list<CrossfadeView*> CrossfadeViewList;
+	typedef std::map<boost::shared_ptr<ARDOUR::Crossfade>, CrossfadeView*> CrossfadeViewList;
 	CrossfadeViewList crossfade_views;
 	bool              crossfades_visible;
 

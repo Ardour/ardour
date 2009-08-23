@@ -408,7 +408,7 @@ Crossfade::refresh ()
 
 	int32_t new_layer_relation = (int32_t) (_in->layer() - _out->layer());
 
-	if (new_layer_relation * layer_relation < 0) { // different sign, layers rotated 
+	if (new_layer_relation * layer_relation < 0) { // different sign, layers rotated
 		Invalidated (shared_from_this ());
 		return false;
 	}
@@ -438,7 +438,6 @@ Crossfade::refresh ()
 			send_signal = true;
 
 		} else {
-
 			Invalidated (shared_from_this ());
 			return false;
 		}
@@ -925,10 +924,4 @@ void
 Crossfade::set_short_xfade_length (nframes_t n)
 {
 	_short_xfade_length = n;
-}
-
-void
-Crossfade::invalidate ()
-{
-	Invalidated (shared_from_this ()); /* EMIT SIGNAL */
 }

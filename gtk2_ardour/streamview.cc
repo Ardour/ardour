@@ -312,7 +312,7 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_modified_weak), ds));
 
 	/* update layers count and the y positions and heights of our regions */
-	if (ds->playlist()) {
+	if (ds->playlist() && _layer_display == Stacked) {
 		_layers = ds->playlist()->top_layer() + 1;
 		update_contents_height ();
 		update_coverage_frames ();

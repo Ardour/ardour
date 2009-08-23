@@ -106,8 +106,6 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	nframes_t overlap_length() const;
 
-	void invalidate();
-
 	sigc::signal<void,boost::shared_ptr<Region> > Invalidated;
 	sigc::signal<void,Change>     StateChanged;
 
