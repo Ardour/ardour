@@ -308,6 +308,7 @@ class Editor : public PublicEditor
 	double             get_current_zoom () const { return frames_per_unit; }
 
 	void temporal_zoom_step (bool coarser);
+	void tav_zoom_step (bool coarser);
 
 	/* stuff that AudioTimeAxisView and related classes use */
 
@@ -1510,6 +1511,9 @@ public:
 	Gtk::Button              zoom_out_full_button;
 	Gtk::Button              zoom_onetoone_button;
 
+	Gtk::Button              tav_expand_button;
+	Gtk::Button              tav_shrink_button;
+	
 	Gtk::VBox                toolbar_clock_vbox;
 	Gtk::VBox                toolbar_selection_clock_vbox; 
 	Gtk::Table               toolbar_selection_clock_table;
@@ -1569,6 +1573,7 @@ public:
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	Gtk::HBox           zoom_box;
+	Gtk::HBox           track_zoom_box;
 	Gtk::VBox           zoom_vbox;
 
 	void                zoom_adjustment_changed();

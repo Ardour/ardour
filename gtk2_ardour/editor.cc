@@ -2915,11 +2915,31 @@ Editor::setup_toolbar ()
 	zoom_box.pack_start (zoom_out_button, false, false);
 	zoom_box.pack_start (zoom_in_button, false, false);
 	zoom_box.pack_start (zoom_out_full_button, false, false);
+	
+	/* Track zoom buttons */
+	tav_expand_button.set_name ("TrackHeightButton");
+	tav_expand_button.set_size_request(-1,20);
+	tav_expand_button.add (*(manage (new Image (::get_icon("tav_exp")))));
+	tav_expand_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::tav_zoom_step), true));
+	ARDOUR_UI::instance()->tooltips().set_tip (tav_expand_button, _("Expand Tracks"));
+	
+	tav_shrink_button.set_name ("TrackHeightButton");
+	tav_shrink_button.set_size_request(-1,20);
+	tav_shrink_button.add (*(manage (new Image (::get_icon("tav_shrink")))));
+	tav_shrink_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::tav_zoom_step), false));
+	ARDOUR_UI::instance()->tooltips().set_tip (tav_shrink_button, _("Shrink Tracks"));
 
+	track_zoom_box.set_spacing (1);
+	track_zoom_box.set_border_width (0);
+
+	track_zoom_box.pack_start (tav_shrink_button, false, false);	
+	track_zoom_box.pack_start (tav_expand_button, false, false);
+	
 	HBox* zbc = manage (new HBox);
 	zbc->pack_start (zoom_focus_selector, PACK_SHRINK);
 	zoom_vbox.pack_start (*zbc, PACK_SHRINK);
 	zoom_vbox.pack_start (zoom_box, PACK_SHRINK);
+	zoom_vbox.pack_start (track_zoom_box, PACK_SHRINK);
 
 	snap_box.set_spacing (1);
 	snap_box.set_border_width (2);

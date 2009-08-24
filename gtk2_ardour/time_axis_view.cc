@@ -133,6 +133,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	name_hbox.show ();
 
+	controls_table.set_size_request (200);
 	controls_table.set_border_width (2);
 	controls_table.set_row_spacings (0);
 	controls_table.set_col_spacings (0);

@@ -1516,6 +1516,21 @@ Editor::scroll_tracks_up_line ()
 /* ZOOM */
 
 void
+Editor::tav_zoom_step (bool coarser)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::temporal_zoom_step), coarser));
+	
+	_routes->suspend_redisplay ();
+
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		TimeAxisView *tv = (static_cast<TimeAxisView*>(*i));
+			tv->step_height (coarser);
+	}
+
+	_routes->resume_redisplay ();
+}	
+
+void
 Editor::temporal_zoom_step (bool coarser)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::temporal_zoom_step), coarser));
