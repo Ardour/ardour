@@ -539,7 +539,6 @@ void AudioPlaylist::notify_crossfade_added (boost::shared_ptr<Crossfade> x)
 	if (g_atomic_int_get(&block_notifications)) {
 		_pending_xfade_adds.insert (_pending_xfade_adds.end(), x);
 	} else {
-
 		NewCrossfade (x); /* EMIT SIGNAL */
 	}
 }
@@ -566,10 +565,11 @@ AudioPlaylist::set_state (const XMLNode& node)
 	XMLNodeConstIterator niter;
 
 	in_set_state++;
-	freeze ();
 
 	Playlist::set_state (node);
 
+	freeze ();
+	
 	nlist = node.children();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
