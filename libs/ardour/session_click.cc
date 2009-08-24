@@ -154,6 +154,7 @@ Session::setup_click_sounds (int which)
 
 		} else {
 
+			info.format = 0;
 			if ((sndfile = sf_open (path.c_str(), SFM_READ, &info)) == 0) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
