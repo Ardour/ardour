@@ -968,20 +968,20 @@ AudioRegion::fade_out_is_default () const
 void
 AudioRegion::set_default_fade_in ()
 {
+	_fade_in_disabled = 0;
 	set_fade_in (Linear, 64);
 }
 
 void
 AudioRegion::set_default_fade_out ()
 {
+	_fade_out_disabled = 0;
 	set_fade_out (Linear, 64);
 }
 
 void
 AudioRegion::set_default_fades ()
 {
-	_fade_in_disabled = 0;
-	_fade_out_disabled = 0;
 	set_default_fade_in ();
 	set_default_fade_out ();
 }
