@@ -48,11 +48,12 @@ RegionSelection::RegionSelection (const RegionSelection& other)
 {
 	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
 
+	_current_start = other._current_start;
+	_current_end = other._current_end;
+	
 	for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 		add (*i);
 	}
-	_current_start = other._current_start;
-	_current_end = other._current_end;
 }
 
 /** operator= to set a RegionSelection to be the same as another.
@@ -65,12 +66,12 @@ RegionSelection::operator= (const RegionSelection& other)
 
 		clear_all();
 		
+		_current_start = other._current_start;
+		_current_end = other._current_end;
+		
 		for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 			add (*i);
 		}
-
-		_current_start = other._current_start;
-		_current_end = other._current_end;
 	}
 
 	return *this;
