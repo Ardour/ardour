@@ -289,10 +289,14 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			if (_session) {
 				_session->request_locate (ev->x / _x_scale + _session->current_start_frame());
 			}
+
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+
+			centre_on_click (ev);
 			
-		} else if (xr.first <= ev->x && ev->x <= xr.second && yr.first <= ev->y && ev->y <= yr.second) {
+		} else {
 				
-			/* ordinary click inside the view rectangle: start a move drag */
+			/* ordinary click: start a move drag */
 			
 			_move_dragging = true;
 			_moved = false;
@@ -349,10 +353,6 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 bool
 EditorSummary::on_button_release_event (GdkEventButton* ev)
 {
-	if (_move_dragging && !_moved) {
-		centre_on_click (ev);
-	}
-
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
