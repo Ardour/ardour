@@ -722,7 +722,6 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
-	bool nocommit = true;
 	vector<RegionView*> copies;
 	boost::shared_ptr<Diskstream> ds;
 	boost::shared_ptr<Playlist> from_playlist;
@@ -739,10 +738,8 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
 	if (!movement_occurred) {
 		/* just a click */
-		goto out;
+		return;
 	}
-
-	nocommit = false;
 
 	if (Config->get_edit_mode() == Splice && !_editor->pre_drag_region_selection.empty()) {
 		_editor->selection->set (_editor->pre_drag_region_selection);
@@ -970,13 +967,11 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	}
 			
   out:
-	if (!nocommit) {
-		for (set<boost::shared_ptr<Playlist> >::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
-			_editor->session->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));	
-		}
-
-		_editor->commit_reversible_command ();
+	for (set<boost::shared_ptr<Playlist> >::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
+		_editor->session->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));	
 	}
+	
+	_editor->commit_reversible_command ();
 
 	for (vector<RegionView*>::iterator x = copies.begin(); x != copies.end(); ++x) {
 		delete *x;
