@@ -3915,9 +3915,9 @@ Editor::cut_copy (CutCopyOp op)
 		/* we only want to cut regions if some are selected */
 		
 		if (!selection->regions.empty()) {
-			get_regions_for_action (rs);
+			get_regions_for_action (rs, false, false);
 		}
-		
+
 		switch (current_mouse_mode()) {
 		case MouseObject: 
 			if (!rs.empty() || !selection->points.empty()) {

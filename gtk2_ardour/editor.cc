@@ -4590,12 +4590,12 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSe
  *      - selected or
  *      - the entered_regionview (if allow_entered == true) or
  *      - under the preferred edit position AND on a selected track, or on a track
- *        which is in the same active edit-enable route group as a selected region.
+ *        which is in the same active edit-enable route group as a selected region (if allow_edit_position == true)
  *  @param rs Returned region list.
  *  @param allow_entered true to include the entered_regionview in the list.
  */
 void
-Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
+Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered, bool allow_edit_position)
 {
 	/* Start with selected regions */
 	rs = selection->regions;
@@ -4605,23 +4605,22 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 		rs.add (entered_regionview);
 	}
 
-	TrackSelection tracks = selection->tracks;
-
-	RegionSelection to_map = rs;
-
-	/* tracks is currently the set of selected tracks; add any other tracks that
-	 * have regions that are in the same edit-activated route group as one of
-	 * our regions */
-	for (RegionSelection::iterator i = to_map.begin (); i != to_map.end(); ++i) {
-
-		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
-		if (g && g->active_property (RouteGroup::Edit)) {
-			tracks.add (axis_views_from_routes (g->route_list()));
+	if (allow_edit_position) {
+		
+		TrackSelection tracks = selection->tracks;
+		
+		/* tracks is currently the set of selected tracks; add any other tracks that
+		 * have regions that are in the same edit-activated route group as one of
+		 * our regions */
+		for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
+			
+			RouteGroup* g = (*i)->get_time_axis_view().route_group ();
+			if (g && g->active_property (RouteGroup::Edit)) {
+				tracks.add (axis_views_from_routes (g->route_list()));
+			}
 		}
-	}
 
-	/* now find regions that are at the edit position on those tracks */
-	for (RegionSelection::iterator i = to_map.begin (); i != to_map.end(); ++i) {
+		/* now find regions that are at the edit position on those tracks */
 		nframes64_t const where = get_preferred_edit_position ();
 		get_regions_at (rs, where, tracks);
 	}
