@@ -303,21 +303,6 @@ RouteTimeAxisView::post_construct ()
 	reset_processor_automation_curves ();
 }
 
-void
-RouteTimeAxisView::set_playlist (boost::shared_ptr<Playlist> /*newplaylist*/)
-{
-	boost::shared_ptr<Playlist> pl = playlist();
-	assert(pl);
-
-	modified_connection.disconnect ();
-	modified_connection = pl->Modified.connect (mem_fun(*this, &RouteTimeAxisView::playlist_modified));
-}
-
-void
-RouteTimeAxisView::playlist_modified ()
-{
-}
-
 gint
 RouteTimeAxisView::edit_click (GdkEventButton *ev)
 {
@@ -342,10 +327,6 @@ void
 RouteTimeAxisView::playlist_changed ()
 {
 	label_view ();
-
-	if (is_track()) {
-		set_playlist (get_diskstream()->playlist());
-	}
 }
 
 void
@@ -1163,7 +1144,6 @@ RouteTimeAxisView::update_diskstream_display ()
 	if (!get_diskstream()) // bus
 		return;
 
-	set_playlist (get_diskstream()->playlist());
 	map_frozen ();
 }	
 

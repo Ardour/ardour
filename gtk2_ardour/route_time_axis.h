@@ -236,11 +236,9 @@ protected:
 	void align_style_changed ();
 	void set_align_style (ARDOUR::AlignStyle);
 	
-	virtual void set_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 	void         playlist_click ();
 	void         show_playlist_selector ();
 	void         playlist_changed ();
-	void         playlist_modified ();
 
 	void rename_current_playlist ();
 	
@@ -311,8 +309,6 @@ protected:
 	std::set<Evoral::Parameter> _show_automation;
 
 	AutomationTracks _automation_tracks;
-
-	sigc::connection modified_connection;
 
 	void post_construct ();
 	

@@ -312,11 +312,13 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_modified_weak), ds));
 
 	/* update layers count and the y positions and heights of our regions */
-	if (ds->playlist() && _layer_display == Stacked) {
+	if (ds->playlist()) {
 		_layers = ds->playlist()->top_layer() + 1;
+	}
+
+	if (_layer_display == Stacked) {
 		update_contents_height ();
 		update_coverage_frames ();
-		//redisplay_diskstream ();
 	}
 }
 
@@ -358,7 +360,7 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	/* catch changes */
 
 	playlist_connections.push_back (ds->playlist()->Modified.connect (bind (
-			mem_fun (*this, &StreamView::playlist_modified_weak), ds)));
+	 		mem_fun (*this, &StreamView::playlist_modified_weak), ds)));
 
 	playlist_connections.push_back (ds->playlist()->RegionAdded.connect (
 			mem_fun (*this, &StreamView::add_region_view_weak)));

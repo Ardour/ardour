@@ -454,7 +454,7 @@ Playlist::flush_notifications ()
 			relayer ();
 		}
 		pending_modified = false;
-		Modified (); /* EMIT SIGNAL */		
+		Modified (); /* EMIT SIGNAL */
 	}
 
 	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
@@ -1834,15 +1834,17 @@ Playlist::set_state (const XMLNode& node)
 XMLNode&
 Playlist::get_state()
 {
-	return state(true);
+	return state (true);
 }
 
 XMLNode&
 Playlist::get_template()
 {
-	return state(false);
+	return state (false);
 }
 
+/** @param full_state true to include regions in the returned state, otherwise false.
+ */
 XMLNode&
 Playlist::state (bool full_state)
 {
@@ -1951,9 +1953,27 @@ Playlist::relayer ()
  
 	freeze ();
 
-	/* build up a new list of regions on each layer */
+	/* Build up a new list of regions on each layer, stored in a set of lists
+	   each of which represent some period of time on some layer.  The idea
+	   is to avoid having to search the entire region list to establish whether
+	   each region overlaps another */
 
-	std::vector<RegionList> layers;
+	/* how many pieces to divide this playlist's time up into */
+	int const divisions = 512;
+
+	/* find the start and end positions of the regions on this playlist */
+	nframes_t start = UINT_MAX;
+	nframes_t end = 0;
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		start = min (start, (*i)->position());
+		end = max (end, (*i)->position() + (*i)->length());
+	}
+
+	/* hence the size of each time division */
+	double const division_size = (end - start) / divisions;
+
+	vector<vector<RegionList> > layers;
+	layers.push_back (vector<RegionList> (divisions));
 
 	/* we want to go through regions from desired lowest to desired highest layer,
 	   which depends on the layer model
@@ -1967,8 +1987,15 @@ Playlist::relayer ()
 		RegionSortByLastLayerOp cmp;
 		copy.sort (cmp);
 	}
-	
+
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
+
+		/* find the time divisions that this region covers */
+		int const start_division = floor ( ((*i)->position() - start) / division_size);
+		int end_division = floor ( ((*i)->position() + (*i)->length() - start) / division_size );
+		if (end_division == divisions) {
+			end_division--;
+		}
 
 		/* find the lowest layer that this region can go on */
 		size_t j = layers.size();
@@ -1976,35 +2003,42 @@ Playlist::relayer ()
 			/* try layer j - 1; it can go on if it overlaps no other region
 			   that is already on that layer
 			*/
-			RegionList::iterator k = layers[j - 1].begin();
-			while (k != layers[j - 1].end()) {
-				if ((*k)->overlap_equivalent (*i)) {
+
+			bool overlap = false;
+			for (int k = start_division; k <= end_division; ++k) {
+				RegionList::iterator l = layers[j-1][k].begin ();
+				while (l != layers[j-1][k].end()) {
+					if ((*l)->overlap_equivalent (*i)) {
+						overlap = true;
+						break;
+					}
+					l++;
+				}
+
+				if (overlap) {
 					break;
 				}
-				k++;
 			}
 
-			if (k != layers[j - 1].end()) {
-				/* no overlap, so we can use this layer */
+			if (overlap) {
+				/* overlap, so we must use layer j */
 				break;
 			}
-					
-			j--;
+			
+			--j;
 		}
 
 		if (j == layers.size()) {
 			/* we need a new layer for this region */
-			layers.push_back (RegionList ());
+			layers.push_back (vector<RegionList> (divisions));
 		}
 
-		layers[j].push_back (*i);
-	}
-
-	/* first pass: set up the layer numbers in the regions */
-	for (size_t j = 0; j < layers.size(); ++j) {
-		for (RegionList::iterator i = layers[j].begin(); i != layers[j].end(); ++i) {
-			(*i)->set_layer (j);
+		/* put a reference to this region in each of the divisions that it exists in */
+		for (int k = start_division; k <= end_division; ++k) {
+			layers[j][k].push_back (*i);
 		}
+
+		(*i)->set_layer (j);
 	}
 
 	/* sending Modified means that various kinds of layering
