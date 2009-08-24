@@ -1863,8 +1863,6 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 	}
 
-	_pointer_frame_offset = _grab_frame - _cursor->current_frame;	
-	
 	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
 }
 
