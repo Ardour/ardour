@@ -900,8 +900,7 @@ ARDOUR_UI::editor_realized ()
 	Config->map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
 
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
-	cerr << "I commented out line line 889 in ardour_ui2.cc, because it made ardour crash somewhere in Gnome::Canvas::Text" << endl;
-	//reset_dpi();
+	reset_dpi ();
 }
 
 void
