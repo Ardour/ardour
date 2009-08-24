@@ -159,9 +159,7 @@ Drag::adjusted_current_frame (GdkEvent* event) const
 		pos = _current_pointer_frame - _pointer_frame_offset;
 	}
 
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (pos);
-	}
+	_editor->snap_to_with_modifier (pos, event);
 	
 	return pos;
 }
@@ -423,12 +421,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_
 			
 			sync_frame = *pending_region_position + (sync_dir*sync_offset);
 			
-			/* we snap if the snap modifier is not enabled.
-			 */
-			
-			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-				_editor->snap_to (sync_frame);	
-			}
+			_editor->snap_to_with_modifier (sync_frame, event);
 			
 			*pending_region_position = _primary->region()->adjust_to_sync (sync_frame);
 			
@@ -1503,9 +1496,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		left_direction = false;
 	}
 
-	if (obey_snap) {
-		_editor->snap_to (_current_pointer_frame);
-	}
+	_editor->snap_to_with_modifier (_current_pointer_frame, event);
 
 	if (first_move) {
 
@@ -1846,7 +1837,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		
 		nframes64_t where = _editor->event_frame (event, 0, 0);
 
-		_editor->snap_to (where);
+		_editor->snap_to_with_modifier (where, event);
 		_editor->playhead_cursor->set_position (where);
 
 	}
@@ -2499,8 +2490,8 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	//translate cx to frames
 	nframes64_t cx_frames = _editor->unit_to_frame (cx);
 
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier()) && !_x_constrained) {
-		_editor->snap_to (cx_frames);
+	if (!_x_constrained) {
+		_editor->snap_to_with_modifier (cx_frames, event);
 	}
 
 	float const fraction = 1.0 - (cy / _point->line().height());
@@ -2648,11 +2639,11 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
- 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier()) && Config->get_rubberbanding_snaps_to_grid()) {
+ 	if (Config->get_rubberbanding_snaps_to_grid()) {
  		if (first_move) {
- 			_editor->snap_to (_grab_frame);
+ 			_editor->snap_to_with_modifier (_grab_frame, event);
 		} 
-		_editor->snap_to (_current_pointer_frame);
+		_editor->snap_to_with_modifier (_current_pointer_frame, event);
  	}
 
 	/* base start and end on initial click position */
@@ -2750,9 +2741,7 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 {
 	RegionView* rv = _primary;
 
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (_current_pointer_frame);
-	}
+	_editor->snap_to_with_modifier (_current_pointer_frame, event);
 
 	if (_current_pointer_frame == _last_pointer_frame) {
 		return;
@@ -3102,9 +3091,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	}
 	
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (_current_pointer_frame);
-	}
+	_editor->snap_to_with_modifier (_current_pointer_frame, event);
 
 	/* only alter selection if the current frame is 
 	   different from the last frame position.
@@ -3272,12 +3259,10 @@ MouseZoomDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t start;
 	nframes64_t end;
 
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		_editor->snap_to (_current_pointer_frame);
-		
-		if (first_move) {
-			_editor->snap_to (_grab_frame);
-		}
+	_editor->snap_to_with_modifier (_current_pointer_frame, event);
+	
+	if (first_move) {
+		_editor->snap_to_with_modifier (_grab_frame, event);
 	}
 		
 	if (_current_pointer_frame == _last_pointer_frame) {

@@ -2515,6 +2515,29 @@ Editor::trackview_by_y_position (double y)
 	return std::make_pair ( (TimeAxisView *) 0, 0);
 }
 
+/** Snap a position to the grid, if appropriate, taking into account current
+ *  grid settings and also the state of any snap modifier keys that may be pressed.
+ *  @param start Position to snap.
+ *  @param event Event to get current key modifier information from.
+ */
+void
+Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32_t direction, bool for_mark)
+{
+	if (!session) {
+		return;
+	}
+
+	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+		if (snap_mode == SnapOff) {
+			snap_to_internal (start, direction, for_mark);
+		}
+	} else {
+		if (snap_mode != SnapOff) {
+			snap_to_internal (start, direction, for_mark);
+		}
+	}
+}
+
 void
 Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 {

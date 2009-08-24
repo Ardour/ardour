@@ -1489,6 +1489,7 @@ public:
 	void redisplay_tempo (bool immediate_redraw);
 	
 	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
+	void snap_to_with_modifier (nframes64_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
 	void snap_to (nframes64_t& first, nframes64_t& last, int32_t direction = 0, bool for_mark = false);
 
 	double snap_length_beats (nframes64_t start);

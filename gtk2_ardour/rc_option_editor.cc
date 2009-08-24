@@ -595,7 +595,7 @@ public:
 			}
 		}
 
-		l = manage (new Label (_("Ignore snap using:")));
+		l = manage (new Label (_("Toggle snap using:")));
 		l->set_name ("OptionsLabel");
 		l->set_alignment (1.0, 0.5);
 

@@ -1181,9 +1181,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MarkerBarItem:
 			if (!_dragging_playhead) {
-				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-					snap_to (where, 0, true);
-				}
+				snap_to_with_modifier (where, event, 0, true);
 				mouse_add_new_marker (where);
 			}
 			return true;
@@ -1191,18 +1189,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case CdMarkerBarItem:
 			if (!_dragging_playhead) {
 				// if we get here then a dragged range wasn't done
-				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-					snap_to (where, 0, true);
-				}
+				snap_to_with_modifier (where, event, 0, true);
 				mouse_add_new_marker (where, true);
 			}
 			return true;
 
 		case TempoBarItem:
 			if (!_dragging_playhead) {
-				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-					snap_to (where);
-				}
+				snap_to_with_modifier (where, event);
 				mouse_add_new_tempo_event (where);
 			}
 			return true;
@@ -2222,9 +2216,7 @@ Editor::point_trim (GdkEvent* event)
 
 	nframes64_t new_bound = _drag->current_pointer_frame();
 
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		snap_to (new_bound);
-	}
+	snap_to_with_modifier (new_bound, event);
 
 	/* Choose action dependant on which button was pressed */
 	switch (event->button.button) {

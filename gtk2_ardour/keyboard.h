@@ -90,6 +90,11 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static bool no_modifiers_active (guint state);
 
 	static void set_snap_modifier (guint);
+
+	/** @return Modifier mask to temporarily toggle grid setting; with this modifier
+	 *  - magnetic or normal grid should become no grid and
+	 *  - no grid should become normal grid
+	 */
 	static ModifierMask snap_modifier () { return ModifierMask (snap_mod); }
 
 	static guint edit_button() { return edit_but; }
