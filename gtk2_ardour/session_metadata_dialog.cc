@@ -233,6 +233,9 @@ SessionMetadataSetEditable::SessionMetadataSetEditable (ustring const & name) :
 {
 	table.set_row_spacings (6);
 	table.set_col_spacings (12);
+	vbox.pack_start (table, false, false);
+	vbox.set_spacing (6);
+	vbox.set_border_width (6);
 }
 
 Gtk::Widget &

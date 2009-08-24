@@ -138,10 +138,10 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Metadata"), _("Metadata"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("EditMetadata"), _("Edit Metadata"),  mem_fun(*this, &ARDOUR_UI::edit_metadata));
+	act = ActionManager::register_action (main_actions, X_("EditMetadata"), _("Edit Metadata..."),  mem_fun(*this, &ARDOUR_UI::edit_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ImportMetadata"), _("Import Metadata"),  mem_fun(*this, &ARDOUR_UI::import_metadata));
+	act = ActionManager::register_action (main_actions, X_("ImportMetadata"), _("Import Metadata..."),  mem_fun(*this, &ARDOUR_UI::import_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export To Audio File(s)..."),  mem_fun (*editor, &PublicEditor::export_audio));

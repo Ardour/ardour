@@ -146,7 +146,7 @@ class SessionMetadataSetEditable : public SessionMetadataSet {
   public:
 	SessionMetadataSetEditable (Glib::ustring const & name);
 	
-	Gtk::Widget & get_widget () { return table; }
+	Gtk::Widget & get_widget () { return vbox; }
 	Gtk::Widget & get_tab_widget ();
 	
 	/// Sets session and loads data
@@ -155,6 +155,7 @@ class SessionMetadataSetEditable : public SessionMetadataSet {
 	void save_data ();
 	
   private:
+	Gtk::VBox vbox;
 	Gtk::Table table;
 	Gtk::Label tab_widget;
 };
