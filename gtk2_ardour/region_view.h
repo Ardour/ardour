@@ -87,7 +87,7 @@ class RegionView : public TimeAxisViewItem
 	virtual void exited () {}
 
 	void enable_display(bool yn) { _enable_display = yn; }
-	void update_coverage_frames (LayerDisplay);
+	virtual void update_coverage_frames (LayerDisplay);
 	
 	static sigc::signal<void,RegionView*> RegionViewGoingAway;
 	

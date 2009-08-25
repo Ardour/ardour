@@ -1360,3 +1360,12 @@ AudioRegionView::set_fade_visibility (bool yn)
 		}
 	}
 }
+
+void
+AudioRegionView::update_coverage_frames (LayerDisplay d)
+{
+	RegionView::update_coverage_frames (d);
+
+	fade_in_handle->raise_to_top ();
+	fade_out_handle->raise_to_top ();
+}

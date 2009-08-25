@@ -107,6 +107,7 @@ class AudioRegionView : public RegionView
 	void reset_fade_out_shape_width (nframes_t);
 
 	void set_fade_visibility (bool);
+	void update_coverage_frames (LayerDisplay);
 
 	virtual void entered ();
 	virtual void exited ();

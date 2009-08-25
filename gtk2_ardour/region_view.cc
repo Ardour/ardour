@@ -459,7 +459,7 @@ RegionView::region_sync_changed ()
 
 		/* points set below */
 		
-		sync_mark =  new ArdourCanvas::Polygon (*group);
+		sync_mark = new ArdourCanvas::Polygon (*group);
 		sync_mark->property_fill_color_rgba() = fill_color;
 
 		sync_line = new ArdourCanvas::Line (*group);
@@ -647,4 +647,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		/* finish off the last rectangle */
 		cr->property_x2() = trackview.editor().frame_to_pixel (end - position);
 	}
+
+	frame_handle_start->raise_to_top ();
+	frame_handle_end->raise_to_top ();
 }
