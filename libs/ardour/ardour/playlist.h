@@ -114,6 +114,7 @@ class Playlist : public SessionObject,
 	RegionList*                regions_to_read (nframes_t start, nframes_t end);
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (nframes_t frame);
+	boost::shared_ptr<Region>  top_unmuted_region_at (nframes_t frame);
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
 	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);

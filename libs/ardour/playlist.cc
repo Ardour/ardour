@@ -1418,7 +1418,38 @@ Playlist::top_region_at (nframes_t frame)
 
 	delete rlist;
 	return region;
-}	
+}
+
+boost::shared_ptr<Region>
+Playlist::top_unmuted_region_at (nframes_t frame)
+
+{
+	RegionLock rlock (this);
+	RegionList *rlist = find_regions_at (frame);
+
+	for (RegionList::iterator i = rlist->begin(); i != rlist->end(); ) {
+
+		RegionList::iterator tmp = i;
+		++tmp;
+
+		if ((*i)->muted()) {
+			rlist->erase (i);
+		}
+
+		i = tmp;
+	}
+	
+	boost::shared_ptr<Region> region;
+	
+	if (rlist->size()) {
+		RegionSortByLayer cmp;
+		rlist->sort (cmp);
+		region = rlist->back();
+	} 
+
+	delete rlist;
+	return region;
+}
 
 Playlist::RegionList*
 Playlist::regions_to_read (nframes_t start, nframes_t end)

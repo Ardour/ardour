@@ -616,7 +616,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		t++;
 
 		/* is this region is on top at time t? */
-		bool const new_me = (pl->top_region_at (t) == _region);
+		bool const new_me = (pl->top_unmuted_region_at (t) == _region);
 
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
