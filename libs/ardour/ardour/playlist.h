@@ -162,9 +162,8 @@ class Playlist : public SessionObject,
 	bool explicit_relayering () const {
 		return _explicit_relayering;
 	}
-	void set_explicit_relayering (bool e) {
-		_explicit_relayering = e;
-	}
+	
+	void set_explicit_relayering (bool e);
 
   protected:
 	friend class Session;

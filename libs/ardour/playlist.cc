@@ -2465,4 +2465,24 @@ Playlist::foreach_region (sigc::slot<void, boost::shared_ptr<Region> > s)
 	}
 }
 
-	
+void
+Playlist::set_explicit_relayering (bool e)
+{
+	if (e == false && _explicit_relayering == true) {
+
+		/* We are changing from explicit to implicit relayering; layering may have been changed whilst
+		   we were in explicit mode, and we don't want that to be undone next time an implicit relayer
+		   occurs.  Hence now we'll set up region last_layer_op values so that an implicit relayer
+		   at this point would keep regions on the same layers.
+
+		   From then on in, it's just you and your towel.
+		*/
+
+		RegionLock rl (this);
+		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+			(*i)->set_last_layer_op ((*i)->layer ());
+		}
+	}
+
+	_explicit_relayering = e;
+}
