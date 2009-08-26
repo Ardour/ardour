@@ -109,12 +109,16 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 void
 CrossfadeView::set_height (double height)
 {
+	double h = 0;
 	if (height <= TimeAxisView::hSmaller) {
-		TimeAxisViewItem::set_height (height - 3);
+		h = height - 3;
 	} else {
-		TimeAxisViewItem::set_height (height - NAME_HIGHLIGHT_SIZE - 3 );
+		h = height - NAME_HIGHLIGHT_SIZE - 3;
 	}
 
+	TimeAxisViewItem::set_height (h);
+
+	_height = h;
 	redraw_curves ();
 }
 
@@ -150,7 +154,6 @@ CrossfadeView::redraw_curves ()
 	Points* points; 
 	int32_t npoints;
 	float* vec;
-	double h;
 
 	if (!crossfade->following_overlap()) {
 		/* curves should not be visible */
@@ -159,20 +162,7 @@ CrossfadeView::redraw_curves ()
 		return;
 	}
 
-	/*
-	 At "height - 3.0" the bottom of the crossfade touches the name highlight or the bottom of the track (if the
-	 track is either Small or Smaller.
-	 */
-
-	double tav_height = get_time_axis_view().current_height();
-	if (tav_height == TimeAxisView::hSmaller ||
-	    tav_height == TimeAxisView::hSmall) {
-		h = tav_height - 3.0;
-	} else {
-		h = tav_height - NAME_HIGHLIGHT_SIZE - 3.0;
-	}
-
-	if (h < 0) {
+	if (_height < 0) {
 		/* no space allocated yet */
 		return;
 	}
@@ -197,7 +187,7 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
-		p.set_y(2.0 + h - (h * vec[i]));
+		p.set_y(2.0 + _height - (_height * vec[i]));
 	}
 	fade_in->property_points() = *points;
 
@@ -205,7 +195,7 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
-		p.set_y(2.0 + h - (h * vec[i]));
+		p.set_y(2.0 + _height - (_height * vec[i]));
 	}
 	fade_out->property_points() = *points;
 

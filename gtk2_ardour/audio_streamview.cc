@@ -313,7 +313,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 
 	CrossfadeViewList::iterator i = crossfade_views.find (crossfade);
 	if (i != crossfade_views.end()) {
-		if (!crossfades_visible || _layer_display == Stacked) {
+		if (!crossfades_visible) {
 			i->second->hide();
 		} else {
 			i->second->show ();
@@ -344,9 +344,11 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 	cv->set_valid (true);
 	crossfade->Invalidated.connect (mem_fun (*this, &AudioStreamView::remove_crossfade));
 	crossfade_views[cv->crossfade] = cv;
-	if (!_trackview.session().config.get_xfades_visible() || !crossfades_visible || _layer_display == Stacked) {
+	if (!_trackview.session().config.get_xfades_visible() || !crossfades_visible) {
 		cv->hide ();
 	}
+
+	update_content_height (cv);
 }
 
 void
@@ -380,7 +382,7 @@ AudioStreamView::redisplay_diskstream ()
 	// Flag crossfade views as invalid
 	for (xi = crossfade_views.begin(); xi != crossfade_views.end(); ++xi) {
 		xi->second->set_valid (false);
-		if (xi->second->visible() && _layer_display != Stacked) {
+		if (xi->second->visible()) {
 			xi->second->show ();
 		}
 	}
@@ -771,7 +773,7 @@ void
 AudioStreamView::reveal_xfades_involving (AudioRegionView& rv)
 {
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (i->second->crossfade->involves (rv.audio_region()) && i->second->visible() && _layer_display != Stacked) {
+		if (i->second->crossfade->involves (rv.audio_region()) && i->second->visible()) {
 			i->second->show ();
 		}
 	}
@@ -799,14 +801,35 @@ void
 AudioStreamView::update_contents_height ()
 {
 	StreamView::update_contents_height ();
-	
+
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (_layer_display == Overlaid) {
-			i->second->show ();
-			i->second->set_height (height);
-		} else {
-			i->second->hide ();
-		}
+		update_content_height (i->second);
+	}
+}
+
+void
+AudioStreamView::update_content_height (CrossfadeView* cv)
+{
+	cv->show ();
+	
+	if (_layer_display == Overlaid) {
+		
+		cv->set_y (0);
+		cv->set_height (height);
+		
+	} else {
+		
+		layer_t const inl = cv->crossfade->in()->layer ();
+		layer_t const outl = cv->crossfade->out()->layer ();
+
+		layer_t const high = max (inl, outl);
+		layer_t const low = min (inl, outl);
+		
+		const double h = child_height ();
+
+		cv->set_y ((_layers - high - 1) * h);
+		cv->set_height ((high - low + 1) * h);
+		
 	}
 }
 

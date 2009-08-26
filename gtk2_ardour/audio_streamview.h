@@ -100,6 +100,7 @@ class AudioStreamView : public StreamView
 	void color_handler ();
 
 	void update_contents_height ();
+	void update_content_height (CrossfadeView *);
 
 	void parameter_changed (std::string const &);
 	void set_waveform_shape (ARDOUR::WaveformShape);
