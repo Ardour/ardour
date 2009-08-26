@@ -39,6 +39,7 @@ setup_gtk_ardour_enums ()
 	Width width;
 	ImportMode import_mode;
 	EditPoint edit_point;
+	LayerDisplay layer_display;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -66,4 +67,8 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (EditAtMouse);
 	REGISTER_ENUM (EditAtSelectedMarker);
 	REGISTER (edit_point);
+
+	REGISTER_ENUM (Overlaid);
+	REGISTER_ENUM (Stacked);
+	REGISTER (layer_display);
 }

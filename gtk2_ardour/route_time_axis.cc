@@ -31,6 +31,7 @@
 #include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
 #include "pbd/memento_command.h"
+#include "pbd/enumwriter.h"
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -388,6 +389,10 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 	XMLNodeList kids = node.children();
 	XMLNodeConstIterator iter;
 	const XMLProperty* prop;
+
+	if (_view && (prop = node.property ("layer-display"))) {
+		set_layer_display (LayerDisplay (string_2_enum (prop->value(), _view->layer_display ())));
+	}
 	
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
@@ -2185,6 +2190,9 @@ RouteTimeAxisView::set_layer_display (LayerDisplay d)
 	if (_view) {
 		_view->set_layer_display (d);
 	}
+
+	ensure_xml_node ();
+	xml_node->add_property (N_("layer-display"), enum_2_string (d));
 }
 
 LayerDisplay
