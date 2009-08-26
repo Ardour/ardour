@@ -186,7 +186,7 @@ protected:
 	
 	void copy_regions (GdkEvent *);
 	bool y_movement_disallowed (int, int, int, TimeAxisViewSummary const &) const;
-	std::map<RegionView*, RouteTimeAxisView*> find_time_axis_views ();
+	std::map<RegionView*, std::pair<RouteTimeAxisView*, int> > find_time_axis_views_and_layers ();
 	double compute_x_delta (GdkEvent const *, nframes64_t *);
 	bool compute_y_delta (
 		TimeAxisView const *, TimeAxisView*, int32_t, int32_t, TimeAxisViewSummary const &,

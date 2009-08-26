@@ -265,7 +265,15 @@ class Region
 		return 0;
 	}
 
-	void invalidate_transients ();	
+	void invalidate_transients ();
+
+	void set_pending_explicit_relayer (bool p) {
+		_pending_explicit_relayer = p;
+	}
+	
+	bool pending_explicit_relayer () const {
+		return _pending_explicit_relayer;
+	}
 
   protected:
 	friend class RegionFactory;
@@ -331,6 +339,9 @@ class Region
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
 	SourceList              _master_sources;
+
+	/** true if this region has had its layer explicitly set since the playlist last relayered */
+	bool                    _pending_explicit_relayer;
 	
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 

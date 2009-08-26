@@ -726,7 +726,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	pair<PlaylistSet::iterator,bool> insert_result, frozen_insert_result;
 	nframes64_t drag_delta;
 	bool changed_tracks, changed_position;
-	map<RegionView*, RouteTimeAxisView*> final;
+	map<RegionView*, pair<RouteTimeAxisView*, int> > final;
 	RouteTimeAxisView* source_tv;
 
 	if (!movement_occurred) {
@@ -781,12 +781,13 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	_editor->update_canvas_now ();
 
 	/* make a list of where each region ended up */
-	final = find_time_axis_views ();
+	final = find_time_axis_views_and_layers ();
 
 	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = (*i);
-		RouteTimeAxisView* dest_rtv = final[*i];
+		RouteTimeAxisView* dest_rtv = final[*i].first;
+		layer_t dest_layer = final[*i].second;
 
 		nframes64_t where;
 
@@ -837,6 +838,10 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			}
 
 			to_playlist->add_region (new_region, where);
+			if (dest_rtv->view()->layer_display() == Stacked) {
+				new_region->set_layer (dest_layer);
+				new_region->set_pending_explicit_relayer (true);
+			}
 
 			c.disconnect ();
 							      
@@ -861,6 +866,11 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
+			if (dest_rtv->view()->layer_display() == Stacked) {
+				rv->region()->set_layer (dest_layer);
+				rv->region()->set_pending_explicit_relayer (true);
+			}
+			
 			insert_result = modified_playlists.insert (playlist);
 			
 			if (insert_result.second) {
@@ -1214,10 +1224,10 @@ RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, Rout
 	_dest_layer = _primary->region()->layer ();
 }
 
-map<RegionView*, RouteTimeAxisView*>
-RegionMotionDrag::find_time_axis_views ()
+map<RegionView*, pair<RouteTimeAxisView*, int> >
+RegionMotionDrag::find_time_axis_views_and_layers ()
 {
-	map<RegionView*, RouteTimeAxisView*> tav;
+	map<RegionView*, pair<RouteTimeAxisView*, int> > tav;
 	
 	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
@@ -1227,7 +1237,7 @@ RegionMotionDrag::find_time_axis_views ()
 		iy1 += _editor->vertical_adjustment.get_value() - _editor->canvas_timebars_vsize;
 
 		pair<TimeAxisView*, int> tv = _editor->trackview_by_y_position (iy1);
-		tav[*i] = dynamic_cast<RouteTimeAxisView*> (tv.first);
+		tav[*i] = make_pair (dynamic_cast<RouteTimeAxisView*> (tv.first), tv.second);
 	}
 
 	return tav;
@@ -1239,9 +1249,9 @@ RegionInsertDrag::finished (GdkEvent* /*event*/, bool /*movement_occurred*/)
 {
 	_editor->update_canvas_now ();
 
-	map<RegionView*, RouteTimeAxisView*> final = find_time_axis_views ();
+	map<RegionView*, pair<RouteTimeAxisView*, int> > final = find_time_axis_views_and_layers ();
 	
-	RouteTimeAxisView* dest_rtv = final[_primary];
+	RouteTimeAxisView* dest_rtv = final[_primary].first;
 
 	_primary->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
 	_primary->get_canvas_group()->property_y() = 0;

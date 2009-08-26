@@ -78,6 +78,7 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
+	, _pending_explicit_relayer (false)
 {
 	/* no sources at this point */
 }
@@ -104,7 +105,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
-
+	, _pending_explicit_relayer (false)
 {
 	_sources.push_back (src);
 	_master_sources.push_back (src);
@@ -136,6 +137,7 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
+	, _pending_explicit_relayer (false)
 {
 	use_sources (srcs);
 	assert(_sources.size() > 0);
@@ -145,6 +147,7 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: SessionObject(other->session(), name)
 	, _type (other->data_type())
+	, _pending_explicit_relayer (false)
 
 {
 	_start = other->_start + offset;
@@ -184,6 +187,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: SessionObject(other->session(), name)
 	, _type (other->data_type())
+	, _pending_explicit_relayer (false)
 {
 	/* create a new Region exactly like another but starting at 0 in its sources */
 
@@ -256,6 +260,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(other->_last_layer_op)
+	, _pending_explicit_relayer (false)
 {
 	_flags = Flag (_flags | DoNotSendPropertyChanges);
 
@@ -289,6 +294,7 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
+	, _pending_explicit_relayer (false)
 {
 	use_sources (srcs);
 
@@ -318,6 +324,7 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
+	, _pending_explicit_relayer (false)
 {
 	_sources.push_back (src);
 

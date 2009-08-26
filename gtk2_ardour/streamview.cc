@@ -351,10 +351,12 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	/* update layers count and the y positions and heights of our regions */
 	_layers = ds->playlist()->top_layer() + 1;
 	update_contents_height ();
-
 	update_coverage_frames ();
+
+	ds->playlist()->set_explicit_relayering (_layer_display == Stacked);
 	
 	/* draw it */
+	
 	redisplay_diskstream ();
 
 	/* catch changes */
@@ -571,6 +573,7 @@ StreamView::set_layer_display (LayerDisplay d)
 	_layer_display = d;
 	update_contents_height ();
 	update_coverage_frames ();
+	_trackview.get_diskstream()->playlist()->set_explicit_relayering (_layer_display == Stacked);
 }
 
 void

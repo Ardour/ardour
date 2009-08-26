@@ -303,7 +303,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
-		_("Layering model"),
+		_("Layering model in overlaid mode"),
 		mem_fun (*_session_config, &SessionConfiguration::get_layer_model),
 		mem_fun (*_session_config, &SessionConfiguration::set_layer_model)
 		);

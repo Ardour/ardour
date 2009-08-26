@@ -159,6 +159,13 @@ class Playlist : public SessionObject,
 
 	void drop_regions ();
 
+	bool explicit_relayering () const {
+		return _explicit_relayering;
+	}
+	void set_explicit_relayering (bool e) {
+		_explicit_relayering = e;
+	}
+
   protected:
 	friend class Session;
 
@@ -214,6 +221,12 @@ class Playlist : public SessionObject,
 	uint64_t         layer_op_counter;
 	nframes_t   freeze_length;
 	bool		 auto_partition;
+
+	/** true if relayering should be done using region's current layers and their `pending explicit relayer'
+	 *  flags; otherwise false if relayering should be done using the layer-model (most recently moved etc.)
+	 *  Explicit relayering is used by tracks in stacked regionview mode.
+	 */
+	bool            _explicit_relayering;
 
 	void init (bool hide);
 

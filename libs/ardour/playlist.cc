@@ -60,6 +60,23 @@ struct RegionSortByLayer {
     }
 };
 
+struct RegionSortByLayerWithPending {
+	bool operator () (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		
+		double p = a->layer ();
+		if (a->pending_explicit_relayer()) {
+			p += 0.5;
+		}
+		
+		double q = b->layer ();
+		if (b->pending_explicit_relayer()) {
+			q += 0.5;
+		}
+		
+		return p < q;
+	}
+};
+
 struct RegionSortByPosition {
     bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
 	    return a->position() < b->position();
@@ -246,6 +263,7 @@ Playlist::init (bool hide)
 	_frozen = false;
 	layer_op_counter = 0;
 	freeze_length = 0;
+	_explicit_relayering = false;
 
 	Modified.connect (mem_fun (*this, &Playlist::mark_session_dirty));
 }
@@ -1981,14 +1999,22 @@ Playlist::relayer ()
 
 	RegionList copy = regions;
 
-	/* sort according to the model */
+	/* sort according to the model and the layering mode that we're in */
 
-	if (_session.config.get_layer_model() == MoveAddHigher || _session.config.get_layer_model() == AddHigher) {
-		RegionSortByLastLayerOp cmp;
-		copy.sort (cmp);
+	if (_explicit_relayering) {
+
+		copy.sort (RegionSortByLayerWithPending ());
+
+	} else if (_session.config.get_layer_model() == MoveAddHigher || _session.config.get_layer_model() == AddHigher) {
+
+		copy.sort (RegionSortByLastLayerOp ());
+		
 	}
 
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
+
+		/* reset the pending explicit relayer flag for every region, now that we're relayering */
+		(*i)->set_pending_explicit_relayer (false);
 
 		/* find the time divisions that this region covers */
 		int const start_division = floor ( ((*i)->position() - start) / division_size);
