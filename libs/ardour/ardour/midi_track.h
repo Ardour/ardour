@@ -84,7 +84,8 @@ protected:
 	int _set_state (const XMLNode&, bool call_base);
 
 private:
-	void write_controller_messages(MidiBuffer& buf, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void write_out_of_band_data (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame,
+				     nframes_t nframes);
 
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 	void use_new_diskstream ();

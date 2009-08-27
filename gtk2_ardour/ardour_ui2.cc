@@ -191,6 +191,7 @@ ARDOUR_UI::setup_transport ()
 {
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
+	transport_tearoff->tearoff_window().signal_key_press_event().connect (bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
 
 	if (Profile->get_sae()) {
 		transport_tearoff->set_can_be_torn_off (false);

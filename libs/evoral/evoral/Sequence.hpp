@@ -92,6 +92,14 @@ public:
 		return a->time() < b->time();
 	}
 
+	struct LaterNoteComparator {
+		typedef const Note<Time>* value_type;
+		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
+		                       const boost::shared_ptr< const Note<Time> > b) const { 
+			return a->time() > b->time();
+		}
+	};
+
 	struct LaterNoteEndComparator {
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,

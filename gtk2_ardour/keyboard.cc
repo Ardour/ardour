@@ -237,6 +237,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 				const AccelKey& ak (k->first);
 				
 				if (keyval == ak.get_key() && (Gdk::ModifierType)(event->state | Gdk::RELEASE_MASK) == ak.get_mod()) {
+					cerr << "Suppress auto repeat\n";
 					ret = true;
 					break;
 				}
@@ -261,6 +262,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 				Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (ts.first.c_str(), ts.second.c_str());
 				if (act) {
 					act->activate();
+					cerr << "use repeat, suppress other\n";
 					ret = true;
 				}
 				break;

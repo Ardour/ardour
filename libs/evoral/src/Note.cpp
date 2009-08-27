@@ -73,7 +73,6 @@ Note<Time>::Note(const Note<Time>& copy)
 	assert(channel() == copy.channel());
 }
 
-
 template<typename Time>
 Note<Time>::~Note()
 {
@@ -98,6 +97,7 @@ Note<Time>::operator=(const Note<Time>& copy)
 	return *this;
 }
 
-template class Note<double>;
+template class Note<Evoral::MusicalTime>;
 
 } // namespace Evoral
+

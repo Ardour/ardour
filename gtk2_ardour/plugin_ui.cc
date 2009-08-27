@@ -331,11 +331,7 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 bool
 PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
-	if (!key_press_focus_accelerator_handler (*this, event)) {
-		return PublicEditor::instance().on_key_press_event(event);
-	} else {
-		return true;
-	}
+	return relay_key_press (event, this);
 }
 
 bool

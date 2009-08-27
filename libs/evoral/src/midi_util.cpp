@@ -1,6 +1,6 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
- * Copyright (C) 2000-2008 Paul Davis
+ * Copyright (C) 2009 Paul Davis
  * 
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -16,32 +16,40 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef EVORAL_TYPES_HPP
-#define EVORAL_TYPES_HPP
-
-#include <stdint.h>
-#include <list>
+#include "evoral/midi_util.h"
+#include <cstdio>
 
 namespace Evoral {
 
-/** Frame count (i.e. length of time in audio frames) */
-typedef uint32_t FrameTime;
+std::string
+midi_note_name (uint8_t val)
+{
+	if (val > 127) {
+		return "???";
+	}
 
-/** Musical time: beats relative to some defined origin */
-typedef double MusicalTime;
+	static const char* notes[] = {
+		"c",
+		"c#",
+		"d",
+		"d#",
+		"e",
+		"f",
+		"f#",
+		"g",
+		"a",
+		"a#",
+		"b",
+		"b#"
+	};
 
-/** Type of an event (opaque, mapped by application) */
-typedef uint32_t EventType;
+	int octave = val/12;
+	static char buf[8];
+	
+	val -= octave*12;
 
-/** Type to describe the movement of a time range */	
-template<typename T>
-struct RangeMove {
-	RangeMove (T f, FrameTime l, T t) : from (f), length (l), to (t) {}
-	T         from;   ///< start of the range
-	FrameTime length; ///< length of the range
-	T         to;     ///< new start of the range
-};
+	snprintf (buf, sizeof (buf), "%s%d", notes[val], octave);
+	return buf;
+}
 
-} // namespace Evoral
-
-#endif // EVORAL_TYPES_HPP
+}

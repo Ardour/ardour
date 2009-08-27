@@ -50,6 +50,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_cut_buffer.h"
+#include "midi_list_editor.h"
 #include "midi_region_view.h"
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
@@ -160,9 +161,7 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		midi_region()->midi_source(0)->load_model();
 	}
 
-	cerr << "Looking up model for midi region\n";
 	_model = midi_region()->midi_source(0)->model();
-	cerr << " model = " << _model << endl;
 	_enable_display = false;
 
 	RegionView::init (basic_color, false);
@@ -236,53 +235,84 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		break;
 
 	case GDK_KEY_PRESS:
-		if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
+
+		/* since GTK bindings are generally activated on press, and since
+		   detectable auto-repeat is the name of the game and only sends
+		   repeated presses, carry out key actions at key press, not release.
+		*/
+
+		if (ev->key.keyval == GDK_Alt_L || ev->key.keyval == GDK_Alt_R){
 			_mouse_state = SelectTouchDragging;
 			return true;
+
 		} else if (ev->key.keyval == GDK_Escape) {
 			clear_selection();
 			_mouse_state = None;
-		}
-		return false;
 
-	case GDK_KEY_RELEASE:
-		if (ev->key.keyval == GDK_Delete) {
+		} else if (ev->key.keyval == GDK_comma || ev->key.keyval == GDK_period) {
+
+			bool start = (ev->key.keyval == GDK_comma);
+			bool end = (ev->key.keyval == GDK_period);
+			bool shorter = Keyboard::modifier_state_contains (ev->key.state, Keyboard::PrimaryModifier);
+			bool fine = Keyboard::modifier_state_contains (ev->key.state, Keyboard::SecondaryModifier);
+			
+			change_note_lengths (fine, shorter, start, end);
+
+			return true;
+
+		} else if (ev->key.keyval == GDK_Delete) {
+
 			delete_selection();
 			apply_command();
 			return true;
-		} else if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
-			_mouse_state = None;
-			return true;
+
 		} else if (ev->key.keyval == GDK_Tab) {
+
 			if (Keyboard::modifier_state_equals (ev->key.state, Keyboard::PrimaryModifier)) {
 				goto_previous_note ();
 			} else {
 				goto_next_note ();
 			}
 			return true;
+
 		} else if (ev->key.keyval == GDK_Up) {
 
 			if (Keyboard::modifier_state_equals (ev->key.state, Keyboard::PrimaryModifier)) {
 				change_velocities (1, true);
 			} else {
-				transpose (true, false);
+				transpose (true, Keyboard::modifier_state_equals (ev->key.state, Keyboard::SecondaryModifier));
 			}
+			return true;
 
 		} else if (ev->key.keyval == GDK_Down) {
-
+			
 			if (Keyboard::modifier_state_equals (ev->key.state, Keyboard::PrimaryModifier)) {
 				change_velocities (-1, true);
 			} else {
-				transpose (false, false);
+				transpose (false, Keyboard::modifier_state_equals (ev->key.state, Keyboard::SecondaryModifier));
 			}
-		} else if (ev->key.keyval == GDK_Left) {
+			return true;
 
+		} else if (ev->key.keyval == GDK_Left) {
+			
 			nudge_notes (false);
+			return true;
 
 		} else if (ev->key.keyval == GDK_Right) {
 
 			nudge_notes (true);
+			return true;
 
+		} else if (ev->key.keyval == GDK_Control_L) {
+			return true;
+		}
+
+		return false;
+
+	case GDK_KEY_RELEASE:
+		if (ev->key.keyval == GDK_Alt_L || ev->key.keyval == GDK_Alt_R) {
+			_mouse_state = None;
+			return true;
 		}
 		return false;
 
@@ -416,7 +446,9 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		group->ungrab(ev->button.time);
 		event_frame = trackview.editor().pixel_to_frame(event_x);
 
-		if (_pressed_button != 1) {
+		if (ev->button.button == 3) {
+			return false;
+		} else if (_pressed_button != 1) {
 			return false;
 		}
 			
@@ -429,7 +461,9 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				break;
 			case MouseObject:
 				create_note_at(event_x, event_y, _default_note_length);
-			default: break;
+				break;
+			default: 
+				break;
 			}
 			_mouse_state = None;
 			break;
@@ -459,6 +493,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	return false;
 }
 
+void
+MidiRegionView::show_list_editor ()
+{
+	MidiListEditor* mle = new MidiListEditor (midi_region());
+	mle->show ();
+}
 
 /** Add a note to the model, and the view, at a canvas (click) coordinate.
  * \param x horizontal position in pixels
@@ -578,7 +618,26 @@ MidiRegionView::apply_command()
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
 }
+
+void
+MidiRegionView::apply_command_as_subcommand()
+{
+	if (!_delta_command) {
+		return;
+	}
+
+	// Mark all selected notes for selection when model reloads
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		_marked_for_selection.insert((*i)->note());
+	}
 	
+	_model->apply_command_as_subcommand(trackview.session(), _delta_command);
+	_delta_command = NULL; 
+	midi_view()->midi_track()->diskstream()->playlist_modified();
+
+	_marked_for_selection.clear();
+	_marked_for_velocity.clear();
+}
 
 void
 MidiRegionView::abort_command()
@@ -673,7 +732,7 @@ void
 MidiRegionView::display_sysexes()
 {
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
-		ARDOUR::MidiModel::TimeType time = (*i)->time();
+		Evoral::MusicalTime time = (*i)->time();
 		assert(time >= 0);
 		
 		ostringstream str;
@@ -1033,8 +1092,12 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 
 	if (event) {
 		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
+			cerr << "Added note " << *note << " was marked for selection\n";
 			note_selected(event, true);
+		} else {
+			cerr << "Added note " << *note << " not selected\n";
 		}
+
 		if (_marked_for_velocity.find(note) != _marked_for_velocity.end()) {
 			event->show_velocity();
 		}
@@ -1190,9 +1253,7 @@ MidiRegionView::delete_selection()
 		return;
 	}
 
-	if (!_delta_command) {
-		_delta_command = _model->new_delta_command("delete selection");
-	}
+	start_delta_command (_("delete selection"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->selected()) {
@@ -1201,6 +1262,8 @@ MidiRegionView::delete_selection()
 	}
 
 	_selection.clear();
+
+	apply_command ();
 }
 
 void
@@ -1252,8 +1315,8 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool 
 	} else {
 		/* find end of latest note selected, select all between that and the start of "ev" */
 
-		MidiModel::TimeType earliest = DBL_MAX;
-		MidiModel::TimeType latest = 0;
+		Evoral::MusicalTime earliest = DBL_MAX;
+		Evoral::MusicalTime latest = 0;
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			if ((*i)->note()->end_time() > latest) {
@@ -1265,18 +1328,24 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool 
 		}
 
 		if (ev->note()->end_time() > latest) {
-			earliest = latest;
 			latest = ev->note()->end_time();
-		} else {
+		}
+
+		if (ev->note()->time() < earliest) {
 			earliest = ev->note()->time();
 		}
 
+
 		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {		
-			if ((*i)->note()->time() >= earliest && (*i)->note()->end_time() <= latest) {
-				add_to_selection (*i);
-			}
 			
-			if ((*i)->note()->end_time() > latest) {
+			/* find notes entirely within OR spanning the earliest..latest range */
+
+			if (((*i)->note()->time() >= earliest && (*i)->note()->end_time() <= latest) ||
+			    ((*i)->note()->time() <= earliest && (*i)->note()->end_time() >= latest)) {
+				add_to_selection (*i);
+			} 			
+
+			if ((*i)->note()->time() > latest) {
 				break;
 			}
 		}
@@ -1431,13 +1500,32 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 		const boost::shared_ptr<NoteType> copy(new NoteType(*(*i)->note().get()));
 
 		nframes64_t start_frames = beats_to_frames((*i)->note()->time());
+
+		cerr << "starting at " << (*i)->note()->time() 
+		     << " (" << start_frames << ") delta on drag = " << dt << endl;
+
 		if (dt >= 0) {
+			cerr << "Motion was " << snap_frame_to_frame(trackview.editor().pixel_to_frame(dt)) << endl;
 			start_frames += snap_frame_to_frame(trackview.editor().pixel_to_frame(dt));
 		} else {
+			cerr << "rev Motion was " << snap_frame_to_frame(trackview.editor().pixel_to_frame(dt)) << endl;
 			start_frames -= snap_frame_to_frame(trackview.editor().pixel_to_frame(-dt));
 		}
 
-		copy->set_time(frames_to_beats(start_frames));
+		cerr << "start frame will be " << start_frames << " vs. region " 
+		     << _region->position ()
+		     << endl;
+
+		Evoral::MusicalTime new_time = frames_to_beats(start_frames);
+
+		if (new_time < 0) {
+			i = next;
+			continue;
+		}
+
+		copy->set_time (new_time);
+
+		cerr << "copy time = " << copy->time() << endl;
 
 		uint8_t original_pitch = (*i)->note()->note();
 		uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
@@ -1457,6 +1545,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 		copy->set_note(new_pitch);
 		
 		command_remove_note(*i);
+		cerr << "Adding note: " << *copy << endl;
 		command_add_note(copy, (*i)->selected());
 
 		i = next;
@@ -1671,7 +1760,63 @@ MidiRegionView::change_note_note (CanvasNoteEvent* event, int8_t note, bool rela
 }
 
 void
-MidiRegionView::change_note_time (CanvasNoteEvent* event, MidiModel::TimeType delta, bool relative)
+MidiRegionView::trim_note (CanvasNoteEvent* event, Evoral::MusicalTime front_delta, Evoral::MusicalTime end_delta)
+{
+	/* NOTE: the semantics of the two delta arguments are slightly subtle:
+
+	   front_delta: if positive - move the start of the note later in time (shortening it)
+	                if negative - move the start of the note earlier in time (lengthening it)
+
+	   end_delta:   if positive - move the end of the note later in time (lengthening it)
+	                if negative - move the end of the note earlier in time (shortening it)
+	 */
+
+	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
+
+	cerr << "Trim front by " << front_delta << " end by " << end_delta << endl;
+
+	if (front_delta) {
+		if (front_delta < 0) {
+			if (copy->time() < -front_delta) {
+				copy->set_time (0);
+			} else {
+				copy->set_time (copy->time() + front_delta); // moves earlier
+			}
+			/* start moved toward zero, so move the end point out to where it used to be.
+			   Note that front_delta is negative, so this increases the length.
+			 */
+			copy->set_length (copy->length() - front_delta); 
+		} else {
+			Evoral::MusicalTime new_pos = copy->time() + front_delta;
+
+			if (new_pos >= copy->end_time()) {
+				return;
+			}
+
+			copy->set_time (copy->time() + front_delta);
+
+			/* start moved toward the end, so move the end point back to where it used to be */
+			copy->set_length (copy->length() - front_delta); 
+		}
+
+	}
+
+	if (end_delta) {
+		if (end_delta < 0) {
+			if (copy->length() < -end_delta) {
+				return;
+			}
+		}
+		
+		copy->set_length (copy->length() + end_delta);
+	}
+
+	command_remove_note(event);
+	command_add_note(copy, event->selected(), false);
+}
+
+void
+MidiRegionView::change_note_time (CanvasNoteEvent* event, Evoral::MusicalTime delta, bool relative)
 {
 	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
 
@@ -1745,6 +1890,44 @@ MidiRegionView::transpose (bool up, bool fine)
 }
 
 void
+MidiRegionView::change_note_lengths (bool fine, bool shorter, bool start, bool end)
+{
+	Evoral::MusicalTime delta;
+
+	if (fine) {
+		delta = 1.0/128.0;
+	} else {
+		/* grab the current grid distance */
+		bool success;
+		delta = trackview.editor().get_grid_type_as_beats (success, _region->position());
+		if (!success) {
+			/* XXX cannot get grid type as beats ... should always be possible ... FIX ME */
+			cerr << "Grid type not available as beats - TO BE FIXED\n";
+			return;
+		}
+	}
+
+	if (shorter) {
+		delta = -delta;
+	}
+
+	start_delta_command (_("change note lengths"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+		Selection::iterator next = i;
+		++next;
+		
+		/* note the negation of the delta for start */
+
+		trim_note (*i, (start ? -delta : 0), (end ? delta : 0));
+		i = next;
+	}
+
+	apply_command ();
+
+}
+
+void
 MidiRegionView::nudge_notes (bool forward)
 {
 	if (_selection.empty()) {
@@ -1757,23 +1940,36 @@ MidiRegionView::nudge_notes (bool forward)
 	*/
 
 	nframes64_t ref_point = _region->position() + beats_to_frames ((*(_selection.begin()))->note()->time());
-	nframes64_t next_pos = ref_point;
+	nframes64_t unused;
+	nframes64_t distance;
 
-	if (forward) {
-		next_pos += 1;
-	} else { 
-		if (next_pos == 0) {
-			return;
+	if ((distance = trackview.editor().get_nudge_distance (ref_point, unused)) == 0) {
+
+		/* no nudge distance set - use grid */
+
+		nframes64_t next_pos = ref_point;
+		
+		if (forward) {
+			/* XXX need check on max_frames, but that needs max_frames64 or something */
+			next_pos += 1;
+		} else { 
+			if (next_pos == 0) {
+				return;
+			}
+			next_pos -= 1;
 		}
-		next_pos -= 1;
+		
+		cerr << "ref point was " << ref_point << " next was " << next_pos;
+		trackview.editor().snap_to (next_pos, (forward ? 1 : -1), false);
+		distance = ref_point - next_pos;
+		cerr << " final is " << next_pos << " distance = " << distance << endl;
+	} 
+		
+	if (distance == 0) {
+		return;
 	}
 
-	trackview.editor().snap_to (next_pos, (forward ? 1 : -1), false);
-	nframes64_t distance = ref_point - next_pos;
-
-	cerr << "ref was " << ref_point << " next is " << next_pos << endl;
-
-	MidiModel::TimeType delta = frames_to_beats (fabs (distance));
+	Evoral::MusicalTime delta = frames_to_beats (fabs (distance));
 
 	if (!forward) {
 		delta = -delta;
@@ -1911,7 +2107,7 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 MidiCutBuffer*
 MidiRegionView::selection_as_cut_buffer () const
 {
-	Evoral::Sequence<MidiModel::TimeType>::Notes notes;
+	NoteList notes;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		notes.push_back (boost::shared_ptr<NoteType> (new NoteType (*((*i)->note().get()))));
@@ -1919,7 +2115,8 @@ MidiRegionView::selection_as_cut_buffer () const
 
 	/* sort them into time order */
 
-	sort (notes.begin(), notes.end(), Evoral::Sequence<MidiModel::TimeType>::note_time_comparator);
+	Evoral::Sequence<Evoral::MusicalTime>::LaterNoteComparator cmp;
+	sort (notes.begin(), notes.end(),  cmp);
 
 	MidiCutBuffer* cb = new MidiCutBuffer (trackview.session());
 	cb->set (notes);
@@ -1936,10 +2133,10 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	start_delta_command (_("paste"));
 
-	MidiModel::TimeType beat_delta;
-	MidiModel::TimeType paste_pos_beats;
-	MidiModel::TimeType duration;
-	MidiModel::TimeType end_point;
+	Evoral::MusicalTime beat_delta;
+	Evoral::MusicalTime paste_pos_beats;
+	Evoral::MusicalTime duration;
+	Evoral::MusicalTime end_point;
 
 	duration = mcb.notes().back()->end_time() - mcb.notes().front()->time();
 	paste_pos_beats = frames_to_beats (pos - _region->position());
@@ -1950,7 +2147,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	for (int n = 0; n < (int) times; ++n) {
 
-		for (Evoral::Sequence<MidiModel::TimeType>::Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
+		for (NoteList::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
 			
 			boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
 			copied_note->set_time (paste_pos_beats + copied_note->time() - beat_delta);
@@ -2033,3 +2230,66 @@ MidiRegionView::goto_previous_note ()
 
 	unique_select (*(_events.rbegin()));
 }
+
+MidiModel::DeltaCommand*
+MidiRegionView::apply (Filter& filter, const std::string& name)
+{
+	MidiModel::Notes before = _model->notes();
+	MidiModel::Notes after;
+
+	_region->apply (filter);
+	
+	redisplay_model ();
+
+	after = _model->notes();
+	
+	start_delta_command (name);
+
+	for (MidiModel::Notes::iterator i = before.begin(); i != before.end(); ++i) {
+		_delta_command->add (*i);
+	}
+
+	for (MidiModel::Notes::iterator i = after.begin(); i != after.end(); ++i) {
+		_delta_command->remove (*i);
+	}
+
+	return _delta_command;
+}
+
+void
+MidiRegionView::selection_as_notelist (NoteList& selected) 
+{
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+		if ((*i)->selected()) {
+			/* make a copy of the original */
+			selected.push_back (boost::shared_ptr<Evoral::Note<Evoral::MusicalTime> >
+					    (new Evoral::Note<Evoral::MusicalTime> (*((*i)->note()))));
+		}
+	}
+}
+
+void
+MidiRegionView::replace_selected (NoteList& replacements)
+{
+	start_delta_command ("whatever");
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+		Selection::iterator tmp;
+		tmp = i;
+		++tmp;
+
+		command_remove_note (*i);
+		remove_from_selection (*i);
+
+		i = tmp;
+	}
+
+	_selection.clear ();
+
+	for (NoteList::iterator i = replacements.begin(); i != replacements.end(); ++i) {
+		command_add_note (*i, true, false);
+	}
+	
+	apply_command_as_subcommand ();
+}
+

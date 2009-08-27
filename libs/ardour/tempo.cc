@@ -1099,30 +1099,91 @@ TempoMap::round_to_beat (nframes_t fr, int dir)
 }
 
 nframes_t
-
-TempoMap::round_to_beat_subdivision (nframes_t fr, int sub_num)
+TempoMap::round_to_beat_subdivision (nframes_t fr, int sub_num, int dir)
 {
 
 	BBT_Time the_beat;
 	uint32_t ticks_one_half_subdivisions_worth;
 	uint32_t ticks_one_subdivisions_worth;
+	uint32_t difference;
 
 	bbt_time(fr, the_beat);
 
 	ticks_one_subdivisions_worth = (uint32_t)Meter::ticks_per_beat / sub_num;
 	ticks_one_half_subdivisions_worth = ticks_one_subdivisions_worth / 2;
+	
+	if (dir > 0) {
+		
+		/* round to next */
 
-	if (the_beat.ticks % ticks_one_subdivisions_worth > ticks_one_half_subdivisions_worth) {
-	  uint32_t difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
-	  if (the_beat.ticks + difference >= (uint32_t)Meter::ticks_per_beat) {
-	    the_beat.beats++;
-	    the_beat.ticks += difference;
-	    the_beat.ticks -= (uint32_t)Meter::ticks_per_beat;
-	  } else {  
-	    the_beat.ticks += difference;
-	  }
-	} else {
-	  the_beat.ticks -= the_beat.ticks % ticks_one_subdivisions_worth;
+		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
+
+		if (mod == 0) { 
+			/* right on the subdivision, so the difference is just the subdivision ticks */
+			difference = ticks_one_subdivisions_worth;
+
+		} else {
+			/* not on subdivision, compute distance to next subdivision */
+
+			difference = ticks_one_subdivisions_worth - mod;
+		}
+
+		if (the_beat.ticks + difference >= (uint32_t)Meter::ticks_per_beat) {
+			the_beat.beats++;
+			the_beat.ticks += difference;
+			the_beat.ticks -= (uint32_t)Meter::ticks_per_beat;
+		} else {  
+			the_beat.ticks += difference;
+		}
+
+	} else if (dir < 0) {
+
+		/* round to previous */
+
+		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
+
+		if (mod == 0) { 
+			/* right on the subdivision, so the difference is just the subdivision ticks */
+			difference = ticks_one_subdivisions_worth;
+			cerr << "On the sub, move by 1 sub = " << difference << endl;
+		} else {
+			/* not on subdivision, compute distance to previous subdivision, which
+			   is just the modulus.
+			*/
+
+			difference = mod;
+			cerr << "off the sub, move by 1 sub = " << difference << endl;
+		}
+
+
+		cerr << "ticks = " << the_beat.ticks << endl;
+
+		if (the_beat.ticks < difference) {
+			cerr << "backup beats, set ticks to "
+			     << (uint32_t)Meter::ticks_per_beat - difference << endl;
+			the_beat.beats--;
+			the_beat.ticks = (uint32_t)Meter::ticks_per_beat - difference;
+		} else {  
+			cerr << " reduce ticks\n";
+			the_beat.ticks -= difference;
+		}
+
+	} else { 
+		/* round to nearest */
+
+		if (the_beat.ticks % ticks_one_subdivisions_worth > ticks_one_half_subdivisions_worth) {
+			difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
+			if (the_beat.ticks + difference >= (uint32_t)Meter::ticks_per_beat) {
+				the_beat.beats++;
+				the_beat.ticks += difference;
+				the_beat.ticks -= (uint32_t)Meter::ticks_per_beat;
+			} else {  
+				the_beat.ticks += difference;
+			}
+		} else {
+			// difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
+			the_beat.ticks -= the_beat.ticks % ticks_one_subdivisions_worth;
+		}
 	}
 
 	return frame_time (the_beat);
@@ -1139,7 +1200,9 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 	switch (type) {
 	case Bar:
 		if (dir < 0) {
-			/* relax */
+			if (bbt.bars > 1) {
+				bbt.bars--;
+			}
 		} else if (dir > 0) {
 			if (bbt.beats > 0) {
 				bbt.bars++;
@@ -1157,7 +1220,9 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 	
 	case Beat:
 		if (dir < 0) {
-			/* relax */
+			if (bbt.beats > 1) {
+				bbt.beats--;
+			}
 		} else if (dir > 0) {
 			if (bbt.ticks > 0) {
 				bbt.beats++;
@@ -1178,11 +1243,12 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 	
 	}
 	
-	/* 
+	/*
 	cerr << "for " << frame << " round to " << bbt << " using "
 	     << metric.start()
 	     << endl;
 	*/
+	
 	return metric.frame() + count_frames_between (metric.start(), bbt);
 }
 

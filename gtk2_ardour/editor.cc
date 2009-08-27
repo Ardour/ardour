@@ -1704,7 +1704,11 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 			bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 		
 		items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::rename_region)));
-		items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
+		if (mr && internal_editing()) {
+			items.push_back (MenuElem (_("Popup list editor"), mem_fun(*this, &Editor::show_midi_list_editor)));
+		} else {
+			items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
+		}
 	}
 
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
@@ -2643,23 +2647,23 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 
 	case SnapToAThirtysecondBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 32);
+		start = session->tempo_map().round_to_beat_subdivision (start, 32, direction);
 		break;
 
 	case SnapToASixteenthBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 16);
+		start = session->tempo_map().round_to_beat_subdivision (start, 16, direction);
 		break;
 
 	case SnapToAEighthBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 8);
+		start = session->tempo_map().round_to_beat_subdivision (start, 8, direction);
 		break;
 
 	case SnapToAQuarterBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 4);
+		start = session->tempo_map().round_to_beat_subdivision (start, 4, direction);
 		break;
 
 	case SnapToAThirdBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 3);
+		start = session->tempo_map().round_to_beat_subdivision (start, 3, direction);
 		break;
 
 	case SnapToMark:
@@ -2758,45 +2762,6 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	}
 }
 
-double
-Editor::snap_length_beats (nframes64_t start)
-{
-	if (!session) {
-		return 1.0;
-	}
-
-	/* FIXME: This could/should also work with non-tempo based snap settings (ie seconds) */
-
-	switch (snap_type) {
-	case SnapToBar:
-		return session->tempo_map().meter_at(start).beats_per_bar();
-
-	case SnapToBeat:
-		return 1.0;
-
-	case SnapToAThirtysecondBeat:
-		return 1.0 / (double)32.0;
-		break;
-
-	case SnapToASixteenthBeat:
-		return 1.0 / (double)16.0;
-		break;
-
-	case SnapToAEighthBeat:
-		return 1.0 / (double)8.0;
-		break;
-
-	case SnapToAQuarterBeat:
-		return 1.0 / (double)4.0;
-		break;
-
-	case SnapToAThirdBeat:
-		return 1.0 / (double)3.0;
-
-	default:
-		return 1.0;
-	}
-}
 
 void
 Editor::setup_toolbar ()
@@ -2846,6 +2811,7 @@ Editor::setup_toolbar ()
 	
 	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
+	mouse_mode_tearoff->tearoff_window().signal_key_press_event().connect (bind (sigc::ptr_fun (relay_key_press), &mouse_mode_tearoff->tearoff_window()), false);
 
 	if (Profile->get_sae()) {
 		mouse_mode_tearoff->set_can_be_torn_off (false);
@@ -2985,6 +2951,7 @@ Editor::setup_toolbar ()
 
 	tools_tearoff = manage (new TearOff (*hbox));
 	tools_tearoff->set_name ("MouseModeBase");
+	tools_tearoff->tearoff_window().signal_key_press_event().connect (bind (sigc::ptr_fun (relay_key_press), &tools_tearoff->tearoff_window()), false);
 
 	if (Profile->get_sae()) {
 		tools_tearoff->set_can_be_torn_off (false);
@@ -3844,6 +3811,60 @@ PlaylistSelector&
 Editor::playlist_selector () const
 {
 	return *_playlist_selector;
+}
+
+Evoral::MusicalTime
+Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
+{
+	success = true;
+
+	switch (snap_type) {
+	case SnapToBeat:
+		return 1.0;
+		break;
+
+	case SnapToAThirtysecondBeat:
+		return 1.0/32.0;		
+		break;
+
+	case SnapToASixteenthBeat:
+		return 1.0/16.0;
+		break;
+
+	case SnapToAEighthBeat:
+		return 1.0/8.0;
+		break;
+
+	case SnapToAQuarterBeat:
+		return 1.0/4.0;
+		break;
+
+	case SnapToAThirdBeat:
+		return 1.0/3.0;
+		break;
+		
+	case SnapToBar:
+		if (session) {
+			return session->tempo_map().meter_at (position).beats_per_bar();
+		}
+		break;
+
+	case SnapToCDFrame:
+	case SnapToSMPTEFrame:
+	case SnapToSMPTESeconds:
+	case SnapToSMPTEMinutes:
+	case SnapToSeconds:
+	case SnapToMinutes:
+	case SnapToRegionStart:
+	case SnapToRegionEnd:
+	case SnapToRegionSync:
+	case SnapToRegionBoundary:
+	default:
+		success = false;
+		break;
+	}
+
+	return 0.0;
 }
 
 nframes64_t

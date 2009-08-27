@@ -57,7 +57,8 @@ struct Event {
 
 	inline const Event& operator=(const Event& copy) {
 		_type = copy._type;
-		_time = copy._time;
+		_original_time = copy._original_time;
+		_nominal_time = copy._nominal_time;
 		if (_owns_buf) {
 			if (copy._buf) {
 				if (copy._size > _size) {
@@ -84,7 +85,8 @@ struct Event {
 		}
 
 		_type = copy._type;
-		_time = copy._time;
+		_original_time = copy._nominal_time;
+		_nominal_time = copy._nominal_time;
 		_size = copy._size;
 		_buf  = copy._buf;
 	}
@@ -99,7 +101,8 @@ struct Event {
 			_buf = buf;
 		}
 
-		_time = t;
+		_original_time = t;
+		_nominal_time = t;
 		_size = size;
 	}
 
@@ -107,7 +110,10 @@ struct Event {
 		if (_type != other._type)
 			return false;
 
-		if (_time != other._time)
+		if (_nominal_time != other._nominal_time)
+			return false;
+
+		if (_original_time != other._original_time)
 			return false;
 
 		if (_size != other._size)
@@ -151,7 +157,8 @@ struct Event {
 	
 	inline void clear() {
 		_type = 0;
-		_time = 0;
+		_original_time = 0;
+		_nominal_time = 0;
 		_size = 0;
 		_buf  = NULL;
 	}
@@ -164,8 +171,10 @@ struct Event {
 
 	inline EventType   event_type()            const { return _type; }
 	inline void        set_event_type(EventType t)   { _type = t; }
-	inline Time        time()                  const { return _time; }
-	inline Time&       time()                        { return _time; }
+	inline Time        time()                  const { return _nominal_time; }
+	inline Time&       time()                        { return _nominal_time; }
+	inline Time        original_time()         const { return _original_time; }
+	inline Time&       original_time()               { return _original_time; }
 	inline uint32_t    size()                  const { return _size; }
 	inline uint32_t&   size()                        { return _size; }
 
@@ -174,7 +183,8 @@ struct Event {
 
 protected:
 	EventType _type; /**< Type of event (application relative, NOT MIDI 'type') */
-	Time      _time; /**< Sample index (or beat time) at which event is valid */
+	Time      _original_time; /**< Sample index (or beat time) at which event is valid */
+        Time      _nominal_time; /**< quantized version of _time, used in preference */
 	uint32_t  _size; /**< Number of uint8_ts of data in \a buffer */
 	uint8_t*  _buf;  /**< Raw MIDI data */
 

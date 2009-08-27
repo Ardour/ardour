@@ -24,7 +24,7 @@ using namespace std;
 
 namespace ARDOUR {
 
-/** Read a block of MIDI events from buffer.
+/** Read a block of MIDI events from buffer into a MidiBuffer.
  *
  * Timestamps of events returned are relative to start (i.e. event with stamp 0
  * occurred at start), with offset added.
@@ -106,11 +106,13 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		// write MIDI buffer contents
 		success = Evoral::EventRingBuffer<T>::full_read(ev_size, write_loc);
 		
-		/*cerr << "wrote MidiEvent to Buffer: ";
+#if 0
+		cerr << "wrote MidiEvent to Buffer: " << hex;
 		for (size_t i=0; i < ev_size; ++i) {
-			printf("%X ", write_loc[i]);
+			cerr << (int) write_loc[i] << ' ';
 		}
-		printf("\n");*/
+		cerr << dec << endl;
+#endif
 
 		if (success) {
 			if (is_channel_event(status) && get_channel_mode() == ForceChannel) {

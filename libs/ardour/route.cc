@@ -479,13 +479,16 @@ Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, 
 		}
 	}
 
+	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
 	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick);
 }
 
 void
 Route::passthru_silence (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, int declick)
 {
-	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, true, declick);
+	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick);
 }
 
 void

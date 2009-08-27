@@ -204,7 +204,7 @@ class TempoMap : public PBD::StatefulDestructible
 
 	nframes_t round_to_bar  (nframes_t frame, int dir);
 	nframes_t round_to_beat (nframes_t frame, int dir);
-	nframes_t round_to_beat_subdivision (nframes_t fr, int sub_num);
+	nframes_t round_to_beat_subdivision (nframes_t fr, int sub_num, int dir);
 	nframes_t round_to_tick (nframes_t frame, int dir);
 
 	void set_length (nframes_t frames);

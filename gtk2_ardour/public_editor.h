@@ -31,6 +31,7 @@
 #include <jack/types.h>
 #include <sigc++/signal.h>
 
+#include "evoral/types.hpp"
 #include "ardour/route_group.h"
 
 #include "pbd/statefuldestructible.h" 
@@ -121,9 +122,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	/** Snap a value according to the current snap setting. */
 	virtual void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false) = 0;
 	
-	/** Get the current snap value in beats */
-	virtual double snap_length_beats (nframes64_t start) = 0;
-
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
 	 */
@@ -264,7 +262,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual nframes64_t get_nudge_distance (nframes64_t pos, nframes64_t& next) = 0;
-
+	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, nframes64_t position) = 0;
 
 #ifdef WITH_CMT
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
@@ -350,7 +348,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	static PublicEditor* _instance;
 
-	friend class PluginUIWindow;
+	friend bool relay_key_press (GdkEventKey*, Gtk::Window*);
 };
 
 #endif // __gtk_ardour_public_editor_h__

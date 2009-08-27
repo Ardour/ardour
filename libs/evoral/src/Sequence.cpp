@@ -787,7 +787,7 @@ Sequence<Time>::set_notes (const Sequence<Time>::Notes& n)
 	_notes = n;
 }
 
-template class Sequence<double>;
+template class Sequence<Evoral::MusicalTime>;
 
 } // namespace Evoral
 

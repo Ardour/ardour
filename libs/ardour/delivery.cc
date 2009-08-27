@@ -22,6 +22,8 @@
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 
+#include "ardour/midi_buffer.h"
+
 #include "ardour/delivery.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/amp.h"

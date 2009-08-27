@@ -326,6 +326,9 @@ class Route : public SessionObject, public AutomatableControls
 	void passthru (sframes_t start_frame, sframes_t end_frame,
 		       nframes_t nframes, int declick);
 
+	virtual void write_out_of_band_data (BufferSet& /* bufs */, sframes_t /* start_frame */, sframes_t /* end_frame */,
+					     nframes_t /* nframes */) {}
+
 	virtual void process_output_buffers (BufferSet& bufs,
 					     sframes_t start_frame, sframes_t end_frame,
 					     nframes_t nframes, bool with_processors, int declick);

@@ -25,7 +25,8 @@ namespace Evoral {
 template<typename Timestamp>
 Event<Timestamp>::Event(EventType type, Timestamp time, uint32_t size, uint8_t* buf, bool alloc)
 	: _type(type)
-	, _time(time)
+	, _original_time(time)
+	, _nominal_time(time)
 	, _size(size)
 	, _buf(buf)
 	, _owns_buf(alloc)
@@ -43,7 +44,8 @@ Event<Timestamp>::Event(EventType type, Timestamp time, uint32_t size, uint8_t* 
 template<typename Timestamp>
 Event<Timestamp>::Event(const Event& copy, bool owns_buf)
 	: _type(copy._type)
-	, _time(copy._time)
+	, _original_time(copy._original_time)
+	, _nominal_time(copy._nominal_time)
 	, _size(copy._size)
 	, _buf(copy._buf)
 	, _owns_buf(owns_buf)
@@ -67,7 +69,7 @@ Event<Timestamp>::~Event() {
 
 #endif // EVORAL_EVENT_ALLOC
 
-template class Event<double>;
+template class Event<Evoral::MusicalTime>;
 template class Event<uint32_t>;
 
 } // namespace Evoral

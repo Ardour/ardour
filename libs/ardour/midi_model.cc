@@ -70,6 +70,19 @@ MidiModel::apply_command(Session& session, Command* cmd)
 	set_edited(true);
 }
 
+/** Apply a command as part of a larger reversible transaction
+ *
+ * Ownership of cmd is taken, it must not be deleted by the caller.
+ * The command will constitute one item on the undo stack.
+ */
+void
+MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
+{
+	(*cmd)();
+	session.add_command(cmd);
+	set_edited(true);
+}
+
 
 // DeltaCommand
 
@@ -107,17 +120,19 @@ MidiModel::DeltaCommand::operator()()
 {
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
-	
+
 	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
 	_model->_midi_source->invalidate(); // release model read lock
 	_model->write_lock();
 
-	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
+	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 		_model->add_note_unlocked(*i);
+	}
 
-	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
+	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
 		_model->remove_note_unlocked(*i);
-
+	}
+	
 	_model->write_unlock();
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -132,11 +147,13 @@ MidiModel::DeltaCommand::undo()
 	_model->_midi_source->invalidate(); // release model read lock
 	_model->write_lock();
 
-	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
+	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 		_model->remove_note_unlocked(*i);
+	}
 
-	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
+	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
 		_model->add_note_unlocked(*i);
+	}
 
 	_model->write_unlock();
 	_model->ContentsChanged(); /* EMIT SIGNAL */

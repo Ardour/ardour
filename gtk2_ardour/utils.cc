@@ -41,6 +41,7 @@
 #include "ardour/filesystem_paths.h"
 
 #include "ardour_ui.h"
+#include "public_editor.h"
 #include "keyboard.h"
 #include "utils.h"
 #include "i18n.h"
@@ -507,6 +508,16 @@ extern "C" {
 	gboolean gdk_quartz_possibly_forward (GdkEvent*);
 }
 #endif
+
+bool
+relay_key_press (GdkEventKey* ev, Gtk::Window* win)
+{
+	if (!key_press_focus_accelerator_handler (*win, ev)) {
+		return PublicEditor::instance().on_key_press_event(ev);
+	} else {
+		return true;
+	}
+}
 
 bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)

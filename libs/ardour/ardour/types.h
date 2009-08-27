@@ -446,6 +446,12 @@ namespace ARDOUR {
 		Rectified
 	};
 
+	enum QuantizeType {
+		Plain,
+		Legato,
+		Groove
+	};
+
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

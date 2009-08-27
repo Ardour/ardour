@@ -24,7 +24,6 @@
 
 namespace Evoral {
 
-
 /** An abstract (protocol agnostic) note.
  *
  * Currently a note is defined as (on event, length, off event).
@@ -75,6 +74,15 @@ private:
 
 
 } // namespace Evoral
+
+template<typename Time>
+std::ostream& operator<<(std::ostream& o, const Evoral::Note<Time>& n) {
+	o << "Note: pitch = " << (int) n.note()
+	  << " @ " << n.time() << " .. " << n.end_time() 
+	  << " velocity " << (int) n.velocity() 
+	  << " chn " << (int) n.channel();
+	return o;
+}
 
 #endif // EVORAL_NOTE_HPP
 

@@ -81,7 +81,7 @@ MIDIEvent<Time>::to_xml() const
 
 #endif // EVORAL_MIDI_XML
 
-template class MIDIEvent<double>;
+template class MIDIEvent<Evoral::MusicalTime>;
 
 } // namespace Evoral
 

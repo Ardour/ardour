@@ -81,9 +81,51 @@ style "time_axis_view_item_name"
 	font_name = "%FONT_SMALLER%"
 }
 
+style "white_tree_view" 
+{
+  GtkButton::default_border = { 0, 0, 0, 0 }
+  GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkButton::button_relief = GTK_RELIEF_NONE
+  GtkTreeView::vertical-padding = 0
+  GtkTreeView::horizontal-padding = 0
+  GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
+  GtkTreeView::odd-row-color = { 0.64, 0.64, 0.64 }
+  
+  fg[NORMAL] = { 0.30, 0.30, 0.40 }	
+  fg[ACTIVE] = { 0.30, 0.30, 0.40 }	
+  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
+  fg[INSENSITIVE] = { 0.30, 0.30, 0.40 }	
+  fg[SELECTED] = { 0.30, 0.30, 0.40 }	
+  
+  bg[NORMAL] = { 0.80, 0.80, 0.80 }
+  bg[ACTIVE] = { 0.80, 0.80, 0.80 }
+  bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+  bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
+  bg[SELECTED] = { 0.80, 0.80, 0.80 }
+  
+  text[NORMAL] = { 0.30, 0.30, 0.40 }
+  text[ACTIVE] = { 0.30, 0.30, 0.40 }
+  text[PRELIGHT] = { 0.30, 0.30, 0.40 }
+  text[INSENSITIVE] = { 0.30, 0.30, 0.40 }
+  text[SELECTED] = { 0, 0, 0 }
+  
+  base[ACTIVE]     = { 0.80, 0.80, 0.80 }
+  base[NORMAL]      =  { 0.80, 0.80, 0.80 }
+  base[PRELIGHT]     = { 0.90, 0.90, 0.90 }
+  base[INSENSITIVE]  = "#4c5159"
+  base[SELECTED]     = { 0.60, 0.60, 0.80 }
+
+  engine "clearlooks" 
+  {
+    menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
+    menuitemstyle     = 0       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
+    listviewitemstyle = 0       # 0 = flat, 1 = 3d-ish (gradient)
+    progressbarstyle  = 1       # 0 = candy bar, 1 = fancy candy bar, 2 = flat
+  }
+}
+
 style "default_base" = "medium_text"
 {
-  
   GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
@@ -1594,4 +1636,5 @@ widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
 widget "*OddPortGroups" style:highest "odd_port_groups"
 widget "*EvenPortGroups" style:highest "even_port_groups"
-
+Widget "*MidiListView" style:highest "white_tree_view"
+Widget "*MidiListView*" style:highest "white_tree_view"

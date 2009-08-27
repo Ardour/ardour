@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007-2009 Paul Davis 
 	Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -21,19 +21,33 @@
 #ifndef __ardour_quantize_h__
 #define __ardour_quantize_h__
 
-#include "ardour/filter.h"
+#include "ardour/types.h"
+#include "ardour/midi_operator.h"
 
 namespace ARDOUR {
 
-class Quantize : public Filter {
-public:
-	Quantize (ARDOUR::Session&, double q);
-	~Quantize ();
+class Session;
 
-	int run (boost::shared_ptr<ARDOUR::Region>);
+class Quantize : public MidiOperator {
+public:
+	 Quantize (ARDOUR::Session&, QuantizeType type, 
+		   bool snap_start, bool snap_end,
+		   double start_grid, double end_grid, 
+		   float strength, float swing, float threshold);
+	 ~Quantize ();
+
+	 int operator() (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&);
+	 std::string name() const { return std::string ("quantize"); }
 
 private:
-	double _q;
+	 ARDOUR::Session& session;
+	 bool   _snap_start;
+	 bool   _snap_end;
+	 double _start_grid;
+	 double _end_grid;
+	 float  _strength;
+	 float  _swing;
+	 float  _threshold;
 };
 
 } /* namespace */

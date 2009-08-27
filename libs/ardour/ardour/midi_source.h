@@ -65,7 +65,7 @@ class MidiSource : virtual public Source
 			sframes_t source_start,
 			nframes_t cnt);
 
-	virtual void append_event_unlocked_beats(const Evoral::Event<double>& ev) = 0;
+	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
 			sframes_t source_start) = 0;
@@ -128,7 +128,7 @@ class MidiSource : virtual public Source
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 	
-	mutable Evoral::Sequence<double>::const_iterator _model_iter;
+	mutable Evoral::Sequence<Evoral::MusicalTime>::const_iterator _model_iter;
 	
 	mutable double    _length_beats;
 	mutable sframes_t _last_read_end;

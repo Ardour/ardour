@@ -47,7 +47,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	close_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 	close_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::close_click));
 	
-	own_window.add_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
+	own_window.add_events (KEY_PRESS_MASK|KEY_RELEASE_MASK|BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
 	own_window.set_resizable (allow_resize);
 	own_window.set_type_hint (WINDOW_TYPE_HINT_TOOLBAR);
 	

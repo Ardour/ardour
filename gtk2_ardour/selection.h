@@ -181,6 +181,7 @@ class Selection : public sigc::trackable
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	void foreach_regionview (void (RegionView::*method)(void));
+	void foreach_midi_regionview (void (MidiRegionView::*method)(void));
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
   private:

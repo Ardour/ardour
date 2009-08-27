@@ -45,6 +45,7 @@
 namespace ARDOUR {
 	class MidiRegion;
 	class MidiModel;
+	class Filter;
 };
 
 namespace MIDI {
@@ -62,7 +63,8 @@ class MidiCutBuffer;
 class MidiRegionView : public RegionView
 {
   public:
-	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
+	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
+	typedef Evoral::Sequence<Evoral::MusicalTime>::Notes NoteList;
 
 	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
@@ -85,6 +87,8 @@ class MidiRegionView : public RegionView
 
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
+
+	ARDOUR::MidiModel::DeltaCommand* apply (ARDOUR::Filter&, const std::string& name);
 
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
@@ -168,6 +172,7 @@ class MidiRegionView : public RegionView
 	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
 
 	void apply_command();
+	void apply_command_as_subcommand();
 	void abort_command();
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
@@ -264,8 +269,14 @@ class MidiRegionView : public RegionView
 	void goto_previous_note ();
 	void goto_next_note ();
 	void change_velocities (int8_t velocity, bool relative);
+	void change_note_lengths (bool, bool, bool start, bool end);
 	void transpose (bool up, bool fine);
 	void nudge_notes (bool forward);
+
+	void show_list_editor ();
+
+	void selection_as_notelist (NoteList& selected);
+	void replace_selected (NoteList& replacements);
 
   protected:
 	/** Allows derived types to specify their visibility requirements
@@ -308,6 +319,8 @@ class MidiRegionView : public RegionView
 	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
 	void change_note_note(ArdourCanvas::CanvasNoteEvent* ev, int8_t note, bool relative=false);
 	void change_note_time(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
+	void trim_note(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType start_delta,
+		       ARDOUR::MidiModel::TimeType end_delta);
 
 	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
@@ -361,6 +374,7 @@ class MidiRegionView : public RegionView
 
 	/* connection used to connect to model's ContentChanged signal */
 	sigc::connection content_connection;
+
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

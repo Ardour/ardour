@@ -401,7 +401,6 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 	_silent = false;
 
 	if ((dret = diskstream->process (transport_frame, nframes, can_record, rec_monitors_input)) != 0) {
-
 		silence (nframes);
 		return dret;
 	}
@@ -416,10 +415,10 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
-		   */
+		*/
 
 		passthru (start_frame, end_frame, nframes, 0);
-
+		
 	} else {
 		/*
 		   XXX is it true that the earlier test on n_outputs()
@@ -434,12 +433,15 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 
 		//const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+		
+		diskstream->get_playback (bufs.get_midi(0), start_frame, end_frame);
 
-		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame);
+		/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
+
+		write_out_of_band_data (bufs, start_frame, end_frame, nframes);	
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes,
 				(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick);
-	
 	}
 
 	_main_outs->flush (nframes);
@@ -448,13 +450,12 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 }
 
 void
-MidiTrack::write_controller_messages(MidiBuffer& output_buf, sframes_t /*start*/, sframes_t /*end*/, nframes_t nframes)
+MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes_t /*end*/, nframes_t nframes)
 {
-	// Append immediate events (UI controls)
+	// Append immediate events
 
-	// XXX TAKE _port_offset in Port into account???
-
-	_immediate_events.read (output_buf, 0, 0, nframes - 1); // all stamps = 0
+	MidiBuffer& buf (bufs.get_midi (0));
+	_immediate_events.read (buf, 0, 0, nframes - 1); // all stamps = 0
 }
 
 int

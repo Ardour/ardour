@@ -79,6 +79,7 @@
 #include "strip_silence_dialog.h"
 #include "editor_routes.h"
 #include "editor_regions.h"
+#include "quantize_dialog.h"
 
 #include "i18n.h"
 
@@ -2535,6 +2536,13 @@ Editor::edit_region ()
 	selection->foreach_regionview (&RegionView::show_region_editor);
 }
 
+/** Show the midi list editor for the selected MIDI regions */
+void
+Editor::show_midi_list_editor ()
+{
+	selection->foreach_midi_regionview (&MidiRegionView::show_list_editor);
+}
+
 void
 Editor::rename_region()
 {
@@ -4801,6 +4809,48 @@ Editor::strip_region_silence ()
 	}
 }
 
+void
+Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv)
+{
+	vector<Evoral::Sequence<Evoral::MusicalTime>::Notes> v;
+	Evoral::Sequence<Evoral::MusicalTime>::Notes selected;
+	
+	v.push_back (selected);
+
+	mrv.selection_as_notelist (v.front());
+	op (v);
+	mrv.replace_selected (v.front());
+}
+				      
+void
+Editor::apply_midi_note_edit_op (MidiOperator& op)
+{
+	RegionSelection rs; 
+
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
+	}
+
+	begin_reversible_command (op.name ());
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
+		RegionSelection::iterator tmp = r;
+		++tmp;
+
+		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
+
+		if (mrv) {
+			apply_midi_note_edit_op_to_region (op, *mrv);
+		}
+		
+		r = tmp;
+	}
+
+	commit_reversible_command ();
+	rs.clear ();
+}
 
 void
 Editor::quantize_region ()
@@ -4809,9 +4859,18 @@ Editor::quantize_region ()
 		return;
 	}
 
-	// FIXME: varying meter?
-	Quantize quant (*session, snap_length_beats(0));
-	apply_filter (quant, _("quantize regions"));
+	QuantizeDialog* qd = new QuantizeDialog (*this);
+
+	qd->present ();
+	qd->run ();
+	qd->hide ();
+	
+	Quantize quant (*session, Plain, 
+			qd->snap_start(), qd->snap_end(),
+			qd->start_grid_size(), qd->end_grid_size(),
+			qd->strength(), qd->swing(), qd->threshold());
+
+	apply_midi_note_edit_op (quant);
 }
 
 void
@@ -4833,13 +4892,6 @@ Editor::apply_filter (Filter& filter, string command)
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
 		RegionSelection::iterator tmp = r;
 		++tmp;
-
-		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*>(*r);
-		if (mrv) {
-			if (mrv->midi_region()->apply(filter) == 0) {
-				mrv->redisplay_model();
-			}
-		}
 
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
 		if (arv) {

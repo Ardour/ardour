@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <cmath>
 
 #include "pbd/basename.h"
 
@@ -31,15 +32,24 @@
 using namespace std;
 using namespace ARDOUR;
 
-
-/** Quantize notes, valid for MIDI regions only.
+/** Quantize notes
  *
- * Q is the quantize value in beats, ie 1.0 = quantize to beats,
+ * grid parameters are the quantize value in beats, ie 1.0 = quantize to beats,
  * 0.25 = quantize to beats/4, etc.
  */
-Quantize::Quantize (Session& s, double q)
-	: Filter (s)
-	, _q(q)
+
+Quantize::Quantize (Session& s, QuantizeType /* type */, 
+		    bool snap_start, bool snap_end,
+		    double start_grid, double end_grid, 
+		    float strength, float swing, float threshold)
+	: session (s)
+	, _snap_start (snap_start)
+	, _snap_end (snap_end)
+	, _start_grid(start_grid)
+	, _end_grid(end_grid)
+	, _strength (strength/100.0)
+	, _swing (swing/100.0)
+	, _threshold (threshold)
 {
 }
 
@@ -48,32 +58,70 @@ Quantize::~Quantize ()
 }
 
 int
-Quantize::run (boost::shared_ptr<Region> r)
+Quantize::operator () (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
 {
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(r);
-	if (!region)
-		return -1;
+	bool even;
 
-	// FIXME: how to make a whole file region if it isn't?
-	//assert(region->whole_file());
+	for (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>::iterator s = seqs.begin();
+	     s != seqs.end(); ++s) {
 
-	boost::shared_ptr<MidiSource> src = region->midi_source(0);
-	src->load_model();
+		even = false;
 
-	boost::shared_ptr<MidiModel> model = src->model();
-	
-	for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = model->notes().begin();
-			i != model->notes().end(); ++i) {
-		const double new_time = lrint((*i)->time() / _q) * _q;
-		double new_dur = lrint((*i)->length() / _q) * _q;
-		if (new_dur == 0.0)
-			new_dur = _q;
-		
-		(*i)->set_time(new_time);
-		(*i)->set_length(new_dur);
+		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin();
+		     i != (*s).end(); ++i) {
+			
+			double new_start = round ((*i)->time() / _start_grid) * _start_grid; 
+			double new_end = round ((*i)->end_time() / _end_grid) * _end_grid;
+			double delta;
+			
+			if (_swing > 0.0 && !even) {
+				
+				double next_grid = new_start + _start_grid;
+				
+				/* find a spot 2/3 (* swing factor) of the way between the grid point
+				   we would put this note at, and the nominal position of the next note.
+				*/
+				
+				new_start = new_start + (2.0/3.0 * _swing * (next_grid - new_start));
+				
+			} else if (_swing < 0.0 && !even) {
+				
+				double prev_grid = new_start - _start_grid;
+				
+				/* find a spot 2/3 (* swing factor) of the way between the grid point
+				   we would put this note at, and the nominal position of the previous note.
+				*/
+				
+				new_start = new_start - (2.0/3.0 * _swing * (new_start - prev_grid));
+				
+			}
+			
+			delta = new_start - (*i)->time();
+			
+			if (fabs (delta) >= _threshold) {
+				if (_snap_start) {
+					delta *= _strength;
+					(*i)->set_time ((*i)->time() + delta);
+				}
+			}
+			
+			if (_snap_end) {
+				delta = new_end - (*i)->end_time();
+				
+				if (fabs (delta) >= _threshold) {
+					double new_dur = new_end - new_start;
+					
+					if (new_dur == 0.0) {
+						new_dur = _end_grid;
+					}
+					
+					(*i)->set_length (new_dur);
+				}
+			}
+			
+			even = !even;
+		}
 	}
-
-	model->set_edited(true);
 
 	return 0;
 }

@@ -47,7 +47,7 @@ class MidiSource;
  * Because of this MIDI controllers and automatable controllers/widgets/etc
  * are easily interchangeable.
  */
-class MidiModel : public AutomatableSequence<double> {
+class MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
 public:
 	typedef double TimeType;
 
@@ -91,6 +91,7 @@ public:
 
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
 	void                     apply_command(Session& session, Command* cmd);
+	void                     apply_command_as_subcommand(Session& session, Command* cmd);
 
 	bool write_to(boost::shared_ptr<MidiSource> source);
 		

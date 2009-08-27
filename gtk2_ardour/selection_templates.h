@@ -29,6 +29,7 @@
 
 #include "selection.h"
 #include "region_view.h"
+#include "midi_region_view.h"
 
 inline void
 Selection::foreach_region (void (ARDOUR::Region::*method)(void)) {
@@ -42,6 +43,16 @@ inline void
 Selection::foreach_regionview (void (RegionView::*method)(void)) {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 		((*i)->*(method))();
+	}
+}
+
+inline void
+Selection::foreach_midi_regionview (void (MidiRegionView::*method)(void)) {
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+		if (mrv) {
+			(mrv->*(method))();
+		}
 	}
 }
 

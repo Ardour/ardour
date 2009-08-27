@@ -24,6 +24,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+#include "ardour/delivery.h"
 #include "ardour/diskstream.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
@@ -315,6 +316,8 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 
 		passthru (start_frame, end_frame, nframes, false);
 	}
+
+	_main_outs->flush (nframes);
 
 	return 0;
 }

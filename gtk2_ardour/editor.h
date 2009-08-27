@@ -82,6 +82,7 @@ namespace ARDOUR {
 	class Filter;
 	class Crossfade;
 	class ChanCount;
+	class MidiOperator;
 }
 
 namespace LADSPA {
@@ -102,6 +103,7 @@ class Drag;
 class GlobalPortMatrixWindow;
 class GroupedButtons;
 class Marker;
+class MidiRegionView;
 class MixerStrip;
 class PlaylistSelector;
 class PluginSelector;
@@ -333,6 +335,7 @@ class Editor : public PublicEditor
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
 	nframes64_t get_nudge_distance (nframes64_t pos, nframes64_t& next);
+	Evoral::MusicalTime get_grid_type_as_beats (bool& success, nframes64_t position);
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
@@ -1060,6 +1063,7 @@ class Editor : public PublicEditor
 	void remove_selected_regions ();
 	void remove_clicked_region ();
 	void edit_region ();
+	void show_midi_list_editor ();
 	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
@@ -1493,8 +1497,6 @@ public:
 	void snap_to_with_modifier (nframes64_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
 	void snap_to (nframes64_t& first, nframes64_t& last, int32_t direction = 0, bool for_mark = false);
 
-	double snap_length_beats (nframes64_t start);
-
 	uint32_t bbt_beat_subdivision;
 
 	/* toolbar */
@@ -1914,6 +1916,9 @@ public:
 	/* audio filters */
 
 	void apply_filter (ARDOUR::Filter&, std::string cmd);
+
+	void apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
+	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op);
 
 	/* handling cleanup */
 
