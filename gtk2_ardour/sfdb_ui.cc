@@ -974,7 +974,7 @@ SoundFileOmega::reset_options ()
 				channel_strings.push_back (_("sequence files"));
 			}
 			if (same_size) {
-				channel_strings.push_back (_("all files in one region"));
+				channel_strings.push_back (_("all files in one track"));
 			}
 			
 		}
