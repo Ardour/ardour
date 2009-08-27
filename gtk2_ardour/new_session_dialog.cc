@@ -399,20 +399,21 @@ NewSessionDialog::NewSessionDialog()
 
 	const char * const template_dir_name = X_("templates");
 
-	if (!path.empty()) {
-		string user_template_path = path + template_dir_name;
-
-		if (Glib::file_test(user_template_path, Glib::FILE_TEST_IS_DIR))
-		{
-			m_template->set_current_folder (user_template_path);
-		}
+	//if SYSTEM template folder exists, add it to the file chooser
+	const std::string sys_templates_path = ARDOUR::get_system_data_path() + template_dir_name;
+printf("system template path = %s\n", sys_templates_path.c_str());
+	if (Glib::file_test(sys_templates_path, Glib::FILE_TEST_IS_DIR))
+	{
+		m_template->add_shortcut_folder(sys_templates_path);
+		m_template->set_current_folder (sys_templates_path);
 	}
 
-	const std::string sys_templates_dir = ARDOUR::get_system_data_path() + template_dir_name;
-	
-	if (Glib::file_test(sys_templates_dir, Glib::FILE_TEST_IS_DIR))
+	//if USER template folder exists, add it to the file chooser
+	const std::string user_template_path = ARDOUR::get_user_ardour_path() + template_dir_name;
+	if (Glib::file_test(user_template_path, Glib::FILE_TEST_IS_DIR))
 	{
-		m_template->add_shortcut_folder(sys_templates_dir);
+		m_template->add_shortcut_folder(user_template_path);
+		m_template->set_current_folder (user_template_path);
 	}
 
 	m_template->set_title(_("select template"));
