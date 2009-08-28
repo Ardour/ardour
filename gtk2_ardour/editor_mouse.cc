@@ -1008,7 +1008,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		bool const r = _drag->end_grab (event);
 		delete _drag;
 		_drag = 0;
-		cerr << "DRAG DONE, r = " << r << endl;
 		if (r) {
 			/* grab dragged, so do nothing else */
 			return true;
