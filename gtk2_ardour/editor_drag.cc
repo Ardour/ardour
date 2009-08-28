@@ -718,7 +718,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	vector<RegionView*> copies;
 	boost::shared_ptr<Diskstream> ds;
 	boost::shared_ptr<Playlist> from_playlist;
-	list<RegionView*> new_views;
+	RegionSelection new_views;
 	typedef set<boost::shared_ptr<Playlist> > PlaylistSet;
 	PlaylistSet modified_playlists;
 	PlaylistSet frozen_playlists;
@@ -952,18 +952,8 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			copies.push_back (rv);
 		}
 	}
-	
-	if (new_views.empty()) {
-		if (_copy) {
-			/* the region(view)s that are being dragged around are copies and do not
-			   belong to any track. remove them from our list
-			*/
-			_views.clear ();
-		}
-	} else {
-		_views = new_views;
-		_primary = _views.front ();
-	}
+
+	_editor->selection->add (new_views);
 
 	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
 		(*p)->thaw();
