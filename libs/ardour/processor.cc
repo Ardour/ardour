@@ -232,8 +232,6 @@ Processor::configure_io (ChanCount in, ChanCount out)
 	_configured_output = out; 
 	_configured = true;
 
-	std::cerr << "******* CONF IN for " << _name << " set to " << in << std::endl;
-
 	ConfigurationChanged.emit (in, out);
 
 	return true;

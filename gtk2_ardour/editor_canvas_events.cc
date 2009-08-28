@@ -753,12 +753,60 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 	return ret;
 }
 
+bool
+Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
+{
+	bool ret = false;
+
+	/* frame handles are not active when in internal edit mode, because actual notes
+	   might be in the area occupied by the handle - we want them to be editable as normal.
+	*/
+
+	if (internal_editing() || !rv->sensitive()) {
+		return false;
+	}
+
+	/* NOTE: frame handles pretend to be the colored trim bar from an event handling
+	   perspective. XXX change this ??
+	*/
+
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+	case GDK_2BUTTON_PRESS:
+	case GDK_3BUTTON_PRESS:
+		clicked_regionview = rv;
+		clicked_control_point = 0;
+		clicked_axisview = &clicked_regionview->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
+		ret = button_press_handler (item, event, RegionViewNameHighlight);
+		break;
+	case GDK_BUTTON_RELEASE:
+		ret = button_release_handler (item, event, RegionViewNameHighlight);
+		break;
+	case GDK_MOTION_NOTIFY:
+		ret = motion_handler (item, event);
+		break;
+	case GDK_ENTER_NOTIFY:
+		ret = enter_handler (item, event, RegionViewNameHighlight);
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+		ret = leave_handler (item, event, RegionViewNameHighlight);
+		break;
+
+	default:
+		break;
+	}
+
+	return ret;
+}
+
 
 bool
 Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
-	
+
 	if (!rv->sensitive()) {
 		return false;
 	}

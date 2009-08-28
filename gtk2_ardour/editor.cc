@@ -3367,6 +3367,31 @@ Editor::clamp_verbose_cursor_y (double y)
 }
 
 void
+Editor::show_verbose_canvas_cursor_with (const string & txt)
+{
+	verbose_canvas_cursor->property_text() = txt.c_str();
+
+	int x, y;
+	double wx, wy;
+
+	track_canvas->get_pointer (x, y);
+	track_canvas->window_to_world (x, y, wx, wy);
+
+	/* move it away from the mouse pointer to avoid an
+	   infinite loop of enter/leave events.
+	*/
+
+	wx += 20;
+	wy += 20;
+
+	/* don't get too close to the edge */
+	verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (wx);
+	verbose_canvas_cursor->property_y() = clamp_verbose_cursor_y (wy);
+
+	show_verbose_canvas_cursor ();
+}
+
+void
 Editor::set_verbose_canvas_cursor (const string & txt, double x, double y)
 {
 	verbose_canvas_cursor->property_text() = txt.c_str();

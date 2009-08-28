@@ -156,10 +156,10 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 		name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 		
 		frame_handle_start->set_data ("regionview", this);
-		frame_handle_start->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), frame_handle_start, this));
+		frame_handle_start->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
 
 		frame_handle_end->set_data ("regionview", this);
-		frame_handle_end->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), frame_handle_end, this));
+		frame_handle_end->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
 
 		frame_handle_start->raise_to_top();
 		frame_handle_end->raise_to_top();

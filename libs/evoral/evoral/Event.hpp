@@ -196,5 +196,18 @@ protected:
 
 } // namespace Evoral
 
+
+template<typename Time>
+std::ostream& operator<<(std::ostream& o, const Evoral::Event<Time>& ev) {
+	o << "Event type = " << ev.event_type() << " @ " << " @ " << ev.time() << "\n\t";
+	o << std::hex;
+	for (uint32_t n = 0; n < ev.size(); ++n) {
+		o << (int) ev.buffer()[n] << ' ';
+	}
+	o << std::dec << std::endl;
+	return o;
+}
+
+
 #endif // EVORAL_EVENT_HPP
 

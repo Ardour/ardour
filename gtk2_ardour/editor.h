@@ -419,6 +419,9 @@ class Editor : public PublicEditor
 	void do_embed (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
+
+	void show_verbose_canvas_cursor_with (const std::string& txt);
+	void hide_verbose_canvas_cursor();
 	
   protected:
 	void map_transport_state ();
@@ -629,7 +632,6 @@ class Editor : public PublicEditor
 	void set_verbose_canvas_cursor (const std::string &, double x, double y);
 	void set_verbose_canvas_cursor_text (const std::string &);
 	void show_verbose_canvas_cursor();
-	void hide_verbose_canvas_cursor();
 
 	bool verbose_cursor_on; // so far unused
 
@@ -1359,6 +1361,7 @@ private:
 public:
 
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
+	bool canvas_frame_handle_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);

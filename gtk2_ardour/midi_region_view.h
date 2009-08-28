@@ -88,8 +88,6 @@ class MidiRegionView : public RegionView
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
 
-	ARDOUR::MidiModel::DeltaCommand* apply (ARDOUR::Filter&, const std::string& name);
-
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
@@ -176,6 +174,7 @@ class MidiRegionView : public RegionView
 	void abort_command();
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
+	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
 	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add);
@@ -268,9 +267,9 @@ class MidiRegionView : public RegionView
 
 	void goto_previous_note ();
 	void goto_next_note ();
-	void change_velocities (int8_t velocity, bool relative);
 	void change_note_lengths (bool, bool, bool start, bool end);
-	void transpose (bool up, bool fine);
+	void change_velocities (bool up, bool fine, bool allow_smush);
+	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward);
 
 	void show_list_editor ();
@@ -374,7 +373,7 @@ class MidiRegionView : public RegionView
 
 	/* connection used to connect to model's ContentChanged signal */
 	sigc::connection content_connection;
+};	
 
-};
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

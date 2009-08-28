@@ -172,12 +172,12 @@ Editor::which_grabber_cursor ()
 
 	if (_internal_editing) {
 		switch (mouse_mode) {
-		case MouseObject:
+		case MouseRange:
 			c = midi_pencil_cursor;
 			break;
 			
-		case MouseRange:
-			c = midi_select_cursor;
+		case MouseObject:
+			c = grabber_cursor;
 			break;
 			
 		case MouseTimeFX:
@@ -208,12 +208,12 @@ Editor::set_canvas_cursor ()
 	if (_internal_editing) {
 
 		switch (mouse_mode) {
-		case MouseObject:
+		case MouseRange:
 			current_canvas_cursor = midi_pencil_cursor;
 			break;
 			
-		case MouseRange:
-			current_canvas_cursor = midi_select_cursor;
+		case MouseObject:
+			current_canvas_cursor = which_grabber_cursor();
 			break;
 			
 		case MouseTimeFX:
@@ -599,9 +599,15 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	}
 	
 	if (internal_editing()) {
-		assert (_drag == 0);
-		_drag = new RegionCreateDrag (this, item, clicked_axisview);
-		_drag->start_grab (event);
+		switch (item_type) {
+		case StreamItem:
+			assert (_drag == 0);
+			_drag = new RegionCreateDrag (this, item, clicked_axisview);
+			_drag->start_grab (event);
+			return true;
+		default:
+			return true;
+		}
 	} else {
 		switch (mouse_mode) {
 		case MouseRange:
@@ -2552,11 +2558,9 @@ Editor::set_internal_edit (bool yn)
 	_internal_editing = yn;
 
 	if (yn) {
-		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_select")))));
-		mouse_move_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
+		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
 	} else {
 		mouse_select_button.set_image (*(manage (new Image (::get_xpm("tool_range.xpm")))));
-		mouse_move_button.set_image (*(manage (new Image (::get_icon("tool_object")))));
 	}
 
 	set_canvas_cursor ();

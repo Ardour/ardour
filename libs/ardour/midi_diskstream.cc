@@ -1652,15 +1652,15 @@ MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 	MidiBuffer::iterator this_cycle_start = dst.end();
 	
 	// Translates stamps to be relative to start
-	#if 1
-		_playback_buf->read(dst, start, end);
-	#else	
-		const size_t events_read = _playback_buf->read(dst, start, end);
-		cout << "MDS events read = " << events_read
-		<< " start = " << start << " end = " << end
-		<< " readspace " << _playback_buf->read_space()
-		<< " writespace " << _playback_buf->write_space() << endl;
-	#endif
+
+	_playback_buf->read(dst, start, end);
+#if 0
+	const size_t events_read = _playback_buf->read(dst, start, end);
+	cout << _name << ": MDS events read = " << events_read
+	     << " start = " << start << " end = " << end
+	     << " readspace " << _playback_buf->read_space()
+	     << " writespace " << _playback_buf->write_space() << endl;
+#endif
 	
 	gint32 frames_read = end - start;
 	g_atomic_int_add(&_frames_read_from_ringbuffer, frames_read);

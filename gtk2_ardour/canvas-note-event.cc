@@ -235,7 +235,8 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 	case GDK_LEAVE_NOTIFY:
 		//Keyboard::magic_widget_drop_focus();
-		if (! selected()) {
+		_region.note_left (this);
+		if (!selected()) {
 			hide_velocity();
 		}
 		//_region.get_canvas_group()->grab_focus();
@@ -255,7 +256,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Drag begin
-			if (editor.current_mouse_mode() == Editing::MouseRange && _region.mouse_state() != MidiRegionView::SelectTouchDragging) {
+			if (editor.current_mouse_mode() == Editing::MouseObject && _region.mouse_state() != MidiRegionView::SelectTouchDragging) {
 				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				_state = Dragging;
