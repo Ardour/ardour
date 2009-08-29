@@ -923,3 +923,16 @@ convert_bgra_to_rgba (guint8 const* src,
 			src_pixel += 4;
 		}
 }
+
+void
+resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int max_height)
+{
+	Glib::RefPtr<Gdk::Screen> screen = window->get_screen ();
+	Gdk::Rectangle monitor_rect;
+	screen->get_monitor_geometry (0, monitor_rect);
+
+	int const w = std::min (monitor_rect.get_width(), max_width) * 0.8;
+	int const h = std::min (monitor_rect.get_height(), max_height) * 0.8;
+
+	window->resize (w, h);
+}

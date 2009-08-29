@@ -20,6 +20,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/stock.h>
 #include "global_port_matrix.h"
+#include "utils.h"
 
 #include "ardour/bundle.h"
 #include "ardour/session.h"
@@ -123,16 +124,12 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::Data
 
 	add (_port_matrix);
 	show_all ();
-
-	/* XXX: hack to make the window full-size on opening.  This may not work for
-	   people with very large monitors */
-	
-	resize (32768, 32768);
 }
 
 void
 GlobalPortMatrixWindow::on_show ()
 {
 	Gtk::Window::on_show ();
-	_port_matrix.setup_max_size ();
+	pair<uint32_t, uint32_t> const pm_max = _port_matrix.max_size ();
+	resize_window_to_proportion_of_monitor (this, pm_max.first, pm_max.second);
 }

@@ -111,7 +111,6 @@ public:
 	void setup_all_ports ();
 
 	std::pair<uint32_t, uint32_t> max_size () const;
-	void setup_max_size ();
 
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.

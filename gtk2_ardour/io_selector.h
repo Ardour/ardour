@@ -79,6 +79,7 @@ class IOSelectorWindow : public Gtk::Window
 
   protected:
 	void on_map ();
+	void on_show ();
 	
   private:
 	IOSelector _selector;

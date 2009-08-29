@@ -500,22 +500,6 @@ PortMatrix::max_size () const
 	return m;
 }
 
-void
-PortMatrix::setup_max_size ()
-{
-	if (!_parent) {
-		return;
-	}
-
-	pair<uint32_t, uint32_t> const m = max_size ();
-	
-	GdkGeometry g;
-	g.max_width = m.first;
-	g.max_height = m.second;
-
-	_parent->set_geometry_hints (*this, g, Gdk::HINT_MAX_SIZE);
-}
-
 bool
 PortMatrix::on_scroll_event (GdkEventScroll* ev)
 {

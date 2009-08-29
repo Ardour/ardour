@@ -102,5 +102,6 @@ void convert_bgra_to_rgba (guint8 const* src,
 			   int           width,
 			   int           height);
 
+void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 #endif /* __ardour_gtk_utils_h__ */

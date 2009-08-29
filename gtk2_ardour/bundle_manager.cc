@@ -29,6 +29,7 @@
 #include "ardour/audioengine.h"
 #include "bundle_manager.h"
 #include "i18n.h"
+#include "utils.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -227,8 +228,14 @@ BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bund
 	}
 	
 	show_all ();
+}
 
-	resize (32768, 32768);
+void
+BundleEditor::on_show ()
+{
+	Gtk::Window::on_show ();
+	pair<uint32_t, uint32_t> const pm_max = _matrix.max_size ();
+	resize_window_to_proportion_of_monitor (this, pm_max.first, pm_max.second);
 }
 
 void
@@ -403,7 +410,6 @@ BundleManager::bundle_changed (Bundle::Change c, boost::shared_ptr<UserBundle> b
 	}
 }
 
-
 NameChannelDialog::NameChannelDialog ()
 	: ArdourDialog (_("Add channel")),
 	  _adding (true)
@@ -447,3 +453,4 @@ NameChannelDialog::get_name () const
 {
 	return _name.get_text ();
 }
+

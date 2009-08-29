@@ -166,8 +166,6 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 	show_all ();
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
-
-	resize (32768, 32768);
 }
 
 void
@@ -176,6 +174,14 @@ IOSelectorWindow::on_map ()
 	_selector.setup_all_ports ();
 	Window::on_map ();
 }
+
+void
+IOSelectorWindow::on_show ()
+{
+	Gtk::Window::on_show ();
+	pair<uint32_t, uint32_t> const pm_max = _selector.max_size ();
+	resize_window_to_proportion_of_monitor (this, pm_max.first, pm_max.second);
+}	
 
 void
 IOSelectorWindow::io_name_changed (void* src)
