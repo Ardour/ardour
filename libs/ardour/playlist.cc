@@ -1999,7 +1999,7 @@ Playlist::relayer ()
 	/* don't send multiple Modified notifications
 	   when multiple regions are relayered.
 	*/
- 
+
 	freeze ();
 
 	/* Build up a new list of regions on each layer, stored in a set of lists
@@ -2019,7 +2019,7 @@ Playlist::relayer ()
 	}
 
 	/* hence the size of each time division */
-	double const division_size = (end - start) / divisions;
+	double const division_size = (end - start) / double (divisions);
 
 	vector<vector<RegionList> > layers;
 	layers.push_back (vector<RegionList> (divisions));
@@ -2053,6 +2053,8 @@ Playlist::relayer ()
 		if (end_division == divisions) {
 			end_division--;
 		}
+
+		assert (end_division < divisions);
 
 		/* find the lowest layer that this region can go on */
 		size_t j = layers.size();
