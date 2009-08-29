@@ -475,8 +475,7 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 
 	if (!Profile->get_sae()) {
-		build_remote_control_menu ();
-		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		items.push_back (MenuElem (_("Remote Control ID..."), mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
 		/* rebuild this every time */
 		build_automation_action_menu ();
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
@@ -2400,4 +2399,3 @@ RouteTimeAxisView::set_button_names ()
 
 	mute_button_label.set_text (_("m"));
 }
-

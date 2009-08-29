@@ -84,7 +84,6 @@ RouteUI::~RouteUI()
 	
 	delete solo_menu;
 	delete mute_menu;
-	delete remote_control_menu;
 	delete sends_menu;
 }
 
@@ -95,7 +94,6 @@ RouteUI::init ()
 	xml_node = 0;
 	mute_menu = 0;
 	solo_menu = 0;
-	remote_control_menu = 0;
 	sends_menu = 0;
 	ignore_toggle = false;
 	wait_for_release = false;
@@ -214,8 +212,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	} else {
 		solo_button->show();
 	}
-
-	connections.push_back (_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu)));
 
 	/* map the current state */
 
@@ -772,72 +768,6 @@ RouteUI::update_rec_display ()
 
 	} else {
 		rec_enable_button->set_visual_state (0);
-	}
-}
-
-void
-RouteUI::build_remote_control_menu ()
-{
-	remote_control_menu = new Menu;
-	refresh_remote_control_menu ();
-}
-
-void
-RouteUI::refresh_remote_control_menu ()
-{
-	ENSURE_GUI_THREAD (mem_fun (*this, &RouteUI::refresh_remote_control_menu));
-
-	// only refresh the menu if it has been instantiated
-
-	if (remote_control_menu == 0) {
-		return;
-	}
-
-	using namespace Menu_Helpers;
-
-	RadioMenuItem::Group rc_group;
-	CheckMenuItem* rc_active;
-	uint32_t limit = _session.ntracks() + _session.nbusses();
-	char buf[32];
-
-	MenuList& rc_items = remote_control_menu->items();
-	rc_items.clear ();
-
-	/* note that this menu list starts at zero, not 1, because zero
-	   is a valid, if useless, ID.
-	*/
-
-	limit += 4; /* leave some breathing room */
-	
-	rc_items.push_back (RadioMenuElem (rc_group, _("None")));
-	if (_route->remote_control_id() == 0) {
-		rc_active = dynamic_cast<CheckMenuItem*> (&rc_items.back());
-		rc_active->set_active ();
-	}
-		
-	for (uint32_t i = 1; i < limit; ++i) {
-		snprintf (buf, sizeof (buf), "%u", i);
-		rc_items.push_back (RadioMenuElem (rc_group, buf));
-		rc_active = dynamic_cast<RadioMenuItem*>(&rc_items.back());
-		if (_route->remote_control_id() == i) {
-			rc_active = dynamic_cast<CheckMenuItem*> (&rc_items.back());
-			rc_active->set_active ();
-		}
-		rc_active->signal_activate().connect (bind (mem_fun (*this, &RouteUI::set_remote_control_id), i, rc_active));
-	}
-}
-
-void
-RouteUI::set_remote_control_id (uint32_t id, CheckMenuItem* item)
-{
-	/* this is called when the radio menu item is toggled, and so 
-	   is actually invoked twice per menu selection. we only
-	   care about the invocation for the item that was being
-	   marked active.
-	*/
-
-	if (item->get_active()) {
-		_route->set_remote_control_id (id);
 	}
 }
 
@@ -1447,4 +1377,33 @@ void
 RouteUI::page_gain_down ()
 {
 	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), this);
+}
+
+void
+RouteUI::open_remote_control_id_dialog ()
+{
+	ArdourDialog dialog (_("Remote Control ID"));
+
+	uint32_t const limit = _session.ntracks() + _session.nbusses () + 4;
+
+	HBox* hbox = manage (new HBox);
+	hbox->set_spacing (6);
+	hbox->pack_start (*manage (new Label (_("Remote control ID:"))));
+	SpinButton* spin = manage (new SpinButton);
+	spin->set_digits (0);
+	spin->set_increments (1, 10);
+	spin->set_range (0, limit);
+	spin->set_value (_route->remote_control_id());
+	hbox->pack_start (*spin);
+	dialog.get_vbox()->pack_start (*hbox);
+
+	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
+
+	dialog.show_all ();
+	int const r = dialog.run ();
+
+	if (r == RESPONSE_ACCEPT) {
+		_route->set_remote_control_id (spin->get_value_as_int ());
+	}
 }

@@ -97,7 +97,6 @@ class RouteUI : public virtual AxisView
 	
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
-	Gtk::Menu* remote_control_menu;
 	Gtk::Menu* sends_menu;
 
 	XMLNode *xml_node;
@@ -133,9 +132,7 @@ class RouteUI : public virtual AxisView
 	void route_rec_enable_changed();
 	void session_rec_enable_changed();
 
-	void build_solo_menu (void);
-	void build_remote_control_menu (void);
-	void refresh_remote_control_menu ();
+	void build_solo_menu ();
 
 	void solo_isolated_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_isolated (Gtk::CheckMenuItem*);
@@ -185,13 +182,12 @@ class RouteUI : public virtual AxisView
 
 	virtual void map_frozen ();
 
-	void set_remote_control_id (uint32_t id, Gtk::CheckMenuItem* item);
-
 	void reversibly_apply_route_boolean (std::string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
 	void reversibly_apply_track_boolean (std::string name, void (ARDOUR::Track::*func)(bool, void*), bool, void *);
 
 	void adjust_latency ();
 	void save_as_template ();
+	void open_remote_control_id_dialog ();
  
    protected:
  	std::vector<sigc::connection> connections;

@@ -1165,9 +1165,8 @@ MixerStrip::build_route_ops_menu ()
 	denormal_menu_item->set_active (_route->denormal_protection());
 
 	if (!Profile->get_sae()) {
-		build_remote_control_menu ();
 		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		items.push_back (MenuElem (_("Remote Control ID..."), mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
         }
 
 	items.push_back (SeparatorElem());
@@ -1193,8 +1192,6 @@ MixerStrip::list_route_operations ()
 	if (route_ops_menu == 0) {
 		build_route_ops_menu ();
 	}
-	
-	refresh_remote_control_menu();
 }
 
 void
