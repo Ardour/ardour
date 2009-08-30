@@ -51,6 +51,7 @@ const int PannerUI::pan_bar_height = 30;
 
 PannerUI::PannerUI (Session& s)
 	: _session (s),
+	  _current_nouts (-1),
 	  hAdjustment(0.0, 0.0, 0.0),
 	  vAdjustment(0.0, 0.0, 0.0),
 	  panning_viewport(hAdjustment, vAdjustment),
@@ -154,7 +155,7 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
  	connections.push_back (_panner->Changed.connect (mem_fun(*this, &PannerUI::panner_changed)));
  	connections.push_back (_panner->LinkStateChanged.connect (mem_fun(*this, &PannerUI::update_pan_linkage)));
  	connections.push_back (_panner->StateChanged.connect (mem_fun(*this, &PannerUI::update_pan_state)));
- 
+
 	setup_pan ();
 
 	pan_changed (0);
@@ -335,13 +336,19 @@ PannerUI::update_pan_state ()
 void
 PannerUI::setup_pan ()
 {
-	cerr << "Setup pan for " << _panner->name() << endl;
-
 	if (!_panner) {
 		return;
 	}
 
 	uint32_t nouts = _panner->nouts();
+
+	if (nouts == _current_nouts) {
+		return;
+	}
+
+	_current_nouts = nouts;
+
+	cout << "Setup pan for " << _panner->name() << endl;
 
 	if (nouts == 0 || nouts == 1) {
 

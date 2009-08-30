@@ -83,6 +83,7 @@ class PannerUI : public Gtk::HBox
 
 	bool ignore_toggle;
 	bool in_pan_update;
+	int _current_nouts;
 
 	static const int pan_bar_height;
 

@@ -304,7 +304,6 @@ MixerStrip::init ()
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
 	
 	SwitchIO.connect (mem_fun (*this, &MixerStrip::switch_io));
-	
 }
 
 MixerStrip::~MixerStrip ()

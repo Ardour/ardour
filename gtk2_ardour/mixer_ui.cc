@@ -311,12 +311,10 @@ Mixer_UI::add_strip (RouteList& routes)
 		if (route->is_hidden()) {
 			return;
 		}
-		
+
 		strip = new MixerStrip (*this, *session, route);
 		strips.push_back (strip);
 		
-		Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
-
 		Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 
 		if (strip->width_owner() != strip) {
