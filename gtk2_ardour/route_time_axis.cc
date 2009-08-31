@@ -1227,7 +1227,7 @@ RouteTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, 
 	nframes_t end_adjusted   = session_frame_to_track_frame(end, speed);
 
 	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
-		_view->get_selectables (start_adjusted, end_adjusted, results);
+		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results);
 	}
 
 	/* pick up visible automation tracks */

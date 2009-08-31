@@ -89,7 +89,7 @@ public:
 	void         foreach_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (nframes_t start, nframes_t end, std::list<Selectable* >&);
+	void get_selectables (nframes_t, nframes_t, double, double, std::list<Selectable* >&);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 
 	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region>) {}

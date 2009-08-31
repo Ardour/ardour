@@ -514,10 +514,27 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 }
 
 void
-StreamView::get_selectables (nframes_t start, nframes_t end, list<Selectable*>& results)
+StreamView::get_selectables (nframes_t start, nframes_t end, double top, double bottom, list<Selectable*>& results)
 {
+	layer_t min_layer = 0;
+	layer_t max_layer = 0;
+	
+	if (_layer_display == Stacked) {
+		double const c = child_height ();
+		min_layer = _layers - ((bottom - _trackview.y_position()) / c);
+		max_layer = _layers - ((top - _trackview.y_position()) / c);
+	}
+	
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region()->coverage(start, end) != OverlapNone) {
+
+		bool layer_ok = true;
+
+		if (_layer_display == Stacked) {
+			layer_t const l = (*i)->region()->layer ();
+			layer_ok = (min_layer <= l && l <= max_layer);
+		}
+		
+		if ((*i)->region()->coverage (start, end) != OverlapNone && layer_ok) {
 			results.push_back (*i);
 		}
 	}
