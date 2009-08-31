@@ -193,7 +193,7 @@ RegionView::~RegionView ()
 		delete *g;
 	}
 
-	for (std::list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
+	for (list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
 		delete *i;
 	}
 
@@ -577,6 +577,10 @@ RegionView::set_height (double h)
 		points.push_back (Gnome::Art::Point (offset, h - NAME_HIGHLIGHT_SIZE));
 		sync_line->property_points().set_value (points);
 	}
+
+	for (list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin(); i != _coverage_frames.end(); ++i) {
+		(*i)->property_y2() = h + 1;
+	}
 }
 
 /** Remove old coverage frames and make new ones, if we're in a LayerDisplay mode
@@ -585,7 +589,7 @@ void
 RegionView::update_coverage_frames (LayerDisplay d)
 {
 	/* remove old coverage frames */
-	for (std::list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
+	for (list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
 		delete *i;
 	}
 
