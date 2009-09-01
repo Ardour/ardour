@@ -137,24 +137,33 @@ ExportDialog::init_gui ()
 	preset_align->add (*preset_selector);
 	preset_align->set_padding (0, 12, 0, 0);
 	get_vbox()->pack_start (*preset_align, false, false, 0);
+
+	Gtk::VBox* advanced_vbox = Gtk::manage (new Gtk::VBox());
+	advanced_vbox->set_spacing (12);
+	advanced_vbox->set_border_width (12);
 	
 	Gtk::Alignment * timespan_align = Gtk::manage (new Gtk::Alignment());
 	timespan_label = Gtk::manage (new Gtk::Label (_("Time Span"), Gtk::ALIGN_LEFT));
 	timespan_align->add (*timespan_selector);
 	timespan_align->set_padding (0, 12, 18, 0);
-	get_vbox()->pack_start (*timespan_label, false, false, 0);
-	get_vbox()->pack_start (*timespan_align, false, false, 0);
+	advanced_vbox->pack_start (*timespan_label, false, false, 0);
+	advanced_vbox->pack_start (*timespan_align, false, false, 0);
 	
 	Gtk::Alignment * channels_align = Gtk::manage (new Gtk::Alignment());
 	channels_label = Gtk::manage (new Gtk::Label (_("Channels"), Gtk::ALIGN_LEFT));
 	channels_align->add (*channel_selector);
 	channels_align->set_padding (0, 12, 18, 0);
-	get_vbox()->pack_start (*channels_label, false, false, 0);
-	get_vbox()->pack_start (*channels_align, false, false, 0);
+	advanced_vbox->pack_start (*channels_label, false, false, 0);
+	advanced_vbox->pack_start (*channels_align, false, false, 0);
 	
 	get_vbox()->pack_start (*file_notebook, false, false, 0);
-	get_vbox()->pack_start (warning_widget, true, true, 0);
-	get_vbox()->pack_start (progress_widget, true, true, 0);
+	get_vbox()->pack_start (warning_widget, false, false, 0);
+	get_vbox()->pack_start (progress_widget, false, false, 0);
+
+	Gtk::Expander* advanced = Gtk::manage (new Gtk::Expander (_("Advanced options")));
+	advanced->add (*advanced_vbox);
+
+	get_vbox()->pack_start (*advanced, false, false);
 	
 	Pango::AttrList bold;
 	Pango::Attribute b = Pango::Attribute::create_attr_weight (Pango::WEIGHT_BOLD);
