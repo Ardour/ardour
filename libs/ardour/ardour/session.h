@@ -963,6 +963,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	SessionConfiguration config;
 
+	bool exporting () const {
+		return _exporting;
+	}
+	
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
