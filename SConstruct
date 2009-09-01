@@ -18,6 +18,9 @@ import commands
 from sets import Set
 import SCons.Node.FS
 
+print "\n----------------------------------------\nPlease build Ardour 3.X using waf:\n\n./waf configure\n./waf"
+exit (0)
+
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
@@ -1485,12 +1488,12 @@ create_stored_revision()
 # the subdirs
 #
 
-for subdir in coredirs:
-    SConscript (subdir + '/SConscript')
+#for subdir in coredirs:
+#    SConscript (subdir + '/SConscript')
 
-for sublistdir in [ subdirs, timefx_subdirs, gtk_subdirs, surface_subdirs ]:
-    for subdir in sublistdir:
-        SConscript (subdir + '/SConscript')
+#for sublistdir in [ subdirs, timefx_subdirs, gtk_subdirs, surface_subdirs ]:
+#    for subdir in sublistdir:
+#        SConscript (subdir + '/SConscript')
 
 # cleanup
 env.Clean ('scrub', [ 'scache.conf', '.sconf_temp', '.sconsign.dblite', 'config.log'])
