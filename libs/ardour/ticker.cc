@@ -56,6 +56,11 @@ void MidiClockTicker::update_midi_clock_port()
 
 void MidiClockTicker::transport_state_changed()
 {
+	if (_session->exporting()) {
+		/* no midi clock during export, for now */
+		return;
+	}
+	
 	float     speed     = _session->transport_speed();
 	nframes_t position  = _session->transport_frame();
 #ifdef DEBUG_MIDI_CLOCK	
