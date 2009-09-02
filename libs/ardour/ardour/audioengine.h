@@ -238,12 +238,6 @@ class AudioEngine : public sigc::trackable
 	int    process_callback (nframes_t nframes);
 	void   remove_all_ports ();
 
-	typedef std::pair<std::string,std::string> PortConnection;
-	typedef std::list<PortConnection> PortConnections;
-
-	PortConnections port_connections;
-	void   remove_connections_for (Port&);
-
 	std::string get_nth_physical (DataType type, uint32_t n, int flags);
 
 	void port_registration_failure (const std::string& portname);

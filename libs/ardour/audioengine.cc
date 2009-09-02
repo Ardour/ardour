@@ -580,8 +580,7 @@ AudioEngine::remove_session ()
 		session = 0;
 	}
 	
-	//FIXME: Preliminary bugfix for  http://tracker.ardour.org/view.php?id=1985
-	//remove_all_ports ();
+	remove_all_ports ();
 }
 
 void
@@ -682,8 +681,6 @@ AudioEngine::unregister_port (Port& port)
 		/* writer goes out of scope, forces update */
 	}
 		
-	remove_connections_for (port);
-
 	return 0;
 }
 
@@ -1141,27 +1138,14 @@ AudioEngine::remove_all_ports ()
 	{
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
+
+		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
+			delete *i;
+		}
+		
 		ps->clear ();
 	}
 }
-
-void
-AudioEngine::remove_connections_for (Port& port)
-{
-	for (PortConnections::iterator i = port_connections.begin(); i != port_connections.end(); ) {
-		PortConnections::iterator tmp;
-		
-		tmp = i;
-		++tmp;
-		
-		if ((*i).first == port.name()) {
-			port_connections.erase (i);
-		}
-
-		i = tmp;
-	}
-}
-
 
 static void 
 ardour_jack_error (const char* msg) 
