@@ -574,7 +574,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 		return false;
 	}
 	
-	/* proxy for the upper most regionview */
+	/* proxy for an underlying regionview */
 
 	/* XXX really need to check if we are in the name highlight,
 	   and proxy to that when required.
@@ -589,21 +589,56 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 
 			boost::shared_ptr<AudioPlaylist> pl;
 			if ((pl = boost::dynamic_pointer_cast<AudioPlaylist> (atv->get_diskstream()->playlist())) != 0) {
-
+				
 				Playlist::RegionList* rl = pl->regions_at (event_frame (event));
-
 				if (!rl->empty()) {
-					DescendingRegionLayerSorter cmp;
-					rl->sort (cmp);
+				
+					if (atv->layer_display() == Overlaid) {
+						
+						/* we're in overlaid mode; proxy to the uppermost region view */
+						
+						DescendingRegionLayerSorter cmp;
+						rl->sort (cmp);
+						
+						RegionView* rv = atv->view()->find_view (rl->front());
+						
+						delete rl;
+						
+						/* proxy */
+						return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 
-					RegionView* rv = atv->view()->find_view (rl->front());
-
-					delete rl;
-
-					/* proxy */
+					} else {
 					
-					return canvas_region_view_event (event, rv->get_canvas_group(), rv);
-				} 
+						/* we're in stacked mode; proxy to the region view under the mouse */
+
+						/* XXX: FIXME: this is an evil hack; it assumes that any event for which
+						   this proxy is being used has its GdkEvent laid out such that the y
+						   member is in the same place as that for a GdkEventButton */
+
+						/* position of the event within the track */
+						double cx = event->button.x;
+						double cy = event->button.y;
+						atv->view()->canvas_item()->w2i (cx, cy);
+
+						/* hence layer that we're over */
+						double const c = atv->view()->child_height ();
+						layer_t const l = pl->top_layer () + 1 - (cy / c);
+
+						/* hence region */
+						Playlist::RegionList::iterator i = rl->begin();
+						while (i != rl->end() && (*i)->layer() != l) {
+							++i;
+						}
+
+						if (i != rl->end()) {
+							RegionView* rv = atv->view()->find_view (*i);
+							delete rl;
+
+							/* proxy */
+							return canvas_region_view_event (event, rv->get_canvas_group(), rv);
+						}
+					}
+				}
 
 				delete rl;
 			}
