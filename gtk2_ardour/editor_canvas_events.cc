@@ -321,7 +321,7 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 		break;
 
 	case GDK_MOTION_NOTIFY:
-		ret = motion_handler (item, event, StreamItem);
+		ret = motion_handler (item, event);
 		break;
 
 	case GDK_ENTER_NOTIFY:
