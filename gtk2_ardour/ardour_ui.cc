@@ -2369,6 +2369,7 @@ ARDOUR_UI::close_session()
 
 	unload_session (true);
 
+	ARDOUR_COMMAND_LINE::session_name = "";
 	get_session_parameters (false);
 }
 
