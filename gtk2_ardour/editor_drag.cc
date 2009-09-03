@@ -1366,45 +1366,18 @@ void
 RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (_dest_trackview);
+
 	if (!mtv) {
 		return;
 	}
 
-	const boost::shared_ptr<MidiDiskstream> diskstream =
-		boost::dynamic_pointer_cast<MidiDiskstream>(mtv->view()->trackview().track()->diskstream());
-	
-	if (!diskstream) {
-		warning << "Cannot create non-MIDI region" << endl;
-		return;
-	}
-
 	if (!movement_occurred) {
-		_editor->begin_reversible_command (_("create region"));
-		XMLNode &before = mtv->playlist()->get_state();
-
-		nframes64_t start = _grab_frame;
-		_editor->snap_to (start, -1);
-		const Meter& m = _editor->session->tempo_map().meter_at(start);
-		const Tempo& t = _editor->session->tempo_map().tempo_at(start);
-		double length = floor (m.frames_per_bar(t, _editor->session->frame_rate()));
-
-		boost::shared_ptr<Source> src = _editor->session->create_midi_source_for_session(*diskstream.get());
-				
-		mtv->playlist()->add_region (boost::dynamic_pointer_cast<MidiRegion>
-					     (RegionFactory::create(src, 0, (nframes_t) length, 
-								    PBD::basename_nosuffix(src->name()))), start);
-		XMLNode &after = mtv->playlist()->get_state();
-		_editor->session->add_command(new MementoCommand<Playlist>(*mtv->playlist().get(), &before, &after));
-		_editor->commit_reversible_command();
-
+		mtv->add_region (_grab_frame);
 	} else {
 		motion (event, false);
 		// TODO: create region-create-drag region here
 	}
 }
-
-
-
 
 void
 RegionGainDrag::motion (GdkEvent* /*event*/, bool)

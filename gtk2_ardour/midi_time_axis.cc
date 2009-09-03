@@ -28,7 +28,9 @@
 #include "pbd/error.h"
 #include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
+#include "pbd/basename.h"
 #include "pbd/enumwriter.h"
+#include "pbd/memento_command.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>
@@ -39,40 +41,44 @@
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_patch_manager.h"
+#include "ardour/midi_source.h"
 #include "ardour/processor.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/location.h"
 #include "ardour/playlist.h"
+#include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_playlist.h"
+#include "ardour/tempo.h"
 #include "ardour/utils.h"
 
-#include "ardour_ui.h"
-#include "midi_time_axis.h"
-#include "automation_time_axis.h"
-#include "automation_line.h"
 #include "add_midi_cc_track_dialog.h"
+#include "ardour_ui.h"
+#include "automation_line.h"
+#include "automation_time_axis.h"
+#include "canvas-note-event.h"
 #include "canvas_impl.h"
 #include "crossfade_view.h"
+#include "editor.h"
 #include "enums.h"
+#include "ghostregion.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "midi_scroomer.h"
+#include "midi_streamview.h"
+#include "midi_region_view.h"
+#include "midi_time_axis.h"
+#include "piano_roll_header.h"
 #include "playlist_selector.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
 #include "point_selection.h"
 #include "prompter.h"
-#include "public_editor.h"
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
 #include "simplerect.h"
-#include "midi_streamview.h"
 #include "utils.h"
-#include "midi_scroomer.h"
-#include "piano_roll_header.h"
-#include "ghostregion.h"
-#include "canvas-note-event.h"
 
 #include "ardour/midi_track.h"
 
@@ -553,3 +559,154 @@ MidiTimeAxisView::route_active_changed ()
 	}
 }
 
+void
+MidiTimeAxisView::build_rec_context_menu ()
+{
+	using namespace Menu_Helpers;
+
+	if (!is_track()) {
+		return;
+	}
+
+	rec_context_menu = manage (new Menu);
+	rec_context_menu->set_name ("ArdourContextMenu");
+
+	MenuList& items = rec_context_menu->items();
+
+	items.push_back (CheckMenuElem (_("Step Edit"),
+					(mem_fun (*this, &MidiTimeAxisView::toggle_step_editing))));
+	_step_edit_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	_step_edit_item->set_active (midi_track()->step_editing());
+}
+
+void
+MidiTimeAxisView::toggle_step_editing ()
+{
+	if (!is_track()) {
+		return;
+	}
+	
+	bool yn = _step_edit_item->get_active();
+
+	if (yn) {
+		start_step_editing ();
+	} else {
+		stop_step_editing ();
+	}
+
+	midi_track()->set_step_editing (yn);
+}
+
+void
+MidiTimeAxisView::start_step_editing ()
+{
+	step_edit_connection = Glib::signal_timeout().connect (mem_fun (*this, &MidiTimeAxisView::check_step_edit), 20);
+	step_edit_insert_position = _editor.get_preferred_edit_position ();
+	step_edit_beat_pos = 0;
+	step_edit_region = playlist()->top_region_at (step_edit_insert_position);
+
+	if (step_edit_region) {
+		RegionView* rv = view()->find_view (step_edit_region);
+		step_edit_region_view = dynamic_cast<MidiRegionView*> (rv);
+	} else {
+		step_edit_region_view = 0;
+	}
+}
+
+void
+MidiTimeAxisView::stop_step_editing ()
+{
+	step_edit_connection.disconnect ();
+}
+
+bool
+MidiTimeAxisView::check_step_edit ()
+{
+	MidiRingBuffer<nframes_t>& incoming (midi_track()->step_edit_ring_buffer());
+	Evoral::Note<Evoral::MusicalTime> note;
+	uint8_t* buf;
+	uint32_t bufsize = 32;
+
+	buf = new uint8_t[bufsize];
+
+	while (incoming.read_space()) {
+		nframes_t time;
+		Evoral::EventType type;
+		uint32_t size;
+
+		incoming.read_prefix (&time, &type, &size);
+		
+		if (size > bufsize) {
+			delete [] buf;
+			bufsize = size;
+			buf = new uint8_t[bufsize];
+		}
+
+		incoming.read_contents (size, buf);
+		
+		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
+
+			if (step_edit_region == 0) {
+				cerr << "Add new region first ..\n";
+
+				step_edit_region = add_region (step_edit_insert_position);
+				RegionView* rv = view()->find_view (step_edit_region);
+
+				if (rv) {
+					step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
+				} else {
+					fatal << X_("programming error: no view found for new MIDI region") << endmsg;
+					/*NOTREACHED*/
+				}
+			}	
+
+			if (step_edit_region_view) {
+
+				bool success;
+				Evoral::MusicalTime beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
+				
+				if (!success) {
+					continue;
+				}
+				
+				cerr << "will add note at " << step_edit_beat_pos << endl;
+				step_edit_region_view->add_note (buf[0] & 0xf, buf[1], buf[2], step_edit_beat_pos, beats);
+				step_edit_beat_pos += beats;
+			}
+		}
+		
+	}
+
+	return true; /* keep checking */
+}
+
+boost::shared_ptr<Region>
+MidiTimeAxisView::add_region (nframes64_t pos)
+{
+	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
+
+	real_editor->begin_reversible_command (_("create region"));
+	XMLNode &before = playlist()->get_state();
+	
+	nframes64_t start = pos;
+	real_editor->snap_to (start, -1);
+	const Meter& m = _session.tempo_map().meter_at(start);
+	const Tempo& t = _session.tempo_map().tempo_at(start);
+	double length = floor (m.frames_per_bar(t, _session.frame_rate()));
+
+	const boost::shared_ptr<MidiDiskstream> diskstream =
+		boost::dynamic_pointer_cast<MidiDiskstream>(view()->trackview().track()->diskstream());
+	
+	boost::shared_ptr<Source> src = _session.create_midi_source_for_session (*diskstream.get());
+	
+	boost::shared_ptr<Region> region = (RegionFactory::create (src, 0, (nframes_t) length, 
+								   PBD::basename_nosuffix(src->name())));
+
+	playlist()->add_region (region, start);
+	XMLNode &after = playlist()->get_state();
+	_session.add_command (new MementoCommand<Playlist> (*playlist().get(), &before, &after));
+
+	real_editor->commit_reversible_command();
+
+	return region;
+}	

@@ -19,6 +19,8 @@
 
 #include "evoral/midi_util.h"
 #include "ardour/midi_region.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
 
 #include "midi_list_editor.h"
 
@@ -29,20 +31,21 @@ using namespace Gtk;
 using namespace Glib;
 using namespace ARDOUR;
 
-MidiListEditor::MidiListEditor (boost::shared_ptr<MidiRegion> r)
+MidiListEditor::MidiListEditor (Session& s, boost::shared_ptr<MidiRegion> r)
 	: ArdourDialog (r->name(), false, false)
+	, session (s)
 	, region (r)
 {
 	model = ListStore::create (columns);
 	view.set_model (model);
 
-	view.append_column (_("Channel"), columns.channel);
-	view.append_column (_("Note"), columns.note);
-	view.append_column (_("Name"), columns.note_name);
-	view.append_column (_("Velocity"), columns.velocity);
 	view.append_column (_("Start"), columns.start);
-	view.append_column (_("End"), columns.end);
+	view.append_column (_("Channel"), columns.channel);
+	view.append_column (_("Num"), columns.note);
+	view.append_column (_("Name"), columns.note_name);
+	view.append_column (_("Vel"), columns.velocity);
 	view.append_column (_("Length"), columns.length);
+	view.append_column (_("End"), columns.end);
 	view.set_headers_visible (true);
 	view.set_name (X_("MidiListView"));
 	view.set_rules_hint (true);
@@ -70,8 +73,20 @@ MidiListEditor::~MidiListEditor ()
 }
 
 void
-MidiListEditor::edited (const Glib::ustring& /* path */, const Glib::ustring& /* text */)
+MidiListEditor::edited (const Glib::ustring& path, const Glib::ustring& /* text */)
 {
+	TreeModel::iterator iter = model->get_iter (path);
+
+	cerr << "Edit at " << path << endl;
+
+	if (!iter) {
+		return;
+	}
+
+	boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+
+	cerr << "Edited " << *note << endl;
+
 	redisplay_model ();
 }
 
@@ -87,12 +102,34 @@ MidiListEditor::redisplay_model ()
 	for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 		row = *(model->append());
 		row[columns.channel] = (*i)->channel();
-		row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
+		row[columns.note_name] = _("Note");
 		row[columns.note] = (*i)->note();
 		row[columns.velocity] = (*i)->velocity();
-		row[columns.start] = (*i)->time();
-		row[columns.length] = (*i)->length();
-		row[columns.end] = (*i)->end_time();
+
+		BBT_Time bbt;
+		BBT_Time dur;
+		stringstream ss;
+		
+		session.tempo_map().bbt_time (region->position(), bbt);
+
+		dur.bars = 0;
+		dur.beats = floor ((*i)->time());
+		dur.ticks = 0;
+
+		session.tempo_map().bbt_duration_at (region->position(), dur, 0);
+		
+		ss << bbt;
+		row[columns.start] = ss.str();
+		ss << dur;
+		row[columns.length] = ss.str();
+
+		session.tempo_map().bbt_time (region->position(), bbt);
+		/* XXX get end point */
+		
+		ss << bbt;
+		row[columns.end] = ss.str();
+
+		row[columns._note] = (*i);
 	}
 
 	view.set_model (model);

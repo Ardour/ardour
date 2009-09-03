@@ -67,6 +67,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void set_height (uint32_t);
 	void hide ();
 
+	boost::shared_ptr<ARDOUR::Region> add_region (nframes64_t pos);
+
 	void show_all_automation ();
 	void show_existing_automation ();
 	void add_cc_track ();
@@ -102,6 +104,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void set_note_range(MidiStreamView::VisibleNoteRange range);
 
 	void route_active_changed ();
+	void build_rec_context_menu ();
 
 	void add_insert_to_subplugin_menu (ARDOUR::Processor *);
 	
@@ -120,6 +123,19 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	MidiMultipleChannelSelector  _channel_selector;
 	Gtk::ComboBoxText            _model_selector;
 	Gtk::ComboBoxText            _custom_device_mode_selector;
+
+	Gtk::CheckMenuItem*          _step_edit_item;
+	sigc::connection              step_edit_connection;
+
+	nframes64_t step_edit_insert_position;
+	Evoral::MusicalTime step_edit_beat_pos;
+	boost::shared_ptr<ARDOUR::Region> step_edit_region;
+	MidiRegionView* step_edit_region_view;
+
+	void toggle_step_editing ();
+	void start_step_editing ();
+	void stop_step_editing ();
+	bool check_step_edit ();
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

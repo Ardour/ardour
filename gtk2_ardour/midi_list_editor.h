@@ -31,12 +31,15 @@
 namespace ARDOUR {
 	class MidiRegion;
 	class MidiModel;
+	class Session;
 };
 
 class MidiListEditor : public ArdourDialog
 {
   public:
-	MidiListEditor(boost::shared_ptr<ARDOUR::MidiRegion>);
+	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
+
+	MidiListEditor(ARDOUR::Session&, boost::shared_ptr<ARDOUR::MidiRegion>);
 	~MidiListEditor();
 
   private:
@@ -49,16 +52,19 @@ class MidiListEditor : public ArdourDialog
 			add (start);
 			add (length);
 			add (end);
+			add (note);
 		};
 		Gtk::TreeModelColumn<uint8_t> channel;
 		Gtk::TreeModelColumn<uint8_t> note;
 		Gtk::TreeModelColumn<std::string> note_name;
 		Gtk::TreeModelColumn<uint8_t> velocity;
-		Gtk::TreeModelColumn<Evoral::MusicalTime> start;
-		Gtk::TreeModelColumn<Evoral::MusicalTime> length;
-		Gtk::TreeModelColumn<Evoral::MusicalTime> end;
+		Gtk::TreeModelColumn<std::string> start;
+		Gtk::TreeModelColumn<std::string> length;
+		Gtk::TreeModelColumn<std::string> end;
+		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
 	
+	ARDOUR::Session&             session;
 	MidiListModelColumns         columns;
 	Glib::RefPtr<Gtk::ListStore> model;
 	Gtk::TreeView                view;

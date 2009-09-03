@@ -98,6 +98,10 @@ class RouteUI : public virtual AxisView
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
 	Gtk::Menu* sends_menu;
+	Gtk::Menu* rec_context_menu;
+
+	virtual void build_rec_context_menu () { }
+	void show_rec_context_menu ();
 
 	XMLNode *xml_node;
 	void ensure_xml_node ();

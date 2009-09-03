@@ -500,7 +500,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 void
 MidiRegionView::show_list_editor ()
 {
-	MidiListEditor* mle = new MidiListEditor (midi_region());
+	MidiListEditor* mle = new MidiListEditor (trackview.session(), midi_region());
 	mle->show ();
 }
 
@@ -761,6 +761,7 @@ MidiRegionView::display_sysexes()
 		string text = str.str();
 		
 		ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
+
 		const double x = trackview.editor().frame_to_pixel(beats_to_frames(time));
 		
 		double height = midi_stream_view()->contents_height();
@@ -2233,6 +2234,30 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 	}
 	
 	apply_command ();
+}
+
+void
+MidiRegionView::add_note (uint8_t channel, uint8_t number, uint8_t velocity, 
+			  Evoral::MusicalTime pos, Evoral::MusicalTime len)
+{
+	boost::shared_ptr<NoteType> new_note (new NoteType (channel, pos, len, number, velocity));
+	
+	start_delta_command (_("step add"));
+	command_add_note (new_note, true, false);
+	apply_command ();
+
+	/* potentially extend region to hold new note */
+
+
+	nframes64_t end_frame = _region->position() + beats_to_frames (new_note->length());
+	nframes64_t region_end = _region->position() + _region->length() - 1;
+
+	if (end_frame > region_end) {
+		cerr << "Resize region!\n";
+		_region->set_length (end_frame, this);
+	} else {
+		redisplay_model ();
+	}
 }
 
 void

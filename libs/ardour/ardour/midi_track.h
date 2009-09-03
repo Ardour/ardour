@@ -77,6 +77,10 @@ public:
 	
 	NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (NoteMode m);
+
+	bool step_editing() const { return _step_editing; }
+	void set_step_editing (bool yn);
+	MidiRingBuffer<nframes_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
 	
 protected:
 	XMLNode& state (bool full);
@@ -93,7 +97,13 @@ private:
 	void set_state_part_three ();
 
 	MidiRingBuffer<nframes_t> _immediate_events;
+	MidiRingBuffer<nframes_t> _step_edit_ring_buffer;
 	NoteMode                  _note_mode;
+	bool                      _step_editing;
+	
+	int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
+		     bool state_changing, bool can_record, bool rec_monitors_input);
+	void push_midi_input_to_step_edit_ringbuffer (nframes_t nframes);
 };
 
 } /* namespace ARDOUR*/

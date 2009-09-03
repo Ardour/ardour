@@ -36,6 +36,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/panner.h"
+#include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
@@ -50,7 +51,9 @@ using namespace PBD;
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode, DataType::MIDI)
 	, _immediate_events(1024) // FIXME: size?
+	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
+	, _step_editing (false)
 {
 	use_new_diskstream ();
 
@@ -63,7 +66,9 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node, DataType::MIDI )
 	, _immediate_events(1024) // FIXME: size?
+	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
+	, _step_editing (false)
 {
 	_set_state(node, false);
 }
@@ -276,6 +281,9 @@ MidiTrack::state(bool full_state)
 	
 	root.add_child_nocopy (_rec_enable_control->get_state());
 
+	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
+	root.add_property ("note-mode", enum_2_string (_note_mode));
+	
 	return root;
 }
 
@@ -449,6 +457,41 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 	return 0;
 }
 
+int
+MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
+		    bool state_changing, bool can_record, bool rec_monitors_input)
+{
+	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
+
+	if (ret == 0 && _step_editing) {
+		push_midi_input_to_step_edit_ringbuffer (nframes);
+	}
+
+	return ret;
+}
+
+void
+MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
+{
+	PortSet& ports (_input->ports());
+
+	for (PortSet::iterator p = ports.begin(DataType::MIDI); p != ports.end(DataType::MIDI); ++p) {
+
+		Buffer& b (p->get_buffer (nframes));
+		const MidiBuffer* const mb = dynamic_cast<MidiBuffer*>(&b);
+		assert (mb);
+
+		for (MidiBuffer::const_iterator e = mb->begin(); e != mb->end(); ++e) {
+
+			const Evoral::MIDIEvent<nframes_t> ev(*e, false);
+			
+			/* we don't care about the time for this purpose */
+
+			_step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
+		}
+	}
+}
+
 void
 MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes_t /*end*/, nframes_t nframes)
 {
@@ -594,3 +637,8 @@ MidiTrack::MidiControl::set_value(float val)
 	AutomationControl::set_value(val);
 } 
 
+void
+MidiTrack::set_step_editing (bool yn)
+{
+	_step_editing = yn;
+}

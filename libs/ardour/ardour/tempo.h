@@ -179,6 +179,8 @@ class TempoMap : public PBD::StatefulDestructible
 	nframes_t frame_time (const BBT_Time&) const;
 	nframes_t bbt_duration_at (nframes_t, const BBT_Time&, int dir) const;
 
+	void bbt_time_add (nframes64_t origin, BBT_Time& start, const BBT_Time& shift);
+
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 

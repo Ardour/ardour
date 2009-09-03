@@ -184,7 +184,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		rec_enable_button->show_all ();
 
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
-		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
+		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release), false);
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 
