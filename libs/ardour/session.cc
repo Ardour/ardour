@@ -675,7 +675,7 @@ Session::when_engine_running ()
 				Port* p = _master_out->output()->nth (n);
 				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
 
-				if (!connect_to.empty()) {
+				if (!connect_to.empty() && p->connected_to (connect_to) == false) {
 					if (_master_out->output()->connect (p, connect_to, this)) {
 						error << string_compose (_("cannot connect master output %1 to %2"), n, connect_to) 
 						      << endmsg;
