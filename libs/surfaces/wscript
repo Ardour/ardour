@@ -19,11 +19,30 @@ VERSION = LIBSURFACES_VERSION
 srcdir = '.'
 blddir = 'build'
 
+children = [
+	'control_protocol',
+	'frontier',
+	'generic_midi',
+	'mackie',
+	'osc',
+	'powermate',
+	'tranzport',
+	'wiimote'
+]
+
 def set_options(opt):
 	autowaf.set_options(opt)
 
+def sub_config_and_use(conf, name, has_objects = True):
+	conf.sub_config(name)
+	autowaf.set_local_lib(conf, name, has_objects)
+
 def configure(conf):
+	autowaf.set_recursive()
 	autowaf.configure(conf)
+
+	for i in children:
+		sub_config_and_use(conf, i)
 
 	conf.check_cc (lib='libusb', header_name='libusb.h', function_name='usb_interrupt_write', define_name='BUILD_TRANZPORT')
 	conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE')

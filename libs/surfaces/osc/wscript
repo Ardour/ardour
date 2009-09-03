@@ -18,11 +18,6 @@ def set_options(opt):
 def configure(conf):
 	autowaf.configure(conf)
 	autowaf.check_pkg(conf, 'liblo', uselib_store='LO', linkflags='-llo')
-	conf.env.append_value('LINKFLAGS_LO', '-llo')
-	#
-	#	TODO: Again this append_value shouldn't be necessary really
-	#	but for some reason the link flag is not being added otherwise.
-	#
 
 def build(bld):
 	obj = bld.new_task_gen('cxx', 'shlib')
