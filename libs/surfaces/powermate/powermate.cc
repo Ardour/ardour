@@ -101,7 +101,11 @@ PowermateControlProtocol::probe ()
 	int port = find_powermate( O_RDONLY ); 
 
 	if (port < 0) {
- 		printf ("powermate: Opening of powermate failed - %s\n", strerror(errno));
+		if (errno == ENOENT) {
+			printf ("ardour: [INFO]: Powermate device not found; perhaps you have no powermate connected.\n");
+		} else {
+			printf ("powermate: Opening of powermate failed - %s\n", strerror(errno));
+		}
 		return false;
 	}
 
