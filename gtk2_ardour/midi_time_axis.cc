@@ -560,44 +560,6 @@ MidiTimeAxisView::route_active_changed ()
 }
 
 void
-MidiTimeAxisView::build_rec_context_menu ()
-{
-	using namespace Menu_Helpers;
-
-	if (!is_track()) {
-		return;
-	}
-
-	rec_context_menu = manage (new Menu);
-	rec_context_menu->set_name ("ArdourContextMenu");
-
-	MenuList& items = rec_context_menu->items();
-
-	items.push_back (CheckMenuElem (_("Step Edit"),
-					(mem_fun (*this, &MidiTimeAxisView::toggle_step_editing))));
-	_step_edit_item = dynamic_cast<CheckMenuItem*>(&items.back());
-	_step_edit_item->set_active (midi_track()->step_editing());
-}
-
-void
-MidiTimeAxisView::toggle_step_editing ()
-{
-	if (!is_track()) {
-		return;
-	}
-	
-	bool yn = _step_edit_item->get_active();
-
-	if (yn) {
-		start_step_editing ();
-	} else {
-		stop_step_editing ();
-	}
-
-	midi_track()->set_step_editing (yn);
-}
-
-void
 MidiTimeAxisView::start_step_editing ()
 {
 	step_edit_connection = Glib::signal_timeout().connect (mem_fun (*this, &MidiTimeAxisView::check_step_edit), 20);
@@ -611,12 +573,15 @@ MidiTimeAxisView::start_step_editing ()
 	} else {
 		step_edit_region_view = 0;
 	}
+
+	midi_track()->set_step_editing (true);
 }
 
 void
 MidiTimeAxisView::stop_step_editing ()
 {
 	step_edit_connection.disconnect ();
+	midi_track()->set_step_editing (false);
 }
 
 bool

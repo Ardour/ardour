@@ -95,7 +95,6 @@ RouteUI::init ()
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
-	rec_context_menu = 0;
 	ignore_toggle = false;
 	wait_for_release = false;
 	route_active_menu_item = 0;
@@ -512,31 +511,9 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	return true;
 }
 
-
-void
-RouteUI::show_rec_context_menu ()
-{
-	if (!rec_context_menu) {
-		cerr << "build menu\n";
-		build_rec_context_menu ();
-	}
-
-	if (rec_context_menu) {
-		/* only do this if build_rec_context_menu() actually did something */
-		cerr << "show menu\n";
-		rec_context_menu->popup (1, gtk_get_current_event_time());
-	}
-}
-
 bool
 RouteUI::rec_enable_release (GdkEventButton* ev)
 {
-	cerr << "release\n";
-	if (Keyboard::is_context_menu_event(ev)) {
-		cerr << "context\n";
-		show_rec_context_menu ();
-	}
-
 	return true;
 }
 

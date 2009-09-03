@@ -463,7 +463,7 @@ MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_fram
 {
 	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
 
-	if (ret == 0 && _step_editing) {
+	if (ret == 0 && diskstream()->record_enabled() && _step_editing) {
 		push_midi_input_to_step_edit_ringbuffer (nframes);
 	}
 

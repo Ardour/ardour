@@ -2248,8 +2248,7 @@ MidiRegionView::add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 
 	/* potentially extend region to hold new note */
 
-
-	nframes64_t end_frame = _region->position() + beats_to_frames (new_note->length());
+	nframes64_t end_frame = _region->position() + beats_to_frames (new_note->end_time());
 	nframes64_t region_end = _region->position() + _region->length() - 1;
 
 	if (end_frame > region_end) {

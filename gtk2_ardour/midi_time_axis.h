@@ -88,6 +88,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 		return _midi_patch_settings_changed;
 	}
 	
+	void start_step_editing ();
+	void stop_step_editing ();
+
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 	  		
@@ -104,7 +107,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void set_note_range(MidiStreamView::VisibleNoteRange range);
 
 	void route_active_changed ();
-	void build_rec_context_menu ();
 
 	void add_insert_to_subplugin_menu (ARDOUR::Processor *);
 	
@@ -132,9 +134,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	boost::shared_ptr<ARDOUR::Region> step_edit_region;
 	MidiRegionView* step_edit_region_view;
 
-	void toggle_step_editing ();
-	void start_step_editing ();
-	void stop_step_editing ();
 	bool check_step_edit ();
 };
 

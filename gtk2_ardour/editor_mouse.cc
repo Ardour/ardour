@@ -2558,9 +2558,27 @@ Editor::set_internal_edit (bool yn)
 
 	if (yn) {
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
+		
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
+			if (mtv) {
+				mtv->start_step_editing ();
+			}
+		}
+
 	} else {
+
 		mouse_select_button.set_image (*(manage (new Image (::get_xpm("tool_range.xpm")))));
+
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
+			if (mtv) {
+				mtv->stop_step_editing ();
+			}
+		}
 	}
 
 	set_canvas_cursor ();
+
+
 }
