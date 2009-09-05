@@ -2252,7 +2252,6 @@ MidiRegionView::add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 	nframes64_t region_end = _region->position() + _region->length() - 1;
 
 	if (end_frame > region_end) {
-		cerr << "Resize region!\n";
 		_region->set_length (end_frame, this);
 	} else {
 		redisplay_model ();

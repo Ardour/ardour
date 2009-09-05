@@ -2565,10 +2565,12 @@ Editor::set_internal_edit (bool yn)
 				mtv->start_step_editing ();
 			}
 		}
+		start_step_editing ();
 
 	} else {
 
 		mouse_select_button.set_image (*(manage (new Image (::get_xpm("tool_range.xpm")))));
+		stop_step_editing ();
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);

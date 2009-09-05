@@ -90,6 +90,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	
 	void start_step_editing ();
 	void stop_step_editing ();
+	void check_step_edit ();
+
 
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
@@ -127,14 +129,12 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::ComboBoxText            _custom_device_mode_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
-	sigc::connection              step_edit_connection;
 
 	nframes64_t step_edit_insert_position;
 	Evoral::MusicalTime step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::Region> step_edit_region;
 	MidiRegionView* step_edit_region_view;
 
-	bool check_step_edit ();
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

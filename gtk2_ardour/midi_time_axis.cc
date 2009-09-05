@@ -562,7 +562,6 @@ MidiTimeAxisView::route_active_changed ()
 void
 MidiTimeAxisView::start_step_editing ()
 {
-	step_edit_connection = Glib::signal_timeout().connect (mem_fun (*this, &MidiTimeAxisView::check_step_edit), 20);
 	step_edit_insert_position = _editor.get_preferred_edit_position ();
 	step_edit_beat_pos = 0;
 	step_edit_region = playlist()->top_region_at (step_edit_insert_position);
@@ -580,11 +579,10 @@ MidiTimeAxisView::start_step_editing ()
 void
 MidiTimeAxisView::stop_step_editing ()
 {
-	step_edit_connection.disconnect ();
 	midi_track()->set_step_editing (false);
 }
 
-bool
+void
 MidiTimeAxisView::check_step_edit ()
 {
 	MidiRingBuffer<nframes_t>& incoming (midi_track()->step_edit_ring_buffer());
@@ -641,8 +639,6 @@ MidiTimeAxisView::check_step_edit ()
 		}
 		
 	}
-
-	return true; /* keep checking */
 }
 
 boost::shared_ptr<Region>

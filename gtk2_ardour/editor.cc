@@ -5087,3 +5087,27 @@ Editor::hide_region_from_region_list ()
 	_regions->selection_mapover (mem_fun (*this, &Editor::hide_a_region));
 }
 
+void
+Editor::start_step_editing ()
+{
+	step_edit_connection = Glib::signal_timeout().connect (mem_fun (*this, &Editor::check_step_edit), 20);
+}
+
+void
+Editor::stop_step_editing ()
+{
+	step_edit_connection.disconnect ();
+}
+
+bool
+Editor::check_step_edit ()
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
+		if (mtv) {
+			mtv->check_step_edit ();
+		}
+	}
+
+	return true; // do it again, till we stop
+}
