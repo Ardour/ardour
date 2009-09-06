@@ -28,6 +28,7 @@
 #include "ardour/export_profile_manager.h"
 #include "ardour/io.h"
 #include "ardour/location.h"
+#include "ardour/midi_model.h"
 #include "ardour/midi_track.h"
 #include "ardour/mute_master.h"
 #include "ardour/panner.h"
@@ -109,6 +110,7 @@ setup_enum_writer ()
 	Delivery::Role _Delivery_Role;
 	IO::Direction _IO_Direction;
 	MuteMaster::MutePoint _MuteMaster_MutePoint;
+	MidiModel::DiffCommand::Property _MidiModel_DiffCommand_Property;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -522,4 +524,11 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (IO, Input);
 	REGISTER_CLASS_ENUM (IO, Output);
 	REGISTER (_IO_Direction);
+
+	REGISTER_CLASS_ENUM (MidiModel::DiffCommand, NoteNumber);
+	REGISTER_CLASS_ENUM (MidiModel::DiffCommand, Channel);
+	REGISTER_CLASS_ENUM (MidiModel::DiffCommand, Velocity);
+	REGISTER_CLASS_ENUM (MidiModel::DiffCommand, StartTime);
+	REGISTER_CLASS_ENUM (MidiModel::DiffCommand, Length);
+	REGISTER (_MidiModel_DiffCommand_Property);
 }

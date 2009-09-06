@@ -78,21 +78,20 @@ Note<Time>::~Note()
 {
 }
 
-
 template<typename Time>
 const Note<Time>&
-Note<Time>::operator=(const Note<Time>& copy)
+Note<Time>::operator=(const Note<Time>& other)
 {
-	_on_event = copy._on_event;
-	_off_event = copy._off_event;
+	_on_event = other._on_event;
+	_off_event = other._off_event;
 	
-	assert(time() == copy.time());
-	assert(end_time() == copy.end_time());
-	assert(note() == copy.note());
-	assert(velocity() == copy.velocity());
-	assert(length() == copy.length());
+	assert(time() == other.time());
+	assert(end_time() == other.end_time());
+	assert(note() == other.note());
+	assert(velocity() == other.velocity());
+	assert(length() == other.length());
 	assert(_on_event.channel() == _off_event.channel());
-	assert(channel() == copy.channel());
+	assert(channel() == other.channel());
 	
 	return *this;
 }

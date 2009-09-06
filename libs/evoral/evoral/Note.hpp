@@ -72,7 +72,6 @@ private:
 	MIDIEvent<Time> _off_event;
 };
 
-
 } // namespace Evoral
 
 template<typename Time>

@@ -169,11 +169,16 @@ class MidiRegionView : public RegionView
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
 	void start_delta_command(std::string name = "midi edit");
-	void command_add_note(const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity=false);
-	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
+	void delta_add_note(const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity=false);
+	void delta_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
 
-	void apply_command();
-	void apply_command_as_subcommand();
+	void start_diff_command(std::string name = "midi edit");
+	void diff_add_change(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::DiffCommand::Property, uint8_t val);
+
+	void apply_delta();
+	void apply_diff();
+	void apply_delta_as_subcommand();
+	void apply_diff_as_subcommand();
 	void abort_command();
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
@@ -354,6 +359,7 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNote**           _active_notes;
 	ArdourCanvas::Group*                 _note_group;
 	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
+	ARDOUR::MidiModel::DiffCommand*      _diff_command;
 
 	MouseState _mouse_state;
 	int _pressed_button;

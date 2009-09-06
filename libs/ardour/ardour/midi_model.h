@@ -89,9 +89,61 @@ public:
 		NoteList _removed_notes;
 	};
 
+
+	/** Change note properties.
+	 * More efficient than DeltaCommand and has the important property that
+	 * it leaves the objects in the MidiModel (Notes) the same, thus
+	 * enabling selection and other state to persist across command
+	 * do/undo/redo.
+	 */
+	class DiffCommand : public Command {
+	public:
+		enum Property {
+			NoteNumber,
+			Velocity,
+			StartTime,
+			Length,
+			Channel
+		};
+
+		DiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
+		DiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
+
+		const std::string& name() const { return _name; }
+		
+		void operator()();
+		void undo();
+		
+		int set_state (const XMLNode&);
+		XMLNode& get_state ();
+		
+		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note, 
+			     Property prop, uint8_t new_value);
+		
+	private:
+		boost::shared_ptr<MidiModel> _model;
+		const std::string            _name;
+
+		struct NotePropertyChange {
+		    DiffCommand::Property property;
+		    boost::shared_ptr<Evoral::Note<TimeType> > note;
+		    uint8_t old_value;
+		    uint8_t new_value;
+		}; 
+		
+		typedef std::list<NotePropertyChange> ChangeList;
+		ChangeList _changes;
+
+		XMLNode &marshal_change(const NotePropertyChange&);
+		NotePropertyChange unmarshal_change(XMLNode *xml_note);
+	};
+
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
+	MidiModel::DiffCommand*  new_diff_command(const std::string name="midi edit");
 	void                     apply_command(Session& session, Command* cmd);
 	void                     apply_command_as_subcommand(Session& session, Command* cmd);
+
+
 
 	bool write_to(boost::shared_ptr<MidiSource> source);
 		
@@ -104,6 +156,8 @@ public:
 	
 	const MidiSource* midi_source() const { return _midi_source; }
 	void set_midi_source(MidiSource* source) { _midi_source = source; } 
+
+	boost::shared_ptr<Evoral::Note<TimeType> > find_note (boost::shared_ptr<Evoral::Note<TimeType> >);
 	
 private:
 	friend class DeltaCommand;

@@ -43,7 +43,7 @@ MidiModel::MidiModel(MidiSource* s, size_t size)
 {
 }
 
-/** Start a new command.
+/** Start a new Delta command.
  *
  * This has no side-effects on the model or Session, the returned command
  * can be held on to for as long as the caller wishes, or discarded without
@@ -53,6 +53,19 @@ MidiModel::DeltaCommand*
 MidiModel::new_delta_command(const string name)
 {
 	DeltaCommand* cmd = new DeltaCommand(_midi_source->model(), name);
+	return cmd;
+}
+
+/** Start a new Diff command.
+ *
+ * This has no side-effects on the model or Session, the returned command
+ * can be held on to for as long as the caller wishes, or discarded without
+ * formality, until apply_command is called and ownership is taken.
+ */
+MidiModel::DiffCommand*
+MidiModel::new_diff_command(const string name)
+{
+	DiffCommand* cmd = new DiffCommand(_midi_source->model(), name);
 	return cmd;
 }
 
@@ -225,7 +238,7 @@ MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 		length_str >> length;
 	} else {
 		warning << "note information missing length" << endmsg;
-		note = 1;
+		length = 1;
 	}
 
 	if ((prop = xml_note->property("velocity")) != 0) {
@@ -286,6 +299,320 @@ MidiModel::DeltaCommand::get_state()
 	return *delta_command;
 }
 
+/************** DIFF COMMAND ********************/
+
+#define DIFF_NOTES_ELEMENT "changed_notes"
+#define DIFF_COMMAND_ELEMENT "DiffCommand"
+
+MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
+	: Command(name)
+	, _model(m)
+	, _name(name)
+{
+	assert(_model);
+}
+
+MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
+	: _model(m)
+{
+	assert(_model);
+	set_state(node);
+}
+
+void
+MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> > note, Property prop,
+			       uint8_t new_value)
+{
+	NotePropertyChange change;
+
+	change.note = note;
+	change.property = prop;
+	change.new_value = new_value;
+
+	switch (prop) {
+	case NoteNumber:
+		change.old_value = note->note();
+		break;
+	case Velocity:
+		change.old_value = note->velocity();
+		break;
+	case StartTime:
+		change.old_value = note->time();
+		break;
+	case Length:
+		change.old_value = note->length();
+		break;
+	case Channel:
+		change.old_value = note->channel();
+		break;
+	}
+
+	_changes.push_back (change);
+}
+
+void
+MidiModel::DiffCommand::operator()()
+{
+	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
+	_model->_midi_source->invalidate(); // release model read lock
+	_model->write_lock();
+
+	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+		Property prop = i->property;
+		switch (prop) {
+		case NoteNumber:
+			i->note->set_note (i->new_value);
+			break;
+		case Velocity:
+			i->note->set_velocity (i->new_value);
+			break;
+		case StartTime:
+			i->note->set_time (i->new_value);
+			break;
+		case Length:
+			i->note->set_length (i->new_value);
+			break;
+		case Channel:
+			i->note->set_channel (i->new_value);
+			break;
+		}
+	}
+	
+	_model->write_unlock();
+	_model->ContentsChanged(); /* EMIT SIGNAL */
+}
+
+void
+MidiModel::DiffCommand::undo()
+{
+	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
+	_model->_midi_source->invalidate(); // release model read lock
+	_model->write_lock();
+
+	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+		Property prop = i->property;
+		switch (prop) {
+		case NoteNumber:
+			i->note->set_note (i->old_value);
+			break;
+		case Velocity:
+			i->note->set_velocity (i->old_value);
+			break;
+		case StartTime:
+			i->note->set_time (i->old_value);
+			break;
+		case Length:
+			i->note->set_length (i->old_value);
+			break;
+		case Channel:
+			i->note->set_channel (i->old_value);
+			break;
+		}
+	}
+
+	_model->write_unlock();
+	_model->ContentsChanged(); /* EMIT SIGNAL */
+}
+
+XMLNode&
+MidiModel::DiffCommand::marshal_change(const NotePropertyChange& change)
+{
+	XMLNode* xml_change = new XMLNode("change");
+	
+	/* first, the change itself */
+
+	xml_change->add_property ("property", enum_2_string (change.property));
+
+	{
+		ostringstream old_value_str (ios::ate);
+		old_value_str << (unsigned int) change.old_value;
+		xml_change->add_property ("old", old_value_str.str());
+	}
+
+	{
+		ostringstream new_value_str (ios::ate);
+		new_value_str << (unsigned int) change.old_value;
+		xml_change->add_property ("new", new_value_str.str());
+	}
+
+	/* now the rest of the note */
+	
+	if (change.property != NoteNumber) {
+		ostringstream note_str(ios::ate);
+		note_str << int(change.note->note());
+		xml_change->add_property("note", note_str.str());
+	}
+	
+	if (change.property != Channel) {
+		ostringstream channel_str(ios::ate);
+		channel_str << int(change.note->channel());
+		xml_change->add_property("channel", channel_str.str());
+	}
+
+	if (change.property != StartTime) {
+		ostringstream time_str(ios::ate);
+		time_str << int(change.note->time());
+		xml_change->add_property("time", time_str.str());
+	}
+
+	if (change.property != Length) {
+		ostringstream length_str(ios::ate);
+		length_str <<(unsigned int) change.note->length();
+		xml_change->add_property("length", length_str.str());
+	}
+
+	if (change.property != Velocity) {
+		ostringstream velocity_str(ios::ate);
+		velocity_str << (unsigned int) change.note->velocity();
+		xml_change->add_property("velocity", velocity_str.str());
+	}
+
+	return *xml_change;
+}
+
+MidiModel::DiffCommand::NotePropertyChange
+MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
+{
+	XMLProperty* prop;
+	NotePropertyChange change;
+	unsigned int note;
+	unsigned int channel;
+	unsigned int time;
+	unsigned int length;
+	unsigned int velocity;
+
+	if ((prop = xml_change->property("property")) != 0) {
+		change.property = (Property) string_2_enum (prop->value(), change.property);
+	} else {
+		fatal << "!!!" << endmsg;
+		/*NOTREACHED*/
+	}
+
+	if ((prop = xml_change->property ("old")) != 0) {
+		istringstream old_str (prop->value());
+		old_str >> change.old_value;
+	} else {
+		fatal << "!!!" << endmsg;
+		/*NOTREACHED*/
+	}
+
+	if ((prop = xml_change->property ("new")) == 0) {
+		istringstream new_str (prop->value());
+		new_str >> change.new_value;
+	} else {
+		fatal << "!!!" << endmsg;
+		/*NOTREACHED*/
+	}
+
+	if (change.property != NoteNumber) {
+		if ((prop = xml_change->property("note")) != 0) {
+			istringstream note_str(prop->value());
+			note_str >> note;
+		} else {
+			warning << "note information missing note value" << endmsg;
+			note = 127;
+		}
+	} else {
+		note = change.new_value;
+	}
+
+	if (change.property != Channel) {
+		if ((prop = xml_change->property("channel")) != 0) {
+			istringstream channel_str(prop->value());
+			channel_str >> channel;
+		} else {
+			warning << "note information missing channel" << endmsg;
+			channel = 0;
+		}
+	} else {
+		channel = change.new_value;
+	}
+
+	if (change.property != StartTime) {
+		if ((prop = xml_change->property("time")) != 0) {
+			istringstream time_str(prop->value());
+			time_str >> time;
+		} else {
+			warning << "note information missing time" << endmsg;
+			time = 0;
+		}
+	} else {
+		time = change.new_value;
+	}
+
+	if (change.property != Length) {
+		if ((prop = xml_change->property("length")) != 0) {
+			istringstream length_str(prop->value());
+			length_str >> length;
+		} else {
+			warning << "note information missing length" << endmsg;
+			length = 1;
+		}
+	} else {
+		length = change.new_value;
+	}
+
+	if (change.property != Velocity) {
+		if ((prop = xml_change->property("velocity")) != 0) {
+			istringstream velocity_str(prop->value());
+			velocity_str >> velocity;
+		} else {
+			warning << "note information missing velocity" << endmsg;
+			velocity = 127;
+		}
+	} else {
+		velocity = change.new_value;
+	}
+
+	/* we must point at the instance of the note that is actually in the model.
+	   so go look for it ...
+	*/
+
+	boost::shared_ptr<Evoral::Note<TimeType> > new_note (new Evoral::Note<TimeType> (channel, time, length, note, velocity));
+
+	change.note = _model->find_note (new_note);
+
+	if (!change.note) {
+		warning << "MIDI note not found in model - programmers should investigate this" << endmsg;
+		/* use the actual new note */
+		change.note = new_note;
+	}
+
+	return change;
+}
+
+int
+MidiModel::DiffCommand::set_state(const XMLNode& diff_command)
+{
+	if (diff_command.name() != string(DIFF_COMMAND_ELEMENT)) {
+		return 1;
+	}
+
+	_changes.clear();
+
+	XMLNode* changed_notes = diff_command.child(DIFF_NOTES_ELEMENT);
+	XMLNodeList notes = changed_notes->children();
+
+	transform (notes.begin(), notes.end(), back_inserter(_changes),
+		   sigc::mem_fun(*this, &DiffCommand::unmarshal_change));
+	
+	return 0;
+}
+
+XMLNode&
+MidiModel::DiffCommand::get_state ()
+{
+	XMLNode* diff_command = new XMLNode(DIFF_COMMAND_ELEMENT);
+	diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
+
+	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
+	for_each(_changes.begin(), _changes.end(), sigc::compose(
+			 sigc::mem_fun(*changes, &XMLNode::add_child_nocopy),
+			 sigc::mem_fun(*this, &DiffCommand::marshal_change)));
+
+	return *diff_command;
+}
+
 /** Write the model to a MidiSource (i.e. save the model).
  * This is different from manually using read to write to a source in that
  * note off events are written regardless of the track mode.  This is so the
@@ -322,3 +649,14 @@ MidiModel::get_state()
 	return *node;
 }
 
+boost::shared_ptr<Evoral::Note<MidiModel::TimeType> >
+MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other) 
+{
+	Notes::iterator i = find (notes().begin(), notes().end(), other);
+
+	if (i == notes().end()) {
+		return boost::shared_ptr<Evoral::Note<TimeType> > ();
+	}
+	
+	return *i;
+}
