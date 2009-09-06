@@ -2748,19 +2748,23 @@ require some unused files to continue to exist."));
 	*/
 
 	const char* bprefix;
+	float space_adjusted;
 
-	if (rep.space < 1048576.0f) {
+	if (rep.space < 1000000.0f) {
 		bprefix = X_("kilo");
-	} else if (rep.space < 1048576.0f * 1000) {
+		space_adjusted = truncf((float)rep.space / 1000.0f);
+	} else if (rep.space < (1000000.0f * 1000)) {
 		bprefix = X_("mega");
+		space_adjusted = truncf((float)rep.space / (1000000.0f));
 	} else {
 		bprefix = X_("giga");
+		space_adjusted = truncf((float)rep.space / (1000000.0f * 1000));
 	}
 
 	if (removed > 1) {
-		txt.set_text (string_compose (plural_msg, removed, session->path() + "dead_sounds", (float) rep.space / 1024.0f, bprefix));
+		txt.set_text (string_compose (plural_msg, removed, session->path() + "dead_sounds", space_adjusted, bprefix));
 	} else {
-		txt.set_text (string_compose (singular_msg, removed, session->path() + "dead_sounds", (float) rep.space / 1024.0f, bprefix));
+		txt.set_text (string_compose (singular_msg, removed, session->path() + "dead_sounds", space_adjusted, bprefix));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
