@@ -119,6 +119,8 @@ public:
 		
 		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note, 
 			     Property prop, uint8_t new_value);
+		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note, 
+			     Property prop, TimeType new_time);
 		
 	private:
 		boost::shared_ptr<MidiModel> _model;
@@ -127,8 +129,14 @@ public:
 		struct NotePropertyChange {
 		    DiffCommand::Property property;
 		    boost::shared_ptr<Evoral::Note<TimeType> > note;
-		    uint8_t old_value;
-		    uint8_t new_value;
+		    union {
+			uint8_t old_value;
+			TimeType old_time;
+		    };
+		    union {
+			uint8_t new_value;
+			TimeType new_time;
+		    };
 		}; 
 		
 		typedef std::list<NotePropertyChange> ChangeList;

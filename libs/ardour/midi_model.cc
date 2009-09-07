@@ -337,13 +337,42 @@ MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> >
 		change.old_value = note->velocity();
 		break;
 	case StartTime:
-		change.old_value = note->time();
+		fatal << "MidiModel::DiffCommand::change() with integer argument called for start time" << endmsg;
+		/*NOTREACHED*/
 		break;
 	case Length:
-		change.old_value = note->length();
+		fatal << "MidiModel::DiffCommand::change() with integer argument called for length" << endmsg;
+		/*NOTREACHED*/
 		break;
 	case Channel:
 		change.old_value = note->channel();
+		break;
+	}
+
+	_changes.push_back (change);
+}
+
+void
+MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> > note, Property prop,
+			       TimeType new_time)
+{
+	NotePropertyChange change;
+
+	change.note = note;
+	change.property = prop;
+	change.new_time = new_time;
+
+	switch (prop) {
+	case NoteNumber:
+	case Channel:
+	case Velocity:
+		fatal << "MidiModel::DiffCommand::change() with time argument called for note, channel or velocity" << endmsg;
+		break;
+	case StartTime:
+		change.old_time = note->time();
+		break;
+	case Length:
+		change.old_time = note->length();
 		break;
 	}
 
@@ -367,10 +396,10 @@ MidiModel::DiffCommand::operator()()
 			i->note->set_velocity (i->new_value);
 			break;
 		case StartTime:
-			i->note->set_time (i->new_value);
+			i->note->set_time (i->new_time);
 			break;
 		case Length:
-			i->note->set_length (i->new_value);
+			i->note->set_length (i->new_time);
 			break;
 		case Channel:
 			i->note->set_channel (i->new_value);
@@ -399,10 +428,10 @@ MidiModel::DiffCommand::undo()
 			i->note->set_velocity (i->old_value);
 			break;
 		case StartTime:
-			i->note->set_time (i->old_value);
+			i->note->set_time (i->old_time);
 			break;
 		case Length:
-			i->note->set_length (i->old_value);
+			i->note->set_length (i->old_time);
 			break;
 		case Channel:
 			i->note->set_channel (i->old_value);

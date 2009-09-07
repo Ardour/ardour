@@ -614,8 +614,18 @@ MidiRegionView::delta_remove_note(ArdourCanvas::CanvasNoteEvent* ev)
 
 void
 MidiRegionView::diff_add_change (ArdourCanvas::CanvasNoteEvent* ev, 
-				    MidiModel::DiffCommand::Property property,
-				    uint8_t val)
+				 MidiModel::DiffCommand::Property property,
+				 uint8_t val)
+{
+	if (_diff_command) {
+		_diff_command->change (ev->note(), property, val);
+	}
+}
+
+void
+MidiRegionView::diff_add_change (ArdourCanvas::CanvasNoteEvent* ev, 
+				 MidiModel::DiffCommand::Property property,
+				 Evoral::MusicalTime val)
 {
 	if (_diff_command) {
 		_diff_command->change (ev->note(), property, val);
@@ -1832,6 +1842,11 @@ MidiRegionView::change_note_note (CanvasNoteEvent* event, int8_t note, bool rela
 void
 MidiRegionView::trim_note (CanvasNoteEvent* event, Evoral::MusicalTime front_delta, Evoral::MusicalTime end_delta)
 {
+	bool change_start = false;
+	bool change_length = false;
+	Evoral::MusicalTime new_start;
+	Evoral::MusicalTime new_length;
+
 	/* NOTE: the semantics of the two delta arguments are slightly subtle:
 
 	   front_delta: if positive - move the start of the note later in time (shortening it)
@@ -1841,48 +1856,61 @@ MidiRegionView::trim_note (CanvasNoteEvent* event, Evoral::MusicalTime front_del
 	                if negative - move the end of the note earlier in time (shortening it)
 	 */
 
-	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
-
 	cerr << "Trim front by " << front_delta << " end by " << end_delta << endl;
 
 	if (front_delta) {
 		if (front_delta < 0) {
-			if (copy->time() < -front_delta) {
-				copy->set_time (0);
+
+			if (event->note()->time() < -front_delta) {
+				new_start = 0;
 			} else {
-				copy->set_time (copy->time() + front_delta); // moves earlier
+				new_start = event->note()->time() + front_delta; // moves earlier
 			}
+
 			/* start moved toward zero, so move the end point out to where it used to be.
 			   Note that front_delta is negative, so this increases the length.
-			 */
-			copy->set_length (copy->length() - front_delta); 
+			*/
+
+			new_length = event->note()->length() - front_delta;
+			change_start = true;
+			change_length = true;
+
 		} else {
-			Evoral::MusicalTime new_pos = copy->time() + front_delta;
 
-			if (new_pos >= copy->end_time()) {
-				return;
+			Evoral::MusicalTime new_pos = event->note()->time() + front_delta;
+			
+			if (new_pos < event->note()->end_time()) {
+				new_start = event->note()->time() + front_delta;
+				/* start moved toward the end, so move the end point back to where it used to be */
+				new_length = event->note()->length() - front_delta; 
+				change_start = true;
+				change_length = true;
 			}
-
-			copy->set_time (copy->time() + front_delta);
-
-			/* start moved toward the end, so move the end point back to where it used to be */
-			copy->set_length (copy->length() - front_delta); 
 		}
 
 	}
 
 	if (end_delta) {
+		bool can_change = true;
 		if (end_delta < 0) {
-			if (copy->length() < -end_delta) {
-				return;
+			if (event->note()->length() < -end_delta) {
+				can_change = false;
 			}
+		} 
+
+		if (can_change) {
+			new_length = event->note()->length() + end_delta;
+			change_length = true;
 		}
-		
-		copy->set_length (copy->length() + end_delta);
 	}
 
-	delta_remove_note(event);
-	delta_add_note(copy, event->selected(), false);
+	if (change_start) {
+		diff_add_change (event, MidiModel::DiffCommand::StartTime, new_start);
+	}
+
+	if (change_length) {
+		diff_add_change (event, MidiModel::DiffCommand::Length, new_length);
+	}
 }
 
 void
@@ -2014,8 +2042,8 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, bool start, bool e
 	if (shorter) {
 		delta = -delta;
 	}
-
-	start_delta_command (_("change note lengths"));
+	
+	start_diff_command (_("change note lengths"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		Selection::iterator next = i;
@@ -2027,7 +2055,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, bool start, bool e
 		i = next;
 	}
 
-	apply_delta ();
+	apply_diff ();
 
 }
 

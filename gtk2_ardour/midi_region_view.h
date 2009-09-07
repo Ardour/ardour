@@ -174,6 +174,7 @@ class MidiRegionView : public RegionView
 
 	void start_diff_command(std::string name = "midi edit");
 	void diff_add_change(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::DiffCommand::Property, uint8_t val);
+	void diff_add_change(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::DiffCommand::Property, Evoral::MusicalTime val);
 
 	void apply_delta();
 	void apply_diff();
