@@ -1573,18 +1573,19 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 		highest_note_difference = highest_note_in_selection - 127;
 	}
 	
-	start_delta_command(_("move notes"));
+	start_diff_command(_("move notes"));
 
-	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
-		Selection::iterator next = i;
-		++next;
-
-		const boost::shared_ptr<NoteType> copy(new NoteType(*(*i)->note().get()));
+	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
 		nframes64_t start_frames = beats_to_frames((*i)->note()->time());
 
 		cerr << "starting at " << (*i)->note()->time() 
 		     << " (" << start_frames << ") delta on drag = " << dt << endl;
+
+
+		/* XXX THERE IS SOMETHING WRONG HERE THAT IS RELATED TO USING DT AND NOT
+		   SOMETHING RELATED TO REGION START + DT ... XXXX
+		*/
 
 		if (dt >= 0) {
 			cerr << "Motion was " << snap_frame_to_frame(trackview.editor().pixel_to_frame(dt)) << endl;
@@ -1601,13 +1602,10 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 		Evoral::MusicalTime new_time = frames_to_beats(start_frames);
 
 		if (new_time < 0) {
-			i = next;
 			continue;
 		}
 
-		copy->set_time (new_time);
-
-		cerr << "copy time = " << copy->time() << endl;
+		diff_add_change (*i, MidiModel::DiffCommand::StartTime, new_time);
 
 		uint8_t original_pitch = (*i)->note()->note();
 		uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
@@ -1624,16 +1622,10 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 		lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
 		highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
 
-		copy->set_note(new_pitch);
-		
-		delta_remove_note(*i);
-		cerr << "Adding note: " << *copy << endl;
-		delta_add_note(copy, (*i)->selected());
-
-		i = next;
+		diff_add_change (*i, MidiModel::DiffCommand::NoteNumber, new_pitch);
 	}
 
-	apply_delta();
+	apply_diff();
 	
 	// care about notes being moved beyond the upper/lower bounds on the canvas
 	if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
@@ -1810,18 +1802,16 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 void
 MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bool relative)
 {
-	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
+	uint8_t new_velocity;
 
 	if (relative) {
-		uint8_t new_velocity = copy->velocity() + velocity;
+		new_velocity = event->note()->velocity() + velocity;
 		clamp_to_0_127(new_velocity);
-		copy->set_velocity(new_velocity);
 	} else {
-		copy->set_velocity(velocity);			
+		new_velocity = velocity;
 	}
 
-	delta_remove_note(event);
-	delta_add_note(copy, event->selected(), true);
+	diff_add_change (event, MidiModel::DiffCommand::Velocity, new_velocity);
 }
 
 void
@@ -1916,24 +1906,23 @@ MidiRegionView::trim_note (CanvasNoteEvent* event, Evoral::MusicalTime front_del
 void
 MidiRegionView::change_note_time (CanvasNoteEvent* event, Evoral::MusicalTime delta, bool relative)
 {
-	const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
+	Evoral::MusicalTime new_time;
 
 	if (relative) {
 		if (delta < 0.0) {
-			if (copy->time() < -delta) {
-				copy->set_time (0);
+			if (event->note()->time() < -delta) {
+				new_time = 0;
 			} else {
-				copy->set_time (copy->time() + delta);
+				new_time = event->note()->time() + delta;
 			} 
 		} else {
-			copy->set_time (copy->time() + delta);
+			new_time = event->note()->time() + delta;
 		}
 	} else {
-		copy->set_time (delta);
+		new_time = delta;
 	}
 
-	delta_remove_note(event);
-	delta_add_note(copy, event->selected(), false);
+	diff_add_change (event, MidiModel::DiffCommand::StartTime, new_time);
 }
 
 void
@@ -1963,7 +1952,7 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
 		}
 	}
 
-	start_delta_command(_("change velocities"));
+	start_diff_command(_("change velocities"));
 	
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
 		Selection::iterator next = i;
@@ -1972,7 +1961,7 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
 		i = next;
 	}
 	
-	apply_delta();
+	apply_diff();
 }
 
 
@@ -2107,7 +2096,7 @@ MidiRegionView::nudge_notes (bool forward)
 		delta = -delta;
 	}
 
-	start_delta_command (_("nudge"));
+	start_diff_command (_("nudge"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		Selection::iterator next = i;
@@ -2116,30 +2105,17 @@ MidiRegionView::nudge_notes (bool forward)
 		i = next;
 	}
 
-	apply_delta ();
+	apply_diff ();
 }
-
 
 void
 MidiRegionView::change_channel(uint8_t channel)
 {
-	start_delta_command(_("change channel"));
-	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
-		Selection::iterator next = i;
-		++next;
-
-		CanvasNoteEvent* event = *i;
-		const boost::shared_ptr<NoteType> copy(new NoteType(*(event->note().get())));
-
-		copy->set_channel(channel);
-		
-		delta_remove_note(event);
-		delta_add_note(copy, event->selected());
-		
-		i = next;
+	start_diff_command(_("change channel"));
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		diff_add_change (*i, MidiModel::DiffCommand::Channel, channel);
 	}
-	
-	apply_delta();
+	apply_diff();
 }
 
 
@@ -2400,35 +2376,9 @@ MidiRegionView::selection_as_notelist (NoteList& selected)
 {
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->selected()) {
-			/* make a copy of the original */
-			selected.push_back (boost::shared_ptr<Evoral::Note<Evoral::MusicalTime> >
-					    (new Evoral::Note<Evoral::MusicalTime> (*((*i)->note()))));
+			selected.push_back ((*i)->note());
 		}
 	}
 }
 
-void
-MidiRegionView::replace_selected (NoteList& replacements)
-{
-	start_delta_command ("whatever");
-
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
-		Selection::iterator tmp;
-		tmp = i;
-		++tmp;
-
-		delta_remove_note (*i);
-		remove_from_selection (*i);
-
-		i = tmp;
-	}
-
-	_selection.clear ();
-
-	for (NoteList::iterator i = replacements.begin(); i != replacements.end(); ++i) {
-		delta_add_note (*i, true, false);
-	}
-	
-	apply_delta_as_subcommand ();
-}
 

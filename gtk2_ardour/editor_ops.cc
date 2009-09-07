@@ -4809,23 +4809,23 @@ Editor::strip_region_silence ()
 	}
 }
 
-void
+Command*
 Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv)
 {
-	vector<Evoral::Sequence<Evoral::MusicalTime>::Notes> v;
 	Evoral::Sequence<Evoral::MusicalTime>::Notes selected;
-	
+	mrv.selection_as_notelist (selected);
+
+	vector<Evoral::Sequence<Evoral::MusicalTime>::Notes> v;
 	v.push_back (selected);
 
-	mrv.selection_as_notelist (v.front());
-	op (v);
-	mrv.replace_selected (v.front());
+	return op (mrv.midi_region()->model(), v);
 }
 				      
 void
 Editor::apply_midi_note_edit_op (MidiOperator& op)
 {
 	RegionSelection rs; 
+	Command* cmd;
 
 	get_regions_for_action (rs);
 
@@ -4842,7 +4842,11 @@ Editor::apply_midi_note_edit_op (MidiOperator& op)
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
 
 		if (mrv) {
-			apply_midi_note_edit_op_to_region (op, *mrv);
+			cmd = apply_midi_note_edit_op_to_region (op, *mrv);
+			if (cmd) {
+				(*cmd)();
+				session->add_command (cmd);
+			}
 		}
 		
 		r = tmp;
@@ -6585,10 +6589,8 @@ Editor::goto_visual_state (uint32_t n)
 void
 Editor::start_visual_state_op (uint32_t n)
 {
-	cerr << "Start visual op\n";
 	if (visual_state_op_connection.empty()) {
 		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
-		cerr << "\tqueued new timeout\n";
 	}
 }
 
@@ -6596,12 +6598,9 @@ void
 Editor::cancel_visual_state_op (uint32_t n)
 {
 	if (!visual_state_op_connection.empty()) {
-		cerr << "cancel visual op, time to goto\n";
 		visual_state_op_connection.disconnect();
 		goto_visual_state (n);
-	} else {
-		cerr << "cancel visual op, do nothing\n";
-	}
+	} 
 }
 
 bool

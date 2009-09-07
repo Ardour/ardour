@@ -36,7 +36,7 @@ public:
 		   float strength, float swing, float threshold);
 	 ~Quantize ();
 
-	 int operator() (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&);
+	 Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&);
 	 std::string name() const { return std::string ("quantize"); }
 
 private:

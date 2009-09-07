@@ -26,14 +26,18 @@
 #include "evoral/types.hpp"
 #include "evoral/Sequence.hpp"
 
+class Command;
+
 namespace ARDOUR {
+
+class MidiModel;
 
 class MidiOperator {
   public:
-	MidiOperator() {}
+	MidiOperator () {}
 	virtual ~MidiOperator() {}
 	
-	virtual int operator() (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&) = 0;
+	virtual Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&) = 0;
 	virtual std::string name() const = 0;
 };
 

@@ -271,9 +271,6 @@ class MidiRegionView : public RegionView
 	/** Convert a timestamp in frames to beats (both relative to region start) */
 	double frames_to_beats(nframes64_t beats) const;
 
-	/** Return the current selection as a MidiModel or null if there is no selection */
-	ARDOUR::MidiModel* selection_as_model () const;
-
 	void goto_previous_note ();
 	void goto_next_note ();
 	void change_note_lengths (bool, bool, bool start, bool end);
@@ -284,7 +281,6 @@ class MidiRegionView : public RegionView
 	void show_list_editor ();
 
 	void selection_as_notelist (NoteList& selected);
-	void replace_selected (NoteList& replacements);
 
   protected:
 	/** Allows derived types to specify their visibility requirements

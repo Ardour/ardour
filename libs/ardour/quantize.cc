@@ -24,12 +24,14 @@
 #include "ardour/quantize.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
+#include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/tempo.h"
 
 #include "i18n.h"
 
 using namespace std;
+using namespace PBD;
 using namespace ARDOUR;
 
 /** Quantize notes
@@ -57,18 +59,17 @@ Quantize::~Quantize ()
 {
 }
 
-int
-Quantize::operator () (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
+Command*
+Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
 {
 	bool even;
+	MidiModel::DiffCommand* cmd = new MidiModel::DiffCommand (model, "quantize");
 
-	for (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>::iterator s = seqs.begin();
-	     s != seqs.end(); ++s) {
+	for (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
 
 		even = false;
 
-		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin();
-		     i != (*s).end(); ++i) {
+		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
 			
 			double new_start = round ((*i)->time() / _start_grid) * _start_grid; 
 			double new_end = round ((*i)->end_time() / _end_grid) * _end_grid;
@@ -101,7 +102,8 @@ Quantize::operator () (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>
 			if (fabs (delta) >= _threshold) {
 				if (_snap_start) {
 					delta *= _strength;
-					(*i)->set_time ((*i)->time() + delta);
+					cmd->change ((*i), MidiModel::DiffCommand::StartTime,
+						     (*i)->time() + delta);
 				}
 			}
 			
@@ -115,7 +117,7 @@ Quantize::operator () (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>
 						new_dur = _end_grid;
 					}
 					
-					(*i)->set_length (new_dur);
+					cmd->change ((*i), MidiModel::DiffCommand::Length, new_dur);
 				}
 			}
 			
@@ -123,5 +125,5 @@ Quantize::operator () (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>
 		}
 	}
 
-	return 0;
+	return cmd;
 }

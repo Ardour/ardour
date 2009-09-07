@@ -1920,7 +1920,7 @@ public:
 
 	void apply_filter (ARDOUR::Filter&, std::string cmd);
 
-	void apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
+	Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op);
 
 	/* handling cleanup */
