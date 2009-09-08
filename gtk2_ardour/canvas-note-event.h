@@ -94,6 +94,7 @@ public:
 	virtual double y2() = 0;
 
 	const boost::shared_ptr<NoteType> note() const { return _note; }
+	MidiRegionView& region_view() const { return _region; }
 	
 	inline static uint32_t meter_style_fill_color(uint8_t vel) {
 		if (vel < 64) {

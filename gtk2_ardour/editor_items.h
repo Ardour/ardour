@@ -46,7 +46,8 @@ enum ItemType {
 	FadeInHandleItem,
 	FadeOutItem,
 	FadeOutHandleItem,
-	
+	NoteItem,
+
 #ifdef WITH_CMT
 	MarkerViewItem,
 	MarkerTimeAxisItem,

@@ -35,6 +35,7 @@
 #include "editor_drag.h"
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
+#include "canvas-note.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -1377,6 +1378,58 @@ RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 		// TODO: create region-create-drag region here
 	}
+}
+
+NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i)
+	, region (0)
+{
+	
+}
+
+void
+NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
+{
+	Gdk::Cursor     cursor;
+	ArdourCanvas::CanvasNote*     cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
+	
+	Drag::start_grab (event);
+
+	region = &cnote->region_view();
+
+	double region_start = region->get_position_pixels();
+	double middle_point = region_start + cnote->x1() + (cnote->x2() - cnote->x1()) / 2.0L;
+	
+	if (_grab_x <= middle_point) {
+		cursor = Gdk::Cursor(Gdk::LEFT_SIDE);
+		at_front = true;
+	} else {
+		cursor = Gdk::Cursor(Gdk::RIGHT_SIDE);
+		at_front = false;
+	}
+	
+	_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, cursor, event->motion.time);
+	
+	if (event->motion.state & Keyboard::PrimaryModifier) {
+		relative = false;
+	} else {
+		relative = true;
+	}
+	
+	region->note_selected (cnote, true);
+	region->begin_resizing (at_front);
+}
+
+void
+NoteResizeDrag::motion (GdkEvent* /*event*/, bool first_move)
+{
+	region->update_resizing (at_front, _current_pointer_x - _grab_x, relative);
+} 
+
+void
+NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	region->commit_resizing (at_front, _current_pointer_x - _grab_x, relative);
 }
 
 void
@@ -3286,4 +3339,101 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_editor->zoom_rect->hide();
+}
+
+NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i)
+{
+	ArdourCanvas::CanvasNote*     cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);	
+	region = &cnote->region_view();
+}
+
+void
+NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
+{
+	Drag::start_grab (event);
+
+	drag_delta_x = 0;
+	drag_delta_note = 0;
+
+	double event_x;
+	double event_y;
+
+	event_x = _current_pointer_x;
+	event_y = _current_pointer_y;
+
+	_item->property_parent().get_value()->w2i(event_x, event_y);
+
+	last_x = region->snap_to_pixel(event_x); 
+	last_y = event_y;
+
+	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);	
+	region->note_selected (cnote, true);
+}
+
+void
+NoteDrag::motion (GdkEvent* ev, bool)
+{
+	MidiStreamView* streamview = region->midi_stream_view();
+	double event_x;
+	double event_y;
+
+	event_x = _current_pointer_x;
+	event_y = _current_pointer_y;
+
+	_item->property_parent().get_value()->w2i(event_x, event_y);
+
+	event_x = region->snap_to_pixel(event_x); 
+
+	double dx     = event_x - last_x;
+	double dy     = event_y - last_y;
+	last_x = event_x;
+	
+	drag_delta_x += dx;
+
+	// Snap to note rows
+
+	if (abs (dy) < streamview->note_height()) {
+		dy = 0.0;
+	} else {
+		int8_t this_delta_note;
+		if (dy > 0) {
+			this_delta_note = (int8_t)ceil(dy / streamview->note_height() / 2.0);
+		} else {
+			this_delta_note = (int8_t)floor(dy / streamview->note_height() / 2.0);
+		}
+		drag_delta_note -= this_delta_note;
+		dy = streamview->note_height() * this_delta_note;
+		last_y = last_y + dy;
+	}
+	
+	region->move_selection (dx, dy);
+}
+	
+void
+NoteDrag::finished (GdkEvent* ev, bool moved)
+{
+	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
+
+	if (!moved) {
+		if (_editor->current_mouse_mode() == Editing::MouseObject) {
+			
+			bool select_mod = (ev->motion.state & (Keyboard::PrimaryModifier | Keyboard::SecondaryModifier));
+
+			if (cnote->selected()) {
+				region->note_deselected (cnote, select_mod);
+			} else {
+				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
+				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
+				
+				if (!extend && !add && region->selection_size() > 1) {
+					region->unique_select(cnote);
+				} else {
+					region->note_selected (cnote, (extend ? true : add), extend);
+				}
+			}
+		}
+	} else {
+		region->note_dropped (cnote, drag_delta_x, drag_delta_note);
+	}
 }

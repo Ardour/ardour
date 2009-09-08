@@ -353,6 +353,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 			// Select drag start
 			if (_pressed_button == 1 && editor.current_mouse_mode() == MouseObject) {
+				cerr << "MRV start select grab\n";
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;
@@ -376,6 +377,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 			// Add note drag start
 			} else if (editor.current_mouse_mode() == MouseRange) {
+				cerr << "MRV start note grab\n";
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;
@@ -1680,7 +1682,7 @@ MidiRegionView::frames_to_beats(nframes64_t frames) const
 }
 
 void
-MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
+MidiRegionView::begin_resizing(bool at_front)
 {
 	_resize_data.clear();
 
@@ -1714,37 +1716,37 @@ MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
 					ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get());
 
 			resize_data->resize_rect = resize_rect;
-
-			if (note_end == CanvasNote::NOTE_ON) {
-				resize_data->current_x = note->x1();
-			} else { // NOTE_OFF
-				resize_data->current_x = note->x2();
-			}
-
 			_resize_data.push_back(resize_data);
 		}
 	}
 }
 
 void
-MidiRegionView::update_resizing(CanvasNote::NoteEnd note_end, double x, bool relative)
+MidiRegionView::update_resizing (bool at_front, double delta_x, bool relative)
 {
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		SimpleRect* resize_rect = (*i)->resize_rect;
 		CanvasNote* canvas_note = (*i)->canvas_note;
-
 		const double region_start = get_position_pixels();
+		double current_x;
 
-		if (relative) {
-			(*i)->current_x = (*i)->current_x + x;
+		if (at_front) {
+			if (relative) {
+				current_x = canvas_note->x1() + delta_x;
+			} else {
+				// x is in track relative, transform it to region relative
+				current_x = delta_x - region_start;
+			}
 		} else {
-			// x is in track relative, transform it to region relative
-			(*i)->current_x = x - region_start;
+			if (relative) {
+				current_x = canvas_note->x2() + delta_x;
+			} else {
+				// x is in track relative, transform it to region relative
+				current_x = delta_x - region_start;
+			}
 		}
-
-		double current_x = (*i)->current_x;
-
-		if (note_end == CanvasNote::NOTE_ON) {
+		
+		if (at_front) {
 			resize_rect->property_x1() = snap_to_pixel(current_x);
 			resize_rect->property_x2() = canvas_note->x2();
 		} else {
@@ -1755,40 +1757,47 @@ MidiRegionView::update_resizing(CanvasNote::NoteEnd note_end, double x, bool rel
 }
 
 void
-MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bool relative)
+MidiRegionView::commit_resizing (bool at_front, double delta_x, bool relative)
 {
-	start_delta_command(_("resize notes"));
+	start_diff_command(_("resize notes"));
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		CanvasNote*  canvas_note = (*i)->canvas_note;
 		SimpleRect*  resize_rect = (*i)->resize_rect;
-		double       current_x   = (*i)->current_x;
-		const double position    = get_position_pixels();
+		const double region_start = get_position_pixels();
+		double current_x;
 
-		if (!relative) {
-			// event_x is in track relative, transform it to region relative
-			current_x = event_x - position;
+		if (at_front) {
+			if (relative) {
+				current_x = canvas_note->x1() + delta_x;
+			} else {
+				// x is in track relative, transform it to region relative
+				current_x = delta_x - region_start;
+			}
+		} else {
+			if (relative) {
+				current_x = canvas_note->x2() + delta_x;
+			} else {
+				// x is in track relative, transform it to region relative
+				current_x = delta_x - region_start;
+			}
 		}
-
-		// because snapping works on world coordinates we have to transform current_x
-		// to world coordinates before snapping and transform it back afterwards
-		nframes64_t current_frame = snap_pixel_to_frame(current_x);
-		// transform to region start relative
-		current_frame += _region->start();
 		
-		const boost::shared_ptr<NoteType> copy(new NoteType(*(canvas_note->note().get())));
+		current_x = snap_pixel_to_frame (current_x);
+		current_x = frames_to_beats (current_x);
 
-		// resize beginning of note
-		if (note_end == CanvasNote::NOTE_ON && current_frame < copy->end_time()) {
-			delta_remove_note(canvas_note);
-			copy->on_event().time() = current_frame;
-			delta_add_note(copy, _selection.find(canvas_note) != _selection.end());
+		if (at_front && current_x < canvas_note->note()->end_time()) {
+
+			diff_add_change (canvas_note, MidiModel::DiffCommand::StartTime, current_x);
 		}
-		// resize end of note
-		if (note_end == CanvasNote::NOTE_OFF && current_frame > copy->time()) {
-			delta_remove_note(canvas_note);
-			copy->off_event().time() = current_frame;
-			delta_add_note(copy, _selection.find(canvas_note) != _selection.end());
+
+		if (!at_front) {
+			double len = current_x - canvas_note->note()->time();
+
+			if (len > 0) {
+				/* XXX convert to beats */
+				diff_add_change (canvas_note, MidiModel::DiffCommand::Length, len);
+			}
 		}
 
 		delete resize_rect;
@@ -1796,7 +1805,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 	}
 
 	_resize_data.clear();
-	apply_delta();
+	apply_diff();
 }
 
 void

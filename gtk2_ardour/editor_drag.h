@@ -263,6 +263,39 @@ private:
 	TimeAxisView* _dest_trackview;
 };
 
+/** Drags to resize MIDI notes */
+class NoteResizeDrag : public Drag
+{
+public:
+	NoteResizeDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+
+private:
+	MidiRegionView*     region;
+	bool                relative;
+	bool                at_front;
+};
+
+class NoteDrag : public Drag
+{
+  public:	
+	NoteDrag (Editor*, ArdourCanvas::Item*);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+
+  private:
+	MidiRegionView* region;
+	double last_x;
+	double last_y;
+	double drag_delta_x;
+	double drag_delta_note;
+};
+
 /** Drag of region gain */
 class RegionGainDrag : public Drag
 {

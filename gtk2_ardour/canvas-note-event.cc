@@ -218,18 +218,9 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		return false;
 	}
 
-	MidiStreamView *streamview = _region.midi_stream_view();
-	static uint8_t drag_delta_note = 0;
-	static double  drag_delta_x = 0;
-	static double last_x, last_y;
-	double event_x, event_y, dx, dy;
-	bool select_mod;
-
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered(this);
-		//_item->grab_focus();
-		//show_velocity();
 		//Keyboard::magic_widget_grab_focus();
 		break;
 
@@ -239,118 +230,20 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		if (!selected()) {
 			hide_velocity();
 		}
-		//_region.get_canvas_group()->grab_focus();
 		break;
 
 	case GDK_BUTTON_PRESS:
-		if (ev->button.button == 1) {
-			_state = Pressed;
-		} else if (ev->button.button == 3) {
+		if (ev->button.button == 3) {
 			show_channel_selector();
-		}
-		return true;
-
-	case GDK_MOTION_NOTIFY:
-		event_x = ev->motion.x;
-		event_y = ev->motion.y;
-
-		switch (_state) {
-		case Pressed: // Drag begin
-			if (editor.current_mouse_mode() == Editing::MouseObject && _region.mouse_state() != MidiRegionView::SelectTouchDragging) {
-				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
-						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
-				_state = Dragging;
-				_item->property_parent().get_value()->w2i(event_x, event_y);
-				event_x = _region.snap_to_pixel(event_x); 
-				last_x = event_x;
-				last_y = event_y;
-				drag_delta_x = 0;
-				drag_delta_note = 0;
-				_region.note_selected(this, true);
-			}
 			return true;
-
-		case Dragging: // Drag motion
-			if (ev->motion.is_hint) {
-				int t_x;
-				int t_y;
-				GdkModifierType state;
-				gdk_window_get_pointer(ev->motion.window, &t_x, &t_y, &state);
-				event_x = t_x;
-				event_y = t_y;
-			}
-			_item->property_parent().get_value()->w2i(event_x, event_y);
-			
-			event_x = _region.snap_to_pixel(event_x); 
-
-			dx     = event_x - last_x;
-			dy     = event_y - last_y;
-			last_x = event_x;
-
-			drag_delta_x += dx;
-
-			// Snap to note rows
-			if (abs(dy) < streamview->note_height()) {
-				dy = 0.0;
-			} else {
-				int8_t this_delta_note;
-				if (dy > 0) {
-					this_delta_note = (int8_t)ceil(dy / streamview->note_height() / 2.0);
-				} else {
-					this_delta_note = (int8_t)floor(dy / streamview->note_height() / 2.0);
-				}
-				drag_delta_note -= this_delta_note;
-				dy = streamview->note_height() * this_delta_note;
-				last_y = last_y + dy;
-			}
-
-			_region.move_selection(dx, dy);
-
-			return true;
-		default:
-			break;
 		}
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		select_mod = (ev->motion.state & (Keyboard::PrimaryModifier | Keyboard::SecondaryModifier));
-		event_x = ev->button.x;
-		event_y = ev->button.y;
-		_item->property_parent().get_value()->w2i(event_x, event_y);
-		
 		if (ev->button.button == 3) {
 			return true;
 		}
-		
-		switch (_state) {
-		case Pressed: // Clicked
-			if (editor.current_mouse_mode() == Editing::MouseRange) {
-				_state = None;
-				if (_selected) {
-					_region.note_deselected(this, select_mod);
-				} else {
-					bool extend = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::TertiaryModifier);
-					bool add = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
-
-					if (!extend && !add && _region.selection_size() > 1) {
-						_region.unique_select(this);
-					} else {
-						_region.note_selected (this, (extend ? true : add), extend);
-					}
-				}
-			}
-			return true;
-
-		case Dragging: // Dropped
-			_item->ungrab(ev->button.time);
-			_state = None;
-			if (_note) {
-				_region.note_dropped(this, drag_delta_x, drag_delta_note);
-			}
-			return true;
-		default:
-			break;
-		}
+		break;
 
 	default:
 		break;

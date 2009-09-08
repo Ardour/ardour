@@ -605,6 +605,22 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			_drag = new RegionCreateDrag (this, item, clicked_axisview);
 			_drag->start_grab (event);
 			return true;
+		case NoteItem:
+			/* Note: we don't get here if not in internal_editing() mode */
+			if (mouse_mode == MouseTimeFX) {
+				assert (_drag == 0);
+				_drag = new NoteResizeDrag (this, item);
+				_drag->start_grab (event);
+				return true;
+			} else if (mouse_mode == MouseObject) {
+				assert (_drag == 0);
+				_drag = new NoteDrag (this, item);
+				_drag->start_grab (event);
+				return true;
+			} else {
+				return false;
+			}
+			break;
 		default:
 			return true;
 		}

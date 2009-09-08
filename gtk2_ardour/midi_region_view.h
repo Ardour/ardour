@@ -201,24 +201,24 @@ class MidiRegionView : public RegionView
 
 	/** Begin resizing of some notes.
 	 * Called by CanvasMidiNote when resizing starts.
-	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
+	 * @param at_front which end of the note (true == note on, false == note off)
 	 */
-	void begin_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end);
+	void begin_resizing(bool at_front);
 
 	/** Update resizing notes while user drags.
-	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
+	 * @param at_front which end of the note (true == note on, false == note off)
 	 * @param x the difference in mouse motion, ie the motion difference if relative=true
 	 *           or the absolute mouse position (track-relative) if relative is false
 	 * @param relative true if relative resizing is taking place, false if absolute resizing
 	 */
-	void update_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double x, bool relative);
+	void update_resizing(bool at_front, double x, bool relative);
 
 	/** Finish resizing notes when the user releases the mouse button.
-	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
+	 * @param at_front which end of the note (true == note on, false == note off)
 	 * @param event_x the absolute mouse position (track-relative)
 	 * @param relative true if relative resizing is taking place, false if absolute resizing
 	 */
-	void commit_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double event_x, bool relative);
+	void commit_resizing(bool at_front, double event_x, bool relative);
 
 	/** Adjust the velocity on a note, and the selection if applicable.
 	 * @param velocity the relative or absolute velocity
@@ -244,7 +244,6 @@ class MidiRegionView : public RegionView
 	struct NoteResizeData {
 		ArdourCanvas::CanvasNote  *canvas_note;
 		ArdourCanvas::SimpleRect  *resize_rect;
-		double                     current_x;
 	};
 	
 	/** Snap a region relative pixel coordinate to pixel units.

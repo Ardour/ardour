@@ -984,6 +984,16 @@ Editor::canvas_zoom_rect_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
+Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	if (!internal_editing()) {
+		return false;
+	}
+
+	return typed_event (item, event, NoteItem);
+}
+
+bool
 Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, int x, int y, guint /*time*/)
 {
 	double wx;

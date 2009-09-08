@@ -31,7 +31,7 @@ namespace Canvas {
 
 class CanvasNote : public SimpleRect, public CanvasNoteEvent {
 public:
-	typedef Evoral::Note<double> NoteType;
+	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 
 	double x1() { return property_x1(); }
 	double y1() { return property_y1(); }
@@ -46,27 +46,12 @@ public:
 
 	bool on_event(GdkEvent* ev);
 
-	enum NoteEnd {
-		NOTE_ON,
-		NOTE_OFF
-	};
-
-	enum NoteState {
-		None,
-		RelativeResize,
-		AbsoluteResize
-	};
-
-	CanvasNote(
-			MidiRegionView&                   region,
-			Group&                            group,
-			const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
-		: SimpleRect(group), CanvasNoteEvent(region, this, note), _note_state(None)
+	CanvasNote (MidiRegionView&                   region,
+		    Group&                            group,
+		    const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
+		: SimpleRect(group), CanvasNoteEvent(region, this, note)
 	{
 	}
-
-protected:
-	NoteState _note_state;
 };
 
 } // namespace Gnome
