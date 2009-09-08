@@ -406,10 +406,8 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 			}
 		}
 	}
-	else {
-		return audioFileName;
-	}
 
+	return audioFileName;
 }
 
 int audioFileWrite(void *buffer, size_t size, size_t nmemb, void *file)
