@@ -351,7 +351,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 }
 
 bool
-EditorSummary::on_button_release_event (GdkEventButton* ev)
+EditorSummary::on_button_release_event (GdkEventButton*)
 {
 	_move_dragging = false;
 	_zoom_dragging = false;
