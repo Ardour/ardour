@@ -97,6 +97,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	for (SourceList::iterator si = nsrcs.begin(); si != nsrcs.end(); ++si) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*si);
 		if (afs) {
+			afs->done_with_peakfile_writes ();
 			afs->update_header (region->position(), *now, xnow);
 			afs->mark_immutable ();
 		}
@@ -118,8 +119,11 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 		region_name = session.new_region_name (region->name());
 	}
 	results.clear ();
-	results.push_back (RegionFactory::create (nsrcs, 0, region->length(), region_name, 0, 
-			Region::Flag (Region::WholeFile|Region::DefaultFlags)));
+
+	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, 0, region->length(), region_name, 0, 
+							     Region::Flag (Region::WholeFile|Region::DefaultFlags));
+	r->set_position (region->position(), 0);
+	results.push_back (r);
 	
 	return 0;
 }
