@@ -1079,7 +1079,7 @@ class Editor : public PublicEditor
 	void strip_region_silence ();
 	void normalize_region ();
 	double _last_normalization_value;
-	void denormalize_region ();
+	void reset_region_scale_amplitude ();
 	void adjust_region_scale_amplitude (bool up);
 	void quantize_region ();
 

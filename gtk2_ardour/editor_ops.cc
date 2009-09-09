@@ -4687,7 +4687,7 @@ Editor::normalize_region ()
 
 
 void
-Editor::denormalize_region ()
+Editor::reset_region_scale_amplitude ()
 {
 	if (!session) {
 		return;
@@ -4701,7 +4701,7 @@ Editor::denormalize_region ()
 		return;
 	}
 
-	begin_reversible_command ("denormalize");
+	begin_reversible_command ("reset gain");
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);

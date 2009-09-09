@@ -1815,10 +1815,9 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 			items.push_back (SeparatorElem());
 		}
 
-		if (ar->scale_amplitude() != 1.0f) {
-			items.push_back (MenuElem (_("DeNormalize"), mem_fun(*this, &Editor::denormalize_region)));
-		} else {
-			items.push_back (MenuElem (_("Normalize"), mem_fun(*this, &Editor::normalize_region)));
+		items.push_back (MenuElem (_("Normalize"), mem_fun(*this, &Editor::normalize_region)));
+		if (ar->scale_amplitude() != 1) {
+			items.push_back (MenuElem (_("Reset Gain"), mem_fun(*this, &Editor::reset_region_scale_amplitude)));
 		}
 
 	} else if (mr) {
@@ -1826,7 +1825,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		items.push_back (SeparatorElem());
 	}
 
-	items.push_back (MenuElem (_("Strip silence..."), mem_fun (*this, &Editor::strip_region_silence)));
+	items.push_back (MenuElem (_("Strip Silence..."), mem_fun (*this, &Editor::strip_region_silence)));
 	items.push_back (MenuElem (_("Reverse"), mem_fun(*this, &Editor::reverse_region)));
 	items.push_back (SeparatorElem());
 
