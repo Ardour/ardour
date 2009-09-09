@@ -29,6 +29,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/source_factory.h"
 #include "ardour/analyser.h"
+#include "ardour/audioregion.h"
 
 #include "i18n.h"
 
@@ -123,6 +124,12 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, 0, region->length(), region_name, 0, 
 							     Region::Flag (Region::WholeFile|Region::DefaultFlags));
 	r->set_position (region->position(), 0);
+
+	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion> (region);
+	boost::shared_ptr<AudioRegion> audio_r = boost::dynamic_pointer_cast<AudioRegion> (r);
+	if (audio_region && audio_r) {
+		audio_r->set_scale_amplitude (audio_region->scale_amplitude());
+	}
 	results.push_back (r);
 	
 	return 0;
