@@ -51,6 +51,8 @@ using namespace PBD;
 using Glib::ustring;
 
 bool AudioSource::_build_missing_peakfiles = false;
+
+/** true if we want peakfiles (e.g. if we are displaying a GUI) */
 bool AudioSource::_build_peakfiles = false;
 
 #define _FPP 256
@@ -629,7 +631,7 @@ AudioSource::build_peaks_from_scratch ()
 		cnt = _length;
 		_peaks_built = false;
 		buf = new Sample[bufsize];
-		
+
 		while (cnt) {
 			
 			frames_to_read = min (bufsize, cnt);
