@@ -65,7 +65,7 @@ class Marker : public PBD::Destructible
 	void hide_line ();
 	void set_line_vpos (double y_origin, double height);
 
-	void set_position (nframes_t);
+	void set_position (nframes64_t);
 	void set_name (const std::string&);
 	void set_color_rgba (uint32_t rgba);
 	

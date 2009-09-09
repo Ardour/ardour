@@ -139,7 +139,7 @@ AutomationRegionView::set_height (double h)
 }
 
 bool
-AutomationRegionView::set_position (nframes_t pos, void* src, double* ignored)
+AutomationRegionView::set_position (nframes64_t pos, void* src, double* ignored)
 {
 	return RegionView::set_position(pos, src, ignored);
 }

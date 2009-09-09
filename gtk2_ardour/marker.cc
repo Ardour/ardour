@@ -390,7 +390,7 @@ Marker::set_name (const string& new_name)
 }
 
 void
-Marker::set_position (nframes_t frame)
+Marker::set_position (nframes64_t frame)
 {
 	double new_unit_position = editor.frame_to_unit (frame);
 	new_unit_position -= shift;

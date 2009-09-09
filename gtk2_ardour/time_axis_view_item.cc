@@ -75,7 +75,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
  * @param duration the duration of this item
  */
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color, 
-				   nframes_t start, nframes_t duration, bool recording,
+				   nframes64_t start, nframes64_t duration, bool recording,
 				   Visibility vis)
 	: trackview (tv), _recregion(recording)
 {
@@ -130,7 +130,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 }
 
 void
-TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & base_color, nframes_t start, nframes_t duration, Visibility vis)
+TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis)
 {
 	item_name = it_name ;
 	samples_per_unit = spu ;
@@ -238,7 +238,7 @@ TimeAxisViewItem::~TimeAxisViewItem()
  * @return true if the position change was a success, false otherwise
  */
 bool
-TimeAxisViewItem::set_position(nframes_t pos, void* src, double* delta)
+TimeAxisViewItem::set_position(nframes64_t pos, void* src, double* delta)
 {
 	if (position_locked) {
 		return false;
@@ -278,7 +278,7 @@ TimeAxisViewItem::set_position(nframes_t pos, void* src, double* delta)
  *
  * @return the position of this item
  */
-nframes_t
+nframes64_t
 TimeAxisViewItem::get_position() const
 {
 	return frame_position;
@@ -292,7 +292,7 @@ TimeAxisViewItem::get_position() const
  * @return true if the duration change was succesful, false otherwise
  */
 bool
-TimeAxisViewItem::set_duration (nframes_t dur, void* src)
+TimeAxisViewItem::set_duration (nframes64_t dur, void* src)
 {
 	if ((dur > max_item_duration) || (dur < min_item_duration)) {
 		warning << string_compose (_("new duration %1 frames is out of bounds for %2"), get_item_name(), dur)
@@ -316,7 +316,7 @@ TimeAxisViewItem::set_duration (nframes_t dur, void* src)
  * Returns the duration of this item
  *
  */
-nframes_t
+nframes64_t
 TimeAxisViewItem::get_duration() const
 {
 	return (item_duration);
@@ -329,7 +329,7 @@ TimeAxisViewItem::get_duration() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_max_duration(nframes_t dur, void* src)
+TimeAxisViewItem::set_max_duration(nframes64_t dur, void* src)
 {
 	max_item_duration = dur ;
 	MaxDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
@@ -340,7 +340,7 @@ TimeAxisViewItem::set_max_duration(nframes_t dur, void* src)
  *
  * @return the maximum duration that this item may be set to
  */
-nframes_t
+nframes64_t
 TimeAxisViewItem::get_max_duration() const
 {
 	return (max_item_duration) ;
@@ -353,7 +353,7 @@ TimeAxisViewItem::get_max_duration() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_min_duration(nframes_t dur, void* src)
+TimeAxisViewItem::set_min_duration(nframes64_t dur, void* src)
 {
 	min_item_duration = dur ;
 	MinDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
@@ -364,7 +364,7 @@ TimeAxisViewItem::set_min_duration(nframes_t dur, void* src)
  *
  * @return the nimum duration that this item mey be set to
  */
-nframes_t
+nframes64_t
 TimeAxisViewItem::get_min_duration() const
 {
 	return(min_item_duration) ;

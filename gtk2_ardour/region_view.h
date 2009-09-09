@@ -62,14 +62,14 @@ class RegionView : public TimeAxisViewItem
 	
 	virtual void set_height (double);
 	virtual void set_samples_per_unit (double);
-	virtual bool set_duration (nframes_t, void*);
+	virtual bool set_duration (nframes64_t, void*);
 	
 	void move (double xdelta, double ydelta);
 	
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	bool set_position(nframes_t pos, void* src, double* delta = 0);
+	bool set_position(nframes64_t pos, void* src, double* delta = 0);
 	void fake_set_opaque (bool yn);
 	
 	virtual void show_region_editor () {}

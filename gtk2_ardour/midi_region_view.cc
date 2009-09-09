@@ -1669,6 +1669,13 @@ MidiRegionView::get_position_pixels()
 	return trackview.editor().frame_to_pixel(region_frame);
 }
 
+double
+MidiRegionView::get_end_position_pixels()
+{
+	nframes64_t frame = get_position() + get_duration ();
+	return trackview.editor().frame_to_pixel(frame);
+}
+
 nframes64_t
 MidiRegionView::beats_to_frames(double beats) const
 {
@@ -1727,7 +1734,6 @@ MidiRegionView::update_resizing (bool at_front, double delta_x, bool relative)
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		SimpleRect* resize_rect = (*i)->resize_rect;
 		CanvasNote* canvas_note = (*i)->canvas_note;
-		const double region_start = get_position_pixels();
 		double current_x;
 
 		if (at_front) {
@@ -1735,14 +1741,14 @@ MidiRegionView::update_resizing (bool at_front, double delta_x, bool relative)
 				current_x = canvas_note->x1() + delta_x;
 			} else {
 				// x is in track relative, transform it to region relative
-				current_x = delta_x - region_start;
+				current_x = delta_x - get_position_pixels();
 			}
 		} else {
 			if (relative) {
 				current_x = canvas_note->x2() + delta_x;
 			} else {
 				// x is in track relative, transform it to region relative
-				current_x = delta_x - region_start;
+				current_x = delta_x - get_end_position_pixels ();
 			}
 		}
 		
@@ -1772,14 +1778,14 @@ MidiRegionView::commit_resizing (bool at_front, double delta_x, bool relative)
 				current_x = canvas_note->x1() + delta_x;
 			} else {
 				// x is in track relative, transform it to region relative
-				current_x = delta_x - region_start;
+				current_x = region_start + delta_x;
 			}
 		} else {
 			if (relative) {
 				current_x = canvas_note->x2() + delta_x;
 			} else {
 				// x is in track relative, transform it to region relative
-				current_x = delta_x - region_start;
+				current_x = region_start + delta_x;
 			}
 		}
 		
@@ -1787,7 +1793,6 @@ MidiRegionView::commit_resizing (bool at_front, double delta_x, bool relative)
 		current_x = frames_to_beats (current_x);
 
 		if (at_front && current_x < canvas_note->note()->end_time()) {
-
 			diff_add_change (canvas_note, MidiModel::DiffCommand::StartTime, current_x);
 		}
 

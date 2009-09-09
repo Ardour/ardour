@@ -36,6 +36,8 @@
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
 #include "canvas-note.h"
+#include "selection.h"
+#include "midi_selection.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -1415,21 +1417,49 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	} else {
 		relative = true;
 	}
+
+	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+
+	if (ms.size() > 1) {
+		/* has to be relative, may make no sense otherwise */
+		relative = true;
+	}
 	
 	region->note_selected (cnote, true);
-	region->begin_resizing (at_front);
+
+	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
+		MidiRegionSelection::iterator next;
+		next = r;
+		++next;
+		(*r)->begin_resizing (at_front);
+		r = next;
+	}
 }
 
 void
 NoteResizeDrag::motion (GdkEvent* /*event*/, bool first_move)
 {
-	region->update_resizing (at_front, _current_pointer_x - _grab_x, relative);
+	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end();) {
+		MidiRegionSelection::iterator next;
+		next = r;
+		++next;
+		(*r)->update_resizing (at_front, _current_pointer_x - _grab_x, relative);
+		r = next;
+	}
 } 
 
 void
 NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	region->commit_resizing (at_front, _current_pointer_x - _grab_x, relative);
+	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end();) {
+		MidiRegionSelection::iterator next;
+		next = r;
+		++next;
+		(*r)->commit_resizing (at_front, _current_pointer_x - _grab_x, relative);
+		r = next;
+	}
 }
 
 void

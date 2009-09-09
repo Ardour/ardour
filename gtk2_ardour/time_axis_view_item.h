@@ -47,14 +47,14 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      * @return true if the position change was a success, false otherwise
      */
-    virtual bool set_position(nframes_t pos, void* src, double* delta = 0) ;
+    virtual bool set_position(nframes64_t pos, void* src, double* delta = 0) ;
     
     /**
      * Return the position of this item upon the timeline
      *
      * @return the position of this item
      */
-    nframes_t get_position() const ; 
+    nframes64_t get_position() const ; 
     
     /**
      * Sets the duration of this item
@@ -63,13 +63,13 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      * @return true if the duration change was succesful, false otherwise
      */
-    virtual bool set_duration(nframes_t dur, void* src) ;
+    virtual bool set_duration(nframes64_t dur, void* src) ;
     
     /**
      * Returns the duration of this item
      *
      */
-    nframes_t get_duration() const ;
+    nframes64_t get_duration() const ;
     
     /**
      * Sets the maximum duration that this item make have.
@@ -77,14 +77,14 @@ class TimeAxisViewItem : public Selectable
      * @param dur the new maximum duration
      * @param src the identity of the object that initiated the change
      */
-    virtual void set_max_duration(nframes_t dur, void* src) ;
+    virtual void set_max_duration(nframes64_t dur, void* src) ;
     
     /**
      * Returns the maxmimum duration that this item may be set to
      *
      * @return the maximum duration that this item may be set to
      */
-    nframes_t get_max_duration() const ;
+    nframes64_t get_max_duration() const ;
     
     /**
      * Sets the minimu duration that this item may be set to
@@ -92,14 +92,14 @@ class TimeAxisViewItem : public Selectable
      * @param the minimum duration that this item may be set to
      * @param src the identity of the object that initiated the change
      */
-    virtual void set_min_duration(nframes_t dur, void* src) ;
+    virtual void set_min_duration(nframes64_t dur, void* src) ;
     
     /**
      * Returns the minimum duration that this item mey be set to
      *
      * @return the nimum duration that this item mey be set to
      */
-    nframes_t get_min_duration() const ;
+    nframes64_t get_min_duration() const ;
     
     /**
      * Sets whether the position of this Item is locked to its current position
@@ -305,19 +305,19 @@ class TimeAxisViewItem : public Selectable
     sigc::signal<void,std::string,std::string,void*> NameChanged ;
     
     /** Emiited when the position of this item changes */
-    sigc::signal<void,nframes_t,void*> PositionChanged ;
+    sigc::signal<void,nframes64_t,void*> PositionChanged ;
     
     /** Emitted when the position lock of this item is changed */
     sigc::signal<void,bool,void*> PositionLockChanged ;
     
     /** Emitted when the duration of this item changes */
-    sigc::signal<void,nframes_t,void*> DurationChanged ;
+    sigc::signal<void,nframes64_t,void*> DurationChanged ;
     
     /** Emitted when the maximum item duration is changed */
-    sigc::signal<void,nframes_t,void*> MaxDurationChanged ;
+    sigc::signal<void,nframes64_t,void*> MaxDurationChanged ;
     
     /** Emitted when the mionimum item duration is changed */
-    sigc::signal<void,nframes_t,void*> MinDurationChanged ;
+    sigc::signal<void,nframes64_t,void*> MinDurationChanged ;
     
     enum Visibility {
 	    ShowFrame = 0x1,
@@ -342,11 +342,11 @@ class TimeAxisViewItem : public Selectable
      * @param duration the duration of this item
      */
     TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color, 
-		     nframes_t start, nframes_t duration, bool recording = false, Visibility v = Visibility (0));
+		     nframes64_t start, nframes64_t duration, bool recording = false, Visibility v = Visibility (0));
 
     TimeAxisViewItem (const TimeAxisViewItem& other);
 
-    void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes_t start, nframes_t duration, Visibility vis);
+    void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis);
     
     /**
      * Calculates some contrasting color for displaying various parts of this item, based upon the base color
@@ -391,16 +391,16 @@ class TimeAxisViewItem : public Selectable
     bool position_locked ;
     
     /** The posotion of this item on the timeline */
-    nframes_t frame_position ;
+    nframes64_t frame_position ;
     
     /** the duration of this item upon the timeline */
-    nframes_t item_duration ;
+    nframes64_t item_duration ;
     
     /** the maximum duration that we allow this item to take */
-    nframes_t max_item_duration ;
+    nframes64_t max_item_duration ;
     
     /** the minimu duration that we allow this item to take */
-    nframes_t min_item_duration ;
+    nframes64_t min_item_duration ;
     
     /** indicates whether this Max Duration constraint is active */
     bool max_duration_active ;

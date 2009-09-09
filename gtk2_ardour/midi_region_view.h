@@ -199,6 +199,9 @@ class MidiRegionView : public RegionView
 	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();
 
+	/** Get the region end position in pixels relative to session. */
+	double get_end_position_pixels();
+
 	/** Begin resizing of some notes.
 	 * Called by CanvasMidiNote when resizing starts.
 	 * @param at_front which end of the note (true == note on, false == note off)

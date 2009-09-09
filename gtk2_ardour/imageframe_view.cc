@@ -168,9 +168,9 @@ ImageFrameView::~ImageFrameView()
  * @return true if the position change was a success, false otherwise
  */
 bool
-ImageFrameView::set_position(nframes_t pos, void* src, double* delta)
+ImageFrameView::set_position(nframes64_t pos, void* src, double* delta)
 {
-	nframes_t old_pos = frame_position ;
+	nframes64_t old_pos = frame_position ;
 	
 	// do the standard stuff
 	bool ret = TimeAxisViewItem::set_position(pos, src, delta) ;
@@ -182,7 +182,7 @@ ImageFrameView::set_position(nframes_t pos, void* src, double* delta)
 		{
 			// calculate the offset of the marker
 			MarkerView* mv = (MarkerView*)*i ;
-			nframes_t marker_old_pos = mv->get_position() ;
+			nframes64_t marker_old_pos = mv->get_position() ;
 			
 			mv->set_position(pos + (marker_old_pos - old_pos), src) ;
 		}
@@ -199,7 +199,7 @@ ImageFrameView::set_position(nframes_t pos, void* src, double* delta)
  * @return true if the duration change was succesful, false otherwise
  */
 bool
-ImageFrameView::set_duration(nframes_t dur, void* src)
+ImageFrameView::set_duration(nframes64_t dur, void* src)
 {
 	/* do the standard stuff */
 	bool ret = TimeAxisViewItem::set_duration(dur, src) ;

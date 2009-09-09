@@ -393,7 +393,7 @@ Mixer_UI::sync_order_keys (string const & src)
 	for (order = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		int old_key = order;
-		int new_key = route->order_key (N_("signal"));
+		unsigned int new_key = route->order_key (N_("signal"));
 
 		assert (new_key < neworder.size());
 		neworder[new_key] = old_key;
