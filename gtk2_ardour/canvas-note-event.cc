@@ -47,6 +47,7 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 	, _state(None)
 	, _note(note)
 	, _selected(false)
+	, _valid (true)
 {
 }
 
@@ -58,6 +59,18 @@ CanvasNoteEvent::~CanvasNoteEvent()
 	}
 	
 	delete _channel_selector_widget;
+}
+
+void
+CanvasNoteEvent::invalidate ()
+{
+	_valid = false;
+}
+
+void
+CanvasNoteEvent::validate ()
+{
+	_valid = true;
 }
 
 void 

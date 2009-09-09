@@ -66,6 +66,10 @@ public:
 	virtual void hide() = 0;
 	virtual bool on_event(GdkEvent* ev);
 
+	bool valid() const { return _valid; }
+	void invalidate ();
+	void validate ();
+
 	bool selected() const { return _selected; }
 	void selected(bool yn);
 
@@ -129,6 +133,7 @@ protected:
 	const boost::shared_ptr<NoteType> _note;
 	bool                              _own_note;
 	bool                              _selected;
+	bool                              _valid;
 };
 
 } // namespace Gnome

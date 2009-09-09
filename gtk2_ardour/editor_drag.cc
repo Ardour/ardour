@@ -1457,6 +1457,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 		MidiRegionSelection::iterator next;
 		next = r;
 		++next;
+		cerr << "Working on MRV " << (*r)->midi_region()->name() << endl;
 		(*r)->commit_resizing (at_front, _current_pointer_x - _grab_x, relative);
 		r = next;
 	}

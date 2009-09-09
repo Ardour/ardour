@@ -37,6 +37,7 @@
 #include "automation_line.h"
 #include "enums.h"
 #include "canvas.h"
+#include "canvas-hit.h"
 #include "canvas-note.h"
 #include "canvas-note-event.h"
 #include "canvas-program-change.h"
@@ -381,6 +382,11 @@ class MidiRegionView : public RegionView
 
 	/* connection used to connect to model's ContentChanged signal */
 	sigc::connection content_connection;
+
+	ArdourCanvas::CanvasNoteEvent* find_canvas_note (boost::shared_ptr<NoteType>);
+	void update_note (ArdourCanvas::CanvasNote*);
+	void update_hit (ArdourCanvas::CanvasHit*);
+	
 };	
 
 

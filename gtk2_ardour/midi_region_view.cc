@@ -724,6 +724,20 @@ MidiRegionView::abort_command()
 	clear_selection();
 }
 
+CanvasNoteEvent*
+MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
+{
+	/* XXX optimize the crap out of this SOON */
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+		if ((*i)->note() == note) {
+			return *i;
+		}
+	}
+
+	return 0;
+}
+
 void
 MidiRegionView::redisplay_model()
 {
@@ -738,17 +752,51 @@ MidiRegionView::redisplay_model()
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			_marked_for_selection.insert((*i)->note());
 		}
+
+		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+			(*i)->invalidate ();
+		}
 		
 
-		clear_events();
 		_model->read_lock();
 		
 		MidiModel::Notes notes = _model->notes();
 		
 		for (size_t i = 0; i < _model->n_notes(); ++i) {
 			boost::shared_ptr<NoteType> note (_model->note_at (i));
+
 			if (note_in_visible_range (note)) {
-				add_note (note);
+				CanvasNoteEvent* cne;
+
+				if ((cne = find_canvas_note (note)) != 0) {
+
+					cne->validate ();
+
+					CanvasNote* cn;
+					CanvasHit* ch;
+
+					if ((cn = dynamic_cast<CanvasNote*>(cne)) != 0) {
+						update_note (cn);
+					} else if ((ch = dynamic_cast<CanvasHit*>(cne)) != 0) {
+						update_hit (ch);
+					}
+
+				} else {
+
+					add_note (note);
+				}
+			}
+		}
+		
+		/* remove note items that are no longer valid */
+
+		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
+			if (!(*i)->valid ()) {
+				cerr << "Canvas note " << *i << " is invalid, deleting\n";
+				delete *i;
+				i = _events.erase (i);
+			} else {
+				++i;
 			}
 		}
 		
@@ -1100,6 +1148,64 @@ MidiRegionView::note_in_visible_range(const boost::shared_ptr<NoteType> note) co
 	return !outside;
 }
 
+void
+MidiRegionView::update_note (CanvasNote* ev)
+{
+	boost::shared_ptr<NoteType> note = ev->note();
+
+	const nframes64_t note_start_frames = beats_to_frames(note->time());
+	const nframes64_t note_end_frames   = beats_to_frames(note->end_time());
+
+	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
+
+	
+	const double y1 = midi_stream_view()->note_to_y(note->note());
+	const double note_endpixel = 
+		trackview.editor().frame_to_pixel(note_end_frames - _region->start());
+	
+	ev->property_x1() = x;
+	ev->property_y1() = y1;
+	if (note->length() > 0) {
+		ev->property_x2() = note_endpixel;
+	} else {
+		ev->property_x2() = trackview.editor().frame_to_pixel(_region->length());
+	}
+	ev->property_y2() = y1 + floor(midi_stream_view()->note_height());
+	
+	if (note->length() == 0) {
+		if (_active_notes) {
+			assert(note->note() < 128);
+			// If this note is already active there's a stuck note,
+			// finish the old note rectangle
+			if (_active_notes[note->note()]) {
+				CanvasNote* const old_rect = _active_notes[note->note()];
+				boost::shared_ptr<NoteType> old_note = old_rect->note();
+				old_rect->property_x2() = x;
+				old_rect->property_outline_what() = (guint32) 0xF;
+			}
+			_active_notes[note->note()] = ev;
+		}
+		/* outline all but right edge */
+		ev->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
+	} else {
+		/* outline all edges */
+		ev->property_outline_what() = (guint32) 0xF;
+	}
+}
+
+void
+MidiRegionView::update_hit (CanvasHit* ev)
+{
+	boost::shared_ptr<NoteType> note = ev->note();
+
+	const nframes64_t note_start_frames = beats_to_frames(note->time());
+	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
+	const double diamond_size = midi_stream_view()->note_height() / 2.0;
+	const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
+
+	ev->move(x, y);
+}
+
 /** Add a MIDI note to the view (with length).
  *
  * If in sustained mode, notes with length 0 will be considered active
@@ -1109,56 +1215,23 @@ MidiRegionView::note_in_visible_range(const boost::shared_ptr<NoteType> note) co
 void
 MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 {
+	CanvasNoteEvent* event = 0;
+	
 	assert(note->time() >= 0);
 	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
 
-	const nframes64_t note_start_frames = beats_to_frames(note->time());
-	const nframes64_t note_end_frames   = beats_to_frames(note->end_time());
-
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 
-	CanvasNoteEvent* event = 0;
-	
-	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
-	
 	if (midi_view()->note_mode() == Sustained) {
-		const double y1 = midi_stream_view()->note_to_y(note->note());
-		const double note_endpixel = 
-			trackview.editor().frame_to_pixel(note_end_frames - _region->start());
 		
 		CanvasNote* ev_rect = new CanvasNote(*this, *group, note);
-		ev_rect->property_x1() = x;
-		ev_rect->property_y1() = y1;
-		if (note->length() > 0) {
-			ev_rect->property_x2() = note_endpixel;
-		} else {
-			ev_rect->property_x2() = trackview.editor().frame_to_pixel(_region->length());
-		}
-		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
-		if (note->length() == 0) {
-			if (_active_notes) {
-				assert(note->note() < 128);
-				// If this note is already active there's a stuck note,
-				// finish the old note rectangle
-				if (_active_notes[note->note()]) {
-					CanvasNote* const old_rect = _active_notes[note->note()];
-					boost::shared_ptr<NoteType> old_note = old_rect->note();
-					old_rect->property_x2() = x;
-					old_rect->property_outline_what() = (guint32) 0xF;
-				}
-				_active_notes[note->note()] = ev_rect;
-			}
-			/* outline all but right edge */
-			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
-		} else {
-			/* outline all edges */
-			ev_rect->property_outline_what() = (guint32) 0xF;
-		}
+		update_note (ev_rect);
 
 		event = ev_rect;
 
 		MidiGhostRegion* gr;
+
 		for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 			if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
 				gr->add_note(ev_rect);
@@ -1166,12 +1239,15 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 		}
 
 	} else if (midi_view()->note_mode() == Percussive) {
+
 		const double diamond_size = midi_stream_view()->note_height() / 2.0;
-		const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
 
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size, note);
-		ev_diamond->move(x, y);
+
+		update_hit (ev_diamond);
+
 		event = ev_diamond;
+
 	} else {
 		event = 0;
 	}
@@ -1859,8 +1935,6 @@ MidiRegionView::trim_note (CanvasNoteEvent* event, Evoral::MusicalTime front_del
 	   end_delta:   if positive - move the end of the note later in time (lengthening it)
 	                if negative - move the end of the note earlier in time (shortening it)
 	 */
-
-	cerr << "Trim front by " << front_delta << " end by " << end_delta << endl;
 
 	if (front_delta) {
 		if (front_delta < 0) {
