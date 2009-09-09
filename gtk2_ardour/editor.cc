@@ -2001,8 +2001,6 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (MenuElem (_("Select All Within Playhead & Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_between), true)));
 	select_items.push_back (MenuElem (_("Select Range Between Playhead & Edit Point"), mem_fun(*this, &Editor::select_range_between)));
 
-	select_items.push_back (SeparatorElem());
-
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
 
 	/* Cut-n-Paste */
