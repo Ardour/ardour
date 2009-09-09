@@ -512,7 +512,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 }
 
 bool
-RouteUI::rec_enable_release (GdkEventButton* ev)
+RouteUI::rec_enable_release (GdkEventButton*)
 {
 	return true;
 }
