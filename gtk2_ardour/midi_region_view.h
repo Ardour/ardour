@@ -187,7 +187,7 @@ class MidiRegionView : public RegionView
 	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
-	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add);
+	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev);
 	void   delete_selection();
 	size_t selection_size() { return _selection.size(); }
 	
@@ -348,7 +348,7 @@ class MidiRegionView : public RegionView
 	/// MIDNAM information of the current track: CustomDeviceMode
 	std::string _custom_device_mode;   
 
-	typedef std::vector<ArdourCanvas::CanvasNoteEvent*> Events;
+	typedef std::list<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx> > SysExes;
 	
@@ -368,6 +368,9 @@ class MidiRegionView : public RegionView
 	/// Currently selected CanvasNoteEvents
 	Selection _selection;
 
+	bool _sort_needed;
+	void time_sort_events ();
+
 	MidiCutBuffer* selection_as_cut_buffer () const;
 
 	/** New notes (created in the current command) which should be selected
@@ -384,6 +387,8 @@ class MidiRegionView : public RegionView
 	sigc::connection content_connection;
 
 	ArdourCanvas::CanvasNoteEvent* find_canvas_note (boost::shared_ptr<NoteType>);
+	Events::iterator _optimization_iterator;
+
 	void update_note (ArdourCanvas::CanvasNote*);
 	void update_hit (ArdourCanvas::CanvasHit*);
 	

@@ -254,8 +254,8 @@ MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 	return note_ptr;
 }
 
-#define ADDED_NOTES_ELEMENT "added_notes"
-#define REMOVED_NOTES_ELEMENT "removed_notes"
+#define ADDED_NOTES_ELEMENT "AddedNotes"
+#define REMOVED_NOTES_ELEMENT "RemovedNotes"
 #define DELTA_COMMAND_ELEMENT "DeltaCommand"
 
 int
@@ -301,7 +301,7 @@ MidiModel::DeltaCommand::get_state()
 
 /************** DIFF COMMAND ********************/
 
-#define DIFF_NOTES_ELEMENT "changed_notes"
+#define DIFF_NOTES_ELEMENT "ChangedNotes"
 #define DIFF_COMMAND_ELEMENT "DiffCommand"
 
 MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
@@ -525,7 +525,7 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 		/*NOTREACHED*/
 	}
 
-	if ((prop = xml_change->property ("new")) == 0) {
+	if ((prop = xml_change->property ("new")) != 0) {
 		istringstream new_str (prop->value());
 		new_str >> change.new_value;
 	} else {

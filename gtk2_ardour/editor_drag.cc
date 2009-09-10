@@ -1440,12 +1440,8 @@ void
 NoteResizeDrag::motion (GdkEvent* /*event*/, bool first_move)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
-	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end();) {
-		MidiRegionSelection::iterator next;
-		next = r;
-		++next;
+	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		(*r)->update_resizing (at_front, _current_pointer_x - _grab_x, relative);
-		r = next;
 	}
 } 
 
@@ -1453,13 +1449,8 @@ void
 NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
-	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end();) {
-		MidiRegionSelection::iterator next;
-		next = r;
-		++next;
-		cerr << "Working on MRV " << (*r)->midi_region()->name() << endl;
+	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		(*r)->commit_resizing (at_front, _current_pointer_x - _grab_x, relative);
-		r = next;
 	}
 }
 
@@ -3399,7 +3390,20 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	last_y = event_y;
 
 	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);	
-	region->note_selected (cnote, true);
+
+	if (!(was_selected = cnote->selected())) {
+		
+		/* tertiary-click means extend selection - we'll do that on button release,
+		   so don't add it here, because otherwise we make it hard to figure
+		   out the "extend-to" range.
+		*/
+
+		bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
+
+		if (!extend) {
+			region->note_selected (cnote, true);
+		}
+	}
 }
 
 void
@@ -3449,18 +3453,21 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 	if (!moved) {
 		if (_editor->current_mouse_mode() == Editing::MouseObject) {
 			
-			bool select_mod = (ev->motion.state & (Keyboard::PrimaryModifier | Keyboard::SecondaryModifier));
-
-			if (cnote->selected()) {
-				region->note_deselected (cnote, select_mod);
+			if (was_selected) {
+				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
+				if (add) {
+					region->note_deselected (cnote);
+				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
-				
+
 				if (!extend && !add && region->selection_size() > 1) {
 					region->unique_select(cnote);
+				} else if (extend) {
+					region->note_selected (cnote, true, true);
 				} else {
-					region->note_selected (cnote, (extend ? true : add), extend);
+					/* it was added during button press */
 				}
 			}
 		}

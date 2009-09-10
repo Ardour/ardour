@@ -294,6 +294,7 @@ class NoteDrag : public Drag
 	double last_y;
 	double drag_delta_x;
 	double drag_delta_note;
+	bool   was_selected;
 };
 
 /** Drag of region gain */
