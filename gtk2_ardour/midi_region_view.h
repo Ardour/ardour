@@ -103,7 +103,7 @@ class MidiRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void add_note(const boost::shared_ptr<NoteType> note);
+	void add_note(const boost::shared_ptr<NoteType> note, bool visible);
 	void resolve_note(uint8_t note_num, double end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
@@ -194,8 +194,10 @@ class MidiRegionView : public RegionView
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_pixels, uint8_t d_note);
 
-	/** Return true iff the note is within the currently visible range */
-	bool note_in_visible_range(const boost::shared_ptr<NoteType> note) const;
+	/** Return true iff the note is within the extent of the region.
+	 * @param visible will be set to true if the note is within the visible note range, false otherwise.
+	 */
+	bool note_in_region_range(const boost::shared_ptr<NoteType> note, bool& visible) const;
 
 	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();

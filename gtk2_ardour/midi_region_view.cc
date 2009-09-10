@@ -775,8 +775,9 @@ MidiRegionView::redisplay_model()
 
 		boost::shared_ptr<NoteType> note (*n);
 		CanvasNoteEvent* cne;
-		
-		if (note_in_visible_range (note)) {
+		bool visible;
+
+		if (note_in_region_range (note, visible)) {
 			
 			if ((cne = find_canvas_note (note)) != 0) {
 				
@@ -791,11 +792,15 @@ MidiRegionView::redisplay_model()
 					update_hit (ch);
 				}
 
-				cne->show ();
+				if (visible) {
+					cne->show ();
+				} else {
+					cne->hide ();
+				}
 				
 			} else {
 				
-				add_note (note);
+				add_note (note, visible);
 			}
 			
 		} else {
@@ -1158,13 +1163,16 @@ MidiRegionView::play_midi_note_off(boost::shared_ptr<NoteType> note)
 }
 
 bool
-MidiRegionView::note_in_visible_range(const boost::shared_ptr<NoteType> note) const
+MidiRegionView::note_in_region_range(const boost::shared_ptr<NoteType> note, bool& visible) const
 {
 	const nframes64_t note_start_frames = beats_to_frames(note->time());
-	bool outside = (note_start_frames - _region->start() >= _region->length())
-			|| (note_start_frames < _region->start())
-			|| (note->note() < midi_stream_view()->lowest_note())
-			|| (note->note() > midi_stream_view()->highest_note());
+
+	bool outside = (note_start_frames - _region->start() >= _region->length()) || 
+		(note_start_frames < _region->start());
+
+	visible = (note->note() >= midi_stream_view()->lowest_note()) &&
+		(note->note() <= midi_stream_view()->highest_note());
+
 	return !outside;
 }
 
@@ -1233,7 +1241,7 @@ MidiRegionView::update_hit (CanvasHit* ev)
  * event arrives, to properly display the note.
  */
 void
-MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
+MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 {
 	CanvasNoteEvent* event = 0;
 	
@@ -1283,7 +1291,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note)
 		event->on_channel_selection_change(_last_channel_selection);
 		_events.push_back(event);
 
-		if (note_in_visible_range(note)) {
+		if (visible) {
 			event->show();
 		} else {
 			event->hide ();

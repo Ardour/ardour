@@ -267,15 +267,19 @@ MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
 
 	_added_notes.clear();
 	XMLNode* added_notes = delta_command.child(ADDED_NOTES_ELEMENT);
-	XMLNodeList notes = added_notes->children();
-	transform(notes.begin(), notes.end(), back_inserter(_added_notes),
-			sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
+	if (added_notes) {
+		XMLNodeList notes = added_notes->children();
+		transform(notes.begin(), notes.end(), back_inserter(_added_notes),
+			  sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
+	}
 
 	_removed_notes.clear();
 	XMLNode* removed_notes = delta_command.child(REMOVED_NOTES_ELEMENT);
-	notes = removed_notes->children();
-	transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
-			sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
+	if (removed_notes) {
+		XMLNodeList notes = removed_notes->children();
+		transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
+			  sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
+	}
 
 	return 0;
 }
@@ -620,11 +624,14 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command)
 	_changes.clear();
 
 	XMLNode* changed_notes = diff_command.child(DIFF_NOTES_ELEMENT);
-	XMLNodeList notes = changed_notes->children();
 
-	transform (notes.begin(), notes.end(), back_inserter(_changes),
-		   sigc::mem_fun(*this, &DiffCommand::unmarshal_change));
-	
+	if (changed_notes) {
+		XMLNodeList notes = changed_notes->children();
+		
+		transform (notes.begin(), notes.end(), back_inserter(_changes),
+			   sigc::mem_fun(*this, &DiffCommand::unmarshal_change));
+	}
+
 	return 0;
 }
 

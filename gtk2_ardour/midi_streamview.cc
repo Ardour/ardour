@@ -589,8 +589,6 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 							if (note->time() + region->position() > start + dur)
 								break;
 
-							mrv->add_note(note);
-
 							if (note->note() < _lowest_note) {
 								_lowest_note = note->note();
 								update_range = true;
@@ -598,6 +596,9 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 								_highest_note = note->note();
 								update_range = true;
 							}
+
+							mrv->add_note (note, !update_range);
+
 						}
 						
 						mrv->extend_active_notes();
