@@ -91,7 +91,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void start_step_editing ();
 	void stop_step_editing ();
 	void check_step_edit ();
-
+	void step_edit_rest ();
 
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;

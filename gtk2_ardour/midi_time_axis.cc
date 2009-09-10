@@ -117,6 +117,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 
 	mute_button->set_active (false);
 	solo_button->set_active (false);
+
+	step_edit_insert_position = 0;
 	
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
@@ -610,7 +612,6 @@ MidiTimeAxisView::check_step_edit ()
 		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
 
 			if (step_edit_region == 0) {
-				cerr << "Add new region first ..\n";
 
 				step_edit_region = add_region (step_edit_insert_position);
 				RegionView* rv = view()->find_view (step_edit_region);
@@ -632,13 +633,20 @@ MidiTimeAxisView::check_step_edit ()
 					continue;
 				}
 				
-				cerr << "will add note at " << step_edit_beat_pos << endl;
 				step_edit_region_view->add_note (buf[0] & 0xf, buf[1], buf[2], step_edit_beat_pos, beats);
 				step_edit_beat_pos += beats;
 			}
 		}
 		
 	}
+}
+
+void
+MidiTimeAxisView::step_edit_rest ()
+{
+	bool success;
+	Evoral::MusicalTime beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
+	step_edit_beat_pos += beats;
 }
 
 boost::shared_ptr<Region>

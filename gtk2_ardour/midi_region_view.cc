@@ -321,7 +321,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		} else if (ev->key.keyval == GDK_Control_L) {
 			return true;
 
+		} else if (ev->key.keyval == GDK_r) {
+			/* if we're not step editing, this really doesn't matter */
+			midi_view()->step_edit_rest ();
+			return true;
 		}
+
 		return false;
 
 	case GDK_KEY_RELEASE:
