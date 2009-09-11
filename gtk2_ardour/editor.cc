@@ -2335,6 +2335,16 @@ Editor::set_state (const XMLNode& node)
 		set_mouse_mode (MouseObject, true);
 	}
 
+	if ((prop = node.property ("internal-edit"))) {
+		bool yn = (prop->value() == "yes");
+		RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
+	}
+
 	if ((prop = node.property ("edit-point"))) {
 		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
 	}
@@ -2479,6 +2489,7 @@ Editor::get_state ()
 	node->add_property ("xfades-visible", _xfade_visibility ? "yes" : "no");
 	node->add_property ("region-list-sort-type", enum2str (_regions->sort_type ()));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
+	node->add_property ("internal-edit", _internal_editing ? "yes" : "no");
 	
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
