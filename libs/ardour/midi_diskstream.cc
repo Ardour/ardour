@@ -1648,9 +1648,6 @@ MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 		return;
 	}
 
-	// Check only events added this offset cycle
-	MidiBuffer::iterator this_cycle_start = dst.end();
-	
 	// Translates stamps to be relative to start
 
 	_playback_buf->read(dst, start, end);
@@ -1664,11 +1661,5 @@ MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 	
 	gint32 frames_read = end - start;
 	g_atomic_int_add(&_frames_read_from_ringbuffer, frames_read);
-	
-	// Feed the data through the MidiStateTracker
-	// If it detects a LoopEvent it will add necessary note offs
-	if (_midi_state_tracker.track(this_cycle_start, dst.end())) {
-		_midi_state_tracker.resolve_notes(dst, end-start - 1);
-	}
 }
 

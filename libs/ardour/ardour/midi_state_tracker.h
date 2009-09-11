@@ -35,7 +35,7 @@ class MidiStateTracker
 public:
 	MidiStateTracker();
 
-	bool track (const MidiBuffer::iterator& from, const MidiBuffer::iterator& to);
+	void track (const MidiBuffer::iterator& from, const MidiBuffer::iterator& to, bool& looped);
 	void resolve_notes (MidiBuffer& buffer, nframes_t time);
 	void dump (std::ostream&);
 	void reset ();
@@ -43,7 +43,7 @@ public:
 private:
 	void track_note_onoffs(const Evoral::MIDIEvent<MidiBuffer::TimeType>& event);
 
-	std::bitset<128*16> _active_notes;
+	uint8_t _active_notes[128*16];
 };
 
 

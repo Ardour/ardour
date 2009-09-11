@@ -441,15 +441,27 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 
 		//const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+		MidiBuffer& mbuf (bufs.get_midi (0));
 		
-		diskstream->get_playback (bufs.get_midi(0), start_frame, end_frame);
+		diskstream->get_playback (mbuf, start_frame, end_frame);
 
 		/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
 
 		write_out_of_band_data (bufs, start_frame, end_frame, nframes);	
 
+		// Feed the data through the MidiStateTracker
+		bool did_loop;
+
+		_midi_state_tracker.track (mbuf.begin(), mbuf.end(), did_loop);
+
+		if (did_loop) {
+			/* add necessary note offs */
+			_midi_state_tracker.resolve_notes (mbuf, end_frame-start_frame - 1);
+		}
+
 		process_output_buffers (bufs, start_frame, end_frame, nframes,
 				(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick);
+
 	}
 
 	_main_outs->flush (nframes);
@@ -469,6 +481,23 @@ MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_fram
 
 	return ret;
 }
+
+void 
+MidiTrack::handle_transport_stopped (bool abort, bool did_locate, bool flush_processors)
+{
+	/* turn off any notes that are on */
+
+	MidiBuffer buf (1024); // XXX is this a reasonable size ? 
+	
+	_midi_state_tracker.resolve_notes (buf, 0); // time is zero because notes are immediate
+
+	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+		write_immediate_event ((*i).size(), (*i).buffer());
+	}
+
+	Route::handle_transport_stopped (abort, did_locate, flush_processors);
+}
+	
 
 void
 MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)

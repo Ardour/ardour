@@ -27,59 +27,55 @@ using namespace ARDOUR;
 
 MidiStateTracker::MidiStateTracker ()
 {
-	_active_notes.reset();
+	reset ();
 }
 
 void
 MidiStateTracker::reset ()
 {
-	_active_notes.reset ();
+	memset (_active_notes, 0, sizeof (_active_notes));
 }
 
 void
 MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent<MidiBuffer::TimeType>& event)
 {
 	if (event.is_note_on()) {
-		_active_notes [event.note() + 128 * event.channel()] = true;
+		_active_notes [event.note() + 128 * event.channel()]++;
 	} else if (event.is_note_off()){
-		_active_notes [event.note() + 128 * event.channel()] = false;
+		if (_active_notes[event.note() + 128 * event.channel()]) {
+			_active_notes [event.note() + 128 * event.channel()]--;
+		}
 	}
 }
 
-bool
-MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::iterator &to)
+void
+MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::iterator &to, bool& looped)
 {
-	bool ret = false;
+	looped = false;
 
 	for (MidiBuffer::iterator i = from; i != to; ++i) {
 		const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 		if (ev.event_type() == LoopEventType) {
-			ret = true;
+			looped = true;
 			continue;
 		}
 
 		track_note_onoffs (ev);
 	}
-	return ret;
 }
 
 void
 MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes_t time)
 {
-	// Dunno if this is actually faster but at least it fills our cacheline.
-	if (_active_notes.none ())
-		return;
-
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
-			if (_active_notes[channel * 128 + note]) {
+			while (_active_notes[channel * 128 + note]) {
 				uint8_t buffer[3] = { MIDI_CMD_NOTE_OFF | channel, note, 0 };
 				Evoral::MIDIEvent<MidiBuffer::TimeType> noteoff
-						(time, MIDI_CMD_NOTE_OFF, 3, buffer, false);
-
+					(time, MIDI_CMD_NOTE_OFF, 3, buffer, false);
+				
 				dst.push_back (noteoff);	
-
-				_active_notes [channel * 128 + note] = false;
+				_active_notes[channel * 128 + note]--;
 			}
 		}
 	}
@@ -92,7 +88,8 @@ MidiStateTracker::dump (ostream& o)
 	for (int c = 0; c < 16; ++c) {
 		for (int x = 0; x < 128; ++x) {
 			if (_active_notes[c * 128 + x]) {
-				o << "Channel " << c+1 << " Note " << x << " is on\n";
+				o << "Channel " << c+1 << " Note " << x << " is on ("
+				  << (int) _active_notes[c*128+x] <<  "times)\n";
 			}
 		}
 	}

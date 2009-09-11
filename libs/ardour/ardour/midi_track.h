@@ -22,6 +22,7 @@
 
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR
 {
@@ -41,6 +42,8 @@ public:
 	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		  int declick, bool can_record, bool rec_monitors_input);
 	
+	void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
+
 	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
 
 	int use_diskstream (string name);
@@ -95,6 +98,8 @@ private:
 	void use_new_diskstream ();
 	void set_state_part_two ();
 	void set_state_part_three ();
+
+	MidiStateTracker _midi_state_tracker;
 
 	MidiRingBuffer<nframes_t> _immediate_events;
 	MidiRingBuffer<nframes_t> _step_edit_ring_buffer;

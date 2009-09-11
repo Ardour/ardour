@@ -585,6 +585,7 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 	_model = model;
 	content_connection.disconnect ();
 	content_connection = _model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
+	clear_events ();
 
 	if (_enable_display) {
 		redisplay_model();
