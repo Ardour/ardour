@@ -12,58 +12,54 @@
 (gtk_accel_path "<Actions>/Editor/cycle-edit-point" "grave")
 (gtk_accel_path "<Actions>/Editor/cycle-edit-point-with-marker" "<%PRIMARY%>asciicircum")
 
-(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary" "period")
-(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-sync" "<%PRIMARY%>period")
-
-(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary" "comma")
-(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-sync" "<%PRIMARY%>comma")
-
 (gtk_accel_path "<Actions>/Editor/extend-range-to-end-of-region" "rightanglebracket")
 (gtk_accel_path "<Actions>/Editor/extend-range-to-start-of-region" "leftanglebracket")
 
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
+(gtk_accel_path "<Actions>/Editor/play-edit-range" "<%SECONDARY%>space")
+(gtk_accel_path "<Actions>/Editor/play-from-edit-point-and-return" "<%PRIMARY%><%TERTIARY%>space")
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>space")
 (gtk_accel_path "<Actions>/Transport/record-roll" "<%TERTIARY%>space")
-
 (gtk_accel_path "<Actions>/Editor/set-fade-in-length" "slash")
-(gtk_accel_path "<Actions>/Editor/set-fade-out-length" "backslash")
-
+(gtk_accel_path "<Actions>/Editor/set-fade-out-length" "<%PRIMARY%>slash")
+(gtk_accel_path "<Actions>/Editor/toggle-fade-out-active" "backslash")
+(gtk_accel_path "<Actions>/Editor/toggle-fade-out-active" "<%PRIMARY%>backslash")
 (gtk_accel_path "<Actions>/Editor/trim-from-start" "<%TERTIARY%>braceleft")
 (gtk_accel_path "<Actions>/Editor/trim-to-end" "<%TERTIARY%>braceright")
-
 (gtk_accel_path "<Actions>/Editor/set-loop-from-edit-range" "bracketright")
 (gtk_accel_path "<Actions>/Editor/set-loop-from-region" "<%SECONDARY%>bracketright")
-
 (gtk_accel_path "<Actions>/Editor/set-punch-from-edit-range" "bracketleft")
 (gtk_accel_path "<Actions>/Editor/set-punch-from-region" "<%SECONDARY%>bracketleft")
-
 (gtk_accel_path "<Actions>/Editor/boost-region-gain" "asciicircum")
 (gtk_accel_path "<Actions>/Editor/cut-region-gain" "ampersand")
-
-;; letters
-
-;; TOP ROW
-
 (gtk_accel_path "<Actions>/Common/Quit" "<%PRIMARY%>q")
 
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
 (gtk_accel_path "<Actions>/Editor/set-edit-point" "e")
 (gtk_accel_path "<Actions>/Editor/select-all-before-edit-cursor" "<%PRIMARY%>e")
+(gtk_accel_path "<Actions>/Editor/export-region" "<%SECONDARY%><%TERTIARY%>e")
+(gtk_accel_path "<Actions>/Main/ExportSession" "<%PRIMARY%><%SECONDARY%>e")
+(gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<%PRIMARY%><%TERTIARY%>e")
 (gtk_accel_path "<Actions>/Editor/show-editor-mixer" "<%TERTIARY%>e")
 (gtk_accel_path "<Actions>/Common/goto-editor" "<%WINDOW%>e")
-(gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<%TERTIARY%><%PRIMARY%>e")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-range" "r")
 (gtk_accel_path "<Actions>/Editor/redo" "<%PRIMARY%>r")
+(gtk_accel_path "<Actions>/Editor/reverse-region" "<%SECONDARY%>r")
 (gtk_accel_path "<Actions>/Transport/Record" "<%TERTIARY%>r")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-timefx" "t")
+(gtk_accel_path "<Actions>/Editor/pitch-shift-region" "<%SECONDARY%>t")
 (gtk_accel_path "<Actions>/Editor/insert-time" "<%PRIMARY%>t")
-(gtk_accel_path "<Actions>/Editor/select-all-between-cursors" "u")
+(gtk_accel_path "<Actions>/Editor/select-all-between-cursors" "<%PRIMARY%>u")
+(gtk_accel_path "<Actions>/Editor/select-all-within-cursors" "u")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/invert-selection" "<%TERTIARY%>i")
-(gtk_accel_path "<Actions>/Editor/addExistingAudioFiles" "<%SECONDARY%>i")
+(gtk_accel_path "<Actions>/Editor/addExistingAudioFiles" "<%PRIMARY%>i")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-object" "o")
+(gtk_accel_path "<Actions>/Main/Open" "<%PRIMARY%>o")
+(gtk_accel_path "<Actions>/Main/Recent" "<%PRIMARY%><%TERTIARY%>o")
 (gtk_accel_path "<Actions>/Common/ToggleOptionsEditor" "<%WINDOW%>o")
+(gtk_accel_path "<Actions>/Editor/naturalize-region" "<%PRIMARY%><%SECONDARY%>o")
 (gtk_accel_path "<Actions>/Editor/set-playhead" "p")
 (gtk_accel_path "<Actions>/Editor/select-all-before-playhead" "<%PRIMARY%>p")
 (gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<%TERTIARY%><%PRIMARY%>p")
@@ -74,10 +70,13 @@
 (gtk_accel_path "<Actions>/Editor/select-all" "<%PRIMARY%>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<%SECONDARY%>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-sync" "<%TERTIARY%>a")
-(gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<%LEVEL4%>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-start" "<%PRIMARY%><%SECONDARY%>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<%SECONDARY%><%TERTIARY%>a")
 (gtk_accel_path "<Actions>/Editor/split-region" "s")
 (gtk_accel_path "<Actions>/Common/Save" "<%PRIMARY%>s")
+(gtk_accel_path "<Actions>/Main/Snapshot" "<%PRIMARY%><%TERTIARY%>s")
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
+(gtk_accel_path "<Actions>/Editor/multi-duplicate-region" "<%TERTIARY%>d")
 (gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<%PRIMARY%>d")
 (gtk_accel_path "<Actions>/Editor/fit-tracks" "f")
 (gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "<%PRIMARY%>f")
@@ -90,9 +89,6 @@
 (gtk_accel_path "<Actions>/Transport/Loop" "l")
 (gtk_accel_path "<Actions>/Editor/select-all-in-loop-range" "<%PRIMARY%>l")
 (gtk_accel_path "<Actions>/Common/ToggleLocations" "<%WINDOW%>l")
-
-;; HOME ROW
-
 (gtk_accel_path "<Actions>/Editor/zoom-to-region" "<%PRIMARY%><%SECONDARY%>z")
 (gtk_accel_path "<Actions>/Editor/zoom-to-region-both-axes" "<%SECONDARY%>z")
 (gtk_accel_path "<Actions>/Editor/undo" "<%PRIMARY%>z")
@@ -104,13 +100,14 @@
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "v")
 (gtk_accel_path "<Actions>/Editor/editor-paste" "<%PRIMARY%>v")
 (gtk_accel_path "<Actions>/Editor/brush-at-mouse" "<%PRIMARY%>b")
+(gtk_accel_path "<Actions>/Editor/track-record-enable-toggle" "<%SECONDARY%>b")
 (gtk_accel_path "<Actions>/Common/ToggleBigClock" "<%WINDOW%>b")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
-(gtk_accel_path "<Actions>/Editor/mute-unmute-region" "m")
+(gtk_accel_path "<Actions>/Main/AddTrackBus" "<%PRIMARY%><%TERTIARY%>n")
+(gtk_accel_path "<Actions>/Main/New" "<%PRIMARY%>n")
+(gtk_accel_path "<Actions>/Editor/toggle-internal-edit" "<%PRIMARY%>m")
+(gtk_accel_path "<Actions>/Editor/mute-unmute-region" "<%PRIMARY%>m")
 (gtk_accel_path "<Actions>/Common/toggle-editor-mixer-on-top" "<%WINDOW%>m")
-
-;; arrow keys, navigation etc.
-
 (gtk_accel_path "<Actions>/Editor/step-tracks-up" "uparrow")
 (gtk_accel_path "<Actions>/Transport/TransitionToRoll" "<%TERTIARY%>uparrow")
 (gtk_accel_path "<Actions>/Editor/select-prev-route" "<%SECONDARY%>uparrow")
@@ -122,19 +119,21 @@
 (gtk_accel_path "<Actions>/Editor/move-selected-tracks-down" "<%PRIMARY%>downarrow")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary" "leftarrow")
-(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary-noselection" "<%LEVEL4%>leftarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary-noselection" "<%SECONDARY%><%TERTIARY%>leftarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-sync" "<%PRIMARY%><%SECONDARY%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/tab-to-transient-backwards" "<%PRIMARY%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/nudge-playhead-backward" "<%SECONDARY%>leftarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-backward-to-grid" "<%SECONDARY%><%TERTIARY%>leftarrow")
 (gtk_accel_path "<Actions>/Transport/Rewind" "<%TERTIARY%>leftarrow")
 (gtk_accel_path "<Actions>/Editor/selected-marker-to-previous-region-boundary" "<%PRIMARY%><%TERTIARY%>leftarrow")
-
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary" "rightarrow")
-(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary-noselection" "<%LEVEL4%>rightarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary-noselection" "<%SECONDARY%><%TERTIARY%>rightarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-to-next-region-sync" "<%PRIMARY%><%SECONDARY%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/tab-to-transient-forwards" "<%PRIMARY%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/nudge-playhead-forward" "<%SECONDARY%>rightarrow")
+(gtk_accel_path "<Actions>/Editor/playhead-forward-to-grid" "<%SECONDARY%><%TERTIARY%>rightarrow")
 (gtk_accel_path "<Actions>/Transport/Forward" "<%TERTIARY%>rightarrow")
 (gtk_accel_path "<Actions>/Editor/selected-marker-to-next-region-boundary" "<%PRIMARY%><%TERTIARY%>rightarrow")
-
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-down" "Page_Down")
 (gtk_accel_path "<Actions>/Editor/scroll-tracks-up" "Page_Up")
 (gtk_accel_path "<Actions>/Transport/GotoStart" "Home")
@@ -149,18 +148,13 @@
 
 (gtk_accel_path "<Actions>/Editor/nudge-backward" "KP_Subtract")
 (gtk_accel_path "<Actions>/Editor/nudge-next-backward" "<%PRIMARY%>KP_Subtract")
-
 (gtk_accel_path "<Actions>/Editor/jump-forward-to-mark" "<%PRIMARY%>KP_Right")
 (gtk_accel_path "<Actions>/Editor/jump-backward-to-mark" "<%PRIMARY%>KP_Left")
-
 (gtk_accel_path "<Actions>/Editor/nudge-forward" "KP_Add")
 (gtk_accel_path "<Actions>/Editor/nudge-next-forward" "<%PRIMARY%>KP_Add")
-
 (gtk_accel_path "<Actions>/Editor/start-range" "<%PRIMARY%>KP_Down")
-
 (gtk_accel_path "<Actions>/Editor/finish-range" "<%PRIMARY%>KP_Up")
 (gtk_accel_path "<Actions>/Editor/finish-add-range" "<%TERTIARY%><%PRIMARY%>KP_Up")
-
 (gtk_accel_path "<Actions>/Editor/add-location-from-playhead" "KP_Enter")
 (gtk_accel_path "<Actions>/Transport/focus-on-clock" "KP_Divide")
 
@@ -181,7 +175,7 @@
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
 (gtk_accel_path "<Actions>/Editor/crop" "F3")
 (gtk_accel_path "<Actions>/Editor/separate" "F4")
-(gtk_accel_path "<Actions>/Editor/pitch-shift-region" "F5")
+(gtk_accel_path "<Actions>/Editor/pitch-<%TERTIARY%>-region" "F5")
 (gtk_accel_path "<Actions>/Editor/select-range-between-cursors" "F6")
 (gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
 
@@ -217,7 +211,7 @@
 (gtk_accel_path "<Actions>/Editor/toggle-edit-mode" "1")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-mode" "2")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-choice" "3")
-(gtk_accel_path "<Actions>/Editor/step-mouse-mode" "4")
+(gtk_accel_path "<Actions>/Transport/ToggleAutoPlay" "4")
 (gtk_accel_path "<Actions>/Transport/ToggleAutoReturn" "5")
 (gtk_accel_path "<Actions>/Transport/ToggleClick" "6")
 (gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "9")

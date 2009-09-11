@@ -18,6 +18,7 @@
            <menu name='Export' action='Export'>
                <menuitem action='ExportSession'/>
                <menuitem action='ExportSelection'/>
+               <menuitem action='export-region'/>
                <menuitem action='ExportRangeMarkers'/>
            </menu>
            <separator/>
@@ -209,7 +210,6 @@
 			   <menuitem action='toggle-edit-mode'/>
 			   <separator/>
 			   <menu name='MouseMode' action='MouseMode'>
-			   <menuitem action='step-mouse-mode'/>
 			   <menuitem action='set-mouse-mode-object'/>
 			   <menuitem action='set-mouse-mode-range'/>
 			   <menuitem action='set-mouse-mode-gain'/>

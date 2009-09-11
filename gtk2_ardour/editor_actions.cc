@@ -497,7 +497,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "lower-region", _("Lower Region"), mem_fun(*this, &Editor::lower_region));
         ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "export-region", _("Export Region"), mem_fun(*this, &Editor::export_region));
+	act = ActionManager::register_action (editor_actions, "export-region", _("Export selected regions to audiofile..."), mem_fun(*this, &Editor::export_region));
         ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "lock-region", _("Lock Region"), mem_fun(*this, &Editor::toggle_region_lock));

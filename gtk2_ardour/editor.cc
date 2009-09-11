@@ -345,7 +345,6 @@ Editor::Editor ()
 	_dragging_edit_point = false;
 	_dragging_hscrollbar = false;
 	select_new_marker = false;
-	zoomed_to_region = false;
 	rhythm_ferret = 0;
 	allow_vertical_scroll = false;
 	no_save_visual = false;
@@ -4359,7 +4358,6 @@ Editor::current_visual_state (bool with_tracks)
 	vs->frames_per_unit = frames_per_unit;
 	vs->leftmost_frame = leftmost_frame;
 	vs->zoom_focus = zoom_focus;
-	vs->zoomed_to_region = zoomed_to_region;
 
 	if (with_tracks) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -4416,7 +4414,6 @@ Editor::use_visual_state (VisualState& vs)
 
 	set_zoom_focus (vs.zoom_focus);
 	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
-	zoomed_to_region = vs.zoomed_to_region;
 	
 	for (list<TAVState>::iterator i = vs.track_states.begin(); i != vs.track_states.end(); ++i) {
 		TrackViewList::iterator t;

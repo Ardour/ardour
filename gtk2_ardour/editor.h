@@ -430,7 +430,6 @@ class Editor : public PublicEditor
 	    double              frames_per_unit;
 	    nframes64_t         leftmost_frame;
 	    Editing::ZoomFocus  zoom_focus;
-	    bool                zoomed_to_region;
 	    std::list<TAVState> track_states;
 	};
 	
@@ -1150,7 +1149,6 @@ class Editor : public PublicEditor
 	void temporal_zoom_selection ();
 	void temporal_zoom_region (bool both_axes);
 	void toggle_zoom_region (bool both_axes);
-	bool zoomed_to_region;
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
 	void temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string & op);

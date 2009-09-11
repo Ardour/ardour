@@ -832,8 +832,6 @@ Editor::region_selection_changed ()
 	}
 	
 	sensitize_the_right_region_actions (!selection->regions.empty());
-
-	zoomed_to_region = false;
 }
 
 void

@@ -143,11 +143,11 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("ExportSession"), _("Export session to audiofile..."),  mem_fun (*editor, &PublicEditor::export_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportSelection"), _("Export selection to audiofile..."),  mem_fun (*editor, &PublicEditor::export_selection));
+	act = ActionManager::register_action (main_actions, X_("ExportSelection"), _("Export selected range to audiofile..."),  mem_fun (*editor, &PublicEditor::export_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportRangeMarkers"), _("Export range markers to audiofile..."),  mem_fun (*editor, &PublicEditor::export_range_markers));
+	act = ActionManager::register_action (main_actions, X_("ExportRangeMarkers"), _("Export range markers to multiple audiofiles..."),  mem_fun (*editor, &PublicEditor::export_range_markers));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::range_sensitive_actions.push_back (act);
 
