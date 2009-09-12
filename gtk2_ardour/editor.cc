@@ -470,8 +470,6 @@ Editor::Editor ()
 	edit_hscrollbar.set_name ("EditorHScrollbar");
 
 	build_cursors ();
-	setup_toolbar ();
-	setup_midi_toolbar ();
 
  	edit_point_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_point_clock_changed));
 	
@@ -604,6 +602,9 @@ Editor::Editor ()
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 	
 	register_actions ();
+
+	setup_toolbar ();
+	setup_midi_toolbar ();
 
 	snap_type = SnapToBeat;
 	set_snap_to (snap_type);
@@ -2995,8 +2996,10 @@ Editor::setup_toolbar ()
 }
 
 void
-Editor::midi_panic_button_pressed ()
+Editor::midi_panic ()
 {
+	cerr << "MIDI panic\n";
+
 	if (session) {
 		session->midi_panic();
 	}
@@ -3005,26 +3008,8 @@ Editor::midi_panic_button_pressed ()
 void
 Editor::setup_midi_toolbar ()
 {
-#if 0
-	midi_tool_pencil_button.add (*(manage (new Image (::get_icon("midi_tool_pencil")))));
-	midi_tool_pencil_button.set_relief(Gtk::RELIEF_NONE);
-	midi_tool_buttons.push_back (&midi_tool_pencil_button);
-	midi_tool_select_button.add (*(manage (new Image (::get_icon("midi_tool_select")))));
-	midi_tool_select_button.set_relief(Gtk::RELIEF_NONE);
-	midi_tool_buttons.push_back (&midi_tool_select_button);
-	midi_tool_resize_button.add (*(manage (new Image (::get_icon("strip_width")))));
-	midi_tool_resize_button.set_relief(Gtk::RELIEF_NONE);
-	midi_tool_buttons.push_back (&midi_tool_resize_button);
-	midi_tool_erase_button.add (*(manage (new Image (::get_icon("midi_tool_erase")))));
-	midi_tool_erase_button.set_relief(Gtk::RELIEF_NONE);
-	midi_tool_buttons.push_back (&midi_tool_erase_button);
+	RefPtr<Action> act;
 
-	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_pencil_button, _("Add/Move/Stretch Notes"));
-	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_select_button, _("Select/Move Notes"));
-	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_resize_button, _("Resize Notes"));
-	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_erase_button,  _("Erase Notes"));
-#endif
-	
 	/* Midi sound notes */
 	midi_sound_notes.add (*(manage (new Image (::get_icon("midi_sound_notes")))));
 	midi_sound_notes.set_relief(Gtk::RELIEF_NONE);
@@ -3033,8 +3018,9 @@ Editor::setup_midi_toolbar ()
 	
 	/* Panic */
 	
+	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	midi_panic_button.set_name("MidiPanicButton");
-	midi_panic_button.signal_pressed().connect (mem_fun(this, &Editor::midi_panic_button_pressed));
+	act->connect_proxy (midi_panic_button);
 
 	panic_box.pack_start (midi_sound_notes , true, true);
 	panic_box.pack_start (midi_panic_button, true, true);

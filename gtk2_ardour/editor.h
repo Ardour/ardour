@@ -1598,7 +1598,7 @@ public:
 	Gtk::HBox                panic_box;
 	Gtk::Button              midi_panic_button;
 	Gtk::ToggleButton        midi_sound_notes;
-	void                     midi_panic_button_pressed ();
+	void                     midi_panic ();
 	bool                     sound_notes () const { return midi_sound_notes.get_active(); }
 	
 	void setup_midi_toolbar ();

@@ -84,6 +84,8 @@ This mode provides many different operations on both regions and control points,
 %mopsolo Mouse Ops on Solo Buttons only
 %mopsfader Mouse Ops on Faders \& Plugin Controls
 
+%midi MIDI specific commands
+
 ;; END GROUP DEFINITIONS
 
 ;; punctuation
@@ -154,6 +156,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Editor/naturalize-region|<@LEVEL4@>o|move to original position
 @trans|Editor/set-playhead|p|toggle auto-punch status
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
+@midi|MIDI/panic|<@SECONDARY@>p|MIDI panic (stop all notes etc)
 @select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
 
 ;; MIDDLE ROW
