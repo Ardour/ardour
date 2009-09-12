@@ -1499,16 +1499,25 @@ void
 MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
-
-		Selection::iterator tmp = i;
-		++tmp;
-
 		if ((*i) != ev) {
-			remove_from_selection (*i);
-		} 
 
-		i = tmp;
+			Selection::iterator tmp = i;
+			++tmp;
+
+			(*i)->selected (false);
+			_selection.erase (i);
+
+			i = tmp;
+
+		} else {
+			++i;
+		}
 	}
+
+	/* don't bother with removing this regionview from the editor selection,
+	   since we're about to add another note, and thus put/keep this
+	   regionview in the editor selection.
+	*/
 
 	if (!ev->selected()) {
 		add_to_selection (ev);

@@ -3392,7 +3392,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);	
 
 	if (!(was_selected = cnote->selected())) {
-		
+
 		/* tertiary-click means extend selection - we'll do that on button release,
 		   so don't add it here, because otherwise we make it hard to figure
 		   out the "extend-to" range.
@@ -3401,7 +3401,13 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
 
 		if (!extend) {
-			region->note_selected (cnote, true);
+			bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+
+			if (add) {
+				region->note_selected (cnote, true);
+			} else {
+				region->unique_select (cnote);
+			}
 		}
 	}
 }
