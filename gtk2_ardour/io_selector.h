@@ -85,6 +85,7 @@ class IOSelectorWindow : public Gtk::Window
 	IOSelector _selector;
 	
 	void io_name_changed (void *src);
+	bool wm_delete (GdkEventAny*);
 };
 
 
@@ -122,6 +123,8 @@ class PortInsertWindow : public ArdourDialog
 
 	void plugin_going_away ();
 	sigc::connection going_away_connection;
+
+	bool wm_delete (GdkEventAny*);
 };
 
 

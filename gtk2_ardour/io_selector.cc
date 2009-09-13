@@ -165,8 +165,17 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<
 
 	show_all ();
 
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
+	signal_delete_event().connect (mem_fun (*this, &IOSelectorWindow::wm_delete));
 }
+
+bool
+IOSelectorWindow::wm_delete (GdkEventAny* /*event*/)
+{
+	_selector.Finished (IOSelector::Accepted);
+	hide ();
+	return true;
+}
+
 
 void
 IOSelectorWindow::on_map ()
@@ -256,9 +265,16 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARD
 	ok_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::accept));
 	cancel_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::cancel));
 
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
-
+	signal_delete_event().connect (mem_fun (*this, &PortInsertWindow::wm_delete), false);
+	
 	going_away_connection = pi->GoingAway.connect (mem_fun (*this, &PortInsertWindow::plugin_going_away));
+}
+
+bool
+PortInsertWindow::wm_delete (GdkEventAny* /*event*/)
+{
+	accept ();
+	return true;
 }
 
 void

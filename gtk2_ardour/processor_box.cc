@@ -672,17 +672,25 @@ ProcessorBox::choose_send ()
 		return;
 	}
 
-	/* let the user adjust the IO setup before creation */
+	/* let the user adjust the IO setup before creation. 
+
+	   Note: this dialog is NOT modal - we just leave it to run and it will
+	   return when its Finished signal is emitted - typically when the window
+	   is closed.
+	 */
+
 	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->output(), true);
 	ios->show_all ();
 
 	/* keep a reference to the send so it doesn't get deleted while
-	   the IOSelectorWindow is doing its stuff */
+	   the IOSelectorWindow is doing its stuff 
+	*/
 	_processor_being_created = send;
 
 	ios->selector().Finished.connect (bind (
 			mem_fun(*this, &ProcessorBox::send_io_finished),
 			boost::weak_ptr<Processor>(send), ios));
+
 }
 
 void
