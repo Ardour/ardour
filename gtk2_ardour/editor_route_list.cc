@@ -132,7 +132,7 @@ Editor::remove_route (TimeAxisView *tv)
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 	boost::shared_ptr<Route> route;
-	TimeAxisView* next_tv;
+	TimeAxisView* next_tv = 0;
 
 	if (tv == entered_track) {
 		entered_track = 0;

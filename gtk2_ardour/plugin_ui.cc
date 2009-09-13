@@ -299,7 +299,7 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 bool
 PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
-	relay_key_press (event, this);
+	return relay_key_press (event, this);
 }
 
 bool
