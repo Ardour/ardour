@@ -4375,10 +4375,11 @@ Editor::undo_visual_state ()
 		return;
 	}
 
+	redo_visual_stack.push_back (current_visual_state());
+
 	VisualState* vs = undo_visual_stack.back();
 	undo_visual_stack.pop_back();
 	use_visual_state (*vs);
-	redo_visual_stack.push_back (vs);
 }
 
 void
@@ -4388,10 +4389,11 @@ Editor::redo_visual_state ()
 		return;
 	}
 
+	undo_visual_stack.push_back (current_visual_state());
+
 	VisualState* vs = redo_visual_stack.back();
 	redo_visual_stack.pop_back();
 	use_visual_state (*vs);
-	undo_visual_stack.push_back (vs);
 }
 
 void
@@ -4401,6 +4403,7 @@ Editor::swap_visual_state ()
 		redo_visual_state ();
 	} else {
 		undo_visual_state ();
+		undo_visual_stack.clear();  //swap_visual_state truncates the undo stack so we are just bouncing between 2 states
 	}
 }
 
