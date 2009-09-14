@@ -456,6 +456,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 
 		if (did_loop) {
 			/* add necessary note offs */
+			cerr << "DID LOOP, RESOLVE NOTES\n";
 			_midi_state_tracker.resolve_notes (mbuf, end_frame-start_frame - 1);
 		}
 

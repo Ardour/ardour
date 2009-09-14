@@ -38,11 +38,11 @@ public:
 	const Note<Time>& operator=(const Note<Time>& copy);
 
 	inline bool operator==(const Note<Time>& other) {
-		return time() == other.time() && 
-	         note() == other.note() && 
-	         length() == other.length() &&
-	         velocity() == other.velocity() &&
-	         channel()  == other.channel();
+		return musical_time_equal (time(), other.time()) && 
+			note() == other.note() && 
+			musical_time_equal (length(), other.length()) && 
+			velocity() == other.velocity() &&
+			channel()  == other.channel();
 	}
 
 	inline Time        time()     const { return _on_event.time(); }

@@ -256,7 +256,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 	
 	const double delta_time_beats   = ev.time() - _last_ev_time_beats;
 	const uint32_t delta_time_ticks = (uint32_t)lrint(delta_time_beats * (double)ppqn());
-
+	
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer());
 	_last_ev_time_beats = ev.time();
 
@@ -396,7 +396,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 	while ((ret = read_event(&delta_t, &size, &buf)) >= 0) {
 		time += delta_t;
 		ev.set(buf, size, time / (double)ppqn());
-		
+
 		if (ret > 0) { // didn't skip (meta) event
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 			_model->append(ev);

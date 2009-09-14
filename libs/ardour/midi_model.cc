@@ -30,6 +30,7 @@
 
 #include "ardour/midi_model.h"
 #include "ardour/midi_source.h"
+#include "ardour/smf_source.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
 
@@ -458,45 +459,63 @@ MidiModel::DiffCommand::marshal_change(const NotePropertyChange& change)
 
 	{
 		ostringstream old_value_str (ios::ate);
-		old_value_str << (unsigned int) change.old_value;
+		if (change.property == StartTime || change.property == Length) {
+			old_value_str << change.old_time;
+		} else {
+			old_value_str << (unsigned int) change.old_value;
+		}
 		xml_change->add_property ("old", old_value_str.str());
 	}
 
 	{
 		ostringstream new_value_str (ios::ate);
-		new_value_str << (unsigned int) change.old_value;
+		if (change.property == StartTime || change.property == Length) {
+			new_value_str << change.new_time;
+		} else {
+			new_value_str << (unsigned int) change.new_value;
+		}
 		xml_change->add_property ("new", new_value_str.str());
 	}
 
 	/* now the rest of the note */
+
+	const SMFSource* smf = dynamic_cast<const SMFSource*> (_model->midi_source());
 	
 	if (change.property != NoteNumber) {
-		ostringstream note_str(ios::ate);
+		ostringstream note_str;
 		note_str << int(change.note->note());
 		xml_change->add_property("note", note_str.str());
 	}
 	
 	if (change.property != Channel) {
-		ostringstream channel_str(ios::ate);
+		ostringstream channel_str;
 		channel_str << int(change.note->channel());
 		xml_change->add_property("channel", channel_str.str());
 	}
 
 	if (change.property != StartTime) {
-		ostringstream time_str(ios::ate);
-		time_str << int(change.note->time());
+		ostringstream time_str;
+		if (smf) {
+			time_str << smf->round_to_file_precision (change.note->time());
+		} else {
+			time_str << change.note->time();
+		}
 		xml_change->add_property("time", time_str.str());
 	}
 
 	if (change.property != Length) {
-		ostringstream length_str(ios::ate);
-		length_str <<(unsigned int) change.note->length();
-		xml_change->add_property("length", length_str.str());
+		ostringstream length_str;
+		if (smf) {
+			length_str << smf->round_to_file_precision (change.note->length());
+		} else {
+			length_str << change.note->length();
+		}
+		xml_change->add_property ("length", length_str.str());
 	}
 
 	if (change.property != Velocity) {
-		ostringstream velocity_str(ios::ate);
-		velocity_str << (unsigned int) change.note->velocity();
+		ostringstream velocity_str;
+		velocity_str << int (change.note->velocity());
 		xml_change->add_property("velocity", velocity_str.str());
 	}
 
@@ -510,9 +529,9 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 	NotePropertyChange change;
 	unsigned int note;
 	unsigned int channel;
-	unsigned int time;
-	unsigned int length;
 	unsigned int velocity;
+	Evoral::MusicalTime time;
+	Evoral::MusicalTime length;
 
 	if ((prop = xml_change->property("property")) != 0) {
 		change.property = (Property) string_2_enum (prop->value(), change.property);
@@ -523,7 +542,13 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 
 	if ((prop = xml_change->property ("old")) != 0) {
 		istringstream old_str (prop->value());
-		old_str >> change.old_value;
+		if (change.property == StartTime || change.property == Length) {
+			old_str >> change.old_time;
+		} else {
+			int integer_value_so_that_istream_does_the_right_thing;
+			old_str >> integer_value_so_that_istream_does_the_right_thing;
+			change.old_value = integer_value_so_that_istream_does_the_right_thing;
+		}
 	} else {
 		fatal << "!!!" << endmsg;
 		/*NOTREACHED*/
@@ -531,7 +556,13 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 
 	if ((prop = xml_change->property ("new")) != 0) {
 		istringstream new_str (prop->value());
-		new_str >> change.new_value;
+		if (change.property == StartTime || change.property == Length) {
+			new_str >> change.new_time;
+		} else {
+			int integer_value_so_that_istream_does_the_right_thing;
+			new_str >> integer_value_so_that_istream_does_the_right_thing;
+			change.new_value = integer_value_so_that_istream_does_the_right_thing;
+		}
 	} else {
 		fatal << "!!!" << endmsg;
 		/*NOTREACHED*/
@@ -570,7 +601,7 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 			time = 0;
 		}
 	} else {
-		time = change.new_value;
+		time = change.new_time;
 	}
 
 	if (change.property != Length) {
@@ -582,7 +613,7 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 			length = 1;
 		}
 	} else {
-		length = change.new_value;
+		length = change.new_time;
 	}
 
 	if (change.property != Velocity) {
@@ -600,13 +631,13 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 	/* we must point at the instance of the note that is actually in the model.
 	   so go look for it ...
 	*/
-
+	
 	boost::shared_ptr<Evoral::Note<TimeType> > new_note (new Evoral::Note<TimeType> (channel, time, length, note, velocity));
 
 	change.note = _model->find_note (new_note);
 
 	if (!change.note) {
-		warning << "MIDI note not found in model - programmers should investigate this" << endmsg;
+		warning << "MIDI note " << *new_note << " not found in model - programmers should investigate this" << endmsg;
 		/* use the actual new note */
 		change.note = new_note;
 	}
@@ -627,7 +658,7 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command)
 
 	if (changed_notes) {
 		XMLNodeList notes = changed_notes->children();
-		
+
 		transform (notes.begin(), notes.end(), back_inserter(_changes),
 			   sigc::mem_fun(*this, &DiffCommand::unmarshal_change));
 	}
@@ -688,11 +719,15 @@ MidiModel::get_state()
 boost::shared_ptr<Evoral::Note<MidiModel::TimeType> >
 MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other) 
 {
-	Notes::iterator i = find (notes().begin(), notes().end(), other);
+	for (Notes::iterator x = notes().begin(); x != notes().end(); ++x) {
+		if (**x == *other) {
+			return *x;
+		}
 
-	if (i == notes().end()) {
-		return boost::shared_ptr<Evoral::Note<TimeType> > ();
+		/* XXX optimize by using a stored iterator and break out 
+		   when passed start time.
+		*/
 	}
-	
-	return *i;
+
+	return boost::shared_ptr<Evoral::Note<TimeType> > ();
 }

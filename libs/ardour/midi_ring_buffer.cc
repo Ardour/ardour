@@ -66,8 +66,8 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
 		if (ev_type == LoopEventType) {
 			/*ev_time -= start;
-			ev_time += offset;
-			cerr << "MRB loop boundary @ " << ev_time << endl;*/
+			  ev_time += offset;*/
+			cerr << "MRB loop boundary @ " << ev_time << endl;
 
 			// Return without reading data or writing to buffer (loop events have no data)
 			// FIXME: This is not correct, loses events after the loop this cycle

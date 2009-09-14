@@ -19,6 +19,7 @@
 
 #define __STDC_LIMIT_MACROS 1
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <stdint.h>
 #include "libsmf/smf.h"
@@ -260,6 +261,14 @@ SMF::end_write() THROW_FILE_ERROR
 {
 	if (smf_save(_smf, _file_path.c_str()) != 0)
 		throw FileError();
+}
+
+double
+SMF::round_to_file_precision (double val) const
+{
+	double div = ppqn();
+
+	return round (val * div) / div;
 }
 
 

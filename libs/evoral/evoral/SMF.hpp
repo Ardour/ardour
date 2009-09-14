@@ -64,6 +64,8 @@ public:
 	
 	void flush() {};
 
+        double round_to_file_precision (double val) const;
+
 private:
 	std::string  _file_path;
 	smf_t*       _smf;
