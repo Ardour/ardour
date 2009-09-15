@@ -51,11 +51,11 @@ def build(bld):
 		fd_midiport.cc
 		fifomidi.cc
 		midi.cc
-		midichannel.cc
-		midifactory.cc
-		midimanager.cc
-		midiparser.cc
-		midiport.cc
+		channel.cc
+		factory.cc
+		manager.cc
+		parser.cc
+		port.cc
 		midnam_patch.cc
 		mmc.cc
 		mtc.cc
