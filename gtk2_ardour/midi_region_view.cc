@@ -1813,7 +1813,7 @@ MidiRegionView::frames_to_beats(nframes64_t frames) const
 }
 
 void
-MidiRegionView::begin_resizing(bool at_front)
+MidiRegionView::begin_resizing (bool /*at_front*/)
 {
 	_resize_data.clear();
 
@@ -2267,7 +2267,7 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 }
 
 void
-MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* ev)
+MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent*)
 {
 	PublicEditor& editor (trackview.editor());
 	editor.hide_verbose_canvas_cursor ();

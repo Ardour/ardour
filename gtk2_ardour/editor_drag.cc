@@ -1437,7 +1437,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 }
 
 void
-NoteResizeDrag::motion (GdkEvent* /*event*/, bool first_move)
+NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
@@ -1446,7 +1446,7 @@ NoteResizeDrag::motion (GdkEvent* /*event*/, bool first_move)
 } 
 
 void
-NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
+NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
@@ -3413,7 +3413,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 }
 
 void
-NoteDrag::motion (GdkEvent* ev, bool)
+NoteDrag::motion (GdkEvent*, bool)
 {
 	MidiStreamView* streamview = region->midi_stream_view();
 	double event_x;

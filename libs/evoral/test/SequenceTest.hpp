@@ -21,7 +21,7 @@ public:
 	
 	~DummyTypeMap() {}
 
-	bool type_is_midi(uint32_t type) const {return true;}
+	bool type_is_midi (uint32_t /*type*/) const {return true;}
 
 	uint8_t parameter_midi_type(const Parameter& param) const {
 		switch (param.type()) {
@@ -40,7 +40,7 @@ public:
 		};
 	}
 	
-	bool is_integer(const Evoral::Parameter& param) const {return true;}
+	bool is_integer (const Evoral::Parameter& /*param*/) const {return true;}
 
 	Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const {
 		Parameter p(type, channel, id);
@@ -48,7 +48,7 @@ public:
 		return p;
 	}
 
-	std::string to_symbol(const Parameter& param) const {return "control";}
+	std::string to_symbol(const Parameter& /*param*/) const {return "control";}
 };
 
 template<typename Time>
@@ -81,7 +81,7 @@ public:
 	}
 	
    	uint32_t assertLastEventTimeEarlier(
-   		Time time, EventType type, uint32_t size, const uint8_t* buf) {
+   		Time time, EventType /*type*/, uint32_t /*size*/, const uint8_t* /*buf*/) {
    		CPPUNIT_ASSERT(_last_event_time <= time);
 		return 0;
    	}
