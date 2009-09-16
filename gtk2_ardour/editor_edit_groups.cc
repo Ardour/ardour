@@ -52,6 +52,9 @@ Editor::build_edit_group_list_menu ()
 	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Editor::activate_all_edit_groups)));
 	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Editor::disable_all_edit_groups)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Editor::show_all_edit_groups)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Editor::hide_all_edit_groups)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Editor::new_edit_group)));
 	
 }
@@ -71,6 +74,24 @@ Editor::disable_all_edit_groups ()
         Gtk::TreeModel::Children children = group_model->children();
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 	        (*iter)[group_columns.is_active] = false;
+	}
+}
+
+void
+Editor::show_all_edit_groups ()
+{
+        Gtk::TreeModel::Children children = group_model->children();
+	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+	        (*iter)[group_columns.is_visible] = true;
+	}
+}
+
+void
+Editor::hide_all_edit_groups ()
+{
+        Gtk::TreeModel::Children children = group_model->children();
+	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+	        (*iter)[group_columns.is_visible] = false;
 	}
 }
 
@@ -257,15 +278,6 @@ Editor::edit_groups_changed ()
 	/* just rebuild the while thing */
 
 	group_model->clear ();
-
-	{
-		TreeModel::Row row;
-		row = *(group_model->append());
-		row[group_columns.is_active] = false;
-		row[group_columns.is_visible] = true;
-		row[group_columns.text] = (_("-all-"));
-		row[group_columns.routegroup] = 0;
-	}
 
 	session->foreach_edit_group (mem_fun (*this, &Editor::add_edit_group));
 }

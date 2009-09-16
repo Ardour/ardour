@@ -1819,6 +1819,8 @@ public:
 	void build_edit_group_list_menu ();
 	void activate_all_edit_groups ();
 	void disable_all_edit_groups ();
+	void show_all_edit_groups ();
+	void hide_all_edit_groups ();
 
 	bool in_edit_group_row_change;
 	void edit_group_row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);

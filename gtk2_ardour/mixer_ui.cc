@@ -987,6 +987,9 @@ Mixer_UI::build_mix_group_context_menu ()
 	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Mixer_UI::activate_all_mix_groups)));
 	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Mixer_UI::disable_all_mix_groups)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Mixer_UI::show_all_mix_groups)));
+	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Mixer_UI::hide_all_mix_groups)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Mixer_UI::new_mix_group)));
 	
 }
@@ -1068,12 +1071,32 @@ Mixer_UI::activate_all_mix_groups ()
 	}
 }
 
+
+
 void
 Mixer_UI::disable_all_mix_groups ()
 {
         Gtk::TreeModel::Children children = group_model->children();
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 	        (*iter)[group_columns.active] = false;
+	}
+}
+
+void
+Mixer_UI::show_all_mix_groups ()
+{
+       Gtk::TreeModel::Children children = group_model->children();
+	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+	        (*iter)[group_columns.visible] = true;
+	}
+}
+
+void
+Mixer_UI::hide_all_mix_groups ()
+{
+       Gtk::TreeModel::Children children = group_model->children();
+	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+	        (*iter)[group_columns.visible] = false;
 	}
 }
 
@@ -1085,15 +1108,6 @@ Mixer_UI::mix_groups_changed ()
 	/* just rebuild the while thing */
 
 	group_model->clear ();
-
-	{
-		TreeModel::Row row;
-		row = *(group_model->append());
-		row[group_columns.active] = false;
-		row[group_columns.visible] = true;
-		row[group_columns.text] = (_("-all-"));
-		row[group_columns.group] = 0;
-	}
 
 	session->foreach_mix_group (mem_fun (*this, &Mixer_UI::add_mix_group));
 }

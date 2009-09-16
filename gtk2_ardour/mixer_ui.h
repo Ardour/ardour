@@ -184,6 +184,8 @@ class Mixer_UI : public Gtk::Window
 	void build_mix_group_context_menu ();
 	void activate_all_mix_groups ();
 	void disable_all_mix_groups ();
+	void show_all_mix_groups ();
+	void hide_all_mix_groups ();
 	void add_mix_group (ARDOUR::RouteGroup *);
 	void mix_groups_changed ();
 	void mix_group_name_edit (const Glib::ustring&, const Glib::ustring&);
