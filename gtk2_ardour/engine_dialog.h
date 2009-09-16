@@ -24,6 +24,7 @@ class EngineControl : public Gtk::VBox {
 	int setup_engine ();
 	void discover_servers ();
 
+	bool interface_chosen () const { return _interface_chosen; }
 	bool was_used() const { return _used; }
 	XMLNode& get_state ();
 	void set_state (const XMLNode&);
@@ -77,6 +78,7 @@ class EngineControl : public Gtk::VBox {
 	Gtk::Notebook notebook;
 	
 	bool _used;
+	bool _interface_chosen;
 
 	void realtime_changed ();
 	void driver_changed ();

@@ -73,6 +73,7 @@ EngineControl::EngineControl ()
 	int row = 0;
 
 	_used = false;
+	_interface_chosen = false;
 
 	strings.push_back (_("8000Hz"));
 	strings.push_back (_("22050Hz"));
@@ -501,6 +502,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 			cmd.push_back ("-d");
 			cmd.push_back (device);
+			_interface_chosen = true;
 		} 
 
 		if (hw_meter_button.get_active()) {
@@ -1173,16 +1175,21 @@ EngineControl::set_state (const XMLNode& root)
 	clist = root.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-		if ( prop && (prop->value() == "FFADO" ))
-				continue;
+
+		if (prop && (prop->value() == "FFADO" )) {
+			continue;
+		}
+
 		child = *citer;
 
 		prop = child->property ("val");
 
 		if (!prop || prop->value().empty()) {
 
-			if ( using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" ))
+			if (using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" )) {
 				continue;
+			}
+
 			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
 			continue;
 		}
@@ -1282,6 +1289,9 @@ EngineControl::set_state (const XMLNode& root)
 			driver_combo.set_active_text(strval);
 		} else if (child->name() == "interface") {
 			interface_combo.set_active_text(strval);
+			if (!strval.empty()) {
+				_interface_chosen = true;
+			}
 		} else if (child->name() == "timeout") {
 			timeout_combo.set_active_text(strval);
 		} else if (child->name() == "dither") {

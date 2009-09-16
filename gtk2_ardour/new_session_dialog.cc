@@ -495,7 +495,12 @@ NewSessionDialog::set_have_engine (bool yn)
 	} else {
 		if (!(page_set & EnginePage)) {
 			engine_control.discover_servers ();
-			m_notebook->append_page (engine_control, _("Audio Setup"));
+			if (engine_control.interface_chosen()) {
+				m_notebook->append_page (engine_control, _("Audio Setup"));
+			} else {
+				/* no interface ever selected - make it the first page */
+				m_notebook->prepend_page (engine_control, _("Audio Setup"));
+			}
 			m_notebook->show_all_children();
 			page_set = Pages (page_set | EnginePage);
 		}
