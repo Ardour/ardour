@@ -91,7 +91,7 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string 
 					out_o++;
 					out_n++;
 				}
-				//				cerr << "HUH!? second region in the crossfade not found!" << endl;
+				// cerr << "HUH!? second region in the crossfade not found!" << endl;
 			}
 		}
 

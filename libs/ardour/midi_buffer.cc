@@ -93,7 +93,6 @@ MidiBuffer::read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offse
 		const Evoral::MIDIEvent<TimeType> ev(*i, false);
 		if (ev.time() >= src_offset && ev.time() < (nframes+src_offset)) {
 			push_back (ev);
-			cerr << "got note " << ev << endl;
 		}
 	}
 

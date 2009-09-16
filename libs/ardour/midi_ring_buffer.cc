@@ -43,17 +43,15 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 
 	size_t count = 0;
 
-	//cerr << "MRB read " << start << " .. " << end << " + " << offset << endl;
-
 	while (this->read_space() >= sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
 
 		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
-
+		
 		if (ev_time > end) {
-			//cerr << "MRB event @ " << ev_time << " past end @ " << end << endl;
+			// cerr << "MRB event @ " << ev_time << " past end @ " << end << endl;
 			break;
 		} else if (ev_time < start) {
-			//cerr << "MRB event @ " << ev_time << " before start @ " << start << endl;
+			// cerr << "MRB event @ " << ev_time << " before start @ " << start << endl;
 			break;
 		}
 
@@ -67,7 +65,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		if (ev_type == LoopEventType) {
 			/*ev_time -= start;
 			  ev_time += offset;*/
-			cerr << "MRB loop boundary @ " << ev_time << endl;
+			// cerr << "MRB loop boundary @ " << ev_time << endl;
 
 			// Return without reading data or writing to buffer (loop events have no data)
 			// FIXME: This is not correct, loses events after the loop this cycle
@@ -87,11 +85,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 				continue;
 			}
 		}
-
-		/*cerr << "MRB " << this << " - Reading event, time = "
-			<< ev_time << " - " << start << " => " << ev_time - start
-			<< ", size = " << ev_size << endl;*/
-
+		
 		assert(ev_time >= start);
 		ev_time -= start;
 		ev_time += offset;
@@ -126,6 +120,84 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 	
 	return count;
 }
+template<typename T>
+void
+MidiRingBuffer<T>::dump(ostream& str) 
+{
+	size_t rspace;
+
+	if ((rspace = this->read_space()) == 0) {
+		str << "MRB::dump: empty\n";
+		return;
+	}
+
+	T                 ev_time;
+	Evoral::EventType ev_type;
+	uint32_t          ev_size;
+	size_t read_ptr = g_atomic_int_get (&this->_read_ptr);
+
+	str << "Dump @ " << read_ptr << endl;
+	
+	while (1) {
+		uint8_t* wp;
+		uint8_t* data;
+		size_t write_ptr;
+
+#define space(r,w) ((w > r) ? (w - r) : ((w - r + this->_size) % this->_size))
+		
+		write_ptr  = g_atomic_int_get (&this->_write_ptr);
+		if (space (read_ptr, write_ptr) < sizeof (T)) {
+			break;
+		}
+
+		wp = &this->_buf[read_ptr];
+		memcpy (&ev_time, wp, sizeof (T)); 
+		read_ptr = (read_ptr + sizeof (T)) % this->_size;
+		str << "time " << ev_time;
+
+		write_ptr  = g_atomic_int_get (&this->_write_ptr);
+		if (space (read_ptr, write_ptr) < sizeof (ev_type)) {
+			break;
+		}
+
+		wp = &this->_buf[read_ptr];
+		memcpy (&ev_type, wp, sizeof (ev_type)); 
+		read_ptr = (read_ptr + sizeof (ev_type)) % this->_size;
+		str << " type " << ev_type;
+
+		write_ptr  = g_atomic_int_get (&this->_write_ptr);
+		if (space (read_ptr, write_ptr) < sizeof (ev_size)) {
+			str << "!OUT!\n";
+			break;
+		}
+
+		wp = &this->_buf[read_ptr];
+		memcpy (&ev_size, wp, sizeof (ev_size)); 
+		read_ptr = (read_ptr + sizeof (ev_size)) % this->_size;
+		str << " size " << ev_size;
+
+		write_ptr  = g_atomic_int_get (&this->_write_ptr);
+		if (space (read_ptr, write_ptr) < ev_size) {
+			str << "!OUT!\n";
+			break;
+		}
+		
+		data = new uint8_t[ev_size];
+		
+		wp = &this->_buf[read_ptr];
+		memcpy (data, wp, ev_size); 
+		read_ptr = (read_ptr + ev_size) % this->_size;
+
+		for (uint32_t i = 0; i != ev_size; ++i) {
+			str << ' ' << hex << (int) data[i] << dec;
+		}
+
+		str << endl;
+
+		delete [] data;
+	}
+}
+
 
 template class MidiRingBuffer<nframes_t>;
 

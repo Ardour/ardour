@@ -85,6 +85,7 @@ private:
 
 	double    _last_ev_time_beats;
 	sframes_t _last_ev_time_frames;
+	mutable sframes_t _smf_last_read_end;
 };
 
 }; /* namespace ARDOUR */

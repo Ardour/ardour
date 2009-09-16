@@ -858,8 +858,6 @@ MidiDiskstream::can_internal_playback_seek (nframes_t distance)
 int
 MidiDiskstream::internal_playback_seek (nframes_t distance)
 {
-	cerr << "MDS: internal_playback_seek " << distance << endl;
-
 	first_recordable_frame += distance;
 	playback_sample += distance;
 
@@ -929,8 +927,7 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 					_id, this_read, start) << endmsg;
 			return -1;
 		}
-		
-		//cout << "MDS this read " << this_read << " start = " << start << endl;
+
 		g_atomic_int_add(&_frames_written_to_ringbuffer, this_read);
 
 		_read_data_count = _playlist->read_data_count();
@@ -1650,7 +1647,9 @@ MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 
 	// Translates stamps to be relative to start
 
+
 	_playback_buf->read(dst, start, end);
+
 #if 0
 	const size_t events_read = _playback_buf->read(dst, start, end);
 	cout << _name << ": MDS events read = " << events_read

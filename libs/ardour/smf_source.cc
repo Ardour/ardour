@@ -55,6 +55,7 @@ SMFSource::SMFSource (Session& s, const ustring& path, bool embedded, Source::Fl
 	, Evoral::SMF()
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
+	, _smf_last_read_end (0)
 {
 	if (init(_name, false)) {
 		throw failed_constructor ();
@@ -72,6 +73,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	, FileSource(s, node, must_exist)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
+	, _smf_last_read_end (0)
 {
 	if (set_state(node)) {
 		throw failed_constructor ();
@@ -116,20 +118,20 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
 
-	if (_last_read_end == 0 || start != _last_read_end) {
+	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
 		//cerr << "SMFSource::read_unlocked seeking to " << start << endl;
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
 			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 			if (ret == -1) { // EOF
-				_last_read_end = start + duration;
+				_smf_last_read_end = start + duration;
 				return duration;
 			}
 			time += ev_delta_t; // accumulate delta time
 		}
 	}
 	
-	_last_read_end = start + duration;
+	_smf_last_read_end = start + duration;
 
 	while (true) {
 		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);

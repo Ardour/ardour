@@ -33,7 +33,7 @@
 #include "evoral/TypeMap.hpp"
 #include "evoral/midi_util.h"
 
-//#define DEBUG_SEQUENCE 1
+// #define DEBUG_SEQUENCE 1
 #ifdef DEBUG_SEQUENCE
 	#include <boost/format.hpp>
 	using boost::format;
@@ -209,10 +209,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		_locked = false;
 		_seq->read_unlock();
 	} else {
-		DUMP(format("New iterator = %1% : %2% @ %3%\n")
-				% (int)_event->event_type()
-				% (int)((MIDIEvent<Time>*)_event.get())->type()
-				% _event->time());
+		DUMP(printf("New iterator = 0x%x : 0x%x @ %f\n",
+			    (int)_event->event_type(),
+			    (int)((MIDIEvent<Time>*)_event.get())->type(),
+			    _event->time()));
 		assert(midi_event_is_valid(_event->buffer(), _event->size()));
 	}
 }

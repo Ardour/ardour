@@ -147,7 +147,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst
 	nframes_t internal_offset = 0;
 	nframes_t src_offset      = 0;
 	nframes_t to_read         = 0;
-	
+
 	/* precondition: caller has verified that we cover the desired section */
 
 	assert(chan_n == 0);
@@ -191,7 +191,16 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst
 		// _start from the note times in the midi source
 		negative_output_buffer_position = _start; 
 	}
-	
+
+#if 0	
+	cerr << "\t\tsource read from " << _position << " - " << _start << " (" << _position - _start << ") "
+	     << " start in source " << _start << " + " << internal_offset << " (" << _start + internal_offset << ") "
+	     << " dur = " << to_read 
+	     << " offset = " << output_buffer_position 
+	     << " negoffset = " << negative_output_buffer_position 
+	     << endl;
+#endif
+
 	if (src->midi_read (
 			dst, // destination buffer
 			_position - _start, // start position of the source in this read context

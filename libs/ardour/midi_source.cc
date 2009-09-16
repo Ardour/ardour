@@ -137,16 +137,15 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 #define BEATS_TO_FRAMES(t) (converter.to(t) + stamp_offset - negative_stamp_offset)
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
-		
-		if (_last_read_end == 0 || start != _last_read_end) { // || !i.valid()) {
-			//cerr << "MidiSource seeking to " << start << " from " << _last_read_end << endl;
+
+		if (_last_read_end == 0 || start != _last_read_end || !i.valid()) {
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (BEATS_TO_FRAMES(i->time()) >= start) {
 					break;
 				}
 			}
 		}
-		
+
 		_last_read_end = start + cnt;
 
 		for (; i != _model->end(); ++i) {
@@ -234,7 +233,7 @@ MidiSource::session_saved()
 			stringstream ss(basename.substr(last_dash+1));
 			unsigned write_count = 0;
 			ss >> write_count;
-			cerr << "WRITE COUNT: " << write_count << endl;
+			// cerr << "WRITE COUNT: " << write_count << endl;
 			++write_count; // start at 1
 			ss.clear();
 			ss << basename.substr(0, last_dash) << "-" << write_count;
