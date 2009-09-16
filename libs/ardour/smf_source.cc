@@ -118,7 +118,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
 
-	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
+//	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
 		//cerr << "SMFSource::read_unlocked seeking to " << start << endl;
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
@@ -129,7 +129,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 			}
 			time += ev_delta_t; // accumulate delta time
 		}
-	}
+//	}
 	
 	_smf_last_read_end = start + duration;
 
