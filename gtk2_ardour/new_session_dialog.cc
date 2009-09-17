@@ -48,6 +48,7 @@ NewSessionDialog::NewSessionDialog()
 {
 	in_destructor = false;
 	session_name_label = new Gtk::Label(_("Name :"));
+	last_name_page = NewPage;
 	m_name = new Gtk::Entry();
 	m_name->set_text(ARDOUR_COMMAND_LINE::session_name);
 
@@ -593,12 +594,11 @@ NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 	char* res;
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		realdir = Glib::path_get_dirname (realdir);
-		cerr << "didn't exist, use " << realdir << endl;
 	}
 
 	if ((res = canonicalize_file_name (realdir.c_str())) != 0) {
-		cerr << "canonical, use " << res << endl;
 		m_folder->set_current_folder (res);
+		engine_page_session_folder = res;
 		free (res);
 	}
 	
@@ -626,12 +626,18 @@ NewSessionDialog::session_name() const
 
 	switch (which_page()) {
 	case NewPage:
-	case EnginePage:
-		/* new or audio setup pages */
-		if (!(page_set & OpenPage) && !(page_set & NewPage)) {
-			return Glib::filename_from_utf8(engine_page_session_name);
-		}
 	        return Glib::filename_from_utf8(m_name->get_text());
+
+	case EnginePage:
+		if (!(page_set & (OpenPage|NewPage))) {
+			return engine_page_session_name;
+		} else if (last_name_page == NewPage) {
+			return Glib::filename_from_utf8(m_name->get_text());
+		} else {
+			/* relax and use the open page stuff at the end */
+		}
+		break;
+
 	default:
 		break;
 	} 
@@ -639,6 +645,7 @@ NewSessionDialog::session_name() const
 	if (m_treeview->get_selection()->count_selected_rows() == 0) {
 		return Glib::filename_from_utf8(str);
 	}
+
 	Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
 	return (*i)[recent_columns.visible_name];
 }
@@ -651,13 +658,13 @@ NewSessionDialog::session_folder() const
 	        return Glib::filename_from_utf8(m_folder->get_filename());
 		
 	case EnginePage:
-		if (!(page_set & OpenPage) && !(page_set & NewPage)) {
-			/* just engine page, nothing else */
+		if (!(page_set & (OpenPage|NewPage))) {
 			return Glib::filename_from_utf8(engine_page_session_folder);
-		}
-		if (page_set == EnginePage) {
+		} else if (last_name_page == NewPage) {
 			/* use m_folder since it should be set */
 			return Glib::filename_from_utf8(m_folder->get_filename());
+		} else {
+			/* relax and use the open page stuff at the end */
 		}
 		break;
 
@@ -769,8 +776,6 @@ NewSessionDialog::Pages
 NewSessionDialog::which_page () const
 {
 	int num = m_notebook->get_current_page();
-
-	cerr << "current page set = " << std::hex << page_set << std::dec << endl;
 
 	if (page_set == NewPage) {
 		return NewPage;
@@ -891,6 +896,7 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		} else {
 			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
+		last_name_page = OpenPage;
 		break;
 
 	case EnginePage:
@@ -898,14 +904,14 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		if (!engine_control.interface_chosen()) {
 			m_okbutton->set_label(_("Start Audio Engine"));
 		} else {
-			m_okbutton->set_label(_("Open"));
+			m_okbutton->set_label(_("Start"));
 		}
 		m_okbutton->set_image (*(manage (new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON))));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 		set_response_sensitive (Gtk::RESPONSE_OK, true);
 		break;
 
-	default:
+	case NewPage:
 		on_new_session_page = true;
 		m_okbutton->set_label(_("New"));
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
@@ -915,6 +921,8 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		} else {
 			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
+		last_name_page = NewPage;
+		break;
 	}
 }
 

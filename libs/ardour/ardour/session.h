@@ -656,6 +656,12 @@ class Session : public PBD::StatefulDestructible
 
 	static sigc::signal<int,nframes_t, nframes_t> AskAboutSampleRateMismatch;
 
+	class SRMismatchRejected : public std::exception {
+	  public:
+		SRMismatchRejected () {}
+		const char* what() const throw() { return "Sample rate mismatch rejected"; }
+	};
+
 	/* handlers should return !0 for use pending state, 0 for
 	   ignore it.
 	*/

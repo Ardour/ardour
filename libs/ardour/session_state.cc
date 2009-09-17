@@ -1158,10 +1158,10 @@ Session::set_state (const XMLNode& node)
 	if ((prop = node.property (X_("sample-rate"))) != 0) {
 
 		_nominal_frame_rate = atoi (prop->value());
-
+		
 		if (_nominal_frame_rate != _current_frame_rate) {
 			if (AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate)) {
-				return -1;
+				throw SRMismatchRejected();
 			}
 		}
 	}

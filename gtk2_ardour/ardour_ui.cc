@@ -25,6 +25,7 @@
 #include <time.h>
 #include <cerrno>
 #include <fstream>
+#include <stdlib.h>
 
 #include <iostream>
 
@@ -2316,8 +2317,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			new_session_dialog->set_existing_session (false);
 			new_session_dialog->set_current_page (0); // new engine page
 			new_session_dialog->engine_control.unset_interface_chosen ();
-			cerr << "go back and show the engine setup tab again , beir = "
-			     << backend_audio_is_running << endl;
 
 			response = Gtk::RESPONSE_NONE;
 			goto try_again;
@@ -2328,7 +2327,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		if (response == Gtk::RESPONSE_OK) {
 
 			session_name = new_session_dialog->session_name();
-			
+
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
 				goto try_again;
@@ -2346,8 +2345,9 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				session_name = Glib::path_get_basename (session_name);
 				
 			} else {
-				
+
 				session_path = new_session_dialog->session_folder();
+
 			}
 
 			template_name = Glib::ustring();			
@@ -2391,6 +2391,8 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				session_path = Glib::build_filename (session_path, session_name);
 
 				if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+
+					new_session_dialog->hide ();
 
 					if (ask_about_loading_existing_session (session_path)) {
 						goto loadit;
@@ -2523,6 +2525,12 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 			break;
 		}
 		goto out;
+	}
+
+	/* this exception is also special */
+
+	catch (Session::SRMismatchRejected& err) {
+		goto out; /* just go back and reload something else, etc. */
 	}
 
 	catch (...) {
@@ -3117,14 +3125,17 @@ ARDOUR_UI::write_buffer_stats ()
 	std::ofstream fout;
 	struct tm tm;
 	char buf[64];
-	char* path;
+	char path[PATH_MAX+1];	int fd;
 
-	if ((path = tempnam (0, "ardourBuffering")) == 0) {
+	strcpy (path, "ardourBufferingXXXXXX");
+
+	if ((fd = mkstemp (path )) < 0) {
 		cerr << X_("cannot find temporary name for ardour buffer stats") << endl;
 		return;
 	}
-
+	
 	fout.open (path);
+	close (fd);
 
 	if (!fout) {
 		cerr << string_compose (X_("cannot open file %1 for ardour buffer stats"), path) << endl;

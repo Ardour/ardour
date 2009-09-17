@@ -220,6 +220,7 @@ protected:
 
 	sigc::connection ic_connection;
 	void engine_interface_chosen();
+	Pages last_name_page;
 };
 
 #endif // NEW_SESSION_DIALOG_H
