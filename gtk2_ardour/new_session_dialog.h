@@ -217,6 +217,9 @@ protected:
 	bool have_engine;
 	Glib::ustring engine_page_session_folder;
 	Glib::ustring engine_page_session_name;
+
+	sigc::connection ic_connection;
+	void engine_interface_chosen();
 };
 
 #endif // NEW_SESSION_DIALOG_H

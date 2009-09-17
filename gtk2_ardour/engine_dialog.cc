@@ -884,6 +884,15 @@ EngineControl::driver_changed ()
 		hw_meter_button.set_sensitive (false);
 		monitor_button.set_sensitive (false);
 	}
+
+	interface_combo.signal_changed().connect (mem_fun (*this, &EngineControl::emit_interface_chosen));
+}
+
+void
+EngineControl::emit_interface_chosen ()
+{
+	cerr << "interface combo changed\n";
+	InterfaceChosen(); 
 }
 
 uint32_t

@@ -2301,8 +2301,13 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				response = Gtk::RESPONSE_REJECT;
 				goto try_again;
 			}
+			
+			/* hide the NSD while we start up the engine */
+
+			new_session_dialog->hide ();
+			flush_pending ();
 		}
-		
+
 		if (create_engine ()) {
 
 			backend_audio_error (!backend_audio_is_running, new_session_dialog);
@@ -2346,8 +2351,15 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			switch (new_session_dialog->which_page()) {
 
 			case NewSessionDialog::OpenPage: 
-			case NewSessionDialog::EnginePage:
 				goto loadit;
+				break;
+
+			case NewSessionDialog::EnginePage:
+				if (new_session_dialog->engine_control.interface_chosen() && !session_path.empty()) {
+					goto loadit;
+				} else {
+					goto try_again;
+				}
 				break;
 
 			case NewSessionDialog::NewPage: /* nominally the "new" session creator, but could be in use for an old session */

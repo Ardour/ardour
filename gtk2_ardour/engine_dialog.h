@@ -29,6 +29,9 @@ class EngineControl : public Gtk::VBox {
 	XMLNode& get_state ();
 	void set_state (const XMLNode&);
 
+	sigc::signal<void> InterfaceChosen;
+	void emit_interface_chosen(); /* grr, need to figure out how to connect signalsl directly */
+
   private:
 	Gtk::Adjustment periods_adjustment;
 	Gtk::SpinButton periods_spinner;

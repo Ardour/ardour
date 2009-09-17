@@ -497,12 +497,20 @@ NewSessionDialog::set_have_engine (bool yn)
 			engine_control.discover_servers ();
 			if (engine_control.interface_chosen()) {
 				m_notebook->append_page (engine_control, _("Audio Setup"));
+				m_notebook->show_all_children();
+				page_set = Pages (page_set | EnginePage);
 			} else {
-				/* no interface ever selected - make it the first page */
+				/* no interface ever selected - make it the first and only page */
 				m_notebook->prepend_page (engine_control, _("Audio Setup"));
+				if (page_set & NewPage) {
+					m_notebook->remove_page (*new_session_table);
+				}
+				if (page_set & OpenPage) {
+					m_notebook->remove_page (*open_session_vbox);
+				}
+				m_notebook->show_all_children();
+				page_set = Pages (EnginePage);
 			}
-			m_notebook->show_all_children();
-			page_set = Pages (page_set | EnginePage);
 		}
 	}
 }
@@ -776,29 +784,58 @@ NewSessionDialog::which_page () const
 		}
 
 	} else if (page_set == (NewPage|EnginePage)) {
-		switch (num) {
-		case 0:
-			return NewPage;
-		default:
-			return EnginePage;
+		if (engine_control.interface_chosen()) {
+			switch (num) {
+			case 0:
+				return NewPage;
+			default:
+				return EnginePage;
+			} 
+		} else {
+			switch (num) {
+			case 0:
+				return EnginePage;
+			default:
+				return NewPage;
+			} 
 		}
 
 	} else if (page_set == (NewPage|EnginePage|OpenPage)) {
-		switch (num) {
-		case 0:
-			return NewPage;
-		case 1:
-			return OpenPage;
-		default:
-			return EnginePage;
+		if (engine_control.interface_chosen()) {
+			switch (num) {
+			case 0:
+				return NewPage;
+			case 1:
+				return OpenPage;
+			default:
+				return EnginePage;
+			}
+		} else {
+			switch (num) {
+			case 0:
+				return EnginePage;
+			case 1:
+				return NewPage;
+			default:
+				return OpenPage;
+			}
 		}
 
 	} else if (page_set == (OpenPage|EnginePage)) {
-		switch (num) {
-		case 0:
-			return OpenPage;
-		default:
-			return EnginePage;
+		if (engine_control.interface_chosen()) {
+			switch (num) {
+			case 0:
+				return OpenPage;
+			default:
+				return EnginePage;
+			}
+		} else {
+			switch (num) {
+			case 0:
+				return EnginePage;
+			default:
+				return OpenPage;
+			}
 		}
 	}
 
@@ -852,7 +889,11 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 
 	case EnginePage:
 		on_new_session_page = false;
-		m_okbutton->set_label(_("Open"));
+		if (!engine_control.interface_chosen()) {
+			m_okbutton->set_label(_("Start Audio Engine"));
+		} else {
+			m_okbutton->set_label(_("Open"));
+		}
 		m_okbutton->set_image (*(manage (new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON))));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 		set_response_sensitive (Gtk::RESPONSE_OK, true);
