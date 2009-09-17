@@ -25,12 +25,11 @@ class EngineControl : public Gtk::VBox {
 	void discover_servers ();
 
 	bool interface_chosen () const { return _interface_chosen; }
+	void unset_interface_chosen() { _interface_chosen = false; }
 	bool was_used() const { return _used; }
 	XMLNode& get_state ();
 	void set_state (const XMLNode&);
 
-	sigc::signal<void> InterfaceChosen;
-	void emit_interface_chosen(); /* grr, need to figure out how to connect signalsl directly */
 
   private:
 	Gtk::Adjustment periods_adjustment;

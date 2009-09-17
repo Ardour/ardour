@@ -489,28 +489,32 @@ NewSessionDialog::run ()
 void
 NewSessionDialog::set_have_engine (bool yn)
 {
-	if (yn) {
-		m_notebook->remove_page (engine_control);
-		page_set = Pages (page_set & ~EnginePage);
-	} else {
-		if (!(page_set & EnginePage)) {
-			engine_control.discover_servers ();
-			if (engine_control.interface_chosen()) {
-				m_notebook->append_page (engine_control, _("Audio Setup"));
-				m_notebook->show_all_children();
-				page_set = Pages (page_set | EnginePage);
-			} else {
-				/* no interface ever selected - make it the first and only page */
-				m_notebook->prepend_page (engine_control, _("Audio Setup"));
-				if (page_set & NewPage) {
-					m_notebook->remove_page (*new_session_table);
-				}
-				if (page_set & OpenPage) {
-					m_notebook->remove_page (*open_session_vbox);
-				}
-				m_notebook->show_all_children();
-				page_set = Pages (EnginePage);
+
+	m_notebook->remove_page (engine_control);
+	page_set = Pages (page_set & ~EnginePage);
+	
+	if (!yn) {
+
+		engine_control.discover_servers ();
+
+		if (engine_control.interface_chosen()) {
+			m_notebook->append_page (engine_control, _("Audio Setup"));
+			m_notebook->show_all_children();
+			page_set = Pages (page_set | EnginePage);
+		} else {
+			m_notebook->prepend_page (engine_control, _("Audio Setup"));
+			page_set = Pages (page_set | EnginePage);
+
+			/* no interface ever selected - make it the first and only page */
+			if (page_set & NewPage) {
+				m_notebook->remove_page (*new_session_table);
+				page_set = Pages (page_set & ~NewPage);
 			}
+			if (page_set & OpenPage) {
+				m_notebook->remove_page (*open_session_vbox);
+				page_set = Pages (page_set & ~OpenPage);
+			}
+			m_notebook->show_all_children();
 		}
 	}
 }
@@ -765,6 +769,8 @@ NewSessionDialog::Pages
 NewSessionDialog::which_page () const
 {
 	int num = m_notebook->get_current_page();
+
+	cerr << "current page set = " << std::hex << page_set << std::dec << endl;
 
 	if (page_set == NewPage) {
 		return NewPage;

@@ -2314,7 +2314,10 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			flush_pending ();
 
 			new_session_dialog->set_existing_session (false);
-			new_session_dialog->set_current_page (2);
+			new_session_dialog->set_current_page (0); // new engine page
+			new_session_dialog->engine_control.unset_interface_chosen ();
+			cerr << "go back and show the engine setup tab again , beir = "
+			     << backend_audio_is_running << endl;
 
 			response = Gtk::RESPONSE_NONE;
 			goto try_again;
