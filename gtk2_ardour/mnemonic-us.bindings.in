@@ -176,7 +176,7 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/fit-tracks|f|fit tracks vertically
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
 @wvis|Editor/toggle-rhythm-ferret|<@WINDOW@>f|toggle rhythm ferret window 
-@mmode|MouseMode/set-mouse-mode-gain|g|region gain
+@mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Editor/play-selected-regions|h|play selected region(s)
 @eep|Editor/trim-front|j|trim front
 @eep|Editor/trim-back|k|trim back
@@ -187,11 +187,11 @@ This mode provides many different operations on both regions and control points,
 
 ;; HOME ROW
 
+@mmode|MouseMode/set-mouse-mode-zoom|z|zoom mode
+@edit|Editor/undo|<@PRIMARY@>z|undo
 @vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)
 @vis|Editor/zoom-to-region-both-axes|<@SECONDARY@>z|zoom (x+y) to selected region
-@edit|Editor/undo|<@PRIMARY@>z|undo
 @vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
-@vis|MouseMode/set-mouse-mode-zoom|z| zoom to selected region(s)
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
 @wvis|Common/ToggleColorManager|<@WINDOW@>c|toggle color manager
