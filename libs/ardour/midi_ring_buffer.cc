@@ -80,7 +80,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
 			const uint8_t channel = status & 0x0F;
 			if (!(get_channel_mask() & (1L << channel))) {
-				//cerr << "MRB skipping event due to channel mask" << endl;
+				// cerr << "MRB skipping event due to channel mask" << endl;
 				this->skip(ev_size); // Advance read pointer to next event
 				continue;
 			}
@@ -93,7 +93,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		// write the timestamp to address (write_loc - 1)
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {
-			cerr << "MRB: Unable to reserve space in buffer, event skipped";
+			// cerr << "MRB: Unable to reserve space in buffer, event skipped";
 			continue;
 		}
 		

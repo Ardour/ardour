@@ -118,7 +118,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
 
-//	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
+	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
 		//cerr << "SMFSource::read_unlocked seeking to " << start << endl;
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
@@ -129,7 +129,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 			}
 			time += ev_delta_t; // accumulate delta time
 		}
-//	}
+	}
 	
 	_smf_last_read_end = start + duration;
 
@@ -147,14 +147,29 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 		
 		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
 
+#if 0
+		cerr << "+++ SMF source read "
+		     << " delta = " << ev_delta_t
+		     << " time = " << time
+		     << " buf[0] " << hex << (int) ev_buffer[0] << dec
+		     << " type = " << ev_type;
+#endif
+
 		assert(time >= start_ticks);
 		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
+
+#if 0
+		cerr << " frames = " << ev_frame_time 
+		     << " w/offset = " << ev_frame_time - negative_stamp_offset
+		     << endl;
+#endif
 
 		if (ev_frame_time < start + duration) {
 			destination.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
 		} else {
 			break;
 		}
+
 
 		_read_data_count += ev_size;
 

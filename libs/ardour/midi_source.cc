@@ -138,13 +138,13 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 
-//		if (_last_read_end == 0 || start != _last_read_end || !i.valid()) {
+		if (_last_read_end == 0 || start != _last_read_end || !i.valid()) {
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (BEATS_TO_FRAMES(i->time()) >= start) {
 					break;
 				}
 			}
-//		}
+		}
 
 		_last_read_end = start + cnt;
 

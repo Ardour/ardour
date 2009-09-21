@@ -599,7 +599,6 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 	nframes_t rec_nframes = 0;
 	bool      nominally_recording;
 	bool      re = record_enabled ();
-	bool      collect_playback = true;
 
 	/* if we've already processed the frames corresponding to this call,
 	   just return. this allows multiple routes that are taking input
@@ -700,6 +699,10 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 			assert(ev.buffer());
 			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
+
+			/* put it in the playback buffer as well, so that we can monitor */
+
+			_playback_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
 		}
 	
 	} else {
@@ -722,34 +725,12 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 
 	} else if (nominally_recording) {
 
-		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
+		/* XXXX do this for MIDI !!!
+		   can't do actual capture yet - waiting for latency effects to finish before we start
+		*/
 
 		playback_distance = nframes;
-		collect_playback = false;
 
-	}
-
-	if (collect_playback) {
-
-		/* we're doing playback */
-
-		nframes_t necessary_samples;
-
-		/* no varispeed playback if we're recording, because the output .... TBD */
-
-		if (rec_nframes == 0 && _actual_speed != 1.0f) {
-			necessary_samples = (nframes_t) floor ((nframes * fabs (_actual_speed))) + 1;
-		} else {
-			necessary_samples = nframes;
-		}
-
-		// Pump entire port buffer into playback buffer (FIXME: split cycles?)
-		MidiBuffer& buf = _source_port->get_midi_buffer(nframes);
-		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
-			assert(ev.buffer());
-			_playback_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
-		}
 	}
 
 	ret = 0;
@@ -1646,7 +1627,6 @@ MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 	}
 
 	// Translates stamps to be relative to start
-
 
 	_playback_buf->read(dst, start, end);
 
