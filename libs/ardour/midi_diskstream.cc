@@ -699,10 +699,6 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 			assert(ev.buffer());
 			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
-
-			/* put it in the playback buffer as well, so that we can monitor */
-
-			_playback_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
 		}
 	
 	} else {

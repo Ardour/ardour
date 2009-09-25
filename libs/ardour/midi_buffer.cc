@@ -260,8 +260,57 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		cerr << "MidiBuffer::merge failed (no space)" << endl;
 		return false;
 	}
-	
-	cerr << "FIXME: MIDI BUFFER IN-PLACE MERGE" << endl;
+
+	const_iterator them = other.begin();
+	iterator us = begin();
+
+	while (them != other.end()) {
+
+		Evoral::MIDIEvent<TimeType> ev_other (*them);
+		size_t sz = 0;
+		size_t src;
+
+		/* gather up total size of events that are earlier than
+		   the event referenced by "us"
+		*/
+
+		src = 0;
+
+		while (them != other.end() && ev_other.time() < (*us).time()) {
+			if (!src) {
+				src = them.offset;
+			}
+			sz += sizeof (TimeType) + ev_other.size();
+			++them;
+		}
+
+		if (sz) {
+			/* move existing */
+			memmove (_data + us.offset + sz, _data + us.offset , _size - us.offset);
+			/* increase _size */
+			_size += sz;
+			/* insert new stuff */
+			memcpy  (_data + us.offset, other._data + src, sz);
+			/* update iterator to our own events. this is a miserable hack */
+			us.offset += sz;
+		} else {
+
+			/* advance past our own events to get to the correct insertion
+			   point for the next event(s) from "other"
+			*/
+
+			while (us != end() && (*us).time() < ev_other.time()) {
+				++us;
+			}
+		}
+
+		if (!(us != end())) {
+			/* just append the rest of other */
+			memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
+			break;
+		}
+	}
+
 	return true;
 }
 

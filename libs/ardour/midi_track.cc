@@ -32,6 +32,7 @@
 #include "ardour/meter.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_playlist.h"
+#include "ardour/midi_port.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
@@ -448,6 +449,11 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
 
 		write_out_of_band_data (bufs, start_frame, end_frame, nframes);	
+
+		/* send incoming data "through" output */
+		if (_input->n_ports().n_midi()) {
+			mbuf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
+		}
 
 		// Feed the data through the MidiStateTracker
 		bool did_loop;
