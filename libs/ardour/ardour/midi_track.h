@@ -84,6 +84,12 @@ public:
 	bool step_editing() const { return _step_editing; }
 	void set_step_editing (bool yn);
 	MidiRingBuffer<nframes_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
+
+	uint8_t default_channel() const { return _default_channel; }
+	void set_default_channel (uint8_t chn);
+
+	bool midi_thru() const { return _midi_thru; }
+	void set_midi_thru (bool yn);
 	
 protected:
 	XMLNode& state (bool full);
@@ -105,6 +111,9 @@ private:
 	MidiRingBuffer<nframes_t> _step_edit_ring_buffer;
 	NoteMode                  _note_mode;
 	bool                      _step_editing;
+	uint8_t                   _default_channel;
+	bool                      _midi_thru;
+
 	
 	int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		     bool state_changing, bool can_record, bool rec_monitors_input);

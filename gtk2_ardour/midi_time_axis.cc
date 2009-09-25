@@ -108,6 +108,9 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 	, _meter_color_mode_item(0)
 	, _channel_color_mode_item(0)
 	, _track_color_mode_item(0)
+	, _step_edit_item (0)
+	, _midi_thru_item (0)
+	, default_channel_menu (0)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -301,8 +304,57 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 			MidiStreamView::ContentsRange)));
 
 	items.push_back (MenuElem (_("Note range"), *range_menu));
-
 	items.push_back (MenuElem (_("Note mode"), *build_note_mode_menu()));
+	items.push_back (MenuElem (_("Default Channel"), *build_def_channel_menu()));
+
+	items.push_back (CheckMenuElem (_("MIDI Thru"), mem_fun(*this, &MidiTimeAxisView::toggle_midi_thru)));
+	_midi_thru_item = dynamic_cast<CheckMenuItem*>(&items.back());
+}
+
+Gtk::Menu*
+MidiTimeAxisView::build_def_channel_menu ()
+{
+	using namespace Menu_Helpers;
+	
+	if (default_channel_menu == 0) {
+		default_channel_menu = manage (new Menu ());
+	} 
+	
+	uint8_t defchn = midi_track()->default_channel();
+	MenuList& def_channel_items = default_channel_menu->items();
+	RadioMenuItem* item;
+	RadioMenuItem::Group dc_group;
+	
+	for (int i = 0; i < 16; ++i) {
+		char buf[4];
+		snprintf (buf, sizeof (buf), "%d", i+1);
+		
+		def_channel_items.push_back (RadioMenuElem (dc_group, buf,
+							    bind (mem_fun (*this, &MidiTimeAxisView::set_default_channel), i)));
+		item = dynamic_cast<RadioMenuItem*>(&def_channel_items.back());
+		item->set_active ((i == defchn));
+	}
+
+	return default_channel_menu;
+}
+
+void
+MidiTimeAxisView::set_default_channel (int chn)
+{
+	midi_track()->set_default_channel (chn);
+}
+
+void
+MidiTimeAxisView::toggle_midi_thru ()
+{
+	if (!_midi_thru_item) {
+		return;
+	}
+
+	bool view_yn = _midi_thru_item->get_active();
+	if (view_yn != midi_track()->midi_thru()) {
+		midi_track()->set_midi_thru (view_yn);
+	}
 }
 
 void

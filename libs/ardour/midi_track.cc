@@ -55,6 +55,8 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
 	, _step_editing (false)
+	, _default_channel (0)
+	, _midi_thru (true)
 {
 	use_new_diskstream ();
 
@@ -70,6 +72,8 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
 	, _step_editing (false)
+	, _default_channel (0)
+	, _midi_thru (true)
 {
 	_set_state(node, false);
 }
@@ -173,6 +177,14 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
 	} else {
 		_note_mode = Sustained;
+	}
+
+	if ((prop = node.property ("midi-thru")) != 0) {
+		set_midi_thru (prop->value() == "yes");
+	}
+
+	if ((prop = node.property ("default-channel")) != 0) {
+		set_default_channel ((uint8_t) atoi (prop->value()));
 	}
 
 	if ((prop = node.property ("diskstream-id")) == 0) {
@@ -284,6 +296,9 @@ MidiTrack::state(bool full_state)
 
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
+	root.add_property ("midi-thru", (_midi_thru ? "yes" : "no"));
+	snprintf (buf, sizeof (buf), "%d", (int) _default_channel);
+	root.add_property ("default-channel", buf);
 	
 	return root;
 }
@@ -450,11 +465,6 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 
 		write_out_of_band_data (bufs, start_frame, end_frame, nframes);	
 
-		/* send incoming data "through" output */
-		if (_input->n_ports().n_midi()) {
-			mbuf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
-		}
-
 		// Feed the data through the MidiStateTracker
 		bool did_loop;
 
@@ -535,7 +545,13 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes
 
 	MidiBuffer& buf (bufs.get_midi (0));
 	_immediate_events.read (buf, 0, 0, nframes - 1); // all stamps = 0
+
+	/* MIDI thru: send incoming data "through" output */
+	if (_midi_thru && _input->n_ports().n_midi()) {
+		buf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
+	}
 }
+
 
 int
 MidiTrack::export_stuff (BufferSet& /*bufs*/, nframes_t /*nframes*/, sframes_t /*end_frame*/)
@@ -677,4 +693,16 @@ void
 MidiTrack::set_step_editing (bool yn)
 {
 	_step_editing = yn;
+}
+
+void
+MidiTrack::set_default_channel (uint8_t chn)
+{
+	_default_channel = std::min ((unsigned int) chn, 15U);
+}
+
+void
+MidiTrack::set_midi_thru (bool yn)
+{
+	_midi_thru = yn;
 }

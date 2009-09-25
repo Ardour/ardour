@@ -651,7 +651,7 @@ PianoRollHeader::send_note_on(uint8_t note)
 	//cerr << "note on: " << (int) note << endl;
 
 	if (track) {
-		_event[0] = MIDI_CMD_NOTE_ON;
+		_event[0] = (MIDI_CMD_NOTE_ON | track->default_channel());
 		_event[1] = note;
 		_event[2] = 100;
 
@@ -665,7 +665,7 @@ PianoRollHeader::send_note_off(uint8_t note)
 	boost::shared_ptr<ARDOUR::MidiTrack> track = _view.trackview().midi_track();
 
 	if (track) {
-		_event[0] = MIDI_CMD_NOTE_OFF;
+		_event[0] = (MIDI_CMD_NOTE_OFF | track->default_channel());
 		_event[1] = note;
 		_event[2] = 100;
 

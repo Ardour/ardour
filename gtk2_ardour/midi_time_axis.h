@@ -129,12 +129,17 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::ComboBoxText            _custom_device_mode_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
+	Gtk::CheckMenuItem*          _midi_thru_item;
+	Gtk::Menu*                    default_channel_menu;
 
 	nframes64_t step_edit_insert_position;
 	Evoral::MusicalTime step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::Region> step_edit_region;
 	MidiRegionView* step_edit_region_view;
 
+	Gtk::Menu* build_def_channel_menu();
+	void set_default_channel (int);
+	void toggle_midi_thru ();
 };
 
 #endif /* __ardour_midi_time_axis_h__ */
