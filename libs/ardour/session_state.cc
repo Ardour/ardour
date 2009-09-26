@@ -117,6 +117,14 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		_path += '/';
 	}
 
+	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS) && ::access (_path.c_str(), W_OK)) {
+		cerr << "Session non-writable based on " << _path << endl;
+		_writable = false;
+	} else {
+		cerr << "Session writable based on " << _path << endl;
+		_writable = true;	
+	}
+
 	set_history_depth (Config->get_history_depth());
 	
 
@@ -656,7 +664,7 @@ Session::save_state (string snapshot_name, bool pending)
 	string xml_path;
 	string bak_path;
 
-	if (_state_of_the_state & CannotSave) {
+	if (!_writable || (_state_of_the_state & CannotSave)) {
 		return 1;
 	}
 
@@ -789,6 +797,15 @@ Session::load_state (string snapshot_name)
 	state_tree = new XMLTree;
 
 	set_dirty();
+
+	/* writable() really reflects the whole folder, but if for any
+	   reason the session state file can't be written to, still
+	   make us unwritable.
+	*/
+
+	if (::access (xmlpath.c_str(), W_OK) != 0) {
+		_writable = false;
+	}
 
 	if (!state_tree->read (xmlpath)) {
 		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
@@ -3096,7 +3113,9 @@ Session::controllable_by_id (const PBD::ID& id)
 void 
 Session::add_instant_xml (XMLNode& node, const std::string& dir)
 {
-	Stateful::add_instant_xml (node, dir);
+	if (_writable) {
+		Stateful::add_instant_xml (node, dir);
+	}
 	Config->add_instant_xml (node, get_user_ardour_path());
 }
 
@@ -3106,6 +3125,10 @@ Session::save_history (string snapshot_name)
     XMLTree tree;
     string xml_path;
     string bak_path;
+
+    if (!_writable) {
+	    return 0;
+    }
 
     if (snapshot_name.empty()) {
 	snapshot_name = _current_snapshot_name;

@@ -169,7 +169,7 @@ class AudioFileSource : public AudioSource {
 	virtual void set_header_timeline_position () = 0;
 
 	bool removable() const;
-	bool writable() const { return _flags & Writable; }
+	bool writable() const;
 
 	static Sample* get_interleave_buffer (nframes_t size);
 	
@@ -177,6 +177,7 @@ class AudioFileSource : public AudioSource {
 	Glib::ustring old_peak_path (Glib::ustring audio_path);
 	Glib::ustring broken_peak_path (Glib::ustring audio_path);
 
+	void fix_writable_flags ();
 };
 
 } // namespace ARDOUR

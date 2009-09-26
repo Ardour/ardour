@@ -45,6 +45,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::write_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_selection_sensitive_actions;

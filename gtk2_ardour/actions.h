@@ -42,6 +42,7 @@ class ActionManager
 	static void init ();
 
 	static std::vector<Glib::RefPtr<Gtk::Action> > session_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > write_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > region_list_selection_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > plugin_selection_sensitive_actions;
 

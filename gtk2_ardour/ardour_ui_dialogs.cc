@@ -56,6 +56,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	/* sensitize menu bar options that are now valid */
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, true);
+	ActionManager::set_sensitive (ActionManager::write_sensitive_actions, session->writable());
 	
 	if (session->locations()->num_range_markers()) {
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, true);

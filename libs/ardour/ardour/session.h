@@ -241,7 +241,8 @@ class Session : public PBD::StatefulDestructible
 	string export_dir () const;
 
 	void set_snap_name ();
-
+	
+	bool writable() const { return _writable; }
 	void set_dirty ();
 	void set_clean ();
 	bool dirty() const { return _state_of_the_state & Dirty; }
@@ -1002,6 +1003,8 @@ class Session : public PBD::StatefulDestructible
 	void destroy ();
 
 	nframes_t compute_initial_length ();
+
+	bool   _writable;
 
 	static const char* _template_suffix;
 	static const char* _statefile_suffix;

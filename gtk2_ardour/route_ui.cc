@@ -170,7 +170,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	update_solo_display ();
 	update_mute_display ();
 
-	if (is_track()) {
+	if (_session.writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 		connections.push_back (t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed)));

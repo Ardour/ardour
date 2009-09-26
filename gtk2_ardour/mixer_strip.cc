@@ -377,6 +377,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 #endif /* VARISPEED_IN_MIXER_STRIP */
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
+		rec_enable_button->set_sensitive (_session.writable());
 		rec_enable_button->show();
 	}
 

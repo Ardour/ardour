@@ -2483,16 +2483,6 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		goto out;
 	}
 
-	/* if it already exists, we must have write access */
-
-	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS) && ::access (path.c_str(), W_OK)) {
-		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
-					      "This prevents the session from being loaded."));
-		pop_back_splash ();
-		msg.run ();
-		goto out;
-	}
-
 	loading_message (_("Please wait while Ardour loads your session"));
 
 	try {

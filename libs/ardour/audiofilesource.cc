@@ -96,6 +96,7 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 		throw failed_constructor ();
 	}
 
+	fix_writable_flags ();
 }
 
 AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
@@ -108,6 +109,8 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFo
 	if (init (path, false)) {
 		throw failed_constructor ();
 	}
+
+	fix_writable_flags ();
 }
 
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
@@ -125,6 +128,8 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 	if (init (foo, must_exist)) {
 		throw failed_constructor ();
 	}
+
+	fix_writable_flags ();
 }
 
 AudioFileSource::~AudioFileSource ()
@@ -132,6 +137,14 @@ AudioFileSource::~AudioFileSource ()
 	if (removable()) {
 		unlink (_path.c_str());
 		unlink (peakpath.c_str());
+	}
+}
+
+void
+AudioFileSource::fix_writable_flags ()
+{
+	if (!_session.writable()) {
+		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
 	}
 }
 
@@ -145,6 +158,12 @@ bool
 AudioFileSource::removable () const
 {
 	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || ((_flags & RemovableIfEmpty) && length() == 0));
+}
+
+bool
+AudioFileSource::writable() const
+{
+	return (_flags & Writable);
 }
 
 int
@@ -298,6 +317,8 @@ AudioFileSource::set_state (const XMLNode& node)
 
 	}
 
+	fix_writable_flags ();
+
 	if ((prop = node.property (X_("channel"))) != 0) {
 		_channel = atoi (prop->value());
 	} else {
@@ -324,7 +345,7 @@ AudioFileSource::mark_for_remove ()
 	// This operation is not allowed for sources for destructive tracks or embedded files.
 	// Fortunately mark_for_remove() is never called for embedded files. This function
 	// must be fixed if that ever happens.
-	if (_flags & Destructive) {
+	if (!_session.writable() || (_flags & Destructive)) {
 		return;
 	}
 
@@ -638,6 +659,8 @@ AudioFileSource::set_allow_remove_if_empty (bool yn)
 	} else {
 		_flags = Flag (_flags & ~RemovableIfEmpty);
 	}
+
+	fix_writable_flags ();
 }
 
 int
