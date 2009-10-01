@@ -229,7 +229,9 @@ Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 
 	bool active = (*iter)[group_columns.is_active];
 	group->set_active (active, this);
-
+	
+	bool visible = (*iter)[group_columns.is_visible];
+	group->set_hidden (!visible, this);
 
 	string name = (*iter)[group_columns.text];
 
@@ -246,7 +248,7 @@ Editor::add_edit_group (RouteGroup* group)
 
 	TreeModel::Row row = *(group_model->append());
 	row[group_columns.is_active] = group->is_active();
-	row[group_columns.is_visible] = false;
+	row[group_columns.is_visible] = !group->is_hidden();
 
 	in_edit_group_row_change = true;
 

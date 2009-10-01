@@ -188,14 +188,8 @@ RouteGroup::set_hidden (bool yn, void *src)
 	}
 	if (yn) {
 		_flags = Flag (_flags | Hidden);
-		if (Config->get_hiding_groups_deactivates_groups()) {
-			_flags = Flag (_flags & ~Active);
-		}
 	} else {
          	_flags = Flag (_flags & ~Hidden);
-		if (Config->get_hiding_groups_deactivates_groups()) {
-			_flags = Flag (_flags | Active);
-		}
 	}
 	_session.set_dirty ();
 	FlagsChanged (src); /* EMIT SIGNAL */
