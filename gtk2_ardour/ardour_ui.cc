@@ -2646,6 +2646,8 @@ ARDOUR_UI::show_about ()
 		about->signal_response().connect(mem_fun (*this, &ARDOUR_UI::about_signal_response) );
 	}
 
+	about->set_transient_for(*editor);
+
 	about->show_all ();
 }
 
