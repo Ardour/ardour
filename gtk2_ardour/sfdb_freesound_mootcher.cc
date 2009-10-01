@@ -221,6 +221,28 @@ std::string	Mootcher::searchText(std::string word)
 		postMessage += tempPointer;
 		sprintf( tempPointer, "&searchtags=1");
 		postMessage += tempPointer;
+
+		// Ref: http://www.freesound.org/forum/viewtopic.php?p=19081
+		// const ORDER_DEFAULT = 0;
+		// const ORDER_DOWNLOADS_DESC = 1;
+		// const ORDER_DOWNLOADS_ASC = 2;
+		// const ORDER_USERNAME_DESC = 3;
+		// const ORDER_USERNAME_ASC = 4;
+		// const ORDER_DATE_DESC = 5;
+		// const ORDER_DATE_ASC = 6;
+		// const ORDER_DURATION_DESC = 7;
+		// const ORDER_DURATION_ASC = 8;
+		// const ORDER_FILEFORMAT_DESC = 9;
+		// const ORDER_FILEFORMAT_ASC = 10;
+		sprintf( tempPointer, "&order=1");
+		postMessage += tempPointer;
+		sprintf( tempPointer, "&start=0");
+		postMessage += tempPointer;
+		sprintf( tempPointer, "&limit=10");
+		postMessage += tempPointer;
+		// The limit of 10 samples is arbitrary, but seems
+		// reasonable in light of the fact that all of the returned
+		// samples get downloaded, and downloads are s-l-o-w.
 		
 		if(curl)
 		{
