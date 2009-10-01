@@ -161,6 +161,7 @@ struct LV2World {
 	SLV2Value srate;
 	SLV2Value gtk_gui;
 	SLV2Value external_gui;
+	SLV2Value logarithmic;
 };
 
 
