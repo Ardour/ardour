@@ -68,7 +68,7 @@ void LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
 	me->_screen_update_connection.disconnect();
 	//me->insert->set_gui(0);
 
-	for (vector<struct lv2_external_ui*>::iterator it = g_external_uis.begin() ; it < g_external_uis.end(); it++) {
+	for (std::vector<struct lv2_external_ui*>::iterator it = g_external_uis.begin() ; it < g_external_uis.end(); it++) {
 		if (*it == me->_external_ui_ptr) {
 			g_external_uis.erase(it);
 		}

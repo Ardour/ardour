@@ -38,6 +38,7 @@ class CAImportableSource : public ImportableSource {
 	nframes_t length() const;
 	nframes_t samplerate() const;
 	void      seek (nframes_t pos);
+	nframes64_t natural_position() const { return 0; }
 
    protected:
 	mutable CAAudioFile af;

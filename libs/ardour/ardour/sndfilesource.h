@@ -46,7 +46,7 @@ class SndFileSource : public AudioFileSource {
 	int update_header (sframes_t when, struct tm&, time_t);
 	int flush_header ();
 
-	sframes_t natural_position () const;
+	nframes64_t natural_position () const;
 
 	sframes_t last_capture_start_frame() const;
 	void mark_capture_start (sframes_t);

@@ -66,7 +66,7 @@ class Source : public SessionObject, public boost::noncopyable
 	
 	virtual const Glib::ustring& path() const = 0;
 
-	virtual sframes_t natural_position() const { return 0; }
+	virtual nframes64_t natural_position() const { return 0; }
 
 	void mark_for_remove();
 	

@@ -87,8 +87,6 @@ class BarController : public Gtk::Frame
 	virtual bool expose (GdkEventExpose *);
 	virtual bool scroll (GdkEventScroll *);
 	virtual bool entry_focus_out (GdkEventFocus*);
-	virtual bool entry_input (double *);
-	virtual bool entry_output ();
 
 	gint mouse_control (double x, GdkWindow* w, double scaling);
 

@@ -695,8 +695,11 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	ustring region_name;
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
+	bool use_timestamp;
+	
+	use_timestamp = (pos == -1);
 
-	if (pos == -1) { // "use timestamp"
+	if (use_timestamp) {
 		if (sources[0]->natural_position() != 0) {
 			pos = sources[0]->natural_position();
 		} else {
@@ -714,8 +717,15 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 		region_name = region_name_from_path (paths.front(), (sources.size() > 1), false);
 		
-		regions.push_back (RegionFactory::create (sources, 0, sources[0]->length(pos), region_name, 0,
-				Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
+		boost::shared_ptr<Region> r = RegionFactory::create (sources, 0, sources[0]->length(pos), region_name, 0,
+								     Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
+
+		if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
+			boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(sources[0]->natural_position());
+     		}
+ 
+		regions.push_back (r);
+
 		
 	} else if (target_regions == -1 || target_regions > 1) {
 
@@ -732,9 +742,14 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 			
 			region_name = region_name_from_path ((*x)->path(), false, false, sources.size(), n);
 
-			regions.push_back (RegionFactory::create (just_one, 0, (*x)->length(pos), region_name, 0,
-					Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
-
+			boost::shared_ptr<Region> r = RegionFactory::create (just_one, 0, (*x)->length(pos), region_name, 0,
+									     Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
+			
+			if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
+				boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position((*x)->natural_position());
+			}
+			
+			regions.push_back (r);
 		}
 	}
 

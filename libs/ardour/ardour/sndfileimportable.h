@@ -38,11 +38,13 @@ class SndFileImportableSource : public ImportableSource {
 	nframes_t length() const;
 	nframes_t samplerate() const;
 	void      seek (nframes_t pos);
+	nframes64_t natural_position() const;
 
    protected:
 	SF_INFO sf_info;
 	boost::shared_ptr<SNDFILE> in;
-
+	nframes_t timecode;
+	int64_t get_timecode_info (SNDFILE*, SF_BROADCAST_INFO*, bool&);
 };
 
 }
