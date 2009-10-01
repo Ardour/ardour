@@ -190,11 +190,17 @@ PluginUIWindow::on_focus_out_event (GdkEventFocus *ev)
 void
 PluginUIWindow::on_show ()
 {
+	set_role("plugin_ui");
+
 	if (_pluginui) {
 		_pluginui->update_presets ();
 	}
 
-	Window::on_show ();
+	if (_pluginui) {
+		if (_pluginui->on_window_show (_title)) {
+			Window::on_show ();
+		}
+	}
 
 	if (parent) {
 		// set_transient_for (*parent);
@@ -205,6 +211,18 @@ void
 PluginUIWindow::on_hide ()
 {
 	Window::on_hide ();
+
+	if (_pluginui) {
+		_pluginui->on_window_hide ();
+	}
+}
+
+void
+PluginUIWindow::set_title(const Glib::ustring& title)
+{
+	//cout << "PluginUIWindow::set_title(\"" << title << "\"" << endl;
+	Gtk::Window::set_title(title);
+	_title = title;
 }
 
 bool

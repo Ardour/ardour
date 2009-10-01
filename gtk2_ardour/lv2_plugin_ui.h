@@ -34,6 +34,8 @@
 
 #ifdef HAVE_LV2
 
+#include "lv2_external_ui.h"
+
 namespace ARDOUR {
 	class PluginInsert;
 	class LV2Plugin;
@@ -60,6 +62,13 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Widget*   _gui_widget;
 	SLV2UIInstance _inst;
 	float*         _values;
+
+	struct lv2_external_ui_host _external_ui_host;
+	LV2_Feature _external_ui_feature;
+	struct lv2_external_ui* _external_ui_ptr;
+	Gtk::Window* _win_ptr;
+
+	static void on_external_ui_closed(LV2UI_Controller controller);
 	
 	static void lv2_ui_write(
 			LV2UI_Controller controller,
@@ -68,12 +77,17 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 			uint32_t         format,
 			const void*      buffer);
 	
+	void lv2ui_instantiate(const Glib::ustring& title);
+
 	void parameter_changed(uint32_t, float);
 	void parameter_update(uint32_t, float);
 	bool configure_handler (GdkEventConfigure*);
 	void save_plugin_setting ();
 	void output_update();
 	bool is_update_wanted(uint32_t index);
+
+	virtual bool on_window_show(const Glib::ustring& title);
+	virtual void on_window_hide();
 };
 #endif // HAVE_LV2
 

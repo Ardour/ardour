@@ -82,6 +82,9 @@ class PlugUIBase : public virtual sigc::trackable
 
 	virtual void update_presets ();
 
+	virtual bool on_window_show(const Glib::ustring& title) { return true; }
+	virtual void on_window_hide() {}
+
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
@@ -230,8 +233,10 @@ class PluginUIWindow : public Gtk::Window
 	void on_hide ();
 	void on_map ();
 
+	void set_title(const Glib::ustring& title);
 
   private:
+	Glib::ustring _title;
 	PlugUIBase* _pluginui;
 	sigc::connection death_connection;
 	Gtk::Window* parent;
