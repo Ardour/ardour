@@ -433,7 +433,8 @@ deps = \
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.109.0',
-	'libgnomecanvas-2.0'   : '2.0'
+	'libgnomecanvas-2.0'   : '2.0',
+	'sndfile'              : '1.0.18'
 }
 
 def DependenciesRequiredMessage():
@@ -565,6 +566,9 @@ libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
 libraries['raptor'] = LibraryInfo()
 libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 
+libraries['sndfile'] = LibraryInfo()
+libraries['sndfile'].ParseConfig ('pkg-config --cflags --libs sndfile')
+
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
@@ -660,6 +664,12 @@ if env['DIST_TARGET'] == 'auto':
     print "detected DIST_TARGET = " + env['DIST_TARGET']
     print "*******************************\n"
 
+if env['DIST_TARGET'] != 'tiger' and env['DIST_TARGET'] != 'leopard':
+	# make sure this is all disabled for non-OS X builds
+	env['GTKOSX'] = 0
+	env['COREAUDIO'] = 0
+	env['AUDIOUNITS'] = 0
+	env['AUSTATE'] = 0
 
 if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
     #
@@ -922,29 +932,9 @@ if env['WIIMOTE']:
 
 
 #
-# Check for FLAC
-
-libraries['flac'] = LibraryInfo ()
-prep_libcheck(env, libraries['flac'])
-libraries['flac'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
-
-#
-# june 1st 2007: look for a function that is in FLAC 1.1.2 and not in later versions
-#                since the version of libsndfile we have internally does not support
-#                the new API that libFLAC has adopted
-#
-
-conf = Configure (libraries['flac'])
-if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_init', language='CXX'):
-    conf.env.Append(CCFLAGS='-DHAVE_FLAC')
-    use_flac = True
-else:
-    use_flac = False
-    
-libraries['flac'] = conf.Finish ()
-
-# or if that fails...
-#libraries['flac']    = LibraryInfo (LIBS='FLAC')
+# need a way to see if the installed version of libsndfile supports
+# FLAC ....
+# 
 
 # boost (we don't link against boost, just use some header files)
 
@@ -1081,14 +1071,6 @@ if env['SYSLIBS']:
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
 
-#
-# cannot use system one for the time being
-#
-    
-    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
-                                    LIBPATH='#libs/libsndfile',
-                                    CPPPATH=['#libs/libsndfile/src'])
-
 #    libraries['libglademm'] = LibraryInfo()
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
@@ -1108,7 +1090,6 @@ if env['SYSLIBS']:
     ]
     
     subdirs = [
-        'libs/libsndfile',
         'libs/pbd',
         'libs/midi++2',
         'libs/ardour',
@@ -1161,9 +1142,6 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
-    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
-                                    LIBPATH='#libs/libsndfile',
-                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
 #                                          LIBPATH='#libs/libglademm',
 #                                          CPPPATH='#libs/libglademm')
@@ -1178,7 +1156,6 @@ else:
     
     subdirs = [
         'libs/sigc++2',
-        'libs/libsndfile',
         'libs/pbd',
         'libs/midi++2',
         'libs/ardour',
@@ -1312,7 +1289,7 @@ env = conf.Finish()
 if env['NLS'] == 1:
     env.Append(CCFLAGS="-DENABLE_NLS")
 
-Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n ardour_version subst_dict use_flac')
+Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n ardour_version subst_dict')
 
 #
 # the configuration file may be system dependent

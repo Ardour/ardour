@@ -306,6 +306,7 @@ else
 fi
 cp ../../gtk2_ardour/ardour2_ui_sae.conf $Resources
 cp ../../gtk2_ardour/ardour2_ui_default.conf $Resources
+cp ../../gtk2_ardour/ardour2_ui_default.conf $Resources/ardour2_ui.conf
 cp ../../gtk2_ardour/ardour2_ui_light.rc $Resources
 cp ../../gtk2_ardour/ardour2_ui_dark.rc $Resources
 cp ../../gtk2_ardour/ardour2_ui_light_sae.rc $Resources
@@ -419,11 +420,27 @@ if [ x$EXTRA_PACKAGING_DIR != x ] ; then
 	rm -rf $MIXBUS_PKG_DIR
 	mkdir $MIXBUS_PKG_DIR
 	mv $APPDIR $MIXBUS_PKG_DIR/
-	# cp HowToInstallArdourMIXBUS.pdf "$MIXBUS_PKG_DIR/How To Install Ardour MIXBUS.pdf"
+	cp MixBus_Install_QuickStart.pdf "$MIXBUS_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
 	
 	if [ -x$EXTERNAL_JACK != x ] ; then
 	    cp $EXTERNAL_JACK $MIXBUS_PKG_DIR
 	fi
+
+	# create dmg
+
+	echo "Building DMG ..."
+
+	# UC_DMG=Ardour-${release_version}-${svn_version}-UC.dmg
+	# FINAL_DMG=Ardour-${release_version}-${svn_version}.dmg
+	UC_DMG=Ardour-${release_version}-${svn_version}.dmg
+
+	rm -f $UC_DMG
+	hdiutil create $UC_DMG -volname Ardour-$release_version -fs HFS+ -srcfolder $MIXBUS_PKG_DIR
+
+	# compress it
+	# echo "Compressing DMG ..."
+	# rm -f $FINAL_DMG
+        # hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
 
     else 
 
@@ -431,6 +448,8 @@ if [ x$EXTRA_PACKAGING_DIR != x ] ; then
 
     fi
 fi
+
+
 
 echo "Done."
 

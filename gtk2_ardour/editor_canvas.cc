@@ -17,6 +17,12 @@
 
 */
 
+#ifdef __APPLE__
+#define Rect AppleHasItsOwnRect
+#include <CoreServices/../Frameworks/CarbonCore.framework/Headers/MacTypes.h>
+#undef Rect
+#endif /* __APPLE__ */
+
 #include <libgnomecanvasmm/init.h>
 #include <libgnomecanvasmm/pixbuf.h>
 #include <jack/types.h>

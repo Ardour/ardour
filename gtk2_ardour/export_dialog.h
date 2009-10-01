@@ -168,6 +168,7 @@ class ExportDialog : public ArdourDialog
 	void export_toc_file (ARDOUR::Locations::LocationList& locations, const string& path);
 	void do_export ();
 	gint window_closed (GdkEventAny *ignored);
+	std::string get_suffixed_filepath ();
 
 	void track_selector_button_click ();
 

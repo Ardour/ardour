@@ -106,7 +106,7 @@ UIConfiguration::load_state ()
 		found = true;
 
 		cerr << string_compose (_("loading user ui configuration file %1"), rcfile) << endl;
-
+		
 		if (!tree.read (rcfile)) {
 			error << string_compose(_("Ardour: cannot read ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
@@ -118,7 +118,7 @@ UIConfiguration::load_state ()
 		}
 	}
 
-	if (!found)
+	if (found != 1)
 		error << "Ardour: could not find any ui configuration file, canvas will look broken." << endmsg;
 
 	pack_canvasvars();

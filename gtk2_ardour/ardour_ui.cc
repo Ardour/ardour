@@ -1161,6 +1161,7 @@ ARDOUR_UI::check_audioengine ()
 			MessageDialog msg (_("Ardour is not connected to JACK\n"
 					     "You cannot open or close sessions in this condition"));
 			pop_back_splash ();
+			msg.set_position (WIN_POS_CENTER);
 			msg.run ();
 			return false;
 		}
@@ -1985,6 +1986,9 @@ ARDOUR_UI::save_template ()
 void
 ARDOUR_UI::fontconfig_dialog ()
 {
+#if 0
+  /* this issue seems to have gone away with changes to font handling in GTK/Quartz
+   */
 #ifdef GTKOSX
 	/* X11 users will always have fontconfig info around, but new GTK-OSX users 
 	   may not and it can take a while to build it. Warn them.
@@ -2007,6 +2011,7 @@ ARDOUR_UI::fontconfig_dialog ()
 		msg.present ();
 		msg.run ();
 	}
+#endif
 #endif
 }
 

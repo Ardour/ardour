@@ -734,9 +734,8 @@ AudioFileSource::safe_file_extension(ustring file)
 		".maud", ".MAUD",
 		".vwe", ".VWE",
 		".paf",
-#ifdef HAVE_FLAC
 		".flac", ".FLAC",
-#endif // HAVE_FLAC
+		".ogg", ".OGG",
 #ifdef HAVE_COREAUDIO
 		".mp3", ".MP3",
 		".aac", ".AAC",

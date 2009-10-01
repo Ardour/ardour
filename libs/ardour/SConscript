@@ -281,7 +281,7 @@ ardour.Merge ([
 	     libraries['raptor'],
 	     libraries['samplerate'],
 	     libraries['sigc2'],
-	     libraries['sndfile-ardour'],
+	     libraries['sndfile'],
 	     libraries['vamp'],
 	     libraries['vamphost'],
 	     libraries['xml']

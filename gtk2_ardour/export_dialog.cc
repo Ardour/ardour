@@ -976,12 +976,77 @@ ExportDialog::do_export_cd_markers (const string& path,const string& cuefile_typ
 	}
 }
 
+string
+ExportDialog::get_suffixed_filepath ()
+{
+	string filepath = file_entry.get_text();
+
+	if (wants_dir()) {
+		return filepath;
+	}
+
+	string::size_type dotpos;
+	
+	/* maybe add suffix */
+	
+	int file_format = sndfile_header_format_from_string (header_format_combo.get_active_text ());
+	
+	if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
+		if (filepath.find (".wav") != filepath.length() - 4) {
+			if ((dotpos = filepath.rfind ('.')) != string::npos) {
+				filepath = filepath.substr (0, dotpos);
+			}
+			filepath += ".wav";
+		}
+	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_AIFF) {
+		if (filepath.find (".aiff") != filepath.length() - 5) {
+			if ((dotpos = filepath.rfind ('.')) != string::npos) {
+				filepath = filepath.substr (0, dotpos);
+			}
+			filepath += ".aiff";
+		}
+	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_CAF) {
+		if (filepath.find (".caf") != filepath.length() - 4) {
+			if ((dotpos = filepath.rfind ('.')) != string::npos) {
+				filepath = filepath.substr (0, dotpos);
+			}
+			filepath += ".caf";
+		}
+	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_W64) {
+		if (filepath.find (".w64") != filepath.length() - 4) {
+			if ((dotpos = filepath.rfind ('.')) != string::npos) {
+				filepath = filepath.substr (0, dotpos);
+			}
+			filepath += ".w64";
+		}
+	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_FLAC) {
+		if (filepath.find (".flac") != filepath.length() - 5) {
+			if ((dotpos = filepath.rfind ('.')) != string::npos) {
+				filepath = filepath.substr (0, dotpos);
+			}
+			filepath += ".flac";
+		}
+	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_OGG) {
+		if (filepath.find (".ogg") != filepath.length() - 4) {
+			if ((dotpos = filepath.rfind ('.')) != string::npos) {
+				filepath = filepath.substr (0, dotpos);
+			}
+			filepath += ".ogg";
+		}
+	} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_RAW) {
+		if (filepath.find (".raw") != filepath.length() - 4) {
+			if ((dotpos = filepath.rfind ('.')) != string::npos) {
+				filepath = filepath.substr (0, dotpos);
+			}
+			filepath += ".raw";
+		}
+	}
+	return filepath;
+}
 
 void
 ExportDialog::do_export ()
 {
-	string filepath = file_entry.get_text();
-
 	if (!ARDOUR_UI::instance()->the_engine().connected()) {
 		MessageDialog msg (*this, 
 				   _("Not connected to audioengine"),
@@ -994,36 +1059,9 @@ ExportDialog::do_export ()
 		return;
 	}
 
-	if (!wants_dir()) {
+	string filepath;
 
-		/* maybe add suffix */
-		
-		int file_format = sndfile_header_format_from_string (header_format_combo.get_active_text ());
-		
-		if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
-			if (filepath.find (".wav") != filepath.length() - 4) {
-				filepath += ".wav";
-			}
-		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_AIFF) {
-			if (filepath.find (".aiff") != filepath.length() - 5) {
-				filepath += ".aiff";
-			}
-		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_W64) {
-			if (filepath.find (".w64") != filepath.length() - 4) {
-				filepath += ".w64";
-			}
-		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_FLAC) {
-			if (filepath.find (".flac") != filepath.length() - 5) {
-				filepath += ".flac";
-			}
-		} else if ((file_format & SF_FORMAT_TYPEMASK) == SF_FORMAT_CAF) {
-			if (filepath.find (".caf") != filepath.length() - 4) {
-				filepath += ".caf";
-			}
-		}
-
-		/* others ? */
-	}
+	filepath = get_suffixed_filepath ();
 
 	if(!is_filepath_valid(filepath)){
 		return;
@@ -1132,11 +1170,21 @@ ExportDialog::start_export ()
 void
 ExportDialog::header_chosen ()
 {
-	if (sndfile_header_format_from_string (header_format_combo.get_active_text ()) == SF_FORMAT_WAV) {
+        int fmt = sndfile_header_format_from_string (header_format_combo.get_active_text ());
+	
+	if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_OGG) {
 		endian_format_combo.set_sensitive (false);
-	} else {
-		endian_format_combo.set_sensitive (true);
+		bitdepth_format_combo.set_sensitive (false);     
+        } else {
+	        if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
+		       endian_format_combo.set_sensitive (false);
+		} else {
+		       endian_format_combo.set_sensitive (true);
+		}
+		bitdepth_format_combo.set_sensitive (true);     
 	}
+
+	file_entry.set_text (get_suffixed_filepath());
 }
 
 void
@@ -1333,14 +1381,22 @@ ExportDialog::initSpec(string &filepath)
 
 	spec.format |= sndfile_header_format_from_string (header_format_combo.get_active_text ());
 
+	/* if they picked Ogg, give them Ogg/Vorbis */
+
+	if ((spec.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_OGG) {
+	  spec.format |= SF_FORMAT_VORBIS;
+	}
+
 	if (!Profile->get_sae()) {
-		if (((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_WAV)) {
-			/* RIFF/WAV specifies endianess */
+	  if (((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_WAV) && ((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG)) {
+			/* RIFF/WAV specifies endianess and O/V has no such concept */
 			spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
 		}
 	}
 
-	spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
+	if ((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG) {
+	  spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
+	}
 
 	string sr_str = sample_rate_combo.get_active_text();
 	if (sr_str == N_("22.05kHz")) {

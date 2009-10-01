@@ -88,6 +88,7 @@ AudioExportSpecification::~AudioExportSpecification ()
 void
 AudioExportSpecification::init ()
 {
+        memset (&sfinfo, 0, sizeof (sfinfo));
 	src_state = 0;
 	pos = 0;
 	total_frames = 0;
@@ -169,7 +170,7 @@ AudioExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
 		return -1;
 	}
 
-	if ((data_width = sndfile_data_width(format)) == 0) {
+	if (((format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG) && (data_width = sndfile_data_width(format)) == 0) {
 		error << _("Bad data width size.  Report me!") << endmsg;
 		return -1;
 	}
@@ -197,7 +198,7 @@ AudioExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
 	}
 
 	/* XXX make sure we have enough disk space for the output */
-	
+
 	if ((out = sf_open (path.c_str(), SFM_WRITE, &sfinfo)) == 0) {
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		error << string_compose(_("Export: cannot open output file \"%1\" (%2)"), path, errbuf) << endmsg;

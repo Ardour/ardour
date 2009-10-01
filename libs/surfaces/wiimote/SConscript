@@ -35,7 +35,7 @@ wiimote.Append(LINKFLAGS="-lcwiid")
 wiimote.Merge ([
 	libraries['ardour'],
 	libraries['ardour_cp'],
-	libraries['sndfile-ardour'],
+	libraries['sndfile'],
 	libraries['midi++2'],
 	libraries['pbd'],
 	libraries['sigc2'],

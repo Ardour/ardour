@@ -13,7 +13,7 @@ rb.Merge  ([libraries['fftw3f'],
 	    libraries['fftw3'],
             libraries['vamp'],
             libraries['samplerate'],
-            libraries['sndfile-ardour']
+            libraries['sndfile']
             ])
 
 rb.Append (CPPATH='#libs/rubberband/rubberband', CXXFLAGS="-Ilibs/rubberband/rubberband")
