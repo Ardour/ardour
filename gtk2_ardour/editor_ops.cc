@@ -6238,10 +6238,8 @@ Editor::goto_visual_state (uint32_t n)
 void
 Editor::start_visual_state_op (uint32_t n)
 {
-	cerr << "Start visual op\n";
 	if (visual_state_op_connection.empty()) {
 		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
-		cerr << "\tqueued new timeout\n";
 	}
 }
 
@@ -6249,11 +6247,13 @@ void
 Editor::cancel_visual_state_op (uint32_t n)
 {
 	if (!visual_state_op_connection.empty()) {
-		cerr << "cancel visual op, time to goto\n";
 		visual_state_op_connection.disconnect();
 		goto_visual_state (n);
 	} else {
-		cerr << "cancel visual op, do nothing\n";
+		//we land here if called from the menu OR if end_visual_state_op has been called
+		//so check if we are already in visual state n
+		// XXX not yet checking it at all, but redoing does not hurt
+		goto_visual_state (n);
 	}
 }
 

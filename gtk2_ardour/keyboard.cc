@@ -233,7 +233,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 
 				const AccelKey& ak (k->first);
 				
-				if (keyval == ak.get_key() && (Gdk::ModifierType)(event->state | Gdk::RELEASE_MASK) == ak.get_mod()) {
+				if (keyval == ak.get_key() && (Gdk::ModifierType)((event->state & Keyboard::RelevantModifierKeyMask)| Gdk::RELEASE_MASK) == ak.get_mod()) {
 					ret = true;
 					break;
 				}
