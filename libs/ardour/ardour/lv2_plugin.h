@@ -65,6 +65,7 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	SLV2Plugin slv2_plugin()         { return _plugin; }
 	SLV2UI     slv2_ui()             { return _ui; }
+	bool       is_external_ui() const;
 	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
 
 	const char* port_symbol(uint32_t port);
@@ -174,6 +175,7 @@ struct LV2World {
 	SLV2Value toggled;
 	SLV2Value srate;
 	SLV2Value gtk_gui;
+	SLV2Value external_gui;
 };
 
 
