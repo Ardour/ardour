@@ -182,34 +182,44 @@ LadspaPlugin::default_value (uint32_t port)
 			ret = prh[port].LowerBound;
 			bounds_given = true;
 			sr_scaling = true;
-			earlier_hint = true;
 		}
 		
 		/* FIXME: add support for logarithmic defaults */
 		
 		else if (LADSPA_IS_HINT_DEFAULT_LOW(prh[port].HintDescriptor)) {
-			ret = prh[port].LowerBound * 0.75f + prh[port].UpperBound * 0.25f;
+			if (LADSPA_IS_HINT_LOGARITHMIC(prh[port].HintDescriptor)) {
+				ret = exp(log(prh[port].LowerBound) * 0.75f + log(prh[port].UpperBound) * 0.25f);
+			}
+			else {
+				ret = prh[port].LowerBound * 0.75f + prh[port].UpperBound * 0.25f;
+			}
 			bounds_given = true;
 			sr_scaling = true;
-			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_MIDDLE(prh[port].HintDescriptor)) {
-			ret = prh[port].LowerBound * 0.50f + prh[port].UpperBound * 0.50f;
+			if (LADSPA_IS_HINT_LOGARITHMIC(prh[port].HintDescriptor)) {
+				ret = exp(log(prh[port].LowerBound) * 0.5f + log(prh[port].UpperBound) * 0.5f);
+			}
+			else {
+				ret = prh[port].LowerBound * 0.5f + prh[port].UpperBound * 0.5f;
+			}
 			bounds_given = true;
 			sr_scaling = true;
-			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_HIGH(prh[port].HintDescriptor)) {
-			ret = prh[port].LowerBound * 0.25f + prh[port].UpperBound * 0.75f;
+			if (LADSPA_IS_HINT_LOGARITHMIC(prh[port].HintDescriptor)) {
+				ret = exp(log(prh[port].LowerBound) * 0.25f + log(prh[port].UpperBound) * 0.75f);
+			}
+			else {
+				ret = prh[port].LowerBound * 0.25f + prh[port].UpperBound * 0.75f;
+			}
 			bounds_given = true;
 			sr_scaling = true;
-			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_MAXIMUM(prh[port].HintDescriptor)) {
 			ret = prh[port].UpperBound;
 			bounds_given = true;
 			sr_scaling = true;
-			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_0(prh[port].HintDescriptor)) {
 			ret = 0.0f;

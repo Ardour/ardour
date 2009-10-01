@@ -109,6 +109,7 @@ BarController::entry_input (double* new_value)
 	// extract a double from the string and take its log
 	Entry *entry = dynamic_cast<Entry *>(&spinner);
 	stringstream stream(entry->get_text());
+	stream.imbue(std::locale(""));
 
 	double value;
 	stream >> value;
@@ -134,12 +135,33 @@ BarController::entry_output ()
 	}
 
 	// generate the exponential and turn it into a string
+	// convert to correct locale. 
+	
 	stringstream stream;
+	string str;
+	size_t found;
+
+	// Gtk.Entry does not like the thousands separator, so we have to  
+	// remove it after conversion from float to string.
+
+	stream.imbue(std::locale(""));
 	stream.precision(spinner.get_digits());
+
 	stream << fixed << exp(spinner.get_adjustment()->get_value());
 	
+	str=stream.str();
+
+	// find thousands separators, remove them
+	found = str.find(use_facet<numpunct<char> >(std::locale("")).thousands_sep());
+	while(found != str.npos) {
+		str.erase(found,1);
+
+		//find next
+		found = str.find(use_facet<numpunct<char> >(std::locale("")).thousands_sep());
+	}
+
 	Entry *entry = dynamic_cast<Entry *>(&spinner);
-	entry->set_text(stream.str());
+	entry->set_text(str);
 	
 	return true;
 }
