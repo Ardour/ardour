@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-07-05 19:46+0100\n"
-"PO-Revision-Date: 2009-07-05 20:06+0100\n"
+"PO-Revision-Date: 2009-08-12 10:14+0100\n"
 "Last-Translator: Robert Schwede <robert-schwede@gmx.de>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -3038,11 +3038,11 @@ msgstr "Abschnitt aus Bereich erstellen..."
 
 #: gtk2_ardour/editor.cc:2080
 msgid "Consolidate range"
-msgstr "Bereich als neue Region"
+msgstr "Bereich als neue Region pre-Mixer"
 
 #: gtk2_ardour/editor.cc:2081
 msgid "Consolidate range with processing"
-msgstr "Bereich als neue Region"
+msgstr "Bereich als neue Region post-Mixer"
 
 #: gtk2_ardour/editor.cc:2082
 msgid "Bounce range to region list"
@@ -7639,5 +7639,4 @@ msgstr "Programmierfehler: %1 %2"
 #: gtk2_ardour/actions.cc:344
 msgid "Unknown action name: %1"
 msgstr "Unbekannte Aktionsbezeichnung: %1"
-
 
