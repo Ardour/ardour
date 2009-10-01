@@ -6600,7 +6600,12 @@ Editor::cancel_visual_state_op (uint32_t n)
 	if (!visual_state_op_connection.empty()) {
 		visual_state_op_connection.disconnect();
 		goto_visual_state (n);
-	} 
+	}  else {
+		//we land here if called from the menu OR if end_visual_state_op has been called
+		//so check if we are already in visual state n
+		// XXX not yet checking it at all, but redoing does not hurt
+		goto_visual_state (n);
+	}
 }
 
 bool
