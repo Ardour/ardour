@@ -66,8 +66,20 @@ void
 Splash::on_realize ()
 {
 	Window::on_realize ();
-	get_window()->set_decorations (Gdk::WMDecoration (0));
-	/* get_window()->set_override_redirect(true);*/
+
+	// Without override redirect, splash screen has redraw problems with ion3.
+	// With override redirect, it is not properly on top with some other
+	// popular (metacity for example) window managers.
+	// Maybe setting override redirect and something else (like the splash wm hint)
+	// will make the splash to work for everybody
+	// Override redirect only does not work on OS X too.
+	// Until we find solution that works for everybody this env var kludge is used
+	if (getenv ("ARDOUR_USE_OVERRIDE_REDIRECT_SPLASH") != 0) {
+		get_window()->set_override_redirect (true);
+	} else {
+		get_window()->set_decorations (Gdk::WMDecoration (0));
+	}
+
 	layout->set_font_description (get_style()->get_font());
 }
 
