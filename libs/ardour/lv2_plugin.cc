@@ -416,7 +416,7 @@ LV2Plugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	
     desc.integer_step = slv2_port_has_property(_plugin, port, _world.integer);
     desc.toggled = slv2_port_has_property(_plugin, port, _world.toggled);
-    desc.logarithmic = false; // TODO (LV2 extension)
+    desc.logarithmic = slv2_port_has_property(_plugin, port, _world.logarithmic);
     desc.sr_dependent = slv2_port_has_property(_plugin, port, _world.srate);
     desc.label = slv2_value_as_string(slv2_port_get_name(_plugin, port));
     desc.lower = min ? slv2_value_as_float(min) : 0.0f;
@@ -659,6 +659,7 @@ LV2World::LV2World()
 	srate = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
 	gtk_gui = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#GtkUI");
 	external_gui = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
+ 	logarithmic = slv2_value_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
 }
 
 LV2World::~LV2World()
