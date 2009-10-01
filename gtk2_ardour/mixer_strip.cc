@@ -782,44 +782,223 @@ MixerStrip::connect_to_pan ()
 	panners.pan_changed (this);
 }
 
+/*
+ * Output port labelling
+ * =====================
+ * 
+ * Case 1: Each output has one connection, all connections are to system:playback_%i
+ *   out 1 -> system:playback_1
+ *   out 2 -> system:playback_2
+ *   out 3 -> system:playback_3
+ *   Display as: 1/2/3
+ *
+ * Case 2: Each output has one connection, all connections are to ardour:track_x/in 1
+ *   out 1 -> ardour:track_x/in 1
+ *   out 2 -> ardour:track_x/in 2
+ *   Display as: track_x
+ * 
+ * Case 3: Each output has one connection, all connections are to Jack client "program x"
+ *   out 1 -> program x:foo
+ *   out 2 -> program x:foo
+ *   Display as: program x
+ *
+ * Case 4: No connections (Disconnected)
+ *   Display as: -
+ * 
+ * Default case (unusual routing):
+ *   Display as: *number of connections*
+ *
+ * Tooltips
+ * ========
+ * .-----------------------------------------------.
+ * | Mixdown                                       |
+ * | out 1 -> ardour:master/in 1, jamin:input/in 1 |
+ * | out 2 -> ardour:master/in 2, jamin:input/in 2 |
+ * '-----------------------------------------------'
+ * .-----------------------------------------------.
+ * | Guitar SM58                                   |
+ * | Disconnected                                  |
+ * '-----------------------------------------------'
+ */
+
+void
+MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool for_input)
+{
+	uint32_t io_count;
+	uint32_t io_index;
+	Port *port;
+	const char **connections;
+	
+	uint32_t connection_index;
+    uint32_t total_connection_count = 0;
+    uint32_t io_connection_count = 0;
+	uint32_t ardour_connection_count = 0;
+	uint32_t system_connection_count = 0;
+	uint32_t other_connection_count = 0;
+
+	ostringstream label;
+	string label_string;
+	char * label_cstr;
+
+	bool have_label = false;
+	bool each_io_has_one_connection = true;
+
+	string connection_name;
+	string ardour_track_name;
+	string other_connection_type;
+	string system_ports;
+	string system_port;
+	
+	ostringstream tooltip;
+	char * tooltip_cstr;
+	
+	tooltip << route->name();
+
+    if (for_input) {
+        io_count = route->n_inputs();
+    } else {
+        io_count = route->n_outputs();
+    }    
+    
+	for (io_index = 0; io_index < io_count; ++io_index) {
+	    if (for_input) {
+	        port = route->input(io_index);
+	    } else {
+	        port = route->output(io_index);
+	    }
+	    
+	    connections = port->get_connections();
+	    io_connection_count = 0;
+	    
+		if (connections) {
+			for (connection_index = 0; connections[connection_index]; ++connection_index) {
+			    connection_name = connections[connection_index];
+			    
+			    if (connection_index == 0) {
+        	        tooltip << endl << port->name().substr(port->name().find("/") + 1) << " -> " << connection_name;
+        	    } else {
+        	        tooltip << ", " << connection_name;
+        	    }
+        	    
+			    if (connection_name.find("ardour:") == 0) {
+			        if (ardour_track_name.empty()) {
+			            // "ardour:Master/in 1" -> "ardour:Master/"
+			            ardour_track_name = connection_name.substr(0, connection_name.find("/") + 1);
+			        }
+			        
+			        if (connection_name.find(ardour_track_name) == 0) {
+			            ++ardour_connection_count;
+			        }
+			    } else if (connection_name.find("system:") == 0) {
+			        if (for_input) {
+			            // "system:capture_123" -> "123"
+			            system_port = connection_name.substr(15);
+			        } else {
+			            // "system:playback_123" -> "123"
+			            system_port = connection_name.substr(16);
+			        }
+			        
+			        if (system_ports.empty()) {
+			            system_ports += system_port;
+			        } else {
+			            system_ports += "/" + system_port;
+			        }
+			    
+			        ++system_connection_count;
+			    } else {
+			        if (other_connection_type.empty()) {
+			            // "jamin:in 1" -> "jamin:"
+			            other_connection_type = connection_name.substr(0, connection_name.find(":") + 1);
+			        }
+			        
+			        if (connection_name.find(other_connection_type) == 0) {
+    			        ++other_connection_count;
+    			    }
+			    }
+			    
+      	        ++total_connection_count;
+      	        ++io_connection_count;
+			}
+		} 
+		
+		if (io_connection_count != 1) {
+		    each_io_has_one_connection = false;
+		}
+    }
+    
+    if (total_connection_count == 0) {
+        tooltip << endl << _("Disconnected");
+    }
+    
+    tooltip_cstr = new char[tooltip.str().size() + 1];
+    strcpy(tooltip_cstr, tooltip.str().c_str());
+    
+    if (for_input) {
+	    ARDOUR_UI::instance()->set_tip (&input_button, tooltip_cstr, "");
+	} else {
+	    ARDOUR_UI::instance()->set_tip (&output_button, tooltip_cstr, "");
+	}  
+	
+    if (each_io_has_one_connection) {
+        if ((total_connection_count == ardour_connection_count)) {
+            // all connections are to the same track in ardour
+            // "ardour:Master/" -> "Master"
+            label << ardour_track_name.substr(7, ardour_track_name.find("/") - 7);
+            have_label = true;
+        }
+        else if (total_connection_count == system_connection_count) {
+            // all connections are to system ports
+            label << system_ports;
+            have_label = true;
+        }
+        else if (total_connection_count == other_connection_count) {
+            // all connections are to the same external program eg jamin
+            // "jamin:" -> "jamin"
+            label << other_connection_type.substr(0, other_connection_type.size() - 1);
+            have_label = true;
+        }
+    }
+    
+    if (!have_label) {
+        if (total_connection_count == 0) {
+            // Disconnected
+            label << "-";
+        } else {
+            // Odd configuration
+            label << "*" << total_connection_count << "*";
+        }
+    }
+    
+	switch (width) {
+	case Wide:
+	    label_string = label.str().substr(0, 6);
+		break;
+	case Narrow:
+		label_string = label.str().substr(0, 3);
+		break;
+	}
+	
+    label_cstr = new char[label_string.size() + 1];
+    strcpy(label_cstr, label_string.c_str());
+    
+    if (for_input) {
+        input_label.set_text (label_cstr);
+    } else {
+        output_label.set_text (label_cstr);
+    }
+}
+
 void
 MixerStrip::update_input_display ()
 {
-	ARDOUR::Connection *c;
-
-	if ((c = _route->input_connection()) != 0) {
-		input_label.set_text (c->name());
-	} else {
-		switch (_width) {
-		case Wide:
-			input_label.set_text (_(" Input"));
-			break;
-		case Narrow:
-			input_label.set_text (_("I"));
-			break;
-		}
-	}
+	update_io_button (_route, _width, true);
 	panners.setup_pan ();
 }
 
 void
 MixerStrip::update_output_display ()
 {
-	ARDOUR::Connection *c;
-
-	if ((c = _route->output_connection()) != 0) {
-		output_label.set_text (c->name());
-	} else {
-		switch (_width) {
-		case Wide:
-			output_label.set_text (_("Output"));
-			break;
-		case Narrow:
-			output_label.set_text (_("O"));
-			break;
-		}
-	}
-
+    update_io_button (_route, _width, false);
 	gpm.setup_meters ();
 	panners.setup_pan ();
 }

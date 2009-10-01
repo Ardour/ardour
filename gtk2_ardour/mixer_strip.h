@@ -258,6 +258,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void engine_stopped();
 
 	static int scrollbar_height;
+	
+	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
 };
 
 #endif /* __ardour_mixer_strip__ */
