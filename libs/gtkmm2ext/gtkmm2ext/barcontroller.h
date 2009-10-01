@@ -48,6 +48,8 @@ class BarController : public Gtk::Frame
 	void set_use_parent (bool yn);
 
 	void set_sensitive (bool yn);
+	
+	void set_logarithmic (bool yn) { logarithmic = yn; }
 
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;
@@ -73,6 +75,7 @@ class BarController : public Gtk::Frame
 	GdkWindow*          grab_window;
 	Gtk::SpinButton     spinner;
 	bool                use_parent;
+	bool                logarithmic;
 
 	virtual std::string get_label (int& /*x*/) {
 		return "";
@@ -94,6 +97,9 @@ class BarController : public Gtk::Frame
 
 	void entry_activated ();
 	void drop_grab ();
+	
+	int entry_input (double* new_value);
+	bool entry_output ();
 };
 
 

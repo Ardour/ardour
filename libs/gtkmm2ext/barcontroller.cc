@@ -18,6 +18,7 @@
 */
 
 #include <string>
+#include <sstream>
 #include <climits>
 #include <cstdio>
 #include <cmath>
@@ -48,6 +49,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	switching = false;
 	switch_on_release = false;
 	use_parent = false;
+	logarithmic = false;
 
 	layout = darea.create_pango_layout("");
 
@@ -76,6 +78,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	spinner.signal_input().connect (mem_fun (*this, &BarController::entry_input));
 	spinner.signal_output().connect (mem_fun (*this, &BarController::entry_output));
 	spinner.set_digits (3);
+	spinner.set_numeric (true);
 
 	add (darea);
 	show_all ();
@@ -422,13 +425,6 @@ BarController::switch_to_spinner ()
 void
 BarController::entry_activated ()
 {
-	string text = spinner.get_text ();
-	float val;
-
-	if (sscanf (text.c_str(), "%f", &val) == 1) {
-		adjustment.set_value (val);
-	}
-	
 	switch_to_bar ();
 }
 
@@ -453,16 +449,84 @@ BarController::set_sensitive (bool yn)
 	darea.set_sensitive (yn);
 }
 
-bool
-BarController::entry_input (double* /*v*/)
+/* 
+    This is called when we need to update the adjustment with the value
+    from the spinner's text entry.
+    
+    We need to use Gtk::Entry::get_text to avoid recursive nastiness :)
+    
+    If we're not in logarithmic mode we can return false to use the 
+    default conversion.
+    
+    In theory we should check for conversion errors but set numeric
+    mode to true on the spinner prevents invalid input.
+*/
+int
+BarController::entry_input (double* new_value)
 {
-	return false;
+	if (!logarithmic) {
+		return false;
+	}
+
+	// extract a double from the string and take its log
+	Entry *entry = dynamic_cast<Entry *>(&spinner);
+	stringstream stream(entry->get_text());
+	stream.imbue(std::locale(""));
+
+	double value;
+	stream >> value;
+	
+	*new_value = log(value);
+	return true;
 }
 
+/* 
+    This is called when we need to update the spinner's text entry 
+    with the value of the adjustment.
+    
+    We need to use Gtk::Entry::set_text to avoid recursive nastiness :)
+    
+    If we're not in logarithmic mode we can return false to use the 
+    default conversion.
+*/
 bool
 BarController::entry_output ()
 {
-	return false;
+	if (!logarithmic) {
+		return false;
+	}
+
+	// generate the exponential and turn it into a string
+	// convert to correct locale. 
+	
+	stringstream stream;
+	string str;
+	size_t found;
+
+	// Gtk.Entry does not like the thousands separator, so we have to  
+	// remove it after conversion from float to string.
+
+	stream.imbue(std::locale(""));
+	stream.precision(spinner.get_digits());
+
+	stream << fixed << exp(spinner.get_adjustment()->get_value());
+	
+	str=stream.str();
+
+	// find thousands separators, remove them
+	found = str.find(use_facet<numpunct<char> >(std::locale("")).thousands_sep());
+	while(found != str.npos) {
+		str.erase(found,1);
+
+		//find next
+		found = str.find(use_facet<numpunct<char> >(std::locale("")).thousands_sep());
+	}
+
+	Entry *entry = dynamic_cast<Entry *>(&spinner);
+	entry->set_text(str);
+	
+	return true;
 }
+
 
 	
