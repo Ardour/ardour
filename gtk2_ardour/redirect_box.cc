@@ -918,13 +918,13 @@ RedirectBox::rename_redirect (boost::shared_ptr<Redirect> redirect)
 	switch (name_prompter.run ()) {
 
 	case Gtk::RESPONSE_ACCEPT:
-        name_prompter.get_result (result);
-        if (result.length()) {
-			if (ARDOUR_UI::instance()->the_editor().get_named_time_axis(result) != 0) {
+		name_prompter.get_result (result);
+		if (result.length()) {
+			if (_session.route_by_name (result)) {
 				ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
 				return;
 			}
-
+			
 			redirect->set_name (result, this);
 		}	
 		break;
