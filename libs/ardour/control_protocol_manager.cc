@@ -309,7 +309,7 @@ ControlProtocolManager::set_state (const XMLNode& node)
 
 			prop = (*citer)->property (X_("active"));
 
-			if (prop && prop->value() == X_("yes")) {
+			if (prop && string_is_affirmative (prop->value())) {
 				if ((prop = (*citer)->property (X_("name"))) != 0) {
 					ControlProtocolInfo* cpi = cpi_by_name (prop->value());
 					if (cpi) {

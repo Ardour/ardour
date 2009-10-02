@@ -171,7 +171,7 @@ StreamPanner::set_state (const XMLNode& node)
 	XMLNodeConstIterator iter;
 
 	if ((prop = node.property (X_("muted")))) {
-		set_muted (prop->value() == "yes");
+		set_muted (string_is_affirmative (prop->value()));
 	}
 
 	return 0;
@@ -1162,12 +1162,12 @@ Panner::set_state (const XMLNode& node)
 	outputs.clear ();
 
 	if ((prop = node.property (X_("linked"))) != 0) {
-		set_linked (prop->value() == "yes");
+		set_linked (string_is_affirmative (prop->value()));
 	}
 
 
 	if ((prop = node.property (X_("bypassed"))) != 0) {
-		set_bypassed (prop->value() == "yes");
+		set_bypassed (string_is_affirmative (prop->value()));
 	}
 
 	if ((prop = node.property (X_("link_direction"))) != 0) {

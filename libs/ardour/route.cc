@@ -1696,15 +1696,15 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert (prop->value()=="yes"?true:false, this);
+		set_phase_invert (string_is_affirmative (prop->value()), this);
 	}
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
-		set_denormal_protection (prop->value()=="yes"?true:false, this);
+		set_denormal_protection (string_is_affirmative (prop->value()), this);
 	}
 
 	if ((prop = node.property (X_("muted"))) != 0) {
-		bool yn = prop->value()=="yes"?true:false; 
+		bool yn = string_is_affirmative (prop->value());
 
 		/* force reset of mute status */
 
@@ -1714,7 +1714,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property (X_("soloed"))) != 0) {
-		bool yn = prop->value()=="yes"?true:false; 
+		bool yn = string_is_affirmative (prop->value());
 
 		/* force reset of solo status */
 
@@ -1724,19 +1724,19 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property (X_("mute-affects-pre-fader"))) != 0) {
-		_mute_affects_pre_fader = (prop->value()=="yes")?true:false;
+		_mute_affects_pre_fader = string_is_affirmative (prop->value());
 	}
 
 	if ((prop = node.property (X_("mute-affects-post-fader"))) != 0) {
-		_mute_affects_post_fader = (prop->value()=="yes")?true:false;
+		_mute_affects_post_fader = string_is_affirmative (prop->value());
 	}
 
 	if ((prop = node.property (X_("mute-affects-control-outs"))) != 0) {
-		_mute_affects_control_outs = (prop->value()=="yes")?true:false;
+		_mute_affects_control_outs = string_is_affirmative (prop->value());
 	}
 
 	if ((prop = node.property (X_("mute-affects-main-outs"))) != 0) {
-		_mute_affects_main_outs = (prop->value()=="yes")?true:false;
+		_mute_affects_main_outs = string_is_affirmative (prop->value());
 	}
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {

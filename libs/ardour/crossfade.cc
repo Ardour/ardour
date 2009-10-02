@@ -728,7 +728,7 @@ Crossfade::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("active")) != 0) {
-		bool x = (prop->value() == "yes");
+		bool x = string_is_affirmative (prop->value());
 		if (x != _active) {
 			_active = x;
 			what_changed = Change (what_changed | ActiveChanged);
@@ -738,13 +738,13 @@ Crossfade::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("follow-overlap")) != 0) {
-		_follow_overlap = (prop->value() == "yes");
+		_follow_overlap = string_is_affirmative (prop->value());
 	} else {
 		_follow_overlap = false;
 	}
 
 	if ((prop = node.property ("fixed")) != 0) {
-		_fixed = (prop->value() == "yes");
+		_fixed = string_is_affirmative (prop->value());
 	} else {
 		_fixed = false;
 	}

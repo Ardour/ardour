@@ -278,7 +278,7 @@ Redirect::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	if (_active != (prop->value() == "yes")) {
+	if (_active != string_is_affirmative (prop->value())) {
 		if (!(_session.state_of_the_state() & Session::Loading) || 
 		    !Session::get_disable_all_loaded_plugins()) {
 			_active = !_active;

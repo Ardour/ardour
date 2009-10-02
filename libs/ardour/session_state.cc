@@ -878,7 +878,7 @@ Session::load_options (const XMLNode& node)
 
 	if ((child = find_named_node (node, "end-marker-is-free")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
-			_end_location_is_free = (prop->value() == "yes");
+			_end_location_is_free = string_is_affirmative (prop->value());
 		}
 	}
 

@@ -1611,7 +1611,7 @@ IO::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("active"))) != 0) {
-		set_active (prop->value() == "yes");
+		set_active (string_is_affirmative (prop->value()));
 	}
 
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {

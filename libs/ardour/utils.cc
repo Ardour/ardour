@@ -582,6 +582,26 @@ ARDOUR::auto_style_to_string (AutoStyle as)
 	return "";
 }
 
+bool
+string_is_affirmative (const std::string& str)
+{
+	/* to be used only with XML data - not intended to handle user input */
+
+	if (str.length() == 1) {
+		if (str[0] == '1' || str[0] == 'y' || str[0] == 'Y') {
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		if (str == "yes" || str == "Yes" || str == "YES") {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
 extern "C" {
 	void c_stacktrace() { stacktrace (cerr); }
 }
