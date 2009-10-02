@@ -399,7 +399,7 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 			if ((prop = (*iter)->property ("automation-id")) != 0) {
 
 				Evoral::Parameter param = ARDOUR::EventTypeMap::instance().new_parameter(prop->value());
-				bool show = ((prop = (*iter)->property ("shown")) != 0) && prop->value() == "yes";
+				bool show = ((prop = (*iter)->property ("shown")) != 0) && string_is_affirmative (prop->value());
 				create_automation_child(param, show);
 			} else {
 				warning << "Automation child has no ID" << endmsg;
@@ -1965,7 +1965,7 @@ RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_p
 
 	if ((node = track->get_state_node()) != 0) {
 		if  ((prop = node->property ("shown")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				hideit = false;
 			}
 		} 

@@ -155,11 +155,11 @@ IOProcessor::set_state (const XMLNode& node)
 	Processor::set_state(node);
 
 	if ((prop = node.property ("own-input")) != 0) {
-		_own_input = (prop->value() == "yes");
+		_own_input = string_is_affirmative (prop->value());
 	}
 
 	if ((prop = node.property ("own-output")) != 0) {
-		_own_output = (prop->value() == "yes");
+		_own_output = string_is_affirmative (prop->value());
 	}
 
 	/* don't attempt to set state for a proxied IO that we don't own */

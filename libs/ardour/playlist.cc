@@ -1820,7 +1820,7 @@ Playlist::set_state (const XMLNode& node)
 		} else if (prop->name() == X_("orig_diskstream_id")) {
 			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {
-			_frozen = (prop->value() == X_("yes"));
+			_frozen = string_is_affirmative (prop->value());
 		}
 	}
 

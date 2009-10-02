@@ -402,7 +402,7 @@ Location::set_state (const XMLNode& node)
 	_flags = Flags (string_2_enum (prop->value(), _flags));
 
 	if ((prop = node.property ("locked")) != 0) {
-		_locked = (prop->value() == "yes");
+		_locked = string_is_affirmative (prop->value());
 	} else {
 		_locked = false;
 	}

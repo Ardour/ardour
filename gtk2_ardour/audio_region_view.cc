@@ -1061,25 +1061,25 @@ AudioRegionView::set_flags (XMLNode* node)
 	XMLProperty *prop;
 
 	if ((prop = node->property ("waveform-visible")) != 0) {
-		if (prop->value() == "yes") {
+		if (string_is_affirmative (prop->value())) {
 			_flags |= WaveformVisible;
 		}
 	}
 
 	if ((prop = node->property ("envelope-visible")) != 0) {
-		if (prop->value() == "yes") {
+		if (string_is_affirmative (prop->value())) {
 			_flags |= EnvelopeVisible;
 		}
 	}
 
 	if ((prop = node->property ("waveform-rectified")) != 0) {
-		if (prop->value() == "yes") {
+		if (string_is_affirmative (prop->value())) {
 			_flags |= WaveformRectified;
 		}
 	}
 
 	if ((prop = node->property ("waveform-logscaled")) != 0) {
-		if (prop->value() == "yes") {
+		if (string_is_affirmative (prop->value())) {
 			_flags |= WaveformLogScaled;
 		}
 	}

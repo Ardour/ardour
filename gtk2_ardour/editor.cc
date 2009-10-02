@@ -2337,7 +2337,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("internal-edit"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = string_is_affirmative (prop->value());
 		RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
@@ -2351,7 +2351,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("show-waveforms-recording"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = string_is_affirmative (prop->value());
 		_show_waveforms_recording = !yn;
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
 		if (act) {
@@ -2363,7 +2363,7 @@ Editor::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("show-measures"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = string_is_affirmative (prop->value());
 		_show_measures = !yn;
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 		if (act) {
@@ -2375,7 +2375,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("follow-playhead"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = string_is_affirmative (prop->value());
 		set_follow_playhead (yn);
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 		if (act) {
@@ -2391,7 +2391,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("xfades-visible"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = string_is_affirmative (prop->value());
 		_xfade_visibility = !yn;
 		// set_xfade_visibility (yn);
 	}
@@ -2402,7 +2402,7 @@ Editor::set_state (const XMLNode& node)
 		if (act) {
 
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-			bool yn = (prop->value() == X_("yes"));
+			bool yn = string_is_affirmative (prop->value());
 
 			/* do it twice to force the change */
 			
@@ -2418,7 +2418,7 @@ Editor::set_state (const XMLNode& node)
 		if (act) {
 
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-			bool yn = (prop->value() == X_("yes"));
+			bool yn = string_is_affirmative (prop->value());
 
 			/* do it twice to force the change */
 			

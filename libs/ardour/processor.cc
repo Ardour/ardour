@@ -212,7 +212,7 @@ Processor::set_state (const XMLNode& node)
 		}
 	}
 
-	if (_active != (prop->value() == "yes")) {
+	if (_active != string_is_affirmative (prop->value())) {
 		_active = !_active;
 		ActiveChanged (); /* EMIT_SIGNAL */
 	}	

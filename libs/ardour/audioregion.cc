@@ -714,7 +714,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			}
 
 			if ((prop = child->property ("active")) != 0) {
-				if (prop->value() == "yes") {
+				if (string_is_affirmative (prop->value())) {
 					set_fade_in_active (true);
 				} else {
 					set_fade_in_active (true);
@@ -735,7 +735,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			}
 
 			if ((prop = child->property ("active")) != 0) {
-				if (prop->value() == "yes") {
+				if (string_is_affirmative (prop->value())) {
 					set_fade_out_active (true);
 				} else {
 					set_fade_out_active (false);

@@ -107,7 +107,7 @@ TempoSection::TempoSection (const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	set_movable (prop->value() == "yes");
+	set_movable (string_is_affirmative (prop->value()));
 }
 
 XMLNode&
@@ -183,7 +183,7 @@ MeterSection::MeterSection (const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	set_movable (prop->value() == "yes");
+	set_movable (string_is_affirmative (prop->value()));
 }
 
 XMLNode&

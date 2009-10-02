@@ -1667,25 +1667,25 @@ Route::_set_state (const XMLNode& node, bool /*call_base*/)
 	}
 
 	if ((prop = node.property ("solo-isolated")) != 0) {
-		set_solo_isolated (prop->value() == "yes", this);
+		set_solo_isolated (string_is_affirmative (prop->value()), this);
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert (prop->value()=="yes"?true:false);
+		set_phase_invert (string_is_affirmative (prop->value()));
 	}
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
-		set_denormal_protection (prop->value()=="yes"?true:false);
+		set_denormal_protection (string_is_affirmative (prop->value()));
 	}
 	
 	if ((prop = node.property (X_("active"))) != 0) {
-		bool yn = (prop->value() == "yes");
+		bool yn = string_is_affirmative (prop->value());
 		_active = !yn; // force switch
 		set_active (yn);
 	}
 
 	if ((prop = node.property (X_("soloed"))) != 0) {
-		bool yn = (prop->value()=="yes");
+		bool yn = string_is_affirmative (prop->value());
 
 		/* XXX force reset of solo status */
 
