@@ -210,7 +210,7 @@ def set_compiler_flags (conf,opt):
 			debug_flags.append ("-DUSE_X86_64_ASM")
 		if build_host_supports_sse != 1:
 			print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
-		if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h') == False:
+		if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
 			optimization_flags.append("-DNO_POSIX_MEMALIGN")
 
 	# end optimization section
