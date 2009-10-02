@@ -4947,7 +4947,7 @@ Editor::remove_route (TimeAxisView *tv)
 
 	TrackViewList::iterator i;
 	boost::shared_ptr<Route> route;
-	TimeAxisView* next_tv;
+	TimeAxisView* next_tv = 0;
 
 	if (tv == entered_track) {
 		entered_track = 0;

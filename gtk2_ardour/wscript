@@ -79,6 +79,7 @@ gtk2_ardour_sources = [
 	'editor_export_audio.cc',
 	'editor_group_tabs.cc',
 	'editor_hscroller.cc',
+	'editor_imageframe.cc',
 	'editor_keyboard.cc',
 	'editor_keys.cc',
 	'editor_markers.cc',

@@ -68,7 +68,7 @@ XMLTree::read_internal(bool validate)
 	delete _root;
 	_root = 0;
 
-	xmlParserCtxtPtr ctxt; /* the parser context */
+	xmlParserCtxtPtr ctxt = NULL; /* the parser context */
 	xmlDocPtr doc; /* the resulting document tree */
 
 	xmlKeepBlanksDefault(0);

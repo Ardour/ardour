@@ -82,7 +82,7 @@ Evoral::ControlList::InterpolationStyle
 EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 {
 	switch (param.type()) {
-	case MidiCCAutomation:              
+	case MidiCCAutomation:
 		switch (param.id()) {
 		case MIDI_CTL_LSB_BANK:
 		case MIDI_CTL_MSB_BANK:
@@ -128,6 +128,7 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break; 
 	default: assert(false);
 	}
+	return Evoral::ControlList::Linear; // Not reached, suppress warnings
 }
 
 
