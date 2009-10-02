@@ -1162,8 +1162,12 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 	switch (name_prompter.run ()) {
 
 	case Gtk::RESPONSE_ACCEPT:
-        name_prompter.get_result (result);
-        if (result.length()) {
+		name_prompter.get_result (result);
+		if (result.length()) {
+			if (_session.route_by_name (result)) {
+				ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
+				return;
+			}
 			processor->set_name (result);
 		}
 		break;

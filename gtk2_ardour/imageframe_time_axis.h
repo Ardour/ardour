@@ -62,7 +62,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param sess the current session
 		 * @param canvas the parent canvas item
 		 */
-		ImageFrameTimeAxis(const string & track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
+		ImageFrameTimeAxis(const std::string & track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
 		
 		/**
 		 * Destructor
@@ -126,7 +126,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param track_id the track_id of the MarkerTimeAxis to search for
 		 * @return the named markerTimeAxis, or 0 if the named MarkerTimeAxis is not associated with this ImageFrameTimeAxis
 		 */
-		MarkerTimeAxis* get_named_marker_time_axis(const string & track_id) ;
+		MarkerTimeAxis* get_named_marker_time_axis(const std::string & track_id) ;
 		
 		/**
 		 * Removes the named markerTimeAxis from those associated with this ImageFrameTimeAxis
@@ -135,7 +135,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param src the identity of the object that initiated the change
 		 * @return the removed MarkerTimeAxis
 		 */
-		MarkerTimeAxis* remove_named_marker_time_axis(const string & track_id, void* src) ;
+		MarkerTimeAxis* remove_named_marker_time_axis(const std::string & track_id, void* src) ;
 		
 		/**
 		 * Removes tav from the list of MarkerTimaAxis associated with this ImageFrameTimeAxis

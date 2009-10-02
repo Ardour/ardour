@@ -127,7 +127,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param track_id the unique id of the removed image frame time axis
 		 * @param src the identity of the object that initiated the change
 		 */
-		void send_imageframe_time_axis_removed(const string & track_id, void* src) ;
+		void send_imageframe_time_axis_removed(const std::string & track_id, void* src) ;
 		
 		/**
 		 * Sends a message indicating that an ImageFrameTimeAxis has been renamed
@@ -137,7 +137,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param time_axis the time axis that has changed
 		 */
-		void send_imageframe_time_axis_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxis* time_axis) ;
+		void send_imageframe_time_axis_renamed(const std::string & new_id, const std::string & old_id, void* src, ImageFrameTimeAxis* time_axis) ;
 		
 		//------------------------
 		// MarkerTimeAxis Messages
@@ -148,7 +148,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param track_id the unique id of the removed image frame time axis
 		 * @param src the identity of the object that initiated the change
 		 */
-		void send_marker_time_axis_removed(const string & track_id, void* src) ;
+		void send_marker_time_axis_removed(const std::string & track_id, void* src) ;
 		
 		/**
 		 * Sends a message indicating that an MarkerTimeAxis has been renamed
@@ -158,7 +158,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param time_axis the time axis that has changed
 		 */
-		void send_marker_time_axis_renamed(const string & new_id, const string & old_id, void* src, MarkerTimeAxis* time_axis) ;
+		void send_marker_time_axis_renamed(const std::string & new_id, const std::string & old_id, void* src, MarkerTimeAxis* time_axis) ;
 		
 		
 		//---------------------------------
@@ -171,7 +171,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param group the group that has changed
 		 */
-		void send_imageframe_time_axis_group_removed(const string & group_id, void* src, ImageFrameTimeAxisGroup* group) ;
+		void send_imageframe_time_axis_group_removed(const std::string & group_id, void* src, ImageFrameTimeAxisGroup* group) ;
 		
 		/**
 		 * Send a message indicating that an ImageFrameTimeAxisGroup has been renamed
@@ -181,7 +181,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param group the group that has changed
 		 */
-		void send_imageframe_time_axis_group_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxisGroup* group) ;
+		void send_imageframe_time_axis_group_renamed(const std::string & new_id, const std::string & old_id, void* src, ImageFrameTimeAxisGroup* group) ;
 
 
 		//---------------------------------
@@ -212,7 +212,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the renamed item
 		 */
-		void send_imageframe_view_renamed(const string & new_id, const string & old_id, void* src, ImageFrameView* item) ;
+		void send_imageframe_view_renamed(const std::string & new_id, const std::string & old_id, void* src, ImageFrameView* item) ;
 		
 		/**
 		 * Send a message indicating that an ImageFrameView item has been removed message
@@ -221,7 +221,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the removed item
 		 */
-		void send_imageframe_view_removed(const string & item_id, void* src, ImageFrameView* item) ;
+		void send_imageframe_view_removed(const std::string & item_id, void* src, ImageFrameView* item) ;
 		
 		//---------------------------------
 		// MarkerView Messages
@@ -252,7 +252,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the MarkerView which has been renamed
 		 */
-		void send_marker_view_renamed(const string & new_id, const string & old_id, void* src, MarkerView* item) ;
+		void send_marker_view_renamed(const std::string & new_id, const std::string & old_id, void* src, MarkerView* item) ;
 		
 		/**
 		 * Send a message indicating that a MarkerView  item has been removed message
@@ -261,7 +261,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the MarkerView which has been removed
 		 */
-		void send_marker_view_removed(const string & item_id, void* src, MarkerView* item) ;
+		void send_marker_view_removed(const std::string & item_id, void* src, MarkerView* item) ;
 
 		
 		//---------------------------------------------------------------------------------------//
@@ -593,7 +593,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param start the start character
 		 * @param num_chars the number of characters to read
 		 * @param the message to break apart
-		 * @return the sub string of the message
+		 * @return the sub std::string of the message
 		 */
 		std::string get_message_part(int start, int32_t num_chars, const char* msg) ;
 		
@@ -649,7 +649,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param errmsg populated with a description of the error on failure
 		 * @return the described item on success, 0 otherwise
 		 */
-		ImageFrameView* get_imageframe_view_from_desc(const string & track_id, const string & group_ud, const string & item_id, int& errcode, std::string& errmsg) ;
+		ImageFrameView* get_imageframe_view_from_desc(const std::string & track_id, const std::string & group_ud, const std::string & item_id, int& errcode, std::string& errmsg) ;
 	 
 		//---------------------------------------------------------------------------------------//
 		// Convenince Message Send Methods
@@ -660,12 +660,12 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param msg the message to send
 		 * @return the return value of the socket call
 		 */
-		int send_message(const string & msg) ;
+		int send_message(const std::string & msg) ;
 		
 		/**
 		 * Reads a message from the Socket
 		 *
-		 * @param msg a string to populate with the received message
+		 * @param msg a std::string to populate with the received message
 		 * @return the return value from the socket call
 		 */
 		int read_message(std::string& msg) ;

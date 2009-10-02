@@ -65,7 +65,7 @@ class MarkerTimeAxis : public VisualTimeAxis
 		 * @param name the name/id of this time axis
 		 * @param tav the associated track view that this MarkerTimeAxis is marking up
 		 */
-		MarkerTimeAxis(PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas, const string & name, TimeAxisView* tav) ;
+		MarkerTimeAxis(PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas, const std::string & name, TimeAxisView* tav) ;
 		
 		/**
 		 * Destructor

@@ -265,13 +265,13 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, nframes64_t position) = 0;
 
 #ifdef WITH_CMT
+	virtual void connect_to_image_compositor()  = 0;
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
 	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*)  = 0;
-	virtual void connect_to_image_compositor()  = 0;
 	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
-	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
 #endif
 
+	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
 	virtual RouteTimeAxisView* get_route_view_by_id (PBD::ID& id) = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, ARDOUR::RouteGroup::Property) const = 0;

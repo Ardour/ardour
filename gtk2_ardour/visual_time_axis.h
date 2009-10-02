@@ -84,7 +84,7 @@ class VisualTimeAxis : public TimeAxisView
 		 * @param name the new name of this TimeAxis
 		 * @param src the identity of the object that initiated the change
 		 */
-		virtual void set_time_axis_name(const string & name, void* src) ;
+		virtual void set_time_axis_name(const std::string & name, void* src) ;
 
 		
 		//---------------------------------------------------------------------------------------//
@@ -113,7 +113,7 @@ class VisualTimeAxis : public TimeAxisView
 		/**
 		 * Emitted when we have changed the gui, and what we have shanged
 		 */
-		sigc::signal<void,const string &,void*> gui_changed ;
+		sigc::signal<void,const std::string &,void*> gui_changed ;
 		
 		/**
 		 * Emitted when this Visual Time Axis has been removed
@@ -122,17 +122,17 @@ class VisualTimeAxis : public TimeAxisView
 		 * the destructor, this allows us to capture the source of the deletion
 		 * event
 		 */
-		sigc::signal<void,const string &,void*> VisualTimeAxisRemoved ;
+		sigc::signal<void,const std::string &,void*> VisualTimeAxisRemoved ;
 		
 		/**
 		 * Emitted when we have changed the name of this TimeAxis
 		 */
-		sigc::signal<void,const string &,const string &,void*> NameChanged ;
+		sigc::signal<void,const std::string &,const std::string &,void*> NameChanged ;
 
 		/**
 		 * Emitted when this time axis has been selected for removal
 		 */
-		//sigc::signal<void,std::string,void*> VisualTimeAxisRemoved ;
+		//sigc::signal<void,std::std::string,void*> VisualTimeAxisRemoved ;
 
 		//---------------------------------------------------------------------------------------//
 		// Constructor / Desctructor
@@ -145,7 +145,7 @@ class VisualTimeAxis : public TimeAxisView
 		 * @param sess the current session
 		 * @param canvas the parent canvas object
 		 */
-		VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
+		VisualTimeAxis(const std::string & name, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
 		
 		
 		//---------------------------------------------------------------------------------------//
