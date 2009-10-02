@@ -60,7 +60,7 @@ RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boos
 		
 			XMLProperty *shown = (*iter)->property("shown_editor");
 			
-			if (shown && shown->value() == "yes") {
+			if (shown && string_is_affirmative (shown->value())) {
 				_marked_for_display = true;
 			}
 			break;

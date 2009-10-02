@@ -201,7 +201,7 @@ AudioTimeAxisView::set_state (const XMLNode& node)
 			XMLProperty *prop=child_node->property ("shown");
 			
 			if (prop != 0) {
-				if (prop->value() == "yes") {
+				if (string_is_affirmative (prop->value())) {
 					show_gain_automation = true;
 				}
 			}
@@ -212,7 +212,7 @@ AudioTimeAxisView::set_state (const XMLNode& node)
 			XMLProperty *prop=child_node->property ("shown");
 			
 			if (prop != 0) {
-				if (prop->value() == "yes") {
+				if (string_is_affirmative (prop->value())) {
 					show_pan_automation = true;
 				}			
 			}
@@ -388,7 +388,7 @@ AudioTimeAxisView::add_gain_automation_child ()
 
 	if ((node = gain_track->get_state_node()) != 0) {
 		if  ((prop = node->property ("shown")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				hideit = false;
 			}
 		} 
@@ -419,7 +419,7 @@ AudioTimeAxisView::add_pan_automation_child ()
 
 	if ((node = pan_track->get_state_node()) != 0) {
 		if ((prop = node->property ("shown")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				hideit = false;
 			}
 		} 

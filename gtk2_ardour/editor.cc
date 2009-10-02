@@ -2469,7 +2469,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("show-waveforms"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = (string_is_affirmative (prop->value()));
 		_show_waveforms = !yn;
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-visible"));
 		if (act) {
@@ -2481,7 +2481,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("show-waveforms-rectified"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = (string_is_affirmative (prop->value()));
 		_show_waveforms_rectified = !yn;
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-rectified"));
 		if (act) {
@@ -2493,7 +2493,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("show-waveforms-recording"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = (string_is_affirmative (prop->value()));
 		_show_waveforms_recording = !yn;
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
 		if (act) {
@@ -2505,7 +2505,7 @@ Editor::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("show-measures"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = (string_is_affirmative (prop->value()));
 		_show_measures = !yn;
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 		if (act) {
@@ -2517,7 +2517,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("follow-playhead"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = (string_is_affirmative (prop->value()));
 		set_follow_playhead (yn);
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 		if (act) {
@@ -2529,7 +2529,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("stationary-playhead"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = (string_is_affirmative (prop->value()));
 		set_stationary_playhead (yn);
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
 		if (act) {
@@ -2546,7 +2546,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("xfades-visible"))) {
-		bool yn = (prop->value() == "yes");
+		bool yn = (string_is_affirmative (prop->value()));
 		_xfade_visibility = !yn;
 		// set_xfade_visibility (yn);
 	}

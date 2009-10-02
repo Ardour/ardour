@@ -528,56 +528,56 @@ Editor::restore_ruler_visibility ()
 
 	if (node) {
 		if ((prop = node->property ("smpte")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_timecode_action->set_active (true);
 			} else {
 				ruler_timecode_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("bbt")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_bbt_action->set_active (true);
 			} else {
 				ruler_bbt_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("frames")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_samples_action->set_active (true);
 			} else {
 				ruler_samples_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("minsec")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_minsec_action->set_active (true);
 			} else {
 				ruler_minsec_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("tempo")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_tempo_action->set_active (true);
 			} else {
 				ruler_tempo_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("meter")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_meter_action->set_active (true);
 			} else {
 				ruler_meter_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("marker")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_marker_action->set_active (true);
 			} else {
 				ruler_marker_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("rangemarker")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_range_action->set_active (true);
 			} else {
 				ruler_range_action->set_active (false);
@@ -585,7 +585,7 @@ Editor::restore_ruler_visibility ()
 		}
 
 		if ((prop = node->property ("transportmarker")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_loop_punch_action->set_active (true);
 			} else {
 				ruler_loop_punch_action->set_active (false);
@@ -593,7 +593,7 @@ Editor::restore_ruler_visibility ()
 		}
 
 		if ((prop = node->property ("cdmarker")) != 0) {
-			if (prop->value() == "yes") {
+			if (string_is_affirmative (prop->value())) {
 				ruler_cd_marker_action->set_active (true);
 			} else {
 				ruler_cd_marker_action->set_active (false);

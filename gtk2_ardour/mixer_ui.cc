@@ -1361,7 +1361,7 @@ Mixer_UI::set_state (const XMLNode& node)
 	set_window_pos_and_size ();
 
 	if ((prop = node.property ("narrow-strips"))) {
-		if (prop->value() == "yes") {
+		if (string_is_affirmative (prop->value())) {
 			set_strip_width (Narrow);
 		} else {
 			set_strip_width (Wide);
@@ -1369,7 +1369,7 @@ Mixer_UI::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("show-mixer"))) {
-		if (prop->value() == "yes") {
+		if (string_is_affirmative (prop->value())) {
 		       _visible = true;
 		}
 	}
