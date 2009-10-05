@@ -303,18 +303,6 @@ def build(bld):
 	font_sizes      = {}
 	base_font       = ""
 
-	# Set up font substitution dictionary
-	for style in ['', 'BOLD', 'ITALIC']:
-		for sizename,points in font_sizes.iteritems():
-			if (len (style)):
-				key = "_".join (['FONT',style,sizename])
-				fontstyle = " ".join ([basefont,style.lower(),points])
-			else:
-				key = "_".join (['FONT',sizename])
-				fontstyle = " ".join ([basefont,points])
-			key = '%' + key + '%'
-			font_subst_dict[key] = fontstyle
-
 	# Set up font sizes
 	if bld.env['IS_OSX']: # OS X fonts
 		basefont = "Lucida Grande"
@@ -345,8 +333,19 @@ def build(bld):
 			'MASSIVE' : '60'
 		}
 
-	# RC files
+ 	# Set up font substitution dictionary
+	for style in ['', 'BOLD', 'ITALIC']:
+		for sizename,points in font_sizes.iteritems():
+			if (len (style)):
+				key = "_".join (['FONT',style,sizename])
+				fontstyle = " ".join ([basefont,style.lower(),points])
+			else:
+				key = "_".join (['FONT',sizename])
+				fontstyle = " ".join ([basefont,points])
+			print key
+			font_subst_dict[key] = fontstyle
 
+	# RC files
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_dark.rc.in'
 	obj.target       = 'ardour3_ui_dark.rc'
