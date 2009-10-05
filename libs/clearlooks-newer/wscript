@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+import autowaf
+import os
+import sys
+
+srcdir = '.'
+blddir = 'build'
+
+path_prefix = 'libs/clearlooks-newer'
+
+def set_options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+    conf.check_tool('compiler_cc')
+
+def build(bld):
+    obj = bld.new_task_gen('cc', 'shlib')
+    obj.source = '''
+    animation.c
+    cairo-support.c
+    clearlooks_draw.c
+    clearlooks_draw_glossy.c
+    clearlooks_draw_gummy.c
+    clearlooks_draw_inverted.c
+    clearlooks_rc_style.c
+    clearlooks_style.c
+    clearlooks_theme_main.c
+    support.c
+    widget-information.c
+    '''
+
+    obj.name = 'clearlooks-newer'
+    obj.target = 'clearlooks'
+    obj.uselib = 'GTK'
+    obj.includes = '.'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+
+    if sys.platform == 'darwin':
+        # Bit of a hack: make a symlink to the .dylib that meets GTK's criteria for finding it (namely that the library must be a *.so
+        # and that it must reside in a directory called `engines')
+        obj = bld.new_task_gen(target = 'engines', rule = 'mkdir -p ${TGT} && rm -f ${TGT}/libclearlooks.so && ln -s ../libclearlooks.dylib ${TGT}/libclearlooks.so')
+
+
+def shutdown():
+    autowaf.shutdown()
+    

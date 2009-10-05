@@ -27,6 +27,7 @@ children = [
 	'libs/surfaces',
 	'libs/ardour',
 	'libs/gtkmm2ext',
+	'libs/clearlooks-newer',
 	'gtk2_ardour'
 ]
 
