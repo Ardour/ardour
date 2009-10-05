@@ -187,6 +187,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/transport_stop", "", transport_stop);
 		REGISTER_CALLBACK (serv, "/ardour/transport_play", "", transport_play);
 		REGISTER_CALLBACK (serv, "/ardour/set_transport_speed", "f", set_transport_speed);
+		REGISTER_CALLBACK (serv, "/ardour/locate", "ii", locate);
 		REGISTER_CALLBACK (serv, "/ardour/save_state", "", save_state);
 		REGISTER_CALLBACK (serv, "/ardour/prev_marker", "", prev_marker);
 		REGISTER_CALLBACK (serv, "/ardour/next_marker", "", next_marker);
