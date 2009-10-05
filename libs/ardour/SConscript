@@ -65,6 +65,7 @@ ladspa_plugin.cc
 location.cc
 mix.cc
 mtc_slave.cc
+mtdm.cc
 named_selection.cc
 onset_detector.cc
 panner.cc

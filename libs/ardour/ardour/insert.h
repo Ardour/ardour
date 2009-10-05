@@ -30,6 +30,7 @@
 #include <ardour/types.h>
 
 class XMLNode;
+class MTDM;
 
 namespace MIDI {
 	class Port;
@@ -81,8 +82,18 @@ class PortInsert : public Insert
 	int32_t configure_io (int32_t magic, int32_t in, int32_t out);
 	uint32_t bit_slot() const { return bitslot; }
 
+	void start_latency_detection ();
+	void stop_latency_detection ();
+
+	MTDM* mtdm () const { return _mtdm; }
+	void set_measured_latency (nframes_t);
+
   private:
-	uint32_t bitslot;
+	uint32_t   bitslot;
+	MTDM*     _mtdm;
+	bool      _latency_detect;
+	nframes_t _latency_flush_frames;
+	nframes_t _measured_latency;
 };
 
 class PluginInsert : public Insert

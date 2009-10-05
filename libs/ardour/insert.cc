@@ -26,6 +26,7 @@
 #include <pbd/stacktrace.h>
 
 #include <ardour/insert.h>
+#include <ardour/mtdm.h>
 #include <ardour/plugin.h>
 #include <ardour/port.h>
 #include <ardour/route.h>
@@ -905,12 +906,19 @@ PortInsert::PortInsert (const PortInsert& other)
 void
 PortInsert::init ()
 {
+	_mtdm = 0;
+	_latency_detect = false;
+	_latency_flush_frames = false;
+	_measured_latency = 0;
 }
 
 PortInsert::PortInsert (Session& s, const XMLNode& node)
 	: Insert (s, "will change", PreFader)
 {
+	init ();
+
 	bitslot = 0xffffffff;
+
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -920,7 +928,34 @@ PortInsert::PortInsert (Session& s, const XMLNode& node)
 
 PortInsert::~PortInsert ()
 {
+	delete _mtdm;
 	GoingAway ();
+}
+
+void
+PortInsert::start_latency_detection ()
+{
+	if (_mtdm != 0) {
+		delete _mtdm;
+	}
+
+	_mtdm = new MTDM;
+	_latency_flush_frames = false;
+	_latency_detect = true;
+	_measured_latency = 0;
+}
+
+void
+PortInsert::stop_latency_detection ()
+{
+	_latency_flush_frames = latency() + _session.engine().frames_per_cycle();
+	_latency_detect = false;
+}
+
+void
+PortInsert::set_measured_latency (nframes_t n)
+{
+	_measured_latency = n;
 }
 
 void
@@ -930,23 +965,57 @@ PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes)
 		return;
 	}
 
+	vector<Port*>::iterator o;
+
+	if (_latency_detect) {
+
+		if (n_inputs() != 0) {
+			Sample* in = get_input_buffer (0, nframes);
+			Sample* out = get_output_buffer (0, nframes);
+
+			_mtdm->process (nframes, in, out);
+			
+			for (o = _outputs.begin(); o != _outputs.end(); ++o) {
+				(*o)->mark_silence (false);
+			}
+		}
+
+		return;
+
+	} else if (_latency_flush_frames) {
+
+		/* wait for the entire input buffer to drain before picking up input again so that we can't
+		   hear the remnants of whatever MTDM pumped into the pipeline.
+		*/
+
+		silence (nframes);
+
+		if (_latency_flush_frames > nframes) {
+			_latency_flush_frames -= nframes;
+		} else {
+			_latency_flush_frames = 0;
+		}
+
+		return;
+	}
+
 	if (!active()) {
 		/* deliver silence */
 		silence (nframes);
 		return;
 	}
 
-	uint32_t n;
-	vector<Port*>::iterator o;
-	vector<Port*>::iterator i;
-
 	/* deliver output */
+
+	uint32_t n;
 
 	for (o = _outputs.begin(), n = 0; o != _outputs.end(); ++o, ++n) {
 		memcpy (get_output_buffer (n, nframes), bufs[min(nbufs,n)], sizeof (Sample) * nframes);
 		(*o)->mark_silence (false);
 	}
 	
+	vector<Port*>::iterator i;
+
 	/* collect input */
 	
 	for (i = _inputs.begin(), n = 0; i != _inputs.end(); ++i, ++n) {
@@ -1027,7 +1096,11 @@ PortInsert::latency()
 	   need to take that into account too.
 	*/
 
-	return _session.engine().frames_per_cycle() + input_latency();
+	if (_measured_latency == 0) {
+		return _session.engine().frames_per_cycle() + input_latency();
+	} else {
+		return _measured_latency;
+	}
 }
 
 int32_t

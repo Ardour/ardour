@@ -34,6 +34,7 @@ using __gnu_cxx::slist;
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/button.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/treeview.h>
@@ -64,7 +65,6 @@ class IOSelector : public Gtk::VBox {
 
 	sigc::signal<void,Result> Finished;
 
-  protected:
 	ARDOUR::Session& session;
 	
   private:
@@ -157,7 +157,6 @@ class IOSelectorWindow : public ArdourDialog
 	void accept ();
 };
 
-
 class PortInsertUI : public Gtk::VBox
 {
   public: 
@@ -167,11 +166,19 @@ class PortInsertUI : public Gtk::VBox
 	void finished (IOSelector::Result);
 
   private:
-	
+	boost::shared_ptr<ARDOUR::PortInsert> _pi;
+
+	Gtk::ToggleButton latency_button;
+	Gtk::Label latency_display;
+	Gtk::Frame latency_frame;
+	Gtk::HBox  latency_hbox;
+	sigc::connection latency_timeout;
+	bool check_latency_measurement ();
+	void latency_button_toggled ();
+
 	Gtk::HBox  hbox;
 	IOSelector input_selector;
 	IOSelector output_selector;
-	
 };
 
 class PortInsertWindow : public ArdourDialog
