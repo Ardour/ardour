@@ -3001,7 +3001,6 @@ ARDOUR_UI::write_buffer_stats ()
 {
 	struct tm tm;
 	char buf[64];
-	char* path;
 
 	char* tmplt = (char*)calloc(strlen("ardourXXXXXX"), sizeof(char));
 	int fd = mkstemp (tmplt);
@@ -3012,7 +3011,7 @@ ARDOUR_UI::write_buffer_stats ()
 
 	FILE* fout = fdopen (fd, "w");
 	if (!fout) {
-		cerr << string_compose (X_("cannot open file %1 for ardour buffer stats"), path) << endl;
+		cerr << string_compose (X_("cannot open file %1 for ardour buffer stats"), tmplt) << endl;
 		return;
 	}
 
@@ -3028,8 +3027,7 @@ ARDOUR_UI::write_buffer_stats ()
 	fclose (fout);
 	close (fd);
 
-	cerr << "Ardour buffering statistics can be found in: " << path << endl;
-	free (path);
+	cerr << "Ardour buffering statistics can be found in: " << tmplt << endl;
 	free (tmplt);
 }
 
