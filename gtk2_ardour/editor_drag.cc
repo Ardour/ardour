@@ -45,6 +45,7 @@ using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
 using namespace Editing;
+using namespace ArdourCanvas;
 
 double const ControlPointDrag::_zero_gain_fraction = gain_to_slider_position (dB_to_coefficient (0.0));
 
@@ -3366,7 +3367,7 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 {
-	ArdourCanvas::CanvasNote*     cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);	
+	CanvasNoteEvent*     cnote = dynamic_cast<CanvasNoteEvent*>(_item);	
 	region = &cnote->region_view();
 }
 
@@ -3389,7 +3390,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	last_x = region->snap_to_pixel(event_x); 
 	last_y = event_y;
 
-	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);	
+	CanvasNoteEvent* cnote = dynamic_cast<CanvasNoteEvent*>(_item);	
 
 	if (!(was_selected = cnote->selected())) {
 
@@ -3447,8 +3448,16 @@ NoteDrag::motion (GdkEvent*, bool)
 		dy = streamview->note_height() * this_delta_note;
 		last_y = last_y + dy;
 	}
-	
-	region->move_selection (dx, dy);
+
+	if (dx || dy) {
+		region->move_selection (dx, dy);
+		
+		CanvasNoteEvent* cnote = dynamic_cast<CanvasNoteEvent*>(_item);
+                char buf[4];
+		snprintf (buf, sizeof (buf), "%g", (int) cnote->note()->note() + drag_delta_note);
+		//editor.show_verbose_canvas_cursor_with (Evoral::midi_note_name (ev->note()->note()));
+		_editor->show_verbose_canvas_cursor_with (buf);
+        }
 }
 	
 void

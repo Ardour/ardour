@@ -35,6 +35,8 @@ const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1] = {
 	N_("AIFF"),
 	N_("CAF"),
 	N_("W64 (64 bit WAV)"),
+	N_("FLAC"),
+	N_("Ogg/Vorbis"),
 	N_("raw (no header)"),
 	0
 };
@@ -44,6 +46,8 @@ const char* const sndfile_file_endings_strings[SNDFILE_HEADER_FORMATS+1] = {
 	N_(".aiff"),
 	N_(".caf"),
 	N_(".w64"),
+	N_(".flac"),
+	N_(".ogg"),
 	N_(".raw"),
 	0
 };
@@ -53,6 +57,8 @@ int sndfile_header_formats[SNDFILE_HEADER_FORMATS] = {
 	SF_FORMAT_AIFF,
 	SF_FORMAT_CAF,
 	SF_FORMAT_W64,
+	SF_FORMAT_FLAC,
+	SF_FORMAT_OGG,
 	SF_FORMAT_RAW
 };
 

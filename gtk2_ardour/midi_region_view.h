@@ -192,7 +192,7 @@ class MidiRegionView : public RegionView
 	size_t selection_size() { return _selection.size(); }
 	
 	void move_selection(double dx, double dy);
-	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_pixels, uint8_t d_note);
+	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_pixels, int8_t d_note);
 
 	/** Return true iff the note is within the extent of the region.
 	 * @param visible will be set to true if the note is within the visible note range, false otherwise.

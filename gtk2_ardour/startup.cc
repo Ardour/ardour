@@ -359,6 +359,8 @@ ArdourStartup::setup_initial_choice_page ()
 
 	centering_vbox->pack_start (ic_new_session_button, false, true);
 	centering_vbox->pack_start (ic_existing_session_button, false, true);
+	ic_new_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_choice_activated), false);
+	ic_existing_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_choice_activated), false);
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
 
@@ -375,6 +377,18 @@ ArdourStartup::setup_initial_choice_page ()
 	 */
 
 	set_page_complete (ic_vbox, true);
+}
+
+bool
+ArdourStartup::initial_choice_activated(GdkEventButton *event)
+{
+  if (event && event->type == GDK_2BUTTON_PRESS && session_page_index != -1)
+    {
+      set_current_page(session_page_index);
+      return true;
+    }
+  else
+    return false;
 }
 
 void

@@ -91,7 +91,6 @@ def create_stored_revision():
 		print 'Could not open libs/ardour/svn_revision.cc for writing\n'
 		sys.exit(-1)
 
-
 def set_compiler_flags (conf,opt):
 	#
 	# Compiler flags and other system-dependent stuff

@@ -45,6 +45,7 @@ public:
 	void hide() { SimpleRect::hide(); }
 
 	bool on_event(GdkEvent* ev);
+	void move_event(double dx, double dy);
 
 	CanvasNote (MidiRegionView&                   region,
 		    Group&                            group,

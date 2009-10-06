@@ -52,7 +52,8 @@ public:
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
 	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }
 
-	bool on_event(GdkEvent* ev) { return CanvasNoteEvent::on_event(ev); }
+	bool on_event(GdkEvent* ev);
+	void move_event(double dx, double dy);
 };
 
 } // namespace Gnome

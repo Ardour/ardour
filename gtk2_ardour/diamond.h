@@ -28,11 +28,16 @@ namespace Gnome {
 namespace Canvas {
 
 
-class Diamond : public Polygon {
-public:
+class Diamond : public Polygon 
+{
+  public:
 	Diamond(Group& group, double height);
-	
+	~Diamond ();
+
 	void set_height(double height);
+
+  protected:
+	GnomeCanvasPoints* points;
 };
 
 

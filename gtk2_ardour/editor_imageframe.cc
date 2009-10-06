@@ -63,7 +63,6 @@ Editor::get_named_time_axis(const string & name)
 }
 
 /* <CMT Additions file="editor.cc"> */
-#ifdef HAVE_CMT
 
 void
 Editor::add_imageframe_time_axis(const string & track_name, void* src)
@@ -1115,4 +1114,3 @@ Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, T
 
 
 /* </CMT Additions file="editor_route_list.cc"> */
-#endif /* HAVE_CMT */

@@ -3,6 +3,8 @@ import autowaf
 import os
 import glob
 import Options
+import re
+import subprocess
 from w18n import build_i18n
 
 # Version of this package (even if built as a child)
@@ -119,6 +121,7 @@ libardour_sources = [
 	'midi_track.cc',
 	'mix.cc',
 	'mtc_slave.cc',
+	'mtdm.cc',
 	'mute_master.cc',
 	'named_selection.cc',
 	'onset_detector.cc',
@@ -181,6 +184,20 @@ libardour_sources = [
 	'version.cc'
 ]
 
+def flac_supported():
+	cmd = subprocess.Popen ("sndfile-info testfile.flac", 
+				stdout = subprocess.PIPE,
+				stderr = subprocess.STDOUT, shell = True)
+	out = cmd.communicate()[0];
+	return re.search ('unknown format', out) == None
+
+def ogg_supported():
+	cmd = subprocess.Popen ("sndfile-info testfile.ogg", 
+				stdout = subprocess.PIPE,
+				stderr = subprocess.STDOUT, shell = True)
+	out = cmd.communicate()[0];
+	return re.search ('unknown format', out) == None
+
 def set_options(opt):
 	autowaf.set_options(opt)
 
@@ -210,11 +227,23 @@ def configure(conf):
 	conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
 	conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
 	
+	if flac_supported():
+		conf.define ('HAVE_FLAC', 1)
+		autowaf.display_msg(conf, 'Checking for FLAC support', True)
+	else:
+		autowaf.display_msg(conf, 'Checking for FLAC support', False)
+	if ogg_supported():
+		conf.define ('HAVE_OGG', 1)
+		autowaf.display_msg(conf, 'Checking for Ogg/Vorbis support', True)
+	else:
+		autowaf.display_msg(conf, 'Checking for Ogg/Vorbis Support', False)
+
 	conf.write_config_header('libardour-config.h')
 
 	# Boost headers
 	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
 	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+
 
 def build(bld):
 	# Library

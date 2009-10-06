@@ -73,17 +73,6 @@ CanvasNoteEvent::validate ()
 	_valid = true;
 }
 
-void 
-CanvasNoteEvent::move_event(double dx, double dy)
-{
-	_item->move(dx, dy);
-	if (_text) {
-		_text->hide();
-		_text->move(dx, dy);
-		_text->show();
-	}
-}
-
 void
 CanvasNoteEvent::show_velocity()
 {

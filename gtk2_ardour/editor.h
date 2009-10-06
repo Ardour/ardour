@@ -195,9 +195,9 @@ class Editor : public PublicEditor
 	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
-#endif
-
 	TimeAxisView* get_named_time_axis(const std::string & name) ;
+#endif /* WITH_CMT */
+
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 

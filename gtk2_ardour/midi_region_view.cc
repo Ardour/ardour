@@ -1191,12 +1191,10 @@ MidiRegionView::update_note (CanvasNote* ev)
 	const nframes64_t note_end_frames   = beats_to_frames(note->end_time());
 
 	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
-
-	
 	const double y1 = midi_stream_view()->note_to_y(note->note());
 	const double note_endpixel = 
 		trackview.editor().frame_to_pixel(note_end_frames - _region->start());
-	
+
 	ev->property_x1() = x;
 	ev->property_y1() = y1;
 	if (note->length() > 0) {
@@ -1237,7 +1235,7 @@ MidiRegionView::update_hit (CanvasHit* ev)
 	const double diamond_size = midi_stream_view()->note_height() / 2.0;
 	const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
 
-	ev->move(x, y);
+	ev->move_event (x, y);
 }
 
 /** Add a MIDI note to the view (with length).
@@ -1680,24 +1678,22 @@ MidiRegionView::move_selection(double dx, double dy)
 }
 
 void
-MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
+MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, int8_t dnote)
 {
-	// TODO: This would be faster/nicer with a MoveCommand that doesn't need to copy...
-	if (_selection.find(ev) == _selection.end()) {
-		return;
-	}
+	assert (!_selection.empty());
 
-	uint8_t lowest_note_in_selection  = midi_stream_view()->lowest_note();
-	uint8_t highest_note_in_selection = midi_stream_view()->highest_note();
+	uint8_t lowest_note_in_selection  = 127;
+	uint8_t highest_note_in_selection = 0;
 	uint8_t highest_note_difference = 0;
 
 	// find highest and lowest notes first
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		uint8_t pitch = (*i)->note()->note();
 		lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
 		highest_note_in_selection = std::max(highest_note_in_selection, pitch);
 	}
-	
+
 	/*
 	cerr << "dnote: " << (int) dnote << endl;
 	cerr << "lowest note (streamview): " << int(midi_stream_view()->lowest_note()) 
@@ -1707,7 +1703,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 	cerr << "selection size: " << _selection.size() << endl;
 	cerr << "Highest note in selection: " << (int) highest_note_in_selection << endl;
 	*/
-	
+
 	// Make sure the note pitch does not exceed the MIDI standard range
 	if (dnote <= 127 && (highest_note_in_selection + dnote > 127)) {
 		highest_note_difference = highest_note_in_selection - 127;
@@ -1735,7 +1731,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 
 		uint8_t original_pitch = (*i)->note()->note();
 		uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
-		
+
 		// keep notes in standard midi range
 		clamp_to_0_127(new_pitch);
 		
@@ -1755,7 +1751,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 	
 	// care about notes being moved beyond the upper/lower bounds on the canvas
 	if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
-			highest_note_in_selection > midi_stream_view()->highest_note()) {
+	    highest_note_in_selection > midi_stream_view()->highest_note()) {
 		midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
 	}
 }
@@ -1918,6 +1914,14 @@ MidiRegionView::commit_resizing (bool at_front, double delta_x, bool relative)
 
 		if (at_front && current_x < canvas_note->note()->end_time()) {
 			diff_add_change (canvas_note, MidiModel::DiffCommand::StartTime, current_x);
+
+			double len = canvas_note->note()->time() - current_x;
+			len += canvas_note->note()->length();
+
+			if (len > 0) {
+				/* XXX convert to beats */
+				diff_add_change (canvas_note, MidiModel::DiffCommand::Length, len);
+			}
 		}
 
 		if (!at_front) {
@@ -2263,7 +2267,10 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 	}
 
 	PublicEditor& editor (trackview.editor());
-	editor.show_verbose_canvas_cursor_with (Evoral::midi_note_name (ev->note()->note()));
+	char buf[4];
+	snprintf (buf, sizeof (buf), "%d", (int) ev->note()->note());
+	//editor.show_verbose_canvas_cursor_with (Evoral::midi_note_name (ev->note()->note()));
+	editor.show_verbose_canvas_cursor_with (buf);
 }
 
 void

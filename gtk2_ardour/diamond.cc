@@ -25,17 +25,35 @@ using namespace Gnome::Art;
 Diamond::Diamond(Group& group, double height)
 	: Polygon(group)
 {
-	set_height(height);
+	points = gnome_canvas_points_new (4);
+	g_object_set (gobj(), "points", points, NULL);
+	set_height (height);
+}
+
+Diamond::~Diamond ()
+{
+	gnome_canvas_points_free (points);
 }
 
 void
 Diamond::set_height(double height)
 {
-	Points points;
-	points.push_back(Art::Point(0, height*2.0));
-	points.push_back(Art::Point(height, height));
-	points.push_back(Art::Point(0, 0));
-	points.push_back(Art::Point(-height, height));
-	property_points() = points;	
+	double x1, y1, x2, y2; 
+	
+	get_bounds (x1, y1, x2, y2);
+
+	points->coords[0] = x1;
+	points->coords[1] = y1 + height*2.0;
+
+	points->coords[2] = x2 + height;
+	points->coords[3] = y1 + height;
+
+	points->coords[4] = x1;
+	points->coords[5] = y2;
+	
+	points->coords[6] = x2 -height;
+	points->coords[7] = y2 + height;
+	
+	g_object_set (gobj(), "points", points, NULL);
 }
 

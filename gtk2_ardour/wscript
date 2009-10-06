@@ -52,6 +52,7 @@ gtk2_ardour_sources = [
 	'bundle_manager.cc',
 	'cairo_widget.cc',
 	'canvas-flag.cc',
+	'canvas-hit.cc',
 	'canvas-note-event.cc',
 	'canvas-note.cc',
 	'canvas-program-change.cc',
@@ -79,7 +80,6 @@ gtk2_ardour_sources = [
 	'editor_export_audio.cc',
 	'editor_group_tabs.cc',
 	'editor_hscroller.cc',
-	'editor_imageframe.cc',
 	'editor_keyboard.cc',
 	'editor_keys.cc',
 	'editor_markers.cc',
@@ -342,7 +342,6 @@ def build(bld):
 			else:
 				key = "_".join (['FONT',sizename])
 				fontstyle = " ".join ([basefont,points])
-			print key
 			font_subst_dict[key] = fontstyle
 
 	# RC files
