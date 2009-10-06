@@ -830,8 +830,8 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	const char **connections;
 	
 	uint32_t connection_index;
-    uint32_t total_connection_count = 0;
-    uint32_t io_connection_count = 0;
+	uint32_t total_connection_count = 0;
+	uint32_t io_connection_count = 0;
 	uint32_t ardour_connection_count = 0;
 	uint32_t system_connection_count = 0;
 	uint32_t other_connection_count = 0;
@@ -853,139 +853,139 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	char * tooltip_cstr;
 	
 	tooltip << route->name();
-
-    if (for_input) {
-        io_count = route->n_inputs();
-    } else {
-        io_count = route->n_outputs();
-    }    
-    
+	
+	if (for_input) {
+		io_count = route->n_inputs();
+	} else {
+		io_count = route->n_outputs();
+	}    
+	
 	for (io_index = 0; io_index < io_count; ++io_index) {
-	    if (for_input) {
-	        port = route->input(io_index);
-	    } else {
-	        port = route->output(io_index);
-	    }
-	    
-	    connections = port->get_connections();
-	    io_connection_count = 0;
-	    
+		if (for_input) {
+			port = route->input(io_index);
+		} else {
+			port = route->output(io_index);
+		}
+		
+		connections = port->get_connections();
+		io_connection_count = 0;
+		
 		if (connections) {
 			for (connection_index = 0; connections[connection_index]; ++connection_index) {
-			    connection_name = connections[connection_index];
-			    
-			    if (connection_index == 0) {
-        	        tooltip << endl << port->name().substr(port->name().find("/") + 1) << " -> " << connection_name;
-        	    } else {
-        	        tooltip << ", " << connection_name;
-        	    }
-        	    
-			    if (connection_name.find("ardour:") == 0) {
-			        if (ardour_track_name.empty()) {
-			            // "ardour:Master/in 1" -> "ardour:Master/"
-			            ardour_track_name = connection_name.substr(0, connection_name.find("/") + 1);
-			        }
-			        
-			        if (connection_name.find(ardour_track_name) == 0) {
-			            ++ardour_connection_count;
-			        }
-			    } else if (connection_name.find("system:") == 0) {
-			        if (for_input) {
-			            // "system:capture_123" -> "123"
-			            system_port = connection_name.substr(15);
-			        } else {
-			            // "system:playback_123" -> "123"
-			            system_port = connection_name.substr(16);
-			        }
-			        
-			        if (system_ports.empty()) {
-			            system_ports += system_port;
-			        } else {
-			            system_ports += "/" + system_port;
-			        }
-			    
-			        ++system_connection_count;
-			    } else {
-			        if (other_connection_type.empty()) {
-			            // "jamin:in 1" -> "jamin:"
-			            other_connection_type = connection_name.substr(0, connection_name.find(":") + 1);
-			        }
-			        
-			        if (connection_name.find(other_connection_type) == 0) {
-    			        ++other_connection_count;
-    			    }
-			    }
-			    
-      	        ++total_connection_count;
-      	        ++io_connection_count;
+				connection_name = connections[connection_index];
+				
+				if (connection_index == 0) {
+					tooltip << endl << port->name().substr(port->name().find("/") + 1) << " -> " << connection_name;
+				} else {
+					tooltip << ", " << connection_name;
+				}
+				
+				if (connection_name.find("ardour:") == 0) {
+					if (ardour_track_name.empty()) {
+						// "ardour:Master/in 1" -> "ardour:Master/"
+						ardour_track_name = connection_name.substr(0, connection_name.find("/") + 1);
+					}
+					
+					if (connection_name.find(ardour_track_name) == 0) {
+						++ardour_connection_count;
+					}
+				} else if (connection_name.find("system:") == 0) {
+					if (for_input) {
+						// "system:capture_123" -> "123"
+						system_port = connection_name.substr(15);
+					} else {
+						// "system:playback_123" -> "123"
+						system_port = connection_name.substr(16);
+					}
+					
+					if (system_ports.empty()) {
+						system_ports += system_port;
+					} else {
+						system_ports += "/" + system_port;
+					}
+					
+					++system_connection_count;
+				} else {
+					if (other_connection_type.empty()) {
+						// "jamin:in 1" -> "jamin:"
+						other_connection_type = connection_name.substr(0, connection_name.find(":") + 1);
+					}
+					
+					if (connection_name.find(other_connection_type) == 0) {
+						++other_connection_count;
+					}
+				}
+				
+				++total_connection_count;
+				++io_connection_count;
 			}
 		} 
 		
 		if (io_connection_count != 1) {
-		    each_io_has_one_connection = false;
+			each_io_has_one_connection = false;
 		}
-    }
-    
-    if (total_connection_count == 0) {
-        tooltip << endl << _("Disconnected");
-    }
-    
-    tooltip_cstr = new char[tooltip.str().size() + 1];
-    strcpy(tooltip_cstr, tooltip.str().c_str());
-    
-    if (for_input) {
-	    ARDOUR_UI::instance()->set_tip (&input_button, tooltip_cstr, "");
+	}
+	
+	if (total_connection_count == 0) {
+		tooltip << endl << _("Disconnected");
+	}
+	
+	tooltip_cstr = new char[tooltip.str().size() + 1];
+	strcpy(tooltip_cstr, tooltip.str().c_str());
+	
+	if (for_input) {
+		ARDOUR_UI::instance()->set_tip (&input_button, tooltip_cstr, "");
 	} else {
-	    ARDOUR_UI::instance()->set_tip (&output_button, tooltip_cstr, "");
+		ARDOUR_UI::instance()->set_tip (&output_button, tooltip_cstr, "");
 	}  
 	
-    if (each_io_has_one_connection) {
-        if ((total_connection_count == ardour_connection_count)) {
-            // all connections are to the same track in ardour
-            // "ardour:Master/" -> "Master"
-            label << ardour_track_name.substr(7, ardour_track_name.find("/") - 7);
-            have_label = true;
-        }
-        else if (total_connection_count == system_connection_count) {
-            // all connections are to system ports
-            label << system_ports;
-            have_label = true;
-        }
-        else if (total_connection_count == other_connection_count) {
-            // all connections are to the same external program eg jamin
-            // "jamin:" -> "jamin"
-            label << other_connection_type.substr(0, other_connection_type.size() - 1);
-            have_label = true;
-        }
-    }
-    
-    if (!have_label) {
-        if (total_connection_count == 0) {
-            // Disconnected
-            label << "-";
-        } else {
-            // Odd configuration
-            label << "*" << total_connection_count << "*";
-        }
-    }
-    
+	if (each_io_has_one_connection) {
+		if ((total_connection_count == ardour_connection_count)) {
+			// all connections are to the same track in ardour
+			// "ardour:Master/" -> "Master"
+			label << ardour_track_name.substr(7, ardour_track_name.find("/") - 7);
+			have_label = true;
+		}
+		else if (total_connection_count == system_connection_count) {
+			// all connections are to system ports
+			label << system_ports;
+			have_label = true;
+		}
+		else if (total_connection_count == other_connection_count) {
+			// all connections are to the same external program eg jamin
+			// "jamin:" -> "jamin"
+			label << other_connection_type.substr(0, other_connection_type.size() - 1);
+			have_label = true;
+		}
+	}
+	
+	if (!have_label) {
+		if (total_connection_count == 0) {
+			// Disconnected
+			label << "-";
+		} else {
+			// Odd configuration
+			label << "*" << total_connection_count << "*";
+		}
+	}
+	
 	switch (width) {
 	case Wide:
-	    label_string = label.str().substr(0, 6);
+		label_string = label.str().substr(0, 6);
 		break;
 	case Narrow:
 		label_string = label.str().substr(0, 3);
 		break;
 	}
 	
-    label_cstr = new char[label_string.size() + 1];
-    strcpy(label_cstr, label_string.c_str());
-    
-    if (for_input) {
-        input_label.set_text (label_cstr);
-    } else {
-        output_label.set_text (label_cstr);
-    }
+	label_cstr = new char[label_string.size() + 1];
+	strcpy(label_cstr, label_string.c_str());
+	
+	if (for_input) {
+		input_label.set_text (label_cstr);
+	} else {
+		output_label.set_text (label_cstr);
+	}
 }
 
 void
