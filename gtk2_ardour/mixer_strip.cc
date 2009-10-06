@@ -926,7 +926,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	Port *port;
 	vector<string> connections;
 	
-	uint32_t connection_index;
+	uint32_t connection_index = 0;
 	uint32_t total_connection_count = 0;
 	uint32_t io_connection_count = 0;
 	uint32_t ardour_connection_count = 0;
@@ -980,7 +980,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 				if (connection_name.find("ardour:") == 0) {
 					if (ardour_track_name.empty()) {
 						// "ardour:Master/in 1" -> "ardour:Master/"
-						ardour_track_name = connection_name.substr(0, connection_name.find("/") + 1);
+						string::size_type slash = connection_name.find("/");
+						if (slash != string::npos) {
+							ardour_track_name = connection_name.substr(0, slash + 1);
+						}
 					}
 					
 					if (connection_name.find(ardour_track_name) == 0) {
@@ -1040,8 +1043,11 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		if ((total_connection_count == ardour_connection_count)) {
 			// all connections are to the same track in ardour
 			// "ardour:Master/" -> "Master"
-			label << ardour_track_name.substr(7, ardour_track_name.find("/") - 7);
-			have_label = true;
+			string::size_type slash = ardour_track_name.find("/");
+			if (slash != string::npos) {
+				label << ardour_track_name.substr(7, slash - 7);
+				have_label = true;
+			}
 		}
 		else if (total_connection_count == system_connection_count) {
 			// all connections are to system ports
