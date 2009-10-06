@@ -1678,7 +1678,7 @@ MidiRegionView::move_selection(double dx, double dy)
 }
 
 void
-MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, int8_t dnote)
+MidiRegionView::note_dropped(CanvasNoteEvent *, double dt, int8_t dnote)
 {
 	assert (!_selection.empty());
 
@@ -1705,7 +1705,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, int8_t dnote)
 	*/
 
 	// Make sure the note pitch does not exceed the MIDI standard range
-	if (dnote <= 127 && (highest_note_in_selection + dnote > 127)) {
+	if (highest_note_in_selection + dnote > 127) {
 		highest_note_difference = highest_note_in_selection - 127;
 	}
 	

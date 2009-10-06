@@ -793,6 +793,8 @@ clearlooks_gummy_draw_separator (cairo_t                   *cr,
                                  const SeparatorParameters *separator,
                                  int x, int y, int width, int height)
 {
+	(void) widget;
+	
 	CairoColor color = colors->shade[3];
 	CairoColor hilight;
 	ge_shade_color (&color, 1.3, &hilight);
@@ -1166,6 +1168,8 @@ clearlooks_gummy_draw_toolbar (cairo_t                 *cr,
                                const ToolbarParameters *toolbar,
                                int x, int y, int width, int height)
 {
+	(void) widget;
+	
 	const CairoColor *fill = &colors->bg[GTK_STATE_NORMAL];
 	const CairoColor *dark = &colors->shade[3];
 	CairoColor light;
@@ -1304,6 +1308,9 @@ clearlooks_gummy_draw_statusbar (cairo_t                *cr,
                                  const WidgetParameters *widget,
                                  int x, int y, int width, int height)
 {
+	(void) widget;
+	(void) height;
+
 	const CairoColor *dark = &colors->shade[3];
 	CairoColor hilight;
 
@@ -1330,6 +1337,9 @@ clearlooks_gummy_draw_radiobutton (cairo_t                  *cr,
                                    const CheckboxParameters *checkbox,
                                    int x, int y, int width, int height)
 {
+	(void) width;
+	(void) height;
+	
 	const CairoColor *border;
 	const CairoColor *dot;
 	CairoColor shadow;

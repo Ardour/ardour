@@ -29,6 +29,10 @@
 #include <ge-support.h>
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include <cairo.h>
 
 typedef void (*menubar_draw_proto) (cairo_t *cr,
@@ -918,6 +922,8 @@ clearlooks_draw_menu_item_separator (cairo_t                   *cr,
                                      const SeparatorParameters *separator,
                                      int x, int y, int width, int height)
 {
+	(void) widget;
+	
 	cairo_save (cr);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 	ge_cairo_set_color (cr, &colors->shade[5]);
@@ -939,6 +945,9 @@ clearlooks_draw_menubar0 (cairo_t *cr,
                           const MenuBarParameters *menubar,
                           int x, int y, int width, int height)
 {
+	(void) params;
+	(void) menubar;
+	
 /* 	const CairoColor *light = &colors->shade[0]; */
 	const CairoColor *dark = &colors->shade[3];
 
@@ -963,6 +972,9 @@ clearlooks_draw_menubar2 (cairo_t *cr,
                           const MenuBarParameters *menubar,
                           int x, int y, int width, int height)
 {
+	(void) params;
+	(void) menubar;
+	
 	CairoColor lower;
 	cairo_pattern_t *pattern;
 
@@ -1035,6 +1047,9 @@ clearlooks_get_frame_gap_clip (int x, int y, int width, int height,
                                ClearlooksRectangle *bevel,
                                ClearlooksRectangle *border)
 {
+	(void) x;
+	(void) y;
+	
 	if (frame->gap_side == CL_GAP_TOP)
 	{
 		CLEARLOOKS_RECTANGLE_SET ((*bevel),  1.5 + frame->gap_x,  -0.5,
@@ -1301,6 +1316,8 @@ clearlooks_draw_separator (cairo_t *cr,
                            const SeparatorParameters  *separator,
                            int x, int y, int width, int height)
 {
+	(void) widget;
+	
 	CairoColor color = colors->shade[3];
 	CairoColor hilight; 
 	ge_shade_color (&color, 1.4, &hilight);
@@ -1415,6 +1432,8 @@ clearlooks_draw_toolbar (cairo_t *cr,
                          const ToolbarParameters         *toolbar,
                          int x, int y, int width, int height)
 {
+	(void) widget;
+
 	const CairoColor *fill  = &colors->bg[GTK_STATE_NORMAL];
 	const CairoColor *dark  = &colors->shade[3];
 	CairoColor light;
@@ -1556,6 +1575,8 @@ clearlooks_draw_scrollbar_trough (cairo_t *cr,
                                   const ScrollBarParameters        *scrollbar,
                                   int x, int y, int width, int height)
 {
+	(void) widget;
+
 	const CairoColor *bg     = &colors->shade[2];
 	const CairoColor *border = &colors->shade[5];
 	CairoColor        bg_shade;
@@ -1795,6 +1816,9 @@ clearlooks_draw_statusbar (cairo_t *cr,
                            const WidgetParameters          *widget,
                            int x, int y, int width, int height)
 {
+	(void) widget;
+	(void) height;
+	
 	const CairoColor *dark = &colors->shade[3];
 	CairoColor hilight;
 
@@ -1820,6 +1844,8 @@ clearlooks_draw_menu_frame (cairo_t *cr,
                             const WidgetParameters          *widget,
                             int x, int y, int width, int height)
 {
+	(void) widget;
+
 	const CairoColor *border = &colors->shade[5];
 	cairo_translate      (cr, x, y);
 	cairo_set_line_width (cr, 1);
@@ -1908,6 +1934,8 @@ clearlooks_draw_resize_grip (cairo_t *cr,
                              const ResizeGripParameters      *grip,
                              int x, int y, int width, int height)
 {
+	(void) widget;
+	
 	const CairoColor *dark   = &colors->shade[4];
 	CairoColor hilight;
 	int lx, ly;
@@ -1978,6 +2006,9 @@ clearlooks_draw_radiobutton (cairo_t *cr,
                              const CheckboxParameters *checkbox,
                              int x, int y, int width, int height)
 {
+	(void) width;
+	(void) height;
+	
 	const CairoColor *border;
 	const CairoColor *dot;
 	CairoColor shadow;

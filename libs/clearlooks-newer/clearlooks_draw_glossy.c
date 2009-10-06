@@ -33,6 +33,9 @@
 
 #include <cairo.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 static void
 clearlooks_draw_glossy_gradient (cairo_t         *cr,
@@ -292,12 +295,13 @@ clearlooks_glossy_draw_button (cairo_t *cr,
 		}
 		
 		/* if (!(params->enable_glow && !params->active && !params->disabled)) */
-		if (!(params->prelight && params->enable_glow && !params->active))
+		if (!(params->prelight && params->enable_glow && !params->active)) {
 			if (!(params->disabled))
 				params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, width-1, height-1, params->radius+1, params->corners);
 			else
 				/*Draw a lighter inset */
 				clearlooks_glossy_draw_light_inset (cr, &params->parentbg, 0, 0, width-1, height-1, params->radius+1, params->corners);
+		}
 		cairo_translate (cr, -0.5, -0.5);
 	}
 
@@ -1090,6 +1094,10 @@ clearlooks_glossy_draw_toolbar (cairo_t *cr,
                          const ToolbarParameters         *toolbar,
                          int x, int y, int width, int height)
 {
+	(void) widget;
+	(void) width;
+	(void) height;
+	
 	const CairoColor *fill  = &colors->bg[GTK_STATE_NORMAL];
 	const CairoColor *dark  = &colors->shade[3];
 	CairoColor light;
@@ -1230,6 +1238,9 @@ clearlooks_glossy_draw_radiobutton (cairo_t *cr,
                              const CheckboxParameters *checkbox,
                              int x, int y, int width, int height)
 {
+	(void) width;
+	(void) height;
+	
 	const CairoColor *border;
 	const CairoColor *dot;
 	CairoColor shadow;

@@ -171,7 +171,7 @@ MidiByteArray MackieMidiBuilder::two_char_display( const std::string & msg, cons
 	return bytes;
 }
 
-MidiByteArray MackieMidiBuilder::two_char_display( unsigned int value, const std::string & dots )
+MidiByteArray MackieMidiBuilder::two_char_display (unsigned int value, const std::string & /*dots*/)
 {
 	ostringstream os;
 	os << setfill('0') << setw(2) << value % 100;
@@ -227,7 +227,7 @@ MidiByteArray MackieMidiBuilder::strip_display( SurfacePort & port, const Strip 
 	return retval;
 }
 	
-MidiByteArray MackieMidiBuilder::all_strips_display( SurfacePort & port, std::vector<std::string> & lines1, std::vector<std::string> & lines2 )
+MidiByteArray MackieMidiBuilder::all_strips_display (SurfacePort & /*port*/, std::vector<std::string> & /*lines1*/, std::vector<std::string> & /*lines2*/)
 {
 	MidiByteArray retval;
 	retval << 0x12 << 0;

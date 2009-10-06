@@ -959,6 +959,8 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 static void
 clearlooks_style_draw_option (DRAW_ARGS)
 {
+	(void) detail;
+		
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	const ClearlooksColors *colors;
 	WidgetParameters params;
@@ -1020,6 +1022,10 @@ clearlooks_style_draw_vline (GtkStyle               *style,
                              gint                    y2,
                              gint                    x)
 {
+	(void) state_type;
+	(void) widget;
+	(void) detail;
+	
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	const ClearlooksColors *colors;
 	SeparatorParameters separator = { FALSE };
@@ -1050,6 +1056,9 @@ clearlooks_style_draw_hline (GtkStyle               *style,
                              gint                    x2,
                              gint                    y)
 {
+	(void) state_type;
+	(void) widget;
+	
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	const ClearlooksColors *colors;
 	cairo_t *cr;
@@ -1130,6 +1139,8 @@ clearlooks_style_draw_resize_grip (GtkStyle       *style,
                   gint            width,
                   gint            height)
 {
+	(void) detail;
+	
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	ClearlooksColors *colors = &clearlooks_style->colors;
 	cairo_t *cr;
@@ -1156,6 +1167,9 @@ clearlooks_style_draw_resize_grip (GtkStyle       *style,
 static void
 clearlooks_style_draw_tab (DRAW_ARGS)
 {
+	(void) shadow_type;
+	(void) detail;
+	
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	ClearlooksColors *colors = &clearlooks_style->colors;
 	WidgetParameters params;
@@ -1191,6 +1205,10 @@ clearlooks_style_draw_arrow (GtkStyle  *style,
                        gint           width,
                        gint           height)
 {
+	(void) shadow;
+	(void) detail;
+	(void) fill;
+	
 	ClearlooksStyle  *clearlooks_style = CLEARLOOKS_STYLE (style);
 	ClearlooksColors *colors = &clearlooks_style->colors;
 	WidgetParameters params;
@@ -1238,7 +1256,7 @@ clearlooks_style_init_from_rc (GtkStyle * style,
 	
 	clearlooks_parent_class->init_from_rc (style, rc_style);
 	
-	g_assert ((CLEARLOOKS_RC_STYLE (rc_style)->style >= 0) && (CLEARLOOKS_RC_STYLE (rc_style)->style < CL_NUM_STYLES));
+	g_assert ((CLEARLOOKS_RC_STYLE (rc_style)->style < CL_NUM_STYLES));
 	clearlooks_style->style		= CLEARLOOKS_RC_STYLE (rc_style)->style;
 	
 	clearlooks_style->menubarstyle      = CLEARLOOKS_RC_STYLE (rc_style)->menubarstyle;
@@ -1460,6 +1478,8 @@ clearlooks_style_draw_layout (GtkStyle * style,
 	     GtkWidget * widget,
 	     const gchar * detail, gint x, gint y, PangoLayout * layout)
 {
+	(void) detail;
+
 	GdkGC *gc;
 
 	g_return_if_fail (GTK_IS_STYLE (style));
@@ -1508,6 +1528,9 @@ clearlooks_style_draw_render_icon (GtkStyle            *style,
              GtkWidget           *widget,
              const char          *detail)
 {
+	(void) direction;
+	(void) detail;
+	
 	int width = 1;
 	int height = 1;
 	GdkPixbuf *scaled;
@@ -1579,6 +1602,7 @@ clearlooks_style_draw_render_icon (GtkStyle            *style,
 static void
 clearlooks_style_init (ClearlooksStyle * style)
 {
+	(void) style;
 }
 
 static void

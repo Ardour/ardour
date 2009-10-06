@@ -159,6 +159,8 @@ add_animation (const GtkWidget *widget, gdouble stop_time)
 static gboolean
 update_animation_info (gpointer key, gpointer value, gpointer user_data)
 {
+	(void) user_data;
+	
 	AnimationInfo *animation_info = value;
 	GtkWidget *widget = key;
 	
@@ -193,6 +195,8 @@ update_animation_info (gpointer key, gpointer value, gpointer user_data)
 static gboolean
 animation_timeout_handler (gpointer data)
 {
+	(void) data;
+	
 	/*g_print("** TICK **\n");*/
 	
 	/* enter threads as update_animation_info will use gtk/gdk. */
@@ -213,6 +217,8 @@ animation_timeout_handler (gpointer data)
 static void
 on_checkbox_toggle (GtkWidget *widget, gpointer data)
 {
+	(void) data;
+	
 	AnimationInfo *animation_info = lookup_animation_info (widget);
 	
 	if (animation_info != NULL)
@@ -230,6 +236,8 @@ on_checkbox_toggle (GtkWidget *widget, gpointer data)
 static void
 on_connected_widget_destruction (gpointer data, GObject *widget)
 {
+	(void) widget;
+	
 	connected_widgets = g_slist_remove (connected_widgets, data);
 	g_free (data);
 }

@@ -342,7 +342,7 @@ PannerUI::setup_pan ()
 
 	uint32_t nouts = _panner->nouts();
 
-	if (nouts == _current_nouts) {
+	if (int32_t (nouts) == _current_nouts) {
 		return;
 	}
 

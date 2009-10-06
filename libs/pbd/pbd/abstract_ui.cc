@@ -27,7 +27,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string name)
 }
 
 template <typename RequestObject> void
-AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_id, string thread_name, uint32_t num_requests)
+AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_id, string /*thread_name*/, uint32_t num_requests)
 {
 	RequestBuffer* b = new RequestBuffer (num_requests);
 

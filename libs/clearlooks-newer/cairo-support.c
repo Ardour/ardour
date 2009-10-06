@@ -809,7 +809,9 @@ GE_EXPORT const gchar* g_module_check_init (GModule *module);
 const gchar*
 g_module_check_init (GModule *module)
 {
-  return gtk_check_version (GTK_MAJOR_VERSION,
-			    GTK_MINOR_VERSION,
-			    GTK_MICRO_VERSION - GTK_INTERFACE_AGE);
+	(void) module;
+	
+	return gtk_check_version (GTK_MAJOR_VERSION,
+				  GTK_MINOR_VERSION,
+				  GTK_MICRO_VERSION - GTK_INTERFACE_AGE);
 }

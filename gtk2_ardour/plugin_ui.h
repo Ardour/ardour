@@ -90,7 +90,7 @@ class PlugUIBase : public virtual sigc::trackable
 
 	void latency_button_clicked ();
 
-	virtual bool on_window_show(const Glib::ustring& title) { return true; }
+	virtual bool on_window_show(const Glib::ustring& /*title*/) { return true; }
 	virtual void on_window_hide() {}
 
   protected:

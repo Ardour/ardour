@@ -212,7 +212,7 @@ map_existing_mono_sources (const vector<string>& new_paths, Session& /*sess*/,
 static bool
 create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 				 uint samplerate, vector<boost::shared_ptr<Source> >& newfiles,
-				 nframes64_t timeline_position)
+				 nframes64_t /*timeline_position*/)
 {
 	for (vector<string>::const_iterator i = new_paths.begin();
 			i != new_paths.end(); ++i)
