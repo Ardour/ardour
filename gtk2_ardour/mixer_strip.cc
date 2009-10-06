@@ -926,7 +926,6 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	Port *port;
 	vector<string> connections;
 	
-	uint32_t connection_index = 0;
 	uint32_t total_connection_count = 0;
 	uint32_t io_connection_count = 0;
 	uint32_t ardour_connection_count = 0;
@@ -966,12 +965,12 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		
 		port->get_connections(connections);
 		io_connection_count = 0;
-		
+
 		if (!connections.empty()) {
 			for (vector<string>::iterator i = connections.begin(); i != connections.end(); ++i) {
 				string& connection_name (*i);
 
-				if (connection_index == 0) {
+				if (io_connection_count == 0) {
 					tooltip << endl << port->name().substr(port->name().find("/") + 1) << " -> " << connection_name;
 				} else {
 					tooltip << ", " << connection_name;
