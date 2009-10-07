@@ -1235,7 +1235,7 @@ MidiRegionView::update_hit (CanvasHit* ev)
 	const double diamond_size = midi_stream_view()->note_height() / 2.0;
 	const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
 
-	ev->move_event (x, y);
+	ev->move_to (x, y);
 }
 
 /** Add a MIDI note to the view (with length).

@@ -34,9 +34,14 @@ class Diamond : public Polygon
 	Diamond(Group& group, double height);
 	~Diamond ();
 
+	void move_to (double x, double y);
+	void move_by (double dx, double dy);
 	void set_height(double height);
 
   protected:
+	double _x;
+	double _y;
+	double _h;
 	GnomeCanvasPoints* points;
 };
 

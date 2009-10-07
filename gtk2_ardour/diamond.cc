@@ -24,10 +24,13 @@ using namespace Gnome::Art;
 
 Diamond::Diamond(Group& group, double height)
 	: Polygon(group)
+	, _x (0)
+	, _y (0)
+	, _h (height)
 {
 	points = gnome_canvas_points_new (4);
 	g_object_set (gobj(), "points", points, NULL);
-	set_height (height);
+	move_to (0, 0);
 }
 
 Diamond::~Diamond ()
@@ -36,24 +39,47 @@ Diamond::~Diamond ()
 }
 
 void
-Diamond::set_height(double height)
+Diamond::set_height (double height)
 {
-	double x1, y1, x2, y2; 
-	
-	get_bounds (x1, y1, x2, y2);
+	_h = height;
+	move_to (_x, _y);
+}
 
-	points->coords[0] = x1;
-	points->coords[1] = y1 + height*2.0;
+void
+Diamond::move_to (double x, double y)
+{
+	_x = x;
+	_y = y;
 
-	points->coords[2] = x2 + height;
-	points->coords[3] = y1 + height;
+	points->coords[0] = _x;
+	points->coords[1] = _y + (_h * 2.0);
 
-	points->coords[4] = x1;
-	points->coords[5] = y2;
+	points->coords[2] = _x + _h;
+	points->coords[3] = _y + _h;
+
+	points->coords[4] = _x;
+	points->coords[5] = _y;
 	
-	points->coords[6] = x2 -height;
-	points->coords[7] = y2 + height;
-	
+	points->coords[6] = _x - _h;
+	points->coords[7] = _y + _h;
+
 	g_object_set (gobj(), "points", points, NULL);
 }
 
+void
+Diamond::move_by (double dx, double dy)
+{
+	points->coords[0] += dx;
+	points->coords[1] += dy;
+
+	points->coords[2] += dx;
+	points->coords[3] += dy;
+
+	points->coords[4] += dx;
+	points->coords[5] += dy;
+
+	points->coords[6] += dx;
+	points->coords[7] += dy;
+
+	g_object_set (gobj(), "points", points, NULL);
+}
