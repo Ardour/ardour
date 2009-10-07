@@ -1,958 +1,859 @@
+# Translation of libardour into Russian
 # Copyright (C) 2004 Paul Davis
 # This file is distributed under the same license as the libardour package.
 # Igor Blinov pitstop@nm.ru, 2004.
+# Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2009
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.716.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-29 21:03-0400\n"
-"PO-Revision-Date: 2004-03-31 00:55+0300\n"
-"Last-Translator: Igor Blinov pitstop@nm.ru\n"
+"POT-Creation-Date: 2009-10-05 17:23+0400\n"
+"PO-Revision-Date: 2009-10-06 02:59+0300\n"
+"Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=koi8-r\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: libs/ardour/audio_diskstream.cc:337
-msgid "AudioDiskstream: Session doesn't know about a Playlist called \"%1\""
-msgstr ""
+#: libs/ardour/audioanalyser.cc:29
+msgid "cannot load VAMP plugin \"%1\""
+msgstr "Невозможно загрузить модуль VAMP \"%1\""
 
-#: libs/ardour/audio_diskstream.cc:342
+#: libs/ardour/audioanalyser.cc:49
+msgid "VAMP Plugin \"%1\" could not be loaded"
+msgstr "Не удалось загрузить модуль VAMP \"%1\""
+
+#: libs/ardour/audio_diskstream.cc:249
 msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
-msgstr ""
+msgstr "AudioDiskstream: список воспроизведения \"%1\" не является музыкальным списком воспроизведения"
 
-#: libs/ardour/audio_diskstream.cc:433
+#: libs/ardour/audio_diskstream.cc:302
 msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
+msgstr "AudioDiskstream %1: не существует копируемого списка воспроизведения!"
+
+#: libs/ardour/audio_diskstream.cc:945
+#: libs/ardour/audio_diskstream.cc:956
+msgid "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:1114 libs/ardour/audio_diskstream.cc:1125
-msgid ""
-"AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
-msgstr ""
-
-#: libs/ardour/audio_diskstream.cc:1254
+#: libs/ardour/audio_diskstream.cc:1104
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
-msgstr ""
+msgstr "AudioDiskstream %1: не удалось прочитать %2 из списка воспроизведения в выборке %3"
 
-#: libs/ardour/audio_diskstream.cc:1621 libs/ardour/audio_diskstream.cc:1638
+#: libs/ardour/audio_diskstream.cc:1146
+#, fuzzy
+msgid "AudioDiskstream %1: cannot read xfade samples %2 from playlist at frame %3"
+msgstr "AudioDiskstream %1: не удалось прочитать %2 из списка воспроизведения в выборке %3"
+
+#: libs/ardour/audio_diskstream.cc:1500
+#: libs/ardour/audio_diskstream.cc:1517
 msgid "AudioDiskstream %1: cannot write to disk"
-msgstr ""
+msgstr "AudioDiskstream %1: не удалось записать на диск"
 
-#: libs/ardour/audio_diskstream.cc:1698
+#: libs/ardour/audio_diskstream.cc:1562
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
-msgstr ""
+msgstr "AudioDiskstream \"%1\": не удалось сбросить захваченные данные на диск!"
 
-#: libs/ardour/audio_diskstream.cc:1796
+#: libs/ardour/audio_diskstream.cc:1650
 msgid "%1: could not create region for complete audio file"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:1819
+#: libs/ardour/audio_diskstream.cc:1675
 msgid "AudioDiskstream: could not create region for captured audio!"
-msgstr ""
+msgstr "AudioDiskstream: не удалось создать область для захваченного звука!"
 
-#: libs/ardour/audio_diskstream.cc:1874
-#, fuzzy
+#: libs/ardour/audio_diskstream.cc:1783
 msgid "programmer error: %1"
-msgstr "������ ���������: "
+msgstr "Ошибка программы: %1"
 
-#: libs/ardour/audio_diskstream.cc:2146
+#: libs/ardour/audio_diskstream.cc:2060
 msgid "AudioDiskstream: channel %1 out of range"
-msgstr ""
+msgstr "AudioDiskstream: канал %1 вне диапазона"
 
-#: libs/ardour/audio_diskstream.cc:2171
+#: libs/ardour/audio_diskstream.cc:2079
 msgid "%1:%2 new capture file not initialized correctly"
-msgstr ""
+msgstr "%1:%2 новый файл захвата некорректно инициализирован"
 
-#: libs/ardour/audio_diskstream.cc:2404
-msgid "Location \"%1\" not valid for track loop (start >= end)"
-msgstr ""
-
-#: libs/ardour/audio_diskstream.cc:2485
+#: libs/ardour/audio_diskstream.cc:2331
 msgid "%1: cannot restore pending capture source file %2"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2507
+#: libs/ardour/audio_diskstream.cc:2353
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2523
+#: libs/ardour/audio_diskstream.cc:2368
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 
-#: libs/ardour/audio_diskstream.cc:2535
+#: libs/ardour/audio_diskstream.cc:2380
 msgid "%1: cannot create region from pending capture sources"
 msgstr ""
 
-#: libs/ardour/audio_library.cc:92
-msgid "channels"
+#: libs/ardour/audioengine.cc:122
+msgid "Connect session to engine"
+msgstr "Соединить сеанс с движком"
+
+#: libs/ardour/audioengine.cc:519
+msgid "a port with the name \"%1\" already exists: check for duplicated track/bus names"
 msgstr ""
 
-#: libs/ardour/audio_library.cc:93
-#, fuzzy
-msgid "samplerate"
-msgstr "���������"
-
-#: libs/ardour/audio_library.cc:94
-msgid "resolution"
+#: libs/ardour/audioengine.cc:521
+msgid "No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks."
 msgstr ""
 
-#: libs/ardour/audio_library.cc:95
-msgid "format"
+#: libs/ardour/audioengine.cc:524
+msgid "AudioEngine: cannot register port \"%1\": %2"
+msgstr "Звуковой движок: не удалось зарегистрировать порт \"%1\": %2"
+
+#: libs/ardour/audioengine.cc:533
+msgid "register input port called before engine was started"
 msgstr ""
 
-#: libs/ardour/audio_library.cc:102
-msgid "Could not open %1.  Audio Library not saved"
+#: libs/ardour/audioengine.cc:569
+msgid "register output port called before engine was started"
 msgstr ""
 
-#: libs/ardour/audio_playlist.cc:53 libs/ardour/audio_playlist.cc:63
-#: libs/ardour/audio_playlist.cc:74 libs/ardour/audio_playlist.cc:121
-#: libs/ardour/insert.cc:76 libs/ardour/insert.cc:95 libs/ardour/insert.cc:120
-#: libs/ardour/insert.cc:838 libs/ardour/insert.cc:846 libs/ardour/send.cc:39
-#: libs/ardour/send.cc:53 libs/ardour/send.cc:62
-#: libs/ardour/session_state.cc:1621 libs/ardour/session_state.cc:1667
-msgid "initial state"
-msgstr ""
+#: libs/ardour/audioengine.cc:660
+msgid "AudioEngine: connection already exists: %1 (%2) to %3 (%4)"
+msgstr "Звуковой движок: соединение уже существует: %1 (%2) с %3 (%4)"
 
-#: libs/ardour/audio_playlist.cc:275 libs/ardour/audio_playlist.cc:769
-msgid ""
-"programming error: non-audio Region passed to remove_overlap in audio "
-"playlist"
-msgstr ""
-
-#: libs/ardour/audio_playlist.cc:402
-msgid ""
-"programming error: non-audio Region tested for overlap in audio playlist"
-msgstr ""
-
-#: libs/ardour/audio_playlist.cc:878
-msgid "xfade change"
-msgstr ""
-
-#: libs/ardour/audio_playlist.cc:933
-msgid "region modified"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:125 libs/ardour/io.cc:1716
-#: libs/ardour/io.cc:1826
-msgid "Unknown connection \"%1\" listed for input of %2"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:127 libs/ardour/io.cc:1718
-#: libs/ardour/io.cc:1828
-msgid "in 1"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:128 libs/ardour/io.cc:1719
-#: libs/ardour/io.cc:1829
-msgid "No input connections available as a replacement"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:132 libs/ardour/io.cc:1723
-#: libs/ardour/io.cc:1833
-msgid "Connection %1 was not available - \"in 1\" used instead"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:141 libs/ardour/io.cc:1842
-msgid "improper input channel list in XML node (%1)"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:186 libs/ardour/audio_track.cc:199
-msgid "AudioTrack: diskstream \"%1\" not known by session"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:297
-msgid ""
-"MIDI rec_enable control specification for %1 is incomplete, so it has been "
-"ignored"
-msgstr ""
-
-#: libs/ardour/audio_track.cc:309
-msgid "programming error: AudioTrack given state without diskstream!"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:144
-msgid "cannot activate JACK client"
-msgstr "�� ������� ������������ ������� JACK �������"
-
-#: libs/ardour/audioengine.cc:395
-msgid "register audio input port called before engine was started"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:426
-msgid "register audio output port called before engine was started"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:487
-msgid "connect called before engine was started"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:503
+#: libs/ardour/audioengine.cc:664
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
-msgstr ""
+msgstr "Звуковой движок: не удалось соединить %1 (%2) с %3 (%4)"
 
-#: libs/ardour/audioengine.cc:516 libs/ardour/audioengine.cc:545
+#: libs/ardour/audioengine.cc:679
+#: libs/ardour/audioengine.cc:710
 msgid "disconnect called before engine was started"
-msgstr ""
+msgstr "разъединение было вызвано перед запуском движка"
 
-#: libs/ardour/audioengine.cc:603
+#: libs/ardour/audioengine.cc:757
 msgid "get_port_by_name() called before engine was started"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:636
+#: libs/ardour/audioengine.cc:802
 msgid "get_ports called before engine was started"
 msgstr ""
 
-#: libs/ardour/audioengine.cc:711
-msgid "get_nth_physical called before engine was started"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:739
-msgid "get_port_total_latency() called with no JACK client connection"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:745
-msgid "get_port_total_latency() called before engine was started"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:869
-msgid "Unable to connect to JACK server"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:872
-msgid "Could not connect to JACK server as  \"%1\""
-msgstr ""
-
-#: libs/ardour/audioengine.cc:877
-msgid "JACK server started"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:911
-msgid "cannot shutdown connection to JACK"
-msgstr ""
-
-#: libs/ardour/audioengine.cc:936
+#: libs/ardour/audioengine.cc:1145
 msgid "failed to connect to JACK"
-msgstr ""
+msgstr "Не удалось соединиться с JACK"
 
-#: libs/ardour/audioengine.cc:952
+#: libs/ardour/audioengine.cc:1163
 msgid "could not reregister %1"
+msgstr "не удалось повторно зарегистрировать %1"
+
+#: libs/ardour/audioengine.cc:1222
+msgid "Disconnected from JACK while reconnecting. You should quit Ardour now."
 msgstr ""
 
-#: libs/ardour/audioengine.cc:1009
+#: libs/ardour/audioengine.cc:1228
 msgid "could not reconnect %1 and %2 (err = %3)"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:444 libs/ardour/session_state.cc:3095
-msgid ""
-"there are already 1000 files with names like %1; versioning discontinued"
+#: libs/ardour/audiofilesource.cc:427
+#: libs/ardour/session_state.cc:2919
+msgid "there are already 1000 files with names like %1; versioning discontinued"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:458 libs/ardour/session_state.cc:3109
+#: libs/ardour/audiofilesource.cc:441
+#: libs/ardour/session_state.cc:2933
 msgid "cannot rename audio file source from %1 to %2 (%3)"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:465 libs/ardour/session_state.cc:3124
+#: libs/ardour/audiofilesource.cc:448
+#: libs/ardour/session_state.cc:2947
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:509
+#: libs/ardour/audiofilesource.cc:486
 msgid "FileSource: search path not set"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:533
+#: libs/ardour/audiofilesource.cc:558
 msgid ""
 "FileSource: \"%1\" is ambigous when searching %2\n"
 "\t"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:539
+#: libs/ardour/audiofilesource.cc:564
 msgid "Filesource: cannot find required file (%1): while searching %2"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:562
+#: libs/ardour/audiofilesource.cc:604
 msgid "Filesource: cannot find required file (%1): %2"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:567
+#: libs/ardour/audiofilesource.cc:609
 msgid "Filesource: cannot check for existing file (%1): %2"
 msgstr ""
 
-#: libs/ardour/audiofilesource.cc:636 libs/ardour/insert.cc:525
-#: libs/ardour/sndfilesource.cc:113
-#, fuzzy
+#: libs/ardour/audiofilesource.cc:674
+#: libs/ardour/audiosource.cc:876
+#: libs/ardour/automation_event.cc:639
+#: libs/ardour/insert.cc:550
+#: libs/ardour/session.cc:2323
+#: libs/ardour/session.cc:3745
+#: libs/ardour/session.cc:3784
+#: libs/ardour/session_command.cc:432
+#: libs/ardour/sndfilesource.cc:130
 msgid "programming error: %1"
-msgstr "������ ���������: "
+msgstr "Ошибка программы: %1"
 
-#: libs/ardour/audiofilesource.cc:641
-msgid "cannot rename audio file for %1 to %2"
+#: libs/ardour/audiofilesource.cc:680
+msgid "Programming error! Ardour tried to rename a file over another file! It's safe to continue working, but please report this to the developers."
 msgstr ""
 
-#: libs/ardour/audiofilter.cc:45
+#: libs/ardour/audiofilesource.cc:685
+msgid "cannot rename audio file %1 to %2"
+msgstr ""
+
+#: libs/ardour/audiofilter.cc:43
+msgid ""
+"This is an old Ardour session that does not have\n"
+"sufficient information for rendered FX"
+msgstr ""
+
+#: libs/ardour/audiofilter.cc:66
 msgid "audiofilter: error creating name for new audio file based on %1"
 msgstr ""
 
-#: libs/ardour/audiofilter.cc:58
+#: libs/ardour/audiofilter.cc:77
 msgid "audiofilter: error creating new audio file %1 (%2)"
 msgstr ""
 
-#: libs/ardour/audioregion.cc:857 libs/ardour/audioregion.cc:919
-msgid "fade in change"
+#: libs/ardour/audio_library.cc:61
+msgid "Could not open %1.  Audio Library not saved"
 msgstr ""
 
-#: libs/ardour/audioregion.cc:1349
-#, c-format
-msgid "normalized to %.2fdB"
+#: libs/ardour/audio_playlist.cc:226
+#: libs/ardour/audio_playlist.cc:615
+msgid "programming error: non-audio Region passed to remove_overlap in audio playlist"
 msgstr ""
 
-#: libs/ardour/audioregion.cc:1367
-msgid "envelope change"
+#: libs/ardour/audio_playlist.cc:356
+msgid "programming error: non-audio Region tested for overlap in audio playlist"
 msgstr ""
 
-#: libs/ardour/audiosource.cc:143
-msgid "poll on peak request pipe failed (%1)"
+#: libs/ardour/audioregion.cc:1642
+msgid ""
+"You have requested an operation that requires audio analysis.\n"
+"\n"
+"You currently have \"auto-analyse-audio\" disabled, which means\n"
+"that transient data must be generated every time it is required.\n"
+"\n"
+"If you are doing work that will require transient data on a\n"
+"regular basis, you should probably enable \"auto-analyse-audio\"\n"
+"then quit ardour and restart.\n"
+"\n"
+"This dialog will not display again.  But you may notice a slight delay\n"
+"in this and future transient-detection operations.\n"
 msgstr ""
 
-#: libs/ardour/audiosource.cc:150
-msgid "Error on peak thread request pipe"
-msgstr ""
-
-#: libs/ardour/audiosource.cc:183
-msgid "Error reading from peak request pipe"
-msgstr ""
-
-#: libs/ardour/audiosource.cc:215 libs/ardour/session_butler.cc:80
-#: libs/ardour/session_midi.cc:1183
-msgid "Cannot create transport request signal pipe (%1)"
-msgstr ""
-
-#: libs/ardour/audiosource.cc:220 libs/ardour/audiosource.cc:225
-msgid "UI: cannot set O_NONBLOCK on peak request pipe (%1)"
-msgstr ""
-
-#: libs/ardour/audiosource.cc:230
-msgid "AudioSource: could not create peak thread"
-msgstr ""
-
-#: libs/ardour/audiosource.cc:308
+#: libs/ardour/audiosource.cc:178
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
 msgstr ""
 
-#: libs/ardour/audiosource.cc:350
+#: libs/ardour/audiosource.cc:205
 #, fuzzy
 msgid "AudioSource: cannot stat peakfile \"%1\""
-msgstr "Ardour: �� ������� ��������� ���� ������������ ������������ \"%1\""
+msgstr "Ardour: не удалось прочитать файл конфигурации пользователя \"%1\""
 
-#: libs/ardour/audiosource.cc:451
+#: libs/ardour/audiosource.cc:329
 msgid "cannot read sample data for unscaled peak computation"
 msgstr ""
 
-#: libs/ardour/audiosource.cc:472 libs/ardour/audiosource.cc:543
-#: libs/ardour/audiosource.cc:787 libs/ardour/audiosource.cc:878
+#: libs/ardour/audiosource.cc:349
 #, fuzzy
-msgid "AudioSource: cannot open peakpath \"%1\" (%2)"
-msgstr "LADSPA: �� ������� ��������� ������ \"%1\" (%2)"
+msgid "AudioSource: cannot open peakpath (a) \"%1\" (%2)"
+msgstr "LADSPA: не удалось загрузить модуль \"%1\" (%2)"
 
-#: libs/ardour/audiosource.cc:644
-msgid "AudioSource[%1]: peak read - cannot read %2 samples at offset %3"
+#: libs/ardour/audiosource.cc:423
+#, fuzzy
+msgid "AudioSource: cannot open peakpath (b) \"%1\" (%2)"
+msgstr "LADSPA: не удалось загрузить модуль \"%1\" (%2)"
+
+#: libs/ardour/audiosource.cc:537
+msgid "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
 
-#: libs/ardour/audiosource.cc:798
+#: libs/ardour/audiosource.cc:624
 msgid "%1: could not write read raw data for peak computation (%2)"
 msgstr ""
 
-#: libs/ardour/audiosource.cc:823
+#: libs/ardour/audiosource.cc:670
+#, fuzzy
+msgid "AudioSource: cannot open peakpath (c) \"%1\" (%2)"
+msgstr "LADSPA: не удалось загрузить модуль \"%1\" (%2)"
+
+#: libs/ardour/audiosource.cc:736
+#: libs/ardour/audiosource.cc:848
 msgid "%1: could not write peak file data (%2)"
+msgstr "%1: не удалось записать файлы пиковых данных (%2)"
+
+#: libs/ardour/audio_track.cc:147
+msgid "Unknown connection \"%1\" listed for input of %2"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:65 libs/ardour/location.cc:345
-#: libs/ardour/tempo.cc:226
-msgid "initial"
+#: libs/ardour/audio_track.cc:152
+msgid "in 1+2"
+msgstr "вход 1+2"
+
+#: libs/ardour/audio_track.cc:154
+msgid "in 1"
+msgstr "вход 1"
+
+#: libs/ardour/audio_track.cc:158
+msgid "No input connections available as a replacement"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:232
-msgid "cleared"
+#: libs/ardour/audio_track.cc:162
+#: libs/ardour/io.cc:1885
+msgid "Connection %1 was not available - \"%2\" used instead"
+msgstr "Соединение «%1» не было доступно, вместо него использовано «%2»"
+
+#: libs/ardour/audio_track.cc:171
+#: libs/ardour/io.cc:1965
+msgid "improper input channel list in XML node (%1)"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:404
-msgid "added event"
+#: libs/ardour/audio_track.cc:212
+#: libs/ardour/audio_track.cc:225
+msgid "AudioTrack: audio diskstream \"%1\" not known by session"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:421
-#, fuzzy
-msgid "removed event"
-msgstr "������� �������"
-
-#: libs/ardour/automation_event.cc:436
-msgid "removed multiple events"
+#: libs/ardour/audio_track.cc:267
+msgid "programming error: AudioTrack given state without diskstream!"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:467 libs/ardour/automation_event.cc:498
-#, fuzzy
-msgid "removed range"
-msgstr "������� �������"
-
-#: libs/ardour/automation_event.cc:528
-msgid "event range adjusted"
+#: libs/ardour/auditioner.cc:56
+msgid "no outputs available for auditioner - manual connection required"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:550
-msgid "event adjusted"
+#: libs/ardour/auditioner.cc:127
+msgid "Auditioning of non-audio regions not yet supported"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:665 libs/ardour/automation_event.cc:770
-#: libs/ardour/panner.cc:1041
-#, fuzzy
+#: libs/ardour/automation_event.cc:785
+#: libs/ardour/panner.cc:916
 msgid "programming error:"
-msgstr "������ ���������: "
+msgstr "ошибка программы:"
 
-#: libs/ardour/automation_event.cc:1079
-msgid "cut/copy/clear"
+#: libs/ardour/automation_event.cc:1310
+msgid "automation list: cannot load coordinates from XML, all points ignored"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:1112
-msgid "copy"
+#: libs/ardour/automation_event.cc:1356
+msgid "automation list: no x-coordinate stored for control point (point ignored)"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:1180 libs/ardour/playlist.cc:939
-msgid "paste"
-msgstr "��������"
-
-#: libs/ardour/automation_event.cc:1235
-msgid ""
-"automation list: no x-coordinate stored for control point (point ignored)"
+#: libs/ardour/automation_event.cc:1362
+msgid "automation list: no y-coordinate stored for control point (point ignored)"
 msgstr ""
 
-#: libs/ardour/automation_event.cc:1241
-msgid ""
-"automation list: no y-coordinate stored for control point (point ignored)"
+#: libs/ardour/automation_event.cc:1376
+msgid "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
 msgstr ""
 
-#: libs/ardour/configuration.cc:80
-#, fuzzy
+#: libs/ardour/configuration.cc:98
 msgid "loading system configuration file %1"
-msgstr "Ardour: �� ������� ��������� ���� ������������ ��������� \"%1\""
+msgstr "загружается файл конфигурации системы \"%1\""
 
-#: libs/ardour/configuration.cc:83
+#: libs/ardour/configuration.cc:101
 msgid "Ardour: cannot read system configuration file \"%1\""
-msgstr "Ardour: �� ������� ��������� ���� ������������ ��������� \"%1\""
-
-#: libs/ardour/configuration.cc:88
-msgid "Ardour: system configuration file \"%1\" not loaded successfully."
-msgstr "Ardour: �� ������� ��������� ���� ������������ ��������� \"%1\"."
-
-#: libs/ardour/configuration.cc:105
-#, fuzzy
-msgid "loading user configuration file %1"
-msgstr "Ardour: �� ������� ��������� ���� ������������ ������������ \"%1\""
+msgstr "Ardour: не удалось прочитать файл конфигурации программы \"%1\""
 
 #: libs/ardour/configuration.cc:108
+msgid "Ardour: system configuration file \"%1\" not loaded successfully."
+msgstr "Ardour: не удалось загрузить файл конфигурации программы \"%1\"."
+
+#: libs/ardour/configuration.cc:112
+msgid "your system Ardour configuration file is empty. This probably means that there as an error installing Ardour"
+msgstr ""
+
+#: libs/ardour/configuration.cc:132
+msgid "loading user configuration file %1"
+msgstr "не удалось прочитать пользовательский файл конфигурации \"%1\""
+
+#: libs/ardour/configuration.cc:135
 msgid "Ardour: cannot read configuration file \"%1\""
-msgstr "Ardour: �� ������� ��������� ���� ������������ ������������ \"%1\""
+msgstr "Ardour: не удалось прочитать файл конфигурации \"%1\""
 
-#: libs/ardour/configuration.cc:113
-#, fuzzy
+#: libs/ardour/configuration.cc:142
 msgid "Ardour: user configuration file \"%1\" not loaded successfully."
-msgstr "Ardour: �� ������� ��������� ���� ������������ ������������ \"%1\"."
+msgstr "Ardour: пользовательский файл конфигурации \"%1\" не загружен успешно."
 
-#: libs/ardour/configuration.cc:137
-#, fuzzy
+#: libs/ardour/configuration.cc:146
+msgid "your Ardour configuration file is empty. This is not normal."
+msgstr ""
+
+#: libs/ardour/configuration.cc:164
 msgid "Config file %1 not saved"
-msgstr "���� ������������ �� �����Σ�"
+msgstr "Конфигурационный файл %1 не сохранён"
 
-#: libs/ardour/configuration.cc:210
+#: libs/ardour/configuration.cc:253
 msgid "ill-formed MIDI port specification in ardour rcfile (ignored)"
 msgstr ""
 
-#: libs/ardour/connection.cc:183
+#: libs/ardour/connection.cc:182
 msgid "Node for Connection has no \"name\" property"
 msgstr ""
 
-#: libs/ardour/connection.cc:191
+#: libs/ardour/connection.cc:190
 msgid "Node for Connection has no \"connections\" property"
 msgstr ""
 
-#: libs/ardour/connection.cc:227 libs/ardour/io.cc:1902
+#: libs/ardour/connection.cc:226
+#: libs/ardour/io.cc:2016
 msgid "IO: badly formed string in XML node for inputs \"%1\""
 msgstr ""
 
-#: libs/ardour/connection.cc:232 libs/ardour/io.cc:1907
+#: libs/ardour/connection.cc:231
+#: libs/ardour/io.cc:2021
 msgid "bad input string in XML node \"%1\""
 msgstr ""
 
-#: libs/ardour/control_protocol_manager.cc:80
+#: libs/ardour/control_protocol_manager.cc:117
 msgid "control protocol name \"%1\" has no descriptor"
 msgstr ""
 
-#: libs/ardour/control_protocol_manager.cc:85
+#: libs/ardour/control_protocol_manager.cc:122
 msgid "control protocol name \"%1\" could not be initialized"
 msgstr ""
 
-#: libs/ardour/control_protocol_manager.cc:141
+#: libs/ardour/control_protocol_manager.cc:189
 msgid "Instantiating mandatory control protocol %1"
 msgstr ""
 
-#: libs/ardour/control_protocol_manager.cc:175
+#: libs/ardour/control_protocol_manager.cc:201
+msgid "looking for control protocols in %1"
+msgstr "поиск протоколов управляющих устройств в %1"
+
+#: libs/ardour/control_protocol_manager.cc:223
 msgid "Control protocol %1 not usable"
-msgstr ""
+msgstr "протокол управляющего устройства %1 не пригоден к использованию"
 
-#: libs/ardour/control_protocol_manager.cc:187
+#: libs/ardour/control_protocol_manager.cc:237
 msgid "Control surface protocol discovered: \"%1\""
-msgstr ""
+msgstr "обнаружен протокол управляющего устройства: \"%1\""
 
-#: libs/ardour/control_protocol_manager.cc:205
-#, fuzzy
+#: libs/ardour/control_protocol_manager.cc:255
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
-msgstr "LADSPA: �� ������� ��������� ������ \"%1\" (%2)"
+msgstr "ControlProtocolManager: не удалось загрузить модуль \"%1\" (%2)"
 
-#: libs/ardour/control_protocol_manager.cc:213
+#: libs/ardour/control_protocol_manager.cc:263
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr ""
 
-#: libs/ardour/crossfade.cc:121
+#: libs/ardour/control_protocol_manager.cc:380
+msgid "control protocol XML node has no name property. Ignored."
+msgstr ""
+
+#: libs/ardour/control_protocol_manager.cc:387
+msgid "control protocol \"%1\" is not known. Ignored"
+msgstr ""
+
+#: libs/ardour/crossfade.cc:125
 msgid "Crossfade: no \"in\" region in state"
 msgstr ""
 
-#: libs/ardour/crossfade.cc:128
+#: libs/ardour/crossfade.cc:132
 msgid "Crossfade: no \"in\" region %1 found in playlist %2"
 msgstr ""
 
-#: libs/ardour/crossfade.cc:138
+#: libs/ardour/crossfade.cc:142
 msgid "Crossfade: no \"out\" region in state"
 msgstr ""
 
-#: libs/ardour/crossfade.cc:145
+#: libs/ardour/crossfade.cc:149
 msgid "Crossfade: no \"out\" region %1 found in playlist %2"
 msgstr ""
 
-#: libs/ardour/crossfade.cc:492
-msgid "active changed"
-msgstr ""
-
-#: libs/ardour/crossfade.cc:741
+#: libs/ardour/crossfade.cc:726
 msgid "old-style crossfade information - no position information"
 msgstr ""
 
-#: libs/ardour/curve.cc:112 libs/ardour/globals.cc:340
-#: libs/ardour/insert.cc:454 libs/ardour/session.cc:2466
-#: libs/ardour/session.cc:2518
+#: libs/ardour/curve.cc:127
+#: libs/ardour/globals.cc:403
+#: libs/ardour/insert.cc:464
+#: libs/ardour/session.cc:2805
+#: libs/ardour/session.cc:2916
 msgid "programming error: "
-msgstr "������ ���������: "
+msgstr "ошибка программы: "
 
-#: libs/ardour/cycle_timer.cc:37
+#: libs/ardour/cycle_timer.cc:36
 msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
 msgstr ""
 
-#: libs/ardour/cycle_timer.cc:49
+#: libs/ardour/cycle_timer.cc:48
 msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
 msgstr ""
 
-#: libs/ardour/cycle_timer.cc:72
+#: libs/ardour/cycle_timer.cc:71
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
 msgstr ""
 
-#: libs/ardour/destructive_filesource.cc:188
-msgid "DestructiveFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
+#: libs/ardour/diskstream.cc:253
+msgid "Location \"%1\" not valid for track loop (start >= end)"
 msgstr ""
 
-#: libs/ardour/destructive_filesource.cc:201
-#: libs/ardour/destructive_filesource.cc:243
-#: libs/ardour/destructive_filesource.cc:250
-msgid "DestructiveFileSource: \"%1\" bad write (%2)"
+#: libs/ardour/globals.cc:116
+msgid "Starting OSC"
 msgstr ""
 
-#: libs/ardour/globals.cc:109
+#: libs/ardour/globals.cc:129
 msgid "no MIDI ports specified: no MMC or MTC control possible"
 msgstr ""
 
-#: libs/ardour/globals.cc:124
-msgid "MIDI port specifications for \"%1\" are not understandable."
+#: libs/ardour/globals.cc:133
+msgid "Configuring MIDI ports"
 msgstr ""
 
-#: libs/ardour/globals.cc:137 libs/ardour/globals.cc:141
-#: libs/ardour/globals.cc:145
+#: libs/ardour/globals.cc:148
+#: libs/ardour/globals.cc:152
+#: libs/ardour/globals.cc:156
 msgid "default"
-msgstr ""
+msgstr "по умолчанию"
 
-#: libs/ardour/globals.cc:173
+#: libs/ardour/globals.cc:186
 msgid "No MMC control (MIDI port \"%1\" not available)"
 msgstr ""
 
-#: libs/ardour/globals.cc:179
+#: libs/ardour/globals.cc:193
 msgid "No MTC support (MIDI port \"%1\" not available)"
 msgstr ""
 
-#: libs/ardour/globals.cc:184
+#: libs/ardour/globals.cc:198
 msgid "No MIDI parameter support (MIDI port \"%1\" not available)"
 msgstr ""
 
-#: libs/ardour/import.cc:75
+#: libs/ardour/globals.cc:279
+msgid "Could not set system open files limit to \"unlimited\""
+msgstr ""
+
+#: libs/ardour/globals.cc:281
+msgid "Could not set system open files limit to %1"
+msgstr ""
+
+#: libs/ardour/globals.cc:285
+msgid "Removed open file count limit. Excellent!"
+msgstr "Снят предел на число открытых файлов. Превосходно!"
+
+#: libs/ardour/globals.cc:287
+msgid "Ardour will be limited to %1 open files"
+msgstr "В Ardour можно будет открыть не более %1 файлов"
+
+#: libs/ardour/globals.cc:291
+#, fuzzy
+msgid "Could not get system open files limit (%1)"
+msgstr "%1: не удалось записать файлы пиковых данных (%2)"
+
+#: libs/ardour/globals.cc:310
+msgid "Loading configuration"
+msgstr "Загружается конфигурация"
+
+#: libs/ardour/import.cc:185
+msgid "Could not find a source for %1 even though we are updating this file!"
+msgstr ""
+
+#: libs/ardour/import.cc:217
+msgid "Unable to create file %1 during import"
+msgstr ""
+
+#: libs/ardour/import.cc:236
+msgid ""
+"converting %1\n"
+"(resample from %2KHz to %3KHz)\n"
+"(%4 of %5)"
+msgstr ""
+
+#: libs/ardour/import.cc:243
+msgid ""
+"converting %1\n"
+"(%2 of %3)"
+msgstr ""
+
+#: libs/ardour/import.cc:329
 msgid "Import: cannot open input sound file \"%1\""
 msgstr ""
 
-#: libs/ardour/import.cc:80
-msgid "resampling audio"
-msgstr ""
-
-#: libs/ardour/import.cc:84
-msgid "Import: cannot open converted sound file \"%1\""
-msgstr ""
-
-#: libs/ardour/import.cc:89
-msgid "Import: error while resampling sound file \"%1\""
-msgstr ""
-
-#: libs/ardour/import.cc:148
-msgid "Session::import_audiofile: cannot open new file source for channel %1"
-msgstr ""
-
-#: libs/ardour/import.cc:167
-msgid "converting audio"
-msgstr ""
-
-#: libs/ardour/import.cc:199
-msgid "building region"
-msgstr ""
-
-#: libs/ardour/import.cc:201
-msgid "building regions"
-msgstr ""
-
-#: libs/ardour/import.cc:325
-msgid "Import: could not open temp file: %1"
-msgstr ""
-
-#: libs/ardour/import.cc:334
-msgid "Import: src_new() failed : %1"
-msgstr ""
-
-#: libs/ardour/import.cc:362
-msgid "Import: %1"
-msgstr "������: %1"
-
-#: libs/ardour/insert.cc:644 libs/ardour/insert.cc:936
+#: libs/ardour/insert.cc:651
+#: libs/ardour/insert.cc:985
 msgid "XML node describing insert is missing the `type' field"
 msgstr ""
 
-#: libs/ardour/insert.cc:653
+#: libs/ardour/insert.cc:664
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr ""
 
-#: libs/ardour/insert.cc:665
-msgid "XML node describing insert is missing the `id' field"
+#: libs/ardour/insert.cc:683
+msgid "Plugin has no unique ID field"
 msgstr ""
 
-#: libs/ardour/insert.cc:678
+#: libs/ardour/insert.cc:693
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
 msgstr ""
 
-#: libs/ardour/insert.cc:716 libs/ardour/insert.cc:953
-msgid "XML node describing insert is missing a Redirect node"
-msgstr ""
-
-#: libs/ardour/insert.cc:721
+#: libs/ardour/insert.cc:724
 msgid "XML node describing a plugin insert is missing the `%1' information"
 msgstr ""
 
-#: libs/ardour/insert.cc:745
+#: libs/ardour/insert.cc:736
+#: libs/ardour/insert.cc:1013
+msgid "XML node describing insert is missing a Redirect node"
+msgstr ""
+
+#: libs/ardour/insert.cc:790
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr ""
 
-#: libs/ardour/insert.cc:752
+#: libs/ardour/insert.cc:797
 msgid "PluginInsert: Auto: port id out of range"
 msgstr ""
 
-#: libs/ardour/insert.cc:768
+#: libs/ardour/insert.cc:828
 msgid "XML node describing a port automation is missing the `%1' information"
 msgstr ""
 
-#: libs/ardour/insert.cc:854
-msgid "PortInsert: cannot add input port"
-msgstr ""
+#: libs/ardour/insert.cc:891
+#: libs/ardour/insert.cc:899
+msgid "insert %1"
+msgstr "возврат 1"
 
-#: libs/ardour/insert.cc:859
-msgid "PortInsert: cannot add output port"
-msgstr ""
-
-#: libs/ardour/insert.cc:941
+#: libs/ardour/insert.cc:990
 msgid "non-port insert XML used for port plugin insert"
 msgstr ""
 
-#: libs/ardour/io.cc:598
+#: libs/ardour/io.cc:663
 msgid "IO: cannot disconnect input port %1 from %2"
 msgstr ""
 
-#: libs/ardour/io.cc:666
+#: libs/ardour/io.cc:731
 msgid "IO: cannot disconnect output port %1 from %2"
 msgstr ""
 
-#: libs/ardour/io.cc:807 libs/ardour/io.cc:1151 libs/ardour/io.cc:1277
-#, c-format
-msgid "%s/out"
-msgstr ""
-
-#: libs/ardour/io.cc:809 libs/ardour/io.cc:1153 libs/ardour/io.cc:1279
-#: libs/ardour/io.cc:2849
-#, c-format
-msgid "%s/out %u"
-msgstr ""
-
-#: libs/ardour/io.cc:813 libs/ardour/io.cc:1158 libs/ardour/io.cc:1283
+#: libs/ardour/io.cc:885
+#: libs/ardour/io.cc:1214
+#: libs/ardour/io.cc:1333
 msgid "IO: cannot register output port %1"
-msgstr ""
+msgstr "IO: невозможно зарегистрировать порт выхода %1"
 
-#: libs/ardour/io.cc:908 libs/ardour/io.cc:1011 libs/ardour/io.cc:1117
-#, c-format
-msgid "%s/in"
-msgstr ""
-
-#: libs/ardour/io.cc:910 libs/ardour/io.cc:1014 libs/ardour/io.cc:1120
-#: libs/ardour/io.cc:2819
-#, c-format
-msgid "%s/in %u"
-msgstr ""
-
-#: libs/ardour/io.cc:914 libs/ardour/io.cc:1020 libs/ardour/io.cc:1125
+#: libs/ardour/io.cc:992
+#: libs/ardour/io.cc:1091
+#: libs/ardour/io.cc:1189
 msgid "IO: cannot register input port %1"
-msgstr ""
+msgstr "IO: невозможно зарегистрировать порт входа %1"
 
-#: libs/ardour/io.cc:1541
-msgid "IO::connecting_became_legal() called without a pending state node"
-msgstr ""
-
-#: libs/ardour/io.cc:1564
-msgid "IO::ports_became_legal() called without a pending state node"
-msgstr ""
-
-#: libs/ardour/io.cc:1594
+#: libs/ardour/io.cc:1583
 msgid "incorrect XML node \"%1\" passed to IO object"
 msgstr ""
 
-#: libs/ardour/io.cc:1649
-msgid ""
-"MIDI gain control specification for %1 is incomplete, so it has been ignored"
-msgstr ""
-
-#: libs/ardour/io.cc:1739 libs/ardour/io.cc:1851
-msgid "Unknown connection \"%1\" listed for output of %2"
-msgstr ""
-
-#: libs/ardour/io.cc:1741 libs/ardour/io.cc:1853
-msgid "out 1"
-msgstr ""
-
-#: libs/ardour/io.cc:1742 libs/ardour/io.cc:1854
-msgid "No output connections available as a replacement"
-msgstr ""
-
-#: libs/ardour/io.cc:1746 libs/ardour/io.cc:1858
-msgid "Connection %1 was not available - \"out 1\" used instead"
-msgstr ""
-
-#: libs/ardour/io.cc:1760
-msgid "%1: cannot create I/O ports"
-msgstr ""
-
-#: libs/ardour/io.cc:1867
-msgid "improper output channel list in XML node (%1)"
-msgstr ""
-
-#: libs/ardour/io.cc:1952
-msgid "IO: badly formed string in XML node for outputs \"%1\""
-msgstr ""
-
-#: libs/ardour/io.cc:1957
-msgid "IO: bad output string in XML node \"%1\""
-msgstr ""
-
-#: libs/ardour/io.cc:2525
-msgid "%1: could not open automation event file \"%2\""
-msgstr ""
-
-#: libs/ardour/io.cc:2564
+#: libs/ardour/io.cc:1707
 msgid "%1: cannot open automation event file \"%2\""
 msgstr ""
 
-#: libs/ardour/io.cc:2579
+#: libs/ardour/io.cc:1722
 msgid "badly formed version number in automation event file \"%1\""
 msgstr ""
 
-#: libs/ardour/io.cc:2583
+#: libs/ardour/io.cc:1726
 msgid "no version information in automation event file \"%1\""
 msgstr ""
 
-#: libs/ardour/io.cc:2588
-msgid "mismatched automation event file version (%1)"
-msgstr ""
-
-#: libs/ardour/io.cc:2596
+#: libs/ardour/io.cc:1734
 msgid "badly formatted automation event record at line %1 of %2 (ignored)"
 msgstr ""
 
-#: libs/ardour/io.cc:2616
+#: libs/ardour/io.cc:1754
 msgid "dubious automation event found (and ignored)"
 msgstr ""
 
-#: libs/ardour/io.cc:2620 libs/ardour/panner.cc:438
-#: libs/ardour/redirect.cc:148
-msgid "loaded from disk"
+#: libs/ardour/io.cc:1767
+msgid "IO::connecting_became_legal() called without a pending state node"
 msgstr ""
 
-#: libs/ardour/io.cc:2791
-msgid "automation write/touch"
+#: libs/ardour/io.cc:1789
+msgid "IO::ports_became_legal() called without a pending state node"
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:87
+#: libs/ardour/io.cc:1819
+msgid "Unknown connection \"%1\" listed for %2 of %3"
+msgstr ""
+
+#: libs/ardour/io.cc:1888
+msgid "No %1 connections available as a replacement"
+msgstr ""
+
+#: libs/ardour/io.cc:1907
+#: libs/ardour/io.cc:1955
+#: libs/ardour/io.cc:2732
+msgid "in"
+msgstr "вход"
+
+#: libs/ardour/io.cc:1907
+#: libs/ardour/io.cc:1955
+msgid "input"
+msgstr "вход"
+
+#: libs/ardour/io.cc:1921
+#: libs/ardour/io.cc:1971
+#: libs/ardour/io.cc:2739
+msgid "out"
+msgstr "выход"
+
+#: libs/ardour/io.cc:1921
+#: libs/ardour/io.cc:1971
+msgid "output"
+msgstr "выход"
+
+#: libs/ardour/io.cc:1936
+msgid "%1: cannot create I/O ports"
+msgstr "%1: не удалось создать порты входа-выхода"
+
+#: libs/ardour/io.cc:1981
+msgid "improper output channel list in XML node (%1)"
+msgstr ""
+
+#: libs/ardour/io.cc:2066
+msgid "IO: badly formed string in XML node for outputs \"%1\""
+msgstr ""
+
+#: libs/ardour/io.cc:2071
+msgid "IO: bad output string in XML node \"%1\""
+msgstr ""
+
+#: libs/ardour/io.cc:2155
+msgid "you cannot use colons to name objects with I/O connections"
+msgstr ""
+
+#: libs/ardour/io.cc:2794
+#: libs/ardour/io.cc:2827
+#, c-format
+msgid "%s %u"
+msgstr "%s %u"
+
+#: libs/ardour/ladspa_plugin.cc:86
 msgid "LADSPA: module has no descriptor function."
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:92
+#: libs/ardour/ladspa_plugin.cc:91
 msgid "LADSPA: plugin has gone away since discovery!"
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:99
+#: libs/ardour/ladspa_plugin.cc:98
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:329
-msgid ""
-"illegal parameter number used with plugin \"%1\". This mayindicate a change "
-"in the plugin design, and presets may beinvalid"
+#: libs/ardour/ladspa_plugin.cc:316
+msgid "illegal parameter number used with plugin \"%1\". This mayindicate a change in the plugin design, and presets may beinvalid"
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:430
+#: libs/ardour/ladspa_plugin.cc:399
 msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:443
+#: libs/ardour/ladspa_plugin.cc:412
 msgid "LADSPA: no ladspa port number"
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:449
+#: libs/ardour/ladspa_plugin.cc:419
 msgid "LADSPA: no ladspa port data"
 msgstr ""
 
-#: libs/ardour/ladspa_plugin.cc:498
-msgid ""
-"LADSPA LadspaPlugin MIDI control specification for port %1 is incomplete, so "
-"it has been ignored"
+#: libs/ardour/ladspa_plugin.cc:658
+msgid "LADSPA: cannot load module from \"%1\""
 msgstr ""
 
-#: libs/ardour/location.cc:269
+#: libs/ardour/location.cc:224
+msgid "You cannot put a CD marker at this position"
+msgstr "Вы не можете разместить здесь метку CD"
+
+#: libs/ardour/location.cc:353
 msgid "incorrect XML node passed to Location::set_state"
 msgstr ""
 
-#: libs/ardour/location.cc:276
+#: libs/ardour/location.cc:358
+msgid "XML node for Location has no ID information"
+msgstr ""
+
+#: libs/ardour/location.cc:364
 msgid "XML node for Location has no name information"
 msgstr ""
 
-#: libs/ardour/location.cc:283
+#: libs/ardour/location.cc:371
 msgid "XML node for Location has no start information"
 msgstr ""
 
-#: libs/ardour/location.cc:294
+#: libs/ardour/location.cc:382
 msgid "XML node for Location has no end information"
 msgstr ""
 
-#: libs/ardour/location.cc:303
+#: libs/ardour/location.cc:389
 msgid "XML node for Location has no flags information"
 msgstr ""
 
-#: libs/ardour/location.cc:391
+#: libs/ardour/location.cc:506
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr ""
 
-#: libs/ardour/location.cc:418 libs/ardour/playlist.cc:1187
-msgid "clear"
-msgstr ""
-
-#: libs/ardour/location.cc:443
-msgid "clear markers"
-msgstr ""
-
-#: libs/ardour/location.cc:471
-msgid "clear ranges"
-msgstr ""
-
-#: libs/ardour/location.cc:489
-msgid "add"
-msgstr "��������"
-
-#: libs/ardour/location.cc:527
-msgid "remove"
-msgstr "�������"
-
-#: libs/ardour/location.cc:567
+#: libs/ardour/location.cc:674
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: libs/ardour/mtc_slave.cc:196
+#: libs/ardour/location.cc:695
+msgid "could not load location from session file - ignored"
+msgstr ""
+
+#: libs/ardour/mtc_slave.cc:127
+msgid "Unknown rate/drop value %1 in incoming MTC stream, session values used instead"
+msgstr ""
+
+#: libs/ardour/mtc_slave.cc:236
 msgid "MTC Slave: atomic read of current time failed, sleeping!"
 msgstr ""
 
-#: libs/ardour/named_selection.cc:77
+#: libs/ardour/named_selection.cc:88
 msgid "Chunk %1 uses an unknown playlist \"%2\""
 msgstr ""
 
-#: libs/ardour/named_selection.cc:80
+#: libs/ardour/named_selection.cc:91
 msgid "Chunk %1 contains misformed playlist information"
 msgstr ""
 
-#: libs/ardour/panner.cc:256
-msgid "MIDI pan control specification is incomplete, so it has been ignored"
+#: libs/ardour/panner.cc:253
+msgid "badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"
 msgstr ""
 
-#: libs/ardour/panner.cc:361
-msgid "automation write pass"
-msgstr ""
-
-#: libs/ardour/panner.cc:401
-#, c-format
-msgid "error writing pan automation file (%s)"
-msgstr ""
-
-#: libs/ardour/panner.cc:429
-msgid ""
-"badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"
-msgstr ""
-
-#: libs/ardour/panner.cc:944
+#: libs/ardour/panner.cc:749
 msgid "badly-formed positional data for Multi2dPanner - ignored"
 msgstr ""
 
-#: libs/ardour/panner.cc:1237
-msgid "cannot open pan automation file \"%1\" for saving (%s)"
-msgstr ""
-
-#: libs/ardour/panner.cc:1273
-msgid "cannot open pan automation file %1 (%2)"
-msgstr ""
-
-#: libs/ardour/panner.cc:1286
-msgid "badly formed version number in pan automation event file \"%1\""
-msgstr ""
-
-#: libs/ardour/panner.cc:1290
-msgid ""
-"no version information in pan automation event file \"%1\" (first line = %2)"
-msgstr ""
-
-#: libs/ardour/panner.cc:1296
-msgid "mismatched pan automation event file version (%1)"
-msgstr ""
-
-#: libs/ardour/panner.cc:1310
-msgid "too many panner states found in pan automation file %1"
-msgstr ""
-
-#: libs/ardour/panner.cc:1451
+#: libs/ardour/panner.cc:1222
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
 msgstr ""
 
-#: libs/ardour/panner.cc:1457
+#: libs/ardour/panner.cc:1228
 msgid "panner plugin node has no type information!"
+msgstr ""
+
+#: libs/ardour/panner.cc:1434
+msgid "cannot open pan automation file %1 (%2)"
+msgstr ""
+
+#: libs/ardour/panner.cc:1447
+msgid "badly formed version number in pan automation event file \"%1\""
+msgstr ""
+
+#: libs/ardour/panner.cc:1451
+msgid "no version information in pan automation event file \"%1\" (first line = %2)"
+msgstr ""
+
+#: libs/ardour/panner.cc:1466
+msgid "too many panner states found in pan automation file %1"
 msgstr ""
 
 #: libs/ardour/playlist.cc:253
@@ -963,379 +864,196 @@ msgstr ""
 msgid "playlist non-const copy constructor called"
 msgstr ""
 
-#: libs/ardour/playlist.cc:499
-msgid "add region"
-msgstr "�������� �������"
-
-#: libs/ardour/playlist.cc:554
-msgid "replace region"
-msgstr "�������� �������"
-
-#: libs/ardour/playlist.cc:567
-msgid "remove region"
-msgstr "������� �������"
-
-#: libs/ardour/playlist.cc:614
-msgid "separate"
-msgstr "���������"
-
-#: libs/ardour/playlist.cc:878
-msgid "cut"
-msgstr "��������"
-
-#: libs/ardour/playlist.cc:968
-msgid "duplicate"
-msgstr "����������"
-
-#: libs/ardour/playlist.cc:1023
-msgid "split"
-msgstr "�������"
-
-#: libs/ardour/playlist.cc:1100
+#: libs/ardour/playlist.cc:1251
 msgid "%1: bounds changed received for region (%2)not in playlist"
 msgstr ""
 
-#: libs/ardour/playlist.cc:1361
-msgid "Playlist: cannot create region from state file"
+#: libs/ardour/playlist.cc:1786
+msgid "region state node has no ID, ignored"
 msgstr ""
 
-#: libs/ardour/playlist.cc:1721
-msgid "nudged"
+#: libs/ardour/playlist.cc:1797
+msgid "Playlist: cannot reset region state from XML"
 msgstr ""
 
-#: libs/ardour/playlist_factory.cc:49 libs/ardour/playlist_factory.cc:64
-msgid ""
-"programming error: Playlist::createRegion called with unknown Region type"
+#: libs/ardour/playlist.cc:1802
+msgid "Playlist: cannot create region from XML"
 msgstr ""
 
-#: libs/ardour/playlist_factory.cc:86
-msgid ""
-"programming error: Playlist::copyPlaylist called with unknown Playlist type"
-msgstr ""
-
-#: libs/ardour/plugin.cc:328
+#: libs/ardour/plugin.cc:283
 msgid "Could not locate HOME.  Preset not saved."
 msgstr ""
 
-#: libs/ardour/plugin.cc:338 libs/ardour/plugin.cc:344
+#: libs/ardour/plugin.cc:293
+#: libs/ardour/plugin.cc:299
 msgid "Could not create %1.  Preset not saved. (%2)"
 msgstr ""
 
-#: libs/ardour/plugin.cc:349
+#: libs/ardour/plugin.cc:304
 msgid "Error saving presets file %1."
 msgstr ""
 
-#: libs/ardour/plugin_manager.cc:194
+#: libs/ardour/plugin_manager.cc:79
+msgid "Cannot become GUI app"
+msgstr ""
+
+#: libs/ardour/plugin_manager.cc:129
+msgid "Discovering Plugins"
+msgstr ""
+
+#: libs/ardour/plugin_manager.cc:274
 msgid "Could not parse rdf file: %1"
 msgstr ""
 
-#: libs/ardour/plugin_manager.cc:235
+#: libs/ardour/plugin_manager.cc:314
 msgid "LADSPA: cannot load module \"%1\" (%2)"
-msgstr "LADSPA: �� ������� ��������� ������ \"%1\" (%2)"
+msgstr "LADSPA: не удалось загрузить модуль \"%1\" (%2)"
 
-#: libs/ardour/plugin_manager.cc:242
+#: libs/ardour/plugin_manager.cc:321
 msgid "LADSPA: module \"%1\" has no descriptor function."
 msgstr ""
 
-#: libs/ardour/plugin_manager.cc:297
-#, fuzzy
-msgid "VST: cannot load module from \"%1\""
-msgstr "LADSPA: �� ������� ��������� ������ \"%1\" (%2)"
-
-#: libs/ardour/plugin_manager.cc:302
-msgid "You asked ardour to not use any VST plugins"
+#: libs/ardour/plugin_manager.cc:522
+msgid "VST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"
 msgstr ""
 
-#: libs/ardour/plugin_manager.cc:305
-msgid "This version of ardour has no support for VST plugins"
+#: libs/ardour/plugin_manager.cc:633
+msgid "unknown favorite plugin type \"%1\" - ignored"
 msgstr ""
 
-#: libs/ardour/plugin_manager.cc:312
-msgid "LADSPA: cannot load module from \"%1\""
-msgstr ""
-
-#: libs/ardour/plugin_manager.cc:374 libs/ardour/plugin_manager.cc:386
-msgid "Unknown"
-msgstr ""
-
-#: libs/ardour/plugin_manager.cc:464
-msgid ""
-"VST plugin %1 does not support processReplacing, and so cannot be used in "
-"ardour at this time"
-msgstr ""
-
-#: libs/ardour/recent_sessions.cc:44
+#: libs/ardour/recent_sessions.cc:48
 msgid "cannot open recent session file %1 (%2)"
-msgstr ""
+msgstr "Не удалось открыть недавний файл сеанса %1 (%2)"
 
-#: libs/ardour/redirect.cc:77
+#: libs/ardour/redirect.cc:80
 msgid "programming error: unknown Redirect type in Redirect::Clone!\n"
 msgstr ""
 
-#: libs/ardour/redirect.cc:102 libs/ardour/utils.cc:203
-msgid "pre"
-msgstr "���"
-
-#: libs/ardour/redirect.cc:104 libs/ardour/utils.cc:206
-msgid "post"
-msgstr "����"
-
-#: libs/ardour/redirect.cc:107
-msgid "Redirect: unknown placement string \"%1\" (ignored)"
+#: libs/ardour/redirect.cc:130
+msgid "%2: badly formatted node name in XML automation state, ignored"
 msgstr ""
 
-#: libs/ardour/redirect.cc:125
-msgid "%1: cannot open %2 to load automation data (%3)"
-msgstr ""
+#: libs/ardour/redirect.cc:143
+msgid "%1: cannot load automation data from XML"
+msgstr "%1: не удалось загрузить данные автоматизации из XML"
 
-#: libs/ardour/redirect.cc:154
-msgid "%1: cannot load automation data from %2"
-msgstr ""
-
-#: libs/ardour/redirect.cc:175
-msgid "%1: cannot open %2 to store automation data (%3)"
-msgstr ""
-
-#: libs/ardour/redirect.cc:194 libs/ardour/redirect.cc:201
-msgid "%1: could not save automation state to %2"
-msgstr ""
-
-#: libs/ardour/redirect.cc:246
-msgid "Could not get state from Redirect (%1).  Problem with save_automation"
-msgstr ""
-
-#: libs/ardour/redirect.cc:296
+#: libs/ardour/redirect.cc:224
 msgid "incorrect XML node \"%1\" passed to Redirect object"
 msgstr ""
 
-#: libs/ardour/redirect.cc:318
-msgid "%1: Automation node has no path property"
-msgstr ""
-
-#: libs/ardour/redirect.cc:343
+#: libs/ardour/redirect.cc:272
 msgid "XML node describing an IO is missing an IO node"
 msgstr ""
 
-#: libs/ardour/redirect.cc:348
+#: libs/ardour/redirect.cc:277
 msgid "XML node describing a redirect is missing the `active' field"
 msgstr ""
 
-#: libs/ardour/redirect.cc:358
+#: libs/ardour/redirect.cc:290
 msgid "XML node describing a redirect is missing the `placement' field"
 msgstr ""
 
-#: libs/ardour/redirect.cc:467
-msgid "active_changed"
+#: libs/ardour/redirect.cc:320
+msgid "%1: Automation node has no path property"
 msgstr ""
 
-#: libs/ardour/region.cc:885
+#: libs/ardour/redirect.cc:355
+msgid "%1: cannot open %2 to load automation data (%3)"
+msgstr ""
+
+#: libs/ardour/redirect.cc:380
+msgid "%1: cannot load automation data from %2"
+msgstr ""
+
+#: libs/ardour/region.cc:1006
+msgid "XMLNode describing a Region is incomplete (no name)"
+msgstr ""
+
+#: libs/ardour/region.cc:1163
 msgid "Session: XMLNode describing a Region is incomplete (no id)"
 msgstr ""
 
-#: libs/ardour/region.cc:892
-msgid "Session: XMLNode describing a Region is incomplete (no name)"
+#: libs/ardour/region_factory.cc:52
+#: libs/ardour/region_factory.cc:69
+#: libs/ardour/region_factory.cc:104
+msgid "programming error: RegionFactory::create() called with unknown Region type"
 msgstr ""
 
-#: libs/ardour/route.cc:79 libs/ardour/session.cc:1554
-#: libs/ardour/session.cc:1560 libs/ardour/session.cc:3093
+#: libs/ardour/resampled_source.cc:61
+msgid "Import: src_new() failed : %1"
+msgstr ""
+
+#: libs/ardour/resampled_source.cc:113
+msgid "Import: %1"
+msgstr "Импорт: %1"
+
+#: libs/ardour/route.cc:84
+#: libs/ardour/session.cc:1601
+#: libs/ardour/session.cc:1607
+#: libs/ardour/session.cc:1912
+#: libs/ardour/session.cc:3538
 msgid "signal"
-msgstr ""
+msgstr "сигнал"
 
-#: libs/ardour/route.cc:1430
-msgid "Could not get state of route.  Problem with save_automation"
-msgstr ""
-
-#: libs/ardour/route.cc:1482
+#: libs/ardour/route.cc:1620
 msgid "Send construction failed"
 msgstr ""
 
-#: libs/ardour/route.cc:1504
+#: libs/ardour/route.cc:1648
 msgid "unknown Insert type \"%1\"; ignored"
 msgstr ""
 
-#: libs/ardour/route.cc:1510
+#: libs/ardour/route.cc:1656
 msgid "Insert XML node has no type property"
 msgstr ""
 
-#: libs/ardour/route.cc:1515
+#: libs/ardour/route.cc:1661
 msgid "insert could not be created. Ignored."
 msgstr ""
 
-#: libs/ardour/route.cc:1533
+#: libs/ardour/route.cc:1683
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr ""
 
-#: libs/ardour/route.cc:1592
+#: libs/ardour/route.cc:1749
 msgid "Route %1: unknown edit group \"%2 in saved state (ignored)"
 msgstr ""
 
-#: libs/ardour/route.cc:1608 libs/ardour/route.cc:1612
+#: libs/ardour/route.cc:1765
+#: libs/ardour/route.cc:1769
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 
-#: libs/ardour/route.cc:1693 libs/ardour/route.cc:1820
+#: libs/ardour/route.cc:1835
+#: libs/ardour/route.cc:2065
+#: libs/ardour/route.cc:2707
 msgid "[control]"
-msgstr ""
+msgstr "[контроль]"
 
-#: libs/ardour/route.cc:1713
+#: libs/ardour/route.cc:1887
 msgid "Route %1: unknown mix group \"%2 in saved state (ignored)"
 msgstr ""
 
-#: libs/ardour/route.cc:1742 libs/ardour/route.cc:1750
-msgid ""
-"MIDI mute control specification for %1 is incomplete, so it has been ignored"
-msgstr ""
+#: libs/ardour/route.cc:2083
+msgid "could not connect %1 to %2"
+msgstr "Не удалось соединить %1 с %2"
 
-#: libs/ardour/send.cc:99
+#: libs/ardour/send.cc:35
+#: libs/ardour/send.cc:58
+msgid "send %1"
+msgstr "посыл %1"
+
+#: libs/ardour/send.cc:145
 msgid "XML node describing a send is missing a Redirect node"
 msgstr ""
 
-#: libs/ardour/session.cc:103
-msgid "Could not resolve path: %1 (%2)"
+#: libs/ardour/session_butler.cc:80
+#: libs/ardour/session_midi.cc:1085
+msgid "Cannot create transport request signal pipe (%1)"
 msgstr ""
 
-#: libs/ardour/session.cc:115
-msgid "cannot check session path %1 (%2)"
-msgstr ""
-
-#: libs/ardour/session.cc:145
-msgid "cannot check statefile %1 (%2)"
-msgstr ""
-
-#: libs/ardour/session.cc:181
-msgid "%1 is not an Ardour snapshot file"
-msgstr ""
-
-#: libs/ardour/session.cc:198
-msgid "cannot determine current working directory (%1)"
-msgstr ""
-
-#: libs/ardour/session.cc:215
-msgid "unknown file type for session %1"
-msgstr ""
-
-#: libs/ardour/session.cc:320
-msgid "monitor"
-msgstr "�������"
-
-#: libs/ardour/session.cc:327
-msgid "master"
-msgstr "������"
-
-#: libs/ardour/session.cc:611
-msgid "could not setup Click I/O"
-msgstr ""
-
-#: libs/ardour/session.cc:632
-msgid "cannot setup Click I/O"
-msgstr ""
-
-#: libs/ardour/session.cc:654
-msgid "cannot create Auditioner: no auditioning of regions possible"
-msgstr ""
-
-#: libs/ardour/session.cc:666
-#, c-format
-msgid "out %<PRIu32>"
-msgstr ""
-
-#: libs/ardour/session.cc:678
-#, c-format
-msgid "in %<PRIu32>"
-msgstr ""
-
-#: libs/ardour/session.cc:692
-#, c-format
-msgid "out %<PRIu32>+%<PRIu32>"
-msgstr ""
-
-#: libs/ardour/session.cc:706
-#, c-format
-msgid "in %<PRIu32>+%<PRIu32>"
-msgstr ""
-
-#: libs/ardour/session.cc:739
-msgid "cannot setup master inputs"
-msgstr ""
-
-#: libs/ardour/session.cc:747
-msgid "cannot setup master outputs"
-msgstr ""
-
-#: libs/ardour/session.cc:758
-#, fuzzy
-msgid "Master Out"
-msgstr "������"
-
-#: libs/ardour/session.cc:830
-msgid "cannot setup control inputs"
-msgstr ""
-
-#: libs/ardour/session.cc:838
-msgid "cannot set up master outputs"
-msgstr ""
-
-#: libs/ardour/session.cc:1110
-msgid "Session: you can't use that location for auto punch (start <= end)"
-msgstr ""
-
-#: libs/ardour/session.cc:1189
-msgid "Session: you can't use a mark for auto loop"
-msgstr ""
-
-#: libs/ardour/session.cc:1572
-msgid "feedback loop setup between %1 and %2"
-msgstr ""
-
-#: libs/ardour/session.cc:1724 libs/ardour/session.cc:1821
-msgid "cannot configure %1 in/%2 out configuration for new audio track"
-msgstr ""
-
-#: libs/ardour/session.cc:1780
-msgid "Session: could not create new audio track."
-msgstr ""
-
-#: libs/ardour/session.cc:1870
-msgid "Session: could not create new route."
-msgstr ""
-
-#: libs/ardour/session.cc:2354
-msgid "cannot create new name for region \"%1\""
-msgstr ""
-
-#: libs/ardour/session.cc:2418
-msgid "too many regions with names like %1"
-msgstr ""
-
-#: libs/ardour/session.cc:2883
-msgid "There are already %1 recordings for %2, which I consider too many."
-msgstr ""
-
-#: libs/ardour/session.cc:3258
-msgid "programming error: unknown type of Insert created!"
-msgstr ""
-
-#: libs/ardour/session.cc:3264
-msgid "programming error: unknown type of Redirect created!"
-msgstr ""
-
-#: libs/ardour/session.cc:3287
-msgid "programming error: unknown type of Insert deleted!"
-msgstr ""
-
-#: libs/ardour/session.cc:3293
-msgid "programming error: unknown type of Redirect deleted!"
-msgstr ""
-
-#: libs/ardour/session.cc:3636
-msgid "too many bounced versions of playlist \"%1\""
-msgstr ""
-
-#: libs/ardour/session.cc:3649
-msgid "cannot create new audio file \"%1\" for %2"
-msgstr ""
-
-#: libs/ardour/session_butler.cc:85 libs/ardour/session_butler.cc:90
+#: libs/ardour/session_butler.cc:85
+#: libs/ardour/session_butler.cc:90
 msgid "UI: cannot set O_NONBLOCK on butler request pipe (%1)"
 msgstr ""
 
@@ -1343,55 +1061,306 @@ msgstr ""
 msgid "Session: could not create butler thread"
 msgstr ""
 
-#: libs/ardour/session_butler.cc:189
+#: libs/ardour/session_butler.cc:185
 msgid "poll on butler request pipe failed (%1)"
 msgstr ""
 
-#: libs/ardour/session_butler.cc:196
-msgid "Error on butler thread request pipe"
+#: libs/ardour/session_butler.cc:192
+msgid "Error on butler thread request pipe: fd=%1 err=%2"
 msgstr ""
 
-#: libs/ardour/session_butler.cc:238
+#: libs/ardour/session_butler.cc:233
 msgid "Error reading from butler request pipe"
 msgstr ""
 
-#: libs/ardour/session_butler.cc:275
+#: libs/ardour/session_butler.cc:278
 msgid "Butler read ahead failure on dstream %1"
 msgstr ""
 
-#: libs/ardour/session_butler.cc:319
+#: libs/ardour/session_butler.cc:323
 msgid "Butler write-behind failure on dstream %1"
 msgstr ""
 
-#: libs/ardour/session_click.cc:158
+#: libs/ardour/session.cc:132
+msgid "Could not resolve path: %1 (%2)"
+msgstr ""
+
+#: libs/ardour/session.cc:144
+msgid "cannot check session path %1 (%2)"
+msgstr ""
+
+#: libs/ardour/session.cc:174
+msgid "cannot check statefile %1 (%2)"
+msgstr ""
+
+#: libs/ardour/session.cc:210
+msgid "%1 is not an Ardour snapshot file"
+msgstr "%1 не является файлом снимка Ardour"
+
+#: libs/ardour/session.cc:227
+msgid "cannot determine current working directory (%1)"
+msgstr ""
+
+#: libs/ardour/session.cc:244
+msgid "unknown file type for session %1"
+msgstr "Неизвестный тип файла для сеанса %1"
+
+#: libs/ardour/session.cc:407
+msgid "monitor"
+msgstr "контроль"
+
+#: libs/ardour/session.cc:414
+#: libs/ardour/session.cc:1941
+msgid "master"
+msgstr "мастер"
+
+#: libs/ardour/session.cc:682
+msgid "Set block size and sample rate"
+msgstr ""
+
+#: libs/ardour/session.cc:687
+msgid "Using configuration"
+msgstr "Используется конфигурация"
+
+#: libs/ardour/session.cc:720
+msgid "could not setup Click I/O"
+msgstr ""
+
+#: libs/ardour/session.cc:745
+msgid "cannot setup Click I/O"
+msgstr ""
+
+#: libs/ardour/session.cc:748
+msgid "Compute I/O Latencies"
+msgstr "Рассчитать задержки I/O"
+
+#: libs/ardour/session.cc:760
+msgid "Set up standard connections"
+msgstr "Установка типовых соединений"
+
+#: libs/ardour/session.cc:766
+#, c-format
+msgid "out %<PRIu32>"
+msgstr "вых %<PRIu32>"
+
+#: libs/ardour/session.cc:778
+#, c-format
+msgid "in %<PRIu32>"
+msgstr "вх %<PRIu32>"
+
+#: libs/ardour/session.cc:792
+#, c-format
+msgid "out %<PRIu32>+%<PRIu32>"
+msgstr "вых %<PRIu32>+%<PRIu32>"
+
+#: libs/ardour/session.cc:806
+#, c-format
+msgid "in %<PRIu32>+%<PRIu32>"
+msgstr "вх %<PRIu32>+%<PRIu32>"
+
+#: libs/ardour/session.cc:839
+msgid "cannot setup master inputs"
+msgstr "Не удалось настроить общие входы"
+
+#: libs/ardour/session.cc:847
+msgid "cannot setup master outputs"
+msgstr "Не удалось настроить общие выходы"
+
+#: libs/ardour/session.cc:858
+msgid "Master Out"
+msgstr "Общий выход"
+
+#: libs/ardour/session.cc:867
+msgid "Setup signal flow and plugins"
+msgstr ""
+
+#: libs/ardour/session.cc:873
+msgid "Catch up with send/insert state"
+msgstr ""
+
+#: libs/ardour/session.cc:904
+msgid "Connect to engine"
+msgstr ""
+
+#: libs/ardour/session.cc:911
+msgid "OSC startup"
+msgstr "Запуск OSC"
+
+#: libs/ardour/session.cc:940
+msgid "cannot create Auditioner: no auditioning of regions possible"
+msgstr ""
+
+#: libs/ardour/session.cc:954
+msgid "cannot setup control inputs"
+msgstr "Не удалось настроить контрольные входы"
+
+#: libs/ardour/session.cc:962
+msgid "cannot set up master outputs"
+msgstr "Не удалось настроить общие выходы"
+
+#: libs/ardour/session.cc:1165
+msgid "Session: you can't use that location for auto punch (start <= end)"
+msgstr ""
+
+#: libs/ardour/session.cc:1206
+msgid "Session: you can't use a mark for auto loop"
+msgstr ""
+
+#: libs/ardour/session.cc:1619
+msgid "feedback loop setup between %1 and %2"
+msgstr ""
+
+#: libs/ardour/session.cc:1806
+#: libs/ardour/session.cc:1972
+msgid "cannot configure %1 in/%2 out configuration for new audio track"
+msgstr ""
+
+#: libs/ardour/session.cc:1858
+msgid "Session: could not create new audio track."
+msgstr ""
+
+#: libs/ardour/session.cc:1915
+msgid "editor"
+msgstr "Редактор"
+
+#: libs/ardour/session.cc:2016
+msgid "Session: could not create new audio route."
+msgstr "Сеанс: не удалось создать новый звуковой маршрут"
+
+#: libs/ardour/session.cc:2075
+msgid "Session: UINT_MAX routes? impossible!"
+msgstr ""
+
+#: libs/ardour/session.cc:2087
+msgid "Session: cannot create track/bus from template description"
+msgstr "Сеанс: не удалось создать дорожку/шину из описания в шаблоне"
+
+#: libs/ardour/session.cc:2107
+msgid "Session: could not create new route from template"
+msgstr "Сеанс: не удалось создать новый маршрут из шаблона"
+
+#: libs/ardour/session.cc:2295
+msgid "session"
+msgstr "сеанс"
+
+#: libs/ardour/session.cc:2694
+msgid "cannot create new name for region \"%1\""
+msgstr ""
+
+#: libs/ardour/session.cc:2772
+#: libs/ardour/session.cc:2832
+msgid "Session::add_region() ignored a null region. Warning: you might have lost a region."
+msgstr ""
+
+#: libs/ardour/session.cc:3328
+msgid "There are already %1 recordings for %2, which I consider too many."
+msgstr ""
+
+#: libs/ardour/session.cc:3559
+msgid "Cannot compile tape track regexp for use (%1)"
+msgstr ""
+
+#: libs/ardour/session.cc:3712
+msgid "programming error: unknown type of Insert created!"
+msgstr ""
+
+#: libs/ardour/session.cc:3718
+msgid "programming error: unknown type of Redirect created!"
+msgstr ""
+
+#: libs/ardour/session.cc:3757
+msgid "programming error: unknown type of Redirect deleted!"
+msgstr ""
+
+#: libs/ardour/session.cc:3877
+#: libs/ardour/session.cc:3891
+#: libs/ardour/session.cc:4298
+msgid "Memory allocation error: posix_memalign (%1 * %2) failed (%3)"
+msgstr ""
+
+#: libs/ardour/session.cc:3961
+msgid "send ID %1 appears to be in use already"
+msgstr ""
+
+#: libs/ardour/session.cc:3973
+msgid "insert ID %1 appears to be in use already"
+msgstr ""
+
+#: libs/ardour/session.cc:4126
+msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
+msgstr ""
+
+#: libs/ardour/session.cc:4164
+msgid "too many bounced versions of playlist \"%1\""
+msgstr ""
+
+#: libs/ardour/session.cc:4173
+msgid "cannot create new audio file \"%1\" for %2"
+msgstr ""
+
+#: libs/ardour/session.cc:4283
+msgid "Programming error: get_silent_buffers() called for %1 buffers but only %2 exist"
+msgstr ""
+
+#: libs/ardour/session_click.cc:160
 msgid "cannot open click soundfile %1 (%2)"
 msgstr ""
 
-#: libs/ardour/session_click.cc:167
+#: libs/ardour/session_click.cc:169
 msgid "cannot read data from click soundfile"
 msgstr ""
 
-#: libs/ardour/session_click.cc:192
+#: libs/ardour/session_click.cc:196
 msgid "cannot open click emphasis soundfile %1 (%2)"
 msgstr ""
 
-#: libs/ardour/session_click.cc:200
+#: libs/ardour/session_click.cc:204
 msgid "cannot read data from click emphasis soundfile"
+msgstr ""
+
+#: libs/ardour/session_command.cc:75
+msgid "Tried to reconstitute a MementoCommand with no contents, failing. id="
+msgstr ""
+
+#: libs/ardour/session_command.cc:111
+msgid "could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
+msgstr "Не удалось воссоздать MementoCommand из XMLNode. Тип объекта = %1, ID = %2"
+
+#: libs/ardour/session_command.cc:123
+msgid "GlobalRouteStateCommand has no \"type\" node, ignoring"
+msgstr ""
+
+#: libs/ardour/session_command.cc:138
+msgid "unknown type of GlobalRouteStateCommand (%1), ignored"
+msgstr "неизвестный тип GlobalRouteStateCommand (%1), проигнорировано"
+
+#: libs/ardour/session_command.cc:186
+msgid "global route state command has no \"%1\" node, ignoring entire command"
+msgstr ""
+
+#: libs/ardour/session_command.cc:202
+#: libs/ardour/session_command.cc:515
+msgid "cannot find track/bus \"%1\" while rebuilding a global route state command, ignored"
+msgstr ""
+
+#: libs/ardour/session_command.cc:499
+msgid "global route meter state command has no \"%1\" node, ignoring entire command"
 msgstr ""
 
 #: libs/ardour/session_events.cc:161
 msgid "Session: cannot have two events of type %1 at the same frame (%2)."
 msgstr ""
 
-#: libs/ardour/session_events.cc:422
+#: libs/ardour/session_events.cc:437
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr ""
 
-#: libs/ardour/session_export.cc:63
+#: libs/ardour/session_export.cc:62
 msgid "Export: no output file specified"
 msgstr ""
 
-#: libs/ardour/session_export.cc:164 libs/ardour/session_export.cc:169
+#: libs/ardour/session_export.cc:164
+#: libs/ardour/session_export.cc:169
 msgid "illegal frame range in export specification"
 msgstr ""
 
@@ -1407,594 +1376,856 @@ msgstr ""
 msgid "cannot initialize sample rate conversion: %1"
 msgstr ""
 
-#: libs/ardour/session_export.cc:316
+#: libs/ardour/session_export.cc:322
 msgid "an error occured during sample rate conversion: %1"
 msgstr ""
 
-#: libs/ardour/session_export.cc:327
+#: libs/ardour/session_export.cc:333
 msgid "warning, leftover frames overflowed, glitches might occur in output"
 msgstr ""
 
-#: libs/ardour/session_export.cc:418
+#: libs/ardour/session_export.cc:424
 msgid "Export: could not write data to output file (%1)"
 msgstr ""
 
-#: libs/ardour/session_export.cc:500
+#: libs/ardour/session_export.cc:519
 msgid "%1: cannot seek to %2 for export"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:200
+#: libs/ardour/session_midi.cc:94
 msgid "Ardour is slaved to MTC - port cannot be reset"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:215
+#: libs/ardour/session_midi.cc:109
 msgid "unknown port %1 requested for MTC"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:541
+#: libs/ardour/session_midi.cc:446
 msgid "Error reading from MIDI port %1"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:914
+#: libs/ardour/session_midi.cc:816
 msgid "Session: could not send full MIDI time code"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:973
+#: libs/ardour/session_midi.cc:875
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1081
+#: libs/ardour/session_midi.cc:983
 msgid "MMC: cannot send command %1%2%3"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1188
+#: libs/ardour/session_midi.cc:1090
 msgid "UI: cannot set O_NONBLOCK on signal read pipe (%1)"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1193
+#: libs/ardour/session_midi.cc:1095
 msgid "UI: cannot set O_NONBLOCK on signal write pipe (%1)"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1198
+#: libs/ardour/session_midi.cc:1100
 msgid "Session: could not create transport thread"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1227
+#: libs/ardour/session_midi.cc:1131
 msgid "cannot send signal to midi thread! (%1)"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1322
+#: libs/ardour/session_midi.cc:1229
 msgid "MIDI thread poll failed (%1)"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1334
+#: libs/ardour/session_midi.cc:1241
 msgid "Error on transport thread request pipe"
 msgstr ""
 
-#: libs/ardour/session_midi.cc:1361
+#: libs/ardour/session_midi.cc:1268
 msgid "Error reading from transport request pipe"
 msgstr ""
 
-#: libs/ardour/session_process.cc:104
+#: libs/ardour/session_process.cc:108
 msgid "Session: error in no roll for %1"
 msgstr ""
 
-#: libs/ardour/session_state.cc:101
+#: libs/ardour/session_state.cc:109
 msgid "Could not use path %1 (%s)"
 msgstr ""
 
-#: libs/ardour/session_state.cc:129
+#: libs/ardour/session_state.cc:153
+#: libs/ardour/session_state.cc:1049
 msgid "end"
-msgstr ""
+msgstr "Конец"
 
-#: libs/ardour/session_state.cc:130
-#, fuzzy
+#: libs/ardour/session_state.cc:154
+#: libs/ardour/session_state.cc:1048
 msgid "start"
-msgstr "���������"
+msgstr "Начало"
 
-#: libs/ardour/session_state.cc:502
-msgid "Session: cannot create session dir \"%1\" (%2)"
+#: libs/ardour/session_state.cc:339
+msgid "Reset Remote Controls"
 msgstr ""
+
+#: libs/ardour/session_state.cc:348
+msgid "Reset Control Protocols"
+msgstr ""
+
+#: libs/ardour/session_state.cc:368
+msgid "Session loading complete"
+msgstr "Загрузка сеанса завершена"
+
+#: libs/ardour/session_state.cc:468
+#: libs/ardour/session_state.cc:2895
+msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
+msgstr ""
+
+#: libs/ardour/session_state.cc:479
+msgid "Session: cannot create session sounds folder \"%1\" (%2)"
+msgstr ""
+
+#: libs/ardour/session_state.cc:487
+msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
+msgstr ""
+
+#: libs/ardour/session_state.cc:494
+msgid "Session: cannot create session export folder \"%1\" (%2)"
+msgstr ""
+
+#: libs/ardour/session_state.cc:501
+msgid "Session: cannot create session analysis folder \"%1\" (%2)"
+msgstr "Сеанс: не удалось создать папку анализа сеанса «%1» (%2)"
 
 #: libs/ardour/session_state.cc:513
-msgid "Session: cannot create session peakfile dir \"%1\" (%2)"
-msgstr ""
+msgid "Session: cannot create session folder \"%1\" (%2)"
+msgstr "Сеанс: не удалось создать папку для сеанса \"%1\" (%2)"
 
-#: libs/ardour/session_state.cc:522
-msgid "Session: cannot create session sounds dir \"%1\" (%2)"
-msgstr ""
-
-#: libs/ardour/session_state.cc:531
-msgid "Session: cannot create session tape dir \"%1\" (%2)"
-msgstr ""
-
-#: libs/ardour/session_state.cc:540
-msgid "Session: cannot create session dead sounds dir \"%1\" (%2)"
-msgstr ""
-
-#: libs/ardour/session_state.cc:549
-msgid "Session: cannot create session automation dir \"%1\" (%2)"
-msgstr ""
-
-#: libs/ardour/session_state.cc:580
+#: libs/ardour/session_state.cc:545
 msgid "Could not open %1 for writing mix template"
-msgstr ""
+msgstr "Не удалось открыть %1 для записи шаблона микса"
 
-#: libs/ardour/session_state.cc:586
+#: libs/ardour/session_state.cc:551
 msgid "Could not open mix template %1 for reading"
 msgstr ""
 
-#: libs/ardour/session_state.cc:593
-msgid "Session already exists.  Not overwriting"
-msgstr ""
-
-#: libs/ardour/session_state.cc:636
+#: libs/ardour/session_state.cc:590
 msgid "Session: could not load diskstream via XML state"
 msgstr ""
 
-#: libs/ardour/session_state.cc:685
-msgid "could not backup old state file, current state not saved."
+#: libs/ardour/session_state.cc:633
+msgid "could not rename snapshot %1 to %2"
 msgstr ""
 
-#: libs/ardour/session_state.cc:698
+#: libs/ardour/session_state.cc:672
+msgid "Ardour's audio engine is not connected and state saving would lose all I/O connections. Session not saved"
+msgstr "Движок Ardour не соединен с JACK, при сохранении сеанса все соединения были бы потеряны. Так что сеанс не сохранён."
+
+#: libs/ardour/session_state.cc:716
 msgid "state could not be saved to %1"
 msgstr ""
 
-#: libs/ardour/session_state.cc:705
-msgid "could not remove corrupt state file %1"
+#: libs/ardour/session_state.cc:723
+msgid "could not rename temporary session file %1 to %2"
 msgstr ""
 
-#: libs/ardour/session_state.cc:709
-msgid "could not restore state file from backup %1"
-msgstr ""
-
-#: libs/ardour/session_state.cc:778
+#: libs/ardour/session_state.cc:793
 msgid "%1: session state information file \"%2\" doesn't exist!"
 msgstr ""
 
-#: libs/ardour/session_state.cc:789
+#: libs/ardour/session_state.cc:811
 msgid "Could not understand ardour file %1"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1493
+#: libs/ardour/session_state.cc:820
+msgid "Session file %1 is not an Ardour session"
+msgstr "Файл сеанса %1 не является сеансом Ardour"
+
+#: libs/ardour/session_state.cc:851
+msgid ""
+"Copying old session file %1 to %2\n"
+"Use %2 with Ardour versions before 2.0 from now on"
+msgstr ""
+"Старый файл сеанса %1 копируется в %2.\n"
+"%2 можно будет использовать только с Ardour 2.0 и новее."
+
+#: libs/ardour/session_state.cc:1167
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1539
+#: libs/ardour/session_state.cc:1233
 msgid "Session: XML state has no options section"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1544
-msgid "Session: XML state has no sources section"
-msgstr ""
-
-#: libs/ardour/session_state.cc:1551
-msgid "Session: XML state has no Regions section"
-msgstr ""
-
-#: libs/ardour/session_state.cc:1558
-msgid "Session: XML state has no playlists section"
-msgstr ""
-
-#: libs/ardour/session_state.cc:1577
-msgid "Session: XML state has no diskstreams section"
-msgstr ""
-
-#: libs/ardour/session_state.cc:1584
-msgid "Session: XML state has no connections section"
-msgstr ""
-
-#: libs/ardour/session_state.cc:1591
+#: libs/ardour/session_state.cc:1240
 msgid "Session: XML state has no locations section"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1624
+#: libs/ardour/session_state.cc:1273
+msgid "Session: XML state has no sources section"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1280
+msgid "Session: XML state has no Regions section"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1287
+msgid "Session: XML state has no playlists section"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1306
+msgid "Session: XML state has no diskstreams section"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1313
+msgid "Session: XML state has no connections section"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1320
 msgid "Session: XML state has no edit groups section"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1631
+#: libs/ardour/session_state.cc:1327
 msgid "Session: XML state has no mix groups section"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1638
+#: libs/ardour/session_state.cc:1334
 msgid "Session: XML state has no Tempo Map section"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1645
+#: libs/ardour/session_state.cc:1341
 msgid "Session: XML state has no routes section"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1652
+#: libs/ardour/session_state.cc:1348
 msgid "Session: XML state has no click section"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1697
+#: libs/ardour/session_state.cc:1390
 msgid "Session: cannot create Route from XML description."
 msgstr ""
 
-#: libs/ardour/session_state.cc:1735
+#: libs/ardour/session_state.cc:1394
+msgid "Loaded track/bus %1"
+msgstr "Загружена дорожка/шина %1"
+
+#: libs/ardour/session_state.cc:1433
 msgid "Session: cannot create Region from XML description."
 msgstr ""
 
-#: libs/ardour/session_state.cc:1764
+#: libs/ardour/session_state.cc:1437
+msgid "Can not load state for region '%1'"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1474
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1772 libs/ardour/session_state.cc:1792
-msgid ""
-"Session: XMLNode describing a AudioRegion references an unknown source id =%1"
+#: libs/ardour/session_state.cc:1482
+#: libs/ardour/session_state.cc:1503
+#: libs/ardour/session_state.cc:1523
+msgid "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1778 libs/ardour/session_state.cc:1798
-msgid ""
-"Session: XMLNode describing a AudioRegion references a non-audio source id =%"
-"1"
+#: libs/ardour/session_state.cc:1488
+#: libs/ardour/session_state.cc:1509
+#: libs/ardour/session_state.cc:1529
+msgid "Session: XMLNode describing a AudioRegion references a non-audio source id =%1"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1868
+#: libs/ardour/session_state.cc:1552
+msgid "Session: XMLNode describing an AudioRegion is missing some master sources; ignored"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1603
+msgid "cannot create new file from region name \"%1\" with ident = \"%2\": too many existing files with similar names"
+msgstr ""
+
+#: libs/ardour/session_state.cc:1626
 msgid "Session: cannot create Source from XML description."
 msgstr ""
 
-#: libs/ardour/session_state.cc:1889
-msgid ""
-"Found a sound file that cannot be used by Ardour. Talk to the progammers."
+#: libs/ardour/session_state.cc:1631
+msgid "A sound file is missing. It will be replaced by silence."
 msgstr ""
 
-#: libs/ardour/session_state.cc:1913
+#: libs/ardour/session_state.cc:1652
+msgid "Found a sound file that cannot be used by Ardour. Talk to the progammers."
+msgstr ""
+
+#: libs/ardour/session_state.cc:1674
 msgid "Could not create mix templates directory \"%1\" (%2)"
-msgstr ""
+msgstr "Не удалось создать каталог для шаблонов миксов «%1» (%2)"
 
-#: libs/ardour/session_state.cc:1927
+#: libs/ardour/session_state.cc:1686
 msgid "Template \"%1\" already exists - new version not created"
-msgstr ""
+msgstr "Шаблон «%1» уже существует, новая версия не создана"
 
-#: libs/ardour/session_state.cc:1934
+#: libs/ardour/session_state.cc:1693
 msgid "mix template not saved"
 msgstr ""
 
-#: libs/ardour/session_state.cc:1994
+#: libs/ardour/session_state.cc:1750
 msgid "cannot create session directory \"%1\"; ignored"
 msgstr ""
 
-#: libs/ardour/session_state.cc:2007
+#: libs/ardour/session_state.cc:1759
 msgid "cannot create sounds directory \"%1\"; ignored"
 msgstr ""
 
-#: libs/ardour/session_state.cc:2018
+#: libs/ardour/session_state.cc:1766
 msgid "cannot create dead sounds directory \"%1\"; ignored"
 msgstr ""
 
-#: libs/ardour/session_state.cc:2029
+#: libs/ardour/session_state.cc:1773
 msgid "cannot create peak file directory \"%1\"; ignored"
 msgstr ""
 
-#: libs/ardour/session_state.cc:2168 libs/ardour/session_state.cc:2189
+#: libs/ardour/session_state.cc:1905
+#: libs/ardour/session_state.cc:1926
 msgid "Session: cannot create Playlist from XML description."
 msgstr ""
 
-#: libs/ardour/session_state.cc:2228
+#: libs/ardour/session_state.cc:1965
 msgid "Session: cannot create Named Selection from XML description."
 msgstr ""
 
-#: libs/ardour/session_state.cc:2360
+#: libs/ardour/session_state.cc:2167
 msgid "Unknown node \"%1\" found in Connections list from state file"
 msgstr ""
 
-#: libs/ardour/session_state.cc:3197
+#: libs/ardour/session_state.cc:3020
 msgid "cannot remove dead sound file %1 (%2)"
 msgstr ""
 
-#: libs/ardour/session_time.cc:374
+#: libs/ardour/session_state.cc:3142
+msgid "could not backup old history file, current history not saved."
+msgstr ""
+
+#: libs/ardour/session_state.cc:3154
+msgid "history could not be saved to %1"
+msgstr "Не удалось сохранить историю действий в %1"
+
+#: libs/ardour/session_state.cc:3161
+msgid "could not remove corrupt history file %1"
+msgstr ""
+
+#: libs/ardour/session_state.cc:3165
+msgid "could not restore history file from backup %1"
+msgstr ""
+
+#: libs/ardour/session_state.cc:3187
+msgid "Loading history from '%1'."
+msgstr "Загружается история действий из «%1»"
+
+#: libs/ardour/session_state.cc:3194
+msgid "Could not understand session history file \"%1\""
+msgstr ""
+
+#: libs/ardour/session_state.cc:3237
+msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
+msgstr ""
+
+#: libs/ardour/session_time.cc:483
 msgid "Unknown JACK transport state %1 in sync callback"
 msgstr ""
 
-#: libs/ardour/session_timefx.cc:77
-msgid "tempoize: error creating name for new audio file based on %1"
-msgstr ""
-
-#: libs/ardour/session_timefx.cc:88
-msgid "tempoize: error creating new audio file %1 (%2)"
-msgstr ""
-
-#: libs/ardour/session_timefx.cc:114
-msgid "tempoize: error reading data from %1"
-msgstr ""
-
-#: libs/ardour/session_timefx.cc:127 libs/ardour/session_timefx.cc:139
-msgid "error writing tempo-adjusted data to %1"
-msgstr ""
-
-#: libs/ardour/session_timefx.cc:145
-msgid "timefx code failure. please notify ardour-developers."
-msgstr ""
-
-#: libs/ardour/session_transport.cc:117
+#: libs/ardour/session_transport.cc:119
 msgid "Cannot loop - no loop range defined"
 msgstr ""
 
-#: libs/ardour/session_transport.cc:479
+#: libs/ardour/session_transport.cc:538
 msgid ""
 "Seamless looping cannot be supported while Ardour is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
 
-#: libs/ardour/session_transport.cc:755
-msgid ""
-"Global varispeed cannot be supported while Ardour is connected to JACK "
-"transport control"
+#: libs/ardour/session_transport.cc:842
+msgid "Global varispeed cannot be supported while Ardour is connected to JACK transport control"
 msgstr ""
 
-#: libs/ardour/session_transport.cc:955
+#: libs/ardour/session_transport.cc:1025
 msgid "please stop the transport before adjusting slave settings"
 msgstr ""
 
-#: libs/ardour/session_transport.cc:991
+#: libs/ardour/session_transport.cc:1060
 msgid "No MTC port defined: MTC slaving is impossible."
 msgstr ""
 
-#: libs/ardour/sndfile_helpers.cc:15
+#: libs/ardour/sndfile_helpers.cc:34
 msgid "WAV"
-msgstr ""
+msgstr "WAV"
 
-#: libs/ardour/sndfile_helpers.cc:16
+#: libs/ardour/sndfile_helpers.cc:35
 msgid "AIFF"
-msgstr ""
+msgstr "AIFF"
 
-#: libs/ardour/sndfile_helpers.cc:17
-msgid "raw (no header)"
-msgstr ""
+#: libs/ardour/sndfile_helpers.cc:36
+msgid "CAF"
+msgstr "CAF"
 
-#: libs/ardour/sndfile_helpers.cc:18
-msgid "PAF (Ensoniq Paris)"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:19
-msgid "AU (Sun/NeXT)"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:20
-msgid "IRCAM"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:21
+#: libs/ardour/sndfile_helpers.cc:37
 msgid "W64 (64 bit WAV)"
-msgstr ""
+msgstr "W64 (64-разрядный WAV)"
 
-#: libs/ardour/sndfile_helpers.cc:26
+#: libs/ardour/sndfile_helpers.cc:38
+msgid "FLAC"
+msgstr "FLAC"
+
+#: libs/ardour/sndfile_helpers.cc:39
+msgid "Ogg/Vorbis"
+msgstr "Ogg/Vorbis"
+
+#: libs/ardour/sndfile_helpers.cc:40
+msgid "raw (no header)"
+msgstr "raw (без заголовка)"
+
+#: libs/ardour/sndfile_helpers.cc:45
 msgid ".wav"
-msgstr ""
+msgstr ".wav"
 
-#: libs/ardour/sndfile_helpers.cc:27
+#: libs/ardour/sndfile_helpers.cc:46
 msgid ".aiff"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:28
-msgid ".raw"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:29
-msgid ".paf"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:30
-msgid ".au"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:31
-msgid ".ircam"
-msgstr ""
-
-#: libs/ardour/sndfile_helpers.cc:32
-msgid ".w64"
-msgstr ""
+msgstr ".aiff"
 
 #: libs/ardour/sndfile_helpers.cc:47
-msgid "16 bit"
-msgstr "16 ���"
+msgid ".caf"
+msgstr ".xaf"
 
 #: libs/ardour/sndfile_helpers.cc:48
-msgid "24 bit"
-msgstr "24 ����"
+msgid ".w64"
+msgstr ".w64"
 
 #: libs/ardour/sndfile_helpers.cc:49
-msgid "32 bit"
-msgstr "32 ����"
+msgid ".flac"
+msgstr ".flac"
 
 #: libs/ardour/sndfile_helpers.cc:50
-msgid "8 bit"
-msgstr "8 ���"
+msgid ".ogg"
+msgstr ".ogg"
 
 #: libs/ardour/sndfile_helpers.cc:51
+msgid ".raw"
+msgstr ".raw"
+
+#: libs/ardour/sndfile_helpers.cc:66
+msgid "16 bit"
+msgstr "16 бит"
+
+#: libs/ardour/sndfile_helpers.cc:67
+msgid "24 bit"
+msgstr "24 бита"
+
+#: libs/ardour/sndfile_helpers.cc:68
+msgid "32 bit"
+msgstr "32 бита"
+
+#: libs/ardour/sndfile_helpers.cc:69
+msgid "8 bit"
+msgstr "8 бит"
+
+#: libs/ardour/sndfile_helpers.cc:70
 msgid "float"
 msgstr ""
 
-#: libs/ardour/sndfile_helpers.cc:64
+#: libs/ardour/sndfile_helpers.cc:83
 msgid "Little-endian (Intel)"
-msgstr ""
+msgstr "Остроконечник (Intel)"
 
-#: libs/ardour/sndfile_helpers.cc:65
+#: libs/ardour/sndfile_helpers.cc:84
 msgid "Big-endian (Mac)"
+msgstr "Тупоконечник (Mac)"
+
+#: libs/ardour/sndfilesource.cc:185
+msgid "cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:147
-msgid "FileSource: cannot get host information for BWF header (%1)"
-msgstr ""
-
-#: libs/ardour/sndfilesource.cc:169
-msgid ""
-"cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
-"for this file"
-msgstr ""
-
-#: libs/ardour/sndfilesource.cc:220
+#: libs/ardour/sndfilesource.cc:238
 msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:226
-msgid ""
-"SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
-"number"
+#: libs/ardour/sndfilesource.cc:246
+msgid "SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:327
+#: libs/ardour/sndfilesource.cc:346
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:378
-#, fuzzy
+#: libs/ardour/sndfilesource.cc:356
+msgid "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"
+msgstr ""
+
+#: libs/ardour/sndfilesource.cc:396
+#: libs/ardour/sndfilesource.cc:431
+msgid "attempt to write a non-writable audio file source (%1)"
+msgstr ""
+
+#: libs/ardour/sndfilesource.cc:401
+#: libs/ardour/utils.cc:523
+#: libs/ardour/utils.cc:547
+#: libs/ardour/utils.cc:561
+#: libs/ardour/utils.cc:580
 msgid "programming error: %1 %2"
-msgstr "������ ���������: "
+msgstr "Ошибка программы: %1 %2"
 
-#: libs/ardour/sndfilesource.cc:487 libs/ardour/sndfilesource.cc:533
-msgid ""
-"cannot set broadcast info for audio file %1; Dropping broadcast info for "
-"this file"
+#: libs/ardour/sndfilesource.cc:535
+msgid "attempt to flush a non-writable audio file source (%1)"
 msgstr ""
 
-#: libs/ardour/sndfilesource.cc:544
-msgid "%1: cannot seek to %2"
+#: libs/ardour/sndfilesource.cc:545
+msgid "attempt to store broadcast info in a non-writable audio file source (%1)"
 msgstr ""
 
-#: libs/ardour/state_manager.cc:47
-msgid "cleared history"
+#: libs/ardour/sndfilesource.cc:581
+#: libs/ardour/sndfilesource.cc:602
+msgid "cannot set broadcast info for audio file %1; Dropping broadcast info for this file"
 msgstr ""
 
-#: libs/ardour/state_manager.cc:60
-msgid ""
-"programming error: illegal state ID (%1) passed to StateManager::set_state() "
-"(range = 0-%2)"
+#: libs/ardour/sndfilesource.cc:615
+msgid "%1: cannot seek to %2 (libsndfile error: %3"
 msgstr ""
 
-#: libs/ardour/stateful.cc:102
-msgid "Error: could not write %1"
+#: libs/ardour/sndfilesource.cc:724
+msgid "SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
 msgstr ""
 
-#: libs/ardour/stateful.cc:116
-msgid "Could not understand XML file %1"
+#: libs/ardour/sndfilesource.cc:737
+#: libs/ardour/sndfilesource.cc:787
+#: libs/ardour/sndfilesource.cc:794
+msgid "SndFileSource: \"%1\" bad write (%2)"
 msgstr ""
 
-#: libs/ardour/tempo.cc:67
+#: libs/ardour/sndfilesource.cc:817
+msgid "Filesource: start time is already set for existing file (%1): Cannot change start time."
+msgstr ""
+
+#: libs/ardour/tempo.cc:71
 msgid "TempoSection XML node has no \"start\" property"
 msgstr ""
 
-#: libs/ardour/tempo.cc:75
+#: libs/ardour/tempo.cc:79
 msgid "TempoSection XML node has an illegal \"start\" value"
 msgstr ""
 
-#: libs/ardour/tempo.cc:82
+#: libs/ardour/tempo.cc:86
 msgid "TempoSection XML node has no \"beats-per-minute\" property"
 msgstr ""
 
-#: libs/ardour/tempo.cc:87
+#: libs/ardour/tempo.cc:91
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
 msgstr ""
 
-#: libs/ardour/tempo.cc:92
+#: libs/ardour/tempo.cc:100
+msgid "TempoSection XML node has an illegal \"note-type\" value"
+msgstr ""
+
+#: libs/ardour/tempo.cc:106
 msgid "TempoSection XML node has no \"movable\" property"
 msgstr ""
 
-#: libs/ardour/tempo.cc:131
+#: libs/ardour/tempo.cc:147
 msgid "MeterSection XML node has no \"start\" property"
 msgstr ""
 
-#: libs/ardour/tempo.cc:139
+#: libs/ardour/tempo.cc:155
 msgid "MeterSection XML node has an illegal \"start\" value"
 msgstr ""
 
-#: libs/ardour/tempo.cc:146
+#: libs/ardour/tempo.cc:162
 msgid "MeterSection XML node has no \"beats-per-bar\" property"
 msgstr ""
 
-#: libs/ardour/tempo.cc:151
+#: libs/ardour/tempo.cc:167
 msgid "MeterSection XML node has an illegal \"beats-per-bar\" value"
 msgstr ""
 
-#: libs/ardour/tempo.cc:156
+#: libs/ardour/tempo.cc:172
 msgid "MeterSection XML node has no \"note-type\" property"
 msgstr ""
 
-#: libs/ardour/tempo.cc:161
+#: libs/ardour/tempo.cc:177
 msgid "MeterSection XML node has an illegal \"note-type\" value"
 msgstr ""
 
-#: libs/ardour/tempo.cc:166
+#: libs/ardour/tempo.cc:182
 msgid "MeterSection XML node has no \"movable\" property"
 msgstr ""
 
-#: libs/ardour/tempo.cc:259
-msgid "move metric"
+#: libs/ardour/tempo.cc:576
+msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
 msgstr ""
 
-#: libs/ardour/tempo.cc:330
-msgid "metric removed"
-msgstr ""
-
-#: libs/ardour/tempo.cc:373
-msgid "add tempo"
-msgstr ""
-
-#: libs/ardour/tempo.cc:402
-msgid "replace tempo"
-msgstr ""
-
-#: libs/ardour/tempo.cc:435
-msgid "add meter"
-msgstr ""
-
-#: libs/ardour/tempo.cc:463
-msgid "replaced meter"
-msgstr ""
-
-#: libs/ardour/tempo.cc:483 libs/ardour/tempo.cc:499
+#: libs/ardour/tempo.cc:600
+#: libs/ardour/tempo.cc:616
 msgid "programming error: no tempo section in tempo map!"
 msgstr ""
 
-#: libs/ardour/tempo.cc:538
+#: libs/ardour/tempo.cc:659
+#: libs/ardour/tempo.cc:717
 msgid "programming error: unhandled MetricSection type"
 msgstr ""
 
-#: libs/ardour/tempo.cc:1226 libs/ardour/tempo.cc:1238
+#: libs/ardour/tempo.cc:1476
+#: libs/ardour/tempo.cc:1488
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
 
-#: libs/ardour/tempo.cc:1262
-msgid "load XML data"
-msgstr ""
-
-#: libs/ardour/utils.cc:246
+#: libs/ardour/utils.cc:300
 msgid "illegal or badly-formed string used for path (%1)"
 msgstr ""
 
-#: libs/ardour/utils.cc:251
+#: libs/ardour/utils.cc:305
 msgid "path (%1) is ambiguous"
 msgstr ""
 
-#: libs/ardour/vst_plugin.cc:187
-msgid "cannot create VST chunk directory: %1"
+#: libs/ardour/utils.cc:367
+#: libs/ardour/utils.cc:391
+msgid "Splice Edit"
+msgstr "Стыковка"
+
+#: libs/ardour/utils.cc:369
+#: libs/ardour/utils.cc:384
+msgid "Slide Edit"
+msgstr "Скольжение"
+
+#: libs/ardour/utils.cc:371
+#: libs/ardour/utils.cc:387
+msgid "Lock Edit"
+msgstr "Блокировка"
+
+#: libs/ardour/utils.cc:374
+#, fuzzy
+msgid "programming error: unknown edit mode string \"%1\""
+msgstr "Ошибка программы: %1"
+
+#: libs/ardour/utils.cc:398
+#: libs/ardour/utils.cc:427
+msgid "Internal"
+msgstr "Внутренний"
+
+#: libs/ardour/utils.cc:402
+#: libs/ardour/utils.cc:423
+msgid "MTC"
+msgstr "MTC"
+
+#: libs/ardour/utils.cc:406
+#: libs/ardour/utils.cc:420
+msgid "JACK"
+msgstr "JACK"
+
+#: libs/ardour/utils.cc:410
+msgid "programming error: unknown slave source string \"%1\""
 msgstr ""
 
-#: libs/ardour/vst_plugin.cc:195
-msgid "cannot check VST chunk directory: %1"
-msgstr ""
-
-#: libs/ardour/vst_plugin.cc:202
-msgid "%1 exists but is not a directory"
-msgstr ""
-
-#: libs/ardour/vst_plugin.cc:240
+#: libs/ardour/vst_plugin.cc:206
 msgid "Bad node sent to VSTPlugin::set_state"
 msgstr ""
 
-#: libs/ardour/vst_plugin.cc:343 libs/ardour/vst_plugin.cc:354
+#: libs/ardour/vst_plugin.cc:337
+#: libs/ardour/vst_plugin.cc:348
 msgid "no support for presets using chunks at this time"
 msgstr ""
 
-#: libs/ardour/coreaudiosource.cc:97
-msgid ""
-"CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel "
-"number"
+#: libs/ardour/vst_plugin.cc:395
+msgid "VST plugin called with zero frames - please notify Ardour developers"
 msgstr ""
 
-#: libs/ardour/coreaudiosource.cc:162
-msgid "CoreAudioSource: could not seek to frame %1 within %2 (%3)"
+#: libs/ardour/vst_plugin.cc:516
+msgid "VST: cannot load module from \"%1\""
+msgstr "VST: не удалось загрузить модуль из «%1»"
+
+#: libs/ardour/vst_plugin.cc:521
+msgid "You asked ardour to not use any VST plugins"
 msgstr ""
+
+#: libs/ardour/coreaudiosource.cc:82
+#, fuzzy
+msgid "CoreAudioSource: cannot open file \"%1\" for %2"
+msgstr "LADSPA: не удалось загрузить модуль \"%1\" (%2)"
+
+#: libs/ardour/rb_effect.cc:224
+#: libs/ardour/rb_effect.cc:265
+msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
+msgstr ""
+
+#: libs/ardour/rb_effect.cc:290
+#: libs/ardour/rb_effect.cc:307
+msgid "error writing tempo-adjusted data to %1"
+msgstr ""
+
+#: libs/ardour/rb_effect.cc:314
+msgid "timefx code failure. please notify ardour-developers."
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:89
+#: libs/ardour/audio_unit.cc:1013
+msgid "Could not create XML version of property list"
+msgstr "Не удалось создать XML-версию списка свойств"
+
+#: libs/ardour/audio_unit.cc:107
+msgid "Cannot open preset file %1 (%2)"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:340
+msgid "Exception thrown during AudioUnit plugin loading - plugin ignored"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:345
+msgid "AudioUnit: Could not convert CAComponent to CAAudioUnit"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:372
+msgid "AUPlugin: cannot set processing block size"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:576
+msgid "AUPlugin: %1 cannot initialize plugin (err = %2)"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:679
+msgid "AU %1 has zero outputs - configuration ignored"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:737
+#: libs/ardour/audio_unit.cc:765
+msgid "AU plugin %1 has illegal IO configuration (-2,-2)"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:845
+msgid "AUPlugin: could not set stream format for %1/%2 (err = %3)"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:864
+msgid "AUPlugin: %1 input_streams() called without any format set!"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:875
+msgid "AUPlugin: %1 output_streams() called without any format set!"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:891
+msgid "AUPlugin: render callback called illegally!"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:1033
+msgid "Saving AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:1051
+msgid "Bad node sent to AUPlugin::set_state"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:1086
+msgid "Restoring AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:1116
+msgid "Loading AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:1149
+msgid "Cannot create user plugin presets folder (%1)"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:1168
+msgid "Saving plugin state to %1 failed"
+msgstr "Не удалось сохранить состояние эффекта в %1"
+
+#: libs/ardour/audio_unit.cc:1177
+msgid "Saving AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr ""
+
+#: libs/ardour/audio_unit.cc:1454
+msgid "Discovering AudioUnit plugins (could take some time ...)"
+msgstr "Выполняется поиск эффектов AudioUnit (это займёт некоторое время)"
+
+#: libs/ardour/audio_unit.cc:1672
+#, fuzzy
+msgid "Cannot get I/O configuration info for AU %1"
+msgstr "Ardour: не удалось прочитать файл конфигурации \"%1\""
+
+#: libs/ardour/audio_unit.cc:1711
+msgid "Checking AudioUnit: %1"
+msgstr "Проверка AudioUnit: %1"
+
+#: libs/ardour/audio_unit.cc:1721
+#: libs/ardour/audio_unit.cc:1722
+msgid "Could not load AU plugin %1 - ignored"
+msgstr "Не удалось загрузить эффект AU %1 — проигнорирован"
+
+#: libs/ardour/audio_unit.cc:1792
+msgid "could not save AU cache to %1"
+msgstr "Не удалось сохранить кэш AU в %1"
+
+#~ msgid "channels"
+#~ msgstr "каналы"
+#~ msgid "samplerate"
+#~ msgstr "частота сэмплирования"
+#~ msgid "resolution"
+#~ msgstr "разрешение"
+#~ msgid "format"
+#~ msgstr "формат"
+#~ msgid "initial state"
+#~ msgstr "исходное состояние"
+#~ msgid "xfade change"
+#~ msgstr "смена кроссфейда"
+#~ msgid "region modified"
+#~ msgstr "область изменена"
+#~ msgid "cannot activate JACK client"
+#~ msgstr "не удалось активировать клиента JACK сервера"
+#~ msgid "JACK server started"
+#~ msgstr "Сервер JACK запущен"
+#~ msgid "envelope change"
+#~ msgstr "изменение огибающей"
+#~ msgid "added event"
+#~ msgstr "добавлено событие"
+#~ msgid "removed event"
+#~ msgstr "удалено событие"
+#~ msgid "removed multiple events"
+#~ msgstr "удалено несколько событий"
+#~ msgid "removed range"
+#~ msgstr "удалена область"
+#~ msgid "paste"
+#~ msgstr "вставить"
+#~ msgid "%s/out"
+#~ msgstr "%s/вых"
+#~ msgid "%s/out %u"
+#~ msgstr "%s/вых %u"
+#~ msgid "%s/in"
+#~ msgstr "%s/вх"
+#~ msgid "clear"
+#~ msgstr "очистить"
+#~ msgid "clear markers"
+#~ msgstr "очистить маркеры"
+#~ msgid "add"
+#~ msgstr "добавить"
+#~ msgid "remove"
+#~ msgstr "удалить"
+#~ msgid "add region"
+#~ msgstr "добавить область"
+#~ msgid "replace region"
+#~ msgstr "заменить область"
+#~ msgid "remove region"
+#~ msgstr "удалить область"
+#~ msgid "separate"
+#~ msgstr "разделить"
+#~ msgid "cut"
+#~ msgstr "вырезать"
+#~ msgid "duplicate"
+#~ msgstr "размножить"
+#~ msgid "split"
+#~ msgstr "склеить"
+#~ msgid "pre"
+#~ msgstr "пре"
+#~ msgid "post"
+#~ msgstr "пост"
+#~ msgid "PAF (Ensoniq Paris)"
+#~ msgstr "PAF (Ensoniq Paris)"
+#~ msgid "AU (Sun/NeXT)"
+#~ msgstr "AU (Sun/NeXT)"
+#~ msgid "IRCAM"
+#~ msgstr "IRCAM"
+#~ msgid ".au"
+#~ msgstr ".au"
+#~ msgid ".ircam"
+#~ msgstr ".ircam"
+
