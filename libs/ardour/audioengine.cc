@@ -1133,8 +1133,6 @@ AudioEngine::disconnect_from_jack ()
 int
 AudioEngine::reconnect_to_jack ()
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
-
 	if (_running) {
 		disconnect_from_jack ();
 		/* XXX give jackd a chance */
@@ -1146,8 +1144,13 @@ AudioEngine::reconnect_to_jack ()
 		return -1;
 	}
 
-	Ports::iterator i;
+	/* Now that we're connected again, we can get a private
+	   pointer to the jack client.
+	*/
 
+        GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
+
+	Ports::iterator i;
 	boost::shared_ptr<Ports> p = ports.reader ();
 
 	for (i = p->begin(); i != p->end(); ++i) {
