@@ -201,6 +201,13 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
 		}
 	}
+
+	if ((prop = xml_node->property ("note-mode")) != 0) {
+		_note_mode = NoteMode (string_2_enum(prop->value(), _note_mode));
+		if (mode_menu) {
+			_percussion_mode_item->set_active (_note_mode == Percussive);
+		}
+	}
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()
@@ -437,6 +444,7 @@ MidiTimeAxisView::set_note_mode(NoteMode mode)
 	if (_note_mode != mode || midi_track()->note_mode() != mode) {
 		_note_mode = mode;
 		midi_track()->set_note_mode(mode);
+		xml_node->add_property ("note-mode", enum_2_string(_note_mode));
 		_view->redisplay_diskstream();
 	}
 }
