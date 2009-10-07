@@ -5,7 +5,7 @@ TOP=`dirname "$0"`/..
 libs=$TOP/@LIBS@
 
 export ARDOUR_PATH=$TOP/gtk2_ardour/icons:$TOP/gtk2_ardour/pixmaps:$TOP/gtk2_ardour:$TOP/build/default/gtk2_ardour:.
-export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate
+export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie
 export ARDOUR_DATA_PATH=$TOP/gtk2_ardour:build/default/gtk2_ardour:.
 
 if test -d $HOME/gtk/inst ; then

@@ -46,6 +46,7 @@ namespace ARDOUR {
 	extern sigc::signal<void,std::string> BootMessage;
 
 	int init (bool with_vst, bool try_optimization);
+	void init_post_engine ();
 	int cleanup ();
 	bool no_auto_connect ();
 

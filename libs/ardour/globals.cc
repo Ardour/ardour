@@ -348,6 +348,14 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	/* singleton - first object is "it" */
 	new PluginManager ();
 
+	BoundsChanged = Change (StartChanged|PositionChanged|LengthChanged);
+
+	return 0;
+}
+
+void
+ARDOUR::init_post_engine ()
+{
 	/* singleton - first object is "it" */
 	new ControlProtocolManager ();
 	ControlProtocolManager::instance().discover_control_protocols ();
@@ -356,10 +364,6 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	if ((node = Config->control_protocol_state()) != 0) {
 		ControlProtocolManager::instance().set_state (*node);
 	}
-
-	BoundsChanged = Change (StartChanged|PositionChanged|LengthChanged);
-
-	return 0;
 }
 
 int

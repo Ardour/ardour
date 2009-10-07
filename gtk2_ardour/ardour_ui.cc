@@ -336,6 +336,8 @@ ARDOUR_UI::post_engine ()
 	MIDI::Manager::instance()->set_api_data (engine->jack());
 	setup_midi ();
 
+	ARDOUR::init_post_engine ();
+
 	ActionManager::init ();
 	_tooltips.enable();
 
