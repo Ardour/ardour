@@ -496,6 +496,18 @@ CrossfadeEditor::add_control_point (double x, double y)
 void
 CrossfadeEditor::Point::move_to (double nx, double ny, double xfract, double yfract)
 {
+	if ( xfract < 0.0 ) {
+		xfract = 0.0;
+	} else if ( xfract > 1.0 ) {
+		xfract = 1.0;
+	}
+	
+	if ( yfract < 0.0 ) {
+		yfract = 0.0;
+	} else if ( yfract > 1.0 ) {
+		yfract = 1.0;
+	}
+
 	const double half_size = rint(size/2.0);
 	double x1 = nx - half_size;
 	double x2 = nx + half_size;
