@@ -152,8 +152,14 @@ RedirectBox::~RedirectBox ()
 void
 RedirectBox::set_route (boost::shared_ptr<Route> r)
 {
+
 	connections.clear ();
 
+        /* since we're dealing with a new route, any existing limit on redisplay
+	   must be irrelevant.
+	*/
+
+	no_redirect_redisplay = false;
 	_route = r;
 
 	connections.push_back (_route->redirects_changed.connect (mem_fun(*this, &RedirectBox::redisplay_redirects)));
