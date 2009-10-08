@@ -591,7 +591,7 @@ void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 	cout << "MIDI::Port::ALSA_Sequencer " << MIDI::Port::ALSA_Sequencer << endl;
 	cout << "MIDI::Port::Unknown " << MIDI::Port::Unknown << endl;
 #endif
-	if ( string( midi_port.device() ) == string( "ardour" ) )
+	if ( string( midi_port.device() ) == string( "ardour" ) && midi_port.type() == MIDI::Port::ALSA_Sequencer )
 	{
 		throw MackieControlException( "The Mackie MCU driver will not use a port with device=ardour" );
 	}

@@ -176,6 +176,8 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 {
 	connections.clear ();
 
+	/* new route: any existing block on processor redisplay must be meaningless */
+	no_processor_redisplay = false;
 	_route = r;
 
 	connections.push_back (_route->processors_changed.connect (
