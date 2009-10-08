@@ -411,8 +411,15 @@ printf("system template path = %s\n", sys_templates_path.c_str());
 
 	//if USER template folder exists, add it to the file chooser
 	const std::string user_template_path = ARDOUR::get_user_ardour_path() + template_dir_name;
-	if (Glib::file_test(user_template_path, Glib::FILE_TEST_IS_DIR))
-	{
+	bool utp_exists = true;
+
+	if (!Glib::file_test(user_template_path, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir_with_parents (user_template_path.c_str(), 0755)) {
+			utp_exists = false;
+		}
+	}
+
+	if (utp_exists) {
 		m_template->add_shortcut_folder(user_template_path);
 		m_template->set_current_folder (user_template_path);
 	}
