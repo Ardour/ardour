@@ -232,14 +232,13 @@ RouteUI::mute_press(GdkEventButton* ev)
 		} else {
 
 			if (Keyboard::is_button2_event (ev)) {
-				// Primary-button2 click is the midi binding click
-				// button2-click is "momentary"
 				
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
-					wait_for_release = true;
+				if (mute_button->on_button_press_event (ev)) {
+					return true;
 				} else {
-					return false;
-				}
+					// button2-click is "momentary"
+					wait_for_release = true;
+				} 
 			}
 
 			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
@@ -325,14 +324,12 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 			if (Keyboard::is_button2_event (ev)) {
 
-				// Primary-button2 click is the midi binding click
-				// button2-click is "momentary"
-				
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
-					wait_for_release = true;
+				if (solo_button->on_button_press_event (ev)) {
+					return true;
 				} else {
-					return false;
-				}
+					// button2-click is "momentary"
+					wait_for_release = true;
+				} 
 			}
 
 			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
