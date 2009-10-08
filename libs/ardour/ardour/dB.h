@@ -26,8 +26,12 @@ static inline float dB_to_coefficient (float dB) {
 	return dB > -318.8f ? pow (10.0f, dB * 0.05f) : 0.0f;
 }
 
-static inline float coefficient_to_dB (float coeff) {
+static inline float fast_coefficient_to_dB (float coeff) {
 	return 20.0f * fast_log10 (coeff);
+}
+
+static inline float accurate_coefficient_to_dB (float coeff) {
+	return 20.f * log10 (coeff);
 }
 
 #endif /* __ardour_dB_h__ */

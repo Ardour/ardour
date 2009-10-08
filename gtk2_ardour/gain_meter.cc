@@ -361,7 +361,7 @@ GainMeterBase::show_gain ()
 	if (v == 0.0) {
 		strcpy (buf, _("-inf"));
 	} else {
-		snprintf (buf, 32, "%.1f", coefficient_to_dB (slider_position_to_gain (v)));
+		snprintf (buf, 32, "%.1f", accurate_coefficient_to_dB (slider_position_to_gain (v)));
 	}
 	
 	gain_display.set_text (buf);

@@ -390,7 +390,7 @@ TranzportControlProtocol::show_track_gain ()
 		gain_t g = route_get_gain (0);
 		if ((g != last_track_gain) || lcd_isdamaged(0,12,8)) {
 			char buf[16]; 
-			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (route_get_effective_gain (0)));
+			snprintf (buf, sizeof (buf), "%6.1fdB", accurate_coefficient_to_dB (route_get_effective_gain (0)));
 			print (0, 12, buf); 
 			last_track_gain = g;
 		}
