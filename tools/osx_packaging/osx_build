@@ -11,7 +11,6 @@ WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
-EXTRA_PACKAGING_DIR==
 EXTERNAL_JACK=
 
 while [ $# -gt 0 ] ; do
@@ -22,10 +21,38 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae) WITH_NLS= ; SAE=1 ; INTERNAL_JACK=1; WITH_LADSPA=1; STRIP= ; EXTRA_PACKAGING_DIR=1 ; shift ;;
-	--mixbus) MIXBUS=1; WITH_NLS= ; SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; EXTRA_PACKAGING_DIR=1; EXTERNAL_JACK=/usr/local/Jack.dmg; shift ;;
-	--public) WITH_NLS= ; SAE= ; INTERNAL_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
-	--allinone) SAE= ; WITH_NLS= ; INTERNAL_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--sae) WITH_NLS= ; 
+               SAE=1 ; 
+	       INTERNAL_JACK=1; 
+	       WITH_LADSPA=1; 
+               STRIP= ; 
+	       PRODUCT_PKG_DIR=ArdourSAE ; 
+	       APPNAME=Ardour ;
+	       shift ;;
+	--mixbus) MIXBUS=1; 
+	          WITH_NLS= ; 
+                  SAE= ; 
+                  INTERNAL_JACK=; 
+                  WITH_LADSPA=; 
+                  STRIP= ; 
+		  PRODUCT_PKG_DIR=MixBus;
+		  APPNAME=Mixbus ;
+                  shift ;;
+	--public) WITH_NLS= ; 
+	          SAE= ; 
+		  INTERNAL_JACK=; 
+                  WITH_LADSPA=1; 
+                  STRIP= ; 
+		  PRODUCT_PKG_DIR=Ardour;
+		  APPNAME=Ardour ;
+		  shift ;;
+	--allinone) SAE= ; 
+	            WITH_NLS= ; 
+		    INTERNAL_JACK=1; 
+		    WITH_LADSPA=1; 
+		    STRIP= ; 
+		    PRODUCT_PKG_DIR=Ardour ;
+		    shift ;;
 	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
@@ -37,7 +64,6 @@ while [ $# -gt 0 ] ; do
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
-	--pdir) EXTRA_PACKAGING_DIR=1; shift ;;
 	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
     esac
 done
@@ -54,12 +80,6 @@ echo "Info string is $info_string"
 
 # setup directory structure
 
-if [ x$MIXBUS != x ] ; then
-    APPNAME=Mixbus
-else
-    APPNAME=Ardour2
-fi
-
 APPDIR=${APPNAME}.app
 APPROOT=$APPDIR/Contents
 Frameworks=$APPROOT/Frameworks
@@ -69,9 +89,6 @@ Surfaces=$APPROOT/Surfaces
 Shared=$Resources/share
 Etc=$Resources/etc
 Locale=$Resources/locale
-
-SAE_PKG_DIR=ArdourSAE
-MIXBUS_PKG_DIR=Mixbus
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -398,58 +415,57 @@ for dylib in $JACK_SHARED_OBJECTS $Frameworks/*.dylib $Frameworks/modules/*.so $
     fi
 done
 
-if [ x$EXTRA_PACKAGING_DIR != x ] ; then
+#
+# and now ... the DMG
+# 
 
-    if [ x$SAE != x ] ; then
+rm -rf $PRODUCT_PKG_DIR
+mkdir $PRODUCT_PKG_DIR
+
+if [ x$SAE != x ] ; then
 	
-	# SAE packaging
+    # SAE packaging
+    
+    echo "Creating SAE packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/Ardour2-SAE.app
+    cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
+    cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
+    cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
+    
+elif [ x$MIXBUS != x ] ; then
 
-	echo "Creating SAE packaging directory"
-	rm -rf $SAE_PKG_DIR
-	mkdir $SAE_PKG_DIR
-	mv $APPDIR $SAE_PKG_DIR/Ardour2-SAE.app
-	cp HowToInstallArdourSAE.pdf "$SAE_PKG_DIR/How To Install Ardour SAE.pdf"
-	cp SAE-de-keypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
-	cp SAE-de-nokeypad.pdf "$SAE_PKG_DIR/Ardour SAE Shortcuts.pdf"
+     # Mixbus packaging
 
-    elif [ x$MIXBUS != x ] ; then
-
-	# Mixbus packaging
-
-	echo "Creating Mixbus packaging directory"
-	rm -rf $MIXBUS_PKG_DIR
-	mkdir $MIXBUS_PKG_DIR
-	mv $APPDIR $MIXBUS_PKG_DIR/
-	cp MixBus_Install_QuickStart.pdf "$MIXBUS_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-	
-	if [ -x$EXTERNAL_JACK != x ] ; then
-	    cp $EXTERNAL_JACK $MIXBUS_PKG_DIR
-	fi
-
-	# create dmg
-
-	echo "Building DMG ..."
-
-	# UC_DMG=Ardour-${release_version}-${svn_version}-UC.dmg
-	# FINAL_DMG=Ardour-${release_version}-${svn_version}.dmg
-	UC_DMG=Ardour-${release_version}-${svn_version}.dmg
-
-	rm -f $UC_DMG
-	hdiutil create $UC_DMG -volname Ardour-$release_version -fs HFS+ -srcfolder $MIXBUS_PKG_DIR
-
-	# compress it
-	# echo "Compressing DMG ..."
-	# rm -f $FINAL_DMG
-        # hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
-
-    else 
-
-	echo "public packaging in an extra folder is not implemented yet"
-
+    echo "Creating Mixbus packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/
+    cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
+    
+    if [ -x $EXTERNAL_JACK != x ] ; then
+	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
     fi
+    
+	# create dmg
+else 
+
+    echo "Creating $APPNAME packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/
+
 fi
 
+echo "Building DMG ..."
 
+# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+
+rm -f $UC_DMG
+echo hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+
+# compress it
+# echo "Compressing DMG ..."
+# rm -f $FINAL_DMG
+# hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
 
 echo "Done."
 
