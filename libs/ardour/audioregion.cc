@@ -187,8 +187,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	assert(_type == DataType::AUDIO);
 	_scale_amplitude = other->_scale_amplitude;
 
-	set_default_fades ();
-
 	listen_to_my_curves ();
 	connect_to_analysis_changed ();
 
