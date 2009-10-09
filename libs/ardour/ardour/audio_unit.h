@@ -33,6 +33,7 @@
 #include <ardour/plugin.h>
 
 #include <AudioUnit/AudioUnit.h>
+#include <AudioUnit/AudioUnitProperties.h>
 #include <appleutility/AUParamInfo.h>
 
 #include <boost/shared_ptr.hpp>
@@ -124,10 +125,18 @@ class AUPlugin : public ARDOUR::Plugin
 	std::vector<std::pair<int,int> > io_configs;
 	AudioBufferList* buffers;
 
-	/* XXX this should really be shared across all AUPlugin instances */
+	/* despite all the cool work that apple did on their AU preset
+	   system, they left factory presets and user presets as two
+	   entirely different kinds of things, handled by two entirely
+	   different parts of the API. Resolve this.
+	*/
 
-	typedef std::map<std::string,std::string> PresetMap;
-	PresetMap preset_map;
+	/* XXX these two maps should really be shared across all instances of this AUPlugin */
+
+	typedef std::map<std::string,std::string> UserPresetMap;
+	UserPresetMap user_preset_map;
+	typedef std::map<std::string,int> FactoryPresetMap;
+	FactoryPresetMap factory_preset_map;
 
 	UInt32 global_elements;
 	UInt32 output_elements;
@@ -148,6 +157,8 @@ class AUPlugin : public ARDOUR::Plugin
 	
 	std::vector<AUParameterDescriptor> descriptors;
 	void init ();
+
+	void discover_factory_presets ();
 };
 	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;

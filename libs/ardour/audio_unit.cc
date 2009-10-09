@@ -111,7 +111,7 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 
 	size_t cnt = CFDataGetLength (xmlData);
 
-	if (write (fd, CFDataGetBytePtr (xmlData), cnt) != cnt) {
+	if (write (fd, CFDataGetBytePtr (xmlData), cnt) != (ssize_t) cnt) {
 		CFRelease (xmlData);
 		close (fd);
 		return -1;
@@ -328,6 +328,35 @@ AUPlugin::~AUPlugin ()
 	}
 }
 
+void
+AUPlugin::discover_factory_presets ()
+{
+	CFArrayRef presets;
+	UInt32 dataSize = 0;
+	OSStatus err = unit->GetPropertyInfo (kAudioUnitProperty_FactoryPresets,
+					      kAudioUnitScope_Global, 0,
+					      &dataSize, NULL);
+	if (err || !dataSize) {
+		/* no presets? */
+		return;
+	}
+
+	dataSize = sizeof (presets);
+
+	if ((err = unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) != 0) {
+		cerr << "cannot get factory preset info: " << err << endl;
+		return;
+	}
+
+	CFIndex cnt = CFArrayGetCount (presets);
+
+	for (CFIndex i = 0; i < cnt; ++i) {
+		AUPreset* preset = (AUPreset*) CFArrayGetValueAtIndex (presets, i);
+
+		string name = CFStringRefToStdString (preset->presetName);
+		factory_preset_map[name] = preset->presetNumber;
+	}
+}
 
 void
 AUPlugin::init ()
@@ -374,6 +403,7 @@ AUPlugin::init ()
 	}
 
 	discover_parameters ();
+	discover_factory_presets ();
 
 	Plugin::setup_controls ();
 }
@@ -1097,18 +1127,34 @@ AUPlugin::load_preset (const string preset_label)
 	bool ret = false;
 	CFPropertyListRef propertyList;
 	Glib::ustring path;
-	PresetMap::iterator x = preset_map.find (preset_label);
+	UserPresetMap::iterator ux;
+	FactoryPresetMap::iterator fx;
 
-	if (x == preset_map.end()) {
-		return false;
-	}
+	/* look first in "user" presets */
+
+	if ((ux = user_preset_map.find (preset_label)) != user_preset_map.end()) {
 	
-	if ((propertyList = load_property_list (x->second)) != 0) {
-		if (unit->SetAUPreset (propertyList) == noErr) {
+		if ((propertyList = load_property_list (ux->second)) != 0) {
+			if (unit->SetAUPreset (propertyList) == noErr) {
+				ret = true;
+			}
+			CFRelease(propertyList);
+		}
+
+	} else if ((fx = factory_preset_map.find (preset_label)) != factory_preset_map.end()) {
+		
+		AUPreset preset;
+		
+		preset.presetNumber = fx->second;
+		preset.presetName = CFStringCreateWithCString (kCFAllocatorDefault, fx->first.c_str(), kCFStringEncodingUTF8);
+		
+		cerr << "Setting factory preset " << fx->second << endl;
+
+		if (unit->SetPresentPreset (preset) == 0) {
 			ret = true;
 		}
-		CFRelease(propertyList);
 	}
+
 	
 	return ret;
 #else
@@ -1360,9 +1406,13 @@ AUPlugin::current_preset() const
 vector<string>
 AUPlugin::get_presets ()
 {
-	vector<string*>* preset_files;
 	vector<string> presets;
+
+#ifdef AU_STATE_SUPPORT
+	vector<string*>* preset_files;
 	PathScanner scanner;
+
+	user_preset_map.clear ();
 
 	preset_files = scanner (preset_search_path, au_preset_filter, this, true, true, -1, true);
 	
@@ -1386,14 +1436,27 @@ AUPlugin::get_presets ()
 		*/
 
 		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
-			presets.push_back (preset_name);
-			preset_map[preset_name] = path;
+			user_preset_map[preset_name] = path;
 		} 
 
 		delete *x;
 	}
 
 	delete preset_files;
+
+        /* now fill the vector<string> with the names we have */
+
+	for (UserPresetMap::iterator i = user_preset_map.begin(); i != user_preset_map.end(); ++i) {
+		presets.push_back (i->first);
+	}
+
+        /* add factory presets */
+
+	for (FactoryPresetMap::iterator i = factory_preset_map.begin(); i != factory_preset_map.end(); ++i) {
+		presets.push_back (i->first);
+	}
+
+#endif
 	
 	return presets;
 }

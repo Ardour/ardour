@@ -327,6 +327,7 @@ sse_env = ardour.Clone()
 sse_env.Append (CXXFLAGS="-msse")
 
 if env['FPU_OPTIMIZATION']:
+	print "FPU OPTIMIZATION WITH TARGET "; print env['DIST_TARGET'];
 	if env['DIST_TARGET'] == "i386":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
 		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
@@ -336,6 +337,8 @@ if env['FPU_OPTIMIZATION']:
 	if env['DIST_TARGET'] == "x86_64":
 		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
 		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
+else:
+	print "No FPU OPTIMIZATION here!!!\n"
 			
 libardour = ardour.SharedLibrary('ardour', ardour_files + always_sse_objects + timefx_sources + extra_sources + arch_specific_objects)
 
