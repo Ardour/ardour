@@ -34,6 +34,7 @@
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
 #include "i18n.h"
+#include "gui_thread.h"
 
 using namespace std;
 using namespace sigc;
@@ -454,6 +455,8 @@ PortMatrix::setup_global_ports ()
 void
 PortMatrix::setup_all_ports ()
 {
+	ENSURE_GUI_THREAD (mem_fun (*this, &PortMatrix::setup_all_ports));
+	
 	setup_ports (0);
 	setup_ports (1);
 }
