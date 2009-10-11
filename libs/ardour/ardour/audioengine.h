@@ -203,6 +203,10 @@ class AudioEngine : public sigc::trackable
 	sigc::signal<void> Running;
 	sigc::signal<void> Stopped;
 
+	/* this signal is emitted if a JACK port is registered or unregistered */
+	
+	sigc::signal<void> PortRegisteredOrUnregistered;
+
 	std::string make_port_name_relative (std::string);
 	std::string make_port_name_non_relative (std::string);
 
@@ -250,6 +254,7 @@ class AudioEngine : public sigc::trackable
 	static void _jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int, void*);
 	static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
 	static void _freewheel_callback (int , void *arg);
+	static void _registration_callback (jack_port_id_t, int, void *);
 
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);

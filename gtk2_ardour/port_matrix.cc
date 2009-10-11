@@ -29,6 +29,7 @@
 #include "ardour/types.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
+#include "ardour/audioengine.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
@@ -73,6 +74,9 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 
 	/* and also bundles */
 	_session.BundleAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::setup_global_ports)));
+
+	/* and also ports */
+	_session.engine().PortRegisteredOrUnregistered.connect (mem_fun (*this, &PortMatrix::setup_all_ports));
 	
 	reconnect_to_routes ();
 

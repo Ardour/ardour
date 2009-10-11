@@ -179,6 +179,7 @@ AudioEngine::start ()
 		jack_set_xrun_callback (_jack, _xrun_callback, this);
 		jack_set_sync_callback (_jack, _jack_sync_callback, this);
 		jack_set_freewheel_callback (_jack, _freewheel_callback, this);
+		jack_set_port_registration_callback (_jack, _registration_callback, this);
 
 		if (session && session->config.get_jack_time_master()) {
 			jack_set_timebase_callback (_jack, 0, _jack_timebase_callback, this);
@@ -307,6 +308,13 @@ void
 AudioEngine::_freewheel_callback (int onoff, void *arg)
 {
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
+}
+
+void
+AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* arg)
+{
+	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
 }
 
 void
