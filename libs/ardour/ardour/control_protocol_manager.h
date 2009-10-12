@@ -52,10 +52,9 @@ struct ControlProtocolInfo {
  class ControlProtocolManager : public sigc::trackable, public PBD::Stateful
 {
   public:
-	ControlProtocolManager ();
 	~ControlProtocolManager ();
 
-	static ControlProtocolManager& instance() { return *_instance; }
+	static ControlProtocolManager& instance();
 
 	void set_session (Session&);
 	void discover_control_protocols ();
@@ -75,6 +74,7 @@ struct ControlProtocolInfo {
 	XMLNode& get_state (void);
 
   private:
+	ControlProtocolManager ();
 	static ControlProtocolManager* _instance;
 
 	Session* _session;

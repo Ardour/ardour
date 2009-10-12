@@ -356,8 +356,6 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 void
 ARDOUR::init_post_engine ()
 {
-	/* singleton - first object is "it" */
-	new ControlProtocolManager ();
 	ControlProtocolManager::instance().discover_control_protocols ();
 
 	XMLNode* node;

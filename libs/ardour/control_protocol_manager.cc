@@ -39,12 +39,9 @@ ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 
 ControlProtocolManager::ControlProtocolManager ()
+	: _session (0)
 {
-	if (_instance == 0) {
-		_instance = this;
-	}
-
-	_session = 0;
+	
 }
 
 ControlProtocolManager::~ControlProtocolManager()
@@ -387,4 +384,14 @@ ControlProtocolManager::set_protocol_states (const XMLNode& node)
 
 		cpi->state = new XMLNode (*child);
 	}
+}
+
+ControlProtocolManager&
+ControlProtocolManager::instance ()
+{
+	if (_instance == 0) {
+		_instance = new ControlProtocolManager ();
+	}
+
+	return *_instance;
 }
