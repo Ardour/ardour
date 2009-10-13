@@ -570,7 +570,7 @@ ARDOUR_UI::update_autosave ()
 {
         ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::update_autosave));
         
-        if (session->dirty()) {
+        if (session && session->dirty()) {
                 if (_autosave_connection.connected()) {
                         _autosave_connection.disconnect();
                 }
