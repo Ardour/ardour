@@ -773,6 +773,8 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 	}
 	
 	loop_changing = false;
+
+	_send_smpte_update = true;
 }
 
 void

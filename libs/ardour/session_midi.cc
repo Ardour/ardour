@@ -762,6 +762,8 @@ Session::send_full_time_code ()
 	MIDI::byte msg[10];
 	SMPTE::Time smpte;
 
+	_send_smpte_update = false;
+
 	if (_mtc_port == 0 || !session_send_mtc) {
 		return 0;
 	}
@@ -829,14 +831,8 @@ Session::send_midi_time_code ()
 		return 0;
 	}
 
-	nframes_t two_smpte_frames_duration;
-	nframes_t quarter_frame_duration;
-
-	/* Duration of two smpte frames */
-	two_smpte_frames_duration = ((long) _frames_per_smpte_frame) << 1;
-
 	/* Duration of one quarter frame */
-	quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
+	nframes_t const quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
 
 	while (_transport_frame >= (outbound_mtc_smpte_frame + (next_quarter_frame_to_send * quarter_frame_duration))) {
 

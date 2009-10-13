@@ -1376,6 +1376,8 @@ class Session : public PBD::StatefulDestructible
 	nframes_t  last_smpte_when;
 	SMPTE::Time last_smpte;
 
+	bool _send_smpte_update; ///< Flag to send a full frame (SMPTE) MTC message this cycle
+	
 	int send_full_time_code ();
 	int send_midi_time_code ();
 

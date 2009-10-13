@@ -336,6 +336,7 @@ Session::process_event (Event* ev)
 			// cerr << "soft locate to " << ev->target_frame << endl;
 			start_locate (ev->target_frame, false, true, false);
 		}
+		_send_smpte_update = true;
 		break;
 
 	case Event::LocateRoll:
@@ -346,6 +347,7 @@ Session::process_event (Event* ev)
 			// cerr << "soft locate to+roll " << ev->target_frame << endl;
 			start_locate (ev->target_frame, true, true, false);
 		}
+		_send_smpte_update = true;
 		break;
 
 	case Event::LocateRollLocate:
