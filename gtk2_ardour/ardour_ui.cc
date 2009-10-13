@@ -577,7 +577,7 @@ ARDOUR_UI::update_autosave ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::update_autosave));
 
-	if (session->dirty()) {
+	if (session && session->dirty()) {
 		if (_autosave_connection.connected()) {
 			_autosave_connection.disconnect();
 		}
@@ -2394,16 +2394,6 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		goto out;
 	} else if (unload_status > 0) {
 		retval = 0;
-		goto out;
-	}
-
-	/* if it already exists, we must have write access */
-
-	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS) && ::access (path.c_str(), W_OK)) {
-		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
-					      "This prevents the session from being loaded."));
-		pop_back_splash ();
-		msg.run ();
 		goto out;
 	}
 

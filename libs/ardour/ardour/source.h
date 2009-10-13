@@ -79,7 +79,7 @@ class Source : public SessionObject, public boost::noncopyable
 	int set_state (const XMLNode&);
 	
 	bool         destructive() const       { return (_flags & Destructive); }
-	bool         writable () const         { return _flags & Writable; }
+	bool         writable () const         { return (_flags & Writable); }
 	virtual bool set_destructive (bool /*yn*/) { return false; }
 	virtual bool length_mutable() const    { return false; }
 	
@@ -128,6 +128,7 @@ class Source : public SessionObject, public boost::noncopyable
 
   private:
 	uint32_t _in_use;
+	void fix_writable_flags ();
 };
 
 }

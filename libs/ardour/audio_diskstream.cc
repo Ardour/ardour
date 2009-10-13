@@ -2065,7 +2065,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
 
-	if (!recordable()) {
+	if (!_session.writable() || !recordable()) {
 		return;
 	}
 	

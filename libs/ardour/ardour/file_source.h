@@ -68,7 +68,7 @@ protected:
 	virtual int move_dependents_to_trash() { return 0; }
 	
 	bool removable () const;
-	
+
 	Glib::ustring _path;
 	Glib::ustring _take_id;
 	bool          _file_is_new;

@@ -248,7 +248,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	std::string raid_path () const;
 
 	void set_snap_name ();
-
+	
+	bool writable() const { return _writable; }
 	void set_dirty ();
 	void set_clean ();
 	bool dirty() const { return _state_of_the_state & Dirty; }
@@ -1041,6 +1042,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	float                   _meter_falloff;
 	bool                    _non_soloed_outs_muted;
 	uint32_t                _listen_cnt;
+	bool                    _writable;
 
 	void set_worst_io_latencies ();
 	void set_worst_io_latencies_x (IOChange, void *) {

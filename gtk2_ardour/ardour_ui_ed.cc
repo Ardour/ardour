@@ -89,8 +89,8 @@ ARDOUR_UI::install_actions ()
 	/* menus + submenus that need action items */
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
-	ActionManager::register_action (main_actions, X_("Files"), _("Import/Export"));
-	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
+	act = ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
+	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
 	ActionManager::register_action (main_actions, X_("Help"), _("Help"));
@@ -117,7 +117,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus..."),
 					      bind (mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
-
+	ActionManager::write_sensitive_actions.push_back (act);
 
 #ifdef WITH_CMT
 
@@ -132,6 +132,7 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot..."),  mem_fun(*this, &ARDOUR_UI::snapshot_session));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -153,7 +154,10 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Cleanup Unused Sources"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
+	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* JACK actions for controlling ... JACK */
@@ -226,6 +230,7 @@ ARDOUR_UI::install_actions ()
 	//ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  bind (mem_fun(*this, &ARDOUR_UI::save_state), string("")));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("RemoveLastCapture"), _("Remove Last Capture"), mem_fun(*this, &ARDOUR_UI::remove_last_capture));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -277,8 +282,10 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (transport_actions, X_("Record"), _("Enable Record"), bind (mem_fun(*this, &ARDOUR_UI::transport_record), false));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("record-roll"), _("Start Recording"), bind (mem_fun(*this, &ARDOUR_UI::transport_record), true));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("Rewind"), _("Rewind"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
 	ActionManager::session_sensitive_actions.push_back (act);

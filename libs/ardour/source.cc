@@ -55,6 +55,7 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	_analysed = false;
 	_timestamp = 0;
 	_in_use = 0;
+	fix_writable_flags ();
 }
 
 Source::Source (Session& s, const XMLNode& node) 
@@ -70,11 +71,22 @@ Source::Source (Session& s, const XMLNode& node)
 	if (set_state (node) || _type == DataType::NIL) {
 		throw failed_constructor();
 	}
+
+	fix_writable_flags ();
 }
 
 Source::~Source ()
 {
 	notify_callbacks ();
+}
+
+
+void
+Source::fix_writable_flags ()
+{
+	if (!_session.writable()) {
+		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	}
 }
 
 XMLNode&

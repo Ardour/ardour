@@ -67,7 +67,7 @@ FileSource::FileSource (Session& session, DataType type,
 
 FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist*/)
 	: Source(session, node)
-	, _file_is_new(false)
+	, _file_is_new (false)
 {
 	_path = _name;
 	_is_embedded = (_path.find(PATH_SEP) != string::npos);

@@ -369,6 +369,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		connections.push_back (at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen)));
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
+		rec_enable_button->set_sensitive (_session.writable());
 		rec_enable_button->show();
 
 	} else if (!is_track()) {

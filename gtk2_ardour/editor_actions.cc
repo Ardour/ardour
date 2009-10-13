@@ -847,10 +847,14 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Import"), mem_fun (*this, &Editor::external_audio_dialog));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
-	
-	ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), mem_fun(*this, &Editor::session_import_dialog));
+	ActionManager::write_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), mem_fun(*this, &Editor::session_import_dialog));
+	ActionManager::write_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 

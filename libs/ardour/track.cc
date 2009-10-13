@@ -170,6 +170,10 @@ Track::can_record()
 void
 Track::set_record_enable (bool yn, void *src)
 {
+	if (!_session.writable()) {
+		return;
+	}
+
 	if (_freeze_record.state == Frozen) {
 		return;
 	}

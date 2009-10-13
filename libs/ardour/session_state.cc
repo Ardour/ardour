@@ -63,52 +63,52 @@
 #include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
 
+#include "ardour/audio_diskstream.h"
+#include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audioregion.h"
+#include "ardour/auditioner.h"
+#include "ardour/buffer.h"
 #include "ardour/configuration.h"
+#include "ardour/control_protocol_manager.h"
+#include "ardour/crossfade.h"
+#include "ardour/cycle_timer.h"
+#include "ardour/directory_names.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/io_processor.h"
+#include "ardour/location.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/midi_patch_manager.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_track.h"
+#include "ardour/named_selection.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/processor.h"
+#include "ardour/region_factory.h"
+#include "ardour/route_group.h"
+#include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
-#include "ardour/session_utils.h"
-#include "ardour/session_state_utils.h"
 #include "ardour/session_metadata.h"
-#include "ardour/buffer.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/midi_diskstream.h"
-#include "ardour/utils.h"
-#include "ardour/audioplaylist.h"
-#include "ardour/midi_playlist.h"
-#include "ardour/smf_source.h"
-#include "ardour/audiofilesource.h"
+#include "ardour/session_state_utils.h"
+#include "ardour/session_utils.h"
 #include "ardour/silentfilesource.h"
-#include "ardour/sndfilesource.h"
-#include "ardour/midi_source.h"
-#include "ardour/sndfile_helpers.h"
-#include "ardour/auditioner.h"
-#include "ardour/io_processor.h"
-#include "ardour/send.h"
-#include "ardour/processor.h"
-#include "ardour/user_bundle.h"
 #include "ardour/slave.h"
-#include "ardour/tempo.h"
-#include "ardour/audio_track.h"
-#include "ardour/midi_track.h"
-#include "ardour/midi_patch_manager.h"
-#include "ardour/cycle_timer.h"
-#include "ardour/utils.h"
-#include "ardour/named_selection.h"
-#include "ardour/version.h"
-#include "ardour/location.h"
-#include "ardour/audioregion.h"
-#include "ardour/midi_region.h"
-#include "ardour/crossfade.h"
-#include "ardour/control_protocol_manager.h"
-#include "ardour/region_factory.h"
+#include "ardour/smf_source.h"
+#include "ardour/sndfile_helpers.h"
+#include "ardour/sndfilesource.h"
 #include "ardour/source_factory.h"
-#include "ardour/playlist_factory.h"
-#include "ardour/filename_extensions.h"
-#include "ardour/directory_names.h"
 #include "ardour/template_utils.h"
+#include "ardour/tempo.h"
 #include "ardour/ticker.h"
-#include "ardour/route_group.h"
+#include "ardour/user_bundle.h"
+#include "ardour/utils.h"
+#include "ardour/utils.h"
+#include "ardour/version.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -138,6 +138,14 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	if (_path[_path.length()-1] != '/') {
 		_path += '/';
+	}
+
+	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS) && ::access (_path.c_str(), W_OK)) {
+		cerr << "Session non-writable based on " << _path << endl;
+		_writable = false;
+	} else {
+		cerr << "Session writable based on " << _path << endl;
+		_writable = true;	
 	}
 
 	/* these two are just provisional settings. set_state()
@@ -665,7 +673,7 @@ Session::save_state (string snapshot_name, bool pending)
 	XMLTree tree;
 	sys::path xml_path(_session_dir->root_path());
 
-	if (_state_of_the_state & CannotSave) {
+	if (!_writable || (_state_of_the_state & CannotSave)) {
 		return 1;
 	}
 
@@ -789,6 +797,15 @@ Session::load_state (string snapshot_name)
 	state_tree = new XMLTree;
 
 	set_dirty();
+
+	/* writable() really reflects the whole folder, but if for any
+	   reason the session state file can't be written to, still
+	   make us unwritable.
+	*/
+
+	if (::access (xmlpath.to_string().c_str(), W_OK) != 0) {
+		_writable = false;
+	}
 
 	if (!state_tree->read (xmlpath.to_string())) {
 		error << string_compose(_("Could not understand ardour file %1"), xmlpath.to_string()) << endmsg;
@@ -2795,7 +2812,10 @@ Session::controllable_by_id (const PBD::ID& id)
 void 
 Session::add_instant_xml (XMLNode& node, bool write_to_config)
 {
-	Stateful::add_instant_xml (node, _path);
+	if (_writable) {
+		Stateful::add_instant_xml (node, _path);
+	}
+
 	if (write_to_config) {
 		Config->add_instant_xml (node);
 	}
@@ -2812,6 +2832,10 @@ Session::save_history (string snapshot_name)
 {
 	XMLTree tree;
 	
+	if (!_writable) {
+	        return 0;
+	}		       
+
  	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
 	}
@@ -2832,7 +2856,6 @@ Session::save_history (string snapshot_name)
 			return -1;
 		}
  	}
-
 
 	if (!Config->get_save_history() || Config->get_saved_history_depth() < 0) {
 		return 0;
